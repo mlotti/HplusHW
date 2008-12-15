@@ -1,0 +1,18 @@
+/IterativeTrackCollectionProducer.h/1.1/Tue Apr 15 16:17:40 2008//
+/MyCaloTower.h/1.4/Tue Mar 25 14:20:35 2008//
+/MyEvent.h/1.9/Tue Jun 24 09:57:38 2008//
+/MyEventConverter.h/1.33/Wed Jun 25 14:42:52 2008//
+/MyGlobalPoint.h/1.6/Wed Feb 20 10:49:45 2008//
+/MyHit.h/1.2/Tue May 20 10:06:23 2008//
+/MyImpactParameter.h/1.2/Tue Oct 30 09:55:52 2007//
+/MyJet.h/1.20/Fri May 30 14:20:20 2008//
+/MyMCParticle.h/1.9/Tue Feb 26 13:49:20 2008//
+/MyMET.h/1.6/Fri May 30 14:20:20 2008//
+/MyMeasurement1D.h/1.1/Mon Oct 29 14:46:47 2007//
+/MyRootTree.h/1.1/Mon Oct 29 14:46:47 2007//
+/MySimTrack.h/1.1/Mon Feb 18 15:23:54 2008//
+/MyTrack.h/1.14/Tue May 20 10:06:23 2008//
+/MyVertex.h/1.5/Mon May 19 20:10:22 2008//
+/TauMETTriggerAnalysis.h/1.4/Thu Apr 10 08:42:22 2008//
+/TauResolutionAnalysis.h/1.10/Fri Feb 29 08:04:41 2008//
+D

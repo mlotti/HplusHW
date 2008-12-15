@@ -1,0 +1,44 @@
+// system include files
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include <iostream>
+using namespace std;
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+
+#include <memory>
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+class OfflineAnalysis : public edm::EDAnalyzer {
+  public:
+  	explicit OfflineAnalysis(const edm::ParameterSet&);
+  	~OfflineAnalysis() {}
+
+  	virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  	virtual void beginJob(const edm::EventSetup& );
+  	virtual void endJob();
+  private:
+	MyEventConverter* myEventConverter;
+};
+
+OfflineAnalysis::OfflineAnalysis(const edm::ParameterSet& iConfig){
+	myEventConverter = new MyEventConverter();
+        myEventConverter->cfgInput(iConfig);
+}
+
+void OfflineAnalysis::beginJob(const edm::EventSetup& iSetup){
+}
+
+void OfflineAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+        myEventConverter->eventSetup(iSetup);
+	myEventConverter->convert(iEvent);
+}
+
+void OfflineAnalysis::endJob(){
+	delete myEventConverter;
+}
+
+DEFINE_FWK_MODULE(OfflineAnalysis);

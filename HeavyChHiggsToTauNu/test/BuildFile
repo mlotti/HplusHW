@@ -1,0 +1,30 @@
+<use name=DataFormats/Common>
+<use name=DataFormats/CLHEP>
+<use name=FWCore/MessageLogger>
+<use name=Geometry/Records>
+<use name=DataFormats/EgammaCandidates>
+<use name=DataFormats/TrackReco>
+<use name=DataFormats/JetReco>
+
+
+
+<use name=root>
+<use name=clhep>
+
+<use name=Foundation/PluginManager>
+<use name=FWCore/Utilities>
+<use name=FWCore/Framework>
+<use name=FWCore/ParameterSet>
+<use name=DataFormats/Math>
+<use name=DataFormats/BTauReco>
+<use name=SimDataFormats/HepMCProduct>
+
+
+<use name=HiggsAnalysis/HeavyChHiggsToTauNu>
+
+<flags EDM_PLUGIN=1>
+
+<library file=OfflineAnalysis.cpp name=OfflineAnalysis>
+  <use name=HiggsAnalysis/HeavyChHiggsToTauNu>
+  <use name=FWCore/Framework>
+</library>
