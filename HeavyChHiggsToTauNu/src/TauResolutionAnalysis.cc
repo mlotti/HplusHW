@@ -19,7 +19,7 @@ using namespace HepMC;
 #include <iostream>
 using namespace std;
 
-double deltaR(double,double,double,double);
+double myDeltaR(double,double,double,double);
 double phiDis(double,double);
 vector<TLorentzVector> visibleTaus(const edm::Event&,int);
 
@@ -215,7 +215,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
           CaloTauCollection::const_iterator iTau;
           for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++){
 
-                        double DR = deltaR(iTau->eta(),visibleTau.Eta(),
+                        double DR = myDeltaR(iTau->eta(),visibleTau.Eta(),
                                            iTau->phi(),visibleTau.Phi());
                         if(DR > 0.4) continue;
 			caloTauCounter++;
@@ -269,7 +269,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 
                         if(iTau->discriminator(Rmatch,Rsignal,Riso,pT_LT,pT_min) == 0) continue;
 
-                        double DR = deltaR(tauJet.eta(),visibleTau.Eta(),
+                        double DR = myDeltaR(tauJet.eta(),visibleTau.Eta(),
                                            tauJet.phi(),visibleTau.Phi());
                         if(DR > 0.4) continue;
 
@@ -288,7 +288,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
           	PFTauCollection::const_iterator iTau;
           	for(iTau = pfTaus.begin(); iTau != pfTaus.end(); iTau++){
 
-			double DR = deltaR(iTau->eta(),visibleTau.Eta(),
+			double DR = myDeltaR(iTau->eta(),visibleTau.Eta(),
                                            iTau->phi(),visibleTau.Phi());
                         if(DR > 0.4) continue;
 			pfTauCounter++;
@@ -359,7 +359,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 
                         if(iTau->discriminatorByIsolPFChargedHadrCandsN(Rmatch,Rsignal,Riso,true,pT_LT,pT_min) == 0) continue;
 
-                        double DR = deltaR(tauJet.eta(),visibleTau.Eta(),
+                        double DR = myDeltaR(tauJet.eta(),visibleTau.Eta(),
                                            tauJet.phi(),visibleTau.Phi());
                         if(DR > 0.4) continue;
 
@@ -401,7 +401,7 @@ void TauResolutionAnalysis::chargedTrackCounter(const edm::Event& iEvent){
 		PFTauCollection::const_iterator pfTauEnd = pfTaus.end();
 
 		while(DR_mcTau > 0.4 && iPfTau != pfTauEnd){
-		  DR_mcTau = deltaR(i->Eta(),iPfTau->eta(),
+		  DR_mcTau = myDeltaR(i->Eta(),iPfTau->eta(),
                                     i->Phi(),iPfTau->phi());
 		  if(DR_mcTau < 0.4){
 			double DR = 999;
@@ -409,17 +409,17 @@ void TauResolutionAnalysis::chargedTrackCounter(const edm::Event& iEvent){
                         CaloTauCollection::const_iterator caloTauEnd = caloTaus.end();
 
 			while(DR > 0.4 && iCaloTau != caloTauEnd){
-			  DR = deltaR(iPfTau->eta(),iCaloTau->eta(),
+			  DR = myDeltaR(iPfTau->eta(),iCaloTau->eta(),
                                       iPfTau->phi(),iCaloTau->phi());
 			  if(DR < 0.4){
                                 const PFCandidateRefVector pfCandidates = iPfTau->signalPFCands();
         			for(RefVector<PFCandidateCollection>::const_iterator iTrack = pfCandidates.begin(); 
                                     iTrack!= pfCandidates.end(); iTrack++){
 					if((*iTrack)->particleId() != 1) continue;					
-					double DRPfTrackPfTau = deltaR((*iTrack)->eta(),iPfTau->eta(),
+					double DRPfTrackPfTau = myDeltaR((*iTrack)->eta(),iPfTau->eta(),
                                                                        (*iTrack)->phi(),iPfTau->phi());
                                         if(DRPfTrackPfTau < 0.45) nPfTrack++;
-                                        double DRPfTrackCaloTau = deltaR((*iTrack)->eta(),iCaloTau->eta(),
+                                        double DRPfTrackCaloTau = myDeltaR((*iTrack)->eta(),iCaloTau->eta(),
                                                                          (*iTrack)->phi(),iCaloTau->phi());
                                         if(DRPfTrackCaloTau < 0.45) nPfTrackCaloTau++;
 				}
@@ -427,7 +427,7 @@ void TauResolutionAnalysis::chargedTrackCounter(const edm::Event& iEvent){
 				const TrackRefVector tracksInCone = iCaloTau->caloTauTagInfoRef()->Tracks();
         			for(RefVector<TrackCollection>::const_iterator iTrack = tracksInCone.begin(); 
                                     iTrack!= tracksInCone.end(); iTrack++){
-                                        double DRCaloTrackCaloTau = deltaR((*iTrack)->eta(),iCaloTau->eta(),
+                                        double DRCaloTrackCaloTau = myDeltaR((*iTrack)->eta(),iCaloTau->eta(),
                                                                            (*iTrack)->phi(),iCaloTau->phi());
                                         if(DRCaloTrackCaloTau < 0.45) nCaloTauTrack++;
 				}

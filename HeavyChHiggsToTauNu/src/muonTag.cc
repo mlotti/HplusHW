@@ -3,8 +3,8 @@
 map<string,double> MyEventConverter::muonTag(const Muon& muon){
 	map<string,double> tagInfo;
 
-	const MuonIsolation isolationR03 = muon.getIsolationR03();
-        const MuonIsolation isolationR05 = muon.getIsolationR05();
+	const MuonIsolation isolationR03 = muon.isolationR03();
+        const MuonIsolation isolationR05 = muon.isolationR05();
 
 	tagInfo["isolationR03.emEt"]    = isolationR03.emEt;
         tagInfo["isolationR03.hadEt"]   = isolationR03.hadEt;

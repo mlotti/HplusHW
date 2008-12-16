@@ -29,7 +29,7 @@ MyEventConverter::~MyEventConverter(){
 
 void MyEventConverter::init(){
 
-	electronIdAlgo = new CutBasedElectronID();
+///	electronIdAlgo = new CutBasedElectronID();
 	userRootTree = new MyRootTree();
 
 	// counters

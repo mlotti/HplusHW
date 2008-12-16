@@ -1,21 +1,26 @@
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
+
 	TrackRef track = recMuon.combinedMuon();
-	const TransientTrack transientTrack = transientTrackBuilder->build(track);
 
-	MyJet muon;
 
-	muon.SetPx(recMuon.px());
+        MyJet muon;
+        muon.SetPx(recMuon.px());
         muon.SetPy(recMuon.py());
         muon.SetPz(recMuon.pz());
         muon.SetE(recMuon.p());
-	muon.type = 13 * (*track).charge();
+        muon.type = 13 * (*track).charge();
+
+	const TransientTrack transientTrack = transientTrackBuilder->build(track);
+
 
 	MyTrack muonTrack = myTrackConverter(transientTrack);
 	muonTrack.ip = impactParameter(transientTrack);
 	muon.tracks.push_back(muonTrack);
+
 	muon.tracks = getTracks(muon);
 
 	muon.tagInfo = muonTag(recMuon);
@@ -23,7 +28,7 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 	return muon;
 }
 
-MyJet MyEventConverter::myJetConverter(const PixelMatchGsfElectron* recElectron,const ClusterShapeRef& clusterShapeRef){
+MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron,const ClusterShapeRef& clusterShapeRef){
 	GsfTrackRef track = recElectron->gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);
 
@@ -62,14 +67,14 @@ MyJet MyEventConverter::myJetConverter(const Photon* recPhoton){
         return photon;
 }
 
-MyJet MyEventConverter::myJetConverter(const ConvertedPhoton* recPhoton){
+MyJet MyEventConverter::myJetConverter(const Conversion* recPhoton){
 
         MyJet photon;
 
-        photon.SetPx(recPhoton->px());
-        photon.SetPy(recPhoton->py());
-        photon.SetPz(recPhoton->pz());
-        photon.SetE(recPhoton->p());
+        photon.SetPx(recPhoton->pairMomentum().x());
+        photon.SetPy(recPhoton->pairMomentum().y());
+        photon.SetPz(recPhoton->pairMomentum().z());
+        photon.SetE(recPhoton->pairMomentum().mag());
 	photon.type = 1; //converted
 
         vector<MyTrack> tracks;
@@ -91,32 +96,7 @@ MyJet MyEventConverter::myJetConverter(const ConvertedPhoton* recPhoton){
         return photon;
 }
 
-
 MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
-
-	MyJet jet;
-
-        jet.SetPx(caloJet->px());
-        jet.SetPy(caloJet->py());
-        jet.SetPz(caloJet->pz());
-        jet.SetE(caloJet->energy());
-
-        jet.tracks = getTracks(jet);
-
-	// Jet energy corrections
-	for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
-		double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
-		string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
-		jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
-	}
-
-        return jet;
-}
-
-MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
-
-
-        const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.jet().get());
 
         MyJet jet;
 
@@ -134,11 +114,34 @@ MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
                 jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
         }
 
-        jet.tagInfo = btag(recJet);
-
         return jet;
 }
 
+MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
+
+
+        const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.first.get());
+
+        MyJet jet;
+
+        jet.SetPx(caloJet->px());
+        jet.SetPy(caloJet->py());
+        jet.SetPz(caloJet->pz());
+        jet.SetE(caloJet->energy());
+
+        jet.tracks = getTracks(jet);
+
+	// Jet energy corrections
+	for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
+		double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
+		string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
+		jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
+	}
+
+	jet.tagInfo = btag(recJet);
+
+        return jet;
+}
 
 MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
@@ -226,7 +229,9 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
                 tracks.push_back(track);
           }
 	}
+
         tau.tracks = tracks;
+
 	tau.hits   = hits;
 
         tau.tagInfo = tauTag(recTau);
@@ -235,7 +240,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
         tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
-        tau.caloInfo = caloTowers(*caloJet);
+////        tau.caloInfo = caloTowers(*caloJet);
 
 	tau.secVertices = secondaryVertices(transientTracks);
 

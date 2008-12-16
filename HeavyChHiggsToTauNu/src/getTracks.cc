@@ -22,7 +22,7 @@ vector<MyTrack> MyEventConverter::getTracks(MyJet& direction){
 	if(direction.getTracks().size() > 0){
 		double DRmin = 9999;
 		for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-                	double DR = deltaR(direction.eta(),iTrack->eta(),
+                	double DR = myDeltaR(direction.eta(),iTrack->eta(),
                                            direction.phi(),iTrack->phi());
 			if(DR < DRmin){
 				DRmin = DR;
@@ -33,7 +33,7 @@ vector<MyTrack> MyEventConverter::getTracks(MyJet& direction){
 
 	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
 		if(iTrack == leptonTrack) continue;
-	        double DR = deltaR(direction.eta(),iTrack->eta(),
+	        double DR = myDeltaR(direction.eta(),iTrack->eta(),
                                    direction.phi(),iTrack->phi());
 		if(DR < 0.5){
 			tracksInJetCone.push_back(myTrackConverter(*iTrack));
@@ -49,7 +49,7 @@ vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direc
 
 	TrackCollection::const_iterator iTrack;
 	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-		double DR = deltaR(direction.eta(),iTrack->eta(),
+		double DR = myDeltaR(direction.eta(),iTrack->eta(),
                                    direction.phi(),iTrack->phi());
 		//if(DR < cone) associatedTracks.push_back(edm::Ref<TrackCollection>(tracks, t));
 		if(DR < cone) associatedTracks.push_back(*iTrack);
@@ -59,17 +59,18 @@ vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direc
 
 vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direction, double cone, vector<Trajectory>* associatedTrajectories) {
 	// Check that track collection and trajectory collection are equally long
-       	bool trajectoryMatchedStatus = (myTrajectoryCollectionHandle->size() == tracks.size()); // tracks is here the track collection
+//       	bool trajectoryMatchedStatus = (myTrajectoryCollectionHandle->size() == tracks.size()); // tracks is here the track collection
 
         vector<Track> associatedTracks;
 
    	TrackCollection::const_iterator iTrack;
-       	vector<Trajectory>::const_iterator iTrajectory = myTrajectoryCollectionHandle->begin();
+//       	vector<Trajectory>::const_iterator iTrajectory = myTrajectoryCollectionHandle->begin();
    	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-       		double DR = deltaR(direction.eta(),iTrack->eta(),
+       		double DR = myDeltaR(direction.eta(),iTrack->eta(),
                                    direction.phi(),iTrack->phi());
        		if(DR < cone) {
                   associatedTracks.push_back(*iTrack);
+/*
                   if (trajectoryMatchedStatus) {
                     associatedTrajectories->push_back(*iTrajectory);
                   }else{
@@ -97,8 +98,9 @@ vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direc
                        associatedTrajectories->push_back(*iTrajSelected);
                     }
               	  }
+*/
 		}
-        	++iTrajectory;
+//        	++iTrajectory;
    	}
    	return associatedTracks;
 }

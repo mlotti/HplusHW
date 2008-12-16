@@ -24,8 +24,8 @@ vector<MyJet> MyEventConverter::getJets(const edm::Event& iEvent){
                         iEvent.getByLabel(btaggingAlgos[iBtag],btagHandle);
                         const reco::JetTagCollection & tag = *(btagHandle.product());
 
-//                        tagInfo[btaggingAlgos[iBtag].label()] = tag[i].second;
-			tagInfo[btaggingAlgos[iBtag].label()] = tag[i].discriminator();
+                        tagInfo[btaggingAlgos[iBtag].label()] = tag[i].second;
+//			tagInfo[btaggingAlgos[iBtag].label()] = tag[i].discriminator();
                         //cout << "discriminator = " << tag[i].second << " " << btaggingAlgos[iBtag].label() << end$
                 }
 

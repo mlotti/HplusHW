@@ -2,9 +2,9 @@
 
 vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 	vector<MyCaloTower> calotowers;
-        vector<CaloTowerRef> towers = caloJet.getConstituents();
+        vector<CaloTowerPtr> towers = caloJet.getCaloConstituents();
 
-        for(vector<CaloTowerRef>::const_iterator iTower = towers.begin();
+        for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
                                                  iTower != towers.end(); iTower++){
 		vector<TVector3> ECALCells;
 	        vector<TVector3> HCALCells;
@@ -40,8 +40,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                         if( recHitDetID.det() == DetId::Hcal ){
                           HcalDetId hcalID = recHitDetID;
                           if( recHitDetID.subdetId() == HcalBarrel ){
-                            //int depth = hcalID.depth();
-                            //if (depth==1){
+                            int depth = hcalID.depth();
+                            if (depth==1){
                                 HBHERecHitCollection::const_iterator theRecHit=HBHERecHits->find(hcalID);
                                 if(theRecHit != HBHERecHits->end()){
                                   DetId id = theRecHit->detid();
@@ -49,11 +49,11 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                                   double energy = theRecHit->energy();
                                   HCALCells.push_back(getCellMomentum(this_cell,energy));
                                 }
-                            //}
+                            }
                           }
                           if( recHitDetID.subdetId() == HcalEndcap ){
-                            //int depth = hcalID.depth();
-                            //if (depth==1){
+                            int depth = hcalID.depth();
+                            if (depth==1){
                                 HBHERecHitCollection::const_iterator theRecHit=HBHERecHits->find(hcalID);
                                 if(theRecHit != HBHERecHits->end()){
                                   DetId id = theRecHit->detid();
@@ -61,25 +61,7 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                                   double energy = theRecHit->energy();
                                   HCALCells.push_back(getCellMomentum(this_cell,energy));
                                 }
-                            //}
-                          }
-                          if( recHitDetID.subdetId() == HcalOuter ){
-                                HORecHitCollection::const_iterator theRecHit=HORecHits->find(hcalID);
-                                if(theRecHit != HORecHits->end()){
-                                  DetId id = theRecHit->detid();
-                                  const CaloCellGeometry* this_cell = HO->getGeometry(id);
-                                  double energy = theRecHit->energy();
-                                  HCALCells.push_back(getCellMomentum(this_cell,energy));
-                                }
-                          }
-                          if( recHitDetID.subdetId() == HcalForward ){
-                                HFRecHitCollection::const_iterator theRecHit=HFRecHits->find(hcalID);
-                                if(theRecHit != HFRecHits->end()){
-                                  DetId id = theRecHit->detid();
-                                  const CaloCellGeometry* this_cell = HF->getGeometry(id);
-                                  double energy = theRecHit->energy();
-                                  HCALCells.push_back(getCellMomentum(this_cell,energy));
-                                }
+                            }
                           }
                         }
                 }

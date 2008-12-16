@@ -14,7 +14,7 @@ using namespace std;
 #include <iostream>
 #include <string>
 
-double deltaR(double,double,double,double);
+double myDeltaR(double,double,double,double);
 
 class MyJet : public TLorentzVector {
   public:

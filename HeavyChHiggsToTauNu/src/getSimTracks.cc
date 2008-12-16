@@ -5,7 +5,7 @@
 #include "SimDataFormats/Vertex/interface/SimVertex.h"
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
-double deltaR(double eta1, double eta2, double phi1, double phi2);
+double myDeltaR(double eta1, double eta2, double phi1, double phi2);
 
 vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEvent* event){
   vector<MySimTrack> simTracks;
@@ -36,14 +36,15 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
     // Loop over SimTracks in container
     SimTrackContainer::const_iterator iSim = simTrackHandle->begin();
     for( ; iSim != simTrackHandle->end(); ++iSim) {
-      const HepLorentzVector myMomentum = (*iSim).momentum();
-      if (myMomentum.perp() > 1) { // require sim track pt > 1 GeV
-	if (deltaR(myLdgTrack.eta(), myMomentum.eta(),
+      const math::XYZTLorentzVectorD & myMomentum = (*iSim).momentum();
+      ////      const HepLorentzVector myMomentum = (*iSim).momentum();
+      if (myMomentum.Et() > 1) { // require sim track pt > 1 GeV
+	if (myDeltaR(myLdgTrack.eta(), myMomentum.eta(),
 		   myLdgTrack.phi(), myMomentum.phi()) < myMatchCone) {
 	  //cout << "- simTrack eta=" << myMomentum.eta()
 	  //     << " phi=" << myMomentum.phi()
-	  //     << " DeltaR=" 
-	  //     << deltaR(myLdgTrack.eta(), myMomentum.eta(),
+	  //     << " myDeltaR=" 
+	  //     << myDeltaR(myLdgTrack.eta(), myMomentum.eta(),
 	  //        myLdgTrack.phi(), myMomentum.phi()) << endl;
 
 	  // Save sim track
@@ -62,7 +63,8 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
 	    mySim.thePosition.SetXYZ(0,0,0);
 	  }
 	  // ECAL hit point
-	  const Hep3Vector myPos = (*iSim).trackerSurfacePosition();
+	  const math::XYZVectorD & myPos = (*iSim).trackerSurfacePosition();
+	  ////const Hep3Vector myPos = (*iSim).trackerSurfacePosition();
 	  mySim.trackEcalHitPoint.x = myPos.x();
 	  mySim.trackEcalHitPoint.y = myPos.y();
 	  mySim.trackEcalHitPoint.z = myPos.z();

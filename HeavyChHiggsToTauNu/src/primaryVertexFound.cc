@@ -1,8 +1,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-bool MyEventConverter::primaryVertexFound(const edm::Event& iEvent){
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-	PVFound = false;
+bool MyEventConverter::primaryVertexFound(const edm::Event& iEvent){
+	bool primaryVertexFound = false;
 
 	Handle<VertexCollection> vertexHandle;
         try{
@@ -21,22 +22,19 @@ bool MyEventConverter::primaryVertexFound(const edm::Event& iEvent){
                                 //                        << iVertex->y() << " "
                                 //                        << iVertex->z() << endl;
                                 double ptsum = 0;
-                                track_iterator iTrack;
+//                                track_iterator iTrack;
+				Vertex::trackRef_iterator iTrack;
                                 for(iTrack  = iVertex->tracks_begin();
-                                    iTrack != iVertex->tracks_end();iTrack++){
+                                    iTrack != iVertex->tracks_end();++iTrack){
                                         ptsum += (*iTrack)->pt();
                                 }
                                 if(ptsum > ptmax){
                                         ptmax = ptsum;
                                         primaryVertex = *iVertex;
-					PVFound = true;
+					primaryVertexFound = true;
                                 }
                         }
                 }
         }
-	return PVFound;
-}
-
-bool MyEventConverter::primaryVertexFound(){
-	return PVFound;
+	return primaryVertexFound;
 }

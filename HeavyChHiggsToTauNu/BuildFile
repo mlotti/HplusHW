@@ -1,4 +1,4 @@
-<use name=FWCore/Framework>
+#<use name=FWCore/Framework>
 
 <use name=root>
 <use name=boost>
@@ -18,7 +18,7 @@
 <use name=JetMETCorrections/MCJet>
 <use name=JetMETCorrections/TauJet>
 
-<use name=EgammaAnalysis/ElectronIDAlgos>
+<use name=RecoEgamma/ElectronIdentification>
 <use name=DataFormats/L1Trigger>
 
 <use name=RecoVertex/KalmanVertexFit>

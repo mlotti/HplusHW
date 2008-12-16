@@ -4,8 +4,8 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 
         GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
-        vector<CaloTowerRef> towers = caloJet->getConstituents();
-        for(vector<CaloTowerRef>::const_iterator iTower = towers.begin();
+        vector<CaloTowerPtr> towers = caloJet->getCaloConstituents();
+        for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
                                                  iTower != towers.end(); iTower++){
                 //size_t numRecHits = (**iTower).constituentsSize();
                 if((*iTower)->et() > maxTowerEt){
@@ -32,9 +32,9 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const ConvertedPhoton* photon){
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
 
-	ConvertedPhoton* convPhoton = const_cast<ConvertedPhoton*>(photon);
+	Conversion* convPhoton = const_cast<Conversion*>(photon);
 	vector<math::XYZPoint> const & ecalHitPositionVector = convPhoton->ecalImpactPosition();
 
 	for(vector<math::XYZPoint>::const_iterator i = ecalHitPositionVector.begin(); i!= ecalHitPositionVector.end(); ++i){

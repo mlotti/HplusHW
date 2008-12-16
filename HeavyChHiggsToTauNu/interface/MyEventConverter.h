@@ -13,12 +13,13 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "EgammaAnalysis/ElectronIDAlgos/interface/CutBasedElectronID.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+////#include "EgammaAnalysis/ElectronIDAlgos/interface/CutBasedElectronID.h"
 #include "DataFormats/EgammaReco/interface/ClusterShape.h"
 
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/EgammaCandidates/interface/ConvertedPhoton.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
 #include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
@@ -71,7 +72,7 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
 
-double deltaR(double,double,double,double);
+double myDeltaR(double,double,double,double);
 
 class MyEventConverter {
   public:
@@ -90,18 +91,18 @@ class MyEventConverter {
 
 	bool triggerDecision(const edm::Event&);
 	bool primaryVertexFound(const edm::Event&);
-        bool primaryVertexFound();
+//        bool primaryVertexFound();
 
         MyImpactParameter 	impactParameter(const TransientTrack&,const CaloJet*);
-	MyImpactParameter 	impactParameter(const TransientTrack&,const ConvertedPhoton*);
+	MyImpactParameter 	impactParameter(const TransientTrack&,const Conversion*);
         MyImpactParameter 	impactParameter(const TransientTrack&);
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
 	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const CaloJet*);
-        MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const ConvertedPhoton*);
+        MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	MyGlobalPoint 		getPrimaryVertex();
-        MyGlobalPoint           getPrimaryVertex(const edm::Event&);
+//        MyGlobalPoint           getPrimaryVertex(const edm::Event&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
 	vector<MyJet> 		getElectrons(const edm::Event&);
         vector<MyJet>           getPhotons(const edm::Event&);
@@ -136,7 +137,7 @@ class MyEventConverter {
 	MyJet			myJetConverter(const Muon&);
         MyJet                   myJetConverter(const PixelMatchGsfElectron*,const ClusterShapeRef&);
         MyJet                   myJetConverter(const Photon*);
-        MyJet                   myJetConverter(const ConvertedPhoton*);
+        MyJet                   myJetConverter(const Conversion*);
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet*);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
@@ -153,7 +154,7 @@ class MyEventConverter {
         map<string,double>      tauTag(const PFTau&);
 	map<string,double> 	etag(const PixelMatchGsfElectron*,const ClusterShapeRef&);
         map<string,double>      photontag(const Photon*);
-	map<string,double> 	photontag(const ConvertedPhoton*);
+	map<string,double> 	photontag(const Conversion*);
 	map<string,double> 	muonTag(const Muon&);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
@@ -167,7 +168,7 @@ class MyEventConverter {
 	bool PVFound;
         InputTag trackCollectionSelection;
 
-        CutBasedElectronID* electronIdAlgo;
+////        CutBasedElectronID* electronIdAlgo;
 	InputTag barrelClusterShapeAssocProducer;
 	InputTag endcapClusterShapeAssocProducer;
         const TransientTrackBuilder* transientTrackBuilder;

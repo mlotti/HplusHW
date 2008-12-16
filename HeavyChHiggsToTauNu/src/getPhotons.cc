@@ -30,27 +30,27 @@ vector<MyJet> MyEventConverter::getPhotons(const edm::Event& iEvent){
 	}
 
 
-        Handle<reco::ConvertedPhotonCollection> convertedPhotonHandle;
+        Handle<reco::ConversionCollection> convertedPhotonHandle;
         try{
           iEvent.getByLabel("correctedPhotons",convertedPhotonHandle);
         }catch(...) {;}
 
         if(convertedPhotonHandle.isValid()){
 
-                const ConvertedPhotonCollection& recoPhotons = *(convertedPhotonHandle.product());
+                const ConversionCollection& recoPhotons = *(convertedPhotonHandle.product());
 
                 int offlinePhotons = recoPhotons.size();
                 cout << "Offline converted photon collection size " << offlinePhotons << endl;
 
-                ConvertedPhotonCollection::const_iterator iPhoton;
+                ConversionCollection::const_iterator iPhoton;
                 for(iPhoton = recoPhotons.begin(); iPhoton != recoPhotons.end(); ++iPhoton){
 
                         MyJet photon = myJetConverter(&(*iPhoton));
                         photons.push_back(photon);
 
-                        cout << "Converted photon: et= " << iPhoton->et();
-                        cout << " eta= "                 << iPhoton->eta();
-                        cout << " phi= "                 << iPhoton->phi();
+                        cout << "Converted photon: et= " << iPhoton->pairMomentum().perp();
+                        cout << " eta= "                 << iPhoton->pairMomentum().eta();
+                        cout << " phi= "                 << iPhoton->pairMomentum().phi();
                         cout << endl;
                 }
         }

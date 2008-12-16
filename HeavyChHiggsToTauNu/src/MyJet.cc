@@ -84,7 +84,7 @@ vector<MyTrack> MyJet::getTracks(double signalCone) const {
 	vector<MyTrack> selectedTracks;
 	vector<MyTrack>::const_iterator i;
 	for(i = tracks.begin(); i!= tracks.end(); i++){
-		double DR = deltaR(this->Eta(),i->Eta(),
+		double DR = myDeltaR(this->Eta(),i->Eta(),
                                    this->Phi(),i->Phi());
 		if(DR < signalCone) selectedTracks.push_back(*i);
 	}
@@ -100,7 +100,7 @@ vector<MyTrack> MyJet::getTracksAroundLeadingTrack(double signalCone,double matc
         vector<MyTrack>::const_iterator i;
         for(i = tracks.begin(); i!= tracks.end(); i++){
 		if(i->charge() == 0) continue;
-                double DR = deltaR(theLeadingTrack.Eta(),i->Eta(),
+                double DR = myDeltaR(theLeadingTrack.Eta(),i->Eta(),
                                    theLeadingTrack.Phi(),i->Phi());
                 if(DR < signalCone) selectedTracks.push_back(*i);
         }
@@ -132,7 +132,7 @@ MyTrack MyJet::leadingTrack(double matchingCone) const {
         for(vector<MyTrack>::const_iterator i = tracks.begin();
                                             i!= tracks.end(); i++){
 		if(i->charge() == 0) continue;
-		double DR = deltaR(i->Eta(),this->Eta(),
+		double DR = myDeltaR(i->Eta(),this->Eta(),
                                    i->Phi(),this->Phi());
 		if(DR > matchingCone) continue;
 
@@ -153,7 +153,7 @@ TLorentzVector MyJet::combinedTracksMomentum(double signalCone,double matchingCo
 		for(vector<MyTrack>::const_iterator i = tracks.begin();
         	                                    i!= tracks.end(); i++){
 			if(i->charge() == 0) continue;
-                	double DR = deltaR(i->Eta(),leadingtrack.Eta(),
+                	double DR = myDeltaR(i->Eta(),leadingtrack.Eta(),
                         	           i->Phi(),leadingtrack.Phi());
                 	if(DR > signalCone) continue;
 
@@ -183,7 +183,7 @@ TLorentzVector MyJet::ecalClusterMomentum(double cone,double matchingCone) const
                 vector<TVector3> cells = i->ECALCells;
                 vector<TVector3>::const_iterator j;
                 for(j = cells.begin(); j!= cells.end(); j++){
-                        double DR = deltaR(ecalHitPoint.Eta(),j->Eta(),
+                        double DR = myDeltaR(ecalHitPoint.Eta(),j->Eta(),
                                            ecalHitPoint.Phi(),j->Phi());
                         if(DR < cone) cluster += *j;
                 }
@@ -211,7 +211,7 @@ TLorentzVector MyJet::hcalClusterMomentum(double cone,double matchingCone) const
 		vector<TVector3> cells = i->HCALCells;
 		vector<TVector3>::const_iterator j;
 		for(j = cells.begin(); j!= cells.end(); j++){
-			double DR = deltaR(ecalHitPoint.Eta(),j->Eta(),
+			double DR = myDeltaR(ecalHitPoint.Eta(),j->Eta(),
                                            ecalHitPoint.Phi(),j->Phi());
 			if(DR < cone) cluster += *j;
 		}

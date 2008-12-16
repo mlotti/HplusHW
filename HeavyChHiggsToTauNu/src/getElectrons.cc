@@ -1,12 +1,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
-
+/*
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
-
+*/
 vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent){
 	vector<MyJet> electrons;
-
+/*
         Handle<PixelMatchGsfElectronCollection> electronHandle;
         try{
           iEvent.getByLabel("pixelMatchGsfElectrons",electronHandle);
@@ -52,5 +52,6 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent){
 		}
 	  }
 	}
+*/
 	return electrons;
 }
