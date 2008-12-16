@@ -26,5 +26,4 @@
 
 <library file=OfflineAnalysis.cpp name=OfflineAnalysis>
   <use name=HiggsAnalysis/HeavyChHiggsToTauNu>
-  <use name=FWCore/Framework>
 </library>
