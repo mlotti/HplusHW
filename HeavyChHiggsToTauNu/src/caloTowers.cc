@@ -2,6 +2,7 @@
 
 vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 	vector<MyCaloTower> calotowers;
+/*
         vector<CaloTowerPtr> towers = caloJet.getCaloConstituents();
 
         for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
@@ -76,6 +77,7 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 
 		calotowers.push_back(calotower);
         }
+*/
 	return calotowers;
 }
 

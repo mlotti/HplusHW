@@ -23,6 +23,7 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 	saveEvent->primaryVertex        = getPrimaryVertex();
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
+/*
 	saveEvent->electrons            = getElectrons(iEvent);
 //	saveEvent->photons              = getPhotons(iEvent);
 	saveEvent->muons                = getMuons(iEvent);
@@ -34,7 +35,7 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 	saveEvent->mcMET                = getMCMET();
 	saveEvent->mcPrimaryVertex      = getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
-
+*/
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;

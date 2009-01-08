@@ -106,14 +106,14 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         jet.SetE(caloJet->energy());
 
         jet.tracks = getTracks(jet);
-
+/*
         // Jet energy corrections
         for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
                 double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
                 string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
                 jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
         }
-
+*/
         return jet;
 }
 
@@ -130,14 +130,14 @@ MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
         jet.SetE(caloJet->energy());
 
         jet.tracks = getTracks(jet);
-
+/*
 	// Jet energy corrections
 	for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
 		double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
 		string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
 		jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
 	}
-
+*/
 	jet.tagInfo = btag(recJet);
 
         return jet;

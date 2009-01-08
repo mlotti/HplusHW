@@ -7,8 +7,10 @@
 #@$-s /bin/csh
 #@$
 
-        setenv ROOTFILEPATH rfio:$CASTOR_HOME/hch300_tauola_HLT
-	setenv ROOTFILE HLTtable_hch300_tauola_1.root
+#	setenv ROOTFILEPATH rfio:$CASTOR_HOME/hch300_tauola_HLT
+#	setenv ROOTFILE HLTtable_hch300_tauola_1.root
+        setenv ROOTFILEPATH rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_Tauola_v1/0002/
+        setenv ROOTFILE 008F0E5C-5C8E-DD11-A113-001617C3B6DC.root
 
 	setenv CASTOR_DIR test
 

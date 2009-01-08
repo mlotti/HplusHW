@@ -12,7 +12,7 @@ void MyEventConverter::cfgInput(const edm::ParameterSet& iConfig){
 		triggerdecision[name] = false;
 	}
 */
-	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
+////	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
         btaggingAlgos = iConfig.getParameter<vector<InputTag> >("BTaggingAlgorithms");
 
 ////	electronIdAlgo->setup(iConfig);
