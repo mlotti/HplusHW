@@ -120,10 +120,10 @@ process.load("Configuration.StandardSequences.FakeConditions_cff")
 process.load("Configuration.StandardSequences.Simulation_cff")
 process.load("Configuration.StandardSequences.MixingNoPileUp_cff")
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
-#process.load("RecoParticleFlow.PFTracking.iterativeTk_cff")
+process.load("RecoTracker.IterativeTracking.iterativeTk_cff")
 
 process.iterativeTracks = cms.EDProducer('IterativeTrackCollectionProducer')
-#process.iterativeTracking = cms.Path(process.iterativeTk,process.iterativeTracks)
+####process.iterativeTracking = cms.Path(process.iterTracking,process.iterativeTracks)
 
 #process.load("EgammaAnalysis.ElectronIDProducers.cutBasedElectronId_cfi")
 #process.load("EgammaAnalysis.ElectronIDProducers.ptdrElectronId_cfi")
@@ -138,16 +138,22 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # b tagging elgorithms
         BTaggingAlgorithms = cms.VInputTag(
-                cms.InputTag("trackCountingHighPurJetTags"),
-                cms.InputTag("trackCountingHighEffJetTags"),
-                cms.InputTag("jetProbabilityJetTags"),
-                cms.InputTag("softElectronJetTags"),
-                cms.InputTag("softMuonJetTags"),
-                cms.InputTag("softMuonNoIPJetTags")
+                cms.InputTag("trackCountingHighPurBJetTags"),
+                cms.InputTag("trackCountingHighEffBJetTags"),
+                cms.InputTag("combinedSecondaryVertexBJetTags"),
+                cms.InputTag("combinedSecondaryVertexMVABJetTags"),
+                cms.InputTag("impactParameterMVABJetTags"),
+                cms.InputTag("jetBProbabilityBJetTags"),
+                cms.InputTag("jetProbabilityBJetTags"),
+                cms.InputTag("simpleSecondaryVertexBJetTags"),
+                cms.InputTag("softElectronBJetTags"),
+                cms.InputTag("softMuonBJetTags"),
+                cms.InputTag("softMuonNoIPBJetTags")
         ),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks
-	TrackCollection = cms.InputTag("iterativeTracks"),
+####	TrackCollection = cms.InputTag("iterativeTracks"),
+	TrackCollection = cms.InputTag("generalTracks"),
 
         #TauJet calibration
 	src = cms.InputTag("iterativeCone5CaloJets"),

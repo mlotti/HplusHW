@@ -29,13 +29,15 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 	saveEvent->muons                = getMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
 	saveEvent->pftaus               = getPFTaus(iEvent);
+*/
 	saveEvent->jets                 = getJets(iEvent);
-	saveEvent->MET                  = getMET(iEvent);
+//	saveEvent->MET                  = getMET(iEvent);
+
         saveEvent->mcParticles          = getMCParticles(iEvent);
 	saveEvent->mcMET                = getMCMET();
 	saveEvent->mcPrimaryVertex      = getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
-*/
+
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
