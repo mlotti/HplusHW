@@ -3,8 +3,9 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
-
-	TrackRef track = recMuon.combinedMuon();
+cout << "check0 MyEventConverter::myJetConverter" << endl;
+//        TrackRef track = recMuon.combinedMuon();
+//	TrackRef track = recMuon.globalTrack();
 
 
         MyJet muon;
@@ -12,19 +13,25 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
         muon.SetPy(recMuon.py());
         muon.SetPz(recMuon.pz());
         muon.SetE(recMuon.p());
-        muon.type = 13 * (*track).charge();
+        muon.type = 13 * recMuon.charge();
+cout << "check1 " << muon.Pt() << " " << muon.eta() << endl;
+	TrackRef track = recMuon.globalTrack();
+cout << "check1.1 " << endl;
+	if(track.isNull()) track = recMuon.innerTrack();
+cout << "check1.2 " << endl;
 
+	if(track.isNonnull()){
 	const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
+cout << "check2 " << endl;
 
 	MyTrack muonTrack = myTrackConverter(transientTrack);
 	muonTrack.ip = impactParameter(transientTrack);
 	muon.tracks.push_back(muonTrack);
-
+cout << "check3 " << endl;
 	muon.tracks = getTracks(muon);
 
 	muon.tagInfo = muonTag(recMuon);
-
+	}
 	return muon;
 }
 

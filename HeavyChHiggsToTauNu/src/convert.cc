@@ -26,12 +26,12 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 /*
 	saveEvent->electrons            = getElectrons(iEvent);
 //	saveEvent->photons              = getPhotons(iEvent);
+*/
 	saveEvent->muons                = getMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
-	saveEvent->pftaus               = getPFTaus(iEvent);
-*/
+//	saveEvent->pftaus               = getPFTaus(iEvent);
 	saveEvent->jets                 = getJets(iEvent);
-//	saveEvent->MET                  = getMET(iEvent);
+	saveEvent->MET                  = getMET(iEvent);
 
         saveEvent->mcParticles          = getMCParticles(iEvent);
 	saveEvent->mcMET                = getMCMET();
