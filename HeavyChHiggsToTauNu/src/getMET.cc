@@ -5,8 +5,9 @@
 
 
 MyMET MyEventConverter::getMET(const edm::Event& iEvent){
+
 	MyMET met;
-	
+
         Handle<reco::CaloMETCollection> caloMET;
         try{
             iEvent.getByLabel("met",caloMET);
@@ -22,6 +23,33 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
              << "  x : " << met.getX()
              << "  y : " << met.getY() << endl;
 
+
+        for(unsigned int iCorr = 0; iCorr < metCorrections.size(); ++iCorr){
+                edm::Handle<reco::CaloMETCollection> metHandle;
+		try{
+                  iEvent.getByLabel(metCorrections[iCorr],metHandle);
+		}catch(...) {;}
+
+                if(metHandle.isValid()){
+		  MyGlobalPoint correction;
+		  correction.name = metCorrections[iCorr].label();
+		  
+                  reco::CaloMETCollection::const_iterator imet = metHandle->begin();
+		  correction.x = imet->px() - met.x;
+		  correction.y = imet->py() - met.y;
+
+		  cout << "     MET " << correction.name << " : " 
+                       << correction.x << " "
+                       << correction.y << endl;
+
+		  met.corrections.push_back(correction);
+                }
+        }
+
+
+
+
+/*
 
         Handle<reco::CaloMETCollection> caloMET_Type1Icone5;
         try{
@@ -41,7 +69,7 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
           met.corrections.push_back(correction);
 	}
-
+/*
         Handle<reco::CaloMETCollection> caloMET_Type1Mcone5;
         try{
             iEvent.getByLabel("corMetType1Mcone5",caloMET_Type1Mcone5);
@@ -187,6 +215,6 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
           met.corrections.push_back(correction);
         }
 
-
+*/
 	return met;
 }

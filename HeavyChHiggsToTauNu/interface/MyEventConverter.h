@@ -177,6 +177,7 @@ class MyEventConverter {
 	const TauJetCorrector* tauJetCorrection;
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;
+	vector<InputTag> metCorrections;
         TrackCollection tracks;
 
         MyMET mcMET;

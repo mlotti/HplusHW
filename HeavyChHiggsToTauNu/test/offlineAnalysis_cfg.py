@@ -81,24 +81,24 @@ MCJetCorrectorMcone5 = cms.ESSource( "MCJetCorrectionService",
 #  label = cms.string( "MCJetCorrectorIcone5" )
 #)
 
-#process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-#process.load("RecoMET.METProducers.CaloMET_cfi")
-#process.missingEt = cms.Path(process.metNoHF)
+process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
+process.load("RecoMET.METProducers.CaloMET_cfi")
+process.missingEt = cms.Path(process.metNoHF)
 
-#process.load("JetMETCorrections.Type1MET.MetType1Corrections_cff")
-#process.missingEt_type1i = cms.Path(process.corMetType1Icone5)
+process.load("JetMETCorrections.Type1MET.MetType1Corrections_cff")
+process.missingEt_type1i = cms.Path(process.corMetType1Icone5)
 #process.missingEt_type1m = cms.Path(process.corMetType1Mcone5)
 
-#process.corMetType1Icone5NoHF = cms.EDProducer('Type1MET',
-#    metType = cms.string("CaloMET"),
-#    inputUncorMetLabel = cms.string("metNoHF"),
-#    inputUncorJetsLabel = cms.string("iterativeCone5CaloJets"),
-#    corrector = cms.string("MCJetCorrectorIcone5"),
-#    jetPTthreshold = cms.double(20.0),
-#    jetEMfracLimit = cms.double(0.9)
-#)
-#process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
-#
+process.corMetType1Icone5NoHF = cms.EDProducer('Type1MET',
+    metType = cms.string("CaloMET"),
+    inputUncorMetLabel = cms.string("metNoHF"),
+    inputUncorJetsLabel = cms.string("iterativeCone5CaloJets"),
+    corrector = cms.string("MCJetCorrectorIcone5"),
+    jetPTthreshold = cms.double(20.0),
+    jetEMfracLimit = cms.double(0.9)
+)
+process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
+
 #process.corMetType1Mcone5NoHF = cms.EDProducer('Type1MET',
 #    metType = cms.string("CaloMET"),
 #    inputUncorMetLabel = cms.string("metNoHF"),
@@ -108,6 +108,13 @@ MCJetCorrectorMcone5 = cms.ESSource( "MCJetCorrectionService",
 #    jetEMfracLimit = cms.double(0.9)
 #)
 #process.missingEt_type1i_nohf = cms.Path(process.corMetType1Mcone5NoHF)
+
+process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
+process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.corMetGlobalMuons)
+
+process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
+process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)
+
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 
@@ -150,6 +157,14 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                 cms.InputTag("softMuonBJetTags"),
                 cms.InputTag("softMuonNoIPBJetTags")
         ),
+
+	METCorrections = cms.VInputTag(
+		cms.InputTag("corMetGlobalMuons"),
+		cms.InputTag("corMetType1Icone5"),
+		cms.InputTag("metNoHF"),
+		cms.InputTag("corMetType1Icone5NoHF"),
+		cms.InputTag("PFJetsCorrCaloJetsDeltaMet")
+	),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks
 ####	TrackCollection = cms.InputTag("iterativeTracks"),
