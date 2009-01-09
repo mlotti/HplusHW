@@ -20,11 +20,12 @@ vector<MyJet> MyEventConverter::getMuons(const edm::Event& iEvent){
 
         	MyJet muon = myJetConverter(*iMuon);
                 muons.push_back(muon);
-
+		/*
                 cout << "Muon: et= " << iMuon->et();
                 cout << " eta= "     << iMuon->eta();
                 cout << " phi= "     << iMuon->phi();
                 cout << endl;
+		*/
           }
         }
 	return muons;
