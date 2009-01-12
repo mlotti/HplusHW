@@ -69,7 +69,7 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
           met.corrections.push_back(correction);
 	}
-/*
+
         Handle<reco::CaloMETCollection> caloMET_Type1Mcone5;
         try{
             iEvent.getByLabel("corMetType1Mcone5",caloMET_Type1Mcone5);

@@ -20,8 +20,6 @@
 <use name=SimDataFormats/HepMCProduct>
 
 
-<use name=HiggsAnalysis/HeavyChHiggsToTauNu>
-
 <flags EDM_PLUGIN=1>
 
 <library file=OfflineAnalysis.cpp name=OfflineAnalysis>

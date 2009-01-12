@@ -17,6 +17,7 @@ void MyEventConverter::cfgInput(const edm::ParameterSet& iConfig){
 
 	metCorrections = iConfig.getParameter<vector<InputTag> >("METCorrections");
 
+	electronIdLabel = iConfig.getParameter<InputTag>("ElectronIdLabel");
 ////	electronIdAlgo->setup(iConfig);
 	barrelClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation");
 	endcapClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation");

@@ -176,6 +176,9 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 	TauTriggerType = cms.int32(1),
 
 	# Electron identification
+	# eidRobustTight eidTight eidLoose eidRobustLoose
+	ElectronIdLabel = cms.InputTag("eidRobustTight"),
+
     	# Selection of input variables:
 #    	useEoverPIn      = cms.bool(1),
 #    	useDeltaEtaIn    = cms.bool(1),

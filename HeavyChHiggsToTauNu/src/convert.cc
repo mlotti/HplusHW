@@ -23,10 +23,10 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 	saveEvent->primaryVertex        = getPrimaryVertex();
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
-/*
+
 	saveEvent->electrons            = getElectrons(iEvent);
 //	saveEvent->photons              = getPhotons(iEvent);
-*/
+
 	saveEvent->muons                = getMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
 //	saveEvent->pftaus               = getPFTaus(iEvent);

@@ -14,7 +14,7 @@
 
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-////#include "EgammaAnalysis/ElectronIDAlgos/interface/CutBasedElectronID.h"
+#include "RecoEgamma/ElectronIdentification/interface/CutBasedElectronID.h"
 #include "DataFormats/EgammaReco/interface/ClusterShape.h"
 
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
@@ -167,6 +167,7 @@ class MyEventConverter {
         Vertex primaryVertex;
 	bool PVFound;
         InputTag trackCollectionSelection;
+	InputTag electronIdLabel;
 
 ////        CutBasedElectronID* electronIdAlgo;
 	InputTag barrelClusterShapeAssocProducer;
