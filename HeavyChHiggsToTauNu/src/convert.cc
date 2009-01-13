@@ -44,5 +44,5 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 
 	delete saveEvent;
 
-	tauResolutionAnalysis->analyse(iEvent);
+//	tauResolutionAnalysis->analyse(iEvent);
 }
