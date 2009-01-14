@@ -104,41 +104,22 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         jet.SetE(caloJet->energy());
 
         jet.tracks = getTracks(jet);
-/*
+
         // Jet energy corrections
         for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
                 double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
                 string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
                 jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
+		cout << "    jet correction " << jetEnergyCorrectionName << " " 
+                                              << jetEnergyCorrectionFactor << endl;
         }
-*/
+
         return jet;
 }
 
 MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
-
-
         const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.first.get());
-
-        MyJet jet;
-
-        jet.SetPx(caloJet->px());
-        jet.SetPy(caloJet->py());
-        jet.SetPz(caloJet->pz());
-        jet.SetE(caloJet->energy());
-
-        jet.tracks = getTracks(jet);
-/*
-	// Jet energy corrections
-	for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
-		double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
-		string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
-		jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
-	}
-*/
-	jet.tagInfo = btag(recJet);
-
-        return jet;
+        return myJetConverter(caloJet);
 }
 
 MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){

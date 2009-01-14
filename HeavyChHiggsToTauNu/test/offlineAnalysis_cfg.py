@@ -69,12 +69,13 @@ process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 #
 #    include "JetMETCorrections/MCJet/data/MCJetCorrections152.cff"
 #    es_prefer MCJetCorrectorMcone5 = MCJetCorrectionService {}
-process.load("JetMETCorrections.Configuration.MCJetCorrections152_cff")
-MCJetCorrectorMcone5 = cms.ESSource( "MCJetCorrectionService",
-  appendToDataLabel = cms.string( "" ),
-  tagName = cms.string( "CMSSW_152_midpointCone5" ),
-  label = cms.string( "MCJetCorrectorMcone5" )
-)
+process.load("JetMETCorrections.Configuration.MCJetCorrectionsSpring07_cff")
+#process.load("JetMETCorrections.Configuration.MCJetCorrections152_cff")
+#MCJetCorrectorMcone5 = cms.ESSource( "MCJetCorrectionService",
+#  appendToDataLabel = cms.string( "" ),
+#  tagName = cms.string( "CMSSW_152_midpointCone5" ),
+#  label = cms.string( "MCJetCorrectorMcone5" )
+#)
 #MCJetCorrectorIcone5 = cms.ESSource( "MCJetCorrectionService",
 #  appendToDataLabel = cms.string( "" ),
 #  tagName = cms.string( "CMSSW_152_iterativeCone5" ),
@@ -141,7 +142,10 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # JetEnergyCorrection = MCJetCorrectorIcone5,MCJetCorrectorMcone5
         # if no corrections, leave {} empty
-	JetEnergyCorrection = cms.VInputTag(cms.InputTag("MCJetCorrectorIcone5"),cms.InputTag("MCJetCorrectorMcone5")),
+	JetEnergyCorrection = cms.VInputTag(
+		cms.InputTag("MCJetCorrectorIcone5")
+#		cms.InputTag("MCJetCorrectorMcone5")
+	),
 
         # b tagging elgorithms
         BTaggingAlgorithms = cms.VInputTag(

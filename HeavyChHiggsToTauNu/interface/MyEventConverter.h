@@ -177,7 +177,7 @@ class MyEventConverter {
 	InputTag reducedEndcapRecHitCollection;
         const TransientTrackBuilder* transientTrackBuilder;
 //	const TransientTrackingRecHitBuilder* TTRHBuilder;
-        const JetCorrector* jetEnergyCorrections[5];
+        vector<const JetCorrector*> jetEnergyCorrections;
 	const TauJetCorrector* tauJetCorrection;
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;

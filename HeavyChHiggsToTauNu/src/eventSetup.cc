@@ -10,16 +10,11 @@ void MyEventConverter::eventSetup(const edm::EventSetup& iSetup){
 //        edm::ESHandle<TransientTrackingRecHitBuilder> theTTRHBuilderHandle;
 //        iSetup.get<TransientRecHitRecord>().get("WithoutRefit",theTTRHBuilderHandle);
 //        TTRHBuilder = theTTRHBuilderHandle.product();
-/*
+
 	for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
 		const JetCorrector* theCorrector = JetCorrector::getJetCorrector(jetEnergyCorrectionTypes[i].label(),iSetup);
-		jetEnergyCorrections[i] = theCorrector;
+		jetEnergyCorrections.push_back(theCorrector);
 	}
-*/
-//        if(jetEnergyCorrectionType != "none"){
-//	  jetEnergyCorrection = JetCorrector::getJetCorrector(jetEnergyCorrectionType,iSetup);
-//	}
-
 
         // geometry initialization
         ESHandle<CaloGeometry> geometry;
