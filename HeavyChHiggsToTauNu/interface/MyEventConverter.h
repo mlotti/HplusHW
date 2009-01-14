@@ -15,7 +15,8 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "RecoEgamma/ElectronIdentification/interface/CutBasedElectronID.h"
-#include "DataFormats/EgammaReco/interface/ClusterShape.h"
+//#include "DataFormats/EgammaReco/interface/ClusterShape.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
@@ -81,7 +82,7 @@ class MyEventConverter {
 
 	void cfgInput(const edm::ParameterSet&);
 	void eventSetup(const edm::EventSetup&);
-	void convert(const edm::Event&);
+	void convert(const edm::Event&,const edm::EventSetup&);
 
   private:
 
@@ -104,7 +105,7 @@ class MyEventConverter {
 	MyGlobalPoint 		getPrimaryVertex();
 //        MyGlobalPoint           getPrimaryVertex(const edm::Event&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
-	vector<MyJet> 		getElectrons(const edm::Event&);
+	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&);
         vector<MyJet>           getPhotons(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
@@ -135,7 +136,7 @@ class MyEventConverter {
 	MyVertex		myVertexConverter(const Vertex&);
         MyVertex                myVertexConverter(const TransientVertex&);
 	MyJet			myJetConverter(const Muon&);
-        MyJet                   myJetConverter(const PixelMatchGsfElectron*,const ClusterShapeRef&);
+        MyJet                   myJetConverter(const GsfElectron*);
         MyJet                   myJetConverter(const Photon*);
         MyJet                   myJetConverter(const Conversion*);
         MyJet                   myJetConverter(const JetTag&);
@@ -152,7 +153,8 @@ class MyEventConverter {
         map<string,double>      tauTag(const IsolatedTauTagInfo&);
         map<string,double>      tauTag(const CaloTau&);
         map<string,double>      tauTag(const PFTau&);
-	map<string,double> 	etag(const PixelMatchGsfElectron*,const ClusterShapeRef&);
+//	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
+	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
         map<string,double>      photontag(const Photon*);
 	map<string,double> 	photontag(const Conversion*);
 	map<string,double> 	muonTag(const Muon&);
@@ -167,11 +169,12 @@ class MyEventConverter {
         Vertex primaryVertex;
 	bool PVFound;
         InputTag trackCollectionSelection;
-	InputTag electronIdLabel;
 
 ////        CutBasedElectronID* electronIdAlgo;
-	InputTag barrelClusterShapeAssocProducer;
-	InputTag endcapClusterShapeAssocProducer;
+//	InputTag barrelClusterShapeAssocProducer;
+//	InputTag endcapClusterShapeAssocProducer;
+	InputTag reducedBarrelRecHitCollection;
+	InputTag reducedEndcapRecHitCollection;
         const TransientTrackBuilder* transientTrackBuilder;
 //	const TransientTrackingRecHitBuilder* TTRHBuilder;
         const JetCorrector* jetEnergyCorrections[5];
@@ -179,6 +182,7 @@ class MyEventConverter {
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;
 	vector<InputTag> metCorrections;
+	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 
         MyMET mcMET;

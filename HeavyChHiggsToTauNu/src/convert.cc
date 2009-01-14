@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-void MyEventConverter::convert(const edm::Event& iEvent){
+void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
 	allEvents++;
 
@@ -24,7 +24,7 @@ void MyEventConverter::convert(const edm::Event& iEvent){
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
-	saveEvent->electrons            = getElectrons(iEvent);
+	saveEvent->electrons            = getElectrons(iEvent,iSetup);
 //	saveEvent->photons              = getPhotons(iEvent);
 
 	saveEvent->muons                = getMuons(iEvent);

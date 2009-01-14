@@ -176,8 +176,15 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 	TauTriggerType = cms.int32(1),
 
 	# Electron identification
-	# eidRobustTight eidTight eidLoose eidRobustLoose
-	ElectronIdLabel = cms.InputTag("eidRobustTight"),
+	ReducedBarrelRecHitCollection = cms.InputTag("reducedEcalRecHitsEB"),
+	ReducedEndcapRecHitCollection = cms.InputTag("reducedEcalRecHitsEE"),
+
+	ElectronIdLabels = cms.VInputTag(
+		cms.InputTag("eidRobustTight"),
+		cms.InputTag("eidTight"),
+		cms.InputTag("eidLoose"),
+		cms.InputTag("eidRobustLoose")
+	),
 
     	# Selection of input variables:
 #    	useEoverPIn      = cms.bool(1),
@@ -192,8 +199,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 #    	useSigmaEtaEta   = cms.bool(1),
 #    	useSigmaPhiPhi   = cms.bool(1),
 
-	barrelClusterShapeAssociation = cms.InputTag("hybridSuperClusters","hybridShapeAssoc"),
-	endcapClusterShapeAssociation = cms.InputTag("islandBasicClusters","islandEndcapShapeAssoc"),
+#	barrelClusterShapeAssociation = cms.InputTag("hybridSuperClusters","hybridShapeAssoc"),
+#	endcapClusterShapeAssociation = cms.InputTag("islandBasicClusters","islandEndcapShapeAssoc"),
 
 #	algo_psets = cms.VPSet(cms.PSet(using PTDR_ID), cms.PSet(using CutBased_ID))
 #	VPSet algo_psets = {

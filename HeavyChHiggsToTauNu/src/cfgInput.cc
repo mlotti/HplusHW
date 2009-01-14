@@ -17,10 +17,12 @@ void MyEventConverter::cfgInput(const edm::ParameterSet& iConfig){
 
 	metCorrections = iConfig.getParameter<vector<InputTag> >("METCorrections");
 
-	electronIdLabel = iConfig.getParameter<InputTag>("ElectronIdLabel");
+	electronIdLabels = iConfig.getParameter<vector<InputTag> >("ElectronIdLabels");
 ////	electronIdAlgo->setup(iConfig);
-	barrelClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation");
-	endcapClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation");
+//	barrelClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation");
+//	endcapClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation");
+	reducedBarrelRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedBarrelRecHitCollection");
+	reducedEndcapRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedEndcapRecHitCollection");
 
         trackCollectionSelection = iConfig.getParameter<InputTag>("TrackCollection");
 	trajectoryInput = trackCollectionSelection;
