@@ -1,16 +1,35 @@
 import FWCore.ParameterSet.Config as cms
+import os
+
+def getEnvVar(var, default=None):
+    if os.environ.has_key(var):
+        return os.environ.get(var)
+    else:
+        return default
+
+maxEvt = int(getEnvVar("MYMAXEVENTS", 100))
+fileList = getEnvVar("MYINPUTFILELIST")
 
 process = cms.Process("test")
 
+process.Tracer = cms.Service("Tracer")
+
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(maxEvt)
 )
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring(
-	'rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_Tauola_v1/0002/008F0E5C-5C8E-DD11-A113-001617C3B6DC.root'
-    )
+    fileNames = cms.untracked.vstring()
 )
+
+if fileList:
+    file = open(fileList)
+    for line in file:
+        f = line.replace("\n", "")
+        print "Append file %s to list of input files" % f
+        process.source.fileNames.append(f)
+else:
+    process.source.fileNames.append("rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_Tauola_v1/0002/008F0E5C-5C8E-DD11-A113-001617C3B6DC.root")
 
 
 #process.load("RecoParticleFlow.Configuration.RecoParticleFlow_cff")
@@ -39,6 +58,9 @@ process.load("RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolation_cfi")
 
 # Message Logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.debugModules = cms.untracked.vstring("*")
+process.MessageLogger.cerr = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"))
+
 
 # Magnetic Field
 process.load("Configuration/StandardSequences/MagneticField_cff")
