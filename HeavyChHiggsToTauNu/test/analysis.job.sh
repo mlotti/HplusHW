@@ -1,12 +1,12 @@
 #!/bin/sh
 
-#@$-r   CMSSW_h2tau  # request name
+#@$-r   CMSSW_m2t    # request name
 #@$-lf  1500mb       # output file size limit
 #@$-eo               # join stderr and stdout
 #@$-me               # send mail upon termination
 #@$-s /bin/bash      # shell
 
-#$ -N CMSSW_h2tau
+#$ -N CMSSW_m2t
 #$ -q lhc
 #$ -S /bin/bash
 #$ -o $JOB_NAME.$JOB_ID.stdout
@@ -54,12 +54,12 @@ echo "Setting runtime"
 cd $LS_SUBCWD
 eval $(scramv1 runtime -sh)
 
-env
+#env
 
 cd $WORKDIR
 echo "Working directory is $WORKDIR"
 
-export MYINPUTFILELIST=$INPUTFILE
+export MYINPUTFILES=$INPUTFILE
 export MYMAXEVENTS=-1
 
 echo "Running CMSSW"

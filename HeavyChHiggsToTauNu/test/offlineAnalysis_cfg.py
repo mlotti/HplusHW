@@ -8,7 +8,7 @@ def getEnvVar(var, default=None):
         return default
 
 maxEvt = int(getEnvVar("MYMAXEVENTS", 100))
-fileList = getEnvVar("MYINPUTFILELIST")
+files = getEnvVar("MYINPUTFILES")
 
 process = cms.Process("test")
 
@@ -22,12 +22,10 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
 )
 
-if fileList:
-    file = open(fileList)
-    for line in file:
-        f = line.replace("\n", "")
-        print "Append file %s to list of input files" % f
-        process.source.fileNames.append(f)
+if files:
+    for file in files.split(" "):
+        print "Append file %s to list of input files" % file
+        process.source.fileNames.append(file)
 else:
     process.source.fileNames.append("rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_Tauola_v1/0002/008F0E5C-5C8E-DD11-A113-001617C3B6DC.root")
 
@@ -133,7 +131,8 @@ process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
 #process.missingEt_type1i_nohf = cms.Path(process.corMetType1Mcone5NoHF)
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.corMetGlobalMuons)
+#process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.corMetGlobalMuons) # 2_2_3
+process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 2_1_12
 
 process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
 process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)
