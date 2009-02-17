@@ -2,14 +2,20 @@
 import re
 import os
 import sys
+import time
 
-from bsubmit import config, job, root_re
+from bsubmit import config, job, root_re, execute
 
-phase = "analysis"
+phase = "analysis_original"
+#phase = "analysis"
 #phase = "analysis_noMerge"
 
 submit = "qsub"
 baseDir = "/pnfs/csc.fi/data/cms/MyEventData/muon2tau"
+
+maxJobs = 10
+reallySubmit = False
+#reallySubmit = True
 
 def main(argv):
     if len(argv) != 1:
@@ -35,23 +41,21 @@ def main(argv):
         ret = os.system("srmmkdir %s" % lsDir)
         if ret != 0:
             return 1
-        
+
+    numJobs = 0
     for file in files:
         outputFile = "%s_%s" % (phase, os.path.basename(file))
         if not (lsDir+"/"+outputFile) in existingOutputFiles:
             cmd = "%s %s %s %s %s" % (submit, job, file, outputDir, outputFile)
             print cmd
-            os.system(cmd)
+            if reallySubmit:
+                os.system(cmd)
+                time.sleep(1)
+            numJobs += 1
+            if maxJobs > 0 and numJobs >= maxJobs:
+                break
 
     return 0
-
-def execute(cmd):
-    f = os.popen4(cmd)[1]
-    ret=[]
-    for line in f:
-        ret.append(line.replace("\n", ""))
-    f.close()
-    return ret
 
 class SrmException(Exception):
     def __init__(self, message):
@@ -59,12 +63,13 @@ class SrmException(Exception):
 
     def __str__(self):
         return self.message
-   
-def srmls(url):
+
+def srmls(url, convertToRoot=False):
     ret = []
     max_size = 1
 
     file_re = re.compile("(?P<size>\d+)\s+(?P<file>\S+)")
+    host_re = re.compile("srm://(?P<host>[^/:]*):8443")
     cmd = "/opt/d-cache/srm/bin/srmls -srm_protocol_version=2 -server_mode=passive -streams_num=1 -count=%d -offset=%d"
 
     count = 500
@@ -96,6 +101,9 @@ def srmls(url):
             url2 = url+"/"
             if url2.find(bn) == -1:
                 name = "%s%s" % (url2, bn)
+
+            if convertToRoot:
+                name = host_re.sub("root://\g<host>", name)
 
             ret.append((name, s))
 

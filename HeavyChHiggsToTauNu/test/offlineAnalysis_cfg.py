@@ -10,9 +10,11 @@ def getEnvVar(var, default=None):
 maxEvt = int(getEnvVar("MYMAXEVENTS", 100))
 files = getEnvVar("MYINPUTFILES")
 
+summer08 = True
+
 process = cms.Process("test")
 
-process.Tracer = cms.Service("Tracer")
+#process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(maxEvt)
@@ -27,6 +29,7 @@ if files:
         print "Append file %s to list of input files" % file
         process.source.fileNames.append(file)
 else:
+#    process.source.fileNames.append("root://madhatter.csc.fi/pnfs/csc.fi/data/cms/Events_matti/muon2tau/TTJets_Fall08_cmssw2117/digi_muon_223/digi_muon_hltskim_402.root")
     process.source.fileNames.append("rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_Tauola_v1/0002/008F0E5C-5C8E-DD11-A113-001617C3B6DC.root")
 
 
@@ -56,12 +59,16 @@ process.load("RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolation_cfi")
 
 # Message Logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.debugModules = cms.untracked.vstring("*")
-process.MessageLogger.cerr = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"))
+#process.MessageLogger.debugModules = cms.untracked.vstring("*")
+#process.MessageLogger.cerr = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"))
 
 
 # Magnetic Field
-process.load("Configuration/StandardSequences/MagneticField_cff")
+# These are probably the same, but let's be sure
+if summer08:
+    process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+else:
+    process.load("Configuration/StandardSequences/MagneticField_cff")
 
 #process.load("RecoJets.JetProducers.iterativeCone5CaloJets_cff")
 ##process.load("RecoBTau.JetTracksAssociator.jetTracksAssociator_cfi")
@@ -79,7 +86,11 @@ process.load("Configuration/StandardSequences/MagneticField_cff")
 
 
 # XML ideal geometry description
-process.load("Geometry.CMSCommonData.cmsIdealGeometryXML_cfi")
+if summer08:
+    process.load('Configuration.StandardSequences.GeometryPilot2_cff')
+else:
+    process.load("Geometry.CMSCommonData.cmsIdealGeometryXML_cfi")
+    
 # Calo geometry service model
 process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
 # Calo topology service model
@@ -131,8 +142,8 @@ process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
 #process.missingEt_type1i_nohf = cms.Path(process.corMetType1Mcone5NoHF)
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-#process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.corMetGlobalMuons) # 2_2_3
-process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 2_1_12
+process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.corMetGlobalMuons) # 2_2_3
+#process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 2_1_12
 
 process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
 process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)

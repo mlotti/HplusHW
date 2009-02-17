@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#@$-r   CMSSW_m2t    # request name
+#@$-r   CMSSW_h2tn   # request name
 #@$-lf  1500mb       # output file size limit
 #@$-eo               # join stderr and stdout
 #@$-me               # send mail upon termination

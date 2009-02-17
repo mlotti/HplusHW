@@ -3,10 +3,12 @@ import re
 import os
 import sys
 
-config = {"analysis": {"dir": "myevent_cmssw2112",
-                       "queue": "1nh"},
-          "analysis_noMerge": {"dir": "relval_ttbar_muons_removed_cmssw223_run1",
-                               "queue": "1nh"}}
+config = {"analysis_original": {"dir": "TTJets_Fall08_cmssw2117_original_cmssw223_run1",
+                                "queue": "8nh"},
+          "analysis": {"dir": "TTJets_Fall08_cmssw2117_muonsReplacedWithTaus_cmssw223_run1",
+                       "queue": "8nh"},
+          "analysis_noMerge": {"dir": "TTJets_Fall08_cmssw2117_muonsRemoved_cmssw223_run1",
+                               "queue": "8nh"}}
 
 phase = "analysis"
 #phase = "analysis_noMerge"
