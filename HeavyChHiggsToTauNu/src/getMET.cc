@@ -4,6 +4,8 @@
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETCollection.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/METCollection.h"
 
 MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
@@ -66,5 +68,28 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
           met.corrections.push_back(correction);
 	}
-	return met;
+
+
+	// track corrected MET
+	Handle<reco::METCollection> tcMET;
+	try{
+		iEvent.getByLabel("tcMet",tcMET);
+	}catch(...) {;}
+
+        if(tcMET.isValid()){
+          MyGlobalPoint correction;
+          correction.name = "tcMET";
+
+          reco::METCollection::const_iterator imet = tcMET->begin();
+          correction.x = imet->px() - met.x;
+          correction.y = imet->py() - met.y;
+
+          cout << "     track corrected MET : " << correction.x << " "
+                                                << correction.y << endl;
+
+          met.corrections.push_back(correction);
+        }
+
+
+        return met;
 }

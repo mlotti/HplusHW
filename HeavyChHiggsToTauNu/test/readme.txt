@@ -90,6 +90,12 @@
 17.6.2008/S.Lehti CMSSW_1_6_12	Removed jet raw Et cut 10 GeV. Added more btagging discriminators
 24.6.2008/S.Lehti CMSSW_1_6_12  Added trigger bit information in MyEvent
 
+26.2.2009/S.Lehti CMSSW_2_2_5   Track corrected MET needs additional tags. All needed tags:
+				cvs co -r V02-05-00-20 RecoMET/METAlgorithms 
+				cvs co -r V02-08-02-16 RecoMET/METProducers 
+				cvs co -r V00-04-02-16 RecoMET/Configuration 
+				cvs co -r V00-06-02-09 DataFormats/METReco
+
 
 	How to compile:
 	-compile
