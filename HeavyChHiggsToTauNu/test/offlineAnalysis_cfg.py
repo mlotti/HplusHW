@@ -146,6 +146,7 @@ process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.cor
 
 process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
 process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)
+#process.missingEt_tauMet = cms.Path(process.tauMetCorr)
 
 # track corrected MET
 process.load("RecoMET.METProducers.TCMET_cfi")
@@ -201,7 +202,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		cms.InputTag("corMetType1Icone5"),
 		cms.InputTag("metNoHF"),
 		cms.InputTag("corMetType1Icone5NoHF"),
-		cms.InputTag("PFJetsCorrCaloJetsDeltaMet")
+		cms.InputTag("tauMetCorr")
 	),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks
@@ -276,3 +277,11 @@ process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
 
+process.TESTOUT = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring(
+#        "drop *",
+#        "keep recoCaloMETs_*_*_*"
+#    ),
+    fileName = cms.untracked.string('file:testout.root')
+)
+#process.outpath = cms.EndPath(process.TESTOUT)

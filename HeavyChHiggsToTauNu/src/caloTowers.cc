@@ -2,7 +2,7 @@
 
 vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 	vector<MyCaloTower> calotowers;
-/*
+
         vector<CaloTowerPtr> towers = caloJet.getCaloConstituents();
 
         for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
@@ -17,7 +17,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                         DetId recHitDetID = (**iTower).constituent(j);
                         //DetId::Detector detNum=recHitDetID.det();
                         if( recHitDetID.det() == DetId::Ecal ){
-                          if( recHitDetID.subdetId() == 1 ){ // Ecal Barrel
+			  if((EcalSubdetector)recHitDetID.subdetId()==EcalBarrel){
+//                          if( recHitDetID.subdetId() == 1 ){ // Ecal Barrel
                                 EBDetId ecalID = recHitDetID;
                                 EBRecHitCollection::const_iterator theRecHit = EBRecHits->find(ecalID);
                                 if(theRecHit != EBRecHits->end()){
@@ -27,7 +28,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                                   ECALCells.push_back(getCellMomentum(this_cell,energy));
                                 }
                           }
-                          if( recHitDetID.subdetId() == 2 ){ // Ecal Endcap
+//                          if( recHitDetID.subdetId() == 2 ){ // Ecal Endcap
+			  if((EcalSubdetector)recHitDetID.subdetId()==EcalEndcap){
                                 EEDetId ecalID = recHitDetID;
                                 EERecHitCollection::const_iterator theRecHit = EERecHits->find(ecalID);
                                 if(theRecHit != EERecHits->end()){
@@ -77,7 +79,7 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 
 		calotowers.push_back(calotower);
         }
-*/
+
 	return calotowers;
 }
 
