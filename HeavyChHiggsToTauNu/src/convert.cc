@@ -27,7 +27,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->electrons            = getElectrons(iEvent,iSetup);
 //	saveEvent->photons              = getPhotons(iEvent);
 
-	saveEvent->muons                = getMuons(iEvent);
+////        saveEvent->muons                = getMuons(iEvent);
+	saveEvent->muons                = getPATMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
 //	saveEvent->pftaus               = getPFTaus(iEvent);
 	saveEvent->jets                 = getJets(iEvent);

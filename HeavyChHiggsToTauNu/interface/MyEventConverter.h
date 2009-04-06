@@ -108,6 +108,7 @@ class MyEventConverter {
 	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&);
         vector<MyJet>           getPhotons(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&);
+	vector<MyJet>           getPATMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
         vector<MyJet> 		getPFTaus(const edm::Event&);
         vector<MyJet> 		getJets(const edm::Event&);

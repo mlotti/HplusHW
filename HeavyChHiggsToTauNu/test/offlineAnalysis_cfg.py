@@ -171,6 +171,11 @@ process.iterativeTracks = cms.EDProducer('IterativeTrackCollectionProducer')
 #process.load("EgammaAnalysis.ElectronIDProducers.cutBasedElectronId_cfi")
 #process.load("EgammaAnalysis.ElectronIDProducers.ptdrElectronId_cfi")
 
+# PAT Layer 0+1
+process.load("PhysicsTools.PatAlgos.patLayer0_cff")
+process.load("PhysicsTools.PatAlgos.patLayer1_cff")
+process.p = cms.Path(process.patLayer0 + process.patLayer1)
+
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
 	HLTSelection = cms.VInputTag(cms.InputTag("HLT1Tau"),cms.InputTag("HLT1MuonIso"),cms.InputTag("HLT1MET"),cms.InputTag("HLT1Tau1MET"),cms.InputTag("HLT1jet"),cms.InputTag("HLT2jet"),cms.InputTag("HLT3jet"),cms.InputTag("HLT4jet")),
@@ -277,11 +282,11 @@ process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
 
-process.TESTOUT = cms.OutputModule("PoolOutputModule",
+#process.TESTOUT = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
 #        "drop *",
 #        "keep recoCaloMETs_*_*_*"
 #    ),
-    fileName = cms.untracked.string('file:testout.root')
-)
+#    fileName = cms.untracked.string('file:testout.root')
+#)
 #process.outpath = cms.EndPath(process.TESTOUT)

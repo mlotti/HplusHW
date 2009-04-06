@@ -27,7 +27,33 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 	}
 	return muon;
 }
+/*
+MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
 
+        MyJet muon;
+        muon.SetPx(recMuon.px());
+        muon.SetPy(recMuon.py());
+        muon.SetPz(recMuon.pz());
+        muon.SetE(recMuon.p());
+        muon.type = 13 * recMuon.charge();
+
+        TrackRef track = recMuon.globalTrack();
+        if(track.isNull()) track = recMuon.innerTrack();
+
+        if(track.isNonnull()){
+                const TransientTrack transientTrack = transientTrackBuilder->build(track);
+
+                MyTrack muonTrack = myTrackConverter(transientTrack);
+                muonTrack.ip = impactParameter(transientTrack);
+                muon.tracks.push_back(muonTrack);
+
+                muon.tracks = getTracks(muon);
+
+                muon.tagInfo = muonTag(recMuon);
+        }
+        return muon;
+}
+*/
 MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	GsfTrackRef track = recElectron->gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);

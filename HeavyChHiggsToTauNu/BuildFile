@@ -23,6 +23,9 @@
 
 <use name=RecoVertex/KalmanVertexFit>
 
+    <use name=PhysicsTools/PatUtils>
+    <use name=DataFormats/PatCandidates>
+
 <export>
    <lib name=HiggsAnalysisHeavyChHiggsToTauNu>
 </export>
