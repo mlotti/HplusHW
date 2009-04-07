@@ -145,8 +145,8 @@ process.missingEt_muons = cms.Path(process.goodMuonsforMETCorrection*process.cor
 #process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 2_1_12
 
 process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
-process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)
-#process.missingEt_tauMet = cms.Path(process.tauMetCorr)
+#process.missingEt_tauMet = cms.Path(process.PFJetsCorrCaloJetsDeltaMet)
+process.missingEt_tauMet = cms.Path(process.tauMetCorr)
 
 # track corrected MET
 process.load("RecoMET.METProducers.TCMET_cfi")
