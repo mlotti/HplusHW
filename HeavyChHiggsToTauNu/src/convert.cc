@@ -19,7 +19,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
-
+	saveEvent->triggerResults       = getTriggerResults(iEvent);
 	saveEvent->primaryVertex        = getPrimaryVertex();
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
