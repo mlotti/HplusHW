@@ -85,6 +85,76 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 		mcMET.x = mcMetX;
 		mcMET.y = mcMetY;
 	}
+
+
+	// newSource from muon->tau conversion, saving the MC tau and its decay products
+        Handle<HepMCProduct> mcEventHandle2;
+        try{
+          iEvent.getByLabel("newSource",mcEventHandle2);
+        }catch(...) {;}
+
+        if(mcEventHandle2.isValid()){
+
+                const HepMC::GenEvent* mcEvent = mcEventHandle2->GetEvent() ;
+                cout << "MC particles size " << mcEvent->particles_size() << endl;
+
+                HepMC::GenEvent::particle_const_iterator i;
+                for(i = mcEvent->particles_begin(); i!= mcEvent->particles_end(); i++){
+/*
+                        cout << "  particle " << (*i)->barcode()
+                             << " " << (*i)->pdg_id()
+                             << " " << (*i)->status()
+                             << " " << (*i)->momentum().perp()
+                             << " " << (*i)->momentum().eta()
+                             << " " << (*i)->momentum().phi()
+                             << endl;
+*/
+
+                        int id = (*i)->pdg_id();
+
+                        // searching parents
+                        // searching parents
+
+                        vector<int> motherList;
+                        vector<int> motherBarcodes;
+                        if( (*i)->production_vertex() ) {
+                                HepMC::GenVertex::particle_iterator iMother =
+                                        (*i)->production_vertex()->particles_begin(HepMC::parents);
+                                if(*iMother != 0) {
+                                    while( (*iMother)->production_vertex() ) {
+                                        int motherId = (*iMother)->pdg_id();
+                                        int motherBarCode = (*iMother)->barcode();
+                                        //cout << "          mother ids,barcode " << motherId
+                                        //     << " " << (*iMother)->barcode() << endl;
+                                        iMother = (*iMother)->production_vertex()->particles_begin(HepMC::parents);
+                                        if((*iMother)->pdg_id() != motherId) {
+                                                motherList.push_back(motherId);
+                                                motherBarcodes.push_back(motherBarCode);
+                                        }
+                                    }
+                                }
+                        }
+
+                        if(motherList.size() > 0){
+                          if(motherList[0] != id){
+                                MyMCParticle mcParticle;
+                                mcParticle.pid    = id;
+                                mcParticle.status = (*i)->status();
+                                mcParticle.barcode = (*i)->barcode();
+                                mcParticle.SetE((*i)->momentum().e());
+                                mcParticle.SetPx((*i)->momentum().px());
+                                mcParticle.SetPy((*i)->momentum().py());
+                                mcParticle.SetPz((*i)->momentum().pz());
+
+                                //mcParticle.motherLine = myMCMotherIterator;
+                                mcParticle.mother = motherList;
+                                mcParticle.motherBarcodes = motherBarcodes;
+                                //cout << "SAVING particle " << mcParticle.barcode << " " << mcParticle.pid << endl;
+                                mcParticles.push_back(mcParticle);
+                          }
+                        }
+                }
+	}
 	return mcParticles;
 }
 
