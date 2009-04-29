@@ -29,7 +29,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	saveEvent->muons                = getMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
-//	saveEvent->pftaus               = getPFTaus(iEvent);
+	saveEvent->pftaus               = getPFTaus(iEvent);
 	saveEvent->jets                 = getJets(iEvent);
 	saveEvent->MET                  = getMET(iEvent);
 

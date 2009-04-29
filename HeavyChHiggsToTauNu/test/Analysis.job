@@ -7,7 +7,7 @@
 #@$-s /bin/csh
 #@$
 
-	setenv MAXEVENTS 10
+	setenv MAXEVENTS -1
 
 #	setenv ROOTFILEPATH rfio:$CASTOR_HOME/hch300_tauola_HLT
 #	setenv ROOTFILE HLTtable_hch300_tauola_1.root
