@@ -19,11 +19,11 @@ class MyEvent : public TObject {
 	MyEvent();
     	virtual ~MyEvent();
 
-    	inline short int event(){return eventNumber;}
-    	inline short int run(){return runNumber;}
+    	inline unsigned int event(){return eventNumber;}
+    	inline unsigned int run(){return runNumber;}
 
-    	short int     eventNumber;
-    	short int     runNumber;
+    	unsigned int     eventNumber;
+    	unsigned int     runNumber;
 
     // Rec event
 	bool trigger(string);
@@ -65,6 +65,8 @@ class MyEvent : public TObject {
     	vector<MyJet> getJets(string);
         vector<MyJet> getTaujets(string);
 
+        vector<MyJet> getExtraObjects();
+
     	MyMET         getMET();
 
     	void 	      listJetCorrections();
@@ -85,6 +87,8 @@ class MyEvent : public TObject {
     	vector<MyJet> taujets;
     	vector<MyJet> pftaus;
     	vector<MyJet> jets;
+
+	vector<MyJet> extraObjects;
 
     	MyMET         MET;
 

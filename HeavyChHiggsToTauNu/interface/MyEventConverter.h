@@ -126,7 +126,7 @@ class MyEventConverter {
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	vector<MyVertex>	secondaryVertices(vector<TransientTrack>&);
 	void			getCaloHits(const edm::Event&);
-
+	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
         MyTrack                 myTrackConverter(const TransientTrack&);
 //	MyTrack			myTrackConverter(const TransientTrack&, const Trajectory&);

@@ -38,6 +38,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->mcPrimaryVertex      = getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
 
+	saveEvent->extraObjects		= getExtraObjects(iEvent);
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
