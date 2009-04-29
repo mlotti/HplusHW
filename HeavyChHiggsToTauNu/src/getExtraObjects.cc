@@ -20,6 +20,7 @@ vector<MyJet> MyEventConverter::getExtraObjects(const edm::Event& iEvent){
           for(iMuon = recoMuons.begin(); iMuon != recoMuons.end(); iMuon++){
 
         	MyJet muon = myJetConverter(*iMuon);
+		muon.tagInfo["mu2tau_selectedMuon"] = 1;
                 extraObjects.push_back(muon);
 		/*
                 cout << "Muon: et= " << iMuon->et();
