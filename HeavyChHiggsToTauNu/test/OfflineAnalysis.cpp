@@ -25,8 +25,7 @@ class OfflineAnalysis : public edm::EDAnalyzer {
 };
 
 OfflineAnalysis::OfflineAnalysis(const edm::ParameterSet& iConfig){
-	myEventConverter = new MyEventConverter();
-        myEventConverter->cfgInput(iConfig);
+	myEventConverter = new MyEventConverter(iConfig);
 }
 
 void OfflineAnalysis::beginJob(const edm::EventSetup& iSetup){
