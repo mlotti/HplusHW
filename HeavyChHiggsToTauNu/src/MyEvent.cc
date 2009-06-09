@@ -76,7 +76,7 @@ vector<MyMCParticle> MyEvent::getMCParticles(){return mcParticles;}
 vector<MySimTrack> MyEvent::getSimTracks(){return simTracks;}
 
 
-void MyEvent::printAll(){
+void MyEvent::printReco(){
     print();
 
         if(triggerResults.size() > 0) cout << " Trigger " << endl;
@@ -93,6 +93,7 @@ void MyEvent::printAll(){
              << ", eta = " << i->eta() 
              << ", phi = " << i->phi() 
              << ", tracks = " << i->tracks.size() << endl;
+	i->print();
     }
 
     if(electrons.size() > 0) cout << " Electrons " << electrons.size() << endl;
@@ -102,6 +103,7 @@ void MyEvent::printAll(){
              << ", eta = " << i->eta()
              << ", phi = " << i->phi()
              << ", tracks = " << i->tracks.size() << endl;
+	i->print();
     }
 
     if(photons.size() > 0) cout << " Photons " << photons.size() << endl;
@@ -111,6 +113,7 @@ void MyEvent::printAll(){
              << ", eta = " << i->eta()
              << ", phi = " << i->phi()
              << ", tracks = " << i->tracks.size() << endl;
+	i->print();
     }
 
     if(muons.size() > 0) cout << " Muons " << muons.size() << endl;
@@ -120,6 +123,7 @@ void MyEvent::printAll(){
              << ", eta = " << i->eta()
              << ", phi = " << i->phi()
              << ", tracks = " << i->tracks.size() << endl;
+	i->print();
     }
 
     if(taujets.size() > 0) cout << " Taujets " << taujets.size() << endl;
@@ -160,6 +164,12 @@ void MyEvent::printAll(){
 
     cout << " MET    = " << getMET().value() << endl;
     getMET().printCorrections();
+}
+
+void MyEvent::printAll(){
+
+    printReco();
+
     cout << " MC MET = " << getMCMET().value() << endl;
 
     if(mcParticles.size() > 0) cout << " MC particles " << mcParticles.size() << endl;
