@@ -59,6 +59,10 @@
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+//PAT
+#include "DataFormats/Common/interface/View.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+
 #include <iostream>
 using namespace std;
 using namespace edm;
@@ -136,7 +140,8 @@ class MyEventConverter {
 	MyTrack 		myTrackConverter(const PFCandidate&);
 	MyVertex		myVertexConverter(const Vertex&);
         MyVertex                myVertexConverter(const TransientVertex&);
-	MyJet			myJetConverter(const Muon&);
+	MyJet			myJetConverter(const reco::Muon&);
+	MyJet			myJetConverter(const pat::Muon&);
         MyJet                   myJetConverter(const GsfElectron*);
         MyJet                   myJetConverter(const Photon*);
         MyJet                   myJetConverter(const Conversion*);
@@ -158,7 +163,8 @@ class MyEventConverter {
 	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
         map<string,double>      photontag(const Photon*);
 	map<string,double> 	photontag(const Conversion*);
-	map<string,double> 	muonTag(const Muon&);
+        map<string,double>      muonTag(const reco::Muon&);
+	map<string,double> 	muonTag(const pat::Muon&);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
 	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);

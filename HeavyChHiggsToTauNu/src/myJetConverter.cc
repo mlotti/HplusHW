@@ -27,7 +27,7 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 	}
 	return muon;
 }
-/*
+
 MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
 
         MyJet muon;
@@ -53,7 +53,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
         }
         return muon;
 }
-*/
+
 MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	GsfTrackRef track = recElectron->gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);

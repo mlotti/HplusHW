@@ -172,9 +172,11 @@ process.iterativeTracks = cms.EDProducer('IterativeTrackCollectionProducer')
 #process.load("EgammaAnalysis.ElectronIDProducers.ptdrElectronId_cfi")
 
 # PAT Layer 0+1
-process.load("PhysicsTools.PatAlgos.patLayer0_cff")
-process.load("PhysicsTools.PatAlgos.patLayer1_cff")
-process.p = cms.Path(process.patLayer0 + process.patLayer1)
+####process.load("PhysicsTools.PatAlgos.patLayer0_cff")
+####process.load("PhysicsTools.PatAlgos.patLayer1_cff")
+####process.p = cms.Path(process.patLayer0 + process.patLayer1)
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+process.p = cms.Path(process.patDefaultSequence)
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
@@ -281,11 +283,10 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
-
 #process.TESTOUT = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
 #        "drop *",
-#        "keep recoCaloMETs_*_*_*"
+#        "keep patMuons_*_*_*"
 #    ),
 #    fileName = cms.untracked.string('file:testout.root')
 #)

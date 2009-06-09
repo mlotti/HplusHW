@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
-#include "DataFormats/Common/interface/View.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
+//#include "DataFormats/Common/interface/View.h"
+//#include "DataFormats/PatCandidates/interface/Muon.h"
 
 
 vector<MyJet> MyEventConverter::getPATMuons(const edm::Event& iEvent){
@@ -19,7 +19,6 @@ vector<MyJet> MyEventConverter::getPATMuons(const edm::Event& iEvent){
           cout << "Offline mu collection size " << offlineMuons << endl;
 
 	  edm::View<pat::Muon>::const_iterator iMuon;
-//          MuonCollection::const_iterator iMuon;
           for(iMuon = recoMuons.begin(); iMuon != recoMuons.end(); iMuon++){
 
         	MyJet muon = myJetConverter(*iMuon);
