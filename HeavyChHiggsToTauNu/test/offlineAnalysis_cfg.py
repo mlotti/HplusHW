@@ -7,7 +7,7 @@ def getEnvVar(var, default=None):
     else:
         return default
 
-maxEvt = int(getEnvVar("MYMAXEVENTS", 100))
+maxEvt = int(getEnvVar("MYMAXEVENTS", -1))
 files = getEnvVar("MYINPUTFILES")
 
 summer08 = True

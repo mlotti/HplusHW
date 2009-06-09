@@ -19,7 +19,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
-
+	saveEvent->triggerResults       = getTriggerResults(iEvent);
 	saveEvent->primaryVertex        = getPrimaryVertex();
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
@@ -30,7 +30,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 ////        saveEvent->muons                = getMuons(iEvent);
 	saveEvent->muons                = getPATMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
-//	saveEvent->pftaus               = getPFTaus(iEvent);
+	saveEvent->pftaus               = getPFTaus(iEvent);
 	saveEvent->jets                 = getJets(iEvent);
 	saveEvent->MET                  = getMET(iEvent);
 
@@ -39,6 +39,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->mcPrimaryVertex      = getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
 
+	saveEvent->extraObjects		= getExtraObjects(iEvent);
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;

@@ -245,7 +245,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
         tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
-////        tau.caloInfo = caloTowers(*caloJet);
+        tau.caloInfo = caloTowers(*caloJet);
 
 	tau.secVertices = secondaryVertices(transientTracks);
 

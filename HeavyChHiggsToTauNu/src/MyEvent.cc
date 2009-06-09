@@ -35,6 +35,7 @@ vector<MyJet> MyEvent::getMuons(){return muons;}
 vector<MyJet> MyEvent::getTaujets(){return taujets;}
 vector<MyJet> MyEvent::getPFTaus(){return pftaus;}
 vector<MyJet> MyEvent::getJets(){return getJets("raw");}
+vector<MyJet> MyEvent::getExtraObjects(){return extraObjects;}
 
 vector<MyJet> MyEvent::getJets(string jetCorrectionType){
 	vector<MyJet> returnJets;
@@ -87,65 +88,74 @@ void MyEvent::printAll(){
 
     if(HLTobjects.size() > 0) cout << " HLT objects " << HLTobjects.size() << endl;
     for(vector<MyJet>::const_iterator i = HLTobjects.begin(); i!= HLTobjects.end(); i++){
-       cout << "    type = " << i->type 
-            << ", Et = " << i->Et() 
-            << ", eta = " << i->eta() 
-            << ", phi = " << i->phi() 
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    type = " << i->type 
+             << ", Et = " << i->Et() 
+             << ", eta = " << i->eta() 
+             << ", phi = " << i->phi() 
+             << ", tracks = " << i->tracks.size() << endl;
     }
 
     if(electrons.size() > 0) cout << " Electrons " << electrons.size() << endl;
     for(vector<MyJet>::const_iterator i = electrons.begin(); i!= electrons.end(); i++){
-       cout << "    type = " << i->type
-            << ", Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    type = " << i->type
+             << ", Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
     }
 
     if(photons.size() > 0) cout << " Photons " << photons.size() << endl;
     for(vector<MyJet>::const_iterator i = photons.begin(); i!= photons.end(); i++){
-       cout << "    type = " << i->type
-            << ", Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    type = " << i->type
+             << ", Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
     }
 
     if(muons.size() > 0) cout << " Muons " << muons.size() << endl;
     for(vector<MyJet>::const_iterator i = muons.begin(); i!= muons.end(); i++){
-       cout << "    type = " << i->type
-            << ", Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    type = " << i->type
+             << ", Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
     }
 
     if(taujets.size() > 0) cout << " Taujets " << taujets.size() << endl;
     for(vector<MyJet>::const_iterator i = taujets.begin(); i!= taujets.end(); i++){
-       cout << "    Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
 	i->print();
     }
 
     if(pftaus.size() > 0) cout << " PFTaus " << pftaus.size() << endl;
     for(vector<MyJet>::const_iterator i = pftaus.begin(); i!= pftaus.end(); i++){
-       cout << "    Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+       	cout << "    Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
         i->print();
     }
 
     if(jets.size() > 0) cout << " Jets " << jets.size() << endl;
     for(vector<MyJet>::const_iterator i = jets.begin(); i!= jets.end(); i++){
-       cout << "    Et = " << i->Et()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi()
-            << ", tracks = " << i->tracks.size() << endl;
+	cout << "    Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
 	i->print();
+    }
+
+    if(extraObjects.size() > 0) cout << " Extra objects " << extraObjects.size() << endl;
+    for(vector<MyJet>::const_iterator i = extraObjects.begin(); i!= extraObjects.end(); i++){
+       	cout << "    Et = " << i->Et()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi()
+             << ", tracks = " << i->tracks.size() << endl;
+       	i->print();
     }
 
     cout << " MET    = " << getMET().value() << endl;
@@ -154,10 +164,10 @@ void MyEvent::printAll(){
 
     if(mcParticles.size() > 0) cout << " MC particles " << mcParticles.size() << endl;
     for(vector<MyMCParticle>::const_iterator i = mcParticles.begin(); i!= mcParticles.end(); i++){
-       cout << "    pid = " << i->pid
-            << ", Et = " << i->pt()
-            << ", eta = " << i->eta()
-            << ", phi = " << i->phi() << endl;
+       	cout << "    pid = " << i->pid
+             << ", Et = " << i->pt()
+             << ", eta = " << i->eta()
+             << ", phi = " << i->phi() << endl;
     }
 
 }

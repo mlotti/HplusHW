@@ -10,7 +10,7 @@ map<string,bool> MyEventConverter::getTriggerResults(const edm::Event& iEvent){
         Handle<TriggerResults> hltHandle;
 
         try{
-          iEvent.getByLabel("TriggerResults",hltHandle);
+          iEvent.getByLabel(edm::InputTag("TriggerResults::HLT"),hltHandle);
         }catch(...) {;}
 
         if(hltHandle.isValid()){
