@@ -1,7 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-MyEventConverter::MyEventConverter(){
-        init();
+MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig){
+        init(iConfig);
 }
 
 MyEventConverter::~MyEventConverter(){
@@ -27,10 +27,10 @@ MyEventConverter::~MyEventConverter(){
 }
 
 
-void MyEventConverter::init(){
+void MyEventConverter::init(const edm::ParameterSet& iConfig){
 
 ///	electronIdAlgo = new CutBasedElectronID();
-	userRootTree = new MyRootTree();
+	userRootTree = new MyRootTree(iConfig.getParameter<std::string>("fileName").c_str());
 
 	// counters
 	allEvents 		= 0;
@@ -40,4 +40,32 @@ void MyEventConverter::init(){
 
 	tauResolutionAnalysis = new TauResolutionAnalysis();
 	tauMETTriggerAnalysis = new TauMETTriggerAnalysis(userRootTree);
+
+
+	HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
+
+/*
+	tauInputType = (iConfig.getParameter<InputTag>("TauInputType")).label();
+	vector<InputTag> HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
+	for(vector<InputTag>::const_iterator i = HLTSelection.begin(); i != HLTSelection.end(); i++){
+		string name = i->label();
+		triggerdecision[name] = false;
+	}
+*/
+	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
+        btaggingAlgos = iConfig.getParameter<vector<InputTag> >("BTaggingAlgorithms");
+
+	metCorrections = iConfig.getParameter<vector<InputTag> >("METCorrections");
+
+	electronIdLabels = iConfig.getParameter<vector<InputTag> >("ElectronIdLabels");
+////	electronIdAlgo->setup(iConfig);
+//	barrelClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation");
+//	endcapClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation");
+	reducedBarrelRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedBarrelRecHitCollection");
+	reducedEndcapRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedEndcapRecHitCollection");
+
+        trackCollectionSelection = iConfig.getParameter<InputTag>("TrackCollection");
+	trajectoryInput = trackCollectionSelection;
+
+	tauJetCorrection = new TauJetCorrector(iConfig);
 }

@@ -179,6 +179,7 @@ process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
+        fileName = cms.string("analysis.root"),
 
 	HLTSelection = cms.VInputTag(cms.InputTag("HLT1Tau"),cms.InputTag("HLT1MuonIso"),cms.InputTag("HLT1MET"),cms.InputTag("HLT1Tau1MET"),cms.InputTag("HLT1jet"),cms.InputTag("HLT2jet"),cms.InputTag("HLT3jet"),cms.InputTag("HLT4jet")),
 

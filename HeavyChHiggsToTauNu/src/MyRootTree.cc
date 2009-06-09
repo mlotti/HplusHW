@@ -1,9 +1,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
 #include <iostream>
 
-MyRootTree::MyRootTree(){
-
-  rootFile = new TFile("analysis.root","RECREATE");
+MyRootTree::MyRootTree(const char *fileName){
+  if(fileName)
+    rootFile = TFile::Open(fileName, "RECREATE");
+  else
+    rootFile = TFile::Open("analysis.root", "RECREATE");
   rootFile->SetCompressionLevel(1);
 
   rootTree = new TTree("rootTree","events");

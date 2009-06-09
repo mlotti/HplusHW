@@ -21,9 +21,11 @@ class MyEvent : public TObject {
 
     	inline unsigned int event(){return eventNumber;}
     	inline unsigned int run(){return runNumber;}
+        inline unsigned int lumiSection(){return lumi;}
 
-    	unsigned int     eventNumber;
-    	unsigned int     runNumber;
+    	unsigned int    eventNumber;
+    	unsigned int    runNumber;
+	unsigned int	lumi;
 
     // Rec event
 	bool trigger(string);
@@ -72,6 +74,7 @@ class MyEvent : public TObject {
     	void 	      listJetCorrections();
     	void          print();
     	void          printAll();
+	void	      printReco();
 	void	      printCorrections();
 
     // rec data
