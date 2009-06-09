@@ -9,10 +9,10 @@
 
 	setenv MAXEVENTS -1
 
-#	setenv ROOTFILEPATH rfio:$CASTOR_HOME/hch300_tauola_HLT
-#	setenv ROOTFILE HLTtable_hch300_tauola_1.root
-        setenv ROOTFILEPATH rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_2_4/RelValTTbar/GEN-SIM-RECO/STARTUP_V8_v1/0000
-	setenv ROOTFILE 200EB7E3-90F3-DD11-B1B0-001D09F2432B.root
+	setenv ROOTFILEPATH rfio:$CASTOR_HOME/testData
+	setenv ROOTFILE A161_RECO.root
+#        setenv ROOTFILEPATH rfio:/castor/cern.ch/cms/store/relval/CMSSW_2_2_4/RelValTTbar/GEN-SIM-RECO/STARTUP_V8_v1/0000
+#	setenv ROOTFILE 200EB7E3-90F3-DD11-B1B0-001D09F2432B.root
 
 
 	setenv CASTOR_DIR test
