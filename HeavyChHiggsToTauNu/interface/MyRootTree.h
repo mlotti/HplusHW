@@ -11,7 +11,7 @@
 
 class MyRootTree : public TObject {
 public:
-  MyRootTree(const char *fileName=0);
+  MyRootTree();
   virtual ~MyRootTree();
 
   void fillTree(MyEvent* event);

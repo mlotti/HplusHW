@@ -77,10 +77,10 @@ double myDeltaR(double,double,double,double);
 
 class MyEventConverter {
   public:
-	MyEventConverter(const edm::ParameterSet&);
+	MyEventConverter();
 	~MyEventConverter();
 
-	//void cfgInput(const edm::ParameterSet&);
+	void cfgInput(const edm::ParameterSet&);
 	void eventSetup(const edm::EventSetup&);
 	void convert(const edm::Event&,const edm::EventSetup&);
 
@@ -88,7 +88,7 @@ class MyEventConverter {
 
 // functions
 
-	void init(const edm::ParameterSet& iConfig);
+	void init();
 
 	bool triggerDecision(const edm::Event&);
 	bool primaryVertexFound(const edm::Event&);
