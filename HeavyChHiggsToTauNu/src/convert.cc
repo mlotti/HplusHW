@@ -26,6 +26,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
 	saveEvent->electrons            = getElectrons(iEvent,iSetup);
+////	saveEvent->electrons		= getPATElectrons(iEvent);
 //	saveEvent->photons              = getPhotons(iEvent);
 
 ////        saveEvent->muons                = getMuons(iEvent);

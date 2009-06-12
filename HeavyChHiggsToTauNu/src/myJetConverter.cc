@@ -74,6 +74,28 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
         return electron;
 }
 
+MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
+        GsfTrackRef track = recElectron.gsfTrack();
+        const TransientTrack transientTrack = transientTrackBuilder->build(track);
+
+	MyJet electron;
+
+	electron.SetPx(recElectron.px());
+        electron.SetPy(recElectron.py());
+        electron.SetPz(recElectron.pz());
+        electron.SetE(recElectron.p());
+	electron.type = 11 * (*track).charge();
+
+        MyTrack electronTrack = myTrackConverter(transientTrack);
+        electronTrack.ip = impactParameter(transientTrack);
+        electron.tracks.push_back(electronTrack);
+        electron.tracks = getTracks(electron);
+
+	electron.tagInfo = etag(recElectron);
+
+	return electron;
+}
+
 MyJet MyEventConverter::myJetConverter(const Photon* recPhoton){
 
         MyJet photon;

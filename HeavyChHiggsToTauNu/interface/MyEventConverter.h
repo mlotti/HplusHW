@@ -62,6 +62,7 @@
 //PAT
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include <iostream>
 using namespace std;
@@ -110,6 +111,7 @@ class MyEventConverter {
 //        MyGlobalPoint           getPrimaryVertex(const edm::Event&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
 	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&);
+	vector<MyJet>		getPATElectrons(const edm::Event&);
         vector<MyJet>           getPhotons(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&);
 	vector<MyJet>           getPATMuons(const edm::Event&);
@@ -143,6 +145,7 @@ class MyEventConverter {
 	MyJet			myJetConverter(const reco::Muon&);
 	MyJet			myJetConverter(const pat::Muon&);
         MyJet                   myJetConverter(const GsfElectron*);
+	MyJet			myJetConverter(const pat::Electron&);
         MyJet                   myJetConverter(const Photon*);
         MyJet                   myJetConverter(const Conversion*);
         MyJet                   myJetConverter(const JetTag&);
@@ -161,6 +164,7 @@ class MyEventConverter {
         map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
+	map<string,double>	etag(const pat::Electron&);
         map<string,double>      photontag(const Photon*);
 	map<string,double> 	photontag(const Conversion*);
         map<string,double>      muonTag(const reco::Muon&);

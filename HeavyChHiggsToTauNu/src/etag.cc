@@ -24,3 +24,16 @@ map<string,double> MyEventConverter::etag(const GsfElectron* electron,EcalCluste
 */
 	return tagInfo;
 }
+
+map<string,double> MyEventConverter::etag(const pat::Electron& electron){
+
+	map<string,double> tagInfo;
+
+	const vector< pair<string,float> > electronIDs = electron.electronIDs();
+	for(vector< pair<string,float> >::const_iterator i = electronIDs.begin();
+	    i!= electronIDs.end(); ++i){
+		tagInfo[i->first] = i->second;
+	}
+
+	return tagInfo;
+}
