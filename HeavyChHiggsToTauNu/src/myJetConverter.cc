@@ -22,9 +22,10 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 		muon.tracks.push_back(muonTrack);
 
 		muon.tracks = getTracks(muon);
-
-		muon.tagInfo = muonTag(recMuon);
 	}
+
+	muon.tagInfo = muonTag(recMuon);
+
 	return muon;
 }
 
@@ -48,9 +49,10 @@ MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
                 muon.tracks.push_back(muonTrack);
 
                 muon.tracks = getTracks(muon);
-
-                muon.tagInfo = muonTag(recMuon);
         }
+
+	muon.tagInfo = muonTag(recMuon);
+
         return muon;
 }
 
@@ -204,6 +206,7 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
+
         const CaloJet* caloJet = recTau.caloTauTagInfoRef()->calojetRef().get();
 
 	MyJet tau;
@@ -274,6 +277,107 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         return tau;
 }
 
+MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
+/*
+	const CaloJet* caloJet = recTau.caloTauTagInfoRef()->calojetRef().get();
+
+        MyJet tau;
+
+        tau.SetPx(recTau.px());
+        tau.SetPy(recTau.py());
+        tau.SetPz(recTau.pz());
+        tau.SetE(recTau.energy());
+
+        vector<MyTrack> tracks;
+        vector<MyHit> hits;
+
+        vector<TransientTrack> transientTracks;
+        if(trackCollectionSelection.label() == "iterativeTracks"){
+          vector<Trajectory> associatedTrajectories;
+          vector<Track> associatedTracks = tracksInCone(recTau.p4(),0.5,&associatedTrajectories);
+          vector<Track>::const_iterator iTrack;
+          vector<Trajectory>::const_iterator iTrajectory = associatedTrajectories.begin();
+          // Make sure, that each track has a trajectory; only this guarantees one to one correspondence
+          bool myTrajectoryStatus = (associatedTracks.size() == associatedTrajectories.size());
+          int trackCounter = 0;
+          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
+
+                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
+                transientTracks.push_back(transientTrack);
+
+                MyTrack track = myTrackConverter(transientTrack);
+
+                if (myTrajectoryStatus) {
+                        vector<MyHit> assocHits = getHits(*iTrajectory,trackCounter);
+                        hits.insert(hits.end(),assocHits.begin(),assocHits.end());
+                }
+                track.ip                = impactParameter(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                tracks.push_back(track);
+                ++iTrajectory;
+                ++trackCounter;
+          }
+        }else{
+          // at this point, adding MyHit information is not implemented for calotau data
+          const TrackRefVector associatedTracks = recTau.caloTauTagInfoRef()->Tracks();
+          RefVector<TrackCollection>::const_iterator iTrack;
+          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
+
+                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
+
+                MyTrack track           = myTrackConverter(transientTrack);
+                track.ip                = impactParameter(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                tracks.push_back(track);
+          }
+        }
+
+        tau.tracks = tracks;
+
+        tau.hits   = hits;
+
+        tau.tagInfo = tauTag(recTau);
+
+        // Jet energy correction
+        double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
+        tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+
+        tau.caloInfo = caloTowers(*caloJet);
+
+        tau.secVertices = secondaryVertices(transientTracks);
+*/
+        MyJet tau;
+
+        tau.SetPx(recTau.px());
+        tau.SetPy(recTau.py());
+        tau.SetPz(recTau.pz());
+        tau.SetE(recTau.energy());
+
+        vector<MyTrack> tracks;
+        const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
+
+        RefVector<PFCandidateCollection>::const_iterator iTrack;
+        for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
+
+                PFCandidate pfCand = **iTrack;
+                MyTrack track = myTrackConverter(pfCand);
+                tracks.push_back(track);
+        }
+
+        const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
+        for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
+
+                PFCandidate pfCand = **iTrack;
+                MyTrack track = myTrackConverter(pfCand);
+                tracks.push_back(track);
+        }
+
+        tau.tracks = tracks;
+
+        tau.tagInfo = tauTag(recTau);
+
+	return tau;
+}
 
 MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 

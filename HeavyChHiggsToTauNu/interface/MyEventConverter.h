@@ -63,6 +63,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include <iostream>
 using namespace std;
@@ -116,6 +117,7 @@ class MyEventConverter {
         vector<MyJet> 		getMuons(const edm::Event&);
 	vector<MyJet>           getPATMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
+	vector<MyJet>		getPATTaus(const edm::Event&);
         vector<MyJet> 		getPFTaus(const edm::Event&);
         vector<MyJet> 		getJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
@@ -125,6 +127,7 @@ class MyEventConverter {
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
         MyMET 			getMET(const edm::Event&);
+	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
         MyMET 			getMCMET();
         MyGlobalPoint 		getMCPrimaryVertex(const edm::Event&);
@@ -152,6 +155,7 @@ class MyEventConverter {
 	MyJet 			myJetConverter(const CaloJet*);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
         MyJet                   myJetConverter(const CaloTau&);
+	MyJet			myJetConverter(const pat::Tau&);
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
 	MyMeasurement1D 	myMeasurement1DConverter(const Measurement1D&);
@@ -161,6 +165,7 @@ class MyEventConverter {
 	map<string,double>    	btag(const JetTag&);
         map<string,double>      tauTag(const IsolatedTauTagInfo&);
         map<string,double>      tauTag(const CaloTau&);
+	map<string,double>	tauTag(const pat::Tau&);
         map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);

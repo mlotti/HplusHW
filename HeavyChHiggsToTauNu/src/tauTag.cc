@@ -57,6 +57,17 @@ map<string,double> MyEventConverter::tauTag(const CaloTau& tau){
         return tagInfo;
 }
 
+map<string,double> MyEventConverter::tauTag(const pat::Tau& tau){
+        map<string,double> tagInfo;
+
+	const vector< pair<string,float> > IDs = tau.tauIDs();
+        for(vector< pair<string,float> >::const_iterator i = IDs.begin(); i!= IDs.end(); ++i){
+                tagInfo[i->first] = i->second;
+        }
+
+	return tagInfo;
+}
+
 map<string,double> MyEventConverter::tauTag(const PFTau& tau){
         map<string,double> tagInfo;
 

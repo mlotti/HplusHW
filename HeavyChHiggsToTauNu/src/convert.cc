@@ -25,16 +25,18 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
-	saveEvent->electrons            = getElectrons(iEvent,iSetup);
-////	saveEvent->electrons		= getPATElectrons(iEvent);
+////	saveEvent->electrons            = getElectrons(iEvent,iSetup);
+	saveEvent->electrons		= getPATElectrons(iEvent);
 //	saveEvent->photons              = getPhotons(iEvent);
 
 ////        saveEvent->muons                = getMuons(iEvent);
 	saveEvent->muons                = getPATMuons(iEvent);
 	saveEvent->taujets              = getTaus(iEvent);
-	saveEvent->pftaus               = getPFTaus(iEvent);
+////	saveEvent->pftaus               = getPFTaus(iEvent);
+	saveEvent->pftaus               = getPATTaus(iEvent);
 	saveEvent->jets                 = getJets(iEvent);
 	saveEvent->MET                  = getMET(iEvent);
+//	saveEvent->MET			= getPATMET(iEvent);
 
         saveEvent->mcParticles          = getMCParticles(iEvent);
 	saveEvent->mcMET                = getMCMET();
