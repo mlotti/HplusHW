@@ -6,7 +6,7 @@ vector<MyJet> MyEventConverter::getPATElectrons(const edm::Event& iEvent){
 
 	edm::Handle<edm::View<pat::Electron> > electronHandle;
         try{
-          iEvent.getByLabel("selectedLayer1Muons",electronHandle);
+          iEvent.getByLabel("selectedLayer1Electrons",electronHandle);
         }catch(...) {;}
 
         if(electronHandle.isValid()){
