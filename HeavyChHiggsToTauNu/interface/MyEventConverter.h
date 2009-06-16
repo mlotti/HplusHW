@@ -64,6 +64,8 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+
 
 #include <iostream>
 using namespace std;
@@ -120,6 +122,7 @@ class MyEventConverter {
 	vector<MyJet>		getPATTaus(const edm::Event&);
         vector<MyJet> 		getPFTaus(const edm::Event&);
         vector<MyJet> 		getJets(const edm::Event&);
+	vector<MyJet>		getPATJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	vector<MyTrack>		getTracks(MyJet&);
@@ -153,6 +156,7 @@ class MyEventConverter {
         MyJet                   myJetConverter(const Conversion*);
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet*);
+	MyJet			myJetConverter(const pat::Jet*);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
         MyJet                   myJetConverter(const CaloTau&);
 	MyJet			myJetConverter(const pat::Tau&);

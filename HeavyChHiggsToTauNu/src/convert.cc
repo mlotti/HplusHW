@@ -34,7 +34,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->taujets              = getTaus(iEvent);
 ////	saveEvent->pftaus               = getPFTaus(iEvent);
 	saveEvent->pftaus               = getPATTaus(iEvent);
-	saveEvent->jets                 = getJets(iEvent);
+////	saveEvent->jets                 = getJets(iEvent);
+	saveEvent->jets			= getPATJets(iEvent);
 	saveEvent->MET                  = getMET(iEvent);
 //	saveEvent->MET			= getPATMET(iEvent);
 

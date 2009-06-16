@@ -167,6 +167,20 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         return jet;
 }
 
+MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
+
+        MyJet jet;
+
+        jet.SetPx(recoJet->px());
+        jet.SetPy(recoJet->py());
+        jet.SetPz(recoJet->pz());
+        jet.SetE(recoJet->energy());
+
+        jet.tracks = getTracks(jet);
+
+	return jet;
+}
+
 MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
         const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.first.get());
         return myJetConverter(caloJet);
