@@ -42,7 +42,13 @@ map<string,double> MyEventConverter::muonTag(const pat::Muon& muon){
         tagInfo["isolationR05.nJets"]   = isolationR05.nJets;
         tagInfo["isolationR05.nTracks"] = isolationR05.nTracks;
         tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
-
+/* not working, no member function muonIDs() (yet?) 
+        const vector< pair<string,float> > IDs = muon.muonIDs();
+        for(vector< pair<string,float> >::const_iterator i = IDs.begin();
+            i!= IDs.end(); ++i){
+                tagInfo[i->first] = i->second;
+        }
+*/
 	tagInfo["pat:trackIso"]		  = muon.trackIso();
 	tagInfo["pat:caloIso"]		  = muon.caloIso();
 	tagInfo["pat:ecalIso"]		  = muon.ecalIso();

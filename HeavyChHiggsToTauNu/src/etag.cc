@@ -35,5 +35,14 @@ map<string,double> MyEventConverter::etag(const pat::Electron& electron){
 		tagInfo[i->first] = i->second;
 	}
 
+        tagInfo["pat:trackIso"]           = electron.trackIso();
+        tagInfo["pat:caloIso"]            = electron.caloIso();
+        tagInfo["pat:ecalIso"]            = electron.ecalIso();
+        tagInfo["pat:hcalIso"]            = electron.hcalIso();
+        tagInfo["pat:particleIso"]        = electron.particleIso();       //all the PFCandidates
+        tagInfo["pat:chargedParticleIso"] = electron.chargedParticleIso();//charged PFCandidates
+        tagInfo["pat:neutralParticleIso"] = electron.neutralParticleIso();//neutral hadrons PFCandidates
+        tagInfo["pat:gammaParticleIso"]   = electron.gammaParticleIso();  //gamma PFCandidates
+
 	return tagInfo;
 }
