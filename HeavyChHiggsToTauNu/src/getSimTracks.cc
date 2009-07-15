@@ -5,8 +5,6 @@
 #include "SimDataFormats/Vertex/interface/SimVertex.h"
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
 
-double myDeltaR(double eta1, double eta2, double phi1, double phi2);
-
 vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEvent* event){
   vector<MySimTrack> simTracks;
   // save sim tracks in cone of 0.7 around tau candidate leading track
@@ -36,11 +34,13 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
     // Loop over SimTracks in container
     SimTrackContainer::const_iterator iSim = simTrackHandle->begin();
     for( ; iSim != simTrackHandle->end(); ++iSim) {
-      const math::XYZTLorentzVectorD & myMomentum = (*iSim).momentum();
+//      const math::XYZTLorentzVectorD & myMomentum = (*iSim).momentum();
+      TLorentzVector myMomentum((*iSim).momentum().x(),(*iSim).momentum().y(),(*iSim).momentum().z(),(*iSim).momentum().t());
       ////      const HepLorentzVector myMomentum = (*iSim).momentum();
       if (myMomentum.Et() > 1) { // require sim track pt > 1 GeV
-	if (myDeltaR(myLdgTrack->eta(), myMomentum.eta(),
-		   myLdgTrack->phi(), myMomentum.phi()) < myMatchCone) {
+	if (myLdgTrack->p4().DeltaR(myMomentum) < myMatchCone ){
+//myDeltaR(myLdgTrack->eta(), myMomentum.eta(),
+//		   myLdgTrack->phi(), myMomentum.phi()) < myMatchCone) {
 	  //cout << "- simTrack eta=" << myMomentum.eta()
 	  //     << " phi=" << myMomentum.phi()
 	  //     << " myDeltaR=" 
@@ -49,7 +49,7 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
 
 	  // Save sim track
 	  MySimTrack mySim;
-	  mySim.SetXYZM(myMomentum.x(), myMomentum.y(), myMomentum.z(), 0);
+	  mySim.SetXYZM(myMomentum.X(), myMomentum.Y(), myMomentum.Z(), 0);
 	  mySim.theGenPID = (*iSim).genpartIndex();
 	  mySim.theType = (*iSim).type();
 	  mySim.theTrackID = (int)(*iSim).trackId();

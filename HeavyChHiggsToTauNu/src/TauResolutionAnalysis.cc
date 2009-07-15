@@ -19,8 +19,7 @@ using namespace HepMC;
 #include <iostream>
 using namespace std;
 
-double myDeltaR(double,double,double,double);
-double phiDis(double,double);
+//double phiDis(double,double);
 vector<TLorentzVector> visibleTaus(const edm::Event&,int);
 
 TauResolutionAnalysis::TauResolutionAnalysis(){
@@ -214,9 +213,8 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 
           CaloTauCollection::const_iterator iTau;
           for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++){
-
-                        double DR = myDeltaR(iTau->eta(),visibleTau.Eta(),
-                                           iTau->phi(),visibleTau.Phi());
+			TLorentzVector p4(iTau->px(),iTau->py(),iTau->pz(),iTau->energy());
+                        double DR = p4.DeltaR(visibleTau);
                         if(DR > 0.4) continue;
 			caloTauCounter++;
 
@@ -245,7 +243,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
                         h_tauEnergyResolution->Fill(dEt);
 			h_tauDR->Fill(DR);
 			h_tauDeta->Fill(iTau->eta()-visibleTau.Eta());
-			h_tauDphi->Fill(phiDis(iTau->phi(),visibleTau.Phi()));
+			h_tauDphi->Fill(p4.DeltaPhi(visibleTau));
 
           }
 
@@ -269,8 +267,9 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 
                         if(iTau->discriminator(Rmatch,Rsignal,Riso,pT_LT,pT_min) == 0) continue;
 
-                        double DR = myDeltaR(tauJet.eta(),visibleTau.Eta(),
-                                           tauJet.phi(),visibleTau.Phi());
+			TLorentzVector p4(iTau->px(),iTau->py(),iTau->pz(),iTau->e());
+                        double DR = p4.DeltaR(visibleTau);
+
                         if(DR > 0.4) continue;
 
                         double dEt = (tauJet.et() - visibleTau.Et())/visibleTau.Et();
@@ -288,8 +287,9 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
           	PFTauCollection::const_iterator iTau;
           	for(iTau = pfTaus.begin(); iTau != pfTaus.end(); iTau++){
 
-			double DR = myDeltaR(iTau->eta(),visibleTau.Eta(),
-                                           iTau->phi(),visibleTau.Phi());
+			TLorentzVector p4(iTau->px(),iTau->py(),iTau->pz(),iTau->energy());
+                        double DR = p4.DeltaR(visibleTau);
+
                         if(DR > 0.4) continue;
 			pfTauCounter++;
 
@@ -319,7 +319,7 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 			h_pftauEnergyResolution->Fill(dEt);
                         h_pftauDR->Fill(DR);
                         h_pftauDeta->Fill(iTau->eta()-visibleTau.Eta());
-                        h_pftauDphi->Fill(phiDis(iTau->phi(),visibleTau.Phi()));
+                        h_pftauDphi->Fill(p4.DeltaPhi(visibleTau));
 
                         // pfjet energy from candidates in 0.4 around the jet axis
 
@@ -359,8 +359,9 @@ bool TauResolutionAnalysis::analyse(const edm::Event& iEvent){
 
                         if(iTau->discriminatorByIsolPFChargedHadrCandsN(Rmatch,Rsignal,Riso,true,pT_LT,pT_min) == 0) continue;
 
-                        double DR = myDeltaR(tauJet.eta(),visibleTau.Eta(),
-                                           tauJet.phi(),visibleTau.Phi());
+			TLorentzVector p4(tauJet.px(),tauJet.py(),tauJet.pz(),tauJet.e());
+                        double DR = p4.DeltaR(visibleTau);
+
                         if(DR > 0.4) continue;
 
                         double dEt = (tauJet.et() - visibleTau.Et())/visibleTau.Et();
@@ -401,34 +402,32 @@ void TauResolutionAnalysis::chargedTrackCounter(const edm::Event& iEvent){
 		PFTauCollection::const_iterator pfTauEnd = pfTaus.end();
 
 		while(DR_mcTau > 0.4 && iPfTau != pfTauEnd){
-		  DR_mcTau = myDeltaR(i->Eta(),iPfTau->eta(),
-                                    i->Phi(),iPfTau->phi());
+		  TLorentzVector p4(iPfTau->px(),iPfTau->py(),iPfTau->pz(),iPfTau->energy());
+                  DR_mcTau = i->DeltaR(p4);
+
 		  if(DR_mcTau < 0.4){
 			double DR = 999;
 			CaloTauCollection::const_iterator iCaloTau = caloTaus.begin();	
                         CaloTauCollection::const_iterator caloTauEnd = caloTaus.end();
 
 			while(DR > 0.4 && iCaloTau != caloTauEnd){
-			  DR = myDeltaR(iPfTau->eta(),iCaloTau->eta(),
-                                      iPfTau->phi(),iCaloTau->phi());
+			  
+                          double DR = ROOT::Math::VectorUtil::DeltaR(iPfTau->p4(),iCaloTau->p4());
 			  if(DR < 0.4){
                                 const PFCandidateRefVector pfCandidates = iPfTau->signalPFCands();
         			for(RefVector<PFCandidateCollection>::const_iterator iTrack = pfCandidates.begin(); 
                                     iTrack!= pfCandidates.end(); iTrack++){
 					if((*iTrack)->particleId() != 1) continue;					
-					double DRPfTrackPfTau = myDeltaR((*iTrack)->eta(),iPfTau->eta(),
-                                                                       (*iTrack)->phi(),iPfTau->phi());
+					double DRPfTrackPfTau = ROOT::Math::VectorUtil::DeltaR(iPfTau->p4(),(*iTrack)->p4());
                                         if(DRPfTrackPfTau < 0.45) nPfTrack++;
-                                        double DRPfTrackCaloTau = myDeltaR((*iTrack)->eta(),iCaloTau->eta(),
-                                                                         (*iTrack)->phi(),iCaloTau->phi());
+                                        double DRPfTrackCaloTau = ROOT::Math::VectorUtil::DeltaR(iCaloTau->p4(),(*iTrack)->p4());
                                         if(DRPfTrackCaloTau < 0.45) nPfTrackCaloTau++;
 				}
 
 				const TrackRefVector tracksInCone = iCaloTau->caloTauTagInfoRef()->Tracks();
         			for(RefVector<TrackCollection>::const_iterator iTrack = tracksInCone.begin(); 
                                     iTrack!= tracksInCone.end(); iTrack++){
-                                        double DRCaloTrackCaloTau = myDeltaR((*iTrack)->eta(),iCaloTau->eta(),
-                                                                           (*iTrack)->phi(),iCaloTau->phi());
+                                        double DRCaloTrackCaloTau = ROOT::Math::VectorUtil::DeltaR(iCaloTau->p4(),(*iTrack)->momentum());
                                         if(DRCaloTrackCaloTau < 0.45) nCaloTauTrack++;
 				}
 			  }

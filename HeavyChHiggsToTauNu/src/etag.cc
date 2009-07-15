@@ -24,3 +24,25 @@ map<string,double> MyEventConverter::etag(const GsfElectron* electron,EcalCluste
 */
 	return tagInfo;
 }
+
+map<string,double> MyEventConverter::etag(const pat::Electron& electron){
+
+	map<string,double> tagInfo;
+
+	const vector< pair<string,float> > electronIDs = electron.electronIDs();
+	for(vector< pair<string,float> >::const_iterator i = electronIDs.begin();
+	    i!= electronIDs.end(); ++i){
+		tagInfo[i->first] = i->second;
+	}
+
+        tagInfo["pat:trackIso"]           = electron.trackIso();
+        tagInfo["pat:caloIso"]            = electron.caloIso();
+        tagInfo["pat:ecalIso"]            = electron.ecalIso();
+        tagInfo["pat:hcalIso"]            = electron.hcalIso();
+        tagInfo["pat:particleIso"]        = electron.particleIso();       //all the PFCandidates
+        tagInfo["pat:chargedParticleIso"] = electron.chargedParticleIso();//charged PFCandidates
+        tagInfo["pat:neutralParticleIso"] = electron.neutralParticleIso();//neutral hadrons PFCandidates
+        tagInfo["pat:gammaParticleIso"]   = electron.gammaParticleIso();  //gamma PFCandidates
+
+	return tagInfo;
+}
