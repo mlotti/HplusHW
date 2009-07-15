@@ -23,9 +23,9 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         	TrajectoryStateClosestToPoint TSCP = transientTrack.trajectoryStateClosestToPoint(ecalHitPosition);
         	GlobalPoint trackEcalHitPoint = TSCP.position();
 
-		ecalHitPoint.x = trackEcalHitPoint.x();
-	        ecalHitPoint.y = trackEcalHitPoint.y();
-	        ecalHitPoint.z = trackEcalHitPoint.z() - primaryVertex.z();
+		ecalHitPoint.SetX(trackEcalHitPoint.x());
+	        ecalHitPoint.SetY(trackEcalHitPoint.y());
+	        ecalHitPoint.SetZ(trackEcalHitPoint.z() - primaryVertex.z());
 
         }catch(...) {;}
 

@@ -2,7 +2,6 @@
  <class name="MyMeasurement1D"/>
  <class name="MyImpactParameter"/>
  <class name="MyGlobalPoint"/>
- <class name="std::vector<MyGlobalPoint>"/>
  <class name="MyMET"/>
  <class name="MyMCParticle"/>
  <class name="std::vector<MyMCParticle>"/>
@@ -17,6 +16,6 @@
  <class name="MyCaloTower"/>
  <class name="std::vector<MyCaloTower>"/>
  <class name="MyJet"/>
- <class name="std::vector<MyJet>"/>
+ <class name="std::map<std::string,std::vector<MyJet> >"/>
  <class name="MyEvent"/>
 </lcgdict>

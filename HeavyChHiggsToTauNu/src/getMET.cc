@@ -7,9 +7,9 @@
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
 
-MyMET MyEventConverter::getMET(const edm::Event& iEvent){
+MyMET MyEventConverter::getCaloMET(const edm::Event& iEvent){
 
-	MyMET met;
+        MyMET met;
 
         Handle<reco::CaloMETCollection> caloMET;
         try{
@@ -18,15 +18,14 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
         if(caloMET.isValid()){
           reco::CaloMETCollection::const_iterator imet = caloMET->begin();
-          met.x = imet->px();
-          met.y = imet->py();
+          met.Set(imet->px(),imet->py());
         }
 
         cout << " calo MET : " << met.value()
-             << "  x : " << met.getX()
-             << "  y : " << met.getY() << endl;
+             << "  x : " << met.X()
+             << "  y : " << met.Y() << endl;
 
-
+/*FIXME
         for(unsigned int iCorr = 0; iCorr < metCorrections.size(); ++iCorr){
                 edm::Handle<reco::CaloMETCollection> metHandle;
 		try{
@@ -38,8 +37,8 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 		  correction.name = metCorrections[iCorr].label();
 		  
                   reco::CaloMETCollection::const_iterator imet = metHandle->begin();
-		  correction.x = imet->px() - met.x;
-		  correction.y = imet->py() - met.y;
+		  correction.x = imet->px() - met.x();
+		  correction.y = imet->py() - met.y();
 
 		  cout << "     MET " << correction.name << " : " 
                        << correction.x << " "
@@ -48,7 +47,13 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 		  met.corrections.push_back(correction);
                 }
         }
+*/
+	return met;
+}
 
+MyMET MyEventConverter::getPFMET(const edm::Event& iEvent){
+
+	MyMET met;
 
 	Handle<reco::PFMETCollection> pfMET;
         try{
@@ -56,19 +61,19 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
         }catch(...) {;}
 
 	if(pfMET.isValid()){
-	  MyGlobalPoint correction;
-	  correction.name = "PFMET";
 
 	  reco::PFMETCollection::const_iterator imet = pfMET->begin();
-          correction.x = imet->px() - met.x;
-          correction.y = imet->py() - met.y;
-
-          cout << "     PF MET : " << correction.x << " "
-                                   << correction.y << endl;
-
-          met.corrections.push_back(correction);
+	  met.Set(imet->px(),imet->py());
+		    
+          cout << "     PF MET : " << met.x() << " "
+                                   << met.y() << endl;
 	}
+	return met;
+}
 
+MyMET MyEventConverter::getTCMET(const edm::Event& iEvent){
+
+	MyMET met;
 
 	// track corrected MET
 	Handle<reco::METCollection> tcMET;
@@ -77,19 +82,12 @@ MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 	}catch(...) {;}
 
         if(tcMET.isValid()){
-          MyGlobalPoint correction;
-          correction.name = "tcMET";
 
           reco::METCollection::const_iterator imet = tcMET->begin();
-          correction.x = imet->px() - met.x;
-          correction.y = imet->py() - met.y;
+	  met.Set(imet->px(),imet->py());
 
-          cout << "     track corrected MET : " << correction.x << " "
-                                                << correction.y << endl;
-
-          met.corrections.push_back(correction);
+          cout << "     track corrected MET : " << met.x() << " "
+                                                << met.y() << endl;
         }
-
-
         return met;
 }

@@ -14,16 +14,16 @@ void MyEventConverter::getTracks(const edm::Event& iEvent){
 }
 
 vector<MyTrack> MyEventConverter::getTracks(MyJet& direction){
-	vector<MyTrack> tracksInJetCone = direction.getTracks();
+	vector<MyTrack> tracksInJetCone = direction.tracks;
 	TrackCollection::const_iterator iTrack;
 
 	// remove duplicate lepton tracks
 	TrackCollection::const_iterator leptonTrack = tracks.end();
 	if(direction.getTracks().size() > 0){
 		double DRmin = 9999;
-		for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-                	double DR = myDeltaR(direction.eta(),iTrack->eta(),
-                                           direction.phi(),iTrack->phi());
+		for(iTrack = tracks.begin(); iTrack != tracks.end(); ++iTrack){
+			TLorentzVector p4(iTrack->momentum().x(),iTrack->momentum().y(),iTrack->momentum().z(),iTrack->momentum().r());
+                	double DR = direction.p4().DeltaR(p4);
 			if(DR < DRmin){
 				DRmin = DR;
 				leptonTrack = iTrack;
@@ -31,10 +31,10 @@ vector<MyTrack> MyEventConverter::getTracks(MyJet& direction){
 		}
 	}
 
-	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
+	for(iTrack = tracks.begin(); iTrack != tracks.end(); ++iTrack){
 		if(iTrack == leptonTrack) continue;
-	        double DR = myDeltaR(direction.eta(),iTrack->eta(),
-                                   direction.phi(),iTrack->phi());
+		TLorentzVector p4(iTrack->momentum().x(),iTrack->momentum().y(),iTrack->momentum().z(),iTrack->momentum().r());
+                double DR = direction.p4().DeltaR(p4);
 		if(DR < 0.5){
 			tracksInJetCone.push_back(myTrackConverter(*iTrack));
 		}
@@ -49,8 +49,8 @@ vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direc
 
 	TrackCollection::const_iterator iTrack;
 	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-		double DR = myDeltaR(direction.eta(),iTrack->eta(),
-                                   direction.phi(),iTrack->phi());
+	  //		TVector3 p(iTrack->momentum().x(),iTrack->momentum().y(),iTrack->momentum().z());
+		double DR = ROOT::Math::VectorUtil::DeltaR(direction,iTrack->momentum());
 		//if(DR < cone) associatedTracks.push_back(edm::Ref<TrackCollection>(tracks, t));
 		if(DR < cone) associatedTracks.push_back(*iTrack);
 	}
@@ -66,8 +66,7 @@ vector<Track> MyEventConverter::tracksInCone(const math::XYZTLorentzVector direc
    	TrackCollection::const_iterator iTrack;
 //       	vector<Trajectory>::const_iterator iTrajectory = myTrajectoryCollectionHandle->begin();
    	for(iTrack = tracks.begin(); iTrack != tracks.end(); iTrack++){
-       		double DR = myDeltaR(direction.eta(),iTrack->eta(),
-                                   direction.phi(),iTrack->phi());
+       		double DR = ROOT::Math::VectorUtil::DeltaR(direction,iTrack->momentum());
        		if(DR < cone) {
                   associatedTracks.push_back(*iTrack);
 /*

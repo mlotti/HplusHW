@@ -1,40 +1,40 @@
-#ifndef MY_MET
-#define MY_MET
+#ifndef __MyMet__
+#define __MyMet__
 
-#include "TROOT.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyGlobalPoint.h"
+#include "TVector2.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <map>
+#include<iostream>
 
-using namespace std;
-
-class MyMET : public MyGlobalPoint {
+/**
+ * \brief Missing transverse energy class for MyEvent dataformat
+ */
+class MyMET: public TVector2 {
    public:
       	MyMET();
+        
+        /**
+         * \brief Constructor
+         *
+         * \param x  x component
+         * \param y  y component
+         */
+        MyMET(double x, double y);
       	virtual ~MyMET();
 
-      	double getX() const;
-      	double getY() const;
+        /**
+         * \brief Get the length of the vector
+         */
         double value() const;
-        double getPhi() const;
+
+        double x() const;
+        double y() const;
         double phi() const;
 
-      	void useCorrection(string);
-      	void print();
-	void printCorrections();
-
-      	vector<MyGlobalPoint> corrections;
-	inline vector<MyGlobalPoint>::const_iterator corrections_begin() { return corrections.begin(); }
-        inline vector<MyGlobalPoint>::const_iterator corrections_end() { return corrections.end(); }
+      	void print(std::ostream& out = std::cout) const;
 
    private:
-	bool correctionExists(string);
 
-      	vector<string> usedCorrections;
-
-   ClassDef(MyMET,1)
+   ClassDef(MyMET, MYEVENT_VERSION)
 };
 #endif

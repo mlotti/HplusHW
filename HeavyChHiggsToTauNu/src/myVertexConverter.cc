@@ -3,9 +3,9 @@
 MyVertex MyEventConverter::myVertexConverter(const Vertex& vertex){
 
 	MyVertex V;
-	V.x = vertex.x();
-	V.y = vertex.y();
-        V.z = vertex.z();
+	V.SetX(vertex.x());
+	V.SetY(vertex.y());
+        V.SetZ(vertex.z());
 
         V.dxx  = vertex.covariance(1,1);
         V.dxy  = vertex.covariance(1,2);
@@ -21,9 +21,9 @@ MyVertex MyEventConverter::myVertexConverter(const TransientVertex& vertex){
 
         MyVertex V(0,0,0);
 	if(vertex.isValid()) {
-          V.x = vertex.position().x();
-          V.y = vertex.position().y();
-          V.z = vertex.position().z();
+          V.SetX(vertex.position().x());
+          V.SetY(vertex.position().y());
+          V.SetZ(vertex.position().z());
 
           V.dxx  = vertex.positionError().matrix()(1,1);
           V.dxy  = vertex.positionError().matrix()(1,2);

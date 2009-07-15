@@ -59,14 +59,6 @@
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
-//PAT
-#include "DataFormats/Common/interface/View.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/Tau.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-
-
 #include <iostream>
 using namespace std;
 using namespace edm;
@@ -81,7 +73,8 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
 
-double myDeltaR(double,double,double,double);
+//double myDeltaR(double,double,double,double);
+#include "Math/VectorUtil.h"
 
 class MyEventConverter {
   public:
@@ -114,23 +107,20 @@ class MyEventConverter {
 //        MyGlobalPoint           getPrimaryVertex(const edm::Event&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
 	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&);
-	vector<MyJet>		getPATElectrons(const edm::Event&);
         vector<MyJet>           getPhotons(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&);
-	vector<MyJet>           getPATMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
-	vector<MyJet>		getPATTaus(const edm::Event&);
         vector<MyJet> 		getPFTaus(const edm::Event&);
         vector<MyJet> 		getJets(const edm::Event&);
-	vector<MyJet>		getPATJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	vector<MyTrack>		getTracks(MyJet&);
 	vector<MyHit>		getHits(const Trajectory&,int&);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
-        MyMET 			getMET(const edm::Event&);
-	MyMET			getPATMET(const edm::Event&);
+        MyMET 			getCaloMET(const edm::Event&);
+	MyMET			getPFMET(const edm::Event&);
+	MyMET			getTCMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
         MyMET 			getMCMET();
         MyGlobalPoint 		getMCPrimaryVertex(const edm::Event&);
@@ -148,18 +138,14 @@ class MyEventConverter {
 	MyTrack 		myTrackConverter(const PFCandidate&);
 	MyVertex		myVertexConverter(const Vertex&);
         MyVertex                myVertexConverter(const TransientVertex&);
-	MyJet			myJetConverter(const reco::Muon&);
-	MyJet			myJetConverter(const pat::Muon&);
+	MyJet			myJetConverter(const Muon&);
         MyJet                   myJetConverter(const GsfElectron*);
-	MyJet			myJetConverter(const pat::Electron&);
         MyJet                   myJetConverter(const Photon*);
         MyJet                   myJetConverter(const Conversion*);
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet*);
-	MyJet			myJetConverter(const pat::Jet*);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
         MyJet                   myJetConverter(const CaloTau&);
-	MyJet			myJetConverter(const pat::Tau&);
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
 	MyMeasurement1D 	myMeasurement1DConverter(const Measurement1D&);
@@ -169,15 +155,12 @@ class MyEventConverter {
 	map<string,double>    	btag(const JetTag&);
         map<string,double>      tauTag(const IsolatedTauTagInfo&);
         map<string,double>      tauTag(const CaloTau&);
-	map<string,double>	tauTag(const pat::Tau&);
         map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
-	map<string,double>	etag(const pat::Electron&);
         map<string,double>      photontag(const Photon*);
 	map<string,double> 	photontag(const Conversion*);
-        map<string,double>      muonTag(const reco::Muon&);
-	map<string,double> 	muonTag(const pat::Muon&);
+	map<string,double> 	muonTag(const Muon&);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
 	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);

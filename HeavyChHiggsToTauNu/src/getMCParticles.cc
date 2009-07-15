@@ -82,8 +82,7 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 				}
 			}
 		}
-		mcMET.x = mcMetX;
-		mcMET.y = mcMetY;
+		mcMET.Set(mcMetX,mcMetY);
 	}
 
 

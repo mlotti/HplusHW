@@ -3,8 +3,9 @@
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 
 MyMET MyEventConverter::getMetFromCaloTowers(const edm::Event& iEvent){
-        MyMET met;
 
+	double x = 0,
+               y = 0;
 	Handle<CaloTowerCollection> caloTowerHandle;
 	iEvent.getByType(caloTowerHandle);
 
@@ -17,12 +18,13 @@ MyMET MyEventConverter::getMetFromCaloTowers(const edm::Event& iEvent){
 //cout << " tower id " << iTower->id().rawId() << endl;
 //cout << " em et, had et " << iTower->emEt() << " "  << iTower->hadEt() << " " << iTower->et() << endl;
 //cout << "momentum " << iTower->momentum().x() << " " << iTower->momentum().y() << " " << iTower->momentum().rho() << endl;
-			met.x -= iTower->momentum().x();
-                        met.y -= iTower->momentum().y();
+			x -= iTower->momentum().x();
+                        y -= iTower->momentum().y();
 		}
 //cout << " met value,x,y " << met.value() << " " << met.x << " " << met.y << endl;
 	}
-
+	MyMET met(x,y);
+/*FIXME
         Handle<MuonCollection> muonHandle;
         try{
           iEvent.getByLabel("muons",muonHandle);
@@ -49,7 +51,7 @@ MyMET MyEventConverter::getMetFromCaloTowers(const edm::Event& iEvent){
                                       << muonCorrection.y << endl;
 
         }
-
+*/
         return met;
 }
 

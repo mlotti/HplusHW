@@ -19,32 +19,32 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
-	saveEvent->lumi			= iEvent.luminosityBlock();
+	saveEvent->lumiNumber		= iEvent.luminosityBlock();
+
 	saveEvent->triggerResults       = getTriggerResults(iEvent);
 	saveEvent->primaryVertex        = getPrimaryVertex();
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
-////	saveEvent->electrons            = getElectrons(iEvent,iSetup);
-	saveEvent->electrons		= getPATElectrons(iEvent);
+	saveEvent->addCollection("electrons",getElectrons(iEvent,iSetup));
 //	saveEvent->photons              = getPhotons(iEvent);
 
-////        saveEvent->muons                = getMuons(iEvent);
-	saveEvent->muons                = getPATMuons(iEvent);
-	saveEvent->taujets              = getTaus(iEvent);
-////	saveEvent->pftaus               = getPFTaus(iEvent);
-	saveEvent->pftaus               = getPATTaus(iEvent);
-////	saveEvent->jets                 = getJets(iEvent);
-	saveEvent->jets			= getPATJets(iEvent);
-	saveEvent->MET                  = getMET(iEvent);
-//	saveEvent->MET			= getPATMET(iEvent);
+	saveEvent->addCollection("muons",getMuons(iEvent));
+	saveEvent->addCollection("calotaus",getTaus(iEvent));
+	saveEvent->addCollection("pftaus",getPFTaus(iEvent));
+	saveEvent->addCollection("icone05jets",getJets(iEvent));
+
+	saveEvent->addMET("caloMET",getCaloMET(iEvent));
+	saveEvent->addMET("pfMET",getPFMET(iEvent));
+	saveEvent->addMET("tcMET",getTCMET(iEvent));
 
         saveEvent->mcParticles          = getMCParticles(iEvent);
 	saveEvent->mcMET                = getMCMET();
 	saveEvent->mcPrimaryVertex      = getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
 
-	saveEvent->extraObjects		= getExtraObjects(iEvent);
+	saveEvent->addCollection("removedMuons",getExtraObjects(iEvent));
+////	saveEvent->addExtraObjects("",getExtraObjects(iEvent));
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;

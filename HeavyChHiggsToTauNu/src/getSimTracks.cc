@@ -26,10 +26,10 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
   }
 
   // Loop over tau candidates
-  vector<MyJet>::iterator iJet = event->taujets.begin();
-  for ( ; iJet != event->taujets.end(); ++iJet) {
+  vector<MyJet*> taujets = event->getCollection("caloTaus");
+  for (vector<MyJet*>::const_iterator iJet = taujets.begin() ; iJet != taujets.end(); ++iJet) {
     // Get leading track
-    MyTrack myLdgTrack = (*iJet).leadingTrack();
+    const MyTrack* myLdgTrack = (*iJet)->leadingTrack();
 //    cout << "jet ldg track eta=" << myLdgTrack.eta()
 //	 << " phi=" << myLdgTrack.phi() << endl;
 
@@ -39,8 +39,8 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
       const math::XYZTLorentzVectorD & myMomentum = (*iSim).momentum();
       ////      const HepLorentzVector myMomentum = (*iSim).momentum();
       if (myMomentum.Et() > 1) { // require sim track pt > 1 GeV
-	if (myDeltaR(myLdgTrack.eta(), myMomentum.eta(),
-		   myLdgTrack.phi(), myMomentum.phi()) < myMatchCone) {
+	if (myDeltaR(myLdgTrack->eta(), myMomentum.eta(),
+		   myLdgTrack->phi(), myMomentum.phi()) < myMatchCone) {
 	  //cout << "- simTrack eta=" << myMomentum.eta()
 	  //     << " phi=" << myMomentum.phi()
 	  //     << " myDeltaR=" 
@@ -65,9 +65,9 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
 	  // ECAL hit point
 	  const math::XYZVectorD & myPos = (*iSim).trackerSurfacePosition();
 	  ////const Hep3Vector myPos = (*iSim).trackerSurfacePosition();
-	  mySim.trackEcalHitPoint.x = myPos.x();
-	  mySim.trackEcalHitPoint.y = myPos.y();
-	  mySim.trackEcalHitPoint.z = myPos.z();
+	  mySim.trackEcalHitPoint.SetX(myPos.x());
+	  mySim.trackEcalHitPoint.SetY(myPos.y());
+	  mySim.trackEcalHitPoint.SetZ(myPos.z());
 	  // Store sim track
 	  //mySim.print();
 	  simTracks.push_back(mySim);

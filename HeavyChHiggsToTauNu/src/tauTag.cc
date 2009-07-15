@@ -57,26 +57,6 @@ map<string,double> MyEventConverter::tauTag(const CaloTau& tau){
         return tagInfo;
 }
 
-map<string,double> MyEventConverter::tauTag(const pat::Tau& tau){
-        map<string,double> tagInfo;
-
-	const vector< pair<string,float> > IDs = tau.tauIDs();
-        for(vector< pair<string,float> >::const_iterator i = IDs.begin(); i!= IDs.end(); ++i){
-                tagInfo[i->first] = i->second;
-        }
-
-        tagInfo["pat:trackIso"]           = tau.trackIso();
-        tagInfo["pat:caloIso"]            = tau.caloIso();
-        tagInfo["pat:ecalIso"]            = tau.ecalIso();
-        tagInfo["pat:hcalIso"]            = tau.hcalIso();
-        tagInfo["pat:particleIso"]        = tau.particleIso();       //all the PFCandidates
-        tagInfo["pat:chargedParticleIso"] = tau.chargedParticleIso();//charged PFCandidates
-        tagInfo["pat:neutralParticleIso"] = tau.neutralParticleIso();//neutral hadrons PFCandidates
-        tagInfo["pat:gammaParticleIso"]   = tau.gammaParticleIso();  //gamma PFCandidates
-
-	return tagInfo;
-}
-
 map<string,double> MyEventConverter::tauTag(const PFTau& tau){
         map<string,double> tagInfo;
 
