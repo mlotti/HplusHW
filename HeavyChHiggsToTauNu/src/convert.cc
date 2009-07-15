@@ -34,9 +34,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->addCollection("pftaus",getPFTaus(iEvent));
 	saveEvent->addCollection("icone05jets",getJets(iEvent));
 
-	saveEvent->addMET("caloMET",getCaloMET(iEvent));
-	saveEvent->addMET("pfMET",getPFMET(iEvent));
-	saveEvent->addMET("tcMET",getTCMET(iEvent));
+	saveEvent->mets			= getMET(iEvent);
+//	saveEvent->addMET("pfMET",getPFMET(iEvent));
+//	saveEvent->addMET("tcMET",getTCMET(iEvent));
 
         saveEvent->mcParticles          = getMCParticles(iEvent);
 	saveEvent->mcMET                = getMCMET();

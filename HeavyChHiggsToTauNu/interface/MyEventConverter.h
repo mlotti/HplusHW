@@ -130,7 +130,8 @@ class MyEventConverter {
 	vector<MyHit>		getHits(const Trajectory&,int&);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
-        MyMET                   getCaloMET(const edm::Event&);
+	std::map<std::string, MyMET> getMET(const edm::Event&);
+        std::map<std::string, MyMET> getCaloMETs(const edm::Event&);
         MyMET                   getPFMET(const edm::Event&);
         MyMET                   getTCMET(const edm::Event&);
 	MyMET			getPATMET(const edm::Event&);
@@ -204,7 +205,7 @@ class MyEventConverter {
 	const TauJetCorrector* tauJetCorrection;
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;
-	vector<InputTag> metCorrections;
+	vector<InputTag> metCollections;
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 

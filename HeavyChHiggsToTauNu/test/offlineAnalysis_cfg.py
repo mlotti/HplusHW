@@ -205,7 +205,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                 cms.InputTag("softMuonNoIPBJetTags")
         ),
 
-	METCorrections = cms.VInputTag(
+	METCollections = cms.VInputTag(
+		cms.InputTag("met"),
 		cms.InputTag("corMetGlobalMuons"),
 		cms.InputTag("corMetType1Icone5"),
 		cms.InputTag("metNoHF"),

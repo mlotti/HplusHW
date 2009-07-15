@@ -7,10 +7,17 @@
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
 
-MyMET MyEventConverter::getCaloMET(const edm::Event& iEvent){
+std::map<std::string, MyMET> MyEventConverter::getMET(const edm::Event& iEvent){
+	std::map<std::string, MyMET> mets = getCaloMETs(iEvent);
+	mets["pfMET"] = getPFMET(iEvent);
+	mets["tcMET"] = getTCMET(iEvent);
+	return mets;
+}
 
-        MyMET met;
+std::map<std::string, MyMET> MyEventConverter::getCaloMETs(const edm::Event& iEvent){
 
+	std::map<std::string, MyMET> mets;
+/*
         Handle<reco::CaloMETCollection> caloMET;
         try{
             iEvent.getByLabel("met",caloMET);
@@ -24,31 +31,26 @@ MyMET MyEventConverter::getCaloMET(const edm::Event& iEvent){
         cout << " calo MET : " << met.value()
              << "  x : " << met.X()
              << "  y : " << met.Y() << endl;
+*/
 
-/*FIXME
-        for(unsigned int iCorr = 0; iCorr < metCorrections.size(); ++iCorr){
+        for(unsigned int iColl = 0; iColl < metCollections.size(); ++iColl){
                 edm::Handle<reco::CaloMETCollection> metHandle;
 		try{
-                  iEvent.getByLabel(metCorrections[iCorr],metHandle);
+                  iEvent.getByLabel(metCollections[iColl],metHandle);
 		}catch(...) {;}
 
                 if(metHandle.isValid()){
-		  MyGlobalPoint correction;
-		  correction.name = metCorrections[iCorr].label();
-		  
-                  reco::CaloMETCollection::const_iterator imet = metHandle->begin();
-		  correction.x = imet->px() - met.x();
-		  correction.y = imet->py() - met.y();
+		  reco::CaloMETCollection::const_iterator imet = metHandle->begin();
+		  MyMET met(imet->px(),imet->py());
+		  mets[metCollections[iColl].label()] = met;
 
-		  cout << "     MET " << correction.name << " : " 
-                       << correction.x << " "
-                       << correction.y << endl;
-
-		  met.corrections.push_back(correction);
+		  cout << "     CaloMET " << metCollections[iColl].label() << " : " 
+                       << met.X() << " "
+                       << met.Y() << endl;
                 }
         }
-*/
-	return met;
+
+	return mets;
 }
 
 MyMET MyEventConverter::getPFMET(const edm::Event& iEvent){
