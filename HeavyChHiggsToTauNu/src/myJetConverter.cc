@@ -70,6 +70,7 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 
 	MyTrack electronTrack = myTrackConverter(transientTrack);
 	electronTrack.ip = impactParameter(transientTrack);
+	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recElectron);
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
@@ -90,6 +91,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 
         MyTrack electronTrack = myTrackConverter(transientTrack);
         electronTrack.ip = impactParameter(transientTrack);
+	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,&recElectron);
         electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 

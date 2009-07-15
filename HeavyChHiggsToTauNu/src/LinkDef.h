@@ -24,7 +24,9 @@
 #pragma link C++ class MyCaloTower+;
 #pragma link C++ class vector<MyCaloTower>;
 #pragma link C++ class MyJet+;
-#pragma link C++ class vector<MyJet>;
+#pragma link C++ class map<string,vector<MyJet> >;
+#pragma link C++ class map<string,MyMET>;
+#pragma link C++ class map<string,bool>;
 #pragma link C++ class MyEvent+;
 
 #endif
