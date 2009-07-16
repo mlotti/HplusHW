@@ -24,7 +24,7 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
   }
 
   // Loop over tau candidates
-  vector<MyJet*> taujets = event->getCollection("caloTaus");
+  vector<MyJet*> taujets = event->getCollection("calotaus");
   for (vector<MyJet*>::const_iterator iJet = taujets.begin() ; iJet != taujets.end(); ++iJet) {
     // Get leading track
     const MyTrack* myLdgTrack = (*iJet)->leadingTrack();
