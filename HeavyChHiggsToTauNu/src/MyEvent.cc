@@ -84,6 +84,7 @@ MyMET *MyEvent::getMET(const string& name) {
     exit(0);
   }
 
+  found->second.name = found->first;
   return &(found->second);
 }
 
