@@ -69,11 +69,12 @@ map<string,double> MyEventConverter::tauTag(const pat::Tau& tau){
         tagInfo["pat:caloIso"]            = tau.caloIso();
         tagInfo["pat:ecalIso"]            = tau.ecalIso();
         tagInfo["pat:hcalIso"]            = tau.hcalIso();
+/*
         tagInfo["pat:particleIso"]        = tau.particleIso();       //all the PFCandidates
         tagInfo["pat:chargedParticleIso"] = tau.chargedParticleIso();//charged PFCandidates
         tagInfo["pat:neutralParticleIso"] = tau.neutralParticleIso();//neutral hadrons PFCandidates
         tagInfo["pat:gammaParticleIso"]   = tau.gammaParticleIso();  //gamma PFCandidates
-
+*/
 	return tagInfo;
 }
 

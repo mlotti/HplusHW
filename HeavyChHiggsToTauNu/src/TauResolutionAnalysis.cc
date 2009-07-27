@@ -3,7 +3,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 using namespace edm;
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "HepMC/GenEvent.h"
 using namespace HepMC;
 
