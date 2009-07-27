@@ -70,6 +70,7 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 
 	MyTrack electronTrack = myTrackConverter(transientTrack);
 	electronTrack.ip = impactParameter(transientTrack);
+	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recElectron);
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
@@ -90,6 +91,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 
         MyTrack electronTrack = myTrackConverter(transientTrack);
         electronTrack.ip = impactParameter(transientTrack);
+	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,&recElectron);
         electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
@@ -159,7 +161,7 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
                 double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
                 string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
-                jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
+                jet.addEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
 		cout << "    jet correction " << jetEnergyCorrectionName << " " 
                                               << jetEnergyCorrectionFactor << endl;
         }
@@ -282,7 +284,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
         // Jet energy correction
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
-        tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
         tau.caloInfo = caloTowers(*caloJet);
 
@@ -354,7 +356,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         // Jet energy correction
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
-        tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
         tau.caloInfo = caloTowers(*caloJet);
 

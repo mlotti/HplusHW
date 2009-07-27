@@ -2,18 +2,9 @@
 
 ClassImp(MyMeasurement1D)
 
-MyMeasurement1D::MyMeasurement1D(){
-	theValue = 0;
-	theError = 0;
-}
-MyMeasurement1D::MyMeasurement1D(double aValue){
-	theValue = aValue;
-        theError = 0;	
-}
-MyMeasurement1D::MyMeasurement1D(double aValue, double aError){
-        theValue = aValue;
-        theError = aError;
-}
+MyMeasurement1D::MyMeasurement1D(double aValue, double aError):
+  theValue(aValue), theError(aError)
+{}
 
 MyMeasurement1D::~MyMeasurement1D(){}
 

@@ -81,7 +81,8 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
 
-double myDeltaR(double,double,double,double);
+////double myDeltaR(double,double,double,double);
+#include "Math/VectorUtil.h"
 
 class MyEventConverter {
   public:
@@ -108,6 +109,8 @@ class MyEventConverter {
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
 	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const CaloJet*);
         MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
+	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
+	MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	MyGlobalPoint 		getPrimaryVertex();
@@ -129,7 +132,10 @@ class MyEventConverter {
 	vector<MyHit>		getHits(const Trajectory&,int&);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
-        MyMET 			getMET(const edm::Event&);
+	std::map<std::string, MyMET> getMET(const edm::Event&);
+        std::map<std::string, MyMET> getCaloMETs(const edm::Event&);
+        MyMET                   getPFMET(const edm::Event&);
+        MyMET                   getTCMET(const edm::Event&);
 	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
         MyMET 			getMCMET();
@@ -201,7 +207,7 @@ class MyEventConverter {
 	const TauJetCorrector* tauJetCorrection;
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;
-	vector<InputTag> metCorrections;
+	vector<InputTag> metCollections;
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 

@@ -23,26 +23,50 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         	TrajectoryStateClosestToPoint TSCP = transientTrack.trajectoryStateClosestToPoint(ecalHitPosition);
         	GlobalPoint trackEcalHitPoint = TSCP.position();
 
-		ecalHitPoint.x = trackEcalHitPoint.x();
-	        ecalHitPoint.y = trackEcalHitPoint.y();
-	        ecalHitPoint.z = trackEcalHitPoint.z() - primaryVertex.z();
+		ecalHitPoint.SetX(trackEcalHitPoint.x());
+	        ecalHitPoint.SetY(trackEcalHitPoint.y());
+	        ecalHitPoint.SetZ(trackEcalHitPoint.z() - primaryVertex.z());
 
         }catch(...) {;}
 
 	return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const GsfElectron* electron){
 
+        GlobalPoint ecalHitPosition(0,0,0);
+	math::XYZVector pos = electron->trackMomentumAtCalo();
+
+	MyGlobalPoint ecalHitPoint(0,0,0);
+	ecalHitPoint.SetX(pos.x());
+	ecalHitPoint.SetY(pos.y());
+	ecalHitPoint.SetZ(pos.z() - primaryVertex.z());
+
+        return ecalHitPoint;
+}
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const pat::Electron* electron){
+
+        GlobalPoint ecalHitPosition(0,0,0);
+        math::XYZVector pos = electron->trackMomentumAtCalo();
+
+	MyGlobalPoint ecalHitPoint(0,0,0);
+        ecalHitPoint.SetX(pos.x());
+        ecalHitPoint.SetY(pos.y());
+        ecalHitPoint.SetZ(pos.z() - primaryVertex.z());
+
+        return ecalHitPoint;
+}
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
+/*
 	Conversion* convPhoton = const_cast<Conversion*>(photon);
 	vector<math::XYZPoint> const & ecalHitPositionVector = convPhoton->ecalImpactPosition();
 
 	for(vector<math::XYZPoint>::const_iterator i = ecalHitPositionVector.begin(); i!= ecalHitPositionVector.end(); ++i){
 		cout << "ecalhitpoint eta,phi " << i->eta() << " " << i->phi() << endl;
 	}
-
+*/
         MyGlobalPoint ecalHitPoint(0,0,0);
-
-
         return ecalHitPoint;
 }

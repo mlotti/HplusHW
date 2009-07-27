@@ -1,49 +1,15 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyVertex.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 
-#include <iostream>
 using namespace std;
-
-double etafun(double,double,double);
-double phifun(double,double);
 
 ClassImp(MyVertex)
 
-MyVertex::MyVertex(){
-        x = 0;
-        y = 0;
-        z = 0;
-        dxx = 0;
-        dxy = 0;
-        dxz = 0;
-        dyy = 0;
-        dyz = 0;
-        dzz = 0;
-        use("3D");
-}
+MyVertex::MyVertex(): MyGlobalPoint(), parentJet(0) {}
 
-MyVertex::MyVertex(double xx,double yy,double zz){
-        x = xx;
-        y = yy;
-        z = zz;
-        dxx = 0;
-        dxy = 0;
-        dxz = 0;
-        dyy = 0;
-        dyz = 0;
-        dzz = 0;
-        use("3D");
-}
-
+MyVertex::MyVertex(double x, double y, double z): MyGlobalPoint(x, y, z), parentJet(0) {}
 
 MyVertex::~MyVertex(){}
-
-double MyVertex::Eta() const {
-    return etafun(x,y,z);
-}
-
-double MyVertex::Phi() const {
-    return phifun(x,y);
-}
 
 double MyVertex::eta() const {
     return Eta();
@@ -53,40 +19,53 @@ double MyVertex::phi() const {
     return Phi();
 }
 
-MyVertex MyVertex::operator + (const MyVertex& q) const {
-    MyVertex point;
-    point.x = x + q.getX();
-    point.y = y + q.getY();
-    point.z = z + q.getZ();
+MyVertex MyVertex::operator+(const MyVertex& q) const {
+    MyVertex point(*this);
+    point += q; // exploit TVector3::operator+=(TVector3&)
 
-    point.dxx = dxx + q.dxx;
-    point.dxy = dxy + q.dxy;
-    point.dxz = dxz + q.dxz;
-    point.dyy = dyy + q.dyy;
-    point.dyz = dyz + q.dyz;
-    point.dzz = dzz + q.dzz;
+    point.dxx += q.dxx;
+    point.dxy += q.dxy;
+    point.dxz += q.dxz;
+    point.dyy += q.dyy;
+    point.dyz += q.dyz;
+    point.dzz += q.dzz;
 
     return point;
 }
 
-MyVertex MyVertex::operator - (const MyVertex& q) const {
-    MyVertex point;
-    point.x = x - q.getX();
-    point.y = y - q.getY();
-    point.z = z - q.getZ();
+MyVertex MyVertex::operator-(const MyVertex& q) const {
+    MyVertex point(*this);
+    point -= q; // exploit TVector3::operator-=(TVector3&)
 
-    point.dxx = dxx + q.dxx;
-    point.dxy = dxy + q.dxy;
-    point.dxz = dxz + q.dxz;
-    point.dyy = dyy + q.dyy;
-    point.dyz = dyz + q.dyz;
-    point.dzz = dzz + q.dzz;
+    point.dxx += q.dxx;
+    point.dxy += q.dxy;
+    point.dxz += q.dxz;
+    point.dyy += q.dyy;
+    point.dyz += q.dyz;
+    point.dzz += q.dzz;
 
     return point;
 }
 
-void MyVertex::print() const {
-	cout << "    Vertex eta,phi,ntracks " << this->Eta() 
-             << " " << this->Phi() << " " << assocTracks.size() << endl;
+std::vector<MyTrack *> MyVertex::getAssocTracks() const {
+    if(!parentJet) {
+        std::cout << "Requesting associated tracks of a secondary vertex, but the pointer to the parent jet is null!" << std::endl;
+        std::exit(0);
+    }
+
+    std::vector<MyTrack *> ret;
+    ret.reserve(assocTrackIndices.size());
+
+    std::vector<MyTrack *> tracks = parentJet->getTracks();
+    for(std::vector<unsigned int>::const_iterator ind = assocTrackIndices.begin(); ind != assocTrackIndices.end(); ++ind) {
+        ret.push_back(tracks[*ind]);
+    }
+
+    return ret;
+}
+
+void MyVertex::print(std::ostream& out) const {
+    out << "    Vertex eta,phi,ntracks " << Eta() 
+        << " " << Phi() << " " << assocTrackIndices.size() << endl;
 }
 

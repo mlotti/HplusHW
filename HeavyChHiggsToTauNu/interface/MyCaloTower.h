@@ -1,32 +1,34 @@
-#ifndef MY_CALOTOWER
-#define MY_CALOTOWER
+#ifndef __MyCaloTower__
+#define __MyCaloTower__
 
-using namespace std;
-
-#include <vector>
-#include "TROOT.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 #include "TVector3.h"
 
-class MyCaloTower : public TObject {
+#include<vector>
+#include<iostream>
+
+/**
+ * \brief Calorimeter tower class for MyEvent dataformat
+ */
+class MyCaloTower {
     public:
       	MyCaloTower();
       	virtual ~MyCaloTower();
 
-      	double  eta,
-               	phi,
-                ECAL_Energy,
-                HCAL_Energy;
+	void print(std::ostream& out = std::cout) const;
 
-      	vector<TVector3> ECALCells;
-	inline vector<TVector3>::const_iterator ECALCells_begin() const { return ECALCells.begin();}
-        inline vector<TVector3>::const_iterator ECALCells_end() const { return ECALCells.end();}
+        std::vector<TVector3 *> getECALCells();
+        std::vector<TVector3 *> getHCALCells();
 
-      	vector<TVector3> HCALCells;
-        inline vector<TVector3>::const_iterator HCALCells_begin() const { return HCALCells.begin();}
-        inline vector<TVector3>::const_iterator HCALCells_end() const { return HCALCells.end();}
+        std::vector<TVector3> ECALCells; ///< ECAL cells
+        std::vector<TVector3> HCALCells; ///< HCAL cells
 
-	void print() const;
+        double eta;         ///< Eta of the tower
+        double phi;         ///< Phi of the tower
+        double ECAL_Energy; ///< Total ECAL energy
+        double HCAL_Energy; ///< Total HCAL energy
 
-   	ClassDef(MyCaloTower,1)
+    private:
+   	ClassDef(MyCaloTower, MYEVENT_VERSION)
 };
 #endif

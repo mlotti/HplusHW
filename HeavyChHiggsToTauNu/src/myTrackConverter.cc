@@ -14,9 +14,9 @@ MyTrack MyEventConverter::myTrackConverter(const Track& recTrack){
         track.SetPy(recTrack.py());
         track.SetPz(recTrack.pz());
         track.SetE(recTrack.p());
-        track.trackCharge = recTrack.charge();
-        track.chiSquared  = recTrack.normalizedChi2();
-        track.nHits       = recTrack.numberOfValidHits();
+        track.trackCharge    = recTrack.charge();
+        track.normChiSquared = recTrack.normalizedChi2();
+        track.nHits          = recTrack.numberOfValidHits();
 
         return track;
 }
