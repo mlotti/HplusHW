@@ -221,6 +221,10 @@ TLorentzVector MyJet::hcalClusterMomentum(double signalCone, double matchingCone
   return TLorentzVector(cluster, cluster.Mag());
 }
 
+vector<TLorentzVector *> MyJet::getClusters() {
+  return convertCollection(clusters);
+}
+
 template <class C>
 void printCollection(std::ostream& out, const C& coll, const char *name) {
   if(coll.size() == 0)
