@@ -77,8 +77,7 @@ class MyJet: public TLorentzVector {
         /**
          * \brief Add energy correction
          *
-         * If the named correction already exists, the new correction
-         * is not added nad the return value is false.
+         * If the named correction already exists, std::exit() is called
          *
          * \param name     Name of the correction
          * \param factor   Correction factor with respect to the original energy
@@ -88,11 +87,12 @@ class MyJet: public TLorentzVector {
         /**
          * \brief Set the current energy correction
          *
-         * If the correction is not found, nothing is done and the
-         * return value is false.
+         * If the correction is not found, std::exit() is called
          *
          * \b Note: if there are multiple pointers to this jet object,
          *          naturally the corrections appreas to them too
+         *
+         * \see getEnergyCorrectionFactor(const std::string&) const
          *
          * \param name     Name of the correction
          */
@@ -100,6 +100,9 @@ class MyJet: public TLorentzVector {
 
         /**
          * \brief Get energy correction factor
+         *
+         * If the name is empty or it has the values raw or none, the
+         * correction factor w.r.t. to the original 4-vector is 1.
          *
          * \param name   Name of the energy correction
          *

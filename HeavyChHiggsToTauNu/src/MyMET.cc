@@ -5,8 +5,8 @@ using std::endl;
 
 ClassImp(MyMET)
 
-MyMET::MyMET(): TVector2(0, 0) {}
-MyMET::MyMET(double x, double y): TVector2(x, y) {}
+MyMET::MyMET(): TVector2(0, 0), name("") {}
+MyMET::MyMET(double x, double y): TVector2(x, y), name("") {}
 MyMET::~MyMET() {}
 
 
