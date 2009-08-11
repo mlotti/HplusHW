@@ -74,6 +74,13 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
+	vector<TLorentzVector> superClusters;
+	superClusters.push_back(TLorentzVector(recElectron->superCluster()->x(),
+	                                       recElectron->superCluster()->y(),
+                                               recElectron->superCluster()->z(),
+                                               recElectron->superCluster()->energy()));
+	electron.clusters = superClusters;
+
         return electron;
 }
 
@@ -94,6 +101,13 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,&recElectron);
         electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
+
+        vector<TLorentzVector> superClusters;
+        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
+                                               recElectron.superCluster()->y(),
+                                               recElectron.superCluster()->z(),
+                                               recElectron.superCluster()->energy()));
+        electron.clusters = superClusters;
 
 	electron.tagInfo = etag(recElectron);
 
