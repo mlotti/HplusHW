@@ -3,7 +3,7 @@
 #include<cmath>
 using std::endl;
 
-ClassImp(MyMET)
+//ClassImp(MyMET)
 
 MyMET::MyMET(): TVector2(0, 0), name("") {}
 MyMET::MyMET(double x, double y): TVector2(x, y), name("") {}

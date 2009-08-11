@@ -5,7 +5,7 @@
 #include<cmath>
 #include<iostream>
 
-ClassImp(MyGlobalPoint)
+//ClassImp(MyGlobalPoint)
 
 MyGlobalPoint::MyGlobalPoint(): TVector3(0,0,0), dxx(0), dxy(0), dxz(0), dyy(0), dyz(0), dzz(0) {}
 MyGlobalPoint::MyGlobalPoint(double x, double y, double z): TVector3(x, y, z), dxx(0), dxy(0), dxz(0), dyy(0), dyz(0), dzz(0) {}

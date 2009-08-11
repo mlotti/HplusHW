@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-ClassImp(MyTrack)
+//ClassImp(MyTrack)
 
 MyTrack::MyTrack(){}
 

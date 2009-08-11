@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMCParticle.h"
 
-ClassImp(MyMCParticle)
+//ClassImp(MyMCParticle)
 
 MyMCParticle::MyMCParticle(): TLorentzVector(0,0,0,0) {}
 MyMCParticle::MyMCParticle(double px, double py, double pz, double E): TLorentzVector(px, py, pz, E) {}
