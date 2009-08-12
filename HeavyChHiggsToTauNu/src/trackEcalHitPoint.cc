@@ -32,17 +32,41 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const GsfElectron* electron){
 
+        GlobalPoint ecalHitPosition(0,0,0);
+	math::XYZVector pos = electron->trackMomentumAtCalo();
+
+	MyGlobalPoint ecalHitPoint(0,0,0);
+	ecalHitPoint.x = pos.x();
+	ecalHitPoint.y = pos.y();
+	ecalHitPoint.z = pos.z() - primaryVertex.z();
+
+        return ecalHitPoint;
+}
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const pat::Electron* electron){
+
+        GlobalPoint ecalHitPosition(0,0,0);
+        math::XYZVector pos = electron->trackMomentumAtCalo();
+
+	MyGlobalPoint ecalHitPoint(0,0,0);
+        ecalHitPoint.x = pos.x();
+        ecalHitPoint.y = pos.y();
+        ecalHitPoint.z = pos.z() - primaryVertex.z();
+
+        return ecalHitPoint;
+}
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
+/*
 	Conversion* convPhoton = const_cast<Conversion*>(photon);
 	vector<math::XYZPoint> const & ecalHitPositionVector = convPhoton->ecalImpactPosition();
 
 	for(vector<math::XYZPoint>::const_iterator i = ecalHitPositionVector.begin(); i!= ecalHitPositionVector.end(); ++i){
 		cout << "ecalhitpoint eta,phi " << i->eta() << " " << i->phi() << endl;
 	}
-
+*/
         MyGlobalPoint ecalHitPoint(0,0,0);
-
-
         return ecalHitPoint;
 }
