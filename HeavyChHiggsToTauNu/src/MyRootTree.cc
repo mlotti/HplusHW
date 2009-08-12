@@ -100,7 +100,7 @@ void MyRootTree::fillTree(MyEvent* event){
 
   rootFile->cd();
 
-////  rootTree->Fill();
+  rootTree->Fill();
 }
 
 void MyRootTree::setAcceptance(string name,double value){
