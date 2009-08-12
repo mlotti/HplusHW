@@ -4,7 +4,7 @@
 using std::endl;
 using std::vector;
 
-//ClassImp(MyCaloTower)
+ClassImp(MyCaloTower)
 
 MyCaloTower::MyCaloTower(): eta(0), phi(0), ECAL_Energy(0), HCAL_Energy(0) {}
 MyCaloTower::~MyCaloTower(){}

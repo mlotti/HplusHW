@@ -10,7 +10,7 @@ using std::cout;
 using std::ostream;
 using std::endl;
 
-//ClassImp(MyJet)
+ClassImp(MyJet)
 
 MyJet::MyJet():
   TLorentzVector(0, 0, 0, 0),

@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMeasurement1D.h"
 
-//ClassImp(MyMeasurement1D)
+ClassImp(MyMeasurement1D)
 
 MyMeasurement1D::MyMeasurement1D(double aValue, double aError):
   theValue(aValue), theError(aError)

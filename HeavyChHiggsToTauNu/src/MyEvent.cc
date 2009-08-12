@@ -15,7 +15,7 @@ using std::cout;
 using std::endl;
 using std::setw;
 
-//ClassImp(MyEvent)
+ClassImp(MyEvent)
 
 MyEvent::MyEvent(): hasMCdata(false) {
   /**

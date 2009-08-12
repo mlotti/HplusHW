@@ -3,7 +3,7 @@
 
 using namespace std;
 
-//ClassImp(MyVertex)
+ClassImp(MyVertex)
 
 MyVertex::MyVertex(): MyGlobalPoint(), parentJet(0) {}
 

@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyImpactParameter.h"
 
-//ClassImp(MyImpactParameter)
+ClassImp(MyImpactParameter)
 
 MyImpactParameter::MyImpactParameter(): ip2D(), ipZ(), ip3D() {}
 
