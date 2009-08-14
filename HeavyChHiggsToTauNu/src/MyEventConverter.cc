@@ -70,7 +70,7 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	tauJetCorrection = new TauJetCorrector(iConfig);
 
         // ECAL clusters 
-	BarrelBasicClusterInput = iConfig.getParameter<InputTag>("BarrelBasicClustersSource"); 
+	BarrelBasicClustersInput = iConfig.getParameter<InputTag>("BarrelBasicClustersSource"); 
 	EndcapBasicClustersInput = iConfig.getParameter<InputTag>("EndcapBasicClustersSource"); 
 	
 }

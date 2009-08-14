@@ -457,18 +457,18 @@ void MyEventConverter::addECALClusters(MyJet* jet) {
   // and stores to jet those, which are within specified DR to
   // leading track hit point on ECAL surface
 
-  MyTrack myLeadingTrack = jet->leadingTrack();
-  if (myLeadingTrack.Pt() < 0.0001) return;
-  MyGlobalPoint myECALHitPoint = myLeadingTrack.ecalHitPoint();
+  const MyTrack *myLeadingTrack = jet->leadingTrack();
+  if (myLeadingTrack->Pt() < 0.0001) return;
+  MyGlobalPoint myECALHitPoint = myLeadingTrack->ecalHitPoint();
   //double myLdgEta = myECALHitPoint.Eta();
   //double myLdgPhi = myECALHitPoint.Phi();
 
   // Loop over barrel ECAL clusters
-  int myBarrelCollectionSize = theBarrelBCCollection->size();
+  unsigned int myBarrelCollectionSize = theBarrelBCCollection->size();
   for(unsigned int i_BC=0; i_BC != myBarrelCollectionSize; ++i_BC) { 
     BasicClusterRef theBasicClusterRef(theBarrelBCCollection, i_BC);    
     if (theBasicClusterRef.isNull()) continue;  
-    if (ROOT::Math::VectorUtil::DeltaR(myECALHitPoint,(*theBasicClusterRef).position()) <= 0.7) {
+    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
       TLorentzVector myCluster((*theBasicClusterRef).position().x(),
 			       (*theBasicClusterRef).position().y(),
 			       (*theBasicClusterRef).position().z(),
@@ -477,11 +477,11 @@ void MyEventConverter::addECALClusters(MyJet* jet) {
     }
   }
   // Loop over endcap ECAL clusters
-  int myEndcapCollectionSize = theEndcapBCCollection->size();
+  unsigned int myEndcapCollectionSize = theEndcapBCCollection->size();
   for(unsigned int i_BC=0; i_BC != myEndcapCollectionSize; ++i_BC) { 
     BasicClusterRef theBasicClusterRef(theEndcapBCCollection, i_BC);    
     if (theBasicClusterRef.isNull()) continue;  
-    if (ROOT::Math::VectorUtil::DeltaR(myECALHitPoint,(*theBasicClusterRef).position()) <= 0.7) {
+    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
       TLorentzVector myCluster((*theBasicClusterRef).position().x(),
 			       (*theBasicClusterRef).position().y(),
 			       (*theBasicClusterRef).position().z(),

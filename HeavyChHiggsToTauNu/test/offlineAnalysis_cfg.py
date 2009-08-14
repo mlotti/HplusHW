@@ -223,6 +223,9 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 	tagName = cms.string("IterativeCone0.4_EtScheme_TowerEt0.5_E0.8_Jets871_2x1033PU_tau"),
 	TauTriggerType = cms.int32(1),
 
+        BarrelBasicClustersSource = cms.InputTag("hybridSuperClusters", "hybridBarrelBasicClusters"),
+        EndcapBasicClustersSource = cms.InputTag("multi5x5BasicClusters", "multi5x5EndcapBasicClusters"),
+
 	# Electron identification
 	ReducedBarrelRecHitCollection = cms.InputTag("reducedEcalRecHitsEB"),
 	ReducedEndcapRecHitCollection = cms.InputTag("reducedEcalRecHitsEE"),

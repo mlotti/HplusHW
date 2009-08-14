@@ -148,6 +148,7 @@ class MyEventConverter {
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	vector<MyVertex>	secondaryVertices(vector<TransientTrack>&);
 	void			getCaloHits(const edm::Event&);
+	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
         MyTrack                 myTrackConverter(const TransientTrack&);
@@ -228,7 +229,7 @@ class MyEventConverter {
         Handle<EERecHitCollection>   EERecHits;
 
 	// ECAL clusters
-	InputTag BarrelBasicClusterInput;
+	InputTag BarrelBasicClustersInput;
 	InputTag EndcapBasicClustersInput;
 	Handle<BasicClusterCollection> theBarrelBCCollection;
 	Handle<BasicClusterCollection> theEndcapBCCollection;

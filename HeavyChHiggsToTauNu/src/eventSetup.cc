@@ -27,10 +27,4 @@ void MyEventConverter::eventSetup(const edm::EventSetup& iSetup){
         HE = geometry->getSubdetectorGeometry(DetId::Hcal,HcalEndcap);
         HO = geometry->getSubdetectorGeometry(DetId::Hcal,HcalOuter);
         HF = geometry->getSubdetectorGeometry(DetId::Hcal,HcalForward);
-
-	// ECAL clusters
-	theEvent.getByLabel(BarrelBasicClustersInput,theBarrelBCCollection);
-	theEvent.getByLabel(EndcapBasicClustersInput,theEndcapBCCollection);
-
-	
 }
