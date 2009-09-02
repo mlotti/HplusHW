@@ -22,7 +22,7 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-"file:/tmp/slehti/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root")
+"file:/tmp/slehti/test.root")
 )
 
 #if files:
@@ -40,11 +40,20 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.cerr = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"))
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = 'IDEAL_V1::All'
-process.GlobalTag.globaltag = 'STARTUP31X_V1::All'
-
+#process.GlobalTag.globaltag = 'IDEAL_31X::All'
+#process.GlobalTag.globaltag = 'STARTUP31X_V1::All'
+process.GlobalTag.globaltag = 'MC_31X_V3::All'
 # Magnetic Field
-process.load("Configuration/StandardSequences/MagneticField_cff")
+#process.load("Configuration/StandardSequences/MagneticField_cff")
+process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load('Configuration/StandardSequences/Services_cff')
+process.load('Configuration/StandardSequences/Geometry_cff')
+
+from Geometry.CaloEventSetup.CaloTopology_cfi import *
+process.load("RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi")
+from RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi import *
+process.load("RecoEgamma.ElectronIdentification.electronIdCutBasedClassesExt_cfi")
+from RecoEgamma.ElectronIdentification.electronIdCutBasedClassesExt_cfi import *
 
 # Calo geometry service model
 process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
