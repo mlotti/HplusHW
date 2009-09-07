@@ -6,7 +6,8 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 
         Handle<HepMCProduct> mcEventHandle;
         try{
-          iEvent.getByLabel("source",mcEventHandle);
+//          iEvent.getByLabel("source",mcEventHandle);
+	    iEvent.getByLabel("generator",mcEventHandle);
         }catch(...) {;}
 
         if(mcEventHandle.isValid()){
