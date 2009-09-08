@@ -5,9 +5,9 @@ using namespace std;
 
 ClassImp(MyVertex)
 
-MyVertex::MyVertex(): MyGlobalPoint(), parentJet(0) {}
+MyVertex::MyVertex(): MyGlobalPoint() {}
 
-MyVertex::MyVertex(double x, double y, double z): MyGlobalPoint(x, y, z), parentJet(0) {}
+MyVertex::MyVertex(double x, double y, double z): MyGlobalPoint(x, y, z) {}
 
 MyVertex::~MyVertex(){}
 
@@ -45,23 +45,6 @@ MyVertex MyVertex::operator-(const MyVertex& q) const {
     point.dzz += q.dzz;
 
     return point;
-}
-
-std::vector<MyTrack *> MyVertex::getAssocTracks() const {
-    if(!parentJet) {
-        std::cout << "Requesting associated tracks of a secondary vertex, but the pointer to the parent jet is null!" << std::endl;
-        std::exit(0);
-    }
-
-    std::vector<MyTrack *> ret;
-    ret.reserve(assocTrackIndices.size());
-
-    std::vector<MyTrack *> tracks = parentJet->getTracks();
-    for(std::vector<unsigned int>::const_iterator ind = assocTrackIndices.begin(); ind != assocTrackIndices.end(); ++ind) {
-        ret.push_back(tracks[*ind]);
-    }
-
-    return ret;
 }
 
 void MyVertex::print(std::ostream& out) const {
