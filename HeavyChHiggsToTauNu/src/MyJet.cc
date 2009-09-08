@@ -120,6 +120,10 @@ const MyTrack *MyJet::leadingTrack(double matchingCone) const {
   for(vector<MyTrack>::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
     if(i->pt() == 0) continue;
     if(i->charge() == 0) continue;
+    // Require track to be within Delta IPz < 1 mm
+    if(TMath::Abs(i->impactParameter().impactParameterZ().value()) > 0.1) continue;
+    // Require track to be within IPT < 0.3 mm
+    if(TMath::Abs(i->impactParameter().impactParameter2D().value()) > 0.03) continue;
 
     double DR = ROOT::Math::VectorUtil::DeltaR(p4(),i->p4());
     if(DR > matchingCone) continue;
@@ -219,6 +223,10 @@ TLorentzVector MyJet::hcalClusterMomentum(double signalCone, double matchingCone
   }
 
   return TLorentzVector(cluster, cluster.Mag());
+}
+
+vector<TLorentzVector *> MyJet::getClusters() {
+  return convertCollection(clusters);
 }
 
 template <class C>

@@ -74,6 +74,13 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
+	vector<TLorentzVector> superClusters;
+	superClusters.push_back(TLorentzVector(recElectron->superCluster()->x(),
+	                                       recElectron->superCluster()->y(),
+                                               recElectron->superCluster()->z(),
+                                               recElectron->superCluster()->energy()));
+	electron.clusters = superClusters;
+
         return electron;
 }
 
@@ -94,6 +101,13 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,&recElectron);
         electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
+
+        vector<TLorentzVector> superClusters;
+        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
+                                               recElectron.superCluster()->y(),
+                                               recElectron.superCluster()->z(),
+                                               recElectron.superCluster()->energy()));
+        electron.clusters = superClusters;
 
 	electron.tagInfo = etag(recElectron);
 
@@ -217,6 +231,8 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 	tau.caloInfo = caloTowers(*caloJet);
 
+	addECALClusters(&tau);
+
         return tau;
 }
 
@@ -289,6 +305,8 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         tau.caloInfo = caloTowers(*caloJet);
 
 	tau.secVertices = secondaryVertices(transientTracks);
+
+	addECALClusters(&tau);
 
         return tau;
 }
@@ -392,6 +410,8 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
+	addECALClusters(&tau);
+
 	return tau;
 }
 
@@ -427,5 +447,46 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
+	addECALClusters(&tau);
+
 	return tau;	
+}
+
+void MyEventConverter::addECALClusters(MyJet* jet) {
+  // Loops over barrel and endcap ECAL cluster
+  // and stores to jet those, which are within specified DR to
+  // leading track hit point on ECAL surface
+
+  const MyTrack *myLeadingTrack = jet->leadingTrack();
+  if (myLeadingTrack->Pt() < 0.0001) return;
+  MyGlobalPoint myECALHitPoint = myLeadingTrack->ecalHitPoint();
+  //double myLdgEta = myECALHitPoint.Eta();
+  //double myLdgPhi = myECALHitPoint.Phi();
+
+  // Loop over barrel ECAL clusters
+  unsigned int myBarrelCollectionSize = theBarrelBCCollection->size();
+  for(unsigned int i_BC=0; i_BC != myBarrelCollectionSize; ++i_BC) { 
+    BasicClusterRef theBasicClusterRef(theBarrelBCCollection, i_BC);    
+    if (theBasicClusterRef.isNull()) continue;  
+    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
+      TLorentzVector myCluster((*theBasicClusterRef).position().x(),
+			       (*theBasicClusterRef).position().y(),
+			       (*theBasicClusterRef).position().z(),
+			       (*theBasicClusterRef).energy());
+      jet->clusters.push_back(myCluster);
+    }
+  }
+  // Loop over endcap ECAL clusters
+  unsigned int myEndcapCollectionSize = theEndcapBCCollection->size();
+  for(unsigned int i_BC=0; i_BC != myEndcapCollectionSize; ++i_BC) { 
+    BasicClusterRef theBasicClusterRef(theEndcapBCCollection, i_BC);    
+    if (theBasicClusterRef.isNull()) continue;  
+    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
+      TLorentzVector myCluster((*theBasicClusterRef).position().x(),
+			       (*theBasicClusterRef).position().y(),
+			       (*theBasicClusterRef).position().z(),
+			       (*theBasicClusterRef).energy());
+      jet->clusters.push_back(myCluster);
+    }
+  }
 }

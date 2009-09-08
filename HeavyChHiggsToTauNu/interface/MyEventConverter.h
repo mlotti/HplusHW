@@ -22,6 +22,9 @@
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
+#include "DataFormats/EgammaReco/interface/BasicCluster.h" 
+#include "DataFormats/EgammaReco/interface/BasicClusterFwd.h" 
+
 #include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 //#include "DataFormats/BTauReco/interface/PFIsolatedTauTagInfo.h"
@@ -145,6 +148,7 @@ class MyEventConverter {
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	vector<MyVertex>	secondaryVertices(vector<TransientTrack>&);
 	void			getCaloHits(const edm::Event&);
+	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
         MyTrack                 myTrackConverter(const TransientTrack&);
@@ -168,6 +172,7 @@ class MyEventConverter {
 	MyJet			myJetConverter(const pat::Tau&);
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
+	void                    addECALClusters(MyJet* jet);
 	MyMeasurement1D 	myMeasurement1DConverter(const Measurement1D&);
         MyHit                   myHitConverter(const TransientTrackingRecHit*, float);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
@@ -223,6 +228,12 @@ class MyEventConverter {
         Handle<EBRecHitCollection>   EBRecHits;
         Handle<EERecHitCollection>   EERecHits;
 
+	// ECAL clusters
+	InputTag BarrelBasicClustersInput;
+	InputTag EndcapBasicClustersInput;
+	Handle<BasicClusterCollection> theBarrelBCCollection;
+	Handle<BasicClusterCollection> theEndcapBCCollection;
+	
         Handle<HBHERecHitCollection> HBHERecHits;
         Handle<HORecHitCollection>   HORecHits;
         Handle<HFRecHitCollection>   HFRecHits;

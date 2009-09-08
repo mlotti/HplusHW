@@ -15,6 +15,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	getCaloHits(iEvent); // needed if calohits are to be stored
         getTracks(iEvent); // needed if tracks inside jet cones are to be stored
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
+        getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();

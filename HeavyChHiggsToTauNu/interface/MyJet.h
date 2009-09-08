@@ -205,6 +205,23 @@ class MyJet: public TLorentzVector {
          */
         TLorentzVector      hcalClusterMomentum(double signalCone ,double matchingCone = 0.1) const;
 
+        /**
+         * \brief Get clusters (valid for electrons and taus)
+         *
+         * Currently this method is meaningfull only for electrons and
+         * taus. The clusters are modeled as TLorentzVectors, where
+         * the 3-vector represents the position of the cluster and the
+         * energy component represents the energy of the cluster.
+         *
+         * For electrons, the vector has only one element which is the
+         * supercluster.
+         *
+         * For taus, the vector has all ECAL clusters.
+         *
+         * \return Vector of pointers to clusters
+         */
+        std::vector<TLorentzVector *> getClusters();
+
 
 	void printTracks(std::ostream& out = std::cout) const;
 	void printVertices(std::ostream& out = std::cout) const;
@@ -220,6 +237,7 @@ class MyJet: public TLorentzVector {
         std::vector<MyHit>            hits;        ///< Hits associated to tracks
         std::vector<MyVertex>         secVertices; ///< Secondary vertices associated to the jet
         std::vector<MyCaloTower>      caloInfo;    ///< Calorimeter info associated to the jet
+        std::vector<TLorentzVector>   clusters;    ///< SuperClusters for electrons, ECAL clusters for taus
         std::map<std::string, double> tagInfo;     ///< Various jet tags, e.g. b-tag discriminators
         std::map<std::string, double> jecs;        ///< Jet energy corrections
         TLorentzVector                originalP4;  ///< Original jet 4-vector, this shouldn't be modified after setting it
