@@ -411,7 +411,11 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
                 PFCandidate pfCand = **iTrack;
-                MyTrack track = myTrackConverter(pfCand);
+		MyTrack track = myTrackConverter(pfCand);
+//		if(pfCand.trackRef()){
+//			const TransientTrack transientTrack = transientTrackBuilder->build(pfCand.trackRef());
+//			track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recTau);
+//		}
                 tracks.push_back(track);
         }
 
