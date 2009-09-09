@@ -375,7 +375,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
         RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
-                PFCandidate pfCand = **iTrack;
+                const PFCandidate* pfCand = iTrack->get();
                 MyTrack track = myTrackConverter(pfCand);
                 tracks.push_back(track);
         }
@@ -383,7 +383,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
         const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
-                PFCandidate pfCand = **iTrack;
+                const PFCandidate* pfCand = iTrack->get();
                 MyTrack track = myTrackConverter(pfCand);
                 tracks.push_back(track);
         }
@@ -410,9 +410,11 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
-                PFCandidate pfCand = **iTrack;
+		const PFCandidate* pfCand = iTrack->get();
 		MyTrack track = myTrackConverter(pfCand);
-//		if(pfCand.trackRef()){
+		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
+//cout << "check MyEventConverter::myJetConverter " << pfCand.trackRef().isNonnull() << endl;
+//		if(pfCand.trackRef().isNonnull()){
 //			const TransientTrack transientTrack = transientTrackBuilder->build(pfCand.trackRef());
 //			track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recTau);
 //		}
@@ -422,8 +424,9 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
-                PFCandidate pfCand = **iTrack;
+		const PFCandidate* pfCand = iTrack->get();
                 MyTrack track = myTrackConverter(pfCand);
+		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
         }
 

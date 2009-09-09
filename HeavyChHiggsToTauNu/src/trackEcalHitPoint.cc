@@ -70,3 +70,15 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         MyGlobalPoint ecalHitPoint(0,0,0);
         return ecalHitPoint;
 }
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const PFCandidate* pfCand){
+
+        math::XYZPointF pos = pfCand->positionAtECALEntrance();
+
+        MyGlobalPoint ecalHitPoint(0,0,0);
+        ecalHitPoint.SetX(pos.x());
+        ecalHitPoint.SetY(pos.y());
+        ecalHitPoint.SetZ(pos.z());
+
+        return ecalHitPoint;
+}
