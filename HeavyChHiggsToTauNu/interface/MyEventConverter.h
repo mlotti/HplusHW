@@ -240,5 +240,7 @@ class MyEventConverter {
 
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
+
+	bool printTrigger;
 };
 #endif

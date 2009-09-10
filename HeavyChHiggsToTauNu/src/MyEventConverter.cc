@@ -38,6 +38,8 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	eventsWithPrimaryVertex = 0;
 	savedEvents 		= 0;
 
+	printTrigger = true;
+
 	tauResolutionAnalysis = new TauResolutionAnalysis();
 	tauMETTriggerAnalysis = new TauMETTriggerAnalysis(userRootTree);
 

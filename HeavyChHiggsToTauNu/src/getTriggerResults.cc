@@ -22,8 +22,7 @@ map<string,bool> MyEventConverter::getTriggerResults(const edm::Event& iEvent){
                 int n = 0;
                 for(vector<string>::const_iterator i = hlNames.begin();
                                                    i!= hlNames.end(); i++){
-                        //cout << "trigger: " << *i << " "
-                        //     << hltHandle->accept(n) << endl;
+                        if(printTrigger) cout << "trigger: " << *i << " " << hltHandle->accept(n) << endl;
 
 			for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin(); 
                                                              iSelect!= HLTSelection.end(); iSelect++){
@@ -33,6 +32,7 @@ map<string,bool> MyEventConverter::getTriggerResults(const edm::Event& iEvent){
 			}
                         n++;
                 }
+		printTrigger = false;
         }
 	return trigger;
 }
