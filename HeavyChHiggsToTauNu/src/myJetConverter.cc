@@ -295,74 +295,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 }
 
 MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
-/*
-	const CaloJet* caloJet = recTau.caloTauTagInfoRef()->calojetRef().get();
 
-        MyJet tau;
-
-        tau.SetPx(recTau.px());
-        tau.SetPy(recTau.py());
-        tau.SetPz(recTau.pz());
-        tau.SetE(recTau.energy());
-
-        vector<MyTrack> tracks;
-        vector<MyHit> hits;
-
-        vector<TransientTrack> transientTracks;
-        if(trackCollectionSelection.label() == "iterativeTracks"){
-          vector<Trajectory> associatedTrajectories;
-          vector<Track> associatedTracks = tracksInCone(recTau.p4(),0.5,&associatedTrajectories);
-          vector<Track>::const_iterator iTrack;
-          vector<Trajectory>::const_iterator iTrajectory = associatedTrajectories.begin();
-          // Make sure, that each track has a trajectory; only this guarantees one to one correspondence
-          bool myTrajectoryStatus = (associatedTracks.size() == associatedTrajectories.size());
-          int trackCounter = 0;
-          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
-
-                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
-                transientTracks.push_back(transientTrack);
-
-                MyTrack track = myTrackConverter(transientTrack);
-
-                if (myTrajectoryStatus) {
-                        vector<MyHit> assocHits = getHits(*iTrajectory,trackCounter);
-                        hits.insert(hits.end(),assocHits.begin(),assocHits.end());
-                }
-                track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
-                tracks.push_back(track);
-                ++iTrajectory;
-                ++trackCounter;
-          }
-        }else{
-          // at this point, adding MyHit information is not implemented for calotau data
-          const TrackRefVector associatedTracks = recTau.caloTauTagInfoRef()->Tracks();
-          RefVector<TrackCollection>::const_iterator iTrack;
-          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
-
-                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
-
-                MyTrack track           = myTrackConverter(transientTrack);
-                track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
-                tracks.push_back(track);
-          }
-        }
-
-        tau.tracks = tracks;
-
-        tau.hits   = hits;
-
-        tau.tagInfo = tauTag(recTau);
-
-        // Jet energy correction
-        double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
-        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
-
-        tau.caloInfo = caloTowers(*caloJet);
-
-        tau.secVertices = secondaryVertices(transientTracks);
-*/
         MyJet tau;
 
         tau.SetPx(recTau.px());
@@ -373,10 +306,14 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
         vector<MyTrack> tracks;
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
+	vector<TransientTrack> transientTracks;
         RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
                 const PFCandidate* pfCand = iTrack->get();
+		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                transientTracks.push_back(transientTrack);
+
                 MyTrack track = myTrackConverter(pfCand);
                 tracks.push_back(track);
         }
@@ -385,6 +322,9 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
                 const PFCandidate* pfCand = iTrack->get();
+		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                transientTracks.push_back(transientTrack);
+
                 MyTrack track = myTrackConverter(pfCand);
                 tracks.push_back(track);
         }
@@ -392,6 +332,8 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
         tau.tracks = tracks;
 
         tau.tagInfo = tauTag(recTau);
+
+	tau.secVertices = secondaryVertices(transientTracks);
 
 	return tau;
 }
@@ -408,10 +350,14 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 	vector<MyTrack> tracks;
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
+	vector<TransientTrack> transientTracks;
         RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
 		const PFCandidate* pfCand = iTrack->get();
+                const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                transientTracks.push_back(transientTrack);
+
 		MyTrack track = myTrackConverter(pfCand);
 		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
@@ -421,6 +367,9 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
 		const PFCandidate* pfCand = iTrack->get();
+                const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                transientTracks.push_back(transientTrack);
+
                 MyTrack track = myTrackConverter(pfCand);
 		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
@@ -430,7 +379,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
-//	tau.secVertices = 
+	tau.secVertices = secondaryVertices(transientTracks);
 
 	return tau;	
 }
