@@ -13,6 +13,7 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
 	TrackRef track = recMuon.globalTrack();
 	if(track.isNull()) track = recMuon.innerTrack();
+	if(track.isNull()) track = recMuon.combinedMuon();
 
 	if(track.isNonnull()){
 		const TransientTrack transientTrack = transientTrackBuilder->build(track);
@@ -413,11 +414,6 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 		const PFCandidate* pfCand = iTrack->get();
 		MyTrack track = myTrackConverter(pfCand);
 		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
-//cout << "check MyEventConverter::myJetConverter " << pfCand.trackRef().isNonnull() << endl;
-//		if(pfCand.trackRef().isNonnull()){
-//			const TransientTrack transientTrack = transientTrackBuilder->build(pfCand.trackRef());
-//			track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recTau);
-//		}
                 tracks.push_back(track);
         }
 
@@ -433,6 +429,8 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         tau.tracks = tracks;
 
         tau.tagInfo = tauTag(recTau);
+
+//	tau.secVertices = 
 
 	return tau;	
 }
