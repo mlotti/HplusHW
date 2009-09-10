@@ -38,7 +38,7 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 
 //                        if( ( (*i)->status() == 1 && (*i)->momentum().perp() > 1) ||
                         if( ( (*i)->status() == 1 ) ||
-			    ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 ) ||
+			    ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 || abs(id) <= 21) ||
                             ( (*i)->status() == 3) ) {
 
                                 // searching parents

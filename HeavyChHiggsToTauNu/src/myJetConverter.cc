@@ -355,9 +355,10 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
 		const PFCandidate* pfCand = iTrack->get();
-                const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
+		if(pfCand->trackRef().isNonnull()){
+                  const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                  transientTracks.push_back(transientTrack);
+		}
 		MyTrack track = myTrackConverter(pfCand);
 		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
@@ -367,9 +368,10 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
 		const PFCandidate* pfCand = iTrack->get();
-                const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
+		if(pfCand->trackRef().isNonnull()){
+                  const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
+                  transientTracks.push_back(transientTrack);
+		}
                 MyTrack track = myTrackConverter(pfCand);
 		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
