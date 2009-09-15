@@ -113,6 +113,7 @@ vector<MyCaloTower> MyJet::getCaloInfo() const {return caloInfo;}
 
 double MyJet::tag(string name) const{
 	if(tagInfo.find(name) == tagInfo.end()){
+		if(tracks.size() == 0) cout << "No tracks!" << endl;
 		cout << "jet tag " << name << " not found, exiting " << endl;
 		exit(0);
 	}
