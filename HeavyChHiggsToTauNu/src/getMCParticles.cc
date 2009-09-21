@@ -120,25 +120,21 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
                         if( (*i)->production_vertex() ) {
                                 HepMC::GenVertex::particle_iterator iMother =
                                         (*i)->production_vertex()->particles_begin(HepMC::parents);
-                                if(*iMother != 0) {
-                                    while( (*iMother)->production_vertex() ) {
+                                while( *iMother && (*iMother)->production_vertex() ) {
                                         int motherId = (*iMother)->pdg_id();
                                         int motherBarCode = (*iMother)->barcode();
                                         //cout << "          mother ids,barcode " << motherId
                                         //     << " " << (*iMother)->barcode() << endl;
                                         iMother = (*iMother)->production_vertex()->particles_begin(HepMC::parents);
-                                        if(! *iMother)
-                                          break;
-                                        if((*iMother)->pdg_id() != motherId) {
+                                        // If the mother doesn't have mother, add to the motherList
+                                        if(!*iMother || (*iMother)->pdg_id() != motherId) {
                                                 motherList.push_back(motherId);
                                                 motherBarcodes.push_back(motherBarCode);
                                         }
-                                    }
                                 }
                         }
 
-                        if(motherList.size() > 0){
-                          if(motherList[0] != id){
+                        if(motherList.size() == 0 || motherList[0] != id){
                                 MyMCParticle mcParticle;
                                 mcParticle.pid    = id;
                                 mcParticle.status = (*i)->status();
@@ -153,7 +149,6 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
                                 mcParticle.motherBarcodes = motherBarcodes;
                                 //cout << "SAVING particle " << mcParticle.barcode << " " << mcParticle.pid << endl;
                                 mcParticles.push_back(mcParticle);
-                          }
                         }
                 }
 	}
