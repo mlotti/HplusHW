@@ -34,26 +34,11 @@ class MyVertex: public MyGlobalPoint {
     	MyVertex operator+(const MyVertex&) const;
     	MyVertex operator-(const MyVertex&) const;
 
-        /**
-         * \brief Get associated tracks
-         */
-        std::vector<MyTrack *> getAssocTracks() const;
-
         void print(std::ostream& out = std::cout) const;
 
         
         /**
-         * \brief Pointer to parent jet
-         *
-         * ROOT is (or at least should be) able to serialize the
-         * pointer to the parent jet correctly.
-         */
-        MyJet *parentJet;
-
-        /**
          * \brief Indices to track collection in the parent jet
-         *
-         * \see parentJet
          */
         std::vector<unsigned int> assocTrackIndices;
 

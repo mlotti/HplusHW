@@ -127,6 +127,8 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
                                         //cout << "          mother ids,barcode " << motherId
                                         //     << " " << (*iMother)->barcode() << endl;
                                         iMother = (*iMother)->production_vertex()->particles_begin(HepMC::parents);
+                                        if(! *iMother)
+                                          break;
                                         if((*iMother)->pdg_id() != motherId) {
                                                 motherList.push_back(motherId);
                                                 motherBarcodes.push_back(motherBarCode);

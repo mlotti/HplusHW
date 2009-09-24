@@ -70,4 +70,9 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	trajectoryInput = trackCollectionSelection;
 
 	tauJetCorrection = new TauJetCorrector(iConfig);
+
+        // ECAL clusters 
+	BarrelBasicClustersInput = iConfig.getParameter<InputTag>("BarrelBasicClustersSource"); 
+	EndcapBasicClustersInput = iConfig.getParameter<InputTag>("EndcapBasicClustersSource"); 
+	
 }
