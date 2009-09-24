@@ -114,6 +114,7 @@ class MyEventConverter {
         MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
 	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
 	MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
+	MyGlobalPoint		trackEcalHitPoint(const reco::PFCandidate*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	MyGlobalPoint 		getPrimaryVertex();
@@ -126,7 +127,7 @@ class MyEventConverter {
 	vector<MyJet>           getPATMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
 	vector<MyJet>		getPATTaus(const edm::Event&);
-        vector<MyJet> 		getPFTaus(const edm::Event&);
+        vector<MyJet> 		getPFTaus(const edm::Event&,string);
         vector<MyJet> 		getJets(const edm::Event&);
 	vector<MyJet>		getPATJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
@@ -155,7 +156,7 @@ class MyEventConverter {
 //	MyTrack			myTrackConverter(const TransientTrack&, const Trajectory&);
 //	MyTrack			myTrackConverter(const Track&, const Trajectory&);
 	MyTrack 		myTrackConverter(const Track&);
-	MyTrack 		myTrackConverter(const PFCandidate&);
+	MyTrack 		myTrackConverter(const PFCandidate*);
 	MyVertex		myVertexConverter(const Vertex&);
         MyVertex                myVertexConverter(const TransientVertex&);
 	MyJet			myJetConverter(const reco::Muon&);
@@ -250,5 +251,7 @@ class MyEventConverter {
 
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
+
+	bool printTrigger;
 };
 #endif

@@ -25,7 +25,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 
 		ecalHitPoint.SetX(trackEcalHitPoint.x());
 	        ecalHitPoint.SetY(trackEcalHitPoint.y());
-	        ecalHitPoint.SetZ(trackEcalHitPoint.z() - primaryVertex.z());
+                ecalHitPoint.SetZ(trackEcalHitPoint.z());
 
         }catch(...) {;}
 
@@ -40,7 +40,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	MyGlobalPoint ecalHitPoint(0,0,0);
 	ecalHitPoint.SetX(pos.x());
 	ecalHitPoint.SetY(pos.y());
-	ecalHitPoint.SetZ(pos.z() - primaryVertex.z());
+	ecalHitPoint.SetZ(pos.z());
 
         return ecalHitPoint;
 }
@@ -53,7 +53,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	MyGlobalPoint ecalHitPoint(0,0,0);
         ecalHitPoint.SetX(pos.x());
         ecalHitPoint.SetY(pos.y());
-        ecalHitPoint.SetZ(pos.z() - primaryVertex.z());
+        ecalHitPoint.SetZ(pos.z());
 
         return ecalHitPoint;
 }
@@ -68,5 +68,17 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	}
 */
         MyGlobalPoint ecalHitPoint(0,0,0);
+        return ecalHitPoint;
+}
+
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const PFCandidate* pfCand){
+
+        math::XYZPointF pos = pfCand->positionAtECALEntrance();
+
+        MyGlobalPoint ecalHitPoint(0,0,0);
+        ecalHitPoint.SetX(pos.x());
+        ecalHitPoint.SetY(pos.y());
+        ecalHitPoint.SetZ(pos.z());
+
         return ecalHitPoint;
 }

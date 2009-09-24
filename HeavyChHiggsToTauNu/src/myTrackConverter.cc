@@ -21,15 +21,15 @@ MyTrack MyEventConverter::myTrackConverter(const Track& recTrack){
         return track;
 }
 
-MyTrack MyEventConverter::myTrackConverter(const PFCandidate& pfTrack){
+MyTrack MyEventConverter::myTrackConverter(const PFCandidate* pfTrack){
 
         MyTrack track;
-        track.SetPx(pfTrack.px());
-        track.SetPy(pfTrack.py());
-        track.SetPz(pfTrack.pz());
-        track.SetE(pfTrack.p());
-        track.trackCharge  = pfTrack.charge();
-	track.particleType = pfTrack.particleId();
+        track.SetPx(pfTrack->px());
+        track.SetPy(pfTrack->py());
+        track.SetPz(pfTrack->pz());
+        track.SetE(pfTrack->p());
+        track.trackCharge  = pfTrack->charge();
+	track.particleType = pfTrack->particleId();
 
         return track;
 }

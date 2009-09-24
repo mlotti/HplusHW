@@ -39,11 +39,11 @@ map<string,double> MyEventConverter::etag(const pat::Electron& electron){
         tagInfo["pat:caloIso"]            = electron.caloIso();
         tagInfo["pat:ecalIso"]            = electron.ecalIso();
         tagInfo["pat:hcalIso"]            = electron.hcalIso();
-/*FIXME (check pf iso)
+
         tagInfo["pat:particleIso"]        = electron.particleIso();       //all the PFCandidates
-        tagInfo["pat:chargedParticleIso"] = electron.chargedParticleIso();//charged PFCandidates
-        tagInfo["pat:neutralParticleIso"] = electron.neutralParticleIso();//neutral hadrons PFCandidates
-        tagInfo["pat:gammaParticleIso"]   = electron.gammaParticleIso();  //gamma PFCandidates
-*/
+        tagInfo["pat:chargedHadronIso"]   = electron.chargedHadronIso();//charged PFCandidates
+        tagInfo["pat:neutralHadronIso"]   = electron.neutralHadronIso();//neutral hadrons PFCandidates
+        tagInfo["pat:photonIso"]          = electron.photonIso();  //gamma PFCandidates
+
 	return tagInfo;
 }
