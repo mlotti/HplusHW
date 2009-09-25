@@ -272,8 +272,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 		MyTrack track = myTrackConverter(transientTrack);
 
                 if (myTrajectoryStatus) {
-			vector<MyHit> assocHits = HitConverter::getHits(*iTrajectory,trackCounter);
-			hits.insert(hits.end(),assocHits.begin(),assocHits.end());
+			HitConverter::addHits(hits, *iTrajectory, trackCounter);
 		}
                 track.ip                = impactParameter(transientTrack,caloJet);
                 track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,caloJet);

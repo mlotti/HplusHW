@@ -63,10 +63,7 @@ MyHit MyEventConverter::myHitConverter(const TrackingRecHit& recHit){
 }
 */
 
-vector<MyHit> HitConverter::getHits(const Trajectory& trajectory, int trackLabel){
-
-	vector<MyHit> hits;
-
+void HitConverter::addHits(std::vector<MyHit>& hits, const Trajectory& trajectory, int trackLabel){
         // Loop over measurements to get hits and hit estimates
         vector<TrajectoryMeasurement> meas = trajectory.measurements();
         vector<TrajectoryMeasurement>::const_iterator iMeasEnd = meas.end();
@@ -80,5 +77,4 @@ vector<MyHit> HitConverter::getHits(const Trajectory& trajectory, int trackLabel
                   hits.push_back(hit);
                 }
         }
-	return hits;
 }
