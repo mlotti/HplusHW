@@ -53,12 +53,12 @@ map<string,double> MyEventConverter::muonTag(const pat::Muon& muon){
 	tagInfo["pat:caloIso"]		  = muon.caloIso();
 	tagInfo["pat:ecalIso"]		  = muon.ecalIso();
 	tagInfo["pat:hcalIso"]		  = muon.hcalIso();
-/*FIXME (check pf iso)
+
 	tagInfo["pat:particleIso"]        = muon.particleIso();       //all the PFCandidates
-	tagInfo["pat:chargedParticleIso"] = muon.chargedParticleIso();//charged PFCandidates
-	tagInfo["pat:neutralParticleIso"] = muon.neutralParticleIso();//neutral hadrons PFCandidates
-        tagInfo["pat:gammaParticleIso"]	  = muon.gammaParticleIso();  //gamma PFCandidates
-*/
+	tagInfo["pat:chargedHadronIso"]   = muon.chargedHadronIso();//charged PFCandidates
+	tagInfo["pat:neutralHadronIso"]   = muon.neutralHadronIso();//neutral hadrons PFCandidates
+        tagInfo["pat:photonIso"]	  = muon.photonIso();  //gamma PFCandidates
+
         return tagInfo;
 }
 

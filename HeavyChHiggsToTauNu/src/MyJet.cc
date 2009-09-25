@@ -147,6 +147,7 @@ vector<MyCaloTower *> MyJet::getCaloInfo() {
 double MyJet::tag(const string& name) const {
   map<string, double>::const_iterator found = tagInfo.find(name);
   if(found == tagInfo.end()) {
+    if(tracks.size() == 0) cout << "No tracks!" << endl;
     cout << "Requested tag " << name << " doesn't exist." << endl;
     exit(0);
   }
