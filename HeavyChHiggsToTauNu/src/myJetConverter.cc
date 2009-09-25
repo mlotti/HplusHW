@@ -2,6 +2,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
+
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
         MyJet muon;
@@ -71,7 +73,7 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 
 	MyTrack electronTrack = myTrackConverter(transientTrack);
 	electronTrack.ip = impactParameter(transientTrack);
-	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recElectron);
+	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,recElectron);
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
@@ -99,7 +101,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 
         MyTrack electronTrack = myTrackConverter(transientTrack);
         electronTrack.ip = impactParameter(transientTrack);
-	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,&recElectron);
+	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,&recElectron);
         electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
 
@@ -151,7 +153,7 @@ MyJet MyEventConverter::myJetConverter(const Conversion* recPhoton){
 
                 MyTrack track           = myTrackConverter(transientTrack);
                 track.ip                = impactParameter(transientTrack,recPhoton);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recPhoton);
+                track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,recPhoton);
                 tracks.push_back(track);
         }
         photon.tracks = tracks;
@@ -223,7 +225,7 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 		MyTrack track           = myTrackConverter(transientTrack);
 		track.ip                = impactParameter(transientTrack,caloJet);
-		track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+		track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,caloJet);
 		tracks.push_back(track);
 	}
 	tau.tracks = tracks;
@@ -273,7 +275,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 			hits.insert(hits.end(),assocHits.begin(),assocHits.end());
 		}
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,caloJet);
                 tracks.push_back(track);
 		++iTrajectory;
 		++trackCounter;
@@ -288,7 +290,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
                 MyTrack track           = myTrackConverter(transientTrack);
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,caloJet);
                 tracks.push_back(track);
           }
 	}
@@ -379,7 +381,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
                   transientTracks.push_back(transientTrack);
 		}
 		MyTrack track = myTrackConverter(pfCand);
-		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
+		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
                 tracks.push_back(track);
         }
 
@@ -392,7 +394,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
                   transientTracks.push_back(transientTrack);
 		}
                 MyTrack track = myTrackConverter(pfCand);
-		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
+		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
                 tracks.push_back(track);
         }
 

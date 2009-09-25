@@ -1,6 +1,23 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const CaloJet* caloJet){
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+
+#include<vector>
+
+using std::vector;
+
+using reco::TransientTrack;
+using reco::CaloJet;
+using reco::GsfElectron;
+using reco::Conversion;
+using reco::PFCandidate;
+
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet* caloJet){
 
         GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
@@ -32,7 +49,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
 	return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const GsfElectron* electron){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const GsfElectron* electron){
 
         GlobalPoint ecalHitPosition(0,0,0);
 	math::XYZVector pos = electron->trackMomentumAtCalo();
@@ -45,7 +62,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const pat::Electron* electron){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const pat::Electron* electron){
 
         GlobalPoint ecalHitPosition(0,0,0);
         math::XYZVector pos = electron->trackMomentumAtCalo();
@@ -58,7 +75,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const Conversion* photon){
 /* FIXME
 	Conversion* convPhoton = const_cast<Conversion*>(photon);
 	vector<math::XYZPoint> const & ecalHitPositionVector = convPhoton->ecalImpactPosition();
@@ -71,7 +88,7 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transien
         return ecalHitPoint;
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const PFCandidate* pfCand){
+MyGlobalPoint TrackEcalHitPoint::convert(const PFCandidate* pfCand){
 
         math::XYZPointF pos = pfCand->positionAtECALEntrance();
 
