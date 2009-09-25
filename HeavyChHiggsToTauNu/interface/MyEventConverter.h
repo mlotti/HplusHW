@@ -114,7 +114,7 @@ class MyEventConverter {
         static MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
 	static MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
 	static MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
-	MyGlobalPoint		trackEcalHitPoint(const reco::PFCandidate*);
+	static MyGlobalPoint		trackEcalHitPoint(const reco::PFCandidate*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	MyGlobalPoint 		getPrimaryVertex();
