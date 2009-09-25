@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 
 void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
@@ -23,7 +24,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->lumiNumber		= iEvent.luminosityBlock();
 
 	saveEvent->triggerResults       = getTriggerResults(iEvent);
-	saveEvent->primaryVertex        = getPrimaryVertex();
+	saveEvent->primaryVertex        = VertexConverter::convert(primaryVertex);
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
