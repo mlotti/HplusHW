@@ -2,6 +2,8 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+
 
 MyVertex VertexConverter::convert(const reco::Vertex& vertex){
 
@@ -36,5 +38,17 @@ MyVertex VertexConverter::convert(const TransientVertex& vertex){
           V.dzz  = vertex.positionError().matrix()(3,3);
 	}
         return V;
+}
+
+void VertexConverter::addSecondaryVertices(const std::vector<reco::TransientTrack>& transientTracks, std::vector<MyVertex>& vertices) {
+	if(transientTracks.size() > 1){
+		KalmanVertexFitter kvf(true);
+		TransientVertex tv = kvf.vertex(transientTracks);
+
+		if(tv.isValid()){
+			MyVertex vertex = convert(tv);
+			vertices.push_back(vertex);
+		}
+	}
 }
 

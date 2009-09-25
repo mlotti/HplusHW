@@ -139,7 +139,6 @@ class MyEventConverter {
         vector<MyMCParticle> 	getMCParticles(const edm::Event&);
 	vector<MyMCParticle> 	getMCJets(const edm::Event&);
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
-	vector<MyVertex>	secondaryVertices(vector<TransientTrack>&);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);

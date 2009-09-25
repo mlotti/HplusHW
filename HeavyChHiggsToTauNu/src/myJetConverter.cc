@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
@@ -308,7 +309,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
         tau.caloInfo = caloTowers(*caloJet);
 
-	tau.secVertices = secondaryVertices(transientTracks);
+	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 
 	addECALClusters(&tau);
 
@@ -354,7 +355,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
-	tau.secVertices = secondaryVertices(transientTracks);
+	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);
 
 	return tau;
@@ -403,7 +404,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
-	tau.secVertices = secondaryVertices(transientTracks);
+	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);
 
 	return tau;	
