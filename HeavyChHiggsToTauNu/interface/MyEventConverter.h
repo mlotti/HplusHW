@@ -151,8 +151,6 @@ class MyEventConverter {
 //	MyTrack			myTrackConverter(const Track&, const Trajectory&);
 	MyTrack 		myTrackConverter(const Track&);
 	MyTrack 		myTrackConverter(const PFCandidate*);
-	static MyVertex		myVertexConverter(const Vertex&);
-        static MyVertex                myVertexConverter(const TransientVertex&);
 	MyJet			myJetConverter(const reco::Muon&);
 	MyJet			myJetConverter(const pat::Muon&);
         MyJet                   myJetConverter(const GsfElectron*);

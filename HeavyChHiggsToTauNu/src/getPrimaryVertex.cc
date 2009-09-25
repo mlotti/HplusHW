@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 
 MyGlobalPoint MyEventConverter::getPrimaryVertex(){
-	return myVertexConverter(primaryVertex);
+	return VertexConverter::convert(primaryVertex);
 }

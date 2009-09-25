@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 
@@ -10,7 +11,7 @@ vector<MyVertex> MyEventConverter::secondaryVertices(vector<TransientTrack>& tra
 		TransientVertex tv = kvf.vertex(transientTracks);
 
 		if(tv.isValid()){
-			MyVertex vertex = myVertexConverter(tv);
+			MyVertex vertex = VertexConverter::convert(tv);
 			vertices.push_back(vertex);
 		}
 	}

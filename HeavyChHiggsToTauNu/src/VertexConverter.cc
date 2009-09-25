@@ -1,6 +1,9 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 
-MyVertex MyEventConverter::myVertexConverter(const Vertex& vertex){
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+
+MyVertex VertexConverter::convert(const reco::Vertex& vertex){
 
 	MyVertex V;
 	V.SetX(vertex.x());
@@ -17,7 +20,7 @@ MyVertex MyEventConverter::myVertexConverter(const Vertex& vertex){
 	return V;
 }
 
-MyVertex MyEventConverter::myVertexConverter(const TransientVertex& vertex){
+MyVertex VertexConverter::convert(const TransientVertex& vertex){
 
         MyVertex V(0,0,0);
 	if(vertex.isValid()) {
