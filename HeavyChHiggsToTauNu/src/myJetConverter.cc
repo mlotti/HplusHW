@@ -3,6 +3,7 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
@@ -271,7 +272,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 		MyTrack track = myTrackConverter(transientTrack);
 
                 if (myTrajectoryStatus) {
-			vector<MyHit> assocHits = getHits(*iTrajectory,trackCounter);
+			vector<MyHit> assocHits = HitConverter::getHits(*iTrajectory,trackCounter);
 			hits.insert(hits.end(),assocHits.begin(),assocHits.end());
 		}
                 track.ip                = impactParameter(transientTrack,caloJet);

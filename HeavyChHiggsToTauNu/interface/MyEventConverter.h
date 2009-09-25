@@ -128,7 +128,6 @@ class MyEventConverter {
         void                    getTracks(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	vector<MyTrack>		getTracks(MyJet&);
-	static vector<MyHit>		getHits(const Trajectory&,int&);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
 	std::map<std::string, MyMET> getMET(const edm::Event&);
