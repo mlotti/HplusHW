@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MeasurementConverter.h"
 
 #include "RecoBTag/BTagTools/interface/SignedTransverseImpactParameter.h"
 #include "RecoBTag/BTagTools/interface/SignedImpactParameter3D.h"
@@ -37,9 +38,9 @@ MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transi
         SignedImpactParameter3D signed_ip3D;
         Measurement1D ip3D = signed_ip3D.apply(transientTrack,direction,primaryVertex).second;
 
-	MyMeasurement1D my_ip   = myMeasurement1DConverter(ip);
-        MyMeasurement1D my_ipZ  = myMeasurement1DConverter(ipZ);
-        MyMeasurement1D my_ip3D = myMeasurement1DConverter(ip3D);
+	MyMeasurement1D my_ip   = MeasurementConverter::convert(ip);
+        MyMeasurement1D my_ipZ  = MeasurementConverter::convert(ipZ);
+        MyMeasurement1D my_ip3D = MeasurementConverter::convert(ip3D);
 
 	return MyImpactParameter(my_ip,my_ipZ,my_ip3D);
 }

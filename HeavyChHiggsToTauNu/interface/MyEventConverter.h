@@ -173,7 +173,6 @@ class MyEventConverter {
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
 	void                    addECALClusters(MyJet* jet);
-	static MyMeasurement1D 	myMeasurement1DConverter(const Measurement1D&);
         MyHit                   myHitConverter(const TransientTrackingRecHit*, float);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
 
