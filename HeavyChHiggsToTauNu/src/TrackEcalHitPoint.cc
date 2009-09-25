@@ -19,60 +19,38 @@ using reco::PFCandidate;
 
 MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet* caloJet){
 
-        GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
         vector<CaloTowerPtr> towers = caloJet->getCaloConstituents();
+        vector<CaloTowerPtr>::const_iterator maxTower = towers.end();
         for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
                                                  iTower != towers.end(); iTower++){
                 //size_t numRecHits = (**iTower).constituentsSize();
                 if((*iTower)->et() > maxTowerEt){
                         maxTowerEt = (*iTower)->et();
-                        ecalHitPosition = GlobalPoint((*iTower)->momentum().x(),
-                                                      (*iTower)->momentum().y(),
-                                                      (*iTower)->momentum().z());
+                        maxTower = iTower;
                 }
         }
+        if(maxTower == towers.end())
+          return MyGlobalPoint(0,0,0);
 
+        //FIXME: is this correct?
+        CaloTower::Vector mom = (*maxTower)->momentum();
+        TrajectoryStateClosestToPoint TSCP = transientTrack.trajectoryStateClosestToPoint(GlobalPoint(mom.x(), mom.y(), mom.z()));
+        GlobalPoint trackEcalHitPoint = TSCP.position();
 
-        MyGlobalPoint ecalHitPoint(0,0,0);
-
-	try{
-        	TrajectoryStateClosestToPoint TSCP = transientTrack.trajectoryStateClosestToPoint(ecalHitPosition);
-        	GlobalPoint trackEcalHitPoint = TSCP.position();
-
-		ecalHitPoint.SetX(trackEcalHitPoint.x());
-	        ecalHitPoint.SetY(trackEcalHitPoint.y());
-	        ecalHitPoint.SetZ(trackEcalHitPoint.z());
-
-        }catch(...) {;}
-
-	return ecalHitPoint;
+        return MyGlobalPoint(trackEcalHitPoint.x(), trackEcalHitPoint.y(), trackEcalHitPoint.z());
 }
 
 MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const GsfElectron* electron){
-
-        GlobalPoint ecalHitPosition(0,0,0);
+        //FIXME: is this correct?
 	math::XYZVector pos = electron->trackMomentumAtCalo();
-
-	MyGlobalPoint ecalHitPoint(0,0,0);
-	ecalHitPoint.SetX(pos.x());
-	ecalHitPoint.SetY(pos.y());
-	ecalHitPoint.SetZ(pos.z());
-
-        return ecalHitPoint;
+        return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
 MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const pat::Electron* electron){
-
-        GlobalPoint ecalHitPosition(0,0,0);
+        //FIXME: is this correct?
         math::XYZVector pos = electron->trackMomentumAtCalo();
-
-	MyGlobalPoint ecalHitPoint(0,0,0);
-        ecalHitPoint.SetX(pos.x());
-        ecalHitPoint.SetY(pos.y());
-        ecalHitPoint.SetZ(pos.z());
-
-        return ecalHitPoint;
+        return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
 MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const Conversion* photon){
@@ -84,18 +62,10 @@ MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,co
 		cout << "ecalhitpoint eta,phi " << i->eta() << " " << i->phi() << endl;
 	}
 */
-        MyGlobalPoint ecalHitPoint(0,0,0);
-        return ecalHitPoint;
+        return MyGlobalPoint(0,0,0);
 }
 
 MyGlobalPoint TrackEcalHitPoint::convert(const PFCandidate* pfCand){
-
-        math::XYZPointF pos = pfCand->positionAtECALEntrance();
-
-        MyGlobalPoint ecalHitPoint(0,0,0);
-        ecalHitPoint.SetX(pos.x());
-        ecalHitPoint.SetY(pos.y());
-        ecalHitPoint.SetZ(pos.z());
-
-        return ecalHitPoint;
+        const math::XYZPointF& pos = pfCand->positionAtECALEntrance();
+        return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
