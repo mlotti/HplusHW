@@ -160,7 +160,6 @@ class MyEventConverter {
 	void                    addECALClusters(MyJet* jet);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
 
-	map<string,double>    	btag(const JetTag&);
         map<string,double>      tauTag(const IsolatedTauTagInfo&);
         map<string,double>      tauTag(const CaloTau&);
 	map<string,double>	tauTag(const pat::Tau&);
