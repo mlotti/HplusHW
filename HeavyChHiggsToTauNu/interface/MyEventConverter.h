@@ -160,17 +160,17 @@ class MyEventConverter {
 	void                    addECALClusters(MyJet* jet);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
 
-        map<string,double>      tauTag(const IsolatedTauTagInfo&);
-        map<string,double>      tauTag(const CaloTau&);
-	map<string,double>	tauTag(const pat::Tau&);
-        map<string,double>      tauTag(const PFTau&);
+        static map<string,double>      tauTag(const IsolatedTauTagInfo&);
+        static map<string,double>      tauTag(const CaloTau&);
+	static map<string,double>	tauTag(const pat::Tau&);
+        static map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
-	map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
-	map<string,double>	etag(const pat::Electron&);
-        map<string,double>      photontag(const Photon*);
-	map<string,double> 	photontag(const Conversion*);
-        map<string,double>      muonTag(const reco::Muon&);
-	map<string,double> 	muonTag(const pat::Muon&);
+	static map<string,double>      etag(const GsfElectron*,EcalClusterLazyTools&,map<string,double>);
+	static map<string,double>	etag(const pat::Electron&);
+        static map<string,double>      photontag(const Photon*);
+	static map<string,double> 	photontag(const Conversion*);
+        static map<string,double>      muonTag(const reco::Muon&);
+	static map<string,double> 	muonTag(const pat::Muon&);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
 	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);
