@@ -144,11 +144,6 @@ class MyEventConverter {
 	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
-        static MyTrack                 myTrackConverter(const TransientTrack&);
-//	MyTrack			myTrackConverter(const TransientTrack&, const Trajectory&);
-//	MyTrack			myTrackConverter(const Track&, const Trajectory&);
-	static MyTrack 		myTrackConverter(const Track&);
-	static MyTrack 		myTrackConverter(const PFCandidate*);
 	MyJet			myJetConverter(const reco::Muon&);
 	MyJet			myJetConverter(const pat::Muon&);
         MyJet                   myJetConverter(const GsfElectron*);

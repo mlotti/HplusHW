@@ -1,13 +1,18 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
-#include "TMath.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
 
-MyTrack MyEventConverter::myTrackConverter(const TransientTrack& transientTrack){
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
-	Track recTrack = transientTrack.track();
-	return myTrackConverter(recTrack);
+using reco::TransientTrack;
+using reco::Track;
+using reco::PFCandidate;
+
+MyTrack TrackConverter::convert(const TransientTrack& transientTrack){
+	return convert(transientTrack.track());
 }
 
-MyTrack MyEventConverter::myTrackConverter(const Track& recTrack){
+MyTrack TrackConverter::convert(const Track& recTrack){
 
         MyTrack track;
         track.SetPx(recTrack.px());
@@ -21,7 +26,7 @@ MyTrack MyEventConverter::myTrackConverter(const Track& recTrack){
         return track;
 }
 
-MyTrack MyEventConverter::myTrackConverter(const PFCandidate* pfTrack){
+MyTrack TrackConverter::convert(const PFCandidate* pfTrack){
 
         MyTrack track;
         track.SetPx(pfTrack->px());

@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
 
 void MyEventConverter::getTracks(const edm::Event& iEvent){
 
@@ -36,7 +37,7 @@ vector<MyTrack> MyEventConverter::getTracks(MyJet& direction){
 		TLorentzVector p4(iTrack->momentum().x(),iTrack->momentum().y(),iTrack->momentum().z(),iTrack->momentum().r());
                 double DR = direction.p4().DeltaR(p4);
 		if(DR < 0.5){
-			tracksInJetCone.push_back(myTrackConverter(*iTrack));
+			tracksInJetCone.push_back(TrackConverter::convert(*iTrack));
 		}
 	}
 
