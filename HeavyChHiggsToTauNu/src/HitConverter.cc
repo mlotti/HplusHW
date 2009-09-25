@@ -1,6 +1,8 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 
-MyHit MyEventConverter::myHitConverter(const TransientTrackingRecHit* recHit, float estimate){
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+
+MyHit HitConverter::convert(const TransientTrackingRecHit* recHit, float estimate){
  	MyHit hit;
 
  	GlobalPoint myPoint = recHit->globalPosition();
