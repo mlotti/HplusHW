@@ -169,7 +169,7 @@ class MyEventConverter {
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
 	void                    addECALClusters(MyJet* jet);
-        MyHit                   myHitConverter(const TransientTrackingRecHit*, float);
+        static MyHit                   myHitConverter(const TransientTrackingRecHit*, float);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
 
 	map<string,double>    	btag(const JetTag&);
