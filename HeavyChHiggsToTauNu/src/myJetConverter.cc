@@ -412,7 +412,7 @@ void MyEventConverter::addECALClusters(MyJet* jet) {
   // leading track hit point on ECAL surface
 
   const MyTrack *myLeadingTrack = jet->leadingTrack();
-  if (myLeadingTrack->Pt() < 0.0001) return;
+  if (!myLeadingTrack || myLeadingTrack->Pt() < 0.0001) return;
   MyGlobalPoint myECALHitPoint = myLeadingTrack->ecalHitPoint();
   //double myLdgEta = myECALHitPoint.Eta();
   //double myLdgPhi = myECALHitPoint.Phi();
