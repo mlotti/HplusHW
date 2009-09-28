@@ -36,30 +36,14 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const Track& track, const Calo
         */
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const GsfElectron* electron){
-
-        GlobalPoint ecalHitPosition(0,0,0);
-	math::XYZVector pos = electron->trackMomentumAtCalo();
-
-	MyGlobalPoint ecalHitPoint(0,0,0);
-	ecalHitPoint.SetX(pos.x());
-	ecalHitPoint.SetY(pos.y());
-	ecalHitPoint.SetZ(pos.z());
-
-        return ecalHitPoint;
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const GsfElectron* electron){
+	math::XYZPoint pos = electron->trackPositionAtCalo();
+        return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
-MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const pat::Electron* electron){
-
-        GlobalPoint ecalHitPosition(0,0,0);
-        math::XYZVector pos = electron->trackMomentumAtCalo();
-
-	MyGlobalPoint ecalHitPoint(0,0,0);
-        ecalHitPoint.SetX(pos.x());
-        ecalHitPoint.SetY(pos.y());
-        ecalHitPoint.SetZ(pos.z());
-
-        return ecalHitPoint;
+MyGlobalPoint MyEventConverter::trackEcalHitPoint(const pat::Electron* electron){
+	math::XYZPoint pos = electron->trackPositionAtCalo();
+        return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
 MyGlobalPoint MyEventConverter::trackEcalHitPoint(const TransientTrack& transientTrack,const Conversion* photon){

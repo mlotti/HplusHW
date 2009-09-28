@@ -114,8 +114,8 @@ class MyEventConverter {
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
 	MyGlobalPoint		trackEcalHitPoint(const Track&, const CaloJet*);
         MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
-	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
-	MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
+	MyGlobalPoint		trackEcalHitPoint(const GsfElectron*);
+	MyGlobalPoint           trackEcalHitPoint(const pat::Electron*);
 	MyGlobalPoint		trackEcalHitPoint(const reco::PFCandidate*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
