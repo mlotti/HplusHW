@@ -43,10 +43,12 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const Track& track, const Calo
         }catch(...) {;}
 
         // Comparison
+        /*
         std::cout << "    Track ecal hit point: TrackAssociator (" << hitPos.x() << "," << hitPos.y() << "," << hitPos.z()
                   << ") TSOS (" << ecalHitPoint2.X() << "," << ecalHitPoint2.Y() << "," << ecalHitPoint.Z()
                   << ") TCSP (" << ecalHitPoint.X() << "," << ecalHitPoint.Y() << "," << ecalHitPoint.Z()
                   << std::endl;
+        */
 
         // Return new method
         return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
