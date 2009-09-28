@@ -1,7 +1,16 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
 
-//map<string,double> MyEventConverter::etag(const GsfElectron* electron,const ClusterShapeRef& shapeRef,map<string,double> tagInfo){
-map<string,double> MyEventConverter::etag(const GsfElectron* electron,EcalClusterLazyTools& myEcalCluster,map<string,double> tagInfo){
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+
+#include<vector>
+
+using std::vector;
+using std::string;
+using std::pair;
+
+void ElectronTag::tag(const reco::GsfElectron *electron, EcalClusterLazyTools& myEcalCluster, TagType& tagInfo){
 
 	tagInfo["EoverPIn"]      = electron->eSuperClusterOverP();
         tagInfo["DeltaEtaIn"]    = electron->deltaEtaSuperClusterTrackAtVtx();
@@ -22,13 +31,9 @@ map<string,double> MyEventConverter::etag(const GsfElectron* electron,EcalCluste
         tagInfo["SigmaEtaEta"]   = shapeRef->covEtaEta();
         tagInfo["SigmaPhiPhi"]   = shapeRef->covPhiPhi();
 */
-	return tagInfo;
 }
 
-map<string,double> MyEventConverter::etag(const pat::Electron& electron){
-
-	map<string,double> tagInfo;
-
+void ElectronTag::tag(const pat::Electron& electron, TagType& tagInfo) {
 	const vector< pair<string,float> > electronIDs = electron.electronIDs();
 	for(vector< pair<string,float> >::const_iterator i = electronIDs.begin();
 	    i!= electronIDs.end(); ++i){
@@ -44,6 +49,4 @@ map<string,double> MyEventConverter::etag(const pat::Electron& electron){
         tagInfo["pat:chargedHadronIso"]   = electron.chargedHadronIso();//charged PFCandidates
         tagInfo["pat:neutralHadronIso"]   = electron.neutralHadronIso();//neutral hadrons PFCandidates
         tagInfo["pat:photonIso"]          = electron.photonIso();  //gamma PFCandidates
-
-	return tagInfo;
 }

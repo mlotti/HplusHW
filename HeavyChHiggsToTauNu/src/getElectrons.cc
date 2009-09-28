@@ -1,5 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
+
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
@@ -39,9 +41,8 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
 		iEvent.getByLabel( reducedEndcapRecHitCollection, pEERecHits );
 
 		EcalClusterLazyTools lazyTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
-		tagInfo = etag(&(*iElectron),lazyTools,tagInfo);
+		ElectronTag::tag(&(*iElectron),lazyTools,electron.tagInfo);
 
-		electron.tagInfo = tagInfo;
 		electrons.push_back(electron);
 	  }
 	}

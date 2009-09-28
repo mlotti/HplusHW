@@ -6,6 +6,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
@@ -115,7 +116,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
                                                recElectron.superCluster()->energy()));
         electron.clusters = superClusters;
 
-	electron.tagInfo = etag(recElectron);
+	ElectronTag::tag(recElectron, electron.tagInfo);
 
 	return electron;
 }
