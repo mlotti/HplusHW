@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig){
+MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
+  trackAssociator_(iConfig) {
         init(iConfig);
 }
 

@@ -17,6 +17,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
         getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
+        trackAssociator_.setEvent(iEvent, iSetup); // give event and event setup to our track associator wrapper
+
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
@@ -52,6 +54,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
+
+        trackAssociator_.reset();
 
 	delete saveEvent;
 

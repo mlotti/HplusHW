@@ -223,7 +223,7 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 		MyTrack track           = myTrackConverter(transientTrack);
 		track.ip                = impactParameter(transientTrack,caloJet);
-		track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+		track.trackEcalHitPoint = trackEcalHitPoint(**iTrack, caloJet);
 		tracks.push_back(track);
 	}
 	tau.tracks = tracks;
@@ -273,7 +273,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 			hits.insert(hits.end(),assocHits.begin(),assocHits.end());
 		}
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(*iTrack, caloJet);
                 tracks.push_back(track);
 		++iTrajectory;
 		++trackCounter;
@@ -288,7 +288,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
                 MyTrack track           = myTrackConverter(transientTrack);
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(**iTrack, caloJet);
                 tracks.push_back(track);
           }
 	}

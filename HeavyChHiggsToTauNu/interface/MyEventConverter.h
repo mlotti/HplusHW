@@ -83,6 +83,8 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackDetectorAssociatorWrapper.h"
+
 
 ////double myDeltaR(double,double,double,double);
 #include "Math/VectorUtil.h"
@@ -110,7 +112,7 @@ class MyEventConverter {
 	MyImpactParameter 	impactParameter(const TransientTrack&,const Conversion*);
         MyImpactParameter 	impactParameter(const TransientTrack&);
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
-	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const CaloJet*);
+	MyGlobalPoint		trackEcalHitPoint(const Track&, const CaloJet*);
         MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
 	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
 	MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
@@ -251,6 +253,7 @@ class MyEventConverter {
 
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
+        TrackDetectorAssociatorWrapper trackAssociator_;
 
 	bool printTrigger;
 };
