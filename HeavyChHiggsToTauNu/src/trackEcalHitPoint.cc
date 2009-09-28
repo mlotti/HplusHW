@@ -1,10 +1,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
 MyGlobalPoint MyEventConverter::trackEcalHitPoint(const Track& track, const CaloJet *caloJet) {
+        // New method
         math::XYZPoint hitPos = trackAssociator_.trackPositionAtEcal(track);
-        return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
+        const TransientTrack transientTrack = transientTrackBuilder->build(track);
 
-        /* Old implementation
+
+        // Old method
         GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
         vector<CaloTowerPtr> towers = caloJet->getCaloConstituents();
@@ -32,8 +34,14 @@ MyGlobalPoint MyEventConverter::trackEcalHitPoint(const Track& track, const Calo
 
         }catch(...) {;}
 
-	return ecalHitPoint;
-        */
+        // Comparison
+        std::cout << "    Track ecal hit point: new (" << hitPos.x() << "," << hitPos.y() << "," << hitPos.z()
+                  << ") old (" << ecalHitPoint.X() << "," << ecalHitPoint.Y() << "," << ecalHitPoint.Z()
+                  << std::endl;
+
+        // Return new method
+        return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
+
 }
 
 MyGlobalPoint MyEventConverter::trackEcalHitPoint(const GsfElectron* electron){
