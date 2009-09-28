@@ -1,6 +1,6 @@
 // -*- c++ -*-
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ElectronTag_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_ElectranTag_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_ElectronTag_h
 
 #include<map>
 #include<string>

@@ -34,8 +34,8 @@ void ElectronTag::tag(const reco::GsfElectron *electron, EcalClusterLazyTools& m
 }
 
 void ElectronTag::tag(const pat::Electron& electron, TagType& tagInfo) {
-	const vector< pair<string,float> > electronIDs = electron.electronIDs();
-	for(vector< pair<string,float> >::const_iterator i = electronIDs.begin();
+	const vector<pat::Electron::IdPair>& electronIDs = electron.electronIDs();
+	for(vector<pat::Electron::IdPair>::const_iterator i = electronIDs.begin();
 	    i!= electronIDs.end(); ++i){
 		tagInfo[i->first] = i->second;
 	}
