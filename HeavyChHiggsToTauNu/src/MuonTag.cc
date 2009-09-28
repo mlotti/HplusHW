@@ -3,11 +3,10 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
-using reco::MuonIsolation;
-
-void MuonTag::tag(const reco::Muon& muon, TagType& tagInfo){
-	const MuonIsolation isolationR03 = muon.isolationR03();
-        const MuonIsolation isolationR05 = muon.isolationR05();
+template <class M>
+static void muonTag(const M& muon, MuonTag::TagType& tagInfo) {
+	const reco::MuonIsolation& isolationR03 = muon.isolationR03();
+        const reco::MuonIsolation& isolationR05 = muon.isolationR05();
 
 	tagInfo["isolationR03.emEt"]    = isolationR03.emEt;
         tagInfo["isolationR03.hadEt"]   = isolationR03.hadEt;
@@ -24,23 +23,13 @@ void MuonTag::tag(const reco::Muon& muon, TagType& tagInfo){
         tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
 }
 
+void MuonTag::tag(const reco::Muon& muon, TagType& tagInfo){
+        muonTag(muon, tagInfo);
+}
+
 void MuonTag::tag(const pat::Muon& muon, TagType& tagInfo){
-        const MuonIsolation isolationR03 = muon.isolationR03();
-        const MuonIsolation isolationR05 = muon.isolationR05();
+        muonTag(muon, tagInfo);
 
-        tagInfo["isolationR03.emEt"]    = isolationR03.emEt;
-        tagInfo["isolationR03.hadEt"]   = isolationR03.hadEt;
-        tagInfo["isolationR03.hoEt"]    = isolationR03.hoEt;
-        tagInfo["isolationR03.nJets"]   = isolationR03.nJets;
-        tagInfo["isolationR03.nTracks"] = isolationR03.nTracks;
-        tagInfo["isolationR03.sumPt"]   = isolationR03.sumPt;
-
-        tagInfo["isolationR05.emEt"]    = isolationR05.emEt;
-        tagInfo["isolationR05.hadEt"]   = isolationR05.hadEt;
-        tagInfo["isolationR05.hoEt"]    = isolationR05.hoEt;
-        tagInfo["isolationR05.nJets"]   = isolationR05.nJets;
-        tagInfo["isolationR05.nTracks"] = isolationR05.nTracks;
-        tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
 /* not working, no member function muonIDs() (yet?) 
         const vector< pair<string,float> > IDs = muon.muonIDs();
         for(vector< pair<string,float> >::const_iterator i = IDs.begin();
