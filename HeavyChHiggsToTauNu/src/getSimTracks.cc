@@ -28,9 +28,9 @@ vector<MySimTrack> MyEventConverter::getSimTracks(const edm::Event& iEvent,MyEve
   for (vector<MyJet*>::const_iterator iJet = taujets.begin() ; iJet != taujets.end(); ++iJet) {
     // Get leading track
     const MyTrack* myLdgTrack = (*iJet)->leadingTrack();
-//    cout << "jet ldg track eta=" << myLdgTrack.eta()
-//	 << " phi=" << myLdgTrack.phi() << endl;
-
+    if(myLdgTrack == 0) continue;
+    cout << "jet ldg track eta=" << myLdgTrack->eta()
+	 << " phi=" << myLdgTrack->phi() << endl;
     // Loop over SimTracks in container
     SimTrackContainer::const_iterator iSim = simTrackHandle->begin();
     for( ; iSim != simTrackHandle->end(); ++iSim) {
