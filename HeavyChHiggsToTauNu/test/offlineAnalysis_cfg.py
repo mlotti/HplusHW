@@ -91,12 +91,14 @@ process.tauMetCorr.InputMETLabel = cms.string('metJESCorIC5CaloJet')
 ####FIXMEprocess.missingEt_tauMet = cms.Path(process.tauMetCorr)
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
+import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
+        TrackAssociator.TrackAssociatorParameterBlock,
         fileName = cms.string("analysis.root"),
 
 #	HLTSelection = cms.VInputTag(cms.InputTag("HLT1Tau"),
