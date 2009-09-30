@@ -137,7 +137,6 @@ class MyEventConverter {
         MyMET 			getMCMET();
         static MyGlobalPoint 		getMCPrimaryVertex(const edm::Event&);
         vector<MyMCParticle> 	getMCParticles(const edm::Event&);
-	static vector<MyMCParticle> 	getMCJets(const edm::Event&);
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
@@ -158,7 +157,6 @@ class MyEventConverter {
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
 	void                    addECALClusters(MyJet* jet);
-	static MyMCParticle 		myMCParticleConverter(const GenJet&);
 
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 

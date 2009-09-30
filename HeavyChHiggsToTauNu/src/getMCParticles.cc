@@ -1,8 +1,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCConverter.h"
 
 vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 
-	vector<MyMCParticle> mcParticles = getMCJets(iEvent);
+	vector<MyMCParticle> mcParticles;
+        MCConverter::addMCJets(iEvent, mcParticles);
 
         Handle<HepMCProduct> mcEventHandle;
         try{
