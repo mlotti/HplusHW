@@ -46,7 +46,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         saveEvent->hasMCdata            = true;
         MCConverter::addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
-        saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
+        MCConverter::setSimTracks(iEvent, *saveEvent);
 
 	saveEvent->addCollection("removedMuons",getExtraObjects(iEvent));
 ////	saveEvent->addExtraObjects("",getExtraObjects(iEvent));

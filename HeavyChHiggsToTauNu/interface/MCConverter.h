@@ -15,7 +15,7 @@ namespace reco {
 }
 
 class MyMET;
-
+class MyEvent;
 
 class MCConverter {
 public:
@@ -23,6 +23,7 @@ public:
   static void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&);
   static MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent);
   static void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&);
+  static void setSimTracks(const edm::Event&, MyEvent&);
 };
 
 #endif

@@ -134,7 +134,6 @@ class MyEventConverter {
         MyMET                   getTCMET(const edm::Event&);
 	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
-        static vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
