@@ -165,8 +165,6 @@ class MyEventConverter {
 	static map<string,double>	tauTag(const pat::Tau&);
         static map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
-        static map<string,double>      photontag(const Photon*);
-	static map<string,double> 	photontag(const Conversion*);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
 	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);

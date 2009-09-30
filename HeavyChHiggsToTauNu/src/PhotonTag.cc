@@ -1,7 +1,9 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonTag.h"
 
-map<string,double> MyEventConverter::photontag(const Photon* photon){
-	map<string,double> tagInfo;
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+
+void PhotonTag::tag(const reco::Photon* photon, TagType& tagInfo){
 /*
 	tagInfo["e5x5"]		= photon->e5x5();
 	tagInfo["r19"]		= photon->r19();
@@ -26,12 +28,9 @@ map<string,double> MyEventConverter::photontag(const Photon* photon){
         tagInfo["SigmaEtaEta"]   = shapeRef->covEtaEta();
         tagInfo["SigmaPhiPhi"]   = shapeRef->covPhiPhi();
 */
-	return tagInfo;
 }
 
-map<string,double> MyEventConverter::photontag(const Conversion* photon){
-        map<string,double> tagInfo;
-
+void PhotonTag::tag(const reco::Conversion* photon, TagType& tagInfo){
 	tagInfo["EoverP"]     		= photon->EoverP();
 	tagInfo["nTracks"]     		= photon->nTracks();
         tagInfo["pairCotThetaSeparation"] = photon->pairCotThetaSeparation();
@@ -42,6 +41,4 @@ map<string,double> MyEventConverter::photontag(const Conversion* photon){
 	tagInfo["zOfPrimaryVertexFromTracks"] = photon->zOfPrimaryVertexFromTracks();
 //        tagInfo["pairPtOverEtSC"] 	= photon->pairPtOverEtSC();
 //        tagInfo["r9"]           	= photon->r9();
-
-        return tagInfo;
 }
