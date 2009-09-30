@@ -134,8 +134,6 @@ class MyEventConverter {
         MyMET                   getTCMET(const edm::Event&);
 	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
-        MyMET 			getMCMET();
-        vector<MyMCParticle> 	getMCParticles(const edm::Event&);
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
@@ -184,8 +182,6 @@ class MyEventConverter {
 	vector<InputTag> metCollections;
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
-
-        MyMET mcMET;
 
         const CaloSubdetectorGeometry* EB;
         const CaloSubdetectorGeometry* EE;

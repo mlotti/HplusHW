@@ -43,9 +43,10 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->addMET("pfMET",getPFMET(iEvent));
 //	saveEvent->addMET("tcMET",getTCMET(iEvent));
 
+        MCConverter mcConverter;
         saveEvent->hasMCdata            = true;
-        saveEvent->mcParticles          = getMCParticles(iEvent);
-	saveEvent->mcMET                = getMCMET();
+        mcConverter.addMCParticles(iEvent, saveEvent->mcParticles);
+	saveEvent->mcMET                = mcConverter.getMCMET();
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
         saveEvent->simTracks            = getSimTracks(iEvent,saveEvent);
 
