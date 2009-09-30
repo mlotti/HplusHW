@@ -135,7 +135,6 @@ class MyEventConverter {
 	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
         MyMET 			getMCMET();
-        static MyGlobalPoint 		getMCPrimaryVertex(const edm::Event&);
         vector<MyMCParticle> 	getMCParticles(const edm::Event&);
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	void			getCaloHits(const edm::Event&);
