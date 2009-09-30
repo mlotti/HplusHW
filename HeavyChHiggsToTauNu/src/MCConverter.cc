@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMET.h"
 
 #include "FWCore/Framework/interface/Event.h"
 
@@ -10,9 +11,6 @@ using std::vector;
 using edm::Handle;
 using edm::SimVertexContainer;
 using edm::HepMCProduct;
-
-MCConverter::MCConverter() {}
-MCConverter::~MCConverter() {}
 
 MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	MyMCParticle mcJet(genJet.px(),genJet.py(),genJet.pz(),genJet.energy());
@@ -57,10 +55,7 @@ MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent){
 	return mcPV;
 }
 
-MyMET MCConverter::getMCMET(){
-	return mcMET;
-}
-void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles){
+void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles, MyMET& mcMET){
         addMCJets(iEvent, mcParticles);
 
         Handle<HepMCProduct> mcEventHandle;
