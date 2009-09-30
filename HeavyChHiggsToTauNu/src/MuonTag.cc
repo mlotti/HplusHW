@@ -1,8 +1,11 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonTag.h"
 
-map<string,double> MyEventConverter::muonTag(const reco::Muon& muon){
-	map<string,double> tagInfo;
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
+using reco::MuonIsolation;
+
+void MuonTag::tag(const reco::Muon& muon, TagType& tagInfo){
 	const MuonIsolation isolationR03 = muon.isolationR03();
         const MuonIsolation isolationR05 = muon.isolationR05();
 
@@ -19,13 +22,9 @@ map<string,double> MyEventConverter::muonTag(const reco::Muon& muon){
         tagInfo["isolationR05.nJets"]   = isolationR05.nJets;
         tagInfo["isolationR05.nTracks"] = isolationR05.nTracks;
         tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
-
-	return tagInfo;
 }
 
-map<string,double> MyEventConverter::muonTag(const pat::Muon& muon){
-        map<string,double> tagInfo;
-
+void MuonTag::tag(const pat::Muon& muon, TagType& tagInfo){
         const MuonIsolation isolationR03 = muon.isolationR03();
         const MuonIsolation isolationR05 = muon.isolationR05();
 
@@ -58,7 +57,5 @@ map<string,double> MyEventConverter::muonTag(const pat::Muon& muon){
 	tagInfo["pat:chargedHadronIso"]   = muon.chargedHadronIso();//charged PFCandidates
 	tagInfo["pat:neutralHadronIso"]   = muon.neutralHadronIso();//neutral hadrons PFCandidates
         tagInfo["pat:photonIso"]	  = muon.photonIso();  //gamma PFCandidates
-
-        return tagInfo;
 }
 

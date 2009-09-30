@@ -7,6 +7,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonTag.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
@@ -31,7 +32,7 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 		muon.tracks = getTracks(muon);
 	}
 
-	muon.tagInfo = muonTag(recMuon);
+	MuonTag::tag(recMuon, muon.tagInfo);
 
 	return muon;
 }
@@ -58,7 +59,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
                 muon.tracks = getTracks(muon);
         }
 
-	muon.tagInfo = muonTag(recMuon);
+	MuonTag::tag(recMuon, muon.tagInfo);
 
         return muon;
 }

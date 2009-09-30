@@ -167,8 +167,6 @@ class MyEventConverter {
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
         static map<string,double>      photontag(const Photon*);
 	static map<string,double> 	photontag(const Conversion*);
-        static map<string,double>      muonTag(const reco::Muon&);
-	static map<string,double> 	muonTag(const pat::Muon&);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);
 	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);
