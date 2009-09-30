@@ -1,11 +1,19 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
+
+#include "DataFormats/TauReco/interface/CaloTau.h"
+#include "DataFormats/TauReco/interface/PFTau.h"
+#include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "RecoTauTag/TauTagTools/interface/CaloTauElementsOperators.h"
 #include "RecoTauTag/TauTagTools/interface/PFTauElementsOperators.h"
 
-map<string,double> MyEventConverter::tauTag(const IsolatedTauTagInfo& jet){
-	map<string,double> tagInfo;
+using reco::CaloTau;
+using reco::PFTau;
+using reco::IsolatedTauTagInfo;
+using pat::Tau;
 
+void TauTag::tag(const IsolatedTauTagInfo& jet, TagType& tagInfo){
         double matchingConeSize         = 0.1,
                signalConeSize           = 0.07,
                isolationConeSize        = 0.4,
@@ -18,13 +26,9 @@ map<string,double> MyEventConverter::tauTag(const IsolatedTauTagInfo& jet){
                                   isolationConeSize,
                                   ptLeadingTrackMin,
                                   ptOtherTracksMin);
-
-	return tagInfo;
 }
 
-map<string,double> MyEventConverter::tauTag(const CaloTau& tau){
-        map<string,double> tagInfo;
-
+void TauTag::tag(const CaloTau& tau, TagType& tagInfo){
 	CaloTau theCaloTau = tau;
 	CaloTauElementsOperators theCaloTauElementsOperators(theCaloTau);
 
@@ -54,12 +58,9 @@ map<string,double> MyEventConverter::tauTag(const CaloTau& tau){
 	if(!theCaloTau.leadTrack()) d_leadingTrack = 0;
         tagInfo["d_leadingTrack"]     = d_leadingTrack;
 */
-        return tagInfo;
 }
 
-map<string,double> MyEventConverter::tauTag(const pat::Tau& tau){
-        map<string,double> tagInfo;
-
+void TauTag::tag(const pat::Tau& tau, TagType& tagInfo){
 	const vector< pair<string,float> > IDs = tau.tauIDs();
         for(vector< pair<string,float> >::const_iterator i = IDs.begin(); i!= IDs.end(); ++i){
                 tagInfo[i->first] = i->second;
@@ -74,13 +75,9 @@ map<string,double> MyEventConverter::tauTag(const pat::Tau& tau){
         tagInfo["pat:chargedHadronIso"]   = tau.chargedHadronIso();//charged PFCandidates
         tagInfo["pat:neutralHadronIso"]   = tau.neutralHadronIso();//neutral hadrons PFCandidates
         tagInfo["pat:photonIso"]          = tau.photonIso();  //gamma PFCandidates
-
-	return tagInfo;
 }
 
-map<string,double> MyEventConverter::tauTag(const PFTau& tau){
-        map<string,double> tagInfo;
-
+void TauTag::tag(const PFTau& tau, TagType& tagInfo){
 	PFTau thePFTau = tau;
 	PFTauElementsOperators thePFTauElementsOperators(thePFTau);
 
@@ -425,6 +422,5 @@ double d_IsolPFNeutrHadrCandsN_3 = thePFTauElementsOperators.discriminatorByIsol
                                                            pT_LT,
                                                            pT_min);
 */
-        return tagInfo;
 }
 

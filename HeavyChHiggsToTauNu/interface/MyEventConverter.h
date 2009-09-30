@@ -160,10 +160,6 @@ class MyEventConverter {
 	void                    addECALClusters(MyJet* jet);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
 
-        static map<string,double>      tauTag(const IsolatedTauTagInfo&);
-        static map<string,double>      tauTag(const CaloTau&);
-	static map<string,double>	tauTag(const pat::Tau&);
-        static map<string,double>      tauTag(const PFTau&);
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 
 	vector<MyCaloTower>	caloTowers(const CaloJet&);

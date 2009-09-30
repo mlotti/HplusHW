@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonTag.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
@@ -236,7 +237,7 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 	}
 	tau.tracks = tracks;
 
-        tau.tagInfo = tauTag(recTau);
+        TauTag::tag(recTau, tau.tagInfo);
 
 	tau.caloInfo = caloTowers(*caloJet);
 
@@ -304,7 +305,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
 	tau.hits   = hits;
 
-        tau.tagInfo = tauTag(recTau);
+        TauTag::tag(recTau, tau.tagInfo);
 
         // Jet energy correction
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
@@ -356,7 +357,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         tau.tracks = tracks;
 
-        tau.tagInfo = tauTag(recTau);
+        TauTag::tag(recTau, tau.tagInfo);
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);
@@ -405,7 +406,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tracks = tracks;
 
-        tau.tagInfo = tauTag(recTau);
+        TauTag::tag(recTau, tau.tagInfo);
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);
