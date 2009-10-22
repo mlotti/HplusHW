@@ -41,9 +41,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         saveEvent->addCollection("shrinkingConePFTaus",getPFTaus(iEvent, edm::InputTag("shrinkingConePFTauProducer")));
 	saveEvent->addCollection("icone05jets",getJets(iEvent, edm::InputTag("iterativeCone5CaloJets")));
 
-	saveEvent->mets			= getMET(iEvent);
-//	saveEvent->addMET("pfMET",getPFMET(iEvent));
-//	saveEvent->addMET("tcMET",getTCMET(iEvent));
+	getMET(iEvent, saveEvent->mets);
         saveEvent->hasMCdata            = true;
         MCConverter::addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
