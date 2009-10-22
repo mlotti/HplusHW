@@ -14,7 +14,7 @@ class TrackConverter {
 public:
   static MyTrack convert(const reco::TransientTrack&);
   static MyTrack convert(const reco::Track&);
-  static MyTrack convert(const reco::PFCandidate*);
+  static MyTrack convert(const reco::PFCandidate&);
 };
 
 #endif

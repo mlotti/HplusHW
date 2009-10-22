@@ -108,8 +108,8 @@ class MyEventConverter {
 	bool primaryVertexFound(const edm::Event&);
 //        bool primaryVertexFound();
 
-        MyImpactParameter 	impactParameter(const TransientTrack&,const CaloJet*);
-	MyImpactParameter 	impactParameter(const TransientTrack&,const Conversion*);
+        MyImpactParameter 	impactParameter(const TransientTrack&,const CaloJet&);
+	MyImpactParameter 	impactParameter(const TransientTrack&,const Conversion&);
         MyImpactParameter 	impactParameter(const TransientTrack&);
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
 
@@ -142,13 +142,13 @@ class MyEventConverter {
 
 	MyJet			myJetConverter(const reco::Muon&);
 	MyJet			myJetConverter(const pat::Muon&);
-        MyJet                   myJetConverter(const GsfElectron*);
+        MyJet                   myJetConverter(const GsfElectron&);
 	MyJet			myJetConverter(const pat::Electron&);
-        MyJet                   myJetConverter(const Photon*);
-        MyJet                   myJetConverter(const Conversion*);
+        MyJet                   myJetConverter(const Photon&);
+        MyJet                   myJetConverter(const Conversion&);
         MyJet                   myJetConverter(const JetTag&);
-	MyJet 			myJetConverter(const CaloJet*);
-	MyJet			myJetConverter(const pat::Jet*);
+	MyJet 			myJetConverter(const CaloJet&);
+	MyJet			myJetConverter(const pat::Jet&);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
         MyJet                   myJetConverter(const CaloTau&);
 	MyJet			myJetConverter(const pat::Tau&);

@@ -14,8 +14,8 @@ class PhotonTag {
 public:
   typedef std::map<std::string, double> TagType;
 
-  static void tag(const reco::Photon *, TagType&);
-  static void tag(const reco::Conversion *, TagType &);
+  static void tag(const reco::Photon&, TagType&);
+  static void tag(const reco::Conversion&, TagType &);
 };
 
 #endif

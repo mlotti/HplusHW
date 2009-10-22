@@ -16,7 +16,7 @@ vector<MyJet> MyEventConverter::getPATJets(const edm::Event& iEvent){
           for(unsigned int i = 0; i < recoJets.size(); ++i){
                 //cout << "jet et " << recoJets[i].pt() << endl;
                 //cout << "tag1 et " << (tag1[i].first)->pt() << " " << tag1[i].second << endl;
-                MyJet jet = myJetConverter(&(recoJets[i]));
+                MyJet jet = myJetConverter(recoJets[i]);
 
                 map<string,double> tagInfo;
                 for(unsigned int iBtag = 0; iBtag < btaggingAlgos.size(); ++iBtag){

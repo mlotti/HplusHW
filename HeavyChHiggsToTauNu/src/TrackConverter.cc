@@ -14,11 +14,7 @@ MyTrack TrackConverter::convert(const TransientTrack& transientTrack){
 
 MyTrack TrackConverter::convert(const Track& recTrack){
 
-        MyTrack track;
-        track.SetPx(recTrack.px());
-        track.SetPy(recTrack.py());
-        track.SetPz(recTrack.pz());
-        track.SetE(recTrack.p());
+        MyTrack track(recTrack.px(), recTrack.py(), recTrack.pz(), recTrack.p());
         track.trackCharge    = recTrack.charge();
         track.normChiSquared = recTrack.normalizedChi2();
         track.nHits          = recTrack.numberOfValidHits();
@@ -26,15 +22,11 @@ MyTrack TrackConverter::convert(const Track& recTrack){
         return track;
 }
 
-MyTrack TrackConverter::convert(const PFCandidate* pfTrack){
+MyTrack TrackConverter::convert(const PFCandidate& pfTrack){
 
-        MyTrack track;
-        track.SetPx(pfTrack->px());
-        track.SetPy(pfTrack->py());
-        track.SetPz(pfTrack->pz());
-        track.SetE(pfTrack->p());
-        track.trackCharge  = pfTrack->charge();
-	track.particleType = pfTrack->particleId();
+        MyTrack track(pfTrack.px(), pfTrack.py(), pfTrack.pz(), pfTrack.p());
+        track.trackCharge  = pfTrack.charge();
+	track.particleType = pfTrack.particleId();
 
         return track;
 }

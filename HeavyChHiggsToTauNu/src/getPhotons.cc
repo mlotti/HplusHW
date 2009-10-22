@@ -19,7 +19,7 @@ vector<MyJet> MyEventConverter::getPhotons(const edm::Event& iEvent){
 		PhotonCollection::const_iterator iPhoton;
 		for(iPhoton = recoPhotons.begin(); iPhoton != recoPhotons.end(); ++iPhoton){
 
-			MyJet photon = myJetConverter(&(*iPhoton));
+			MyJet photon = myJetConverter(*iPhoton);
 			photons.push_back(photon);
 
 			cout << "Photon: et= " << iPhoton->et();
@@ -45,7 +45,7 @@ vector<MyJet> MyEventConverter::getPhotons(const edm::Event& iEvent){
                 ConversionCollection::const_iterator iPhoton;
                 for(iPhoton = recoPhotons.begin(); iPhoton != recoPhotons.end(); ++iPhoton){
 
-                        MyJet photon = myJetConverter(&(*iPhoton));
+                        MyJet photon = myJetConverter(*iPhoton);
                         photons.push_back(photon);
 
                         cout << "Converted photon: et= " << iPhoton->pairMomentum().perp();

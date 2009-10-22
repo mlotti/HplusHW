@@ -3,7 +3,7 @@
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
-void PhotonTag::tag(const reco::Photon* photon, TagType& tagInfo){
+void PhotonTag::tag(const reco::Photon& photon, TagType& tagInfo){
 /*
 	tagInfo["e5x5"]		= photon->e5x5();
 	tagInfo["r19"]		= photon->r19();
@@ -30,15 +30,15 @@ void PhotonTag::tag(const reco::Photon* photon, TagType& tagInfo){
 */
 }
 
-void PhotonTag::tag(const reco::Conversion* photon, TagType& tagInfo){
-	tagInfo["EoverP"]     		= photon->EoverP();
-	tagInfo["nTracks"]     		= photon->nTracks();
-        tagInfo["pairCotThetaSeparation"] = photon->pairCotThetaSeparation();
-        tagInfo["pairInvariantMass"] 	= photon->pairInvariantMass();
+void PhotonTag::tag(const reco::Conversion& photon, TagType& tagInfo){
+	tagInfo["EoverP"]     		= photon.EoverP();
+	tagInfo["nTracks"]     		= photon.nTracks();
+        tagInfo["pairCotThetaSeparation"] = photon.pairCotThetaSeparation();
+        tagInfo["pairInvariantMass"] 	= photon.pairInvariantMass();
 //        tagInfo["pairMomentumX"] 	= photon->pairMomentum().x();
 //        tagInfo["pairMomentumY"]        = photon->pairMomentum().y();
 //        tagInfo["pairMomentumZ"]        = photon->pairMomentum().z();
-	tagInfo["zOfPrimaryVertexFromTracks"] = photon->zOfPrimaryVertexFromTracks();
+	tagInfo["zOfPrimaryVertexFromTracks"] = photon.zOfPrimaryVertexFromTracks();
 //        tagInfo["pairPtOverEtSC"] 	= photon->pairPtOverEtSC();
 //        tagInfo["r9"]           	= photon->r9();
 }

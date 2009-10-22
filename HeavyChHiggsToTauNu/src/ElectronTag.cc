@@ -10,20 +10,20 @@ using std::vector;
 using std::string;
 using std::pair;
 
-void ElectronTag::tag(const reco::GsfElectron *electron, EcalClusterLazyTools& myEcalCluster, TagType& tagInfo){
+void ElectronTag::tag(const reco::GsfElectron& electron, EcalClusterLazyTools& myEcalCluster, TagType& tagInfo){
 
-	tagInfo["EoverPIn"]      = electron->eSuperClusterOverP();
-        tagInfo["DeltaEtaIn"]    = electron->deltaEtaSuperClusterTrackAtVtx();
-        tagInfo["DeltaPhiIn"]    = electron->deltaPhiSuperClusterTrackAtVtx();
-        tagInfo["HoverE"]        = electron->hadronicOverEm();
-        tagInfo["EoverPOut"]     = electron->eSeedClusterOverPout();
-        tagInfo["DeltaPhiOut"]   = electron->deltaPhiSuperClusterTrackAtVtx();
-        tagInfo["InvEMinusInvP"] = (1./electron->caloEnergy())-(1./electron->trackMomentumAtVtx().R());
-        tagInfo["BremFraction"]  = electron->trackMomentumAtVtx().R()-electron->trackMomentumOut().R();
+	tagInfo["EoverPIn"]      = electron.eSuperClusterOverP();
+        tagInfo["DeltaEtaIn"]    = electron.deltaEtaSuperClusterTrackAtVtx();
+        tagInfo["DeltaPhiIn"]    = electron.deltaPhiSuperClusterTrackAtVtx();
+        tagInfo["HoverE"]        = electron.hadronicOverEm();
+        tagInfo["EoverPOut"]     = electron.eSeedClusterOverPout();
+        tagInfo["DeltaPhiOut"]   = electron.deltaPhiSuperClusterTrackAtVtx();
+        tagInfo["InvEMinusInvP"] = (1./electron.caloEnergy())-(1./electron.trackMomentumAtVtx().R());
+        tagInfo["BremFraction"]  = electron.trackMomentumAtVtx().R()-electron.trackMomentumOut().R();
 
-	tagInfo["E9overE25"]     = myEcalCluster.e3x3(*(electron->superCluster()->seed()))/
-                                   myEcalCluster.e5x5(*(electron->superCluster()->seed()));
-	vector<float> vCov       = myEcalCluster.covariances(*(electron->superCluster()->seed()));
+	tagInfo["E9overE25"]     = myEcalCluster.e3x3(*(electron.superCluster()->seed()))/
+                                   myEcalCluster.e5x5(*(electron.superCluster()->seed()));
+	vector<float> vCov       = myEcalCluster.covariances(*(electron.superCluster()->seed()));
 	tagInfo["SigmaEtaEta"]   = sqrt (vCov[0]);
 	tagInfo["SigmaPhiPhi"]   = sqrt (vCov[1]);
 /*

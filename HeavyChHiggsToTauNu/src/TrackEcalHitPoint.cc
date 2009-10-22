@@ -30,14 +30,14 @@ void TrackEcalHitPoint::reset() {
   trackAssociator_.reset();
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet* caloJet){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet& caloJet){
         // New method
         math::XYZPoint hitPos = trackAssociator_.trackPositionAtEcal(transientTrack.track());
 
         // Old method
         GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
-        vector<CaloTowerPtr> towers = caloJet->getCaloConstituents();
+        vector<CaloTowerPtr> towers = caloJet.getCaloConstituents();
         for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
                                                  iTower != towers.end(); iTower++){
                 //size_t numRecHits = (**iTower).constituentsSize();
@@ -71,17 +71,17 @@ MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,co
         return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const GsfElectron* electron){
-	math::XYZPoint pos = electron->trackPositionAtCalo();
+MyGlobalPoint TrackEcalHitPoint::convert(const GsfElectron& electron){
+	math::XYZPoint pos = electron.trackPositionAtCalo();
         return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const pat::Electron* electron){
-	math::XYZPoint pos = electron->trackPositionAtCalo();
+MyGlobalPoint TrackEcalHitPoint::convert(const pat::Electron& electron){
+	math::XYZPoint pos = electron.trackPositionAtCalo();
         return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const Conversion* photon){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const Conversion& photon){
 /* FIXME
 	Conversion* convPhoton = const_cast<Conversion*>(photon);
 	vector<math::XYZPoint> const & ecalHitPositionVector = convPhoton->ecalImpactPosition();
@@ -93,7 +93,7 @@ MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,co
         return MyGlobalPoint(0,0,0);
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const PFCandidate* pfCand){
-        const math::XYZPointF& pos = pfCand->positionAtECALEntrance();
+MyGlobalPoint TrackEcalHitPoint::convert(const PFCandidate& pfCand){
+        const math::XYZPointF& pos = pfCand.positionAtECALEntrance();
         return MyGlobalPoint(pos.x(), pos.y(), pos.z());
 }

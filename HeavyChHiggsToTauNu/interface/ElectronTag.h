@@ -13,7 +13,7 @@ class ElectronTag {
 public:
   typedef std::map<std::string, double> TagType;
 
-  static void tag(const reco::GsfElectron *, EcalClusterLazyTools&, TagType&);
+  static void tag(const reco::GsfElectron&, EcalClusterLazyTools&, TagType&);
   static void tag(const pat::Electron&, TagType &);
 };
 

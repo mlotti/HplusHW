@@ -22,7 +22,7 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
           cout << "Offline electron collection size " << recoElectrons.size() << endl;
 
 	  for(unsigned int i = 0; i < recoElectrons.size(); ++i){
-		MyJet electron = myJetConverter(&(recoElectrons[i]));
+		MyJet electron = myJetConverter(recoElectrons[i]);
 
 		map<string,double> tagInfo;
 		edm::Ref<reco::GsfElectronCollection> iElectron(electronHandle,i);
@@ -41,7 +41,7 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
 		iEvent.getByLabel( reducedEndcapRecHitCollection, pEERecHits );
 
 		EcalClusterLazyTools lazyTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
-		ElectronTag::tag(&(*iElectron),lazyTools,electron.tagInfo);
+		ElectronTag::tag(*iElectron,lazyTools,electron.tagInfo);
 
 		electrons.push_back(electron);
 	  }

@@ -13,18 +13,18 @@ MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transi
         return impactParameter(transientTrack,direction);
 }
 
-MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transientTrack,const CaloJet* caloJet){
+MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transientTrack,const CaloJet& caloJet){
 
-        GlobalVector direction(caloJet->px(),caloJet->py(),caloJet->pz());
+        GlobalVector direction(caloJet.px(),caloJet.py(),caloJet.pz());
 
 	return impactParameter(transientTrack,direction);
 }
 
-MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transientTrack,const Conversion* photon){
+MyImpactParameter MyEventConverter::impactParameter(const TransientTrack& transientTrack,const Conversion& photon){
 
-        GlobalVector direction(photon->pairMomentum().x(),
-                               photon->pairMomentum().y(),
-                               photon->pairMomentum().z());
+        GlobalVector direction(photon.pairMomentum().x(),
+                               photon.pairMomentum().y(),
+                               photon.pairMomentum().z());
 
         return impactParameter(transientTrack,direction);
 }

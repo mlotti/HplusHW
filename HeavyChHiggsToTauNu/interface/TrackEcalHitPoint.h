@@ -28,12 +28,12 @@ public:
   void setEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup);
   void reset();
   
-  MyGlobalPoint convert(const reco::TransientTrack&, const reco::CaloJet *);
+  MyGlobalPoint convert(const reco::TransientTrack&, const reco::CaloJet &);
 
-  static MyGlobalPoint convert(const reco::TransientTrack&, const reco::Conversion *);
-  static MyGlobalPoint convert(const reco::GsfElectron *);
-  static MyGlobalPoint convert(const pat::Electron *);
-  static MyGlobalPoint convert(const reco::PFCandidate *);
+  static MyGlobalPoint convert(const reco::TransientTrack&, const reco::Conversion &);
+  static MyGlobalPoint convert(const reco::GsfElectron &);
+  static MyGlobalPoint convert(const pat::Electron &);
+  static MyGlobalPoint convert(const reco::PFCandidate &);
 
 private:
   TrackDetectorAssociatorWrapper trackAssociator_;
