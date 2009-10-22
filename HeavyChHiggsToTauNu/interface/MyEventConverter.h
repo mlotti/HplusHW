@@ -83,6 +83,8 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
+
 
 ////double myDeltaR(double,double,double,double);
 #include "Math/VectorUtil.h"
@@ -214,6 +216,7 @@ class MyEventConverter {
 
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
+        TrackEcalHitPoint trackEcalHitPoint;
 
 	bool printTrigger;
 };

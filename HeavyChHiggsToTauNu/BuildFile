@@ -10,6 +10,7 @@
 
 <use name=Geometry/CaloGeometry>
 <lib name=TrackingToolsTransientTrack>
+<use name=TrackingTools/TrackAssociator>
 
 <use name=RecoTauTag/TauTagTools>
 

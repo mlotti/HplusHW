@@ -19,6 +19,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
         getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
+        trackEcalHitPoint.setEvent(iEvent, iSetup); // give event and event setup to our track associator wrapper
+
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
@@ -42,7 +44,6 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->mets			= getMET(iEvent);
 //	saveEvent->addMET("pfMET",getPFMET(iEvent));
 //	saveEvent->addMET("tcMET",getTCMET(iEvent));
-
         saveEvent->hasMCdata            = true;
         MCConverter::addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
@@ -53,6 +54,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
+
+        trackEcalHitPoint.reset();
 
 	delete saveEvent;
 

@@ -3,8 +3,14 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TrackEcalHitPoint_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyGlobalPoint.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackDetectorAssociatorWrapper.h"
 
 // Forward declarations
+namespace edm { 
+  class ParameterSet;
+  class Event;
+  class EventSetup;
+}
 namespace pat { class Electron; }
 namespace reco { 
   class TransientTrack;
@@ -16,11 +22,21 @@ namespace reco {
 
 class TrackEcalHitPoint {
 public:
-  static MyGlobalPoint convert(const reco::TransientTrack&, const reco::CaloJet *);
+  TrackEcalHitPoint(const edm::ParameterSet& iConfig);
+  ~TrackEcalHitPoint();
+
+  void setEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  void reset();
+  
+  MyGlobalPoint convert(const reco::TransientTrack&, const reco::CaloJet *);
+
   static MyGlobalPoint convert(const reco::TransientTrack&, const reco::Conversion *);
-  static MyGlobalPoint convert(const reco::TransientTrack&, const reco::GsfElectron *);
-  static MyGlobalPoint convert(const reco::TransientTrack&, const pat::Electron *);
+  static MyGlobalPoint convert(const reco::GsfElectron *);
+  static MyGlobalPoint convert(const pat::Electron *);
   static MyGlobalPoint convert(const reco::PFCandidate *);
+
+private:
+  TrackDetectorAssociatorWrapper trackAssociator_;
 };
 
 #endif
