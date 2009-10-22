@@ -115,7 +115,7 @@ class MyEventConverter {
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
-	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&);
+	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&, const edm::InputTag&);
 	vector<MyJet>		getPATElectrons(const edm::Event&);
         vector<MyJet>           getPhotons(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&);

@@ -31,7 +31,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
-	saveEvent->addCollection("electrons",getElectrons(iEvent,iSetup));
+	saveEvent->addCollection("electrons",getElectrons(iEvent,iSetup, edm::InputTag("pixelMatchGsfElectrons")));
 //	saveEvent->photons              = getPhotons(iEvent);
 
 	saveEvent->addCollection("muons",getMuons(iEvent));
