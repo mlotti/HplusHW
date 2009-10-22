@@ -6,6 +6,7 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -17,14 +18,18 @@ using std::pair;
 using reco::GsfTrackRef;
 using reco::TransientTrack;
 
-ElectronConverter::ElectronConverter(const TransientTrackBuilder& builder, const ImpactParameterConverter& ip, EcalClusterLazyTools& tools):
+ElectronConverter::ElectronConverter(const TransientTrackBuilder& builder, const ImpactParameterConverter& ip, EcalClusterLazyTools& tools,
+                                     const edm::Event& event, const std::vector<edm::InputTag>& labels):
   transientTrackBuilder(builder),
   ipConverter(ip),
-  clusterTools(tools)
+  clusterTools(tools),
+  iEvent(event),
+  tagLabels(labels)
 {}
 ElectronConverter::~ElectronConverter() {}
 
-MyJet ElectronConverter::convert(const reco::GsfElectron& recElectron) const {
+template<class T>
+MyJet ElectronConverter::helper(const T& recElectron) const {
 	GsfTrackRef track = recElectron.gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder.build(track);
 
@@ -38,43 +43,38 @@ MyJet ElectronConverter::convert(const reco::GsfElectron& recElectron) const {
         // FIXME
         //electron.tracks = getTracks(electron);
 
-	vector<TLorentzVector> superClusters;
-	superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-	                                       recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-	electron.clusters = superClusters;
+	electron.clusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
+                                                   recElectron.superCluster()->y(),
+                                                   recElectron.superCluster()->z(),
+                                                   recElectron.superCluster()->energy()));
+	tag(recElectron, electron.tagInfo);
 
         return electron;
 }
 
-MyJet ElectronConverter::convert(const pat::Electron& recElectron) const {
-        GsfTrackRef track = recElectron.gsfTrack();
-        const TransientTrack transientTrack = transientTrackBuilder.build(track);
+MyJet ElectronConverter::convert(edm::Handle<edm::View<reco::GsfElectron> >& handle, size_t i) {
+        MyJet electron = helper((*handle)[i]);
+        edm::Ref<edm::View<reco::GsfElectron> > iElectron(handle,i);
+        //edm::RefToBase<reco::GsfElectron> iElectron = handle->refAt(i); //?
 
-	MyJet electron(recElectron.px(), recElectron.py(), recElectron.pz(), recElectron.p()); // FIXME: should we use .energy() instead of .p()?
-	electron.type = 11 * (*track).charge();
+        for(unsigned int ietag = 0; ietag < tagLabels.size(); ++ietag){
+                edm::Handle<edm::ValueMap<float> > electronIdHandle;
+                iEvent.getByLabel(tagLabels[ietag], electronIdHandle );
 
-        MyTrack electronTrack = TrackConverter::convert(transientTrack);
-        electronTrack.ip = ipConverter.convert(transientTrack);
-	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(recElectron);
-        electron.tracks.push_back(electronTrack);
-        // FIXME
-        //electron.tracks = getTracks(electron);
+                const edm::ValueMap<float>& electronId = *electronIdHandle;
 
-        vector<TLorentzVector> superClusters;
-        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-                                               recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-        electron.clusters = superClusters;
+                electron.tagInfo[tagLabels[ietag].label()] = electronId[iElectron];
+        }
+        return electron;
+}
 
-	tag(recElectron, electron.tagInfo);
-
-	return electron;
+MyJet ElectronConverter::convert(edm::Handle<edm::View<pat::Electron> >& handle, size_t i) {
+        return helper((*handle)[i]);
 }
 
 void ElectronConverter::tag(const reco::GsfElectron& electron, TagType& tagInfo) {
+        
+        
 
 	tagInfo["EoverPIn"]      = electron.eSuperClusterOverP();
         tagInfo["DeltaEtaIn"]    = electron.deltaEtaSuperClusterTrackAtVtx();

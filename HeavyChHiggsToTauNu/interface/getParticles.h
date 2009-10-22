@@ -10,7 +10,7 @@
 #include<vector>
 
 template <class T, class Converter>
-std::vector<MyJet> getParticles(const edm::InputTag& name, const edm::Event& iEvent, const Converter& converter) {
+std::vector<MyJet> getParticles(const edm::InputTag& name, const edm::Event& iEvent, Converter& converter) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(name, handle);
 
