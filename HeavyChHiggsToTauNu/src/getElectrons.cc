@@ -1,6 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
-
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
 
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
@@ -20,9 +20,10 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
         const GsfElectronCollection & recoElectrons = *(electronHandle.product());
         cout << "Offline electron collection size " << recoElectrons.size() << endl;
 
-        EcalClusterLazyTools lazyTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
+        EcalClusterLazyTools tools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
+        ElectronConverter converter(*transientTrackBuilder, ImpactParameterConverter(primaryVertex), tools);
         for(unsigned int i = 0; i < recoElectrons.size(); ++i){
-		MyJet electron = myJetConverter(recoElectrons[i]);
+		MyJet electron = converter.convert(recoElectrons[i]);
 
 		edm::Ref<reco::GsfElectronCollection> iElectron(electronHandle,i);
 		for(unsigned int ietag = 0; ietag < electronIdLabels.size(); ++ietag){
@@ -33,7 +34,7 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
 			electron.tagInfo[electronIdLabels[ietag].label()] = electronId[iElectron];
 		}
 
-		ElectronTag::tag(*iElectron,lazyTools,electron.tagInfo);
+		converter.tag(*iElectron,electron.tagInfo);
 
 		electrons.push_back(electron);
         }

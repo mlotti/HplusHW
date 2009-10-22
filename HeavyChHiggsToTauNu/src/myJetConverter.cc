@@ -6,57 +6,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
-
-MyJet MyEventConverter::myJetConverter(const GsfElectron& recElectron){
-	GsfTrackRef track = recElectron.gsfTrack();
-        const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-        MyJet electron(recElectron.px(), recElectron.py(), recElectron.pz(), recElectron.p()); // FIXME: should we use .energy() instead of .p()?
-        electron.type = 11 * (*track).charge();
-
-	MyTrack electronTrack = TrackConverter::convert(transientTrack);
-	electronTrack.ip = ImpactParameterConverter(primaryVertex).convert(transientTrack);
-	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(recElectron);
-	electron.tracks.push_back(electronTrack);
-        electron.tracks = getTracks(electron);
-
-	vector<TLorentzVector> superClusters;
-	superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-	                                       recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-	electron.clusters = superClusters;
-
-        return electron;
-}
-
-MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
-        GsfTrackRef track = recElectron.gsfTrack();
-        const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-	MyJet electron(recElectron.px(), recElectron.py(), recElectron.pz(), recElectron.p()); // FIXME: should we use .energy() instead of .p()?
-	electron.type = 11 * (*track).charge();
-
-        MyTrack electronTrack = TrackConverter::convert(transientTrack);
-        electronTrack.ip = ImpactParameterConverter(primaryVertex).convert(transientTrack);
-	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(recElectron);
-        electron.tracks.push_back(electronTrack);
-        electron.tracks = getTracks(electron);
-
-        vector<TLorentzVector> superClusters;
-        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-                                               recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-        electron.clusters = superClusters;
-
-	ElectronTag::tag(recElectron, electron.tagInfo);
-
-	return electron;
-}
 
 MyJet MyEventConverter::myJetConverter(const Photon& recPhoton){
 

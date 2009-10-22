@@ -9,6 +9,7 @@ vector<MyJet> MyEventConverter::getPATElectrons(const edm::Event& iEvent){
           iEvent.getByLabel("selectedLayer1Electrons",electronHandle);
         }catch(...) {;}
 
+        /* FIXME
         if(electronHandle.isValid()){
 	  const edm::View<pat::Electron> & recoElectrons = *(electronHandle.product());
 
@@ -30,5 +31,6 @@ vector<MyJet> MyEventConverter::getPATElectrons(const edm::Event& iEvent){
           }
 
         }
+        */
 	return electrons;
 }
