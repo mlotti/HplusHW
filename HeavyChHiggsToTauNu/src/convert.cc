@@ -34,7 +34,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->addCollection("electrons",getElectrons(iEvent,iSetup, edm::InputTag("pixelMatchGsfElectrons")));
 //	saveEvent->photons              = getPhotons(iEvent);
 
-	saveEvent->addCollection("muons",getMuons(iEvent));
+	saveEvent->addCollection("muons",getMuons(iEvent, edm::InputTag("muons")));
 	saveEvent->addCollection("calotaus",getTaus(iEvent));
 	saveEvent->addCollection("fixedConePFTaus",getPFTaus(iEvent,"fixedConePFTauProducer"));
 	saveEvent->addCollection("fixedConeHighEffPFTaus",getPFTaus(iEvent,"fixedConeHighEffPFTauProducer"));
