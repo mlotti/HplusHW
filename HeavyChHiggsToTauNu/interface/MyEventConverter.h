@@ -133,8 +133,6 @@ class MyEventConverter {
 	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
-	MyJet			myJetConverter(const reco::Muon&);
-	MyJet			myJetConverter(const pat::Muon&);
         MyJet                   myJetConverter(const GsfElectron&);
 	MyJet			myJetConverter(const pat::Electron&);
         MyJet                   myJetConverter(const Photon&);

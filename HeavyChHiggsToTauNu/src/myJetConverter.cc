@@ -7,56 +7,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronTag.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
-
-MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
-
-        MyJet muon(recMuon.px(), recMuon.py(), recMuon.pz(), recMuon.p()); // FIXME: should we use .energy() instead of .p()?
-        muon.type = 13 * recMuon.charge();
-
-	TrackRef track = recMuon.globalTrack();
-	if(track.isNull()) track = recMuon.innerTrack();
-	if(track.isNull()) track = recMuon.combinedMuon();
-
-	if(track.isNonnull()){
-		const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-		MyTrack muonTrack = TrackConverter::convert(transientTrack);
-		muonTrack.ip = ImpactParameterConverter(primaryVertex).convert(transientTrack);
-		muon.tracks.push_back(muonTrack);
-
-		muon.tracks = getTracks(muon);
-	}
-
-	MuonTag::tag(recMuon, muon.tagInfo);
-
-	return muon;
-}
-
-MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
-
-        MyJet muon(recMuon.px(), recMuon.py(), recMuon.pz(), recMuon.p()); // FIXME: should we use .energy() instead of .p()?
-        muon.type = 13 * recMuon.charge();
-
-        TrackRef track = recMuon.globalTrack();
-        if(track.isNull()) track = recMuon.innerTrack();
-
-        if(track.isNonnull()){
-                const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-                MyTrack muonTrack = TrackConverter::convert(transientTrack);
-                muonTrack.ip = ImpactParameterConverter(primaryVertex).convert(transientTrack);
-                muon.tracks.push_back(muonTrack);
-
-                muon.tracks = getTracks(muon);
-        }
-
-	MuonTag::tag(recMuon, muon.tagInfo);
-
-        return muon;
-}
 
 MyJet MyEventConverter::myJetConverter(const GsfElectron& recElectron){
 	GsfTrackRef track = recElectron.gsfTrack();

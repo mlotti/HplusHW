@@ -1,6 +1,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/getParticles.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonConverter.h"
+
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
@@ -20,6 +27,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
         trackEcalHitPoint.setEvent(iEvent, iSetup); // give event and event setup to our track associator wrapper
+        ImpactParameterConverter ipConverter(primaryVertex);
 
 	MyEvent* saveEvent = new MyEvent;
 	saveEvent->eventNumber          = iEvent.id().event();
@@ -34,7 +42,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->addCollection("electrons",getElectrons(iEvent,iSetup, edm::InputTag("pixelMatchGsfElectrons")));
 //	saveEvent->photons              = getPhotons(iEvent);
 
-	saveEvent->addCollection("muons",getMuons(iEvent, edm::InputTag("muons")));
+	saveEvent->addCollection("muons",    getParticles<reco::Muon>(edm::InputTag("muons"),               iEvent, MuonConverter(*transientTrackBuilder, ipConverter)));
+	//saveEvent->addCollection("patmuons", getParticles<pat::Muon> (edm::InputTag("selectedLayer1Muons"), iEvent, MuonConverter(*transientTrackBuilder, ipConverter)));
 	saveEvent->addCollection("calotaus",getTaus(iEvent, edm::InputTag("caloRecoTauProducer")));
 	saveEvent->addCollection("fixedConePFTaus",getPFTaus(iEvent, edm::InputTag("fixedConePFTauProducer")));
 	saveEvent->addCollection("fixedConeHighEffPFTaus",getPFTaus(iEvent, edm::InputTag("fixedConeHighEffPFTauProducer")));
