@@ -123,7 +123,7 @@ class MyEventConverter {
         vector<MyJet>           getTaus(const edm::Event&, const edm::InputTag&);
 	vector<MyJet>		getPATTaus(const edm::Event&);
         vector<MyJet> 		getPFTaus(const edm::Event&, const edm::InputTag&);
-        vector<MyJet> 		getJets(const edm::Event&);
+        vector<MyJet> 		getJets(const edm::Event&, const edm::InputTag&);
 	vector<MyJet>		getPATJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
