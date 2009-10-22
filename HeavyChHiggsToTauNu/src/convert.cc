@@ -36,9 +36,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	saveEvent->addCollection("muons",getMuons(iEvent, edm::InputTag("muons")));
 	saveEvent->addCollection("calotaus",getTaus(iEvent, edm::InputTag("caloRecoTauProducer")));
-	saveEvent->addCollection("fixedConePFTaus",getPFTaus(iEvent,"fixedConePFTauProducer"));
-	saveEvent->addCollection("fixedConeHighEffPFTaus",getPFTaus(iEvent,"fixedConeHighEffPFTauProducer"));
-        saveEvent->addCollection("shrinkingConePFTaus",getPFTaus(iEvent,"shrinkingConePFTauProducer"));
+	saveEvent->addCollection("fixedConePFTaus",getPFTaus(iEvent, edm::InputTag("fixedConePFTauProducer")));
+	saveEvent->addCollection("fixedConeHighEffPFTaus",getPFTaus(iEvent, edm::InputTag("fixedConeHighEffPFTauProducer")));
+        saveEvent->addCollection("shrinkingConePFTaus",getPFTaus(iEvent, edm::InputTag("shrinkingConePFTauProducer")));
 	saveEvent->addCollection("icone05jets",getJets(iEvent));
 
 	saveEvent->mets			= getMET(iEvent);
