@@ -113,7 +113,7 @@ class MyEventConverter {
         MyImpactParameter 	impactParameter(const TransientTrack&);
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
 
-	map<string,bool> 	getTriggerResults(const edm::Event&);
+	void                    getTriggerResults(const edm::Event&, const edm::InputTag&, std::map<std::string, bool>&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
 	vector<MyJet> 		getElectrons(const edm::Event&,const edm::EventSetup&, const edm::InputTag&);
 	vector<MyJet>		getPATElectrons(const edm::Event&);

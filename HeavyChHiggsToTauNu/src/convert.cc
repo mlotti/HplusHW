@@ -26,7 +26,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->runNumber		= iEvent.run();
 	saveEvent->lumiNumber		= iEvent.luminosityBlock();
 
-	saveEvent->triggerResults       = getTriggerResults(iEvent);
+	getTriggerResults(iEvent, edm::InputTag("TriggerResults::HLT"), saveEvent->triggerResults);
 	saveEvent->primaryVertex        = VertexConverter::convert(primaryVertex);
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
