@@ -1,25 +1,24 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-vector<MyJet> MyEventConverter::getTaus(const edm::Event& iEvent){
+vector<MyJet> MyEventConverter::getTaus(const edm::Event& iEvent, const edm::InputTag& label){
 	vector<MyJet> taus;
 
 	Handle<CaloTauCollection> theCaloTauHandle;
-	try{
-	  iEvent.getByLabel("caloRecoTauProducer",theCaloTauHandle);
-	}catch(...) {;}
+        iEvent.getByLabel(label, theCaloTauHandle);
 
-	if(theCaloTauHandle.isValid()){
-	  const CaloTauCollection & caloTaus = *(theCaloTauHandle.product());
+	if(!theCaloTauHandle.isValid())
+                return taus;
 
-	  int nCaloTaus = caloTaus.size();
-          cout << "calotau collection size " << nCaloTaus << endl;
+        const CaloTauCollection & caloTaus = *(theCaloTauHandle.product());
 
-	  CaloTauCollection::const_iterator iTau;
-	  for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++){
+        int nCaloTaus = caloTaus.size();
+        cout << "calotau collection size " << nCaloTaus << endl;
+
+        CaloTauCollection::const_iterator iTau;
+        for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++){
 	     	if(!iTau->leadTrack()) continue;
                 MyJet tau = myJetConverter(*iTau);
                 taus.push_back(tau);
-          }
 	}
 /*
         Handle<IsolatedTauTagInfoCollection> isolatedTauHandle;
