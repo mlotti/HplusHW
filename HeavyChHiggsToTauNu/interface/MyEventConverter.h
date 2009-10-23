@@ -120,7 +120,6 @@ class MyEventConverter {
         void		        getTrajectories(const edm::Event&);
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
-	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
