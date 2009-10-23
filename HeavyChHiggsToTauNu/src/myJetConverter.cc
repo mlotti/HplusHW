@@ -62,7 +62,8 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
         TauTag::tag(recTau, tau.tagInfo);
 
-	tau.caloInfo = caloTowers(caloJet);
+        // FIXME
+	//tau.caloInfo = caloTowers(caloJet);
 
 	addECALClusters(&tau);
 
@@ -131,7 +132,8 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
         tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
-        tau.caloInfo = caloTowers(caloJet);
+        // FIXME
+        //tau.caloInfo = caloTowers(caloJet);
 
         // FIXME
 	//VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);

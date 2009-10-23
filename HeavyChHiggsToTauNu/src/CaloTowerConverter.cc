@@ -1,8 +1,53 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CaloTowerConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyCaloTower.h"
 
-vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
-	vector<MyCaloTower> calotowers;
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
+#include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/CaloTowers/interface/CaloTower.h"
+#include "DataFormats/CaloTowers/interface/CaloTowerFwd.h"
+
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+
+using reco::CaloJet;
+using std::vector;
+
+template <class T>
+static const T& helper(const edm::Event& iEvent, const edm::InputTag& label) {
+  edm::Handle<T> handle;
+  iEvent.getByLabel(label, handle);
+  return *handle;
+}
+
+CaloTowerConverter::CaloTowerConverter(const edm::Event& iEvent, const edm::EventSetup& iSetup):
+        EBRecHits(helper<EBRecHitCollection>(iEvent, edm::InputTag("ecalRecHit", "EcalRecHitsEB"))),
+        EERecHits(helper<EERecHitCollection>(iEvent, edm::InputTag("ecalRecHit", "EcalRecHitsEE"))),
+        HBHERecHits(helper<HBHERecHitCollection>(iEvent, edm::InputTag("hbhereco"))) {
+        //iEvent.getByLabel( "horeco", HORecHits );
+        //iEvent.getByLabel( "hfreco", HFRecHits );
+
+        edm::ESHandle<CaloGeometry> geometry;
+        iSetup.get<CaloGeometryRecord>().get(geometry);
+        EB = geometry->getSubdetectorGeometry(DetId::Ecal,EcalBarrel);
+        EE = geometry->getSubdetectorGeometry(DetId::Ecal,EcalEndcap);
+        HB = geometry->getSubdetectorGeometry(DetId::Hcal,HcalBarrel);
+        HE = geometry->getSubdetectorGeometry(DetId::Hcal,HcalEndcap);
+
+        // FIXME: these are from eventSetup.cc, but they are not currently used?
+        //HO = geometry->getSubdetectorGeometry(DetId::Hcal,HcalOuter);
+        //HF = geometry->getSubdetectorGeometry(DetId::Hcal,HcalForward);
+}
+CaloTowerConverter::~CaloTowerConverter() {}
+
+void CaloTowerConverter::convert(const CaloJet& caloJet, vector<MyCaloTower>& calotowers) const {
         vector<CaloTowerPtr> towers = caloJet.getCaloConstituents();
 
         for(vector<CaloTowerPtr>::const_iterator iTower = towers.begin();
@@ -20,8 +65,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 			  if((EcalSubdetector)recHitDetID.subdetId()==EcalBarrel){
 //                          if( recHitDetID.subdetId() == 1 ){ // Ecal Barrel
                                 EBDetId ecalID = recHitDetID;
-                                EBRecHitCollection::const_iterator theRecHit = EBRecHits->find(ecalID);
-                                if(theRecHit != EBRecHits->end()){
+                                EBRecHitCollection::const_iterator theRecHit = EBRecHits.find(ecalID);
+                                if(theRecHit != EBRecHits.end()){
                                   DetId id = theRecHit->detid();
                                   const CaloCellGeometry* this_cell = EB->getGeometry(id);
                                   double energy = theRecHit->energy();
@@ -31,8 +76,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 //                          if( recHitDetID.subdetId() == 2 ){ // Ecal Endcap
 			  if((EcalSubdetector)recHitDetID.subdetId()==EcalEndcap){
                                 EEDetId ecalID = recHitDetID;
-                                EERecHitCollection::const_iterator theRecHit = EERecHits->find(ecalID);
-                                if(theRecHit != EERecHits->end()){
+                                EERecHitCollection::const_iterator theRecHit = EERecHits.find(ecalID);
+                                if(theRecHit != EERecHits.end()){
                                   DetId id = theRecHit->detid();
                                   const CaloCellGeometry* this_cell = EE->getGeometry(id);
                                   double energy = theRecHit->energy();
@@ -41,12 +86,14 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                           }
                         }
                         if( recHitDetID.det() == DetId::Hcal ){
+                          // FIXME
+                          // Is this correct? I mean, using HBHERecHits for both barrel and endcap?
                           HcalDetId hcalID = recHitDetID;
                           if( recHitDetID.subdetId() == HcalBarrel ){
                             int depth = hcalID.depth();
                             if (depth==1){
-                                HBHERecHitCollection::const_iterator theRecHit=HBHERecHits->find(hcalID);
-                                if(theRecHit != HBHERecHits->end()){
+                                HBHERecHitCollection::const_iterator theRecHit=HBHERecHits.find(hcalID);
+                                if(theRecHit != HBHERecHits.end()){
                                   DetId id = theRecHit->detid();
                                   const CaloCellGeometry* this_cell = HB->getGeometry(id);
                                   double energy = theRecHit->energy();
@@ -57,8 +104,8 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
                           if( recHitDetID.subdetId() == HcalEndcap ){
                             int depth = hcalID.depth();
                             if (depth==1){
-                                HBHERecHitCollection::const_iterator theRecHit=HBHERecHits->find(hcalID);
-                                if(theRecHit != HBHERecHits->end()){
+                                HBHERecHitCollection::const_iterator theRecHit=HBHERecHits.find(hcalID);
+                                if(theRecHit != HBHERecHits.end()){
                                   DetId id = theRecHit->detid();
                                   const CaloCellGeometry* this_cell = HE->getGeometry(id);
                                   double energy = theRecHit->energy();
@@ -79,11 +126,9 @@ vector<MyCaloTower> MyEventConverter::caloTowers(const CaloJet& caloJet){
 
 		calotowers.push_back(calotower);
         }
-
-	return calotowers;
 }
 
-const TVector3 MyEventConverter::getCellMomentum(const CaloCellGeometry* cell,double& energy){
+TVector3 CaloTowerConverter::getCellMomentum(const CaloCellGeometry *cell, double energy) const {
         TVector3 momentum(0,0,0);
         if(cell){
                 GlobalPoint hitPosition = cell->getPosition();

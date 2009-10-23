@@ -15,16 +15,4 @@ void MyEventConverter::eventSetup(const edm::EventSetup& iSetup){
 		const JetCorrector* theCorrector = JetCorrector::getJetCorrector(jetEnergyCorrectionTypes[i].label(),iSetup);
 		jetEnergyCorrections.push_back(theCorrector);
 	}
-
-        // geometry initialization
-        ESHandle<CaloGeometry> geometry;
-//        iSetup.get<IdealGeometryRecord>().get(geometry);
-	iSetup.get<CaloGeometryRecord>().get(geometry);
-
-        EB = geometry->getSubdetectorGeometry(DetId::Ecal,EcalBarrel);
-        EE = geometry->getSubdetectorGeometry(DetId::Ecal,EcalEndcap);
-        HB = geometry->getSubdetectorGeometry(DetId::Hcal,HcalBarrel);
-        HE = geometry->getSubdetectorGeometry(DetId::Hcal,HcalEndcap);
-        HO = geometry->getSubdetectorGeometry(DetId::Hcal,HcalOuter);
-        HF = geometry->getSubdetectorGeometry(DetId::Hcal,HcalForward);
 }

@@ -121,7 +121,6 @@ class MyEventConverter {
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
-	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
 
         MyJet                   myJetConverter(const JetTag&);
@@ -135,9 +134,6 @@ class MyEventConverter {
 	void                    addECALClusters(MyJet* jet);
 
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
-
-	vector<MyCaloTower>	caloTowers(const CaloJet&);
-	const TVector3 		getCellMomentum(const CaloCellGeometry*,double&);
 
 
 // datafields
@@ -162,26 +158,12 @@ class MyEventConverter {
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 
-        const CaloSubdetectorGeometry* EB;
-        const CaloSubdetectorGeometry* EE;
-        const CaloSubdetectorGeometry* HB;
-        const CaloSubdetectorGeometry* HE;
-        const CaloSubdetectorGeometry* HO;
-        const CaloSubdetectorGeometry* HF;
-
-        Handle<EBRecHitCollection>   EBRecHits;
-        Handle<EERecHitCollection>   EERecHits;
-
 	// ECAL clusters
 	InputTag BarrelBasicClustersInput;
 	InputTag EndcapBasicClustersInput;
 	Handle<BasicClusterCollection> theBarrelBCCollection;
 	Handle<BasicClusterCollection> theEndcapBCCollection;
 	
-        Handle<HBHERecHitCollection> HBHERecHits;
-        Handle<HORecHitCollection>   HORecHits;
-        Handle<HFRecHitCollection>   HFRecHits;
-
 	Handle<vector<Trajectory> > myTrajectoryCollectionHandle;
  	InputTag trajectoryInput; // Input for trajectory collection
 
