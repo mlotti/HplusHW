@@ -6,46 +6,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonTag.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
-
-MyJet MyEventConverter::myJetConverter(const Photon& recPhoton){
-
-        MyJet photon(recPhoton.px(), recPhoton.py(), recPhoton.pz(), recPhoton.p()); // FIXME: should we use .energy() instead of .p()?
-        photon.type = 0; //unconverted
-
-        // FIXME
-        //photon.tracks = getTracks(photon);
-
-	PhotonTag::tag(recPhoton, photon.tagInfo);
-
-        return photon;
-}
-
-MyJet MyEventConverter::myJetConverter(const Conversion& recPhoton){
-
-        const GlobalVector& mom(recPhoton.pairMomentum());
-        MyJet photon(mom.x(), mom.y(), mom.z(), mom.mag());
-	photon.type = 1; //converted
-
-        vector<MyTrack> tracks;
-	vector<TrackRef> associatedTracks = recPhoton.tracks();
-	vector<TrackRef>::const_iterator iTrack;
-        for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); ++iTrack){
-
-                const TransientTrack transientTrack = transientTrackBuilder->build(**iTrack);
-
-                MyTrack track           = TrackConverter::convert(transientTrack);
-                track.ip                = ImpactParameterConverter(primaryVertex).convert(transientTrack,recPhoton);
-                track.trackEcalHitPoint = TrackEcalHitPoint::convert(transientTrack,recPhoton);
-                tracks.push_back(track);
-        }
-        photon.tracks = tracks;
-
-        PhotonTag::tag(recPhoton, photon.tagInfo);
-
-        return photon;
-}
 
 MyJet MyEventConverter::myJetConverter(const CaloJet& caloJet){
 

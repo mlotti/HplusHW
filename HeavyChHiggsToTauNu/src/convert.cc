@@ -7,6 +7,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/getParticles.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MuonConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ElectronConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PhotonConverter.h"
 
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -52,16 +53,20 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
+        EcalClusterLazyTools ecalTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
+
         TrackConverter trackConverter(iEvent, trackCollectionSelection);
         ImpactParameterConverter ipConverter(primaryVertex);
-        EcalClusterLazyTools ecalTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
         ElectronConverter electronConverter(trackConverter, ipConverter, *transientTrackBuilder, ecalTools, iEvent, electronIdLabels);
         MuonConverter muonConverter(trackConverter, ipConverter, *transientTrackBuilder);
+        //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
 
         //saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),  iEvent, electronConverter));
-        saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),  iEvent, electronConverter));
+        saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),     iEvent, electronConverter));
         //saveEvent->addCollection("patelectrons", getParticles<pat::Electron>    (edm::InputTag("selectedLayer1Electrons"), iEvent, electronConverter));
-//	saveEvent->photons              = getPhotons(iEvent);
+
+        //saveEvent->addCollection("photons",      getParticles<reco::Photon>     (edm::InputTag("correctedPhotons"), iEvent, photonConverter));
+        //saveEvent->addCollection("conversions",  getParticles<reco::Conversion> (edm::InputTag("correctedPhotons"), iEvent, photonConverter));
         
         saveEvent->addCollection("muons",        getParticles<reco::Muon>       (edm::InputTag("muons"),                   iEvent, muonConverter));
 	//saveEvent->addCollection("patmuons",     getParticles<pat::Muon>        (edm::InputTag("selectedLayer1Muons"),     iEvent, muonConverter));

@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_getParticles_h
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/View.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
