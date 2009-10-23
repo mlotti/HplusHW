@@ -118,11 +118,7 @@ class MyEventConverter {
         vector<MyJet> 		getPFTaus(const edm::Event&, const edm::InputTag&);
         vector<MyJet> 		getJets(const edm::Event&, const edm::InputTag&);
 	vector<MyJet>		getPATJets(const edm::Event&);
-        void                    getTracks(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
-	vector<MyTrack>		getTracks(MyJet&);
-	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
-	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET			getPATMET(const edm::Event&);

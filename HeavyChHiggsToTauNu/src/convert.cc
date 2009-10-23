@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MCConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
 
@@ -35,7 +36,6 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	eventsWithPrimaryVertex++;
 
 	getCaloHits(iEvent); // needed if calohits are to be stored
-        getTracks(iEvent); // needed if tracks inside jet cones are to be stored
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
         getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
@@ -52,6 +52,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	saveEvent->L1objects            = getL1objects(iEvent);
 //	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
+        TrackConverter trackConverter(iEvent, trackCollectionSelection);
         ImpactParameterConverter ipConverter(primaryVertex);
         EcalClusterLazyTools ecalTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
         ElectronConverter electronConverter(*transientTrackBuilder, ipConverter, ecalTools, iEvent, electronIdLabels);

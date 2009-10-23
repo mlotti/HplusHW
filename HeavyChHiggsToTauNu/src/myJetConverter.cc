@@ -14,7 +14,8 @@ MyJet MyEventConverter::myJetConverter(const Photon& recPhoton){
         MyJet photon(recPhoton.px(), recPhoton.py(), recPhoton.pz(), recPhoton.p()); // FIXME: should we use .energy() instead of .p()?
         photon.type = 0; //unconverted
 
-        photon.tracks = getTracks(photon);
+        // FIXME
+        //photon.tracks = getTracks(photon);
 
 	PhotonTag::tag(recPhoton, photon.tagInfo);
 
@@ -49,7 +50,8 @@ MyJet MyEventConverter::myJetConverter(const Conversion& recPhoton){
 MyJet MyEventConverter::myJetConverter(const CaloJet& caloJet){
 
         MyJet jet(caloJet.px(), caloJet.py(), caloJet.pz(), caloJet.energy());
-        jet.tracks = getTracks(jet);
+        // FIXME
+        //jet.tracks = getTracks(jet);
 
         // Jet energy corrections
         for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
@@ -66,7 +68,8 @@ MyJet MyEventConverter::myJetConverter(const CaloJet& caloJet){
 MyJet MyEventConverter::myJetConverter(const pat::Jet& recoJet){
 
         MyJet jet(recoJet.px(), recoJet.py(), recoJet.pz(), recoJet.energy());
-        jet.tracks = getTracks(jet);
+        // FIXME
+        //jet.tracks = getTracks(jet);
 
 	return jet;
 }
@@ -115,6 +118,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 	vector<MyTrack> tracks;
 	vector<MyHit> hits;
 
+        /* FIXME
 	vector<TransientTrack> transientTracks;
 	if(trackCollectionSelection.label() == "iterativeTracks"){
 	  vector<Trajectory> associatedTrajectories;
@@ -156,6 +160,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 	}
 
         tau.tracks = tracks;
+        */
 
 	tau.hits   = hits;
 
@@ -167,7 +172,8 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
         tau.caloInfo = caloTowers(caloJet);
 
-	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
+        // FIXME
+	//VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 
 	addECALClusters(&tau);
 
