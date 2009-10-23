@@ -11,8 +11,8 @@ template <class T>
 MyMET getMEThelper(const edm::Event& iEvent, const edm::InputTag& label, const char *print) {
         Handle<T> met;
         iEvent.getByLabel(label, met);
-        if(!met.isValid())
-                return MyMET();
+        //if(!met.isValid())
+        //        return MyMET();
 
         typename T::const_iterator imet = met->begin();
         std::cout << "     " << print << " " << label.label() << " :" << imet->px() << " " << imet->py() << std::endl;
@@ -22,7 +22,7 @@ MyMET getMEThelper(const edm::Event& iEvent, const edm::InputTag& label, const c
 void MyEventConverter::getCaloMETs(const edm::Event& iEvent, std::map<std::string, MyMET>& mets) {
         MyMET met;
         for(unsigned int iColl = 0; iColl < metCollections.size(); ++iColl){
-                met = getMEThelper<reco::METCollection>(iEvent, metCollections[iColl], "CaloMET");
+                met = getMEThelper<reco::CaloMETCollection>(iEvent, metCollections[iColl], "CaloMET");
                 mets[metCollections[iColl].label()] = met;
         }
 }
