@@ -1,20 +1,114 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CaloTowerConverter.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyTrack.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyHit.h"
 
 #include "DataFormats/TauReco/interface/CaloTau.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
 #include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/PatternTools/interface/Trajectory.h"
+
 #include "RecoTauTag/TauTagTools/interface/CaloTauElementsOperators.h"
 #include "RecoTauTag/TauTagTools/interface/PFTauElementsOperators.h"
+#include "JetMETCorrections/TauJet/interface/TauJetCorrector.h"
 
 using reco::CaloTau;
 using reco::PFTau;
 using reco::IsolatedTauTagInfo;
 using pat::Tau;
 
-void TauTag::tag(const IsolatedTauTagInfo& jet, TagType& tagInfo){
-        double matchingConeSize         = 0.1,
+TauConverter::TauConverter(const TrackConverter& tc, const ImpactParameterConverter& ip, TrackEcalHitPoint& tehp, const CaloTowerConverter& ctc,
+                           const TransientTrackBuilder& builder, const TauJetCorrector& tjc):
+        trackConverter(tc),
+        ipConverter(ip),
+        trackEcalHitPoint(tehp),
+        caloTowerConverter(ctc),
+        transientTrackBuilder(builder),
+        tauJetCorrection(tjc)
+{}
+TauConverter::~TauConverter() {}
+
+
+MyJet TauConverter::convert(const CaloTau& recTau) {
+        const CaloJet& caloJet = *(recTau.caloTauTagInfoRef()->calojetRef().get());
+
+	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+
+	vector<MyTrack> tracks;
+	vector<MyHit> hits;
+
+	vector<TransientTrack> transientTracks;
+	if(trackConverter.getCollectionLabel() == "iterativeTracks") {
+	  vector<Trajectory> associatedTrajectories;
+	  vector<Track> associatedTracks = trackConverter.getTracksInCone(recTau.p4(),0.5,associatedTrajectories);
+	  vector<Track>::const_iterator iTrack;
+	  vector<Trajectory>::const_iterator iTrajectory = associatedTrajectories.begin();
+          // Make sure, that each track has a trajectory; only this guarantees one to one correspondence
+          bool myTrajectoryStatus = (associatedTracks.size() == associatedTrajectories.size());
+	  int trackCounter = 0;
+          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
+
+                const TransientTrack transientTrack = transientTrackBuilder.build(*iTrack);
+		transientTracks.push_back(transientTrack);
+
+		MyTrack track = TrackConverter::convert(transientTrack);
+
+                if (myTrajectoryStatus) {
+			HitConverter::addHits(hits, *iTrajectory, trackCounter);
+		}
+                track.ip                = ipConverter.convert(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
+                tracks.push_back(track);
+		++iTrajectory;
+		++trackCounter;
+          }
+	}else{
+	  // at this point, adding MyHit information is not implemented for calotau data
+	  const TrackRefVector associatedTracks = recTau.caloTauTagInfoRef()->Tracks();
+	  RefVector<TrackCollection>::const_iterator iTrack;
+	  for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
+
+                const TransientTrack transientTrack = transientTrackBuilder.build(*iTrack);
+
+                MyTrack track           = TrackConverter::convert(transientTrack);
+                track.ip                = ipConverter.convert(transientTrack,caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
+                tracks.push_back(track);
+          }
+	}
+
+        tau.tracks = tracks;
+	tau.hits   = hits;
+
+        tag(recTau, tau.tagInfo);
+
+        // Jet energy correction
+        double jetEnergyCorrectionFactor = tauJetCorrection.correction(recTau.p4());
+        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+
+        caloTowerConverter.convert(caloJet, tau.caloInfo);
+
+	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
+
+        // FIXME
+	//addECALClusters(&tau);
+
+        return tau;
+}
+
+
+void TauConverter::tag(const IsolatedTauTagInfo& jet, TagType& tagInfo){
+        const double matchingConeSize         = 0.1,
                signalConeSize           = 0.07,
                isolationConeSize        = 0.4,
                ptLeadingTrackMin        = 20,
@@ -28,11 +122,11 @@ void TauTag::tag(const IsolatedTauTagInfo& jet, TagType& tagInfo){
                                   ptOtherTracksMin);
 }
 
-void TauTag::tag(const CaloTau& tau, TagType& tagInfo){
+void TauConverter::tag(const CaloTau& tau, TagType& tagInfo){
 	CaloTau theCaloTau = tau;
 	CaloTauElementsOperators theCaloTauElementsOperators(theCaloTau);
 
-        double matchingConeSize         = 0.1,
+        const double matchingConeSize         = 0.1,
                signalConeSize           = 0.07,
                isolationConeSize        = 0.4,
                ptLeadingTrackMin        = 20,
@@ -60,7 +154,7 @@ void TauTag::tag(const CaloTau& tau, TagType& tagInfo){
 */
 }
 
-void TauTag::tag(const pat::Tau& tau, TagType& tagInfo){
+void TauConverter::tag(const pat::Tau& tau, TagType& tagInfo){
 	const vector< pair<string,float> > IDs = tau.tauIDs();
         for(vector< pair<string,float> >::const_iterator i = IDs.begin(); i!= IDs.end(); ++i){
                 tagInfo[i->first] = i->second;
@@ -77,11 +171,11 @@ void TauTag::tag(const pat::Tau& tau, TagType& tagInfo){
         tagInfo["pat:photonIso"]          = tau.photonIso();  //gamma PFCandidates
 }
 
-void TauTag::tag(const PFTau& tau, TagType& tagInfo){
+void TauConverter::tag(const PFTau& tau, TagType& tagInfo){
 	PFTau thePFTau = tau;
 	PFTauElementsOperators thePFTauElementsOperators(thePFTau);
 
-        double matchingConeSize         = 0.1,
+        const double matchingConeSize         = 0.1,
                signalConeSize           = 0.07,
                isolationConeSize        = 0.4,
                ptLeadingTrackMin        = 20,

@@ -6,6 +6,8 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
+#include<string>
+
 namespace reco {
   class TransientTrack;
   class PFCandidate;
@@ -22,6 +24,8 @@ public:
   TrackConverter(const edm::Event&, const edm::InputTag&);
   ~TrackConverter();
 
+  const std::string& getCollectionLabel() const;
+
   void addTracksInCone(MyJet&, double cone=0.5) const;
   std::vector<reco::Track> getTracksInCone(const math::XYZTLorentzVector& direction, double cone) const;
   std::vector<reco::Track> getTracksInCone(const math::XYZTLorentzVector& direction, double cone, const std::vector<Trajectory>&) const;
@@ -31,6 +35,7 @@ public:
   static MyTrack convert(const reco::PFCandidate&);
 private:
   const reco::TrackCollection& tracks;
+  const edm::InputTag& label;
 };
 
 #endif

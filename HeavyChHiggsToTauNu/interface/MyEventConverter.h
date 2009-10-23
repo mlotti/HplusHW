@@ -127,7 +127,6 @@ class MyEventConverter {
 	MyJet 			myJetConverter(const CaloJet&);
 	MyJet			myJetConverter(const pat::Jet&);
         MyJet                   myJetConverter(const IsolatedTauTagInfo&);
-        MyJet                   myJetConverter(const CaloTau&);
 	MyJet			myJetConverter(const pat::Tau&);
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);

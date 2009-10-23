@@ -30,7 +30,7 @@ void TrackEcalHitPoint::reset() {
   trackAssociator_.reset();
 }
 
-MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet& caloJet){
+MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet& caloJet) {
         // New method
         math::XYZPoint hitPos = trackAssociator_.trackPositionAtEcal(transientTrack.track());
 

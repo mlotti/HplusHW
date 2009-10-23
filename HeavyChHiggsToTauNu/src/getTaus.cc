@@ -17,8 +17,9 @@ vector<MyJet> MyEventConverter::getTaus(const edm::Event& iEvent, const edm::Inp
         CaloTauCollection::const_iterator iTau;
         for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++){
 	     	if(!iTau->leadTrack()) continue;
-                MyJet tau = myJetConverter(*iTau);
-                taus.push_back(tau);
+                // FIXME
+                //MyJet tau = myJetConverter(*iTau);
+                //taus.push_back(tau);
 	}
 /*
         Handle<IsolatedTauTagInfoCollection> isolatedTauHandle;

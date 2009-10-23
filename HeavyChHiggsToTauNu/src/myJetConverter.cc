@@ -6,7 +6,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HitConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauTag.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauConverter.h"
 
 MyJet MyEventConverter::myJetConverter(const CaloJet& caloJet){
 
@@ -60,83 +60,10 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 	}
 	tau.tracks = tracks;
 
-        TauTag::tag(recTau, tau.tagInfo);
+        TauConverter::tag(recTau, tau.tagInfo);
 
         // FIXME
 	//tau.caloInfo = caloTowers(caloJet);
-
-	addECALClusters(&tau);
-
-        return tau;
-}
-
-MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
-
-
-        const CaloJet& caloJet = *(recTau.caloTauTagInfoRef()->calojetRef().get());
-
-	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
-
-	vector<MyTrack> tracks;
-	vector<MyHit> hits;
-
-        /* FIXME
-	vector<TransientTrack> transientTracks;
-	if(trackCollectionSelection.label() == "iterativeTracks"){
-	  vector<Trajectory> associatedTrajectories;
-	  vector<Track> associatedTracks = tracksInCone(recTau.p4(),0.5,&associatedTrajectories);
-	  vector<Track>::const_iterator iTrack;
-	  vector<Trajectory>::const_iterator iTrajectory = associatedTrajectories.begin();
-          // Make sure, that each track has a trajectory; only this guarantees one to one correspondence
-          bool myTrajectoryStatus = (associatedTracks.size() == associatedTrajectories.size());
-	  int trackCounter = 0;
-          for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
-
-                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
-		transientTracks.push_back(transientTrack);
-
-		MyTrack track = TrackConverter::convert(transientTrack);
-
-                if (myTrajectoryStatus) {
-			HitConverter::addHits(hits, *iTrajectory, trackCounter);
-		}
-                track.ip                = ImpactParameterConverter(primaryVertex).convert(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
-                tracks.push_back(track);
-		++iTrajectory;
-		++trackCounter;
-          }
-	}else{
-	  // at this point, adding MyHit information is not implemented for calotau data
-	  const TrackRefVector associatedTracks = recTau.caloTauTagInfoRef()->Tracks();
-	  RefVector<TrackCollection>::const_iterator iTrack;
-	  for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
-
-                const TransientTrack transientTrack = transientTrackBuilder->build(*iTrack);
-
-                MyTrack track           = TrackConverter::convert(transientTrack);
-                track.ip                = ImpactParameterConverter(primaryVertex).convert(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
-                tracks.push_back(track);
-          }
-	}
-
-        tau.tracks = tracks;
-        */
-
-	tau.hits   = hits;
-
-        TauTag::tag(recTau, tau.tagInfo);
-
-        // Jet energy correction
-        double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
-        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
-
-        // FIXME
-        //tau.caloInfo = caloTowers(caloJet);
-
-        // FIXME
-	//VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 
 	addECALClusters(&tau);
 
@@ -175,7 +102,7 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         tau.tracks = tracks;
 
-        TauTag::tag(recTau, tau.tagInfo);
+        TauConverter::tag(recTau, tau.tagInfo);
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);
@@ -219,7 +146,7 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tracks = tracks;
 
-        TauTag::tag(recTau, tau.tagInfo);
+        TauConverter::tag(recTau, tau.tagInfo);
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 	addECALClusters(&tau);

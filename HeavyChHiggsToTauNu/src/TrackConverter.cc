@@ -24,11 +24,15 @@ static const reco::TrackCollection& helper(const edm::Event& iEvent, const edm::
         return *handle;
 }
 
-TrackConverter::TrackConverter(const edm::Event& iEvent, const edm::InputTag& label):
-        tracks(helper(iEvent, label))
+TrackConverter::TrackConverter(const edm::Event& iEvent, const edm::InputTag& label_):
+        tracks(helper(iEvent, label_)),
+        label(label)
 {}
 TrackConverter::~TrackConverter() {}
 
+const std::string& TrackConverter::getCollectionLabel() const {
+        return label.label();
+}
 
 void TrackConverter::addTracksInCone(MyJet& direction, double cone) const {
 	TrackCollection::const_iterator iTrack;
