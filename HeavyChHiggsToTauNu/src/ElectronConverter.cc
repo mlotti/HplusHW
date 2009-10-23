@@ -29,7 +29,9 @@ ElectronConverter::ElectronConverter(const TransientTrackBuilder& builder, const
 ElectronConverter::~ElectronConverter() {}
 
 template<class T>
-MyJet ElectronConverter::helper(const T& recElectron) const {
+MyJet ElectronConverter::helper(const edm::Ref<edm::View<T> >& iElectron) {
+        const T& recElectron = *iElectron;
+
 	GsfTrackRef track = recElectron.gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder.build(track);
 
@@ -47,34 +49,30 @@ MyJet ElectronConverter::helper(const T& recElectron) const {
                                                    recElectron.superCluster()->y(),
                                                    recElectron.superCluster()->z(),
                                                    recElectron.superCluster()->energy()));
-	tag(recElectron, electron.tagInfo);
+	tag(iElectron, electron.tagInfo);
 
         return electron;
 }
 
 MyJet ElectronConverter::convert(edm::Handle<edm::View<reco::GsfElectron> >& handle, size_t i) {
-        MyJet electron = helper((*handle)[i]);
-        edm::Ref<edm::View<reco::GsfElectron> > iElectron(handle,i);
-        //edm::RefToBase<reco::GsfElectron> iElectron = handle->refAt(i); //?
+        return helper(edm::Ref<edm::View<reco::GsfElectron> >(handle, i));
+}
 
+MyJet ElectronConverter::convert(edm::Handle<edm::View<pat::Electron> >& handle, size_t i) {
+        return helper(edm::Ref<edm::View<pat::Electron> >(handle, i));
+}
+
+void ElectronConverter::tag(const edm::Ref<edm::View<reco::GsfElectron> >& iElectron, TagType& tagInfo) {
+        const reco::GsfElectron& electron = *iElectron;
+
+        edm::Handle<edm::ValueMap<float> > electronIdHandle;
         for(unsigned int ietag = 0; ietag < tagLabels.size(); ++ietag){
-                edm::Handle<edm::ValueMap<float> > electronIdHandle;
                 iEvent.getByLabel(tagLabels[ietag], electronIdHandle );
 
                 const edm::ValueMap<float>& electronId = *electronIdHandle;
 
-                electron.tagInfo[tagLabels[ietag].label()] = electronId[iElectron];
+                tagInfo[tagLabels[ietag].label()] = electronId[iElectron];
         }
-        return electron;
-}
-
-MyJet ElectronConverter::convert(edm::Handle<edm::View<pat::Electron> >& handle, size_t i) {
-        return helper((*handle)[i]);
-}
-
-void ElectronConverter::tag(const reco::GsfElectron& electron, TagType& tagInfo) {
-        
-        
 
 	tagInfo["EoverPIn"]      = electron.eSuperClusterOverP();
         tagInfo["DeltaEtaIn"]    = electron.deltaEtaSuperClusterTrackAtVtx();
@@ -97,7 +95,9 @@ void ElectronConverter::tag(const reco::GsfElectron& electron, TagType& tagInfo)
 */
 }
 
-void ElectronConverter::tag(const pat::Electron& electron, TagType& tagInfo) const {
+void ElectronConverter::tag(const edm::Ref<edm::View<pat::Electron> >& iElectron, TagType& tagInfo) {
+        const pat::Electron& electron = *iElectron;
+
 	const vector<pat::Electron::IdPair>& electronIDs = electron.electronIDs();
 	for(vector<pat::Electron::IdPair>::const_iterator i = electronIDs.begin();
 	    i!= electronIDs.end(); ++i){

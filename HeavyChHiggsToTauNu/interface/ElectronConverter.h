@@ -30,15 +30,15 @@ public:
                     const edm::Event&, const std::vector<edm::InputTag>&);
   ~ElectronConverter();
 
-  MyJet convert(edm::Handle<edm::View<reco::GsfElectron> >&, size_t i);
-  MyJet convert(edm::Handle<edm::View<pat::Electron> >& handle, size_t i);
+  MyJet convert(edm::Handle<edm::View<reco::GsfElectron> >&, size_t);
+  MyJet convert(edm::Handle<edm::View<pat::Electron> >&, size_t);
 
 private:
   template <class T>
-  MyJet helper(const T&) const;
+  MyJet helper(const edm::Ref<edm::View<T> >&);
 
-  void tag(const reco::GsfElectron&, TagType&);
-  void tag(const pat::Electron&, TagType &) const;
+  void tag(const edm::Ref<edm::View<reco::GsfElectron> >&, TagType&);
+  void tag(const edm::Ref<edm::View<pat::Electron> >&, TagType &);
 
   const TransientTrackBuilder& transientTrackBuilder;
   const ImpactParameterConverter& ipConverter;
