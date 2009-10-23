@@ -14,12 +14,14 @@ ClassImp(MyJet)
 
 MyJet::MyJet():
   TLorentzVector(0, 0, 0, 0),
-  originalP4(0, 0, 0, 0)
+  originalP4(0, 0, 0, 0),
+  type(0)
 {}
 
 MyJet::MyJet(double px, double py, double pz, double E):
   TLorentzVector(px, py, pz, E),
-  originalP4(px, py, pz, E)
+  originalP4(px, py, pz, E),
+  type(0)
 {}
 
 
