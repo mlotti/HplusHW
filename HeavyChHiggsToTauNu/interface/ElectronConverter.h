@@ -20,13 +20,14 @@ namespace edm {
 class EcalClusterLazyTools;
 class TransientTrackBuilder;
 
+class TrackConverter;
 class ImpactParameterConverter;
 
 class ElectronConverter {
 public:
   typedef std::map<std::string, double> TagType;
 
-  ElectronConverter(const TransientTrackBuilder&, const ImpactParameterConverter&, EcalClusterLazyTools&,
+  ElectronConverter(const TrackConverter&, const ImpactParameterConverter&, const TransientTrackBuilder&, EcalClusterLazyTools&,
                     const edm::Event&, const std::vector<edm::InputTag>&);
   ~ElectronConverter();
 
@@ -40,8 +41,9 @@ private:
   void tag(const edm::Ref<edm::View<reco::GsfElectron> >&, TagType&);
   void tag(const edm::Ref<edm::View<pat::Electron> >&, TagType &);
 
-  const TransientTrackBuilder& transientTrackBuilder;
+  const TrackConverter& trackConverter;
   const ImpactParameterConverter& ipConverter;
+  const TransientTrackBuilder& transientTrackBuilder;
   EcalClusterLazyTools& clusterTools;
 
   const edm::Event& iEvent;

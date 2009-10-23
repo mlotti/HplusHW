@@ -13,11 +13,12 @@ namespace reco { class Muon; }
 namespace pat { class Muon; }
 class TransientTrackBuilder;
 
+class TrackConverter;
 class ImpactParameterConverter;
 
 class MuonConverter {
 public:
-  MuonConverter(const TransientTrackBuilder&, const ImpactParameterConverter&);
+  MuonConverter(const TrackConverter&, const ImpactParameterConverter&, const TransientTrackBuilder&);
   ~MuonConverter();
 
   template <class T> MyJet convert(edm::Handle<T>& handle, size_t i) const {
@@ -36,8 +37,9 @@ private:
   void tag(const pat::Muon&, TagType&) const;
   template <class T> void tagHelper(const T&, TagType&) const;
 
-  const TransientTrackBuilder& transientTrackBuilder;
+  const TrackConverter& trackConverter;
   const ImpactParameterConverter& ipConverter;
+  const TransientTrackBuilder& transientTrackBuilder;
 };
 
 #endif

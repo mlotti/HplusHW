@@ -18,6 +18,7 @@ vector<MyJet> MyEventConverter::getExtraObjects(const edm::Event& iEvent){
           int offlineMuons = recoMuons.size();
           cout << "ExtraObjects: selected muon collection size " << offlineMuons << endl;
 
+          /* FIXME
           MuonConverter converter(*transientTrackBuilder, ImpactParameterConverter(primaryVertex));
 
           MuonCollection::const_iterator iMuon;
@@ -26,13 +27,16 @@ vector<MyJet> MyEventConverter::getExtraObjects(const edm::Event& iEvent){
                 MyJet muon = converter.convert(*iMuon);
 		muon.tagInfo["mu2tau_selectedMuon"] = 1;
                 extraObjects.push_back(muon);
+          */
 		/*
                 cout << "Muon: et= " << iMuon->et();
                 cout << " eta= "     << iMuon->eta();
                 cout << " phi= "     << iMuon->phi();
                 cout << endl;
 		*/
+          /*
           }
+          */
         }
 	return extraObjects;
 }

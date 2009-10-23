@@ -55,8 +55,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         TrackConverter trackConverter(iEvent, trackCollectionSelection);
         ImpactParameterConverter ipConverter(primaryVertex);
         EcalClusterLazyTools ecalTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
-        ElectronConverter electronConverter(*transientTrackBuilder, ipConverter, ecalTools, iEvent, electronIdLabels);
-        MuonConverter muonConverter(*transientTrackBuilder, ipConverter);
+        ElectronConverter electronConverter(trackConverter, ipConverter, *transientTrackBuilder, ecalTools, iEvent, electronIdLabels);
+        MuonConverter muonConverter(trackConverter, ipConverter, *transientTrackBuilder);
 
         //saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),  iEvent, electronConverter));
         saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),  iEvent, electronConverter));

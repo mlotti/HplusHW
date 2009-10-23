@@ -18,13 +18,14 @@ using std::pair;
 using reco::GsfTrackRef;
 using reco::TransientTrack;
 
-ElectronConverter::ElectronConverter(const TransientTrackBuilder& builder, const ImpactParameterConverter& ip, EcalClusterLazyTools& tools,
+ElectronConverter::ElectronConverter(const TrackConverter& tc, const ImpactParameterConverter& ip, const TransientTrackBuilder& builder, EcalClusterLazyTools& tools,
                                      const edm::Event& event, const std::vector<edm::InputTag>& labels):
-  transientTrackBuilder(builder),
-  ipConverter(ip),
-  clusterTools(tools),
-  iEvent(event),
-  tagLabels(labels)
+        trackConverter(tc),
+        ipConverter(ip),
+        transientTrackBuilder(builder),
+        clusterTools(tools),
+        iEvent(event),
+        tagLabels(labels)
 {}
 ElectronConverter::~ElectronConverter() {}
 
@@ -42,8 +43,7 @@ MyJet ElectronConverter::helper(const edm::Ref<edm::View<T> >& iElectron) {
 	electronTrack.ip = ipConverter.convert(transientTrack);
 	electronTrack.trackEcalHitPoint = TrackEcalHitPoint::convert(recElectron);
 	electron.tracks.push_back(electronTrack);
-        // FIXME
-        //electron.tracks = getTracks(electron);
+        trackConverter.addTracksInCone(electron);
 
 	electron.clusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
                                                    recElectron.superCluster()->y(),

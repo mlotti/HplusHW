@@ -11,9 +11,10 @@
 using reco::TrackRef;
 using reco::TransientTrack;
 
-MuonConverter::MuonConverter(const TransientTrackBuilder& builder, const ImpactParameterConverter& ip):
-        transientTrackBuilder(builder),
-        ipConverter(ip)
+MuonConverter::MuonConverter(const TrackConverter& tc, const ImpactParameterConverter& ip, const TransientTrackBuilder& builder):
+        trackConverter(tc),
+        ipConverter(ip),
+        transientTrackBuilder(builder)
 {}
 MuonConverter::~MuonConverter() {}
 
@@ -32,9 +33,7 @@ MyJet MuonConverter::helper(const T& recMuon) const {
 		MyTrack muonTrack = TrackConverter::convert(transientTrack);
 		muonTrack.ip = ipConverter.convert(transientTrack);
 		muon.tracks.push_back(muonTrack);
-
-                // FIXME
-		//muon.tracks = getTracks(muon);
+                trackConverter.addTracksInCone(muon);
 	}
 
         tag(recMuon, muon.tagInfo);
