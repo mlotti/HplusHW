@@ -10,6 +10,18 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+struct Finalizer {
+  Finalizer(MyEvent *ev, TrackEcalHitPoint& tehp):
+    event(ev), trackEcalHitPoint(tehp) {}
+  ~Finalizer() {
+    trackEcalHitPoint.reset();
+    delete event;
+  }
+  
+  MyEvent *event;
+  TrackEcalHitPoint& trackEcalHitPoint;
+};
+
 void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
 	allEvents++;
@@ -28,8 +40,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         getEcalClusters(iEvent); // needed if ecal clusters for taus are to be stored
 
         trackEcalHitPoint.setEvent(iEvent, iSetup); // give event and event setup to our track associator wrapper
-
 	MyEvent* saveEvent = new MyEvent;
+        Finalizer finalizer(saveEvent, trackEcalHitPoint); // exception safe way of deleting MyEvent and resetting TrackEcalHitPoint
+
 	saveEvent->eventNumber          = iEvent.id().event();
 	saveEvent->runNumber		= iEvent.run();
 	saveEvent->lumiNumber		= iEvent.luminosityBlock();
@@ -44,7 +57,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         ElectronConverter electronConverter(*transientTrackBuilder, ipConverter, ecalTools, iEvent, electronIdLabels);
         MuonConverter muonConverter(*transientTrackBuilder, ipConverter);
 
-        saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),  iEvent, electronConverter));
+        //saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),  iEvent, electronConverter));
+        saveEvent->addCollection("electrons",    getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),  iEvent, electronConverter));
         //saveEvent->addCollection("patelectrons", getParticles<pat::Electron>    (edm::InputTag("selectedLayer1Electrons"), iEvent, electronConverter));
 //	saveEvent->photons              = getPhotons(iEvent);
         
@@ -67,10 +81,6 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
-
-        trackEcalHitPoint.reset();
-
-	delete saveEvent;
 
 //	tauResolutionAnalysis->analyse(iEvent);
 }
