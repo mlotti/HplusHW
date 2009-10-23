@@ -123,7 +123,6 @@ class MyEventConverter {
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 	void			getCaloHits(const edm::Event&);
 	void			getEcalClusters(const edm::Event&);
-	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet&);

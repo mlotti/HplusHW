@@ -28,5 +28,26 @@ std::vector<MyJet> getParticles(const edm::InputTag& name, const edm::Event& iEv
   return ret;
 }
 
+// Version with additional tagger
+template <class T, class Converter, class Tagger>
+std::vector<MyJet> getParticles(const edm::InputTag& name, const edm::Event& iEvent, Converter& converter, const Tagger& tagger) {
+  edm::Handle<edm::View<T> > handle;
+  iEvent.getByLabel(name, handle);
+
+  if(edm::isDebugEnabled())
+    LogDebug("MyEventConverter") << "Particle collection " << name << " with " << handle->size() << " particles" << std::endl;
+
+
+  std::vector<MyJet> ret;
+  ret.reserve(handle->size());
+  for(size_t i = 0; i<handle->size(); ++i) {
+    MyJet jet = converter.convert(handle, i);
+    tagger.tag(handle, i, jet.tagInfo);
+    ret.push_back(jet);
+  }
+
+  return ret;
+}
+
 
 #endif

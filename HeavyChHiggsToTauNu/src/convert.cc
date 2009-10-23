@@ -24,6 +24,12 @@ struct Finalizer {
   TrackEcalHitPoint& trackEcalHitPoint;
 };
 
+struct MuonReplacementTagger {
+  void tag(const edm::Handle<edm::View<reco::Muon> >, size_t i, std::map<std::string, double>& tagInfo) const {
+    tagInfo["mu2tau_selectedMuon"] = 1;
+  }
+};
+
 void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
 	allEvents++;
@@ -70,19 +76,22 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         
         saveEvent->addCollection("muons",        getParticles<reco::Muon>       (edm::InputTag("muons"),                   iEvent, muonConverter));
 	//saveEvent->addCollection("patmuons",     getParticles<pat::Muon>        (edm::InputTag("selectedLayer1Muons"),     iEvent, muonConverter));
+
 	saveEvent->addCollection("calotaus",getTaus(iEvent, edm::InputTag("caloRecoTauProducer")));
 	saveEvent->addCollection("fixedConePFTaus",getPFTaus(iEvent, edm::InputTag("fixedConePFTauProducer")));
 	saveEvent->addCollection("fixedConeHighEffPFTaus",getPFTaus(iEvent, edm::InputTag("fixedConeHighEffPFTauProducer")));
         saveEvent->addCollection("shrinkingConePFTaus",getPFTaus(iEvent, edm::InputTag("shrinkingConePFTauProducer")));
+
 	saveEvent->addCollection("icone05jets",getJets(iEvent, edm::InputTag("iterativeCone5CaloJets")));
 
 	getMET(iEvent, saveEvent->mets);
+
         saveEvent->hasMCdata            = true;
         MCConverter::addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
         MCConverter::setSimTracks(iEvent, *saveEvent);
 
-	saveEvent->addCollection("removedMuons",getExtraObjects(iEvent));
+	saveEvent->addCollection("removedMuons", getParticles<reco::Muon> (edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger()));
 ////	saveEvent->addExtraObjects("",getExtraObjects(iEvent));
 
 	userRootTree->fillTree(saveEvent);
