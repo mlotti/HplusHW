@@ -106,8 +106,12 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
         MCConverter::setSimTracks(iEvent, *saveEvent);
 
-	saveEvent->addCollection("removedMuons", getParticles<reco::Muon> (edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger()));
-////	saveEvent->addExtraObjects("",getExtraObjects(iEvent));
+        try {
+          saveEvent->addCollection("removedMuons", getParticles<reco::Muon> (edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger()));
+        } catch(const cms::Exception& e) {
+          if(e.category() != "ProductNotFound")
+            throw;
+        }
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;
