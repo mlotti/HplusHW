@@ -1,26 +1,5 @@
-/LinkDef.h/1.3/Result of merge//
-/MyCaloTower.cc/1.6/Result of merge//
-/MyEvent.cc/1.23/Result of merge//
-/MyEventConverter.cc/1.9/Result of merge//
-/MyGlobalPoint.cc/1.6/Result of merge//
-/MyHit.cc/1.3/Result of merge//
-/MyImpactParameter.cc/1.3/Result of merge//
-/MyJet.cc/1.34/Result of merge+Mon Oct 26 11:53:56 2009//
-/MyMCParticle.cc/1.5/Result of merge//
-/MyMET.cc/1.8/Result of merge+Mon Oct 26 11:53:56 2009//
-/MyMeasurement1D.cc/1.2/Result of merge//
-/MyRootTree.cc/1.5/Result of merge//
-/MySimTrack.cc/1.2/Result of merge//
-/MyTrack.cc/1.16/Result of merge//
-/MyVertex.cc/1.5/Result of merge//
-/TauMETTriggerAnalysis.cc/1.9/Result of merge//
-/TauResolutionAnalysis.cc/1.17/Result of merge//
 /btag.cc/1.2/Mon Oct 26 11:41:55 2009//
 /caloTowers.cc/1.3/Mon Oct 26 11:41:55 2009//
-/convert.cc/1.18/Result of merge//
-/etaPhiFunctions.cc/1.3/Result of merge//
-/etag.cc/1.4/Result of merge//
-/eventSetup.cc/1.13/Result of merge//
 /getCaloHits.cc/1.1/Mon Oct 26 11:41:55 2009//
 /getElectrons.cc/1.7/Mon Oct 26 11:41:55 2009//
 /getExtraObjects.cc/1.2/Mon Oct 26 11:41:55 2009//
@@ -29,32 +8,53 @@
 /getJets.cc/1.7/Mon Oct 26 11:41:55 2009//
 /getMCJets.cc/1.2/Mon Oct 26 11:41:55 2009//
 /getMCMET.cc/1.1/Mon Oct 26 11:41:55 2009//
-/getMCParticles.cc/1.13/Result of merge//
-/getMCPrimaryVertex.cc/1.2/Result of merge//
-/getMET.cc/1.13/Result of merge//
-/getMetFromCaloTowers.cc/1.3/Result of merge//
 /getMuons.cc/1.2/Mon Oct 26 11:41:55 2009//
-/getPFTaus.cc/1.4/Result of merge//
 /getPhotons.cc/1.3/Mon Oct 26 11:41:55 2009//
 /getPrimaryVertex.cc/1.3/Mon Oct 26 11:41:55 2009//
-/getSimTracks.cc/1.4/Result of merge//
 /getTaus.cc/1.2/Mon Oct 26 11:41:55 2009//
-/getTracks.cc/1.9/Result of merge//
 /getTrajectories.cc/1.1/Mon Oct 26 11:41:55 2009//
 /getTriggerResults.cc/1.5/Result of merge//
 /impactParameter.cc/1.6/Mon Oct 26 11:41:55 2009//
-/muonTag.cc/1.3/Result of merge//
-/myHitConverter.cc/1.3/Result of merge//
-/myJetConverter.cc/1.30/Result of merge+Mon Oct 26 11:53:57 2009//
 /myMCParticleConverter.cc/1.2/Mon Oct 26 11:41:55 2009//
 /myMeasurement1DConverter.cc/1.1/Mon Oct 26 11:41:55 2009//
-/myTrackConverter.cc/1.8/Result of merge//
-/myVertexConverter.cc/1.4/Result of merge//
 /photontag.cc/1.3/Mon Oct 26 11:41:55 2009//
 /primaryVertexFound.cc/1.3/Mon Oct 26 11:41:55 2009//
 /secondaryVertices.cc/1.1/Mon Oct 26 11:41:55 2009//
-/tauTag.cc/1.7/Result of merge//
-/trackEcalHitPoint.cc/1.6/Result of merge//
 /triggerDecision.cc/1.4/Mon Oct 26 11:41:55 2009//
-/visibleTaus.cpp/1.3/Result of merge//
+/LinkDef.h/1.3/Mon Oct 26 11:53:55 2009//
+/MyCaloTower.cc/1.6/Mon Oct 26 11:53:55 2009//
+/MyEvent.cc/1.23/Mon Oct 26 11:53:55 2009//
+/MyEventConverter.cc/1.9/Mon Oct 26 11:53:55 2009//
+/MyGlobalPoint.cc/1.6/Mon Oct 26 11:53:55 2009//
+/MyHit.cc/1.3/Mon Oct 26 11:53:56 2009//
+/MyImpactParameter.cc/1.3/Mon Oct 26 11:53:56 2009//
+/MyMCParticle.cc/1.5/Mon Oct 26 11:53:56 2009//
+/MyMeasurement1D.cc/1.2/Mon Oct 26 11:53:56 2009//
+/MyRootTree.cc/1.5/Mon Oct 26 11:53:56 2009//
+/MySimTrack.cc/1.2/Mon Oct 26 11:53:56 2009//
+/MyTrack.cc/1.16/Mon Oct 26 11:53:56 2009//
+/MyVertex.cc/1.5/Mon Oct 26 11:53:56 2009//
+/TauMETTriggerAnalysis.cc/1.9/Mon Oct 26 11:53:57 2009//
+/TauResolutionAnalysis.cc/1.17/Mon Oct 26 11:53:57 2009//
+/convert.cc/1.18/Mon Oct 26 11:53:57 2009//
+/etaPhiFunctions.cc/1.3/Mon Oct 26 11:53:57 2009//
+/etag.cc/1.4/Mon Oct 26 11:53:57 2009//
+/eventSetup.cc/1.13/Mon Oct 26 11:53:57 2009//
+/getMCParticles.cc/1.13/Mon Oct 26 11:53:57 2009//
+/getMCPrimaryVertex.cc/1.2/Mon Oct 26 11:53:57 2009//
+/getMET.cc/1.13/Mon Oct 26 11:53:57 2009//
+/getMetFromCaloTowers.cc/1.3/Mon Oct 26 11:53:57 2009//
+/getPFTaus.cc/1.4/Mon Oct 26 11:53:57 2009//
+/getSimTracks.cc/1.4/Mon Oct 26 11:53:57 2009//
+/getTracks.cc/1.9/Mon Oct 26 11:53:57 2009//
+/muonTag.cc/1.3/Mon Oct 26 11:53:57 2009//
+/myHitConverter.cc/1.3/Mon Oct 26 11:53:57 2009//
+/myTrackConverter.cc/1.8/Mon Oct 26 11:53:58 2009//
+/myVertexConverter.cc/1.4/Mon Oct 26 11:53:58 2009//
+/tauTag.cc/1.7/Mon Oct 26 11:53:58 2009//
+/trackEcalHitPoint.cc/1.6/Mon Oct 26 11:53:58 2009//
+/visibleTaus.cpp/1.3/Mon Oct 26 11:53:58 2009//
+/MyJet.cc/1.34/Mon Oct 26 12:06:29 2009//
+/myJetConverter.cc/1.30/Mon Oct 26 12:06:50 2009//
+/MyMET.cc/1.8/Mon Oct 26 12:11:19 2009//
 D

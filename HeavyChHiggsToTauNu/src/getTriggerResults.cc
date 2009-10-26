@@ -27,7 +27,7 @@ map<string,bool> MyEventConverter::getTriggerResults(const edm::Event& iEvent){
                                                    i!= hlNames.end(); i++){
                         if(printTrigger) cout << "trigger: " << *i << " " << (*iHandle)->accept(n) << endl;
 
-			string s_trigger = hltTableName + *i;
+			string s_trigger = hltTableName + "_" + *i;
 			trigger[s_trigger] = (*iHandle)->accept(n);
 /*
                         for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin();

@@ -1,19 +1,6 @@
 #ifndef __MyMet__
 #define __MyMet__
 
-<<<<<<< MyMET.h
-#include "TVector2.h"
-#include "TVector3.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
-
-#include<iostream>
-#include<string>
-
-/**
- * \brief Missing transverse energy class for MyEvent dataformat
- */
-class MyMET: public TVector2 {
-=======
 #include "TVector2.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
@@ -24,7 +11,6 @@ class MyMET: public TVector2 {
  * \brief Missing transverse energy class for MyEvent dataformat
  */
 class MyMET: public TVector2 {
->>>>>>> 1.7
    public:
       	MyMET();
         
@@ -46,13 +32,7 @@ class MyMET: public TVector2 {
         double y() const;
         double phi() const;
 
-<<<<<<< MyMET.h
-        TVector3 tvector3() const;
-
       	void print(std::ostream& out = std::cout) const;
-=======
-      	void print(std::ostream& out = std::cout) const;
->>>>>>> 1.7
 
         /**
          * \brief Name of the MET object

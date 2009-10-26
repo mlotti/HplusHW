@@ -26,35 +26,6 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 	return muon;
 }
 
-<<<<<<< myJetConverter.cc
-MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
-
-        MyJet muon;
-        muon.SetPx(recMuon.px());
-        muon.SetPy(recMuon.py());
-        muon.SetPz(recMuon.pz());
-        muon.SetE(recMuon.p());
-        muon.type = 13 * recMuon.charge();
-
-        TrackRef track = recMuon.globalTrack();
-        if(track.isNull()) track = recMuon.innerTrack();
-
-        if(track.isNonnull()){
-                const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-                MyTrack muonTrack = myTrackConverter(transientTrack);
-                muonTrack.ip = impactParameter(transientTrack);
-                muon.tracks.push_back(muonTrack);
-
-                muon.tracks = getTracks(muon);
-        }
-
-	muon.tagInfo = muonTag(recMuon);
-
-        return muon;
-}
-
-=======
 MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
 
         MyJet muon(recMuon.px(), recMuon.py(), recMuon.pz(), recMuon.p()); // FIXME: should we use .energy() instead of .p()?
@@ -78,7 +49,6 @@ MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
         return muon;
 }
 
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	GsfTrackRef track = recElectron->gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);
@@ -102,38 +72,6 @@ MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
         return electron;
 }
 
-<<<<<<< myJetConverter.cc
-MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
-        GsfTrackRef track = recElectron.gsfTrack();
-        const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-	MyJet electron;
-
-	electron.SetPx(recElectron.px());
-        electron.SetPy(recElectron.py());
-        electron.SetPz(recElectron.pz());
-        electron.SetE(recElectron.p());
-	electron.type = 11 * (*track).charge();
-
-        MyTrack electronTrack = myTrackConverter(transientTrack);
-        electronTrack.ip = impactParameter(transientTrack);
-	electronTrack.trackEcalHitPoint = trackEcalHitPoint(&recElectron);
-        electron.tracks.push_back(electronTrack);
-        electron.tracks = getTracks(electron);
-
-        vector<TLorentzVector> superClusters;
-        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-                                               recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-        electron.clusters = superClusters;
-
-	electron.tagInfo = etag(recElectron);
-
-	return electron;
-}
-
-=======
 MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
         GsfTrackRef track = recElectron.gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);
@@ -159,7 +97,6 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 	return electron;
 }
 
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const Photon* recPhoton){
 
         MyJet photon(recPhoton->px(), recPhoton->py(), recPhoton->pz(), recPhoton->p()); // FIXME: should we use .energy() instead of .p()?
@@ -214,22 +151,6 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         return jet;
 }
 
-<<<<<<< myJetConverter.cc
-MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
-
-        MyJet jet;
-
-        jet.SetPx(recoJet->px());
-        jet.SetPy(recoJet->py());
-        jet.SetPz(recoJet->pz());
-        jet.SetE(recoJet->energy());
-
-        jet.tracks = getTracks(jet);
-
-	return jet;
-}
-
-=======
 MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
 
         MyJet jet(recoJet->px(), recoJet->py(), recoJet->pz(), recoJet->energy());
@@ -238,7 +159,6 @@ MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
 	return jet;
 }
 
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
         const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.first.get());
         return myJetConverter(caloJet);
@@ -343,52 +263,6 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
         return tau;
 }
 
-<<<<<<< myJetConverter.cc
-MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
-
-        MyJet tau;
-
-        tau.SetPx(recTau.px());
-        tau.SetPy(recTau.py());
-        tau.SetPz(recTau.pz());
-        tau.SetE(recTau.energy());
-
-        vector<MyTrack> tracks;
-        const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
-
-	vector<TransientTrack> transientTracks;
-        RefVector<PFCandidateCollection>::const_iterator iTrack;
-        for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
-
-                const PFCandidate* pfCand = iTrack->get();
-		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
-                MyTrack track = myTrackConverter(pfCand);
-                tracks.push_back(track);
-        }
-
-        const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
-        for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
-
-                const PFCandidate* pfCand = iTrack->get();
-		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
-                MyTrack track = myTrackConverter(pfCand);
-                tracks.push_back(track);
-        }
-
-        tau.tracks = tracks;
-
-        tau.tagInfo = tauTag(recTau);
-
-	tau.secVertices = secondaryVertices(transientTracks);
-	addECALClusters(&tau);
-
-	return tau;
-}
-=======
 MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
         MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
@@ -428,7 +302,6 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
 	return tau;
 }
->>>>>>> 1.30
 
 MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 

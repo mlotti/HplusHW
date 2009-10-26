@@ -21,15 +21,10 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource",
-<<<<<<< offlineAnalysis_cfg.py
-    fileNames = cms.untracked.vstring(
-"file:/tmp/slehti/test.root")
-=======
     fileNames = cms.untracked.vstring(
 #"file:/tmp/slehti/QCD_Pt80_OctX.root"
     "rfio:/castor/cern.ch/user/s/slehti/QCD_Pt80_OctX.root"
     )
->>>>>>> 1.7
 )
 
 #if files:
@@ -108,31 +103,6 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         TrackAssociator.TrackAssociatorParameterBlock,
         fileName = cms.string("analysis.root"),
 
-<<<<<<< offlineAnalysis_cfg.py
-#	HLTSelection = cms.VInputTag(cms.InputTag("HLT1Tau"),
-#                                     cms.InputTag("HLT1MuonIso"),
-#                                     cms.InputTag("HLT1MET"),
-#                                     cms.InputTag("HLT1Tau1MET"),
-#                                     cms.InputTag("HLT1jet"),
-#                                     cms.InputTag("HLT2jet"),
-#                                     cms.InputTag("HLT3jet"),
-#                                     cms.InputTag("HLT4jet")),
-        HLTSelection = cms.VInputTag(cms.InputTag("HLT_SingleIsoTau30_Trk5"),
-				     cms.InputTag("HLT_DoubleLooseIsoTau15_Trk5"),
-				     cms.InputTag("HLT_Jet50"),
-				     cms.InputTag("HLT_Jet80"),
-				     cms.InputTag("HLT_DiJetAve50U"),
-				     cms.InputTag("HLT_DiJetAve70U"),
-				     cms.InputTag("HLT_QuadJet30"),
-				     cms.InputTag("HLT_SumET120"),
-				     cms.InputTag("HLT_IsoMu9"),
-				     cms.InputTag("HLT_Mu9"),
-				     cms.InputTag("HLT_Mu11"),
-				     cms.InputTag("HLT_Mu15"),
-				     cms.InputTag("HLT_DoubleMu3")),
-
-=======
->>>>>>> 1.7
         # JetEnergyCorrection = MCJetCorrectorIcone5,MCJetCorrectorMcone5
         # if no corrections, leave {} empty
 	JetEnergyCorrection = cms.VInputTag(

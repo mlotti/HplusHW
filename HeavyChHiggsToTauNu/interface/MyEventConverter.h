@@ -199,8 +199,8 @@ class MyEventConverter {
 
 // datafields
 
-	InputTag	 triggerTable;
-        vector<InputTag> HLTSelection;
+//	InputTag	 triggerTable;
+//	vector<InputTag> HLTSelection;
         Vertex primaryVertex;
 	bool PVFound;
         InputTag trackCollectionSelection;
