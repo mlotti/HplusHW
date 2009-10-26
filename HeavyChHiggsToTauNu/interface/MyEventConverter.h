@@ -121,12 +121,10 @@ class MyEventConverter {
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
-	void			getEcalClusters(const edm::Event&);
 
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet&);
 	MyJet			myJetConverter(const pat::Jet&);
-	void                    addECALClusters(MyJet* jet);
 
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 
@@ -154,10 +152,8 @@ class MyEventConverter {
         TrackCollection tracks;
 
 	// ECAL clusters
-	InputTag BarrelBasicClustersInput;
-	InputTag EndcapBasicClustersInput;
-	Handle<BasicClusterCollection> theBarrelBCCollection;
-	Handle<BasicClusterCollection> theEndcapBCCollection;
+	InputTag barrelBasicClustersInput;
+	InputTag endcapBasicClustersInput;
 	
 	Handle<vector<Trajectory> > myTrajectoryCollectionHandle;
  	InputTag trajectoryInput; // Input for trajectory collection
