@@ -49,5 +49,24 @@ std::vector<MyJet> getParticles(const edm::InputTag& name, const edm::Event& iEv
   return ret;
 }
 
+template <class T, class Converter, class Condition>
+std::vector<MyJet> getParticlesIf(const edm::InputTag& name, const edm::Event& iEvent, Converter& converter, const Condition& condition) {
+  edm::Handle<edm::View<T> > handle;
+  iEvent.getByLabel(name, handle);
+
+  if(edm::isDebugEnabled())
+    LogDebug("MyEventConverter") << "Particle collection " << name << " with " << handle->size() << " particles" << std::endl;
+
+
+  std::vector<MyJet> ret;
+  ret.reserve(handle->size());
+  for(size_t i = 0; i<handle->size(); ++i) {
+    if(!condition((*handle)[i])) continue;
+    ret.push_back(converter.convert(handle, i));
+  }
+
+  return ret;
+}
+
 
 #endif
