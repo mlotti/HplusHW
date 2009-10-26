@@ -125,34 +125,34 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # JetEnergyCorrection = MCJetCorrectorIcone5,MCJetCorrectorMcone5
         # if no corrections, leave {} empty
-	JetEnergyCorrection = cms.VInputTag(
-		cms.InputTag("MCJetCorrectorIcone5")
-#		cms.InputTag("MCJetCorrectorMcone5")
+	JetEnergyCorrection = cms.vstring(
+		"MCJetCorrectorIcone5"
+#		"MCJetCorrectorMcone5"
 	),
 
         # b tagging elgorithms
-        BTaggingAlgorithms = cms.VInputTag(
-                cms.InputTag("trackCountingHighPurBJetTags"),
-                cms.InputTag("trackCountingHighEffBJetTags"),
-                cms.InputTag("combinedSecondaryVertexBJetTags"),
-                cms.InputTag("combinedSecondaryVertexMVABJetTags"),
-                cms.InputTag("jetBProbabilityBJetTags"),
-                cms.InputTag("jetProbabilityBJetTags"),
-                cms.InputTag("simpleSecondaryVertexBJetTags"),
-                cms.InputTag("softElectronByIP3dBJetTags"),
-		cms.InputTag("softElectronByPtBJetTags"),
-                cms.InputTag("softMuonBJetTags"),
-                cms.InputTag("softMuonByIP3dBJetTags"),
-		cms.InputTag("softMuonByPtBJetTags")
+        BTaggingAlgorithms = cms.vstring(
+                "trackCountingHighPurBJetTags",
+                "trackCountingHighEffBJetTags",
+                "combinedSecondaryVertexBJetTags",
+                "combinedSecondaryVertexMVABJetTags",
+                "jetBProbabilityBJetTags",
+                "jetProbabilityBJetTags",
+                "simpleSecondaryVertexBJetTags",
+                "softElectronByIP3dBJetTags",
+		"softElectronByPtBJetTags",
+                "softMuonBJetTags",
+                "softMuonByIP3dBJetTags",
+		"softMuonByPtBJetTags"
         ),
 
 	METCollections = cms.VInputTag(
 		cms.InputTag("met"),
 		cms.InputTag("corMetGlobalMuons"),
-		cms.InputTag("corMetType1Icone5"),
+		#cms.InputTag("corMetType1Icone5"),
 		cms.InputTag("metNoHF"),
 		cms.InputTag("corMetType1Icone5NoHF"),
-		cms.InputTag("tauMetCorr")
+		#cms.InputTag("tauMetCorr")
 	),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks

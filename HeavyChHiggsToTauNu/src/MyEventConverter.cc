@@ -55,8 +55,8 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 		triggerdecision[name] = false;
 	}
 */
-	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
-        btaggingAlgos = iConfig.getParameter<vector<InputTag> >("BTaggingAlgorithms");
+	jetEnergyCorrectionTypes = iConfig.getParameter<vector<std::string> >("JetEnergyCorrection");
+        btaggingAlgos = iConfig.getParameter<vector<std::string> >("BTaggingAlgorithms");
 
 	metCollections = iConfig.getParameter<vector<InputTag> >("METCollections");
 

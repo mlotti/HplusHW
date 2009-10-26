@@ -119,10 +119,6 @@ class MyEventConverter {
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 
-        MyJet                   myJetConverter(const JetTag&);
-	MyJet 			myJetConverter(const CaloJet&);
-	MyJet			myJetConverter(const pat::Jet&);
-
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 
 
@@ -142,8 +138,8 @@ class MyEventConverter {
 //	const TransientTrackingRecHitBuilder* TTRHBuilder;
         vector<const JetCorrector*> jetEnergyCorrections;
 	const TauJetCorrector* tauJetCorrection;
-        vector<InputTag> jetEnergyCorrectionTypes;
-        vector<InputTag> btaggingAlgos;
+        vector<std::string> jetEnergyCorrectionTypes;
+        vector<std::string> btaggingAlgos;
 	vector<InputTag> metCollections;
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
