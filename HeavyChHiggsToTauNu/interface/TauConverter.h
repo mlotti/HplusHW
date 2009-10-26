@@ -43,15 +43,13 @@ public:
   MyJet convert(const pat::Tau& recTau);
   MyJet convert(const reco::PFTau& recTau);
 
+private:
   typedef std::map<std::string, double> TagType;
 
   static void tag(const reco::IsolatedTauTagInfo&, TagType&);
   static void tag(const reco::CaloTau&, TagType&);
   static void tag(const pat::Tau&, TagType&);
   static void tag(const reco::PFTau&, TagType&);
-
-private:
-  void caloTowers(const reco::CaloJet&, std::vector<MyCaloTower>&);
 
   const TrackConverter& trackConverter;
   const ImpactParameterConverter& ipConverter;
