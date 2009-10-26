@@ -112,9 +112,6 @@ class MyEventConverter {
 	vector<MyJet>		getHLTObjects(const edm::Event&);
         vector<MyJet> 		getMuons(const edm::Event&, const edm::InputTag&);
 	vector<MyJet>           getPATMuons(const edm::Event&);
-        vector<MyJet>           getTaus(const edm::Event&, const edm::InputTag&);
-	vector<MyJet>		getPATTaus(const edm::Event&);
-        vector<MyJet> 		getPFTaus(const edm::Event&, const edm::InputTag&);
         vector<MyJet> 		getJets(const edm::Event&, const edm::InputTag&);
 	vector<MyJet>		getPATJets(const edm::Event&);
         void		        getTrajectories(const edm::Event&);

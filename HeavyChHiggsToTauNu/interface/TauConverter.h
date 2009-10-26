@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TauConverter_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TauConverter_h
 
+#include "DataFormats/Common/interface/Handle.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 
 #include<vector>
@@ -31,6 +33,10 @@ public:
                const EcalClusterConverter&,
                const TransientTrackBuilder&, const TauJetCorrector&);
   ~TauConverter();
+
+  template <class T> MyJet convert(edm::Handle<T>& handle, size_t i) {
+    return convert((*handle)[i]);
+  }
 
   MyJet convert(const reco::CaloTau& recTau);
   MyJet convert(const reco::IsolatedTauTagInfo& recTau);
