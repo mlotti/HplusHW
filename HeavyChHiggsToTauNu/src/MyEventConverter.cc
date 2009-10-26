@@ -1,9 +1,31 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
 MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
-  trackEcalHitPoint(iConfig) {
-        init(iConfig);
-}
+        HLTSelection(iConfig.getParameter< vector<InputTag> >("HLTSelection")),
+        trackCollectionSelection(iConfig.getParameter<InputTag>("TrackCollection")),
+//	barrelClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation")),
+//	endcapClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation")),
+	reducedBarrelRecHitCollection(iConfig.getParameter<edm::InputTag>("ReducedBarrelRecHitCollection")),
+	reducedEndcapRecHitCollection(iConfig.getParameter<edm::InputTag>("ReducedEndcapRecHitCollection")),
+        transientTrackBuilder(0),
+        tauJetCorrection(new TauJetCorrector(iConfig)),
+	jetEnergyCorrectionTypes(iConfig.getParameter<std::vector<std::string> >("JetEnergyCorrection")),
+        btaggingAlgos(iConfig.getParameter<std::vector<std::string> >("BTaggingAlgorithms")),
+        metCollections(iConfig.getParameter<std::vector<edm::InputTag> >("METCollections")),
+	electronIdLabels(iConfig.getParameter<std::vector<edm::InputTag> >("ElectronIdLabels")),
+	barrelBasicClustersInput(iConfig.getParameter<InputTag>("BarrelBasicClustersSource")),
+        endcapBasicClustersInput(iConfig.getParameter<InputTag>("EndcapBasicClustersSource")),
+        trajectoryInput(trackCollectionSelection),
+        allEvents(0),
+	triggeredEvents(0),
+        eventsWithPrimaryVertex(0),
+	savedEvents(0),
+	userRootTree(new MyRootTree(iConfig.getParameter<std::string>("fileName").c_str())),
+        tauResolutionAnalysis(new TauResolutionAnalysis()),
+	tauMETTriggerAnalysis(new TauMETTriggerAnalysis(userRootTree)),
+        trackEcalHitPoint(iConfig),
+        printTrigger(true)
+{}
 
 MyEventConverter::~MyEventConverter(){
 
@@ -25,55 +47,4 @@ MyEventConverter::~MyEventConverter(){
         delete userRootTree;
 
 	delete tauResolutionAnalysis;
-}
-
-
-void MyEventConverter::init(const edm::ParameterSet& iConfig){
-
-///	electronIdAlgo = new CutBasedElectronID();
-	userRootTree = new MyRootTree(iConfig.getParameter<std::string>("fileName").c_str());
-
-	// counters
-	allEvents 		= 0;
-	triggeredEvents 	= 0;
-	eventsWithPrimaryVertex = 0;
-	savedEvents 		= 0;
-
-	printTrigger = true;
-
-	tauResolutionAnalysis = new TauResolutionAnalysis();
-	tauMETTriggerAnalysis = new TauMETTriggerAnalysis(userRootTree);
-
-
-	HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
-
-/*
-	tauInputType = (iConfig.getParameter<InputTag>("TauInputType")).label();
-	vector<InputTag> HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
-	for(vector<InputTag>::const_iterator i = HLTSelection.begin(); i != HLTSelection.end(); i++){
-		string name = i->label();
-		triggerdecision[name] = false;
-	}
-*/
-	jetEnergyCorrectionTypes = iConfig.getParameter<vector<std::string> >("JetEnergyCorrection");
-        btaggingAlgos = iConfig.getParameter<vector<std::string> >("BTaggingAlgorithms");
-
-	metCollections = iConfig.getParameter<vector<InputTag> >("METCollections");
-
-	electronIdLabels = iConfig.getParameter<vector<InputTag> >("ElectronIdLabels");
-////	electronIdAlgo->setup(iConfig);
-//	barrelClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation");
-//	endcapClusterShapeAssocProducer = iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation");
-	reducedBarrelRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedBarrelRecHitCollection");
-	reducedEndcapRecHitCollection = iConfig.getParameter<edm::InputTag>("ReducedEndcapRecHitCollection");
-
-        trackCollectionSelection = iConfig.getParameter<InputTag>("TrackCollection");
-	trajectoryInput = trackCollectionSelection;
-
-	tauJetCorrection = new TauJetCorrector(iConfig);
-
-        // ECAL clusters 
-	barrelBasicClustersInput = iConfig.getParameter<InputTag>("BarrelBasicClustersSource"); 
-	endcapBasicClustersInput = iConfig.getParameter<InputTag>("EndcapBasicClustersSource"); 
-	
 }

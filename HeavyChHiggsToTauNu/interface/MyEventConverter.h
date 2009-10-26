@@ -102,8 +102,6 @@ class MyEventConverter {
 
 // functions
 
-	void init(const edm::ParameterSet& iConfig);
-
 	bool triggerDecision(const edm::Event&);
 	bool primaryVertexFound(const edm::Event&);
 //        bool primaryVertexFound();
@@ -120,32 +118,32 @@ class MyEventConverter {
 
 // datafields
 
-        vector<InputTag> HLTSelection;
-        Vertex primaryVertex;
+        std::vector<edm::InputTag> HLTSelection;
+        reco::Vertex primaryVertex;
 	bool PVFound;
-        InputTag trackCollectionSelection;
+        edm::InputTag trackCollectionSelection;
 
 ////        CutBasedElectronID* electronIdAlgo;
-//	InputTag barrelClusterShapeAssocProducer;
-//	InputTag endcapClusterShapeAssocProducer;
-	InputTag reducedBarrelRecHitCollection;
-	InputTag reducedEndcapRecHitCollection;
+//	edm::InputTag barrelClusterShapeAssocProducer;
+//	edm::InputTag endcapClusterShapeAssocProducer;
+	edm::InputTag reducedBarrelRecHitCollection;
+	edm::InputTag reducedEndcapRecHitCollection;
         const TransientTrackBuilder* transientTrackBuilder;
 //	const TransientTrackingRecHitBuilder* TTRHBuilder;
         vector<const JetCorrector*> jetEnergyCorrections;
 	const TauJetCorrector* tauJetCorrection;
-        vector<std::string> jetEnergyCorrectionTypes;
-        vector<std::string> btaggingAlgos;
-	vector<InputTag> metCollections;
-	vector<InputTag> electronIdLabels;
+        std::vector<std::string> jetEnergyCorrectionTypes;
+        std::vector<std::string> btaggingAlgos;
+	std::vector<edm::InputTag> metCollections;
+	std::vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 
 	// ECAL clusters
-	InputTag barrelBasicClustersInput;
-	InputTag endcapBasicClustersInput;
+	edm::InputTag barrelBasicClustersInput;
+	edm::InputTag endcapBasicClustersInput;
 	
 	Handle<vector<Trajectory> > myTrajectoryCollectionHandle;
- 	InputTag trajectoryInput; // Input for trajectory collection
+ 	edm::InputTag trajectoryInput; // Input for trajectory collection
 
 	int allEvents;
 	int triggeredEvents;
