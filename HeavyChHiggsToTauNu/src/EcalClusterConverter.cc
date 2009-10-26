@@ -23,7 +23,17 @@ EcalClusterConverter::EcalClusterConverter(const edm::Event& iEvent, const edm::
 
 EcalClusterConverter::~EcalClusterConverter() {}
 
-
+template <class T>
+inline void addClustersHelper(MyJet *jet, const T& collection, const MyGlobalPoint& myECALHitPoint) {
+  unsigned int myCollectionSize = collection.size();
+  for(unsigned int i=0; i != myCollectionSize; ++i) { 
+    const BasicCluster& theBasicCluster(collection[i]);
+    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), theBasicCluster.position()) <= 0.7) {
+      const math::XYZPoint& pos(theBasicCluster.position());
+      jet->clusters.push_back(TLorentzVector(pos.x(), pos.y(), pos.z(), theBasicCluster.energy()));
+    }
+  }
+}
 
 void EcalClusterConverter::addClusters(MyJet *jet) const {
   // Loops over barrel and endcap ECAL cluster
@@ -33,31 +43,10 @@ void EcalClusterConverter::addClusters(MyJet *jet) const {
   const MyTrack *myLeadingTrack = jet->leadingTrack();
   if (!myLeadingTrack || myLeadingTrack->Pt() < 0.0001) return;
   MyGlobalPoint myECALHitPoint = myLeadingTrack->ecalHitPoint();
-  //double myLdgEta = myECALHitPoint.Eta();
-  //double myLdgPhi = myECALHitPoint.Phi();
 
   // Loop over barrel ECAL clusters
-  unsigned int myBarrelCollectionSize = barrelBCCollection.size();
-  for(unsigned int i_BC=0; i_BC != myBarrelCollectionSize; ++i_BC) { 
-    const BasicCluster& theBasicCluster(barrelBCCollection[i_BC]);
-    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), theBasicCluster.position()) <= 0.7) {
-      TLorentzVector myCluster(theBasicCluster.position().x(),
-			       theBasicCluster.position().y(),
-			       theBasicCluster.position().z(),
-			       theBasicCluster.energy());
-      jet->clusters.push_back(myCluster);
-    }
-  }
+  addClustersHelper(jet, barrelBCCollection, myECALHitPoint);
+
   // Loop over endcap ECAL clusters
-  unsigned int myEndcapCollectionSize = endcapBCCollection.size();
-  for(unsigned int i_BC=0; i_BC != myEndcapCollectionSize; ++i_BC) { 
-    const BasicCluster& theBasicCluster(endcapBCCollection[i_BC]);
-    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), theBasicCluster.position()) <= 0.7) {
-      TLorentzVector myCluster(theBasicCluster.position().x(),
-			       theBasicCluster.position().y(),
-			       theBasicCluster.position().z(),
-			       theBasicCluster.energy());
-      jet->clusters.push_back(myCluster);
-    }
-  }
+  addClustersHelper(jet, endcapBCCollection, myECALHitPoint);
 }
