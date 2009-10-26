@@ -14,10 +14,12 @@ map<string,bool> MyEventConverter::getTriggerResults(const edm::Event& iEvent){
 	for(vector<Handle<TriggerResults> >::const_iterator iHandle = hltHandles.begin();
             iHandle!= hltHandles.end(); ++iHandle){
 		if((*iHandle)->size() < 10) continue;
-		cout << "trigger table size " << (*iHandle)->size() << endl;
 
         	const std::string hltTableName = iHandle->provenance()->processName();
-        	if(printTrigger) cout << " hltTableName: " << hltTableName << endl;
+        	if(printTrigger) {
+			cout << "trigger table " << hltTableName 
+                             << " size " << (*iHandle)->size() << endl;
+		}
 
                 TriggerNames triggerNames;
                 triggerNames.init(**iHandle);
