@@ -26,7 +26,7 @@ static const reco::TrackCollection& helper(const edm::Event& iEvent, const edm::
 
 TrackConverter::TrackConverter(const edm::Event& iEvent, const edm::InputTag& label_):
         tracks(helper(iEvent, label_)),
-        label(label)
+        label(label_)
 {}
 TrackConverter::~TrackConverter() {}
 
