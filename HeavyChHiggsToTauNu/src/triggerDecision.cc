@@ -3,6 +3,17 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 
+#include<iostream>
+
+using edm::Handle;
+using edm::TriggerResults;
+using edm::TriggerNames;
+using edm::InputTag;
+using std::vector;
+using std::string;
+using std::cout;
+using std::endl;
+
 bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
 
 	bool triggerdecision = false;

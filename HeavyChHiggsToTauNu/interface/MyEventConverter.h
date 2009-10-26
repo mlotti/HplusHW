@@ -1,100 +1,42 @@
+// -*- c++ -*-
 // Class to convert edm::Event to MyEvent
 // 26.10.2007/S.Lehti
 
-#ifndef MY_EVENTCONVERTER
-#define MY_EVENTCONVERTER
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_MyEventConverter_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_MyEventConverter_h
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Framework/interface/Event.h"
-
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
-#include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-#include "RecoEgamma/ElectronIdentification/interface/CutBasedElectronID.h"
-//#include "DataFormats/EgammaReco/interface/ClusterShape.h"
-#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
-
-#include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
-#include "DataFormats/EgammaCandidates/interface/Conversion.h"
-
-#include "DataFormats/EgammaReco/interface/BasicCluster.h" 
-#include "DataFormats/EgammaReco/interface/BasicClusterFwd.h" 
-
-#include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
-#include "DataFormats/JetReco/interface/CaloJet.h"
-//#include "DataFormats/BTauReco/interface/PFIsolatedTauTagInfo.h"
-#include "DataFormats/TauReco/interface/PFTau.h"
-//#include "DataFormats/TauReco/interface/PFTauDiscriminatorByIsolation.h"
-#include "DataFormats/TauReco/interface/CaloTau.h"
-
-
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "TrackingTools/Records/interface/TransientRecHitRecord.h"
-#include "TrackingTools/PatternTools/interface/Trajectory.h"
-#include "TrackingTools/PatternTools/interface/TrajectoryMeasurement.h"
-
-#include "DataFormats/BTauReco/interface/TauImpactParameterInfo.h"
-
-#include "JetMETCorrections/Objects/interface/JetCorrector.h"
-#include "JetMETCorrections/TauJet/interface/TauJetCorrector.h"
-
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-
-#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
-
-#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
-#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
-#include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
-
-#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
-#include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-#include "DataFormats/EcalDetId/interface/EBDetId.h"
-#include "DataFormats/EcalDetId/interface/EEDetId.h"
-#include "DataFormats/HcalDetId/interface/HcalDetId.h"
-#include "DataFormats/CaloTowers/interface/CaloTowerDetId.h"
-
-#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
-
-//PAT
-#include "DataFormats/Common/interface/View.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/Tau.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-
-
-#include <iostream>
-using namespace std;
-using namespace edm;
-using namespace reco;
-
-
-#include "DataFormats/BTauReco/interface/JetTag.h"
-
-
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
 
+#include<vector>
+#include<string>
+#include<map>
 
-////double myDeltaR(double,double,double,double);
-#include "Math/VectorUtil.h"
+namespace edm {
+  class ParameterSet;
+  class Event;
+  class EventSetup;
+}
+class TransientTrackBuilder;
+class TauJetCorrector;
+class JetCorrector;
+class Trajectory;
+
+class MyRootTree;
+class TauResolutionAnalysis;
+class TauMETTriggerAnalysis;
+
 
 class MyEventConverter {
   public:
 	MyEventConverter(const edm::ParameterSet&);
 	~MyEventConverter();
 
-	//void cfgInput(const edm::ParameterSet&);
 	void eventSetup(const edm::EventSetup&);
 	void convert(const edm::Event&,const edm::EventSetup&);
 
@@ -104,16 +46,14 @@ class MyEventConverter {
 
 	bool triggerDecision(const edm::Event&);
 	bool primaryVertexFound(const edm::Event&);
-//        bool primaryVertexFound();
 
 	void                    getTriggerResults(const edm::Event&, const edm::InputTag&, std::map<std::string, bool>&);
-	vector<MyJet>		getHLTObjects(const edm::Event&);
+	std::vector<MyJet>	getHLTObjects(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 
-//	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);
 
 
 // datafields
@@ -130,19 +70,19 @@ class MyEventConverter {
 	edm::InputTag reducedEndcapRecHitCollection;
         const TransientTrackBuilder* transientTrackBuilder;
 //	const TransientTrackingRecHitBuilder* TTRHBuilder;
-        vector<const JetCorrector*> jetEnergyCorrections;
+        std::vector<const JetCorrector*> jetEnergyCorrections;
 	const TauJetCorrector* tauJetCorrection;
         std::vector<std::string> jetEnergyCorrectionTypes;
         std::vector<std::string> btaggingAlgos;
 	std::vector<edm::InputTag> metCollections;
-	std::vector<InputTag> electronIdLabels;
-        TrackCollection tracks;
+        std::vector<edm::InputTag> electronIdLabels;
+  //TrackCollection tracks;
 
 	// ECAL clusters
 	edm::InputTag barrelBasicClustersInput;
 	edm::InputTag endcapBasicClustersInput;
 	
-	Handle<vector<Trajectory> > myTrajectoryCollectionHandle;
+	edm::Handle<std::vector<Trajectory> > myTrajectoryCollectionHandle;
  	edm::InputTag trajectoryInput; // Input for trajectory collection
 
 	int allEvents;

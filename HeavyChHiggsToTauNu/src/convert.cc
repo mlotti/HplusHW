@@ -13,8 +13,25 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetConverter.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
+
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/TauReco/interface/CaloTau.h"
+#include "DataFormats/TauReco/interface/PFTau.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+
 
 struct Finalizer {
   Finalizer(MyEvent *ev, TrackEcalHitPoint& tehp):

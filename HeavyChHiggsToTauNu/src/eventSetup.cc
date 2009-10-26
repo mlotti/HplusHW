@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 void MyEventConverter::eventSetup(const edm::EventSetup& iSetup){
 

@@ -1,4 +1,16 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
+
+#include "JetMETCorrections/TauJet/interface/TauJetCorrector.h"
+
+#include<iostream>
+
+using std::vector;
+using edm::InputTag;
+using std::cout;
+using std::endl;
 
 MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         HLTSelection(iConfig.getParameter< vector<InputTag> >("HLTSelection")),

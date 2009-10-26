@@ -3,6 +3,17 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 
+#include<iostream>
+
+using edm::Handle;
+using edm::TriggerResults;
+using edm::TriggerNames;
+using edm::InputTag;
+using std::cout;
+using std::endl;
+using std::vector;
+using std::string;
+
 void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::InputTag& label, std::map<std::string, bool>& trigger){
         Handle<TriggerResults> hltHandle;
         iEvent.getByLabel(label, hltHandle);

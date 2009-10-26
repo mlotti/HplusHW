@@ -1,4 +1,14 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
+
+#include<iostream>
+
+using edm::Handle;
+using reco::IsolatedTauTagInfo;
+using reco::IsolatedTauTagInfoCollection;
+using std::vector;
+using std::cout;
+using std::endl;
 
 vector<MyJet> MyEventConverter::getHLTObjects(const edm::Event& iEvent){
 	vector<MyJet> HLTObjects;

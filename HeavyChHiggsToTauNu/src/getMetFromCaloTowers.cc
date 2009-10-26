@@ -2,6 +2,12 @@
 
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 
+#include<iostream>
+
+using edm::Handle;
+using std::cout;
+using std::endl;
+
 MyMET MyEventConverter::getMetFromCaloTowers(const edm::Event& iEvent){
 
 	double x = 0,

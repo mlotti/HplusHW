@@ -2,6 +2,10 @@
 
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+using edm::Handle;
+using reco::Vertex;
+using reco::VertexCollection;
+
 bool MyEventConverter::primaryVertexFound(const edm::Event& iEvent){
 	bool primaryVertexFound = false;
 

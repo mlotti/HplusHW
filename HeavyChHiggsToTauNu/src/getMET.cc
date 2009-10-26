@@ -13,7 +13,7 @@
 
 template <class T>
 MyMET getMEThelper(const edm::Event& iEvent, const edm::InputTag& label, const char *print) {
-        Handle<T> met;
+        edm::Handle<T> met;
         iEvent.getByLabel(label, met);
 
         typename T::const_iterator imet = met->begin();
