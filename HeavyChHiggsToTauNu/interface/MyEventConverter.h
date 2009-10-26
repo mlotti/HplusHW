@@ -110,10 +110,6 @@ class MyEventConverter {
 
 	void                    getTriggerResults(const edm::Event&, const edm::InputTag&, std::map<std::string, bool>&);
 	vector<MyJet>		getHLTObjects(const edm::Event&);
-        vector<MyJet> 		getMuons(const edm::Event&, const edm::InputTag&);
-	vector<MyJet>           getPATMuons(const edm::Event&);
-        vector<MyJet> 		getJets(const edm::Event&, const edm::InputTag&);
-	vector<MyJet>		getPATJets(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
         void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
