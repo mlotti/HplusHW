@@ -18,11 +18,15 @@ double MyMET::x() const { return X(); }
 double MyMET::y() const { return Y(); }
 
 double MyMET::phi() const {
+<<<<<<< MyMET.cc
     return Phi();
 }
 
 TVector3 MyMET::tvector3() const {
   return TVector3(X(), Y(), 0);
+=======
+    return Phi();
+>>>>>>> 1.8
 }
 
 void MyMET::print(std::ostream& out) const {

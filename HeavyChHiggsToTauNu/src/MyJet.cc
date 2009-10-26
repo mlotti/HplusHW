@@ -51,7 +51,18 @@ void MyJet::setP4(const TLorentzVector& vector){
 
 ////////////////////////////
 
+<<<<<<< MyJet.cc
 void MyJet::addEnergyCorrection(const std::string& name, double value) {
+  pair<map<string, double>::iterator, bool> ret = jecs.insert(make_pair(name, value));
+  if(!ret.second) {
+    cout << "Unable to add energy correction " << name << ".";
+    if(jecs.find(name) != jecs.end())
+      cout << " A correction with the same name already exists.";
+    cout << endl;
+    exit(0);
+  }
+=======
+void MyJet::addEnergyCorrection(const string& name, double value) {
   pair<map<string, double>::iterator, bool> ret = jecs.insert(make_pair(name, value));
   if(!ret.second) {
     cout << "Unable to add energy correction " << name << ".";
@@ -62,6 +73,18 @@ void MyJet::addEnergyCorrection(const std::string& name, double value) {
   }
 }
 
+void MyJet::setEnergyCorrection(const std::string& name) {
+  double correction = getEnergyCorrectionFactor(name);
+
+  currentCorrection = name;
+  SetXYZT(originalP4.X() * correction,
+          originalP4.Y() * correction,
+          originalP4.Z() * correction,
+          originalP4.T() * correction);
+>>>>>>> 1.34
+}
+
+<<<<<<< MyJet.cc
 void MyJet::setEnergyCorrection(const std::string& name) {
   double correction = getEnergyCorrectionFactor(name);
 
@@ -151,8 +174,102 @@ vector<MyHit *> MyJet::getHits() {
 vector<MyCaloTower *> MyJet::getCaloInfo() {
   return convertCollection(caloInfo);
 }
+=======
+double MyJet::getEnergyCorrectionFactor(const string& name) const {
+  if(name == "raw" || name == "" || name == "none")
+    return 1;
+>>>>>>> 1.34
 
+<<<<<<< MyJet.cc
 double MyJet::tag(const std::string& name) const {
+  map<string, double>::const_iterator found = tagInfo.find(name);
+  if(found == tagInfo.end()) {
+    if(tracks.size() == 0) cout << "No tracks!" << endl;
+    cout << "Requested tag " << name << " doesn't exist." << endl;
+    exit(0);
+  }
+  return found->second;
+}
+=======
+  map<string, double>::const_iterator found = jecs.find(name);
+  if(found == jecs.end()) {
+    cout << "Requested energy correction " << name << " doesn't exist." << endl;
+    exit(0);
+  }
+
+  return found->second;
+}
+
+bool MyJet::hasEnergyCorrection(const string& name) const {
+  map<string, double>::const_iterator found = jecs.find(name);
+  return found != jecs.end();
+}
+
+const std::string& MyJet::getActiveEnergyCorrectionName() const {
+  return currentCorrection;
+}
+
+// helper
+std::vector<MyTrack *> MyJet::getTracksAroundP4(const TLorentzVector& p4, double signalCone) {
+  vector<MyTrack *> selectedTracks;
+  vector<MyTrack>::const_iterator i;
+  for(vector<MyTrack>::iterator i = tracks.begin(); i != tracks.end(); ++i){
+    double DR = ROOT::Math::VectorUtil::DeltaR(p4, i->p4());
+    if(DR < signalCone)
+      selectedTracks.push_back(&(*i));
+  }
+  return selectedTracks;
+}
+>>>>>>> 1.34
+
+<<<<<<< MyJet.cc
+bool MyJet::hasTag(const std::string& name) const {
+  map<string, double>::const_iterator found = tagInfo.find(name);
+  return found != tagInfo.end();
+=======
+vector<MyTrack*> MyJet::getTracks(double signalCone) {
+  return getTracksAroundP4(p4(), signalCone);
+>>>>>>> 1.34
+}
+
+<<<<<<< MyJet.cc
+
+=======
+vector<MyTrack *> MyJet::getTracksAroundLeadingTrack(double signalCone,double matchingCone) {
+  return getTracksAroundP4(leadingTrack(matchingCone)->p4(), signalCone);
+}
+
+const MyTrack *MyJet::leadingTrack(double matchingCone) const {
+  const MyTrack *theLeadingTrack = 0;
+  double ptmax = 0;
+  for(vector<MyTrack>::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
+    if(i->pt() == 0) continue;
+    if(i->charge() == 0) continue;
+    // Require track to be within Delta IPz < 1 mm
+    if(TMath::Abs(i->impactParameter().impactParameterZ().value()) > 0.1) continue;
+    // Require track to be within IPT < 0.3 mm
+    if(TMath::Abs(i->impactParameter().impactParameter2D().value()) > 0.03) continue;
+
+    double DR = ROOT::Math::VectorUtil::DeltaR(p4(),i->p4());
+    if(DR > matchingCone) continue;
+
+    if(i->Pt() > ptmax){
+      ptmax = i->Pt();
+      theLeadingTrack = &(*i);
+    }
+  }
+  return theLeadingTrack;
+}
+
+vector<MyVertex *> MyJet::getSecVertices() {
+  return convertCollection(secVertices);
+}
+
+vector<MyCaloTower *> MyJet::getCaloInfo() {
+  return convertCollection(caloInfo);
+}
+
+double MyJet::tag(const string& name) const {
   map<string, double>::const_iterator found = tagInfo.find(name);
   if(found == tagInfo.end()) {
     if(tracks.size() == 0) cout << "No tracks!" << endl;
@@ -168,9 +285,138 @@ bool MyJet::hasTag(const std::string& name) const {
 }
 
 
+>>>>>>> 1.34
 TLorentzVector MyJet::combinedTracksMomentum(double signalCone,double matchingCone) const {
+<<<<<<< MyJet.cc
   TLorentzVector p(0,0,0,0);
 
+  const MyTrack *leadingtrack = leadingTrack(matchingCone);
+  if(!leadingtrack)
+    return p;
+
+  for(vector<MyTrack>::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
+    if(i->charge() == 0) continue;
+    double DR = ROOT::Math::VectorUtil::DeltaR(leadingtrack->p4(), i->p4());
+    if(DR > signalCone) continue;
+    p += i->p4();
+  }
+  return p;
+}
+
+TLorentzVector MyJet::ecalClusterMomentum(double signalCone, double matchingCone) const {
+  TVector3 ecalHitPoint(0,0,0);
+
+  const MyTrack *leadingtrack = leadingTrack(matchingCone);
+  if(!leadingtrack) {
+    ecalHitPoint = p4().BoostVector();
+  }
+  else {
+    ecalHitPoint = leadingtrack->ecalHitPoint().tvector3();
+  }
+
+  TVector3 cluster(0,0,0);
+
+  for(vector<MyCaloTower>::const_iterator i = caloInfo.begin(); i != caloInfo.end(); ++i) {
+    vector<TVector3> cells = i->ECALCells;
+    for(vector<TVector3>::const_iterator j; j != cells.end(); ++j) {
+      double DR = ROOT::Math::VectorUtil::DeltaR(ecalHitPoint, *j);
+      if(DR < signalCone)
+        cluster += *j;
+    }
+  }
+
+  return TLorentzVector(cluster, cluster.Mag());
+}
+
+TLorentzVector MyJet::hcalClusterMomentum(double signalCone, double matchingCone) const {
+  TVector3 hcalHitPoint(0,0,0);
+
+  const MyTrack *leadingtrack = leadingTrack(matchingCone);
+  if(!leadingtrack) {
+    hcalHitPoint = p4().BoostVector();
+  }
+  else {
+    hcalHitPoint = leadingtrack->ecalHitPoint().tvector3();
+  }
+
+  TVector3 cluster(0,0,0);
+
+  for(vector<MyCaloTower>::const_iterator i = caloInfo.begin(); i != caloInfo.end(); ++i) {
+    vector<TVector3> cells = i->HCALCells;
+    for(vector<TVector3>::const_iterator j; j != cells.end(); ++j) {
+      double DR = ROOT::Math::VectorUtil::DeltaR(hcalHitPoint, *j);
+      if(DR < signalCone)
+        cluster += *j;
+    }
+  }
+
+  return TLorentzVector(cluster, cluster.Mag());
+}
+=======
+  TLorentzVector p(0,0,0,0);
+>>>>>>> 1.34
+
+<<<<<<< MyJet.cc
+vector<TLorentzVector *> MyJet::getClusters() {
+  return convertCollection(clusters);
+}
+
+template <class C>
+void printCollection(std::ostream& out, const C& coll, const char *name) {
+  if(coll.size() == 0)
+    return;
+
+  out << "      " << name << " " << coll.size() << endl;
+  for(typename C::const_iterator i = coll.begin(); i != coll.end(); ++i) {
+    i->print();
+  }
+  
+}
+template <class C>
+void printMap(std::ostream& out, const C& coll, const char *name) {
+  if(coll.size() == 0)
+    return;
+
+  out << "      " << name << " " << coll.size() << endl;
+  for(typename C::const_iterator i = coll.begin(); i != coll.end(); ++i) {
+    cout << "        " << i->first << " "  << i->second << endl;
+  }
+  
+}
+
+void MyJet::printTracks(std::ostream& out) const {
+  printCollection(out, tracks, "tracks");
+}
+void MyJet::printVertices(std::ostream& out) const {
+  printCollection(out, secVertices, "vertices");
+}
+void MyJet::printCaloInfo(std::ostream& out) const {
+  printCollection(out, caloInfo, "caloTowers");
+}
+void MyJet::printTagInfo(std::ostream& out) const {
+  printMap(out, tagInfo, "tagInfo");
+}
+void MyJet::printEnergyCorrections(std::ostream& out) const {
+  printMap(out, jecs, "jetEnergyCorrections");
+}
+
+void MyJet::printCorrections(std::ostream& out) const {
+  if(jecs.size() == 0)
+    return;
+  for(map<string,double>::const_iterator i = jecs.begin(); i!= jecs.end(); ++i) {
+    out << "          " << i->first << endl;
+  }
+}
+
+void MyJet::print(std::ostream& out) const {
+  printTracks(out);
+  printVertices(out);
+  printCaloInfo(out);
+  printTagInfo(out);
+  printEnergyCorrections(out);
+  out << endl;
+}
+=======
   const MyTrack *leadingtrack = leadingTrack(matchingCone);
   if(!leadingtrack)
     return p;
@@ -261,23 +507,23 @@ void printMap(std::ostream& out, const C& coll, const char *name) {
   
 }
 
-void MyJet::printTracks(std::ostream& out) const {
+void MyJet::printTracks(ostream& out) const {
   printCollection(out, tracks, "tracks");
 }
-void MyJet::printVertices(std::ostream& out) const {
+void MyJet::printVertices(ostream& out) const {
   printCollection(out, secVertices, "vertices");
 }
-void MyJet::printCaloInfo(std::ostream& out) const {
+void MyJet::printCaloInfo(ostream& out) const {
   printCollection(out, caloInfo, "caloTowers");
 }
-void MyJet::printTagInfo(std::ostream& out) const {
+void MyJet::printTagInfo(ostream& out) const {
   printMap(out, tagInfo, "tagInfo");
 }
-void MyJet::printEnergyCorrections(std::ostream& out) const {
+void MyJet::printEnergyCorrections(ostream& out) const {
   printMap(out, jecs, "jetEnergyCorrections");
 }
 
-void MyJet::printCorrections(std::ostream& out) const {
+void MyJet::printCorrections(ostream& out) const {
   if(jecs.size() == 0)
     return;
   for(map<string,double>::const_iterator i = jecs.begin(); i!= jecs.end(); ++i) {
@@ -285,7 +531,7 @@ void MyJet::printCorrections(std::ostream& out) const {
   }
 }
 
-void MyJet::print(std::ostream& out) const {
+void MyJet::print(ostream& out) const {
   printTracks(out);
   printVertices(out);
   printCaloInfo(out);
@@ -293,9 +539,17 @@ void MyJet::print(std::ostream& out) const {
   printEnergyCorrections(out);
   out << endl;
 }
+>>>>>>> 1.34
 
+<<<<<<< MyJet.cc
 void useCorrection(std::vector<MyJet *>& jets, const std::string& name) {
   for(vector<MyJet *>::iterator p = jets.begin(); p != jets.end(); ++p) {
     (*p)->setEnergyCorrection(name);
   }
+=======
+void useCorrection(vector<MyJet *>& jets, const std::string& name) {
+  for(vector<MyJet *>::iterator p = jets.begin(); p != jets.end(); ++p) {
+    (*p)->setEnergyCorrection(name);
+  }
+>>>>>>> 1.34
 }

@@ -21,8 +21,15 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource",
+<<<<<<< offlineAnalysis_cfg.py
     fileNames = cms.untracked.vstring(
 "file:/tmp/slehti/test.root")
+=======
+    fileNames = cms.untracked.vstring(
+#"file:/tmp/slehti/QCD_Pt80_OctX.root"
+    "rfio:/castor/cern.ch/user/s/slehti/QCD_Pt80_OctX.root"
+    )
+>>>>>>> 1.7
 )
 
 #if files:
@@ -101,6 +108,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         TrackAssociator.TrackAssociatorParameterBlock,
         fileName = cms.string("analysis.root"),
 
+<<<<<<< offlineAnalysis_cfg.py
 #	HLTSelection = cms.VInputTag(cms.InputTag("HLT1Tau"),
 #                                     cms.InputTag("HLT1MuonIso"),
 #                                     cms.InputTag("HLT1MET"),
@@ -123,6 +131,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 				     cms.InputTag("HLT_Mu15"),
 				     cms.InputTag("HLT_DoubleMu3")),
 
+=======
+>>>>>>> 1.7
         # JetEnergyCorrection = MCJetCorrectorIcone5,MCJetCorrectorMcone5
         # if no corrections, leave {} empty
 	JetEnergyCorrection = cms.VInputTag(

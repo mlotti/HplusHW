@@ -45,6 +45,7 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	tauMETTriggerAnalysis = new TauMETTriggerAnalysis(userRootTree);
 
 
+	triggerTable = iConfig.getParameter<InputTag>("TriggerTable");
 	HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
 
 /*
