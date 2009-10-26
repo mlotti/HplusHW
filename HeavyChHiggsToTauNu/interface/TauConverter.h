@@ -23,10 +23,12 @@ class TrackConverter;
 class ImpactParameterConverter;
 class TrackEcalHitPoint;
 class CaloTowerConverter;
+class EcalClusterConverter;
 
 class TauConverter {
 public:
   TauConverter(const TrackConverter&, const ImpactParameterConverter&, TrackEcalHitPoint&, const CaloTowerConverter&,
+               const EcalClusterConverter&,
                const TransientTrackBuilder&, const TauJetCorrector&);
   ~TauConverter();
 
@@ -49,6 +51,7 @@ private:
   const ImpactParameterConverter& ipConverter;
   TrackEcalHitPoint& trackEcalHitPoint;
   const CaloTowerConverter& caloTowerConverter;
+  const EcalClusterConverter& ecalClusterConverter;
   const TransientTrackBuilder& transientTrackBuilder;
   const TauJetCorrector& tauJetCorrection;
 };

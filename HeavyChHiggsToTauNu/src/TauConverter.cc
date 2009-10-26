@@ -5,6 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ImpactParameterConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CaloTowerConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EcalClusterConverter.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyTrack.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyHit.h"
@@ -28,11 +29,13 @@ using reco::IsolatedTauTagInfo;
 using pat::Tau;
 
 TauConverter::TauConverter(const TrackConverter& tc, const ImpactParameterConverter& ip, TrackEcalHitPoint& tehp, const CaloTowerConverter& ctc,
+                           const EcalClusterConverter& ecc,
                            const TransientTrackBuilder& builder, const TauJetCorrector& tjc):
         trackConverter(tc),
         ipConverter(ip),
         trackEcalHitPoint(tehp),
         caloTowerConverter(ctc),
+        ecalClusterConverter(ecc),
         transientTrackBuilder(builder),
         tauJetCorrection(tjc)
 {}
@@ -100,8 +103,7 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 
-        // FIXME
-	//addECALClusters(&tau);
+	ecalClusterConverter.addClusters(&tau);
 
         return tau;
 }
@@ -132,8 +134,7 @@ MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
 
         caloTowerConverter.convert(caloJet, tau.caloInfo);
 
-        // FIXME
-	//addECALClusters(&tau);
+	ecalClusterConverter.addClusters(&tau);
 
         return tau;
 }
@@ -182,8 +183,7 @@ MyJet TauConverter::convert(const pat::Tau& recTau) {
         // FIXME
         // no calotowers?
 
-        // FIXME
-	//addECALClusters(&tau);
+	ecalClusterConverter.addClusters(&tau);
 
 	return tau;
 }
@@ -234,8 +234,7 @@ MyJet TauConverter::convert(const PFTau& recTau) {
         // FIXME
         // no calotowers?
 
-        // FIXME
-	//addECALClusters(&tau);
+	ecalClusterConverter.addClusters(&tau);
 
 	return tau;	
 }
