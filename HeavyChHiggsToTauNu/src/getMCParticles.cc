@@ -6,7 +6,8 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 
         Handle<HepMCProduct> mcEventHandle;
         try{
-          iEvent.getByLabel("source",mcEventHandle);
+//          iEvent.getByLabel("source",mcEventHandle);
+	    iEvent.getByLabel("generator",mcEventHandle);
         }catch(...) {;}
 
         if(mcEventHandle.isValid()){
@@ -37,7 +38,7 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 
 //                        if( ( (*i)->status() == 1 && (*i)->momentum().perp() > 1) ||
                         if( ( (*i)->status() == 1 ) ||
-			    ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 ) ||
+			    ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 || abs(id) <= 21) ||
                             ( (*i)->status() == 3) ) {
 
                                 // searching parents
@@ -82,8 +83,7 @@ vector<MyMCParticle> MyEventConverter::getMCParticles(const edm::Event& iEvent){
 				}
 			}
 		}
-		mcMET.x = mcMetX;
-		mcMET.y = mcMetY;
+		mcMET.Set(mcMetX,mcMetY);
 	}
 
 

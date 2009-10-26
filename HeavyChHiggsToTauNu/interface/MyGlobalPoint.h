@@ -1,66 +1,82 @@
-#ifndef MY_GLOBALPOINT
-#define MY_GLOBALPOINT
+#ifndef __MyGlobalPoint__
+#define __MyGlobalPoint__
 
-namespace std{}
-using namespace std;
-
-#include "TROOT.h"
 #include "TVector3.h"
-#include <string>
-#include <math.h>
 
-class MyGlobalPoint {
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
+
+/**
+ * \brief Global point class for MyEvent dataformat
+ */
+class MyGlobalPoint: public TVector3 {
    public:
         MyGlobalPoint();
-      	MyGlobalPoint(double,double,double);
+
+        /**
+         * \brief Constructor
+         *
+         * \param x  x component
+         * \param y  y component
+         * \param z  z component
+         */
+      	MyGlobalPoint(double x, double y, double z);
+
       	virtual ~MyGlobalPoint();
 
-      	double 	getX() const;
-      	double  getY() const;
-      	double  getZ() const;
+      	double Xerror() const;
+      	double Yerror() const;
+      	double Zerror() const;
 
-      	double  getXerror() const;
-      	double  getYerror() const;
-      	double  getZerror() const;
-
-      	double	value() const;
-      	double 	error() const;
-      	double	significance() const;
-
-      	double 	getPhi() const;
-	double 	Phi() const;
-	double 	phi() const;
-
-	double getEta() const;
-	double Eta() const;
+	double phi() const;
 	double eta() const;
 
-      	double    rotatedError() const;
-      	double    rotatedSignificance() const;
+        /**
+         * \brief Get the length of the vector
+         */
+      	double value() const;
 
-      	void	use(string D); // values = "2D","3D","Z"
+        /**
+         * \brief Get the uncertainty of the point
+         *
+         * The covariances between the vector components are taken
+         * into account.
+         */
+      	double error() const;
 
-      	MyGlobalPoint operator + (const MyGlobalPoint&) const;
-      	MyGlobalPoint operator - (const MyGlobalPoint&) const;
+        /**
+         * \brief Calculate the significance, i.e. value/error
+         */
+      	double significance() const;
 
-      	TVector3	tvector3();
+        /**
+         * \brief Calculate rotated error
+         *
+         * rotating the vector x,y,z so that z' = vector direction 
+         * in result z error = error
+         * First rotation +phi around z-axis, then rotation +theta around y-axis
+         * (Rotating coordinates -> plus sign)
+         */
+      	double rotatedError() const;
 
-      	double 	x,
-		y,
-		z,
-		dxx,
-		dxy,
-		dxz,
-		dyy,
-		dyz,
-		dzz;
+        /**
+         * \brief Calculate the significance with rotated error
+         */
+      	double rotatedSignificance() const;
 
-      	string    name;
+      	MyGlobalPoint operator+(const MyGlobalPoint&) const;
+      	MyGlobalPoint operator-(const MyGlobalPoint&) const;
+
+      	TVector3	tvector3() const;
+
+        double   dxx;  ///< Covariance matrix xx-component
+        double   dxy;  ///< Covariance matrix xy-component
+        double   dxz;  ///< Covariance matrix xz-component
+        double   dyy;  ///< Covariance matrix yy-component
+        double   dyz;  ///< Covariance matrix yz-component
+        double   dzz;  ///< Covariance matrix zz-component
 
    private:
-      	double    DValue(double xx, double yy, double zz) const;
-      	int       dimension;
 
-   ClassDef(MyGlobalPoint,1)
+   ClassDef(MyGlobalPoint, MYEVENT_VERSION)
 };
 #endif

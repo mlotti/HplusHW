@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig){
+MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
+  trackAssociator_(iConfig) {
         init(iConfig);
 }
 
@@ -38,10 +39,13 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	eventsWithPrimaryVertex = 0;
 	savedEvents 		= 0;
 
+	printTrigger = true;
+
 	tauResolutionAnalysis = new TauResolutionAnalysis();
 	tauMETTriggerAnalysis = new TauMETTriggerAnalysis(userRootTree);
 
 
+	triggerTable = iConfig.getParameter<InputTag>("TriggerTable");
 	HLTSelection = iConfig.getParameter< vector<InputTag> >("HLTSelection");
 
 /*
@@ -55,7 +59,7 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
         btaggingAlgos = iConfig.getParameter<vector<InputTag> >("BTaggingAlgorithms");
 
-	metCorrections = iConfig.getParameter<vector<InputTag> >("METCorrections");
+	metCollections = iConfig.getParameter<vector<InputTag> >("METCollections");
 
 	electronIdLabels = iConfig.getParameter<vector<InputTag> >("ElectronIdLabels");
 ////	electronIdAlgo->setup(iConfig);
@@ -68,4 +72,9 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	trajectoryInput = trackCollectionSelection;
 
 	tauJetCorrection = new TauJetCorrector(iConfig);
+
+        // ECAL clusters 
+	BarrelBasicClustersInput = iConfig.getParameter<InputTag>("BarrelBasicClustersSource"); 
+	EndcapBasicClustersInput = iConfig.getParameter<InputTag>("EndcapBasicClustersSource"); 
+	
 }
