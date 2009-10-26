@@ -126,10 +126,6 @@ class MyEventConverter {
         MyJet                   myJetConverter(const JetTag&);
 	MyJet 			myJetConverter(const CaloJet&);
 	MyJet			myJetConverter(const pat::Jet&);
-        MyJet                   myJetConverter(const IsolatedTauTagInfo&);
-	MyJet			myJetConverter(const pat::Tau&);
-//        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
-	MyJet 			myJetConverter(const PFTau&);
 	void                    addECALClusters(MyJet* jet);
 
 //	map<string,double> 	etag(const GsfElectron*,const ClusterShapeRef&,map<string,double>);

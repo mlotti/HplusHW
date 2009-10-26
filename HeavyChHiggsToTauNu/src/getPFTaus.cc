@@ -17,8 +17,10 @@ vector<MyJet> MyEventConverter::getPFTaus(const edm::Event& iEvent, const edm::I
         PFTauCollection::const_iterator iTau;
         for(iTau = pfTaus.begin(); iTau != pfTaus.end(); iTau++){
                 if(!iTau->leadPFChargedHadrCand()) continue;
+                /* FIXME
                 MyJet tau = myJetConverter(*iTau);
                 pftaus.push_back(tau);
+                */
 	}
 	return pftaus;
 }

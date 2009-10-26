@@ -19,8 +19,10 @@ vector<MyJet> MyEventConverter::getPATTaus(const edm::Event& iEvent){
           for(iTau = recoTaus.begin();
               iTau!= recoTaus.end(); iTau++){
 
+            /* FIXME
                 MyJet tau = myJetConverter(*iTau);
                 taus.push_back(tau);
+            */
 
                 cout << "Tau: et= " << iTau->et();
                 cout << " eta= "     << iTau->eta();

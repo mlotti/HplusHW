@@ -31,6 +31,9 @@ public:
   ~TauConverter();
 
   MyJet convert(const reco::CaloTau& recTau);
+  MyJet convert(const reco::IsolatedTauTagInfo& recTau);
+  MyJet convert(const pat::Tau& recTau);
+  MyJet convert(const reco::PFTau& recTau);
 
   typedef std::map<std::string, double> TagType;
 

@@ -18,9 +18,11 @@ vector<MyJet> MyEventConverter::getHLTObjects(const edm::Event& iEvent){
                         if(i->discriminator(0.1,0.065,0.4,20.,1.)){
 //                                Jet thejet = *(i->jet().get());
 				IsolatedTauTagInfo theHLTTau = *i;
+                                /* FIXME
 				MyJet HLTtau = myJetConverter(theHLTTau);
 				HLTtau.type = 15; // label for HLT object being tau
                 		HLTObjects.push_back(HLTtau);
+                                */
                         }
                 }
         }
