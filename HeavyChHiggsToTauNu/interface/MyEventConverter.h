@@ -37,7 +37,6 @@ class MyEventConverter {
 	MyEventConverter(const edm::ParameterSet&);
 	~MyEventConverter();
 
-	void eventSetup(const edm::EventSetup&);
 	void convert(const edm::Event&,const edm::EventSetup&);
 
   private:

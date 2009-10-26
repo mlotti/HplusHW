@@ -32,7 +32,6 @@ void OfflineAnalysis::beginJob(const edm::EventSetup& iSetup){
 }
 
 void OfflineAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-        myEventConverter->eventSetup(iSetup);
 	myEventConverter->convert(iEvent,iSetup);
 }
 

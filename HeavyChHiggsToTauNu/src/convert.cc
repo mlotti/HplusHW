@@ -30,6 +30,8 @@
 #include "DataFormats/TauReco/interface/CaloTau.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
 
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 
 
@@ -63,6 +65,10 @@ struct TauHasLeadingTrack {
 void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& iSetup){
 
 	allEvents++;
+
+        edm::ESHandle<TransientTrackBuilder> builder;
+        iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",builder);
+        transientTrackBuilder = builder.product();
 
 //        tauMETTriggerAnalysis->analyse(iEvent);
 
