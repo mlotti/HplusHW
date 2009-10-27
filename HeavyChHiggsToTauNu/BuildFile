@@ -5,12 +5,12 @@
 
 <use name=DataFormats/BTauReco>
 <use name=RecoBTag/BTagTools>
-<use name=SimDataFormats/GeneratorProducts>
+<use name=SimDataFormats/HepMCProduct>
 <use name=RecoParticleFlow/PFClusterTools>
 
+<use name=Geometry/CaloEventSetup>
 <use name=Geometry/CaloGeometry>
 <lib name=TrackingToolsTransientTrack>
-<use name=TrackingTools/TrackAssociator>
 
 <use name=RecoTauTag/TauTagTools>
 

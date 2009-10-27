@@ -7,10 +7,6 @@
 #include "TTree.h"
 #include "TH1F.h"
 
-#include <string>
-#include <map>
-#include <vector>
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
 
 class MyRootTree : public TObject {
@@ -19,7 +15,7 @@ public:
   virtual ~MyRootTree();
 
   void fillTree(MyEvent* event);
-  void setAcceptance(std::string,double);
+  void setAcceptance(string,double);
 
 private:
   TH1F* eventInfo;
@@ -32,7 +28,7 @@ private:
   double CNOR,
          cross_section;
 
-  std::map<std::string,double> acceptances;
-  std::vector<std::string>     names;
+  map<string,double> acceptances;
+  vector<string>     names;
 }; 
 #endif 

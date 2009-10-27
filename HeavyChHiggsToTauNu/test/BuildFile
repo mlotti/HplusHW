@@ -11,12 +11,13 @@
 <use name=root>
 <use name=clhep>
 
+<use name=Foundation/PluginManager>
 <use name=FWCore/Utilities>
 <use name=FWCore/Framework>
 <use name=FWCore/ParameterSet>
 <use name=DataFormats/Math>
 <use name=DataFormats/BTauReco>
-<use name=SimDataFormats/GeneratorProducts>
+<use name=SimDataFormats/HepMCProduct>
 
 
 <flags EDM_PLUGIN=1>

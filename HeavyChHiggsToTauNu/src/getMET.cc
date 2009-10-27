@@ -7,17 +7,10 @@
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/METReco/interface/METCollection.h"
 
-std::map<std::string, MyMET> MyEventConverter::getMET(const edm::Event& iEvent){
-	std::map<std::string, MyMET> mets = getCaloMETs(iEvent);
-	mets["pfMET"] = getPFMET(iEvent);
-	mets["tcMET"] = getTCMET(iEvent);
-	return mets;
-}
+MyMET MyEventConverter::getMET(const edm::Event& iEvent){
 
-std::map<std::string, MyMET> MyEventConverter::getCaloMETs(const edm::Event& iEvent){
+	MyMET met;
 
-	std::map<std::string, MyMET> mets;
-/*
         Handle<reco::CaloMETCollection> caloMET;
         try{
             iEvent.getByLabel("met",caloMET);
@@ -25,37 +18,37 @@ std::map<std::string, MyMET> MyEventConverter::getCaloMETs(const edm::Event& iEv
 
         if(caloMET.isValid()){
           reco::CaloMETCollection::const_iterator imet = caloMET->begin();
-          met.Set(imet->px(),imet->py());
+          met.x = imet->px();
+          met.y = imet->py();
         }
 
         cout << " calo MET : " << met.value()
-             << "  x : " << met.X()
-             << "  y : " << met.Y() << endl;
-*/
+             << "  x : " << met.getX()
+             << "  y : " << met.getY() << endl;
 
-        for(unsigned int iColl = 0; iColl < metCollections.size(); ++iColl){
+
+        for(unsigned int iCorr = 0; iCorr < metCorrections.size(); ++iCorr){
                 edm::Handle<reco::CaloMETCollection> metHandle;
 		try{
-                  iEvent.getByLabel(metCollections[iColl],metHandle);
+                  iEvent.getByLabel(metCorrections[iCorr],metHandle);
 		}catch(...) {;}
 
                 if(metHandle.isValid()){
-		  reco::CaloMETCollection::const_iterator imet = metHandle->begin();
-		  MyMET met(imet->px(),imet->py());
-		  mets[metCollections[iColl].label()] = met;
+		  MyGlobalPoint correction;
+		  correction.name = metCorrections[iCorr].label();
+		  
+                  reco::CaloMETCollection::const_iterator imet = metHandle->begin();
+		  correction.x = imet->px() - met.x;
+		  correction.y = imet->py() - met.y;
 
-		  cout << "     CaloMET " << metCollections[iColl].label() << " : " 
-                       << met.X() << " "
-                       << met.Y() << endl;
+		  cout << "     MET " << correction.name << " : " 
+                       << correction.x << " "
+                       << correction.y << endl;
+
+		  met.corrections.push_back(correction);
                 }
         }
 
-	return mets;
-}
-
-MyMET MyEventConverter::getPFMET(const edm::Event& iEvent){
-
-	MyMET met;
 
 	Handle<reco::PFMETCollection> pfMET;
         try{
@@ -63,19 +56,19 @@ MyMET MyEventConverter::getPFMET(const edm::Event& iEvent){
         }catch(...) {;}
 
 	if(pfMET.isValid()){
+	  MyGlobalPoint correction;
+	  correction.name = "PFMET";
 
 	  reco::PFMETCollection::const_iterator imet = pfMET->begin();
-	  met.Set(imet->px(),imet->py());
-		    
-          cout << "     PF MET : " << met.x() << " "
-                                   << met.y() << endl;
+          correction.x = imet->px() - met.x;
+          correction.y = imet->py() - met.y;
+
+          cout << "     PF MET : " << correction.x << " "
+                                   << correction.y << endl;
+
+          met.corrections.push_back(correction);
 	}
-	return met;
-}
 
-MyMET MyEventConverter::getTCMET(const edm::Event& iEvent){
-
-	MyMET met;
 
 	// track corrected MET
 	Handle<reco::METCollection> tcMET;
@@ -84,12 +77,19 @@ MyMET MyEventConverter::getTCMET(const edm::Event& iEvent){
 	}catch(...) {;}
 
         if(tcMET.isValid()){
+          MyGlobalPoint correction;
+          correction.name = "tcMET";
 
           reco::METCollection::const_iterator imet = tcMET->begin();
-	  met.Set(imet->px(),imet->py());
+          correction.x = imet->px() - met.x;
+          correction.y = imet->py() - met.y;
 
-          cout << "     track corrected MET : " << met.x() << " "
-                                                << met.y() << endl;
+          cout << "     track corrected MET : " << correction.x << " "
+                                                << correction.y << endl;
+
+          met.corrections.push_back(correction);
         }
+
+
         return met;
 }

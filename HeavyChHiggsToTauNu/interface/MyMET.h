@@ -1,55 +1,40 @@
-#ifndef __MyMet__
-#define __MyMet__
+#ifndef MY_MET
+#define MY_MET
 
-#include "TVector2.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
+#include "TROOT.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyGlobalPoint.h"
 
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
 
-/**
- * \brief Missing transverse energy class for MyEvent dataformat
- */
-class MyMET: public TVector2 {
+using namespace std;
+
+class MyMET : public MyGlobalPoint {
    public:
       	MyMET();
-        
-        /**
-         * \brief Constructor
-         *
-         * \param x  x component
-         * \param y  y component
-         */
-        MyMET(double x, double y);
       	virtual ~MyMET();
 
-        /**
-         * \brief Get the length of the vector
-         */
+      	double getX() const;
+      	double getY() const;
         double value() const;
-
-        double x() const;
-        double y() const;
+        double getPhi() const;
         double phi() const;
 
-      	void print(std::ostream& out = std::cout) const;
+      	void useCorrection(string);
+      	void print();
+	void printCorrections();
 
-        /**
-         * \brief Name of the MET object
-         *
-         * This is the same as is the key in the MyEvent::mets map. We
-         * felt that it would be important for the MET object itself
-         * to know it's name, so it can be checked from the object itself.
-         *
-         * The name is set by MyEvent::getMET(const std::string&), and
-         * hence it doesn't have to be stored in the TTree by ROOT. To
-         * prevent the serialization, there is the //! after it.
-         * Actually this might only work for CINT dictionaries, for
-         * reflex we need something else.
-         */
-        std::string name; //!
+      	vector<MyGlobalPoint> corrections;
+	inline vector<MyGlobalPoint>::const_iterator corrections_begin() { return corrections.begin(); }
+        inline vector<MyGlobalPoint>::const_iterator corrections_end() { return corrections.end(); }
+
    private:
+	bool correctionExists(string);
 
-   ClassDef(MyMET, MYEVENT_VERSION)
+      	vector<string> usedCorrections;
+
+   ClassDef(MyMET,1)
 };
 #endif

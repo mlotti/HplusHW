@@ -4,12 +4,15 @@
 
 MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 
-        MyJet muon(recMuon.px(), recMuon.py(), recMuon.pz(), recMuon.p()); // FIXME: should we use .energy() instead of .p()?
+        MyJet muon;
+        muon.SetPx(recMuon.px());
+        muon.SetPy(recMuon.py());
+        muon.SetPz(recMuon.pz());
+        muon.SetE(recMuon.p());
         muon.type = 13 * recMuon.charge();
 
 	TrackRef track = recMuon.globalTrack();
 	if(track.isNull()) track = recMuon.innerTrack();
-	if(track.isNull()) track = recMuon.combinedMuon();
 
 	if(track.isNonnull()){
 		const TransientTrack transientTrack = transientTrackBuilder->build(track);
@@ -26,7 +29,6 @@ MyJet MyEventConverter::myJetConverter(const Muon& recMuon){
 	return muon;
 }
 
-<<<<<<< myJetConverter.cc
 MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
 
         MyJet muon;
@@ -54,59 +56,27 @@ MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
         return muon;
 }
 
-=======
-MyJet MyEventConverter::myJetConverter(const pat::Muon& recMuon){
-
-        MyJet muon(recMuon.px(), recMuon.py(), recMuon.pz(), recMuon.p()); // FIXME: should we use .energy() instead of .p()?
-        muon.type = 13 * recMuon.charge();
-
-        TrackRef track = recMuon.globalTrack();
-        if(track.isNull()) track = recMuon.innerTrack();
-
-        if(track.isNonnull()){
-                const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-                MyTrack muonTrack = myTrackConverter(transientTrack);
-                muonTrack.ip = impactParameter(transientTrack);
-                muon.tracks.push_back(muonTrack);
-
-                muon.tracks = getTracks(muon);
-        }
-
-	muon.tagInfo = muonTag(recMuon);
-
-        return muon;
-}
-
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const GsfElectron* recElectron){
 	GsfTrackRef track = recElectron->gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);
 
-        MyJet electron(recElectron->px(), recElectron->py(), recElectron->pz(), recElectron->p()); // FIXME: should we use .energy() instead of .p()?
+        MyJet electron;
+
+        electron.SetPx(recElectron->px());
+        electron.SetPy(recElectron->py());
+        electron.SetPz(recElectron->pz());
+        electron.SetE(recElectron->p());
         electron.type = 11 * (*track).charge();
 
 	MyTrack electronTrack = myTrackConverter(transientTrack);
 	electronTrack.ip = impactParameter(transientTrack);
-<<<<<<< myJetConverter.cc
 	electronTrack.trackEcalHitPoint = trackEcalHitPoint(transientTrack,recElectron);
-=======
-	electronTrack.trackEcalHitPoint = trackEcalHitPoint(recElectron);
->>>>>>> 1.30
 	electron.tracks.push_back(electronTrack);
         electron.tracks = getTracks(electron);
-
-	vector<TLorentzVector> superClusters;
-	superClusters.push_back(TLorentzVector(recElectron->superCluster()->x(),
-	                                       recElectron->superCluster()->y(),
-                                               recElectron->superCluster()->z(),
-                                               recElectron->superCluster()->energy()));
-	electron.clusters = superClusters;
 
         return electron;
 }
 
-<<<<<<< myJetConverter.cc
 MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
         GsfTrackRef track = recElectron.gsfTrack();
         const TransientTrack transientTrack = transientTrackBuilder->build(track);
@@ -130,36 +100,14 @@ MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
 	return electron;
 }
 
-=======
-MyJet MyEventConverter::myJetConverter(const pat::Electron& recElectron){
-        GsfTrackRef track = recElectron.gsfTrack();
-        const TransientTrack transientTrack = transientTrackBuilder->build(track);
-
-	MyJet electron(recElectron.px(), recElectron.py(), recElectron.pz(), recElectron.p()); // FIXME: should we use .energy() instead of .p()?
-	electron.type = 11 * (*track).charge();
-
-        MyTrack electronTrack = myTrackConverter(transientTrack);
-        electronTrack.ip = impactParameter(transientTrack);
-	electronTrack.trackEcalHitPoint = trackEcalHitPoint(&recElectron);
-        electron.tracks.push_back(electronTrack);
-        electron.tracks = getTracks(electron);
-
-        vector<TLorentzVector> superClusters;
-        superClusters.push_back(TLorentzVector(recElectron.superCluster()->x(),
-                                               recElectron.superCluster()->y(),
-                                               recElectron.superCluster()->z(),
-                                               recElectron.superCluster()->energy()));
-        electron.clusters = superClusters;
-
-	electron.tagInfo = etag(recElectron);
-
-	return electron;
-}
-
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const Photon* recPhoton){
 
-        MyJet photon(recPhoton->px(), recPhoton->py(), recPhoton->pz(), recPhoton->p()); // FIXME: should we use .energy() instead of .p()?
+        MyJet photon;
+
+        photon.SetPx(recPhoton->px());
+        photon.SetPy(recPhoton->py());
+        photon.SetPz(recPhoton->pz());
+        photon.SetE(recPhoton->p());
         photon.type = 0; //unconverted
 
         photon.tracks = getTracks(photon);
@@ -171,8 +119,12 @@ MyJet MyEventConverter::myJetConverter(const Photon* recPhoton){
 
 MyJet MyEventConverter::myJetConverter(const Conversion* recPhoton){
 
-        const GlobalVector& mom(recPhoton->pairMomentum());
-        MyJet photon(mom.x(), mom.y(), mom.z(), mom.mag());
+        MyJet photon;
+
+        photon.SetPx(recPhoton->pairMomentum().x());
+        photon.SetPy(recPhoton->pairMomentum().y());
+        photon.SetPz(recPhoton->pairMomentum().z());
+        photon.SetE(recPhoton->pairMomentum().mag());
 	photon.type = 1; //converted
 
         vector<MyTrack> tracks;
@@ -196,14 +148,20 @@ MyJet MyEventConverter::myJetConverter(const Conversion* recPhoton){
 
 MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
 
-        MyJet jet(caloJet->px(), caloJet->py(), caloJet->pz(), caloJet->energy());
+        MyJet jet;
+
+        jet.SetPx(caloJet->px());
+        jet.SetPy(caloJet->py());
+        jet.SetPz(caloJet->pz());
+        jet.SetE(caloJet->energy());
+
         jet.tracks = getTracks(jet);
 
         // Jet energy corrections
         for(unsigned int i = 0; i < jetEnergyCorrectionTypes.size(); ++i){
                 double jetEnergyCorrectionFactor = jetEnergyCorrections[i]->correction(*caloJet);
                 string jetEnergyCorrectionName = jetEnergyCorrectionTypes[i].label();
-                jet.addEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
+                jet.setJetEnergyCorrection(jetEnergyCorrectionName,jetEnergyCorrectionFactor);
 		cout << "    jet correction " << jetEnergyCorrectionName << " " 
                                               << jetEnergyCorrectionFactor << endl;
         }
@@ -211,7 +169,6 @@ MyJet MyEventConverter::myJetConverter(const CaloJet* caloJet){
         return jet;
 }
 
-<<<<<<< myJetConverter.cc
 MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
 
         MyJet jet;
@@ -226,16 +183,6 @@ MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
 	return jet;
 }
 
-=======
-MyJet MyEventConverter::myJetConverter(const pat::Jet* recoJet){
-
-        MyJet jet(recoJet->px(), recoJet->py(), recoJet->pz(), recoJet->energy());
-        jet.tracks = getTracks(jet);
-
-	return jet;
-}
-
->>>>>>> 1.30
 MyJet MyEventConverter::myJetConverter(const JetTag& recJet){
         const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recJet.first.get());
         return myJetConverter(caloJet);
@@ -245,7 +192,12 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 	const CaloJet* caloJet = dynamic_cast<const CaloJet*>(recTau.jet().get());
 
-        MyJet tau(caloJet->px(), caloJet->py(), caloJet->pz(), caloJet->energy());
+        MyJet tau;
+
+	tau.SetPx(caloJet->px());
+        tau.SetPy(caloJet->py());
+        tau.SetPz(caloJet->pz());
+        tau.SetE(caloJet->energy());
 
 	const TrackRefVector associatedTracks = recTau.allTracks();
 	RefVector<TrackCollection>::const_iterator iTrack;
@@ -256,7 +208,7 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
 
 		MyTrack track           = myTrackConverter(transientTrack);
 		track.ip                = impactParameter(transientTrack,caloJet);
-		track.trackEcalHitPoint = trackEcalHitPoint(**iTrack, caloJet);
+		track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
 		tracks.push_back(track);
 	}
 	tau.tracks = tracks;
@@ -264,8 +216,6 @@ MyJet MyEventConverter::myJetConverter(const IsolatedTauTagInfo& recTau){
         tau.tagInfo = tauTag(recTau);
 
 	tau.caloInfo = caloTowers(*caloJet);
-
-	addECALClusters(&tau);
 
         return tau;
 }
@@ -275,7 +225,12 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
         const CaloJet* caloJet = recTau.caloTauTagInfoRef()->calojetRef().get();
 
-	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	MyJet tau;
+
+        tau.SetPx(recTau.px());
+        tau.SetPy(recTau.py());
+        tau.SetPz(recTau.pz());
+        tau.SetE(recTau.energy());
 
 	vector<MyTrack> tracks;
 	vector<MyHit> hits;
@@ -301,7 +256,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 			hits.insert(hits.end(),assocHits.begin(),assocHits.end());
 		}
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(*iTrack, caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
                 tracks.push_back(track);
 		++iTrajectory;
 		++trackCounter;
@@ -316,7 +271,7 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
                 MyTrack track           = myTrackConverter(transientTrack);
                 track.ip                = impactParameter(transientTrack,caloJet);
-                track.trackEcalHitPoint = trackEcalHitPoint(**iTrack, caloJet);
+                track.trackEcalHitPoint = trackEcalHitPoint(transientTrack,caloJet);
                 tracks.push_back(track);
           }
 	}
@@ -329,18 +284,15 @@ MyJet MyEventConverter::myJetConverter(const CaloTau& recTau){
 
         // Jet energy correction
         double jetEnergyCorrectionFactor = tauJetCorrection->correction(recTau.p4());
-        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+        tau.setJetEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
 
         tau.caloInfo = caloTowers(*caloJet);
 
 	tau.secVertices = secondaryVertices(transientTracks);
 
-	addECALClusters(&tau);
-
         return tau;
 }
 
-<<<<<<< myJetConverter.cc
 MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 /*
 	const CaloJet* caloJet = recTau.caloTauTagInfoRef()->calojetRef().get();
@@ -442,79 +394,32 @@ MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
 
 	return tau;
 }
-=======
-MyJet MyEventConverter::myJetConverter(const pat::Tau& recTau){
-
-        MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
-
-        vector<MyTrack> tracks;
-        const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
-
-	vector<TransientTrack> transientTracks;
-        RefVector<PFCandidateCollection>::const_iterator iTrack;
-        for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
-
-                const PFCandidate* pfCand = iTrack->get();
-		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
-                MyTrack track = myTrackConverter(pfCand);
-                tracks.push_back(track);
-        }
-
-        const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
-        for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
-
-                const PFCandidate* pfCand = iTrack->get();
-		const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                transientTracks.push_back(transientTrack);
-
-                MyTrack track = myTrackConverter(pfCand);
-                tracks.push_back(track);
-        }
-
-        tau.tracks = tracks;
-
-        tau.tagInfo = tauTag(recTau);
-
-	tau.secVertices = secondaryVertices(transientTracks);
-	addECALClusters(&tau);
-
-	return tau;
-}
->>>>>>> 1.30
 
 MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
-	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	MyJet tau;
+
+	tau.SetPx(recTau.px());
+        tau.SetPy(recTau.py());
+        tau.SetPz(recTau.pz());
+        tau.SetE(recTau.energy());
 
 	vector<MyTrack> tracks;
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
-	vector<TransientTrack> transientTracks;
         RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
-		const PFCandidate* pfCand = iTrack->get();
-		if(pfCand->trackRef().isNonnull()){
-                  const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                  transientTracks.push_back(transientTrack);
-		}
-		MyTrack track = myTrackConverter(pfCand);
-		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
+                PFCandidate pfCand = **iTrack;
+                MyTrack track = myTrackConverter(pfCand);
                 tracks.push_back(track);
         }
 
         const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
-		const PFCandidate* pfCand = iTrack->get();
-		if(pfCand->trackRef().isNonnull()){
-                  const TransientTrack transientTrack = transientTrackBuilder->build(pfCand->trackRef());
-                  transientTracks.push_back(transientTrack);
-		}
+                PFCandidate pfCand = **iTrack;
                 MyTrack track = myTrackConverter(pfCand);
-		track.trackEcalHitPoint = trackEcalHitPoint(pfCand);
                 tracks.push_back(track);
         }
 
@@ -522,47 +427,5 @@ MyJet MyEventConverter::myJetConverter(const PFTau& recTau){
 
         tau.tagInfo = tauTag(recTau);
 
-	tau.secVertices = secondaryVertices(transientTracks);
-	addECALClusters(&tau);
-
 	return tau;	
-}
-
-void MyEventConverter::addECALClusters(MyJet* jet) {
-  // Loops over barrel and endcap ECAL cluster
-  // and stores to jet those, which are within specified DR to
-  // leading track hit point on ECAL surface
-
-  const MyTrack *myLeadingTrack = jet->leadingTrack();
-  if (!myLeadingTrack || myLeadingTrack->Pt() < 0.0001) return;
-  MyGlobalPoint myECALHitPoint = myLeadingTrack->ecalHitPoint();
-  //double myLdgEta = myECALHitPoint.Eta();
-  //double myLdgPhi = myECALHitPoint.Phi();
-
-  // Loop over barrel ECAL clusters
-  unsigned int myBarrelCollectionSize = theBarrelBCCollection->size();
-  for(unsigned int i_BC=0; i_BC != myBarrelCollectionSize; ++i_BC) { 
-    BasicClusterRef theBasicClusterRef(theBarrelBCCollection, i_BC);    
-    if (theBasicClusterRef.isNull()) continue;  
-    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
-      TLorentzVector myCluster((*theBasicClusterRef).position().x(),
-			       (*theBasicClusterRef).position().y(),
-			       (*theBasicClusterRef).position().z(),
-			       (*theBasicClusterRef).energy());
-      jet->clusters.push_back(myCluster);
-    }
-  }
-  // Loop over endcap ECAL clusters
-  unsigned int myEndcapCollectionSize = theEndcapBCCollection->size();
-  for(unsigned int i_BC=0; i_BC != myEndcapCollectionSize; ++i_BC) { 
-    BasicClusterRef theBasicClusterRef(theEndcapBCCollection, i_BC);    
-    if (theBasicClusterRef.isNull()) continue;  
-    if (ROOT::Math::VectorUtil::DeltaR(math::XYZPoint(myECALHitPoint), (*theBasicClusterRef).position()) <= 0.7) {
-      TLorentzVector myCluster((*theBasicClusterRef).position().x(),
-			       (*theBasicClusterRef).position().y(),
-			       (*theBasicClusterRef).position().z(),
-			       (*theBasicClusterRef).energy());
-      jet->clusters.push_back(myCluster);
-    }
-  }
 }

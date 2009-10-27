@@ -95,8 +95,7 @@
 				cvs co -r V02-08-02-16 RecoMET/METProducers 
 				cvs co -r V00-04-02-16 RecoMET/Configuration 
 				cvs co -r V00-06-02-09 DataFormats/METReco
-24.9.2009/S.Lehti CMSSW_3_1_3	pat lepton dataformat requires the usage of 313, 312 wont work.
-				No tags needed.
+
 
 	How to compile:
 	-compile

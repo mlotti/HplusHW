@@ -1,37 +1,26 @@
-#ifndef __MyImpactParameter__
-#define __MyImpactParameter__
+#ifndef MY_IMPACTPARAMETER
+#define MY_IMPACTPARAMETER
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMeasurement1D.h"
+using namespace std;
 
 #include "TROOT.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMeasurement1D.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
-/**
- * \brief Impact parameter class for MyEvent dataformat
- */
 class MyImpactParameter {
   public:
 	MyImpactParameter();
-
-        /**
-         * \brief Constructor
-         *
-         * \param ip_2d   2D impact parameter
-         * \param ip_z    Z impact parameter
-         * \param ip_3d   3D impact parameter
-         */
-	MyImpactParameter(const MyMeasurement1D& ip_2d, const MyMeasurement1D& ip_z, const MyMeasurement1D& ip_3d);
-
+	MyImpactParameter(MyMeasurement1D,MyMeasurement1D,MyMeasurement1D);
 	virtual ~MyImpactParameter();
 
-	MyMeasurement1D impactParameter2D() const;
-        MyMeasurement1D impactParameterZ() const;
-        MyMeasurement1D impactParameter3D() const;
+	MyMeasurement1D impactParameter2D();
+        MyMeasurement1D impactParameterZ();
+        MyMeasurement1D impactParameter3D();
 
   private:
 	MyMeasurement1D ip2D;
 	MyMeasurement1D ipZ;
 	MyMeasurement1D ip3D;
 
-  ClassDef(MyImpactParameter, MYEVENT_VERSION)
+  ClassDef(MyImpactParameter,1)
 };
 #endif

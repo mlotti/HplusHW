@@ -35,7 +35,7 @@ using namespace HepMC;
 #include <iostream>
 //using namespace std;
 
-//double myDeltaR(double,double,double,double);
+double myDeltaR(double,double,double,double);
 //double phiDis(double,double);
 
 vector<TLorentzVector> visibleTaus(const edm::Event&,int);
@@ -341,11 +341,10 @@ bool TauMETTriggerAnalysis::genuineTau(math::XYZTLorentzVector p4){
 
 	bool trueTau = false;
 
-	TLorentzVector p4TLor(p4.X(),p4.Y(),p4.Z(),p4.T());
-
 	vector<TLorentzVector>::const_iterator i;
 	for(i = visible_taus.begin(); i!= visible_taus.end(); i++){
-		double DR = i->DeltaR(p4TLor);
+		double DR = myDeltaR(i->Eta(),p4.eta(),
+                                   i->Phi(),p4.phi());
 		if(DR < 0.5) trueTau = true;
 	}
 	return trueTau;

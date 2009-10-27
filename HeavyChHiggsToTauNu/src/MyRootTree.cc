@@ -1,8 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
 #include <iostream>
 
-using namespace std;
-
 MyRootTree::MyRootTree(const char *fileName){
   if(fileName)
     rootFile = TFile::Open(fileName, "RECREATE");

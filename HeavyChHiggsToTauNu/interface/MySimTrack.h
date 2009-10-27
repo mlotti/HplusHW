@@ -1,32 +1,27 @@
-#ifndef __MySimTrack__
-#define __MySimTrack__
+#ifndef MYSIMTRACK_H
+#define MYSIMTRACK_H
 
+#include "TROOT.h"
 #include "TLorentzVector.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyGlobalPoint.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
-#include<iostream>
-
-/**
- * \brief Simulated track class for MyEvent dataformat
- */
-class MySimTrack: public TLorentzVector {
+class MySimTrack : public TLorentzVector {
  public:
   MySimTrack();
   ~MySimTrack();
 
-  void print(std::ostream& out = std::cout);
+  void print();
 
   // Data members
-  TVector3 thePosition;            ///< Production point of the track
-  int theGenPID;                   ///< Generator particle id
-  int theType;                     ///< Particle type (in case there is no gen particle)
-  int theTrackID;                  ///< Track ID
-  MyGlobalPoint trackEcalHitPoint; ///< Track ECAL impact point
+  TVector3 thePosition;
+  int theGenPID; // Generator particle
+  int theType; // Particle type (in case there is no gen particle)
+  int theTrackID; // Track ID
+  MyGlobalPoint trackEcalHitPoint; // for simtrack // LAW 11.02.08
 
  private:
 
-  ClassDef(MySimTrack, MYEVENT_VERSION)
+  ClassDef(MySimTrack,1)
 };
 
 

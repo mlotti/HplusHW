@@ -9,13 +9,13 @@ MyGlobalPoint MyEventConverter::getMCPrimaryVertex(const edm::Event& iEvent){
 
 	MyGlobalPoint mcPV;
 	if(simVertices->size() > 0){
-		mcPV.SetX((*simVertices)[0].position().x());
-		mcPV.SetY((*simVertices)[0].position().y());
-		mcPV.SetZ((*simVertices)[0].position().z());
+		mcPV.x = (*simVertices)[0].position().x();
+		mcPV.y = (*simVertices)[0].position().y();
+		mcPV.z = (*simVertices)[0].position().z();
 	}else{
-                mcPV.SetX(-999);
-                mcPV.SetY(-999);
-                mcPV.SetZ(-999);
+                mcPV.x = -999;
+                mcPV.y = -999;
+                mcPV.z = -999;
 	}
 	return mcPV;
 }

@@ -2,30 +2,11 @@
 
 ClassImp(MyMCParticle)
 
-MyMCParticle::MyMCParticle(): TLorentzVector(0,0,0,0) {}
-MyMCParticle::MyMCParticle(double px, double py, double pz, double E): TLorentzVector(px, py, pz, E) {}
+MyMCParticle::MyMCParticle(){}
+MyMCParticle::MyMCParticle(double px,double py,double pz,double e){
+        SetXYZT(px,py,pz,e);
+}
 MyMCParticle::~MyMCParticle(){}
-
-double MyMCParticle::pt()  const { return Pt(); }
-double MyMCParticle::eta() const { return Eta(); }
-double MyMCParticle::phi() const { return Phi(); }
-
-double MyMCParticle::px()  const { return Px(); }
-double MyMCParticle::py()  const { return Py(); }
-double MyMCParticle::pz()  const { return Pz(); }
-double MyMCParticle::p()  const { return P(); }
-
-TLorentzVector MyMCParticle::p4() const {
-        return TLorentzVector(Px(), Py(), Pz(), E());
-}
-
-void MyMCParticle::setP4(const TLorentzVector& vector) {
-	SetXYZT(vector.Px(), vector.Py(), vector.Pz(), vector.E());
-}
-
-int MyMCParticle::charge() const { return pCharge; }
-MyImpactParameter MyMCParticle::impactParameter() const { return ip; }
-
 /*
 MyGlobalPoint MyMCParticle::GetMCVertex() const { return impactParameter; }
 

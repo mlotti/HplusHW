@@ -4,9 +4,9 @@ MyHit MyEventConverter::myHitConverter(const TransientTrackingRecHit* recHit, fl
  	MyHit hit;
 
  	GlobalPoint myPoint = recHit->globalPosition();
- 	hit.SetX(myPoint.x());
- 	hit.SetY(myPoint.y());
- 	hit.SetZ(myPoint.z());
+ 	hit.x = myPoint.x();
+ 	hit.y = myPoint.y();
+ 	hit.z = myPoint.z();
  	GlobalError myError = recHit->globalPositionError();
  	hit.dxx = myError.cxx();
  	hit.dxy = myError.cyx();

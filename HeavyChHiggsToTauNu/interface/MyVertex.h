@@ -1,49 +1,33 @@
-#ifndef __MyVertex__
-#define __MyVertex__
+#ifndef MYVERTEX
+#define MYVERTEX
 
+using namespace std;
+
+#include "TROOT.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyTrack.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 #include <vector>
 
-#include<iostream>
-
-// Forward declare MyJet in order to avoid circular dependency
-class MyJet;
-
-/**
- * \brief Vertex class for MyEvent dataformat
- */
-class MyVertex: public MyGlobalPoint {
+class MyVertex : public MyGlobalPoint {
     public:
     	MyVertex();
-
-        /**
-         * \brief Constructor
-         *
-         * \param x  x component
-         * \param y  y component
-         * \param z  z component
-         */
-	MyVertex(double x, double y, double z);
-
+	MyVertex(double,double,double);
     	virtual ~MyVertex();
+
+    	double   Eta() const;
+    	double   Phi() const;
 
     	double   eta() const;
     	double   phi() const;
 
-    	MyVertex operator+(const MyVertex&) const;
-    	MyVertex operator-(const MyVertex&) const;
+    	MyVertex operator + (const MyVertex&) const;
+    	MyVertex operator - (const MyVertex&) const;
 
-        void print(std::ostream& out = std::cout) const;
+    	vector<MyTrack> assocTracks;
+	inline vector<MyTrack>::const_iterator assocTracks_begin() const { return assocTracks.begin(); }
+        inline vector<MyTrack>::const_iterator assocTracks_end() const { return assocTracks.end(); }
 
-        
-        /**
-         * \brief Indices to track collection in the parent jet
-         */
-        std::vector<unsigned int> assocTrackIndices;
+	void print() const;
 
-
-    private:
-    	ClassDef(MyVertex, MYEVENT_VERSION)
+    	ClassDef(MyVertex,1)
 };
 #endif

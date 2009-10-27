@@ -1,313 +1,121 @@
 #ifndef __MyEvent__
 #define __MyEvent__
 
-#include "TMap.h"
+namespace std{}
+using namespace std;
+
+#include "TROOT.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMCParticle.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMET.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MySimTrack.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MySimTrack.h" // LAW 11.02.08
 
-#include<vector>
-#include<map>
-#include<string>
-#include<iostream>
+#include <vector>
+#include <iostream>
+#include <iomanip>
 
-/**
- * \brief Event class for MyEvent dataformat
- *
- * All RECO particle collections are stored as vector<MyJet> in the
- * collections map.
- *
- * Collections of objects are returned as vector of pointers (e.g.
- * vector<MyJet *>). This minimizes the amount of object copying,
- * altough it has the downsides of bare pointers and copying of the
- * vectors themselves (although the latter appears to be relatively
- * cheap).
- *
- * The MC methods return either null or empty collections if there's
- * no MC info (this could also be enforced at analysis time by setting
- * hasMCdata member to false). It might be a good practice to check
- * with hasMCinfo() method if the MC info is accessible or not before
- * doing any analysis with MC. 
- *
- * The error conditions are handled with a print to stdout followed by
- * exit() call. This way we achieve early and noisy notification about
- * failures. If/when this becomes too restrictive, we should probably
- * go with exceptions.
- *
- * It should be noted that every time any \b data field of any MyEvent
- * class is changed, the MYEVENT_VERSION should be incremented. This
- * also implies that the previous MyEvent data may or may not be
- * readable. At least as long as new fields are added to the bottom of
- * the classes, ROOT should be able to read the old data (the new
- * fields are initialized with their default values).
- *
- * The code of the methods is \b not stored and hence it is safe to
- * add/modify the the methods of the classes without the need of
- * changing the actual dataformat.
- */
-class MyEvent: public TObject {
+class MyEvent : public TObject {
     public:
-        MyEvent();
-        virtual ~MyEvent();
+	MyEvent();
+    	virtual ~MyEvent();
 
-        /**
-         * \brief Copy constructor
-         *
-         * The explicit copy constructor is apparently needed because
-         * of the TMap member, which copy constructor is private. The
-         * problem seems to come from reflex dictionary generation (in
-         * CMSSW), where CINT (or whatever) generates the copy
-         * constructor for this class.
-         *
-         * \see http://root.cern.ch/root/roottalk/roottalk01/0159.html
-         */
-        MyEvent(const MyEvent& event);
+    	inline unsigned int event(){return eventNumber;}
+    	inline unsigned int run(){return runNumber;}
+        inline unsigned int lumiSection(){return lumi;}
 
-        /**
-         * \brief Check if particle collection exists
-         *
-         * \param name  Name of the collection
-         *
-         * \return True, if collection exists, otherwise false
-         */
-        bool hasCollection(const std::string& name) const;
+    	unsigned int    eventNumber;
+    	unsigned int    runNumber;
+	unsigned int	lumi;
 
-        /**
-         * \brief Get particle collection
-         *
-         * \param name  Name of the collection
-         *
-         * \return Collection as vector of pointers.
-         */
-        std::vector<MyJet *> getCollection(const std::string& name);
+    // Rec event
+	bool trigger(string);
 
-        /**
-         * \brief Add particle collection
-         *
-         * If the named collection already exists, the new collection
-         * is not added and the return value is false.
-         *
-         * \param name  Name of the collection
-         * \param coll  Collection to be added (the contents are copied)
-         */
-        void addCollection(const std::string& name, const std::vector<MyJet>& coll);
+    	MyGlobalPoint getPrimaryVertex();
 
-        /**
-         * \brief Check if MET exists
-         *
-         * \param name  Name of the MET object
-         *
-         * \return True, if MET object exists, otherwise false
-         */
-        bool hasMET(const std::string& name) const;
+    	vector<MyJet> getL1objects();
+        inline vector<MyJet>::const_iterator L1objects_begin(){return L1objects.begin();}
+        inline vector<MyJet>::const_iterator L1objects_end(){return L1objects.end();}
 
-        /**
-         * \brief Get MET object
-         *
-         * \param name  Name of the MET object
-         * 
-         * \return Pointer to the MET object.
-         */
-        MyMET *getMET(const std::string& name);
+    	vector<MyJet> getHLTobjects();
+        inline vector<MyJet>::const_iterator HLTobjects_begin(){return HLTobjects.begin();}
+        inline vector<MyJet>::const_iterator HLTobjects_end(){return HLTobjects.end();}
 
-        /**
-         * \brief Add MET object
-         *
-         * If the named MET object already exists, the new MET is not
-         * added and the return value is false.
-         *
-         * \param name  Name of the MET object
-         * \param met   MET to be added (the contents are copied)
-         */
-        void addMET(const std::string& name, const MyMET& met);
+    	vector<MyJet> getElectrons();
+        inline vector<MyJet>::const_iterator electrons_begin(){return electrons.begin();}
+        inline vector<MyJet>::const_iterator electrons_end(){return electrons.end();}
 
-        /**
-         * \brief Check if trigger exists
-         *
-         * \param name  Name of the trigger
-         *
-         * \return True, if trigger exists, otherwise false
-         */
-        bool hasTrigger(const std::string& name) const;
+    	vector<MyJet> getPhotons();
+        inline vector<MyJet>::const_iterator photons_begin(){return photons.begin();}
+        inline vector<MyJet>::const_iterator photons_end(){return photons.end();}
 
-        /**
-         * \brief Get trigger value
-         *
-         * \param name  Name of the trigger
-         *
-         * \return True, if event passed the trigger, false if not.
-         */
-        bool trigger(const std::string& name) const;
+    	vector<MyJet> getMuons();
+        inline vector<MyJet>::const_iterator muons_begin(){return muons.begin();}
+        inline vector<MyJet>::const_iterator muons_end(){return muons.end();}
 
-        /**
-         * \brief Add trigger value
-         *
-         * If the named trigger already exists, the new trigger is not
-         * added and the return value is false.
-         *
-         * \param name    Name of the trigger
-         * \param passed  True if event passed the trigger, false if not
-         */
-        void addTrigger(const std::string& name, bool passed);
+    	vector<MyJet> getTaujets();
+        inline vector<MyJet>::const_iterator taujets_begin(){return taujets.begin();}
+        inline vector<MyJet>::const_iterator taujets_end(){return taujets.end();}
 
-        /**
-         * \brief Get primary vertex
-         *
-         * \return Pointer to primary vertex
-         */
-        MyGlobalPoint *getPrimaryVertex();
+    	vector<MyJet> getPFTaus();
+        inline vector<MyJet>::const_iterator pftaus_begin(){return pftaus.begin();}
+        inline vector<MyJet>::const_iterator pftaus_end(){return pftaus.end();}
 
-        /**
-         * \brief Check if MC info is accessible
-         *
-         * \return True, if MC info is available, otherwise false
-         */
-        bool hasMCinfo() const;
+    	vector<MyJet> getJets();
+        //inline vector<MyJet>::const_iterator jets_begin(){return jets.begin();}
+        //inline vector<MyJet>::const_iterator jets_end(){return jets.end();}
 
-        /**
-         * \brief Get MC primary vertex
-         *
-         * \return Pointer to MC primary vertex. 
-         */
-        MyGlobalPoint *getMCPrimaryVertex();
+    	vector<MyJet> getJets(string);
+        vector<MyJet> getTaujets(string);
 
-        /**
-         * \brief Get MC particle list
-         *
-         * \return Collection of MC particles as vector of pointers.
-         */
-        std::vector<MyMCParticle *> getMCParticles();
+        vector<MyJet> getExtraObjects();
 
+    	MyMET         getMET();
 
-        /**
-         * \brief Get Monte-Carlo MET object
-         *
-         * \param name  Name of the Monte-Carlo MET object
-         *
-         * \return Pointer to the Monte-Carlo MET object.
-         */
-        MyMET *getMCMET();
+    	void 	      listJetCorrections();
+    	void          print();
+    	void          printAll();
+	void	      printReco();
+	void	      printCorrections();
 
+    // rec data
+	map<string,bool> triggerResults;
 
-        /**
-         * \brief Get simulated tracks
-         *
-         * \return Collection of simulated tracks as vector of
-         *         pointers.
-         */
-        std::vector<MySimTrack *> getSimTracks();
+    	MyGlobalPoint primaryVertex;
 
-        /**
-         * \brief Check if extra object exists
-         *
-         * \param name  Name of the extra object
-         *
-         * \return True, if the extra object exists, otherwise false
-         */
-        bool hasExtraObject(const std::string& name) const;
+    	vector<MyJet> L1objects;
+    	vector<MyJet> HLTobjects;
+    	vector<MyJet> electrons;
+    	vector<MyJet> photons;
+    	vector<MyJet> muons;
+    	vector<MyJet> taujets;
+    	vector<MyJet> pftaus;
+    	vector<MyJet> jets;
 
-        /**
-         * \brief Get extra object
-         *
-         * \param name  Name of the extra object
-         *
-         * \return TObject pointer to the extra object; you must cast
-         *         (preferrably with dynamic_cast) the object to the
-         *         correct type by yourself. If the named object
-         *         doesn't exist, null pointer is returned.
-         */
-        TObject *getExtraObject(const std::string& name);
+	vector<MyJet> extraObjects;
 
-        /**
-         * \brief Add extra object
-         *
-         * If the named extra object already exists, the new trigger
-         * is not added and the return value is false.
-         *
-         * Note that the extra object must inherit from TObject. This
-         * is in order to have relatively general solution without
-         * heavy framework.
-         *
-         * MyEvent claims the ownership of the extra object. In case
-         * of failures, the object is deleted by MyEvent (here one has
-         * to be careful in order to avoid memory leaks).
-         *
-         * \param name  Name of the extra object
-         * \param obj   Pointer to extra object (ownership is transferred to MyEvent)
-         */
-        void addExtraObject(const std::string& name, TObject *obj);
-      
-        /**
-         * \brief Get event number
-         */
-        unsigned int event() const;
+    	MyMET         MET;
 
-        /**
-         * \brief Get run number
-         */
-        unsigned int run() const;
+  // MC event
+    	MyMET            getMCMET();
+    	MyGlobalPoint 	 getMCPrimaryVertex();
 
-        /**
-         * \brief Get lumiSection id
-         */
-        unsigned int lumiSection() const;
+    	vector<MyMCParticle> getMCParticles();
+        inline vector<MyMCParticle>::const_iterator mcParticles_begin(){return mcParticles.begin();}
+        inline vector<MyMCParticle>::const_iterator mcParticles_end(){return mcParticles.end();}
 
-        /**
-         * \brief Print summary
-         */
-        void printSummary(std::ostream& out = std::cout) const;
+    	vector<MySimTrack>   getSimTracks();
+        inline vector<MySimTrack>::const_iterator simTracks_begin(){return simTracks.begin();}
+        inline vector<MySimTrack>::const_iterator simTracks_end(){return simTracks.end();}
 
-        /**
-         * \brief Print available energy corrections
-         */
-        void printCorrections(std::ostream& out = std::cout) const;
-
-        /**
-         * \brief Print reco data
-         */
-        void printReco(std::ostream& out = std::cout) const;
-
-        /**
-         * \brief Print whole event
-         */
-        void printAll(std::ostream& out = std::cout) const;
-
-
-        /*** Members ***/
-        typedef std::vector<MyJet> JetCollection;
-        typedef std::map<std::string, JetCollection> CollectionMap;
-        typedef std::map<std::string, MyMET> METMap;
-        typedef std::map<std::string, bool> TriggerMap;
-
-        // RECO data
-        CollectionMap collections;
-        METMap mets;
-        TriggerMap triggerResults;
-
-        MyGlobalPoint primaryVertex;
-
-        // MC and SIM data
-        std::vector<MyMCParticle> mcParticles;
-        std::vector<MySimTrack>   simTracks;
-	MyMET            	  mcMET;
-        MyGlobalPoint mcPrimaryVertex;
-        // std::map<std::string, MyGlobalPoint> vertices ?
-
-        // for the case of testing something without changing data format
-        TMap extraObjects;
-
-        // event id
-        unsigned int eventNumber;
-        unsigned int runNumber;
-        unsigned int lumiNumber;
-
-        bool hasMCdata; /// Does the event contain MC info?
-
+    // MC data
+    	MyMET         	 mcMET;
+    	MyGlobalPoint        mcPrimaryVertex;
+    	vector<MyMCParticle> mcParticles;
+    	vector<MySimTrack>   simTracks; // LAW 12.02.08
 
     private:
-    	ClassDef(MyEvent, MYEVENT_VERSION) // The macro
+
+    	ClassDef(MyEvent,1) // The macro
 };
 
 #endif

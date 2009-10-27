@@ -1,33 +1,49 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyGlobalPoint.h"
 
-#include "TMatrix.h"
-
-#include<cmath>
-#include<iostream>
+double phifun(double,double);
+double etafun(double,double,double);
 
 ClassImp(MyGlobalPoint)
 
-MyGlobalPoint::MyGlobalPoint(): TVector3(0,0,0), dxx(0), dxy(0), dxz(0), dyy(0), dyz(0), dzz(0) {}
-MyGlobalPoint::MyGlobalPoint(double x, double y, double z): TVector3(x, y, z), dxx(0), dxy(0), dxz(0), dyy(0), dyz(0), dzz(0) {}
-
+MyGlobalPoint::MyGlobalPoint(){}
+MyGlobalPoint::MyGlobalPoint(double xx,double yy,double zz){
+	x = xx;
+	y = yy;
+	z = zz;
+}
 MyGlobalPoint::~MyGlobalPoint(){}
 
-double MyGlobalPoint::Xerror() const { return sqrt(dxx); }
-double MyGlobalPoint::Yerror() const { return sqrt(dyy); }
-double MyGlobalPoint::Zerror() const { return sqrt(dzz); }
+double MyGlobalPoint::getX() const { return x; }
+double MyGlobalPoint::getY() const { return y; }
+double MyGlobalPoint::getZ() const { return z; }
 
-double MyGlobalPoint::value() const { return Mag(); }
-double MyGlobalPoint::error() const { return sqrt(dxx + 2*dxy + 2*dxz + dyy + 2*dyz + dzz); } // FIXME: the formula is still wrong
+double MyGlobalPoint::getXerror() const { return sqrt(dxx); }
+double MyGlobalPoint::getYerror() const { return sqrt(dyy); }
+double MyGlobalPoint::getZerror() const { return sqrt(dzz); }
+
+double MyGlobalPoint::DValue(double xx, double yy, double zz) const {
+
+    double dvalue = 0;
+
+    switch(dimension){
+        case 1:  dvalue = zz; break;
+        case 2:  dvalue = sqrt(xx*xx + yy*yy); break;
+        //case 3:  dvalue = sqrt(xx*xx + yy*yy + zz*zz); break; 
+        default: dvalue = sqrt(xx*xx + yy*yy + zz*zz); break;
+    }
+    return dvalue;
+}
+
+double MyGlobalPoint::value() const { return DValue(getX(),getY(),getZ());}
+double MyGlobalPoint::error() const { return DValue(getXerror(),getYerror(),getZerror());}
+
+#include "TMatrix.h"
 
 double MyGlobalPoint::rotatedError() const {
     // rotating the vector x,y,z so that z' = vector direction 
     // in result z error = error
     // First rotation +phi around z-axis, then rotation +theta around y-axis
     // (Rotating coordinates -> plus sign)
-
-    double x = X();
-    double y = Y();
-    double z = Z();
 
     double T = sqrt(x*x + y*y);
     double R = sqrt(T*T + z*z);
@@ -63,43 +79,53 @@ double MyGlobalPoint::rotatedError() const {
 
 double MyGlobalPoint::rotatedSignificance() const {
     double significance = 0;
-    double e = rotatedError();
-    if(std::abs(e) > 0) significance = value()/e;
+    if(rotatedError() != 0) significance = value()/rotatedError();
     return significance;
 }
 
 double MyGlobalPoint::significance() const {  
     double significance = 0;
-    double e = error();
-    if(std::abs(e) > 0) significance = value()/e;
+    if(error() != 0) significance = value()/error();
     return significance;
+}
+
+double MyGlobalPoint::getPhi() const {
+    return Phi();
+}
+
+double MyGlobalPoint::Phi() const {
+    return phifun(getX(),getY());
 }
 
 double MyGlobalPoint::phi() const {
     return Phi();
 }
 
+double MyGlobalPoint::Eta() const {
+    return etafun(getX(),getY(),getZ());
+}
+
 double MyGlobalPoint::eta() const {
-    return Eta();
+	return Eta();
 }
 
-MyGlobalPoint MyGlobalPoint::operator+(const MyGlobalPoint& q) const {
-    MyGlobalPoint point(*this);
-    point += q; // exploit TVector3::operator+=(TVector3&)
-
-    point.dxx += q.dxx;
-    point.dxy += q.dxy;
-    point.dxz += q.dxz;
-    point.dyy += q.dyy;
-    point.dyz += q.dyz;
-    point.dzz += q.dzz;
-
-    return point;
+double MyGlobalPoint::getEta() const {
+        return Eta();
 }
 
-MyGlobalPoint MyGlobalPoint::operator-(const MyGlobalPoint& q) const {
-    MyGlobalPoint point(*this);
-    point -= q; // exploit TVector3::operator-=(TVector3&)
+
+void MyGlobalPoint::use(string D){ 
+    dimension = 0;
+    if(D == "2D")            dimension = 2;
+    if(D == "3D")            dimension = 3;
+    if(D == "z" || D == "Z") dimension = 1;
+}
+
+MyGlobalPoint MyGlobalPoint::operator + (const MyGlobalPoint& q) const {
+    MyGlobalPoint point;
+    point.x = x + q.getX();
+    point.y = y + q.getY();
+    point.z = z + q.getZ();
 
     point.dxx = dxx + q.dxx;
     point.dxy = dxy + q.dxy;
@@ -111,6 +137,22 @@ MyGlobalPoint MyGlobalPoint::operator-(const MyGlobalPoint& q) const {
     return point;
 }
 
-TVector3 MyGlobalPoint::tvector3() const {
-    return TVector3(X(), Y(), Z());
+MyGlobalPoint MyGlobalPoint::operator - (const MyGlobalPoint& q) const {
+    MyGlobalPoint point;
+    point.x = x - q.getX();
+    point.y = y - q.getY();
+    point.z = z - q.getZ();
+
+    point.dxx = dxx + q.dxx;
+    point.dxy = dxy + q.dxy;
+    point.dxz = dxz + q.dxz;
+    point.dyy = dyy + q.dyy;
+    point.dyz = dyz + q.dyz;
+    point.dzz = dzz + q.dzz;
+
+    return point;
+}
+
+TVector3 MyGlobalPoint::tvector3(){
+	return TVector3(x,y,z);
 }
