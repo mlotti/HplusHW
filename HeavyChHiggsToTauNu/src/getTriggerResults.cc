@@ -15,28 +15,38 @@ using std::vector;
 using std::string;
 
 void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::InputTag& label, std::map<std::string, bool>& trigger){
-        Handle<TriggerResults> hltHandle;
-        iEvent.getByLabel(label, hltHandle);
+        vector<Handle<TriggerResults> > hltHandles;
+	iEvent.getManyByType(hltHandles);
+	cout << "check MyEventConverter::getTriggerResults " << hltHandles.size() << endl;
 
-        if(!hltHandle.isValid())
-                return;
-        cout << "trigger table size " << hltHandle->size() << endl;
+	for(vector<Handle<TriggerResults> >::const_iterator iHandle = hltHandles.begin();
+            iHandle!= hltHandles.end(); ++iHandle){
+		if((*iHandle)->size() < 10) continue;
 
-        TriggerNames triggerNames;
-        triggerNames.init(*hltHandle);
-        const std::vector<std::string>& hlNames = triggerNames.triggerNames();
-        int n = 0;
-        for(vector<string>::const_iterator i = hlNames.begin();
-                                           i!= hlNames.end(); i++){
-                if(printTrigger) cout << "trigger: " << *i << " " << hltHandle->accept(n) << endl;
+        	const std::string hltTableName = iHandle->provenance()->processName();
+        	if(printTrigger) cout << "trigger table " << hltTableName 
+                                      << " size " << (*iHandle)->size() << endl;
 
-                for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin(); 
-                                                     iSelect!= HLTSelection.end(); iSelect++){
-                        if(iSelect->label() != *i) continue;
+                TriggerNames triggerNames;
+                triggerNames.init(**iHandle);
+                vector<string> hlNames = triggerNames.triggerNames();
+                int n = 0;
+                for(vector<string>::const_iterator i = hlNames.begin();
+                                                   i!= hlNames.end(); i++){
+                        if(printTrigger) cout << "trigger: " << *i << " " << (*iHandle)->accept(n) << endl;
 
-                        trigger[*i] = hltHandle->accept(n);
+			string s_trigger = hltTableName + "_" + *i;
+			trigger[s_trigger] = (*iHandle)->accept(n);
+/*
+                        for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin();
+                                                             iSelect!= HLTSelection.end(); iSelect++){
+                                if(iSelect->label() != *i) continue;
+				string s_trigger = hltTableName + *i;
+                                trigger[s_trigger] = (*iHandle)->accept(n);
+                        }
+*/
+                        n++;
                 }
-                n++;
-        }
-        printTrigger = false;
+	}
+	printTrigger = false;
 }

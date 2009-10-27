@@ -121,11 +121,6 @@ class MyJet: public TLorentzVector {
         const std::string& getActiveEnergyCorrectionName() const;
 
         /**
-         * \brief Get the factor of active energy correction
-         */
-        double getActiveEnergyCorrectionFactor() const;
-
-        /**
          * \brief Get tracks of the jet
          *
          * \param signalCone     Consider only tracks in this cone around the jet
@@ -160,11 +155,6 @@ class MyJet: public TLorentzVector {
          * \brief Get secondary vertices
          */
         std::vector<MyVertex *> getSecVertices();
-
-        /**
-         * \brief Get track hits
-         */
-        std::vector<MyHit *> getHits();
 
         /**
          * \brief Get calorimeter information

@@ -57,7 +57,7 @@ class MyEventConverter {
 
 // datafields
 
-        std::vector<edm::InputTag> HLTSelection;
+//        std::vector<edm::InputTag> HLTSelection;
         reco::Vertex primaryVertex;
 	bool PVFound;
         edm::InputTag trackCollectionSelection;

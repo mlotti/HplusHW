@@ -53,7 +53,7 @@ void MyJet::setP4(const TLorentzVector& vector){
 
 ////////////////////////////
 
-void MyJet::addEnergyCorrection(const std::string& name, double value) {
+void MyJet::addEnergyCorrection(const string& name, double value) {
   pair<map<string, double>::iterator, bool> ret = jecs.insert(make_pair(name, value));
   if(!ret.second) {
     cout << "Unable to add energy correction " << name << ".";
@@ -74,7 +74,7 @@ void MyJet::setEnergyCorrection(const std::string& name) {
           originalP4.T() * correction);
 }
 
-double MyJet::getEnergyCorrectionFactor(const std::string& name) const {
+double MyJet::getEnergyCorrectionFactor(const string& name) const {
   if(name == "raw" || name == "" || name == "none")
     return 1;
 
@@ -87,17 +87,13 @@ double MyJet::getEnergyCorrectionFactor(const std::string& name) const {
   return found->second;
 }
 
-bool MyJet::hasEnergyCorrection(const std::string& name) const {
+bool MyJet::hasEnergyCorrection(const string& name) const {
   map<string, double>::const_iterator found = jecs.find(name);
   return found != jecs.end();
 }
 
 const std::string& MyJet::getActiveEnergyCorrectionName() const {
   return currentCorrection;
-}
-
-double MyJet::getActiveEnergyCorrectionFactor() const {
-  return getEnergyCorrectionFactor(currentCorrection);
 }
 
 // helper
@@ -146,15 +142,11 @@ vector<MyVertex *> MyJet::getSecVertices() {
   return convertCollection(secVertices);
 }
 
-vector<MyHit *> MyJet::getHits() {
-  return convertCollection(hits);
-}
-
 vector<MyCaloTower *> MyJet::getCaloInfo() {
   return convertCollection(caloInfo);
 }
 
-double MyJet::tag(const std::string& name) const {
+double MyJet::tag(const string& name) const {
   map<string, double>::const_iterator found = tagInfo.find(name);
   if(found == tagInfo.end()) {
     if(tracks.size() == 0) cout << "No tracks!" << endl;
@@ -263,23 +255,23 @@ void printMap(std::ostream& out, const C& coll, const char *name) {
   
 }
 
-void MyJet::printTracks(std::ostream& out) const {
+void MyJet::printTracks(ostream& out) const {
   printCollection(out, tracks, "tracks");
 }
-void MyJet::printVertices(std::ostream& out) const {
+void MyJet::printVertices(ostream& out) const {
   printCollection(out, secVertices, "vertices");
 }
-void MyJet::printCaloInfo(std::ostream& out) const {
+void MyJet::printCaloInfo(ostream& out) const {
   printCollection(out, caloInfo, "caloTowers");
 }
-void MyJet::printTagInfo(std::ostream& out) const {
+void MyJet::printTagInfo(ostream& out) const {
   printMap(out, tagInfo, "tagInfo");
 }
-void MyJet::printEnergyCorrections(std::ostream& out) const {
+void MyJet::printEnergyCorrections(ostream& out) const {
   printMap(out, jecs, "jetEnergyCorrections");
 }
 
-void MyJet::printCorrections(std::ostream& out) const {
+void MyJet::printCorrections(ostream& out) const {
   if(jecs.size() == 0)
     return;
   for(map<string,double>::const_iterator i = jecs.begin(); i!= jecs.end(); ++i) {
@@ -287,7 +279,7 @@ void MyJet::printCorrections(std::ostream& out) const {
   }
 }
 
-void MyJet::print(std::ostream& out) const {
+void MyJet::print(ostream& out) const {
   printTracks(out);
   printVertices(out);
   printCaloInfo(out);
@@ -296,7 +288,7 @@ void MyJet::print(std::ostream& out) const {
   out << endl;
 }
 
-void useCorrection(std::vector<MyJet *>& jets, const std::string& name) {
+void useCorrection(vector<MyJet *>& jets, const std::string& name) {
   for(vector<MyJet *>::iterator p = jets.begin(); p != jets.end(); ++p) {
     (*p)->setEnergyCorrection(name);
   }

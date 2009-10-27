@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 
 MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
-        HLTSelection(iConfig.getParameter< vector<InputTag> >("HLTSelection")),
+//        HLTSelection(iConfig.getParameter< vector<InputTag> >("HLTSelection")),
         trackCollectionSelection(iConfig.getParameter<InputTag>("TrackCollection")),
 //	barrelClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation")),
 //	endcapClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("endcapClusterShapeAssociation")),
