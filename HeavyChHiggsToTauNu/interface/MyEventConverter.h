@@ -22,6 +22,9 @@
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
+#include "DataFormats/EgammaReco/interface/BasicCluster.h" 
+#include "DataFormats/EgammaReco/interface/BasicClusterFwd.h" 
+
 #include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 //#include "DataFormats/BTauReco/interface/PFIsolatedTauTagInfo.h"
@@ -56,7 +59,7 @@
 #include "DataFormats/HcalDetId/interface/HcalDetId.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerDetId.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
 //PAT
@@ -80,8 +83,11 @@ using namespace reco;
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackDetectorAssociatorWrapper.h"
 
-double myDeltaR(double,double,double,double);
+
+////double myDeltaR(double,double,double,double);
+#include "Math/VectorUtil.h"
 
 class MyEventConverter {
   public:
@@ -106,10 +112,11 @@ class MyEventConverter {
 	MyImpactParameter 	impactParameter(const TransientTrack&,const Conversion*);
         MyImpactParameter 	impactParameter(const TransientTrack&);
 	MyImpactParameter 	impactParameter(const TransientTrack&,const GlobalVector&);
-	MyGlobalPoint		trackEcalHitPoint(const TransientTrack&,const CaloJet*);
+	MyGlobalPoint		trackEcalHitPoint(const Track&, const CaloJet*);
         MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const Conversion*);
-        MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const GsfElectron*);
-        MyGlobalPoint           trackEcalHitPoint(const TransientTrack&,const pat::Electron*);
+	MyGlobalPoint		trackEcalHitPoint(const GsfElectron*);
+	MyGlobalPoint           trackEcalHitPoint(const pat::Electron*);
+	MyGlobalPoint		trackEcalHitPoint(const reco::PFCandidate*);
 
 	map<string,bool> 	getTriggerResults(const edm::Event&);
 	MyGlobalPoint 		getPrimaryVertex();
@@ -122,7 +129,7 @@ class MyEventConverter {
 	vector<MyJet>           getPATMuons(const edm::Event&);
         vector<MyJet>           getTaus(const edm::Event&);
 	vector<MyJet>		getPATTaus(const edm::Event&);
-        vector<MyJet> 		getPFTaus(const edm::Event&);
+        vector<MyJet> 		getPFTaus(const edm::Event&,string);
         vector<MyJet> 		getJets(const edm::Event&);
 	vector<MyJet>		getPATJets(const edm::Event&);
         void                    getTracks(const edm::Event&);
@@ -131,7 +138,10 @@ class MyEventConverter {
 	vector<MyHit>		getHits(const Trajectory&,int&);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double);
 	vector<Track> 		tracksInCone(const math::XYZTLorentzVector,double,vector<Trajectory>*);
-        MyMET 			getMET(const edm::Event&);
+	std::map<std::string, MyMET> getMET(const edm::Event&);
+        std::map<std::string, MyMET> getCaloMETs(const edm::Event&);
+        MyMET                   getPFMET(const edm::Event&);
+        MyMET                   getTCMET(const edm::Event&);
 	MyMET			getPATMET(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
         MyMET 			getMCMET();
@@ -141,13 +151,14 @@ class MyEventConverter {
         vector<MySimTrack>      getSimTracks(const edm::Event&,MyEvent*);
 	vector<MyVertex>	secondaryVertices(vector<TransientTrack>&);
 	void			getCaloHits(const edm::Event&);
+	void			getEcalClusters(const edm::Event&);
 	vector<MyJet> 		getExtraObjects(const edm::Event&);
 
         MyTrack                 myTrackConverter(const TransientTrack&);
 //	MyTrack			myTrackConverter(const TransientTrack&, const Trajectory&);
 //	MyTrack			myTrackConverter(const Track&, const Trajectory&);
 	MyTrack 		myTrackConverter(const Track&);
-	MyTrack 		myTrackConverter(const PFCandidate&);
+	MyTrack 		myTrackConverter(const PFCandidate*);
 	MyVertex		myVertexConverter(const Vertex&);
         MyVertex                myVertexConverter(const TransientVertex&);
 	MyJet			myJetConverter(const reco::Muon&);
@@ -164,6 +175,7 @@ class MyEventConverter {
 	MyJet			myJetConverter(const pat::Tau&);
 //        MyJet                   myJetConverter(const PFIsolatedTauTagInfo&);
 	MyJet 			myJetConverter(const PFTau&);
+	void                    addECALClusters(MyJet* jet);
 	MyMeasurement1D 	myMeasurement1DConverter(const Measurement1D&);
         MyHit                   myHitConverter(const TransientTrackingRecHit*, float);
 	MyMCParticle 		myMCParticleConverter(const GenJet&);
@@ -187,7 +199,8 @@ class MyEventConverter {
 
 // datafields
 
-        vector<InputTag> HLTSelection;
+//	InputTag	 triggerTable;
+//	vector<InputTag> HLTSelection;
         Vertex primaryVertex;
 	bool PVFound;
         InputTag trackCollectionSelection;
@@ -203,7 +216,7 @@ class MyEventConverter {
 	const TauJetCorrector* tauJetCorrection;
         vector<InputTag> jetEnergyCorrectionTypes;
         vector<InputTag> btaggingAlgos;
-	vector<InputTag> metCorrections;
+	vector<InputTag> metCollections;
 	vector<InputTag> electronIdLabels;
         TrackCollection tracks;
 
@@ -219,6 +232,12 @@ class MyEventConverter {
         Handle<EBRecHitCollection>   EBRecHits;
         Handle<EERecHitCollection>   EERecHits;
 
+	// ECAL clusters
+	InputTag BarrelBasicClustersInput;
+	InputTag EndcapBasicClustersInput;
+	Handle<BasicClusterCollection> theBarrelBCCollection;
+	Handle<BasicClusterCollection> theEndcapBCCollection;
+	
         Handle<HBHERecHitCollection> HBHERecHits;
         Handle<HORecHitCollection>   HORecHits;
         Handle<HFRecHitCollection>   HFRecHits;
@@ -235,5 +254,8 @@ class MyEventConverter {
 
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
+        TrackDetectorAssociatorWrapper trackAssociator_;
+
+	bool printTrigger;
 };
 #endif

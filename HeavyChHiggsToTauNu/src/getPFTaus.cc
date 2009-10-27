@@ -1,11 +1,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
-vector<MyJet> MyEventConverter::getPFTaus(const edm::Event& iEvent){
+vector<MyJet> MyEventConverter::getPFTaus(const edm::Event& iEvent,string label){
 	vector<MyJet> pftaus;
 
   	Handle<PFTauCollection> thePFTauHandle;
 	try{
-	  iEvent.getByLabel("pfRecoTauProducer",thePFTauHandle);
+	  //fixedConeHighEffPFTauProducer,fixedConePFTauProducer,shrinkingConePFTauProducer
+	  iEvent.getByLabel(edm::InputTag(label),thePFTauHandle);
         }catch(...) {;}
 
 	if(thePFTauHandle.isValid()){
@@ -21,25 +22,5 @@ vector<MyJet> MyEventConverter::getPFTaus(const edm::Event& iEvent){
                 pftaus.push_back(tau);
           }
 	}
-
-/*
-        Handle<PFIsolatedTauTagInfoCollection> isolatedTauHandle;
-        try{
-          iEvent.getByLabel("pfConeIsolation",isolatedTauHandle);
-        }catch(...) {;}
-
-        if(isolatedTauHandle.isValid()){
-          const PFIsolatedTauTagInfoCollection & isolatedTaus =
-                                                *(isolatedTauHandle.product());
-          int offlineTaus = isolatedTaus.size();
-          cout << "PFtau collection size " << offlineTaus << endl;
-
-          PFIsolatedTauTagInfoCollection::const_iterator iTau;
-          for(iTau = isolatedTaus.begin(); iTau != isolatedTaus.end(); iTau++){
-		MyJet tau = myJetConverter(*iTau);
-                pftaus.push_back(tau);
-          }
-        }
-*/
 	return pftaus;
 }

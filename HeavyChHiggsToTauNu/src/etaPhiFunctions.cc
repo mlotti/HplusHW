@@ -40,7 +40,7 @@ double deltaPhi(double phi1, double phi2){
 
 double phiDis(double phi1, double phi2){ return deltaPhi(phi1,phi2); }
 
-double myDeltaR(double eta1, double eta2, double phi1, double phi2){
+double deltaR(double eta1, double eta2, double phi1, double phi2){
 
     double dphi = deltaPhi(phi1,phi2);
     double deta = fabs(eta1-eta2);

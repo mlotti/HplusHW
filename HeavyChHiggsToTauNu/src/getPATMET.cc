@@ -27,15 +27,15 @@ MyMET MyEventConverter::getPATMET(const edm::Event& iEvent){
              << "  y : " << met.getY() << endl;
 
 
-        for(unsigned int iCorr = 0; iCorr < metCorrections.size(); ++iCorr){
+        for(unsigned int iCorr = 0; iCorr < metCollections.size(); ++iCorr){
                 edm::Handle<reco::CaloMETCollection> metHandle;
 		try{
-                  iEvent.getByLabel(metCorrections[iCorr],metHandle);
+                  iEvent.getByLabel(metCollections[iCorr],metHandle);
 		}catch(...) {;}
 
                 if(metHandle.isValid()){
 		  MyGlobalPoint correction;
-		  correction.name = metCorrections[iCorr].label();
+		  correction.name = metCollections[iCorr].label();
 		  
                   reco::CaloMETCollection::const_iterator imet = metHandle->begin();
 		  correction.x = imet->px() - met.x;

@@ -1,32 +1,80 @@
-#ifndef MY_MCPARTICLE
-#define MY_MCPARTICLE
+#ifndef __MyMCParticle__
+#define __MyMCParticle__
 
-#include "TROOT.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyTrack.h"
-#include <vector>
+#include "TLorentzVector.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyImpactParameter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
-using namespace std;
+#include<vector>
 
-class MyMCParticle : public MyTrack {
+/**
+ * \brief Monte Carlo particle class for MyEvent dataformat
+ */
+class MyMCParticle: public TLorentzVector {
     public:
         MyMCParticle();
-	MyMCParticle(double,double,double,double);
+
+        /**
+         * \brief Constructor with 4-momentum
+         *
+         * \param px  momentum x component
+         * \param py  momentum y component
+         * \param pz  momentum z component
+         * \param E   total energy
+         */
+	MyMCParticle(double px, double py, double pz, double E);
+
         virtual ~MyMCParticle();
 /*
         MyGlobalPoint GetMCVertex() const;
         MyGlobalPoint GetImpactParameter() const;
 */
-	int         pid;
-	int 	    status;
-	int	    barcode;
-        vector<int> mother;
-	inline vector<int>::const_iterator mother_begin() const { return mother.begin();}
-        inline vector<int>::const_iterator mother_end() const { return mother.end();}
 
-	vector<int> motherBarcodes;
-        inline vector<int>::const_iterator motherBarcodes_begin() const { return motherBarcodes.begin();}
-        inline vector<int>::const_iterator motherBarcodes_end() const { return motherBarcodes.end();}
+      	double   pt()  const;
+      	double   eta() const;
+      	double   phi() const;
 
-    ClassDef(MyMCParticle,1)
+      	double   px()  const;
+      	double   py()  const;
+      	double   pz()  const;
+	double   p()   const;
+
+        /**
+         * \brief Get the 4-momentum of the track
+         *
+         * \return Copy of the 4-momentum
+         */
+        TLorentzVector p4() const;
+
+        /**
+         * \brief Set the 4-momentum of the track
+         *
+         * \param p4  4-momentum to be set
+         */
+	void setP4(const TLorentzVector& p4);
+
+        /**
+         * \brief Get the charge of the particle
+         */
+	int charge() const;
+
+        /**
+         * \brief Get the impact parameter of the track
+         */
+        MyImpactParameter impactParameter() const;
+
+
+        MyImpactParameter ip;             ///< Impact parameter
+        int pCharge;                      ///< Particle charge
+
+        std::vector<int> mother;          ///< Mother particle IDs
+        std::vector<int> motherBarcodes;  ///< Mother particle barcodes
+        int         pid;                  ///< Particle ID
+	int 	    status;               ///< Particle status
+	int	    barcode;              ///< Particle barcode
+
+    private:
+
+    ClassDef(MyMCParticle, MYEVENT_VERSION)
 };
 #endif
