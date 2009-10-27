@@ -25,13 +25,13 @@ bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
                         cout << "trigger: " << *i << " "
                              << hltHandle->accept(n) << endl;
 
-			for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin(); 
-                                                             iSelect!= HLTSelection.end(); iSelect++){
-				if(iSelect->label() == *i && hltHandle->accept(n) == 1) {
+//			for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin(); 
+//                                                             iSelect!= HLTSelection.end(); iSelect++){
+//				if(iSelect->label() == *i && hltHandle->accept(n) == 1) {
 					triggerdecision = true;
 					cout << "event triggered with " << *i << endl;
-				}
-			}
+//				}
+//			}
                         n++;
                 }
         }
