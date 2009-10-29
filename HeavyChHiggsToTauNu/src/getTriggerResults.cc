@@ -12,7 +12,7 @@ using edm::InputTag;
 using std::vector;
 using std::string;
 
-void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::InputTag& label, std::map<std::string, bool>& trigger){
+void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::InputTag& label, std::map<std::string, bool>& trigger, bool printTrigger){
         vector<Handle<TriggerResults> > hltHandles;
 	iEvent.getManyByType(hltHandles);
         if(edm::isDebugEnabled())
@@ -49,5 +49,4 @@ void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::In
                         n++;
                 }
 	}
-	printTrigger = false;
 }
