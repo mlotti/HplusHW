@@ -6,6 +6,7 @@
 
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/Track/interface/SimTrack.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 #include "SimDataFormats/Vertex/interface/SimVertex.h"
@@ -66,6 +67,69 @@ MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent){
 void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles, MyMET& mcMET){
         addMCJets(iEvent, mcParticles);
 
+	Handle<reco::GenParticleCollection> mcEventHandle;
+	iEvent.getByLabel("genParticles",mcEventHandle);
+
+	cout << "MC particles size " << mcEventHandle->size() << endl;
+	double mcMetX = 0;
+	double mcMetY = 0;
+
+	const reco::GenParticleCollection genParticles = *(mcEventHandle.product());
+
+	reco::GenParticleCollection::const_iterator i;
+	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
+		cout << "  particle " 
+		     << " " << i->pdgId()
+		     << " " << i->status()
+		     << " " << i->pt()
+		     << " " << i->eta()
+		     << " " << i->phi()
+		     << endl;
+
+		int id = i->pdgId();
+
+                if(abs(id) == 12 || abs(id) == 14 || abs(id) == 16){
+                        mcMetX += i->px();
+                        mcMetY += i->py();
+                }
+
+                if( ( i->status() == 1 ) ||
+                    ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 || abs(id) <= 21) ||
+                    ( i->status() == 3) ) {
+
+                        // searching parents
+
+                        vector<int> motherList;
+			const reco::Candidate* mother = i->mother();
+                        while(mother->mother() != NULL){
+				int motherId = mother->pdgId();
+                                mother = mother->mother();
+				if(mother->pdgId() != motherId) {
+					motherList.push_back(motherId);
+				}
+			}
+
+                        if(motherList.size() > 0){
+                          if(motherList[0] != id){
+                                MyMCParticle mcParticle;
+                                mcParticle.pid    = id;
+                                mcParticle.status = i->status();
+                                //mcParticle.barcode = (*i)->barcode();
+                                mcParticle.SetE(i->energy());
+                                mcParticle.SetPx(i->px());
+                                mcParticle.SetPy(i->py());
+                                mcParticle.SetPz(i->pz());
+
+                                mcParticle.mother = motherList;
+                                //mcParticle.motherBarcodes = motherBarcodes;
+                                mcParticles.push_back(mcParticle);
+                          }
+                        }
+		}
+	}
+	mcMET.Set(mcMetX,mcMetY);
+
+/*
         Handle<HepMCProduct> mcEventHandle;
 //      iEvent.getByLabel("source",mcEventHandle);
         iEvent.getByLabel("generator",mcEventHandle);
@@ -77,7 +141,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
         double mcMetY = 0;
         HepMC::GenEvent::particle_const_iterator i;
         for(i = mcEvent->particles_begin(); i!= mcEvent->particles_end(); i++){
-/*
+
                         cout << "  particle " << (*i)->barcode()
                              << " " << (*i)->pdg_id()
                              << " " << (*i)->status()
@@ -85,7 +149,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                              << " " << (*i)->momentum().eta()
                              << " " << (*i)->momentum().phi()
                              << endl;
-*/
+
 
 		int id = (*i)->pdg_id();
 
@@ -142,7 +206,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 		}
 	}
 	mcMET.Set(mcMetX,mcMetY);
-
+*/
 	// newSource from muon->tau conversion, saving the MC tau and its decay products
         Handle<HepMCProduct> mcEventHandle2;
         iEvent.getByLabel("newSource",mcEventHandle2);
