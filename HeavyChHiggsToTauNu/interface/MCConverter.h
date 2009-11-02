@@ -22,7 +22,7 @@ class MyEvent;
 class MCConverter {
 public:
   MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
-              const edm::InputTag& hepMcLabel, const edm::InputTag& hepMcReplLabel);
+              const edm::InputTag& genLabel, const edm::InputTag& hepMcReplLabel);
   ~MCConverter();
 
   static MyMCParticle convert(const reco::GenJet&);
@@ -33,7 +33,7 @@ public:
 private:
   edm::InputTag genJets;
   edm::InputTag simHits;
-  edm::InputTag hepMcProduct;
+  edm::InputTag genParticles;
   edm::InputTag hepMcProductReplacement;
   
 };

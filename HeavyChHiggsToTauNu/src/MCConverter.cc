@@ -3,6 +3,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
 
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
@@ -22,10 +23,10 @@ using std::cout;
 using std::endl;
 
 MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
-                         const edm::InputTag& hepMcLabel, const edm::InputTag& hepMcReplLabel):
+                         const edm::InputTag& genLabel, const edm::InputTag& hepMcReplLabel):
         genJets(genJetLabel),
         simHits(simHitLabel),
-        hepMcProduct(hepMcLabel),
+        genParticles(genLabel),
         hepMcProductReplacement(hepMcReplLabel)
 {}
 MCConverter::~MCConverter() {}
@@ -77,9 +78,10 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
         addMCJets(iEvent, mcParticles);
 
 	Handle<reco::GenParticleCollection> mcEventHandle;
-	iEvent.getByLabel("genParticles",mcEventHandle);
+	iEvent.getByLabel(genParticles, mcEventHandle);
 
-	cout << "MC particles size " << mcEventHandle->size() << endl;
+        if(edm::isDebugEnabled())
+                LogDebug("MyEventConverter") << "MC particles size " << mcEventHandle->size() << std::endl;
 	double mcMetX = 0;
 	double mcMetY = 0;
 
@@ -87,6 +89,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
 	reco::GenParticleCollection::const_iterator i;
 	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
+                /*
 		cout << "  particle " 
 		     << " " << i->pdgId()
 		     << " " << i->status()
@@ -94,6 +97,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 		     << " " << i->eta()
 		     << " " << i->phi()
 		     << endl;
+                */
 
 		int id = i->pdgId();
 
@@ -120,14 +124,10 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
                         if(motherList.size() > 0){
                           if(motherList[0] != id){
-                                MyMCParticle mcParticle;
+                                MyMCParticle mcParticle(i->px(), i->py(), i->pz(), i->energy());
                                 mcParticle.pid    = id;
                                 mcParticle.status = i->status();
                                 //mcParticle.barcode = (*i)->barcode();
-                                mcParticle.SetE(i->energy());
-                                mcParticle.SetPx(i->px());
-                                mcParticle.SetPy(i->py());
-                                mcParticle.SetPz(i->pz());
 
                                 mcParticle.mother = motherList;
                                 //mcParticle.motherBarcodes = motherBarcodes;
@@ -261,14 +261,10 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                         }
 
                         if(motherList.size() == 0 || motherList[0] != id){
-                                MyMCParticle mcParticle;
+                                MyMCParticle mcParticle((*i)->momentum().px(), (*i)->momentum().py(), (*i)->momentum().pz(), (*i)->momentum().e());
                                 mcParticle.pid    = id;
                                 mcParticle.status = (*i)->status();
                                 mcParticle.barcode = (*i)->barcode();
-                                mcParticle.SetE((*i)->momentum().e());
-                                mcParticle.SetPx((*i)->momentum().px());
-                                mcParticle.SetPy((*i)->momentum().py());
-                                mcParticle.SetPz((*i)->momentum().pz());
 
                                 //mcParticle.motherLine = myMCMotherIterator;
                                 mcParticle.mother = motherList;
