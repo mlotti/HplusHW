@@ -109,24 +109,24 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
         MCConverter mcConverter(edm::InputTag("iterativeCone5GenJets"), edm::InputTag("g4SimHits"), edm::InputTag("genParticles"), edm::InputTag("newSource"));
 
-        //saveEvent->addCollection("electrons",              getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),        iEvent, electronConverter));
-        saveEvent->addCollection("electrons",              getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),                  iEvent, electronConverter));
-        //saveEvent->addCollection("patelectrons",           getParticles<pat::Electron>    (edm::InputTag("selectedLayer1Electrons"),       iEvent, electronConverter));
+        //getParticles<reco::GsfElectron>(saveEvent, "electrons", edm::InputTag("pixelMatchGsfElectrons"), iEvent, electronConverter);
+        getParticles<reco::GsfElectron>(saveEvent, "electrons", edm::InputTag("gsfElectrons"), iEvent, electronConverter);
+        //getParticles<pat::Electron>(saveEvent, "patelectrons", edm::InputTag("slectedLayer1Electrons"), iEvent, electronConverter);
 
-        //saveEvent->addCollection("photons",                getParticles<reco::Photon>     (edm::InputTag("correctedPhotons"),              iEvent, photonConverter));
-        //saveEvent->addCollection("conversions",            getParticles<reco::Conversion> (edm::InputTag("correctedPhotons"),              iEvent, photonConverter));
+        //getParticles<reco::Photon>(    saveEvent, "photons",     edm::InputTag("correctedPhotons"), iEvent, photonConverter);
+        //getParticles<reco::Conversion>(saveEvent, "conversions", edm::InputTag("correctedPhotons"), iEvent, photonConverter);
 
-        saveEvent->addCollection("muons",                  getParticles<reco::Muon>       (edm::InputTag("muons"),                         iEvent, muonConverter));
-	//saveEvent->addCollection("patmuons",               getParticles<pat::Muon>        (edm::InputTag("selectedLayer1Muons"),           iEvent, muonConverter));
+        getParticles<reco::Muon>(saveEvent, "muons", edm::InputTag("muons"), iEvent, muonConverter);
+        //getParticles<pat::Muon>(saveEvent, "patmuons", edm::InputTag("selectedLayer1Muons"), iEvent, muonConverter);
 
-        saveEvent->addCollection("calotaus",               getParticlesIf<reco::CaloTau>  (edm::InputTag("caloRecoTauProducer"),           iEvent, tauConverter, TauHasLeadingTrack()));
-        saveEvent->addCollection("fixedConePFTaus",        getParticlesIf<reco::PFTau>    (edm::InputTag("fixedConePFTauProducer"),        iEvent, tauConverter, TauHasLeadingTrack()));
-        saveEvent->addCollection("fixedConeHighEffPFTaus", getParticlesIf<reco::PFTau>    (edm::InputTag("fixedConeHighEffPFTauProducer"), iEvent, tauConverter, TauHasLeadingTrack()));
-        saveEvent->addCollection("shrinkingConePFTaus",    getParticlesIf<reco::PFTau>    (edm::InputTag("shrinkingConePFTauProducer"),    iEvent, tauConverter, TauHasLeadingTrack()));
-        //saveEvent->addCollection("pattaus",                getParticles<pat::Tau>         (edm::InputTag("selectedLayer1Taus"),            iEvent, tauConverter));
+        getParticlesIf<reco::CaloTau>(saveEvent, "calotaus",               edm::InputTag("caloRecoTauProducer"),           iEvent, tauConverter, TauHasLeadingTrack());
+        getParticlesIf<reco::PFTau>(  saveEvent, "fixedConePFTaus",        edm::InputTag("fixedConePFTauProducer"),        iEvent, tauConverter, TauHasLeadingTrack());
+        getParticlesIf<reco::PFTau>(  saveEvent, "fixedConeHighEffPFTaus", edm::InputTag("fixedConeHighEffPFTauProducer"), iEvent, tauConverter, TauHasLeadingTrack());
+        getParticlesIf<reco::PFTau>(  saveEvent, "shrinkingConePFTaus",    edm::InputTag("shrinkingConePFTauProducer"),    iEvent, tauConverter, TauHasLeadingTrack());
+        //getParticles<pat::Tau>(       saveEvent, "pattaus",                edm::InputTag("selectedLayer1Taus"),            iEvent, tauConverter);
                                                                                             
-        saveEvent->addCollection("icone05jets",            getParticles<reco::CaloJet>    (edm::InputTag("iterativeCone5CaloJets"),        iEvent, jetConverter));
-        //saveEvent->addCollection("patjets",                getParticles<pat::Jet>         (edm::InputTag("selectedLayer1Jets"),            iEvent, jetConverter));
+        getParticles<reco::CaloJet>(saveEvent, "icone05jets", edm::InputTag("iterativeCone5CaloJets"), iEvent, jetConverter);
+        //getParticles<pat::Jet>(saveEvent, "patjets", edm::InputTag("selectedLayer1Jets"), iEvent, jetConverter));
 
         metConverter.convert(iEvent, saveEvent->mets);
 
@@ -136,7 +136,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         mcConverter.setSimTracks(iEvent, *saveEvent);
 
         try {
-          saveEvent->addCollection("removedMuons", getParticles<reco::Muon> (edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger()));
+          getParticles<reco::Muon>(saveEvent, "removedMuons", edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger());
         } catch(const cms::Exception& e) {
           if(e.category() != "ProductNotFound")
             throw;
