@@ -85,7 +85,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 	double mcMetX = 0;
 	double mcMetY = 0;
 
-	const reco::GenParticleCollection genParticles = *(mcEventHandle.product());
+	const reco::GenParticleCollection genParticles(*mcEventHandle);
 
 	reco::GenParticleCollection::const_iterator i;
 	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
@@ -114,6 +114,8 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
                         vector<int> motherList;
 			const reco::Candidate* mother = i->mother();
+                        if(!mother)
+                                continue;
                         while(mother->mother() != NULL){
 				int motherId = mother->pdgId();
                                 mother = mother->mother();
