@@ -60,7 +60,7 @@ std::vector<MyJet *> MyEvent::getCollection(const string& name) {
   return convertCollection(found->second);
 }
 
-void MyEvent::addCollection(const string& name, const vector<MyJet>& coll) {
+std::vector<MyJet>& MyEvent::addCollection(const string& name, const vector<MyJet>& coll) {
   pair<CollectionMap::iterator, bool> ins = collections.insert(make_pair(name, coll));
   if(!ins.second) {
     cout << "Unable to insert MyJet collection " << name << ".";
@@ -69,6 +69,11 @@ void MyEvent::addCollection(const string& name, const vector<MyJet>& coll) {
     cout << endl;
     exit(0);
   }
+  return ins.first->second;
+}
+
+std::vector<MyJet>& MyEvent::addCollection(const std::string& name) {
+  return addCollection(name, std::vector<MyJet>());
 }
 
 

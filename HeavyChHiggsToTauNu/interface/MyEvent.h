@@ -86,13 +86,25 @@ class MyEvent: public TObject {
         /**
          * \brief Add particle collection
          *
-         * If the named collection already exists, the new collection
-         * is not added and the return value is false.
+         * If the named collection already exists, exit() is called
          *
          * \param name  Name of the collection
          * \param coll  Collection to be added (the contents are copied)
+         *
+         * \return Reference to the inserted vector
          */
-        void addCollection(const std::string& name, const std::vector<MyJet>& coll);
+        std::vector<MyJet>& addCollection(const std::string& name, const std::vector<MyJet>& coll);
+
+        /**
+         * \brief Add empty particle collection
+         *
+         * If the named collection already exists, exit() is called
+         *
+         * \param name  Name of the collection
+         *
+         * \return Reference to the inserted vector
+         */
+        std::vector<MyJet>& addCollection(const std::string& name);
 
         /**
          * \brief Check if MET exists
