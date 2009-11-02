@@ -20,6 +20,11 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(maxEvt)
 )
 
+# Job will exit if any product is not found in the event
+process.options = cms.untracked.PSet(
+    Rethrow = cms.untracked.vstring("ProductNotFound")
+)
+
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #"file:/tmp/slehti/QCD_Pt80_OctX.root"
