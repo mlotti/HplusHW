@@ -1,7 +1,9 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerConverter.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Framework/interface/Event.h"
 
+#include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 
@@ -12,7 +14,7 @@ using edm::InputTag;
 using std::vector;
 using std::string;
 
-void MyEventConverter::getTriggerResults(const edm::Event& iEvent, const edm::InputTag& label, std::map<std::string, bool>& trigger, bool printTrigger){
+void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std::string, bool>& trigger, bool printTrigger){
         vector<Handle<TriggerResults> > hltHandles;
 	iEvent.getManyByType(hltHandles);
         if(edm::isDebugEnabled())

@@ -46,7 +46,6 @@ class MyEventConverter {
 	bool triggerDecision(const edm::Event&);
 	bool primaryVertexFound(const edm::Event&);
 
-	static void                    getTriggerResults(const edm::Event&, const edm::InputTag&, std::map<std::string, bool>&, bool print);
 	std::vector<MyJet>	getHLTObjects(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
