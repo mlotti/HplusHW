@@ -20,6 +20,15 @@ using edm::HepMCProduct;
 using std::cout;
 using std::endl;
 
+MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
+                         const edm::InputTag& hepMcLabel, const edm::InputTag& hepMcReplLabel):
+        genJets(genJetLabel),
+        simHits(simHitLabel),
+        hepMcProduct(hepMcLabel),
+        hepMcProductReplacement(hepMcReplLabel)
+{}
+MCConverter::~MCConverter() {}
+
 MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	MyMCParticle mcJet(genJet.px(),genJet.py(),genJet.pz(),genJet.energy());
 	mcJet.pid = 0; //= genJet.pdgId();
@@ -29,7 +38,7 @@ MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 
 void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles){
 	Handle<reco::GenJetCollection> genJetHandle;
-        iEvent.getByLabel("iterativeCone5GenJets",genJetHandle);
+        iEvent.getByLabel(genJets, genJetHandle);
 
         const reco::GenJetCollection & genJetCollection = *(genJetHandle.product());
         //cout << "MC GenJets " << genJetCollection.size();
@@ -48,7 +57,7 @@ void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcPa
 
 MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent){
 	Handle<SimVertexContainer> simVertices;
-	iEvent.getByLabel("g4SimHits",simVertices);
+	iEvent.getByLabel(simHits, simVertices);
 
 	MyGlobalPoint mcPV;
 	if(simVertices->size() > 0){
@@ -67,8 +76,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
         addMCJets(iEvent, mcParticles);
 
         Handle<HepMCProduct> mcEventHandle;
-//      iEvent.getByLabel("source",mcEventHandle);
-        iEvent.getByLabel("generator",mcEventHandle);
+        iEvent.getByLabel(hepMcProduct, mcEventHandle);
 
         const HepMC::GenEvent* mcEvent = mcEventHandle->GetEvent() ;
         //cout << "MC particles size " << mcEvent->particles_size() << endl;
@@ -145,7 +153,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
 	// newSource from muon->tau conversion, saving the MC tau and its decay products
         Handle<HepMCProduct> mcEventHandle2;
-        iEvent.getByLabel("newSource",mcEventHandle2);
+        iEvent.getByLabel(hepMcProductReplacement, mcEventHandle2);
 
         if(mcEventHandle2.isValid()){
 
@@ -215,16 +223,8 @@ void MCConverter::setSimTracks(const edm::Event& iEvent, MyEvent& event){
 
   Handle<SimTrackContainer> simTrackHandle;
   iEvent.getByType<SimTrackContainer>(simTrackHandle);
-  if (! simTrackHandle.isValid()) {
-    cout << "getSimTracks error! No SimTracks found!" << endl;
-    return;
-  }
   Handle<SimVertexContainer> simVertices;
   iEvent.getByType<SimVertexContainer>(simVertices);
-  if (! simTrackHandle.isValid()) {
-    cout << "getSimTracks error! No SimVertices found!" << endl;
-    return;
-  }
 
   // Loop over tau candidates
   vector<MyJet*> taujets = event.getCollection("calotaus");

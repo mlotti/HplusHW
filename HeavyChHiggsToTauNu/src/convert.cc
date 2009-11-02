@@ -107,6 +107,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
         TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
+        MCConverter mcConverter(edm::InputTag("iterativeCone5GenJets"), edm::InputTag("g4SimHits"), edm::InputTag("generator"), edm::InputTag("newSource"));
 
         //saveEvent->addCollection("electrons",              getParticles<reco::GsfElectron>(edm::InputTag("pixelMatchGsfElectrons"),        iEvent, electronConverter));
         saveEvent->addCollection("electrons",              getParticles<reco::GsfElectron>(edm::InputTag("gsfElectrons"),                  iEvent, electronConverter));
@@ -130,9 +131,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	getMET(iEvent, saveEvent->mets);
 
         saveEvent->hasMCdata            = true;
-        MCConverter::addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
-	saveEvent->mcPrimaryVertex      = MCConverter::getMCPrimaryVertex(iEvent);
-        MCConverter::setSimTracks(iEvent, *saveEvent);
+        mcConverter.addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
+	saveEvent->mcPrimaryVertex      = mcConverter.getMCPrimaryVertex(iEvent);
+        mcConverter.setSimTracks(iEvent, *saveEvent);
 
         try {
           saveEvent->addCollection("removedMuons", getParticles<reco::Muon> (edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger()));

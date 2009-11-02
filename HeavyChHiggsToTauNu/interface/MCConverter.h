@@ -7,6 +7,8 @@
 
 #include<vector>
 
+#include "FWCore/Utilities/interface/InputTag.h"
+
 namespace edm {
   class Event;
 }
@@ -19,11 +21,21 @@ class MyEvent;
 
 class MCConverter {
 public:
+  MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
+              const edm::InputTag& hepMcLabel, const edm::InputTag& hepMcReplLabel);
+  ~MCConverter();
+
   static MyMCParticle convert(const reco::GenJet&);
-  static void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&);
-  static MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent);
-  static void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&);
+  void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&);
+  MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent);
+  void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&);
   static void setSimTracks(const edm::Event&, MyEvent&);
+private:
+  edm::InputTag genJets;
+  edm::InputTag simHits;
+  edm::InputTag hepMcProduct;
+  edm::InputTag hepMcProductReplacement;
+  
 };
 
 #endif
