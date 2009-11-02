@@ -23,7 +23,6 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         tauJetCorrection(new TauJetCorrector(iConfig)),
 	jetEnergyCorrectionTypes(iConfig.getParameter<std::vector<std::string> >("JetEnergyCorrection")),
         btaggingAlgos(iConfig.getParameter<std::vector<std::string> >("BTaggingAlgorithms")),
-        metCollections(iConfig.getParameter<std::vector<edm::InputTag> >("METCollections")),
 	electronIdLabels(iConfig.getParameter<std::vector<edm::InputTag> >("ElectronIdLabels")),
 	barrelBasicClustersInput(iConfig.getParameter<InputTag>("BarrelBasicClustersSource")),
         endcapBasicClustersInput(iConfig.getParameter<InputTag>("EndcapBasicClustersSource")),
@@ -36,6 +35,7 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         tauResolutionAnalysis(new TauResolutionAnalysis()),
 	tauMETTriggerAnalysis(new TauMETTriggerAnalysis(userRootTree)),
         trackEcalHitPoint(iConfig),
+        metConverter(iConfig.getParameter<std::vector<edm::InputTag> >("METCollections"), edm::InputTag("pfMet"), edm::InputTag("tcMet")),
         printTrigger(true)
 {}
 

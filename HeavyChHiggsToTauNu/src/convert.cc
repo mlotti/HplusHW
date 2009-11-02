@@ -128,7 +128,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         saveEvent->addCollection("icone05jets",            getParticles<reco::CaloJet>    (edm::InputTag("iterativeCone5CaloJets"),        iEvent, jetConverter));
         //saveEvent->addCollection("patjets",                getParticles<pat::Jet>         (edm::InputTag("selectedLayer1Jets"),            iEvent, jetConverter));
 
-	getMET(iEvent, saveEvent->mets);
+        metConverter.convert(iEvent, saveEvent->mets);
 
         saveEvent->hasMCdata            = true;
         mcConverter.addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);

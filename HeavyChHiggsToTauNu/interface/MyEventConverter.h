@@ -10,8 +10,8 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METConverter.h"
 
 #include<vector>
 #include<string>
@@ -48,8 +48,6 @@ class MyEventConverter {
 
 	std::vector<MyJet>	getHLTObjects(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
-	void getMET(const edm::Event&, std::map<std::string, MyMET>&);
-        void  getCaloMETs(const edm::Event&, std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 
 
@@ -72,7 +70,6 @@ class MyEventConverter {
 	const TauJetCorrector* tauJetCorrection;
         std::vector<std::string> jetEnergyCorrectionTypes;
         std::vector<std::string> btaggingAlgos;
-	std::vector<edm::InputTag> metCollections;
         std::vector<edm::InputTag> electronIdLabels;
   //TrackCollection tracks;
 
@@ -93,6 +90,7 @@ class MyEventConverter {
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
         TrackEcalHitPoint trackEcalHitPoint;
+        METConverter metConverter;
 
 	bool printTrigger;
 };
