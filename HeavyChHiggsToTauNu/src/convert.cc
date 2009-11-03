@@ -141,10 +141,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
         metConverter.convert(iEvent, saveEvent->mets);
 
-        saveEvent->hasMCdata            = true;
-        mcConverter.addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
-	saveEvent->mcPrimaryVertex      = mcConverter.getMCPrimaryVertex(iEvent);
-        mcConverter.setSimTracks(iEvent, *saveEvent);
+        mcConverter.addMC(saveEvent, iEvent);
 
         try {
           getParticles<reco::Muon>(saveEvent, "removedMuons", edm::InputTag("selectedMuons"), iEvent,      muonConverter, MuonReplacementTagger());

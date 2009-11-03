@@ -26,10 +26,14 @@ public:
   ~MCConverter();
 
   static MyMCParticle convert(const reco::GenJet&);
-  void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&);
-  MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent);
-  void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&);
   static void setSimTracks(const edm::Event&, MyEvent&);
+
+  void addMC(MyEvent *, const edm::Event&) const;
+
+  void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&) const;
+  MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent) const;
+  void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&) const;
+
 private:
   edm::InputTag genJets;
   edm::InputTag simHits;

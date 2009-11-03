@@ -31,6 +31,21 @@ MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& 
 {}
 MCConverter::~MCConverter() {}
 
+void MCConverter::addMC(MyEvent *saveEvent, const edm::Event& iEvent) const {
+        try {
+                addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
+        } catch(const cms::Exception& e) {
+                if(e.category() == "ProductNotFound")
+                        return;
+                else
+                        throw;
+        }
+
+        saveEvent->mcPrimaryVertex = getMCPrimaryVertex(iEvent);
+        setSimTracks(iEvent, *saveEvent);
+        saveEvent->hasMCdata = true;
+}
+
 MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	MyMCParticle mcJet(genJet.px(),genJet.py(),genJet.pz(),genJet.energy());
 	mcJet.pid = 0; //= genJet.pdgId();
@@ -38,7 +53,7 @@ MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	return mcJet;
 }
 
-void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles){
+void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles) const {
 	Handle<reco::GenJetCollection> genJetHandle;
         iEvent.getByLabel(genJets, genJetHandle);
 
@@ -50,31 +65,25 @@ void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcPa
 
           if(iJet->et() < 20 || fabs(iJet->eta()) > 2.5) continue;
           //cout << "     GenJet Et,eta " << iJet->et() << " " << iJet->eta() << endl;
-          MyMCParticle mcJet = convert(*iJet);
-          mcParticles.push_back(mcJet);
+          mcParticles.push_back(convert(*iJet));
         }
         //cout << ", saved " << mcParticles.size() << endl;
 }
 
 
-MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent){
+MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent) const {
 	Handle<SimVertexContainer> simVertices;
 	iEvent.getByLabel(simHits, simVertices);
 
-	MyGlobalPoint mcPV;
-	if(simVertices->size() > 0){
-		mcPV.SetX((*simVertices)[0].position().x());
-		mcPV.SetY((*simVertices)[0].position().y());
-		mcPV.SetZ((*simVertices)[0].position().z());
-	}else{
-                mcPV.SetX(-999);
-                mcPV.SetY(-999);
-                mcPV.SetZ(-999);
-	}
-	return mcPV;
+	if(simVertices->size() > 0)
+                return MyGlobalPoint((*simVertices)[0].position().x(),
+                                     (*simVertices)[0].position().y(),
+                                     (*simVertices)[0].position().z());
+        else
+                return MyGlobalPoint(-999, -999, -999);
 }
 
-void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles, MyMET& mcMET){
+void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles, MyMET& mcMET) const {
         addMCJets(iEvent, mcParticles);
 
 	Handle<reco::GenParticleCollection> mcEventHandle;
