@@ -49,8 +49,8 @@ struct Finalizer {
 };
 
 struct MuonReplacementTagger {
-  void tag(const edm::Handle<edm::View<reco::Muon> >, size_t i, std::map<std::string, double>& tagInfo) const {
-    tagInfo["mu2tau_selectedMuon"] = 1;
+  void operator()(const edm::Handle<edm::View<reco::Muon> >&, size_t i, MyJet *jet) const {
+    jet->tagInfo["mu2tau_selectedMuon"] = 1;
   }
 };
 

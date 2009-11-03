@@ -25,9 +25,9 @@ void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputT
   }
 }
 
-// Version with additional tagger
-template <class T, class Converter, class Tagger>
-void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Tagger& tagger) {
+// Version with additional modifier
+template <class T, class Converter, class Modify>
+void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Modify& modify) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
 
@@ -39,11 +39,12 @@ void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputT
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     MyJet jet = converter.convert(handle, i);
-    tagger.tag(handle, i, jet.tagInfo);
+    modify(handle, i, &jet);
     ret.push_back(jet);
   }
 }
 
+// Version with conditition (if conditiion is true, add to collection)
 template <class T, class Converter, class Condition>
 void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition) {
   edm::Handle<edm::View<T> > handle;
@@ -58,6 +59,26 @@ void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::Inpu
   for(size_t i = 0; i<handle->size(); ++i) {
     if(!condition((*handle)[i])) continue;
     ret.push_back(converter.convert(handle, i));
+  }
+}
+
+// Version with condition and additional modifier
+template <class T, class Converter, class Condition, class Modify>
+void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition, const Modify& modify) {
+  edm::Handle<edm::View<T> > handle;
+  iEvent.getByLabel(label, handle);
+
+  if(edm::isDebugEnabled())
+    LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
+
+
+  std::vector<MyJet>& ret(saveEvent->addCollection(name));
+  ret.reserve(handle->size());
+  for(size_t i = 0; i<handle->size(); ++i) {
+    if(!condition((*handle)[i])) continue;
+    MyJet jet = converter.convert(handle, i);
+    modify(handle, i, &jet);
+    ret.push_back(jet);
   }
 }
 
