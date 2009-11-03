@@ -30,6 +30,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/TauReco/interface/CaloTau.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
+#include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
@@ -46,6 +47,15 @@ struct Finalizer {
   
   MyEvent *event;
   TrackEcalHitPoint& trackEcalHitPoint;
+};
+
+struct HLTTau {
+  bool operator()(const reco::IsolatedTauTagInfo& tau) const {
+    return tau.discriminator(0.1, 0.065, 0.4, 20., 1.);
+  }
+  void operator()(const edm::Handle<edm::View<reco::IsolatedTauTagInfo> >&, size_t i, MyJet *jet) const {
+    jet->type = 15; // label for HLT object being tau
+  }
 };
 
 struct MuonReplacementTagger {
@@ -93,7 +103,6 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         printTrigger = false;
 	saveEvent->primaryVertex        = VertexConverter::convert(primaryVertex);
 //	saveEvent->L1objects            = getL1objects(iEvent);
-//	saveEvent->HLTobjects           = getHLTObjects(iEvent);
 
         EcalClusterLazyTools ecalTools(iEvent,iSetup,reducedBarrelRecHitCollection,reducedEndcapRecHitCollection);
 
@@ -108,6 +117,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
         MCConverter mcConverter(edm::InputTag("iterativeCone5GenJets"), edm::InputTag("g4SimHits"), edm::InputTag("genParticles"), edm::InputTag("newSource"));
+
+        //getParticlesIf<reco::IsolatedTauTagInfo>(saveEvent, "hlttaus", edm::InputTag("coneIsolationL3SingleTau"), iEvent, tauConverter, HLTTau(), HLTTau());
 
         //getParticles<reco::GsfElectron>(saveEvent, "electrons", edm::InputTag("pixelMatchGsfElectrons"), iEvent, electronConverter);
         getParticles<reco::GsfElectron>(saveEvent, "electrons", edm::InputTag("gsfElectrons"), iEvent, electronConverter);

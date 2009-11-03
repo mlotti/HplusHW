@@ -45,7 +45,6 @@ class MyEventConverter {
 
 	bool triggerDecision(const edm::Event&);
 
-	std::vector<MyJet>	getHLTObjects(const edm::Event&);
         void		        getTrajectories(const edm::Event&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 
