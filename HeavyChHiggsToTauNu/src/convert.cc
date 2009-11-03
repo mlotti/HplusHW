@@ -76,7 +76,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	if(!triggerDecision(iEvent)) return;
 	triggeredEvents++;
 
-        if(!primaryVertexFound(iEvent)) return;
+        if(!VertexConverter::findPrimaryVertex(iEvent, edm::InputTag("pixelVertices"), &primaryVertex)) return;
 	eventsWithPrimaryVertex++;
 
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored

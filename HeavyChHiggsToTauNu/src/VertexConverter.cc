@@ -1,9 +1,36 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexConverter.h"
 
+#include "FWCore/Framework/interface/Event.h"
+#include "DataFormats/Common/interface/View.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
+bool VertexConverter::findPrimaryVertex(const edm::Event& iEvent, const edm::InputTag& label, reco::Vertex* primaryVertex) {
+        edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+        iEvent.getByLabel(label, vertexHandle);
+
+        const edm::View<reco::Vertex>& vertexCollection(*vertexHandle);
+        double ptmax = 0;
+        edm::View<reco::Vertex>::const_iterator iVertex;
+        edm::View<reco::Vertex>::const_iterator found = vertexCollection.end();
+        for(iVertex = vertexCollection.begin(); iVertex!= vertexCollection.end(); ++iVertex) {
+                double ptsum = 0;
+                reco::Vertex::trackRef_iterator iTrack;
+                for(iTrack  = iVertex->tracks_begin(); iTrack != iVertex->tracks_end(); ++iTrack)
+                        ptsum += (*iTrack)->pt();
+
+                if(ptsum > ptmax) {
+                        ptmax = ptsum;
+                        found = iVertex;
+                }
+        }
+        if(found == vertexCollection.end())
+                return false;
+        *primaryVertex = *found;
+        return true;
+}
 
 MyVertex VertexConverter::convert(const reco::Vertex& vertex){
 
