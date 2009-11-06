@@ -131,6 +131,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		"softMuonByPtBJetTags"
         ),
 
+        Vertices = cms.InputTag("pixelVertices"),
         GsfElectrons = cms.VInputTag(
                 cms.InputTag("gsfElectrons")
         ),

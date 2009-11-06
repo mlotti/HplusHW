@@ -14,6 +14,7 @@ using std::endl;
 
 MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
 //        HLTSelection(iConfig.getParameter< vector<InputTag> >("HLTSelection")),
+        vertexLabel(iConfig.getParameter<InputTag>("Vertices")),
         trackCollectionSelection(iConfig.getParameter<InputTag>("TrackCollection")),
         gsfElectronLabels(iConfig.getParameter<std::vector<InputTag> >("GsfElectrons")),
         patElectronLabels(iConfig.getParameter<std::vector<InputTag> >("PATElectrons")),

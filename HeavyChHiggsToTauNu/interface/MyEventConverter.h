@@ -54,6 +54,7 @@ class MyEventConverter {
 
 //        std::vector<edm::InputTag> HLTSelection;
         reco::Vertex primaryVertex;
+        edm::InputTag vertexLabel;
         edm::InputTag trackCollectionSelection;
 
         std::vector<edm::InputTag> gsfElectronLabels;
