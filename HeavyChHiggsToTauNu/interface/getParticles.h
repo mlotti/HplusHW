@@ -11,14 +11,14 @@
 #include<vector>
 
 template <class T, class Converter>
-void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter) {
+void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
 
   if(edm::isDebugEnabled())
     LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
 
-  std::vector<MyJet>& ret(saveEvent->addCollection(name));
+  std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     ret.push_back(converter.convert(handle, i));
@@ -27,7 +27,7 @@ void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputT
 
 // Version with additional modifier
 template <class T, class Converter, class Modify>
-void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Modify& modify) {
+void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Modify& modify) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
 
@@ -35,7 +35,7 @@ void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputT
     LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
 
 
-  std::vector<MyJet>& ret(saveEvent->addCollection(name));
+  std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     MyJet jet = converter.convert(handle, i);
@@ -46,7 +46,7 @@ void getParticles(MyEvent *saveEvent, const std::string& name, const edm::InputT
 
 // Version with conditition (if conditiion is true, add to collection)
 template <class T, class Converter, class Condition>
-void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition) {
+void getParticlesIf(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
 
@@ -54,7 +54,7 @@ void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::Inpu
     LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
 
 
-  std::vector<MyJet>& ret(saveEvent->addCollection(name));
+  std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     if(!condition((*handle)[i])) continue;
@@ -64,7 +64,7 @@ void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::Inpu
 
 // Version with condition and additional modifier
 template <class T, class Converter, class Condition, class Modify>
-void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition, const Modify& modify) {
+void getParticlesIf(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Condition& condition, const Modify& modify) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
 
@@ -72,7 +72,7 @@ void getParticlesIf(MyEvent *saveEvent, const std::string& name, const edm::Inpu
     LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
 
 
-  std::vector<MyJet>& ret(saveEvent->addCollection(name));
+  std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     if(!condition((*handle)[i])) continue;

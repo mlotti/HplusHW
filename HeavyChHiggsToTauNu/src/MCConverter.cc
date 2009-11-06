@@ -298,7 +298,7 @@ void MCConverter::setSimTracks(const edm::Event& iEvent, MyEvent& event){
   iEvent.getByType<SimVertexContainer>(simVertices);
 
   // Loop over tau candidates
-  vector<MyJet*> taujets = event.getCollection("calotaus");
+  vector<MyJet*> taujets = event.getCollection("caloRecoTauProducer");
   for (vector<MyJet*>::const_iterator iJet = taujets.begin() ; iJet != taujets.end(); ++iJet) {
     // Get leading track
     const MyTrack* myLdgTrack = (*iJet)->leadingTrack();

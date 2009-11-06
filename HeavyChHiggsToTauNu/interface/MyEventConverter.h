@@ -56,6 +56,17 @@ class MyEventConverter {
         reco::Vertex primaryVertex;
         edm::InputTag trackCollectionSelection;
 
+        std::vector<edm::InputTag> gsfElectronLabels;
+        std::vector<edm::InputTag> patElectronLabels;
+        //std::vector<edm::InputTag> photonLabels;
+        std::vector<edm::InputTag> muonLabels;
+        std::vector<edm::InputTag> patMuonLabels;
+        std::vector<edm::InputTag> caloTauLabels;
+        std::vector<edm::InputTag> pfTauLabels;
+        std::vector<edm::InputTag> patTauLabels;
+        std::vector<edm::InputTag> caloJetLabels;
+        std::vector<edm::InputTag> patJetLabels;
+
 ////        CutBasedElectronID* electronIdAlgo;
 //	edm::InputTag barrelClusterShapeAssocProducer;
 //	edm::InputTag endcapClusterShapeAssocProducer;

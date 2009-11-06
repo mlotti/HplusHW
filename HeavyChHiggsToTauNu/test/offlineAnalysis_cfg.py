@@ -131,6 +131,39 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		"softMuonByPtBJetTags"
         ),
 
+        GsfElectrons = cms.VInputTag(
+                cms.InputTag("gsfElectrons")
+        ),
+        PATElectrons = cms.VInputTag(
+#                cms.InputTag("cleanLayer1Electrons")
+        ),
+#        Photons = cms.VInputTag(
+#                cms.InputTag("correctedPhotons")
+#        ),
+        Muons = cms.VInputTag(
+                 cms.InputTag("muons")
+        ),
+        PATMuons = cms.VInputTag(
+#                 cms.InputTag("cleanLauer1Muons")
+        ),
+        CaloTaus = cms.VInputTag(
+                 cms.InputTag("caloRecoTauProducer")
+        ),
+        PFTaus = cms.VInputTag(
+                 cms.InputTag("fixedConePFTauProducer"),
+                 cms.InputTag("fixedConeHighEffPFTauProducer"),
+                 cms.InputTag("shrinkingConePFTauProducer")
+        ),
+        PATTaus = cms.VInputTag(
+#                 cms.InputTag("cleanLayer1Taus")
+        ),
+        CaloJets = cms.VInputTag(
+                 cms.InputTag("iterativeCone5CaloJets")
+        ),
+        PATJets = cms.VInputTag(
+#                 cms.InputTag("cleanLayer1Jets")
+        ),
+        
 	METCollections = cms.VInputTag(
 		cms.InputTag("met"),
 		cms.InputTag("corMetGlobalMuons"),
