@@ -67,6 +67,11 @@ class MyEventConverter {
         std::vector<edm::InputTag> caloJetLabels;
         std::vector<edm::InputTag> patJetLabels;
 
+        edm::InputTag genParticleLabel;
+        edm::InputTag muonReplacementHepMcLabel;
+        edm::InputTag genJetLabel;
+        edm::InputTag simHitLabel;
+
 ////        CutBasedElectronID* electronIdAlgo;
 //	edm::InputTag barrelClusterShapeAssocProducer;
 //	edm::InputTag endcapClusterShapeAssocProducer;

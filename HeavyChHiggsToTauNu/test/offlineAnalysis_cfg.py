@@ -177,6 +177,12 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 ####	TrackCollection = cms.InputTag("iterativeTracks"),
 	TrackCollection = cms.InputTag("generalTracks"),
 
+        # MC collections
+        GenParticles = cms.InputTag("genParticles"),
+        MuonReplacementHepMc = cms.InputTag("newSource"),
+        GenJets = cms.InputTag("iterativeCone5GenJets"),
+        SimHits = cms.InputTag("g4SimHits"),
+        
         #TauJet calibration
 	src = cms.InputTag("iterativeCone5CaloJets"),
 	tagName = cms.string("IterativeCone0.4_EtScheme_TowerEt0.5_E0.8_Jets871_2x1033PU_tau"),
