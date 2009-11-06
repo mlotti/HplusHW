@@ -166,7 +166,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         mcConverter.addMC(saveEvent, iEvent);
 
         try {
-          getParticles<reco::Muon>(saveEvent, edm::InputTag("selectedMuons"), iEvent, muonConverter, MuonReplacementTagger());
+                getParticles<reco::Muon>(saveEvent, muonReplacementMuonLabel, iEvent, muonConverter, MuonReplacementTagger());
         } catch(const cms::Exception& e) {
           if(e.category() != "ProductNotFound")
             throw;

@@ -178,6 +178,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 ####	TrackCollection = cms.InputTag("iterativeTracks"),
 	TrackCollection = cms.InputTag("generalTracks"),
 
+        MuonReplacementMuons = cms.InputTag("selectedMuons"),
+
         # MC collections
         GenParticles = cms.InputTag("genParticles"),
         MuonReplacementHepMc = cms.InputTag("newSource"),
