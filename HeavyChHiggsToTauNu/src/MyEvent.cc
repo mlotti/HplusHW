@@ -54,10 +54,20 @@ bool MyEvent::hasCollection(const string& name) const {
 std::vector<MyJet *> MyEvent::getCollection(const string& name) {
   CollectionMap::iterator found = collections.find(name);
   if(found == collections.end()) {
-    cout << "Requested MyJet collection " << name << " which doesn't exist." << endl;
+    cout << "Requested MyJet collection " << name << " which doesn't exist." << endl
+         << "The following MyJet collections exist:" << std::endl;
+    for(CollectionMap::const_iterator iter = collections.begin(); iter != collections.end(); ++iter) {
+      std::cout << "  " << iter->first << std::endl;
+    }
     exit(0);
   }
   return convertCollection(found->second);
+}
+
+std::vector<MyJet *> MyEvent::getCollectionWithCorrection(const string& name, const std::string& corr) {
+  std::vector<MyJet *> coll(getCollection(name));
+  ::useCorrection(coll, corr);
+  return coll;
 }
 
 std::vector<MyJet>& MyEvent::addCollection(const string& name, const vector<MyJet>& coll) {
@@ -113,7 +123,11 @@ bool MyEvent::hasTrigger(const string& name) const {
 bool MyEvent::trigger(const string& name) const {
   TriggerMap::const_iterator found = triggerResults.find(name);
   if(found == triggerResults.end()) {
-    cout << "Requested trigger " << name << " which doesn't exist." << endl;
+    cout << "Requested trigger " << name << " which doesn't exist." << endl
+         << "The following triggers exist:" << std::endl;
+    for(TriggerMap::const_iterator iter = triggerResults.begin(); iter != triggerResults.end(); ++iter) {
+      std::cout << "  " << iter->first << std::endl;
+    }
     exit(0);
   }
 

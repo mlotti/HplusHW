@@ -2,6 +2,7 @@
 #define __MyMet__
 
 #include "TVector2.h"
+#include "TVector3.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventVersion.h"
 
 #include<iostream>
@@ -31,6 +32,8 @@ class MyMET: public TVector2 {
         double x() const;
         double y() const;
         double phi() const;
+
+        TVector3 tvector3() const;
 
       	void print(std::ostream& out = std::cout) const;
 

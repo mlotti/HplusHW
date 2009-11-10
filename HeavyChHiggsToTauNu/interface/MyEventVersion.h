@@ -1,6 +1,6 @@
 #ifndef __MyEventVersion__
 #define __MyEventVersion__
 
-#define MYEVENT_VERSION 3
+#define MYEVENT_VERSION 4
 
 #endif

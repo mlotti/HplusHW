@@ -84,6 +84,16 @@ class MyEvent: public TObject {
         std::vector<MyJet *> getCollection(const std::string& name);
 
         /**
+         * \brief Get particle collection with correction
+         *
+         * \param name  Name of the collection
+         * \param corr  Name of the (energy) correction
+         *
+         * \return Collection as vector of pointers.
+         */
+        std::vector<MyJet *> getCollectionWithCorrection(const std::string& name, const std::string& corr);
+
+        /**
          * \brief Add particle collection
          *
          * If the named collection already exists, exit() is called

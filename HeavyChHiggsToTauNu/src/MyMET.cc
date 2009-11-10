@@ -21,6 +21,10 @@ double MyMET::phi() const {
     return Phi();
 }
 
+TVector3 MyMET::tvector3() const {
+  return TVector3(X(), Y(), 0);
+}
+
 void MyMET::print(std::ostream& out) const {
     out << " MET value,x,y,phi " << value() << " " 
          << X() << " " << Y() << " " << Phi() << endl;

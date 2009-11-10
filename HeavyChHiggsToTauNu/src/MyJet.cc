@@ -53,7 +53,7 @@ void MyJet::setP4(const TLorentzVector& vector){
 
 ////////////////////////////
 
-void MyJet::addEnergyCorrection(const string& name, double value) {
+void MyJet::addEnergyCorrection(const std::string& name, double value) {
   pair<map<string, double>::iterator, bool> ret = jecs.insert(make_pair(name, value));
   if(!ret.second) {
     cout << "Unable to add energy correction " << name << ".";
@@ -67,6 +67,19 @@ void MyJet::addEnergyCorrection(const string& name, double value) {
 void MyJet::setEnergyCorrection(const std::string& name) {
   double correction = getEnergyCorrectionFactor(name);
 
+  /**
+   * FIXME
+   *
+   * This is a very ugly hack to fix a problem in first trials of
+   * CMSSW 3X MyEvent data, where the originalP4 field has not been
+   * filled.
+   *
+   * !!!THIS SHOULD BE REMOVED ASAP WHEN ALL REQUIRED DATA IS FIXED!!!
+   */
+  if(originalP4.X() < 1e-10 && originalP4.Y() < 1e-10 && originalP4.Z() < 1e-10 && originalP4.T() < 1e-10) {
+    originalP4.SetXYZT(X(), Y(), Z(), T());
+  }
+
   currentCorrection = name;
   SetXYZT(originalP4.X() * correction,
           originalP4.Y() * correction,
@@ -74,26 +87,34 @@ void MyJet::setEnergyCorrection(const std::string& name) {
           originalP4.T() * correction);
 }
 
-double MyJet::getEnergyCorrectionFactor(const string& name) const {
+double MyJet::getEnergyCorrectionFactor(const std::string& name) const {
   if(name == "raw" || name == "" || name == "none")
     return 1;
 
   map<string, double>::const_iterator found = jecs.find(name);
   if(found == jecs.end()) {
-    cout << "Requested energy correction " << name << " doesn't exist." << endl;
+    cout << "Requested energy correction " << name << " doesn't exist." << endl
+         << "The following corrections exist for this object:" << std::endl;
+    for(std::map<std::string, double>::const_iterator iter = jecs.begin(); iter != jecs.end(); ++iter) {
+      std::cout << "  " << iter->first << std::endl;
+    }
     exit(0);
   }
 
   return found->second;
 }
 
-bool MyJet::hasEnergyCorrection(const string& name) const {
+bool MyJet::hasEnergyCorrection(const std::string& name) const {
   map<string, double>::const_iterator found = jecs.find(name);
   return found != jecs.end();
 }
 
 const std::string& MyJet::getActiveEnergyCorrectionName() const {
   return currentCorrection;
+}
+
+double MyJet::getActiveEnergyCorrectionFactor() const {
+  return getEnergyCorrectionFactor(currentCorrection);
 }
 
 // helper
@@ -142,11 +163,15 @@ vector<MyVertex *> MyJet::getSecVertices() {
   return convertCollection(secVertices);
 }
 
+vector<MyHit *> MyJet::getHits() {
+  return convertCollection(hits);
+}
+
 vector<MyCaloTower *> MyJet::getCaloInfo() {
   return convertCollection(caloInfo);
 }
 
-double MyJet::tag(const string& name) const {
+double MyJet::tag(const std::string& name) const {
   map<string, double>::const_iterator found = tagInfo.find(name);
   if(found == tagInfo.end()) {
     if(tracks.size() == 0) cout << "No tracks!" << endl;
@@ -255,23 +280,23 @@ void printMap(std::ostream& out, const C& coll, const char *name) {
   
 }
 
-void MyJet::printTracks(ostream& out) const {
+void MyJet::printTracks(std::ostream& out) const {
   printCollection(out, tracks, "tracks");
 }
-void MyJet::printVertices(ostream& out) const {
+void MyJet::printVertices(std::ostream& out) const {
   printCollection(out, secVertices, "vertices");
 }
-void MyJet::printCaloInfo(ostream& out) const {
+void MyJet::printCaloInfo(std::ostream& out) const {
   printCollection(out, caloInfo, "caloTowers");
 }
-void MyJet::printTagInfo(ostream& out) const {
+void MyJet::printTagInfo(std::ostream& out) const {
   printMap(out, tagInfo, "tagInfo");
 }
-void MyJet::printEnergyCorrections(ostream& out) const {
+void MyJet::printEnergyCorrections(std::ostream& out) const {
   printMap(out, jecs, "jetEnergyCorrections");
 }
 
-void MyJet::printCorrections(ostream& out) const {
+void MyJet::printCorrections(std::ostream& out) const {
   if(jecs.size() == 0)
     return;
   for(map<string,double>::const_iterator i = jecs.begin(); i!= jecs.end(); ++i) {
@@ -279,7 +304,7 @@ void MyJet::printCorrections(ostream& out) const {
   }
 }
 
-void MyJet::print(ostream& out) const {
+void MyJet::print(std::ostream& out) const {
   printTracks(out);
   printVertices(out);
   printCaloInfo(out);
@@ -288,7 +313,7 @@ void MyJet::print(ostream& out) const {
   out << endl;
 }
 
-void useCorrection(vector<MyJet *>& jets, const std::string& name) {
+void useCorrection(std::vector<MyJet *>& jets, const std::string& name) {
   for(vector<MyJet *>::iterator p = jets.begin(); p != jets.end(); ++p) {
     (*p)->setEnergyCorrection(name);
   }
