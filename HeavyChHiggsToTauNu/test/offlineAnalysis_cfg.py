@@ -127,6 +127,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		cms.InputTag("softMuonByPtBJetTags")
         ),
 
+	# CaloMET collections, more info: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMETObjects
+	# TCMET and PFMET in separate collections, saved by default
 	METCollections = cms.VInputTag(
 		cms.InputTag("met"),
 		cms.InputTag("metHO"),
