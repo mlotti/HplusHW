@@ -8,9 +8,13 @@
 #include "DataFormats/METReco/interface/METCollection.h"
 
 std::map<std::string, MyMET> MyEventConverter::getMET(const edm::Event& iEvent){
-	std::map<std::string, MyMET> mets = getCaloMETs(iEvent);
-	mets["pfMET"] = getPFMET(iEvent);
-	mets["tcMET"] = getTCMET(iEvent);
+	std::map<std::string, MyMET> mets;
+//	std::map<std::string, MyMET> mets = getCaloMETs(iEvent);
+//	mets["pfMET"] = getPFMET(iEvent);
+//	mets["tcMET"] = getTCMET(iEvent);
+	getCaloMETs(iEvent,mets);
+	getPFMETs(iEvent,mets);
+	getMETs(iEvent,mets);
 	return mets;
 }
 
@@ -92,4 +96,61 @@ MyMET MyEventConverter::getTCMET(const edm::Event& iEvent){
                                                 << met.y() << endl;
         }
         return met;
+}
+
+void MyEventConverter::getCaloMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+
+	vector<Handle<reco::CaloMETCollection> > metHandles;
+        iEvent.getManyByType(metHandles);
+
+	for(vector<Handle<reco::CaloMETCollection> >::const_iterator iHandle = metHandles.begin();
+            iHandle!= metHandles.end(); ++iHandle){
+		if(iHandle->isValid()){
+			reco::CaloMETCollection::const_iterator imet = (*iHandle)->begin();
+			const std::string metCollectionName = iHandle->provenance()->moduleLabel();
+
+			mets[metCollectionName] = MyMET(imet->px(),imet->py());
+
+			cout << "     " << metCollectionName << " : " 
+                             << imet->px() << " " << imet->py() << endl;
+		}		
+	}
+}
+
+void MyEventConverter::getPFMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+
+        vector<Handle<reco::PFMETCollection> > metHandles;
+        iEvent.getManyByType(metHandles);
+
+        for(vector<Handle<reco::PFMETCollection> >::const_iterator iHandle = metHandles.begin();
+            iHandle!= metHandles.end(); ++iHandle){
+                if(iHandle->isValid()){
+                        reco::PFMETCollection::const_iterator imet = (*iHandle)->begin();
+                        const std::string metCollectionName = iHandle->provenance()->moduleLabel();
+
+                        mets[metCollectionName] = MyMET(imet->px(),imet->py());
+
+                        cout << "     " << metCollectionName << " : "
+                             << imet->px() << " " << imet->py() << endl;
+                }
+        }
+}
+
+void MyEventConverter::getMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+
+        vector<Handle<reco::METCollection> > metHandles;
+        iEvent.getManyByType(metHandles);
+
+        for(vector<Handle<reco::METCollection> >::const_iterator iHandle = metHandles.begin();
+            iHandle!= metHandles.end(); ++iHandle){
+                if(iHandle->isValid()){
+                        reco::METCollection::const_iterator imet = (*iHandle)->begin();
+                        const std::string metCollectionName = iHandle->provenance()->moduleLabel();
+
+                        mets[metCollectionName] = MyMET(imet->px(),imet->py());
+
+                        cout << "     " << metCollectionName << " : "
+                             << imet->px() << " " << imet->py() << endl;
+                }
+        }
 }

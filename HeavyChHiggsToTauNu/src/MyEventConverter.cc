@@ -59,7 +59,7 @@ void MyEventConverter::init(const edm::ParameterSet& iConfig){
 	jetEnergyCorrectionTypes = iConfig.getParameter<vector<InputTag> >("JetEnergyCorrection");
         btaggingAlgos = iConfig.getParameter<vector<InputTag> >("BTaggingAlgorithms");
 
-	metCollections = iConfig.getParameter<vector<InputTag> >("METCollections");
+////	metCollections = iConfig.getParameter<vector<InputTag> >("METCollections");
 
 	electronIdLabels = iConfig.getParameter<vector<InputTag> >("ElectronIdLabels");
 ////	electronIdAlgo->setup(iConfig);

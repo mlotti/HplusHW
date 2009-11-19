@@ -129,21 +129,21 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
 	# CaloMET collections, more info: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMETObjects
 	# TCMET and PFMET in separate collections, saved by default
-	METCollections = cms.VInputTag(
-		cms.InputTag("met"),
-		cms.InputTag("metHO"),
-		cms.InputTag("metNoHFHO"),
-		cms.InputTag("metNoHF"),
-		cms.InputTag("metOptHO"),
-		cms.InputTag("metOptNoHFHO"),
-		cms.InputTag("metOptNoHF"),
-		cms.InputTag("metOpt"),
-		cms.InputTag("corMetGlobalMuons"),
-		cms.InputTag("metJESCorIC5CaloJet"),
-		cms.InputTag("metJESCorIC5CaloJetMuons"),
-		cms.InputTag("corMetType1Icone5NoHF"),
-		cms.InputTag("tauMetCorr")
-	),
+#	METCollections = cms.VInputTag(
+#		cms.InputTag("met"),
+#		cms.InputTag("metHO"),
+#		cms.InputTag("metNoHFHO"),
+#		cms.InputTag("metNoHF"),
+#		cms.InputTag("metOptHO"),
+#		cms.InputTag("metOptNoHFHO"),
+#		cms.InputTag("metOptNoHF"),
+#		cms.InputTag("metOpt"),
+#		cms.InputTag("corMetGlobalMuons"),
+#		cms.InputTag("metJESCorIC5CaloJet"),
+#		cms.InputTag("metJESCorIC5CaloJetMuons"),
+#		cms.InputTag("corMetType1Icone5NoHF"),
+#		cms.InputTag("tauMetCorr")
+#	),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks
 ####	TrackCollection = cms.InputTag("iterativeTracks"),
