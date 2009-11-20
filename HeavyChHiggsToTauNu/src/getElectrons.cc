@@ -12,7 +12,7 @@ vector<MyJet> MyEventConverter::getElectrons(const edm::Event& iEvent,const edm:
 
         Handle<GsfElectronCollection> electronHandle;
         try{
-          iEvent.getByLabel("pixelMatchGsfElectrons",electronHandle);
+          iEvent.getByLabel("gsfElectrons",electronHandle);
         }catch(...) {;}
 
         if(electronHandle.isValid()){
