@@ -15,6 +15,7 @@ std::map<std::string, MyMET> MyEventConverter::getMET(const edm::Event& iEvent){
 	getCaloMETs(iEvent,mets);
 	getPFMETs(iEvent,mets);
 	getMETs(iEvent,mets);
+
 	return mets;
 }
 
@@ -98,7 +99,7 @@ MyMET MyEventConverter::getTCMET(const edm::Event& iEvent){
         return met;
 }
 
-void MyEventConverter::getCaloMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+void MyEventConverter::getCaloMETs(const edm::Event& iEvent,std::map<std::string, MyMET>& mets){
 
 	vector<Handle<reco::CaloMETCollection> > metHandles;
         iEvent.getManyByType(metHandles);
@@ -117,7 +118,7 @@ void MyEventConverter::getCaloMETs(const edm::Event& iEvent,std::map<std::string
 	}
 }
 
-void MyEventConverter::getPFMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+void MyEventConverter::getPFMETs(const edm::Event& iEvent,std::map<std::string, MyMET>& mets){
 
         vector<Handle<reco::PFMETCollection> > metHandles;
         iEvent.getManyByType(metHandles);
@@ -136,7 +137,7 @@ void MyEventConverter::getPFMETs(const edm::Event& iEvent,std::map<std::string, 
         }
 }
 
-void MyEventConverter::getMETs(const edm::Event& iEvent,std::map<std::string, MyMET> mets){
+void MyEventConverter::getMETs(const edm::Event& iEvent,std::map<std::string, MyMET>& mets){
 
         vector<Handle<reco::METCollection> > metHandles;
         iEvent.getManyByType(metHandles);
