@@ -20,6 +20,10 @@ map<string,double> MyEventConverter::muonTag(const reco::Muon& muon){
         tagInfo["isolationR05.nTracks"] = isolationR05.nTracks;
         tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
 
+        tagInfo["isGlobal"]     = muon.isGlobalMuon()     ? 1 : 0;
+        tagInfo["isStandAlone"] = muon.isStandAloneMuon() ? 1 : 0;
+        tagInfo["isTracker"]    = muon.isTrackerMuon()    ? 1 : 0;
+
 	return tagInfo;
 }
 
@@ -58,6 +62,10 @@ map<string,double> MyEventConverter::muonTag(const pat::Muon& muon){
 	tagInfo["pat:chargedHadronIso"]   = muon.chargedHadronIso();//charged PFCandidates
 	tagInfo["pat:neutralHadronIso"]   = muon.neutralHadronIso();//neutral hadrons PFCandidates
         tagInfo["pat:photonIso"]	  = muon.photonIso();  //gamma PFCandidates
+
+        tagInfo["isGlobal"]     = muon.isGlobalMuon()     ? 1 : 0;
+        tagInfo["isStandAlone"] = muon.isStandAloneMuon() ? 1 : 0;
+        tagInfo["isTracker"]    = muon.isTrackerMuon()    ? 1 : 0;
 
         return tagInfo;
 }
