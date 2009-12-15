@@ -68,6 +68,10 @@ void MuonConverter::tagHelper(const T& muon, TagType& tagInfo) const {
         tagInfo["isolationR05.nJets"]   = isolationR05.nJets;
         tagInfo["isolationR05.nTracks"] = isolationR05.nTracks;
         tagInfo["isolationR05.sumPt"]   = isolationR05.sumPt;
+
+        tagInfo["isGlobal"]     = muon.isGlobalMuon()     ? 1 : 0;
+        tagInfo["isStandAlone"] = muon.isStandAloneMuon() ? 1 : 0;
+        tagInfo["isTracker"]    = muon.isTrackerMuon()    ? 1 : 0;
 }
 
 void MuonConverter::tag(const reco::Muon& muon, TagType& tagInfo) const {
