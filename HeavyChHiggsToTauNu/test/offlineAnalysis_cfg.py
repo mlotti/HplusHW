@@ -134,10 +134,10 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         Vertices = cms.InputTag("pixelVertices"),
         GsfElectrons = cms.VInputTag(
-                cms.InputTag("gsfElectrons")
+#                cms.InputTag("gsfElectrons")
         ),
         PATElectrons = cms.VInputTag(
-#                cms.InputTag("cleanLayer1Electrons")
+                cms.InputTag("cleanLayer1Electrons")
         ),
 #        Photons = cms.VInputTag(
 #                cms.InputTag("correctedPhotons")
