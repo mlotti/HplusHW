@@ -117,6 +117,13 @@ class MyEvent: public TObject {
         std::vector<MyJet>& addCollection(const std::string& name);
 
         /**
+         * \brief Change the scale of the named colletion by the factor
+         *
+         * \param name  Name of the collection
+         */
+	void setJetEnergyScale(const std::string& name, double);
+
+        /**
          * \brief Check if MET exists
          *
          * \param name  Name of the MET object

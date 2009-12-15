@@ -69,10 +69,11 @@ process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
 process.load("JetMETCorrections.Configuration.JetCorrectionsHLT_cff")
+process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
 process.load("RecoMET.METProducers.CaloMET_cfi")
-process.missingEt = cms.Path(process.metNoHF)
+#process.missingEt = cms.Path(process.metNoHF)
 
 process.load("JetMETCorrections.Type1MET.MetType1Corrections_cff")
 process.missingEt_type1i = cms.Path(process.metJESCorIC5CaloJet)
@@ -90,7 +91,7 @@ process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
 
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 3_2_4
+#process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 3_2_4
 
 from RecoTauTag.RecoTau.PFRecoTauProducer_cfi import *
 process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
@@ -165,14 +166,23 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 #                 cms.InputTag("cleanLayer1Jets")
         ),
         
-	METCollections = cms.VInputTag(
-		cms.InputTag("met"),
-		cms.InputTag("corMetGlobalMuons"),
-		#cms.InputTag("corMetType1Icone5"),
-		cms.InputTag("metNoHF"),
-		cms.InputTag("corMetType1Icone5NoHF"),
-		#cms.InputTag("tauMetCorr")
-	),
+	# CaloMET collections, more info: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMETObjects
+	# TCMET and PFMET in separate collections, saved by default
+#	METCollections = cms.VInputTag(
+#		cms.InputTag("met"),
+#		cms.InputTag("metHO"),
+#		cms.InputTag("metNoHFHO"),
+#		cms.InputTag("metNoHF"),
+#		cms.InputTag("metOptHO"),
+#		cms.InputTag("metOptNoHFHO"),
+#		cms.InputTag("metOptNoHF"),
+#		cms.InputTag("metOpt"),
+#		cms.InputTag("corMetGlobalMuons"),
+#		cms.InputTag("metJESCorIC5CaloJet"),
+#		cms.InputTag("metJESCorIC5CaloJetMuons"),
+#		cms.InputTag("corMetType1Icone5NoHF"),
+#		cms.InputTag("tauMetCorr")
+#	),
 
         #TrackCollection = ctfWithMaterialTracks,iterativeTracks
 ####	TrackCollection = cms.InputTag("iterativeTracks"),

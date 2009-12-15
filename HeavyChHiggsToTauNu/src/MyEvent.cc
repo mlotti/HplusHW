@@ -86,6 +86,21 @@ std::vector<MyJet>& MyEvent::addCollection(const std::string& name) {
   return addCollection(name, std::vector<MyJet>());
 }
 
+void MyEvent::setJetEnergyScale(const std::string& name, double energyScale) {
+
+    vector<MyJet> scaledJets;
+
+    vector<MyJet*> source = this->getCollection(name);
+    for(vector<MyJet*>::const_iterator i = source.begin();
+	i!= source.end(); ++i){
+      MyJet jet = **i;
+      TLorentzVector p4 = (*i)->p4()*energyScale;
+      jet.setP4(p4);
+      jet.originalP4 = (*i)->originalP4*energyScale;
+      scaledJets.push_back(jet);
+    }
+    collections[name] = scaledJets;
+}
 
 bool MyEvent::hasMET(const string& name) const {
   METMap::const_iterator found = mets.find(name);
@@ -95,7 +110,11 @@ bool MyEvent::hasMET(const string& name) const {
 MyMET *MyEvent::getMET(const string& name) {
   METMap::iterator found = mets.find(name);
   if(found == mets.end()) {
-    cout << "Reqeusted MyMET object " << name << " which doesn't exist." << endl;
+    cout << "Requested MyMET object " << name << " which doesn't exist." << endl
+         << "The following METs exist:" << std::endl;
+    for(METMap::const_iterator iter = mets.begin(); iter != mets.end(); ++iter) {
+      std::cout << "  " << iter->first << std::endl;
+    }
     exit(0);
   }
 

@@ -46,6 +46,9 @@ class MyEventConverter {
 	bool triggerDecision(const edm::Event&);
 
         void		        getTrajectories(const edm::Event&);
+	void			getCaloMETs(const edm::Event&,std::map<std::string, MyMET>&);
+	void			getPFMETs(const edm::Event&,std::map<std::string, MyMET>&);
+	void		 	getMETs(const edm::Event&,std::map<std::string, MyMET>&);
 	MyMET 			getMetFromCaloTowers(const edm::Event&);
 
 
