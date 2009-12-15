@@ -51,7 +51,6 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         tauResolutionAnalysis(new TauResolutionAnalysis()),
 	tauMETTriggerAnalysis(new TauMETTriggerAnalysis(userRootTree)),
         trackEcalHitPoint(iConfig),
-        metConverter(iConfig.getParameter<std::vector<edm::InputTag> >("METCollections"), edm::InputTag("pfMet"), edm::InputTag("tcMet")),
         printTrigger(true)
 {}
 

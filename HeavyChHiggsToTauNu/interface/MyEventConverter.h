@@ -11,7 +11,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METConverterAll.h"
 
 #include<vector>
 #include<string>
@@ -109,7 +109,7 @@ class MyEventConverter {
 	TauResolutionAnalysis* tauResolutionAnalysis;
 	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
         TrackEcalHitPoint trackEcalHitPoint;
-        METConverter metConverter;
+        METConverterAll metConverter;
 
 	bool printTrigger;
 };

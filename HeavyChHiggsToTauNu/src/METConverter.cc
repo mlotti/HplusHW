@@ -21,6 +21,7 @@ METConverter::~METConverter() {}
 
 
 template <class T>
+static
 MyMET metHelper(const edm::Event& iEvent, const edm::InputTag& label) {
         edm::Handle<T> met;
         iEvent.getByLabel(label, met);
@@ -30,6 +31,7 @@ MyMET metHelper(const edm::Event& iEvent, const edm::InputTag& label) {
 }
 
 template <class T>
+static
 void metHelper(const edm::Event& iEvent, const std::vector<edm::InputTag>& metCollections, std::map<std::string, MyMET>& mets) {
         for(unsigned int iColl = 0; iColl < metCollections.size(); ++iColl)
                 mets[metCollections[iColl].label()] = metHelper<T>(iEvent, metCollections[iColl]);
