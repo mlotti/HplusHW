@@ -47,9 +47,6 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
 
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
 
-	vector<MyTrack> tracks;
-	vector<MyHit> hits;
-
 	vector<TransientTrack> transientTracks;
 	if(trackConverter.getCollectionLabel() == "iterativeTracks") {
 	  vector<Trajectory> associatedTrajectories;
@@ -67,11 +64,11 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
 		MyTrack track = TrackConverter::convert(transientTrack);
 
                 if (myTrajectoryStatus) {
-			HitConverter::addHits(hits, *iTrajectory, trackCounter);
+			HitConverter::addHits(tau.hits, *iTrajectory, trackCounter);
 		}
                 track.ip                = ipConverter.convert(transientTrack,caloJet);
                 track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
 		++iTrajectory;
 		++trackCounter;
           }
@@ -86,12 +83,9 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
                 MyTrack track           = TrackConverter::convert(transientTrack);
                 track.ip                = ipConverter.convert(transientTrack,caloJet);
                 track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
           }
 	}
-
-        tau.tracks = tracks;
-	tau.hits   = hits;
 
         tag(recTau, tau.tagInfo);
 
@@ -115,7 +109,6 @@ MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
 
 	const TrackRefVector associatedTracks = recTau.allTracks();
 	RefVector<TrackCollection>::const_iterator iTrack;
-	vector<MyTrack> tracks;
 	for(iTrack = associatedTracks.begin(); iTrack!= associatedTracks.end(); iTrack++){
 
                 const TransientTrack transientTrack = transientTrackBuilder.build(*iTrack);
@@ -123,9 +116,8 @@ MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
 		MyTrack track           = TrackConverter::convert(transientTrack);
 		track.ip                = ipConverter.convert(transientTrack,caloJet);
 		track.trackEcalHitPoint = trackEcalHitPoint.convert(transientTrack,caloJet);
-		tracks.push_back(track);
+		tau.tracks.push_back(track);
 	}
-	tau.tracks = tracks;
 
         TauConverter::tag(recTau, tau.tagInfo);
 
@@ -142,7 +134,6 @@ MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
 MyJet TauConverter::convert(const pat::Tau& recTau) {
         MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
 
-        vector<MyTrack> tracks;
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
 	vector<TransientTrack> transientTracks;
@@ -157,7 +148,7 @@ MyJet TauConverter::convert(const pat::Tau& recTau) {
                 // FIXME
                 // no impact parameter?
                 // no ECAL hit point?
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
         }
 
         const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
@@ -171,10 +162,8 @@ MyJet TauConverter::convert(const pat::Tau& recTau) {
                 // FIXME
                 // no impact parameter?
                 // no ECAL hit point?
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
         }
-
-        tau.tracks = tracks;
 
         TauConverter::tag(recTau, tau.tagInfo);
 
@@ -191,7 +180,6 @@ MyJet TauConverter::convert(const pat::Tau& recTau) {
 MyJet TauConverter::convert(const PFTau& recTau) {
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
 
-	vector<MyTrack> tracks;
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
 	vector<TransientTrack> transientTracks;
@@ -207,7 +195,7 @@ MyJet TauConverter::convert(const PFTau& recTau) {
 		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
                 // FIXME
                 // no impact parameter?
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
         }
 
         const PFCandidateRefVector pfIsolCandidates = recTau.isolationPFCands();
@@ -222,10 +210,8 @@ MyJet TauConverter::convert(const PFTau& recTau) {
 		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
                 // FIXME
                 // no impact parameter?
-                tracks.push_back(track);
+                tau.tracks.push_back(track);
         }
-
-        tau.tracks = tracks;
 
         TauConverter::tag(recTau, tau.tagInfo);
 
