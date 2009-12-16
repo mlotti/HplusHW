@@ -187,14 +187,13 @@ MyJet TauConverter::convert(const PFTau& recTau) {
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 
                 const PFCandidate& pfCand = *(iTrack->get());
+		MyTrack track = TrackConverter::convert(pfCand);
 		if(pfCand.trackRef().isNonnull()){
                   const TransientTrack transientTrack = transientTrackBuilder.build(pfCand.trackRef());
                   transientTracks.push_back(transientTrack);
+                  track.ip = ipConverter.convert(transientTrack, pfCand);
 		}
-		MyTrack track = TrackConverter::convert(pfCand);
 		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
-                // FIXME
-                // no impact parameter?
                 tau.tracks.push_back(track);
         }
 
@@ -202,14 +201,13 @@ MyJet TauConverter::convert(const PFTau& recTau) {
         for(iTrack = pfIsolCandidates.begin(); iTrack!= pfIsolCandidates.end(); iTrack++){
 
                 const PFCandidate& pfCand = *(iTrack->get());
+                MyTrack track = TrackConverter::convert(pfCand);
 		if(pfCand.trackRef().isNonnull()){
                   const TransientTrack transientTrack = transientTrackBuilder.build(pfCand.trackRef());
                   transientTracks.push_back(transientTrack);
+                  track.ip = ipConverter.convert(transientTrack, pfCand);
 		}
-                MyTrack track = TrackConverter::convert(pfCand);
 		track.trackEcalHitPoint = TrackEcalHitPoint::convert(pfCand);
-                // FIXME
-                // no impact parameter?
                 tau.tracks.push_back(track);
         }
 
