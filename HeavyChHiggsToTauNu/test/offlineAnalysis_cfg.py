@@ -1,15 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import os
 
-def getEnvVar(var, default=None):
-    if os.environ.has_key(var):
-        return os.environ.get(var)
-    else:
-        return default
-
-maxEvt = int(getEnvVar("MYMAXEVENTS", 10))
-files = getEnvVar("MYINPUTFILES")
-
 summer08 = True
 
 process = cms.Process("test")
@@ -17,7 +8,7 @@ process = cms.Process("test")
 #process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(maxEvt)
+    input = cms.untracked.int32(10)
 )
 
 # Job will exit if any product is not found in the event
@@ -43,6 +34,7 @@ process.source = cms.Source("PoolSource",
 
 # Message Logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 #process.MessageLogger.debugModules = cms.untracked.vstring("*")
 #process.MessageLogger.cerr = cms.untracked.PSet(threshold = cms.untracked.string("DEBUG"))
 
