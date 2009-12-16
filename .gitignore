@@ -1,2 +1,5 @@
 LSFJOB_*
 *~
+crab_0_*
+*.root
+*.pyc
