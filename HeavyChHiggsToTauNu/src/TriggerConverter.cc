@@ -1,10 +1,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerConverter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Framework/interface/Event.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "FWCore/Framework/interface/TriggerNames.h"
 
 using edm::Handle;
@@ -51,4 +53,31 @@ void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std:
                         n++;
                 }
 	}
+}
+
+void TriggerConverter::addTriggerObjects(MyEvent *saveEvent, const edm::Event& iEvent) {
+  std::vector<edm::Handle<trigger::TriggerEvent> > handles;
+  iEvent.getManyByType(handles);
+
+  for(std::vector<edm::Handle<trigger::TriggerEvent> >::const_iterator iHandle = handles.begin(); iHandle != handles.end(); ++iHandle) {
+    std::string name("HLTObjects_");
+    name += iHandle->provenance()->processName();
+    //std::cout << name << std::endl;
+    const trigger::TriggerObjectCollection& objects((*iHandle)->getObjects());
+
+    if(edm::isDebugEnabled())
+      LogDebug("MyEventConverter") << "Adding " << objects.size() << " HLT objects with name " << name << std::endl;
+    //std::cout << "Object collection size " << objects.size() << std::endl;
+
+    std::vector<MyJet>& ret(saveEvent->addCollection(name));
+    for(trigger::TriggerObjectCollection::const_iterator iObject = objects.begin(); iObject != objects.end(); ++iObject) {
+      //std::cout << "  " << iObject->id() << "  " << iObject->pt() << std::endl;
+      MyJet jet(iObject->px(), iObject->py(), iObject->pz(), iObject->energy());
+      jet.type = iObject->id();
+      ret.push_back(jet);
+    }
+
+    //std::cout << std::endl;
+  }
+  //std::cout << std::endl;
 }

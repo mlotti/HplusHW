@@ -125,6 +125,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->lumiNumber		= iEvent.luminosityBlock();
 
         TriggerConverter::getTriggerResults(iEvent, saveEvent->triggerResults, printTrigger);
+        TriggerConverter::addTriggerObjects(saveEvent, iEvent);
         printTrigger = false;
 	saveEvent->primaryVertex        = VertexConverter::convert(primaryVertex);
 //	saveEvent->L1objects            = getL1objects(iEvent);
