@@ -4,7 +4,6 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
-#include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
 #include "RecoBTag/BTagTools/interface/SignedTransverseImpactParameter.h"
 #include "RecoBTag/BTagTools/interface/SignedImpactParameter3D.h"
@@ -22,22 +21,6 @@ ImpactParameterConverter::~ImpactParameterConverter() {}
 MyImpactParameter ImpactParameterConverter::convert(const TransientTrack& transientTrack) const{
 	const Track& track = transientTrack.track();
         GlobalVector direction(track.px(),track.py(),track.pz());
-
-        return convert(transientTrack,direction);
-}
-
-MyImpactParameter ImpactParameterConverter::convert(const TransientTrack& transientTrack, const CaloJet& caloJet) const {
-
-        GlobalVector direction(caloJet.px(),caloJet.py(),caloJet.pz());
-
-	return convert(transientTrack,direction);
-}
-
-MyImpactParameter ImpactParameterConverter::convert(const TransientTrack& transientTrack, const Conversion& photon) const {
-
-        GlobalVector direction(photon.pairMomentum().x(),
-                               photon.pairMomentum().y(),
-                               photon.pairMomentum().z());
 
         return convert(transientTrack,direction);
 }

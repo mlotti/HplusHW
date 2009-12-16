@@ -4,12 +4,28 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyImpactParameter.h"
 #include "DataFormats/GeometryVector/interface/GlobalVector.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
+// Forward declarations
 namespace reco {
   class TransientTrack;
-  class CaloJet;
-  class Conversion;
   class Vertex;
+}
+
+// We need a namespace for the explicit specialization
+namespace ipcHelper {
+  template <typename T>
+  struct TypeHelper {
+    static GlobalVector direction(const T& particle) {
+      return GlobalVector(particle.px(), particle.py(), particle.pz());
+    }
+  };
+  template <>
+  struct TypeHelper<reco::Conversion> {
+    static GlobalVector direction(const reco::Conversion& photon) {
+      return GlobalVector(photon.pairMomentum().x(), photon.pairMomentum().y(), photon.pairMomentum().z());
+    }
+  };
 }
 
 class ImpactParameterConverter {
@@ -18,9 +34,12 @@ public:
   ~ImpactParameterConverter();
 
   MyImpactParameter convert(const reco::TransientTrack&) const;
-  MyImpactParameter convert(const reco::TransientTrack&, const reco::CaloJet&) const;
-  MyImpactParameter convert(const reco::TransientTrack&, const reco::Conversion&) const;
   MyImpactParameter convert(const reco::TransientTrack&, const GlobalVector&) const;
+
+  template <typename T>
+  MyImpactParameter convert(const reco::TransientTrack& transientTrack, const T& particle) const {
+    return convert(transientTrack, ipcHelper::TypeHelper<T>::direction(particle));
+  }
 private:
   const reco::Vertex& primaryVertex;
 };
