@@ -119,9 +119,13 @@ class MyEvent: public TObject {
         /**
          * \brief Change the scale of the named colletion by the factor
          *
-         * \param name  Name of the collection
+         * The method changes the originalP4 and P4 of each MyJet in
+         * the collection.
+         *
+         * \param name         Name of the collection
+         * \param energyScale  Scale factor
          */
-	void setJetEnergyScale(const std::string& name, double);
+	void setJetEnergyScale(const std::string& name, double energyScal);
 
         /**
          * \brief Check if MET exists

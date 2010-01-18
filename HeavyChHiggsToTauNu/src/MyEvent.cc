@@ -15,6 +15,31 @@ using std::cout;
 using std::endl;
 using std::setw;
 
+template <typename T, typename I=typename T::iterator>
+struct FindHelper {
+  static I find(T& collections, const std::string& name, const char *str) {
+    I found = collections.find(name);
+    if(found == collections.end()) {
+      cout << "Requested " << str << " " << name << " which doesn't exist." << endl
+           << "The following " << str << "s exist:" << std::endl;
+      for(typename T::const_iterator iter = collections.begin(); iter != collections.end(); ++iter) {
+        std::cout << "  " << iter->first << std::endl;
+      }
+      exit(0);
+    }
+    return found;
+  }
+};
+template <typename T>
+static typename T::iterator findCollection(T& collections, const std::string& name, const char *str) {
+  return FindHelper<T>::find(collections, name, str);
+}
+template <typename T>
+static typename T::const_iterator findCollection(const T& collections, const std::string& name, const char *str) {
+  return FindHelper<const T, typename T::const_iterator>::find(collections, name, str);
+}
+
+
 template <typename T>
 struct MyEventTraits {
   static const char *name() { return ""; }
@@ -99,7 +124,8 @@ bool MyEvent::hasCollection(const string& name) const {
 }
 
 std::vector<MyJet *> MyEvent::getCollection(const string& name) {
-  return getCollectionTmpl(collections, name);
+  CollectionMap::iterator found = findCollection(collections, name, "MyJet collection");
+  return convertCollection(found->second);
 }
 
 std::vector<MyJet *> MyEvent::getCollectionWithCorrection(const string& name, const std::string& corr) {
@@ -117,19 +143,11 @@ std::vector<MyJet>& MyEvent::addCollection(const std::string& name) {
 }
 
 void MyEvent::setJetEnergyScale(const std::string& name, double energyScale) {
-
-    vector<MyJet> scaledJets;
-
-    vector<MyJet*> source = this->getCollection(name);
-    for(vector<MyJet*>::const_iterator i = source.begin();
-	i!= source.end(); ++i){
-      MyJet jet = **i;
-      TLorentzVector p4 = (*i)->p4()*energyScale;
-      jet.setP4(p4);
-      jet.originalP4 = (*i)->originalP4*energyScale;
-      scaledJets.push_back(jet);
-    }
-    collections[name] = scaledJets;
+  CollectionMap::iterator found = findCollection(collections, name, "MyJet collection");
+  for(JetCollection::iterator jet = found->second.begin(); jet != found->second.end(); ++jet) {
+    jet->originalP4 *= energyScale;
+    jet->setP4(jet->originalP4);
+  }
 }
 
 bool MyEvent::hasMET(const string& name) const {
@@ -138,16 +156,7 @@ bool MyEvent::hasMET(const string& name) const {
 }
 
 MyMET *MyEvent::getMET(const string& name) {
-  METMap::iterator found = mets.find(name);
-  if(found == mets.end()) {
-    cout << "Requested MyMET object " << name << " which doesn't exist." << endl
-         << "The following METs exist:" << std::endl;
-    for(METMap::const_iterator iter = mets.begin(); iter != mets.end(); ++iter) {
-      std::cout << "  " << iter->first << std::endl;
-    }
-    exit(0);
-  }
-
+  METMap::iterator found = findCollection(mets, name, "MyMET object");
   found->second.name = found->first;
   return &(found->second);
 }
@@ -170,16 +179,7 @@ bool MyEvent::hasTrigger(const string& name) const {
 }
 
 bool MyEvent::trigger(const string& name) const {
-  TriggerMap::const_iterator found = triggerResults.find(name);
-  if(found == triggerResults.end()) {
-    cout << "Requested trigger " << name << " which doesn't exist." << endl
-         << "The following triggers exist:" << std::endl;
-    for(TriggerMap::const_iterator iter = triggerResults.begin(); iter != triggerResults.end(); ++iter) {
-      std::cout << "  " << iter->first << std::endl;
-    }
-    exit(0);
-  }
-
+  TriggerMap::const_iterator found = findCollection(triggerResults, name, "trigger");
   return found->second;
 }
 
