@@ -184,7 +184,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # MC collections
         GenParticles = cms.InputTag("genParticles"),
-        MuonReplacementHepMc = cms.InputTag("newSource"),
+        MuonReplacementGen = cms.InputTag("DUMMY"),
         GenJets = cms.InputTag("iterativeCone5GenJets"),
         SimHits = cms.InputTag("g4SimHits"),
         

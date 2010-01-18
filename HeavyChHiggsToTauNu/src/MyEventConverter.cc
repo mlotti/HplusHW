@@ -28,7 +28,7 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         patJetLabels(iConfig.getParameter<std::vector<InputTag> >("PATJets")),
         muonReplacementMuonLabel(iConfig.getParameter<edm::InputTag>("MuonReplacementMuons")),
         genParticleLabel(iConfig.getParameter<InputTag>("GenParticles")),
-        muonReplacementHepMcLabel(iConfig.getParameter<InputTag>("MuonReplacementHepMc")),
+        muonReplacementGenLabel(iConfig.getParameter<InputTag>("MuonReplacementGen")),
         genJetLabel(iConfig.getParameter<InputTag>("GenJets")),
         simHitLabel(iConfig.getParameter<InputTag>("SimHits")),
 //	barrelClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation")),
