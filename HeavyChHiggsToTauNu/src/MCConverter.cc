@@ -96,6 +96,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
 	const reco::GenParticleCollection genParticles(*mcEventHandle);
 
+        const reco::Candidate *first = &(*genParticles.begin());
 	reco::GenParticleCollection::const_iterator i;
 	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
                 /*
@@ -115,6 +116,18 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                         mcMetY += i->py();
                 }
 
+                MyMCParticle mcParticle(i->px(), i->py(), i->pz(), i->energy());
+                mcParticle.pid = id;
+                mcParticle.status = i->status();
+
+                const reco::Candidate *mother = i->mother();
+                if(mother) {
+                        mcParticle.motherIndex = mother-first;
+                }
+
+                mcParticles.push_back(mcParticle);
+
+                /*
                 if( ( i->status() == 1 ) ||
                     ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 || abs(id) <= 21) ||
                     ( i->status() == 3) ) {
@@ -146,6 +159,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                           }
                         }
 		}
+                */
 	}
 	mcMET.Set(mcMetX,mcMetY);
 
@@ -226,6 +240,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 	}
 	mcMET.Set(mcMetX,mcMetY);
 */
+#ifdef FOO
 	// newSource from muon->tau conversion, saving the MC tau and its decay products
         Handle<HepMCProduct> mcEventHandle2;
         iEvent.getByLabel(hepMcProductReplacement, mcEventHandle2);
@@ -285,6 +300,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                         }
                 }
 	}
+#endif
 }
 
 void MCConverter::setSimTracks(const edm::Event& iEvent, MyEvent& event){

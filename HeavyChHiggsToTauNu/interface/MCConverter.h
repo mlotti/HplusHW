@@ -14,6 +14,7 @@ namespace edm {
 }
 namespace reco {
   class GenJet;
+  class GenParticle;
 }
 
 class MyMET;
@@ -32,6 +33,7 @@ public:
 
   void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&) const;
   MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent) const;
+
   void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&) const;
 
 private:

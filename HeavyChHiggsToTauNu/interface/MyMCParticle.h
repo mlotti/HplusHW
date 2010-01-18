@@ -67,11 +67,10 @@ class MyMCParticle: public TLorentzVector {
         MyImpactParameter ip;             ///< Impact parameter
         int pCharge;                      ///< Particle charge
 
-        std::vector<int> mother;          ///< Mother particle IDs
-        std::vector<int> motherBarcodes;  ///< Mother particle barcodes
+        int motherIndex;                  ///< Index to the mother particle in the vector
+
         int         pid;                  ///< Particle ID
 	int 	    status;               ///< Particle status
-	int	    barcode;              ///< Particle barcode
 
     private:
 
