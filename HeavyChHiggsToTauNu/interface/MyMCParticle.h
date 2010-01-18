@@ -67,7 +67,7 @@ class MyMCParticle: public TLorentzVector {
         MyImpactParameter ip;             ///< Impact parameter
         int pCharge;                      ///< Particle charge
 
-        int motherIndex;                  ///< Index to the mother particle in the vector
+        std::vector<int> motherIndices;   ///< Index to the mother particle in the vector
 
         int         pid;                  ///< Particle ID
 	int 	    status;               ///< Particle status
