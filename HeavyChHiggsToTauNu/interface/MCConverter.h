@@ -23,7 +23,7 @@ class MyEvent;
 class MCConverter {
 public:
   MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
-              const edm::InputTag& genLabel, const edm::InputTag& hepMcReplLabel);
+              const edm::InputTag& genLabel, const edm::InputTag& genReplLabel);
   ~MCConverter();
 
   static MyMCParticle convert(const reco::GenJet&);
@@ -31,16 +31,17 @@ public:
 
   void addMC(MyEvent *, const edm::Event&) const;
 
-  void addMCJets(const edm::Event& iEvent, std::vector<MyMCParticle>&) const;
+  void addMCJets(const edm::Event& iEvent, MyEvent *) const;
   MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent) const;
 
-  void addMCParticles(const edm::Event&, std::vector<MyMCParticle>&, MyMET&) const;
+  void addMCParticles(const edm::Event&, MyEvent *, MyMET&) const;
+  void addMCParticles(const edm::Event&, MyEvent *, const edm::InputTag& label) const;
 
 private:
   edm::InputTag genJets;
   edm::InputTag simHits;
   edm::InputTag genParticles;
-  edm::InputTag hepMcProductReplacement;
+  edm::InputTag genParticlesReplacement;
   
 };
 
