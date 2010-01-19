@@ -68,6 +68,7 @@ class MyEventConverter {
         std::vector<edm::InputTag> caloTauLabels;
         std::vector<edm::InputTag> pfTauLabels;
         std::vector<edm::InputTag> patTauLabels;
+	std::vector<edm::InputTag> tcTauLabels;
         std::vector<edm::InputTag> caloJetLabels;
         std::vector<edm::InputTag> patJetLabels;
 

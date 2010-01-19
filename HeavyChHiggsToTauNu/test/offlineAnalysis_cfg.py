@@ -97,6 +97,11 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
 
+process.load("JetMETCorrections.TauJet.TCRecoTauProducer_cfi")
+process.runTCTauProducer = cms.Path(
+        process.tcRecoTauProducer
+)
+
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         TrackAssociator.TrackAssociatorParameterBlock,
         fileName = cms.string("analysis.root"),
@@ -151,6 +156,9 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         PATTaus = cms.VInputTag(
 #                 cms.InputTag("cleanLayer1Taus")
         ),
+	TCTaus = cms.VInputTag(
+		 cms.InputTag("tcRecoTauProducer")
+	),
         CaloJets = cms.VInputTag(
                  cms.InputTag("iterativeCone5CaloJets")
         ),

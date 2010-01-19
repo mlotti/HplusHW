@@ -24,6 +24,7 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         caloTauLabels(iConfig.getParameter<std::vector<InputTag> >("CaloTaus")),
         pfTauLabels(iConfig.getParameter<std::vector<InputTag> >("PFTaus")),
         patTauLabels(iConfig.getParameter<std::vector<InputTag> >("PATTaus")),
+	tcTauLabels(iConfig.getParameter<std::vector<InputTag> >("TCTaus")),
         caloJetLabels(iConfig.getParameter<std::vector<InputTag> >("CaloJets")),
         patJetLabels(iConfig.getParameter<std::vector<InputTag> >("PATJets")),
         muonReplacementMuonLabel(iConfig.getParameter<edm::InputTag>("MuonReplacementMuons")),

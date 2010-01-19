@@ -97,6 +97,8 @@
 				cvs co -r V00-06-02-09 DataFormats/METReco
 24.9.2009/S.Lehti CMSSW_3_1_3	pat lepton dataformat requires the usage of 313, 312 wont work.
 				No tags needed.
+15.1.2010/S.Lehti CMSSW_3_1_6	TCTau tag needed:
+				cvs co JetMETCorrections/TauJet
 
 	How to compile:
 	-compile
