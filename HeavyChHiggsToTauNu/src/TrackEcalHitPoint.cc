@@ -33,7 +33,11 @@ void TrackEcalHitPoint::reset() {
 MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,const CaloJet& caloJet) {
         // New method
         math::XYZPoint hitPos = trackAssociator_.trackPositionAtEcal(transientTrack.track());
+        // Return new method
+        return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
 
+        // The old method produced sometimes TrajectoryStateException
+#ifdef OLD
         // Old method
         GlobalPoint ecalHitPosition(0,0,0);
         double maxTowerEt = 0;
@@ -52,7 +56,6 @@ MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,co
                 }
         }
 
-
         GlobalPoint trackEcalHitPoint = transientTrack.trajectoryStateClosestToPoint(ecalHitPosition).position();
         GlobalPoint trackEcalHitPoint2 = transientTrack.stateOnSurface(ecalHitPosition).globalPosition();
  
@@ -69,6 +72,7 @@ MyGlobalPoint TrackEcalHitPoint::convert(const TransientTrack& transientTrack,co
 
         // Return new method
         return MyGlobalPoint(hitPos.x(), hitPos.y(), hitPos.z());
+#endif
 }
 
 MyGlobalPoint TrackEcalHitPoint::convert(const GsfElectron& electron){
