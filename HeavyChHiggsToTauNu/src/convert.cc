@@ -80,16 +80,13 @@ struct TauPtNonZero {
 };
 
 template <typename T1, typename T2>
-struct And {
-  And(T1 a_, T2 b_): a(a_), b(b_) {}
+struct And: private T1, private T2 {
+  And(T1 a, T2 b): T1(a), T2(b) {}
 
   template <typename C>
   bool operator()(const C& obj) const {
-    return a(obj) && b(obj);
+    return T1::operator()(obj) && T2::operator()(obj);
   }
-
-  T1 a;
-  T2 b;
 };
 
 template <typename T1, typename T2>
