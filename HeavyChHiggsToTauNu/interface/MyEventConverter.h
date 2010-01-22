@@ -74,6 +74,7 @@ class MyEventConverter {
         edm::InputTag muonReplacementMuonLabel;
 
         edm::InputTag genParticleLabel;
+	edm::InputTag genVisibleTauLabel;
         edm::InputTag muonReplacementGenLabel;
         edm::InputTag genJetLabel;
         edm::InputTag simHitLabel;

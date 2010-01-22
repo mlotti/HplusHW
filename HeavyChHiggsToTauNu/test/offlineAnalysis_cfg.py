@@ -19,7 +19,8 @@ process.options = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #"file:/tmp/slehti/QCD_Pt80_OctX.root"
-    "rfio:/castor/cern.ch/user/s/slehti/QCD_Pt80_OctX.root"
+#    "rfio:/castor/cern.ch/user/s/slehti/QCD_Pt80_OctX.root"
+    "rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root"
     )
 )
 
@@ -96,6 +97,16 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
+
+process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
+        GenParticles  = cms.untracked.InputTag("genParticles"),
+        ptMinTau      = cms.untracked.double(3),
+        ptMinMuon     = cms.untracked.double(3),
+        ptMinElectron = cms.untracked.double(3),
+        BosonID       = cms.untracked.vint32(23),
+        EtaMax         = cms.untracked.double(2.5)
+)
+process.visibleTau = cms.Path(process.TauMCProducer)
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         TrackAssociator.TrackAssociatorParameterBlock,
@@ -184,6 +195,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # MC collections
         GenParticles = cms.InputTag("genParticles"),
+	VisibleTaus  = cms.InputTag("TauMCProducer:HadronicTauOneAndThreeProng"),
         MuonReplacementGen = cms.InputTag("DUMMY"),
         GenJets = cms.InputTag("iterativeCone5GenJets"),
         SimHits = cms.InputTag("g4SimHits"),
@@ -212,11 +224,11 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
-#process.TESTOUT = cms.OutputModule("PoolOutputModule",
+process.TESTOUT = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring(
 #        "drop *",
 #        "keep patMuons_*_*_*"
 #    ),
-#    fileName = cms.untracked.string('file:testout.root')
-#)
-#process.outpath = cms.EndPath(process.TESTOUT)
+    fileName = cms.untracked.string('file:testout.root')
+)
+process.outpath = cms.EndPath(process.TESTOUT)
