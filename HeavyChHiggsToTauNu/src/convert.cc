@@ -80,8 +80,8 @@ struct TauPtNonZero {
 };
 
 template <typename T1, typename T2>
-struct And: private T1, private T2 {
-  And(T1 a, T2 b): T1(a), T2(b) {}
+struct AndImpl: private T1, private T2 {
+  AndImpl(T1 a, T2 b): T1(a), T2(b) {}
 
   template <typename C>
   bool operator()(const C& obj) const {
@@ -90,8 +90,8 @@ struct And: private T1, private T2 {
 };
 
 template <typename T1, typename T2>
-And<T1, T2> make_And(T1 a, T2 b) {
-  return And<T1, T2>(a, b);
+AndImpl<T1, T2> And(T1 a, T2 b) {
+  return AndImpl<T1, T2>(a, b);
 }
 
 template <class T, class C>
@@ -177,7 +177,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollections<pat::Muon> (saveEvent, patMuonLabels, iEvent, muonConverter);
 
         addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
-        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, make_And(TauHasLeadingTrack(), TauPtNonZero()));
+        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
 
         addParticleCollections<reco::CaloJet>(saveEvent, caloJetLabels, iEvent, jetConverter);
