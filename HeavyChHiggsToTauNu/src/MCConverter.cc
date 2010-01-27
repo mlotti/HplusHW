@@ -386,16 +386,14 @@ void MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent,
 	edm::Handle<std::vector<math::XYZTLorentzVectorD> > mcTaus;
         iEvent.getByLabel(label, mcTaus);
 
-	if(mcTaus.isValid()){
-		MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
-		std::vector<math::XYZTLorentzVectorD> visibleTauCollection = *(mcTaus.product());
-		//cout << "MC Visible Taus " << visibleTauCollection.size() <<  endl;
+        MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
+        std::vector<math::XYZTLorentzVectorD> visibleTauCollection = *(mcTaus.product());
+        //cout << "MC Visible Taus " << visibleTauCollection.size() <<  endl;
 
-		std::vector<math::XYZTLorentzVectorD>::const_iterator iTau;
-		for(iTau = visibleTauCollection.begin(); iTau!= visibleTauCollection.end(); ++iTau){
-			mcParticles.push_back(convert(*iTau));
-		}
-	}
+        std::vector<math::XYZTLorentzVectorD>::const_iterator iTau;
+        for(iTau = visibleTauCollection.begin(); iTau!= visibleTauCollection.end(); ++iTau){
+                mcParticles.push_back(convert(*iTau));
+        }
 }
 
 
