@@ -54,11 +54,11 @@ MyJet ElectronConverter::helper(const edm::Ref<edm::View<T> >& iElectron) {
         return electron;
 }
 
-MyJet ElectronConverter::convert(edm::Handle<edm::View<reco::GsfElectron> >& handle, size_t i) {
+MyJet ElectronConverter::convert(const edm::InputTag&, edm::Handle<edm::View<reco::GsfElectron> >& handle, size_t i) {
         return helper(edm::Ref<edm::View<reco::GsfElectron> >(handle, i));
 }
 
-MyJet ElectronConverter::convert(edm::Handle<edm::View<pat::Electron> >& handle, size_t i) {
+MyJet ElectronConverter::convert(const edm::InputTag&, edm::Handle<edm::View<pat::Electron> >& handle, size_t i) {
         return helper(edm::Ref<edm::View<pat::Electron> >(handle, i));
 }
 
