@@ -163,7 +163,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
         TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
-        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel);
+        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel, genVisibleTauLabel);
 
         //getParticlesIf<reco::IsolatedTauTagInfo>(saveEvent, edm::InputTag("coneIsolationL3SingleTau"), iEvent, tauConverter, HLTTau(), HLTTau());
 

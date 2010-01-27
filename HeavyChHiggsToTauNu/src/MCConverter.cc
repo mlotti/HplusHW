@@ -23,10 +23,11 @@ using std::cout;
 using std::endl;
 
 MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
-                         const edm::InputTag& genLabel, const edm::InputTag& genReplLabel):
+                         const edm::InputTag& genLabel, const edm::InputTag& genReplLabel, const edm::InputTag& genVisTauLabel):
         genJets(genJetLabel),
         simHits(simHitLabel),
         genParticles(genLabel),
+	genVisibleTaus(genVisTauLabel),
         genParticlesReplacement(genReplLabel)
 {}
 MCConverter::~MCConverter() {}
@@ -50,6 +51,14 @@ void MCConverter::addMC(MyEvent *saveEvent, const edm::Event& iEvent) const {
                         throw;
         }
 
+	// visible taus
+        try {
+                addMCVisibleTaus(iEvent, saveEvent, genVisibleTaus);
+        } catch(const cms::Exception& e) {
+                if(e.category() != "ProductNotFound")
+                        throw;
+        }
+
         saveEvent->mcPrimaryVertex = getMCPrimaryVertex(iEvent);
         setSimTracks(iEvent, *saveEvent);
         saveEvent->hasMCdata = true;
@@ -60,6 +69,14 @@ MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	mcJet.pid = 0; //= genJet.pdgId();
 	mcJet.status = 4;
 	return mcJet;
+}
+
+MyMCParticle MCConverter::convert(const math::XYZTLorentzVectorD& genJet){
+//std::vector<math::XYZTLorentzVectorD>
+        MyMCParticle mcJet(genJet.px(),genJet.py(),genJet.pz(),genJet.energy());
+        mcJet.pid = 15; //= genJet.pdgId();
+        mcJet.status = 5;
+        return mcJet;
 }
 
 void MCConverter::addMCJets(const edm::Event& iEvent, MyEvent *saveEvent) const {
@@ -362,6 +379,22 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, c
                 }
 
                 mcParticles.push_back(mcParticle);
+	}
+}
+
+void MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label) const {
+	edm::Handle<std::vector<math::XYZTLorentzVectorD> > mcTaus;
+        iEvent.getByLabel(label, mcTaus);
+
+	if(mcTaus.isValid()){
+		MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
+		std::vector<math::XYZTLorentzVectorD> visibleTauCollection = *(mcTaus.product());
+		//cout << "MC Visible Taus " << visibleTauCollection.size() <<  endl;
+
+		std::vector<math::XYZTLorentzVectorD>::const_iterator iTau;
+		for(iTau = visibleTauCollection.begin(); iTau!= visibleTauCollection.end(); ++iTau){
+			mcParticles.push_back(convert(*iTau));
+		}
 	}
 }
 
