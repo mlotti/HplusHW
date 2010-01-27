@@ -151,8 +151,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         PATMuons = cms.VInputTag(
 #                 cms.InputTag("cleanLauer1Muons")
         ),
-        CaloTaus = cms.VInputTag(
-                 cms.InputTag("caloRecoTauProducer")
+        CaloTaus = cms.VPSet(
+            cms.PSet(src = cms.InputTag("caloRecoTauProducer"), corrections = cms.vstring("TauJetCorrector"))
         ),
         PFTaus = cms.VInputTag(
                  cms.InputTag("fixedConePFTauProducer"),
