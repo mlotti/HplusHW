@@ -96,11 +96,23 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
 
+
 # TCTau
 process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
 process.runTCTauProducer = cms.Path(
     process.TCTau
 )
+
+
+process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
+        GenParticles  = cms.untracked.InputTag("genParticles"),
+        ptMinTau      = cms.untracked.double(3),
+        ptMinMuon     = cms.untracked.double(3),
+        ptMinElectron = cms.untracked.double(3),
+        BosonID       = cms.untracked.vint32(23),
+        EtaMax         = cms.untracked.double(2.5)
+)
+process.visibleTau = cms.Path(process.TauMCProducer)
 
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
@@ -146,8 +158,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         PATMuons = cms.VInputTag(
 #                 cms.InputTag("cleanLauer1Muons")
         ),
-        CaloTaus = cms.VInputTag(
-                 cms.InputTag("caloRecoTauProducer")
+        CaloTaus = cms.VPSet(
+            cms.PSet(src = cms.InputTag("caloRecoTauProducer"), corrections = cms.vstring("TauJetCorrector"))
         ),
         PFTaus = cms.VInputTag(
                  cms.InputTag("fixedConePFTauProducer"),
@@ -193,7 +205,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 
         # MC collections
         GenParticles = cms.InputTag("genParticles"),
-        MuonReplacementHepMc = cms.InputTag("newSource"),
+	VisibleTaus  = cms.InputTag("TauMCProducer:HadronicTauOneAndThreeProng"),
+        MuonReplacementGen = cms.InputTag("DUMMY"),
         GenJets = cms.InputTag("iterativeCone5GenJets"),
         SimHits = cms.InputTag("g4SimHits"),
         

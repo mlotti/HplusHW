@@ -11,6 +11,7 @@
 
 namespace reco { class Muon; }
 namespace pat { class Muon; }
+namespace edm { class InputTag; }
 class TransientTrackBuilder;
 
 class TrackConverter;
@@ -21,7 +22,7 @@ public:
   MuonConverter(const TrackConverter&, const ImpactParameterConverter&, const TransientTrackBuilder&);
   ~MuonConverter();
 
-  template <class T> MyJet convert(edm::Handle<T>& handle, size_t i) const {
+  template <class T> MyJet convert(const edm::InputTag& src, edm::Handle<T>& handle, size_t i) const {
     return convert((*handle)[i]);
   }
 

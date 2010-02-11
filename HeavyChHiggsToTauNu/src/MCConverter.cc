@@ -23,21 +23,39 @@ using std::cout;
 using std::endl;
 
 MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& simHitLabel,
-                         const edm::InputTag& genLabel, const edm::InputTag& hepMcReplLabel):
+                         const edm::InputTag& genLabel, const edm::InputTag& genReplLabel, const edm::InputTag& genVisTauLabel):
         genJets(genJetLabel),
         simHits(simHitLabel),
         genParticles(genLabel),
-        hepMcProductReplacement(hepMcReplLabel)
+	genVisibleTaus(genVisTauLabel),
+        genParticlesReplacement(genReplLabel)
 {}
 MCConverter::~MCConverter() {}
 
 void MCConverter::addMC(MyEvent *saveEvent, const edm::Event& iEvent) const {
         try {
-                addMCParticles(iEvent, saveEvent->mcParticles, saveEvent->mcMET);
+                addMCParticles(iEvent, saveEvent, saveEvent->mcMET);
         } catch(const cms::Exception& e) {
                 if(e.category() == "ProductNotFound")
                         return;
                 else
+                        throw;
+        }
+        addMCJets(iEvent, saveEvent);
+
+        // optional muon replacement generator data
+        try {
+                addMCParticles(iEvent, saveEvent, genParticlesReplacement);
+        } catch(const cms::Exception& e) {
+                if(e.category() != "ProductNotFound")
+                        throw;
+        }
+
+	// visible taus
+        try {
+                addMCVisibleTaus(iEvent, saveEvent, genVisibleTaus);
+        } catch(const cms::Exception& e) {
+                if(e.category() != "ProductNotFound")
                         throw;
         }
 
@@ -53,9 +71,19 @@ MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
 	return mcJet;
 }
 
-void MCConverter::addMCJets(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles) const {
+MyMCParticle MCConverter::convert(const math::XYZTLorentzVectorD& genJet){
+//std::vector<math::XYZTLorentzVectorD>
+        MyMCParticle mcJet(genJet.px(),genJet.py(),genJet.pz(),genJet.energy());
+        mcJet.pid = 15; //= genJet.pdgId();
+        mcJet.status = 5;
+        return mcJet;
+}
+
+void MCConverter::addMCJets(const edm::Event& iEvent, MyEvent *saveEvent) const {
 	Handle<reco::GenJetCollection> genJetHandle;
         iEvent.getByLabel(genJets, genJetHandle);
+
+        MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(genJets.label()));
 
         const reco::GenJetCollection & genJetCollection = *(genJetHandle.product());
         //cout << "MC GenJets " << genJetCollection.size();
@@ -83,21 +111,30 @@ MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent) const {
                 return MyGlobalPoint(-999, -999, -999);
 }
 
-void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>& mcParticles, MyMET& mcMET) const {
-        addMCJets(iEvent, mcParticles);
-
+void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, MyMET& mcMET) const {
 	Handle<reco::GenParticleCollection> mcEventHandle;
 	iEvent.getByLabel(genParticles, mcEventHandle);
+
+        MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(genParticles.label()));
 
         if(edm::isDebugEnabled())
                 LogDebug("MyEventConverter") << "MC particles size " << mcEventHandle->size() << std::endl;
 	double mcMetX = 0;
 	double mcMetY = 0;
 
-	const reco::GenParticleCollection genParticles(*mcEventHandle);
+	const reco::GenParticleCollection& genParticles(*mcEventHandle);
 
+        //const reco::GenParticle *first = &(*genParticles.begin());
 	reco::GenParticleCollection::const_iterator i;
 	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
+                //const reco::GenParticle *current = &(*i);
+                //std::cout << (i-genParticles.begin()) << ": pdgid " << i->pdgId();
+                /*
+                std::cout << " first " << first 
+                          << " current " << current 
+                          << " index " << (current-first);
+                */
+
                 /*
 		cout << "  particle " 
 		     << " " << i->pdgId()
@@ -115,6 +152,40 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                         mcMetY += i->py();
                 }
 
+                MyMCParticle mcParticle(i->px(), i->py(), i->pz(), i->energy());
+                mcParticle.pid = id;
+                mcParticle.status = i->status();
+
+                /*
+                const reco::Candidate *mother = i->mother();
+                if(mother) {
+                        const reco::GenParticle *gen = dynamic_cast<const reco::GenParticle *>(mother);
+                        if(gen) {
+                                //std::cout << "first " << first << " mother " << mother << " index " << (mother-first) << std::endl;
+                                std::cout << " nmothers " << i->numberOfMothers()
+                                        //<< " mother " << gen 
+                                          << " pdgid " << gen->pdgId();
+                                        //<< " index " << (gen-first);
+                                reco::GenParticle::daughters::value_type motherRef = i->motherRef();
+                                std::cout << " refindex " << motherRef.index();
+                                
+                        }
+                        else
+                                std::cout << "Cast to GenParticle failed";
+                }
+                else if(i->numberOfMothers() > 0) {
+                        reco::GenParticle::daughters::value_type motherRef = i->motherRef();
+                        std::cout << " refindex " << motherRef.index();
+                }
+                std::cout << std::endl;
+                */
+                for(size_t j=0; j<i->numberOfMothers(); ++j) {
+                        mcParticle.motherIndices.push_back(i->motherRef(j).index());
+                }
+
+                mcParticles.push_back(mcParticle);
+
+                /*
                 if( ( i->status() == 1 ) ||
                     ( abs(id) == 12 || abs(id) == 14 || abs(id) == 16 || abs(id) <= 21) ||
                     ( i->status() == 3) ) {
@@ -146,6 +217,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                           }
                         }
 		}
+                */
 	}
 	mcMET.Set(mcMetX,mcMetY);
 
@@ -226,6 +298,7 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 	}
 	mcMET.Set(mcMetX,mcMetY);
 */
+        /*
 	// newSource from muon->tau conversion, saving the MC tau and its decay products
         Handle<HepMCProduct> mcEventHandle2;
         iEvent.getByLabel(hepMcProductReplacement, mcEventHandle2);
@@ -237,15 +310,13 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
 
                 HepMC::GenEvent::particle_const_iterator i;
                 for(i = mcEvent->particles_begin(); i!= mcEvent->particles_end(); i++){
-/*
-                        cout << "  particle " << (*i)->barcode()
-                             << " " << (*i)->pdg_id()
-                             << " " << (*i)->status()
-                             << " " << (*i)->momentum().perp()
-                             << " " << (*i)->momentum().eta()
-                             << " " << (*i)->momentum().phi()
-                             << endl;
-*/
+                        //cout << "  particle " << (*i)->barcode()
+                        //     << " " << (*i)->pdg_id()
+                        //     << " " << (*i)->status()
+                        //     << " " << (*i)->momentum().perp()
+                        //     << " " << (*i)->momentum().eta()
+                        //     << " " << (*i)->momentum().phi()
+                        //     << endl;
 
                         int id = (*i)->pdg_id();
 
@@ -285,7 +356,46 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, vector<MyMCParticle>&
                         }
                 }
 	}
+        */
 }
+
+void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label) const {
+	Handle<reco::GenParticleCollection> mcEventHandle;
+	iEvent.getByLabel(label, mcEventHandle);
+
+        MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
+        if(edm::isDebugEnabled())
+                LogDebug("MyEventConverter") << "MC particles " << label.label() << " size " << mcEventHandle->size() << std::endl;
+
+	const reco::GenParticleCollection& genParticles(*mcEventHandle);
+	reco::GenParticleCollection::const_iterator i;
+	for(i = genParticles.begin(); i!= genParticles.end(); ++i){
+                MyMCParticle mcParticle(i->px(), i->py(), i->pz(), i->energy());
+                mcParticle.pid = i->pdgId();
+                mcParticle.status = i->status();
+
+                for(size_t j=0; j<i->numberOfMothers(); ++j) {
+                        mcParticle.motherIndices.push_back(i->motherRef(j).index());
+                }
+
+                mcParticles.push_back(mcParticle);
+	}
+}
+
+void MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label) const {
+	edm::Handle<std::vector<math::XYZTLorentzVectorD> > mcTaus;
+        iEvent.getByLabel(label, mcTaus);
+
+        MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
+        std::vector<math::XYZTLorentzVectorD> visibleTauCollection = *(mcTaus.product());
+        //cout << "MC Visible Taus " << visibleTauCollection.size() <<  endl;
+
+        std::vector<math::XYZTLorentzVectorD>::const_iterator iTau;
+        for(iTau = visibleTauCollection.begin(); iTau!= visibleTauCollection.end(); ++iTau){
+                mcParticles.push_back(convert(*iTau));
+        }
+}
+
 
 void MCConverter::setSimTracks(const edm::Event& iEvent, MyEvent& event){
   vector<MySimTrack>& simTracks(event.simTracks);

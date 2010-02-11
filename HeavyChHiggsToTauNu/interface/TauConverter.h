@@ -17,6 +17,7 @@ namespace reco {
   class CaloJet;
 }
 namespace pat { class Tau; }
+namespace edm { class InputTag; }
 class TransientTrackBuilder;
 class TauJetCorrector;
 
@@ -29,19 +30,21 @@ class EcalClusterConverter;
 
 class TauConverter {
 public:
+  typedef std::vector<std::pair<edm::InputTag, std::vector<std::string> > > InputTagCorrectorVector;
   TauConverter(const TrackConverter&, const ImpactParameterConverter&, TrackEcalHitPoint&, const CaloTowerConverter&,
                const EcalClusterConverter&,
-               const TransientTrackBuilder&, const TauJetCorrector&);
+               const TransientTrackBuilder&, const TauJetCorrector&,
+               const InputTagCorrectorVector&);
   ~TauConverter();
 
-  template <class T> MyJet convert(edm::Handle<T>& handle, size_t i) {
-    return convert((*handle)[i]);
+  template <class T> MyJet convert(const edm::InputTag& src, edm::Handle<T>& handle, size_t i) {
+    return convert(src, (*handle)[i]);
   }
 
-  MyJet convert(const reco::CaloTau& recTau);
-  MyJet convert(const reco::IsolatedTauTagInfo& recTau);
-  MyJet convert(const pat::Tau& recTau);
-  MyJet convert(const reco::PFTau& recTau);
+  MyJet convert(const edm::InputTag& src, const reco::CaloTau& recTau);
+  MyJet convert(const edm::InputTag& src, const reco::IsolatedTauTagInfo& recTau);
+  MyJet convert(const edm::InputTag& src, const pat::Tau& recTau);
+  MyJet convert(const edm::InputTag& src, const reco::PFTau& recTau);
 
 private:
   typedef std::map<std::string, double> TagType;
@@ -51,6 +54,9 @@ private:
   static void tag(const pat::Tau&, TagType&);
   static void tag(const reco::PFTau&, TagType&);
 
+  template <typename T>
+  double correction(const std::string& name, const T&);
+
   const TrackConverter& trackConverter;
   const ImpactParameterConverter& ipConverter;
   TrackEcalHitPoint& trackEcalHitPoint;
@@ -58,6 +64,7 @@ private:
   const EcalClusterConverter& ecalClusterConverter;
   const TransientTrackBuilder& transientTrackBuilder;
   const TauJetCorrector& tauJetCorrection;
+  const InputTagCorrectorVector& inputTagCorrector;
 };
 
 #endif

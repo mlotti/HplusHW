@@ -21,7 +21,7 @@ void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Eve
   std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
-    ret.push_back(converter.convert(handle, i));
+    ret.push_back(converter.convert(label, handle, i));
   }
 }
 
@@ -38,7 +38,7 @@ void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Eve
   std::vector<MyJet>& ret(saveEvent->addCollection(label.label()));
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
-    MyJet jet = converter.convert(handle, i);
+    MyJet jet = converter.convert(label, handle, i);
     modify(handle, i, &jet);
     ret.push_back(jet);
   }
@@ -58,7 +58,7 @@ void getParticlesIf(MyEvent *saveEvent, const edm::InputTag& label, const edm::E
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     if(!condition((*handle)[i])) continue;
-    ret.push_back(converter.convert(handle, i));
+    ret.push_back(converter.convert(label, handle, i));
   }
 }
 
@@ -76,7 +76,7 @@ void getParticlesIf(MyEvent *saveEvent, const edm::InputTag& label, const edm::E
   ret.reserve(handle->size());
   for(size_t i = 0; i<handle->size(); ++i) {
     if(!condition((*handle)[i])) continue;
-    MyJet jet = converter.convert(handle, i);
+    MyJet jet = converter.convert(label, handle, i);
     modify(handle, i, &jet);
     ret.push_back(jet);
   }

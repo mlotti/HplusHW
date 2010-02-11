@@ -15,6 +15,7 @@
 namespace edm { 
   class Event;
   class EventSetup;
+  class InputTag;
 }
 namespace reco { class CaloJet; }
 namespace pat { class Jet; }
@@ -28,7 +29,7 @@ public:
                const std::vector<std::string>& types, const std::vector<std::string>& btags);
   ~JetConverter();
 
-  template <class T> MyJet convert(edm::Handle<T>& handle, size_t i) const {
+  template <class T> MyJet convert(const edm::InputTag& src, edm::Handle<T>& handle, size_t i) const {
     return convert((*handle)[i]);
   }
   /*

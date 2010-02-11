@@ -31,8 +31,8 @@ public:
                     const edm::Event&, const std::vector<edm::InputTag>&);
   ~ElectronConverter();
 
-  MyJet convert(edm::Handle<edm::View<reco::GsfElectron> >&, size_t);
-  MyJet convert(edm::Handle<edm::View<pat::Electron> >&, size_t);
+  MyJet convert(const edm::InputTag& src, edm::Handle<edm::View<reco::GsfElectron> >&, size_t);
+  MyJet convert(const edm::InputTag& src, edm::Handle<edm::View<pat::Electron> >&, size_t);
 
 private:
   template <class T>

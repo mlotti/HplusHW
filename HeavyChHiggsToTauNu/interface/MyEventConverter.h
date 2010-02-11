@@ -71,11 +71,13 @@ class MyEventConverter {
 	std::vector<edm::InputTag> tcTauLabels;
         std::vector<edm::InputTag> caloJetLabels;
         std::vector<edm::InputTag> patJetLabels;
+        std::vector<std::pair<edm::InputTag, std::vector<std::string> > > caloTauCorrections;
 
         edm::InputTag muonReplacementMuonLabel;
 
         edm::InputTag genParticleLabel;
-        edm::InputTag muonReplacementHepMcLabel;
+	edm::InputTag genVisibleTauLabel;
+        edm::InputTag muonReplacementGenLabel;
         edm::InputTag genJetLabel;
         edm::InputTag simHitLabel;
 

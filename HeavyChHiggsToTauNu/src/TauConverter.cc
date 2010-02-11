@@ -30,19 +30,32 @@ using pat::Tau;
 
 TauConverter::TauConverter(const TrackConverter& tc, const ImpactParameterConverter& ip, TrackEcalHitPoint& tehp, const CaloTowerConverter& ctc,
                            const EcalClusterConverter& ecc,
-                           const TransientTrackBuilder& builder, const TauJetCorrector& tjc):
+                           const TransientTrackBuilder& builder, const TauJetCorrector& tjc,
+                           const InputTagCorrectorVector& itcv):
         trackConverter(tc),
         ipConverter(ip),
         trackEcalHitPoint(tehp),
         caloTowerConverter(ctc),
         ecalClusterConverter(ecc),
         transientTrackBuilder(builder),
-        tauJetCorrection(tjc)
+        tauJetCorrection(tjc),
+        inputTagCorrector(itcv)
 {}
 TauConverter::~TauConverter() {}
 
+template<typename T>
+double TauConverter::correction(const std::string& name, const T& tau) {
+        if(name == "TauJetCorrector") {
+                return tauJetCorrection.correction(tau.p4());
+        }
+        else {
+                throw cms::Exception("Configuration") << "Unsupported corrector " << name << "; supported are 'TauJetCorrector'" << std::endl;
+        }
+        return 0;
+}
 
-MyJet TauConverter::convert(const CaloTau& recTau) {
+
+MyJet TauConverter::convert(const edm::InputTag& src, const CaloTau& recTau) {
         const CaloJet& caloJet = *(recTau.caloTauTagInfoRef()->calojetRef().get());
 
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
@@ -90,8 +103,16 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
         tag(recTau, tau.tagInfo);
 
         // Jet energy correction
-        double jetEnergyCorrectionFactor = tauJetCorrection.correction(recTau.p4());
-        tau.addEnergyCorrection("TauJet",jetEnergyCorrectionFactor);
+        for(size_t i=0; i<inputTagCorrector.size(); ++i) {
+                const edm::InputTag& tag(inputTagCorrector[0].first);
+                if(inputTagCorrector[0].first == src) {
+                        const std::vector<std::string>& corrs(inputTagCorrector[0].second);
+                        for(size_t j=0; j<corrs.size(); ++j) {
+                                tau.addEnergyCorrection(corrs[i], correction(corrs[i], recTau));
+                        }
+                        break;
+                }
+        }
 
         caloTowerConverter.convert(caloJet, tau.caloInfo);
 
@@ -102,7 +123,7 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
         return tau;
 }
 
-MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
+MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& recTau) {
         const CaloJet& caloJet = *(dynamic_cast<const CaloJet*>(recTau.jet().get()));
 
         MyJet tau(caloJet.px(), caloJet.py(), caloJet.pz(), caloJet.energy());
@@ -131,7 +152,7 @@ MyJet TauConverter::convert(const IsolatedTauTagInfo& recTau) {
         return tau;
 }
 
-MyJet TauConverter::convert(const pat::Tau& recTau) {
+MyJet TauConverter::convert(const edm::InputTag& src, const pat::Tau& recTau) {
         MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
 
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
@@ -177,7 +198,7 @@ MyJet TauConverter::convert(const pat::Tau& recTau) {
 	return tau;
 }
 
-MyJet TauConverter::convert(const PFTau& recTau) {
+MyJet TauConverter::convert(const edm::InputTag& src, const PFTau& recTau) {
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
 
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();

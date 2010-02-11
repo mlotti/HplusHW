@@ -21,7 +21,6 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         //photonLabels(iConfig.getParameter<std::vector<InputTag> >("Photons")),
         muonLabels(iConfig.getParameter<std::vector<InputTag> >("Muons")),
         patMuonLabels(iConfig.getParameter<std::vector<InputTag> >("PATMuons")),
-        caloTauLabels(iConfig.getParameter<std::vector<InputTag> >("CaloTaus")),
         pfTauLabels(iConfig.getParameter<std::vector<InputTag> >("PFTaus")),
         patTauLabels(iConfig.getParameter<std::vector<InputTag> >("PATTaus")),
 	tcTauLabels(iConfig.getParameter<std::vector<InputTag> >("TCTaus")),
@@ -29,7 +28,8 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         patJetLabels(iConfig.getParameter<std::vector<InputTag> >("PATJets")),
         muonReplacementMuonLabel(iConfig.getParameter<edm::InputTag>("MuonReplacementMuons")),
         genParticleLabel(iConfig.getParameter<InputTag>("GenParticles")),
-        muonReplacementHepMcLabel(iConfig.getParameter<InputTag>("MuonReplacementHepMc")),
+	genVisibleTauLabel(iConfig.getParameter<InputTag>("VisibleTaus")),
+        muonReplacementGenLabel(iConfig.getParameter<InputTag>("MuonReplacementGen")),
         genJetLabel(iConfig.getParameter<InputTag>("GenJets")),
         simHitLabel(iConfig.getParameter<InputTag>("SimHits")),
 //	barrelClusterShapeAssocProducer(iConfig.getParameter<edm::InputTag>("barrelClusterShapeAssociation")),
@@ -53,7 +53,16 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
 	tauMETTriggerAnalysis(new TauMETTriggerAnalysis(userRootTree)),
         trackEcalHitPoint(iConfig),
         printTrigger(true)
-{}
+{
+        const std::vector<edm::ParameterSet>& calotaus(iConfig.getParameter<std::vector<edm::ParameterSet> >("CaloTaus"));
+        caloTauLabels.reserve(calotaus.size());
+        caloTauCorrections.reserve(calotaus.size());
+        for(size_t i=0; i<calotaus.size(); ++i) {
+                caloTauLabels.push_back(calotaus[i].getParameter<edm::InputTag>("src"));
+                caloTauCorrections.push_back(std::make_pair(calotaus[i].getParameter<edm::InputTag>("src"),
+                                                            calotaus[i].getParameter<std::vector<std::string> >("corrections")));
+        }
+}
 
 MyEventConverter::~MyEventConverter(){
 

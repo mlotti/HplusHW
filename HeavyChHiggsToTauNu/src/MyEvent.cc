@@ -15,6 +15,78 @@ using std::cout;
 using std::endl;
 using std::setw;
 
+template <typename T, typename I=typename T::iterator>
+struct FindHelper {
+  static I find(T& collections, const std::string& name, const char *str) {
+    I found = collections.find(name);
+    if(found == collections.end()) {
+      cout << "Requested " << str << " " << name << " which doesn't exist." << endl
+           << "The following " << str << "s exist:" << std::endl;
+      for(typename T::const_iterator iter = collections.begin(); iter != collections.end(); ++iter) {
+        std::cout << "  " << iter->first << std::endl;
+      }
+      exit(0);
+    }
+    return found;
+  }
+};
+template <typename T>
+static typename T::iterator findCollection(T& collections, const std::string& name, const char *str) {
+  return FindHelper<T>::find(collections, name, str);
+}
+template <typename T>
+static typename T::const_iterator findCollection(const T& collections, const std::string& name, const char *str) {
+  return FindHelper<const T, typename T::const_iterator>::find(collections, name, str);
+}
+
+
+template <typename T>
+struct MyEventTraits {
+  static const char *name() { return ""; }
+};
+template <>
+struct MyEventTraits<MyJet> {
+  static const char *name() { return "MyJet"; }
+};
+template <>
+struct MyEventTraits<MyMCParticle> {
+  static const char *name() { return "MyMCParticle"; }
+};
+
+template <typename T>
+std::vector<T>& addCollectionTmpl(std::map<std::string, std::vector<T> >& colls, const std::string& name, const std::vector<T>& coll) {
+  typedef std::map<std::string, std::vector<T> > Map;
+  std::pair<typename Map::iterator, bool> ins = colls.insert(make_pair(name, coll));
+  if(!ins.second) {
+    cout << "Unable to insert " << MyEventTraits<T>::name() << " collection " << name << ".";
+    if(colls.find(name) != colls.end())
+      cout << " A collection with the same name already exists.";
+    cout << endl;
+    exit(0);
+  }
+  return ins.first->second;
+}
+
+template <typename T>
+std::vector<T *> getCollectionTmpl(std::map<std::string, std::vector<T> >& colls, const std::string& name) {
+  typedef std::map<std::string, std::vector<T> > Map;
+  typename Map::iterator found = colls.find(name);
+  if(found == colls.end()) {
+    const char *cl = MyEventTraits<T>::name();
+    cout << "Requested " << cl << " collection " << name << " which doesn't exist." << endl
+         << "The following " << cl << " collections exist:" << std::endl;
+    for(typename Map::const_iterator iter = colls.begin(); iter != colls.end(); ++iter) {
+      std::cout << "  " << iter->first << std::endl;
+    }
+    exit(0);
+  }
+  return convertCollection(found->second);
+}
+
+
+
+
+
 ClassImp(MyEvent)
 
 MyEvent::MyEvent(): hasMCdata(false) {
@@ -35,7 +107,7 @@ MyEvent::MyEvent(const MyEvent& event):
   mets(event.mets),
   triggerResults(event.triggerResults),
   primaryVertex(event.primaryVertex),
-  mcParticles(event.mcParticles),
+  mcCollections(event.mcCollections),
   simTracks(event.simTracks),
   mcPrimaryVertex(event.mcPrimaryVertex),
   extraObjects(),
@@ -52,15 +124,7 @@ bool MyEvent::hasCollection(const string& name) const {
 }
 
 std::vector<MyJet *> MyEvent::getCollection(const string& name) {
-  CollectionMap::iterator found = collections.find(name);
-  if(found == collections.end()) {
-    cout << "Requested MyJet collection " << name << " which doesn't exist." << endl
-         << "The following MyJet collections exist:" << std::endl;
-    for(CollectionMap::const_iterator iter = collections.begin(); iter != collections.end(); ++iter) {
-      std::cout << "  " << iter->first << std::endl;
-    }
-    exit(0);
-  }
+  CollectionMap::iterator found = findCollection(collections, name, "MyJet collection");
   return convertCollection(found->second);
 }
 
@@ -71,15 +135,7 @@ std::vector<MyJet *> MyEvent::getCollectionWithCorrection(const string& name, co
 }
 
 std::vector<MyJet>& MyEvent::addCollection(const string& name, const vector<MyJet>& coll) {
-  pair<CollectionMap::iterator, bool> ins = collections.insert(make_pair(name, coll));
-  if(!ins.second) {
-    cout << "Unable to insert MyJet collection " << name << ".";
-    if(collections.find(name) != collections.end())
-      cout << " A collection with the same name already exists.";
-    cout << endl;
-    exit(0);
-  }
-  return ins.first->second;
+  return addCollectionTmpl(collections, name, coll);
 }
 
 std::vector<MyJet>& MyEvent::addCollection(const std::string& name) {
@@ -87,19 +143,11 @@ std::vector<MyJet>& MyEvent::addCollection(const std::string& name) {
 }
 
 void MyEvent::setJetEnergyScale(const std::string& name, double energyScale) {
-
-    vector<MyJet> scaledJets;
-
-    vector<MyJet*> source = this->getCollection(name);
-    for(vector<MyJet*>::const_iterator i = source.begin();
-	i!= source.end(); ++i){
-      MyJet jet = **i;
-      TLorentzVector p4 = (*i)->p4()*energyScale;
-      jet.setP4(p4);
-      jet.originalP4 = (*i)->originalP4*energyScale;
-      scaledJets.push_back(jet);
-    }
-    collections[name] = scaledJets;
+  CollectionMap::iterator found = findCollection(collections, name, "MyJet collection");
+  for(JetCollection::iterator jet = found->second.begin(); jet != found->second.end(); ++jet) {
+    jet->originalP4 *= energyScale;
+    jet->setP4(jet->originalP4);
+  }
 }
 
 bool MyEvent::hasMET(const string& name) const {
@@ -108,16 +156,7 @@ bool MyEvent::hasMET(const string& name) const {
 }
 
 MyMET *MyEvent::getMET(const string& name) {
-  METMap::iterator found = mets.find(name);
-  if(found == mets.end()) {
-    cout << "Requested MyMET object " << name << " which doesn't exist." << endl
-         << "The following METs exist:" << std::endl;
-    for(METMap::const_iterator iter = mets.begin(); iter != mets.end(); ++iter) {
-      std::cout << "  " << iter->first << std::endl;
-    }
-    exit(0);
-  }
-
+  METMap::iterator found = findCollection(mets, name, "MyMET object");
   found->second.name = found->first;
   return &(found->second);
 }
@@ -140,16 +179,7 @@ bool MyEvent::hasTrigger(const string& name) const {
 }
 
 bool MyEvent::trigger(const string& name) const {
-  TriggerMap::const_iterator found = triggerResults.find(name);
-  if(found == triggerResults.end()) {
-    cout << "Requested trigger " << name << " which doesn't exist." << endl
-         << "The following triggers exist:" << std::endl;
-    for(TriggerMap::const_iterator iter = triggerResults.begin(); iter != triggerResults.end(); ++iter) {
-      std::cout << "  " << iter->first << std::endl;
-    }
-    exit(0);
-  }
-
+  TriggerMap::const_iterator found = findCollection(triggerResults, name, "trigger");
   return found->second;
 }
 
@@ -182,12 +212,17 @@ MyGlobalPoint *MyEvent::getMCPrimaryVertex() {
   return &mcPrimaryVertex;
 }
 
-std::vector<MyMCParticle *> MyEvent::getMCParticles() {
+std::vector<MyMCParticle>& MyEvent::addMCParticles(const string& name) {
+  std::vector<MyMCParticle> coll;
+  return addCollectionTmpl(mcCollections, name, coll);
+}
+
+std::vector<MyMCParticle *> MyEvent::getMCParticles(const std::string& name) {
   if(!hasMCdata) {
     cout << "Requested MC particles, but MC info is not available." << endl;
     exit(0);
   }
-  return convertCollection(mcParticles);
+  return getCollectionTmpl(mcCollections, name);
 }
 
 MyMET *MyEvent::getMCMET() {
@@ -257,7 +292,9 @@ void MyEvent::printSummary(std::ostream& out) const {
   for(CollectionMap::const_iterator iter = collections.begin(); iter != collections.end(); ++iter) {
     out << ", " << iter->first << ": " << setw(2) << iter->second.size();
   }
-  out << ", MC: " << setw(2) << mcParticles.size();
+  for(McCollectionMap::const_iterator iter = mcCollections.begin(); iter != mcCollections.end(); ++iter) {
+    out << ", MC " << iter->first << ": " << setw(2) << iter->second.size();
+  }
   out << endl;
 }
 
@@ -313,13 +350,16 @@ void MyEvent::printReco(std::ostream& out) const {
 void MyEvent::printAll(std::ostream& out) const {
   printReco(out);
 
-  if(mcParticles.size() > 0) {
-    out << " MC particles " << mcParticles.size() << endl;
-    for(vector<MyMCParticle>::const_iterator i = mcParticles.begin(); i!= mcParticles.end(); i++){
-      out << "    pid = " << i->pid
-          << ", Et = " << i->pt()
-          << ", eta = " << i->eta()
-          << ", phi = " << i->phi() << endl;
+  if(mcCollections.size() > 0) {
+    for(McCollectionMap::const_iterator iter = mcCollections.begin(); iter != mcCollections.end(); ++iter) {
+      const McCollection& mcParticles(iter->second);
+      out << " MC particle collection " << iter->first << " " << mcParticles.size() << endl;
+      for(vector<MyMCParticle>::const_iterator i = mcParticles.begin(); i!= mcParticles.end(); i++){
+        out << "    pid = " << i->pid
+            << ", Et = " << i->pt()
+            << ", eta = " << i->eta()
+            << ", phi = " << i->phi() << endl;
+      }
     }
   }
 }

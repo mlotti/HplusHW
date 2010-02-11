@@ -73,6 +73,27 @@ struct TauHasLeadingTrack {
   }
 };
 
+struct TauPtNonZero {
+  bool operator()(const reco::PFTau& tau) const {
+    return tau.pt() > 0;
+  }
+};
+
+template <typename T1, typename T2>
+struct AndImpl: private T1, private T2 {
+  AndImpl(T1 a, T2 b): T1(a), T2(b) {}
+
+  template <typename C>
+  bool operator()(const C& obj) const {
+    return T1::operator()(obj) && T2::operator()(obj);
+  }
+};
+
+template <typename T1, typename T2>
+AndImpl<T1, T2> And(T1 a, T2 b) {
+  return AndImpl<T1, T2>(a, b);
+}
+
 template <class T, class C>
 void addParticleCollections(MyEvent *saveEvent, const std::vector<edm::InputTag>& labels, const edm::Event& iEvent, C& converter) {
         for(std::vector<edm::InputTag>::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
@@ -140,9 +161,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         ElectronConverter electronConverter(trackConverter, ipConverter, *transientTrackBuilder, ecalTools, iEvent, electronIdLabels);
         MuonConverter muonConverter(trackConverter, ipConverter, *transientTrackBuilder);
         //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
-        TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection);
+        TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection, caloTauCorrections);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
-        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementHepMcLabel);
+        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel, genVisibleTauLabel);
 
         //getParticlesIf<reco::IsolatedTauTagInfo>(saveEvent, edm::InputTag("coneIsolationL3SingleTau"), iEvent, tauConverter, HLTTau(), HLTTau());
 
@@ -156,7 +177,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollections<pat::Muon> (saveEvent, patMuonLabels, iEvent, muonConverter);
 
         addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
-        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, TauHasLeadingTrack());
+        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
 	addParticleCollectionsIf<reco::CaloTau>(saveEvent, tcTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
 

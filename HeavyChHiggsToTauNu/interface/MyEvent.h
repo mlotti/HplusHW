@@ -119,9 +119,13 @@ class MyEvent: public TObject {
         /**
          * \brief Change the scale of the named colletion by the factor
          *
-         * \param name  Name of the collection
+         * The method changes the originalP4 and P4 of each MyJet in
+         * the collection.
+         *
+         * \param name         Name of the collection
+         * \param energyScale  Scale factor
          */
-	void setJetEnergyScale(const std::string& name, double);
+	void setJetEnergyScale(const std::string& name, double energyScal);
 
         /**
          * \brief Check if MET exists
@@ -203,11 +207,22 @@ class MyEvent: public TObject {
         MyGlobalPoint *getMCPrimaryVertex();
 
         /**
+         * \brief Add empty MC particle collection
+         *
+         * If the named collection already exists, exit() is called
+         *
+         * \param name  Name of the collection
+         *
+         * \return Reference to the inserted vector
+         */
+        std::vector<MyMCParticle>& addMCParticles(const std::string& name);
+
+        /**
          * \brief Get MC particle list
          *
          * \return Collection of MC particles as vector of pointers.
          */
-        std::vector<MyMCParticle *> getMCParticles();
+        std::vector<MyMCParticle *> getMCParticles(const std::string& name);
 
 
         /**
@@ -309,6 +324,8 @@ class MyEvent: public TObject {
         typedef std::map<std::string, JetCollection> CollectionMap;
         typedef std::map<std::string, MyMET> METMap;
         typedef std::map<std::string, bool> TriggerMap;
+        typedef std::vector<MyMCParticle> McCollection;
+        typedef std::map<std::string, McCollection> McCollectionMap;
 
         // RECO data
         CollectionMap collections;
@@ -318,7 +335,8 @@ class MyEvent: public TObject {
         MyGlobalPoint primaryVertex;
 
         // MC and SIM data
-        std::vector<MyMCParticle> mcParticles;
+        //std::vector<MyMCParticle> mcParticles;
+        McCollectionMap mcCollections;
         std::vector<MySimTrack>   simTracks;
 	MyMET            	  mcMET;
         MyGlobalPoint mcPrimaryVertex;
