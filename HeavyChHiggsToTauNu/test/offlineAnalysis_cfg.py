@@ -18,8 +18,7 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#"file:/tmp/slehti/QCD_Pt80_OctX.root"
-    "rfio:/castor/cern.ch/user/s/slehti/QCD_Pt80_OctX.root"
+        'rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root'
     )
 )
 
@@ -97,10 +96,12 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
 
-process.load("JetMETCorrections.TauJet.TCRecoTauProducer_cfi")
+# TCTau
+process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
 process.runTCTauProducer = cms.Path(
-        process.tcRecoTauProducer
+    process.TCTau
 )
+
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         TrackAssociator.TrackAssociatorParameterBlock,
