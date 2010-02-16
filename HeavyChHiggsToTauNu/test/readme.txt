@@ -99,6 +99,7 @@
 				No tags needed.
 15.1.2010/S.Lehti CMSSW_3_1_6	TCTau tag needed:
 				cvs co JetMETCorrections/TauJet
+				cvs co JetMETCorrections/Configuration/data
 
 	How to compile:
 	-compile
