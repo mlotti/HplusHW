@@ -93,6 +93,13 @@ void ElectronConverter::tag(const edm::Ref<edm::View<reco::GsfElectron> >& iElec
         tagInfo["SigmaEtaEta"]   = shapeRef->covEtaEta();
         tagInfo["SigmaPhiPhi"]   = shapeRef->covPhiPhi();
 */
+	tagInfo["isEB"]        = electron.isEB();
+        tagInfo["isEE"]        = electron.isEE();
+	tagInfo["isEBEEGap"]   = electron.isEBEEGap();
+	tagInfo["isEBEtaGap"]  = electron.isEBEtaGap();
+	tagInfo["isEBPhiGap"]  = electron.isEBPhiGap();
+	tagInfo["isEEDeeGap"]  = electron.isEEDeeGap();
+	tagInfo["isEERingGap"] = electron.isEERingGap();
 }
 
 void ElectronConverter::tag(const edm::Ref<edm::View<pat::Electron> >& iElectron, TagType& tagInfo) {
@@ -103,6 +110,14 @@ void ElectronConverter::tag(const edm::Ref<edm::View<pat::Electron> >& iElectron
 	    i!= electronIDs.end(); ++i){
 		tagInfo[i->first] = i->second;
 	}
+
+        tagInfo["isEB"]        = electron.isEB();
+        tagInfo["isEE"]        = electron.isEE();
+        tagInfo["isEBEEGap"]   = electron.isEBEEGap();
+        tagInfo["isEBEtaGap"]  = electron.isEBEtaGap();
+        tagInfo["isEBPhiGap"]  = electron.isEBPhiGap();
+        tagInfo["isEEDeeGap"]  = electron.isEEDeeGap();
+        tagInfo["isEERingGap"] = electron.isEERingGap();
 
         tagInfo["pat:trackIso"]           = electron.trackIso();
         tagInfo["pat:caloIso"]            = electron.caloIso();

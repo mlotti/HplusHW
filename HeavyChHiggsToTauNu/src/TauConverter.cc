@@ -104,7 +104,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const CaloTau& recTau) {
 
         // Jet energy correction
         for(size_t i=0; i<inputTagCorrector.size(); ++i) {
-                const edm::InputTag& tag(inputTagCorrector[0].first);
+	        //const edm::InputTag& tag(inputTagCorrector[0].first);
                 if(inputTagCorrector[0].first == src) {
                         const std::vector<std::string>& corrs(inputTagCorrector[0].second);
                         for(size_t j=0; j<corrs.size(); ++j) {
