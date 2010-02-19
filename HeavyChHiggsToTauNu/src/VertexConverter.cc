@@ -39,13 +39,21 @@ MyVertex VertexConverter::convert(const reco::Vertex& vertex){
 	V.SetY(vertex.y());
         V.SetZ(vertex.z());
 
+        V.dxx  = vertex.covariance(0,0);
+        V.dxy  = vertex.covariance(0,1);
+        V.dxz  = vertex.covariance(0,2);
+        V.dyy  = vertex.covariance(1,1);
+        V.dyz  = vertex.covariance(1,2);
+        V.dzz  = vertex.covariance(2,2);
+
+	/*
         V.dxx  = vertex.covariance(1,1);
         V.dxy  = vertex.covariance(1,2);
         V.dxz  = vertex.covariance(1,3);
         V.dyy  = vertex.covariance(2,2);
         V.dyz  = vertex.covariance(2,3);
         V.dzz  = vertex.covariance(3,3);
-
+	*/
 	return V;
 }
 

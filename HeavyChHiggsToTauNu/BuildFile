@@ -9,7 +9,7 @@
 <use name=RecoParticleFlow/PFClusterTools>
 
 <use name=Geometry/CaloGeometry>
-<lib name=TrackingToolsTransientTrack>
+<use name=TrackingTools/TransientTrack>
 <use name=TrackingTools/TrackAssociator>
 
 <use name=RecoTauTag/TauTagTools>
