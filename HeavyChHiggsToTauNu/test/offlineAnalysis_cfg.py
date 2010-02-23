@@ -39,8 +39,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'IDEAL_31X::All'
-#process.GlobalTag.globaltag = 'STARTUP31X_V1::All'
-process.GlobalTag.globaltag = 'MC_31X_V3::All'
+process.GlobalTag.globaltag = 'START3X_V18::All'
+#process.GlobalTag.globaltag = 'MC_3XY_V18::All'
+#process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
+
 # Magnetic Field
 #process.load("Configuration/StandardSequences/MagneticField_cff")
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
