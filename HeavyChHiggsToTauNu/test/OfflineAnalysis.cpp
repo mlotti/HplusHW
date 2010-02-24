@@ -18,7 +18,7 @@ class OfflineAnalysis : public edm::EDAnalyzer {
   	~OfflineAnalysis() {}
 
   	virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-  	virtual void beginJob(const edm::EventSetup& );
+  	virtual void beginJob();
   	virtual void endJob();
   private:
 	MyEventConverter* myEventConverter;
@@ -28,7 +28,7 @@ OfflineAnalysis::OfflineAnalysis(const edm::ParameterSet& iConfig){
 	myEventConverter = new MyEventConverter(iConfig);
 }
 
-void OfflineAnalysis::beginJob(const edm::EventSetup& iSetup){
+void OfflineAnalysis::beginJob(){
 }
 
 void OfflineAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){

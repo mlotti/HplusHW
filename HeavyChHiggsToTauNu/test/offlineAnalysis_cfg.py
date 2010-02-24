@@ -8,7 +8,7 @@ process = cms.Process("test")
 #process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 # Job will exit if any product is not found in the event
@@ -18,9 +18,13 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root'
+#        'rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root'
+        "rfio:/castor/cern.ch/cms/store/data/BeamCommissioning09/MinimumBias/RAW-RECO/SD_AllMinBias-Dec19thSkim_336p3_v1/0008/AEA7D8F2-A8F0-DE11-9B51-00151796D87C.root"
     )
 )
+
+#from HiggsAnalysis.HeavyChHiggsToTauNu.MinimumBias_BeamCommissioning09_SD_AllMinBias_Dec19thSkim_336p3_v1_RAW_RECO import *
+#process.source = source
 
 #if files:
 #    for file in files.split(" "):
@@ -39,9 +43,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'IDEAL_31X::All'
-process.GlobalTag.globaltag = 'START3X_V18::All'
+#process.GlobalTag.globaltag = 'START3X_V18::All'
 #process.GlobalTag.globaltag = 'MC_3XY_V18::All'
-#process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
+process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
 
 # Magnetic Field
 #process.load("Configuration/StandardSequences/MagneticField_cff")
@@ -97,13 +101,16 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 process.p = cms.Path(process.patDefaultSequence)
+from PhysicsTools.PatAlgos.tools.coreTools import *
+removeMCMatching(process)
+
 
 
 # TCTau
-process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
-process.runTCTauProducer = cms.Path(
-    process.TCTau
-)
+#process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
+#process.runTCTauProducer = cms.Path(
+#    process.TCTau
+#)
 
 
 process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
@@ -114,7 +121,7 @@ process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         BosonID       = cms.untracked.vint32(23),
         EtaMax         = cms.untracked.double(2.5)
 )
-process.visibleTau = cms.Path(process.TauMCProducer)
+#process.visibleTau = cms.Path(process.TauMCProducer)
 
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
@@ -236,11 +243,12 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
-#process.TESTOUT = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
+process.TESTOUT = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(
 #        "drop *",
 #        "keep patMuons_*_*_*"
-#    ),
-#    fileName = cms.untracked.string('file:testout.root')
-#)
-#process.outpath = cms.EndPath(process.TESTOUT)
+         "keep *"
+    ),
+    fileName = cms.untracked.string('file:/tmp/slehti/testout.root')
+)
+process.outpath = cms.EndPath(process.TESTOUT)
