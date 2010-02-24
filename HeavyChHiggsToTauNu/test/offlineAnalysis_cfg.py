@@ -245,12 +245,12 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 process.runEDAna = cms.Path(process.hPlusAnalysis)
 
 
-process.TESTOUT = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring(
+#process.TESTOUT = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring(
 #        "drop *",
 #        "keep patMuons_*_*_*"
-         "keep *"
-    ),
-    fileName = cms.untracked.string('file:/tmp/slehti/testout.root')
-)
-process.outpath = cms.EndPath(process.TESTOUT)
+#         "keep *"
+#    ),
+#    fileName = cms.untracked.string('file:/tmp/slehti/testout.root')
+#)
+#process.outpath = cms.EndPath(process.TESTOUT)
