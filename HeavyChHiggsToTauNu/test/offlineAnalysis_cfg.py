@@ -151,12 +151,14 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		"softMuonByPtBJetTags"
         ),
 
-        Vertices = cms.InputTag("pixelVertices"),
+#        Vertices = cms.InputTag("pixelVertices"),
+        Vertices = cms.InputTag("offlinePrimaryVertices"),
         GsfElectrons = cms.VInputTag(
 #                cms.InputTag("gsfElectrons")
         ),
         PATElectrons = cms.VInputTag(
-                cms.InputTag("cleanLayer1Electrons")
+                cms.InputTag("cleanPatElectrons")
+#                cms.InputTag("cleanLayer1Electrons")
         ),
 #        Photons = cms.VInputTag(
 #                cms.InputTag("correctedPhotons")
@@ -185,7 +187,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                  cms.InputTag("iterativeCone5CaloJets")
         ),
         PATJets = cms.VInputTag(
-#                 cms.InputTag("cleanLayer1Jets")
+                 cms.InputTag("cleanPatJets")
         ),
         
 	# CaloMET collections, more info: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMETObjects

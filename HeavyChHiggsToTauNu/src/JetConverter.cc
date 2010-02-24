@@ -9,7 +9,7 @@
 #include "DataFormats/JetReco/interface/CaloJet.h"
 
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
-
+using namespace std;
 JetConverter::JetConverter(const TrackConverter& tc, const edm::Event& event, const edm::EventSetup& iSetup,
                            const std::vector<std::string>& labels, const std::vector<std::string>& btags):
   trackConverter(tc),
@@ -73,8 +73,7 @@ void JetConverter::tag(const reco::CaloJet& jet, TagType& tagInfo) const {
         for(unsigned int i = 0; i < btagAlgos.size(); ++i){
                 iEvent.getByLabel(btagAlgos[i], handle);
                 const reco::JetTagCollection& tag(*handle);
-
-                tagInfo[btagAlgos[i]] = reco::JetFloatAssociation::getValue(tag, jet);
+		//FIXME, didnt work with real data                tagInfo[btagAlgos[i]] = reco::JetFloatAssociation::getValue(tag, jet);
         }
 }
 

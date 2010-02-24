@@ -35,7 +35,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
-
+using namespace std;
 
 struct Finalizer {
   Finalizer(MyEvent *ev, TrackEcalHitPoint& tehp):
@@ -132,7 +132,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	if(!triggerDecision(iEvent)) return;
 	triggeredEvents++;
 
-        if(!VertexConverter::findPrimaryVertex(iEvent, vertexLabel, &primaryVertex)) return;
+	//        if(!VertexConverter::findPrimaryVertex(iEvent, vertexLabel, &primaryVertex)) return;
 	eventsWithPrimaryVertex++;
 
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
@@ -163,7 +163,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
         TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection, caloTauCorrections);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
-        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel, genVisibleTauLabel);
+	////        MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel, genVisibleTauLabel);
 
         //getParticlesIf<reco::IsolatedTauTagInfo>(saveEvent, edm::InputTag("coneIsolationL3SingleTau"), iEvent, tauConverter, HLTTau(), HLTTau());
 
@@ -179,9 +179,9 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
         addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
-	addParticleCollectionsIf<reco::CaloTau>(saveEvent, tcTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
+	//	addParticleCollectionsIf<reco::CaloTau>(saveEvent, tcTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
 
-        addParticleCollections<reco::CaloJet>(saveEvent, caloJetLabels, iEvent, jetConverter);
+	addParticleCollections<reco::CaloJet>(saveEvent, caloJetLabels, iEvent, jetConverter);
         addParticleCollections<pat::Jet>     (saveEvent, patJetLabels,  iEvent, jetConverter);
 
         metConverter.convert(iEvent, saveEvent->mets);
