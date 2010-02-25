@@ -132,7 +132,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 //	if(!triggerDecision(iEvent)) return;
 	triggeredEvents++;
 
-	//        if(!VertexConverter::findPrimaryVertex(iEvent, vertexLabel, &primaryVertex)) return;
+        if(!VertexConverter::findPrimaryVertex(iEvent, vertexLabel, &primaryVertex)) return;
 	eventsWithPrimaryVertex++;
 
 ////	getTrajectories(iEvent); // needed if tracker hits are to be stored
