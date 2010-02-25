@@ -45,7 +45,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'IDEAL_31X::All'
 #process.GlobalTag.globaltag = 'START3X_V18::All'
 #process.GlobalTag.globaltag = 'MC_3XY_V18::All'
-process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
+process.GlobalTag.globaltag = cms.string('GR09_R_35X_V2::All')
 
 # Magnetic Field
 #process.load("Configuration/StandardSequences/MagneticField_cff")
