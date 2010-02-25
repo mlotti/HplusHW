@@ -28,8 +28,6 @@ class JetCorrector;
 class Trajectory;
 
 class MyRootTree;
-class TauResolutionAnalysis;
-class TauMETTriggerAnalysis;
 
 
 class MyEventConverter {
@@ -109,8 +107,6 @@ class MyEventConverter {
 
 	MyRootTree* userRootTree;
 
-	TauResolutionAnalysis* tauResolutionAnalysis;
-	TauMETTriggerAnalysis* tauMETTriggerAnalysis;
         TrackEcalHitPoint trackEcalHitPoint;
         METConverterAll metConverter;
 

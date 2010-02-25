@@ -1,7 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauMETTriggerAnalysis.h"
 
 #include "JetMETCorrections/TauJet/interface/TauJetCorrector.h"
 
@@ -49,8 +47,6 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         eventsWithPrimaryVertex(0),
 	savedEvents(0),
 	userRootTree(new MyRootTree(iConfig.getParameter<std::string>("fileName").c_str())),
-        tauResolutionAnalysis(new TauResolutionAnalysis()),
-	tauMETTriggerAnalysis(new TauMETTriggerAnalysis(userRootTree)),
         trackEcalHitPoint(iConfig),
         printTrigger(true)
 {
@@ -75,13 +71,9 @@ MyEventConverter::~MyEventConverter(){
         cout << endl << endl;
 
 
-        delete tauMETTriggerAnalysis;
-
 	userRootTree->setAcceptance("allEvents",allEvents);
 //	userRootTree->setAcceptance("HLTselection",triggeredEvents);
 //        userRootTree->setAcceptance("eventsWithPrimaryVertex",eventsWithPrimaryVertex);
         userRootTree->setAcceptance("savedEvents",savedEvents);
         delete userRootTree;
-
-	delete tauResolutionAnalysis;
 }

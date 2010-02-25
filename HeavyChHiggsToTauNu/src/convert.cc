@@ -15,7 +15,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetConverter.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyRootTree.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauResolutionAnalysis.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEvent.h"
 
