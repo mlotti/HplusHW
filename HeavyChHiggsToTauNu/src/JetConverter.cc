@@ -8,8 +8,10 @@
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 
+#include "Math/VectorUtil.h"
+
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
-using namespace std;
+
 JetConverter::JetConverter(const TrackConverter& tc, const edm::Event& event, const edm::EventSetup& iSetup,
                            const std::vector<std::string>& labels, const std::vector<std::string>& btags):
   trackConverter(tc),
@@ -73,7 +75,13 @@ void JetConverter::tag(const reco::CaloJet& jet, TagType& tagInfo) const {
         for(unsigned int i = 0; i < btagAlgos.size(); ++i){
                 iEvent.getByLabel(btagAlgos[i], handle);
                 const reco::JetTagCollection& tag(*handle);
-		//FIXME, didnt work with real data                tagInfo[btagAlgos[i]] = reco::JetFloatAssociation::getValue(tag, jet);
+
+		for(unsigned int j = 0; j < tag.size(); ++j){
+		  double DR = ROOT::Math::VectorUtil::DeltaR(jet.p4(),tag[j].first->p4());
+		  if(DR < 0.3) tagInfo[btagAlgos[i]] = tag[j].second;
+		}  
+		//FIXME, didnt work with real data. Replaced with DeltaR above
+                //tagInfo[btagAlgos[i]] = reco::JetFloatAssociation::getValue(tag, jet);
         }
 }
 
