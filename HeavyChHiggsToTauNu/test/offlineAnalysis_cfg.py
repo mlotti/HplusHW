@@ -107,10 +107,10 @@ removeMCMatching(process)
 
 
 # TCTau
-#process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
-#process.runTCTauProducer = cms.Path(
-#    process.TCTau
-#)
+process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
+process.runTCTauProducer = cms.Path(
+    process.TCTau
+)
 
 
 process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
