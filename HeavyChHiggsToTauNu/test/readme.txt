@@ -102,14 +102,15 @@
 				cvs co JetMETCorrections/Configuration/data
 19.1.2010/S.Lehti CMSSW_3_4_2   TCTau tag needed:
                                 cvs co JetMETCorrections/TauJet
-25.2.2010/S.Lehti CMSSW_3_5_2   TCTau (and JPT) tags needed:
+25.2.2010/S.Lehti CMSSW_3_5_2   TCTau (and JPT) and pat tags needed:
 				cvs co JetMETCorrections/TauJet
-				cvs co -r V01-08-13-09 CondFormats/JetMETObjects/data
+				cvs co -r V01-08-13-09 CondFormats/JetMETObjects
 				cvs co -r V01-09-07-02 JetMETCorrections/Algorithms
 				cvs co -r V01-08-32-06 JetMETCorrections/Configuration
 				cvs co -r V03-03-06-09 JetMETCorrections/JetPlusTrack
 				cvs co -r V02-10-00-01 JetMETCorrections/Modules
 				cvs co -r V02-04-00    JetMETCorrections/Objects
+				cvs co -r V07-11-20    PhysicsTools/PatAlgos
 
 	How to compile:
 	-compile
