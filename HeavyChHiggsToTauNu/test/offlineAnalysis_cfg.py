@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 import os
 
-summer08 = True
+#realData = True
+realData = False
+summer09 = True
 
 process = cms.Process("test")
 
@@ -18,8 +20,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        'rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_GEN_SIM_RECO_MC_31X_V2_preproduction_311_v1.root'
-        "rfio:/castor/cern.ch/cms/store/data/BeamCommissioning09/MinimumBias/RAW-RECO/SD_AllMinBias-Dec19thSkim_336p3_v1/0008/AEA7D8F2-A8F0-DE11-9B51-00151796D87C.root"
+#        "rfio:/castor/cern.ch/cms/store/data/BeamCommissioning09/MinimumBias/RAW-RECO/SD_AllMinBias-Dec19thSkim_336p3_v1/0008/AEA7D8F2-A8F0-DE11-9B51-00151796D87C.root"
+        "rfio:/castor/cern.ch/user/s/slehti/testData/MinBias900GeV_GEN_SIM_RECO_MC_31X_V3_v1_00EEC933-8888-DE11-9954-00304865C456.root"
     )
 )
 
@@ -45,7 +47,13 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'IDEAL_31X::All'
 #process.GlobalTag.globaltag = 'START3X_V18::All'
 #process.GlobalTag.globaltag = 'MC_3XY_V18::All'
-process.GlobalTag.globaltag = cms.string('GR09_R_35X_V2::All')
+if realData:
+    process.GlobalTag.globaltag = cms.string('GR09_R_35X_V2::All')
+else:
+    process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
+
+print "GlobalTag "
+print process.GlobalTag.globaltag
 
 # Magnetic Field
 #process.load("Configuration/StandardSequences/MagneticField_cff")
@@ -100,9 +108,23 @@ import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+if not realData and summer09:
+    process.patJets.jetSource = cms.InputTag("iterativeCone5CaloJets")
+    process.patJets.trackAssociationSource = cms.InputTag("iterativeCone5JetTracksAssociatorAtVertex")
+    process.patJets.addJetID = False
+    #process.patJets.jetIDMap = cms.InputTag("ak5JetID")
+    process.patJetCorrFactors.jetSource = cms.InputTag("iterativeCone5CaloJets")
+    process.patJetCharge.src = cms.InputTag("iterativeCone5JetTracksAssociatorAtVertex")
+    process.patJetPartonMatch.src = cms.InputTag("iterativeCone5CaloJets")
+    process.patJetGenJetMatch.src = cms.InputTag("iterativeCone5CaloJets")
+    process.patJetGenJetMatch.matched = cms.InputTag("iterativeCone5GenJets")
+    process.patJetPartonAssociation.jets = cms.InputTag("iterativeCone5CaloJets")
+    process.metJESCorAK5CaloJet.inputUncorJetsLabel = "iterativeCone5CaloJets"
+
 process.p = cms.Path(process.patDefaultSequence)
-from PhysicsTools.PatAlgos.tools.coreTools import *
-removeMCMatching(process)
+if realData:
+    from PhysicsTools.PatAlgos.tools.coreTools import *
+    removeMCMatching(process)
 
 
 
@@ -121,7 +143,8 @@ process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         BosonID       = cms.untracked.vint32(23),
         EtaMax         = cms.untracked.double(2.5)
 )
-#process.visibleTau = cms.Path(process.TauMCProducer)
+if not realData:
+    process.visibleTau = cms.Path(process.TauMCProducer)
 
 
 process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
