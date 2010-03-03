@@ -59,6 +59,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const CaloTau& recTau) {
         const CaloJet& caloJet = *(recTau.caloTauTagInfoRef()->calojetRef().get());
 
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	if(tau.pt() == 0) return tau;
 
 	vector<TransientTrack> transientTracks;
 	if(trackConverter.getCollectionLabel() == "iterativeTracks") {
@@ -127,6 +128,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& 
         const CaloJet& caloJet = *(dynamic_cast<const CaloJet*>(recTau.jet().get()));
 
         MyJet tau(caloJet.px(), caloJet.py(), caloJet.pz(), caloJet.energy());
+	if(tau.pt() == 0) return tau;
 
 	const TrackRefVector associatedTracks = recTau.allTracks();
 	RefVector<TrackCollection>::const_iterator iTrack;
@@ -154,6 +156,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& 
 
 MyJet TauConverter::convert(const edm::InputTag& src, const pat::Tau& recTau) {
         MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	if(tau.pt() == 0) return tau;
 
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
 
