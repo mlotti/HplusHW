@@ -59,6 +59,8 @@ MyJet TauConverter::convert(const edm::InputTag& src, const CaloTau& recTau) {
         const CaloJet& caloJet = *(recTau.caloTauTagInfoRef()->calojetRef().get());
 
 	MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	tag(recTau, tau.tagInfo);
+
 	if(tau.pt() == 0) return tau;
 
 	vector<TransientTrack> transientTracks;
@@ -101,7 +103,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const CaloTau& recTau) {
           }
 	}
 
-        tag(recTau, tau.tagInfo);
+        //tag(recTau, tau.tagInfo);
 
         // Jet energy correction
         for(size_t i=0; i<inputTagCorrector.size(); ++i) {
@@ -128,6 +130,8 @@ MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& 
         const CaloJet& caloJet = *(dynamic_cast<const CaloJet*>(recTau.jet().get()));
 
         MyJet tau(caloJet.px(), caloJet.py(), caloJet.pz(), caloJet.energy());
+	tag(recTau, tau.tagInfo);
+
 	if(tau.pt() == 0) return tau;
 
 	const TrackRefVector associatedTracks = recTau.allTracks();
@@ -142,7 +146,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& 
 		tau.tracks.push_back(track);
 	}
 
-        TauConverter::tag(recTau, tau.tagInfo);
+        //TauConverter::tag(recTau, tau.tagInfo);
 
         // FIXME
         // no secondary vertices?
@@ -155,7 +159,10 @@ MyJet TauConverter::convert(const edm::InputTag& src, const IsolatedTauTagInfo& 
 }
 
 MyJet TauConverter::convert(const edm::InputTag& src, const pat::Tau& recTau) {
+
         MyJet tau(recTau.px(), recTau.py(), recTau.pz(), recTau.energy());
+	tag(recTau, tau.tagInfo);
+
 	if(tau.pt() == 0) return tau;
 
         const PFCandidateRefVector pfSignalCandidates = recTau.signalPFCands();
@@ -189,7 +196,7 @@ MyJet TauConverter::convert(const edm::InputTag& src, const pat::Tau& recTau) {
                 tau.tracks.push_back(track);
         }
 
-        TauConverter::tag(recTau, tau.tagInfo);
+        //TauConverter::tag(recTau, tau.tagInfo);
 
 	VertexConverter::addSecondaryVertices(transientTracks, tau.secVertices);
 
