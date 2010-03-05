@@ -207,7 +207,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 		 cms.InputTag("tcRecoTauProducer")
 	),
         CaloJets = cms.VInputTag(
-                 cms.InputTag("iterativeCone5CaloJets")
+                 cms.InputTag("iterativeCone5CaloJets"),
+                 cms.InputTag("antikt5CaloJets")
         ),
         PATJets = cms.VInputTag(
                  cms.InputTag("cleanPatJets")
