@@ -185,7 +185,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
         metConverter.convert(iEvent, saveEvent->mets);
 
-	////        mcConverter.addMC(saveEvent, iEvent);
+	mcConverter.addMC(saveEvent, iEvent);
 
         try {
                 getParticles<reco::Muon>(saveEvent, muonReplacementMuonLabel, iEvent, muonConverter, MuonReplacementTagger());
