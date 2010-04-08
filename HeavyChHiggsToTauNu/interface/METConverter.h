@@ -19,9 +19,9 @@ public:
 
   void convert(const edm::Event&, std::map<std::string, MyMET>&);
 private:
-  std::vector<edm::InputTag> caloMets;
-  edm::InputTag pfMet;
-  edm::InputTag tcMet;
+  const std::vector<edm::InputTag>& caloMets;
+  const edm::InputTag& pfMet;
+  const edm::InputTag& tcMet;
 };
 
 #endif

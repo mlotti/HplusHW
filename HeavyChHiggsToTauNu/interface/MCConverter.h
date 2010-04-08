@@ -42,11 +42,11 @@ public:
   bool addMCVisibleTaus(const edm::Event&, MyEvent *, const edm::InputTag& label, bool missingSilent=false) const;
 
 private:
-  edm::InputTag genJets;
-  edm::InputTag simHits;
-  edm::InputTag genParticles;
-  edm::InputTag genVisibleTaus;
-  edm::InputTag genParticlesReplacement;
+  const edm::InputTag& genJets;
+  const edm::InputTag& simHits;
+  const edm::InputTag& genParticles;
+  const edm::InputTag& genVisibleTaus;
+  const edm::InputTag& genParticlesReplacement;
   
 };
 
