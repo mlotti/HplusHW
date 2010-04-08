@@ -20,9 +20,7 @@ bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
 
         Handle<TriggerResults> hltHandle;
 
-        try{
-          iEvent.getByLabel("TriggerResults",hltHandle);
-        }catch(...) {;}
+        iEvent.getByLabel("TriggerResults",hltHandle);
 
         if(hltHandle.isValid()){
                 cout << "trigger table size " << hltHandle->size() << endl;

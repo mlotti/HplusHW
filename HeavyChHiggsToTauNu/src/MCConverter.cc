@@ -32,36 +32,25 @@ MCConverter::MCConverter(const edm::InputTag& genJetLabel, const edm::InputTag& 
 {}
 MCConverter::~MCConverter() {}
 
-void MCConverter::addMC(MyEvent *saveEvent, const edm::Event& iEvent) const {
-        try {
-                addMCParticles(iEvent, saveEvent, saveEvent->mcMET);
-        } catch(const cms::Exception& e) {
-                if(e.category() == "ProductNotFound")
-                        return;
-                else
-                        throw;
-        }
+bool MCConverter::addMC(MyEvent *saveEvent, const edm::Event& iEvent) const {
+        // If MC particle collection is missing, silently ignore all possible MC data
+        bool valid = addMCParticles(iEvent, saveEvent, saveEvent->mcMET, true);
+        if(!valid)
+                return false;
+
         addMCJets(iEvent, saveEvent);
 
-        // optional muon replacement generator data
-        try {
-                addMCParticles(iEvent, saveEvent, genParticlesReplacement);
-        } catch(const cms::Exception& e) {
-                if(e.category() != "ProductNotFound")
-                        throw;
-        }
+        // optional muon replacement generator data, ignore silently if missing
+        addMCParticles(iEvent, saveEvent, genParticlesReplacement, true);
 
-	// visible taus
-        try {
-                addMCVisibleTaus(iEvent, saveEvent, genVisibleTaus);
-        } catch(const cms::Exception& e) {
-                if(e.category() != "ProductNotFound")
-                        throw;
-        }
+	// visible taus, ignore silently if missing (why?)
+        addMCVisibleTaus(iEvent, saveEvent, genVisibleTaus, true);
 
         saveEvent->mcPrimaryVertex = getMCPrimaryVertex(iEvent);
         setSimTracks(iEvent, *saveEvent);
         saveEvent->hasMCdata = true;
+
+        return true;
 }
 
 MyMCParticle MCConverter::convert(const reco::GenJet& genJet){
@@ -111,9 +100,11 @@ MyGlobalPoint MCConverter::getMCPrimaryVertex(const edm::Event& iEvent) const {
                 return MyGlobalPoint(-999, -999, -999);
 }
 
-void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, MyMET& mcMET) const {
+bool MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, MyMET& mcMET, bool missingSilent) const {
 	Handle<reco::GenParticleCollection> mcEventHandle;
 	iEvent.getByLabel(genParticles, mcEventHandle);
+        if(missingSilent && !mcEventHandle.isValid())
+                return false;
 
         MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(genParticles.label()));
 
@@ -357,11 +348,14 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, M
                 }
 	}
         */
+        return true;
 }
 
-void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label) const {
+bool MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label, bool missingSilent) const {
 	Handle<reco::GenParticleCollection> mcEventHandle;
 	iEvent.getByLabel(label, mcEventHandle);
+        if(missingSilent && !mcEventHandle.isValid())
+                return false;
 
         MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
         if(edm::isDebugEnabled())
@@ -380,11 +374,14 @@ void MCConverter::addMCParticles(const edm::Event& iEvent, MyEvent *saveEvent, c
 
                 mcParticles.push_back(mcParticle);
 	}
+        return true;
 }
 
-void MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label) const {
+bool MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent, const edm::InputTag& label, bool missingSilent) const {
 	edm::Handle<std::vector<math::XYZTLorentzVectorD> > mcTaus;
         iEvent.getByLabel(label, mcTaus);
+        if(missingSilent && !mcTaus.isValid())
+                return false;
 
         MyEvent::McCollection& mcParticles(saveEvent->addMCParticles(label.label()));
         std::vector<math::XYZTLorentzVectorD> visibleTauCollection = *(mcTaus.product());
@@ -394,6 +391,7 @@ void MCConverter::addMCVisibleTaus(const edm::Event& iEvent, MyEvent *saveEvent,
         for(iTau = visibleTauCollection.begin(); iTau!= visibleTauCollection.end(); ++iTau){
                 mcParticles.push_back(convert(*iTau));
         }
+        return true;
 }
 
 

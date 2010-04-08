@@ -186,12 +186,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 	mcConverter.addMC(saveEvent, iEvent);
 
-        try {
-                getParticles<reco::Muon>(saveEvent, muonReplacementMuonLabel, iEvent, muonConverter, MuonReplacementTagger());
-        } catch(const cms::Exception& e) {
-          if(e.category() != "ProductNotFound")
-            throw;
-        }
+        // If collection doesn't exist, ignore it silently
+        getParticles<reco::Muon>(saveEvent, muonReplacementMuonLabel, iEvent, muonConverter, MuonReplacementTagger(), true);
 
 	userRootTree->fillTree(saveEvent);
 	savedEvents++;

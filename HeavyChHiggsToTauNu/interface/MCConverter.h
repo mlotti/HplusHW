@@ -32,14 +32,14 @@ public:
   static MyMCParticle convert(const math::XYZTLorentzVectorD&);
   static void setSimTracks(const edm::Event&, MyEvent&);
 
-  void addMC(MyEvent *, const edm::Event&) const;
+  bool addMC(MyEvent *, const edm::Event&) const;
 
   void addMCJets(const edm::Event& iEvent, MyEvent *) const;
   MyGlobalPoint getMCPrimaryVertex(const edm::Event& iEvent) const;
 
-  void addMCParticles(const edm::Event&, MyEvent *, MyMET&) const;
-  void addMCParticles(const edm::Event&, MyEvent *, const edm::InputTag& label) const;
-  void addMCVisibleTaus(const edm::Event&, MyEvent *, const edm::InputTag& label) const;
+  bool addMCParticles(const edm::Event&, MyEvent *, MyMET&, bool missingSilent=false) const;
+  bool addMCParticles(const edm::Event&, MyEvent *, const edm::InputTag& label, bool missingSilent=false) const;
+  bool addMCVisibleTaus(const edm::Event&, MyEvent *, const edm::InputTag& label, bool missingSilent=false) const;
 
 private:
   edm::InputTag genJets;

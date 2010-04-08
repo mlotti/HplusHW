@@ -27,9 +27,11 @@ void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Eve
 
 // Version with additional modifier
 template <class T, class Converter, class Modify>
-void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Modify& modify) {
+void getParticles(MyEvent *saveEvent, const edm::InputTag& label, const edm::Event& iEvent, Converter& converter, const Modify& modify, bool missingSilent=false) {
   edm::Handle<edm::View<T> > handle;
   iEvent.getByLabel(label, handle);
+  if(missingSilent && !handle.isValid())
+    return;
 
   if(edm::isDebugEnabled())
     LogDebug("MyEventConverter") << "Particle collection " << label << " with " << handle->size() << " particles" << std::endl;
