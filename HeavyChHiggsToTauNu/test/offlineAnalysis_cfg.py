@@ -200,7 +200,10 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                                                     cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "RECO")),
                      corrections = cms.vstring("TauJetCorrector")),
             cms.PSet(src = cms.InputTag("tcRecoTauProducer"),
-                     discriminators = cms.VInputTag(),
+                     discriminators = cms.VInputTag(cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "test"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "test"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "test"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "test")),
                      corrections = cms.vstring())
         ),
         PFTaus = cms.VPSet(
