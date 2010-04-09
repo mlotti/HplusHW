@@ -177,7 +177,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollections<pat::Muon> (saveEvent, patMuonLabels, iEvent, muonConverter);
 
         addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauConfs, iEvent, tauConverter, TauHasLeadingTrack());
-        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
+        addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauConfs,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
 
 	addParticleCollections<reco::CaloJet>(saveEvent, caloJetLabels, iEvent, jetConverter);

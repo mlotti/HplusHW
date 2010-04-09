@@ -14,6 +14,7 @@
 #include "DataFormats/TauReco/interface/CaloTau.h"
 #include "DataFormats/TauReco/interface/CaloTauDiscriminator.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
+#include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 #include "DataFormats/BTauReco/interface/IsolatedTauTagInfo.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
@@ -266,6 +267,25 @@ MyJet TauConverter::convert(const PFTau& recTau) {
 
 	return tau;	
 }
+
+
+MyJet TauConverter::convert(const PFTauConf& conf, edm::Handle<reco::PFTauCollection>& handle, size_t i) {
+        const reco::PFTau& recTau = (*handle)[i];
+        MyJet tau(convert(recTau));
+
+        // Discriminators
+        const PFTauRef recTauRef(handle, i);
+        for(size_t j=0; j<conf.discriminators.size(); ++j) {
+                edm::Handle<reco::PFTauDiscriminator> dHandle;
+                iEvent.getByLabel(conf.discriminators[j], dHandle);
+
+                float value = (*dHandle)[recTauRef];
+                tau.tagInfo[conf.discriminators[j].label()] = value;
+        }
+
+        return tau;
+}
+
 
 
 void TauConverter::tag(const IsolatedTauTagInfo& jet, TagType& tagInfo){

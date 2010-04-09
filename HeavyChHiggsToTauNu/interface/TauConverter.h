@@ -6,6 +6,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 #include "DataFormats/TauReco/interface/CaloTauFwd.h"
+#include "DataFormats/TauReco/interface/PFTauFwd.h"
 
 #include<vector>
 #include<map>
@@ -32,6 +33,7 @@ class TrackEcalHitPoint;
 class CaloTowerConverter;
 class EcalClusterConverter;
 class CaloTauConf;
+class PFTauConf;
 
 class TauConverter {
 public:
@@ -52,6 +54,7 @@ public:
   MyJet convert(const reco::PFTau& recTau);
 
   MyJet convert(const CaloTauConf& conf, edm::Handle<reco::CaloTauCollection>& handle, size_t i);
+  MyJet convert(const PFTauConf& conf, edm::Handle<reco::PFTauCollection>& handle, size_t i);
 
 private:
   typedef std::map<std::string, double> TagType;

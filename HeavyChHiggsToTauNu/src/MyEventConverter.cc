@@ -19,7 +19,6 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         //photonLabels(iConfig.getParameter<std::vector<InputTag> >("Photons")),
         muonLabels(iConfig.getParameter<std::vector<InputTag> >("Muons")),
         patMuonLabels(iConfig.getParameter<std::vector<InputTag> >("PATMuons")),
-        pfTauLabels(iConfig.getParameter<std::vector<InputTag> >("PFTaus")),
         patTauLabels(iConfig.getParameter<std::vector<InputTag> >("PATTaus")),
         caloJetLabels(iConfig.getParameter<std::vector<InputTag> >("CaloJets")),
         patJetLabels(iConfig.getParameter<std::vector<InputTag> >("PATJets")),
@@ -55,6 +54,13 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
                 caloTauConfs.push_back(CaloTauConf(calotaus[i].getParameter<edm::InputTag>("src"),
                                                    calotaus[i].getParameter<std::vector<edm::InputTag> >("discriminators"),
                                                    calotaus[i].getParameter<std::vector<std::string> >("corrections")));
+        }
+
+        const std::vector<edm::ParameterSet>& pftaus(iConfig.getParameter<std::vector<edm::ParameterSet> >("PFTaus"));
+        pfTauConfs.reserve(pftaus.size());
+        for(size_t i=0; i<pftaus.size(); ++i) {
+                pfTauConfs.push_back(PFTauConf(pftaus[i].getParameter<edm::InputTag>("src"),
+                                               pftaus[i].getParameter<std::vector<edm::InputTag> >("discriminators")));
         }
 }
 
