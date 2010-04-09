@@ -50,12 +50,11 @@ MyEventConverter::MyEventConverter(const edm::ParameterSet& iConfig):
         printTrigger(true)
 {
         const std::vector<edm::ParameterSet>& calotaus(iConfig.getParameter<std::vector<edm::ParameterSet> >("CaloTaus"));
-        caloTauLabels.reserve(calotaus.size());
-        caloTauCorrections.reserve(calotaus.size());
+        caloTauConfs.reserve(calotaus.size());
         for(size_t i=0; i<calotaus.size(); ++i) {
-                caloTauLabels.push_back(calotaus[i].getParameter<edm::InputTag>("src"));
-                caloTauCorrections.push_back(std::make_pair(calotaus[i].getParameter<edm::InputTag>("src"),
-                                                            calotaus[i].getParameter<std::vector<std::string> >("corrections")));
+                caloTauConfs.push_back(CaloTauConf(calotaus[i].getParameter<edm::InputTag>("src"),
+                                                   calotaus[i].getParameter<std::vector<edm::InputTag> >("discriminators"),
+                                                   calotaus[i].getParameter<std::vector<std::string> >("corrections")));
         }
 }
 

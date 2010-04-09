@@ -193,8 +193,15 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 #                 cms.InputTag("cleanLauer1Muons")
         ),
         CaloTaus = cms.VPSet(
-            cms.PSet(src = cms.InputTag("caloRecoTauProducer"), corrections = cms.vstring("TauJetCorrector")),
-            cms.PSet(src = cms.InputTag("tcRecoTauProducer"), corrections = cms.vstring())
+            cms.PSet(src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
+                     discriminators = cms.VInputTag(cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "RECO"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "RECO"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "RECO"),
+                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "RECO")),
+                     corrections = cms.vstring("TauJetCorrector")),
+            cms.PSet(src = cms.InputTag("tcRecoTauProducer"),
+                     discriminators = cms.VInputTag(),
+                     corrections = cms.vstring())
         ),
         PFTaus = cms.VInputTag(
                  cms.InputTag("fixedConePFTauProducer"),

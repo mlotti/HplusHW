@@ -93,27 +93,28 @@ AndImpl<T1, T2> And(T1 a, T2 b) {
   return AndImpl<T1, T2>(a, b);
 }
 
-template <class T, class C>
-void addParticleCollections(MyEvent *saveEvent, const std::vector<edm::InputTag>& labels, const edm::Event& iEvent, C& converter) {
-        for(std::vector<edm::InputTag>::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
+template <class T, class L, class C>
+void addParticleCollections(MyEvent *saveEvent, const L& labels, const edm::Event& iEvent, C& converter) {
+        for(typename L::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
                 getParticles<T>(saveEvent, *tag, iEvent, converter);
         }
 }
-template <class T, class C, class M>
-void addParticleCollections(MyEvent *saveEvent, const std::vector<edm::InputTag>& labels, const edm::Event& iEvent, C& converter, const M& modify) {
-        for(std::vector<edm::InputTag>::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
+template <class T, class L, class C, class M>
+void addParticleCollections(MyEvent *saveEvent, const L& labels, const edm::Event& iEvent, C& converter, const M& modify) {
+        for(typename L::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
                 getParticles<T>(saveEvent, *tag, iEvent, converter, modify);
         }
 }
-template <class T, class C, class D>
-void addParticleCollectionsIf(MyEvent *saveEvent, const std::vector<edm::InputTag>& labels, const edm::Event& iEvent, C& converter, const D& condition) {
-        for(std::vector<edm::InputTag>::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
+
+template <class T, class L, class C, class D>
+void addParticleCollectionsIf(MyEvent *saveEvent, const L& labels, const edm::Event& iEvent, C& converter, const D& condition) {
+        for(typename L::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
                 getParticlesIf<T>(saveEvent, *tag, iEvent, converter, condition);
         }
 }
-template <class T, class C, class D, class M>
-void addParticleCollectionsIf(MyEvent *saveEvent, const std::vector<edm::InputTag>& labels, const edm::Event& iEvent, C& converter, const D& condition, const M& modify) {
-        for(std::vector<edm::InputTag>::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
+template <class T, class L, class C, class D, class M>
+void addParticleCollectionsIf(MyEvent *saveEvent, const L& labels, const edm::Event& iEvent, C& converter, const D& condition, const M& modify) {
+        for(typename L::const_iterator tag = labels.begin(); tag != labels.end(); ++tag) {
                 getParticlesIf<T>(saveEvent, *tag, iEvent, converter, condition, modify);
         }
 }
@@ -160,7 +161,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         ElectronConverter electronConverter(trackConverter, ipConverter, *transientTrackBuilder, ecalTools, iEvent, electronIdLabels);
         MuonConverter muonConverter(trackConverter, ipConverter, *transientTrackBuilder);
         //PhotonConverter photonConverter(trackConverter, ipConverter, *transientTrackBuilder);
-        TauConverter tauConverter(trackConverter, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection, caloTauCorrections);
+        TauConverter tauConverter(trackConverter, iEvent, ipConverter, trackEcalHitPoint, ctConverter, ecConverter, *transientTrackBuilder, *tauJetCorrection);
         JetConverter jetConverter(trackConverter, iEvent, iSetup, jetEnergyCorrectionTypes, btaggingAlgos);
 	MCConverter mcConverter(genJetLabel, simHitLabel, genParticleLabel, muonReplacementGenLabel, genVisibleTauLabel);
 
@@ -175,7 +176,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollections<reco::Muon>(saveEvent, muonLabels,    iEvent, muonConverter);
         addParticleCollections<pat::Muon> (saveEvent, patMuonLabels, iEvent, muonConverter);
 
-        addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauLabels, iEvent, tauConverter, TauHasLeadingTrack());
+        addParticleCollectionsIf<reco::CaloTau>(saveEvent, caloTauConfs, iEvent, tauConverter, TauHasLeadingTrack());
         addParticleCollectionsIf<reco::PFTau>  (saveEvent, pfTauLabels,   iEvent, tauConverter, And(TauHasLeadingTrack(), TauPtNonZero()));
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
 

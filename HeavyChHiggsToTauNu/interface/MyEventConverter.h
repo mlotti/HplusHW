@@ -12,6 +12,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METConverterAll.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauConf.h"
 
 #include<vector>
 #include<string>
@@ -63,12 +64,13 @@ class MyEventConverter {
         //std::vector<edm::InputTag> photonLabels;
         std::vector<edm::InputTag> muonLabels;
         std::vector<edm::InputTag> patMuonLabels;
-        std::vector<edm::InputTag> caloTauLabels;
         std::vector<edm::InputTag> pfTauLabels;
         std::vector<edm::InputTag> patTauLabels;
         std::vector<edm::InputTag> caloJetLabels;
         std::vector<edm::InputTag> patJetLabels;
-        std::vector<std::pair<edm::InputTag, std::vector<std::string> > > caloTauCorrections;
+
+        std::vector<CaloTauConf> caloTauConfs;
+        std::vector<PFTauConf> pfTauConfs;
 
         edm::InputTag muonReplacementMuonLabel;
 
