@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 import os
 
-#realData = True
-realData = False
-summer09 = True
+realData = True
+#realData = False
+#summer09 = True
 
 process = cms.Process("test")
 
@@ -20,8 +20,7 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-#        "rfio:/castor/cern.ch/cms/store/data/BeamCommissioning09/MinimumBias/RAW-RECO/SD_AllMinBias-Dec19thSkim_336p3_v1/0008/AEA7D8F2-A8F0-DE11-9B51-00151796D87C.root"
-        "rfio:/castor/cern.ch/user/s/slehti/testData/MinBias900GeV_GEN_SIM_RECO_MC_31X_V3_v1_00EEC933-8888-DE11-9954-00304865C456.root"
+	'/store/data/Commissioning10/MinimumBias/RAW-RECO/v8/000/133/081/EC31F51D-ED46-DF11-A87F-0025B3E05D68.root'
     )
 )
 
@@ -48,7 +47,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = 'START3X_V18::All'
 #process.GlobalTag.globaltag = 'MC_3XY_V18::All'
 if realData:
-    process.GlobalTag.globaltag = cms.string('GR09_R_35X_V2::All')
+    process.GlobalTag.globaltag = cms.string('GR10_P_V4::All')
 else:
     process.GlobalTag.globaltag = cms.string('MC_3XY_V18::All')
 
