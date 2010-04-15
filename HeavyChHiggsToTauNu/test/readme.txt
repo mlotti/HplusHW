@@ -111,6 +111,8 @@
 				cvs co -r V02-10-00-01 JetMETCorrections/Modules
 				cvs co -r V02-04-00    JetMETCorrections/Objects
 				cvs co -r V07-11-20    PhysicsTools/PatAlgos
+15.4.2010/S.Lehti CMSSW_3_5_6	Tags needed:
+				cvs co -r V02-04-04    JetMETCorrections/TauJet
 
 	How to compile:
 	-compile
