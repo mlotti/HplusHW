@@ -10,7 +10,7 @@ process = cms.Process("test")
 #process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1000)
 )
 
 # Job will exit if any product is not found in the event
@@ -257,7 +257,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         ),
         CaloJets = cms.VInputTag(
                  cms.InputTag("iterativeCone5CaloJets"),
-                 cms.InputTag("antikt5CaloJets")
+                 cms.InputTag("ak5CaloJets")
         ),
         PATJets = cms.VInputTag(
                  cms.InputTag("cleanPatJets")

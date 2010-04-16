@@ -69,8 +69,8 @@ MyEventConverter::~MyEventConverter(){
         cout << endl << endl;
         cout << "    SUMMARY " << endl << endl;
         cout << "    All events   : " << allEvents << endl;
-//        cout << "    HLT          : " << triggeredEvents << endl;
-//        cout << "    PV reconstr. : " << eventsWithPrimaryVertex << endl;
+        cout << "    HLT          : " << triggeredEvents << endl;
+        cout << "    PV reconstr. : " << eventsWithPrimaryVertex << endl;
         cout << "    saved events : " << savedEvents << endl;
         cout << endl << endl;
 

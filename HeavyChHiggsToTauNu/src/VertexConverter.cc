@@ -9,9 +9,11 @@
 
 bool VertexConverter::findPrimaryVertex(const edm::Event& iEvent, const edm::InputTag& label, reco::Vertex* primaryVertex) {
         edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+
         iEvent.getByLabel(label, vertexHandle);
 
         const edm::View<reco::Vertex>& vertexCollection(*vertexHandle);
+/*
         double ptmax = 0;
         edm::View<reco::Vertex>::const_iterator iVertex;
         edm::View<reco::Vertex>::const_iterator found = vertexCollection.end();
@@ -30,6 +32,15 @@ bool VertexConverter::findPrimaryVertex(const edm::Event& iEvent, const edm::Inp
                 return false;
         *primaryVertex = *found;
         return true;
+*/
+// 16.4.2010/SLehti: In the 7 TeV data all events have a vertex, but the vertices
+//                   contain no associated tracks. Therefore the ptsum calc. is
+//                   disabled, and vertex selection simplified. FIXME: This situation
+//                   needs to be checked later!
+	if(vertexHandle->size() == 0) return false;
+	*primaryVertex = *(vertexCollection.begin());
+	return true;
+// End of fix
 }
 
 MyVertex VertexConverter::convert(const reco::Vertex& vertex){
