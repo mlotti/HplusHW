@@ -134,15 +134,17 @@ process.runTCTauProducer = cms.Path(
 )
 
 # tau veto
-process.load("RecoTauTag.RecoTau.PFRecoTauVetoDiscrimination_cfi")
-process.fixedConeTauVetoDiscrimination                      = copy.deepcopy(pfRecoTauVetoDiscrimination)
-process.fixedConeHighEffTauVetoDiscrimination               = copy.deepcopy(pfRecoTauVetoDiscrimination)
-process.shrinkingConePFTauVetoDiscrimination                = copy.deepcopy(pfRecoTauVetoDiscrimination)
+process.load("RecoTauTag.RecoTau.PFTauVetoProducer_cff")
+process.fixedConeTauVetoDiscrimination                      = copy.deepcopy(pfTauVeto)
+process.fixedConeHighEffTauVetoDiscrimination               = copy.deepcopy(pfTauVeto)
+process.shrinkingConePFTauVetoDiscrimination                = copy.deepcopy(pfTauVeto)
 process.fixedConeTauVetoDiscrimination.PFTauProducer        = cms.InputTag("fixedConePFTauProducer")
 process.fixedConeHighEffTauVetoDiscrimination.PFTauProducer = cms.InputTag("fixedConeHighEffPFTauProducer")
 process.shrinkingConePFTauVetoDiscrimination.PFTauProducer  = cms.InputTag("shrinkingConePFTauProducer")
 process.runTauVetoDiscriminatorProducer = cms.Path(
-    process.fixedConeHighEffTauVetoDiscrimination * process.shrinkingConePFTauVetoDiscrimination
+    process.fixedConeTauVetoDiscrimination *
+    process.fixedConeHighEffTauVetoDiscrimination * 
+    process.shrinkingConePFTauVetoDiscrimination
 )
 
 process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
@@ -228,7 +230,10 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                                                     cms.InputTag("fixedConePFTauDiscriminationByLeadingTrackFinding"),
                                                     cms.InputTag("fixedConePFTauDiscriminationByLeadingTrackPtCut"),
                                                     cms.InputTag("fixedConePFTauDiscriminationByTrackIsolation"),
-                                                    cms.InputTag("fixedConePFTauDiscriminationByTrackIsolationUsingLeadingPion"))
+                                                    cms.InputTag("fixedConePFTauDiscriminationByTrackIsolationUsingLeadingPion"),
+                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTauHighEfficiency"),
+                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTauHighPurity"))
+
             ),
             cms.PSet(src = cms.InputTag("fixedConeHighEffPFTauProducer"),
                      discriminators = cms.VInputTag(cms.InputTag("fixedConeHighEffPFTauDiscriminationAgainstElectron"),
