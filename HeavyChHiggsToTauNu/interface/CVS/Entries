@@ -1,0 +1,17 @@
+/TauMETTriggerAnalysis.h/1.4/Mon Oct 26 11:41:55 2009//
+/TauResolutionAnalysis.h/1.10/Mon Oct 26 11:41:55 2009//
+/MyCaloTower.h/1.5/Mon Oct 26 11:53:54 2009//
+/MyEvent.h/1.12/Mon Oct 26 11:53:54 2009//
+/MyEventConverter.h/1.37/Mon Oct 26 11:53:54 2009//
+/MyGlobalPoint.h/1.7/Mon Oct 26 11:53:54 2009//
+/MyHit.h/1.3/Mon Oct 26 11:53:54 2009//
+/MyImpactParameter.h/1.3/Mon Oct 26 11:53:54 2009//
+/MyJet.h/1.22/Mon Oct 26 11:59:24 2009//
+/MyMCParticle.h/1.10/Mon Oct 26 11:53:55 2009//
+/MyMeasurement1D.h/1.2/Mon Oct 26 11:53:55 2009//
+/MyRootTree.h/1.3/Mon Oct 26 11:53:55 2009//
+/MySimTrack.h/1.2/Mon Oct 26 11:53:55 2009//
+/MyTrack.h/1.15/Mon Oct 26 11:53:55 2009//
+/MyVertex.h/1.6/Mon Oct 26 11:53:55 2009//
+/MyMET.h/1.7/Mon Oct 26 11:59:53 2009//
+D
