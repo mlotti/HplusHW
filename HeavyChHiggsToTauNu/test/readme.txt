@@ -116,6 +116,7 @@
 10.5.2010/S.Lehti CMSSW_3_5_8	Tags needed:
 				cvs co -r V02-04-04    JetMETCorrections/TauJet
 				git clone http://cmsdoc.cern.ch/~attikis/RecoTauTag.git
+				addpkg RecoTauTag
 
 	How to compile:
 	-compile
