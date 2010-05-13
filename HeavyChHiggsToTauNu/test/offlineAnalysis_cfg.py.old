@@ -134,17 +134,21 @@ process.runTCTauProducer = cms.Path(
 )
 
 # tau veto
-process.load("RecoTauTag/RecoTau/PFTauVetoProducerHighEfficiency_cff")
-process.load("RecoTauTag/RecoTau/PFTauVetoProducerHighPurity_cff")
-process.runPFTauProducer = cms.Path(
-    process.pfTauVetoHighEfficiencyFixedCone + 
-    process.pfTauVetoHighEfficiencyFixedConeHighEff + 
-    process.pfTauVetoHighEfficiencyShrinkingCone + 
-    process.pfTauVetoHighPurityFixedCone + 
-    process.pfTauVetoHighPurityFixedConeHighEff + 
-    process.pfTauVetoHighPurityShrinkingCone
+process.load("RecoTauTag/RecoTau/PFTauVetoProducer_cff")
+#process.runPFTauProducer = cms.Path(
+#    process.pfTauVeto
+#)
+process.fixedConeTauVetoDiscrimination                      = copy.deepcopy(process.pfTauVeto)
+process.fixedConeHighEffTauVetoDiscrimination               = copy.deepcopy(process.pfTauVeto)
+process.shrinkingConePFTauVetoDiscrimination                = copy.deepcopy(process.pfTauVeto)
+process.fixedConeTauVetoDiscrimination.PFTauProducer        = cms.InputTag("fixedConePFTauProducer")
+process.fixedConeHighEffTauVetoDiscrimination.PFTauProducer = cms.InputTag("fixedConeHighEffPFTauProducer")
+process.shrinkingConePFTauVetoDiscrimination.PFTauProducer  = cms.InputTag("shrinkingConePFTauProducer")
+process.runTauVetoDiscriminatorProducer = cms.Path(
+    process.fixedConeTauVetoDiscrimination *
+    process.fixedConeHighEffTauVetoDiscrimination * 
+    process.shrinkingConePFTauVetoDiscrimination
 )
-
 
 process.TauMCProducer = cms.EDProducer("HLTTauMCProducer",
         GenParticles  = cms.untracked.InputTag("genParticles"),
@@ -230,9 +234,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                                                     cms.InputTag("fixedConePFTauDiscriminationByLeadingTrackPtCut"),
                                                     cms.InputTag("fixedConePFTauDiscriminationByTrackIsolation"),
                                                     cms.InputTag("fixedConePFTauDiscriminationByTrackIsolationUsingLeadingPion"),
-                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTausHighEfficiency"),
-                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTausHighPurity"))
-
+                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTauHighEfficiency"),
+                                                    cms.InputTag("fixedConePFTauDiscriminationAgainstTauHighPurity"))
 
             ),
             cms.PSet(src = cms.InputTag("fixedConeHighEffPFTauProducer"),
@@ -247,9 +250,8 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                                                     cms.InputTag("fixedConeHighEffPFTauDiscriminationByLeadingTrackPtCut"),
                                                     cms.InputTag("fixedConeHighEffPFTauDiscriminationByTrackIsolation"),
                                                     cms.InputTag("fixedConeHighEffPFTauDiscriminationByTrackIsolationUsingLeadingPion"),
-                                                    cms.InputTag("fixedConeHighEffPFTauDiscriminationAgainstTausHighEfficiency"),
-                                                    cms.InputTag("fixedConeHighEffPFTauDiscriminationAgainstTausHighPurity"))
-
+                                                    cms.InputTag("fixedConeHighEffPFTauDiscriminationAgainstTauHighEfficiency"),
+                                                    cms.InputTag("fixedConeHighEffPFTauDiscriminationAgainstTauHighPurity"))
             ),
             cms.PSet(src = cms.InputTag("shrinkingConePFTauProducer"),
                      discriminators = cms.VInputTag(cms.InputTag("shrinkingConePFTauDecayModeIndexProducer"),
@@ -266,12 +268,11 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                                                     cms.InputTag("shrinkingConePFTauDiscriminationByTaNCfrHalfPercent"),
                                                     cms.InputTag("shrinkingConePFTauDiscriminationByTaNCfrOnePercent"),
                                                     cms.InputTag("shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent"),
-                                                    cms.InputTag("shrinkingConePFTauDiscriminationByTaNCfrTenthPercent"),
+                                                    cms.InputTg("shrinkingConePFTauDiscriminationByTaNCfrTenthPercent"),
                                                     cms.InputTag("shrinkingConePFTauDiscriminationByTrackIsolation"),
                                                     cms.InputTag("shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion"),
-                                                    cms.InputTag("shrinkingConePFTauDiscriminationAgainstTausHighEfficiency"),
-                                                    cms.InputTag("shrinkingConePFTauDiscriminationAgainstTausHighPurity"))
-
+                                                    cms.InputTag("shrinkingConePFTauDiscriminationAgainstTauHighEfficiency"),
+                                                    cms.InputTag("shrinkingConePFTauDiscriminationAgainstTauHighPurity"))
             )
         ),
         PATTaus = cms.VInputTag(
