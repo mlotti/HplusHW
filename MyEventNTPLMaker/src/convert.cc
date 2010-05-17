@@ -22,6 +22,7 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/JetReco/interface/JPTJet.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -181,6 +182,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
         addParticleCollections<pat::Tau>       (saveEvent, patTauLabels,  iEvent, tauConverter); 
 
 	addParticleCollections<reco::CaloJet>(saveEvent, caloJetLabels, iEvent, jetConverter);
+	addParticleCollections<reco::JPTJet> (saveEvent, jptJetLabels, iEvent, jetConverter);
         addParticleCollections<pat::Jet>     (saveEvent, patJetLabels,  iEvent, jetConverter);
 
         metConverter.convert(iEvent, saveEvent->mets);

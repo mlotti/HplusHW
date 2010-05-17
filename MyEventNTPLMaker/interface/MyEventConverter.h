@@ -68,6 +68,7 @@ class MyEventConverter {
         std::vector<edm::InputTag> patMuonLabels;
         std::vector<edm::InputTag> patTauLabels;
         std::vector<edm::InputTag> caloJetLabels;
+	std::vector<edm::InputTag> jptJetLabels;
         std::vector<edm::InputTag> patJetLabels;
 
         std::vector<CaloTauConf> caloTauConfs;

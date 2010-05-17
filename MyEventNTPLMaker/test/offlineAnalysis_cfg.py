@@ -291,6 +291,9 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
                  cms.InputTag("iterativeCone5CaloJets"),
                  cms.InputTag("ak5CaloJets")
         ),
+	JPTJets = cms.VInputTag(
+		 cms.InputTag("JetPlusTrackZSPCorJetAntiKt5")
+        ),
         PATJets = cms.VInputTag(
                  cms.InputTag("cleanPatJets")
         ),
