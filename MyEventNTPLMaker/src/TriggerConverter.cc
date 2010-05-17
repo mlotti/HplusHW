@@ -16,14 +16,18 @@ using edm::TriggerNames;
 using edm::InputTag;
 using std::vector;
 using std::string;
+using namespace std;
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Framework/interface/TriggerNamesService.h"
 
 TriggerConverter::TriggerConverter(const edm::ParameterSet& iConfig){
-	triggerNames = new TriggerNames(iConfig);
+	hlNames = edm::Service<edm::service::TriggerNamesService>()->getTrigPaths();
+//	triggerNames = new TriggerNames(iConfig);
 	triggerDecision = false;
 }
 
 TriggerConverter::~TriggerConverter(){
-	delete triggerNames;
+//	delete triggerNames;
 }
 
 bool TriggerConverter::getTriggerDecision(){
@@ -31,6 +35,7 @@ bool TriggerConverter::getTriggerDecision(){
 }
 
 void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std::string, bool>& trigger, bool printTrigger){
+
         vector<Handle<TriggerResults> > hltHandles;
 	iEvent.getManyByType(hltHandles);
         if(edm::isDebugEnabled())
@@ -45,7 +50,7 @@ void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std:
                         LogDebug("MyEventConverter") << "trigger table " << hltTableName 
                                                      << " size " << (*iHandle)->size() << std::endl;
 
-                vector<string> hlNames = triggerNames->triggerNames();
+//                vector<string> hlNames = triggerNames->triggerNames();
                 int n = 0;
                 for(vector<string>::const_iterator i = hlNames.begin();
                                                    i!= hlNames.end(); i++){

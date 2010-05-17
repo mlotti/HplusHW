@@ -75,36 +75,41 @@ process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 ##process.load("JetMETCorrections.Configuration.JetCorrectionsHLT_cff")
 ##process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 
-process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-process.load("RecoMET.METProducers.CaloMET_cfi")
+#process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
+#process.load("RecoMET.METProducers.CaloMET_cfi")
 #process.missingEt = cms.Path(process.metNoHF)
 
 process.load("JetMETCorrections.Type1MET.MetType1Corrections_cff")
+#process.missingEt_type1 = cms.Path(process.MetType1Corrections)
 process.missingEt_type1i = cms.Path(process.metJESCorIC5CaloJet)
+process.missingEt_type1a = cms.Path(process.metJESCorAK5CaloJet)
 #process.missingEt_type1m = cms.Path(process.corMetType1Mcone5)
 
-process.corMetType1Icone5NoHF = cms.EDProducer('Type1MET',
-    metType = cms.string("CaloMET"),
-    inputUncorMetLabel = cms.string("metNoHF"),
-    inputUncorJetsLabel = cms.string("iterativeCone5CaloJets"),
-    corrector = cms.string("MCJetCorrectorIcone5"),
-    jetPTthreshold = cms.double(20.0),
-    jetEMfracLimit = cms.double(0.9)
-)
-process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
+#process.corMetType1Icone5NoHF = cms.EDProducer('Type1MET',
+#    metType = cms.string("CaloMET"),
+#    inputUncorMetLabel = cms.string("metNoHF"),
+#    inputUncorJetsLabel = cms.string("iterativeCone5CaloJets"),
+#    corrector = cms.string("MCJetCorrectorIcone5"),
+#    jetPTthreshold = cms.double(20.0),
+#    jetEMfracLimit = cms.double(0.9)
+#)
+#process.missingEt_type1i_nohf = cms.Path(process.corMetType1Icone5NoHF)
 
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
-#process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 3_2_4
+process.missingEt_muons = cms.Path(process.corMetGlobalMuons) # 3_2_4
 
-from RecoTauTag.RecoTau.PFRecoTauProducer_cfi import *
-process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
-process.tauMetCorr.InputMETLabel = cms.string('metJESCorIC5CaloJet')
-####FIXMEprocess.missingEt_tauMet = cms.Path(process.tauMetCorr)
+#from RecoTauTag.RecoTau.PFRecoTauProducer_cfi import *
+#process.load("JetMETCorrections.Type1MET.TauMetCorrections_cff")
+#process.tauMetCorr.InputMETLabel = cms.string('metJESCorIC5CaloJet')
+#process.missingEt_tauMet = cms.Path(process.tauMetCorr)
 
 process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
 import TrackingTools.TrackAssociator.default_cfi as TrackAssociator
 
+process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
+process.btagForPat = cms.Path(process.simpleSecondaryVertexHighEffBJetTags*
+                              process.simpleSecondaryVertexHighPurBJetTags)
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 if not realData and summer09:
@@ -124,7 +129,6 @@ process.p = cms.Path(process.patDefaultSequence)
 if realData:
     from PhysicsTools.PatAlgos.tools.coreTools import *
     removeMCMatching(process)
-
 
 
 # TCTau
@@ -167,7 +171,7 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
         # JetEnergyCorrection = MCJetCorrectorIcone5,MCJetCorrectorMcone5
         # if no corrections, leave {} empty
 	JetEnergyCorrection = cms.vstring(
-		"MCJetCorrectorIcone5"
+#FIXME,JPTJets		"MCJetCorrectorIcone5"
 #		"MCJetCorrectorMcone5"
 	),
 
@@ -206,17 +210,18 @@ process.hPlusAnalysis = cms.EDAnalyzer('OfflineAnalysis',
 #                 cms.InputTag("cleanLauer1Muons")
         ),
         CaloTaus = cms.VPSet(
-            cms.PSet(src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
+#            cms.PSet(src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
+            cms.PSet(src = cms.InputTag("caloRecoTauProducer"),
                      discriminators = cms.VInputTag(cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "RECO"),
                                                     cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "RECO"),
                                                     cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "RECO"),
                                                     cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "RECO")),
-                     corrections = cms.vstring("TauJetCorrector")),
-            cms.PSet(src = cms.InputTag("tcRecoTauProducer"),
-                     discriminators = cms.VInputTag(cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "test"),
-                                                    cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "test"),
-                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "test"),
-                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "test")),
+#                     corrections = cms.vstring("TauJetCorrector")),
+#            cms.PSet(src = cms.InputTag("tcRecoTauProducer"),
+#                     discriminators = cms.VInputTag(cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "test"),
+#                                                    cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "test"),
+#                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "test"),
+#                                                    cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "test")),
                      corrections = cms.vstring())
         ),
         PFTaus = cms.VPSet(

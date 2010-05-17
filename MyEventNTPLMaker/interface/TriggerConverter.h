@@ -5,6 +5,7 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 
 #include<map>
+#include<vector>
 #include<string>
 
 namespace edm { class Event; }
@@ -22,7 +23,8 @@ class TriggerConverter {
 	bool getTriggerDecision();
 
     private:
-	edm::TriggerNames* triggerNames;
+	std::vector<std::string> hlNames;
+//	edm::TriggerNames* triggerNames;
 	bool triggerDecision;
 };
 
