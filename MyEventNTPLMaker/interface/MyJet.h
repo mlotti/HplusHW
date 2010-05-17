@@ -75,6 +75,16 @@ class MyJet: public TLorentzVector {
         void setP4(const TLorentzVector& p4);
 
         /**
+         * \brief Set 4-momentum
+         *
+         * \b Note: this only sets the \b raw jet 4-momentum.
+         *
+         * \param p4  4-momentum to be set
+         *
+         */
+        void setRawP4(const TLorentzVector& p4);
+
+        /**
          * \brief Add energy correction
          *
          * If the named correction already exists, std::exit() is called
@@ -215,6 +225,8 @@ class MyJet: public TLorentzVector {
          */
         TLorentzVector      hcalClusterMomentum(double signalCone ,double matchingCone = 0.1) const;
 
+	TLorentzVector      getRawP4() const;
+
         /**
          * \brief Get clusters (valid for electrons and taus)
          *
@@ -251,6 +263,7 @@ class MyJet: public TLorentzVector {
         std::map<std::string, double> tagInfo;     ///< Various jet tags, e.g. b-tag discriminators
         std::map<std::string, double> jecs;        ///< Jet energy corrections
         TLorentzVector                originalP4;  ///< Original jet 4-vector, this shouldn't be modified after setting it
+	TLorentzVector		      rawP4;       ///< Jet energy before corrections
         std::string            currentCorrection;  //!< Name of current correction, not to be stored in the TTree (hence !)
 
         int type;  ///< type of the jet/particle, not really used currently

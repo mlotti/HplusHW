@@ -27,5 +27,5 @@
     <use name=DataFormats/PatCandidates>
 
 <export>
-   <lib name=HiggsAnalysisHeavyChHiggsToTauNu>
+   <lib name=HiggsAnalysisMyEventNTPLMaker>
 </export>
