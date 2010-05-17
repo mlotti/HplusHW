@@ -66,10 +66,10 @@ MyJet TauConverter::convert(const CaloTau& recTau) {
 
 	if(tau.pt() == 0) return tau;
 
-	tau.setRawP4(recTau.rawJetRef->px(),
-                     recTau.rawJetRef->py(),
-                     recTau.rawJetRef->pz(),
-                     recTau.rawJetRef->e());
+	tau.setRawP4(TLorentzVector(recTau.rawJetRef()->px(),
+                     		    recTau.rawJetRef()->py(),
+                                    recTau.rawJetRef()->pz(),
+				    recTau.rawJetRef()->energy()));
 
 	vector<TransientTrack> transientTracks;
 	if(trackConverter.getCollectionLabel() == "iterativeTracks") {
