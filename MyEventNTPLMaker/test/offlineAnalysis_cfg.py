@@ -72,8 +72,8 @@ process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
 process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
-process.load("JetMETCorrections.Configuration.JetCorrectionsHLT_cff")
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
+##process.load("JetMETCorrections.Configuration.JetCorrectionsHLT_cff")
+##process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 
 process.load("JetMETCorrections.Type1MET.MetMuonCorrections_cff")
 process.load("RecoMET.METProducers.CaloMET_cfi")
@@ -128,9 +128,11 @@ if realData:
 
 
 # TCTau
-process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
+####process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
+process.load("JetMETCorrections/TauJet/RecoTCTauTag_cff")
 process.runTCTauProducer = cms.Path(
-    process.TCTau
+####    process.TCTau
+	process.tautagging
 )
 
 # tau veto
