@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_TriggerConverter_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_TriggerConverter_h
 
+#include "FWCore/Common/interface/TriggerNames.h"
+
 #include<map>
 #include<string>
 
@@ -9,9 +11,19 @@ namespace edm { class Event; }
 class MyEvent;
 
 class TriggerConverter {
-public:
-  static void getTriggerResults(const edm::Event&, std::map<std::string, bool>&, bool print);
-  static void addTriggerObjects(MyEvent *, const edm::Event&);
+    public:
+  	TriggerConverter(const edm::ParameterSet& iConfig);
+  	~TriggerConverter();
+
+//  	static void getTriggerResults(const edm::Event&, std::map<std::string, bool>&, bool print);
+	void getTriggerResults(const edm::Event&, std::map<std::string, bool>&, bool print);
+  	static void addTriggerObjects(MyEvent *, const edm::Event&);
+
+	bool getTriggerDecision();
+
+    private:
+	edm::TriggerNames* triggerNames;
+	bool triggerDecision;
 };
 
 #endif

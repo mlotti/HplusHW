@@ -129,7 +129,7 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 
 //        tauMETTriggerAnalysis->analyse(iEvent);
 
-//	if(!triggerDecision(iEvent)) return;
+//	if(!triggerConverter.getTriggerDecision(iEvent)) return;
 	triggeredEvents++;
 
         if(!VertexConverter::findPrimaryVertex(iEvent, vertexLabel, &primaryVertex)) return;
@@ -145,8 +145,8 @@ void MyEventConverter::convert(const edm::Event& iEvent,const edm::EventSetup& i
 	saveEvent->runNumber		= iEvent.run();
 	saveEvent->lumiNumber		= iEvent.luminosityBlock();
 
-        TriggerConverter::getTriggerResults(iEvent, saveEvent->triggerResults, printTrigger);
-        TriggerConverter::addTriggerObjects(saveEvent, iEvent);
+        triggerConverter.getTriggerResults(iEvent, saveEvent->triggerResults, printTrigger);
+        triggerConverter.addTriggerObjects(saveEvent, iEvent);
         printTrigger = false;
 	saveEvent->primaryVertex        = VertexConverter::convert(primaryVertex);
 //	saveEvent->L1objects            = getL1objects(iEvent);

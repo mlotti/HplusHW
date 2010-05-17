@@ -7,7 +7,8 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
+//#include "FWCore/Framework/interface/TriggerNames.h"
+//#include "FWCore/Common/interface/TriggerNames.h"
 
 using edm::Handle;
 using edm::TriggerResults;
@@ -15,6 +16,19 @@ using edm::TriggerNames;
 using edm::InputTag;
 using std::vector;
 using std::string;
+
+TriggerConverter::TriggerConverter(const edm::ParameterSet& iConfig){
+	triggerNames = new TriggerNames(iConfig);
+	triggerDecision = false;
+}
+
+TriggerConverter::~TriggerConverter(){
+	delete triggerNames;
+}
+
+bool TriggerConverter::getTriggerDecision(){
+	return triggerDecision; //can only be called after TriggerConverter::getTriggerResults
+}
 
 void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std::string, bool>& trigger, bool printTrigger){
         vector<Handle<TriggerResults> > hltHandles;
@@ -31,9 +45,7 @@ void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std:
                         LogDebug("MyEventConverter") << "trigger table " << hltTableName 
                                                      << " size " << (*iHandle)->size() << std::endl;
 
-                TriggerNames triggerNames;
-                triggerNames.init(**iHandle);
-                vector<string> hlNames = triggerNames.triggerNames();
+                vector<string> hlNames = triggerNames->triggerNames();
                 int n = 0;
                 for(vector<string>::const_iterator i = hlNames.begin();
                                                    i!= hlNames.end(); i++){
@@ -42,14 +54,15 @@ void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std:
 
 			string s_trigger = hltTableName + "_" + *i;
 			trigger[s_trigger] = (*iHandle)->accept(n);
-/*
+			/*
                         for(vector<InputTag>::const_iterator iSelect = HLTSelection.begin();
                                                              iSelect!= HLTSelection.end(); iSelect++){
-                                if(iSelect->label() != *i) continue;
-				string s_trigger = hltTableName + *i;
-                                trigger[s_trigger] = (*iHandle)->accept(n);
+				if(iSelect->label() == *i && (*iHandle)->accept(n) == 1) {
+                                        triggerDecision = true;
+                                        LogDebug("MyEventConverter") << "event triggered with " << *i << std::endl;
+                                }
                         }
-*/
+			*/
                         n++;
                 }
 	}

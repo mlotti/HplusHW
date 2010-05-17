@@ -9,6 +9,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerConverter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyJet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TrackEcalHitPoint.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METConverterAll.h"
@@ -55,6 +56,7 @@ class MyEventConverter {
 // datafields
 
 //        std::vector<edm::InputTag> HLTSelection;
+	TriggerConverter triggerConverter;
         reco::Vertex primaryVertex;
         edm::InputTag vertexLabel;
         edm::InputTag trackCollectionSelection;

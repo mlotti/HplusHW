@@ -1,7 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MyEventConverter.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Framework/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 #include<iostream>
 
@@ -15,7 +15,8 @@ using std::cout;
 using std::endl;
 
 bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
-
+	return triggerConverter.getTriggerDecision();
+/*
 	bool triggerdecision = false;
 
         Handle<TriggerResults> hltHandle;
@@ -24,9 +25,9 @@ bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
 
         if(hltHandle.isValid()){
                 cout << "trigger table size " << hltHandle->size() << endl;
-
-                TriggerNames triggerNames;
-                triggerNames.init(*hltHandle);
+///FIXME
+///                TriggerNames triggerNames;
+///                triggerNames.init(*hltHandle);
                 vector<string> hlNames = triggerNames.triggerNames();
                 int n = 0;
                 for(vector<string>::const_iterator i = hlNames.begin();
@@ -43,6 +44,8 @@ bool MyEventConverter::triggerDecision(const edm::Event& iEvent){
 //			}
                         n++;
                 }
+
         }
 	return triggerdecision;
+*/
 }
