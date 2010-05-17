@@ -72,6 +72,9 @@ process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
 process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
+process.load("RecoJets.JetPlusTracks.JetPlusTrackCorrections_cff")
+process.jptJetProducer = cms.Path(process.JetPlusTrackCorrectionsAntiKt5)
+
 ##process.load("JetMETCorrections.Configuration.JetCorrectionsHLT_cff")
 ##process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_cff")
 
