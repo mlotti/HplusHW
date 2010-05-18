@@ -135,7 +135,7 @@ if realData:
 
 
 # TCTau
-process.load("RecoTauTag.RecoTau.RecoTCTauTag_cff")
+process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
 process.runTCTauProducer = cms.Path(
 	process.tautagging
 )
