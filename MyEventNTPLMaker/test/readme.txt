@@ -123,7 +123,6 @@
 				cvs co -r V00-16-00 DataFormats/TauReco
 				cvs co -r V00-23-00 RecoTauTag/RecoTau
 				cvs co -r V00-21-00 RecoTauTag/Configuration
-				cvs co -r V02-07-01 JetMETCorrections/TauJet
 
 
 	How to compile:
