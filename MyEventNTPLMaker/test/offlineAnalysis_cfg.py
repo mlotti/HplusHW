@@ -10,7 +10,7 @@ process = cms.Process("test")
 #process.Tracer = cms.Service("Tracer")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(100)
 )
 
 # Job will exit if any product is not found in the event
@@ -135,16 +135,14 @@ if realData:
 
 
 # TCTau
-####process.load("JetMETCorrections/TauJet/TCTauProducer_cff")
-process.load("JetMETCorrections/TauJet/RecoTCTauTag_cff")
+process.load("RecoTauTag.RecoTau.RecoTCTauTag_cff")
 process.runTCTauProducer = cms.Path(
-####    process.TCTau
 	process.tautagging
 )
 
 # tau veto
-process.load("RecoTauTag/RecoTau/PFTauVetoProducerHighEfficiency_cff")
-process.load("RecoTauTag/RecoTau/PFTauVetoProducerHighPurity_cff")
+process.load("RecoTauTag.RecoTau.PFTauVetoProducerHighEfficiency_cff")
+process.load("RecoTauTag.RecoTau.PFTauVetoProducerHighPurity_cff")
 process.runPFTauProducer = cms.Path(
     process.pfTauVetoHighEfficiencyFixedCone + 
     process.pfTauVetoHighEfficiencyFixedConeHighEff + 
