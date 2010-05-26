@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("discrTest")
+process = cms.Process("test")
 
 process.maxEvents = cms.untracked.PSet(
-        input = cms.untracked.int32(-1)
+        input = cms.untracked.int32(10)
 )
 
 process.source = cms.Source("PoolSource",
@@ -20,17 +20,17 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
-process.load("HiggsAnalysis.HeavyVhHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
 
 process.runEDAna = cms.Path(
-        process.chargedHiggsTauIDDiscrimination
+        process.hplusTauDiscriminationSequence
 )
 
 process.TESTOUT = cms.OutputModule("PoolOutputModule",
         outputCommands = cms.untracked.vstring(
-            "drop *"
-            "keep *_*_*_discrTest"
+            "drop *",
+            "keep *_*_*_test"
         ),
-        fileName = cms.untracked.string('file:discrTest.root')
+        fileName = cms.untracked.string('file:testout.root')
 )
 process.outpath = cms.EndPath(process.TESTOUT)
