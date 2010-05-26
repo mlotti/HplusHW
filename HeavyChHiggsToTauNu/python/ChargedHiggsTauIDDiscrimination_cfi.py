@@ -5,7 +5,8 @@ hplusTrackQualityCuts = PFTauQualityCuts.clone()
 hplusTrackQualityCuts.maxTrackChi2 = cms.double(10.)
 hplusTrackQualityCuts.minTrackHits = cms.uint32(8)
 
-#from RecoTauTag.RecoTau.TauDiscriminatorTools import noPrediscriminants
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByLeadingTrackFinding_cfi import *
+pfRecoTauDiscriminationByLeadingTrackFinding.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByLeadingTrackPtCut_cfi import *
 hplusTauDiscriminationByLeadingTrackPtCut = pfRecoTauDiscriminationByLeadingTrackPtCut.clone()
@@ -13,11 +14,19 @@ hplusTauDiscriminationByLeadingTrackPtCut.PFTauProducer = cms.InputTag('fixedCon
 hplusTauDiscriminationByLeadingTrackPtCut.MinPtLeadingObject = cms.double(20.0)
 hplusTauDiscriminationByLeadingTrackPtCut.qualityCuts = hplusTrackQualityCuts
 
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByECALIsolation_cfi import *
+hplusTauDiscriminationByECALIsolation = pfRecoTauDiscriminationByECALIsolation.clone()
+hplusTauDiscriminationByECALIsolation.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
+
 hplusTauPrediscriminants = cms.PSet(
     BooleanOperator = cms.string("and"),
     leadingTrack = cms.PSet( 
         Producer = cms.InputTag('hplusTauDiscriminationByLeadingTrackPtCut'),
         cut = cms.double(0.5) 
+    ),
+    ecalIsolation = cms.PSet(
+        Producer = cms.InputTag('hplusTauDiscriminationByECALIsolation'),
+        cut = cms.double(0.5)
     )
 )
 
@@ -29,26 +38,8 @@ hplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
 
 hplusTauDiscriminationSequence = cms.Sequence(
     hplusTauDiscriminationByLeadingTrackPtCut *
+    pfRecoTauDiscriminationByLeadingTrackFinding * # needed by ECALIsolation
+    hplusTauDiscriminationByECALIsolation *
     hplusTauDiscrimination
 )
 
-#hplusTauIDDiscrimination = cms.EDProducer("TCRecoTauDiscriminationAlgoComponent",
-#        TauProducer = cms.InputTag('pfRecoTauProducer'),
-#        Prediscriminants = noPrediscriminants
-#)
-#
-#process.load("RecoTauTag.RecoTau.PFRecoTauDiscriminationByLeadingPionPtCut_cfi")
-#from RecoTauTag.RecoTau.TauDiscriminatorTools import noPrediscriminants
-#process.thisPFTauDiscriminationByLeadingPionPtCut = cms.EDFilter("PFRecoTauDiscriminationByLeadingObjectPtCut",
-#
-#    # Tau collection to discriminate
-#    PFTauProducer = cms.InputTag('shrinkingConePFTauProducer'),
-#
-#    # no pre-reqs for this cut
-#    Prediscriminants = noPrediscriminants,
-#
-#    # Allow either charged or neutral PFCandidates to meet this requirement
-#    UseOnlyChargedHadrons = cms.bool(False),
-#
-#    MinPtLeadingObject = cms.double(3.0)
-#)
