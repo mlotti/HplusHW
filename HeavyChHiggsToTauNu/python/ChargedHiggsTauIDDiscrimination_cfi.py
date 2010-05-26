@@ -27,6 +27,9 @@ pfRecoTauDiscriminationAgainstElectron.PFTauProducer = cms.InputTag('fixedConePF
 from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByTauPolarization_cfi import *
 pfRecoTauDiscriminationByTauPolarization.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
+pfRecoTauDiscriminationByNProngs.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
+
 hplusTauPrediscriminants = cms.PSet(
     BooleanOperator = cms.string("and"),
     leadingTrack = cms.PSet( 
@@ -48,6 +51,10 @@ hplusTauPrediscriminants = cms.PSet(
     polarization = cms.PSet(
         Producer = cms.InputTag('pfRecoTauDiscriminationByTauPolarization'),
         cut = cms.double(0.5)
+    ),
+    prongs = cms.PSet(
+        Producer = cms.InputTag('pfRecoTauDiscriminationByNProngs'),
+        cut = cms.double(0.5)
     )
 )
 
@@ -64,6 +71,7 @@ hplusTauDiscriminationSequence = cms.Sequence(
     hplusTauDiscriminationByECALIsolation *
     pfRecoTauDiscriminationAgainstElectron *
     pfRecoTauDiscriminationByTauPolarization *
+    pfRecoTauDiscriminationByNProngs *
     hplusTauDiscrimination
 )
 
