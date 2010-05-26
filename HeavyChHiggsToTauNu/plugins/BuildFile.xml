@@ -1,0 +1,6 @@
+<library   file="*.cc" name="HiggsAnalysisHeavyChHiggsToTauNuPlugins">
+  <flags   EDM_PLUGIN="1"/>
+  <use   name="DataFormats/TauReco"/>
+  <use   name="RecoTauTag/RecoTau"/>
+</library>
+
