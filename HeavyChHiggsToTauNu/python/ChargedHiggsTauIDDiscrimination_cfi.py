@@ -14,6 +14,9 @@ hplusTauDiscriminationByLeadingTrackPtCut.PFTauProducer = cms.InputTag('fixedCon
 hplusTauDiscriminationByLeadingTrackPtCut.MinPtLeadingObject = cms.double(20.0)
 hplusTauDiscriminationByLeadingTrackPtCut.qualityCuts = hplusTrackQualityCuts
 
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByCharge_cfi import *
+pfRecoTauDiscriminationByCharge.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
+
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByECALIsolation_cfi import *
 hplusTauDiscriminationByECALIsolation = pfRecoTauDiscriminationByECALIsolation.clone()
 hplusTauDiscriminationByECALIsolation.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
@@ -26,6 +29,10 @@ hplusTauPrediscriminants = cms.PSet(
     leadingTrack = cms.PSet( 
         Producer = cms.InputTag('hplusTauDiscriminationByLeadingTrackPtCut'),
         cut = cms.double(0.5) 
+    ),
+    charge = cms.PSet(
+        Producer = cms.InputTag('pfRecoTauDiscriminationByCharge'),
+        cut = cms.double(0.5)
     ),
     ecalIsolation = cms.PSet(
         Producer = cms.InputTag('hplusTauDiscriminationByECALIsolation'),
@@ -45,6 +52,7 @@ hplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
 
 hplusTauDiscriminationSequence = cms.Sequence(
     hplusTauDiscriminationByLeadingTrackPtCut *
+    pfRecoTauDiscriminationByCharge *
     pfRecoTauDiscriminationByLeadingTrackFinding * # needed by ECALIsolation and AgainstElectron
     hplusTauDiscriminationByECALIsolation *
     pfRecoTauDiscriminationAgainstElectron *
