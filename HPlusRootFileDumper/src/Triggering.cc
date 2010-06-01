@@ -60,7 +60,7 @@ void Triggering::setRootTreeBranches(TTree& tree) {
 }
 
 bool Triggering::apply(const edm::Event& iEvent) {
-  std::vector<edm::Handle<edm::TriggerResults> > myHLTHandles;
+  /*  std::vector<edm::Handle<edm::TriggerResults> > myHLTHandles;
   iEvent.getManyByType(myHLTHandles);
   if (!myHLTHandles.size()) {
     edm::LogWarning("HPlus") << "Cannot find HLT handles!" << std::endl;
@@ -78,7 +78,7 @@ bool Triggering::apply(const edm::Event& iEvent) {
       //std::cout << "Found HLT trigger names and the corresponding bits" << std::endl;
     }
   }
-  
+  */
   /* CODE EXAMPLE FOR HANDLING HLT OBJECTS
   std::vector<edm::Handle<trigger::TriggerEvent> > handles;
   iEvent.getManyByType(handles);
@@ -95,7 +95,7 @@ bool Triggering::apply(const edm::Event& iEvent) {
     //std::cout << "Object collection size " << objects.size() << std::endl;
   }
   */
-  
+  /*  
   // Set ROOT tree variable values
   int myTriggerCount = fTriggerBitsToBeSaved.size();
   for (int i = 0; i < myTriggerCount; ++i) {
@@ -109,7 +109,7 @@ bool Triggering::apply(const edm::Event& iEvent) {
     edm::Handle<edm::TriggerResults> myHandle = myHLTHandles[fTriggerBitsToBeApplied[i].first];
     if (!myHandle->accept(fTriggerBitsToBeApplied[i].second)) return false;
     fCounter->addCount(fCounterIdPassedTrigger[i]);
-  }
+    }*/
   return true;
 }
 
@@ -120,7 +120,7 @@ void Triggering::fillRootTreeData(TTree& tree) {
 void Triggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResults> >& handles,
                                  std::vector<std::string>& requested,
                                  std::vector<std::pair<int, int> >& bits) {
-  // Look for triggers
+  /*  // Look for triggers
   for (std::vector<std::string>::const_iterator it = requested.begin();
       it != requested.end(); ++it) {
     bool myTriggerFoundStatus = false;
@@ -148,6 +148,7 @@ void Triggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResul
     printListOfTriggers(handles);
     fPrintTriggerNames = false; // just to make sure
   }
+  */
 }
 
 
@@ -160,7 +161,7 @@ void Triggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResul
 }*/
 
 void Triggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerResults> >& handles) {
-  std::stringstream myStream;
+  /*  std::stringstream myStream;
   myStream << "Available triggers:" << std::endl;
   for (std::vector<edm::Handle<edm::TriggerResults> >::const_iterator iHandle = handles.begin();
     iHandle != handles.end(); ++iHandle) {
@@ -172,6 +173,7 @@ void Triggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerR
     }
   }
   edm::LogInfo("HPlus") << myStream.str();
+  */
 }
 
 }

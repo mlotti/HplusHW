@@ -13,12 +13,10 @@ CMSSW_3_6_1
 
 To install:
 -----------
-setup your local CMSSW area
+setup your local CMSSW area:
 scram project CMSSW CMSSW_x_y_z
 cd CMSSW_x_y_z/src
-mkdir HiggsAnalysis
-cd HiggsAnalysis
-git clone http://cmsdoc.cern.ch/~wendland/HPlusRootFileDumper.git
+git clone http://cmsdoc.cern.ch/~wendland/HiggsAnalysis.git
 cvs co -r V03-28-04 DataFormats/JetReco
 cvs co -r V00-16-00 DataFormats/TauReco
 cvs co -r V00-23-00 RecoTauTag/RecoTau
@@ -26,8 +24,10 @@ cvs co -r V00-21-00 RecoTauTag/Configuration
 
 To compile:
 -----------
-cd HPlusRootFileDumper
-scram b
+Compile first the packages by cd'ing into the relevant directory followed
+by a scram b. Then:
+  cd HiggsAnalysis/HPlusRootFileDumper
+  scram b
 
 To submit with crab:
 --------------------
