@@ -14,6 +14,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
 
 #include "TLorentzVector.h"
 
@@ -32,6 +33,7 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 		invMassMin		= iConfig.getParameter<double>("invMassMin");
 		invMassMax		= iConfig.getParameter<double>("invMassMax");
 		flightPathSig		= iConfig.getParameter<double>("flightPathSig");
+		withPVError		= iConfig.getParameter<bool>("UsePVerror");
 
 		PVProducer		= iConfig.getParameter<edm::InputTag>("PrimaryVertex");
 		chargedPionMass = 0.139;
@@ -46,7 +48,7 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 	double threeProngDeltaE(const PFTauRef&);
 	double threeProngInvMass(const PFTauRef&);
 	double threeProngFlightPathSig(const PFTauRef&);
-	double vertexSignificance(reco::Vertex&,TransientVertex&);
+	double vertexSignificance(reco::Vertex&,reco::Vertex&,GlobalVector&);
 
 
 	double chargedPionMass;
@@ -59,6 +61,7 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 	double deltaEmin,deltaEmax;
 	double invMassMin,invMassMax;
 	double flightPathSig;
+	bool withPVError;
 
 	reco::Vertex primaryVertex;
 	const TransientTrackBuilder* transientTrackBuilder;
@@ -151,14 +154,18 @@ double PFRecoTauDiscriminationByNProngs::threeProngFlightPathSig(const PFTauRef&
                 TransientVertex tv = kvf.vertex(transientTracks);
 
                 if(tv.isValid()){
-			flightPathSignificance = vertexSignificance(primaryVertex,tv);
+			GlobalVector tauDir(tau->px(),
+                                            tau->py(),
+                                            tau->pz());
+			Vertex secVer = tv;
+			flightPathSignificance = vertexSignificance(primaryVertex,secVer,tauDir);
                 }
         }
 	return flightPathSignificance;
 }
 
-double PFRecoTauDiscriminationByNProngs::vertexSignificance(reco::Vertex& pv, TransientVertex& sv){
-	return 0;
+double PFRecoTauDiscriminationByNProngs::vertexSignificance(reco::Vertex& pv, Vertex& sv,GlobalVector& direction){
+	return SecondaryVertex::computeDist3d(pv,sv,direction,withPVError).significance();
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByNProngs);

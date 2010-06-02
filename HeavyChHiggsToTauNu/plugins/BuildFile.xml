@@ -2,5 +2,6 @@
   <flags   EDM_PLUGIN="1"/>
   <use   name="DataFormats/TauReco"/>
   <use   name="RecoTauTag/RecoTau"/>
+  <use   name="RecoBTag/SecondaryVertex"/>
 </library>
 

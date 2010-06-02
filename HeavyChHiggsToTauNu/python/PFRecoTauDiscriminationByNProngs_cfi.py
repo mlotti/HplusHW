@@ -17,6 +17,7 @@ pfRecoTauDiscriminationByNProngs = cms.EDProducer("PFRecoTauDiscriminationByNPro
     invMassMin		= cms.double(0.0),   # used only if threeProngSelection == true
     invMassMax          = cms.double(1.4),   # used only if threeProngSelection == true
     flightPathSig	= cms.double(1.5),   # used only if threeProngSelection == true
+    UsePVerror		= cms.bool(True),
 
     qualityCuts         = PFTauQualityCuts,# set the standard quality cuts
     PVProducer          = cms.InputTag('offlinePrimaryVertices'), # needed for quality cuts
