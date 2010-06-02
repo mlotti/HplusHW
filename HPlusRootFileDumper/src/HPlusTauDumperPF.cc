@@ -54,7 +54,7 @@ void HPlusTauDumperPF::initializeSpecificBranchData() {
   fPFElectronET = -1;
 }
 */
-void HPlusTauDumperPF::setData(edm::Event& iEvent) {
+void HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Create pointers to data
   
   // Jet direction

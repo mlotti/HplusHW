@@ -106,7 +106,7 @@ void HPlusTauDumperCaloTau::initializeSpecificBranchData() {
 }
 */
 
-void HPlusTauDumperCaloTau::setData(edm::Event& iEvent) {
+void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Create pointers to data
   
   // Jet direction

@@ -7,6 +7,7 @@
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -41,7 +42,7 @@ class HPlusTauDumperBase : public HPlusAnalysisBase {
   virtual void initializeSpecificBranchData();
   */
   /// Sets the data specific to this tau collection
-  virtual void setData(edm::Event& iEvent); // Note: needs to be non-const
+  virtual void setData(edm::Event& iEvent, const edm::EventSetup& iSetup); // Note: Event needs to be non-const
   
   //TVector3& getPrimaryVertex() const { return fPV; }
   

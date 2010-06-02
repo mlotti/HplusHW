@@ -24,7 +24,7 @@ class HPlusTauDumperPF : public HPlusTauDumperBase {
   /// Initializes the variables specific to this tau collection 
   void initializeSpecificBranchData();*/
   /// Sets the data specific to this tau collection
-  void setData(edm::Event& iEvent);
+  void setData(edm::Event& iEvent, const edm::EventSetup& iSetup);
   
  private:
   
