@@ -5,6 +5,7 @@
 /* class PFRecoTauDiscriminationByTauPolarization
  * created : May 26 2010,
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
+ * based on H+ tau ID by Lauri Wendland
  */
 
 #include "TLorentzVector.h"
@@ -24,6 +25,8 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 		invMassMin		= iConfig.getParameter<double>("invMassMin");
 		invMassMax		= iConfig.getParameter<double>("invMassMax");
 		flightPathSig		= iConfig.getParameter<double>("flightPathSig");
+
+		chargedPionMass = 0.139;
 	}
 
       	~PFRecoTauDiscriminationByNProngs(){}
@@ -35,6 +38,8 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 	double threeProngDeltaE(const PFTauRef&);
 	double threeProngInvMass(const PFTauRef&);
 	double threeProngFlightPathSig(const PFTauRef&);
+
+	double chargedPionMass;
 
 	PFTauQualityCutWrapper qualityCuts_;
 
@@ -72,7 +77,6 @@ double PFRecoTauDiscriminationByNProngs::discriminate(const PFTauRef& tau){
 }
 
 double PFRecoTauDiscriminationByNProngs::threeProngDeltaE(const PFTauRef& tau){
-	double chargedPionMass = 0.139;
 	double tracksE = 0;
 	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
 	for(size_t i = 0; i < signalTracks.size(); ++i){
@@ -83,11 +87,23 @@ double PFRecoTauDiscriminationByNProngs::threeProngDeltaE(const PFTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->momentum().r();
+	return tracksE/tau->momentum().r() - 1;
 }
+
 double PFRecoTauDiscriminationByNProngs::threeProngInvMass(const PFTauRef& tau){
-	return 0;
+	TLorentzVector sum;
+	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
+        for(size_t i = 0; i < signalTracks.size(); ++i){                        
+                TLorentzVector p4;
+                p4.SetXYZM(signalTracks[i]->px(), 
+                           signalTracks[i]->py(),
+                           signalTracks[i]->pz(),
+                           chargedPionMass);
+                sum += p4;
+        }
+	return sum.M();
 }
+
 double PFRecoTauDiscriminationByNProngs::threeProngFlightPathSig(const PFTauRef& tau){
 	return 0;
 }
