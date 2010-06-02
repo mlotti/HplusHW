@@ -1,12 +1,19 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
 //#include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
+#include "FWCore/Utilities/interface/InputTag.h"
 
-/* class PFRecoTauDiscriminationByTauPolarization
+/* class PFRecoTauDiscriminationByNProngs
  * created : May 26 2010,
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
  * based on H+ tau ID by Lauri Wendland
  */
+
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 
 #include "TLorentzVector.h"
 
@@ -26,18 +33,21 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 		invMassMax		= iConfig.getParameter<double>("invMassMax");
 		flightPathSig		= iConfig.getParameter<double>("flightPathSig");
 
+		PVProducer		= iConfig.getParameter<edm::InputTag>("PrimaryVertex");
 		chargedPionMass = 0.139;
 	}
 
       	~PFRecoTauDiscriminationByNProngs(){}
 
-	void beginEvent(const Event&, const EventSetup&);
-	double discriminate(const PFTauRef&);
+	void beginEvent(const edm::Event&, const edm::EventSetup&);
+	double discriminate(const reco::PFTauRef&);
 
     private:
 	double threeProngDeltaE(const PFTauRef&);
 	double threeProngInvMass(const PFTauRef&);
 	double threeProngFlightPathSig(const PFTauRef&);
+	double vertexSignificance(reco::Vertex&,TransientVertex&);
+
 
 	double chargedPionMass;
 
@@ -49,9 +59,27 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 	double deltaEmin,deltaEmax;
 	double invMassMin,invMassMax;
 	double flightPathSig;
+
+	reco::Vertex primaryVertex;
+	const TransientTrackBuilder* transientTrackBuilder;
+	edm::InputTag PVProducer;
 };
 
-void PFRecoTauDiscriminationByNProngs::beginEvent(const Event& event, const EventSetup& eventSetup){}
+void PFRecoTauDiscriminationByNProngs::beginEvent(const Event& iEvent, const EventSetup& iSetup){
+
+//Primary vertex
+	edm::Handle<edm::View<reco::Vertex> > vertexHandle;
+	iEvent.getByLabel(PVProducer, vertexHandle);
+        const edm::View<reco::Vertex>& vertexCollection(*vertexHandle);
+        
+        primaryVertex = *(vertexCollection.begin());
+
+	// Transient Tracks
+	edm::ESHandle<TransientTrackBuilder> builder;
+        iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",builder);
+        transientTrackBuilder = builder.product();
+
+}
 
 double PFRecoTauDiscriminationByNProngs::discriminate(const PFTauRef& tau){
 
@@ -105,6 +133,31 @@ double PFRecoTauDiscriminationByNProngs::threeProngInvMass(const PFTauRef& tau){
 }
 
 double PFRecoTauDiscriminationByNProngs::threeProngFlightPathSig(const PFTauRef& tau){
+	double flightPathSignificance = 0;
+
+//Secondary vertex	
+	const PFCandidateRefVector pfSignalCandidates = tau->signalPFCands();
+	vector<TransientTrack> transientTracks;
+	RefVector<PFCandidateCollection>::const_iterator iTrack;
+        for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
+		const PFCandidate& pfCand = *(iTrack->get());
+		if(pfCand.trackRef().isNonnull()){
+                  const TransientTrack transientTrack = transientTrackBuilder->build(pfCand.trackRef());
+                  transientTracks.push_back(transientTrack);
+                }
+	}
+        if(transientTracks.size() > 1){
+                KalmanVertexFitter kvf(true);
+                TransientVertex tv = kvf.vertex(transientTracks);
+
+                if(tv.isValid()){
+			flightPathSignificance = vertexSignificance(primaryVertex,tv);
+                }
+        }
+	return flightPathSignificance;
+}
+
+double PFRecoTauDiscriminationByNProngs::vertexSignificance(reco::Vertex& pv, TransientVertex& sv){
 	return 0;
 }
 
