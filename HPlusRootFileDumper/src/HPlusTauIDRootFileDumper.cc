@@ -139,7 +139,7 @@ void HPlusTauIDRootFileDumper::produce(edm::Event& iEvent, const edm::EventSetup
   //fTauDumper->setupCommonRootTreeBranches(iEvent);
 
   // Set tau-jet variables
-  fTauDumper->setData(iEvent);
+  fTauDumper->setData(iEvent, iSetup);
   // ROOT tree filling is called inside the tau dumper object
   // Therefore, do not add ROOT tree filling here
   fCounter->addCount(fCounterIdSavedEvents);
