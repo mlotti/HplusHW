@@ -7,6 +7,8 @@
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
  */
 
+#include "TLorentzVector.h"
+
 using namespace reco;
 using namespace std;
 
@@ -30,6 +32,10 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 	double discriminate(const PFTauRef&);
 
     private:
+	double threeProngDeltaE(const PFTauRef&);
+	double threeProngInvMass(const PFTauRef&);
+	double threeProngFlightPathSig(const PFTauRef&);
+
 	PFTauQualityCutWrapper qualityCuts_;
 
 	uint32_t nprongs;
@@ -51,11 +57,39 @@ double PFRecoTauDiscriminationByNProngs::discriminate(const PFTauRef& tau){
            (np == 3 && (nprongs == 3 || nprongs == 0)) ) accepted = true;
 
 	if(threeProngSelection){
+		double dE = threeProngDeltaE(tau);
+		if(dE < deltaEmin || dE > deltaEmax) accepted = false;
 
+		double invMass = threeProngInvMass(tau);
+		if(invMass < invMassMin || invMass > invMassMax) accepted = false;
+
+		double fSig = threeProngFlightPathSig(tau);
+		if(fSig < flightPathSig) accepted = false;  
 	}
 
 	if(!accepted) np = 0;
 	return np;
+}
+
+double PFRecoTauDiscriminationByNProngs::threeProngDeltaE(const PFTauRef& tau){
+	double chargedPionMass = 0.139;
+	double tracksE = 0;
+	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
+	for(size_t i = 0; i < signalTracks.size(); ++i){
+		TLorentzVector p4;
+		p4.SetXYZM(signalTracks[i]->px(), 
+                           signalTracks[i]->py(), 
+                           signalTracks[i]->pz(), 
+                           chargedPionMass);
+		tracksE += p4.E();
+	}
+	return tracksE/tau->momentum().r();
+}
+double PFRecoTauDiscriminationByNProngs::threeProngInvMass(const PFTauRef& tau){
+	return 0;
+}
+double PFRecoTauDiscriminationByNProngs::threeProngFlightPathSig(const PFTauRef& tau){
+	return 0;
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByNProngs);
