@@ -158,7 +158,6 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
       throw cms::Exception("HPlus") << "Discriminator " << fTauDiscriminators[i].label() << " not found in dataset!" << std::endl;
     }
   }
-
   // calo jets
   edm::Handle<CaloJetCollection> calojets;
   iEvent.getByLabel(calojetsSrc, calojets); // FIXME set to InputTag instead of string 
@@ -168,7 +167,6 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   iEvent.getByLabel("caloRecoTauProducer",theCaloTauHandle);
   const CaloTauCollection & caloTaus = *(theCaloTauHandle.product());
   int nCaloTaus = caloTaus.size();
-
 
   // calo tau discriminators // FIXME: duplicate code
   /*//   
@@ -184,14 +182,15 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   Handle<CaloTauDiscriminator> theCaloTauDiscriminatorAgainstElectron;
   iEvent.getByLabel("caloRecoTauDiscriminationAgainstElectron",theCaloTauDiscriminatorAgainstElectron);
 */
-
   Handle<ValueMap<reco::JetID> > jetsID;
   iEvent.getByLabel(jetsIDSrc,jetsID);
+  if (!jetsID.isValid()) {
+    std::cout << "jetsID handle is a zero pointer" << std::endl;
+  }
   
     // get vertex // FIXME: vertex handling to base class
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByLabel("offlinePrimaryVertices",recVtxs);
-
   
   // FIXME: move this PV code to base class 
   int nvtx = 0;
@@ -261,7 +260,6 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
         
     double mN90  =  myJetRef->n90();
     double mEmf  =  myJetRef->emEnergyFraction(); 
-    
     double mN90Hits = (*jetsID)[myJetRef].n90Hits;
     double mfHPD    = (*jetsID)[myJetRef].fHPD;
     double mfRBX    = (*jetsID)[myJetRef].fRBX;  

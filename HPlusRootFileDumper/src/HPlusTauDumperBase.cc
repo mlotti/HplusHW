@@ -30,10 +30,9 @@ HPlusTauDumperBase::HPlusTauDumperBase(edm::EDProducer& producer, edm::Parameter
   producer.produces<std::vector<int> >(alias = "chargeSum").setBranchAlias(alias);
   // Charged track isolation related
   producer.produces<std::vector<int> >(alias = "trIsoSignalTrackCount").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "trIsoLowestSignalTrackPt").setBranchAlias(alias);
+  producer.produces<std::vector<float> >(alias = "trIsoSignalMinTrackPt").setBranchAlias(alias);
   producer.produces<std::vector<int> >(alias = "trIsoIsolationTrackCount").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "trIsoHighestIsolationTrackPt").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "trIsoSignalMinTrackPt").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "trIsoIsolationMinTrackPt").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "trIsoIsolationMaxDz").setBranchAlias(alias);
     // Jet energy details

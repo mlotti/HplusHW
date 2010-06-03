@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("tauID")
+process = cms.Process("HPLUS")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.categories.append("HPlusRootFileDumper")
@@ -9,13 +9,13 @@ process.MessageLogger.cerr = cms.untracked.PSet(
 )
 process.MessageLogger.cout = cms.untracked.PSet(
   INFO = cms.untracked.PSet(
-   reportEvery = cms.untracked.int32(100), # every 100th only
-   limit = cms.untracked.int32(100)       # or limit to 100 printouts...
+#   reportEvery = cms.untracked.int32(100), # every 100th only
+#   limit = cms.untracked.int32(100)       # or limit to 100 printouts...
   )
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 # Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')
@@ -73,7 +73,7 @@ process.monster = cms.EDFilter(
 process.source = cms.Source("PoolSource",
   #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-#        "file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root"
+#        'file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/E27821C3-0C3C-DF11-9BD9-0030487CD718.root',
@@ -101,7 +101,7 @@ process.source = cms.Source("PoolSource",
 )
 
 process.TFileService = cms.Service("TFileService",
-  fileName = cms.string('HPlusRootFileDumper.root')
+  fileName = cms.string('HPlusOutInfo.root')
 )
 
 #from RecoTauTag.RecoTau.CaloRecoTauTagInfoProducer_cfi import *
@@ -113,7 +113,7 @@ process.TFileService = cms.Service("TFileService",
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
 
-process.HPlusTauIDRootFileDumper = cms.EDAnalyzer('HPlusTauIDRootFileDumper',
+process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 #  tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
   tauCollectionName       = cms.InputTag("caloRecoTauProducer"),
   CaloTaus = cms.VPSet(
@@ -228,12 +228,13 @@ process.p = cms.Path(
     process.HPlusTauIDRootFileDumper
 )
                      
-#process.TESTOUT = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
-#        "drop *",
-#        "keep *_*_*_tauID"
+process.myout = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(
+        "drop *",
+        "keep *_*_*_tauID"
 ##         "keep *"
-#    ),
-#    fileName = cms.untracked.string('file:testout.root')
-#)
-#process.outpath = cms.EndPath(process.TESTOUT)
+    ),
+    fileName = cms.untracked.string('file:HPlusOut.root')
+)
+
+process.outpath = cms.EndPath(process.myout)
