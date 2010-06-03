@@ -69,16 +69,20 @@ process.TFileService = cms.Service("TFileService",
 from RecoTauTag.RecoTau.PFRecoTauProducer_cfi import *
 
 process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
+  TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
   TriggersToBeApplied = cms.vstring(
-    #"HLT_Jet15U"
-    "HLT_Jet30U"
-    #"HLT_DiJetAve15U_8E29"
-    #"HLT_QuadJet15U"
+#    "HLT_Jet30"
   ),
   TriggersToBeSaved = cms.vstring(
-    "HLT_Jet30U",
-    "HLT_DiJetAve15U_8E29",
-    "HLT_QuadJet15U"
+    "HLT_Jet30",
+    "HLT_DiJetAve15U_1E31",
+    "HLT_DiJetAve30U_1E31",
+    "HLT_QuadJet30",
+    "HLT_SingleIsoTau30_Trk5",
+    "HLT_Mu15",
+    "HLT_Ele15_SW_L1R",
+    "HLT_Ele15_SW_EleId_L1R",
+    "HLT_MET35",
   ),
   PrintTriggerNames = cms.bool(False)
 )

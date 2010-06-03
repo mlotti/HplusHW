@@ -14,6 +14,12 @@ HPlusAnalysis::HPlusAnalysisBase("HLTTrigger"),
 HPlusAnalysis::HPlusSelectionBase(iConfig) {
   fFoundTriggerBitsStatus = false;
   fPrintTriggerNames = false;
+  
+  if (iConfig.exists("TriggerResultsName")) {
+    fTriggerResultsName = iConfig.getParameter<edm::InputTag>("TriggerResultsName");
+  } else {
+    throw cms::Exception("HPlus") << "HPlusTriggering: You forgot to specify 'TriggerResultsName' in the config!" << std::endl;
+  }
   // Parse the list of triggers in the config file
   if (iConfig.exists("TriggersToBeApplied")) {
     fTriggerNamesToBeApplied = iConfig.getParameter<std::vector<std::string> >("TriggersToBeApplied");
@@ -22,15 +28,34 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
     fTriggerNamesToBeSaved = iConfig.getParameter<std::vector<std::string> >("TriggersToBeSaved");
   }
   // Add counters for all triggers to be applied
+  fCounterInput = fCounter->addCounter("HLTTrigger: input");
   for (std::vector<std::string>::const_iterator it = fTriggerNamesToBeApplied.begin();
        it != fTriggerNamesToBeApplied.end(); ++it) {
-    fCounterIdPassedTrigger.push_back(fCounter->addCounter("Passed trg " + *it));
+    fCounterIdPassedTrigger.push_back(fCounter->addCounter("HLTTrigger: passed trg " + *it));
   }
+  fCounterPassedAll = fCounter->addCounter("HLTTrigger: passed all");
   // Parse options
   if (iConfig.exists("PrintTriggerNames")) {
     fPrintTriggerNames = iConfig.getParameter<bool>("PrintTriggerNames");
   }
   
+  // Declare produced items
+  std::string alias;
+  int myTriggerCount = fTriggerNamesToBeSaved.size();
+  for (int i = 0; i < myTriggerCount; ++i) {
+    std::string myName = fTriggerNamesToBeSaved[i];
+    size_t myPosition = 0;
+    while (myPosition < myName.size()) {
+      size_t myIndex = myName.find("_", myPosition);
+      if (myIndex < myName.size()) {
+        myName = myName.erase(myIndex, 1);
+        //myName[myIndex] = '-';
+      }
+      myPosition = myIndex;
+    }
+    produces<int>(alias = myName.c_str()).setBranchAlias(alias);
+    fProductionTriggerNames.push_back(myName);
+  }
 }
 
 HPlusTriggering::~HPlusTriggering() {
@@ -65,25 +90,44 @@ void HPlusTriggering::setRootTreeBranches(TTree& tree) {
 }
 */
 bool HPlusTriggering::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  /*  std::vector<edm::Handle<edm::TriggerResults> > myHLTHandles;
-  iEvent.getManyByType(myHLTHandles);
-  if (!myHLTHandles.size()) {
-    edm::LogWarning("HPlus") << "Cannot find HLT handles!" << std::endl;
+  fCounter->addCount(fCounterInput);
+  edm::Handle<edm::TriggerResults> myHLTHandle;
+  iEvent.getByLabel(fTriggerResultsName, myHLTHandle);
+  if (!myHLTHandle.isValid()) {
+    throw cms::Exception("HPlus") << "HPlusTriggering: Cannot find HLT handle!" << std::endl;
     return false;
   }
+  
   // Find trigger bits, unless they are already searched
   if (!fFoundTriggerBitsStatus) {
-    findTriggerBits(myHLTHandles, fTriggerNamesToBeSaved, fTriggerBitsToBeSaved);
-    findTriggerBits(myHLTHandles, fTriggerNamesToBeApplied, fTriggerBitsToBeApplied);
-    // Check if search was successful
-    fFoundTriggerBitsStatus = (fTriggerNamesToBeApplied.size() && fTriggerBitsToBeApplied.size())
-      || (fTriggerNamesToBeSaved.size() && fTriggerBitsToBeSaved.size());
-    if (fFoundTriggerBitsStatus) {
-      edm::LogInfo("HPlus") << "Found HLT trigger names and the corresponding bits" << std::endl;
-      //std::cout << "Found HLT trigger names and the corresponding bits" << std::endl;
+    edm::TriggerNames const& myTriggerNames = iEvent.triggerNames(*myHLTHandle);
+    findTriggerBits(myTriggerNames, fTriggerNamesToBeApplied, fTriggerBitsToBeApplied);
+    findTriggerBits(myTriggerNames, fTriggerNamesToBeSaved, fTriggerBitsToBeSaved);
+    if (fPrintTriggerNames) {
+      printListOfTriggers(myTriggerNames);
+      fPrintTriggerNames = false; // just to make sure
     }
+    fFoundTriggerBitsStatus = true;
   }
-  */
+     
+  // Apply trigger decision
+  int myTriggerCount = fTriggerBitsToBeApplied.size();
+  for (int i = 0; i < myTriggerCount; ++i) {
+    if (!myHLTHandle->accept(fTriggerBitsToBeApplied[i])) return false;
+    fCounter->addCount(fCounterIdPassedTrigger[i]);
+  }
+  
+  // Set saved trigger values
+  myTriggerCount = fTriggerBitsToBeSaved.size();
+  for (int i = 0; i < myTriggerCount; ++i) {
+    std::auto_ptr<int> myTrgValue(new int);
+    *myTrgValue = myHLTHandle->accept(fTriggerBitsToBeSaved[i]);
+    iEvent.put(myTrgValue, fProductionTriggerNames[i]);
+  }
+  
+  fCounter->addCount(fCounterPassedAll);
+  return true;
+
   /* CODE EXAMPLE FOR HANDLING HLT OBJECTS
   std::vector<edm::Handle<trigger::TriggerEvent> > handles;
   iEvent.getManyByType(handles);
@@ -100,89 +144,63 @@ bool HPlusTriggering::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) 
     //std::cout << "Object collection size " << objects.size() << std::endl;
   }
   */
-  /*  
-  // Set ROOT tree variable values
-  int myTriggerCount = fTriggerBitsToBeSaved.size();
-  for (int i = 0; i < myTriggerCount; ++i) {
-    edm::Handle<edm::TriggerResults> myHandle = myHLTHandles[fTriggerBitsToBeSaved[i].first];
-    fTriggerStatusToBeSaved[i] = myHandle->accept(fTriggerBitsToBeSaved[i].second);
-  }
-    
-  // Apply trigger decision
-  myTriggerCount = fTriggerBitsToBeApplied.size();
-  for (int i = 0; i < myTriggerCount; ++i) {
-    edm::Handle<edm::TriggerResults> myHandle = myHLTHandles[fTriggerBitsToBeApplied[i].first];
-    if (!myHandle->accept(fTriggerBitsToBeApplied[i].second)) return false;
-    fCounter->addCount(fCounterIdPassedTrigger[i]);
-    }*/
-  return true;
 }
 
 void HPlusTriggering::endJob() {
 
 }
-
 /*
-void HPlusTriggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResults> >& handles,
-                                 std::vector<std::string>& requested,
-                                 std::vector<std::pair<int, int> >& bits) {
-    // Look for triggers
-  for (std::vector<std::string>::const_iterator it = requested.begin();
-      it != requested.end(); ++it) {
-    bool myTriggerFoundStatus = false;
-    int myHandleCount = handles.size();
-    for (int j = 0; j < myHandleCount; ++j) {
-      edm::TriggerNames myTriggerNames;
-      myTriggerNames.init(*(handles[j]));
-      int myTriggerSize = myTriggerNames.size();
-      for (int i = 0; i < myTriggerSize; ++i) {
-        if (*it == myTriggerNames.triggerName(i)) {
-          std::pair<int, int> myPair;
-          myPair.first = j;
-          myPair.second = i;
-          bits.push_back(myPair);
-          myTriggerFoundStatus = true;
-        }
-      }
-    }
-    if (!myTriggerFoundStatus) {
-      printListOfTriggers(handles);
-      throw cms::Exception("Configuration") << "Trigger '" << *it << "' not found in HLT menu!" << std::endl; 
-    }
+void HPlusTriggering::findTriggerBits(const edm::Event& iEvent,
+                                      const edm::TriggerResults& triggerResults, 
+                                      std::vector<std::string>& requested)
+  edm::TriggerNames const& myTriggerNames = iEvent.triggerNames(*myHLTHandle);
+  int myTriggerSize = myTriggerNames.size();
+  
+  int myRequestedSize = requested.size();
+  for (int j = 0; j < myRequestedSize; ++j) {
+    std::cout << requested[j] << ", idx=" << myTriggerNames.triggerIndex(requested[j]) << std::endl;
   }
-  if (fPrintTriggerNames) {
-    printListOfTriggers(handles);
-    fPrintTriggerNames = false; // just to make sure
-  }
-
-}
-
-
-void HPlusTriggering::printListOfTriggers(const edm::TriggerNames& names) {
-  int myTriggerSize = names.size();
-  std::cout << "Available triggers:" << std::endl;
-  for (int i = 0; i < myTriggerSize; ++i) {
-    std::cout << "  " << i << " " << names.triggerName(i) << std::endl;
-  }
-}
-
-void HPlusTriggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerResults> >& handles) {
-   std::stringstream myStream;
-  myStream << "Available triggers:" << std::endl;
-  for (std::vector<edm::Handle<edm::TriggerResults> >::const_iterator iHandle = handles.begin();
-    iHandle != handles.end(); ++iHandle) {
-    edm::TriggerNames myTriggerNames;
-    myTriggerNames.init(**iHandle);
-    int myTriggerSize = myTriggerNames.size();
     for (int i = 0; i < myTriggerSize; ++i) {
-      myStream << "  " << i << " " << myTriggerNames.triggerName(i) << std::endl;
+      if (requested[j] == 
     }
+  }
+  
+  
+  std::stringstream myStream;
+  myStream << "Available triggers:" << std::endl;
+  edm::TriggerNames const& myTriggerNames = iEvent.triggerNames(*myHLTHandle);
+  int myTriggerSize = myTriggerNames.size();
+  for (int i = 0; i < myTriggerSize; ++i) {
+    myStream << "  " << i << " " << myTriggerNames.triggerName(i) << std::endl;
   }
   edm::LogInfo("HPlus") << myStream.str();
-  
-}
 */
-//}
+
+void HPlusTriggering::findTriggerBits(edm::TriggerNames const& triggerNames,
+                                      std::vector<std::string>& requestedNames,
+                                      std::vector<int>& requestedBits) {
+  // Look for trigger bits
+  int myRequestedSize = requestedNames.size();
+  int myTriggerNamesSize = triggerNames.size();
+  for (int j = 0; j < myRequestedSize; ++j) {
+    int myIndex = triggerNames.triggerIndex(requestedNames[j]);
+    if (myIndex == myTriggerNamesSize) {
+      printListOfTriggers(triggerNames);
+      throw cms::Exception("HPlus") << "HPlusTriggering: Cannot find trigger index for trigger '"
+                                    << requestedNames[j] << "'!" << std::endl;
+    }
+    requestedBits.push_back(myIndex);
+  }
+}
+
+void HPlusTriggering::printListOfTriggers(const edm::TriggerNames& names) {
+  std::stringstream myStream;
+  int myTriggerSize = names.size();
+  myStream << "Available triggers:" << std::endl;
+  for (int i = 0; i < myTriggerSize; ++i) {
+    myStream << "  " << i << " " << names.triggerName(i) << std::endl;
+  }
+  edm::LogInfo("HPlus") << myStream.str();
+}
 
 DEFINE_FWK_MODULE(HPlusTriggering);
-
