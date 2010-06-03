@@ -4,30 +4,34 @@
 
 namespace HPlusAnalysis {
 
-HPlusSelectionBase::HPlusSelectionBase() {
+HPlusSelectionBase::HPlusSelectionBase(const edm::ParameterSet& iConfig) {
   fIsApplied = true;
   fIsHistogrammed = true;
+  // Get general settings, if they have been specified
+  if (iConfig.exists("IsAppliedStatus")) {
+    fIsApplied = iConfig.getParameter<bool>("IsAppliedStatus");
+  }
+  if (iConfig.exists("IsHistogrammedStatus")) {
+    fIsHistogrammed = iConfig.getParameter<bool>("IsHistogrammedStatus");
+  }
 }
 
 HPlusSelectionBase::~HPlusSelectionBase() {
 
 }
 
-void HPlusSelectionBase::setup(const edm::ParameterSet& iConfig) { 
-  edm::LogWarning("HPlus") << "Did you forget to add to a selection class the 'setup'-method?";
+void HPlusSelectionBase::beginJob() {
+
 }
 
-void HPlusSelectionBase::setRootTreeBranches(TTree& tree) {
-  edm::LogWarning("HPlus") << "Did you forget to add to a selection class the 'setRootTreeBranches'-method?";
-}
-
-bool HPlusSelectionBase::apply(const edm::Event& iEvent) {
-  edm::LogWarning("HPlus") << "Did you forget to add to a selection class the 'apply'-method?";
+/// Method to apply the event selection; returns true if passed
+bool HPlusSelectionBase::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  edm::LogWarning("HPlus") << "Did you forget to add to a selection class the 'filter'-method?";
   return false;
 }
 
-void HPlusSelectionBase::fillRootTreeData(TTree& tree) {
-  edm::LogWarning("HPlus") << "Did you forget to add to a selection class the 'fillRootTreeData'-method?";
+void HPlusSelectionBase::endJob() {
+
 }
 
 void HPlusSelectionBase::setOptions(bool isApplied, bool isHistogrammed) {

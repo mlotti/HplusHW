@@ -1,5 +1,5 @@
-#ifndef HPLUSANALYSISTRIGGERING_H
-#define HPLUSANALYSISTRIGGERING_H
+#ifndef HPLUSANALYSIHPLUSSTRIGGERING_H
+#define HPLUSANALYSIHPLUSSTRIGGERING_H
 
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusAnalysisBase.h"
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusSelectionBase.h"
@@ -10,36 +10,28 @@
 #include <string>
 #include <utility>
 
-namespace HPlusAnalysis {
+//namespace HPlusAnalysis {
 
 /**
 Class for applying and handling trigger decisions
 
 	@author Lauri Wendland
 */
-class Triggering : public HPlusAnalysisBase, public HPlusSelectionBase {
+class HPlusTriggering : public HPlusAnalysis::HPlusAnalysisBase, public HPlusAnalysis::HPlusSelectionBase {
  public:
   /// Default constructor
-  Triggering();
+  HPlusTriggering(const edm::ParameterSet& iConfig);
   /// Default destructor
-  ~Triggering();
+  ~HPlusTriggering();
   
-  /// Method for parsing all necessary configuration things 
-  void setup(const edm::ParameterSet& iConfig);
-  /// Method for setting ROOT tree branches
-  void setRootTreeBranches(TTree& tree);
+  void beginJob();
+
   /// Applies the trigger selection; returns true if trigger was passed
-  bool apply(const edm::Event& iEvent);
-  /// Method for filling ROOT tree branches with data
-  void fillRootTreeData(TTree& tree);
+  bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
+  
+  void endJob();
   
  private:
-  /// Internal method for finding TriggerResults handle and trigger bit ID for each trigger
-  void findTriggerBits(const std::vector<edm::Handle<edm::TriggerResults> >& handles,
-                       std::vector<std::string>& requested,
-                       std::vector<std::pair<int, int> >& bits);
-  /// Prints to LogInfo names of all available triggers
-  void printListOfTriggers(const std::vector<edm::Handle<edm::TriggerResults> >& handles);
   
   /// IDs of the event counters
   std::vector<int> fCounterIdPassedTrigger;
@@ -62,6 +54,6 @@ class Triggering : public HPlusAnalysisBase, public HPlusSelectionBase {
   std::vector<int> fTriggerStatusToBeSaved;
 };
 
-}
+//}
 
 #endif

@@ -112,6 +112,26 @@ process.TFileService = cms.Service("TFileService",
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
+process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
+  TriggersToBeApplied = cms.vstring(
+    #"HLT_Jet15U"
+    "HLT_Jet30U"
+    #"HLT_DiJetAve15U_8E29"
+    #"HLT_QuadJet15U"
+  ),
+  TriggersToBeSaved = cms.vstring(
+    "HLT_Jet30U",
+    "HLT_DiJetAve15U_8E29",
+    "HLT_QuadJet15U"
+  ),
+  PrintTriggerNames = cms.bool(False)
+)
+
+process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
+  MuonCollectionName = cms.InputTag("muons"),
+  MaxMuonPtCutValue = cms.double(15),
+  IsHistogrammedStatus = cms.bool(True)
+)
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 #  tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
@@ -190,41 +210,22 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 	cms.InputTag("shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion")
       )
     )
-  ),
-  EventSelectionManager = cms.PSet(
-    DefaultIsAppliedStatus = cms.bool(True),
-    DefaultIsHistogrammedStatus = cms.bool(True),
-    EventSelection = cms.VPSet(
-      cms.PSet(
-        Name = cms.string("HLTTrigger"),
-        TriggersToBeApplied = cms.vstring(
-          #"HLT_Jet15U"         
-          #"HLT_Jet30U"
-        ),
-        TriggersToBeSaved = cms.vstring(
-          "HLT_Jet30U",
-          "HLT_DiJetAve15U_8E29",
-          "HLT_QuadJet15U"
-        )
-      ),
-      cms.PSet(
-        Name = cms.string("GlobalMuonVeto"),
-        MuonCollectionName = cms.InputTag("muons"),
-        MaxMuonPtCutValue = cms.double(15)
-      )
-      # Add here new event selections, if necessary
-    )
   )
 )
 
 #process.p = cms.Path(process.HPlusTauIDRootFileDumper)
 
+MySelection = cms.Sequence (
+  process.HPlusHLTTrigger *
+  process.HPlusGlobalMuonVeto
+)
 
 process.p = cms.Path(
     process.hltLevel1GTSeed *
     process.hltHighLevel *	
     process.monster *
     process.tautagging *
+    MySelection *
     process.HPlusTauIDRootFileDumper
 )
                      

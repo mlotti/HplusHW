@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HPlusRootFileDumper/interface/Triggering.h"
+#include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusTriggering.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
@@ -7,24 +7,13 @@
 #include <iostream>
 #include <sstream>
 
-namespace HPlusAnalysis {
+//namespace HPlusAnalysis {
 
-Triggering::Triggering() :
-HPlusAnalysisBase("HLTTrigger") {
+HPlusTriggering::HPlusTriggering(const edm::ParameterSet& iConfig) :
+HPlusAnalysis::HPlusAnalysisBase("HLTTrigger"), 
+HPlusAnalysis::HPlusSelectionBase(iConfig) {
   fFoundTriggerBitsStatus = false;
   fPrintTriggerNames = false;
-}
-
-Triggering::~Triggering() {
-  fTriggerNamesToBeSaved.clear();
-  fTriggerNamesToBeApplied.clear();
-  fTriggerBitsToBeSaved.clear();
-  fTriggerBitsToBeApplied.clear();
-  fCounterIdPassedTrigger.clear();
-  fTriggerStatusToBeSaved.clear();
-}
-
-void Triggering::setup(const edm::ParameterSet& iConfig) {
   // Parse the list of triggers in the config file
   if (iConfig.exists("TriggersToBeApplied")) {
     fTriggerNamesToBeApplied = iConfig.getParameter<std::vector<std::string> >("TriggersToBeApplied");
@@ -41,9 +30,24 @@ void Triggering::setup(const edm::ParameterSet& iConfig) {
   if (iConfig.exists("PrintTriggerNames")) {
     fPrintTriggerNames = iConfig.getParameter<bool>("PrintTriggerNames");
   }
+  
 }
 
-void Triggering::setRootTreeBranches(TTree& tree) {
+HPlusTriggering::~HPlusTriggering() {
+  fTriggerNamesToBeSaved.clear();
+  fTriggerNamesToBeApplied.clear();
+  fTriggerBitsToBeSaved.clear();
+  fTriggerBitsToBeApplied.clear();
+  fCounterIdPassedTrigger.clear();
+  fTriggerStatusToBeSaved.clear();
+}
+
+void HPlusTriggering::beginJob() {
+
+}
+
+/*
+void HPlusTriggering::setRootTreeBranches(TTree& tree) {
   // Initialize trigger status variables
   if (!fTriggerStatusToBeSaved.size()) {
     for (std::vector<std::string>::const_iterator it = fTriggerNamesToBeSaved.begin();
@@ -59,8 +63,8 @@ void Triggering::setRootTreeBranches(TTree& tree) {
     tree.Branch(myName.str().c_str(), &(fTriggerStatusToBeSaved[i]));
   }
 }
-
-bool Triggering::apply(const edm::Event& iEvent) {
+*/
+bool HPlusTriggering::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   /*  std::vector<edm::Handle<edm::TriggerResults> > myHLTHandles;
   iEvent.getManyByType(myHLTHandles);
   if (!myHLTHandles.size()) {
@@ -114,14 +118,15 @@ bool Triggering::apply(const edm::Event& iEvent) {
   return true;
 }
 
-void Triggering::fillRootTreeData(TTree& tree) {
+void HPlusTriggering::endJob() {
 
 }
 
-void Triggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResults> >& handles,
+/*
+void HPlusTriggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResults> >& handles,
                                  std::vector<std::string>& requested,
                                  std::vector<std::pair<int, int> >& bits) {
-  /*  // Look for triggers
+    // Look for triggers
   for (std::vector<std::string>::const_iterator it = requested.begin();
       it != requested.end(); ++it) {
     bool myTriggerFoundStatus = false;
@@ -149,20 +154,20 @@ void Triggering::findTriggerBits(const std::vector<edm::Handle<edm::TriggerResul
     printListOfTriggers(handles);
     fPrintTriggerNames = false; // just to make sure
   }
-  */
+
 }
 
 
-/*void Triggering::printListOfTriggers(const edm::TriggerNames& names) {
+void HPlusTriggering::printListOfTriggers(const edm::TriggerNames& names) {
   int myTriggerSize = names.size();
   std::cout << "Available triggers:" << std::endl;
   for (int i = 0; i < myTriggerSize; ++i) {
     std::cout << "  " << i << " " << names.triggerName(i) << std::endl;
   }
-}*/
+}
 
-void Triggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerResults> >& handles) {
-  /*  std::stringstream myStream;
+void HPlusTriggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerResults> >& handles) {
+   std::stringstream myStream;
   myStream << "Available triggers:" << std::endl;
   for (std::vector<edm::Handle<edm::TriggerResults> >::const_iterator iHandle = handles.begin();
     iHandle != handles.end(); ++iHandle) {
@@ -174,9 +179,10 @@ void Triggering::printListOfTriggers(const std::vector<edm::Handle<edm::TriggerR
     }
   }
   edm::LogInfo("HPlus") << myStream.str();
-  */
+  
 }
+*/
+//}
 
-}
-
+DEFINE_FWK_MODULE(HPlusTriggering);
 

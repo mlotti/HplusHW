@@ -1,20 +1,13 @@
-#include "HiggsAnalysis/HPlusRootFileDumper/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusGlobalMuonVeto.h"
 
 #include <iostream>
-#include <sstream>
+#include <string>
 
-namespace HPlusAnalysis {
+//namespace HPlusAnalysis {
 
-GlobalMuonVeto::GlobalMuonVeto() :
-HPlusAnalysisBase("GlobalMuonVeto") {
-  fMaxMuonPt = -1;
-  fMuonTracks.reserve(20);
-}
-
-GlobalMuonVeto::~GlobalMuonVeto() {
-}
-
-void GlobalMuonVeto::setup(const edm::ParameterSet& iConfig) {
+HPlusGlobalMuonVeto::HPlusGlobalMuonVeto(const edm::ParameterSet& iConfig) :
+HPlusAnalysis::HPlusAnalysisBase("GlobalMuonVeto"),
+HPlusAnalysis::HPlusSelectionBase(iConfig) {
   // Parse the list of triggers in the config file
   if (iConfig.exists("MuonCollectionName")) {
     fMuonCollectionName = iConfig.getParameter<edm::InputTag>("MuonCollectionName");
@@ -27,42 +20,50 @@ void GlobalMuonVeto::setup(const edm::ParameterSet& iConfig) {
     throw cms::Exception("Configuration") << "GlobalMuonVeto: float value 'MaxMuonPtCutValue' is missing! in config!" << std::endl;
   }
   // Initialize counters
-  fPassedGlobalMuonVeto = fCounter->addCounter("Global muon veto passed");
+  fGlobalMuonVetoInput = fCounter->addCounter("GlobalMuonVeto input");
+  fPassedGlobalMuonVeto = fCounter->addCounter("GlobalMuonVeto passed");
+  fMuonCollectionHandleEmpty = fCounter->addSubCounter("GlobalMuonVeto: Muon collection is empty");
   fAllMuonCandidates = fCounter->addSubCounter("GlobalMuonVeto: All mu candidates");
   fAfterExcludedMuons = fCounter->addSubCounter("GlobalMuonVeto: Excluded mu removed");
   fAfterTrackRefNonNull = fCounter->addSubCounter("GlobalMuonVeto: Muon track found");
   fFailedPtCut = fCounter->addSubCounter("GlobalMuonVeto: After pT cut");
+  
+  // Declare produced items
+  std::string alias;
+  produces<float>(alias = "GlobalMuonVetoMaxMuonPt").setBranchAlias(alias);
 }
 
-void GlobalMuonVeto::setRootTreeBranches(TTree& tree) {
-  // Setup branches
-  tree.Branch("MuonVeto_MaxMuonPt", &fMaxMuonPt);
-  
+HPlusGlobalMuonVeto::~HPlusGlobalMuonVeto() {
+}
+
+void HPlusGlobalMuonVeto::beginJob() {
   // Set histograms
-  std::cout << "muon isHistogrammed=" << isHistogrammed() << std::endl;
   if (isHistogrammed()) {
-    hMuonMaxPt = fFileService->make<TH1F>("N / 2 GeV/c", "Highest global #mu p_{T}, GeV/c", 100, 0., 200.);
-    hMuonEtaofHighest = fFileService->make<TH1F>("N / 0.05", "#eta of highest global #mu", 120, -3.0, 3.0);
-    hMuonPtAllMuons = fFileService->make<TH1F>("N / 2 GeV/c", "#mu p_{T} of all global #mu's, GeV/c", 100, 0., 200.);
-    hMuonEtaAllMuons = fFileService->make<TH1F>("N / 0.05", "#eta of all global #mu's", 120, -3.0, 3.0);
+    hMuonMaxPt = fFileService->make<TH1F>("HighestGlobalMuPt", "Highest global #mu p_{T}",  100, 0., 200.);
+    hMuonEtaofHighest = fFileService->make<TH1F>("HighestGlobalMuEta", "#eta of highest global #mu", 120, -3.0, 3.0);
+    hMuonPtAllMuons = fFileService->make<TH1F>("AllGlobalMuPt", "#mu p_{T} of all global #mu's", 100, 0., 200.);
+    hMuonEtaAllMuons = fFileService->make<TH1F>("AllGlobalMuEta", "#eta of all global #mu's", 120, -3.0, 3.0);
   }
 }
 
-bool GlobalMuonVeto::apply(const edm::Event& iEvent) {
-  // Initialize histogramming variables
-  fMaxMuonPt = 0;
-  fMuonTracks.clear();
-  
+void HPlusGlobalMuonVeto::endJob() {
+
+}
+
+bool HPlusGlobalMuonVeto::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  fCounter->addCount(fGlobalMuonVetoInput);
   // Get muon handle
   edm::Handle<reco::MuonCollection> myMuonHandle;
   iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
   if (!myMuonHandle->size()) {
-    edm::LogInfo("HPlus") << "Muon handle is empty!" << std::endl;
+    //edm::LogInfo("HPlus") << "Muon handle is empty!" << std::endl;
     // No muons --> global muon veto has been passed
     fCounter->addCount(fPassedGlobalMuonVeto);
+    fCounter->addCount(fMuonCollectionHandleEmpty);
     return true;
   }
   
+  std::auto_ptr<float> myHighestMuonPt(new float); // highest pt of muon that has passed all criteria
   /*
   // Analyze MC info to look for muons from a W
   TLorentzVector mcMuonFromW(0,0,0,0);
@@ -79,6 +80,8 @@ bool GlobalMuonVeto::apply(const edm::Event& iEvent) {
   bool myDecisionStatus = true;
 
   // Loop over muons
+  *myHighestMuonPt = 0;
+  double myHighestMuonEta = -10;
   for (reco::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
     fCounter->addCount(fAllMuonCandidates);
 
@@ -99,7 +102,12 @@ bool GlobalMuonVeto::apply(const edm::Event& iEvent) {
     reco::TrackRef myTrackRef = (*iMuon).globalTrack();
     if (myTrackRef.isNull()) continue;
     fCounter->addCount(fAfterTrackRefNonNull);
-    if (isHistogrammed()) fMuonTracks.push_back(myTrackRef);
+    // Plot pt and eta of all muons 
+    if (isHistogrammed()) {
+      hMuonPtAllMuons->Fill(myTrackRef->pt());
+      hMuonEtaAllMuons->Fill(myTrackRef->eta());
+    }
+    
     double myMuonPt = myTrackRef->pt();
     //fHistograms->fill("h_vetoMuon_pt",(*iMuon)->Pt());
     //if (myMuonPt > 0) fHistograms->fill("h_vetoMuon_eta",(*iMuon)->Eta()); // protection against infinite eta
@@ -111,9 +119,10 @@ bool GlobalMuonVeto::apply(const edm::Event& iEvent) {
     //fHistograms->fill("h_ptIsolatedMuon",iMuon->Pt());
 
     // Check the muon pt
-    if (myMuonPt > fMaxMuonPt)
-      fMaxMuonPt = myMuonPt;
-    std::cout << "muon pt=" << myMuonPt << ", max=" << fMaxMuonPt << std::endl;
+    if (myMuonPt > *myHighestMuonPt) {
+      *myHighestMuonPt = myMuonPt;
+      myHighestMuonEta = myTrackRef->eta();
+    }
     if (myMuonPt < fCutValueMaxMuonPt) continue;
     fCounter->addCount(fFailedPtCut);
     
@@ -133,27 +142,20 @@ bool GlobalMuonVeto::apply(const edm::Event& iEvent) {
       fEventCounter->addSubCount("veto muon cands, mc mu from W");
     }*/
   }
-  if (!myDecisionStatus) std::cout << "failed" << std::endl;
+  if (isHistogrammed()) {
+    hMuonMaxPt->Fill(*myHighestMuonPt);
+    if (hMuonMaxPt > 0)
+      hMuonEtaofHighest->Fill(myHighestMuonEta);
+  }
+  //if (!myDecisionStatus) std::cout << "failed" << std::endl;
    
-  if (myDecisionStatus) fCounter->addCount(fPassedGlobalMuonVeto);
+  if (myDecisionStatus) {
+    fCounter->addCount(fPassedGlobalMuonVeto);
+    iEvent.put(myHighestMuonPt, "GlobalMuonVetoMaxMuonPt");
+  }
   return myDecisionStatus;
 }
 
-void GlobalMuonVeto::fillRootTreeData(TTree& tree) {
-  std::vector<reco::TrackRef>::const_iterator itEnd = fMuonTracks.end();
-  for (std::vector<reco::TrackRef>::const_iterator it = fMuonTracks.begin(); it != itEnd; ++it) {
-    if (abs((*it)->pt() - fMaxMuonPt) < 0.0001) {
-      hMuonEtaofHighest->Fill((*it)->eta());
-    }
-    hMuonPtAllMuons->Fill((*it)->pt());
-    hMuonEtaAllMuons->Fill((*it)->eta());
-  }
-  if (fMuonTracks.size()) {
-    hMuonMaxPt->Fill(fMaxMuonPt);
-  }
-}
+//}
 
-
-}
-
-
+DEFINE_FWK_MODULE(HPlusGlobalMuonVeto);

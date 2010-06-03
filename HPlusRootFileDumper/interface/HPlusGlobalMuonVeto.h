@@ -1,5 +1,5 @@
-#ifndef HPLUSANALYSISGLOBALMUONVETO_H
-#define HPLUSANALYSISGLOBALMUONVETO_H
+#ifndef HPLUSANALYSISHPLUSGLOBALMUONVETO_H
+#define HPLUSANALYSISHPLUSGLOBALMUONVETO_H
 
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusAnalysisBase.h"
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusSelectionBase.h"
@@ -17,7 +17,7 @@
 
 #include <vector>
 
-namespace HPlusAnalysis {
+//namespace HPlusAnalysis {
 
 /**
 Class for applying global muon veto, i.e. loop over all muons in the event
@@ -29,21 +29,17 @@ H+ -> tau nu decay channel
 
 	@author Lauri Wendland, Ritva Kinnunen
 */
-class GlobalMuonVeto : public HPlusAnalysisBase, public HPlusSelectionBase {
+class HPlusGlobalMuonVeto : public HPlusAnalysis::HPlusAnalysisBase, public HPlusAnalysis::HPlusSelectionBase {
  public:
   /// Default constructor
-  GlobalMuonVeto();
+  HPlusGlobalMuonVeto(const edm::ParameterSet& iConfig);
   /// Default destructor
-  ~GlobalMuonVeto();
+  ~HPlusGlobalMuonVeto();
   
-  /// Method for parsing all necessary configuration things 
-  void setup(const edm::ParameterSet& iConfig);
-  /// Method for setting ROOT tree branches
-  void setRootTreeBranches(TTree& tree);
+  void beginJob();
+  void endJob();
   /// Applies the trigger selection; returns true if trigger was passed
-  bool apply(const edm::Event& iEvent);
-  /// Method for filling ROOT tree branches with data
-  void fillRootTreeData(TTree& tree);
+  bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   /// Setter for excluded muons
   void addExcludedMuon(const reco::Muon* muon) { fExcludedMuons.push_back(muon); }
   
@@ -57,17 +53,13 @@ class GlobalMuonVeto : public HPlusAnalysisBase, public HPlusSelectionBase {
   
   // Counter ID's
   /// IDs of the event counters
+  int fGlobalMuonVetoInput;
   int fPassedGlobalMuonVeto;
-
+  int fMuonCollectionHandleEmpty;
   int fAllMuonCandidates;
   int fAfterExcludedMuons;
   int fAfterTrackRefNonNull;
   int fFailedPtCut;
-  // Values to be saved in ROOT tree or histograms
-  /// pTmax of all reconstructed muons
-  float fMaxMuonPt;
-  /// Collection of valid global muon tracks for histogramming
-  std::vector<reco::TrackRef> fMuonTracks;
   // Histograms
   /// Maximum muon pT in event (-1 if no muon in event)
   TH1F* hMuonMaxPt;
@@ -79,6 +71,6 @@ class GlobalMuonVeto : public HPlusAnalysisBase, public HPlusSelectionBase {
   TH1F* hMuonEtaAllMuons;
 };
 
-}
+//}
 
 #endif
