@@ -443,8 +443,6 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     fjtau = jtau;
   }
   
-  
-  
   // Put event data
   
   // Jet direction

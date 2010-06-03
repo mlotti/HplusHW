@@ -6,8 +6,8 @@
 
 namespace HPlusAnalysis {
 
-Counter::Counter() {
-
+Counter::Counter(std::string aModuleName) {
+  fModuleName = aModuleName;
 }
 
 Counter::~Counter() {
@@ -66,18 +66,23 @@ void Counter::storeCountersToHistogram(edm::Service<TFileService>& fileService) 
   // Create histogram for top-level counters
   int myCount = fMainCountersIndices.size();
   TH1I* myCounterHisto = fileService->make<TH1I>("Counters", "Counters;Counter;N", myCount, 0, myCount);
+  std::cout << "Counter(" << fModuleName << ") summary:" << std::endl;
   for (int i = 0; i < myCount; ++i) {
     int myIndex = fMainCountersIndices[i];
     myCounterHisto->GetXaxis()->SetBinLabel(i+1, fCounters[myIndex]->getName().c_str());
     myCounterHisto->Fill(i, fCounters[myIndex]->getValue());
+    std::cout << "  " << fCounters[myIndex]->getName() << ": " << fCounters[myIndex]->getValue() << std::endl;
   }
   // Create histogram for sub-level counters
   myCount = fSubCountersIndices.size();
   myCounterHisto = fileService->make<TH1I>("SubCounters", "SubCounters;SubCounter;N", myCount, 0, myCount);
+  if (myCount)
+    std::cout << "Counter(" << fModuleName << ") sub counter summary:" << std::endl;
   for (int i = 0; i < myCount; ++i) {
     int myIndex = fSubCountersIndices[i];
     myCounterHisto->GetXaxis()->SetBinLabel(i+1, fCounters[myIndex]->getName().c_str());
     myCounterHisto->Fill(i, fCounters[myIndex]->getValue());
+    std::cout << "  " << fCounters[myIndex]->getName() << ": " << fCounters[myIndex]->getValue() << std::endl;
   }
 }
 

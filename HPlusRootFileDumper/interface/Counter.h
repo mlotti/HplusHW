@@ -23,7 +23,7 @@ public:
   /**
    * \brief Constructor
    */
-  Counter();
+  Counter(std::string aModuleName);
 
   /**
    * \brief Destructor
@@ -87,6 +87,7 @@ private:
   std::vector<int> fMainCountersIndices; ///< List of counter indices that are main counters
   std::vector<int> fSubCountersIndices; ///< List of counter indices that are sub-counters (second-level counters)
 
+  std::string fModuleName; ///< Name of the module which owns the counter
 };
 
 }
