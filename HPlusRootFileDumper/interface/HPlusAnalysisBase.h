@@ -9,6 +9,8 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+#include <string>
+
 namespace HPlusAnalysis {
 
 /**
@@ -18,7 +20,8 @@ Base class for H+ analysis
 */
 class HPlusAnalysisBase {
  public:
-  HPlusAnalysisBase(Counter* counter = 0);
+  HPlusAnalysisBase(Counter* counter);
+  HPlusAnalysisBase(std::string aModuleName);
   ~HPlusAnalysisBase();
   
   //virtual void setup(const edm::ParameterSet& iConfig);

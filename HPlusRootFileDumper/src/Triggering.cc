@@ -9,7 +9,8 @@
 
 namespace HPlusAnalysis {
 
-Triggering::Triggering() {
+Triggering::Triggering() :
+HPlusAnalysisBase("HLTTrigger") {
   fFoundTriggerBitsStatus = false;
   fPrintTriggerNames = false;
 }

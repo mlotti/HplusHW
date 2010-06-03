@@ -5,7 +5,8 @@
 
 namespace HPlusAnalysis {
 
-GlobalMuonVeto::GlobalMuonVeto() {
+GlobalMuonVeto::GlobalMuonVeto() :
+HPlusAnalysisBase("GlobalMuonVeto") {
   fMaxMuonPt = -1;
   fMuonTracks.reserve(20);
 }

@@ -31,7 +31,7 @@ HPlusTauIDRootFileDumper::HPlusTauIDRootFileDumper(const edm::ParameterSet& iCon
   }
   
   // Create event counter object
-  fCounter = new HPlusAnalysis::Counter();
+  fCounter = new HPlusAnalysis::Counter("TauIDDumper");
   
   // Find correct tau collection from parameter sets
   edm::ParameterSet myTauCollectionParameters;
@@ -139,10 +139,12 @@ void HPlusTauIDRootFileDumper::produce(edm::Event& iEvent, const edm::EventSetup
   //fTauDumper->setupCommonRootTreeBranches(iEvent);
 
   // Set tau-jet variables
-  fTauDumper->setData(iEvent, iSetup);
+  if (fTauDumper->setData(iEvent, iSetup))
+    fCounter->addCount(fCounterIdSavedEvents);
+  
   // ROOT tree filling is called inside the tau dumper object
   // Therefore, do not add ROOT tree filling here
-  fCounter->addCount(fCounterIdSavedEvents);
+  
 }
 
 // ------------ method called once each job just before starting event loop  ------------

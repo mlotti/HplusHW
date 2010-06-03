@@ -106,7 +106,7 @@ void HPlusTauDumperCaloTau::initializeSpecificBranchData() {
 }
 */
 
-void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Create pointers to data
   
   // Jet direction
@@ -239,7 +239,7 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 
   CaloTauRef theSelectedCaloTauRef;
 
-  if( (nvtx != 1) || (ntrkV < 3) || (ntrkV > 100) ) return;
+  if( (nvtx != 1) || (ntrkV < 3) || (ntrkV > 100) ) return false;
 
   std::vector<CaloTauRef> mySelectedCaloTauRefs;
   // Loop over CaloTau's
@@ -265,6 +265,7 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     double mfRBX    = (*jetsID)[myJetRef].fRBX;  
     
     // jet ID selections // FIXME: Set the cut values in config file
+    
     if(mEmf < 0.01) continue;
     if(mfHPD>0.98) continue;
     if(mN90Hits < 2) continue;
@@ -444,7 +445,7 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   }
   
   // Put event data
-  
+  if (!mySelectedCaloTauRefs.size()) return false;
   // Jet direction
   iEvent.put(myDataJetE, "jetE");
   // Leading track properties
@@ -490,6 +491,7 @@ void HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   iEvent.put(myDataPV, "primaryVertex");
   
   myDiscriminatorHandles.clear();
+  return true;
 }
   /*
 

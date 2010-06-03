@@ -41,8 +41,8 @@ class HPlusTauDumperBase : public HPlusAnalysisBase {
   /// Initializes the variables specific to this tau collection 
   virtual void initializeSpecificBranchData();
   */
-  /// Sets the data specific to this tau collection
-  virtual void setData(edm::Event& iEvent, const edm::EventSetup& iSetup); // Note: Event needs to be non-const
+  /// Sets the data specific to this tau collection; returns true if something was saved
+  virtual bool setData(edm::Event& iEvent, const edm::EventSetup& iSetup); // Note: Event needs to be non-const
   
   //TVector3& getPrimaryVertex() const { return fPV; }
   

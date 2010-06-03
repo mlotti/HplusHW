@@ -134,8 +134,9 @@ void HPlusTauDumperBase::initializeCommonBranchData() {
   }
 }*/
 
-void HPlusTauDumperBase::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HPlusTauDumperBase::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // virtual
+  return false;
 }
 
 }

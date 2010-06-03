@@ -231,7 +231,7 @@ process.p = cms.Path(
 process.myout = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep *_*_*_tauID"
+        "keep *_*_*_HPLUS"
 ##         "keep *"
     ),
     fileName = cms.untracked.string('file:HPlusOut.root')

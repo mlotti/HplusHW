@@ -4,12 +4,12 @@ namespace HPlusAnalysis {
 
 HPlusAnalysisBase::HPlusAnalysisBase(Counter* counter)
   : fCounter(counter) {
-  if (!counter) {
-    fOwnsCounterStatus = true;
-    fCounter = new Counter();
-  } else {
-    fOwnsCounterStatus = false;
-  }
+  fOwnsCounterStatus = false;
+}
+
+HPlusAnalysisBase::HPlusAnalysisBase(std::string aModuleName) {
+  fOwnsCounterStatus = true;
+  fCounter = new Counter(aModuleName);
 }
 
 HPlusAnalysisBase::~HPlusAnalysisBase() {

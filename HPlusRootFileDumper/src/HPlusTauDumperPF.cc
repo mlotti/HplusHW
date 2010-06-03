@@ -54,7 +54,7 @@ void HPlusTauDumperPF::initializeSpecificBranchData() {
   fPFElectronET = -1;
 }
 */
-void HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Create pointers to data
   
   // Jet direction
@@ -231,7 +231,7 @@ void HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   
   // Put event data
-  
+  if (!mySelectedPFTauRefs.size()) return false;
   // Jet direction
   iEvent.put(myDataJetE, "jetE");
   // Leading track properties
@@ -282,6 +282,7 @@ void HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.put(myDataPV, "primaryVertex");
   
   myDiscriminatorHandles.clear();
+  return true;
 }
 
 }
