@@ -28,15 +28,15 @@ process.load('Configuration/StandardSequences/Services_cff')
 ###############################################################################
 
 # Configuration of the ROOT file dumper
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source("PoolSource",
   #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 
-  fileNames = cms.untracked.vstring(
-    "file:datatest500.root"
-    #"file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root"
-  )
+  fileNames = cms.untracked.vstring("rfio:/castor/cern.ch/user/a/attikis/testing/minbias_3_5_x.root")
+                                   #"rfio:/castor/cern.ch/user/a/attikis/testing/summer09_MC_HPlus140.root"
+                            
 #fileNames = cms.untracked.vstring(
 #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
 #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',

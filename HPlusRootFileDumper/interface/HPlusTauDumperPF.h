@@ -19,15 +19,27 @@ class HPlusTauDumperPF : public HPlusTauDumperBase {
   /// Default destructor
   ~HPlusTauDumperPF();
 
+  typedef reco::Candidate::LorentzVector LorentzVector; // can be saved to edm 
   /* /// Creates the branches specific to this tau collection
   void setupSpecificRootTreeBranches();
   /// Initializes the variables specific to this tau collection 
   void initializeSpecificBranchData();*/
   /// Sets the data specific to this tau collection
   void setData(edm::Event& iEvent, const edm::EventSetup& iSetup);
+  bool refitThreeProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
+  bool refitFiveProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
   
  private:
-  
+  int fCounterTest;
+  int fCounter0pr;
+  int fCounter1pr;
+  int fCounter2pr;
+  int fCounter3pr;
+  int fCounterXpr;
+  int fCounterPFelectronsSignalCone;
+  int fCounterPFNeutHadrsSignalCone;
+  int fCounterPFelectronsIsolCone;
+  int fCounterPFNeutHadrsIsolCone; 
 };
 
 }

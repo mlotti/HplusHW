@@ -1,4 +1,5 @@
 <use name="root">
+<use name=rootrflx>
 <use name=boost>
 
 <use name=FWCore/Framework>
@@ -13,9 +14,6 @@
 <use name=DataFormats/JetReco>
 <use name=DataFormats/VertexReco>
 <use name=RecoTauTag/TauTagTools>
-<use name=RecoVertex/KalmanVertexFit> 
-<use name=RecoVertex/AdaptiveVertexFit> 
-<use name=RecoTauTag/RecoTau>
 
 <use name=DataFormats/PatCandidates>
 <use name=JetMETCorrections/Algorithms>
