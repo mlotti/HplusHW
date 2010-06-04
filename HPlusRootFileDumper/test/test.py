@@ -28,13 +28,16 @@ process.load('Configuration/StandardSequences/Services_cff')
 ###############################################################################
 
 # Configuration of the ROOT file dumper
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-    #'file:datatest500.root'
-     'file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root',
+    #"rfio:/castor/cern.ch/user/a/attikis/testing/minbias_3_5_x.root")
+    #"rfio:/castor/cern.ch/user/a/attikis/testing/summer09_MC_HPlus140.root"
+    'file:datatest500.root'
+    #'file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root',
     # '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/E27821C3-0C3C-DF11-9BD9-0030487CD718.root',
@@ -74,15 +77,15 @@ process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
 #    "HLT_Jet30"
   ),
   TriggersToBeSaved = cms.vstring(
-    "HLT_Jet30",
-    "HLT_DiJetAve15U_1E31",
-    "HLT_DiJetAve30U_1E31",
-    "HLT_QuadJet30",
-    "HLT_SingleIsoTau30_Trk5",
-    "HLT_Mu15",
-    "HLT_Ele15_SW_L1R",
-    "HLT_Ele15_SW_EleId_L1R",
-    "HLT_MET35",
+    #"HLT_Jet30",
+    #"HLT_DiJetAve15U_1E31",
+    #"HLT_DiJetAve30U_1E31",
+    #"HLT_QuadJet30",
+    #"HLT_SingleIsoTau30_Trk5",
+    #"HLT_Mu15",
+    #"HLT_Ele15_SW_L1R",
+    #"HLT_Ele15_SW_EleId_L1R",
+    #"HLT_MET35",
   ),
   PrintTriggerNames = cms.bool(False)
 )
@@ -90,7 +93,7 @@ process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
 process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
   MuonCollectionName = cms.InputTag("muons"),
   MaxMuonPtCutValue = cms.double(15),
-  IsHistogrammedStatus = cms.bool(True)
+  IsHistogrammedStatus = cms.bool(True),
   IsAppliedStatus = cms.bool(True)
 )
 
@@ -101,9 +104,13 @@ process.HPlusGlobalElectronVeto = cms.EDFilter('HPlusGlobalElectronVeto',
   #ElectronIdentificationType = cms.string("RobustElectronIdentification"),
   #ElectronIdentificationType = cms.string("LooseElectronIdentification"),
   #ElectronIdentificationType = cms.string("TightElectronIdentification"),
-  IsHistogrammedStatus = cms.bool(True)
+  IsHistogrammedStatus = cms.bool(True),
   IsAppliedStatus = cms.bool(True)
 )
+
+#### The PFTauDecayModes are dropped by default from RECO.  You can add them back in on the fly by doing:
+process.load("RecoTauTag.Configuration.ShrinkingConePFTaus_cfi")
+#### and then adding "process.shrinkingConePFTauDecayModeProducer" to your sequence/path.
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
   tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
@@ -195,6 +202,7 @@ MySelection = cms.Sequence (
 )
 
 process.p = cms.Path(
+  process.shrinkingConePFTauDecayModeProducer *
   MySelection *
   process.HPlusTauIDRootFileDumper
 )

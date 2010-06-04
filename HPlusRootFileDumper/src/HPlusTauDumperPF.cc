@@ -1,38 +1,53 @@
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusTauDumperPF.h"
 
-//#include "DataFormats/TauReco/interface/PFTauDecayMode.h"
-//#include "DataFormats/TauReco/interface/PFTauDecayModeAssociation.h"
+#include "DataFormats/TauReco/interface/PFTauDecayMode.h"
+#include "DataFormats/TauReco/interface/PFTauDecayModeAssociation.h"
 #include "DataFormats/TauReco/interface/PFTauTagInfo.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
-
 #include "RecoTauTag/TauTagTools/interface/TauTagTools.h"
-
 #include "DataFormats/TauReco/interface/PFTauTagInfoFwd.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
-
 #include "DataFormats/Math/interface/Vector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/Math/interface/deltaR.h"
+// Required for secondary vertex fitting
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+//#include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
+#include "PhysicsTools/RecoAlgos/plugins/KalmanVertexFitter.h"
+#include "RecoTauTag/RecoTau/interface/PFRecoTauAlgorithmBase.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 
 namespace HPlusAnalysis {
-
-HPlusTauDumperPF::HPlusTauDumperPF(edm::EDProducer& producer, edm::ParameterSet& aTauCollectionParameterSet,
-                                   Counter* counter)
-: HPlusTauDumperBase(producer, aTauCollectionParameterSet, counter) {
-  std::string alias;
-  // PF BDT output from Electron PreID
-  producer.produces<std::vector<float> >(alias = "PFElectronPreIDOutput").setBranchAlias(alias);
-  // Decision from Electron PreID
-  producer.produces<std::vector<float> >(alias = "PFElectronPreIDDecision").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "PFNeutralHadronET").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "PFGammaET").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "PFElectronET").setBranchAlias(alias);
-
-  // Common tau variable aliases are created in the base class constructor
-  // Discriminator aliases are created in the base class constructor
-}
+  
+  HPlusTauDumperPF::HPlusTauDumperPF(edm::EDProducer& producer, edm::ParameterSet& aTauCollectionParameterSet,
+				     Counter* counter)
+    : HPlusTauDumperBase(producer, aTauCollectionParameterSet, counter) {
+    std::string alias;
+    // PF BDT output from Electron PreID
+    producer.produces<std::vector<float> >(alias = "PFElectronPreIDOutput").setBranchAlias(alias);
+    // Decision from Electron PreID
+    producer.produces<std::vector<float> >(alias = "PFElectronPreIDDecision").setBranchAlias(alias);
+    producer.produces<std::vector<float> >(alias = "PFNeutralHadronET").setBranchAlias(alias);
+    producer.produces<std::vector<float> >(alias = "PFGammaET").setBranchAlias(alias);
+    producer.produces<std::vector<float> >(alias = "PFElectronET").setBranchAlias(alias);
+    
+    fCounter0pr = fCounter->addCounter("0prong PFTau");
+    fCounter1pr = fCounter->addCounter("1prong PFTau");
+    fCounter2pr = fCounter->addCounter("2prong PFTau");
+    fCounter3pr = fCounter->addCounter("3prong PFTau");
+    fCounterXpr = fCounter->addCounter("Xprong PFTau");
+    fCounterPFelectronsSignalCone  = fCounter->addCounter("PFelectronsSignalCone");
+    fCounterPFNeutHadrsSignalCone  = fCounter->addCounter("PFNeutHadrsSignalCone");
+    fCounterPFelectronsIsolCone    = fCounter->addCounter("PFelectronsIsolCone");
+    fCounterPFNeutHadrsIsolCone    = fCounter->addCounter("PFNeutHadrsIsolCone"); 
+    
+    // Common tau variable aliases are created in the base class constructor
+    // Discriminator aliases are created in the base class constructor
+  }
 
 HPlusTauDumperPF::~HPlusTauDumperPF() {
 
@@ -100,6 +115,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   std::auto_ptr<math::XYZVector> myDataPV(new math::XYZVector);
   math::XYZVector myPV(-1., -1., -1.);
   *myDataPV = myPV;
+  std::cout << "myPV = " << myPV << std::endl;
   
   // Get tau jets
   edm::Handle<reco::PFTauCollection> myTauJets;
@@ -107,7 +123,10 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     throw cms::Exception("HPlus") << "tau collection not found" << std::endl;
   }
   size_t myTauJetCount = myTauJets->size();
-  
+
+  edm::Handle<reco::PFTauDecayModeAssociation> theDMAssoc; // Get the PFTau->PFTauDecayMode association from event
+  iEvent.getByLabel( "shrinkingConePFTauDecayModeProducer", theDMAssoc); // Get the PFTau Decay Modes: associate an inputTag to a handle
+    
   // Get discriminators
   size_t myDiscriminatorCount = fTauDiscriminators.size();
   std::vector<edm::Handle<reco::PFTauDiscriminator> > myDiscriminatorHandles;
@@ -123,7 +142,8 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   // Loop over the tau jets
   for (size_t i = 0; i < myTauJetCount; ++i) {
     reco::PFTauRef myTauJetRef(myTauJets, i);
-    
+    const PFTauDecayMode& theDecayMode = (*theDMAssoc)[myTauJetRef]; //get PFTauDecayMode associated to this PFTau
+     
     const PFCandidateRef& myLdgChargedHadronCandidateRef = myTauJetRef->leadPFChargedHadrCand();
     if (myLdgChargedHadronCandidateRef.isNull()) continue;
     // FIXME: add a counter here
@@ -138,57 +158,112 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     mySelectedPFTauRefs.push_back(myTauJetRef);
     
     // Set tau jet related variables
+    LorentzVector myTauJetVector(myTauJetRef->px(), myTauJetRef->py(), myTauJetRef->pz(), myTauJetRef->energy()); 
+    //     fJetET = myTauJetVector.Perp();1
+    //     fJetEta = myTauJetVector.Eta();
+    //     fJetPhi = myTauJetVector.Phi(); 
     math::XYZVector myJetVector = myTauJetRef->momentum();
     myDataJetE->push_back(myJetVector);
+    
     // Leading charged hadron related
+    // const reco::TrackRef myLdgChargedHadronTrackRef = myLdgChargedHadronCandidateRef->trackRef();
     math::XYZVector myLdgChargedHadronMomentum = myLdgChargedHadronTrackRef->momentum();
     myDataLdgChargedHadronP->push_back(myLdgChargedHadronMomentum);
     myDataLdgChargedHadronJetDR->push_back(deltaR(myJetVector, myLdgChargedHadronMomentum));
     myDataLdgChargedHadronHits->push_back(myLdgChargedHadronTrackRef->numberOfValidHits());
     myDataLdgChargedHadronNormalizedChi->push_back(myLdgChargedHadronTrackRef->normalizedChi2());
-    // FIXME: add IP information
-    myDataLdgChargedHadronIP->push_back(math::XYZVector(-1.,-1.,-1.));
-    myDataLdgChargedHadronIPTSignificance->push_back(-1.);
+    // IP information
+    myDataLdgChargedHadronIP->push_back(math::XYZVector(myLdgChargedHadronTrackRef->dxy(),myLdgChargedHadronTrackRef->dxy(),myLdgChargedHadronTrackRef->dz())); // Note: dx,dy=dxy! i.e. Transverse Impact Parameter!
+    myDataLdgChargedHadronIPTSignificance->push_back(myTauJetRef->leadPFChargedHadrCandsignedSipt());
     if (myJetVector.Mag2()) {
       myDataRtau->push_back(sqrt(myLdgChargedHadronMomentum.Mag2() / myJetVector.Mag2()));
     }
-    
     // Track quality cuts have already been applied to all the PF tracks
     
     // Charged track isolation
     const PFCandidateRefVector& mySignalPFCandidates = myTauJetRef->signalPFCands(); // Leading track is included here 
     const PFCandidateRefVector& myIsolationPFCandidates = myTauJetRef->isolationPFCands(); // Leading track is included here
-    RefVector<PFCandidateCollection>::const_iterator iTrack;
+    const PFCandidateRefVector& mySignalPFGammaCandidates = myTauJetRef->signalPFGammaCands();
+    RefVector<PFCandidateCollection>::const_iterator iCand;
+    
     // Count the number of signal tracks in the signal cone above a certain pt threshold
     int mySignalTrackCount = 0;
     int myChargeSum = 0;
     double myMinPt = 9999.;
     math::XYZVector myPtSum(0,0,0);
-    for (iTrack = mySignalPFCandidates.begin(); iTrack != mySignalPFCandidates.end(); ++iTrack) {
-      const reco::TrackRef myTrack = (*iTrack)->trackRef();
+    LorentzVector mySignalPFChHadronsP4; 
+    LorentzVector mySignalPFelectronP4;
+    LorentzVector myTrackP4;
+    LorentzVector myCandP4;
+    LorentzVector mySignalPFNeutHadronsP4;
+    LorentzVector mySignalPFgammaP4;
+    float fphotonEnergy = 0.0;
+    
+    // Loop over particles within the signal cone  
+    for (iCand = mySignalPFCandidates.begin(); iCand != mySignalPFCandidates.end(); ++iCand) {
+      // For each Signal PF Candidates return a reference to the corresponding track, if charged.
+      const reco::TrackRef myTrack = (*iCand)->trackRef();
       if (myTrack.isNonnull()) {
-        if ((*iTrack)->particleId() == reco::PFCandidate::h) { // Look at charged hadrons only
-          double myTrackPt = myTrack->pt();
-          if (myTrackPt > 1) {
-            ++mySignalTrackCount;
-            myChargeSum += myTrack->charge();
-            myPtSum += myTrack->momentum();
-            if (myTrackPt < myMinPt)
-              myMinPt = myTrackPt;
-          }
-        }
+	// Look at charged hadrons only
+	if( ((*iCand)->particleId() == reco::PFCandidate::h) && (myTrack->pt() > 1.0) ) { 
+	  double myTrackPt = myTrack->pt();
+	  ++mySignalTrackCount; // number of charged tracks in signal cone
+	  myChargeSum += myTrack->charge();
+	  myPtSum += myTrack->momentum();
+	  myTrackP4.SetPxPyPzE( myTrack->momentum().x(), myTrack->momentum().y(), myTrack->momentum().z(), sqrt(myTrack->momentum().Mag2() + 0.139*0.139) ); // mass used is that of charged pion : 0.139 GeV
+	  mySignalPFChHadronsP4 += myTrackP4; 	  
+	  if (myTrackPt < myMinPt){myMinPt = myTrackPt;}
+	}
+	// Look at PFelectrons. Apply pt quality cut on track.
+	if (myTrack->pt() > 1 && (*iCand)->particleId() == reco::PFCandidate::e){
+	  myTrackP4.SetPxPyPzE( myTrack->momentum().x(), myTrack->momentum().y(), myTrack->momentum().z(), sqrt(myTrack->momentum().Mag2() + 0.00051*0.00051) ); // mass used is that of electron: 0.51 MeV (0.00051 GeV)
+	  mySignalPFelectronP4  += myTrackP4; 
+	  fCounter->addCount(fCounterPFelectronsSignalCone);
+	}
       }
-    }
+      else{
+	// Look at neutral hadrons
+	if ((*iCand)->particleId() == reco::PFCandidate::h0) {
+	  myCandP4.SetPxPyPzE( (*iCand)->momentum().x(), (*iCand)->momentum().y(), (*iCand)->momentum().z(), sqrt((*iCand)->momentum().Mag2() + 0.135*0.135) ); // mass used is that of neutral pion: 0.135 GeV (0.00051 GeV)
+	  mySignalPFNeutHadronsP4 += myCandP4; 
+	  fCounter->addCount(fCounterPFNeutHadrsSignalCone);
+	}
+	// Look at PFgammas
+	if((*iCand)->particleId() == reco::PFCandidate::gamma){
+	  myCandP4.SetPxPyPzE((*iCand)->momentum().x(), (*iCand)->momentum().y(), (*iCand)->momentum().z(), sqrt((*iCand)->momentum().Mag2()));
+	  mySignalPFgammaP4 += myCandP4;
+	  fphotonEnergy += (*iCand)->ecalEnergy() + (*iCand)->hcalEnergy();
+	}
+      }
+      // Reset variables for next iteration
+      myTrackP4.SetPxPyPzE(0, 0, 0, 0);
+      myCandP4.SetPxPyPzE(0, 0, 0, 0); 
+    } //end of loop
+    // Basic Counters
+    fCounter->addCount(fCounterXpr);
+    if(mySignalTrackCount==0){ fCounter->addCount(fCounter0pr); }
+    if(mySignalTrackCount==1){ fCounter->addCount(fCounter1pr); }
+    if(mySignalTrackCount==2){ fCounter->addCount(fCounter2pr); }
+    if(mySignalTrackCount==3){ fCounter->addCount(fCounter3pr); }
+    // Store variables
     myDataChargeSum->push_back(myChargeSum);
     myDataTrIsoSignalTrackCount->push_back(mySignalTrackCount);
     myDataTrIsoLowestSignalTrackPt->push_back(myMinPt);
+
+    // Reset variables
     double myHighestIsolationTrackPt = 0;
     int myIsolationTrackCount = 0;
+    LorentzVector myIsolPFelectronP4;
+    LorentzVector myIsolPFNeutHadronsP4;
+    LorentzVector myIsolPFgammaP4;
     myMinPt = 9999.;
-    for (iTrack = myIsolationPFCandidates.begin(); iTrack != myIsolationPFCandidates.end(); ++iTrack) {
-      const reco::TrackRef myTrack = (*iTrack)->trackRef();
+    
+    // Loop over particles within the isolation cone
+    for (iCand = myIsolationPFCandidates.begin(); iCand != myIsolationPFCandidates.end(); ++iCand) {
+      const reco::TrackRef myTrack = (*iCand)->trackRef();
       if (myTrack.isNonnull()) {
-        if ((*iTrack)->particleId() == reco::PFCandidate::h) { // Look at charged hadrons only
+	// Look at charged hadrons only
+	if ((*iCand)->particleId() == reco::PFCandidate::h) {
           double myTrackPt = myTrack->pt();
           if (myTrackPt > myHighestIsolationTrackPt) {
             myHighestIsolationTrackPt = myTrackPt;
@@ -197,41 +272,107 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
           if (myTrackPt < myMinPt)
             myMinPt = myTrackPt;
         }
+	// Look at PFelectrons. Apply pt quality cut on track.
+	if (myTrack->pt() > 1 && (*iCand)->particleId() == reco::PFCandidate::e){   // alex
+	  myTrackP4.SetPxPyPzE( myTrack->momentum().x(), myTrack->momentum().y(), myTrack->momentum().z(), sqrt(myTrack->momentum().Mag2() + 0.00051*0.00051) ); // mass used is that of electron: 0.51 MeV (0.00051 GeV)
+	  myIsolPFelectronP4  += myTrackP4; //alex
+	  fCounter->addCount(fCounterPFelectronsIsolCone);
+	}
       }
-    }
+      else{
+	// Look at neutral hadrons
+	if ((*iCand)->particleId() == reco::PFCandidate::h0) {
+	  myCandP4.SetPxPyPzE( (*iCand)->momentum().x(), (*iCand)->momentum().y(), (*iCand)->momentum().z(), sqrt((*iCand)->momentum().Mag2() + 0.135*0.135) ); // mass used is that of electron: 0.51 MeV (0.00051 GeV)
+	  myIsolPFNeutHadronsP4 += myCandP4;
+	  fCounter->addCount(fCounterPFNeutHadrsIsolCone);
+	}
+	// Look at PFgammas
+	if ((*iCand)->particleId() == reco::PFCandidate::gamma){
+	  myCandP4.SetPxPyPzE((*iCand)->momentum().x(), (*iCand)->momentum().y(), (*iCand)->momentum().z(), sqrt((*iCand)->momentum().Mag2()));
+	  myIsolPFgammaP4 += myCandP4;
+	  fphotonEnergy += (*iCand)->ecalEnergy() + (*iCand)->hcalEnergy();
+	}
+      }
+      // Reset variables for next iteration
+      myTrackP4.SetPxPyPzE(0, 0, 0, 0);
+      myCandP4.SetPxPyPzE(0, 0, 0, 0);
+    } //end of loop
+    // Basic Counters
+    
+    // Store variables
     myDataTrIsoIsolationTrackCount->push_back(myIsolationTrackCount);
     myDataTrIsoHighestIsolationTrackPt->push_back(myHighestIsolationTrackPt);
     myDataTrIsoIsolationMinTrackPt->push_back(myMinPt);
     myDataTrIsoIsolationMaxDz->push_back(-1.); // FIXME
-    
+  
     // Calorimetry related
-    myDataEMFraction->push_back(myTauJetRef->emFraction());
-    myDataMaxHCALOverLdgP->push_back(myTauJetRef->hcalMaxOverPLead());
-    myDataECALIsolationET->push_back(myTauJetRef->isolationPFGammaCandsEtSum()); // nan if ldg track does not exist
-    myDataMaxHCALClusterET->push_back(myTauJetRef->maximumHCALPFClusterEt());
+    myDataEMFraction->push_back(myTauJetRef->emFraction()); // fEMFraction = Ecal/Hcal Cluster Energy
+    myDataMaxHCALOverLdgP->push_back(myTauJetRef->hcalMaxOverPLead()); //  = (Max. Hcal Cluster Energy)/(leadPFChargedHadron P)
+    myDataECALIsolationET->push_back(myTauJetRef->isolationPFGammaCandsEtSum()); // Et Sum of gamma PFCandidates in isolation annulus around Lead PF". Set to nan if ldg track does not exist
+    myDataMaxHCALClusterET->push_back(myTauJetRef->maximumHCALPFClusterEt()); // // Et of the highest Et HCAL PFCluster  
     myDataChargedHadronET->push_back(sqrt(myPtSum.Perp2()));
     
-    // Flight path - FIXME: move this code to the base class
-    myDataFlightPathLength->push_back(math::XYZVector(-1.,-1.,-1.));
-    myDataFlightPathTransverseSignificance->push_back(-1.);
-    myDataFlightPathSignificance->push_back(-1.);
-    
     // Invariant mass FIXME: move this code to the base class (if possible)
-    myDataInvariantMassFromTracksOnly->push_back(-1.);
-    myDataInvariantMassFull->push_back(-1.);
+    myDataInvariantMassFromTracksOnly->push_back(mySignalPFChHadronsP4.M());  // includes 1prong. Remove the 1prong?
+    myDataInvariantMassFull->push_back(theDecayMode.mass());
 
     // PF specific
     myDataPFElectronPreIDOutput->push_back(myTauJetRef->electronPreIDOutput());
     myDataPFElectronPreIDDecision->push_back(myTauJetRef->electronPreIDDecision());
-    // Loop over all candidate tracks to calculate neutral hadron, gamma, and PF electron ET 
     
-    myDataPFNeutralHadronET->push_back(-1.); // FIXME
-    myDataPFGammaET->push_back(-1.); // FIXME
-    myDataPFElectronET->push_back(-1.); // FIXME
-  }
+    // Loop over all candidate tracks to calculate neutral hadron, gamma, and PF electron ET 
+    myDataPFNeutralHadronET->push_back( myIsolPFNeutHadronsP4.Et()); // CHECKME
+    myDataPFGammaET->push_back(myIsolPFgammaP4.Et()); // CHECKME
+    myDataPFElectronET->push_back(myIsolPFelectronP4.Et()); // CHECKME
+
   
+
+    // 3Prong+5Prong related variables
+    // *******************************
+    if(mySignalTrackCount==3){
+      bool test = false;
+      std::cout << "\n --> mySignalTrackCount = " << mySignalTrackCount << std::endl;
+      // cout << "refitThreeProng(myTauJetRef) = " << refitThreeProng(myTauJetRef)  << std::endl;
+      test = refitThreeProng(myTauJetRef,iSetup);
+      if(test){std::cout << "\n --> KalmanVertexFitter fitter called!!!" << std::endl;}
+      // Flight path related
+      myDataFlightPathLength->push_back(math::XYZVector(-1.,-1.,-1.));
+      myDataFlightPathTransverseSignificance->push_back(-1.);
+      myDataFlightPathSignificance->push_back(-1.);
+    }
+    if(mySignalTrackCount==5){ 
+      cout << "mySignalTrackCount = " << mySignalTrackCount << std::endl;
+      cout << "refitFiveProng(myTauJetRef) = " << refitFiveProng(myTauJetRef,iSetup)  << std::endl;
+      // Flight path related
+      myDataFlightPathLength->push_back(math::XYZVector(-1.,-1.,-1.));
+      myDataFlightPathTransverseSignificance->push_back(-1.);
+      myDataFlightPathSignificance->push_back(-1.);
+    }
+       
+    // Flight path - FIXME: move this code to the base class
+    myDataFlightPathLength->push_back(math::XYZVector(-1.,-1.,-1.));
+    myDataFlightPathTransverseSignificance->push_back(-1.);
+    myDataFlightPathSignificance->push_back(-1.);
+
+
+
+    // Reset variables for next Event
+    mySignalPFChHadronsP4.SetPxPyPzE(0, 0, 0, 0);
+    myTrackP4.SetPxPyPzE(0, 0, 0, 0);
+    myCandP4.SetPxPyPzE(0, 0, 0, 0);
+    mySignalPFelectronP4.SetPxPyPzE(0, 0, 0, 0); 
+    myIsolPFelectronP4.SetPxPyPzE(0, 0, 0, 0); 
+    myIsolPFgammaP4.SetPxPyPzE(0, 0, 0, 0); 
+    mySignalPFNeutHadronsP4.SetPxPyPzE(0, 0, 0, 0);
+    mySignalPFgammaP4.SetPxPyPzE(0, 0, 0, 0);
+
+  } //eof: for (size_t i = 0; i < myTauJetCount; ++i) {
+
+  // ***********************************************************************************
+
   // Put event data
   if (!mySelectedPFTauRefs.size()) return false;
+  
   // Jet direction
   iEvent.put(myDataJetE, "jetE");
   // Leading track properties
@@ -285,4 +426,131 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   return true;
 }
 
-}
+  
+  bool HPlusTauDumperPF::refitThreeProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup) {
+    
+    bool response=false;
+    
+    edm::ESHandle<TransientTrackBuilder> myTransientTrackBuilder; // create a handle for the transient track builder
+    myEvtSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",myTransientTrackBuilder); // attach collection to handle
+    const TransientTrackBuilder *TransientTrackBuilder_ = myTransientTrackBuilder.product();
+
+    // Get hadrons reference vector
+    reco::PFCandidateRefVector hadrons = myPFTau->signalPFChargedHadrCands();
+     // Get individual hadrons
+     PFCandidateRef  h1  = hadrons.at(0);
+     PFCandidateRef  h2  = hadrons.at(1);
+     PFCandidateRef  h3  = hadrons.at(2);
+  
+     if(h1->trackRef().isNonnull() && h2->trackRef().isNonnull() && h3->trackRef().isNonnull() ) {
+       // Make transient(extrapolated) tracks for each hadron
+       std::vector<TransientTrack> transientTracks;
+       std::cout << "refitThreeProng 1a" << std::endl;
+       transientTracks.push_back(TransientTrackBuilder_->build(h1->trackRef()));
+       transientTracks.push_back(TransientTrackBuilder_->build(h2->trackRef()));
+       transientTracks.push_back(TransientTrackBuilder_->build(h3->trackRef()));
+       std::cout << "refitThreeProng 2" << std::endl;
+       // Apply the Vertex Fit 
+       KalmanVertexFitter fitter(true); // if true it returns the new, fitted Lorentz Vector
+    
+       TransientVertex myVertex = fitter.vertex(transientTracks); 
+       std::cout << "refitThreeProng 3" << std::endl;
+       // Require a valid vertex and 3 refitted tracks
+       if(myVertex.isValid() && myVertex.hasRefittedTracks() && myVertex.refittedTracks().size()==3) {
+	
+ 	response=true;
+ 	math::XYZPoint vtx(myVertex.position().x(),myVertex.position().y(),myVertex.position().z());
+	
+ 	// Create a TLorentzVector for each refitted track
+ 	math::XYZTLorentzVector p1(myVertex.refittedTracks().at(0).track().px(),
+ 				   myVertex.refittedTracks().at(0).track().py(),
+ 				   myVertex.refittedTracks().at(0).track().pz(),
+ 				   sqrt(myVertex.refittedTracks().at(0).track().momentum().mag2() +0.139*0.139));
+	
+ 	math::XYZTLorentzVector p2(myVertex.refittedTracks().at(1).track().px(),
+ 				   myVertex.refittedTracks().at(1).track().py(),
+ 				   myVertex.refittedTracks().at(1).track().pz(),
+ 				   sqrt(myVertex.refittedTracks().at(1).track().momentum().mag2() +0.139*0.139));
+	
+ 	math::XYZTLorentzVector p3(myVertex.refittedTracks().at(2).track().px(),
+				   myVertex.refittedTracks().at(2).track().py(),
+ 				   myVertex.refittedTracks().at(2).track().pz(),
+ 				  sqrt(myVertex.refittedTracks().at(2).track().momentum().mag2() +0.139*0.139));
+ 	std::cout << "refitThreeProng 4" << std::endl;
+ 	// Update the myPFTau p4
+ 	// myPFTau->setP4(p1+p2+p3); // need a PFTau and NOT a PFTauRef
+ 	// Update the vertex
+ 	// myPFTau->setVertex(vtx);   // need a PFTau and NOT a PFTauRef
+       }
+     }
+     return response;
+  } 
+
+  
+
+  bool HPlusTauDumperPF::refitFiveProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup) {
+    
+    bool response=false;
+    edm::ESHandle<TransientTrackBuilder> myTransientTrackBuilder; // create a handle for the transient track builder
+    myEvtSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",myTransientTrackBuilder); // attach collection to handle
+    const TransientTrackBuilder *TransientTrackBuilder_ = myTransientTrackBuilder.product();
+    // Get hadrons reference vector
+    reco::PFCandidateRefVector hadrons = myPFTau->signalPFChargedHadrCands();
+    // Get individual hadrons
+    PFCandidateRef  h1  = hadrons.at(0);
+    PFCandidateRef  h2  = hadrons.at(1);
+    PFCandidateRef  h3  = hadrons.at(2);
+    
+    // Make transient(extrapolated) tracks for each hadron
+    std::vector<TransientTrack> transientTracks;
+    transientTracks.push_back(TransientTrackBuilder_->build(h1->trackRef()));
+    transientTracks.push_back(TransientTrackBuilder_->build(h2->trackRef()));
+    transientTracks.push_back(TransientTrackBuilder_->build(h3->trackRef()));
+    
+    // Apply the Vertex Fit 
+    KalmanVertexFitter fitter(true);    // if true it returns the new, fitted Lorentz Vector
+    
+    TransientVertex myVertex = fitter.vertex(transientTracks); 
+    
+    // Require a valid vertex and 5 refitted tracks
+    if(myVertex.isValid() && myVertex.hasRefittedTracks() && myVertex.refittedTracks().size()==5) {
+      
+      response=true;
+      math::XYZPoint vtx(myVertex.position().x(),myVertex.position().y(),myVertex.position().z());
+      
+      // Create a TLorentzVector for each refitted track
+      math::XYZTLorentzVector p1(myVertex.refittedTracks().at(0).track().px(),
+				myVertex.refittedTracks().at(0).track().py(),
+				myVertex.refittedTracks().at(0).track().pz(),
+				sqrt(myVertex.refittedTracks().at(0).track().momentum().mag2() +0.139*0.139));
+      
+      math::XYZTLorentzVector p2(myVertex.refittedTracks().at(1).track().px(),
+				myVertex.refittedTracks().at(1).track().py(),
+				myVertex.refittedTracks().at(1).track().pz(),
+				sqrt(myVertex.refittedTracks().at(1).track().momentum().mag2() +0.139*0.139));
+      
+      math::XYZTLorentzVector p3(myVertex.refittedTracks().at(2).track().px(),
+				myVertex.refittedTracks().at(2).track().py(),
+				myVertex.refittedTracks().at(2).track().pz(),
+				sqrt(myVertex.refittedTracks().at(2).track().momentum().mag2() +0.139*0.139));
+      
+      math::XYZTLorentzVector p4(myVertex.refittedTracks().at(3).track().px(),
+				myVertex.refittedTracks().at(3).track().py(),
+				myVertex.refittedTracks().at(3).track().pz(),
+				sqrt(myVertex.refittedTracks().at(3).track().momentum().mag2() +0.139*0.139));
+      
+      math::XYZTLorentzVector p5(myVertex.refittedTracks().at(4).track().px(),
+				myVertex.refittedTracks().at(4).track().py(),
+				myVertex.refittedTracks().at(4).track().pz(),
+				sqrt(myVertex.refittedTracks().at(4).track().momentum().mag2() +0.139*0.139));
+      
+      // Update the myPFTau p4
+      // myPFTau->setP4(p1+p2+p3); // need a PFTau and NOT a PFTauRef
+      
+      // Update the vertex
+      // myPFTau->setVertex(vtx);   // need a PFTau and NOT a PFTauRef
+    }
+    return response;
+  }
+  
+} //eof: namespace HPlusAnalysis {

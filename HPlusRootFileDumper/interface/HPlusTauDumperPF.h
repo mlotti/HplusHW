@@ -6,7 +6,7 @@
 /**
 Class for dumping the relevant PF tau information to a root file
 
-	@author Lauri Wendland
+	@author Alexandros Attikis, Lauri Wendland
 */
 
 namespace HPlusAnalysis {
@@ -19,15 +19,25 @@ class HPlusTauDumperPF : public HPlusTauDumperBase {
   /// Default destructor
   ~HPlusTauDumperPF();
 
-  /* /// Creates the branches specific to this tau collection
-  void setupSpecificRootTreeBranches();
-  /// Initializes the variables specific to this tau collection 
-  void initializeSpecificBranchData();*/
+  typedef reco::Candidate::LorentzVector LorentzVector; // can be saved to edm 
+
   /// Sets the data specific to this tau collection; returns true if something was saved
   bool setData(edm::Event& iEvent, const edm::EventSetup& iSetup);
   
- private:
+  bool refitThreeProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
+  bool refitFiveProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
   
+ private:
+  int fCounterTest;
+  int fCounter0pr; // FIXME: Please change name to more descriptive for self-documenting purposes
+  int fCounter1pr;
+  int fCounter2pr;
+  int fCounter3pr;
+  int fCounterXpr;
+  int fCounterPFelectronsSignalCone;
+  int fCounterPFNeutHadrsSignalCone;
+  int fCounterPFelectronsIsolCone;
+  int fCounterPFNeutHadrsIsolCone; 
 };
 
 }
