@@ -91,6 +91,18 @@ process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
   MuonCollectionName = cms.InputTag("muons"),
   MaxMuonPtCutValue = cms.double(15),
   IsHistogrammedStatus = cms.bool(True)
+  IsAppliedStatus = cms.bool(True)
+)
+
+process.HPlusGlobalElectronVeto = cms.EDFilter('HPlusGlobalElectronVeto',
+  ElectronCollectionName = cms.InputTag("muons"),
+  MaxElectronPtCutValue = cms.double(15),
+  ElectronIdentificationType = cms.string("NoElectronIdentification"),
+  #ElectronIdentificationType = cms.string("RobustElectronIdentification"),
+  #ElectronIdentificationType = cms.string("LooseElectronIdentification"),
+  #ElectronIdentificationType = cms.string("TightElectronIdentification"),
+  IsHistogrammedStatus = cms.bool(True)
+  IsAppliedStatus = cms.bool(True)
 )
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',

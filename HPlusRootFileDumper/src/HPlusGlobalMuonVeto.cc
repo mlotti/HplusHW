@@ -3,7 +3,10 @@
 #include <iostream>
 #include <string>
 
-//namespace HPlusAnalysis {
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+
+#include "DataFormats/Common/interface/Handle.h"
 
 HPlusGlobalMuonVeto::HPlusGlobalMuonVeto(const edm::ParameterSet& iConfig) :
 HPlusAnalysis::HPlusAnalysisBase("GlobalMuonVeto"),
@@ -155,7 +158,5 @@ bool HPlusGlobalMuonVeto::filter(edm::Event& iEvent, const edm::EventSetup& iSet
   }
   return myDecisionStatus;
 }
-
-//}
 
 DEFINE_FWK_MODULE(HPlusGlobalMuonVeto);

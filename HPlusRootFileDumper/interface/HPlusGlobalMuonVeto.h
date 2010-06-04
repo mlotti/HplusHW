@@ -4,14 +4,11 @@
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusAnalysisBase.h"
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusSelectionBase.h"
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/TrackReco/interface/Track.h"
+
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
 
 #include "TH1F.h"
 
