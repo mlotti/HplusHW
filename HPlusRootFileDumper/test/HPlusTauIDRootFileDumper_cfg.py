@@ -15,7 +15,7 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')

@@ -101,11 +101,12 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   std::auto_ptr<std::vector<float> > myDataMaxHCALClusterET(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataChargedHadronET(new std::vector<float>);
   // Flight path related
-  // std::auto_ptr<std::vector<math::XYZVector> > myDataFlightPathLength(new std::vector<math::XYZVector>);
+  //  std::auto_ptr<std::vector<math::XYZVector> > myDataFlightPathLength(new std::vector<math::XYZVector>);
   std::auto_ptr<std::vector<float> > myDataFlightPathLength(new std::vector<float>);
-  std::auto_ptr<std::vector<float> > myDataFlightPathSignificance(new std::vector<float>);
-  std::auto_ptr<std::vector<float> > myDataFlightPathTransverseLength(new std::vector<float>);
-  std::auto_ptr<std::vector<float> > myDataFlightPathTransverseSignificance(new std::vector<float>);
+  std::auto_ptr<std::vector<float> > myDataFlightPathLengthSignificance(new std::vector<float>);
+  std::auto_ptr<std::vector<float> > myDataFlightPathLengthTransverse(new std::vector<float>);
+  std::auto_ptr<std::vector<float> > myDataFlightPathLengthTransverseSignificance(new std::vector<float>);
+  
   // Invariant mass related
   std::auto_ptr<std::vector<float> > myDataInvariantMassFromTracksOnly(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataInvariantMassFull(new std::vector<float>);
@@ -170,9 +171,9 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     
     // Set tau jet related variables
     LorentzVector myTauJetVector(myTauJetRef->px(), myTauJetRef->py(), myTauJetRef->pz(), myTauJetRef->energy()); 
-    //     fJetET = myTauJetVector.Perp();1
-    //     fJetEta = myTauJetVector.Eta();
-    //     fJetPhi = myTauJetVector.Phi(); 
+    // fJetET = myTauJetVector.Perp();
+//     fJetEta = myTauJetVector.Eta();
+//     fJetPhi = myTauJetVector.Phi(); 
     math::XYZVector myJetVector = myTauJetRef->momentum();
     GlobalVector tauDir(myTauJetVector.px(), myTauJetVector.py(), myTauJetVector.pz());
     myDataJetE->push_back(myJetVector);
@@ -310,7 +311,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
       myCandP4.SetPxPyPzE(0, 0, 0, 0);
     } //end of loop
     // Basic Counters
-    
+  
     // Store variables
     myDataTrIsoIsolationTrackCount->push_back(myIsolationTrackCount);
     myDataTrIsoHighestIsolationTrackPt->push_back(myHighestIsolationTrackPt);
@@ -337,36 +338,42 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     myDataPFGammaET->push_back(myIsolPFgammaP4.Et()); // CHECKME
     myDataPFElectronET->push_back(myIsolPFelectronP4.Et()); // CHECKME
 
-  
-    // 3Prong and 5Prong related variables
-    // ***********************************
+
+    // 3Prong+5Prong related variables
+    // *******************************
     Vertex SV;
     bool withPVError = true;
-   
     if(mySignalTrackCount==3){
+      std::cout << "\n --> mySignalTrackCount = " << mySignalTrackCount << std::endl;
       SV = threeProng(myTauJetRef, iEvent, iSetup);
+      // Flight path related
+      //       std::cout <<  " \n\n n -------------->myDataFlightPathLengthValue = " << reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value() << "\n\n <-------------- " << std::endl;
+//       std::cout <<  " \n\n n -------------->myDataFlightPathLengthError = " << reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).error() << "\n\n <-------------- " << std::endl;
+//       std::cout <<  " \n\n n -------------->myDataFlightPathLengthSignificance = " << reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance() << "\n\n <-------------- " << std::endl;
       
-      // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
-      myDataFlightPathSignificance->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance());
-      myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
-      myDataFlightPathTransverseSignificance->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).significance());
+      // myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
+//       myDataFlightPathLengthSignificance->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance());
+//       //
+//       myDataFlightPathLengthTransverse->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
+//       myDataFlightPathLengthTransverseSignificance->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).significance());
+      
     }
-    else if(mySignalTrackCount==5){ 
-      SV = fiveProng(myTauJetRef, iEvent, iSetup);
-      // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
-      myDataFlightPathSignificance->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance());
-      myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
-      myDataFlightPathTransverseSignificance->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).significance());
+    if(mySignalTrackCount==5){ 
+      std::cout << "\n --> mySignalTrackCount = " << mySignalTrackCount << std::endl;
+      // mySV = fiveProng(myTauJetRef, iEvent, iSetup);
+      // Flight path related
+      // myDataFlightPathLength->push_back(math::XYZVector(-1.,-1.,-1.));
+      // myDataFlightPathTransverseSignificance->push_back(-1.);
+      // myDataFlightPathSignificance->push_back(-1.);
     }
-    else{
-      // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(-1.0);
-      myDataFlightPathSignificance->push_back(-1.0);
-      myDataFlightPathTransverseLength->push_back(-1.0);
-      myDataFlightPathTransverseSignificance->push_back(-1.0);
-    }
+    
+    // Flight path - FIXME: move this code to the base class
+    myDataFlightPathLength->push_back(-1.0);
+    myDataFlightPathLengthSignificance->push_back(-1.0);
+    myDataFlightPathLengthTransverse->push_back(-1.0);
+    myDataFlightPathLengthTransverseSignificance->push_back(-1.0);
+
+
 
     // Reset variables for next Event
     mySignalPFChHadronsP4.SetPxPyPzE(0, 0, 0, 0);
@@ -412,9 +419,10 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.put(myDataChargedHadronET, "chargedHadronET");
   // Flight path related
   iEvent.put(myDataFlightPathLength, "flightPathLength");
-  iEvent.put(myDataFlightPathSignificance, "flightPathSignificance");
-  iEvent.put(myDataFlightPathTransverseLength, "flightPathTransverseLength");
-  iEvent.put(myDataFlightPathTransverseSignificance, "flightPathTransverseSignificance");
+  iEvent.put(myDataFlightPathLengthSignificance, "flightPathLengthSignificance");
+  iEvent.put(myDataFlightPathLengthTransverse, "flightPathLengthTransverse");
+  iEvent.put(myDataFlightPathLengthTransverseSignificance, "fightPathLengthTransverseSignificance");
+  
   // Invariant mass related
   iEvent.put(myDataInvariantMassFromTracksOnly, "invariantMassFromTracksOnly");
   iEvent.put(myDataInvariantMassFull, "invariantMassFull");
@@ -434,11 +442,12 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   // Other
   iEvent.put(myDataPV, "primaryVertex");
-  
+
   myDiscriminatorHandles.clear();
   return true;
 }
 
+  
   reco::Vertex HPlusTauDumperPF::threeProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup) {
     
     // Primary vertex
@@ -591,6 +600,5 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     return secondaryVertex;
 }
-  
-  
+
 } //eof: namespace HPlusAnalysis {

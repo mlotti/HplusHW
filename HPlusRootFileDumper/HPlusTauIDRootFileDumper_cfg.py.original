@@ -15,7 +15,7 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
 
 # Standard sequences
@@ -117,8 +117,7 @@ process.TFileService = cms.Service("TFileService",
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
-#process.HPlusTauIDRootFileDumper = cms.EDAnalyzer('HPlusTauIDRootFileDumper',
-process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
+process.HPlusTauIDRootFileDumper = cms.EDAnalyzer('HPlusTauIDRootFileDumper',
   tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
 #  tauCollectionName       = cms.InputTag("caloRecoTauProducer"),
   CaloTaus = cms.VPSet(
@@ -229,12 +228,12 @@ process.p = cms.Path(
     process.HPlusTauIDRootFileDumper
 )
                      
-process.TESTOUT = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring(
-        "drop *",
-        "keep *_*_*_tauID"
+#process.TESTOUT = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring(
+#        "drop *",
+#        "keep *_*_*_tauID"
 ##         "keep *"
-    ),
-    fileName = cms.untracked.string('file:HPlusRootFileDumperV.root')
-)
-process.outpath = cms.EndPath(process.TESTOUT)
+#    ),
+#    fileName = cms.untracked.string('file:testout.root')
+#)
+#process.outpath = cms.EndPath(process.TESTOUT)

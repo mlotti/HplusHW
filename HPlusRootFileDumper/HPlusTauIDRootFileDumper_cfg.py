@@ -8,15 +8,18 @@ process.MessageLogger.cerr = cms.untracked.PSet(
   placeholder = cms.untracked.bool(True)
 )
 process.MessageLogger.cout = cms.untracked.PSet(
-    INFO = cms.untracked.PSet(
-    reportEvery = cms.untracked.int32(1000), # every 1000th only
-    limit = cms.untracked.int32(10)       # or limit to 100 printouts...
+  INFO = cms.untracked.PSet(
+#   reportEvery = cms.untracked.int32(100), # every 100th only
+#   limit = cms.untracked.int32(100)       # or limit to 100 printouts...
   )
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+
+### Use the Tracer-Service to see in which step your job is currently executing. i.e. Use it to see 'What's going on'
+#process.Tracer = cms.Service("Tracer")
 
 # Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')
@@ -43,11 +46,9 @@ process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
-# The PFTauDecayModes are dropped by default from RECO.  You can add them back in on the fly by doing:
+#### The PFTauDecayModes are dropped by default from RECO.  You can add them back in on the fly by doing:
 process.load("RecoTauTag.Configuration.ShrinkingConePFTaus_cfi")
-# and then adding:
-### process.shrinkingConePFTauDecayModeProducer
-# to your sequence/path.
+#### and then adding "process.shrinkingConePFTauDecayModeProducer" to your sequence/path.
 
 #### Choose techical bits 40 and coincidence with BPTX (0)
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
@@ -79,7 +80,7 @@ process.monster = cms.EDFilter(
 process.source = cms.Source("PoolSource",
   #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-#        "file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root"
+#        'file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',
         '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/E27821C3-0C3C-DF11-9BD9-0030487CD718.root',
@@ -107,23 +108,25 @@ process.source = cms.Source("PoolSource",
 )
 
 process.TFileService = cms.Service("TFileService",
-  fileName = cms.string('HPlusRootFileDumper.root')
+  fileName = cms.string('HPlusOutInfo.root')
 )
 
 #from RecoTauTag.RecoTau.CaloRecoTauTagInfoProducer_cfi import *
+
 
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #process.load('RecoTauTag.RecoTau.CaloRecoTauTagInfoProducer_cfi')
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
-process.HPlusTauIDRootFileDumper = cms.EDAnalyzer('HPlusTauIDRootFileDumper',
+
+process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
   tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
 #  tauCollectionName       = cms.InputTag("caloRecoTauProducer"),
   CaloTaus = cms.VPSet(
     cms.PSet(
-    ###  src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
-    ###  src = cms.InputTag("caloRecoTauTagInfoProducer", "", "RECO"),
+##      src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
+###      src = cms.InputTag("caloRecoTauTagInfoProducer", "", "RECO"),
 ##      discriminators = cms.VInputTag(
 ##	cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "RECO"),
 ##	cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "RECO"),
@@ -210,9 +213,14 @@ process.HPlusTauIDRootFileDumper = cms.EDAnalyzer('HPlusTauIDRootFileDumper',
           "HLT_DiJetAve15U_8E29",
           "HLT_QuadJet15U"
         )
+      ),
+      cms.PSet(
+        Name = cms.string("GlobalMuonVeto"),
+        MuonCollectionName = cms.InputTag("muons"),
+        MaxMuonPtCutValue = cms.double(15)
       )
+      # Add here new event selections, if necessary
     )
-    # Add here new event selections, if necessary
   )
 )
 
@@ -228,12 +236,13 @@ process.p = cms.Path(
     process.HPlusTauIDRootFileDumper
 )
                      
-#process.TESTOUT = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring(
-#        "drop *",
-#        "keep *_*_*_tauID"
-##         "keep *"
-#    ),
-#    fileName = cms.untracked.string('file:testout.root')
-#)
-#process.outpath = cms.EndPath(process.TESTOUT)
+process.myout = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(
+        "drop *",
+        "keep *_*_*_tauID"
+#         "keep *"
+    ),
+    fileName = cms.untracked.string('file:HPlusOut.root')
+)
+
+process.outpath = cms.EndPath(process.myout)
