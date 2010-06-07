@@ -15,7 +15,7 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
 
 # Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')
@@ -136,7 +136,13 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
       corrections = cms.vstring("TauJetCorrector"),
       calojets         = cms.string('ak5CaloJets'),
       jetsID           = cms.string('ak5JetID'),
-      jetExtender      = cms.string('ak5JetExtender')
+      jetExtender      = cms.string('ak5JetExtender'),
+      # Cut values
+      EMFractionCutValue = cms.double(0.01),
+      mfHPDCutValue = cms.double(0.98),
+      mN90HitsCutValue = cms.double(2.0),
+      CaloTauEtCutValue = cms.double(4.0),
+      CaloTauEtaCutValue = cms.double(2.5)
     )
   ),
   TCTaus = cms.VPSet(
@@ -231,7 +237,7 @@ process.p = cms.Path(
 process.myout = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep *_*_*_HPLUS"
+        "keep *_HPlus*_*_HPLUS"
 ##         "keep *"
     ),
     fileName = cms.untracked.string('file:HPlusOut.root')
