@@ -21,7 +21,7 @@ using namespace std;
 #include "FWCore/Framework/interface/TriggerNamesService.h"
 
 TriggerConverter::TriggerConverter(const edm::ParameterSet& iConfig){
-	hlNames = edm::Service<edm::service::TriggerNamesService>()->getTrigPaths();
+//	hlNames = edm::Service<edm::service::TriggerNamesService>()->getTrigPaths();
 //	triggerNames = new TriggerNames(iConfig);
 	triggerDecision = false;
 }
@@ -50,6 +50,10 @@ void TriggerConverter::getTriggerResults(const edm::Event& iEvent, std::map<std:
                         LogDebug("MyEventConverter") << "trigger table " << hltTableName 
                                                      << " size " << (*iHandle)->size() << std::endl;
 
+		const edm::TriggerResults tr = **iHandle;
+		bool fromPSetRegistry;
+		edm::Service<edm::service::TriggerNamesService> tns;
+		tns->getTrigPaths(tr, hlNames, fromPSetRegistry);
 //                vector<string> hlNames = triggerNames->triggerNames();
                 int n = 0;
                 for(vector<string>::const_iterator i = hlNames.begin();

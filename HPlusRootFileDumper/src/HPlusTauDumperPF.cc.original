@@ -279,7 +279,7 @@ void HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.put(myDataFlightPathLength, "flightPathLength");
   iEvent.put(myDataFlightPathTransverseSignificance, "flightPathTransverseSignificance");
   iEvent.put(myDataFlightPathSignificance, "flightPathSignificance");
-  // Invariant mass related
+    // Invariant mass related
   iEvent.put(myDataInvariantMassFromTracksOnly, "invariantMassFromTracksOnly");
   iEvent.put(myDataInvariantMassFull, "invariantMassFull");
   // PF specific

@@ -16,6 +16,7 @@
 <use name=RecoVertex/KalmanVertexFit> 
 <use name=RecoVertex/AdaptiveVertexFit> 
 <use name=RecoTauTag/RecoTau>
+<use name=RecoBTag/SecondaryVertex>
 
 <use name=DataFormats/PatCandidates>
 <use name=JetMETCorrections/Algorithms>

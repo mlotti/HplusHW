@@ -2,6 +2,13 @@
 #define HPLUSTAUDUMPERPF_H
 
 #include "HiggsAnalysis/HPlusRootFileDumper/interface/HPlusTauDumperBase.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 /**
 Class for dumping the relevant PF tau information to a root file
@@ -23,21 +30,20 @@ class HPlusTauDumperPF : public HPlusTauDumperBase {
 
   /// Sets the data specific to this tau collection; returns true if something was saved
   bool setData(edm::Event& iEvent, const edm::EventSetup& iSetup);
-  
-  bool refitThreeProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
-  bool refitFiveProng(reco::PFTauRef myPFTau, const edm::EventSetup& myEvtSetup); // method taken from HPSPFRecoTauAlgorithm
-  
+  reco::Vertex threeProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup);
+  reco::Vertex fiveProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup); 
+
  private:
   int fCounterTest;
-  int fCounter0pr; // FIXME: Please change name to more descriptive for self-documenting purposes
-  int fCounter1pr;
-  int fCounter2pr;
-  int fCounter3pr;
-  int fCounterXpr;
-  int fCounterPFelectronsSignalCone;
-  int fCounterPFNeutHadrsSignalCone;
-  int fCounterPFelectronsIsolCone;
-  int fCounterPFNeutHadrsIsolCone; 
+  int fCounter0pr; // Counter for 0-prong PFTaus (no selection cuts)
+  int fCounter1pr; // Counter for 1-prong PFTaus (no selection cuts)
+  int fCounter2pr; // Counter for 2-prong PFTaus (no selection cuts)
+  int fCounter3pr; // Counter for 3-prong PFTaus (no selection cuts)
+  int fCounterXpr; // Counter for Any-prong PFTaus (no selection cuts)
+  int fCounterPFelectronsSignalCone;   // Counter for PFelectrons found inside signal cone (no selection cuts)
+  int fCounterPFNeutHadrsSignalCone;   // Counter for PFNeutralHadrons found inside signal cone (no selection cuts)
+  int fCounterPFelectronsIsolCone;     // Counter for PFelectrons found inside isolation cone (no selection cuts)
+  int fCounterPFNeutHadrsIsolCone;     // Counter for PFNeutralHadrons found inside isolation cone (no selection cuts)
 };
 
 }
