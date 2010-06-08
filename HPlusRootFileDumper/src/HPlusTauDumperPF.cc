@@ -417,7 +417,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     for (std::vector<reco::PFTauRef>::const_iterator it = mySelectedPFTauRefs.begin(); it != mySelectedPFTauRefs.end(); ++it) {
       myDiscriminatorValues->push_back((*myDiscriminatorHandles[j])[*it]);
     }
-    iEvent.put(myDiscriminatorValues, fTauDiscriminators[j].label());
+    iEvent.put(myDiscriminatorValues, "mydisc"+fTauDiscriminators[j].label());
   }
   // Other
   iEvent.put(myDataPV, "primaryVertex");

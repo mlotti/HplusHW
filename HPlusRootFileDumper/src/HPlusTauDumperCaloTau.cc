@@ -45,6 +45,8 @@
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
+#include <string>
+
 namespace HPlusAnalysis {
 
 HPlusTauDumperCaloTau::HPlusTauDumperCaloTau(edm::EDProducer& producer,
@@ -54,10 +56,44 @@ HPlusTauDumperCaloTau::HPlusTauDumperCaloTau(edm::EDProducer& producer,
   calojetsSrc      = aTauCollectionParameterSet.getParameter< std::string > ("calojets");
   jetsIDSrc        = aTauCollectionParameterSet.getParameter< std::string > ("jetsID");
   
+  fEMFractionCutValue = 0.0;
+  if (aTauCollectionParameterSet.exists("EMFractionCutValue")) {
+    fEMFractionCutValue = aTauCollectionParameterSet.getParameter<double>("EMFractionCutValue");
+  } else {
+    edm::LogWarning("HPlus") << "HPlusTauDumperCaloTau: You forgot to define 'EMFractionCutValue' in the config!" << std::endl;
+  }
+  fmfHPDCutValue = 0.0;
+  if (aTauCollectionParameterSet.exists("mfHPDCutValue")) {
+    fmfHPDCutValue = aTauCollectionParameterSet.getParameter<double>("mfHPDCutValue");
+  } else {
+    edm::LogWarning("HPlus") << "HPlusTauDumperCaloTau: You forgot to define 'mfHPDCutValue' in the config!" << std::endl;
+  }  
+
+  fmN90HitsCutValue = 0.0;
+  if (aTauCollectionParameterSet.exists("mN90HitsCutValue")) {
+    fmN90HitsCutValue = aTauCollectionParameterSet.getParameter<double>("mN90HitsCutValue");
+  } else {
+    edm::LogWarning("HPlus") << "HPlusTauDumperCaloTau: You forgot to define 'mN90HitsCutValue' in the config!" << std::endl;
+  } 
+ 
+  fCaloTauEtCutValue = 0.0;
+  if (aTauCollectionParameterSet.exists("CaloTauEtCutValue")) {
+    fCaloTauEtCutValue = aTauCollectionParameterSet.getParameter<double>("CaloTauEtCutValue");
+  } else {
+    edm::LogWarning("HPlus") << "HPlusTauDumperCaloTau: You forgot to define 'CaloTauEtCutValue' in the config!" << std::endl;
+  }  
+  fCaloTauEtaCutValue = 0.0;
+  if (aTauCollectionParameterSet.exists("CaloTauEtaCutValue")) {
+    fCaloTauEtaCutValue = aTauCollectionParameterSet.getParameter<double>("CaloTauEtaCutValue");
+  } else {
+    edm::LogWarning("HPlus") << "HPlusTauDumperCaloTau: You forgot to define 'CaloTauEtaCutValue' in the config!" << std::endl;
+  }  
   // Common tau variable aliases are created in the base class constructor
   // Discriminator aliases are created in the base class constructor
-  
-  
+  std::string alias;
+  producer.produces<int>(alias = "SelectedJetsCount").setBranchAlias(alias);
+
+
   eventCount = 0;
   jetCount = 0;
   jet2Count = 0;
@@ -134,6 +170,9 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   std::auto_ptr<std::vector<float> > myDataECALIsolationET(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataMaxHCALClusterET(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataChargedHadronET(new std::vector<float>);
+
+  std::auto_ptr<int> myDataSelectedJets(new int);
+
   // Flight path related
   std::auto_ptr<std::vector<math::XYZVector> > myDataFlightPathLength(new std::vector<math::XYZVector>);
   std::auto_ptr<std::vector<float> > myDataFlightPathTransverseSignificance(new std::vector<float>);
@@ -154,6 +193,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   for (size_t i = 0; i < myDiscriminatorCount; ++i) {
     edm::Handle<reco::CaloTauDiscriminator> myEmptyHandle;
     myDiscriminatorHandles.push_back(myEmptyHandle);
+    //    cout <<  "Discriminator label " << fTauDiscriminators[i].label() << std::endl;
     if (!iEvent.getByLabel(fTauDiscriminators[i], myDiscriminatorHandles[i])) {
       throw cms::Exception("HPlus") << "Discriminator " << fTauDiscriminators[i].label() << " not found in dataset!" << std::endl;
     }
@@ -265,14 +305,15 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     double mfRBX    = (*jetsID)[myJetRef].fRBX;  
     
     // jet ID selections // FIXME: Set the cut values in config file
-    
-    if(mEmf < 0.01) continue;
-    if(mfHPD>0.98) continue;
-    if(mN90Hits < 2) continue;
-    
+   
+    if(mEmf < fEMFractionCutValue) continue;  // default value = 0.01
+    if(mfHPD > fmfHPDCutValue) continue;  // default value = 0.98
+    if(mN90Hits < fmN90HitsCutValue) continue;  // default value = 2
+     
     // consider only jets with raw ET > 4 GeV. // FIXME: Set the cut values in config file
-    if( theCaloTau.pt() < 4.0 ) continue;
-    if(fabs(theCaloTau.eta()) > 2.5) continue;
+    if( theCaloTau.pt() < fCaloTauEtCutValue ) continue;
+    if(fabs(theCaloTau.eta()) > fCaloTauEtaCutValue ) continue;
+
     
     // Obtain leading track (0.5 around jet axis) // FIXME: Set the cut values in config file
     string metric = "DR"; // can be DR,angle,area
@@ -443,11 +484,15 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     
     fjtau = jtau;
   }
+  *myDataSelectedJets = mySelectedCaloTauRefs.size();
   
   // Put event data
   if (!mySelectedCaloTauRefs.size()) return false;
   // Jet direction
   iEvent.put(myDataJetE, "jetE");
+
+  iEvent.put(myDataSelectedJets, "SelectedJetsCount");
+
   // Leading track properties
   iEvent.put(myDataLdgChargedHadronP, "ldgChargedHadronP");
   iEvent.put(myDataLdgChargedHadronJetDR, "ldgChargedHadronJetDR");
@@ -484,7 +529,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     for (std::vector<reco::CaloTauRef>::const_iterator it = mySelectedCaloTauRefs.begin(); it != mySelectedCaloTauRefs.end(); ++it) {
       myDiscriminatorValues->push_back((*myDiscriminatorHandles[j])[*it]);
     }
-    iEvent.put(myDiscriminatorValues, fTauDiscriminators[j].label());
+    iEvent.put(myDiscriminatorValues, "mydisc"+fTauDiscriminators[j].label());
   }
   
   // Other

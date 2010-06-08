@@ -41,6 +41,7 @@ HPlusTauDumperBase::HPlusTauDumperBase(edm::EDProducer& producer, edm::Parameter
   producer.produces<std::vector<float> >(alias = "ECALIsolationET").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "maxHCALClusterET").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "chargedHadronET").setBranchAlias(alias);
+
   // Flight path related
   producer.produces<std::vector<math::XYZVector> >(alias = "flightPathLength").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "flightPathTransverseSignificance").setBranchAlias(alias);
@@ -53,7 +54,7 @@ HPlusTauDumperBase::HPlusTauDumperBase(edm::EDProducer& producer, edm::Parameter
  
   // Discriminator aliases
   for (size_t i = 0; i < fTauDiscriminators.size(); ++i) {
-    producer.produces<std::vector<float> >(alias = fTauDiscriminators[i].label()).setBranchAlias(alias);
+    producer.produces<std::vector<float> >(alias = "mydisc"+fTauDiscriminators[i].label()).setBranchAlias(alias);
   }
 
   // Primary vertex

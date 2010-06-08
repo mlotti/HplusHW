@@ -37,6 +37,13 @@ class HPlusTauDumperCaloTau : public HPlusTauDumperBase {
   int eventCount;
   int jetCount;
   int jet2Count;
+
+  // cuts from config
+  double fEMFractionCutValue;
+  double fmfHPDCutValue;
+  double fmN90HitsCutValue;
+  double fCaloTauEtaCutValue; 
+  double fCaloTauEtCutValue; 
 };
 
 }
