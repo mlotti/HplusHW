@@ -18,9 +18,15 @@ if __name__ == "__main__":
     dummy_file = ROOT.TFile("../data/tauIdEff_ntuple.root")
     ntuple_manager = TauNtupleManager(dummy_file.Get("Events"), "tauIdEffNtuple")
 
+    # Get the list of collections availabe for our ntuple
+    print ntuple_manager
+
     # Get the shrinking ntuple
-    selectedTaus = ntuple_manager.get_ntuple(
-        "patPFTausDijetTagAndProbeShrinkingCone")
+    selectedTaus = ntuple_manager.get_ntuple("patCaloTausDijetTagAndProbe")
+#        "patPFTausDijetTagAndProbeShrinkingCone")
+
+    # Get list of variables available
+    print selectedTaus
 
     my_selection = selectedTaus.expr('abs($eta) < 2.5') & \
                    selectedTaus.expr('$byIsolation > 0.5')
@@ -45,7 +51,7 @@ if __name__ == "__main__":
 
     # Make some plots
 ###################################################################################
-    canvas_pt = ROOT.TCanvas("canvas_pt", "", 500, 500)
+    canvas = ROOT.TCanvas("canvas_pt", "", 500, 500)
 
     pt_result = plotter.distribution(
         expression = selectedTaus.expr('$pt'),
@@ -58,48 +64,63 @@ if __name__ == "__main__":
     print "MC average pt: %f" % \
             pt_result['samples']['mc_test']['mean']
 
-    canvas_pt.SaveAs("caloTau_pt.png")
+    canvas.SaveAs("caloTau_pt.png")
 
 ###################################################################################
-#    canvas_ptraw = ROOT.TCanvas("canvas_ptraw", "", 500, 500)
-#                                                                                             
-#    ptraw_result = plotter.distribution(
-#        expression = selectedTaus.expr('$jetPt'),
-#        selection  = my_selection,
-#        binning    = (100, 0, 50)
-#        x_axis_title = "P_{T}(raw)"
-#    )                                                                                        
-#    # this should draw a comparison on the canvas, but pt_result                             
-#    # now contains some helpful stuff.                                                       
-##    print "MC average raw pt: %f" % \
-##            ptraw_result['samples']['mc_test']['mean']
-#
-#    canvas_ptraw.SaveAs("caloTau_rawpt.png")
-#  
+    canvas_ptraw = ROOT.TCanvas("canvas_ptraw", "", 500, 500)
+                                                                                             
+    ptraw_result = plotter.distribution(
+        expression = selectedTaus.expr('$jetPt'),
+        selection  = my_selection,
+        binning    = (100, 0, 50),
+        x_axis_title = "P_{T}(raw)"
+    )                                                                                        
+
+    canvas_ptraw.SaveAs("caloTau_rawpt.png")
+  
 ###################################################################################
-    canvas_eta = ROOT.TCanvas("canvas_eta", "", 500, 500)
+    canvas = ROOT.TCanvas("canvas_eta", "", 500, 500)
 
     eta_result = plotter.distribution(
         expression = selectedTaus.expr('$eta'),
         selection  = selectedTaus.expr('abs($eta) < 5'),
         binning    = (100, -5, 5),
         x_axis_title = "eta"
-#        expression=selectedTaus.expr('$eta'),
-#        selection=selectedTaus.expr('$pt > 5.0'),
-#        binning = (100, -5, 5),
-#        x_axis_title = "#eta"
     )
-    canvas_eta.SaveAs("caloTau_eta.png")
+    canvas.SaveAs("caloTau_eta.png")
 
 ###################################################################################
 
-#    canvas_phi = ROOT.TCanvas("canvas_phi", "", 500, 500)                       
-#
-#    phi_result = plotter.distribution(
-#        expression = selectedTaus.expr('$phi'),
-#	selection  = my_selection,
-#        binning    = (100, -500, 500),
-#        x_axis_title = "phi"
-#    )
-#    canvas_phi.SaveAs("caloTau_phi.png")
+    canvas_phi = ROOT.TCanvas("canvas_phi", "", 500, 500)                       
+
+    phi_result = plotter.distribution(
+        expression = selectedTaus.expr('$phi'),
+	selection  = my_selection,
+        binning    = (100, -500, 500),
+        x_axis_title = "phi"
+    )
+    canvas_phi.SaveAs("caloTau_phi.png")
+
+###################################################################################                                  
+    canvas = ROOT.TCanvas("canvas_ltrackpt", "", 500, 500)
+
+    ltpt_result = plotter.distribution(
+        expression = selectedTaus.expr('$leadTrackPt'),
+        selection  = my_selection,
+        binning    = (100, 0, 50),
+        x_axis_title = "leading track pt"
+    )                                                                                                                
+    canvas.SaveAs("caloTau_ltrack_pt.png")
+
+###################################################################################
+    canvas = ROOT.TCanvas("canvas_nSignalTracks", "", 500, 500)
+
+    nstr_result = plotter.distribution(
+        expression = selectedTaus.expr('$numSignalTracks'),
+        selection  = my_selection,
+        binning    = (100, 0, 50),
+        x_axis_title = "Tracks in signal cone"
+    )   
+    canvas.SaveAs("caloTau_nSignalTracks.png")
+        
 

@@ -40,6 +40,8 @@ data_first_three_weeks = build_sample(_DATA_LUMI_MAP_FILE, "data_three_weeks",
                                       "data_week_3")
 
 data_test = build_sample(_DATA_LUMI_MAP_FILE, "data_test", "merge", "test_data")
-mc_test = build_sample(_MC_LUMI_MAP_FILE, "mc_test", "merge", "test_mc")
 data_test2 = build_sample(_DATA_LUMI_MAP_FILE, "data_test2", "merge", "test_data2")
+mc_test = build_sample(_MC_LUMI_MAP_FILE, "mc_test", "merge", "test_mc")
+mc_test2 = build_sample(_MC_LUMI_MAP_FILE, "mc_test2", "merge", "test_mc2")
+
 

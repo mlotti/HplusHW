@@ -25,7 +25,13 @@
     },
     "test_mc": {
         "files": [
-            "/tmp/slehti/tauIdEff_ntuple_24_1.root"
+            "/tmp/slehti/tauIdEff_ntuple_14_1.root"
+        ],
+        "int_lumi": 1.0
+    },
+    "test_mc2": {  
+        "files": [
+            "/castor/cern.ch/user/e/edelhoff/TauIdCommissioning/qcdDiJet/v1_1/minBias/tauIdEff_ntuple_14_1.root"
         ],
         "int_lumi": 1.0
     }
