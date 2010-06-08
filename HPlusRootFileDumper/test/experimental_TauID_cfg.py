@@ -31,6 +31,9 @@ process.load('Configuration/EventContent/EventContent_cff')
 # Global tag - is this necessary, what does it do?
 process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
 
+# Hplus skimming
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_SkimPaths_cff")
+
 
 # Jet ET corrections (included in 3_6_0)
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -195,3 +198,20 @@ process.p = cms.Path(
     process.monster *
     process.tautagging *
     process.HPlusTauIDRootFileDumper)
+
+################################################################################
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_SkimPaths_cff")
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_EventContent_cff")
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ['HLT_Jet30']
+process.heavyChHiggsToTauNuFilter.minNumberOfJets = cms.int32(4)
+
+process.out = cms.OutputModule("PoolOutputModule",
+    process.heavyChHiggsToTauNuEventSelection,
+    fileName = cms.untracked.string('HPlusOut.root'),
+    outputCommands = cms.untracked.vstring(
+        "drop *",
+        "keep *_HPlus*_*_HPLUS"
+    )
+)
+################################################################################
+process.e = cms.EndPath(process.out)

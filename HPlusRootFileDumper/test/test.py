@@ -37,7 +37,7 @@ process.source = cms.Source('PoolSource',
     #'/store/mc/Spring10/TTbar_Htaunu_M140/GEN-SIM-RECO/START3X_V26_S09-v1/0024/EED314DE-DC46-DF11-9646-E41F13181704.root'
     #"rfio:/castor/cern.ch/user/a/attikis/testing/minbias_3_5_x.root")
     #"rfio:/castor/cern.ch/user/a/attikis/testing/summer09_MC_HPlus140.root"
-    'file:datatest500.root'
+    #'file:datatest500.root'
     #'file:AE250FF9-12C2-DE11-B56B-001E4F3D3147.root',
     # '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',
@@ -49,7 +49,7 @@ process.source = cms.Source('PoolSource',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/92684831-233C-DF11-ABA0-0030487CD16E.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/90269E76-0D3C-DF11-A1A0-0030487CD840.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/8CAE3014-133C-DF11-A05D-000423D174FE.root',
-    #       '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/8C51BAC6-1A3C-DF11-A0EE-000423D94A04.root',
+           '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/8C51BAC6-1A3C-DF11-A0EE-000423D94A04.root'
     #       '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/8C042B04-2D3C-DF11-939F-0030487CD178.root',
     #       '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/80471A6B-0E3C-DF11-8DCD-0030487C6A66.root',
     #        '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/762824C3-0C3C-DF11-A4FD-0030487CD6D2.root',
@@ -213,13 +213,18 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 )
 
 ################################################################################
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_SkimPaths_cff")
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_EventContent_cff")
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ['HLT_Jet30']
+process.heavyChHiggsToTauNuFilter.minNumberOfJets = cms.int32(4)
 
 process.out = cms.OutputModule("PoolOutputModule",
-  fileName = cms.untracked.string('HPlusOut.root'),
-  outputCommands = cms.untracked.vstring(
-    "drop *",
-    "keep *_HPlus*_*_HPLUS"
-  )
+    process.heavyChHiggsToTauNuEventSelection,
+    fileName = cms.untracked.string('HPlusOut.root'),
+    outputCommands = cms.untracked.vstring(
+    	"drop *",
+    	"keep *_HPlus*_*_HPLUS"
+    )
 )
 ################################################################################
 

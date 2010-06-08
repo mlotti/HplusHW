@@ -239,7 +239,13 @@ process.p = cms.Path(
     process.HPlusTauIDRootFileDumper
 )
 
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_SkimPaths_cff")
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_EventContent_cff")
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ['HLT_Jet30']
+process.heavyChHiggsToTauNuFilter.minNumberOfJets = cms.int32(4)
+
 process.myout = cms.OutputModule("PoolOutputModule",
+    process.heavyChHiggsToTauNuEventSelection,
     outputCommands = cms.untracked.vstring(
         "drop *",
         "keep *_HPlus*_*_HPLUS"
