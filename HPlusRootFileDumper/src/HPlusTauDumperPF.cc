@@ -101,10 +101,10 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   std::auto_ptr<std::vector<float> > myDataMaxHCALClusterET(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataChargedHadronET(new std::vector<float>);
   // Flight path related
-  // std::auto_ptr<std::vector<math::XYZVector> > myDataFlightPathLength(new std::vector<math::XYZVector>);
-  std::auto_ptr<std::vector<float> > myDataFlightPathLength(new std::vector<float>);
+  std::auto_ptr<std::vector<math::XYZVector> > myDataFlightPathLength(new std::vector<math::XYZVector>);
+  //std::auto_ptr<std::vector<float> > myDataFlightPathLength(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataFlightPathSignificance(new std::vector<float>);
-  std::auto_ptr<std::vector<float> > myDataFlightPathTransverseLength(new std::vector<float>);
+  //std::auto_ptr<std::vector<float> > myDataFlightPathTransverseLength(new std::vector<float>);
   std::auto_ptr<std::vector<float> > myDataFlightPathTransverseSignificance(new std::vector<float>);
   // Invariant mass related
   std::auto_ptr<std::vector<float> > myDataInvariantMassFromTracksOnly(new std::vector<float>);
@@ -119,7 +119,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   std::auto_ptr<math::XYZVector> myDataPV(new math::XYZVector);
   math::XYZVector myPV(-1., -1., -1.);
   *myDataPV = myPV;
-  std::cout << "myPV = " << myPV << std::endl;
+  //std::cout << "myPV = " << myPV << std::endl;
   
   // Primary vertex
   reco::Vertex PV;
@@ -189,6 +189,8 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     myDataLdgChargedHadronIPTSignificance->push_back(myTauJetRef->leadPFChargedHadrCandsignedSipt());
     if (myJetVector.Mag2()) {
       myDataRtau->push_back(sqrt(myLdgChargedHadronMomentum.Mag2() / myJetVector.Mag2()));
+    } else {
+      myDataRtau->push_back(-1.0);
     }
     // Track quality cuts have already been applied to all the PF tracks
     
@@ -342,29 +344,33 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     // ***********************************
     Vertex SV;
     bool withPVError = true;
-   
+    
     if(mySignalTrackCount==3){
       SV = threeProng(myTauJetRef, iEvent, iSetup);
-      
       // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
+      math::XYZVector myFlightPathVector = SV.position() - PV.position();
+      myDataFlightPathLength->push_back(myFlightPathVector);
+      //myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
       myDataFlightPathSignificance->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance());
-      myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
+      //myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
       myDataFlightPathTransverseSignificance->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).significance());
     }
     else if(mySignalTrackCount==5){ 
       SV = fiveProng(myTauJetRef, iEvent, iSetup);
       // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
+      math::XYZVector myFlightPathVector = SV.position() - PV.position();
+      myDataFlightPathLength->push_back(myFlightPathVector);
+      //myDataFlightPathLength->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).value());
       myDataFlightPathSignificance->push_back(reco::SecondaryVertex::computeDist3d(PV, SV, tauDir, withPVError).significance());
-      myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
+      //myDataFlightPathTransverseLength->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).value());
       myDataFlightPathTransverseSignificance->push_back(reco::SecondaryVertex::computeDist2d(PV, SV, tauDir, withPVError).significance());
     }
     else{
       // Flight path - FIXME: move this code to the base class
-      myDataFlightPathLength->push_back(-1.0);
+      myDataFlightPathLength->push_back(math::XYZVector(-1.0,-1.0,-1.0));
+      //myDataFlightPathLength->push_back(-1.0);
       myDataFlightPathSignificance->push_back(-1.0);
-      myDataFlightPathTransverseLength->push_back(-1.0);
+      //myDataFlightPathTransverseLength->push_back(-1.0);
       myDataFlightPathTransverseSignificance->push_back(-1.0);
     }
 
@@ -413,7 +419,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   // Flight path related
   iEvent.put(myDataFlightPathLength, "flightPathLength");
   iEvent.put(myDataFlightPathSignificance, "flightPathSignificance");
-  iEvent.put(myDataFlightPathTransverseLength, "flightPathTransverseLength");
+  //iEvent.put(myDataFlightPathTransverseLength, "flightPathTransverseLength");
   iEvent.put(myDataFlightPathTransverseSignificance, "flightPathTransverseSignificance");
   // Invariant mass related
   iEvent.put(myDataInvariantMassFromTracksOnly, "invariantMassFromTracksOnly");
@@ -499,6 +505,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	   secondaryVertex = myVertex;
 	   
+           // Please note, that there can also be pi0's in 3/5-prong tau decays
 	   // Update the myPFTau p4
 	   // myPFTau->setP4(p1+p2+p3); // need a PFTau and NOT a PFTauRef
 	   // Update the vertex
@@ -584,6 +591,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
       
       secondaryVertex = myVertex;
       
+      // Please note, that there can also be pi0's in 3/5-prong tau decays
       // Update the myPFTau p4
       // myPFTau->setP4(p1+p2+p3); // need a PFTau and NOT a PFTauRef
       // Update the vertex

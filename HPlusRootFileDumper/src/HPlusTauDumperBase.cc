@@ -43,10 +43,10 @@ HPlusTauDumperBase::HPlusTauDumperBase(edm::EDProducer& producer, edm::Parameter
   producer.produces<std::vector<float> >(alias = "chargedHadronET").setBranchAlias(alias);
 
   // Flight path related
-  //  producer.produces<std::vector<math::XYZVector> >(alias = "flightPathLength").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "flightPathLength").setBranchAlias(alias);
+  producer.produces<std::vector<math::XYZVector> >(alias = "flightPathLength").setBranchAlias(alias);
+  //producer.produces<std::vector<float> >(alias = "flightPathLength").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "flightPathSignificance").setBranchAlias(alias);
-  producer.produces<std::vector<float> >(alias = "flightPathTransverseLength").setBranchAlias(alias);
+  //producer.produces<std::vector<float> >(alias = "flightPathTransverseLength").setBranchAlias(alias);
   producer.produces<std::vector<float> >(alias = "flightPathTransverseSignificance").setBranchAlias(alias);
   // Invariant mass related
   producer.produces<std::vector<float> >(alias = "invariantMassFromTracksOnly").setBranchAlias(alias);

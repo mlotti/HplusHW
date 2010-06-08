@@ -29,7 +29,7 @@ process.load('Configuration/StandardSequences/Services_cff')
 
 # Configuration of the ROOT file dumper
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
