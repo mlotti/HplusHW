@@ -29,11 +29,12 @@ process.load('Configuration/StandardSequences/Services_cff')
 
 # Configuration of the ROOT file dumper
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
 
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
+    #'/store/mc/Spring10/TTbar_Htaunu_M140/GEN-SIM-RECO/START3X_V26_S09-v1/0024/EED314DE-DC46-DF11-9646-E41F13181704.root'
     #"rfio:/castor/cern.ch/user/a/attikis/testing/minbias_3_5_x.root")
     #"rfio:/castor/cern.ch/user/a/attikis/testing/summer09_MC_HPlus140.root"
     'file:datatest500.root'
@@ -68,8 +69,34 @@ process.options = cms.untracked.PSet(
 process.TFileService = cms.Service("TFileService",
   fileName = cms.string('HPlusOutInfo.root')
 )
-	
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string('GR10_P_V6::All') # GR10_P_V6::All
+
+# Magnetic Field
+#process.load("Configuration/StandardSequences/MagneticField_cff")
+process.load("Configuration.StandardSequences.MagneticField_38T_cff")
+process.load('Configuration/StandardSequences/Services_cff')
+process.load('Configuration/StandardSequences/Geometry_cff')
+
+# Calo geometry service model
+process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
+# Calo topology service model
+process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
+
 from RecoTauTag.RecoTau.PFRecoTauProducer_cfi import *
+
+process.load("RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRefit_cfi")
+process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")   
+
+process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
+process.btagForPat = cms.Path(process.simpleSecondaryVertexHighEffBJetTags *
+                              process.simpleSecondaryVertexHighPurBJetTags)
+
+# PAT Layer 0+1
+process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.tools.coreTools import *
+removeMCMatching(process)
 
 process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
   TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
@@ -90,20 +117,21 @@ process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
   PrintTriggerNames = cms.bool(False)
 )
 
-process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
-  MuonCollectionName = cms.InputTag("muons"),
-  MaxMuonPtCutValue = cms.double(15),
-  IsHistogrammedStatus = cms.bool(True),
-  IsAppliedStatus = cms.bool(True)
-)
-
 process.HPlusGlobalElectronVeto = cms.EDFilter('HPlusGlobalElectronVeto',
-  ElectronCollectionName = cms.InputTag("muons"),
+  #ElectronCollectionName = cms.InputTag("patElectrons"),
+  ElectronCollectionName = cms.InputTag("cleanPatElectrons"),
   MaxElectronPtCutValue = cms.double(15),
   ElectronIdentificationType = cms.string("NoElectronIdentification"),
   #ElectronIdentificationType = cms.string("RobustElectronIdentification"),
   #ElectronIdentificationType = cms.string("LooseElectronIdentification"),
   #ElectronIdentificationType = cms.string("TightElectronIdentification"),
+  IsHistogrammedStatus = cms.bool(True),
+  IsAppliedStatus = cms.bool(True)
+)
+
+process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
+  MuonCollectionName = cms.InputTag("muons"),
+  MaxMuonPtCutValue = cms.double(15),
   IsHistogrammedStatus = cms.bool(True),
   IsAppliedStatus = cms.bool(True)
 )
@@ -184,21 +212,25 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
   )
 )
 
-
 ################################################################################
 
 process.out = cms.OutputModule("PoolOutputModule",
   fileName = cms.untracked.string('HPlusOut.root'),
   outputCommands = cms.untracked.vstring(
     "drop *",
-    "keep *_*_*_HPLUS"
+    "keep *_HPlus*_*_HPLUS"
   )
 )
 ################################################################################
 
 MySelection = cms.Sequence (
   process.HPlusHLTTrigger *
+  process.HPlusGlobalElectronVeto *
   process.HPlusGlobalMuonVeto
+)
+
+process.mypat = cms.Path(
+  process.patDefaultSequence # needed for GlobalMuonVeto on patElectrons  
 )
 
 process.p = cms.Path(

@@ -156,7 +156,7 @@ bool HPlusGlobalMuonVeto::filter(edm::Event& iEvent, const edm::EventSetup& iSet
     fCounter->addCount(fPassedGlobalMuonVeto);
     iEvent.put(myHighestMuonPt, "GlobalMuonVetoMaxMuonPt");
   }
-  return myDecisionStatus;
+  return myDecisionStatus || !isApplied();
 }
 
 DEFINE_FWK_MODULE(HPlusGlobalMuonVeto);

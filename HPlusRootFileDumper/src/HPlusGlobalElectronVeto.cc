@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
-#include "DataFormats/EgammaCandidates/interface/Electron.h"
-
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+//#include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
+//#include "DataFormats/EgammaCandidates/interface/Electron.h"
+//#include "DataFormats/TrackReco/interface/TrackFwd.h"
+//#include "DataFormats/TrackReco/interface/Track.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 
@@ -79,16 +79,18 @@ void HPlusGlobalElectronVeto::endJob() {
 bool HPlusGlobalElectronVeto::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   fCounter->addCount(fGlobalElectronVetoInput);
   // Get muon handle
-  edm::Handle<reco::ElectronCollection> myElectronHandle;
+  edm::Handle<std::vector<pat::Electron> > myElectronHandle;
   iEvent.getByLabel(fElectronCollectionName, myElectronHandle);
   if (!myElectronHandle->size()) {
-    //edm::LogInfo("HPlus") << "Electron handle is empty!" << std::endl;
+    //std::cout << "get by type: " << iEvent.getByType(myElectronHandle) << std::endl;
+  
+    edm::LogInfo("HPlus") << "Electron handle for '" << fElectronCollectionName << " is empty!" << std::endl;
     // No muons --> global muon veto has been passed
     fCounter->addCount(fPassedGlobalElectronVeto);
     fCounter->addCount(fElectronCollectionHandleEmpty);
     return true;
   }
-  
+  std::cout << "debug" << std::endl;
   std::auto_ptr<float> myHighestElectronPt(new float); // highest pt of muon that has passed all criteria
   /*
   // Analyze MC info to look for muons from a W
@@ -108,10 +110,16 @@ bool HPlusGlobalElectronVeto::filter(edm::Event& iEvent, const edm::EventSetup& 
   // Loop over muons
   *myHighestElectronPt = 0;
   double myHighestElectronEta = -10;
-  for (reco::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
+  for (pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     fCounter->addCount(fAllElectronCandidates);
 
     // Add here electron identification
+    const std::vector<pat::Electron::IdPair>& myElectronIDs = (*iElectron).electronIDs();
+    int myPairs = myElectronIDs.size();
+    for (int i = 0; i < myPairs; ++i) {
+      std::cout << "idtag=" << myElectronIDs[i].first << ", result=" << myElectronIDs[i].second << std::endl;
+    }
+    
     
     fCounter->addCount(fAfterElectronID);
     /*
