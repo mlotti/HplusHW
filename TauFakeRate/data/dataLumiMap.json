@@ -1,0 +1,33 @@
+{
+    "data_week_1": {
+        "files": [
+            "tauIdEff_ntuple.root"
+        ], 
+        "int_lumi": 1.0
+    },
+    "data_week_2": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 2.0
+    },
+    "data_week_3": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 3.0
+    },
+    "test_data": {
+        "files": [
+            "/tmp/slehti/tauIdEff_ntuple_24_1.root"
+        ],
+        "int_lumi": 1.0
+    },
+    "test_data2": {
+        "files": [
+            "/castor/cern.ch/user/s/slehti/TauIdCommissioning/qcdDiJet/v1_1c/tauIdEff_ntuple_24_1.root"
+        ],
+        "int_lumi": 1.0
+    }
+
+}

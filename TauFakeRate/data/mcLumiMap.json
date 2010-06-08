@@ -1,0 +1,32 @@
+{
+    "ztautau": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 1.0
+    },
+    "QCD_20_30": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 2.0
+    },
+    "QCD_30_50": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 2.0
+    },
+    "minbias": {
+        "files": [
+            "tauIdEff_ntuple.root" 
+        ], 
+        "int_lumi": 3.0
+    },
+    "test_mc": {
+        "files": [
+            "/tmp/slehti/tauIdEff_ntuple_24_1.root"
+        ],
+        "int_lumi": 1.0
+    }
+}
