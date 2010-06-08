@@ -1,0 +1,43 @@
+The big picture of things to implement:
+  done 1) HLT trigger (Lauri)
+  2) Global electron veto
+  done 3) Global muon veto (Lauri)
+  4) tau-jet ID (Alexandros & Ritva)
+  5) jet selection
+  6) missing ET
+  7) b-tagging
+  8) top/W reco
+
+For doing jet->tau fake rate studies, we need the points
+1,2,3,5, and 6 + the tau-jet dumper. Hence I would consider these high priority.
+For doing full signal selection studies we need the whole list (maybe putting 8 as a low priority). 
+
+
+TODO list (with priorities)
+===========================
+(high, Ritva working): add filling of variables to CaloTau
+(high): add jet energy corrections to CaloTau
+(high): add filling of variables to TCTau (should be almost the same
+as for the CaloTaus)
+
+(medium): TCTau not working with energy corrections at the moment,
+Sami will tell when code is ready
+(medium): add setting of key variables to the python file (track
+quality cuts and cone sizes, if fixed)
+
+(low/medium): add missing variables for PFtaus
+(low): add MC matching (reimplement from HipProofAnalysis)
+(low): produce all tau collection root files in one submit (see TTeff
+for example)
+(low): remove the unnecessary python files from the tool for combining root files produced with CRAB 
+
+Existing and tested:
+====================
+- crab.cfg added enable large scale testing/running; added also tool for combining the resulting root files
+- reading the output root trees with AnalysisPack has been succesfully tested 
+- code is compiling and running with CMSSW_3_5_4 without any extra tags
+- filling of most of 1-prong PFtaus variables exist in code and work
+- merging of root trees works with mergeHistograms (from the
+HipProofAnalysis package)
+- reimplemented eventcounter functionality from HipProofAnalysis
+
