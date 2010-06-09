@@ -21,13 +21,13 @@ cvs co -r V03-28-04 DataFormats/JetReco
 cvs co -r V00-16-00 DataFormats/TauReco
 cvs co -r V00-23-00 RecoTauTag/RecoTau
 cvs co -r V00-21-00 RecoTauTag/Configuration
+cvs co HiggsAnalysis/Skimming
+rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
 To compile:
 -----------
-Compile first the packages by cd'ing into the relevant directory followed
-by a scram b. Then:
-  cd HiggsAnalysis/HPlusRootFileDumper
-  scram b
+Compile everything from CMSSW_x_y_z/src   
+  scram b -r -j 4
 
 To submit with crab:
 --------------------

@@ -215,8 +215,9 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 ################################################################################
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_SkimPaths_cff")
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_EventContent_cff")
-process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ['HLT_Jet30']
-process.heavyChHiggsToTauNuFilter.minNumberOfJets = cms.int32(4)
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ['HLT_Jet15U']
+process.heavyChHiggsToTauNuFilter.minNumberOfJets = cms.int32(0)
+process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
 
 process.out = cms.OutputModule("PoolOutputModule",
     process.heavyChHiggsToTauNuEventSelection,
