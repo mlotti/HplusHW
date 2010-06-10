@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("HPLUS")
+process = cms.Process("tauID")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.categories.append("HPlusRootFileDumper")
@@ -15,7 +15,11 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+
+### Use the Tracer-Service to see in which step your job is currently executing. i.e. Use it to see 'What's going on'
+#process.Tracer = cms.Service("Tracer")
 
 # Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')
@@ -115,26 +119,6 @@ process.TFileService = cms.Service("TFileService",
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
-process.HPlusHLTTrigger = cms.EDFilter('HPlusTriggering',
-  TriggersToBeApplied = cms.vstring(
-    #"HLT_Jet15U"
-    "HLT_Jet30U"
-    #"HLT_DiJetAve15U_8E29"
-    #"HLT_QuadJet15U"
-  ),
-  TriggersToBeSaved = cms.vstring(
-    "HLT_Jet30U",
-    "HLT_DiJetAve15U_8E29",
-    "HLT_QuadJet15U"
-  ),
-  PrintTriggerNames = cms.bool(False)
-)
-
-process.HPlusGlobalMuonVeto = cms.EDFilter('HPlusGlobalMuonVeto',
-  MuonCollectionName = cms.InputTag("muons"),
-  MaxMuonPtCutValue = cms.double(15),
-  IsHistogrammedStatus = cms.bool(True)
-)
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
   tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
@@ -213,26 +197,59 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 	cms.InputTag("shrinkingConePFTauDiscriminationByTrackIsolationUsingLeadingPion")
       )
     )
+  ),
+  EventSelectionManager = cms.PSet(
+    DefaultIsAppliedStatus = cms.bool(True),
+    DefaultIsHistogrammedStatus = cms.bool(True),
+    EventSelection = cms.VPSet(
+      cms.PSet(
+        Name = cms.string("HLTTrigger"),
+        TriggersToBeApplied = cms.vstring(
+          #"HLT_Jet15U"         
+          #"HLT_Jet30U"
+        ),
+        TriggersToBeSaved = cms.vstring(
+          "HLT_Jet30U",
+          "HLT_DiJetAve15U_8E29",
+          "HLT_QuadJet15U"
+        )
+      ),
+      cms.PSet(
+        Name = cms.string("GlobalMuonVeto"),
+        MuonCollectionName = cms.InputTag("muons"),
+        MaxMuonPtCutValue = cms.double(15)
+      )
+      # Add here new event selections, if necessary
+    )
   )
+)
+
+process.HPlusJetSelection = cms.EDFilter('HPlusJetSelection',
+  JetCollectionName = cms.InputTag("ak5CaloJets"),
+  CutMinJetEt = cms.double(10.0),
+  CutMaxAbsJetEta = cms.double(10.0),
+  CutMaxEMFraction = cms.double(10.0)
 )
 
 #process.p = cms.Path(process.HPlusTauIDRootFileDumper)
 
 MySelection = cms.Sequence (
-  process.HPlusHLTTrigger *
-  process.HPlusGlobalMuonVeto
+# process.HPlusHLTTrigger *
+# process.HPlusGlobalMuonVeto *
+  process.HPlusJetSelection  
 )
+
 
 process.p = cms.Path(
     process.hltLevel1GTSeed *
     process.hltHighLevel *	
     process.monster *
-    process.tautagging *
     MySelection *
+    process.tautagging *
     process.shrinkingConePFTauDecayModeProducer *
     process.HPlusTauIDRootFileDumper
 )
-
+                     
 process.myout = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
         "drop *",
