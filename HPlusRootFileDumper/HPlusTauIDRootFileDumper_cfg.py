@@ -221,11 +221,12 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
 )
 
 process.HPlusJetSelection = cms.EDFilter('HPlusJetSelection',
-  JetCollectionName = cms.InputTag("ak5CaloJets"),
-  CutMinJetEt = cms.double(10.0),
-  CutMaxAbsJetEta = cms.double(10.0),
-  CutMaxEMFraction = cms.double(10.0)
-)
+                                         JetCollectionName = cms.InputTag("ak5CaloJets"),
+                                         CutMinNJets = cms.double(4.0),
+                                         CutMinJetEt = cms.double(5.0),
+                                         CutMaxAbsJetEta = cms.double(2.6),
+                                         CutMaxEMFraction = cms.double(0.5)
+                                         )
 
 #process.p = cms.Path(process.HPlusTauIDRootFileDumper)
 
