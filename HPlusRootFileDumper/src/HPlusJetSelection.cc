@@ -98,46 +98,55 @@ namespace HPlusAnalysis {
     std::vector<reco::CaloJet> mySortedJets;
     std::vector<reco::CaloJet> myFilteredJets;
 
+
+    // Step 1) Store all jets in a vector
     for (size_t i = 0; i < myJetCount; ++i) {
       const reco::CaloJet & myJet = (*myCaloJets)[i];
       myUnsortedJets.push_back(myJet);
-    }
-    
-    // Loop over JetCollection
-    for (std::vector<reco::CaloJet>::const_iterator iJet = myUnsortedJets.begin(); iJet != myUnsortedJets.end(); iJet++) {
-      
       // Reference counter. Count total number of jets prior any selection in each Event.
       fCounter->addCount(fCounterJetsPriorSelection);
-      
     }
+    
+//     // Loop over JetCollection
+//     for (std::vector<reco::CaloJet>::const_iterator iJet = myUnsortedJets.begin(); iJet != myUnsortedJets.end(); iJet++) {
+//       // Reference counter. Count total number of jets prior any selection in each Event.
+//       fCounter->addCount(fCounterJetsPriorSelection);      
+//     }
 
+    // Step 2) Order Jets according to Jet Energy
     const size_t myUnsortedJetsSize = myUnsortedJets.size();
     // Call a function to take an unsorted caloJet vector and sort it according to caloJet-Energies
     if(myUnsortedJetsSize!=0){mySortedJets = sortCaloJets(myUnsortedJets, myUnsortedJetsSize);}
     const size_t mySortJetsSize = mySortedJets.size();
-    if(mySortJetsSize==myUnsortedJetsSize){
-      // Call filtering function
-      myFilteredJets = filterCaloJets(mySortedJets, mySortJetsSize);
-    }
+    
+    // Step 3) Filter the now ordered jets: Apply Jet Et, Eta and EMFraction Cuts
+    // Calling filtering function..
+    if(mySortJetsSize==myUnsortedJetsSize){ myFilteredJets = filterCaloJets(mySortedJets, mySortJetsSize); }
     else{
       edm::LogInfo("HPlus") << "Jet handle is empty!" << std::endl;
       fCounter->addCount(fCounterError);
     }
-    
+
+    // Step 4) Now analyze the filtered jets.
     const size_t myFilteredJetsSize = myFilteredJets.size();
-    if(myFilteredJetsSize!=0){
-      std::vector<reco::CaloJet>::const_iterator iFilteredJet;
-      std::cout << "*** myFilteredJetsSize != 0 ***" << std::endl;
-      for(iFilteredJet =  myFilteredJets.begin(); iFilteredJet != myFilteredJets.end(); iFilteredJet++){
-	// Count total number of jets prio any selection in each Event.
-      fCounter->addCount(fCounterJetsPostSelection);
-      std::cout << "(*iFilteredJet).energy()= " << (*iFilteredJet).energy() << std::endl;
+      if(myFilteredJetsSize!=0){
+	// Change function decision to true
+	decision = true;  // remember: if fCutMinNJets is NOT satisfied, then then "myFilteredJets" vector is returned empty!
+	// Create a vector iterator for the filtered jets
+	std::vector<reco::CaloJet>::const_iterator iFilteredJet;
+	// Loop over all the filtered jets
+	for(iFilteredJet =  myFilteredJets.begin(); iFilteredJet != myFilteredJets.end(); iFilteredJet++){
+	  // Count total number of jets prio any selection in each Event.
+	  fCounter->addCount(fCounterJetsPostSelection);
+	  std::cout << "(*iFilteredJet).energy()= " << (*iFilteredJet).energy() << std::endl;
+	}
       }
-    }
-    else{ std::cout << "*** WARNING:  myFilteredJetsSize == 0 ***" << std::endl; }
-    
-    return decision;
-    
+      else{ 
+	//std::cout << "*** WARNING:  myFilteredJetsSize == 0 ***" << std::endl; 
+      }
+      
+      return decision;
+      
   }//eof:  HPlusJetSelection::analyze()
   
   std::vector<reco::CaloJet> HPlusJetSelection::sortCaloJets(std::vector<reco::CaloJet> caloJetsToSort, const size_t caloJetSize) {
@@ -178,54 +187,47 @@ namespace HPlusAnalysis {
     
     // Declare variables
     reco::CaloJet myJet;
+    std::vector<reco::CaloJet> caloJetsFilteredCands;
     std::vector<reco::CaloJet> caloJetsFiltered;
+    std::vector<reco::CaloJet>::iterator it_caloJetsFilteredCands;
     std::vector<reco::CaloJet>::iterator it_caloJetsFiltered;
     bool passedNJets      = false;
     bool passedJetEt      = false;
     bool passedJetEta     = false;
     bool passedEMFraction = false;  
-    int counter = 0;
     
-    if(caloJetSize >=fCutMinNJets){
+    if(caloJetSize >= fCutMinNJets){
     
       std::cout << "---> Looping over filtered jets <--- " << std::endl;
       // Loop over sorted Jets and apply quality cuts
-      for( it_caloJetsFiltered = caloJetsSorted.begin(); it_caloJetsFiltered != caloJetsSorted.end(); ++it_caloJetsFiltered) {
+      for( it_caloJetsFilteredCands = caloJetsSorted.begin(); it_caloJetsFilteredCands != caloJetsSorted.end(); ++it_caloJetsFilteredCands) {
 	
-	if( (*it_caloJetsFiltered).energy() >= fCutMinJetEt){ passedJetEt = true;}
-	if( fabs((*it_caloJetsFiltered).eta()) <= fCutMaxAbsJetEta){ passedJetEta = true;}
-	if( (*it_caloJetsFiltered).emEnergyFraction() >= fCutMaxEMFraction ){ passedEMFraction = true;}
-	//  std::cout << "(*it_caloJetsFiltered).energy() = " << (*it_caloJetsFiltered).energy() << std::endl;
-	//  std::cout << "(*it_caloJetsFiltered).eta() = " << (*it_caloJetsFiltered).eta() << std::endl;
-	//  std::cout << "(*it_caloJetsFiltered).emEnergyFraction() = " << (*it_caloJetsFiltered).emEnergyFraction() << std::endl;
+	if( (*it_caloJetsFilteredCands).energy() >= fCutMinJetEt){ passedJetEt = true;}
+	if( fabs((*it_caloJetsFilteredCands).eta()) <= fCutMaxAbsJetEta){ passedJetEta = true;}
+	if( (*it_caloJetsFilteredCands).emEnergyFraction() >= fCutMaxEMFraction ){ passedEMFraction = true;}
+	
 	// Boolean will be used to erase those jets that do not satisfy criteria
 	bool jetSurvives = ( passedJetEt && passedJetEta && passedEMFraction) ;
 	if(!jetSurvives){ 
-	  std::cout << "Jet did not survive " << std::endl;
-	caloJetsSorted.erase(caloJetsSorted.begin()+counter);
-	} // FIXME
-	else{caloJetsFiltered.push_back(*it_caloJetsFiltered);}
+	  // std::cout << "Jet did not survive " << std::endl;
+	} 
+	else{caloJetsFilteredCands.push_back(*it_caloJetsFilteredCands);}
 					
-	counter++;
       }
-      
-      const double myFilteredJetsSize = caloJetsFiltered.size();
+      const double myFilteredJetsSize = caloJetsFilteredCands.size();
       if( myFilteredJetsSize >= fCutMinNJets  ){ passedNJets = true;}
     }
     else{
       std::cout << "*** WARNING: caloJetSize < fCutMinNJets ***" << std::endl;
     }
-    
 
-    // To do's
-    // 1) Save to edm ntuple: 
-    //    a) the jets after selection
-    //    b) the number of jets left after selection criteria, 
-    //    c) Validation histograms including Jet Et, Eta of: "leading-Jet", "2nd-Jet", "3rd-Jet", "4th-Jet".
-    //    d) Informative counters
-    // 2) Return boolean decision if Event satisfies "jet-selection criteria", i.e. At least N jets are left after the steps 1) -> 4)
+    // Last criterion: Is the number of jets enough? If not return an empty vector
+    if(passedNJets){ caloJetsFiltered = caloJetsFilteredCands; }
+    else{
+      // return an empty vector!
+    }
     
-      return caloJetsFiltered;
+    return caloJetsFiltered;
     
   }//eof: HPlusJetSelection::filterCaloJets
 
