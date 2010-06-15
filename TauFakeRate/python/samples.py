@@ -7,41 +7,33 @@ samples.py
 
 Central defintion of data sources for commissioning.
 
-$Id: samples.py,v 1.1 2010/05/27 21:10:23 friis Exp $
+$Id: samples.py,v 1.4 2010/06/12 00:39:01 friis Exp $
 
 '''
 
 # Locations of the luminosity maps
 _DATA_LUMI_MAP_FILE = os.path.join(
-    os.environ['CMSSW_BASE'], 'src/HiggsAnalysis/TauFakeRate/test/'
-    '../data', 'dataLumiMap.json')
+    os.environ['CMSSW_BASE'], 'src/TauAnalysis/TauIdEfficiency/test/'
+    'commissioning', 'dataLumiMap.json')
 
 _MC_LUMI_MAP_FILE = os.path.join(
-    os.environ['CMSSW_BASE'], 'src/HiggsAnalysis/TauFakeRate/test/'
-    '../data', 'mcLumiMap.json')
+    os.environ['CMSSW_BASE'], 'src/TauAnalysis/TauIdEfficiency/test/'
+    'commissioning', 'mcLumiMap.json')
 
 
 # Arugments: lumi map file, name of output collection, merge/add, list of samples
 # to take from the JSON file
-ztautau_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_ztt", "merge", "ztautau")
+print "loading definition of Ztautau signal Monte Carlo samples..."
+ztautau_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_ztt", "merge", "Ztautau")
 
 # Merge multiple pt hat bins
-qcd_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_qcd", "merge", "QCD_20_30", 
-                      "QCD_30_50")
+print "loading definition of QCD background Monte Carlo samples..."
+qcd_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_qcd", "merge", "QCD_Pt15", "QCD_Pt30", "QCD_Pt80", "QCD_Pt170")
+#qcd_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_qcd", "merge", "QCD_Pt15")
 
-minbias_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_minbias", "merge", "minbias")
+print "loading definition of min. Bias background Monte Carlo samples..."
+minbias_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_minbias", "merge", "minBias")
 
 # For data, we use the add mode, to concatenate data
-data_first_two_weeks = build_sample(_DATA_LUMI_MAP_FILE, "data_two_weeks", 
-                                    "add", "data_week_1", "data_week_2")
-
-data_first_three_weeks = build_sample(_DATA_LUMI_MAP_FILE, "data_three_weeks", 
-                                      "add", "data_week_1", "data_week_2", 
-                                      "data_week_3")
-
-data_test = build_sample(_DATA_LUMI_MAP_FILE, "data_test", "merge", "test_data")
-data_test2 = build_sample(_DATA_LUMI_MAP_FILE, "data_test2", "merge", "test_data2")
-mc_test = build_sample(_MC_LUMI_MAP_FILE, "mc_test", "merge", "test_mc")
-mc_test2 = build_sample(_MC_LUMI_MAP_FILE, "mc_test2", "merge", "test_mc2")
-
-
+print "loading definition of Data samples..."
+data = build_sample(_DATA_LUMI_MAP_FILE, "data", "add", "Data_part01")

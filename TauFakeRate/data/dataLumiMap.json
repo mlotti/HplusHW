@@ -1,33 +1,114 @@
 {
-    "data_week_1": {
+    "Data_part01": {
         "files": [
-            "tauIdEff_ntuple.root"
+            "tauIdEff_ntuple_1_1.root",
+            "tauIdEff_ntuple_2_1.root",
+            "tauIdEff_ntuple_3_1.root",
+            "tauIdEff_ntuple_4_1.root",
+            "tauIdEff_ntuple_5_1.root",
+            "tauIdEff_ntuple_6_1.root",
+            "tauIdEff_ntuple_7_1.root",
+            "tauIdEff_ntuple_8_1.root",
+            "tauIdEff_ntuple_9_1.root",
+            "tauIdEff_ntuple_10_1.root",
+            "tauIdEff_ntuple_11_1.root",
+            "tauIdEff_ntuple_12_1.root",
+            "tauIdEff_ntuple_13_1.root",
+            "tauIdEff_ntuple_14_1.root",
+            "tauIdEff_ntuple_15_1.root",
+            "tauIdEff_ntuple_16_1.root",
+            "tauIdEff_ntuple_17_1.root",
+            "tauIdEff_ntuple_18_1.root",
+            "tauIdEff_ntuple_19_1.root",
+            "tauIdEff_ntuple_20_1.root",
+            "tauIdEff_ntuple_21_1.root",
+            "tauIdEff_ntuple_22_1.root",
+            "tauIdEff_ntuple_23_1.root",
+            "tauIdEff_ntuple_24_1.root",
+            "tauIdEff_ntuple_25_1.root",
+            "tauIdEff_ntuple_26_1.root",
+            "tauIdEff_ntuple_27_1.root",
+            "tauIdEff_ntuple_28_1.root",
+            "tauIdEff_ntuple_29_1.root",
+            "tauIdEff_ntuple_30_1.root",
+            "tauIdEff_ntuple_31_1.root",
+            "tauIdEff_ntuple_32_1.root",
+            "tauIdEff_ntuple_33_1.root",
+            "tauIdEff_ntuple_34_1.root",
+            "tauIdEff_ntuple_35_1.root",
+            "tauIdEff_ntuple_36_1.root",
+            "tauIdEff_ntuple_37_1.root",
+            "tauIdEff_ntuple_38_1.root",
+            "tauIdEff_ntuple_39_1.root",
+            "tauIdEff_ntuple_40_1.root",
+            "tauIdEff_ntuple_41_1.root",
+            "tauIdEff_ntuple_42_1.root",
+            "tauIdEff_ntuple_43_1.root",
+            "tauIdEff_ntuple_44_1.root",
+            "tauIdEff_ntuple_45_1.root",
+            "tauIdEff_ntuple_46_1.root",
+            "tauIdEff_ntuple_47_1.root",
+            "tauIdEff_ntuple_48_1.root",
+            "tauIdEff_ntuple_49_1.root",
+            "tauIdEff_ntuple_50_1.root",
+            "tauIdEff_ntuple_51_1.root",
+            "tauIdEff_ntuple_52_1.root",
+            "tauIdEff_ntuple_53_1.root",
+            "tauIdEff_ntuple_54_1.root",
+            "tauIdEff_ntuple_55_1.root",
+            "tauIdEff_ntuple_56_1.root",
+            "tauIdEff_ntuple_57_1.root",
+            "tauIdEff_ntuple_58_1.root",
+            "tauIdEff_ntuple_59_1.root",
+            "tauIdEff_ntuple_60_1.root",
+            "tauIdEff_ntuple_61_1.root",
+            "tauIdEff_ntuple_62_1.root",
+            "tauIdEff_ntuple_63_1.root",
+            "tauIdEff_ntuple_64_1.root",
+            "tauIdEff_ntuple_65_1.root",
+            "tauIdEff_ntuple_66_1.root",
+            "tauIdEff_ntuple_67_1.root",
+            "tauIdEff_ntuple_68_1.root",
+            "tauIdEff_ntuple_69_1.root",
+            "tauIdEff_ntuple_70_1.root",
+            "tauIdEff_ntuple_71_1.root",
+            "tauIdEff_ntuple_72_1.root",
+            "tauIdEff_ntuple_73_1.root",
+            "tauIdEff_ntuple_74_1.root",
+            "tauIdEff_ntuple_75_1.root",
+            "tauIdEff_ntuple_76_1.root",
+            "tauIdEff_ntuple_77_1.root",
+            "tauIdEff_ntuple_78_1.root",
+            "tauIdEff_ntuple_79_1.root",
+            "tauIdEff_ntuple_80_1.root",
+            "tauIdEff_ntuple_81_1.root",
+            "tauIdEff_ntuple_82_1.root",
+            "tauIdEff_ntuple_83_1.root",
+            "tauIdEff_ntuple_84_1.root",
+            "tauIdEff_ntuple_85_1.root",
+            "tauIdEff_ntuple_86_1.root",
+            "tauIdEff_ntuple_87_1.root",
+            "tauIdEff_ntuple_88_1.root",
+            "tauIdEff_ntuple_89_1.root",
+            "tauIdEff_ntuple_90_1.root",
+            "tauIdEff_ntuple_91_1.root",
+            "tauIdEff_ntuple_92_1.root",
+            "tauIdEff_ntuple_93_1.root",
+            "tauIdEff_ntuple_94_1.root",
+            "tauIdEff_ntuple_95_1.root",
+            "tauIdEff_ntuple_96_1.root",
+            "tauIdEff_ntuple_97_1.root",
+            "tauIdEff_ntuple_98_1.root",
+            "tauIdEff_ntuple_99_1.root",
+            "tauIdEff_ntuple_100_1.root",
+            "tauIdEff_ntuple_101_1.root",
+            "tauIdEff_ntuple_102_1.root",
+            "tauIdEff_ntuple_103_1.root",
+            "tauIdEff_ntuple_104_1.root",
+            "tauIdEff_ntuple_105_1.root",
+            "tauIdEff_ntuple_106_1.root"
         ], 
-        "int_lumi": 1.0
-    },
-    "data_week_2": {
-        "files": [
-            "tauIdEff_ntuple.root" 
-        ], 
-        "int_lumi": 2.0
-    },
-    "data_week_3": {
-        "files": [
-            "tauIdEff_ntuple.root" 
-        ], 
-        "int_lumi": 3.0
-    },
-    "test_data": {
-        "files": [
-            "/tmp/slehti/tauIdEff_ntuple_24_1.root"
-        ],
-        "int_lumi": 1.0
-    },
-    "test_data2": {
-        "files": [
-            "/castor/cern.ch/user/s/slehti/TauIdCommissioning/qcdDiJet/v1_1c/tauIdEff_ntuple_24_1.root"
-        ],
-        "int_lumi": 1.0
+	"directory": "rfio:/castor/cern.ch/user/s/slehti/TauIdCommissioning/qcdDiJet/v1_1/",
+        "int_lumi": 2.54
     }
-
 }
