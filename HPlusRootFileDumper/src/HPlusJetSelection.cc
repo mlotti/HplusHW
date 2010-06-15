@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
@@ -12,14 +13,13 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "DataFormats/Common/interface/Handle.h"
-#include <vector>
-#include <algorithm>
+#include "DataFormats/Math/interface/Vector.h"
+#include "DataFormats/Math/interface/Vector3D.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 namespace HPlusAnalysis {
   
-  HPlusJetSelection::HPlusJetSelection(const edm::ParameterSet& iConfig) : 
-    HPlusAnalysis::HPlusAnalysisBase("JetSelection"),
-    HPlusAnalysis::HPlusSelectionBase(iConfig) {
+  HPlusJetSelection::HPlusJetSelection(const edm::ParameterSet& iConfig) : HPlusAnalysis::HPlusAnalysisBase("JetSelection"), HPlusAnalysis::HPlusSelectionBase(iConfig) {
     // Parse the list of triggers in the config file
     if (iConfig.exists("JetCollectionName")) {
       fJetCollectionName = iConfig.getParameter<edm::InputTag>("JetCollectionName");
@@ -46,17 +46,19 @@ namespace HPlusAnalysis {
     } else {
       throw cms::Exception("Configuration") << "JetSelection: double value 'CutMaxEMFraction' is missing in config!" << std::endl;
     }
-    
+    // Declare produced items (class-specific): 
+    std::string alias;
+    produces< std::vector<reco::CaloJet> >(alias = "CaloJets").setBranchAlias(alias);
+    produces< std::vector<math::XYZVector> >(alias = "LdgJet").setBranchAlias(alias);
+    produces< std::vector<math::XYZVector> >(alias = "SecondLdgJet").setBranchAlias(alias);
+    produces< std::vector<math::XYZVector> >(alias = "ThirdLdgJet").setBranchAlias(alias);
+    produces< std::vector<math::XYZVector> >(alias = "FourthLdgJet").setBranchAlias(alias);
     // Initialize counters
     fCounterJetsPriorSelection = fCounter->addCounter("All Jets");
     fCounterJetsPostSelection  = fCounter->addCounter("Selected Jets");
     fCounterJetCollectionHandleEmpty = fCounter->addCounter("Empty Jet Handle");
     fCounterError = fCounter->addCounter("Random Errors");
-
-    std::string alias;
-    // Declare produced items (class-specific):  Max Jet Et 
-    produces<float>(alias = "JetSelectionMaxJetEt").setBranchAlias(alias);
-  
+    
   } //eof: HPlusAnalysis::HPlusSelectionBase(iConfig) {
 
   HPlusJetSelection::~HPlusJetSelection() {}
@@ -67,15 +69,15 @@ namespace HPlusAnalysis {
     if (isHistogrammed()) {
       
       // myHisto =  fs->make<TH1D>(tName, tName, nBins, min, max ); // (const char*, const char*, Int_t, Float_t, Float_t)
-      hLdgJetEt = fFileService->make<TH1F>("LdgJetEt", "LdgJet  E_{T}",  200, 0.0, 200.);// LdgJet Et 
-      hSecondLdgJetEt = fFileService->make<TH1F>("SecondLdgJetEt", "2nd LdgJet  E_{T}",  100, 0., 200.);
-      hThirdLdgJetEt = fFileService->make<TH1F>("ThirdLdgJetEt", "3rd LdgJet  E_{T}",  100, 0., 200.);
-      hFourthLdgJetEt = fFileService->make<TH1F>("FourthLdgJetEt", "4th LdgJet  E_{T}",  100, 0., 200.);
-      // hFifthLdgJetEt = fFileService->make<TH1F>("FifthLdgJetEt", "5th LdgJet  E_{T}",  100, 0., 200.);
+      hLdgJetEt       = fFileService->make<TH1F>("LdgJetEt", "LdgJet  E_{T}",  202, -1.5, 200.5);// LdgJet Et 
+      hSecondLdgJetEt = fFileService->make<TH1F>("SecondLdgJetEt", "2nd LdgJet  E_{T}",  202, -1.5, 200.5);
+      hThirdLdgJetEt  = fFileService->make<TH1F>("ThirdLdgJetEt", "3rd LdgJet  E_{T}",  202, -1.5, 200.5);
+      hFourthLdgJetEt = fFileService->make<TH1F>("FourthLdgJetEt", "4th LdgJet  E_{T}",  202, -1.5, 200.5);
+      // hFifthLdgJetE = fFileService->make<TH1F>("FifthLdgJetEt", "5th LdgJet  E_{T}",  202, -1.5, 200.5);
       //
-      hLdgJetEta = fFileService->make<TH1F>("LdgJetEta", "LdgJet  E_{T}",  30, -3., 3.);// LdgJet Eta
+      hLdgJetEta       = fFileService->make<TH1F>("LdgJetEta", "LdgJet  E_{T}",  30, -3., 3.);// LdgJet Eta
       hSecondLdgJetEta = fFileService->make<TH1F>("SecondLdgJetEta", "2nd LdgJet  E_{T}",  30, -3., 3.);
-      hThirdLdgJetEta = fFileService->make<TH1F>("ThirdLdgJetEta", "3rd LdgJet  E_{T}",  30, -3., 3.);
+      hThirdLdgJetEta  = fFileService->make<TH1F>("ThirdLdgJetEta", "3rd LdgJet  E_{T}",  30, -3., 3.);
       hFourthLdgJetEta = fFileService->make<TH1F>("FourthLdgJetEta", "4th LdgJet  E_{T}",  30, -3., 3.);
       // hFifthLdgJetEta = fFileService->make<TH1F>("FifthLdgJetEta", "5th LdgJet  E_{T}",  30, -3., 3.);
     }
@@ -95,19 +97,17 @@ namespace HPlusAnalysis {
     //     else if(fJetCollectionName.label().compare("JetPlusTrackZSPCorJetAntiKt5") == 0){ myJetClass = "reco::JPTJet";}
     //     else{std::cout << "ERROR: No such class exists!!! Please select either \"ak5CaloJets\" or \"JetPlusTrackZSPCorJetAntiKt5\""<< std::endl;}
     
-    bool decision = false; // filter decision true iff at least NJets survive the selection criteria.
+    bool jetsPassCriteria = false; // The filter decision is true iff at least NJets survive the selection criteria (on Et, Eta, EMFraction)
 
     // ************************************************************************************************
-    // FIXME
-//     std::auto_ptr<float> myLdgJetEt(new float); // highest pt of jet that has passed all criteria
-//     std::auto_ptr<float> mySecondLdgJetEt(new float); // Et of ldg jet
-//     std::auto_ptr<float> myThirdLdgJetEt(new float); 
-//     std::auto_ptr<float> myFourthdLdgJetEt(new float); 
-//     std::auto_ptr<float> myFifthdLdgJetEt(new float); 
-//     std::auto_ptr<float> mySecondLdgJetEta(new float); // Eta of ldg jet
-//     std::auto_ptr<float> myThirdLdgJetEta(new float); 
-//     std::auto_ptr<float> myFourthdLdgJetEta(new float); 
-//     std::auto_ptr<float> myFifthdLdgJetEta(new float); 
+    // JetSelection specific variables
+    // std::auto_ptr< std::vector<reco::CaloJet> > myDataCaloJets(new std::vector<reco::CaloJet>); // likely to cause problems: different number of entries than rest of vectors 
+    std::auto_ptr< std::vector<math::XYZVector> > myDataLdgJet(new std::vector<math::XYZVector>);       // highest Et jet passing criteria
+    std::auto_ptr< std::vector<math::XYZVector> > myDataSecondLdgJet(new std::vector<math::XYZVector>); // 2nd highest Et jet passing criteria
+    std::auto_ptr< std::vector<math::XYZVector> > myDataThirdLdgJet(new std::vector<math::XYZVector>);  // 3rd highest Et jet passing criteria
+    std::auto_ptr< std::vector<math::XYZVector> > myDataFourthLdgJet(new std::vector<math::XYZVector>); // 4th highest Et jet passing criteria
+    // std::auto_ptr<float> myLdgJetEt(new float); // highest pt of jet that has passed all criteria
+    // std::auto_ptr<float> mySecondLdgJetEta(new float); // Eta of ldg jet
     // ************************************************************************************************
     
     // Get JetCollection handle
@@ -116,7 +116,7 @@ namespace HPlusAnalysis {
     if (!myCaloJets->size()) {
       edm::LogInfo("HPlus") << "*** WARNING: Jet handle is empty! ***" << std::endl;
       fCounter->addCount(fCounterJetCollectionHandleEmpty);
-    return decision;
+    return jetsPassCriteria;
     }
     const size_t myJetCount = myCaloJets->size();
     
@@ -124,7 +124,8 @@ namespace HPlusAnalysis {
     std::vector<reco::CaloJet> myUnsortedJets;
     std::vector<reco::CaloJet> mySortedJets;
     std::vector<reco::CaloJet> myFilteredJets;
-
+    std::vector<reco::CaloJet> myEmptyJets;
+    
     // Step 1) Store all jets in a vector
     // **********************************
     for (size_t i = 0; i < myJetCount; ++i) {
@@ -142,61 +143,88 @@ namespace HPlusAnalysis {
     const size_t mySortJetsSize = mySortedJets.size();
     
     // Step 3) Filter the now ordered Jets: Apply Jet Et, Eta and EMFraction Cuts
-    // ************************************
-    if(mySortJetsSize==myUnsortedJetsSize){ myFilteredJets = filterCaloJets(mySortedJets, mySortJetsSize); }
+    // **************************************************************************
+    if(mySortJetsSize == myUnsortedJetsSize){ myFilteredJets = filterCaloJets(mySortedJets, mySortJetsSize); }
     else{
-      edm::LogInfo("HPlus") << "Jet handle is empty!" << std::endl;
+      edm::LogInfo("HPlus") << "WARNING! The number of sorted jets is not the same as the number of un-sorted jets!!!" << std::endl;
       fCounter->addCount(fCounterError);
+      myFilteredJets = myEmptyJets;
     }
-
-    // Step 4) Now analyze the filtered Jets
-    // *************************************
-    const size_t myFilteredJetsSize = myFilteredJets.size();
+    
+    // Step 4) Last criterion: Is the number of jets enough? 
+    // *****************************************************
+    int myFilteredJetsSize = myFilteredJets.size();
+    std::cout << "myFilteredJetsSize = " << myFilteredJetsSize << std::endl;
+    // size_t myFilteredJetsSize = myFilteredJets.size();
+    if( myFilteredJetsSize >= fCutMinNJets  ){ jetsPassCriteria = true;}
+    
+    // Step 5) Save variables to ntuple 
+    // *********************************
     if(myFilteredJetsSize!=0){
-      // remember: if fCutMinNJets is NOT satisfied, then then "myFilteredJets" vector is returned empty!
-      decision = true; 
-      // Create a vector iterator for the filtered jets
-      std::vector<reco::CaloJet>::const_iterator iFilteredJet;
       // Loop over all the filtered jets
-      for(iFilteredJet =  myFilteredJets.begin(); iFilteredJet != myFilteredJets.end(); iFilteredJet++){
-	// Count total number of jets prio any selection in each Event.
+      for(std::vector<reco::CaloJet>::const_iterator iFilteredJet; iFilteredJet =  myFilteredJets.begin(); iFilteredJet != myFilteredJets.end(); iFilteredJet++){
+	// Count total number of jets prior to any selection in each Event.
 	fCounter->addCount(fCounterJetsPostSelection);
+	// myDataCaloJets->push_back((*iFilteredJet)); // likely to cause problems: different number of entries than rest of vectors 
+      }
+      if(jetsPassCriteria){
+	// Keep the 4 leading jets momenta.
+	myDataLdgJet       ->push_back( myFilteredJets.at(0).momentum());
+	myDataSecondLdgJet ->push_back( myFilteredJets.at(1).momentum()); 
+	myDataThirdLdgJet  ->push_back( myFilteredJets.at(2).momentum());
+	myDataFourthLdgJet ->push_back( myFilteredJets.at(3).momentum());
+	// myDataFifthLdgJet  ->push_back( myFilteredJets.at(4).momentum());
+
+	// Step 6) Fill some validation histograms
+	// ***************************************
+	hLdgJetEt->Fill(myFilteredJets.at(0).et()); // LdgJet Energy
+	hSecondLdgJetEt->Fill(myFilteredJets.at(1).et());
+	hThirdLdgJetEt->Fill(myFilteredJets.at(2).et());
+	hFourthLdgJetEt->Fill(myFilteredJets.at(3).et());
+	// hFifthLdgJetEt->Fill(myFilteredJets.at(4).et());
+	hLdgJetEta->Fill(myFilteredJets.at(0).eta()); // LdgJet Eta
+	hSecondLdgJetEta->Fill(myFilteredJets.at(1).eta());
+	hThirdLdgJetEta->Fill(myFilteredJets.at(2).eta());
+	hFourthLdgJetEta->Fill(myFilteredJets.at(3).eta());
+	// hFifthLdgJetEta->Fill(myFilteredJets.at(4).eta());
+      } else{
+	// Fill with empty vector
+	math::XYZVector myEmptyXYZVector;
+	myEmptyXYZVector.SetXYZ(0, 0, 0);
+	// FIXME: Is this really neaded? Data corruption
+	myDataLdgJet       ->push_back( myEmptyXYZVector );
+	myDataSecondLdgJet ->push_back( myEmptyXYZVector ); 
+	myDataThirdLdgJet  ->push_back( myEmptyXYZVector );
+	myDataFourthLdgJet ->push_back( myEmptyXYZVector );
+	// myDataFifthLdgJet  ->push_back( myFilteredJets.at(4).momentum());
       }
     }
     else{ 
-      //std::cout << "*** WARNING:  myFilteredJetsSize == 0 ***" << std::endl; 
-    }
-
-    // Step 5) Fill some validation histograms
-    // ***************************************  
-    if(myFilteredJets.size()!=0){
-
-      hLdgJetEt->Fill(myFilteredJets.at(0).et()); // LdgJet Et
-      hSecondLdgJetEt->Fill(myFilteredJets.at(1).et());
-      hThirdLdgJetEt->Fill(myFilteredJets.at(2).et());
-      hFourthLdgJetEt->Fill(myFilteredJets.at(3).et());
-      // hFifthLdgJetEt->Fill(myFilteredJets.at(4).et());
-      //
-      hLdgJetEta->Fill(myFilteredJets.at(0).eta()); // LdgJet Et
-      hSecondLdgJetEta->Fill(myFilteredJets.at(1).eta());
-      hThirdLdgJetEta->Fill(myFilteredJets.at(2).eta());
-      hFourthLdgJetEta->Fill(myFilteredJets.at(3).eta());
-      // hFifthLdgJetEta->Fill(myFilteredJets.at(4).eta());
-    }  else{
       hLdgJetEt->Fill(-1.0);
       hSecondLdgJetEt->Fill(-1.0);
       hThirdLdgJetEt->Fill(-1.0);
       hFourthLdgJetEt->Fill(-1.0);
       // hFifthLdgJetEt->Fill(-1.0);
-      //
-      hLdgJetEta->Fill(-1.0);
-      hSecondLdgJetEta->Fill(-1.0);
-      hThirdLdgJetEta->Fill(-1.0);
-      hFourthLdgJetEta->Fill(-1.0);
-      // hFifthLdgJetEta->Fill(-1.0);
+      hLdgJetEta->Fill(-999.0);
+      hSecondLdgJetEta->Fill(-999.0);
+      hThirdLdgJetEta->Fill(-999.0);
+      hFourthLdgJetEta->Fill(-999.0);
+      // hFifthLdgJetEta->Fill(-999.0);
     }
-    
-    return decision;
+
+    // Step 7) Put event data
+    // **********************
+    // if (!mySelectedPFTauRefs.size()) return false;
+    // Jet energy details
+    // iEvent.put(myDataCaloJets, "CaloJets"); // likely to cause problems: different number of entries than rest of vectors 
+    iEvent.put(myDataLdgJet, "LdgJet");
+    iEvent.put(myDataSecondLdgJet, "SecondLdgJet");
+    iEvent.put(myDataThirdLdgJet, "ThirdLdgJet");
+    iEvent.put(myDataFourthLdgJet, "FourthLdgJet");
+    // iEvent.put(myDataFifthLdgJet, "FifthLdgJet");
+
+    // Return true if "fCutMinNJets" Jets satisfy the cuts on Jet Et, Jet Eta, Jet EMFraction for each Jet.
+    return jetsPassCriteria;
       
   }//eof:  HPlusJetSelection::analyze()
   
@@ -228,6 +256,7 @@ namespace HPlusAnalysis {
     
   }//eof: HPlusJetSelection::sortCaloJets()
 
+
   std::vector<reco::CaloJet> HPlusJetSelection::filterCaloJets(std::vector<reco::CaloJet> caloJetsSorted, const size_t caloJetSize) {
     
     // Declare variables
@@ -237,7 +266,6 @@ namespace HPlusAnalysis {
     std::vector<reco::CaloJet> caloJetsEmpty;
     std::vector<reco::CaloJet>::iterator it_caloJetsFilteredCands;
     std::vector<reco::CaloJet>::iterator it_caloJetsFiltered;
-    bool passedNJets      = false;
     bool passedJetEt      = false;
     bool passedJetEta     = false;
     bool passedEMFraction = false;  
@@ -250,7 +278,7 @@ namespace HPlusAnalysis {
 	passedJetEt      = false;
 	passedJetEta     = false;
 	passedEMFraction = false;
-	if( (*it_caloJetsFilteredCands).energy() >= fCutMinJetEt){ passedJetEt = true;}
+	if( (*it_caloJetsFilteredCands).et() >= fCutMinJetEt){ passedJetEt = true;}
 	if( fabs((*it_caloJetsFilteredCands).eta()) <= fCutMaxAbsJetEta){ passedJetEta = true;}
 	if( (*it_caloJetsFilteredCands).emEnergyFraction() >= fCutMaxEMFraction ){ passedEMFraction = true;}
 	
@@ -264,20 +292,6 @@ namespace HPlusAnalysis {
 	}
       }
     }
-    
-    // Last criterion: Is the number of jets enough? 
-    double myFilteredJetsSize = caloJetsFiltered.size();
-    if( myFilteredJetsSize >= fCutMinNJets  ){ passedNJets = true;}
-    
-    // If fCutMinNJets criterion is not satisfied, return an empty vector of caloJets!
-    if(passedNJets){ 
-      // do nothing 
-    }
-    else{
-      // return an empty vector!
-      caloJetsFiltered = caloJetsEmpty;      
-    }
-    
     return caloJetsFiltered;
     
   }//eof: HPlusJetSelection::filterCaloJets

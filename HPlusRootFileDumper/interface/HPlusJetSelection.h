@@ -48,6 +48,10 @@ namespace HPlusAnalysis {
   double fCutMinJetEt;
   double fCutMaxAbsJetEta;
   double fCutMaxEMFraction;
+  math::XYZVector myDataLdgJet;
+  math::XYZVector myDataSecondLdgJet;
+  math::XYZVector myDataThirdLdgJet;
+  math::XYZVector myDataFourthLdgJet;
   // ****************************//
 
   // Counters

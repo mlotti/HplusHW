@@ -437,7 +437,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   
   myDiscriminatorHandles.clear();
   return true;
-}
+}//eof: HPlusTauDumperPF::setData()
 
   reco::Vertex HPlusTauDumperPF::threeProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup) {
     
