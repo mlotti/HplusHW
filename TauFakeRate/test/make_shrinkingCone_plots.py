@@ -4,7 +4,7 @@ from TauAnalysis.TauIdEfficiency.ntauples.PlotManager import PlotManager
 import TauAnalysis.TauIdEfficiency.ntauples.styles as style
 
 # Defintion of input files.
-import samples_cache as samples
+import HiggsAnalysis.TauFakeRate.samples_cache as samples
 import os
 import sys
 

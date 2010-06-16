@@ -13,12 +13,12 @@ $Id: samples.py,v 1.4 2010/06/12 00:39:01 friis Exp $
 
 # Locations of the luminosity maps
 _DATA_LUMI_MAP_FILE = os.path.join(
-    os.environ['CMSSW_BASE'], 'src/TauAnalysis/TauIdEfficiency/test/'
-    'commissioning', 'dataLumiMap.json')
+    os.environ['CMSSW_BASE'], 'src/HiggsAnalysis/TauFakeRate/data/'
+    '', 'dataLumiMap.json')
 
 _MC_LUMI_MAP_FILE = os.path.join(
-    os.environ['CMSSW_BASE'], 'src/TauAnalysis/TauIdEfficiency/test/'
-    'commissioning', 'mcLumiMap.json')
+    os.environ['CMSSW_BASE'], 'src/HiggsAnalysis/TauFakeRate/data/'
+    '', 'mcLumiMap.json')
 
 
 # Arugments: lumi map file, name of output collection, merge/add, list of samples
@@ -37,3 +37,12 @@ minbias_mc = build_sample(_MC_LUMI_MAP_FILE, "mc_minbias", "merge", "minBias")
 # For data, we use the add mode, to concatenate data
 print "loading definition of Data samples..."
 data = build_sample(_DATA_LUMI_MAP_FILE, "data", "add", "Data_part01")
+
+# Small test mc sample
+print "loading mc test"
+mc_test   = build_sample(_MC_LUMI_MAP_FILE, "mc_test", "merge", "MC_test")
+
+# Small test data sample
+print "loading data test"
+data_test = build_sample(_DATA_LUMI_MAP_FILE, "data_test", "add", "Data_test")
+

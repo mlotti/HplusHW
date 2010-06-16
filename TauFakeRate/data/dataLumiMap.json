@@ -110,5 +110,12 @@
         ], 
 	"directory": "rfio:/castor/cern.ch/user/s/slehti/TauIdCommissioning/qcdDiJet/v1_1/",
         "int_lumi": 2.54
-    }
+    },
+    "Data_test": {
+        "files": [                                                                             
+            "tauIdEff_ntuple_1_1.root"
+        ],                                                                                     
+        "directory": "rfio:/castor/cern.ch/user/s/slehti/TauIdCommissioning/qcdDiJet/v1_1/",   
+        "int_lumi": 1.0                                                                       
+    }                                                                                          
 }

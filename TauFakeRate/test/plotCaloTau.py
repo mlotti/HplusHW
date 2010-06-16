@@ -1,12 +1,12 @@
 import ROOT
 
-from TauAnalysis.TauIdEfficiency.ntauples.TauNtupleManager \
-        import TauNtupleManager
-from TauAnalysis.TauIdEfficiency.ntauples.PlotManager \
-        import PlotManager
+from TauAnalysis.TauIdEfficiency.ntauples.TauNtupleManager import TauNtupleManager
+from TauAnalysis.TauIdEfficiency.ntauples.PlotManager import PlotManager
+
+import TauAnalysis.TauIdEfficiency.ntauples.styles as style
 
 # Defintion of input files.
-import HiggsAnalysis.TauFakeRate.samples as samples
+import HiggsAnalysis.TauFakeRate.samples_cache as samples
 
 if __name__ == "__main__":
     ROOT.gROOT.SetBatch(True)
@@ -15,8 +15,9 @@ if __name__ == "__main__":
 
     # Pull out the defintion of the ntuple (this should be improved)
     # Don't ever access this file directly, just use it to parse event content...
-    dummy_file = ROOT.TFile("../data/tauIdEff_ntuple.root")
-    ntuple_manager = TauNtupleManager(dummy_file.Get("Events"), "tauIdEffNtuple")
+#    dummy_file = ROOT.TFile("../data/tauIdEff_ntuple.root")
+#    ntuple_manager = TauNtupleManager(dummy_file.Get("Events"), "tauIdEffNtuple")
+    ntuple_manager = samples.data.build_ntuple_manager("tauIdEffNtuple")
 
     # Get the list of collections availabe for our ntuple
     print ntuple_manager
@@ -34,17 +35,22 @@ if __name__ == "__main__":
     # Build the plot manager.  The plot manager keeps track of all the samples
     # and ensures they are correctly normalized w.r.t. luminosity.  See 
     # samples.py for available samples.
+#    data_sample = samples.data
+#    mc_sample = samples.minbias_mc
     data_sample = samples.data_test
     mc_sample = samples.mc_test
    
     plotter = PlotManager()
     # Add each sample we want to plot/compare
-    plotter.add_sample(mc_sample, "MC", 
-                       fill_color=ROOT.EColor.kBlue-5, draw_option="hist",
-                       line_color=ROOT.EColor.kBlue, fill_style=1)
+    plotter.add_sample(mc_sample, "Minbias MC", **style.MINBIAS_MC_STYLE)
+    plotter.add_sample(data_sample, "Data (7 TeV)", **style.DATA_STYLE)
 
-    plotter.add_sample(data_sample, "Data", marker_size=2,
-                       marker_color=ROOT.EColor.kRed, draw_option="pe")
+#    plotter.add_sample(mc_sample, "MC", 
+#                       fill_color=ROOT.EColor.kBlue-5, draw_option="hist",
+#                       line_color=ROOT.EColor.kBlue, fill_style=1)
+#
+#    plotter.add_sample(data_sample, "Data", marker_size=2,
+#                       marker_color=ROOT.EColor.kRed, draw_option="pe")
 
     # Normalize everything to the data luminosity
     plotter.set_integrated_lumi(data_sample.effective_luminosity())
@@ -65,7 +71,7 @@ if __name__ == "__main__":
             pt_result['samples']['mc_test']['mean']
 
     canvas.SaveAs("caloTau_pt.png")
-
+    exit()
 ###################################################################################
     canvas_ptraw = ROOT.TCanvas("canvas_ptraw", "", 500, 500)
                                                                                              
