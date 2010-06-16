@@ -18,9 +18,6 @@
 //   Description: Class for jet selection: Loop over all jets in Evt, sort them by ascending order wrt their  *
 //                Energy, apply selection cuts on their Jet Et, Eta and EMFraction. Return a boolean decision *
 //                which is "true" iff there are "fCutMinNJets" jets in the Evt which satisfy the criteria.    *
-//   info       : JPT are Jets made from CaloJets corrected for ZSP (Zero Suppression) and tracks.            *
-//                JPTJet represents Jets made from CaloTowers and corrected for tracks in addition to generic *
-//                Jet parameters it gives reference to the original jet, ZSP scale, associated tracks.        *
 //*************************************************************************************************************
 
 namespace HPlusAnalysis {
@@ -37,16 +34,10 @@ namespace HPlusAnalysis {
     void endJob();
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
     //  Class-specific functions.
-    bool doCaloJets(edm::Event& iEvent, const edm::EventSetup& iSetup);
     std::vector<reco::CaloJet> sortCaloJets(std::vector<reco::CaloJet> CaloJetsToSort, const size_t caloJetSize);
     std::vector<reco::CaloJet> filterCaloJets(std::vector<reco::CaloJet> caloJetsSorted, const size_t caloJetSize);
     std::vector<reco::CaloJet> eraseVectorElement( std::vector<reco::CaloJet> myJetVector, reco::CaloJet test);
-    //
-    bool doJPTJets(edm::Event& iEvent, const edm::EventSetup& iSetup);
-    std::vector<reco::JPTJet> sortJPTJets(std::vector<reco::JPTJet> JPTJetsToSort, const size_t caloJetSize);
-    std::vector<reco::JPTJet> filterJPTJets(std::vector<reco::JPTJet> JPTJetsSorted, const size_t caloJetSize);
-    std::vector<reco::JPTJet> eraseVectorElement( std::vector<reco::JPTJet> myJetVector, reco::JPTJet test);
-
+    
   private:
     // Cut values (their values taken from py cfg file)
     edm::InputTag fJetCollectionName; // Name of jet collection to be analyzed
@@ -64,7 +55,6 @@ namespace HPlusAnalysis {
     // other
     bool useCaloJets;
     bool useJPTJets;
-    bool decision;
     // Validating Histograms
     TH1F* hLdgJetEt; /// LdgJet Et 
     TH1F* hSecondLdgJetEt; 

@@ -46,26 +46,15 @@ namespace HPlusAnalysis {
     } else {
       throw cms::Exception("Configuration") << "JetSelection: double value 'CutMaxEMFraction' is missing in config!" << std::endl;
     }
+    // Declare produced items (class-specific): 
+    std::string alias;
+    produces< std::vector<reco::CaloJet> >(alias = "LdgJet").setBranchAlias(alias);
+    produces< std::vector<reco::CaloJet> >(alias = "SecondLdgJet").setBranchAlias(alias);
+    produces< std::vector<reco::CaloJet> >(alias = "ThirdLdgJet").setBranchAlias(alias);
+    produces< std::vector<reco::CaloJet> >(alias = "FourthLdgJet").setBranchAlias(alias);
+    // produces< std::vector<reco::CaloJet> >(alias = "FifthLdgJet").setBranchAlias(alias);
+    // produces< std::vector<std::vector<reco::CaloJet> > >(alias = "CaloJets").setBranchAlias(alias);
 
-    // Initialise booleans
-    useCaloJets = false;
-    useJPTJets  = false;
-    decision    = false;    
-    
-    // See which jet collection was selected for analysing...
-    if( (fJetCollectionName.label()).compare("ak5CaloJets") == 0){ 
-      std::cout << "\n*** HPlusJetSelection::HPlusJetSelection() *** Have chosen to run on Jet-Collection \"ak5CaloJets\".\n"  << std::endl;
-      useCaloJets = true;
-    }
-    else if(fJetCollectionName.label().compare("JetPlusTrackZSPCorJetAntiKt5") == 0){ 
-      std::cout << "\n*** HPlusJetSelection::HPlusJetSelection() *** Have chosen to run on Jet-Collection \"JetPlusTrackZSPCorJetAntiKt5\".\n" << std::endl;
-      useJPTJets = true;
-    }
-    else{ 
-      std::cout << "\n*** HPlusJetSelection::HPlusJetSelection() *** ERROR: No Jet-Collection exists with the name \"" << fJetCollectionName.label() << "\"! Please select either a \"reco::caloJet\" or a \"reco::JPTJet\" collection."<< std::endl;
-      fCounter->addCount(fCounterError);
-    }
-    
     // Initialize counters
     fCounterNEvts = fCounter->addCounter("Total #Evts (before selection)");
     fCounterNEvtsPassedSelection = fCounter->addCounter("Total #Evts (after selection)");
@@ -73,33 +62,16 @@ namespace HPlusAnalysis {
     fCounterJetsPostSelection  = fCounter->addCounter("#Jets (after selection)");
     fCounterJetCollectionHandleEmpty = fCounter->addCounter("#Evts with Empty Jet Handle");
     fCounterError = fCounter->addCounter("Errors and Warnings");
-
-    // Declare produced items (class-specific): 
-    std::string alias;
-    if(useCaloJets){    
-      produces< std::vector<reco::CaloJet> >(alias = "LdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::CaloJet> >(alias = "SecondLdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::CaloJet> >(alias = "ThirdLdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::CaloJet> >(alias = "FourthLdgJet").setBranchAlias(alias);
-      // produces< std::vector<reco::CaloJet> >(alias = "FifthLdgJet").setBranchAlias(alias);
-      // produces< std::vector<std::vector<reco::CaloJet> > >(alias = "CaloJets").setBranchAlias(alias);
-    }
-    if(useJPTJets){
-      produces< std::vector<reco::JPTJet> >(alias = "LdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::JPTJet> >(alias = "SecondLdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::JPTJet> >(alias = "ThirdLdgJet").setBranchAlias(alias);
-      produces< std::vector<reco::JPTJet> >(alias = "FourthLdgJet").setBranchAlias(alias);
-      // produces< std::vector<reco::JPTJet> >(alias = "FifthLdgJet").setBranchAlias(alias);
-      // produces< std::vector<std::vector<reco::JPTJet> > >(alias = "JPTJets").setBranchAlias(alias);
-    }
-  
+    
   } //eof: HPlusAnalysis::HPlusSelectionBase(iConfig) {
 
   HPlusJetSelection::~HPlusJetSelection() {}
   
+
   void HPlusJetSelection::beginJob() {
     // Set histograms
     if (isHistogrammed()) {
+      
       // myHisto =  fs->make<TH1D>(tName, tName, nBins, min, max ); // (const char*, const char*, Int_t, Float_t, Float_t)
       hLdgJetEt       = fFileService->make<TH1F>("LdgJetEt", "LdgJet  E_{T}",  202, -1.5, 200.5);// LdgJet Et 
       hSecondLdgJetEt = fFileService->make<TH1F>("SecondLdgJetEt", "2nd LdgJet  E_{T}",  202, -1.5, 200.5);
@@ -113,16 +85,33 @@ namespace HPlusAnalysis {
       hFourthLdgJetEta = fFileService->make<TH1F>("FourthLdgJetEta", "4th LdgJet  E_{T}",  30, -3., 3.);
       // hFifthLdgJetEta = fFileService->make<TH1F>("FifthLdgJetEta", "5th LdgJet  E_{T}",  30, -3., 3.);
     }
-
   }
   
   void HPlusJetSelection::endJob() {
+    
   }
   
   bool HPlusJetSelection::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // std::cout << "\n*** HPlusJetSelection::filter() *** The boolean useJPTJets = " <<  useJPTJets <<  "\n"  << std::endl; // deleteMe    
+
+    useCaloJets = false;
+    useJPTJets = false;
     
-    // Use booleans to determine which functions to call (Collection-Dependent)
+    // See which jet collection was selected for analysing...
+    if( (fJetCollectionName.label()).compare("ak5CaloJets") == 0){ 
+      std::cout << "*** HPlusJetSelection::filter() *** Have chosen to run on Jet-Collection \"ak5CaloJets\"."  << std::endl;
+      useCaloJets = true;
+    }
+    else if(fJetCollectionName.label().compare("JetPlusTrackZSPCorJetAntiKt5") == 0){ 
+      std::cout << "*** HPlusJetSelection::filter() *** Have chosen to run on Jet-Collection \"JetPlusTrackZSPCorJetAntiKt5\"." << std::endl;
+      useCaloJets = true;
+    }
+    else{ 
+      std::cout << "ERROR: No jet-collection exists with the name \""<< fJetCollectionName.label() << "\"! Please select either a \"reco::caloJet\" or a \"reco::JPTJet\" collection."<< std::endl;
+      fCounter->addCount(fCounterError);
+    }
+    bool decision = false;    
+
+
     if(useCaloJets){decision = doCaloJets(iEvent, iSetup);}
     else if(useJPTJets){decision = doJPTJets(iEvent, iSetup);}
     else{  
@@ -130,11 +119,11 @@ namespace HPlusAnalysis {
     }
     
     return decision;
-    
+      
   }//eof: HPlusJetSelection::filter()
   
-  // CALOJETS
   bool HPlusJetSelection::doCaloJets(edm::Event& iEvent, const edm::EventSetup& iSetup){
+
     // The filter decision is true iff at least NJets survive the selection criteria (on Et, Eta, EMFraction)
     bool jetsPassCriteria = false; 
     
@@ -167,8 +156,8 @@ namespace HPlusAnalysis {
     // Step 1) Store all jets in a vector
     // **********************************
     for (size_t i = 0; i < myJetCount; ++i) {
-      const reco::CaloJet & myCaloJet = (*myCaloJets)[i];
-      myUnsortedJets.push_back(myCaloJet);
+      const reco::CaloJet & myJet = (*myCaloJets)[i];
+      myUnsortedJets.push_back(myJet);
       fCounter->addCount(fCounterJetsPriorSelection);
     }
     
@@ -262,32 +251,11 @@ namespace HPlusAnalysis {
 
   }//eof:  HPlusJetSelection::doCaloJets()
 
-  std::vector<reco::CaloJet> HPlusJetSelection::sortCaloJets(std::vector<reco::CaloJet> caloJetsToSort, const size_t caloJetSize) {
-    // Declare variables
-    reco::CaloJet myTmpLdgJet;
-    reco::CaloJet myTmpLdgJet_new;
-    std::vector<reco::CaloJet> caloJetsSorted;
-    std::vector<reco::CaloJet>::iterator myJet;
-    // Store the "first" N jets [wrt energy).
-    for ( size_t i = 0; i < caloJetSize; i++) {
-      for ( myJet = caloJetsToSort.begin(); myJet != caloJetsToSort.end(); ++myJet) {
-	if( (*myJet).energy() > myTmpLdgJet.energy() ){ 
-	  myTmpLdgJet = (*myJet);
-	} else{}
-      }
-      // Store myJet as ith-LdgJet (descending order in Energy)
-      caloJetsSorted.push_back(myTmpLdgJet);
-      // Delete myJet from vector list
-      caloJetsToSort = eraseVectorElement(caloJetsToSort, myTmpLdgJet);
-      myTmpLdgJet = myTmpLdgJet_new;
-    }//eof: for ( size_t i = 0; i < caloJetsToSort.size(); i++) {
-
-    return caloJetsSorted;
-    
-  }//eof: HPlusJetSelection::sortCaloJets()          
-
   std::vector<reco::CaloJet> HPlusJetSelection::filterCaloJets(std::vector<reco::CaloJet> caloJetsSorted, const size_t caloJetSize) {
+    
     // Declare variables
+    reco::CaloJet myJet;
+    // std::vector<reco::CaloJet> caloJetsFilteredCands;
     std::vector<reco::CaloJet> caloJetsFiltered;
     std::vector<reco::CaloJet>::iterator it_caloJetsFilteredCands;
     std::vector<reco::CaloJet>::iterator it_caloJetsFiltered;
@@ -321,6 +289,7 @@ namespace HPlusAnalysis {
     
   }//eof: HPlusJetSelection::filterCaloJets
 
+
   std::vector<reco::CaloJet> HPlusJetSelection::eraseVectorElement( std::vector<reco::CaloJet> myJetVector, reco::CaloJet test) {
 
     std::vector<reco::CaloJet>::iterator it;
@@ -337,16 +306,12 @@ namespace HPlusAnalysis {
 	break;
       } else{counter++;}
     }
-    
     return myJetVector;
-    
   }//eof: HPlusJetSelection::eraseVectorElement()
 
 
-
-  // JPTJETS
   bool HPlusJetSelection::doJPTJets(edm::Event& iEvent, const edm::EventSetup& iSetup){
-
+    
     // The filter decision is true iff at least NJets survive the selection criteria (on Et, Eta, EMFraction)
     bool jetsPassCriteria = false; 
     
@@ -359,7 +324,7 @@ namespace HPlusAnalysis {
     // std::auto_ptr< std::vector<std::vector<reco::JPTJet> > >myDataJPTJets(new std::vector<std::vector<reco::JPTJet> >); // FIXME?
     
     // Get JetCollection handle
-    edm::Handle<reco::JPTJetCollection> myJPTJets;       // create an empty handle 
+    edm::Handle<reco::CaloJetCollection> myJPTJets;       // create an empty handle 
     iEvent.getByLabel(fJetCollectionName, myJPTJets);     // attach handle to JetCollection
     if (!myJPTJets->size()) {
       edm::LogInfo("HPlus") << "*** WARNING: Jet handle is empty! ***" << std::endl;
@@ -379,8 +344,8 @@ namespace HPlusAnalysis {
     // Step 1) Store all jets in a vector
     // **********************************
     for (size_t i = 0; i < myJetCount; ++i) {
-      const reco::JPTJet & myJPTJet = (*myJPTJets)[i];
-      myUnsortedJets.push_back(myJPTJet);
+      const reco::JPTJet & myJet = (*myJPTJets)[i];
+      myUnsortedJets.push_back(myJet);
       fCounter->addCount(fCounterJetsPriorSelection);
     }
     
@@ -473,67 +438,42 @@ namespace HPlusAnalysis {
     return jetsPassCriteria;
 
   }//eof:  HPlusJetSelection::doJPTJets()
-  
-  std::vector<reco::JPTJet> HPlusJetSelection::sortJPTJets(std::vector<reco::JPTJet> JPTJetsToSort, const size_t JPTJetSize) {
 
-    // Declare variables
-    reco::JPTJet myTmpLdgJet;
-    reco::JPTJet myTmpLdgJet_new;
-    std::vector<reco::JPTJet> JPTJetsSorted;
-    std::vector<reco::JPTJet>::iterator myJet;
-    // Store the "first" N jets [wrt energy).
-    for ( size_t i = 0; i < JPTJetSize; i++) {
-      for ( myJet = JPTJetsToSort.begin(); myJet != JPTJetsToSort.end(); ++myJet) {
-	if( (*myJet).energy() > myTmpLdgJet.energy() ){ 
-	  myTmpLdgJet = (*myJet);
-	} else{}
-      }
-      // Store myJet as ith-LdgJet (descending order in Energy)
-      JPTJetsSorted.push_back(myTmpLdgJet);
-      // Delete myJet from vector list
-      JPTJetsToSort = eraseVectorElement(JPTJetsToSort, myTmpLdgJet);
-      myTmpLdgJet = myTmpLdgJet_new;
-    }//eof: for ( size_t i = 0; i < JPTJetsToSort.size(); i++) {
-
-    return JPTJetsSorted;
+  std::vector<reco::JPTJet> HPlusJetSelection::filterJPTJets(std::vector<reco::JPTJet> caloJetsSorted, const size_t caloJetSize) {
     
-  }//eof: HPlusJetSelection::sortJPTJets()           
-
-  std::vector<reco::JPTJet> HPlusJetSelection::filterJPTJets(std::vector<reco::JPTJet> JPTJetsSorted, const size_t JPTJetSize) {
-
     // Declare variables
-    std::vector<reco::JPTJet> JPTJetsFiltered;
-    std::vector<reco::JPTJet>::iterator it_JPTJetsFilteredCands;
-    std::vector<reco::JPTJet>::iterator it_JPTJetsFiltered;
+    reco::JPTJet myJet;
+    // std::vector<reco::JPTJet> caloJetsFilteredCands;
+    std::vector<reco::JPTJet> caloJetsFiltered;
+    std::vector<reco::JPTJet>::iterator it_caloJetsFilteredCands;
+    std::vector<reco::JPTJet>::iterator it_caloJetsFiltered;
     bool passedJetEt      = false;
     bool passedJetEta     = false;
     bool passedEMFraction = false;  
     bool jetSurvives = false;   
     
-    if(JPTJetSize >= fCutMinNJets){
+    if(caloJetSize >= fCutMinNJets){
       
       // Loop over sorted Jets and apply quality cuts
-      for( it_JPTJetsFilteredCands = JPTJetsSorted.begin(); it_JPTJetsFilteredCands != JPTJetsSorted.end(); ++it_JPTJetsFilteredCands) {
+      for( it_caloJetsFilteredCands = caloJetsSorted.begin(); it_caloJetsFilteredCands != caloJetsSorted.end(); ++it_caloJetsFilteredCands) {
 	passedJetEt      = false;
 	passedJetEta     = false;
 	passedEMFraction = false;
-	if( (*it_JPTJetsFilteredCands).et() >= fCutMinJetEt){ passedJetEt = true;}
-	if( fabs((*it_JPTJetsFilteredCands).eta()) <= fCutMaxAbsJetEta){ passedJetEta = true;}
-	if( (*it_JPTJetsFilteredCands).chargedEmEnergyFraction() <= fCutMaxEMFraction ){ passedEMFraction = true;}    // FIXME
-	// if( (*it_JPTJetsFilteredCands).neutralEmEnergyFraction() <= fCutMaxEMFraction ){ passedEMFraction = true;} // FIXME
-	std::cout << "*** HPlusJetSelection::filterJPTJets() *** WARNING! Using JPTJet.chargedEmEnergyFraction() for the EMFraction, and NOT JPTJet.neutralEmEnergyFraction() ...! " << std::endl;
-
+	if( (*it_caloJetsFilteredCands).et() >= fCutMinJetEt){ passedJetEt = true;}
+	if( fabs((*it_caloJetsFilteredCands).eta()) <= fCutMaxAbsJetEta){ passedJetEta = true;}
+	if( (*it_caloJetsFilteredCands).emEnergyFraction() <= fCutMaxEMFraction ){ passedEMFraction = true;}
+	
 	// Boolean will be used to erase those jets that do not satisfy criteria
 	jetSurvives = ( passedJetEt && passedJetEta && passedEMFraction) ;
 	if(jetSurvives){ 
-	  JPTJetsFiltered.push_back(*it_JPTJetsFilteredCands);
+	  caloJetsFiltered.push_back(*it_caloJetsFilteredCands);
 	} 
 	else{ 
 	  // std::cout << "Jet did not survive " << std::endl;  
 	}
       }
     }
-    return JPTJetsFiltered;
+    return caloJetsFiltered;
     
   }//eof: HPlusJetSelection::filterJPTJets
 

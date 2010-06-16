@@ -15,12 +15,12 @@ process.MessageLogger.cout = cms.untracked.PSet(
 )
 process.MessageLogger.statistics.append('cout')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1))
 
 ### Use the Tracer-Service to see in which step your job is currently executing. i.e. Use it to see 'What's going on'
 #process.Tracer = cms.Service("Tracer")
 
-# Standard sequences
+### Standard sequences
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('Configuration/StandardSequences/RawToDigi_Data_cff')
 process.load('Configuration/StandardSequences/L1Reco_cff')
@@ -35,8 +35,8 @@ process.GlobalTag.globaltag = cms.string('GR09_R_34X_V2::All')
 
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 
-##process.load('JetMETCorrections.Configuration.DefaultJEC_cff')  sasha
-##process.load('HiggsAnalysis.HPlusRootFileDumper.DefaultJEC_cff')
+#process.load('JetMETCorrections.Configuration.DefaultJEC_cff')  sasha
+#process.load('HiggsAnalysis.HPlusRootFileDumper.DefaultJEC_cff')
 
 process.load('Configuration/StandardSequences/Geometry_cff')
 process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
@@ -45,16 +45,16 @@ process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
 
-#### The PFTauDecayModes are dropped by default from RECO.  You can add them back in on the fly by doing:
+### The PFTauDecayModes are dropped by default from RECO.  You can add them back in on the fly by doing:
 process.load("RecoTauTag.Configuration.ShrinkingConePFTaus_cfi")
-#### and then adding "process.shrinkingConePFTauDecayModeProducer" to your sequence/path.
+### and then adding "process.shrinkingConePFTauDecayModeProducer" to your sequence/path.
 
-#### Choose techical bits 40 and coincidence with BPTX (0)
+### Choose techical bits 40 and coincidence with BPTX (0)
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
 process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
 process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND 40 AND NOT (36 OR 37 OR 38 OR 39)')
-#### HLT
+### HLT
 process.hltHighLevel = cms.EDFilter("HLTHighLevel",
      TriggerResultsTag = cms.InputTag("TriggerResults","","HLT"),
       HLTPaths = cms.vstring('HLT_PhysicsDeclared'),           # provide list of HLT paths (or patterns) you want
@@ -63,7 +63,7 @@ process.hltHighLevel = cms.EDFilter("HLTHighLevel",
      andOr = cms.bool(True),             # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
      throw = cms.bool(True)    # throw exception on unknown path names
 )
-#### remove monster events
+### remove monster events
 process.monster = cms.EDFilter(
     "FilterOutScraping",
     applyfilter = cms.untracked.bool(True),
@@ -71,17 +71,19 @@ process.monster = cms.EDFilter(
     numtrack = cms.untracked.uint32(10),
     thresh = cms.untracked.double(0.2)
     )
-####
+###
 
-## end Sasha
+### end Sasha
 
 
 process.source = cms.Source("PoolSource",
-  #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-  fileNames = cms.untracked.vstring(
-    # /JetMETTauMonitor/Run2010A-PromptReco-v2/RECO:
-    #'/store/data/Run2010A/JetMETTauMonitor/RECO/v2/000/137/436/48526FDE-8F74-DF11-B2DC-000423D98E6C.root'
-    'file:test.root'
+                            #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
+                            fileNames = cms.untracked.vstring(
+### JPTJets: /JetMETTauMonitor/Run2010A-PromptReco-v2/RECO:
+    'file:JPTtest.root'
+#   '/store/data/Run2010A/JetMETTauMonitor/RECO/v2/000/137/436/48526FDE-8F74-DF11-B2DC-000423D98E6C.root'
+### CaloJets:
+    #  'file:test.root'
 #  '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F4C92A98-163C-DF11-9788-0030487C7392.root',
 #  '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/F427D642-173C-DF11-A909-0030487C60AE.root',
 #  '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/E27821C3-0C3C-DF11-9BD9-0030487CD718.root',
@@ -110,26 +112,24 @@ process.TFileService = cms.Service("TFileService",
 
 #from RecoTauTag.RecoTau.CaloRecoTauTagInfoProducer_cfi import *
 
-
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #process.load('RecoTauTag.RecoTau.CaloRecoTauTagInfoProducer_cfi')
 #process.caloRecoTauTagInfoProducer.CaloJetTracksAssociatorProducer = cms.InputTag('ak5JetTracksAssociatorAtVertex')
 #process.caloRecoTauTagInfoProducer.tkQuality = cms.string('highPurity')
-
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
   tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
 #  tauCollectionName       = cms.InputTag("caloRecoTauProducer"),
   CaloTaus = cms.VPSet(
     cms.PSet(
-##      src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
-###      src = cms.InputTag("caloRecoTauTagInfoProducer", "", "RECO"),
-##      discriminators = cms.VInputTag(
-##	cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "RECO"),
-##	cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "RECO"),
-##	cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "RECO"),
-##	cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "RECO")
-##      ),
+#      src = cms.InputTag("caloRecoTauProducer", "", "RECO"),
+#      src = cms.InputTag("caloRecoTauTagInfoProducer", "", "RECO"),
+#      discriminators = cms.VInputTag(
+#	cms.InputTag("caloRecoTauDiscriminationAgainstElectron", "", "RECO"),
+#	cms.InputTag("caloRecoTauDiscriminationByIsolation", "", "RECO"),
+#	cms.InputTag("caloRecoTauDiscriminationByLeadingTrackFinding", "", "RECO"),
+#	cms.InputTag("caloRecoTauDiscriminationByLeadingTrackPtCut", "", "RECO")
+#      ),
       src = cms.InputTag("caloRecoTauProducer"),
       discriminators = cms.VInputTag(
       	cms.InputTag("caloRecoTauDiscriminationAgainstElectron"),
@@ -216,14 +216,14 @@ process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
         MuonCollectionName = cms.InputTag("muons"),
         MaxMuonPtCutValue = cms.double(15)
       )
-      # Add here new event selections, if necessary
+      ### Add here new event selections, if necessary
     )
   )
 )
 
 process.HPlusJetSelection = cms.EDFilter('HPlusJetSelection',
-                                         JetCollectionName = cms.InputTag("ak5CaloJets"),
-                                         #JetCollectionName = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
+                                         #JetCollectionName = cms.InputTag("ak5CaloJets"),
+                                         JetCollectionName = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
                                          CutMinNJets = cms.double(4.0),
                                          CutMinJetEt = cms.double(2.0),
                                          CutMaxAbsJetEta = cms.double(3.0),
@@ -233,20 +233,36 @@ process.HPlusJetSelection = cms.EDFilter('HPlusJetSelection',
 #process.p = cms.Path(process.HPlusTauIDRootFileDumper)
 
 MySelection = cms.Sequence (
-# process.HPlusHLTTrigger *
-# process.HPlusGlobalMuonVeto *
+#process.HPlusHLTTrigger *
+#process.HPlusGlobalMuonVeto *
   process.HPlusJetSelection  
 )
 
+### Declare counters here. Look for this in the root-output file (HPlusOut.root) under the "LuminosityBlocks" TTree.
+process.hltLevel1GTSeedCounter = cms.EDProducer("EventCountProducer")
+process.hltHighLevelCounter    = cms.EDProducer("EventCountProducer")
+process.monsterCounter         = cms.EDProducer("EventCountProducer")
+process.MySelectionCounter     = cms.EDProducer("EventCountProducer")
+process.tautaggingCounter      = cms.EDProducer("EventCountProducer")
+process.shrinkingConePFTauDecayModeProducerCounter = cms.EDProducer("EventCountProducer")
+process.HPlusTauIDRootFileDumperCounter            = cms.EDProducer("EventCountProducer")
 
+    
 process.p = cms.Path(
-    process.hltLevel1GTSeed *
-    process.hltHighLevel *	
-    process.monster *
-    MySelection *
-    process.tautagging *
-    process.shrinkingConePFTauDecayModeProducer #*
-#    process.HPlusTauIDRootFileDumper #attikis
+process.hltLevel1GTSeedCounter * #counter
+process.hltLevel1GTSeed *
+process.hltHighLevelCounter*     #counter
+process.hltHighLevel *
+process.monsterCounter *         #counter
+process.monster *
+process.MySelectionCounter *     #counter
+MySelection *
+process.tautaggingCounter *      #counter
+process.tautagging *
+process.shrinkingConePFTauDecayModeProducerCounter *  #counter
+process.shrinkingConePFTauDecayModeProducer *
+process.HPlusTauIDRootFileDumperCounter *             #counter
+process.HPlusTauIDRootFileDumper                      #counter, #attikis
 )
                      
 process.myout = cms.OutputModule("PoolOutputModule",
