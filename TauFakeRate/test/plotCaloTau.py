@@ -63,7 +63,7 @@ if __name__ == "__main__":
         expression = selectedTaus.expr('$pt'),
         selection  = my_selection,
         binning    = (100, 0, 50),
-        x_axis_title = "P_{T}"
+        x_axis_title = "P_{T}(GeV/c)"
     )
     # this should draw a comparison on the canvas, but pt_result
     # now contains some helpful stuff.
@@ -71,18 +71,18 @@ if __name__ == "__main__":
             pt_result['samples']['mc_test']['mean']
 
     canvas.SaveAs("caloTau_pt.png")
-    exit()
+
 ###################################################################################
-    canvas_ptraw = ROOT.TCanvas("canvas_ptraw", "", 500, 500)
+    canvas = ROOT.TCanvas("canvas_ptraw", "", 500, 500)
                                                                                              
     ptraw_result = plotter.distribution(
         expression = selectedTaus.expr('$jetPt'),
         selection  = my_selection,
         binning    = (100, 0, 50),
-        x_axis_title = "P_{T}(raw)"
+        x_axis_title = "P_{T}(raw)(GeV/c)"
     )                                                                                        
 
-    canvas_ptraw.SaveAs("caloTau_rawpt.png")
+    canvas.SaveAs("caloTau_rawpt.png")
   
 ###################################################################################
     canvas = ROOT.TCanvas("canvas_eta", "", 500, 500)
@@ -95,9 +95,20 @@ if __name__ == "__main__":
     )
     canvas.SaveAs("caloTau_eta.png")
 
+###################################################################################                          
+    canvas = ROOT.TCanvas("canvas_etaraw", "", 500, 500)
+
+    etaraw_result = plotter.distribution(                                                                  
+        expression = selectedTaus.expr('$jetEta'),
+        selection  = selectedTaus.expr('abs($jetEta) < 5'),
+        binning    = (100, -5, 5),
+        x_axis_title = "eta(raw)"
+    )                                                                                                        
+    canvas.SaveAs("caloTau_raweta.png") 
+
 ###################################################################################
 
-    canvas_phi = ROOT.TCanvas("canvas_phi", "", 500, 500)                       
+    canvas = ROOT.TCanvas("canvas_phi", "", 500, 500)                       
 
     phi_result = plotter.distribution(
         expression = selectedTaus.expr('$phi'),
@@ -105,9 +116,21 @@ if __name__ == "__main__":
         binning    = (100, -500, 500),
         x_axis_title = "phi"
     )
-    canvas_phi.SaveAs("caloTau_phi.png")
+    canvas.SaveAs("caloTau_phi.png")
+###################################################################################                          
+                                                                                                             
+    canvas = ROOT.TCanvas("canvas_phiraw", "", 500, 500)
 
-###################################################################################                                  
+    phi_result = plotter.distribution(
+        expression = selectedTaus.expr('$jetPhi'),
+        selection  = my_selection,
+        binning    = (100, -500, 500),
+        x_axis_title = "phi(raw)"
+    )
+    canvas.SaveAs("caloTau_rawphi.png")
+    
+###################################################################################
+
     canvas = ROOT.TCanvas("canvas_ltrackpt", "", 500, 500)
 
     ltpt_result = plotter.distribution(
@@ -119,6 +142,7 @@ if __name__ == "__main__":
     canvas.SaveAs("caloTau_ltrack_pt.png")
 
 ###################################################################################
+
     canvas = ROOT.TCanvas("canvas_nSignalTracks", "", 500, 500)
 
     nstr_result = plotter.distribution(
