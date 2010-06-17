@@ -29,6 +29,7 @@ if __name__ == "__main__":
     # Get list of variables available
     print selectedTaus
 
+    no_selection = selectedTaus.expr('abs($eta) < 2.5')
     my_selection = selectedTaus.expr('abs($eta) < 2.5') & \
                    selectedTaus.expr('$byIsolation > 0.5')
 
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     phi_result = plotter.distribution(
         expression = selectedTaus.expr('$phi'),
 	selection  = my_selection,
-        binning    = (100, -500, 500),
+        binning    = (100, -3.5, 3.5),
         x_axis_title = "phi"
     )
     canvas.SaveAs("caloTau_phi.png")
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     phi_result = plotter.distribution(
         expression = selectedTaus.expr('$jetPhi'),
         selection  = my_selection,
-        binning    = (100, -500, 500),
+        binning    = (100, -3.5, 3.5),
         x_axis_title = "phi(raw)"
     )
     canvas.SaveAs("caloTau_rawphi.png")
@@ -144,13 +145,55 @@ if __name__ == "__main__":
 ###################################################################################
 
     canvas = ROOT.TCanvas("canvas_nSignalTracks", "", 500, 500)
+    canvas.SetLogy()
 
-    nstr_result = plotter.distribution(
+    nSignalTr_result = plotter.distribution(
         expression = selectedTaus.expr('$numSignalTracks'),
-        selection  = my_selection,
-        binning    = (100, 0, 50),
+        selection  = no_selection,
+        binning    = (10, 0, 10),
         x_axis_title = "Tracks in signal cone"
     )   
     canvas.SaveAs("caloTau_nSignalTracks.png")
         
+
+###################################################################################
+
+    canvas = ROOT.TCanvas("canvas_nIsolationTracks", "", 500, 500)
+    canvas.SetLogy()
+    
+    nIsolTr_result = plotter.distribution(
+        expression = selectedTaus.expr('$numIsolationTracks'),
+        selection  = no_selection,
+        binning    = (25, 0, 25),
+        x_axis_title = "Tracks in isolation cone"
+    )
+    canvas.SaveAs("caloTau_nIsolationTracks.png")
+
+###################################################################################
+
+    canvas = ROOT.TCanvas("canvas_nIsolationTracksPtSum", "", 500, 500)
+    canvas.SetLogy()
+        
+    nIsolTrPtSum_result = plotter.distribution(
+        expression = selectedTaus.expr('$ptSumIsolationTracks'),
+        selection  = no_selection,
+        binning    = (100, 0, 50),
+        x_axis_title = "#Sigma P_T of tracks in isolation cone"
+    )
+    canvas.SaveAs("caloTau_nIsolationTracksPtSum.png")
+
+###################################################################################
+
+    canvas = ROOT.TCanvas("canvas_nIsolationEcalEtSum", "", 500, 500)
+    canvas.SetLogy()
+        
+    nIsolEcalEtSum_result = plotter.distribution(
+        expression = selectedTaus.expr('$etSumIsolationECAL'),
+        selection  = no_selection,
+        binning    = (100, 0, 50),
+        x_axis_title = "#Sigma ECAL Isolation E_T "
+    )
+    canvas.SaveAs("caloTau_nIsolationEcalEtSum.png")
+
+
 
