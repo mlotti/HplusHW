@@ -29,9 +29,11 @@ if __name__ == "__main__":
     # Get list of variables available
     print selectedTaus
 
-    no_selection = selectedTaus.expr('abs($eta) < 2.5')
-    my_selection = selectedTaus.expr('abs($eta) < 2.5') & \
-                   selectedTaus.expr('$byIsolation > 0.5')
+    hlt = ntuple_manager.get_ntuple("TriggerResults")
+
+    base_selection = selectedTaus.expr('$probe > 0.5') & hlt.expr('$hltJet15U > 0.5')
+    eta_selection  = base_selection & selectedTaus.expr('abs($eta) < 2.5')
+    my_selection   = eta_selection & selectedTaus.expr('$byIsolation > 0.5')
 
     # Build the plot manager.  The plot manager keeps track of all the samples
     # and ensures they are correctly normalized w.r.t. luminosity.  See 
@@ -162,7 +164,7 @@ if __name__ == "__main__":
 
     nSignalTr_result = plotter.distribution(
         expression = selectedTaus.expr('$numSignalTracks'),
-        selection  = no_selection,
+        selection  = eta_selection,
         binning    = (10, 0, 10),
         x_axis_title = "Tracks in signal cone"
     )
@@ -178,7 +180,7 @@ if __name__ == "__main__":
     
     nIsolTr_result = plotter.distribution(
         expression = selectedTaus.expr('$numIsolationTracks'),
-        selection  = no_selection,
+        selection  = eta_selection,
         binning    = (25, 0, 25),
         x_axis_title = "Tracks in isolation cone"
     )
@@ -193,7 +195,7 @@ if __name__ == "__main__":
         
     nIsolTrPtSum_result = plotter.distribution(
         expression = selectedTaus.expr('$ptSumIsolationTracks'),
-        selection  = no_selection,
+        selection  = eta_selection,
         binning    = (100, 0, 50),
         x_axis_title = "#Sigma P_T of tracks in isolation cone [GeV/c]"
     )
@@ -208,7 +210,7 @@ if __name__ == "__main__":
         
     nIsolEcalEtSum_result = plotter.distribution(
         expression = selectedTaus.expr('$etSumIsolationECAL'),
-        selection  = no_selection,
+        selection  = eta_selection,
         binning    = (100, 0, 50),
         x_axis_title = "#Sigma ECAL Isolation E_T [GeV]"
     )
@@ -218,13 +220,13 @@ if __name__ == "__main__":
 
 ###################################################################################                                           
 
-    denominator = selectedTaus.expr('abs($jetEta) < 2.5 & $jetPt > 5')
+    denominator = eta_selection & selectedTaus.expr('$jetPt > 5')
     numerator_byLeadTrackFinding = selectedTaus.expr('$byLeadTrackFinding') & denominator
     numerator_byLeadTrackPtCut   = selectedTaus.expr('$byLeadTrackPtCut') & denominator
     numerator_byIsolation        = selectedTaus.expr('$byIsolation') & denominator
     numerator_againstElectron    = selectedTaus.expr('$againstElectron') & denominator
 
-    canvas = ROOT.TCanvas("canvas_pt_eff_result", "", 500, 500)
+    canvas = ROOT.TCanvas("canvas_pt_ltrFind_eff_result", "", 500, 500)
 
     pt_eff_result = plotter.efficiency(
         expression=selectedTaus.expr('$pt'),
@@ -238,13 +240,13 @@ if __name__ == "__main__":
     # Add a legend
     pt_eff_result['legend'].make_legend().Draw()
 
-    canvas.SaveAs("caloTau_discr_eff_pt.png")
+    canvas.SaveAs("caloTau_discr_ltrFind_eff_pt.png")
 
 
-    canvas = ROOT.TCanvas("canvas_eta_eff_result", "", 500, 500)
+    canvas = ROOT.TCanvas("canvas_eta_ltrFind_eff_result", "", 500, 500)
 
     eta_eff_result = plotter.efficiency(
-        expression=selectedTaus.expr('abs($jetEta)'),
+        expression=selectedTaus.expr('$eta'),
         denominator = denominator,
         numerator = numerator_byLeadTrackFinding,
         binning = (25, 0, 2.5),
@@ -255,5 +257,75 @@ if __name__ == "__main__":
     # Add a legend
     eta_eff_result['legend'].make_legend().Draw()
 
-    canvas.SaveAs("caloTau_discr_eff_eta.png")
+    canvas.SaveAs("caloTau_discr_ltrFind_eff_eta.png")
+
+###
+
+    canvas = ROOT.TCanvas("canvas_pt_ltrPt_eff_result", "", 500, 500)
+
+    pt_eff_result = plotter.efficiency(
+        expression=selectedTaus.expr('$pt'),
+        denominator = denominator,
+        numerator = numerator_byLeadTrackPtCut,
+        binning = (20, 0, 100),
+        x_axis_title = "Tau P_{T} [GeV/c]",
+        y_min = 1e-4, y_max = 5, logy = True,
+    )
+
+    # Add a legend
+    pt_eff_result['legend'].make_legend().Draw()
+
+    canvas.SaveAs("caloTau_discr_ltrPt_eff_pt.png")
+
+
+    canvas = ROOT.TCanvas("canvas_eta_ltrPt_eff_result", "", 500, 500)
+
+    eta_eff_result = plotter.efficiency(
+        expression=selectedTaus.expr('$eta'),
+        denominator = denominator,
+        numerator = numerator_byLeadTrackPtCut,
+        binning = (25, 0, 2.5),
+        x_axis_title = "Tau |#eta|",
+        y_min = 1e-4, y_max = 5, logy = True,
+    )
+
+    # Add a legend
+    eta_eff_result['legend'].make_legend().Draw()
+
+    canvas.SaveAs("caloTau_discr_ltrPt_eff_eta.png")
+
+###
+
+    canvas = ROOT.TCanvas("canvas_pt_isol_eff_result", "", 500, 500)
+
+    pt_eff_result = plotter.efficiency(
+        expression=selectedTaus.expr('$pt'),
+        denominator = denominator,
+        numerator = numerator_byIsolation,
+        binning = (20, 0, 100),
+        x_axis_title = "Tau P_{T} [GeV/c]",
+        y_min = 1e-4, y_max = 5, logy = True,
+    )
+
+    # Add a legend
+    pt_eff_result['legend'].make_legend().Draw()
+
+    canvas.SaveAs("caloTau_discr_isol_eff_pt.png")
+
+
+    canvas = ROOT.TCanvas("canvas_eta_isol_eff_result", "", 500, 500)
+
+    eta_eff_result = plotter.efficiency(
+        expression=selectedTaus.expr('$eta'),
+        denominator = denominator,
+        numerator = numerator_byIsolation,
+        binning = (25, 0, 2.5),
+        x_axis_title = "Tau |#eta|",
+        y_min = 1e-4, y_max = 5, logy = True,
+    )
+
+    # Add a legend
+    eta_eff_result['legend'].make_legend().Draw()
+
+    canvas.SaveAs("caloTau_discr_isol_eff_eta.png")
 
