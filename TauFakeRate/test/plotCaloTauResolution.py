@@ -67,9 +67,8 @@ if __name__ == "__main__":
 
     pt_result = plotter.distribution(
         expression = selectedTaus.expr('$pt')/gen.expr('$genPt') - 1,
-#	expression = gen.expr('$genPt'),
         selection  = my_selection & gen.expr('$genPt > 0'),
-        binning    = (100, -5, 5),
+        binning    = (100, -1, 1),
         x_axis_title = "CaloTau P_{T}[GeV/c]"
     )
     # this should draw a comparison on the canvas, but pt_result
@@ -86,7 +85,7 @@ if __name__ == "__main__":
     pt_result = plotter.distribution(                                                                  
         expression = selectedTaus.expr('$jetPt')/gen.expr('$genPt') - 1,                                  
         selection  = my_selection & gen.expr('$genPt > 0'),                                            
-        binning    = (100, -5, 5),                                                                     
+        binning    = (100, -1, 1),                                                                     
         x_axis_title = "CaloTau P_{T}[GeV/c]"                                                          
     )                                                                                                  
     # this should draw a comparison on the canvas, but pt_result                                       
@@ -103,7 +102,7 @@ if __name__ == "__main__":
     pt_result = plotter.distribution(                                                                  
         expression = selectedTaus.expr('$caloJetPt')/gen.expr('$genPt') - 1,                                  
         selection  = my_selection & gen.expr('$genPt > 0'),                                            
-        binning    = (100, -5, 5),                                                                     
+        binning    = (100, -1, 1),                                                                     
         x_axis_title = "CaloTau P_{T}[GeV/c]"                                                          
     )                                                                                                  
     # this should draw a comparison on the canvas, but pt_result                                       
