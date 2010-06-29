@@ -34,7 +34,7 @@ class HPlusTauDumperPF : public HPlusTauDumperBase {
   reco::Vertex fiveProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup); 
 
  private:
-  int fCounterTest;
+  // counters
   int fCounter0pr; // Counter for 0-prong PFTaus (no selection cuts)
   int fCounter1pr; // Counter for 1-prong PFTaus (no selection cuts)
   int fCounter2pr; // Counter for 2-prong PFTaus (no selection cuts)

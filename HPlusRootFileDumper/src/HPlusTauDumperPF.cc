@@ -29,14 +29,14 @@ namespace HPlusAnalysis {
 				     Counter* counter)
     : HPlusTauDumperBase(producer, aTauCollectionParameterSet, counter) {
     std::string alias;
-    // PF BDT output from Electron PreID
+    // Declare produced items (class-specific): BDT output from Electron PreID
     producer.produces<std::vector<float> >(alias = "PFElectronPreIDOutput").setBranchAlias(alias);
-    // Decision from Electron PreID
+    // Declare produced items (class-specific): Decision from Electron PreID
     producer.produces<std::vector<float> >(alias = "PFElectronPreIDDecision").setBranchAlias(alias);
     producer.produces<std::vector<float> >(alias = "PFNeutralHadronET").setBranchAlias(alias);
     producer.produces<std::vector<float> >(alias = "PFGammaET").setBranchAlias(alias);
     producer.produces<std::vector<float> >(alias = "PFElectronET").setBranchAlias(alias);
-    
+    // Initialize counters    
     fCounter0pr = fCounter->addCounter("0prong PFTau");
     fCounter1pr = fCounter->addCounter("1prong PFTau");
     fCounter2pr = fCounter->addCounter("2prong PFTau");
@@ -443,7 +443,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   
   myDiscriminatorHandles.clear();
   return true;
-}
+}//eof: HPlusTauDumperPF::setData()
 
   reco::Vertex HPlusTauDumperPF::threeProng(reco::PFTauRef myPFTau, edm::Event& myEvent, const edm::EventSetup& myEvtSetup) {
     

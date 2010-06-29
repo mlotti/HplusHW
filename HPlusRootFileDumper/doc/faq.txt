@@ -1,0 +1,213 @@
+= Frequently Asked Questions =
+
+== Running ==
+
+=== How to run hipGridAnalysis (or hipGridProduction) on lxplus? ===
+
+In order send jobs with hipGrid\* to ametisti or sepeli, one needs the
+ARC middleware user interface. For lxplus (works also on other RHEL4
+based Linux distributions on i386 architecture) the ARC UI can be
+set up with the build system. See the example below.
+
+NOTE: The ROOT version which the code is compiled and the ROOT version
+at sepeli/ametisti must match exactly (also the architecture and the
+compiler must match). E.g. the ROOT in
+'/afs/cern.ch/sw/lcg/app/releases/ROOT/5.24.00/slc4_amd64_gcc34/root'
+works.
+
+----
+workspace$ make
+workspace$ make arc
+workspace$ source setPaths.(c)sh
+workspace$ hipGridAnalysis -create -submit all
+----
+
+
+=== I've run hipGridAnalysis but I don't see the output for event counter ===
+
+This is because the counter data is now saved to the output root file
+and counter printing has been moved from
+link:index.html#_analysis[+analysis+] program to
+link:index.html#_printcounter[+printCounter+] program. When the
+analysis is run using the 'workspace/analysis.job' script,
+link:index.html#_printcounter[+printCounter+] is executed
+implicitly. With grid jobs, this is (currently!) not the case. See the
+example below about how to compile and use the program.
+
+----
+workspace$ make printCounter
+workspace$ source setPaths.(c)sh   # only if not done yet
+workspace$ printCounter analysis_N_XXXXXXXXXXXXXX/res/histograms-0.root
+----
+
+
+=== I've run hipGridAnalysis such that my output is split to several files. How do I merge them? ===
+
+----
+workspace$ hipGridAnalysis -merge
+----
+
+
+=== How to merge histogram.root files by hand? ===
+
+----
+workspace$ make mergeHistograms
+workspace$ hadd output.root histograms-0.root histograms-1.root
+workspace$ mergeHistograms histograms-0.root histograms-1.root -o output.root
+----
+
+=== My hipGridAnalysis jobs are stuck ===
+
+The stdout (and stderr) of (ARC) grid jobs can be obtained with
+----
+$ ngcat gsiftp://....
+----
+The job id (i.e. +gsiftp://...+ URL) is available via +hipGridAnalysis -status+.
+
+If there is e.g.
+----
+dcap: Last IO operation timeout.
+----
+in the list line, the job is indeed stuck and won't quit until the job
+time limit is met. There can of course be other causes for stuck jobs.
+
+Usually the only cure is to kill the jobs and resubmit them:
+----
+workspace$ hipGridAnalysis -kill <jobs>
+workspace$ hipGridAnalysis -resubmit <jobs>
+----
+
+
+== Programming ==
+
+=== How to add a module? ===
+
+----
+src$ mkdir MyModule
+src$ cd MyModule
+src/MyModule$ mkdir interface src
+----
+
+Place header files to 'src/MyModule/inteface' and source files to
+'src/MyModule/src'. If ROOT dictionary generation is needed, place
+LinkDef file either in 'interface' or in 'src'. The file should match
+to the '*LinkDef.h' pattern.
+
+If the module has dependencies to other modules and/or externals, a
+'module.mk' file should be created as 'src/MyModule/module.mk'. Also
+if if the list of souce files or the module library name should be
+modified from the default, a 'module.mk' file is needed. 
+
+If the module is a selector and thus required by the +analysis+
+program, the dependency to the new module must be added by hand to
+'src/programs/analysis/program.mk'.
+
+link:build.html#_module[More information]
+
+
+=== How to add a program? ===
+
+----
+src$ mkdir programs/MyProgram
+----
+
+If header and source files are placed to 'src/programs/MyProgram', the
+build system is able to automagically compile them. If the program is
+more complicated, having a separate directories to header and source
+files may be a good idea. In this case, a 'program.mk' file should be
+created as 'src/MyProgram/program.mk'. If the program has dependencies
+to modules and/or externals, they should be specified in the
+'program.mk' file too.
+
+link:build.html#_program[More information]
+
+
+
+=== How to add an external library? ===
+
+----
+$ mkdir external/MyExternal
+  # edit external/MyExternal/external.mk
+----
+
+Adding external library is trickier than adding module or program. The
+'external.mk' is required, and it should contain all necessary
+information about how the external is downloaded and compiled.
+
+link:build.html#_external[More information]
+
+=== How to create patches for external libraries? ===
+
+.Create patchfile manually with diff
+----
+workspace$ make MyExternal_extract
+workspace$ cd ../external/MyExternal
+external/MyExternal$ cp -R MyExternal-0.01 MyExternal-0.01-original  # New name doesn't really matter
+
+#                 modify MyExternal
+
+external/MyExternal$ diff -uN MyExternal-0.01-original MyExternal-0.01 > patch-aa
+external/MyExternal$ mkdir patches
+external/MyExternal$ cp patch-aa patches
+----
+
+NOTE: Here +MyExternal-0.01+ is the *directory* (result of extracting
+the tarball) of the package. With this method it is important to copy
+and take diff across the *entire* directory instead of individual
+files, since the patch applying make target assumes so.
+
+
+.Create patchfile with git
+----
+workspace$ make MyExternal_extract
+workspace$ cd ../external/MyExternal/MyExternal-0.01
+external/MyExternal/MyExternal-0.01$ git init
+external/MyExternal/MyExternal-0.01$ git add *
+external/MyExternal/MyExternal-0.01$ git commit -m "Initial commit"
+
+#                 modify MyExternal
+
+external/MyExternal/MyExternal-0.01$ git commit -a -m "Modifications"
+external/MyExternal/MyExternal-0.01$ git diff -p HEAD^ > ../patch-aa
+external/MyExternal/MyExternal-0.01$ cd ..
+external/MyExternal$ mkdir patches
+external/MyExternal$ cp patch-aa patches
+----
+
+.Create patchfile on top of an existing one (with git)
+----
+workspace$ make MyExternal_patch
+workspace$ cd ../external/MyExternal/MyExternal-0.01
+external/MyExternal/MyExternal-0.01$ git init
+external/MyExternal/MyExternal-0.01$ git add *
+external/MyExternal/MyExternal-0.01$ git commit -m "Initial commit"
+
+#                 modify MyExternal
+
+external/MyExternal/MyExternal-0.01$ git commit -a -m "Modifications"
+external/MyExternal/MyExternal-0.01$ git diff -p HEAD^ > ../patch-ab
+external/MyExternal/MyExternal-0.01$ cd ..
+external/MyExternal$ mkdir patches
+external/MyExternal$ cp patch-ab patches
+----
+
+.Test
+----------
+external/MyExternal$ cd ../../workspace
+workspace$ make cleanMyExternal
+workspace$ make MyExternal_patch  # Only patching
+workspace$ make MyExternal        # Full build
+----------
+
+
+== Troubleshooting ==
+
+=== Linking error related to ROOT::Math::GenVector ===
+
+If you see a linking error like
+----------
+../libs/libMyEvent.so: undefined reference to `ROOT::Math::GenVector_detail::BitReproducible::Dto2longs(double, unsigned int&, unsigned int&)'
+collect2: ld returned 1 exit status
+----------
+it means that you're using ROOT older than 5.22. This can be fixed by
+using ROOT version at least 5.22.
