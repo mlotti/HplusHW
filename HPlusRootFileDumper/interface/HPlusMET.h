@@ -28,10 +28,11 @@ class HPlusMET : public HPlusAnalysis::HPlusAnalysisBase, public HPlusAnalysis::
     private:
   	/// Name of muon collection
   	edm::InputTag fCollectionName;
+	double fCut;
   
   	// Counter ID's
   	/// IDs of the event counters
-	int fMET_All;
-	int fMET_Selected;
+	int fAll;
+	int fSelected;
 };
 #endif

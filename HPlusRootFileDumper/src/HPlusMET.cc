@@ -19,8 +19,8 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	}
 
   	// Initialize counters  
-	fMET_All      = fCounter->addCounter("MET all");
-	fMET_Selected = fCounter->addCounter("MET selected");
+	fAll      = fCounter->addCounter("MET all");
+	fSelected = fCounter->addCounter("MET selected");
 
   	// Declare produced items
   	std::string alias;
@@ -37,7 +37,7 @@ void HPlusMET::endJob(){}
 
 bool HPlusMET::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-	fCounter->addCount(fMET_All);
+	fCounter->addCount(fAll);
 
 	edm::Handle<edm::View<pat::MET> > theHandle;
 	iEvent.getByLabel(fCollectionName,theHandle);
@@ -52,7 +52,7 @@ bool HPlusMET::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	iEvent.put(metY, "METy");
 
 	if((*theHandle)[0].pt() < fCut) return 0; 
-	fCounter->addCount(fMET_Selected);
+	fCounter->addCount(fSelected);
 	return 1;
 }
 
