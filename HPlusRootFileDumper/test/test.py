@@ -141,7 +141,8 @@ process.load("RecoTauTag.Configuration.ShrinkingConePFTaus_cfi")
 #### and then adding "process.shrinkingConePFTauDecayModeProducer" to your sequence/path.
 
 process.HPlusTauIDRootFileDumper = cms.EDProducer('HPlusTauIDRootFileDumper',
-  tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
+#  tauCollectionName       = cms.InputTag("shrinkingConePFTauProducer"),
+  tauCollectionName       = cms.InputTag("fixedConePFTauProducer"),
 #  tauCollectionName       = cms.InputTag("caloRecoTauProducer"),
   CaloTaus = cms.VPSet(
     cms.PSet(
