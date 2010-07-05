@@ -56,7 +56,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 
 ################################################################################
 
@@ -66,8 +66,8 @@ process.s = cms.Sequence (
 #  process.HPlusGlobalElectronVeto *
 #  process.HPlusGlobalMuonVeto *
     process.HChTaus *
-    process.HChMETs *
-    process.HChJets
+    process.HChMETs 
+#    process.HChJets
 #  process.HPlusJetSelection
 )
 process.path    = cms.Path(process.s)
