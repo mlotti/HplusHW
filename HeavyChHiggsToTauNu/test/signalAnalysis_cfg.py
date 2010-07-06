@@ -54,6 +54,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
 ####from PhysicsTools.PatAlgos.tools.coreTools import *
 ####removeMCMatching(process)
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
@@ -64,15 +65,12 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
 process.s = cms.Sequence (
     process.patDefaultSequence *
-#  process.HPlusHLTTrigger *
-#  process.HPlusGlobalElectronVeto *
-#  process.HPlusGlobalMuonVeto *
+    process.HChTriggers *
     process.HChTaus *
     process.HChMETs *
     process.HChJets *
     process.HChMuons *
     process.HChElectrons
-#  process.HPlusJetSelection
 )
 process.path    = cms.Path(process.s)
 
@@ -83,9 +81,10 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('HPlusOut.root'),
     outputCommands = cms.untracked.vstring(
 #        "keep *"
-       "drop *",
-	"keep *_*_*_HChSignalAnalysis"
-#       "keep *_HPlus*_*_HPLUS"
+	"drop *",
+	"keep *_*_*_HChSignalAnalysis",
+	"drop reco*_*_*_HChSignalAnalysis",
+	"drop pat*_*_*_HChSignalAnalysis"
     )
 )
 process.outpath = cms.EndPath(process.out)
