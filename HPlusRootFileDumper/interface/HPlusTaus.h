@@ -28,6 +28,7 @@ class HPlusTaus : public HPlusAnalysis::HPlusAnalysisBase, public HPlusAnalysis:
     private:
   	/// Name of muon collection
   	edm::InputTag fCollectionName;
+	std::vector<edm::InputTag> vDiscriminators;
   
   	// Counter ID's
   	/// IDs of the event counters

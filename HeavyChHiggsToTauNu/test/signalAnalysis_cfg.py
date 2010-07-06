@@ -26,10 +26,10 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
-selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
-selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
-selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
+#selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
+#selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
+#selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
+process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
                      '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
                      '& tauID("byIsolationUsingLeadingPion") > 0.5'+
                      '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
