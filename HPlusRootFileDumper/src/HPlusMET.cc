@@ -7,7 +7,7 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 
 HPlusMET::HPlusMET(const edm::ParameterSet& iConfig) :
-HPlusAnalysis::HPlusAnalysisBase("METttest"),
+HPlusAnalysis::HPlusAnalysisBase("MET"),
 HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	// Parse the list of triggers in the config file
   	if (iConfig.exists("CollectionName")) {

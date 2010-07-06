@@ -8,7 +8,7 @@
 
 
 HPlusTaus::HPlusTaus(const edm::ParameterSet& iConfig) :
-HPlusAnalysis::HPlusAnalysisBase("Tauttest"),
+HPlusAnalysis::HPlusAnalysisBase("Taus"),
 HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	// Parse the list of triggers in the config file
   	if (iConfig.exists("CollectionName")) {
