@@ -19,8 +19,8 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	}
 
   	// Initialize counters  
-	fAll      = fCounter->addCounter("MET all");
-	fSelected = fCounter->addCounter("MET selected");
+	fAll      = fCounter->addCounter("all");
+	fSelected = fCounter->addCounter("selected");
 
   	// Declare produced items
   	std::string alias;

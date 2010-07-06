@@ -20,8 +20,8 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	}
 
   	// Initialize counters  
-	fAll      = fCounter->addCounter("Taus all");
-	fSelected = fCounter->addCounter("Taus selected");
+	fAll      = fCounter->addCounter("all");
+	fSelected = fCounter->addCounter("selected");
 
   	// Declare produced items
   	std::string alias;

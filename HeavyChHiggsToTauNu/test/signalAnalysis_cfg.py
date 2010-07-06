@@ -58,6 +58,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
 ################################################################################
 
@@ -69,7 +70,8 @@ process.s = cms.Sequence (
     process.HChTaus *
     process.HChMETs *
     process.HChJets *
-    process.HChMuons
+    process.HChMuons *
+    process.HChElectrons
 #  process.HPlusJetSelection
 )
 process.path    = cms.Path(process.s)
