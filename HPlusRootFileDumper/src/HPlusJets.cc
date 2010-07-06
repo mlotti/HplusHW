@@ -6,25 +6,30 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
+
 HPlusJets::HPlusJets(const edm::ParameterSet& iConfig) :
-HPlusAnalysis::HPlusAnalysisBase("METttest"),
+HPlusAnalysis::HPlusAnalysisBase("Jetttest"),
 HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	// Parse the list of triggers in the config file
   	if (iConfig.exists("CollectionName")) {
     		fCollectionName = iConfig.getParameter<edm::InputTag>("CollectionName");
+		vDiscriminators = iConfig.getParameter<std::vector<edm::InputTag> >("Discriminators");
   	} else {
     		throw cms::Exception("Configuration") 
-                  << "MET: InputTag 'CollectionName' is missing in config!" << std::endl;
+                  << "Taus: InputTag 'CollectionName' is missing in config!" << std::endl;
   	}
 
   	// Initialize counters  
-	fAll      = fCounter->addCounter("MET all");
-	fSelected = fCounter->addCounter("MET selected");
+	fAll      = fCounter->addCounter("Jets all");
+	fSelected = fCounter->addCounter("Jets selected");
 
   	// Declare produced items
   	std::string alias;
-//	produces<float>(alias = "METx").setBranchAlias(alias);
-//	produces<float>(alias = "METy").setBranchAlias(alias);
+	produces< std::vector<math::XYZVector> >(alias = "momentum").setBranchAlias(alias);
+
+	for(size_t i = 0; i < vDiscriminators.size(); ++i){
+		produces< std::vector<float> >(alias = vDiscriminators[i].label()).setBranchAlias(alias);
+	}
 }
 
 HPlusJets::~HPlusJets(){}
@@ -40,27 +45,26 @@ bool HPlusJets::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	edm::Handle<edm::View<pat::Jet> > theHandle;
 	iEvent.getByLabel(fCollectionName,theHandle);
 
-	for(edm::View<pat::Jet>::const_iterator ijet = theHandle->begin(); 
-                                                ijet!= theHandle->end(); ++ijet){
-		//ijet->correctedJet(corrLevel(), corrFlavor()).pt()
-		//ijet->bDiscriminator(label)
-		//TAUS: const std::vector< IdPair > & 	tauIDs () //Returns all the tau IDs in the form of <name,value> pairs 
+        std::auto_ptr< std::vector<math::XYZVector> > momentum(new std::vector<math::XYZVector>);
+        for(edm::View<pat::Jet>::const_iterator i = theHandle->begin();
+                                                i!= theHandle->end(); ++i){
+                momentum->push_back(i->momentum());
 	}
 
-/*
-	std::auto_ptr<float> metX(new float);
-	std::auto_ptr<float> metY(new float);
+	for(size_t ds = 0; ds < vDiscriminators.size(); ++ds){
+		std::cout << vDiscriminators[ds].label() << std::endl;
+		std::auto_ptr< std::vector<float> > discr(new std::vector<float>);
+		for(edm::View<pat::Jet>::const_iterator i = theHandle->begin();
+                                                        i!= theHandle->end(); ++i){
+			discr->push_back(i->bDiscriminator(vDiscriminators[ds].label()));
+		}
+		iEvent.put(discr,vDiscriminators[ds].label());
+	}
 
-	*metX = (*theHandle)[0].px();
-	*metY = (*theHandle)[0].py();
-
-    	iEvent.put(metX, "METx");
-	iEvent.put(metY, "METy");
-
-	if((*theHandle)[0].pt() < fCut) return 0; 
 	fCounter->addCount(fSelected);
-*/
 	return 1;
 }
 
 DEFINE_FWK_MODULE(HPlusJets);
+
+

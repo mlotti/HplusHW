@@ -26,9 +26,9 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-#selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
-#selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
-#selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
+process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
+process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
+process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
 process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
                      '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
                      '& tauID("byIsolationUsingLeadingPion") > 0.5'+
@@ -56,7 +56,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 
 ################################################################################
 
@@ -66,8 +66,8 @@ process.s = cms.Sequence (
 #  process.HPlusGlobalElectronVeto *
 #  process.HPlusGlobalMuonVeto *
     process.HChTaus *
-    process.HChMETs 
-#    process.HChJets
+    process.HChMETs *
+    process.HChJets
 #  process.HPlusJetSelection
 )
 process.path    = cms.Path(process.s)
