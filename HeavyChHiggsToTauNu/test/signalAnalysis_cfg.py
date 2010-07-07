@@ -11,11 +11,19 @@ process.GlobalTag.globaltag = cms.string("START36_V10::All")
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/FA6E6683-C844-DF11-A2D8-0018F3D0961E.root',
-       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/D0E1C289-C744-DF11-B84C-00261894389F.root',
-       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/A24BB684-C544-DF11-81ED-00261894391D.root',
-       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/284100C7-4E45-DF11-9AF9-0018F3D09710.root',
-       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/06A4E187-C644-DF11-BC3E-0018F3D096AA.root'
+#36x
+#       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/FA6E6683-C844-DF11-A2D8-0018F3D0961E.root',
+#       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/D0E1C289-C744-DF11-B84C-00261894389F.root',
+#       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/A24BB684-C544-DF11-81ED-00261894391D.root',
+#       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/284100C7-4E45-DF11-9AF9-0018F3D09710.root',
+#       '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/06A4E187-C644-DF11-BC3E-0018F3D096AA.root'
+#35x
+	"file:/tmp/slehti/86C58057-8F52-DF11-9160-002618FDA28E.root"
+#       '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0017/86C58057-8F52-DF11-9160-002618FDA28E.root',
+#       '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/FC9BCE19-5152-DF11-8EDC-002618FDA204.root',
+#       '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/64D9835B-5052-DF11-8343-002618FDA279.root',
+#       '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/50C0224A-4F52-DF11-B8A0-002618943906.root',
+#       '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/207DFCE2-4F52-DF11-8D25-0018F3D096BA.root'
   )
 )
 
@@ -23,13 +31,13 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 
-## creating JPT jets
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.load('RecoJets.Configuration.RecoJPTJets_cff')
-
 
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+process.patJets.jetSource = cms.InputTag("ak5CaloJets")
+process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
+process.patJets.addJetID = False
 
 process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
 process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
@@ -56,6 +64,17 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                  doJetID      = False
                  )
 
+#### needed for CMSSW35x data
+process.load("RecoJets.Configuration.GenJetParticles_cff")
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+## creating JPT jets
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.load('RecoJets.Configuration.RecoJPTJets_cff')
+
+from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
+run36xOn35xInput(process)
+#### end of needed for CMSSW35x data
+
 ####from PhysicsTools.PatAlgos.tools.coreTools import *
 ####removeMCMatching(process)
 
@@ -67,9 +86,13 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
 ################################################################################
-
+#print process.dumpPython()
 process.s = cms.Sequence (
+    #for 35X
+    process.genJetParticles *
+    process.ak5GenJets *
     process.recoJPTJets *
+    #
     process.patDefaultSequence *
     process.HChTriggers *
     process.HChTaus *
@@ -94,3 +117,4 @@ process.out = cms.OutputModule("PoolOutputModule",
     )
 )
 process.outpath = cms.EndPath(process.out)
+
