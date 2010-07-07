@@ -23,6 +23,11 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 
+## creating JPT jets
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.load('RecoJets.Configuration.RecoJPTJets_cff')
+
+
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -64,6 +69,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 ################################################################################
 
 process.s = cms.Sequence (
+    process.recoJPTJets *
     process.patDefaultSequence *
     process.HChTriggers *
     process.HChTaus *
