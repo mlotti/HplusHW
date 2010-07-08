@@ -100,7 +100,8 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 process.patTaus.tauIDSources = process.fixedConeTauIDSources
 
 ################################################################################
-print process.dumpPython()
+#print process.dumpPython()
+
 process.s = cms.Sequence (
     process.hplusTauDiscriminationSequence *
     process.patDefaultSequence *
@@ -145,9 +146,3 @@ process.out = cms.OutputModule("PoolOutputModule",
 )
 process.outpath = cms.EndPath(process.out)
 
-
-#switchToCaloTau(process)
-#    process.patCaloTauProducer = copy.deepcopy(process.patTaus)
-
-#    switchToPFTauFixedCone(process)
-#    process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)

@@ -49,7 +49,9 @@ bool HPlusJets::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
         for(edm::View<pat::Jet>::const_iterator i = theHandle->begin();
                                                 i!= theHandle->end(); ++i){
                 momentum->push_back(i->momentum());
+		//std::cout << "check jet pt " << i->momentum()->rho() << std::endl;
 	}
+	iEvent.put(momentum, "momentum");
 
 	for(size_t ds = 0; ds < vDiscriminators.size(); ++ds){
 		std::cout << vDiscriminators[ds].label() << std::endl;
