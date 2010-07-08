@@ -91,6 +91,13 @@ if cmssw35Xdata:
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerObjects_cfi")
+#process.patTriggerMatcher += process.tauTriggerMatchHLTSingleLooseIsoTau20
+#process.patTriggerMatcher.remove( process.patTriggerMatcherElectron )
+#process.patTriggerMatcher.remove( process.patTriggerMatcherMuon )
+#from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
+process.patDefaultSequence += process.patTriggerSequence
+#switchOnTrigger( process )
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
@@ -106,6 +113,7 @@ process.s = cms.Sequence (
     process.hplusTauDiscriminationSequence *
     process.patDefaultSequence *
     process.HChTriggers *
+#    process.HChHLTTaus *
     process.HChTaus *
     process.HChMETs *
     process.HChJets *
@@ -140,8 +148,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 #        "keep *"
 	"drop *",
 	"keep *_*_*_HChSignalAnalysis",
-	"drop reco*_*_*_HChSignalAnalysis",
-	"drop pat*_*_*_HChSignalAnalysis"
+#	"drop reco*_*_*_HChSignalAnalysis",
+#	"drop pat*_*_*_HChSignalAnalysis"
     )
 )
 process.outpath = cms.EndPath(process.out)

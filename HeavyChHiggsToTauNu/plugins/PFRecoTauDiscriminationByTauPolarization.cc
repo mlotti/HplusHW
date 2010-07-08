@@ -33,7 +33,8 @@ void PFRecoTauDiscriminationByTauPolarization::beginEvent(const Event& event, co
 double PFRecoTauDiscriminationByTauPolarization::discriminate(const PFTauRef& tau){
 
 	double rTau = 0;
-	if(tau->p() > 0) rTau = tau->leadTrack()->p()/tau->p();
+	//if(tau->p() > 0) rTau = tau->leadTrack()->p()/tau->p();
+	if(tau.isNonnull() && tau->p() > 0 && tau->leadTrack().isNonnull()) rTau = tau->leadTrack()->p()/tau->p();
 
 	return ( rTau > rTauMin ? 1. : 0. );
 }
