@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 HLT8E29 = cms.EDFilter('HPlusTriggering',
-    TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
+#    TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
+    TriggerResultsName = cms.InputTag("TriggerResults::HLT8E29"),
     TriggersToBeApplied = cms.vstring(
     ),
     TriggersToBeSaved = cms.vstring(

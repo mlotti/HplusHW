@@ -64,6 +64,8 @@ hplusTauDiscrimination.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
 hplusTauDiscrimination.Prediscriminants = hplusTauPrediscriminants
 hplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
 
+fixedConeHplusTauDiscrimination = hplusTauDiscrimination.clone()
+
 hplusTauDiscriminationSequence = cms.Sequence(
     hplusTauDiscriminationByLeadingTrackPtCut *
     pfRecoTauDiscriminationByCharge *
@@ -72,6 +74,8 @@ hplusTauDiscriminationSequence = cms.Sequence(
     pfRecoTauDiscriminationAgainstElectron *
     pfRecoTauDiscriminationByTauPolarization *
     pfRecoTauDiscriminationByNProngs *
-    hplusTauDiscrimination
+    fixedConeHplusTauDiscrimination
+#    hplusTauDiscrimination
 )
+
 

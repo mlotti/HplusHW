@@ -35,7 +35,7 @@ class PFRecoTauDiscriminationByNProngs : public PFTauDiscriminationProducerBase 
 		flightPathSig		= iConfig.getParameter<double>("flightPathSig");
 		withPVError		= iConfig.getParameter<bool>("UsePVerror");
 
-		PVProducer		= iConfig.getParameter<edm::InputTag>("PrimaryVertex");
+		PVProducer		= iConfig.getParameter<edm::InputTag>("PVProducer");
 		chargedPionMass = 0.139;
 	}
 

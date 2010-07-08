@@ -50,6 +50,13 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
         for(edm::View<pat::Tau>::const_iterator i = theHandle->begin();
                                                 i!= theHandle->end(); ++i){
                 momentum->push_back(i->momentum());
+
+                std::vector< std::pair<std::string,float> > discriminators = i->tauIDs();
+                size_t nDiscr = discriminators.size();
+                for(size_t id = 0; id < nDiscr; ++id){
+                        std::cout << "discr " << discriminators[id].first << " "
+                                              << discriminators[id].second << std::endl;
+                }
 	}
 
 	for(size_t ds = 0; ds < vDiscriminators.size(); ++ds){
