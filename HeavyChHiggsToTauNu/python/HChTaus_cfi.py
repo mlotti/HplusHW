@@ -23,7 +23,17 @@ fixedConeTauIDSources = cms.PSet(
 fixedConePFTaus = cms.EDFilter('HPlusTaus',
     CollectionName = cms.InputTag("selectedPatTaus"),
     Discriminators = cms.VInputTag(
-	cms.InputTag("byIsolation"),
+        cms.InputTag("againstElectron"),
+        cms.InputTag("againstMuon"),
+        cms.InputTag("byIsolation"),
+        cms.InputTag("byIsolationUsingLeadingPion"),
+        cms.InputTag("ecalIsolation"),
+        cms.InputTag("ecalIsolationUsingLeadingPion"),
+        cms.InputTag("leadingPionPtCut"),
+        cms.InputTag("leadingTrackFinding"),
+        cms.InputTag("leadingTrackPtCut"),
+        cms.InputTag("trackIsolation"),
+        cms.InputTag("trackIsolationUsingLeadingPion"),
 	cms.InputTag("HChTauID")
     )
 )
