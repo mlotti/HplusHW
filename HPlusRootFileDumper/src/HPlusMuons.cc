@@ -24,12 +24,17 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
 	fSelected = fCounter->addCounter("selected");
 
   	// Declare produced items
-  	std::string alias;
-	produces< std::vector<math::XYZVector> >(alias = "momentum").setBranchAlias(alias);
-	produces< std::vector<float> >(alias = "trackIso").setBranchAlias(alias);
+        std::string name;
+        std::string alias_prefix = iConfig.getParameter<std::string>("@module_label") + "_";
+
+        name = "momentum";
+        produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
+        name = "trackIso";
+	produces< std::vector<float> >(name).setBranchAlias(alias_prefix+name);
 
 	for(size_t i = 0; i < vDiscriminators.size(); ++i){
-		produces< std::vector<float> >(alias = vDiscriminators[i].label()).setBranchAlias(alias);
+                name = vDiscriminators[i].label();
+		produces< std::vector<float> >(name).setBranchAlias(alias_prefix+name);
 	}
 }
 
