@@ -3,16 +3,21 @@ import FWCore.ParameterSet.Config as cms
 # Message logger
 from FWCore.MessageService.MessageLogger_cfi import *
 MessageLogger.categories.append("HPlusRootFileDumper")
-MessageLogger.cerr = cms.untracked.PSet(
-  placeholder = cms.untracked.bool(True)
-)
-MessageLogger.cout = cms.untracked.PSet(
-  INFO = cms.untracked.PSet(
+MessageLogger.categories.append("hltPrescaleTable")
+MessageLogger.cerr.FwkReport.reportEvery = 100
+
+MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(reportEvery = MessageLogger.cerr.FwkReport.reportEvery)
+
+#MessageLogger.cerr = cms.untracked.PSet(
+#  placeholder = cms.untracked.bool(True)
+#)
+#MessageLogger.cout = cms.untracked.PSet(
+#  INFO = cms.untracked.PSet(
    #reportEvery = cms.untracked.int32(100), # every 100th only
    #limit = cms.untracked.int32(100)       # or limit to 100 printouts...
-  )
-)
-MessageLogger.statistics.append('cout')
+#  )
+#)
+#MessageLogger.statistics.append('cout')
 
 # Job will exit if any product is not found in the event
 options = cms.untracked.PSet(
