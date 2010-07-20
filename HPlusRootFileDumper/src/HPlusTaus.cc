@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include<limits>
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
@@ -26,6 +27,7 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
   	// Declare produced items
   	std::string alias;
 	produces< std::vector<math::XYZVector> >(alias = "momentum").setBranchAlias(alias);
+        produces< std::vector<math::XYZVector> >(alias = "leadingTrackMomentum").setBranchAlias(alias); 
 
 	for(size_t i = 0; i < vDiscriminators.size(); ++i){
 		produces< std::vector<float> >(alias = vDiscriminators[i].label()).setBranchAlias(alias);
@@ -47,9 +49,19 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	iEvent.getByLabel(fCollectionName,theHandle);
 
         std::auto_ptr< std::vector<math::XYZVector> > momentum(new std::vector<math::XYZVector>);
+        std::auto_ptr< std::vector<math::XYZVector> > ldgTrkMomentum(new std::vector<math::XYZVector>);
         for(edm::View<pat::Tau>::const_iterator i = theHandle->begin();
                                                 i!= theHandle->end(); ++i){
                 momentum->push_back(i->momentum());
+
+                reco::TrackRef ldgTrk = i->leadTrack();
+                if(ldgTrk.isNonnull()) {
+                  ldgTrkMomentum->push_back(ldgTrk->momentum());
+                }
+                else {
+                  const double nan = std::numeric_limits<double>::quiet_NaN();
+                  ldgTrkMomentum->push_back(math::XYZVector(nan, nan, nan));
+                }
 
                 std::vector< std::pair<std::string,float> > discriminators = i->tauIDs();
                 size_t nDiscr = discriminators.size();
@@ -126,6 +138,7 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //	}
 
 	iEvent.put(momentum, "momentum");
+        iEvent.put(ldgTrkMomentum, "leadingTrackMomentum");
 
 /*
 	for(size_t n = 0; n < theHandle->size(); ++n) {
