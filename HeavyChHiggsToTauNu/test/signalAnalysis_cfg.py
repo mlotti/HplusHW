@@ -96,6 +96,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerObjects_cfi")
 #process.patTriggerMatcher.remove( process.patTriggerMatcherElectron )
 #process.patTriggerMatcher.remove( process.patTriggerMatcherMuon )
 #from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
+process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
 process.patDefaultSequence += process.patTriggerSequence
 #switchOnTrigger( process )
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
@@ -105,6 +106,10 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
 process.patTaus.tauIDSources = process.fixedConeTauIDSources
+
+# Customise the correct trigger process name for PAT trigger
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
+process = HChTrigger.customise(process)
 
 ################################################################################
 #print process.dumpPython()

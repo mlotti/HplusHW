@@ -36,5 +36,31 @@ HLT = cms.EDFilter('HPlusTriggering',
     PrintTriggerNames = cms.bool(False)
 )
 
+HLTREDIGI36X = cms.EDFilter('HPlusTriggering',
+    TriggerResultsName = cms.InputTag("TriggerResults::REDIGI36X"),
+    TriggersToBeApplied = cms.vstring(
+    ),
+    TriggersToBeSaved = cms.vstring(
+	"HLT_SingleLooseIsoTau20",
+	"HLT_MET45",
+	"HLT_MET100",
+	"HLT_Jet15U",
+	"HLT_Jet30U",
+	"HLT_Jet50U",
+	"HLT_QuadJet15U",
+	"HLT_Mu9"
+    ),
+    PrintTriggerNames = cms.bool(False)
+)
+
+
 #HChTriggers = cms.Sequence( HLT8E29 * HLT )
-HChTriggers = cms.Sequence( HLT8E29 )
+#HChTriggers = cms.Sequence( HLT8E29 )
+HChTriggers = cms.Sequence( HLTREDIGI36X )
+
+
+def customise(process):
+    process.patTrigger.processName = "REDIGI36X"
+    process.patTriggerEvent.processName = "REDIGI36X"
+
+    return process

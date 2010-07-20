@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff import *
+#from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff import *
 
 tauTriggerMatchHLTSingleLooseIsoTau20 = cms.EDFilter( "PATTriggerMatcherDRDPtLessByR",
     src     = cms.InputTag( "cleanPatTaus" ),
