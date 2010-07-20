@@ -9,3 +9,6 @@ muons = cms.EDFilter('HPlusMuons',
 
 HChMuons = cms.Sequence( muons )
 
+def extendEventContent(content, process):
+    content.append("keep *_muons_*_"+process.name_())
+    return content

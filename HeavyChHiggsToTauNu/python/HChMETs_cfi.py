@@ -15,3 +15,10 @@ TCMET = cms.EDFilter('HPlusMET',
 
 HChMETs = cms.Sequence( MET * PFMET * TCMET )
 #HChMETs = cms.Sequence(PFMET)
+
+def extendEventContent(content, process):
+    name = process.name_()
+    content.extend(["keep *_MET_*_"+name,
+                    "keep *_PFMET_*_"+name,
+                    "keep *_TCMET_*_"+name])
+    return content

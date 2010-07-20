@@ -109,7 +109,13 @@ process.patTaus.tauIDSources = process.fixedConeTauIDSources
 
 # Customise the correct trigger process name for PAT trigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
-process = HChTrigger.customise(process)
+HChTrigger.customise(process)
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi as HChMETs
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi as HChJets
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi as HChMuons
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi as HChElectrons
 
 ################################################################################
 #print process.dumpPython()
@@ -152,10 +158,17 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
 #        "keep *"
 	"drop *",
-	"keep *_*_*_HChSignalAnalysis",
+#	"keep *_*_*_HChSignalAnalysis",
 #	"drop reco*_*_*_HChSignalAnalysis",
 #	"drop pat*_*_*_HChSignalAnalysis"
     )
 )
+HChTrigger.extendEventContent(process.out.outputCommands, process)
+HChTaus.extendEventContent(process.out.outputCommands, process)
+HChJets.extendEventContent(process.out.outputCommands, process)
+HChMETs.extendEventContent(process.out.outputCommands, process)
+HChMuons.extendEventContent(process.out.outputCommands, process)
+HChElectrons.extendEventContent(process.out.outputCommands, process)
+
 process.outpath = cms.EndPath(process.out)
 

@@ -64,3 +64,7 @@ def customise(process):
     process.patTriggerEvent.processName = "REDIGI36X"
 
     return process
+
+def extendEventContent(content, process):
+    content.append("keep *_HLTREDIGI36X_*_"+process.name_())
+    return content
