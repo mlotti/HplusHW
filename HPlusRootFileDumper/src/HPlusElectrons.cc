@@ -57,7 +57,7 @@ bool HPlusElectrons::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	iEvent.put(trIsol, "trackIso");	
 
 	for(size_t ds = 0; ds < vDiscriminators.size(); ++ds){
-		std::cout << vDiscriminators[ds].label() << std::endl;
+                //std::cout << vDiscriminators[ds].label() << std::endl;
 		std::auto_ptr< std::vector<float> > discr(new std::vector<float>);
 		for(edm::View<pat::Electron>::const_iterator i = theHandle->begin();
                                                         i!= theHandle->end(); ++i){
