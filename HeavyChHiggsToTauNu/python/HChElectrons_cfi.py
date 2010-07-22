@@ -9,3 +9,6 @@ electrons = cms.EDFilter('HPlusElectrons',
 
 HChElectrons = cms.Sequence( electrons )
 
+def extendEventContent(content, process):
+    content.append("keep *_electrons_*_"+process.name_())
+    return content

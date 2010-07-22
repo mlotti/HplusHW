@@ -23,10 +23,14 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
 	fSelected = fCounter->addCounter("selected");
 
   	// Declare produced items
-  	std::string alias;
+        std::string name;
+        std::string alias_prefix = iConfig.getParameter<std::string>("@module_label") + "_";
+
 //  	produces<float>(alias = fCollectionName.label()).setBranchAlias(alias);
-	produces<float>(alias = "METx").setBranchAlias(alias);
-	produces<float>(alias = "METy").setBranchAlias(alias);
+        name = "METx";
+	produces<float>(name).setBranchAlias(alias_prefix+name);
+        name = "METy";
+	produces<float>(name).setBranchAlias(alias_prefix+name);
 }
 
 HPlusMET::~HPlusMET(){}

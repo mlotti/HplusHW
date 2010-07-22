@@ -18,3 +18,8 @@ JPTJets = cms.EDFilter('HPlusJets',
 
 HChJets = cms.Sequence( jets * JPTJets )
 
+def extendEventContent(content, process):
+    name = process.name_()
+    content.extend(["keep *_jets_*_"+name,
+                    "keep *_JPTJets_*_"+name])
+    return content

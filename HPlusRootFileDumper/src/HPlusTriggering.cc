@@ -40,7 +40,8 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
   }
   
   // Declare produced items
-  std::string alias;
+  std::string alias_prefix = iConfig.getParameter<std::string>("@module_label") + "_";
+
   int myTriggerCount = fTriggerNamesToBeSaved.size();
   for (int i = 0; i < myTriggerCount; ++i) {
     std::string myName = fTriggerNamesToBeSaved[i];
@@ -53,7 +54,7 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
       }
       myPosition = myIndex;
     }
-    produces<int>(alias = myName.c_str()).setBranchAlias(alias);
+    produces<int>(myName).setBranchAlias(alias_prefix+myName);
     fProductionTriggerNames.push_back(myName);
   }
 }

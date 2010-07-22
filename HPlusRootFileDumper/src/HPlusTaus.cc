@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include<limits>
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
@@ -24,11 +25,17 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
 	fSelected = fCounter->addCounter("selected");
 
   	// Declare produced items
-  	std::string alias;
-	produces< std::vector<math::XYZVector> >(alias = "momentum").setBranchAlias(alias);
+        std::string name;
+        std::string alias_prefix = iConfig.getParameter<std::string>("@module_label") + "_";
+
+        name = "momentum";
+	produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
+        name = "leadingTrackMomentum";
+        produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
 
 	for(size_t i = 0; i < vDiscriminators.size(); ++i){
-		produces< std::vector<float> >(alias = vDiscriminators[i].label()).setBranchAlias(alias);
+                name = vDiscriminators[i].label();
+		produces< std::vector<float> >(name).setBranchAlias(alias_prefix+name);
 	}
 //	produces< std::vector<float> >(alias = "discr").setBranchAlias(alias);
 }
@@ -47,20 +54,32 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	iEvent.getByLabel(fCollectionName,theHandle);
 
         std::auto_ptr< std::vector<math::XYZVector> > momentum(new std::vector<math::XYZVector>);
+        std::auto_ptr< std::vector<math::XYZVector> > ldgTrkMomentum(new std::vector<math::XYZVector>);
         for(edm::View<pat::Tau>::const_iterator i = theHandle->begin();
                                                 i!= theHandle->end(); ++i){
                 momentum->push_back(i->momentum());
 
+                reco::TrackRef ldgTrk = i->leadTrack();
+                if(ldgTrk.isNonnull()) {
+                  ldgTrkMomentum->push_back(ldgTrk->momentum());
+                }
+                else {
+                  const double nan = std::numeric_limits<double>::quiet_NaN();
+                  ldgTrkMomentum->push_back(math::XYZVector(nan, nan, nan));
+                }
+
                 std::vector< std::pair<std::string,float> > discriminators = i->tauIDs();
                 size_t nDiscr = discriminators.size();
+                /*
                 for(size_t id = 0; id < nDiscr; ++id){
                         std::cout << "discr " << discriminators[id].first << " "
                                               << discriminators[id].second << std::endl;
                 }
+                */
 	}
 
 	for(size_t ds = 0; ds < vDiscriminators.size(); ++ds){
-		std::cout << vDiscriminators[ds].label() << std::endl;
+                //std::cout << vDiscriminators[ds].label() << std::endl;
 		std::auto_ptr< std::vector<float> > discr(new std::vector<float>);
 		for(edm::View<pat::Tau>::const_iterator i = theHandle->begin();
                                                         i!= theHandle->end(); ++i){
@@ -124,6 +143,7 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //	}
 
 	iEvent.put(momentum, "momentum");
+        iEvent.put(ldgTrkMomentum, "leadingTrackMomentum");
 
 /*
 	for(size_t n = 0; n < theHandle->size(); ++n) {

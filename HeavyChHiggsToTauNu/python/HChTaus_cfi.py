@@ -39,3 +39,7 @@ fixedConePFTaus = cms.EDFilter('HPlusTaus',
 )
 
 HChTaus = cms.Sequence( fixedConePFTaus )
+
+def extendEventContent(content, process):
+    content.append("keep *_fixedConePFTaus_*_"+process.name_())
+    return content
