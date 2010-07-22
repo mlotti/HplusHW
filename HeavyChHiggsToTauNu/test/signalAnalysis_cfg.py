@@ -90,7 +90,7 @@ if cmssw35Xdata:
 ####removeMCMatching(process)
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi")
+
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerObjects_cfi")
 #process.patTriggerMatcher += process.tauTriggerMatchHLTSingleLooseIsoTau20
 #process.patTriggerMatcher.remove( process.patTriggerMatcherElectron )
@@ -107,9 +107,9 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
 process.patTaus.tauIDSources = process.fixedConeTauIDSources
 
-# Customise the correct trigger process name for PAT trigger
+# Add the correct trigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
-HChTrigger.customise(process)
+HChTrigger.customise(process, cmssw35Xdata)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi as HChMETs
