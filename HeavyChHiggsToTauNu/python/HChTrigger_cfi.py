@@ -45,7 +45,7 @@ def addSpring10(process):
     process.patTriggerEvent.processName = "REDIGI"
 
     process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI36X"),
+        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI"),
         TriggersToBeApplied = cms.vstring(
         ),
         TriggersToBeSaved = cms.vstring(
