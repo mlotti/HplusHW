@@ -17,7 +17,13 @@ fixedConeTauIDSources = cms.PSet(
     byIsolationUsingLeadingPion = cms.InputTag("fixedConePFTauDiscriminationByIsolationUsingLeadingPion"),
     againstElectron = cms.InputTag("fixedConePFTauDiscriminationAgainstElectron"),
     againstMuon = cms.InputTag("fixedConePFTauDiscriminationAgainstMuon"),
-    HChTauID = cms.InputTag("fixedConeHplusTauDiscrimination")
+    HChTauID = cms.InputTag("fixedConeHplusTauDiscrimination"),
+
+    HChTauIDleadingTrackPtCut = cms.InputTag("hplusTauDiscriminationByLeadingTrackPtCut"),
+    HChTauIDcharge = cms.InputTag("pfRecoTauDiscriminationByCharge"),
+    #HChTauID_ecalIsolation = cms.InputTag("hplusTauDiscriminationByECALIsolation"),
+    HChTauIDtauPolarization = cms.InputTag("pfRecoTauDiscriminationByTauPolarization"),
+    HChTauIDnProngs = cms.InputTag("pfRecoTauDiscriminationByNProngs")
 )
 
 fixedConePFTaus = cms.EDFilter('HPlusTaus',
@@ -34,7 +40,11 @@ fixedConePFTaus = cms.EDFilter('HPlusTaus',
         cms.InputTag("leadingTrackPtCut"),
         cms.InputTag("trackIsolation"),
         cms.InputTag("trackIsolationUsingLeadingPion"),
-	cms.InputTag("HChTauID")
+	cms.InputTag("HChTauID"),
+        cms.InputTag("HChTauIDleadingTrackPtCut"),
+        cms.InputTag("HChTauIDcharge"),
+        cms.InputTag("HChTauIDtauPolarization"),
+        cms.InputTag("HChTauIDnProngs")
     )
 )
 
