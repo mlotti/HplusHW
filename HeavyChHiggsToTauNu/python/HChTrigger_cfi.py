@@ -93,5 +93,6 @@ def customise(process, cmssw35x):
     return process
 
 def extendEventContent(content, process):
-    content.append("keep *_HLTREDIGI36X_*_"+process.name_())
+#    content.append("keep *_HLTREDIGI36X_*_"+process.name_())
+    content.append("keep *_HLTREDIGI_*_"+process.name_())
     return content
