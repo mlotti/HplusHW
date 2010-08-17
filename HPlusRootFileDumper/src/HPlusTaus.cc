@@ -32,6 +32,8 @@ HPlusAnalysis::HPlusSelectionBase(iConfig) {
 	produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
         name = "leadingTrackMomentum";
         produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
+        name = "leadingIsolTrackMomentum";
+        produces< std::vector<math::XYZVector> >(name).setBranchAlias(alias_prefix+name);
 
 	for(size_t i = 0; i < vDiscriminators.size(); ++i){
                 name = vDiscriminators[i].label();
@@ -55,6 +57,7 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
         std::auto_ptr< std::vector<math::XYZVector> > momentum(new std::vector<math::XYZVector>);
         std::auto_ptr< std::vector<math::XYZVector> > ldgTrkMomentum(new std::vector<math::XYZVector>);
+	std::auto_ptr< std::vector<math::XYZVector> > ldgIsolTrkMomentum(new std::vector<math::XYZVector>);
         for(edm::View<pat::Tau>::const_iterator i = theHandle->begin();
                                                 i!= theHandle->end(); ++i){
                 momentum->push_back(i->momentum());
@@ -68,9 +71,28 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                   ldgTrkMomentum->push_back(math::XYZVector(nan, nan, nan));
                 }
 
+		//leading track in the isolation cone
+		double ptMax = 0;
+		reco::TrackRefVector isolTracks = i->isolationTracks();
+		reco::TrackRef ldgIsolTrk;// = *(isolTracks.begin());
+		for(size_t jj = 0; jj < isolTracks.size(); ++jj){
+			//std::cout << isolTracks[jj]->pt() << std::endl;
+			if(isolTracks[jj]->pt() > ptMax){
+				ptMax = isolTracks[jj]->pt();
+				ldgIsolTrk = isolTracks[jj];
+			}
+		}
+		if(ldgIsolTrk.isNonnull()) {
+		  ldgIsolTrkMomentum->push_back(ldgIsolTrk->momentum());
+                }
+                else {
+                  const double nan = std::numeric_limits<double>::quiet_NaN();
+                  ldgIsolTrkMomentum->push_back(math::XYZVector(nan, nan, nan));
+                }
+
+		/*
                 std::vector< std::pair<std::string,float> > discriminators = i->tauIDs();
                 size_t nDiscr = discriminators.size();
-                /*
                 for(size_t id = 0; id < nDiscr; ++id){
                         std::cout << "discr " << discriminators[id].first << " "
                                               << discriminators[id].second << std::endl;
@@ -144,7 +166,7 @@ bool HPlusTaus::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 	iEvent.put(momentum, "momentum");
         iEvent.put(ldgTrkMomentum, "leadingTrackMomentum");
-
+	iEvent.put(ldgIsolTrkMomentum, "leadingIsolTrackMomentum");
 /*
 	for(size_t n = 0; n < theHandle->size(); ++n) {
 		iEvent.put(d, "discr");
