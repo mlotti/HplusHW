@@ -7,80 +7,99 @@ hplusTrackQualityCuts.maxTrackChi2 = cms.double(10.)
 hplusTrackQualityCuts.minTrackHits = cms.uint32(8)
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByLeadingTrackFinding_cfi import *
-#pfRecoTauDiscriminationByLeadingTrackFinding.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-#fixedConePFTauDiscriminationByLeadingTrackFinding = copy.deepcopy(pfRecoTauDiscriminationByLeadingTrackFinding)
-fixedConePFTauHplusTauDiscriminationByLeadingTrackFinding = pfRecoTauDiscriminationByLeadingTrackFinding.clone()
-fixedConePFTauHplusTauDiscriminationByLeadingTrackFinding.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-
+def hplusTauDiscriminationByLeadingTrackFinding(tau):
+    DiscriminationByLeadingTrackFinding = pfRecoTauDiscriminationByLeadingTrackFinding.clone()
+    DiscriminationByLeadingTrackFinding.PFTauProducer = cms.InputTag(tau+'Producer')
+    return DiscriminationByLeadingTrackFinding
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByLeadingTrackPtCut_cfi import *
-fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut = pfRecoTauDiscriminationByLeadingTrackPtCut.clone()
-fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut.MinPtLeadingObject = cms.double(20.0)
-fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut.qualityCuts = hplusTrackQualityCuts
+def hplusTauDiscriminationByLeadingTrackPtCut(tau):
+    DiscriminationByLeadingTrackPtCut = pfRecoTauDiscriminationByLeadingTrackPtCut.clone()
+    DiscriminationByLeadingTrackPtCut.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByLeadingTrackPtCut.MinPtLeadingObject = cms.double(20.0)
+    DiscriminationByLeadingTrackPtCut.qualityCuts = hplusTrackQualityCuts
+    return DiscriminationByLeadingTrackPtCut
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByCharge_cfi import *
-fixedConePFTauHplusTauDiscriminationByCharge = pfRecoTauDiscriminationByCharge.clone()
-fixedConePFTauHplusTauDiscriminationByCharge.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
+def hplusTauDiscriminationByCharge(tau):
+    DiscriminationByCharge = pfRecoTauDiscriminationByCharge.clone()
+    DiscriminationByCharge.PFTauProducer = cms.InputTag(tau+'Producer')
+    return DiscriminationByCharge
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByECALIsolation_cfi import *
-fixedConePFTauHplusTauDiscriminationByECALIsolation = pfRecoTauDiscriminationByECALIsolation.clone()
-fixedConePFTauHplusTauDiscriminationByECALIsolation.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscriminationByECALIsolation.Prediscriminants.leadTrack.Producer = cms.InputTag('fixedConePFTauDiscriminationByLeadingTrackFinding')
+def hplusTauDiscriminationByECALIsolation(tau):
+    DiscriminationByECALIsolation = pfRecoTauDiscriminationByECALIsolation.clone()
+    DiscriminationByECALIsolation.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByECALIsolation.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByECALIsolation
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationAgainstElectron_cfi import *
-#fixedConePFTauDiscriminationAgainstElectron = copy.deepcopy(pfRecoTauDiscriminationAgainstElectron)
-fixedConePFTauHplusTauDiscriminationAgainstElectron = pfRecoTauDiscriminationAgainstElectron.clone()
-fixedConePFTauHplusTauDiscriminationAgainstElectron.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscriminationAgainstElectron.Prediscriminants.leadPion.Producer = cms.InputTag('fixedConePFTauDiscriminationByLeadingTrackFinding')
+def hplusTauDiscriminationAgainstElectron(tau):
+    DiscriminationAgainstElectron = pfRecoTauDiscriminationAgainstElectron.clone()
+    DiscriminationAgainstElectron.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationAgainstElectron.Prediscriminants.leadPion.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationAgainstElectron
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByTauPolarization_cfi import *
-fixedConePFTauHplusTauDiscriminationByTauPolarization = pfRecoTauDiscriminationByTauPolarization.clone()
-fixedConePFTauHplusTauDiscriminationByTauPolarization.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscriminationByTauPolarization.Prediscriminants.leadTrack.Producer = cms.InputTag('fixedConePFTauDiscriminationByLeadingTrackFinding')
+def hplusTauDiscriminationByTauPolarization(tau):
+    DiscriminationByTauPolarization = pfRecoTauDiscriminationByTauPolarization.clone()
+    DiscriminationByTauPolarization.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByTauPolarization.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByTauPolarization
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
-fixedConePFTauHplusTauDiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
-fixedConePFTauHplusTauDiscriminationByNProngs.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscriminationByNProngs.Prediscriminants.leadTrack.Producer = cms.InputTag('fixedConePFTauDiscriminationByLeadingTrackFinding')
-
-hplusTauPrediscriminants = cms.PSet(
-    BooleanOperator = cms.string("and"),
-    leadingTrack = cms.PSet( 
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut'),
-        cut = cms.double(0.5) 
-    ),
-    charge = cms.PSet(
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByCharge'),
-        cut = cms.double(0.5)
-    ),
-    ecalIsolation = cms.PSet(
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByECALIsolation'),
-        cut = cms.double(0.5)
-    ),
-    electronVeto = cms.PSet(
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationAgainstElectron'),
-        cut = cms.double(0.5)
-    ),
-    polarization = cms.PSet(
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByTauPolarization'),
-        cut = cms.double(0.5)
-    ),
-    prongs = cms.PSet(
-        Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByNProngs'),
-        cut = cms.double(0.5)
-    )
-)
+def hplusTauDiscriminationByNProngs(tau):
+    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByNProngs.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByNProngs
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTrackIsolation_cfi import *
-fixedConePFTauHplusTauDiscrimination = pfRecoTauDiscriminationByTrackIsolation.clone()
-fixedConePFTauHplusTauDiscrimination.PFTauProducer = cms.InputTag('fixedConePFTauProducer')
-fixedConePFTauHplusTauDiscrimination.Prediscriminants = hplusTauPrediscriminants
-fixedConePFTauHplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
+def hplusTauDiscrimination(tau):
+    hplusTauPrediscriminants = cms.PSet(
+        BooleanOperator = cms.string("and"),
+        leadingTrack = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut'),
+            cut = cms.double(0.5)
+        ),
+        charge = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByCharge'),
+            cut = cms.double(0.5)
+        ),
+        ecalIsolation = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByECALIsolation'),
+            cut = cms.double(0.5)
+        ),
+        electronVeto = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationAgainstElectron'),
+            cut = cms.double(0.5)
+        ),
+        polarization = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByTauPolarization'),
+            cut = cms.double(0.5)
+        ),
+        prongs = cms.PSet(
+            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByNProngs'),
+            cut = cms.double(0.5)
+        )
+    )
+    HplusTauDiscrimination = pfRecoTauDiscriminationByTrackIsolation.clone()
+    HplusTauDiscrimination.PFTauProducer = cms.InputTag(tau+'Producer')
+    HplusTauDiscrimination.Prediscriminants = hplusTauPrediscriminants
+    HplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
+    return  HplusTauDiscrimination
 
 
-hplusTauDiscriminationSequence = cms.Sequence(
-#fixedConePFTauHplusTauDiscriminationSequence = cms.Sequence(
+fixedConePFTauHplusTauDiscriminationByLeadingTrackFinding = hplusTauDiscriminationByLeadingTrackFinding("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut   = hplusTauDiscriminationByLeadingTrackPtCut("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByCharge              = hplusTauDiscriminationByCharge("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByECALIsolation       = hplusTauDiscriminationByECALIsolation("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationAgainstElectron       = hplusTauDiscriminationAgainstElectron("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByTauPolarization     = hplusTauDiscriminationByTauPolarization("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("fixedConePFTau")
+fixedConePFTauHplusTauDiscrimination                      = hplusTauDiscrimination("fixedConePFTau")
+
+fixedConePFTauHplusTauDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut *
     fixedConePFTauHplusTauDiscriminationByCharge *
     fixedConePFTauHplusTauDiscriminationByLeadingTrackFinding *
@@ -90,5 +109,31 @@ hplusTauDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationByNProngs *
     fixedConePFTauHplusTauDiscrimination
 )
+
+shrinkingConePFTauHplusTauDiscriminationByLeadingTrackFinding = hplusTauDiscriminationByLeadingTrackFinding("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationByLeadingTrackPtCut   = hplusTauDiscriminationByLeadingTrackPtCut("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationByCharge              = hplusTauDiscriminationByCharge("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationByECALIsolation       = hplusTauDiscriminationByECALIsolation("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationAgainstElectron       = hplusTauDiscriminationAgainstElectron("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationByTauPolarization     = hplusTauDiscriminationByTauPolarization("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("shrinkingConePFTau")
+shrinkingConePFTauHplusTauDiscrimination                      = hplusTauDiscrimination("shrinkingConePFTau")
+
+shrinkingConePFTauHplusTauDiscriminationSequence = cms.Sequence(
+    shrinkingConePFTauHplusTauDiscriminationByLeadingTrackPtCut *
+    shrinkingConePFTauHplusTauDiscriminationByCharge *
+    shrinkingConePFTauHplusTauDiscriminationByLeadingTrackFinding *
+    shrinkingConePFTauHplusTauDiscriminationByECALIsolation *
+    shrinkingConePFTauHplusTauDiscriminationAgainstElectron *
+    shrinkingConePFTauHplusTauDiscriminationByTauPolarization *
+    shrinkingConePFTauHplusTauDiscriminationByNProngs *
+    shrinkingConePFTauHplusTauDiscrimination
+)
+
+hplusTauDiscriminationSequence = cms.Sequence(
+    fixedConePFTauHplusTauDiscriminationSequence 
+#    shrinkingConePFTauHplusTauDiscriminationSequence
+)
+
 
 
