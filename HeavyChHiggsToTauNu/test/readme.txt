@@ -6,3 +6,8 @@
 	cvs co -r V00-21-00 RecoTauTag/Configuration
 	cvs co HiggsAnalysis/Skimming
 	rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+
+9.8.2010/M.Kortelainen CMSSW_3_7_0_patch_3
+    Tags needed:
+        cvs co HiggsAnalysis/Skimming
+        rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py

@@ -1,6 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
-cmssw35Xdata = 1
+#dataVersion = "35X"
+#dataVersion = "36X"
+dataVersion = "37X"
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -8,7 +10,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR10_P_V6::All') # GR10_P_V6::All
-process.GlobalTag.globaltag = cms.string("START36_V10::All")
+if dataVersion == "37X":
+    process.GlobalTag.globaltag = cms.string("START37_V6::All")
+else:
+    process.GlobalTag.globaltag = cms.string("START36_V10::All")
 
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -20,7 +25,7 @@ process.source = cms.Source('PoolSource',
        '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/06A4E187-C644-DF11-BC3E-0018F3D096AA.root'
   )
 )
-if cmssw35Xdata:
+if dataVersion == "35X":
     process.source.fileNames = cms.untracked.vstring(
 	"rfio:/castor/cern.ch/user/s/slehti/testData/testHplus_35X.root"
 #        '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0017/86C58057-8F52-DF11-9160-002618FDA28E.root',
@@ -75,7 +80,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                  )
 
 #### needed for CMSSW35x data
-if cmssw35Xdata:
+if dataVersion == "35X": 
     process.load("RecoJets.Configuration.GenJetParticles_cff")
     process.load("RecoJets.Configuration.RecoGenJets_cff")
     ## creating JPT jets
@@ -109,7 +114,7 @@ process.patTaus.tauIDSources = process.fixedConeTauIDSources
 
 # Add the correct trigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
-HChTrigger.customise(process, cmssw35Xdata)
+HChTrigger.customise(process, dataVersion)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi as HChMETs
@@ -131,7 +136,7 @@ process.s = cms.Sequence (
     process.HChMuons *
     process.HChElectrons
 )
-if cmssw35Xdata:
+if dataVersion == "35X":
     process.s = cms.Sequence (
         #for 35X
         process.genJetParticles *

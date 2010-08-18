@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+import sys
+
 # HLT8E29 = cms.EDFilter('HPlusTriggering',
 # #    TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
 #     TriggerResultsName = cms.InputTag("TriggerResults::HLT8E29"),
@@ -82,11 +84,37 @@ def addSummer10(process):
         PrintTriggerNames = cms.bool(False)
     )
 
-def customise(process, cmssw35x):
-    if cmssw35x:
+def addSummer10_37X(process):
+    process.patTrigger.processName = "REDIGI37X"
+    process.patTriggerEvent.processName = "REDIGI37X"
+
+    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
+        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI37X"),
+        TriggersToBeApplied = cms.vstring(
+        ),
+        TriggersToBeSaved = cms.vstring(
+    	"HLT_SingleLooseIsoTau20",
+    	"HLT_MET45",
+    	"HLT_MET100",
+    	"HLT_Jet15U",
+    	"HLT_Jet30U",
+    	"HLT_Jet50U",
+    	"HLT_QuadJet15U",
+    	"HLT_Mu9"
+        ),
+        PrintTriggerNames = cms.bool(False)
+    )
+
+def customise(process, dataVersion):
+    if dataVersion == "35X":
         addSpring10(process)
-    else:
+    elif dataVersion == "36X":
         addSummer10(process)
+    elif dataVersion == "37X":
+        addSummer10_37X(process)
+    else:
+        print "Incorrect data version '%s'" % dataVersion
+        sys.exit(1)
 
     process.HChTriggers = cms.Sequence( process.HLTREDIGI )
 
