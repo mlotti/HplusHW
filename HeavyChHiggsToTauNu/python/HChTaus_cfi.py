@@ -2,29 +2,29 @@ import FWCore.ParameterSet.Config as cms
 
 #from HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi import fixedConeHplusTauDiscrimination
 
-fixedConeTauIDSources = cms.PSet(
-    # configure many IDs as InputTag <someName> = <someTag>
-    # you can comment out those you don't want to save some
-    # disk space
-    leadingTrackFinding = cms.InputTag("fixedConePFTauDiscriminationByLeadingTrackFinding"),
-    leadingTrackPtCut = cms.InputTag("fixedConePFTauDiscriminationByLeadingTrackPtCut"),
-    leadingPionPtCut = cms.InputTag("fixedConePFTauDiscriminationByLeadingPionPtCut"),
-    trackIsolation = cms.InputTag("fixedConePFTauDiscriminationByTrackIsolation"),
-    trackIsolationUsingLeadingPion = cms.InputTag("fixedConePFTauDiscriminationByTrackIsolationUsingLeadingPion"),
-    ecalIsolation = cms.InputTag("fixedConePFTauDiscriminationByECALIsolation"),
-    ecalIsolationUsingLeadingPion = cms.InputTag("fixedConePFTauDiscriminationByECALIsolationUsingLeadingPion"),
-    byIsolation = cms.InputTag("fixedConePFTauDiscriminationByIsolation"),
-    byIsolationUsingLeadingPion = cms.InputTag("fixedConePFTauDiscriminationByIsolationUsingLeadingPion"),
-    againstElectron = cms.InputTag("fixedConePFTauDiscriminationAgainstElectron"),
-    againstMuon = cms.InputTag("fixedConePFTauDiscriminationAgainstMuon"),
-    HChTauID = cms.InputTag("fixedConeHplusTauDiscrimination"),
+def tauIDSources(tau):
+    pset = cms.PSet(
+        leadingTrackFinding            = cms.InputTag(tau+"DiscriminationByLeadingTrackFinding"),
+        leadingTrackPtCut              = cms.InputTag(tau+"DiscriminationByLeadingTrackPtCut"),
+        leadingPionPtCut               = cms.InputTag(tau+"DiscriminationByLeadingPionPtCut"),
+        trackIsolation                 = cms.InputTag(tau+"DiscriminationByTrackIsolation"),
+        trackIsolationUsingLeadingPion = cms.InputTag(tau+"DiscriminationByTrackIsolationUsingLeadingPion"),
+        ecalIsolation                  = cms.InputTag(tau+"DiscriminationByECALIsolation"),
+        ecalIsolationUsingLeadingPion  = cms.InputTag(tau+"DiscriminationByECALIsolationUsingLeadingPion"),
+        byIsolation                    = cms.InputTag(tau+"DiscriminationByIsolation"),
+        byIsolationUsingLeadingPion    = cms.InputTag(tau+"DiscriminationByIsolationUsingLeadingPion"),
+        againstElectron                = cms.InputTag(tau+"DiscriminationAgainstElectron"),
+        againstMuon                    = cms.InputTag(tau+"DiscriminationAgainstMuon"),
 
-    HChTauIDleadingTrackPtCut = cms.InputTag("hplusTauDiscriminationByLeadingTrackPtCut"),
-    HChTauIDcharge = cms.InputTag("pfRecoTauDiscriminationByCharge"),
-    #HChTauID_ecalIsolation = cms.InputTag("hplusTauDiscriminationByECALIsolation"),
-    HChTauIDtauPolarization = cms.InputTag("pfRecoTauDiscriminationByTauPolarization"),
-    HChTauIDnProngs = cms.InputTag("pfRecoTauDiscriminationByNProngs")
-)
+        HChTauIDleadingTrackPtCut      = cms.InputTag(tau+"HplusTauDiscriminationByLeadingTrackPtCut"),
+        HChTauIDcharge                 = cms.InputTag(tau+"HplusTauDiscriminationByCharge"),
+        HChTauIDtauPolarization        = cms.InputTag(tau+"HplusTauDiscriminationByTauPolarization"),
+        HChTauIDnProngs                = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
+	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination")
+    )
+    return pset
+
+fixedConeTauIDSources = tauIDSources("fixedConePFTau")
 
 fixedConePFTaus = cms.EDFilter('HPlusTaus',
     CollectionName = cms.InputTag("selectedPatTaus"),
@@ -48,8 +48,10 @@ fixedConePFTaus = cms.EDFilter('HPlusTaus',
     )
 )
 
+
 HChTaus = cms.Sequence( fixedConePFTaus )
 
 def extendEventContent(content, process):
     content.append("keep *_fixedConePFTaus_*_"+process.name_())
+    content.append("keep *_shrinkingConePFTaus_*_"+process.name_())
     return content
