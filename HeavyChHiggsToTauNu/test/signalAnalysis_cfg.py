@@ -46,7 +46,7 @@ process.patJets.addJetID = False
 
 from PhysicsTools.PatAlgos.tools.tauTools import *
 #process.patTaus.tauSource = cms.InputTag("fixedConePFTauProducer")
-switchToPFTauFixedCone(process)
+####switchToPFTauFixedCone(process)
 #process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
 
 process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
@@ -105,7 +105,9 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
-process.patTaus.tauIDSources = process.fixedConeTauIDSources
+#process.patTaus.tauIDSources = process.fixedConeTauIDSources
+process.patTaus.tauIDSources = process.shrinkingConeTauIDSources
+
 
 # Add the correct trigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
