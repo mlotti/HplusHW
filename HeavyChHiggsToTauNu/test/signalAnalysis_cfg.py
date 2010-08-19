@@ -105,8 +105,16 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi")
 
-#process.patTaus.tauIDSources = process.fixedConeTauIDSources
-process.patTaus.tauIDSources = process.shrinkingConeTauIDSources
+
+switchToPFTauFixedCone(process)
+process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
+process.patPFTauProducerFixedCone.tauIDSources = process.fixedConeTauIDSources
+process.fixedConePFTaus.CollectionName = cms.InputTag("patPFTauProducerFixedCone")
+
+#switchToPFTauShrinkingCone(process)
+#process.patPFTauProducerShrinkingCone = copy.deepcopy(process.patTaus)
+#process.patPFTauProducerShrinkingCone.tauIDSources = process.shrinkingConeTauIDSources
+#process.shrinkingConePFTaus.CollectionName = cms.InputTag("patPFTauProducerShrinkingCone")
 
 
 # Add the correct trigger
@@ -142,6 +150,8 @@ if cmssw35Xdata:
         #
 	process.hplusTauDiscriminationSequence *
         process.patDefaultSequence *
+	process.patPFTauProducerFixedCone *
+#	process.patPFTauProducerShrinkingCone *
         process.HChTriggers *
         process.HChTaus *
         process.HChMETs *
