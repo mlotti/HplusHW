@@ -59,27 +59,27 @@ def hplusTauDiscrimination(tau):
     hplusTauPrediscriminants = cms.PSet(
         BooleanOperator = cms.string("and"),
         leadingTrack = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
             cut = cms.double(0.5)
         ),
         charge = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByCharge'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
             cut = cms.double(0.5)
         ),
         ecalIsolation = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByECALIsolation'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
             cut = cms.double(0.5)
         ),
         electronVeto = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationAgainstElectron'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
             cut = cms.double(0.5)
         ),
         polarization = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByTauPolarization'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByTauPolarization'),
             cut = cms.double(0.5)
         ),
         prongs = cms.PSet(
-            Producer = cms.InputTag('fixedConePFTauHplusTauDiscriminationByNProngs'),
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByNProngs'),
             cut = cms.double(0.5)
         )
     )
@@ -131,8 +131,8 @@ shrinkingConePFTauHplusTauDiscriminationSequence = cms.Sequence(
 )
 
 hplusTauDiscriminationSequence = cms.Sequence(
-    fixedConePFTauHplusTauDiscriminationSequence 
-#    shrinkingConePFTauHplusTauDiscriminationSequence
+    fixedConePFTauHplusTauDiscriminationSequence *
+    shrinkingConePFTauHplusTauDiscriminationSequence
 )
 
 
