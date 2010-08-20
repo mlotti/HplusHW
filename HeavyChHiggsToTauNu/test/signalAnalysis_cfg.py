@@ -138,6 +138,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChElectrons_cfi as HChElectrons
 process.s = cms.Sequence (
     process.hplusTauDiscriminationSequence *
     process.patDefaultSequence *
+    process.patPFTauProducerFixedCone *
     process.HChTriggers *
 #    process.HChHLTTaus *
     process.HChTaus *
