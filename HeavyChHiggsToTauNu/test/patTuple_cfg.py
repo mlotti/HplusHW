@@ -6,7 +6,7 @@ dataVersion = "36X"
 
 process = cms.Process("HChPatTuple")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR10_P_V6::All') # GR10_P_V6::All
@@ -14,6 +14,8 @@ if dataVersion == "37X":
     process.GlobalTag.globaltag = cms.string("START37_V6::All")
 else:
     process.GlobalTag.globaltag = cms.string("START36_V10::All")
+
+process.GlobalTag.globaltag = cms.string("START38_V9::All")
 
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -43,8 +45,20 @@ if dataVersion == "35X":
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 del process.TFileService
 
+process.out = cms.OutputModule("PoolOutputModule",
+    fileName = cms.untracked.string('pattuple.root'),
+    outputCommands = cms.untracked.vstring(
+        "drop *",
+        "keep *_genParticles_*_*",
+        "keep edmTriggerResults_*_*_*",
+        "keep triggerTriggerEvent_*_*_*"
+    )
+)
+
 # PAT Layer 0+1
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.patEventContent_cff import *
+
 
 process.patJets.jetSource = cms.InputTag("ak5CaloJets")
 process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
@@ -66,9 +80,13 @@ process.patTaus.embedLeadTrack = True
 process.patTaus.embedSignalTracks = True
 process.patTaus.embedIsolationTracks = True
 
+process.out.outputCommands.extend(patEventContentNoCleaning)
+
+
 from PhysicsTools.PatAlgos.tools.metTools import *
 addTcMET(process, 'TC')
 addPfMET(process, 'PF')
+process.out.outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
 
 from PhysicsTools.PatAlgos.tools.jetTools import *
 addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
@@ -82,6 +100,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                  genJetCollection = cms.InputTag("ak5GenJets"),
                  doJetID      = False
                  )
+process.out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
 #### needed for CMSSW35x data
 if dataVersion == "35X": 
@@ -104,13 +123,15 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerObjects_cfi")
 #process.patTriggerMatcher += process.tauTriggerMatchHLTSingleLooseIsoTau20
 #process.patTriggerMatcher.remove( process.patTriggerMatcherElectron )
 #process.patTriggerMatcher.remove( process.patTriggerMatcherMuon )
-#from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
+from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
 process.patDefaultSequence += process.patTriggerSequence
 
 # Add the correct trigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 HChTrigger.customise(process, dataVersion)
+switchOnTrigger(process)
+
 
 ################################################################################
 #print process.dumpPython()
@@ -134,20 +155,24 @@ process.path    = cms.Path(process.s)
 
 ################################################################################
 
-process.out = cms.OutputModule("PoolOutputModule",
-#    process.heavyChHiggsToTauNuEventSelection,
-#    SelectEvents = cms.untracked.PSet(
-#        SelectEvents = cms.vstring("path")
-#    ),
-    fileName = cms.untracked.string('pattuple.root'),
-    outputCommands = cms.untracked.vstring(
-#        "keep *"
-	"drop *",
-	"keep *_*_*_HChPatTuple",
-#	"drop reco*_*_*_HChSignalAnalysis",
-#	"drop pat*_*_*_HChSignalAnalysis"
-    )
-)
+# process.out = cms.OutputModule("PoolOutputModule",
+# #    process.heavyChHiggsToTauNuEventSelection,
+# #    SelectEvents = cms.untracked.PSet(
+# #        SelectEvents = cms.vstring("path")
+# #    ),
+#     fileName = cms.untracked.string('pattuple.root'),
+#     outputCommands = outputCommands
+# #    outputCommands = cms.untracked.vstring(
+# #        "keep *"
+# #	"drop *"
+# #        "keep 
+# #	"keep *_*_*_HChPatTuple",
+# #	"drop reco*_*_*_HChSignalAnalysis",
+# #	"drop pat*_*_*_HChSignalAnalysis"
+# #    )
+# )
+
+
 
 process.outpath = cms.EndPath(process.out)
 
