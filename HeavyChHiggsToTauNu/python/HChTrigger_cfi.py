@@ -43,6 +43,27 @@ import sys
 #HChTriggers = cms.Sequence( HLT8E29 )
 
 def addSpring10(process):
+    process.patTrigger.processName = "HLT"
+    process.patTriggerEvent.processName = "HLT"
+
+    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
+        TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
+        TriggersToBeApplied = cms.vstring(
+        ),
+        TriggersToBeSaved = cms.vstring(
+        "HLT_SingleLooseIsoTau20",
+        "HLT_MET45",
+        "HLT_MET100",
+        "HLT_Jet15U",
+        "HLT_Jet30U",
+        "HLT_Jet50U",
+        "HLT_QuadJet15U",
+        "HLT_Mu9"
+        ),
+        PrintTriggerNames = cms.bool(False)
+    )
+
+def addSpring10redigi(process):
     process.patTrigger.processName = "REDIGI"
     process.patTriggerEvent.processName = "REDIGI"
 
@@ -106,7 +127,9 @@ def addSummer10_37X(process):
     )
 
 def customise(process, dataVersion):
-    if dataVersion == "35X":
+    if dataVersion == "35Xredigi":
+        addSpring10redigi(process)
+    elif dataVersion == "35X":
         addSpring10(process)
     elif dataVersion == "36X":
         addSummer10(process)
