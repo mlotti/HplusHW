@@ -3,5 +3,7 @@
   <use   name="DataFormats/TauReco"/>
   <use   name="RecoTauTag/RecoTau"/>
   <use   name="RecoBTag/SecondaryVertex"/>
+  <use   name="FWCore/Framework"/>
+  <use   name="FWCore/MessageLogger"/>
 </library>
 
