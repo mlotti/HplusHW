@@ -27,7 +27,7 @@ process.source = cms.Source('PoolSource',
   )
 )
 
-process.source.fileNames = cms.untracked.vstring("file:pattuple.root")
+process.source.fileNames = cms.untracked.vstring("file:pattuple-1000.root")
 
 ################################################################################
 
@@ -144,35 +144,40 @@ addHistoAnalyzers(process, process.analysis, "02_tauetacut", [
 
 #### Tau leading track pt cut
 #prevcut = addCut(process, process.analysis, "TauLeadTrkPtCut", prevcut, "? isPFTau ? (leadPFChargedHadrCand().isNonnull() && leadPFChargedHardCand().pt() > 30.) : (leadTrack().isNonnull() && leadTrack().pt() > 30.)", selector="PATTauSelector")
-prevtaucut = addCut(process, process.analysis, "TauLeadTrkPtCut", prevtaucut, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector")
-addHistoAnalyzers(process, process.analysis, "03_tauldgtrkptcut", [
-    ("tau", prevtaucut, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
+# prevtaucut = addCut(process, process.analysis, "TauLeadTrkPtCut", prevtaucut, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector")
+# addHistoAnalyzers(process, process.analysis, "03_tauldgtrkptcut", [
+#     ("tau", prevtaucut, tauHistos),
+#     ("calojet", calo_jets, jetHistos),
+#     ("jptjet", jpt_jets, jetHistos),
+#     ("calomet", calo_met, metHistos),
+#     ("pfmet", pf_met, metHistos),
+#     ("tcmet", tc_met, metHistos)])
 
-#### Jet pt cut
-prevjetcut = addCut(process, process.analysis, "JetPtCut", jets, "pt() > 30.", min=3)
-addHistoAnalyzers(process, process.analysis, "02_jetptcut", [
-    ("tau", prevtaucut, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
+# #### Jet pt cut
+# prevjetcut = addCut(process, process.analysis, "JetPtCut", jets, "pt() > 30.", min=3)
+# addHistoAnalyzers(process, process.analysis, "02_jetptcut", [
+#     ("tau", prevtaucut, tauHistos),
+#     ("calojet", calo_jets, jetHistos),
+#     ("jptjet", jpt_jets, jetHistos),
+#     ("calomet", calo_met, metHistos),
+#     ("pfmet", pf_met, metHistos),
+#     ("tcmet", tc_met, metHistos)])
 
-# MET cut
-prevmetcut = addCut(process, process.analysis, "METCut", met, "et() > 40.")
-addHistoAnalyzers(process, process.analysis, "02_metcut", [
-    ("tau", prevtaucut, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
-                                                    
+# # MET cut
+# prevmetcut = addCut(process, process.analysis, "METCut", met, "et() > 40.")
+# addHistoAnalyzers(process, process.analysis, "02_metcut", [
+#     ("tau", prevtaucut, tauHistos),
+#     ("calojet", calo_jets, jetHistos),
+#     ("jptjet", jpt_jets, jetHistos),
+#     ("calomet", calo_met, metHistos),
+#     ("pfmet", pf_met, metHistos),
+#     ("tcmet", tc_met, metHistos)])
+
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
+process.transverseMass.tauSrc = prevtaucut
+process.transverseMass.metSrc = met
+process.analysis *= process.transverseMass
+addHistoAnalyzer(process, process.analysis, "transverse", "transverseMass", [Histo("transverseMass", "mass()", min=0, max=200, nbins=100, description="m_T")])
 
 process.path    = cms.Path(process.analysis)
 
