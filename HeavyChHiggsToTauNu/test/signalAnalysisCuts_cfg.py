@@ -37,16 +37,16 @@ process.TFileService.fileName = "histograms.root"
 process.countAll = cms.EDProducer("EventCountProducer")
 process.analysis = cms.Sequence(process.countAll)
 
-taus = "selectedPatTaus"
+selectedTaus = "selectedPatTaus"
 
 calo_jets = "selectedPatJets"
 jpt_jets = "selectedPatJetsAK5JPT"
-jets = jpt_jets
+selectedJets = jpt_jets
 
 calo_met = "patMETs"
 pf_met = "patMETsPF"
 tc_met = "patMETsTC"
-met = pf_met
+selectedMet = pf_met
 
 def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector"):
     cutname = name
@@ -102,82 +102,76 @@ class Histo:
                         lazyParsing = cms.untracked.bool(self.lazy))
 
 tauHistos = [
-    Histo("taupt", "pt()", min=0., max=100., nbins=100, description="tau pt (GeV/c)"),
-    Histo("taueta", "eta()", min=-3, max=3, nbins=60, description="tau eta"),
-    Histo("tauldgtrkpt", "? leadTrack().isNonnull() ? leadTrack().pt() : -1", min=0., max=100., nbins=100, description="tau leading track pt (GeV/c)")
+    Histo("pt", "pt()", min=0., max=100., nbins=100, description="tau pt (GeV/c)"),
+    Histo("eta", "eta()", min=-3, max=3, nbins=60, description="tau eta"),
+    Histo("ldgtrkpt", "? leadTrack().isNonnull() ? leadTrack().pt() : -1", min=0., max=100., nbins=100, description="tau leading track pt (GeV/c)")
     ]
-jetHistos = [Histo("jetpt", "pt()", min=0., max=100., nbins=100, description="jet pt (GeV/c)")]
-metHistos = [Histo("metet", "et()", min=0., max=100., nbins=100, description="met et (GeV/c)")]
+jetHistos = [Histo("pt", "pt()", min=0., max=100., nbins=100, description="jet pt (GeV/c)")]
+metHistos = [Histo("et", "et()", min=0., max=100., nbins=100, description="met et (GeV/c)")]
 
 def addHistoAnalyzers(process, sequence, prefix, lst):
     for t in lst:
         addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2])
+def addMultiHistoAnalyzer(process, sequence, name, lst):
+    m = cms.EDAnalyzer("CandViewMultiHistoAnalyzer")
+    for t in lst:
+        histos = cms.VPSet()
+        for histo in t[2]:
+            histos.append(histo.pset())
+        
+        m.__setattr__(t[0], cms.untracked.PSet(src = cms.InputTag(t[1]), histograms = histos))
+    process.__setattr__(name, m)
+    sequence *= m
+
+def cloneModule(process, sequence, name, mod):
+    m = mod.clone()
+    process.__setattr__(name, m)
+    sequence *= m
+    return m
+    
 
 #### Beginning
-addHistoAnalyzers(process, process.analysis, "00_beginning", [
-    ("tau", taus, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
+addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
+    ("tau_", selectedTaus, tauHistos),
+    ("jet_", selectedJets, jetHistos),
+    ("calojet_", calo_jets, jetHistos),
+    ("jptjet_", jpt_jets, jetHistos),
+    ("met_", selectedMet, metHistos),
+    ("calomet_", calo_met, metHistos),
+    ("pfmet_", pf_met, metHistos),
+    ("tcmet_", tc_met, metHistos)])
                   
 #### Tau Pt cut
-prevtaucut = addCut(process, process.analysis, "TauPtCut", taus, "pt() > 30.", selector="PATTauSelector")
-addHistoAnalyzers(process, process.analysis, "01_tauptcut", [
-    ("tau", prevtaucut, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
+selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 30.", selector="PATTauSelector")
+histoAnalyzer = cloneModule(process, process.analysis, "h01_tauptcut", process.h00_beginning)
+histoAnalyzer.tau_.src = selectedTaus
 
-#### Tau Eta cut
-prevtaucut = addCut(process, process.analysis, "TauEtaCut", prevtaucut, "abs(eta()) < 2.4", selector="PATTauSelector")
-addHistoAnalyzers(process, process.analysis, "02_tauetacut", [
-    ("tau", prevtaucut, tauHistos),
-    ("calojet", calo_jets, jetHistos),
-    ("jptjet", jpt_jets, jetHistos),
-    ("calomet", calo_met, metHistos),
-    ("pfmet", pf_met, metHistos),
-    ("tcmet", tc_met, metHistos)])
+# #### Tau Eta cut
+selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", selector="PATTauSelector")
+histoAnalyzer = cloneModule(process, process.analysis, "h02_tauetacut", histoAnalyzer)
+histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau leading track pt cut
-#prevcut = addCut(process, process.analysis, "TauLeadTrkPtCut", prevcut, "? isPFTau ? (leadPFChargedHadrCand().isNonnull() && leadPFChargedHardCand().pt() > 30.) : (leadTrack().isNonnull() && leadTrack().pt() > 30.)", selector="PATTauSelector")
-# prevtaucut = addCut(process, process.analysis, "TauLeadTrkPtCut", prevtaucut, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector")
-# addHistoAnalyzers(process, process.analysis, "03_tauldgtrkptcut", [
-#     ("tau", prevtaucut, tauHistos),
-#     ("calojet", calo_jets, jetHistos),
-#     ("jptjet", jpt_jets, jetHistos),
-#     ("calomet", calo_met, metHistos),
-#     ("pfmet", pf_met, metHistos),
-#     ("tcmet", tc_met, metHistos)])
+selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector")
+histoAnalyzer = cloneModule(process, process.analysis, "h03_tauldgtrkptcut", histoAnalyzer)
+histoAnalyzer.tau_.src = selectedTaus
 
 # #### Jet pt cut
-# prevjetcut = addCut(process, process.analysis, "JetPtCut", jets, "pt() > 30.", min=3)
-# addHistoAnalyzers(process, process.analysis, "02_jetptcut", [
-#     ("tau", prevtaucut, tauHistos),
-#     ("calojet", calo_jets, jetHistos),
-#     ("jptjet", jpt_jets, jetHistos),
-#     ("calomet", calo_met, metHistos),
-#     ("pfmet", pf_met, metHistos),
-#     ("tcmet", tc_met, metHistos)])
+histoAnalyzer = cloneModule(process, process.analysis, "h05_jetptcut", histoAnalyzer)
+histoAnalyzer.jet_.src = selectedJets
 
 # # MET cut
-# prevmetcut = addCut(process, process.analysis, "METCut", met, "et() > 40.")
-# addHistoAnalyzers(process, process.analysis, "02_metcut", [
-#     ("tau", prevtaucut, tauHistos),
-#     ("calojet", calo_jets, jetHistos),
-#     ("jptjet", jpt_jets, jetHistos),
-#     ("calomet", calo_met, metHistos),
-#     ("pfmet", pf_met, metHistos),
-#     ("tcmet", tc_met, metHistos)])
+selectedMet = addCut(process, process.analysis, "METCut", selectedMet, "et() > 40.")
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
-process.transverseMass.tauSrc = prevtaucut
-process.transverseMass.metSrc = met
+process.transverseMass.tauSrc = selectedTaus
+process.transverseMass.metSrc = selectedMet
 process.analysis *= process.transverseMass
-addHistoAnalyzer(process, process.analysis, "transverse", "transverseMass", [Histo("transverseMass", "mass()", min=0, max=200, nbins=100, description="m_T")])
+
+histoAnalyzer = cloneModule(process, process.analysis, "h06_metcut", histoAnalyzer)
+histoAnalyzer.met_.src = selectedMet
+histoAnalyzer.transverseMass_ = cms.untracked.PSet(src = cms.InputTag("transverseMass"), histograms = cms.VPSet(Histo("mt", "mass()", min=0, max=200, nbins=100, description="m_T").pset()))
+
 
 process.path    = cms.Path(process.analysis)
 
