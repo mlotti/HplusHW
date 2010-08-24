@@ -49,6 +49,9 @@ process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
 )
 process.analysis *= process.genRunInfo
 
+# Import cut and histogrammint tools
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+
 # selected* will hold the name of the product of the selected objects
 # (i.e. which has passed the previous cut)
 selectedTaus = "selectedPatTaus"
@@ -62,62 +65,7 @@ pf_met = "patMETsPF"
 tc_met = "patMETsTC"
 selectedMet = pf_met
 
-def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector", counter=None):
-    cutname = name
-    filtername = name+"Filter"
-    countname = "count"+name
-
-    m1 = cms.EDFilter(selector,
-                      src = cms.InputTag(src),
-                      cut = cms.string(cut))
-    m2 = cms.EDFilter("CandViewCountFilter",
-                      src = cms.InputTag(name),
-                      minNumber = cms.uint32(min))
-    m3 = cms.EDProducer("EventCountProducer")
-    process.__setattr__(cutname, m1)
-    process.__setattr__(filtername, m2)
-    process.__setattr__(countname, m3)
-
-    for n in [m1, m2, m3]:
-        sequence *= n
-
-    if counter != None:
-        counter.counters.append(cms.InputTag(countname))
-
-    return cutname
-
-def addHisto(process, sequence, name, m):
-    process.__setattr__(name, m)
-    sequence *= m
-
-def addHistoAnalyzer(process, sequence, name, src, lst):
-    histos = cms.VPSet()
-    for histo in lst:
-        histos.append(histo.pset())
-    addHisto(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=cms.InputTag(src), histograms=histos))
-
-class Histo:
-    def __init__(self, name, expr, min, max, nbins, description=None, lazy=True):
-        self.min = min
-        self.max = max
-        self.nbins = nbins
-        self.name = name
-        self.expr = expr
-        self.lazy = lazy
-        if description == None:
-            self.descr = name
-        else:
-            self.descr = description
-
-    def pset(self):
-        return cms.PSet(min = cms.untracked.double(self.min),
-                        max = cms.untracked.double(self.max),
-                        nbins = cms.untracked.int32(self.nbins),
-                        name = cms.untracked.string(self.name),
-                        plotquantity = cms.untracked.string(self.expr),
-                        description = cms.untracked.string(self.descr),
-                        lazyParsing = cms.untracked.bool(self.lazy))
-
+# List of histograms for each object type
 tauHistos = [
     Histo("pt", "pt()", min=0., max=100., nbins=100, description="tau pt (GeV/c)"),
     Histo("eta", "eta()", min=-3, max=3, nbins=60, description="tau eta"),
@@ -126,28 +74,7 @@ tauHistos = [
 jetHistos = [Histo("pt", "pt()", min=0., max=100., nbins=100, description="jet pt (GeV/c)")]
 metHistos = [Histo("et", "et()", min=0., max=100., nbins=100, description="met et (GeV/c)")]
 
-def addHistoAnalyzers(process, sequence, prefix, lst):
-    for t in lst:
-        addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2])
-def addMultiHistoAnalyzer(process, sequence, name, lst):
-    m = cms.EDAnalyzer("CandViewMultiHistoAnalyzer")
-    for t in lst:
-        histos = cms.VPSet()
-        for histo in t[2]:
-            histos.append(histo.pset())
-        
-        m.__setattr__(t[0], cms.untracked.PSet(src = cms.InputTag(t[1]), histograms = histos))
-    process.__setattr__(name, m)
-    sequence *= m
-
-def cloneModule(process, sequence, name, mod):
-    m = mod.clone()
-    process.__setattr__(name, m)
-    sequence *= m
-    return m
-    
-
-#### Beginning
+#### Beginning, book the first MultiHistoAnalyzer with all histograms
 addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
     ("tau_", selectedTaus, tauHistos),
     ("jet_", selectedJets, jetHistos),
@@ -159,11 +86,13 @@ addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
     ("tcmet_", tc_met, metHistos)])
 
 #### Tau Pt cut
+# We need to use PATTauSelector for all tau cuts, as the
+# CandViewSelector does not implement the lazy expression parsing
 selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 30.", selector="PATTauSelector", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h01_tauptcut", process.h00_beginning)
 histoAnalyzer.tau_.src = selectedTaus
 
-# #### Tau Eta cut
+#### Tau Eta cut
 selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", selector="PATTauSelector", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h02_tauetacut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
@@ -173,19 +102,21 @@ selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus
 histoAnalyzer = cloneModule(process, process.analysis, "h03_tauldgtrkptcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
-# #### Jet pt cut
+#### Jet pt cut
 selectedJets = addCut(process, process.analysis, "JetPtCut", selectedJets, "pt() > 30.", min=3, counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h05_jetptcut", histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
-# # MET cut
+#### MET cut
 selectedMet = addCut(process, process.analysis, "METCut", selectedMet, "et() > 40.", counter=process.counters)
 
+# calculate transverse mass
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
 process.transverseMass.tauSrc = selectedTaus
 process.transverseMass.metSrc = selectedMet
 process.analysis *= process.transverseMass
 
+# add transverse mass plot to the MultiHistoAnalyzer which is run after the MET cut
 histoAnalyzer = cloneModule(process, process.analysis, "h06_metcut", histoAnalyzer)
 histoAnalyzer.met_.src = selectedMet
 histoAnalyzer.transverseMass_ = cms.untracked.PSet(src = cms.InputTag("transverseMass"), histograms = cms.VPSet(Histo("mt", "mass()", min=0, max=200, nbins=100, description="m_T").pset()))
@@ -201,6 +132,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 #    ),
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
+#        "keep *_*_*_HChSignalAnalysis"
 	"drop *",
         "keep edmMergeableCounter_*_*_*"
     )
