@@ -9,5 +9,6 @@
   <use   name="DataFormats/Candidate"/>
   <use   name="DataFormats/METReco"/>
   <use   name="CommonTools/UtilAlgos"/>
+  <use   name="SimDataFormats/GeneratorProducts"/>
 </library>
 
