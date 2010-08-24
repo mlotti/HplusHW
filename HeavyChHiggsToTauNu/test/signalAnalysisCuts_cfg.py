@@ -34,15 +34,23 @@ process.source.fileNames = cms.untracked.vstring("file:pattuple-1000.root")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.TFileService.fileName = "histograms.root"
 
+# Set up event counter stuff and the analysis sequence
 process.countAll = cms.EDProducer("EventCountProducer")
 process.analysis = cms.Sequence(process.countAll)
-
 process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counters = cms.untracked.VInputTag(
         cms.InputTag("countAll")
     )
 )
 
+# Add generator infor to the TFileService file
+process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
+    src = cms.untracked.InputTag("generator")
+)
+process.analysis *= process.genRunInfo
+
+# selected* will hold the name of the product of the selected objects
+# (i.e. which has passed the previous cut)
 selectedTaus = "selectedPatTaus"
 
 calo_jets = "selectedPatJets"
