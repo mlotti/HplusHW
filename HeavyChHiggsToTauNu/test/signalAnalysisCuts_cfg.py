@@ -37,6 +37,12 @@ process.TFileService.fileName = "histograms.root"
 process.countAll = cms.EDProducer("EventCountProducer")
 process.analysis = cms.Sequence(process.countAll)
 
+process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+    counters = cms.untracked.VInputTag(
+        cms.InputTag("countAll")
+    )
+)
+
 selectedTaus = "selectedPatTaus"
 
 calo_jets = "selectedPatJets"
@@ -48,7 +54,7 @@ pf_met = "patMETsPF"
 tc_met = "patMETsTC"
 selectedMet = pf_met
 
-def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector"):
+def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector", counter=None):
     cutname = name
     filtername = name+"Filter"
     countname = "count"+name
@@ -66,6 +72,9 @@ def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector"
 
     for n in [m1, m2, m3]:
         sequence *= n
+
+    if counter != None:
+        counter.counters.append(cms.InputTag(countname))
 
     return cutname
 
@@ -140,28 +149,29 @@ addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
     ("calomet_", calo_met, metHistos),
     ("pfmet_", pf_met, metHistos),
     ("tcmet_", tc_met, metHistos)])
-                  
+
 #### Tau Pt cut
-selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 30.", selector="PATTauSelector")
+selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 30.", selector="PATTauSelector", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h01_tauptcut", process.h00_beginning)
 histoAnalyzer.tau_.src = selectedTaus
 
 # #### Tau Eta cut
-selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", selector="PATTauSelector")
+selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", selector="PATTauSelector", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h02_tauetacut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau leading track pt cut
-selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector")
+selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 30.", selector="PATTauSelector", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h03_tauldgtrkptcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 # #### Jet pt cut
+selectedJets = addCut(process, process.analysis, "JetPtCut", selectedJets, "pt() > 30.", min=3, counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h05_jetptcut", histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
 # # MET cut
-selectedMet = addCut(process, process.analysis, "METCut", selectedMet, "et() > 40.")
+selectedMet = addCut(process, process.analysis, "METCut", selectedMet, "et() > 40.", counter=process.counters)
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
 process.transverseMass.tauSrc = selectedTaus
@@ -173,7 +183,7 @@ histoAnalyzer.met_.src = selectedMet
 histoAnalyzer.transverseMass_ = cms.untracked.PSet(src = cms.InputTag("transverseMass"), histograms = cms.VPSet(Histo("mt", "mass()", min=0, max=200, nbins=100, description="m_T").pset()))
 
 
-process.path    = cms.Path(process.analysis)
+process.path    = cms.Path(process.analysis * process.counters)
 
 ################################################################################
 
