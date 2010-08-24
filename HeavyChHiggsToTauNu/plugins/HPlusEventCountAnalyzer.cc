@@ -3,10 +3,15 @@
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/MergeableCounter.h"
 #include "DataFormats/Provenance/interface/Provenance.h"
+
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include "TH1F.h"
 
 #include<iostream>
 #include<iomanip> 
@@ -108,12 +113,23 @@ void HPlusEventCountAnalyzer::endJob() {
   const size_t name_w = 50;
   const size_t count_w = 20;
 
+  edm::Service<TFileService> fs;
+  TH1F *counts = 0;
+  if(fs.isAvailable()) {
+    counts = fs->make<TH1F>("counter", "counter", counters.size(), 0, counters.size());
+  }
+
   edm::LogVerbatim(cat) << "========================================" << std::endl;
   edm::LogVerbatim(cat) << "Event counts " << (countersGiven ?  "(order given in python configuration)" : "(semi-alphabetical order, all counters in the file)") << std::endl;
   edm::LogVerbatim(cat) << std::endl << std::endl;
   edm::LogVerbatim(cat) << std::setw(name_w) << std::left << "Counter" << std::setw(count_w) << std::right << "Counts" << std::endl;
   for(size_t i=0; i<counters.size(); ++i) {
     edm::LogVerbatim(cat) << std::setw(name_w) << std::left << counters[i].tag_.encode() << std::setw(count_w) << std::right << counters[i].count_ << std::endl;
+    if(counts) {
+      size_t bin = i+1;
+      counts->SetBinContent(bin, counters[i].count_);
+      counts->GetXaxis()->SetBinLabel(bin, counters[i].tag_.encode().c_str());
+    }
   }
 
   if(countersGiven) {
