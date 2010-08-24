@@ -6,7 +6,7 @@ dataVersion = "36X"
 
 process = cms.Process("HChPatTuple")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR10_P_V6::All') # GR10_P_V6::All
@@ -50,6 +50,8 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
         "drop *",
         "keep *_genParticles_*_*",
+        "keep GenEventInfoProduct_*_*_*",
+        "keep GenRunInfoProduct_*_*_*",
         "keep edmTriggerResults_*_*_*",
         "keep triggerTriggerEvent_*_*_*"
     )
