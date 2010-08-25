@@ -15,10 +15,16 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "CommonTools/UtilAlgos/interface/ExpressionHisto.h"
 #include "FWCore/ParameterSet/interface/Entry.h"
 
-template<typename C>
+template <template <class> class H>
+struct MultiHistoAnalyzerTraits {
+  template <typename T>
+  static void endEvent(H<T> *histo) {
+  }
+};
+
+template<typename C, template <class> class H, typename Traits = MultiHistoAnalyzerTraits<H> >
 class MultiHistoAnalyzer : public edm::EDAnalyzer {
  public:
   /// constructor from parameter set
@@ -38,7 +44,7 @@ class MultiHistoAnalyzer : public edm::EDAnalyzer {
   /// label of the weight collection (can be null for weights = 1)
   edm::InputTag weights_;
   /// vector of the histograms
-  typedef ExpressionHisto<typename C::value_type> Histogram;
+  typedef H<typename C::value_type> Histogram;
   typedef std::vector<Histogram *> Histograms;
 
   struct HistoObject {
@@ -48,8 +54,8 @@ class MultiHistoAnalyzer : public edm::EDAnalyzer {
   std::vector<HistoObject> histograms_;
 };
 
-template<typename C>
-MultiHistoAnalyzer<C>::MultiHistoAnalyzer( const edm::ParameterSet& par ) : 
+template<typename C, template <class> class H, typename Traits>
+MultiHistoAnalyzer<C, H, Traits>::MultiHistoAnalyzer( const edm::ParameterSet& par ) : 
   usingWeights_(par.exists("weights")),
   weights_(par.template getUntrackedParameter<edm::InputTag>("weights", edm::InputTag("fake")))
 {
@@ -80,29 +86,29 @@ MultiHistoAnalyzer<C>::MultiHistoAnalyzer( const edm::ParameterSet& par ) :
     for(; it != end; ++it) {
       it->insert(true, name, edm::Entry(name, histonames[i]+it->getUntrackedParameter<std::string>(name), false));
 
-      ExpressionHisto<typename C::value_type>* hist = new ExpressionHisto<typename C::value_type>(*it);
+      Histogram* hist = new Histogram(*it);
       hist->initialize(*fs);
       histograms_[i].histograms_.push_back(hist);
     }   
   }
 }
 
-template<typename C>
-MultiHistoAnalyzer<C>::~MultiHistoAnalyzer() 
+template<typename C, template <class> class H, typename Traits>
+MultiHistoAnalyzer<C, H, Traits>::~MultiHistoAnalyzer() 
 {
   for(size_t i=0; i<histograms_.size(); ++i) {
     // delete all histograms and clear the vector of pointers
-    typename std::vector<ExpressionHisto<typename C::value_type>* >::iterator it = histograms_[i].histograms_.begin(); 
-    typename std::vector<ExpressionHisto<typename C::value_type>* >::iterator end = histograms_[i].histograms_.end();
+    typename Histograms::iterator it = histograms_[i].histograms_.begin(); 
+    typename Histograms::iterator end = histograms_[i].histograms_.end();
     for (;it!=end; ++it){
-      (*it)->~ExpressionHisto<typename C::value_type>();
+      delete *it;
     }
     histograms_[i].histograms_.clear(); 
   }
 }
 
-template<typename C>
-void MultiHistoAnalyzer<C>::analyze( const edm::Event& iEvent, const edm::EventSetup& ) 
+template<typename C, template <class> class H, typename Traits>
+void MultiHistoAnalyzer<C, H, Traits>::analyze( const edm::Event& iEvent, const edm::EventSetup& ) 
 {
   double weight = 1.0;
   if (usingWeights_) { 
@@ -115,8 +121,8 @@ void MultiHistoAnalyzer<C>::analyze( const edm::Event& iEvent, const edm::EventS
     edm::Handle<C> coll;
     iEvent.getByLabel( histograms_[i].src_, coll);
 
-    typename std::vector<ExpressionHisto<typename C::value_type>* >::iterator it = histograms_[i].histograms_.begin();
-    typename std::vector<ExpressionHisto<typename C::value_type>* >::iterator end = histograms_[i].histograms_.end(); 
+    typename Histograms::iterator it = histograms_[i].histograms_.begin();
+    typename Histograms::iterator end = histograms_[i].histograms_.end(); 
 
     for (;it!=end; ++it){
       uint32_t i = 0;
@@ -125,6 +131,7 @@ void MultiHistoAnalyzer<C>::analyze( const edm::Event& iEvent, const edm::EventS
           break;
         }
       }
+      Traits::endEvent(*it);
     }
   }
 }

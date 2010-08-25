@@ -10,5 +10,6 @@
   <use   name="DataFormats/METReco"/>
   <use   name="CommonTools/UtilAlgos"/>
   <use   name="SimDataFormats/GeneratorProducts"/>
+  <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>
 </library>
 
