@@ -85,6 +85,44 @@ addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
     ("pfmet_", pf_met, metHistos),
     ("tcmet_", tc_met, metHistos)])
 
+process.taupteff = cms.EDAnalyzer("CandViewMultiEfficiencyPerObjectAnalyzer",
+    tau_ = cms.untracked.PSet(
+        src = cms.InputTag(selectedTaus),
+        histograms = cms.VPSet(
+            cms.PSet(
+                nbins = cms.untracked.int32(100),
+                description = cms.untracked.string('tau pt (GeV/c)'),
+                plotquantity = cms.untracked.string('pt()'),
+                min = cms.untracked.double(0.0),
+                max = cms.untracked.double(100.0),
+                cuttype = cms.untracked.string(">"),
+                lazyParsing = cms.untracked.bool(True),
+                name = cms.untracked.string('pt')
+            )
+        )
+    )
+)
+process.taupteffevent = cms.EDAnalyzer("CandViewMultiEfficiencyPerEventAnalyzer",
+    tau_ = cms.untracked.PSet(
+        src = cms.InputTag(selectedTaus),
+        histograms = cms.VPSet(
+            cms.PSet(
+                nbins = cms.untracked.int32(100),
+                description = cms.untracked.string('tau pt (GeV/c)'),
+                plotquantity = cms.untracked.string('pt()'),
+                min = cms.untracked.double(0.0),
+                max = cms.untracked.double(100.0),
+                cuttype = cms.untracked.string(">"),
+                lazyParsing = cms.untracked.bool(True),
+                name = cms.untracked.string('pt')
+            )
+        )
+    )
+)
+
+process.analysis *= process.taupteff
+process.analysis *= process.taupteffevent
+
 #### Tau Pt cut
 # We need to use PATTauSelector for all tau cuts, as the
 # CandViewSelector does not implement the lazy expression parsing
