@@ -1,8 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
-#dataVersion = "35X"
+#new 35X TTT H+ samples, no redigi
+#old 35X TTbar H+samples with redigi
+dataVersion = "35X"
+#dataVersion = "35Xredigi"
 #dataVersion = "36X"
-dataVersion = "37X"
+#dataVersion = "37X"
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -25,7 +28,7 @@ process.source = cms.Source('PoolSource',
        '/store/relval/CMSSW_3_6_0_pre6/RelValZTT/GEN-SIM-RECO/START36_V4-v1/0011/06A4E187-C644-DF11-BC3E-0018F3D096AA.root'
   )
 )
-if dataVersion == "35X":
+if dataVersion == "35Xredigi":
     process.source.fileNames = cms.untracked.vstring(
 	"rfio:/castor/cern.ch/user/s/slehti/testData/testHplus_35X.root"
 #        '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0017/86C58057-8F52-DF11-9160-002618FDA28E.root',
@@ -34,7 +37,11 @@ if dataVersion == "35X":
 #        '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/50C0224A-4F52-DF11-B8A0-002618943906.root',
 #        '/store/relval/CMSSW_3_5_8/RelValZTT/GEN-SIM-RECO/START3X_V26-v1/0016/207DFCE2-4F52-DF11-8D25-0018F3D096BA.root'
     )
-    
+
+if dataVersion == "35X":
+    process.source.fileNames = cms.untracked.vstring(
+	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHpmToTauNu_M90_test.root"
+    )    
 
 
 ################################################################################
@@ -80,7 +87,7 @@ addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                  )
 
 #### needed for CMSSW35x data
-if dataVersion == "35X": 
+if (dataVersion == "35X") | (dataVersion == "35Xredigi"): 
     process.load("RecoJets.Configuration.GenJetParticles_cff")
     process.load("RecoJets.Configuration.RecoGenJets_cff")
     ## creating JPT jets
@@ -147,7 +154,7 @@ process.s = cms.Sequence (
     process.HChMuons *
     process.HChElectrons
 )
-if dataVersion == "35X":
+if (dataVersion == "35X") | (dataVersion == "35Xredigi"):
     process.s = cms.Sequence (
         #for 35X
         process.genJetParticles *
