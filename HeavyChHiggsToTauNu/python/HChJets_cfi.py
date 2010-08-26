@@ -11,8 +11,8 @@ jets  = cms.EDFilter('HPlusJets',
 JPTJets = cms.EDFilter('HPlusJets',
     CollectionName = cms.InputTag("selectedPatJetsAK5JPT"),
     Discriminators = cms.VInputTag(
-	cms.InputTag("trackCountingHighPurBJetTagsAK5JPT"),
-	cms.InputTag("trackCountingHighEffBJetTagsAK5JPT")
+	cms.InputTag("trackCountingHighPurBJetTags"),
+	cms.InputTag("trackCountingHighEffBJetTags")
     )
 )
 
