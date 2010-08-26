@@ -1,8 +1,19 @@
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
+import copy
 
 #dataVersion = "35X"
 dataVersion = "36X"
 #dataVersion = "37X"
+
+# https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
+options = VarParsing.VarParsing()
+options.register("crossSection",
+                 0., # default value
+                 options.multiplicity.singleton, # singleton or list
+                 options.varType.float,          # string, int, or float
+                 "Cross section of the dataset (stored to histograms ROOT file)")
+options.parseArguments()
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -47,6 +58,10 @@ process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
     src = cms.untracked.InputTag("generator")
 )
+process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
+    crossSection = cms.untracked.double(options.crossSection)
+)
+print "Dataset cross section has been set to %g pb" % options.crossSection
 process.analysis *= process.genRunInfo
 
 # Import cut and histogrammint tools
@@ -85,43 +100,57 @@ addMultiHistoAnalyzer(process, process.analysis, "h00_beginning", [
     ("pfmet_", pf_met, metHistos),
     ("tcmet_", tc_met, metHistos)])
 
-process.taupteff = cms.EDAnalyzer("CandViewMultiEfficiencyPerObjectAnalyzer",
-    tau_ = cms.untracked.PSet(
-        src = cms.InputTag(selectedTaus),
-        histograms = cms.VPSet(
-            cms.PSet(
-                nbins = cms.untracked.int32(100),
-                description = cms.untracked.string('tau pt (GeV/c)'),
-                plotquantity = cms.untracked.string('pt()'),
-                min = cms.untracked.double(0.0),
-                max = cms.untracked.double(100.0),
-                cuttype = cms.untracked.string(">"),
-                lazyParsing = cms.untracked.bool(True),
-                name = cms.untracked.string('pt')
-            )
-        )
-    )
-)
-process.taupteffevent = cms.EDAnalyzer("CandViewMultiEfficiencyPerEventAnalyzer",
-    tau_ = cms.untracked.PSet(
-        src = cms.InputTag(selectedTaus),
-        histograms = cms.VPSet(
-            cms.PSet(
-                nbins = cms.untracked.int32(100),
-                description = cms.untracked.string('tau pt (GeV/c)'),
-                plotquantity = cms.untracked.string('pt()'),
-                min = cms.untracked.double(0.0),
-                max = cms.untracked.double(100.0),
-                cuttype = cms.untracked.string(">"),
-                lazyParsing = cms.untracked.bool(True),
-                name = cms.untracked.string('pt')
-            )
-        )
-    )
-)
+def cloneHisto(histo, cuttype, minObjects=None):
+    h = copy.deepcopy(histo)
+    h.setCuttype(cuttype)
+    if minObjects != None:
+        h.setMinObjects(minObjects)
+    return h
 
-process.analysis *= process.taupteff
-process.analysis *= process.taupteffevent
+addMultiEfficiencyPerObjectAnalyzer(process, process.analysis, "h00_beginning_passes", [
+    ("tau_", selectedTaus, [cloneHisto(tauHistos[0], ">"),
+                            Histo("eta", "abs(eta())", min=0, max=3, nbins=30, description="tau eta", cuttype="<"),
+                            cloneHisto(tauHistos[2], ">")]),
+    ("jet_", selectedJets, [cloneHisto(jetHistos[0], ">", minObjects=3)],
+     "met_", selectedMet, [cloneHisto(metHistos[0], ">")])])
+
+# process.taupteff = cms.EDAnalyzer("CandViewMultiEfficiencyPerObjectAnalyzer",
+#     tau_ = cms.untracked.PSet(
+#         src = cms.InputTag(selectedTaus),
+#         histograms = cms.VPSet(
+#             cms.PSet(
+#                 nbins = cms.untracked.int32(100),
+#                 description = cms.untracked.string('tau pt (GeV/c)'),
+#                 plotquantity = cms.untracked.string('pt()'),
+#                 min = cms.untracked.double(0.0),
+#                 max = cms.untracked.double(100.0),
+#                 cuttype = cms.untracked.string(">"),
+#                 lazyParsing = cms.untracked.bool(True),
+#                 name = cms.untracked.string('pt')
+#             )
+#         )
+#     )
+# )
+# process.taupteffevent = cms.EDAnalyzer("CandViewMultiEfficiencyPerEventAnalyzer",
+#     tau_ = cms.untracked.PSet(
+#         src = cms.InputTag(selectedTaus),
+#         histograms = cms.VPSet(
+#             cms.PSet(
+#                 nbins = cms.untracked.int32(100),
+#                 description = cms.untracked.string('tau pt (GeV/c)'),
+#                 plotquantity = cms.untracked.string('pt()'),
+#                 min = cms.untracked.double(0.0),
+#                 max = cms.untracked.double(100.0),
+#                 cuttype = cms.untracked.string(">"),
+#                 lazyParsing = cms.untracked.bool(True),
+#                 name = cms.untracked.string('pt')
+#             )
+#         )
+#     )
+# )
+
+# process.analysis *= process.taupteff
+# process.analysis *= process.taupteffevent
 
 #### Tau Pt cut
 # We need to use PATTauSelector for all tau cuts, as the
