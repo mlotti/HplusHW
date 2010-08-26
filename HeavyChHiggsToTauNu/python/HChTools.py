@@ -87,6 +87,17 @@ def addHistoAnalyzers(process, sequence, prefix, lst):
     for t in lst:
         addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2])
 
+def addMultiAnalyzer(process, sequence, name, lst, analyzer):
+    m = cms.EDAnalyzer(analyzer)
+    for t in lst:
+        histos = cms.VPSet()
+        for histo in t[2]:
+            histos.append(histo.pset())
+        
+        m.__setattr__(t[0], cms.untracked.PSet(src = cms.InputTag(t[1]), histograms = histos))
+    process.__setattr__(name, m)
+    sequence *= m
+
 # Add CandViewMultiHistoAnalyzer to process and sequence
 #
 # process   cms.Process object
@@ -98,37 +109,49 @@ def addHistoAnalyzers(process, sequence, prefix, lst):
 #           source   source collection name
 #           histo    list of Histo objects
 def addMultiHistoAnalyzer(process, sequence, name, lst):
-    m = cms.EDAnalyzer("CandViewMultiHistoAnalyzer")
-    for t in lst:
-        histos = cms.VPSet()
-        for histo in t[2]:
-            histos.append(histo.pset())
-        
-        m.__setattr__(t[0], cms.untracked.PSet(src = cms.InputTag(t[1]), histograms = histos))
-    process.__setattr__(name, m)
-    sequence *= m
+    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiHistoAnalyzer")
+
+def addMultiEfficiencyPerObjectAnalyzer(process, sequence, name, lst):
+    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerObjectAnalyzer")
+
+def addMultiEfficiencyPerEventAnalyzer(process, sequence, name, lst):
+    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerEventAnalyzer")
 
 
 # Helper class to decrease the required amount of typing when adding
 # CandView(Multi)HistoAnalyzers to the analysis
 class Histo:
-    def __init__(self, name, expr, min, max, nbins, description=None, lazy=True):
+    def __init__(self, name, expr, min, max, nbins, description=None, cuttype=None, minObjects=None, lazy=True):
         self.min = min
         self.max = max
         self.nbins = nbins
         self.name = name
         self.expr = expr
         self.lazy = lazy
+        self.minObjects = minObjects
+        self.cuttype = cuttype
         if description == None:
             self.descr = name
         else:
             self.descr = description
 
+    def setCuttype(self, cuttype):
+        self.cuttype = cuttype
+
+    def setMinObjects(self, minObjects):
+        self.minObjects = minObjects
+
     def pset(self):
-        return cms.PSet(min = cms.untracked.double(self.min),
-                        max = cms.untracked.double(self.max),
-                        nbins = cms.untracked.int32(self.nbins),
-                        name = cms.untracked.string(self.name),
-                        plotquantity = cms.untracked.string(self.expr),
-                        description = cms.untracked.string(self.descr),
-                        lazyParsing = cms.untracked.bool(self.lazy))
+        p = cms.PSet(min = cms.untracked.double(self.min),
+                     max = cms.untracked.double(self.max),
+                     nbins = cms.untracked.int32(self.nbins),
+                     name = cms.untracked.string(self.name),
+                     plotquantity = cms.untracked.string(self.expr),
+                     description = cms.untracked.string(self.descr),
+                     lazyParsing = cms.untracked.bool(self.lazy))
+        if self.minObjects != None:
+            p.minObjects = cms.untracked.uint32(self.minObjects)
+        if self.cuttype != None:
+            p.cuttype = cms.untracked.string(self.cuttype)
+        
+        return p
