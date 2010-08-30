@@ -23,8 +23,8 @@ using namespace std;
 
 class PFRecoTauDiscriminationByNProngsNew : public PFTauDiscriminationProducerBase  {
     public:
-	explicit PFRecoTauDiscriminationByNProngsNew(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig), 
-                                                                               qualityCuts_(iConfig.getParameter<ParameterSet>("qualityCuts")){  // retrieve quality cuts    
+	explicit PFRecoTauDiscriminationByNProngsNew(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig){
+//                                                                               qualityCuts_(iConfig.getParameter<ParameterSet>("qualityCuts")){  // retrieve quality cuts    
 		nprongs			= iConfig.getParameter<uint32_t>("nProngs");
 	}
 
@@ -35,7 +35,7 @@ class PFRecoTauDiscriminationByNProngsNew : public PFTauDiscriminationProducerBa
 
     private:
 
-	PFTauQualityCutWrapper qualityCuts_;
+//	PFTauQualityCutWrapper qualityCuts_;
 
 	uint32_t nprongs;
 };
