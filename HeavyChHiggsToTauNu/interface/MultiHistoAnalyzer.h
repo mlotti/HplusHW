@@ -125,9 +125,9 @@ void MultiHistoAnalyzer<C, H, Traits>::analyze( const edm::Event& iEvent, const 
     typename Histograms::iterator end = histograms_[i].histograms_.end(); 
 
     for (;it!=end; ++it){
-      uint32_t i = 0;
-      for( typename C::const_iterator elem=coll->begin(); elem!=coll->end(); ++elem, ++i ) {
-        if (!(*it)->fill( *elem, weight, i )) {
+      uint32_t j = 0;
+      for( typename C::const_iterator elem=coll->begin(); elem!=coll->end(); ++elem, ++j ) {
+        if (!(*it)->fill( *elem, weight, j )) {
           break;
         }
       }
