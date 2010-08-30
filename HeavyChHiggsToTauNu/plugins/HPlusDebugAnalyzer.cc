@@ -1,9 +1,11 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -27,11 +29,18 @@ class HPlusDebugAnalyzer: public edm::EDAnalyzer {
   /// Default EDAnalyzer method - called at the end of the job
   virtual void endJob();
 
-  edm::InputTag src_;
+  void printJetDiscriminants(const edm::Event& iEvent) const;
+  void printTriggerPaths(const edm::Event& iEvent) const;
+
+  edm::InputTag jetSrc_;
+  edm::InputTag trigSrc_;
+  edm::InputTag patTrigSrc_;
 };
 
 HPlusDebugAnalyzer::HPlusDebugAnalyzer(const edm::ParameterSet& pset):
-  src_(pset.getUntrackedParameter<edm::InputTag>("src"))
+  jetSrc_(pset.getUntrackedParameter<edm::InputTag>("jetSrc")),
+  trigSrc_(pset.getUntrackedParameter<edm::InputTag>("trigSrc"))
+  //patTrigSrc_(pset.getUntrackedParameter<edm::InputTag>("patTrigSrc"))
 {}
 
 HPlusDebugAnalyzer::~HPlusDebugAnalyzer() {}
@@ -40,8 +49,13 @@ void HPlusDebugAnalyzer::beginJob() {
 }
 
 void HPlusDebugAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  //printJetDiscriminants(iEvent);
+  printTriggerPaths(iEvent);
+}
+
+void HPlusDebugAnalyzer::printJetDiscriminants(const edm::Event& iEvent) const {
   edm::Handle<edm::View<pat::Jet> > jets;
-  iEvent.getByLabel(src_, jets);
+  iEvent.getByLabel(jetSrc_, jets);
 
   if(jets->size() == 0)
     return;
@@ -52,6 +66,19 @@ void HPlusDebugAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup
     std::cout << "  " << bdiscrs[i].first << ": " << bdiscrs[i].second << std::endl;
   }
 }
+
+void HPlusDebugAnalyzer::printTriggerPaths(const edm::Event& iEvent) const {
+  edm::Handle<edm::TriggerResults> trigger;
+  iEvent.getByLabel(trigSrc_, trigger);
+
+  const edm::TriggerNames& triggerNames = iEvent.triggerNames(*trigger);
+
+  std::cout << "Available triggers:" << std::endl;
+  for(size_t i=0; i<triggerNames.size(); ++i) {
+    std::cout << "  " << triggerNames.triggerName(i) << std::endl;
+  }
+}
+
 
 void HPlusDebugAnalyzer::endJob() {
 }
