@@ -44,7 +44,7 @@ def addPat(process, dataVersion):
         out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
     #### needed for CMSSW35x data
-    if dataVersion == "35X": 
+    if dataVersion in ["35X", "35Xredigi"]: 
         process.load("RecoJets.Configuration.GenJetParticles_cff")
         process.load("RecoJets.Configuration.RecoGenJets_cff")
         ## creating JPT jets
@@ -92,7 +92,7 @@ def addPat(process, dataVersion):
 
     # Build sequence
     seq = cms.Sequence()
-    if dataVersion == "35X":
+    if dataVersion in ["35X", "35Xredigi"]: 
         process.hplusJptSequence = cms.Sequence(
             process.genJetParticles *
             process.ak5GenJets *
