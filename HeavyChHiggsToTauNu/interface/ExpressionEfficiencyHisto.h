@@ -113,8 +113,10 @@ public:
   bool fill(const T& element, double weight=1.0, uint32_t i=0);
 
   void endEvent();
-private:
+
+protected:
   const uint32_t minObjects_;
+private:
   std::vector<double> values_;
   double weight_;
 };
