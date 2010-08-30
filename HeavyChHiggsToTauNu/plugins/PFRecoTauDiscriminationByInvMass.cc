@@ -23,8 +23,7 @@ using namespace std;
 
 class PFRecoTauDiscriminationByInvMass : public PFTauDiscriminationProducerBase  {
     public:
-	explicit PFRecoTauDiscriminationByInvMass(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig), 
-                                                                               qualityCuts_(iConfig.getParameter<ParameterSet>("qualityCuts")){  // retrieve quality cuts    
+	explicit PFRecoTauDiscriminationByInvMass(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig) {
 		invMassMin		= iConfig.getParameter<double>("invMassMin");
 		invMassMax		= iConfig.getParameter<double>("invMassMax");
 		chargedPionMass 	= 0.139;
@@ -40,11 +39,9 @@ class PFRecoTauDiscriminationByInvMass : public PFTauDiscriminationProducerBase 
 
 	double chargedPionMass;
 
-	PFTauQualityCutWrapper qualityCuts_;
-
 	double invMassMin,invMassMax;
 
-	edm::InputTag PVProducer;
+//	edm::InputTag PVProducer;
 };
 
 void PFRecoTauDiscriminationByInvMass::beginEvent(const Event& iEvent, const EventSetup& iSetup){
