@@ -125,7 +125,7 @@ def hplusTau3ProngDiscrimination(tau):
     return DiscriminationByNProngs
 
 #from HiggsAnalysis.HeavyChHiggsToTauNu.EmptyTauDiscrimination_cfi import *
-def hplusTauNProngDiscrimination(tau):
+def hplusTauNProngDiscriminationNew(tau):
     prediscriminants = cms.PSet(
 	BooleanOperator = cms.string("and"),
         oneProng = cms.PSet(
@@ -142,6 +142,49 @@ def hplusTauNProngDiscrimination(tau):
     DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
     DiscriminationByNProngs.Prediscriminants = prediscriminants
     return DiscriminationByNProngs
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
+def hplusTauDiscriminationByNProngs(tau):
+    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByNProngs.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByNProngs
+
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTrackIsolation_cfi import *
+def hplusTauDiscriminationNew(tau):
+    hplusTauPrediscriminants = cms.PSet(
+        BooleanOperator = cms.string("and"),
+        leadingTrack = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
+            cut = cms.double(0.5)
+        ),
+        charge = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
+            cut = cms.double(0.5)
+        ),
+        ecalIsolation = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
+            cut = cms.double(0.5)
+        ),
+        electronVeto = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
+            cut = cms.double(0.5)
+        ),
+        polarization = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByTauPolarization'),
+            cut = cms.double(0.5)
+        ),
+        prongs = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByNProngsNew'),
+            cut = cms.double(0.5)
+        )
+    )
+    HplusTauDiscrimination = pfRecoTauDiscriminationByTrackIsolation.clone()
+    HplusTauDiscrimination.PFTauProducer = cms.InputTag(tau+'Producer')
+    HplusTauDiscrimination.Prediscriminants = hplusTauPrediscriminants
+    HplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
+    return  HplusTauDiscrimination
+
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTrackIsolation_cfi import *
 def hplusTauDiscrimination(tau):
@@ -190,8 +233,10 @@ fixedConePFTauHplusTauDiscriminationByInvMass		  = hplusTauDiscriminationByInvMa
 fixedConePFTauHplusTauDiscriminationByFlightPathSignif    = hplusTauDiscriminationByFlightPathSignificance("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationBy1Prong              = hplusTau1ProngDiscrimination("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationBy3Prongs		  = hplusTau3ProngDiscrimination("fixedConePFTau")
-fixedConePFTauHplusTauDiscriminationByNProngs		  = hplusTauNProngDiscrimination("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByNProngsNew	  = hplusTauNProngDiscriminationNew("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("fixedConePFTau")
 fixedConePFTauHplusTauDiscrimination                      = hplusTauDiscrimination("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationNew			  = hplusTauDiscriminationNew("fixedConePFTau")
 
 fixedConePFTauHplusTauDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut *
@@ -206,7 +251,9 @@ fixedConePFTauHplusTauDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationByFlightPathSignif *
     fixedConePFTauHplusTauDiscriminationBy1Prong *
     fixedConePFTauHplusTauDiscriminationBy3Prongs *
+    fixedConePFTauHplusTauDiscriminationByNProngsNew *
     fixedConePFTauHplusTauDiscriminationByNProngs *
+    fixedConePFTauHplusTauDiscriminationNew *
     fixedConePFTauHplusTauDiscrimination
 )
 

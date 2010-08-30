@@ -9,7 +9,7 @@ dataVersion = "35X"
 
 process = cms.Process("HChSignalAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('GR10_P_V6::All') # GR10_P_V6::All
