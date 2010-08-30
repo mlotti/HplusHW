@@ -5,7 +5,7 @@ import FWCore.ParameterSet.Config as cms
 # process     cms.Process object where the modules are added
 # sequence    cms.Sequence object where the modules are appended
 # name        Name of a cut, used as a name of the object selector and as a part of a name for other modules
-# src         Source collection name (as string, support for InputTag should probably be added)
+# src         Source collection InputTag
 # cut         Cut expression
 # min         Minimum number of selected objects (default: 1)
 # selector    Selector module to use (default: CandViewSelector)
@@ -18,7 +18,7 @@ def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector"
     countname = "count"+name
 
     m1 = cms.EDFilter(selector,
-                      src = cms.InputTag(src),
+                      src = src,
                       cut = cms.string(cut))
     m2 = cms.EDFilter("CandViewCountFilter",
                       src = cms.InputTag(name),
@@ -34,7 +34,7 @@ def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector"
     if counter != None:
         counter.counters.append(cms.InputTag(countname))
 
-    return cutname
+    return cms.InputTag(cutname)
 
 # Add module to process and append to a sequence
 #
@@ -65,13 +65,13 @@ def cloneModule(process, sequence, name, mod):
 # process   cms.Process object
 # sequence  cms.Sequence object
 # name      Name of the module
-# src       Source collection name
+# src       Source collection InputTag
 # lst       List of Histo objects, one histogram is booked for each
 def addHistoAnalyzer(process, sequence, name, src, lst):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    addModule(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=cms.InputTag(src), histograms=histos))
+    addModule(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos))
 
 # Add multiple CandViewHistoAnalyzers to process and sequence
 #
@@ -81,7 +81,7 @@ def addHistoAnalyzer(process, sequence, name, src, lst):
 # lst       List of the following tuples:
 #           (name, source, histos), where
 #           name         name of the histogramming module
-#           source       source collection name
+#           source       source collection InputTag
 #           histo        list of Histo objects
 def addHistoAnalyzers(process, sequence, prefix, lst):
     for t in lst:
@@ -94,9 +94,10 @@ def addMultiAnalyzer(process, sequence, name, lst, analyzer):
         for histo in t[2]:
             histos.append(histo.pset())
         
-        m.__setattr__(t[0], cms.untracked.PSet(src = cms.InputTag(t[1]), histograms = histos))
+        m.__setattr__(t[0], cms.untracked.PSet(src = t[1], histograms = histos))
     process.__setattr__(name, m)
     sequence *= m
+    return m
 
 # Add CandViewMultiHistoAnalyzer to process and sequence
 #
@@ -106,16 +107,16 @@ def addMultiAnalyzer(process, sequence, name, lst, analyzer):
 # lst       List of the following tuples:
 #           (name, source, histos), where
 #           name     prefix of the histograms for this source collection
-#           source   source collection name
+#           source   source collection InputTag
 #           histo    list of Histo objects
 def addMultiHistoAnalyzer(process, sequence, name, lst):
-    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiHistoAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiHistoAnalyzer")
 
 def addMultiEfficiencyPerObjectAnalyzer(process, sequence, name, lst):
-    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerObjectAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerObjectAnalyzer")
 
 def addMultiEfficiencyPerEventAnalyzer(process, sequence, name, lst):
-    addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerEventAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerEventAnalyzer")
 
 
 # Helper class to decrease the required amount of typing when adding
@@ -140,6 +141,12 @@ class Histo:
 
     def setMinObjects(self, minObjects):
         self.minObjects = minObjects
+
+    def setPlotquantity(self, quant):
+        self.plotquantity = quant
+
+    def getPlotQuantity(self):
+        return self.plotquantity
 
     def pset(self):
         p = cms.PSet(min = cms.untracked.double(self.min),
