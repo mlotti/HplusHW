@@ -44,7 +44,7 @@ void HPlusConfigInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 
 void HPlusConfigInfoAnalyzer::endJob() {
   edm::Service<TFileService> fs;
-  TH1F *info = fs->make<TH1F>("geninfo", "geninfo", 2, 0, 2);
+  TH1F *info = fs->make<TH1F>("configinfo", "configinfo", 2, 0, 2);
 
   info->GetXaxis()->SetBinLabel(1, "control");
   info->GetXaxis()->SetBinLabel(2, "crossSection");
