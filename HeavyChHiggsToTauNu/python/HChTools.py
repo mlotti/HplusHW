@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
 # Add an object selector, count filter and event counter for one cut
 #
@@ -162,3 +163,123 @@ class Histo:
             p.cuttype = cms.untracked.string(self.cuttype)
         
         return p
+
+
+class Analysis:
+    def __init__(self, process, seqname, options, allCounterName="countAll"):
+        self.process = process
+
+        # Generator and configuration info analyzers
+        process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
+        process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer", crossSection = cms.untracked.double(options.crossSection))
+
+        print "Dataset cross section has been set to %g pb" % options.crossSection
+
+        # Event counter for all events
+        countAll = cms.EDProducer("EventCountProducer")
+        process.__setattr__(allCounterName, countAll)
+
+        # Create the analysis sequence
+        self.sequence = cms.Sequence(countAll*process.genRunInfo*process.configInfo)
+        self.process.__setattr__(seqname, self.sequence)
+
+        # Create the count analyzer
+        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag(cms.InputTag(allCounterName)))
+        self.process.countAnalyzerPath = cms.Path(self.process.countAnalyzer)
+
+        self.histoIndex = 0
+
+        self.triggerProcessMap = {"35X": "HLT",
+                                  "35Xredigi": "REDIGI",
+                                  "36X": "REDIGI36X",
+                                  "37X": "REDIGI37X"}
+
+    def getSequence(self):
+        return self.sequence
+
+    def addToSequence(self, module):
+        self.sequence *= module
+
+    def getCountPath(self):
+        return self.process.countAnalyzerPath
+
+    def getTriggerName(self, dataVersion):
+        if dataVersion in self.triggerProcessMap:
+            return self.triggerProcessMap[dataVersion]
+        else:
+            return "HLT"
+
+    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=False):
+        filtername = name+"Trigger"
+        countname = "count"+name
+
+        m1 = triggerResultsFilter.clone()
+        m1.hltResults = cms.InputTag("TriggerResults", "", self.getTriggerName(dataVersion))
+        m1.l1tResults = cms.InputTag("")
+        m1.throw = cms.bool(throw) # Should it throw an exception if the trigger product is not found
+        m1.triggerConditions = cms.vstring(triggerConditions)
+
+        m2 = cms.EDProducer("EventCountProducer")
+
+        self.process.__setattr__(filtername, m1)
+        self.process.__setattr__(countname, m2)
+
+        self.sequence *= m1
+        self.sequence *= m2
+
+        self.process.countAnalyzer.counters.append(cms.InputTag(countname))
+
+    def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
+        # Create the EDModule objects
+        m1 = cms.EDFilter(selector,
+                          src = src,
+                          cut = cms.string(expression))
+        self.process.__setattr__(name, m1)
+        self.sequence *= m1
+
+        self.addNumberCut(name, cms.InputTag(name), minNumber, maxNumber)
+
+        # Return the InputTag of the selected collection
+        return cms.InputTag(name)
+
+    def addNumberCut(self, name, src, minNumber=1, maxNumber=None):
+        filtername = name+"Filter"
+        countname = "count"+name
+        
+        m2 = None
+        if maxNumber == None:
+            m2 = cms.EDFilter("CandViewCountFilter",
+                              src = src,
+                              minNumber = cms.uint32(minNumber))
+        else:
+            m2 = cms.EDFilter("PATCandViewCountFilter",
+                              src = src,
+                              minNumber = cms.uint32(minNumber),
+                              maxNumber = cms.uint32(maxNumber))
+
+        m3 = cms.EDProducer("EventCountProducer")
+
+        # Add the modules to process and to the analysis sequence
+        self.process.__setattr__(filtername, m2)
+        self.process.__setattr__(countname, m3)
+
+        for m in [m2, m3]:
+            self.sequence *= m
+
+        # Add the counter product to the countAnalyzer
+        self.process.countAnalyzer.counters.append(cms.InputTag(countname))
+
+        # Increase the histogram index
+        self.histoIndex += 1
+
+    def addMultiHistoAnalyzer(self, postfix, histos):
+        return addMultiAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, histos, "HPlusCandViewMultiHistoAnalyzer")
+
+    def addCloneMultiHistoAnalyzer(self, postfix, module):
+        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
+
+    def addCloneModule(self, name, module):
+        m = module.clone()
+        self.process.__setattr__(name, m)
+        self.sequence *= m
+        return m
