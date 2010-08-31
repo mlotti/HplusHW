@@ -53,19 +53,22 @@ void HPlusTransverseMassProducer::produce(edm::Event& iEvent, const edm::EventSe
   edm::Handle<edm::View<reco::Candidate> > taus;
   iEvent.getByLabel(taus_, taus);
 
-  edm::Handle<edm::View<reco::MET> > met;
+  edm::Handle<edm::View<reco::Candidate> > met;
   iEvent.getByLabel(met_, met);
 
   if(met->size() != 1)
-    throw cms::Exception("LogicError") << "MET collection " << met_.encode() << " has " << met->size() << " != 1 elements!";
+    throw cms::Exception("LogicError") << "MET collection " << met_.encode() << " has " << met->size() << " != 1 elements!" << std::endl;
 
+  edm::Ptr<reco::MET> metPtr(met->ptrAt(0));
+  if(metPtr.get() == 0) // check that the implicit dynamic_cast to reco::MET succeeds
+    throw cms::Exception("ProductNotFound") << "\"MET\" object in collection " << met_.encode() << " is not derived from reco::MET" << std::endl;
 
   std::auto_ptr<Product> result(new Product());
   result->reserve(taus->size());
 
   for(edm::View<reco::Candidate>::const_iterator iTau = taus->begin(); iTau != taus->end(); ++iTau) {
     reco::LeafCandidate cand;
-    cand.setMass(recoalgo(*iTau, met->front()));
+    cand.setMass(recoalgo(*iTau, *metPtr));
     result->push_back(cand);
   }
 
