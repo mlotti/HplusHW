@@ -9,6 +9,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include<iostream>
 
@@ -30,15 +31,18 @@ class HPlusDebugAnalyzer: public edm::EDAnalyzer {
   virtual void endJob();
 
   void printJetDiscriminants(const edm::Event& iEvent) const;
+  void printTauDiscriminants(const edm::Event& iEvent) const;
   void printTriggerPaths(const edm::Event& iEvent) const;
 
   edm::InputTag jetSrc_;
+  edm::InputTag tauSrc_;
   edm::InputTag trigSrc_;
   edm::InputTag patTrigSrc_;
 };
 
 HPlusDebugAnalyzer::HPlusDebugAnalyzer(const edm::ParameterSet& pset):
   jetSrc_(pset.getUntrackedParameter<edm::InputTag>("jetSrc")),
+  tauSrc_(pset.getUntrackedParameter<edm::InputTag>("tauSrc")),
   trigSrc_(pset.getUntrackedParameter<edm::InputTag>("trigSrc"))
   //patTrigSrc_(pset.getUntrackedParameter<edm::InputTag>("patTrigSrc"))
 {}
@@ -50,7 +54,8 @@ void HPlusDebugAnalyzer::beginJob() {
 
 void HPlusDebugAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   //printJetDiscriminants(iEvent);
-  printTriggerPaths(iEvent);
+  printTauDiscriminants(iEvent);
+  //printTriggerPaths(iEvent);
 }
 
 void HPlusDebugAnalyzer::printJetDiscriminants(const edm::Event& iEvent) const {
@@ -64,6 +69,20 @@ void HPlusDebugAnalyzer::printJetDiscriminants(const edm::Event& iEvent) const {
   std::cout << "Number of discriminants " << bdiscrs.size() << std::endl;
   for(size_t i=0; i<bdiscrs.size(); ++i) {
     std::cout << "  " << bdiscrs[i].first << ": " << bdiscrs[i].second << std::endl;
+  }
+}
+
+void HPlusDebugAnalyzer::printTauDiscriminants(const edm::Event& iEvent) const {
+  edm::Handle<edm::View<pat::Tau> > taus;
+  iEvent.getByLabel(tauSrc_, taus);
+
+  if(taus->size() == 0)
+    return;
+
+  const std::vector<pat::Tau::IdPair>& ids = taus->front().tauIDs();
+  std::cout << "Number of discriminants " << ids.size() << std::endl;
+  for(size_t i=0; i<ids.size(); ++i) {
+    std::cout << "  " << ids[i].first << ": " << ids[i].second << std::endl;
   }
 }
 
