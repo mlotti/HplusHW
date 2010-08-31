@@ -163,8 +163,8 @@ if (dataVersion == "35X") | (dataVersion == "35Xredigi"):
         process.recoJPTJets *
         #
 	process.hplusTauDiscriminationSequence *
-        process.patDefaultSequence 
-#	process.patPFTauProducerFixedCone *
+        process.patDefaultSequence *
+	process.patPFTauProducerFixedCone 
 ##	process.patPFTauProducerShrinkingCone *
 #        process.HChTriggers *
 #        process.HChTaus *
@@ -184,17 +184,18 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
 #        "keep *"
 	"drop *",
-	"keep *_*_*_HChSignalAnalysis",
+	"keep pat*_*_*_*"
+#	"keep *_*_*_HChSignalAnalysis",
 #	"drop reco*_*_*_HChSignalAnalysis",
 #	"drop pat*_*_*_HChSignalAnalysis"
     )
 )
-HChTrigger.extendEventContent(process.out.outputCommands, process)
-HChTaus.extendEventContent(process.out.outputCommands, process)
-HChJets.extendEventContent(process.out.outputCommands, process)
-HChMETs.extendEventContent(process.out.outputCommands, process)
-HChMuons.extendEventContent(process.out.outputCommands, process)
-HChElectrons.extendEventContent(process.out.outputCommands, process)
+#HChTrigger.extendEventContent(process.out.outputCommands, process)
+#HChTaus.extendEventContent(process.out.outputCommands, process)
+#HChJets.extendEventContent(process.out.outputCommands, process)
+#HChMETs.extendEventContent(process.out.outputCommands, process)
+#HChMuons.extendEventContent(process.out.outputCommands, process)
+#HChElectrons.extendEventContent(process.out.outputCommands, process)
 
 process.outpath = cms.EndPath(process.out)
 

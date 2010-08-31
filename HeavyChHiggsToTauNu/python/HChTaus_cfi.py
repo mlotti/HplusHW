@@ -25,7 +25,14 @@ def tauIDSources(tau):
         HChTauIDcharge                 = cms.InputTag(tau+"HplusTauDiscriminationByCharge"),
         HChTauIDtauPolarization        = cms.InputTag(tau+"HplusTauDiscriminationByTauPolarization"),
         HChTauIDnProngs                = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
-	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination")
+	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination"),
+	HChTauIDDeltaE		       = cms.InputTag(tau+"HplusTauDiscriminationByDeltaE"),
+	HChTauIDInvMass		       = cms.InputTag(tau+"HplusTauDiscriminationByInvMass"),
+	HChTauIDFlightPathSignif       = cms.InputTag(tau+"HplusTauDiscriminationByFlightPathSignif"),
+	HChTauID1Prong		       = cms.InputTag(tau+"HplusTauDiscriminationBy1Prong"),
+	HChTauID3Prongs		       = cms.InputTag(tau+"HplusTauDiscriminationBy3Prongs"),
+	HChTauIDnProngsNew	       = cms.InputTag(tau+"HplusTauDiscriminationByNProngsNew"),
+	HChTauIDNew		       = cms.InputTag(tau+"HplusTauDiscriminationNew")
     )
     if(tau=="shrinkingConePFTau"):
         pset = cms.PSet(
@@ -79,6 +86,13 @@ def patTaus(tau):
             cms.InputTag("HChTauIDcharge"),
             cms.InputTag("HChTauIDtauPolarization"),
             cms.InputTag("HChTauIDnProngs"),
+	    cms.InputTag("HChTauIDDeltaE"),
+            cms.InputTag("HChTauIDInvMass"),
+            cms.InputTag("HChTauIDFlightPathSignif"),
+            cms.InputTag("HChTauID1Prong"),
+            cms.InputTag("HChTauID3Prongs"),
+            cms.InputTag("HChTauIDnProngsNew"),
+            cms.InputTag("HChTauIDNew"),
 #           cms.InputTag("decayModeIndex"),
 #           cms.InputTag("taNC"),
 #            cms.InputTag("taNCfrHalfPercent"),
