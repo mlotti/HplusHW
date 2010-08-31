@@ -35,7 +35,7 @@ class PFRecoTauDiscriminationByDeltaE : public PFTauDiscriminationProducerBase  
 	double discriminate(const reco::PFTauRef&);
 
     private:
-	double threeProngDeltaE(const PFTauRef&);
+	double DeltaE(const PFTauRef&);
 
 	double chargedPionMass;
 
@@ -49,16 +49,11 @@ void PFRecoTauDiscriminationByDeltaE::beginEvent(const Event& iEvent, const Even
 
 double PFRecoTauDiscriminationByDeltaE::discriminate(const PFTauRef& tau){
 
-	bool accepted = false;
-
-	double dE = threeProngDeltaE(tau);
-	if(dE < deltaEmin || dE > deltaEmax) accepted = false;
-
-	if(!accepted) return 0;
-	return 1;
+	double dE = DeltaE(tau);
+	return ( dE > deltaEmin && dE < deltaEmax ? 1. : 0. );	
 }
 
-double PFRecoTauDiscriminationByDeltaE::threeProngDeltaE(const PFTauRef& tau){
+double PFRecoTauDiscriminationByDeltaE::DeltaE(const PFTauRef& tau){
 	double tracksE = 0;
 	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
 	for(size_t i = 0; i < signalTracks.size(); ++i){

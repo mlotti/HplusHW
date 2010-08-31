@@ -49,13 +49,9 @@ void PFRecoTauDiscriminationByInvMass::beginEvent(const Event& iEvent, const Eve
 
 double PFRecoTauDiscriminationByInvMass::discriminate(const PFTauRef& tau){
 
-	bool accepted = false;
-
+//	return threeProngInvMass(tau);
 	double invMass = threeProngInvMass(tau);
-	if(invMass < invMassMin || invMass > invMassMax) accepted = false;
-
-	if(!accepted) return 0;
-	return 1;
+	return ( invMass > invMassMin && invMass < invMassMax ? 1. : 0. );
 }
 
 double PFRecoTauDiscriminationByInvMass::threeProngInvMass(const PFTauRef& tau){

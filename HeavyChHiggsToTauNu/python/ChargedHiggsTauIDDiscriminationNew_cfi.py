@@ -127,7 +127,7 @@ def hplusTau3ProngDiscrimination(tau):
 #from HiggsAnalysis.HeavyChHiggsToTauNu.EmptyTauDiscrimination_cfi import *
 def hplusTauNProngDiscriminationNew(tau):
     prediscriminants = cms.PSet(
-	BooleanOperator = cms.string("and"),
+	BooleanOperator = cms.string("or"),
         oneProng = cms.PSet(
             Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1Prong'),
             cut = cms.double(0.5)

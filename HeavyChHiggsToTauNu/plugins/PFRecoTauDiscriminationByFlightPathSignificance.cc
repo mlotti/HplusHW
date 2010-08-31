@@ -69,12 +69,7 @@ void PFRecoTauDiscriminationByFlightPathSignificance::beginEvent(const Event& iE
 double PFRecoTauDiscriminationByFlightPathSignificance::discriminate(const PFTauRef& tau){
 
 //	return threeProngFlightPathSig(tau);
-
-	bool accepted = false;
-	if(fSig < flightPathSig) accepted = false;  
-
-	if(!accepted) return 0;
-	return 1;
+	return ( threeProngFlightPathSig(tau) > flightPathSig ? 1. : 0. );
 }
 
 double PFRecoTauDiscriminationByFlightPathSignificance::threeProngFlightPathSig(const PFTauRef& tau){
