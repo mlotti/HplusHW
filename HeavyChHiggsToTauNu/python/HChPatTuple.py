@@ -22,6 +22,11 @@ def addPat(process, dataVersion):
     if outdict.has_key("out"):
         out = outdict["out"]
 
+    # Tau Discriminators
+    #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationNew_cfi")
+
+
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -89,10 +94,6 @@ def addPat(process, dataVersion):
     switchOnTrigger(process)
     HChTrigger.customise(process, dataVersion)
 
-    # Discriminators
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
-
-
     # Build sequence
     seq = cms.Sequence()
     if dataVersion in ["35X", "35Xredigi"]: 
@@ -102,6 +103,7 @@ def addPat(process, dataVersion):
             process.recoJPTJets
         )
         seq *= process.hplusJptSequence
+
     process.hplusPatSequence = cms.Sequence(
 	process.hplusTauDiscriminationSequence *
         process.patDefaultSequence
