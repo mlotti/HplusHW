@@ -1,13 +1,13 @@
 // -*- C++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ExpressionEfficiencyHisto_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_ExpressionEfficiencyHisto_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_HPlusExpressionEfficiencyHisto_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_HPlusExpressionEfficiencyHisto_h
 
 // Took ExpressionHisto as a basis
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionEfficiencyHistoComparison.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusExpressionEfficiencyHistoComparison.h"
 
 #include "TFile.h"
 #include "TH1F.h"
@@ -17,10 +17,10 @@
 #include<algorithm>
 
 template<typename T>
-class ExpressionEfficiencyHisto {
+class HPlusExpressionEfficiencyHisto {
  public:
-  ExpressionEfficiencyHisto(const edm::ParameterSet& iConfig);
-  ~ExpressionEfficiencyHisto();
+  HPlusExpressionEfficiencyHisto(const edm::ParameterSet& iConfig);
+  ~HPlusExpressionEfficiencyHisto();
   
   void initialize(TFileDirectory& fs);
   
@@ -38,11 +38,11 @@ protected:
   TH1 *passed;
   StringObjectFunction<T> function;
   //FillFunction fillFunction;
-  std::auto_ptr<ExpressionEfficiencyHistoComparison> cmp;
+  std::auto_ptr<HPlusExpressionEfficiencyHistoComparison> cmp;
 };
 
 template<typename T>
-ExpressionEfficiencyHisto<T>::ExpressionEfficiencyHisto(const edm::ParameterSet& iConfig):
+HPlusExpressionEfficiencyHisto<T>::HPlusExpressionEfficiencyHisto(const edm::ParameterSet& iConfig):
   min(iConfig.template getUntrackedParameter<double>("min")),
   max(iConfig.template getUntrackedParameter<double>("max")),
   nbins(iConfig.template getUntrackedParameter<int>("nbins")),
@@ -51,7 +51,7 @@ ExpressionEfficiencyHisto<T>::ExpressionEfficiencyHisto(const edm::ParameterSet&
   passed(0),
   function(iConfig.template getUntrackedParameter<std::string>("plotquantity"), 
            iConfig.template getUntrackedParameter<bool>("lazyParsing", false)),
-  cmp(ExpressionEfficiencyHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
+  cmp(HPlusExpressionEfficiencyHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
 
   if(cmp.get() == 0)
     throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
@@ -59,11 +59,11 @@ ExpressionEfficiencyHisto<T>::ExpressionEfficiencyHisto(const edm::ParameterSet&
 }
 
 template<typename T>
-ExpressionEfficiencyHisto<T>::~ExpressionEfficiencyHisto() {
+HPlusExpressionEfficiencyHisto<T>::~HPlusExpressionEfficiencyHisto() {
 }
 
 template<typename T>
-void ExpressionEfficiencyHisto<T>::initialize(TFileDirectory& fs) 
+void HPlusExpressionEfficiencyHisto<T>::initialize(TFileDirectory& fs) 
 {
   passed = fs.make<TH1F>((name+"_passed").c_str(),description.c_str(),nbins,min,max);
 }
@@ -71,11 +71,11 @@ void ExpressionEfficiencyHisto<T>::initialize(TFileDirectory& fs)
 
 
 template <typename T>
-class ExpressionEfficiencyHistoPerObject: public ExpressionEfficiencyHisto<T> {
-  typedef ExpressionEfficiencyHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerObject: public HPlusExpressionEfficiencyHisto<T> {
+  typedef HPlusExpressionEfficiencyHisto<T> Base;
 public:
-  ExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig);
-  ~ExpressionEfficiencyHistoPerObject();
+  HPlusExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig);
+  ~HPlusExpressionEfficiencyHistoPerObject();
 
   /** Plot the quantity for the specified element and index.
     Returns true if the quantity has been plotted, false otherwise.
@@ -85,11 +85,11 @@ public:
   bool fill(const T& element, double weight=1.0, uint32_t i=0);
 };
 template <typename T>
-ExpressionEfficiencyHistoPerObject<T>::ExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig): Base(iConfig) {}
+HPlusExpressionEfficiencyHistoPerObject<T>::HPlusExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig): Base(iConfig) {}
 template <typename T>
-ExpressionEfficiencyHistoPerObject<T>::~ExpressionEfficiencyHistoPerObject() {}
+HPlusExpressionEfficiencyHistoPerObject<T>::~HPlusExpressionEfficiencyHistoPerObject() {}
 template <typename T>
-bool ExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double weight, uint32_t i) {
+bool HPlusExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double weight, uint32_t i) {
   double entries = this->passed->GetEntries();
   this->cmp->fill(this->passed, this->function(element), weight);
   this->passed->SetEntries(entries+1);
@@ -99,11 +99,11 @@ bool ExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double weight
 
 
 template <typename T>
-class ExpressionEfficiencyHistoPerEvent: public ExpressionEfficiencyHisto<T> {
-  typedef ExpressionEfficiencyHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerEvent: public HPlusExpressionEfficiencyHisto<T> {
+  typedef HPlusExpressionEfficiencyHisto<T> Base;
 public:
-  ExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig);
-  ~ExpressionEfficiencyHistoPerEvent();
+  HPlusExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig);
+  ~HPlusExpressionEfficiencyHistoPerEvent();
 
   /** Plot the quantity for the specified element and index.
     Returns true if the quantity has been plotted, false otherwise.
@@ -121,7 +121,7 @@ private:
   double weight_;
 };
 template <typename T>
-ExpressionEfficiencyHistoPerEvent<T>::ExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig):
+HPlusExpressionEfficiencyHistoPerEvent<T>::HPlusExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig):
   Base(iConfig),
   minObjects_(iConfig.template getUntrackedParameter<uint32_t>("minObjects", 1)) {
   values_.reserve(minObjects_);
@@ -129,13 +129,13 @@ ExpressionEfficiencyHistoPerEvent<T>::ExpressionEfficiencyHistoPerEvent(const ed
     throw cms::Exception("Configuration") << "minObjects must be at least 1! (was " << minObjects_ << ")";
 }
 template <typename T>
-ExpressionEfficiencyHistoPerEvent<T>::~ExpressionEfficiencyHistoPerEvent() {}
+HPlusExpressionEfficiencyHistoPerEvent<T>::~HPlusExpressionEfficiencyHistoPerEvent() {}
 template <typename T>
-bool ExpressionEfficiencyHistoPerEvent<T>::fill(const T& element, double weight, uint32_t i) {
+bool HPlusExpressionEfficiencyHistoPerEvent<T>::fill(const T& element, double weight, uint32_t i) {
   weight_ = weight;
 
   double value = this->function(element);
-  std::vector<double>::iterator pos = std::lower_bound(values_.begin(), values_.end(), value, ExpressionEfficiencyHistoComparison::Wrapper(this->cmp.get()));
+  std::vector<double>::iterator pos = std::lower_bound(values_.begin(), values_.end(), value, HPlusExpressionEfficiencyHistoComparison::Wrapper(this->cmp.get()));
   if(values_.size() >= minObjects_) {
     if(pos != values_.begin()) {
       std::copy(values_.begin()+1, pos, values_.begin());
@@ -149,7 +149,7 @@ bool ExpressionEfficiencyHistoPerEvent<T>::fill(const T& element, double weight,
   return true;
 }
 template <typename T>
-void ExpressionEfficiencyHistoPerEvent<T>::endEvent() {
+void HPlusExpressionEfficiencyHistoPerEvent<T>::endEvent() {
   double entries = this->passed->GetEntries();
 
   if(values_.size() >= minObjects_) {
@@ -164,9 +164,9 @@ void ExpressionEfficiencyHistoPerEvent<T>::endEvent() {
 template <template <class> class H> struct MultiHistoAnalyzerTraits;
 
 template <>
-struct MultiHistoAnalyzerTraits<ExpressionEfficiencyHistoPerEvent> {
+struct MultiHistoAnalyzerTraits<HPlusExpressionEfficiencyHistoPerEvent> {
   template <typename T>
-  static void endEvent(ExpressionEfficiencyHistoPerEvent<T> *histo) {
+  static void endEvent(HPlusExpressionEfficiencyHistoPerEvent<T> *histo) {
     histo->endEvent();
   }
 };

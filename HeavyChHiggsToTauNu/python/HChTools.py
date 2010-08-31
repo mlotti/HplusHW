@@ -12,7 +12,7 @@ import FWCore.ParameterSet.Config as cms
 # counter     HPlusEventCountAnalyzer EDAnalyzer object, if the event count should be added to that (default: None)
 #
 # returns the name of the object selector module, so that it can be used in subsequent cuts
-def addCut(process, sequence, name, src, cut, min=1, selector="CandViewLazyPtrSelector", counter=None):
+def addCut(process, sequence, name, src, cut, min=1, selector="HPlusCandViewLazyPtrSelector", counter=None):
     cutname = name
     filtername = name+"Filter"
     countname = "count"+name
@@ -110,13 +110,13 @@ def addMultiAnalyzer(process, sequence, name, lst, analyzer):
 #           source   source collection InputTag
 #           histo    list of Histo objects
 def addMultiHistoAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiHistoAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiHistoAnalyzer")
 
 def addMultiEfficiencyPerObjectAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerObjectAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerObjectAnalyzer")
 
 def addMultiEfficiencyPerEventAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "CandViewMultiEfficiencyPerEventAnalyzer")
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerEventAnalyzer")
 
 
 # Helper class to decrease the required amount of typing when adding

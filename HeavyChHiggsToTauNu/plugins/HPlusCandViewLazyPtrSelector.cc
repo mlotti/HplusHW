@@ -7,6 +7,6 @@ typedef SingleObjectSelector<
   edm::View<reco::Candidate>,
   StringCutObjectSelector<reco::Candidate, true>,
   edm::PtrVector<reco::Candidate>
-> CandViewLazyPtrSelector;
+> HPlusCandViewLazyPtrSelector;
 
-DEFINE_FWK_MODULE(CandViewLazyPtrSelector);
+DEFINE_FWK_MODULE(HPlusCandViewLazyPtrSelector);

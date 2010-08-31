@@ -135,7 +135,7 @@ efficiencyPlots = [
 addMultiEfficiencyPerObjectAnalyzer(process, process.analysis, "h%02d_beginning_passes_object"%hi, efficiencyPlots)
 addMultiEfficiencyPerEventAnalyzer(process, process.analysis, "h%02d_beginning_passes_event"%hi, efficiencyPlots)
 
-# process.taupteff = cms.EDAnalyzer("CandViewMultiEfficiencyPerObjectAnalyzer",
+# process.taupteff = cms.EDAnalyzer("HPlusCandViewMultiEfficiencyPerObjectAnalyzer",
 #     tau_ = cms.untracked.PSet(
 #         src = cms.InputTag(selectedTaus),
 #         histograms = cms.VPSet(
@@ -152,7 +152,7 @@ addMultiEfficiencyPerEventAnalyzer(process, process.analysis, "h%02d_beginning_p
 #         )
 #     )
 # )
-# process.taupteffevent = cms.EDAnalyzer("CandViewMultiEfficiencyPerEventAnalyzer",
+# process.taupteffevent = cms.EDAnalyzer("HPlusCandViewMultiEfficiencyPerEventAnalyzer",
 #     tau_ = cms.untracked.PSet(
 #         src = cms.InputTag(selectedTaus),
 #         histograms = cms.VPSet(
@@ -287,7 +287,7 @@ process.path    = cms.Path(process.analysis)
 ################################################################################
 # Efficiency plots after full selection
 
-process.fullEfficiencyPerEvent = cms.EDAnalyzer("CandViewFullEfficiencyPerEventAnalyzer",
+process.fullEfficiencyPerEvent = cms.EDAnalyzer("HPlusCandViewFullEfficiencyPerEventAnalyzer",
     tau_ = cms.untracked.PSet(
         src = fixedConeTaus,
         histograms = cms.VPSet(cms.PSet(

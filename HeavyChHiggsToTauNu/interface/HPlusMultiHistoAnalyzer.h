@@ -1,7 +1,7 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_MultiHistoAnalyzer_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_MultiHistoAnalyzer_h
-/** \class MultiHistoAnalyzer
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_HPlusMultiHistoAnalyzer_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_HPlusMultiHistoAnalyzer_h
+/** \class HPlusMultiHistoAnalyzer
  *
  * HistoAnalyzer used as a template
  * 
@@ -18,19 +18,19 @@
 #include "FWCore/ParameterSet/interface/Entry.h"
 
 template <template <class> class H>
-struct MultiHistoAnalyzerTraits {
+struct HPlusMultiHistoAnalyzerTraits {
   template <typename T>
   static void endEvent(H<T> *histo) {
   }
 };
 
-template<typename C, template <class> class H, typename Traits = MultiHistoAnalyzerTraits<H> >
-class MultiHistoAnalyzer : public edm::EDAnalyzer {
+template<typename C, template <class> class H, typename Traits = HPlusMultiHistoAnalyzerTraits<H> >
+class HPlusMultiHistoAnalyzer : public edm::EDAnalyzer {
  public:
   /// constructor from parameter set
-  MultiHistoAnalyzer( const edm::ParameterSet& );
+  HPlusMultiHistoAnalyzer( const edm::ParameterSet& );
   /// destructor
-  ~MultiHistoAnalyzer();
+  ~HPlusMultiHistoAnalyzer();
   
  protected:
   /// process an event
@@ -55,7 +55,7 @@ class MultiHistoAnalyzer : public edm::EDAnalyzer {
 };
 
 template<typename C, template <class> class H, typename Traits>
-MultiHistoAnalyzer<C, H, Traits>::MultiHistoAnalyzer( const edm::ParameterSet& par ) : 
+HPlusMultiHistoAnalyzer<C, H, Traits>::HPlusMultiHistoAnalyzer( const edm::ParameterSet& par ) : 
   usingWeights_(par.exists("weights")),
   weights_(par.template getUntrackedParameter<edm::InputTag>("weights", edm::InputTag("fake")))
 {
@@ -94,7 +94,7 @@ MultiHistoAnalyzer<C, H, Traits>::MultiHistoAnalyzer( const edm::ParameterSet& p
 }
 
 template<typename C, template <class> class H, typename Traits>
-MultiHistoAnalyzer<C, H, Traits>::~MultiHistoAnalyzer() 
+HPlusMultiHistoAnalyzer<C, H, Traits>::~HPlusMultiHistoAnalyzer() 
 {
   for(size_t i=0; i<histograms_.size(); ++i) {
     // delete all histograms and clear the vector of pointers
@@ -108,7 +108,7 @@ MultiHistoAnalyzer<C, H, Traits>::~MultiHistoAnalyzer()
 }
 
 template<typename C, template <class> class H, typename Traits>
-void MultiHistoAnalyzer<C, H, Traits>::analyze( const edm::Event& iEvent, const edm::EventSetup& ) 
+void HPlusMultiHistoAnalyzer<C, H, Traits>::analyze( const edm::Event& iEvent, const edm::EventSetup& ) 
 {
   double weight = 1.0;
   if (usingWeights_) { 

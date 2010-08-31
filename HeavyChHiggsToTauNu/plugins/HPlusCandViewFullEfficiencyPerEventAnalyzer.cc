@@ -11,15 +11,15 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionEfficiencyHisto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusExpressionEfficiencyHisto.h"
 
 #include<iostream>
 #include<algorithm>
 
 namespace {
   template <typename T>
-  class ExpressionCutHisto: public ExpressionEfficiencyHistoPerEvent<T> {
-    typedef ExpressionEfficiencyHistoPerEvent<T> Base;
+  class ExpressionCutHisto: public HPlusExpressionEfficiencyHistoPerEvent<T> {
+    typedef HPlusExpressionEfficiencyHistoPerEvent<T> Base;
   public:
     ExpressionCutHisto(const edm::ParameterSet& iConfig);
     ~ExpressionCutHisto();
@@ -47,13 +47,13 @@ namespace {
 }
 
 
-class CandViewFullEfficiencyPerEventAnalyzer: public edm::EDAnalyzer {
+class HPlusCandViewFullEfficiencyPerEventAnalyzer: public edm::EDAnalyzer {
  public:
 
   /// Default EDAnalyzer constructor
-  explicit CandViewFullEfficiencyPerEventAnalyzer(const edm::ParameterSet&);
+  explicit HPlusCandViewFullEfficiencyPerEventAnalyzer(const edm::ParameterSet&);
   /// Default EDAnalyzer destructor
-  ~CandViewFullEfficiencyPerEventAnalyzer();
+  ~HPlusCandViewFullEfficiencyPerEventAnalyzer();
 
  private:
   /// Default EDAnalyzer method - called at the beginning of the job
@@ -138,7 +138,7 @@ class CandViewFullEfficiencyPerEventAnalyzer: public edm::EDAnalyzer {
   std::vector<Collection> colls_;
 };
 
-CandViewFullEfficiencyPerEventAnalyzer::CandViewFullEfficiencyPerEventAnalyzer(const edm::ParameterSet& par):
+HPlusCandViewFullEfficiencyPerEventAnalyzer::HPlusCandViewFullEfficiencyPerEventAnalyzer(const edm::ParameterSet& par):
   usingWeights_(par.exists("weights")),
   weights_(par.getUntrackedParameter<edm::InputTag>("weights", edm::InputTag("fake"))) {
   edm::Service<TFileService> fs;
@@ -175,7 +175,7 @@ CandViewFullEfficiencyPerEventAnalyzer::CandViewFullEfficiencyPerEventAnalyzer(c
   }
 }
 
-CandViewFullEfficiencyPerEventAnalyzer::~CandViewFullEfficiencyPerEventAnalyzer() {
+HPlusCandViewFullEfficiencyPerEventAnalyzer::~HPlusCandViewFullEfficiencyPerEventAnalyzer() {
   for(size_t i=0; i<colls_.size(); ++i) {
     // delete all histograms and clear the vector of pointers
     Histograms::iterator it = colls_[i].histograms.begin(); 
@@ -187,10 +187,10 @@ CandViewFullEfficiencyPerEventAnalyzer::~CandViewFullEfficiencyPerEventAnalyzer(
   }
 }
 
-void CandViewFullEfficiencyPerEventAnalyzer::beginJob() {
+void HPlusCandViewFullEfficiencyPerEventAnalyzer::beginJob() {
 }
 
-void CandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   double weight = 1.0;
   if (usingWeights_) { 
     edm::Handle<double> weightColl;
@@ -337,8 +337,8 @@ void CandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEvent, c
   // be at least two failed cuts, so nothing is filled
 }
 
-void CandViewFullEfficiencyPerEventAnalyzer::endJob() {
+void HPlusCandViewFullEfficiencyPerEventAnalyzer::endJob() {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(CandViewFullEfficiencyPerEventAnalyzer);
+DEFINE_FWK_MODULE(HPlusCandViewFullEfficiencyPerEventAnalyzer);
