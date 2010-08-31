@@ -11,3 +11,15 @@
     Tags needed:
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+
+
+
+
+Multicrab instructions
+https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMultiCrab
+
+# Multicrab doesn't seem to work well with multiple configuration files
+cp multicrab_(pat|analysis).cfg multicrab.cfg 
+  edit multicrab.cfg
+multicrab -create
+multicrab -submit
