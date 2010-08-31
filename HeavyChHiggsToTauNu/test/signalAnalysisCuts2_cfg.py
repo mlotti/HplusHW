@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-import copy
 
 dataVersion = "35X"
 #dataVersion = "36X"
@@ -12,20 +11,11 @@ if options.dataVersion != "":
 
 print "Assuming data is ", dataVersion
 
-triggerProcess = "HLT"
-triggerProcessMap = {"35X": "HLT",
-                     "35Xredigi": "REDIGI",
-                     "36X": "REDIGI36X",
-                     "37X": "REDIGI37X"}
-if dataVersion in triggerProcessMap:
-    triggerProcess = triggerProcessMap[dataVersion]
-
-
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
@@ -45,37 +35,12 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.TFileService.fileName = "histograms.root"
 
-# Set up event counter stuff and the analysis sequence
-process.countAll = cms.EDProducer("EventCountProducer")
-process.analysis = cms.Sequence(process.countAll)
-process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counters = cms.untracked.VInputTag(
-        cms.InputTag("countAll")
-    )
-)
-process.counterPath = cms.Path(process.counters)
-
-# Add generator infor to the TFileService file
-process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
-    src = cms.untracked.InputTag("generator")
-)
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
-    crossSection = cms.untracked.double(options.crossSection)
-)
-print "Dataset cross section has been set to %g pb" % options.crossSection
-process.analysis *= process.genRunInfo
-process.analysis *= process.configInfo
-
-# Module for miscellaneous debugging
-# process.debug = cms.EDAnalyzer("HPlusDebugAnalyzer",
-#     jetSrc = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
-#     tauSrc = cms.untracked.InputTag("selectedPatTaus"),
-#     trigSrc = cms.untracked.InputTag("TriggerResults", "", "REDIGI36X")
-# )
-# process.analysis *= process.debug
-
 # Import cut and histogrammint tools
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+
+# Create the Analysis object, which helps to build the proper
+# configuration
+analysis = Analysis(process, "analysis", options)
 
 # selected* will hold the name of the product of the selected objects
 # (i.e. which has passed the previous cut)
@@ -105,9 +70,8 @@ jetHistos = [
     ]
 metHistos = [Histo("et", "et()", min=0., max=100., nbins=100, description="met et (GeV/c)")]
 
-#### Beginning, book the first MultiHistoAnalyzer with all histograms
-hi = 0
-histoAnalyzer = addMultiHistoAnalyzer(process, process.analysis, "h%02d_beginning"%hi, [
+# keep the previous histogram analyzer in the histoAnalyzer variable
+histoAnalyzer = analysis.addMultiHistoAnalyzer("beginning", [
     ("tau_", selectedTaus, tauHistos),
     ("jet_", selectedJets, jetHistos),
     ("calojet_", calo_jets, jetHistos),
@@ -117,113 +81,36 @@ histoAnalyzer = addMultiHistoAnalyzer(process, process.analysis, "h%02d_beginnin
     ("pfmet_", pf_met, metHistos),
     ("tcmet_", tc_met, metHistos)])
 
-
-def cloneHisto(histo, cuttype, minObjects=None):
-    h = copy.deepcopy(histo)
-    h.setCuttype(cuttype)
-    if minObjects != None:
-        h.setMinObjects(minObjects)
-    return h
-
-efficiencyPlots = [
-    ("tau_", selectedTaus, [cloneHisto(tauHistos[0], ">"),
-                            Histo("eta", "abs(eta())", min=0, max=3, nbins=30, description="tau eta", cuttype="<"),
-                            cloneHisto(tauHistos[2], ">")]),
-    ("jet_", selectedJets, [cloneHisto(jetHistos[0], ">", minObjects=3)],
-     "met_", selectedMet, [cloneHisto(metHistos[0], ">")])]
-addMultiEfficiencyPerObjectAnalyzer(process, process.analysis, "h%02d_beginning_passes_object"%hi, efficiencyPlots)
-addMultiEfficiencyPerEventAnalyzer(process, process.analysis, "h%02d_beginning_passes_event"%hi, efficiencyPlots)
-
-# process.taupteff = cms.EDAnalyzer("HPlusCandViewMultiEfficiencyPerObjectAnalyzer",
-#     tau_ = cms.untracked.PSet(
-#         src = cms.InputTag(selectedTaus),
-#         histograms = cms.VPSet(
-#             cms.PSet(
-#                 nbins = cms.untracked.int32(100),
-#                 description = cms.untracked.string('tau pt (GeV/c)'),
-#                 plotquantity = cms.untracked.string('pt()'),
-#                 min = cms.untracked.double(0.0),
-#                 max = cms.untracked.double(100.0),
-#                 cuttype = cms.untracked.string(">"),
-#                 lazyParsing = cms.untracked.bool(True),
-#                 name = cms.untracked.string('pt')
-#             )
-#         )
-#     )
-# )
-# process.taupteffevent = cms.EDAnalyzer("HPlusCandViewMultiEfficiencyPerEventAnalyzer",
-#     tau_ = cms.untracked.PSet(
-#         src = cms.InputTag(selectedTaus),
-#         histograms = cms.VPSet(
-#             cms.PSet(
-#                 nbins = cms.untracked.int32(100),
-#                 description = cms.untracked.string('tau pt (GeV/c)'),
-#                 plotquantity = cms.untracked.string('pt()'),
-#                 min = cms.untracked.double(0.0),
-#                 max = cms.untracked.double(100.0),
-#                 cuttype = cms.untracked.string(">"),
-#                 lazyParsing = cms.untracked.bool(True),
-#                 name = cms.untracked.string('pt')
-#             )
-#         )
-#     )
-# )
-# process.analysis *= process.taupteff
-# process.analysis *= process.taupteffevent
-
 #### Trigger
-from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
-process.TriggerFilter = triggerResultsFilter.clone()
-process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", triggerProcess)
-process.TriggerFilter.l1tResults = cms.InputTag("")
-#process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
-process.countTrigger = cms.EDProducer("EventCountProducer")
-process.analysis *= process.TriggerFilter
-process.analysis *= process.countTrigger
-process.counters.counters.append(cms.InputTag("countTrigger"))
-
-hi+=1
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_trigger"%hi, histoAnalyzer)
-
+analysis.addTriggerCut(dataVersion, "HLT_SingleLooseIsoTau20")
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("trigger", histoAnalyzer)
 
 #### Tau Pt cut
-hi+=1
-selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 20.", counter=process.counters)
-# Clone the set of histograms to plot after the cut and update the collection of selected taus
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauptcut"%hi, histoAnalyzer)
+selectedTaus = analysis.addCut("TauPtCut", selectedTaus, "pt() > 20.")
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauptcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau Eta cut
-hi+=1 
-selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", counter=process.counters)
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauetacut"%hi, histoAnalyzer)
+selectedTaus = analysis.addCut("TauEtaCut", selectedTaus, "eta() > 20.")
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauetacut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
-#### Tau leading track pt cut
-hi+=1
-selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 10.", counter=process.counters)
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauldgtrkptcut"%hi, histoAnalyzer)
+#### Tau leading track Pt cut
+selectedTaus = analysis.addCut("TauLeadTrkPtPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 10.")
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauleadtrkptptcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau ID
-hi+=1
 tauIDs = ["againstElectron", "againstMuon", "byIsolation"] 
-selectedTaus = addCut(process, process.analysis, "TauIdCuts", selectedTaus, " && ".join(["tauID('%s')"%x for x in tauIDs]))
+selectedTaus = analysis.addCut("TauIdCuts", selectedTaus, " && ".join(["tauID('%s')"%x for x in tauIDs]))
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauidcut", histoAnalyzer)
+histoAnalyzer.tau_.src = selectedTaus
 
 #### Demand exactly one tau jet
-process.TauNumberFilter = cms.EDFilter("PATCandViewCountFilter",
-    src = selectedTaus,
-    minNumber = cms.uint32(1),
-    maxNumber = cms.uint32(1)
-)
-process.countTauNumber = cms.EDProducer("EventCountProducer")
-process.analysis *= process.TauNumberFilter
-process.analysis *= process.countTauNumber
-process.counters.counters.append(cms.InputTag("countTauNumber"))
+analysis.addNumberCut("TauNumber", selectedTaus, minNumber=1, maxNumber=1)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("taunumbercut", histoAnalyzer)
+histoAnalyzer.tau_.src = selectedTaus
 
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_taunumbercut"%hi, histoAnalyzer)
-hi+=1
 
 #### Clean jet collection from tau jet
 process.cleanedPatJets = cms.EDProducer("PATJetCleaner",
@@ -242,51 +129,46 @@ process.cleanedPatJets = cms.EDProducer("PATJetCleaner",
     ),
     finalCut = cms.string("")
 )
-process.analysis *= process.cleanedPatJets
+analysis.addToSequence(process.cleanedPatJets)
 selectedJets = cms.InputTag("cleanedPatJets")
 
-
-#### Jet pt cut
-hi+=1
-selectedJets = addCut(process, process.analysis, "JetPtCut", selectedJets, "pt() > 30.", min=3, counter=process.counters)
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_jetptcut"%hi, histoAnalyzer)
+#### Jet Pt cut
+selectedJets = analysis.addCut("JetPtCut", selectedJets, "pt() > 30.", minNumber=3)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("jetptcut", histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
-#### Jet eta cut
-hi+=1
-selectedJets = addCut(process, process.analysis, "JetEtaCut", selectedJets, "abs(eta()) < 2.4", min=3, counter=process.counters)
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_jetetacut"%hi, histoAnalyzer)
+#### Jet Eta cut
+selectedJets = analysis.addCut("JetEtaCut", selectedJets, "abs(eta()) < 2.4", minNumber=3)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("jetetacut", histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
 #### B-tagging
-hi+=1
-selectedBjets = addCut(process, process.analysis, "Btagging", selectedJets, "bDiscriminator('trackCountingHighEffBJetTags') > 1.5", min=1, counter=process.counters)
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_btagging"%hi, histoAnalyzer)
+selectedBjets = analysis.addCut("Btagging", selectedJets, "bDiscriminator('trackCountingHighEffBJetTags') > 1.5", minNumber=1)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("btagging", histoAnalyzer)
 histoAnalyzer.bjet_ = cms.untracked.PSet(
     src = selectedBjets,
     histograms = cms.VPSet([h.pset() for h in jetHistos])
 )
 
+
 #### MET cut
-hi+=1
-selectedMet = addCut(process, process.analysis, "METCut", selectedMet, "et() > 40.", counter=process.counters)
+selectedMet = analysis.addCut("METCut", selectedMet, "et() > 40.")
 
 # calculate transverse mass
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
 process.transverseMass.tauSrc = selectedTaus
 process.transverseMass.metSrc = selectedMet
-process.analysis *= process.transverseMass
+analysis.addToSequence(process.transverseMass)
 
 # add transverse mass plot to the MultiHistoAnalyzer which is run after the MET cut
-histoAnalyzer = cloneModule(process, process.analysis, "h%02d_metcut"%hi, histoAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("metcut", histoAnalyzer)
 histoAnalyzer.met_.src = selectedMet
 histoAnalyzer.transverseMass_ = cms.untracked.PSet(
     src = cms.InputTag("transverseMass"),
     histograms = cms.VPSet(Histo("mt", "mass()", min=0, max=200, nbins=100, description="m_T").pset())
 )
 
-
-process.path    = cms.Path(process.analysis)
+process.analysisPath = cms.Path(analysis.getSequence())
 
 ################################################################################
 # Efficiency plots after full selection
@@ -362,8 +244,10 @@ process.out = cms.OutputModule("PoolOutputModule",
 #process.outpath = cms.EndPath(process.out)
 
 process.schedule = cms.Schedule(
-    process.path,
+    process.analysisPath,
     process.fullEffPath,
-    process.counterPath
+    analysis.getCountPath()
 #    ,process.outpath
 )
+
+
