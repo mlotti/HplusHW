@@ -12,7 +12,7 @@ import FWCore.ParameterSet.Config as cms
 # counter     HPlusEventCountAnalyzer EDAnalyzer object, if the event count should be added to that (default: None)
 #
 # returns the name of the object selector module, so that it can be used in subsequent cuts
-def addCut(process, sequence, name, src, cut, min=1, selector="CandViewSelector", counter=None):
+def addCut(process, sequence, name, src, cut, min=1, selector="CandViewLazyPtrSelector", counter=None):
     cutname = name
     filtername = name+"Filter"
     countname = "count"+name

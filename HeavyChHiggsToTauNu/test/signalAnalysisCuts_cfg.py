@@ -189,23 +189,21 @@ addMultiEfficiencyPerEventAnalyzer(process, process.analysis, "h%02d_beginning_p
 
 
 #### Tau Pt cut
-# We need to use PATTauSelector for all tau cuts, as the
-# CandViewSelector does not implement the lazy expression parsing
 hi+=1
-selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 20.", selector="PATTauSelector", counter=process.counters)
+selectedTaus = addCut(process, process.analysis, "TauPtCut", selectedTaus, "pt() > 20.", counter=process.counters)
 # Clone the set of histograms to plot after the cut and update the collection of selected taus
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauptcut"%hi, histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau Eta cut
 hi+=1 
-selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", selector="PATTauSelector", counter=process.counters)
+selectedTaus = addCut(process, process.analysis, "TauEtaCut", selectedTaus, "abs(eta()) < 2.4", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauetacut"%hi, histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 # #### Tau leading track pt cut
 hi+=1
-selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 20.", selector="PATTauSelector", counter=process.counters)
+selectedTaus = addCut(process, process.analysis, "TauLeadTrkPtCut", selectedTaus, "leadTrack().isNonnull() && leadTrack().pt() > 20.", counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_tauldgtrkptcut"%hi, histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
@@ -224,7 +222,6 @@ histoAnalyzer = cloneModule(process, process.analysis, "h%02d_taunumbercut"%hi, 
 hi+=1
 
 #### Clean jet collection from tau jet
-# FIXME: add example
 process.cleanedPatJets = cms.EDProducer("PATJetCleaner",
     src = selectedJets,
     preselection = cms.string(""),
@@ -247,19 +244,19 @@ selectedJets = cms.InputTag("cleanedPatJets")
 
 #### Jet pt cut
 hi+=1
-selectedJets = addCut(process, process.analysis, "JetPtCut", selectedJets, "pt() > 20.", min=2, selector="PATJetSelector", counter=process.counters)
+selectedJets = addCut(process, process.analysis, "JetPtCut", selectedJets, "pt() > 20.", min=2, counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_jetptcut"%hi, histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
 #### Jet eta cut
 hi+=1
-selectedJets = addCut(process, process.analysis, "JetEtaCut", selectedJets, "abs(eta()) < 2.4", min=2, selector="PATJetSelector", counter=process.counters)
+selectedJets = addCut(process, process.analysis, "JetEtaCut", selectedJets, "abs(eta()) < 2.4", min=2, counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_jetetacut"%hi, histoAnalyzer)
 histoAnalyzer.jet_.src = selectedJets
 
 #### B-tagging
 hi+=1
-selectedBjets = addCut(process, process.analysis, "Btagging", selectedJets, "bDiscriminator('trackCountingHighEffBJetTags') > 1.5", min=1, selector="PATJetSelector", counter=process.counters)
+selectedBjets = addCut(process, process.analysis, "Btagging", selectedJets, "bDiscriminator('trackCountingHighEffBJetTags') > 1.5", min=1, counter=process.counters)
 histoAnalyzer = cloneModule(process, process.analysis, "h%02d_btagging"%hi, histoAnalyzer)
 histoAnalyzer.bjet_ = cms.untracked.PSet(
     src = selectedBjets,
@@ -353,9 +350,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 #    ),
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalAnalysis"
-#	"drop *",
-#        "keep edmMergeableCounter_*_*_*"
+#        "keep *_*_*_HChSignalAnalysis"
+	"drop *",
+        "keep edmMergeableCounter_*_*_*"
     )
 )
 
