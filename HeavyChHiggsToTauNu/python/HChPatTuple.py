@@ -7,6 +7,7 @@ from PhysicsTools.PatAlgos.tools.tauTools import switchToPFTauFixedCone
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 
 # Assumes that process.out is the output module
 #
@@ -55,13 +56,13 @@ def addPat(process, dataVersion):
 
 
     # Taus
-    #process.patTaus.tauSource = cms.InputTag("fixedConePFTauProducer")
     switchToPFTauFixedCone(process)
-    #process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
 
     process.patTaus.embedLeadTrack = True
     process.patTaus.embedSignalTracks = True
     process.patTaus.embedIsolationTracks = True
+
+    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
 
     # Preselections of objects
@@ -72,6 +73,8 @@ def addPat(process, dataVersion):
                                  '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
                                  '& tauID("byIsolationUsingLeadingPion") > 0.5'+
                                  '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
+
+    # Add PAT default event content
     if out != None:
         out.outputCommands.extend(patEventContentNoCleaning)
 
