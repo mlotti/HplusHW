@@ -197,7 +197,7 @@ class Analysis:
     def getSequence(self):
         return self.sequence
 
-    def addToSequence(self, module):
+    def appendToSequence(self, module):
         self.sequence *= module
 
     def getCountPath(self):

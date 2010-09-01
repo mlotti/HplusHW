@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 
-dataVersion = "35X"
+#dataVersion = "35X"
+dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "37X"
 
@@ -15,7 +16,7 @@ process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
@@ -24,7 +25,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_test4/aeb358267eaaf4a551b6d50f9189cf47/pattuple_6_1_I0i.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
+    "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
 #        "file:pattuple-1000.root"
   )
 )
@@ -41,6 +43,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 # Create the Analysis object, which helps to build the proper
 # configuration
 analysis = Analysis(process, "analysis", options)
+
+# Module for miscellaneous debugging
+process.debug = cms.EDAnalyzer("HPlusDebugAnalyzer",
+    jetSrc = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
+    tauSrc = cms.untracked.InputTag("selectedPatTaus"),
+    trigSrc = cms.untracked.InputTag("TriggerResults", "", "REDIGI36X")
+)
+#analysis.appendToSequence(process.debug)
 
 # selected* will hold the name of the product of the selected objects
 # (i.e. which has passed the previous cut)
@@ -91,7 +101,7 @@ histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauptcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau Eta cut
-selectedTaus = analysis.addCut("TauEtaCut", selectedTaus, "eta() > 20.")
+selectedTaus = analysis.addCut("TauEtaCut", selectedTaus, "abs(eta()) < 2.4")
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauetacut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
 
@@ -101,7 +111,12 @@ histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauleadtrkptptcut", histoAn
 histoAnalyzer.tau_.src = selectedTaus
 
 #### Tau ID
-tauIDs = ["againstElectron", "againstMuon", "byIsolation"] 
+tauIDs = [
+    "againstElectron",
+    "againstMuon",
+    "byIsolation",
+    "HChTauIDcharge"
+]
 selectedTaus = analysis.addCut("TauIdCuts", selectedTaus, " && ".join(["tauID('%s')"%x for x in tauIDs]))
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("tauidcut", histoAnalyzer)
 histoAnalyzer.tau_.src = selectedTaus
@@ -129,7 +144,7 @@ process.cleanedPatJets = cms.EDProducer("PATJetCleaner",
     ),
     finalCut = cms.string("")
 )
-analysis.addToSequence(process.cleanedPatJets)
+analysis.appendToSequence(process.cleanedPatJets)
 selectedJets = cms.InputTag("cleanedPatJets")
 
 #### Jet Pt cut
@@ -158,7 +173,7 @@ selectedMet = analysis.addCut("METCut", selectedMet, "et() > 40.")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusTransverseMassProducer_cfi")
 process.transverseMass.tauSrc = selectedTaus
 process.transverseMass.metSrc = selectedMet
-analysis.addToSequence(process.transverseMass)
+analysis.appendToSequence(process.transverseMass)
 
 # add transverse mass plot to the MultiHistoAnalyzer which is run after the MET cut
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("metcut", histoAnalyzer)
