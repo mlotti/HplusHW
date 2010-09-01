@@ -229,6 +229,8 @@ class Analysis:
 
         self.process.countAnalyzer.counters.append(cms.InputTag(countname))
 
+        self.histoIndex += 1
+
     def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
         # Create the EDModule objects
         m1 = cms.EDFilter(selector,
