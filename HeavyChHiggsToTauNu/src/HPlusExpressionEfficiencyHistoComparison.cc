@@ -3,6 +3,8 @@
 #include "TH1.h"
 #include "TAxis.h"
 
+#include<iostream>
+
 namespace {
   class Less: public HPlusExpressionEfficiencyHistoComparison {
   public:
@@ -39,6 +41,7 @@ namespace {
   Less::Less():HPlusExpressionEfficiencyHistoComparison() {}
   Less::~Less() {}
   void Less::fill(TH1 *passed, double value, double weight) {
+    //std::cout << "### Less::fill(), filling for value " << value << std::endl;
     for(int bin=passed->GetNbinsX(); bin >= 1; --bin) {
       if(value < passed->GetXaxis()->GetBinCenter(bin))
         passed->AddBinContent(bin, weight);
@@ -67,6 +70,7 @@ namespace {
   Greater::Greater():HPlusExpressionEfficiencyHistoComparison() {}
   Greater::~Greater() {}
   void Greater::fill(TH1 *passed, double value, double weight) {
+    //std::cout << "### Greater::fill(), filling for value " << value << std::endl;
     for(int bin=1; bin <= passed->GetNbinsX(); ++bin) {
       if(value > passed->GetXaxis()->GetBinCenter(bin))
         passed->AddBinContent(bin, weight);

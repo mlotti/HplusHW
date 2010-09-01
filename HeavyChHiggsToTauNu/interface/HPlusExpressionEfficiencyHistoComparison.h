@@ -21,7 +21,9 @@ public:
     Wrapper(const HPlusExpressionEfficiencyHistoComparison *cmp): ptr(cmp) {}
 
     bool operator()(double a, double b) const {
-      return ptr->compare(a, b);
+      // The comparison needs to be inverted in order to have the
+      // vector of values sorted in the corred direction
+      return !ptr->compare(a, b);
     }
 
   private:

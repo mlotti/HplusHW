@@ -16,6 +16,8 @@
 #include<iostream>
 #include<algorithm>
 
+//#define DEBUG
+
 namespace {
   template <typename T>
   class ExpressionCutHisto: public HPlusExpressionEfficiencyHistoPerEvent<T> {
@@ -25,7 +27,9 @@ namespace {
     ~ExpressionCutHisto();
 
     bool passesCut(const T& element) const {
-      //std::cout << "  value " << this->function(element) << " cutValue " << cutValue_ << std::endl;
+#ifdef DEBUG
+      std::cout << "  value " << this->function(element) << " cutValue " << cutValue_ << std::endl;
+#endif
       return this->cmp->compare(this->function(element), cutValue_);
     }
 
@@ -209,17 +213,23 @@ void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEve
     Histograms::iterator it = colls_[i].histograms.begin();
     Histograms::iterator end = colls_[i].histograms.end(); 
 
-    //std::cout << std::endl
-    //          << "Collection " << colls_[i].src.encode() << std::endl;
+#ifdef DEBUG
+    std::cout << std::endl
+              << "Collection " << colls_[i].src.encode() << std::endl;
+#endif
 
     // For each object, count the number of cuts the object fails a cut
     colls_[i].cutsFailed.setNobjects(coll->size());
     for(; it!= end; ++it, ++iHisto) {
       size_t iObj=0;
-      //std::cout << "Checking cut " << iHisto << std::endl;
+#ifdef DEBUG
+      std::cout << "Checking cut " << iHisto << std::endl;
+#endif
       for(CollectionType::const_iterator elem=coll->begin(); elem!=coll->end(); ++elem, ++iObj) {
         if(!(*it)->passesCut(*elem)) {
-          //std::cout << "  Failed, adding to cutFailedForObj" << std::endl;
+#ifdef DEBUG
+          std::cout << "  Failed, adding to cutFailedForObj" << std::endl;
+#endif
           colls_[i].cutsFailed.cutFailedForObj(iObj, iHisto);
         }
       }
@@ -235,9 +245,11 @@ void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEve
       else if(nFailed == 1)
         colls_[i].count1 += 1;
     }
-    //std::cout << "Count0 " << colls_[i].count0 << std::endl
-    //          << "Count1 " << colls_[i].count1 << std::endl
-    //          << "minObjects " << colls_[i].minObjects << std::endl;
+#ifdef DEBUG
+    std::cout << "Count0 " << colls_[i].count0 << std::endl
+              << "Count1 " << colls_[i].count1 << std::endl
+              << "minObjects " << colls_[i].minObjects << std::endl;
+#endif
     
 
     // Update the bookkeeping between collections
@@ -245,19 +257,25 @@ void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEve
       ++nCollsWithCount0;
     else
       lastFailedCollIndex = i;
-    //std::cout << "nCollsWithCount0 " << nCollsWithCount0 << std::endl
-    //          << "lastFailedCollIndex " << lastFailedCollIndex << std::endl;
+#ifdef DEBUG
+    std::cout << "nCollsWithCount0 " << nCollsWithCount0 << std::endl
+              << "lastFailedCollIndex " << lastFailedCollIndex << std::endl;
+#endif
   }
 
   if(nCollsWithCount0 == colls_.size()) {
     // The event passes all cuts, so we fill all cuts, but only for
     // those objects for which no other cut has failed.
-    //std::cout << "Filling for all cuts" << std::endl;
+#ifdef DEBUG
+    std::cout << "Filling for all cuts" << std::endl;
+#endif
 
     for(size_t i=0; i<colls_.size(); ++i) {
       edm::Handle<CollectionType> coll;
       iEvent.getByLabel( colls_[i].src, coll);
-      //std::cout << " coll " << colls_[i].src.encode() << std::endl;
+#ifdef DEBUG
+      std::cout << " coll " << colls_[i].src.encode() << std::endl;
+#endif
 
       size_t iHisto = 0;
       Histograms::iterator it = colls_[i].histograms.begin();
@@ -267,7 +285,9 @@ void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEve
         for(CollectionType::const_iterator elem=coll->begin(); elem!=coll->end(); ++elem, ++iObj) {
           if(!colls_[i].cutsFailed.hasOtherCutFailedForObj(iObj, iHisto)) {
             // Fill only if no other cut has failed for this object
-            //std::cout << "  filling for cut " << iHisto << " obj " << iObj << std::endl;
+#ifdef DEBUG
+            std::cout << "  filling for cut " << iHisto << " obj " << iObj << std::endl;
+#endif
             if (!(*it)->fill( *elem, weight, iObj )) {
               break;
             }
@@ -327,12 +347,11 @@ void HPlusCandViewFullEfficiencyPerEventAnalyzer::analyze(const edm::Event& iEve
         }
         (*it)->endEvent();
       }
-
-
     }
     // Otherwise, for some object in the collection, there are at
     // least 2 failed cuts and therefore nothing is filled
   }
+
   // Otherwise at least two collections had failed cuts, so there must
   // be at least two failed cuts, so nothing is filled
 }
