@@ -16,7 +16,7 @@ process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
@@ -25,8 +25,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
-    "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
+    #"dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
 #        "file:pattuple-1000.root"
   )
 )
@@ -222,7 +222,7 @@ process.fullEfficiencyPerEvent = cms.EDAnalyzer("HPlusCandViewFullEfficiencyPerE
             lazyParsing = cms.untracked.bool(True),
             name = cms.untracked.string('ldgtrkpt'),
             cuttype = cms.untracked.string('>'),
-            cutvalue = cms.untracked.double(20.)
+            cutvalue = cms.untracked.double(10.)
         ))
     ),
     jet_ = cms.untracked.PSet(
@@ -237,7 +237,7 @@ process.fullEfficiencyPerEvent = cms.EDAnalyzer("HPlusCandViewFullEfficiencyPerE
             name = cms.untracked.string('pt'),
             minObjects = cms.untracked.uint32(3),
             cuttype = cms.untracked.string('>'),
-            cutvalue = cms.untracked.double(20.)
+            cutvalue = cms.untracked.double(30.)
         ))
     )
 )
