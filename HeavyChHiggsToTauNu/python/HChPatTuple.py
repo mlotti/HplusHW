@@ -71,13 +71,13 @@ def addPat(process, dataVersion):
 
 
     # Preselections of objects
-    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
-    process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
-    process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
-    process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
-                                 '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
-                                 '& tauID("byIsolationUsingLeadingPion") > 0.5'+
-                                 '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
+#    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
+#    process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
+#    process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
+#    process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
+#                                 '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
+#                                 '& tauID("byIsolationUsingLeadingPion") > 0.5'+
+#                                 '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
 
     # Add PAT default event content
     if out != None:
