@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -22,8 +23,9 @@ namespace HPlus {
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    Count count1;
-    Count count2;
+    Count fAllCounter;
+
+    TauSelection fTauSelection;
   };
 }
 

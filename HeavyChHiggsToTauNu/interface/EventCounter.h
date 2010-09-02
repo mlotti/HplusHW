@@ -76,6 +76,11 @@ namespace HPlus {
     EventCounter *counter_;
     size_t index_;
   };
+
+  inline
+  void increment(Count& count, int value=1) {
+    count.increment(value);
+  }
 }
 
 #endif
