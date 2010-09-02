@@ -19,9 +19,19 @@ namespace HPlus {
 
   // Prevent copying
   class EventCounter: private boost::noncopyable {
-  public:
-    typedef std::pair<std::string, int> CountValue;
+    struct CountValue {
+      CountValue(const std::string& n, const std::string& i, int v);
+      bool equalName(std::string n) const;
+      void produces(edm::EDProducer *producer) const;
+      void produce(edm::LuminosityBlock *block) const;
+      void reset();
+
+      std::string name;
+      std::string instance;
+      int value;
+    };
     typedef std::vector<CountValue> CountVector;
+  public:
 
     EventCounter();
     ~EventCounter();
@@ -30,7 +40,7 @@ namespace HPlus {
     Count addSubCounter(const std::string& base, const std::string& name);
 
     void incrementCount(size_t index, int value) {
-      counter_[index].second += value;
+      counter_[index].value += value;
     }
 
     void produces(edm::EDProducer *producer) const;
@@ -39,6 +49,8 @@ namespace HPlus {
     void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) const;
 
   private:
+    Count insert(const std::string& name);
+
     CountVector counter_;
     mutable bool finalized;
   };

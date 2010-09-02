@@ -79,6 +79,7 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
   std::vector<Counter> counters;
   std::vector<edm::InputTag> available;
   edm::InputTag counterNames;
+  edm::InputTag counterInstances;
 
   bool countersGiven;
   bool counterNamesGiven;
@@ -96,6 +97,7 @@ HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
   counterNamesGiven = false;
   if(pset.exists("counterNames")) {
     counterNames = pset.getUntrackedParameter<edm::InputTag>("counterNames");
+    counterInstances = pset.getUntrackedParameter<edm::InputTag>("counterInstances");
     counterNamesGiven = true;
   }
 }
@@ -122,9 +124,16 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
       edm::Handle<std::vector<std::string> > names;
       lumi.getByLabel(counterNames, names);
 
+      edm::Handle<std::vector<std::string> > instances;
+      lumi.getByLabel(counterInstances, instances);
+
+      if(names->size() != instances->size())
+        throw cms::Exception("LogicError") << "Size of names is " << names->size() << ", size of instances is " << instances->size()
+                                           << "; names is from " << counterNames.encode() << " and instances from " << counterInstances.encode() << std::endl;
+
       edm::Handle<edm::MergeableCounter> count;
-      for(size_t i=0; i<names->size(); ++i) {
-        edm::InputTag tag(counterNames.label(), names->at(i), counterNames.process());
+      for(size_t i=0; i<instances->size(); ++i) {
+        edm::InputTag tag(counterInstances.label(), instances->at(i), counterNames.process());
         lumi.getByLabel(tag, count);
         std::vector<Counter>::iterator found = std::find_if(counters.begin(), counters.end(), std::bind2nd(CounterEq(), tag));
         if(found == counters.end())

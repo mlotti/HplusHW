@@ -7,8 +7,8 @@ namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter) {
     edm::Service<TFileService> fs;
 
-    count1 = eventCounter.addCounter("foo1");
-    count2 = eventCounter.addSubCounter("foo1", "foo2");
+    count1 = eventCounter.addCounter("foo 1");
+    count2 = eventCounter.addSubCounter("foo 1", "foo 2");
   }
   SignalAnalysis::~SignalAnalysis() {}
 
