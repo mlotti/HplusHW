@@ -15,6 +15,8 @@ namespace edm {
   class EventSetup;
 }
 
+class TH1;
+
 namespace HPlus {
   class SignalAnalysis {
   public:
@@ -34,6 +36,8 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     METSelection fMETSelection;
+
+    TH1 *hTransverseMass;
   };
 }
 

@@ -1,7 +1,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+
+#include "TH1F.h"
 
 namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
@@ -11,7 +14,11 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter)
-  {}
+  {
+    edm::Service<TFileService> fs;
+    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
+
+  }
 
   SignalAnalysis::~SignalAnalysis() {}
 
@@ -31,5 +38,8 @@ namespace HPlus {
     if(!fBTagging.analyze(fJetSelection)) return;
 
     if(!fMETSelection.analyze(iEvent, iSetup)) return;
+
+    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTau()), *(fMETSelection.getSelectedMET()));
+    hTransverseMass->Fill(transverseMass);
   }
 }
