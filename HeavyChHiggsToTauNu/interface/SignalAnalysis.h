@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 namespace edm {
@@ -25,6 +26,7 @@ namespace HPlus {
 
     Count fAllCounter;
 
+    TriggerSelection fTriggerSelection;
     TauSelection fTauSelection;
   };
 }
