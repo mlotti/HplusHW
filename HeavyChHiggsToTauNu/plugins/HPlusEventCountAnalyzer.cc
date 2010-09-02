@@ -19,6 +19,28 @@
 #include<algorithm>
 #include<functional>
 
+namespace {
+  struct MainCounter {
+    MainCounter(const std::string& name, long long count): name_(name), count_(count) {}
+
+    std::string name_;
+    long long count_;
+  };
+
+  struct SubCounters {
+    SubCounters(const std::string& name): name_(name) {}
+
+    std::string name_;
+    std::vector<MainCounter> counts_;
+  };
+
+  struct SubCounterEq: public std::binary_function<SubCounters, std::string, bool> {
+    bool operator()(const SubCounters& c, const std::string& name) const {
+      return c.name_ == name;
+    }
+  };
+}
+
 class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
  public:
 
@@ -40,9 +62,11 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
 
   class Counter {
   public:
-    Counter(const edm::InputTag& tag): tag_(tag), count_(0) {}
+    Counter(const edm::InputTag& tag): tag_(tag), name_(tag.encode()), count_(0) {}
+    Counter(const edm::InputTag& tag, const std::string& name): tag_(tag), name_(name), count_(0) {}
 
     edm::InputTag tag_;
+    std::string name_;
     long long count_;
   };
 
@@ -54,16 +78,28 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
 
   std::vector<Counter> counters;
   std::vector<edm::InputTag> available;
-  bool countersGiven;
+  edm::InputTag counterNames;
+  edm::InputTag counterInstances;
 
+  bool countersGiven;
+  bool counterNamesGiven;
 };
 
 HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset): countersGiven(false) {
-  const std::vector<edm::InputTag>& tags = pset.getUntrackedParameter<std::vector<edm::InputTag> >("counters");
-  for(size_t i=0; i<tags.size(); ++i) {
-    counters.push_back(tags[i]);
+  if(pset.exists("counters")) {
+    const std::vector<edm::InputTag>& tags = pset.getUntrackedParameter<std::vector<edm::InputTag> >("counters");
+    for(size_t i=0; i<tags.size(); ++i) {
+      counters.push_back(tags[i]);
+    }
   }
   countersGiven = !counters.empty();
+
+  counterNamesGiven = false;
+  if(pset.exists("counterNames")) {
+    counterNames = pset.getUntrackedParameter<edm::InputTag>("counterNames");
+    counterInstances = pset.getUntrackedParameter<edm::InputTag>("counterInstances");
+    counterNamesGiven = true;
+  }
 }
 
 HPlusEventCountAnalyzer::~HPlusEventCountAnalyzer() {}
@@ -75,11 +111,35 @@ void HPlusEventCountAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 }
 
 void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lumi, const edm::EventSetup & setup) {
-  if(countersGiven) {
-    edm::Handle<edm::MergeableCounter> count;
-    for(size_t i=0; i<counters.size(); ++i) {
-      lumi.getByLabel(counters[i].tag_, count);
-      counters[i].count_ += count->value;
+  if(counterNamesGiven || countersGiven) {
+    // Add the explicitly given counters before the ones read from a string vector
+    if(countersGiven) {
+      edm::Handle<edm::MergeableCounter> count;
+      for(size_t i=0; i<counters.size(); ++i) {
+        lumi.getByLabel(counters[i].tag_, count);
+        counters[i].count_ += count->value;
+      }
+    }
+    if(counterNamesGiven) {
+      edm::Handle<std::vector<std::string> > names;
+      lumi.getByLabel(counterNames, names);
+
+      edm::Handle<std::vector<std::string> > instances;
+      lumi.getByLabel(counterInstances, instances);
+
+      if(names->size() != instances->size())
+        throw cms::Exception("LogicError") << "Size of names is " << names->size() << ", size of instances is " << instances->size()
+                                           << "; names is from " << counterNames.encode() << " and instances from " << counterInstances.encode() << std::endl;
+
+      edm::Handle<edm::MergeableCounter> count;
+      for(size_t i=0; i<instances->size(); ++i) {
+        edm::InputTag tag(counterInstances.label(), instances->at(i), counterNames.process());
+        lumi.getByLabel(tag, count);
+        std::vector<Counter>::iterator found = std::find_if(counters.begin(), counters.end(), std::bind2nd(CounterEq(), tag));
+        if(found == counters.end())
+          found = counters.insert(counters.end(), Counter(tag, names->at(i)));
+        found->count_ += count->value;
+      }
     }
 
     std::vector<edm::Handle<edm::MergeableCounter> > counts;
@@ -108,27 +168,68 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
   }
 }
 
-void HPlusEventCountAnalyzer::endJob() {
-  std::string cat("EventCounts");
+
+void printCounter(const std::string& cat, bool order, const std::vector<MainCounter>& counter, const char *counterName) {
   const size_t name_w = 50;
   const size_t count_w = 20;
 
-  edm::Service<TFileService> fs;
-  TH1F *counts = 0;
-  if(fs.isAvailable()) {
-    counts = fs->make<TH1F>("counter", "counter", counters.size(), 0, counters.size());
-  }
-
   edm::LogVerbatim(cat) << "========================================" << std::endl;
-  edm::LogVerbatim(cat) << "Event counts " << (countersGiven ?  "(order given in python configuration)" : "(semi-alphabetical order, all counters in the file)") << std::endl;
+  edm::LogVerbatim(cat) << "Event counts in " << counterName << " " << (order ?  "(order given in python configuration)" : "(semi-alphabetical order, all counters in the file)") << std::endl;
   edm::LogVerbatim(cat) << std::endl << std::endl;
   edm::LogVerbatim(cat) << std::setw(name_w) << std::left << "Counter" << std::setw(count_w) << std::right << "Counts" << std::endl;
+  for(size_t i=0; i<counter.size(); ++i)
+    edm::LogVerbatim(cat) << std::setw(name_w) << std::left << counter[i].name_ << std::setw(count_w) << std::right << counter[i].count_ << std::endl;
+}
+
+void serializeCounter(TFileService& service, const std::vector<MainCounter>& counter, const char *name) {
+  TH1F * counts = service.make<TH1F>(name, name, counter.size(), 0, counter.size());
+  for(size_t i=0; i<counter.size(); ++i) {
+    size_t bin = i+1;
+    counts->SetBinContent(bin, counter[i].count_);
+    counts->GetXaxis()->SetBinLabel(bin, counter[i].name_.c_str());
+  }
+}
+
+void HPlusEventCountAnalyzer::endJob() {
+  std::string cat("EventCounts");
+
+  edm::Service<TFileService> fs;
+
+  std::vector<MainCounter> mainCounter;
+  std::vector<SubCounters> subCounters;
+
   for(size_t i=0; i<counters.size(); ++i) {
-    edm::LogVerbatim(cat) << std::setw(name_w) << std::left << counters[i].tag_.encode() << std::setw(count_w) << std::right << counters[i].count_ << std::endl;
-    if(counts) {
-      size_t bin = i+1;
-      counts->SetBinContent(bin, counters[i].count_);
-      counts->GetXaxis()->SetBinLabel(bin, counters[i].tag_.encode().c_str());
+    size_t subIndex = counters[i].name_.find("#");
+    if(subIndex != std::string::npos) {
+      std::string name = counters[i].name_.substr(0, subIndex);
+      std::string subname = counters[i].name_.substr(subIndex+1, std::string::npos);
+      std::vector<SubCounters>::iterator found = std::find_if(subCounters.begin(), subCounters.end(), std::bind2nd(SubCounterEq(), name));
+      if(found != subCounters.end()) {
+        found->counts_.push_back(MainCounter(subname, counters[i].count_));
+      }
+      else {
+        subCounters.push_back(SubCounters(name));
+        subCounters.back().counts_.push_back(MainCounter(subname, counters[i].count_));
+      }
+    }
+    else {
+      mainCounter.push_back(MainCounter(counters[i].name_, counters[i].count_));
+    }
+  }
+
+
+
+  bool order = counterNamesGiven || countersGiven;
+  printCounter(cat, order, mainCounter, "main counter");
+  for(size_t i=0; i<subCounters.size(); ++i) {
+    printCounter(cat, order, subCounters[i].counts_, subCounters[i].name_.c_str());
+  }
+
+
+  if(fs.isAvailable()) {
+    serializeCounter(*fs, mainCounter, "counter");
+    for(size_t i=0; i<subCounters.size(); ++i) {
+      serializeCounter(*fs, subCounters[i].counts_, subCounters[i].name_.c_str());
     }
   }
 
