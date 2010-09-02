@@ -5,6 +5,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -28,6 +31,9 @@ namespace HPlus {
 
     TriggerSelection fTriggerSelection;
     TauSelection fTauSelection;
+    JetSelection fJetSelection;
+    BTagging fBTagging;
+    METSelection fMETSelection;
   };
 }
 

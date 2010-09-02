@@ -19,15 +19,14 @@ namespace HPlus {
     fPtCutCount(eventCounter.addCounter("Tau pt cut")),
     fEtaCutCount(eventCounter.addCounter("Tau eta cut")),
     fLeadTrkPtCount(eventCounter.addCounter("Tau leading track pt cut")),
+    fAllSubCount(eventCounter.addSubCounter("Tau identification", "all tau candidates")),
     fPtCutSubCount(eventCounter.addSubCounter("Tau identification", "pt cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Tau identification", "eta cut")),
     fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut"))
   {
-
-
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
-    hEta = fs->make<TH1F>("tau_eta", "tau_pt", 60, -3., 3.);
+    hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
   }
 
@@ -50,6 +49,8 @@ namespace HPlus {
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       edm::Ptr<pat::Tau> iTau = *iter;
 
+      increment(fAllSubCount);
+
       hPt->Fill(iTau->pt());
       hEta->Fill(iTau->eta());
       reco::TrackRef leadTrk = iTau->leadTrack();
@@ -60,7 +61,7 @@ namespace HPlus {
       increment(fPtCutSubCount);
       ++ptCutPassed;
 
-      if(!(std::abs(iTau->eta() < fEtaCut))) continue;
+      if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
       increment(fEtaCutSubCount);
       ++etaCutPassed;
 

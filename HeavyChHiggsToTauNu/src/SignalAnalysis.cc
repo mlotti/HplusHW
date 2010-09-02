@@ -7,7 +7,10 @@ namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter)
+    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
+    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter)
   {}
 
   SignalAnalysis::~SignalAnalysis() {}
@@ -22,5 +25,11 @@ namespace HPlus {
     if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
+
+    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection)) return;
+
+    if(!fBTagging.analyze(fJetSelection)) return;
+
+    if(!fMETSelection.analyze(iEvent, iSetup)) return;
   }
 }

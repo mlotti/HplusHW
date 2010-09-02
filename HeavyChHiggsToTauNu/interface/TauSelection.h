@@ -40,6 +40,7 @@ namespace HPlus {
     Count fEtaCutCount;
     Count fLeadTrkPtCount;
 
+    Count fAllSubCount;
     Count fPtCutSubCount;
     Count fEtaCutSubCount;
     Count fLeadTrkPtSubCount;
