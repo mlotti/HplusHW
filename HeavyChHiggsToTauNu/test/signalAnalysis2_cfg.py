@@ -19,7 +19,8 @@ process.source = cms.Source('PoolSource',
 # For testing in lxplus
         "/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/pattuple_6_1_EG2.root"
 # For testing in jade
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/1a7f88596e815487086a354652dd6ad5/pattuple_6_1_EG2.root"
+        #"dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/1a7f88596e815487086a354652dd6ad5/pattuple_6_1_EG2.root"
   )
 )
 
@@ -83,13 +84,13 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
 )
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances")
 )
 process.signalAnalysisPath = cms.Path(
     process.signalAnalysis *
-    process.counters
+    process.signalAnalysisCounters
 )
 
 
@@ -108,5 +109,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 #        "keep edmMergeableCounter_*_*_*"
     )
 )
+
+# Uncomment the following line to get also the event output (can be
+# useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)
 
