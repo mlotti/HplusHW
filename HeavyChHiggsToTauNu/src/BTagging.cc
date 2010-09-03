@@ -1,5 +1,4 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -24,9 +23,7 @@ namespace HPlus {
 
   BTagging::~BTagging() {}
 
-  bool BTagging::analyze(const JetSelection& jetSelection) {
-    const edm::PtrVector<pat::Jet>& jets(jetSelection.getSelectedJets());
-
+  bool BTagging::analyze(const edm::PtrVector<pat::Jet>& jets) {
     fSelectedJets.clear();
     fSelectedJets.reserve(jets.size());
 

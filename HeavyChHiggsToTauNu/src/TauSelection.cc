@@ -38,8 +38,8 @@ namespace HPlus {
 
     const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
 
-    edm::PtrVector<pat::Tau> selectedTaus;
-    selectedTaus.reserve(taus.size());
+    fSelectedTaus.clear();
+    fSelectedTaus.reserve(taus.size());
 
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
@@ -69,7 +69,7 @@ namespace HPlus {
       increment(fLeadTrkPtSubCount);
       ++leadTrkPtCutPassed;
 
-      selectedTaus.push_back(iTau);
+      fSelectedTaus.push_back(iTau);
     }
 
     if(ptCutPassed == 0) return false;
@@ -81,11 +81,11 @@ namespace HPlus {
     if(leadTrkPtCutPassed == 0) return false;
     increment(fLeadTrkPtCount);      
 
-    if(selectedTaus.size() > 1)
-      // do something!
+    /*
+    if(fSelectedTaus.size() > 1)
       return false;
+    */
 
-    fSelectedTau = selectedTaus[0];
     return true;
   }
 }

@@ -24,8 +24,8 @@ namespace HPlus {
 
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    const edm::Ptr<pat::Tau> getSelectedTau() const {
-      return fSelectedTau;
+    const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
+      return fSelectedTaus;
     }
 
   private:
@@ -51,7 +51,7 @@ namespace HPlus {
     TH1 *hLeadTrkPt;
 
     // Selected tau
-    edm::Ptr<pat::Tau> fSelectedTau;
+    edm::PtrVector<pat::Tau> fSelectedTaus;
   };
 }
 

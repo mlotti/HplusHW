@@ -33,13 +33,13 @@ namespace HPlus {
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
 
-    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection)) return;
+    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return;
 
-    if(!fBTagging.analyze(fJetSelection)) return;
+    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
 
     if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
-    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTau()), *(fMETSelection.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
     hTransverseMass->Fill(transverseMass);
   }
 }

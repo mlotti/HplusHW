@@ -5,6 +5,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
@@ -17,14 +18,13 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
-  class TauSelection;
-
   class JetSelection {
   public:
     JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
     ~JetSelection();
 
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection& tauSelection);
+    // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
+    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
 
     const edm::PtrVector<pat::Jet>& getSelectedJets() const {
       return fSelectedJets;

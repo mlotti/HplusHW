@@ -1,5 +1,4 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -34,7 +33,7 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  bool JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const TauSelection& tauSelection) {
+  bool JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
@@ -47,15 +46,21 @@ namespace HPlus {
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
     
-    pat::Tau::LorentzVector tau = tauSelection.getSelectedTau()->p4();
-
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
 
       increment(fAllSubCount);
 
       // remove tau jet
-      if(!(ROOT::Math::VectorUtil::DeltaR(tau, iJet->p4()) > fMaxDR)) continue;
+      bool match = false;
+      for(edm::PtrVector<pat::Tau>::const_iterator itertau = taus.begin(); itertau != taus.end(); ++itertau) {
+        edm::Ptr<pat::Tau> iTau = *itertau;
+        if(!(ROOT::Math::VectorUtil::DeltaR(iTau->p4(), iJet->p4()) > fMaxDR)) {
+          match = true;
+          break;
+        }
+      }
+      if(match) continue;
       increment(fCleanCutSubCount);
       ++cleanPassed;
 

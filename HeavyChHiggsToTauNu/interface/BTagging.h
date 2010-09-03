@@ -23,7 +23,7 @@ namespace HPlus {
     BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
     ~BTagging();
 
-    bool analyze(const JetSelection& jetSelection);
+    bool analyze(const edm::PtrVector<pat::Jet>& jets);
 
     const edm::PtrVector<pat::Jet>& getSelectedJets() const {
       return fSelectedJets;
