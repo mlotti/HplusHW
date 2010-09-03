@@ -5,6 +5,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TH1F.h"
+#include "TNamed.h"
 
 namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
@@ -16,8 +17,11 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter)
   {
     edm::Service<TFileService> fs;
-    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
+    // Save the module configuration to the output ROOT file as a TNamed object
+    fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
+    // Book histograms filled in the analysis body
+    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
   }
 
   SignalAnalysis::~SignalAnalysis() {}
