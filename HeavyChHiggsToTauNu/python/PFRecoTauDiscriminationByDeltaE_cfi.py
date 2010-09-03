@@ -7,6 +7,7 @@ pfRecoTauDiscriminationByDeltaE = cms.EDProducer("PFRecoTauDiscriminationByDelta
     PFTauProducer       = cms.InputTag('pfRecoTauProducer'), #tau collection to discriminate
 
     Prediscriminants    = requireLeadTrack,
+    BooleanOutput	= cms.bool(True),
 
     deltaEmin		= cms.double(-0.15),
     deltaEmax           = cms.double(1.0),  

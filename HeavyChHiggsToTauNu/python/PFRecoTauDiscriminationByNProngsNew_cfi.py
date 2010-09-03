@@ -7,6 +7,7 @@ pfRecoTauDiscriminationByNProngsNew = cms.EDProducer("PFRecoTauDiscriminationByN
     PFTauProducer       = cms.InputTag('pfRecoTauProducer'), #tau collection to discriminate
 
     Prediscriminants    = requireLeadTrack,
+    BooleanOutput       = cms.bool(True),
 
     nProngs             = cms.uint32(0), # number of prongs required: 0=1||3, 1, 3
 )

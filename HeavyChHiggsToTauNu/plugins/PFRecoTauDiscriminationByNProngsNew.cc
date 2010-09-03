@@ -26,6 +26,7 @@ class PFRecoTauDiscriminationByNProngsNew : public PFTauDiscriminationProducerBa
 	explicit PFRecoTauDiscriminationByNProngsNew(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig){
 //                                                                               qualityCuts_(iConfig.getParameter<ParameterSet>("qualityCuts")){  // retrieve quality cuts    
 		nprongs			= iConfig.getParameter<uint32_t>("nProngs");
+		booleanOutput = iConfig.getParameter<bool>("BooleanOutput");
 	}
 
       	~PFRecoTauDiscriminationByNProngsNew(){}
@@ -38,6 +39,7 @@ class PFRecoTauDiscriminationByNProngsNew : public PFTauDiscriminationProducerBa
 //	PFTauQualityCutWrapper qualityCuts_;
 
 	uint32_t nprongs;
+	bool booleanOutput;
 };
 
 void PFRecoTauDiscriminationByNProngsNew::beginEvent(const Event& iEvent, const EventSetup& iSetup){}
@@ -51,6 +53,7 @@ double PFRecoTauDiscriminationByNProngsNew::discriminate(const PFTauRef& tau){
            (np == 3 && (nprongs == 3 || nprongs == 0)) ) accepted = true;
 
 	if(!accepted) np = 0;
+	if(booleanOutput) return accepted;
 	return np;
 }
 

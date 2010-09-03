@@ -7,6 +7,7 @@ pfRecoTauDiscriminationByFlightPathSignificance = cms.EDProducer("PFRecoTauDiscr
     PFTauProducer       = cms.InputTag('pfRecoTauProducer'), #tau collection to discriminate
 
     Prediscriminants    = requireLeadTrack,
+    BooleanOutput       = cms.bool(True),
 
     flightPathSig	= cms.double(1.5),   # used only if threeProngSelection == true
     UsePVerror		= cms.bool(True),
