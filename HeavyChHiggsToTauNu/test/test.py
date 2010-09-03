@@ -101,8 +101,8 @@ if (dataVersion == "35X") | (dataVersion == "35Xredigi"):
 ####from PhysicsTools.PatAlgos.tools.coreTools import *
 ####removeMCMatching(process)
 
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationNew_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerObjects_cfi")
 #process.patTriggerMatcher += process.tauTriggerMatchHLTSingleLooseIsoTau20
@@ -163,6 +163,7 @@ if (dataVersion == "35X") | (dataVersion == "35Xredigi"):
         process.recoJPTJets *
         #
 	process.hplusTauDiscriminationSequence *
+	process.hplusTauContinuousDiscriminationSequence *
         process.patDefaultSequence *
 	process.patPFTauProducerFixedCone 
 ##	process.patPFTauProducerShrinkingCone *
@@ -184,8 +185,8 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(
 #        "keep *"
 	"drop *",
-	"keep pat*_*_*_*"
-#	"keep *_*_*_HChSignalAnalysis",
+	"keep pat*_*_*_*",
+	"keep *_*_*_HChSignalAnalysis",
 #	"drop reco*_*_*_HChSignalAnalysis",
 #	"drop pat*_*_*_HChSignalAnalysis"
     )
