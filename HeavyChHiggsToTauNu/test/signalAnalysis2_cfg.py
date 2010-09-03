@@ -27,9 +27,14 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.categories.append("EventCounts")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+
+# Uncomment the following in order to print the counters at the end of
+# the job (note that if many other modules are being run in the same
+# job, their INFO messages are printed too)
+#process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 process.TFileService.fileName = "histograms.root"
+
 
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
     src = cms.untracked.InputTag("generator")
