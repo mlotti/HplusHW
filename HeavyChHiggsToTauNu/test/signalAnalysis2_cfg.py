@@ -1,25 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-import copy
-
-dataVersion = "35X"
-#dataVersion = "36X"
-#dataVersion = "37X"
 
 options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-
-triggerProcess = "HLT"
-triggerProcessMap = {"35X": "HLT",
-                     "35Xredigi": "REDIGI",
-                     "36X": "REDIGI36X",
-                     "37X": "REDIGI37X"}
-if dataVersion in triggerProcessMap:
-    triggerProcess = triggerProcessMap[dataVersion]
-
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -37,7 +19,7 @@ process.source = cms.Source('PoolSource',
 # For testing in lxplus
         "/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/pattuple_6_1_EG2.root"
 # For testing in jade
-#    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"
   )
 )
 
@@ -49,6 +31,20 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 process.TFileService.fileName = "histograms.root"
 
+process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
+    src = cms.untracked.InputTag("generator")
+)
+process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
+    crossSection = cms.untracked.double(options.crossSection)
+)
+process.infoPath = cms.Path(
+    process.genRunInfo +
+    process.configInfo
+)
+print "Dataset cross section has been set to %g pb" % options.crossSection
+
+
+# Signal analysis module
 process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     trigger = cms.untracked.PSet(
         src = cms.untracked.InputTag("patTriggerEvent"),
@@ -80,15 +76,16 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
         METCut = cms.untracked.double(40)
     )
 )
-process.path = cms.Path(process.signalAnalysis)
-
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances")
 )
-process.counterPath = cms.Path(process.counters)
+process.signalAnalysisPath = cms.Path(
+    process.signalAnalysis *
+    process.counters
+)
 
 
 ################################################################################
@@ -99,15 +96,12 @@ process.out = cms.OutputModule("PoolOutputModule",
 #    ),
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalAnalysis"
+        "keep *_*_*_HChSignalAnalysis",
+        "drop *_counterNames_*_*",
+        "drop *_counterInstances_*_*"
 #	"drop *",
 #        "keep edmMergeableCounter_*_*_*"
     )
 )
-process.outpath = cms.EndPath(process.out)
+#process.outpath = cms.EndPath(process.out)
 
-process.schedule = cms.Schedule(
-    process.path,
-    process.counterPath
-#    ,process.outpath
-)
