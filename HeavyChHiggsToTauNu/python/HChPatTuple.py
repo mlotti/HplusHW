@@ -67,6 +67,20 @@ def addPat(process, dataVersion):
     process.patTaus.embedSignalTracks = True
     process.patTaus.embedIsolationTracks = True
 
+    process.patTaus.embedLeadPFCand = True
+    process.patTaus.embedLeadPFChargedHadrCand = True
+    process.patTaus.embedLeadPFNeutralCand = True
+
+    process.patTaus.embedSignalPFCands = True
+    process.patTaus.embedSignalPFChargedHadrCands = True
+    process.patTaus.embedSignalPFNeutralHadrCands = True
+    process.patTaus.embedSignalPFGammaCands = True
+
+    process.patTaus.embedIsolationPFCands = True
+    process.patTaus.embedIsolationPFChargedHadrCands = True
+    process.patTaus.embedIsolationPFNeutralHadrCands = True
+    process.patTaus.embedIsolationPFGammaCands = True
+
     process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
 
