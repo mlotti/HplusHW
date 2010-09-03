@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.VarParsing as VarParsing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 
 # This configuration requires CMSSW.pycfg_params to be set!
 
@@ -7,14 +7,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "36X"
 #dataVersion = "37X"
 
-# https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
-options = VarParsing.VarParsing()
-options.register("dataVersion",
-                 "", # default value
-                 options.multiplicity.singleton, # singleton or list
-                 options.varType.string,          # string, int, or float
-                 "Data version")
-options.parseArguments()
+options = getOptions()
+if options.dataVersion != "":
+    dataVersion = options.dataVersion
 
 if options.dataVersion != "":
     dataVersion = options.dataVersion
@@ -39,6 +34,7 @@ process.source = cms.Source('PoolSource',
 
 # Load common stuff
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
 
 # Output module

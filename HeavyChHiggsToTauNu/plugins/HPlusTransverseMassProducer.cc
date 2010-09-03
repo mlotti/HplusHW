@@ -12,10 +12,7 @@
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/METReco/interface/MET.h"
 
-#include "TLorentzVector.h"
-
-namespace {
-}
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 
 class HPlusTransverseMassProducer: public edm::EDProducer {
 public:
@@ -27,19 +24,15 @@ public:
   virtual void endJob();
   
 private:
-  double recoalgo(const reco::Candidate& j1, const reco::MET& met) const;
-
   typedef std::vector<reco::LeafCandidate> Product;
 
   const edm::InputTag taus_;
   const edm::InputTag met_;
-  const double tauMass_;
 };
 
 HPlusTransverseMassProducer::HPlusTransverseMassProducer(const edm::ParameterSet& iConfig):
   taus_(iConfig.getParameter<edm::InputTag>("tauSrc")),
-  met_(iConfig.getParameter<edm::InputTag>("metSrc")),
-  tauMass_(iConfig.getParameter<double>("tauMass")) {
+  met_(iConfig.getParameter<edm::InputTag>("metSrc")) {
 
   produces<Product>();
 }
@@ -68,31 +61,13 @@ void HPlusTransverseMassProducer::produce(edm::Event& iEvent, const edm::EventSe
 
   for(edm::View<reco::Candidate>::const_iterator iTau = taus->begin(); iTau != taus->end(); ++iTau) {
     reco::LeafCandidate cand;
-    cand.setMass(recoalgo(*iTau, *metPtr));
+    cand.setMass(HPlus::TransverseMass::reconstruct(*iTau, *metPtr));
     result->push_back(cand);
   }
 
   iEvent.put(result);
 }
 
-double HPlusTransverseMassProducer::recoalgo(const reco::Candidate& j1, const reco::MET& met) const {
-  // Construct tau vector, mtau = 1.777 GeV/c2
-  TLorentzVector myTau;
-  myTau.SetXYZM(j1.px(), j1.py(), j1.pz(), tauMass_); 
-  // Calculate cosine of angle between jet and met direction
-  double myEtMiss = sqrt(met.px()*met.px() + met.py()+met.py());
-  double myCosPhi = 100;
-  if (myEtMiss > 0 && myTau.Pt() > 0)
-    myCosPhi = (myTau.X()*met.px() + myTau.Y()*met.py()) / (myTau.Pt()*myEtMiss);
-  // Calculate transverse mass
-  double myTransverseMass = -999;
-  double myTransverseMassSquared = 0;
-  if (myCosPhi < 10)
-    myTransverseMassSquared = 2 * myTau.Et() * myEtMiss * (1.0-myCosPhi);
-  if (myTransverseMassSquared >= 0)
-    myTransverseMass = TMath::Sqrt(myTransverseMassSquared);
-  return myTransverseMass;
-}
 
 void HPlusTransverseMassProducer::endJob() {}
 

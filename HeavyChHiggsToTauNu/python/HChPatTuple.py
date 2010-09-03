@@ -66,17 +66,31 @@ def addPat(process, dataVersion):
     process.patTaus.embedSignalTracks = True
     process.patTaus.embedIsolationTracks = True
 
+    process.patTaus.embedLeadPFCand = True
+    process.patTaus.embedLeadPFChargedHadrCand = True
+    process.patTaus.embedLeadPFNeutralCand = True
+
+    process.patTaus.embedSignalPFCands = True
+    process.patTaus.embedSignalPFChargedHadrCands = True
+    process.patTaus.embedSignalPFNeutralHadrCands = True
+    process.patTaus.embedSignalPFGammaCands = True
+
+    process.patTaus.embedIsolationPFCands = True
+    process.patTaus.embedIsolationPFChargedHadrCands = True
+    process.patTaus.embedIsolationPFNeutralHadrCands = True
+    process.patTaus.embedIsolationPFGammaCands = True
+
     process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
 
     # Preselections of objects
-    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
-    process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
-    process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
-    process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
-                                 '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
-                                 '& tauID("byIsolationUsingLeadingPion") > 0.5'+
-                                 '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
+#    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
+#    process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
+#    process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
+#    process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
+#                                 '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
+#                                 '& tauID("byIsolationUsingLeadingPion") > 0.5'+
+#                                 '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
 
     # Add PAT default event content
     if out != None:
