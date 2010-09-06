@@ -8,6 +8,7 @@ from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
 # Assumes that process.out is the output module
 #
@@ -80,6 +81,10 @@ def addPat(process, dataVersion):
 
     process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
+    # Continuous tau discriminators
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
+    process.hplusTauDiscriminationSequence *= process.hplusTauContinuousDiscriminationSequence
+    HChTausCont.tauIDSourcesCont(process.patTaus.tauIDSources,"fixedConePFTau")    
 
     # Preselections of objects
 #    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
