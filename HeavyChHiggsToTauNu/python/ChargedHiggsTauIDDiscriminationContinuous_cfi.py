@@ -1,11 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import copy
 
-#from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import *
-#hplusTrackQualityCuts = PFTauQualityCuts.clone()
-#hplusTrackQualityCuts.maxTrackChi2 = cms.double(10.)
-#hplusTrackQualityCuts.minTrackHits = cms.uint32(8)
-
 from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByTauPolarization_cfi import *
 def hplusTauDiscriminationByTauPolarizationCont(tau):
     DiscriminationByTauPolarization = pfRecoTauDiscriminationByTauPolarization.clone()
@@ -64,3 +59,4 @@ fixedConePFTauHplusTauDiscriminationSequenceCont = cms.Sequence(
 hplusTauContinuousDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationSequenceCont 
 )
+

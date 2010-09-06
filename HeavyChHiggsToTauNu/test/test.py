@@ -113,6 +113,7 @@ process.load("PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff")
 process.patDefaultSequence += process.patTriggerSequence
 #switchOnTrigger( process )
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMETs_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChJets_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChMuons_cfi")
@@ -200,3 +201,4 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 process.outpath = cms.EndPath(process.out)
 
+#print process.dumpPython()
