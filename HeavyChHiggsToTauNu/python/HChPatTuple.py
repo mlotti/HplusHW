@@ -15,8 +15,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion):
-    seq = cms.Sequence()
-
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):

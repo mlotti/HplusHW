@@ -18,6 +18,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.GlobalTag.globaltag = cms.string("START36_V10::All")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
 
 # Source
