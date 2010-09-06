@@ -1,16 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 
-# This configuration requires CMSSW.pycfg_params to be set!
-
 #dataVersion = "35X"
+#dataVersion = "35Xredigi"
 dataVersion = "36X"
 #dataVersion = "37X"
 
 options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
