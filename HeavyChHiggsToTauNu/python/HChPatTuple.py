@@ -85,7 +85,7 @@ def addPat(process, dataVersion):
     process.patTaus.embedIsolationPFNeutralHadrCands = True
     process.patTaus.embedIsolationPFGammaCands = True
 
-#    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
+    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
     # Continuous tau discriminators
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
@@ -93,7 +93,6 @@ def addPat(process, dataVersion):
     HChTausCont.tauIDSourcesCont(process.patTaus.tauIDSources,"fixedConePFTau")    
 
     process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
-    process.patPFTauProducerFixedCone.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
     process.hplusPatSequence *= process.patPFTauProducerFixedCone
 
     # Preselections of objects
@@ -108,6 +107,9 @@ def addPat(process, dataVersion):
     # Add PAT default event content
     if out != None:
         out.outputCommands.extend(patEventContentNoCleaning)
+	out.outputCommands.extend(["drop *_selectedPatTaus_*_*",
+                                   "drop *_cleanPatTaus_*_*",
+                                   "drop *_patTaus_*_*"])
 
     # MET
     addTcMET(process, 'TC')
