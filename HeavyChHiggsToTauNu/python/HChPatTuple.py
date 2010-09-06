@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import copy
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
@@ -8,6 +9,7 @@ from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
 # Assumes that process.out is the output module
 #
@@ -26,6 +28,11 @@ def addPat(process, dataVersion):
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+    process.hplusPatSequence = cms.Sequence(
+        process.hplusTauDiscriminationSequence *
+        process.patDefaultSequence
+    )
 
     # Jets
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
@@ -80,6 +87,13 @@ def addPat(process, dataVersion):
 
     process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
+    # Continuous tau discriminators
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
+    process.hplusTauDiscriminationSequence *= process.hplusTauContinuousDiscriminationSequence
+    HChTausCont.tauIDSourcesCont(process.patTaus.tauIDSources,"fixedConePFTau")    
+
+    process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
+    process.hplusPatSequence *= process.patPFTauProducerFixedCone
 
     # Preselections of objects
 #    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
@@ -93,6 +107,9 @@ def addPat(process, dataVersion):
     # Add PAT default event content
     if out != None:
         out.outputCommands.extend(patEventContentNoCleaning)
+	out.outputCommands.extend(["drop *_selectedPatTaus_*_*",
+                                   "drop *_cleanPatTaus_*_*",
+                                   "drop *_patTaus_*_*"])
 
     # MET
     addTcMET(process, 'TC')
@@ -115,10 +132,10 @@ def addPat(process, dataVersion):
         )
         seq *= process.hplusJptSequence
 
-    process.hplusPatSequence = cms.Sequence(
-	process.hplusTauDiscriminationSequence *
-        process.patDefaultSequence
-    )
+#    process.hplusPatSequence = cms.Sequence(
+#	process.hplusTauDiscriminationSequence *
+#        process.patDefaultSequence
+#    )
     seq *= process.hplusPatSequence
 
     return seq

@@ -118,11 +118,6 @@ fixedConePFTaus = patTaus("fixedConePFTau")
 shrinkingConeTauIDSources = tauIDSources("shrinkingConePFTau")
 shrinkingConePFTaus = patTaus("shrinkingConePFTau")
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi import *
-tauIDSourcesCont(fixedConeTauIDSources,"fixedConePFTau")
-#shrinkingConeTauIDSourcesCont = tauIDSourcesCont("shrinkingConePFTau")
-#shrinkingConeTauIDSources.insertInto(shrinkingConeTauIDSourcesCont,"cont")
-
 HChTaus = cms.Sequence( fixedConePFTaus )
 #HChTaus = cms.Sequence( shrinkingConePFTaus )
 #HChTaus = cms.Sequence( 
