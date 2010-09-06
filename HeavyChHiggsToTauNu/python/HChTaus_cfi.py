@@ -24,15 +24,15 @@ def tauIDSources(tau):
         HChTauIDleadingTrackPtCut      = cms.InputTag(tau+"HplusTauDiscriminationByLeadingTrackPtCut"),
         HChTauIDcharge                 = cms.InputTag(tau+"HplusTauDiscriminationByCharge"),
         HChTauIDtauPolarization        = cms.InputTag(tau+"HplusTauDiscriminationByTauPolarization"),
-        HChTauIDnProngs                = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
-	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination"),
+#        HChTauIDnProngs                = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
+#	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination"),
 	HChTauIDDeltaE		       = cms.InputTag(tau+"HplusTauDiscriminationByDeltaE"),
 	HChTauIDInvMass		       = cms.InputTag(tau+"HplusTauDiscriminationByInvMass"),
 	HChTauIDFlightPathSignif       = cms.InputTag(tau+"HplusTauDiscriminationByFlightPathSignif"),
 	HChTauID1Prong		       = cms.InputTag(tau+"HplusTauDiscriminationBy1Prong"),
 	HChTauID3Prongs		       = cms.InputTag(tau+"HplusTauDiscriminationBy3Prongs"),
-	HChTauIDnProngsNew	       = cms.InputTag(tau+"HplusTauDiscriminationByNProngsNew"),
-	HChTauIDNew		       = cms.InputTag(tau+"HplusTauDiscriminationNew")
+	HChTauIDnProngs	       	       = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
+	HChTauID		       = cms.InputTag(tau+"HplusTauDiscrimination")
     )
     if(tau=="shrinkingConePFTau"):
         pset = cms.PSet(
@@ -81,7 +81,7 @@ def patTaus(tau):
             cms.InputTag("leadingTrackPtCut"),
             cms.InputTag("trackIsolation"),
             cms.InputTag("trackIsolationUsingLeadingPion"),
-            cms.InputTag("HChTauID"),
+#            cms.InputTag("HChTauID"),
             cms.InputTag("HChTauIDleadingTrackPtCut"),
             cms.InputTag("HChTauIDcharge"),
             cms.InputTag("HChTauIDtauPolarization"),
@@ -91,8 +91,8 @@ def patTaus(tau):
             cms.InputTag("HChTauIDFlightPathSignif"),
             cms.InputTag("HChTauID1Prong"),
             cms.InputTag("HChTauID3Prongs"),
-            cms.InputTag("HChTauIDnProngsNew"),
-            cms.InputTag("HChTauIDNew"),
+            cms.InputTag("HChTauIDnProngs"),
+            cms.InputTag("HChTauID"),
 #           cms.InputTag("decayModeIndex"),
 #           cms.InputTag("taNC"),
 #            cms.InputTag("taNCfrHalfPercent"),
@@ -118,6 +118,10 @@ fixedConePFTaus = patTaus("fixedConePFTau")
 shrinkingConeTauIDSources = tauIDSources("shrinkingConePFTau")
 shrinkingConePFTaus = patTaus("shrinkingConePFTau")
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi import *
+tauIDSourcesCont(fixedConeTauIDSources,"fixedConePFTau")
+#shrinkingConeTauIDSourcesCont = tauIDSourcesCont("shrinkingConePFTau")
+#shrinkingConeTauIDSources.insertInto(shrinkingConeTauIDSourcesCont,"cont")
 
 HChTaus = cms.Sequence( fixedConePFTaus )
 #HChTaus = cms.Sequence( shrinkingConePFTaus )

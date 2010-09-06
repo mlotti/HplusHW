@@ -27,6 +27,7 @@ class PFRecoTauDiscriminationByDeltaE : public PFTauDiscriminationProducerBase  
 		deltaEmin		= iConfig.getParameter<double>("deltaEmin");
 		deltaEmax               = iConfig.getParameter<double>("deltaEmax");
 		chargedPionMass         = 0.139;
+		booleanOutput 		= iConfig.getParameter<bool>("BooleanOutput");
 	}
 
       	~PFRecoTauDiscriminationByDeltaE(){}
@@ -42,6 +43,7 @@ class PFRecoTauDiscriminationByDeltaE : public PFTauDiscriminationProducerBase  
 //	PFTauQualityCutWrapper qualityCuts_;
 
 	double deltaEmin,deltaEmax;
+	bool booleanOutput;
 };
 
 void PFRecoTauDiscriminationByDeltaE::beginEvent(const Event& iEvent, const EventSetup& iSetup){
@@ -50,7 +52,8 @@ void PFRecoTauDiscriminationByDeltaE::beginEvent(const Event& iEvent, const Even
 double PFRecoTauDiscriminationByDeltaE::discriminate(const PFTauRef& tau){
 
 	double dE = DeltaE(tau);
-	return ( dE > deltaEmin && dE < deltaEmax ? 1. : 0. );	
+	if(booleanOutput) return ( dE > deltaEmin && dE < deltaEmax ? 1. : 0. );
+	return dE;
 }
 
 double PFRecoTauDiscriminationByDeltaE::DeltaE(const PFTauRef& tau){

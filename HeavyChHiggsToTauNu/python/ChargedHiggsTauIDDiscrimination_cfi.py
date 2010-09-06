@@ -47,6 +47,102 @@ def hplusTauDiscriminationByTauPolarization(tau):
     DiscriminationByTauPolarization.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
     return DiscriminationByTauPolarization
 
+#from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
+#def hplusTauDiscriminationBy1Prong(tau):
+#    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+#    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+#    DiscriminationByNProngs.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+#    DiscriminationByNProngs.nProngs = cms.uint32(1)
+#    return DiscriminationByNProngs
+#
+#def hplusTauDiscriminationBy3Prongs(tau):
+#    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+#    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+#    DiscriminationByNProngs.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+#    DiscriminationByNProngs.nProngs = cms.uint32(3)
+#    return DiscriminationByNProngs
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByDeltaE_cfi import *
+def hplusTauDiscriminationByDeltaE(tau):
+    DiscriminationByDeltaE = pfRecoTauDiscriminationByDeltaE.clone()
+    DiscriminationByDeltaE.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByDeltaE.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByDeltaE
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByInvMass_cfi import *
+def hplusTauDiscriminationByInvMass(tau):
+    DiscriminationByInvMass = pfRecoTauDiscriminationByInvMass.clone()
+    DiscriminationByInvMass.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByInvMass.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByInvMass
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByFlightPathSignificance_cfi import *
+def hplusTauDiscriminationByFlightPathSignificance(tau):
+    DiscriminationByFlightPathSignificance = pfRecoTauDiscriminationByFlightPathSignificance.clone()
+    DiscriminationByFlightPathSignificance.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByFlightPathSignificance.Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    return DiscriminationByFlightPathSignificance
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
+def hplusTau1ProngDiscrimination(tau):
+    prediscriminants = cms.PSet(
+	BooleanOperator = cms.string("and"),
+	leadTrack = cms.PSet(
+            Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+            cut = cms.double(0.5)
+        )	
+    )
+    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByNProngs.Prediscriminants = prediscriminants
+    DiscriminationByNProngs.nProngs = cms.uint32(1)
+    return DiscriminationByNProngs
+
+def hplusTau3ProngDiscrimination(tau):
+    prediscriminants = cms.PSet(
+        BooleanOperator = cms.string("and"),
+        leadTrack = cms.PSet(
+            Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+            cut = cms.double(0.5)
+        ),
+	deltaD = cms.PSet(
+            Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+            cut = cms.double(0.5)
+        ),
+	invMass = cms.PSet(
+            Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+            cut = cms.double(0.5)
+        ),
+	flightPathSig = cms.PSet(
+            Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+            cut = cms.double(0.5)
+        )
+    )
+    DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
+    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByNProngs.Prediscriminants = prediscriminants
+    DiscriminationByNProngs.nProngs = cms.uint32(3)
+    return DiscriminationByNProngs
+
+#from HiggsAnalysis.HeavyChHiggsToTauNu.EmptyTauDiscrimination_cfi import *
+def hplusTauNProngDiscrimination(tau):
+    prediscriminants = cms.PSet(
+	BooleanOperator = cms.string("or"),
+        oneProng = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1Prong'),
+            cut = cms.double(0.5)
+        ),
+        threeProng = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy3Prongs'),
+            cut = cms.double(0.5)
+        )
+    )
+#    DiscriminationByNProngs = emptyTauDiscrimination.clone()
+    DiscriminationByNProngs = pfRecoTauDiscriminationByLeadingTrackFinding.clone()
+    DiscriminationByNProngs.PFTauProducer = cms.InputTag(tau+'Producer')
+    DiscriminationByNProngs.Prediscriminants = prediscriminants
+    return DiscriminationByNProngs
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
 def hplusTauDiscriminationByNProngs(tau):
     DiscriminationByNProngs = pfRecoTauDiscriminationByNProngs.clone()
@@ -90,12 +186,53 @@ def hplusTauDiscrimination(tau):
     return  HplusTauDiscrimination
 
 
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTrackIsolation_cfi import *
+def hplusTauDiscrimination(tau):
+    hplusTauPrediscriminants = cms.PSet(
+        BooleanOperator = cms.string("and"),
+        leadingTrack = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
+            cut = cms.double(0.5)
+        ),
+        charge = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
+            cut = cms.double(0.5)
+        ),
+        ecalIsolation = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
+            cut = cms.double(0.5)
+        ),
+        electronVeto = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
+            cut = cms.double(0.5)
+        ),
+        polarization = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByTauPolarization'),
+            cut = cms.double(0.5)
+        ),
+        prongs = cms.PSet(
+            Producer = cms.InputTag(tau+'HplusTauDiscriminationByNProngs'),
+            cut = cms.double(0.5)
+        )
+    )
+    HplusTauDiscrimination = pfRecoTauDiscriminationByTrackIsolation.clone()
+    HplusTauDiscrimination.PFTauProducer = cms.InputTag(tau+'Producer')
+    HplusTauDiscrimination.Prediscriminants = hplusTauPrediscriminants
+    HplusTauDiscrimination.qualityCuts = hplusTrackQualityCuts
+    return  HplusTauDiscrimination
+
+
 fixedConePFTauHplusTauDiscriminationByLeadingTrackFinding = hplusTauDiscriminationByLeadingTrackFinding("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationByLeadingTrackPtCut   = hplusTauDiscriminationByLeadingTrackPtCut("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationByCharge              = hplusTauDiscriminationByCharge("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationByECALIsolation       = hplusTauDiscriminationByECALIsolation("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationAgainstElectron       = hplusTauDiscriminationAgainstElectron("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationByTauPolarization     = hplusTauDiscriminationByTauPolarization("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByDeltaE		  = hplusTauDiscriminationByDeltaE("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByInvMass		  = hplusTauDiscriminationByInvMass("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationByFlightPathSignif    = hplusTauDiscriminationByFlightPathSignificance("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationBy1Prong              = hplusTau1ProngDiscrimination("fixedConePFTau")
+fixedConePFTauHplusTauDiscriminationBy3Prongs		  = hplusTau3ProngDiscrimination("fixedConePFTau")
 fixedConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("fixedConePFTau")
 fixedConePFTauHplusTauDiscrimination                      = hplusTauDiscrimination("fixedConePFTau")
 
@@ -106,6 +243,11 @@ fixedConePFTauHplusTauDiscriminationSequence = cms.Sequence(
     fixedConePFTauHplusTauDiscriminationByECALIsolation *
     fixedConePFTauHplusTauDiscriminationAgainstElectron *
     fixedConePFTauHplusTauDiscriminationByTauPolarization *
+    fixedConePFTauHplusTauDiscriminationByDeltaE *
+    fixedConePFTauHplusTauDiscriminationByInvMass *
+    fixedConePFTauHplusTauDiscriminationByFlightPathSignif *
+    fixedConePFTauHplusTauDiscriminationBy1Prong *
+    fixedConePFTauHplusTauDiscriminationBy3Prongs *
     fixedConePFTauHplusTauDiscriminationByNProngs *
     fixedConePFTauHplusTauDiscrimination
 )
@@ -116,7 +258,7 @@ shrinkingConePFTauHplusTauDiscriminationByCharge              = hplusTauDiscrimi
 shrinkingConePFTauHplusTauDiscriminationByECALIsolation       = hplusTauDiscriminationByECALIsolation("shrinkingConePFTau")
 shrinkingConePFTauHplusTauDiscriminationAgainstElectron       = hplusTauDiscriminationAgainstElectron("shrinkingConePFTau")
 shrinkingConePFTauHplusTauDiscriminationByTauPolarization     = hplusTauDiscriminationByTauPolarization("shrinkingConePFTau")
-shrinkingConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("shrinkingConePFTau")
+#shrinkingConePFTauHplusTauDiscriminationByNProngs             = hplusTauDiscriminationByNProngs("shrinkingConePFTau")
 shrinkingConePFTauHplusTauDiscrimination                      = hplusTauDiscrimination("shrinkingConePFTau")
 
 shrinkingConePFTauHplusTauDiscriminationSequence = cms.Sequence(
@@ -126,13 +268,13 @@ shrinkingConePFTauHplusTauDiscriminationSequence = cms.Sequence(
     shrinkingConePFTauHplusTauDiscriminationByECALIsolation *
     shrinkingConePFTauHplusTauDiscriminationAgainstElectron *
     shrinkingConePFTauHplusTauDiscriminationByTauPolarization *
-    shrinkingConePFTauHplusTauDiscriminationByNProngs *
+#    shrinkingConePFTauHplusTauDiscriminationByNProngs *
     shrinkingConePFTauHplusTauDiscrimination
 )
 
 hplusTauDiscriminationSequence = cms.Sequence(
-    fixedConePFTauHplusTauDiscriminationSequence *
-    shrinkingConePFTauHplusTauDiscriminationSequence
+    fixedConePFTauHplusTauDiscriminationSequence 
+#    shrinkingConePFTauHplusTauDiscriminationSequence
 )
 
 

@@ -7,6 +7,7 @@ pfRecoTauDiscriminationByTauPolarization = cms.EDProducer("PFRecoTauDiscriminati
     PFTauProducer       = cms.InputTag('pfRecoTauProducer'), #tau collection to discriminate
 
     Prediscriminants    = requireLeadTrack,
+    BooleanOutput       = cms.bool(True),
 
     rtau                = cms.double(0.8), # minimum value for the polarization variable
 

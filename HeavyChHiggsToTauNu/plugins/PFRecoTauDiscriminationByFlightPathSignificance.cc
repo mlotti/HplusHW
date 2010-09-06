@@ -29,6 +29,8 @@ class PFRecoTauDiscriminationByFlightPathSignificance : public PFTauDiscriminati
 		withPVError		= iConfig.getParameter<bool>("UsePVerror");
 
 		PVProducer		= iConfig.getParameter<edm::InputTag>("PVProducer");
+
+		booleanOutput 		= iConfig.getParameter<bool>("BooleanOutput");
 	}
 
       	~PFRecoTauDiscriminationByFlightPathSignificance(){}
@@ -48,6 +50,8 @@ class PFRecoTauDiscriminationByFlightPathSignificance : public PFTauDiscriminati
 	reco::Vertex primaryVertex;
 	const TransientTrackBuilder* transientTrackBuilder;
 	edm::InputTag PVProducer;
+
+	bool booleanOutput;
 };
 
 void PFRecoTauDiscriminationByFlightPathSignificance::beginEvent(const Event& iEvent, const EventSetup& iSetup){
@@ -68,8 +72,8 @@ void PFRecoTauDiscriminationByFlightPathSignificance::beginEvent(const Event& iE
 
 double PFRecoTauDiscriminationByFlightPathSignificance::discriminate(const PFTauRef& tau){
 
-//	return threeProngFlightPathSig(tau);
-	return ( threeProngFlightPathSig(tau) > flightPathSig ? 1. : 0. );
+	if(booleanOutput) return ( threeProngFlightPathSig(tau) > flightPathSig ? 1. : 0. );
+	return threeProngFlightPathSig(tau);
 }
 
 double PFRecoTauDiscriminationByFlightPathSignificance::threeProngFlightPathSig(const PFTauRef& tau){

@@ -23,8 +23,7 @@ def addPat(process, dataVersion):
         out = outdict["out"]
 
     # Tau Discriminators
-    #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationNew_cfi")
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
 
 
     # PAT Layer 0+1

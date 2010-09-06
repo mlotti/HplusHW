@@ -27,6 +27,7 @@ class PFRecoTauDiscriminationByInvMass : public PFTauDiscriminationProducerBase 
 		invMassMin		= iConfig.getParameter<double>("invMassMin");
 		invMassMax		= iConfig.getParameter<double>("invMassMax");
 		chargedPionMass 	= 0.139;
+		booleanOutput 		= iConfig.getParameter<bool>("BooleanOutput");
 	}
 
       	~PFRecoTauDiscriminationByInvMass(){}
@@ -42,6 +43,7 @@ class PFRecoTauDiscriminationByInvMass : public PFTauDiscriminationProducerBase 
 	double invMassMin,invMassMax;
 
 //	edm::InputTag PVProducer;
+	bool booleanOutput;
 };
 
 void PFRecoTauDiscriminationByInvMass::beginEvent(const Event& iEvent, const EventSetup& iSetup){
@@ -49,9 +51,9 @@ void PFRecoTauDiscriminationByInvMass::beginEvent(const Event& iEvent, const Eve
 
 double PFRecoTauDiscriminationByInvMass::discriminate(const PFTauRef& tau){
 
-//	return threeProngInvMass(tau);
 	double invMass = threeProngInvMass(tau);
-	return ( invMass > invMassMin && invMass < invMassMax ? 1. : 0. );
+	if(booleanOutput) return ( invMass > invMassMin && invMass < invMassMax ? 1. : 0. );
+	return invMass;
 }
 
 double PFRecoTauDiscriminationByInvMass::threeProngInvMass(const PFTauRef& tau){

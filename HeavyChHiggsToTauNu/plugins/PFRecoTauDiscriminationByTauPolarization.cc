@@ -15,6 +15,7 @@ class PFRecoTauDiscriminationByTauPolarization : public PFTauDiscriminationProdu
 	explicit PFRecoTauDiscriminationByTauPolarization(const ParameterSet& iConfig):PFTauDiscriminationProducerBase(iConfig), 
                                                                                qualityCuts_(iConfig.getParameter<ParameterSet>("qualityCuts")){  // retrieve quality cuts    
 		rTauMin = iConfig.getParameter<double>("rtau");
+		booleanOutput = iConfig.getParameter<bool>("BooleanOutput");
 	}
 
       	~PFRecoTauDiscriminationByTauPolarization(){}
@@ -25,6 +26,7 @@ class PFRecoTauDiscriminationByTauPolarization : public PFTauDiscriminationProdu
     private:
 	PFTauQualityCutWrapper qualityCuts_;
 
+	bool booleanOutput;
 	double rTauMin;
 };
 
@@ -36,7 +38,8 @@ double PFRecoTauDiscriminationByTauPolarization::discriminate(const PFTauRef& ta
 	//if(tau->p() > 0) rTau = tau->leadTrack()->p()/tau->p();
 	if(tau.isNonnull() && tau->p() > 0 && tau->leadTrack().isNonnull()) rTau = tau->leadTrack()->p()/tau->p();
 
-	return ( rTau > rTauMin ? 1. : 0. );
+	if(booleanOutput) return ( rTau > rTauMin ? 1. : 0. );
+	return rTau;
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByTauPolarization);
