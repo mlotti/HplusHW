@@ -57,3 +57,4 @@ process.s = addPat(process, dataVersion)
 process.path    = cms.Path(process.s)
 process.outpath = cms.EndPath(process.out)
 
+process.dumpPython()

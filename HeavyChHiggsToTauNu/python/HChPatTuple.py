@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import copy
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
@@ -27,6 +28,11 @@ def addPat(process, dataVersion):
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
+    process.hplusPatSequence = cms.Sequence(
+        process.hplusTauDiscriminationSequence *
+        process.patDefaultSequence
+    )
 
     # Jets
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
@@ -79,12 +85,16 @@ def addPat(process, dataVersion):
     process.patTaus.embedIsolationPFNeutralHadrCands = True
     process.patTaus.embedIsolationPFGammaCands = True
 
-    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
+#    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
 
     # Continuous tau discriminators
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
     process.hplusTauDiscriminationSequence *= process.hplusTauContinuousDiscriminationSequence
     HChTausCont.tauIDSourcesCont(process.patTaus.tauIDSources,"fixedConePFTau")    
+
+    process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
+    process.patPFTauProducerFixedCone.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
+    process.hplusPatSequence *= process.patPFTauProducerFixedCone
 
     # Preselections of objects
 #    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
@@ -120,10 +130,10 @@ def addPat(process, dataVersion):
         )
         seq *= process.hplusJptSequence
 
-    process.hplusPatSequence = cms.Sequence(
-	process.hplusTauDiscriminationSequence *
-        process.patDefaultSequence
-    )
+#    process.hplusPatSequence = cms.Sequence(
+#	process.hplusTauDiscriminationSequence *
+#        process.patDefaultSequence
+#    )
     seq *= process.hplusPatSequence
 
     return seq
