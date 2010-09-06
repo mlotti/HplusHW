@@ -108,20 +108,23 @@ def addPat(process, dataVersion):
     HChTrigger.customise(process, dataVersion)
 
     # Build sequence
-    seq = cms.Sequence()
+    seq = None
     if dataVersion in ["35X", "35Xredigi"]: 
         process.hplusJptSequence = cms.Sequence(
             process.genJetParticles *
             process.ak5GenJets *
             process.recoJPTJets
         )
-        seq *= process.hplusJptSequence
+        seq = cms.Sequence(process.hplusJptSequence)
 
     process.hplusPatSequence = cms.Sequence(
 	process.hplusTauDiscriminationSequence *
         process.patDefaultSequence
     )
-    seq *= process.hplusPatSequence
+    if seq == None:
+        seq = cms.Sequence(process.hplusPatSequence)
+    else:
+        seq *= process.hplusPatSequence
 
     return seq
     
