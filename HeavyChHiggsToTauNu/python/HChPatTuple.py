@@ -109,7 +109,8 @@ def addPat(process, dataVersion):
         out.outputCommands.extend(patEventContentNoCleaning)
 	out.outputCommands.extend(["drop *_selectedPatTaus_*_*",
                                    "drop *_cleanPatTaus_*_*",
-                                   "drop *_patTaus_*_*"])
+                                   "drop *_patTaus_*_*",
+                                   "keep *_patPFTauProducerFixedCone_*_*"])
 
     # MET
     addTcMET(process, 'TC')
