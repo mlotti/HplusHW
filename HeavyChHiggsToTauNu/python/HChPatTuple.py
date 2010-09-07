@@ -8,6 +8,7 @@ from PhysicsTools.PatAlgos.tools.tauTools import switchToPFTauFixedCone
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
+import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
@@ -23,8 +24,8 @@ def addPat(process, dataVersion):
         out = outdict["out"]
 
     # Tau Discriminators
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
-
+#    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
+    HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
