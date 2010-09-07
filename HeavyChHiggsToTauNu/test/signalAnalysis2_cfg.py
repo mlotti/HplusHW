@@ -17,10 +17,10 @@ process.source = cms.Source('PoolSource',
 #    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
 # For testing in lxplus
-        "/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/pattuple_6_1_EG2.root"
+        "/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/pattuple_6_1_MSU.root"
 # For testing in jade
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/1a7f88596e815487086a354652dd6ad5/pattuple_6_1_EG2.root"
-        #"dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v1/1a7f88596e815487086a354652dd6ad5/pattuple_6_1_EG2.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
+        #"dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
   )
 )
 
@@ -57,7 +57,8 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
         trigger = cms.untracked.string("HLT_SingleLooseIsoTau20")
     ),
     tauSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("selectedPatTaus"),
+        src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
+        #src = cms.untracked.InputTag("selectedPatTaus"),
         ptCut = cms.untracked.double(20),
         etaCut = cms.untracked.double(2.4),
         leadingTrackPtCut = cms.untracked.double(10)
