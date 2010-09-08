@@ -45,7 +45,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep GenRunInfoProduct_*_*_*",
         "keep edmTriggerResults_*_*_*",
         "keep triggerTriggerEvent_*_*_*",
-	"keep *_*_*_HChPatTuple"
+	"keep *_*_*_HChPatTuple",
+	"keep reco*_*_*_*"
     )
 )
 

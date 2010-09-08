@@ -24,14 +24,13 @@ def tauIDSources(tau):
         HChTauIDleadingTrackPtCut      = cms.InputTag(tau+"HplusTauDiscriminationByLeadingTrackPtCut"),
         HChTauIDcharge                 = cms.InputTag(tau+"HplusTauDiscriminationByCharge"),
         HChTauIDtauPolarization        = cms.InputTag(tau+"HplusTauDiscriminationByTauPolarization"),
-#        HChTauIDnProngs                = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
-#	HChTauID                       = cms.InputTag(tau+"HplusTauDiscrimination"),
 	HChTauIDDeltaE		       = cms.InputTag(tau+"HplusTauDiscriminationByDeltaE"),
 	HChTauIDInvMass		       = cms.InputTag(tau+"HplusTauDiscriminationByInvMass"),
 	HChTauIDFlightPathSignif       = cms.InputTag(tau+"HplusTauDiscriminationByFlightPathSignif"),
 	HChTauID1Prong		       = cms.InputTag(tau+"HplusTauDiscriminationBy1Prong"),
 	HChTauID3Prongs		       = cms.InputTag(tau+"HplusTauDiscriminationBy3Prongs"),
-	HChTauIDnProngs	       	       = cms.InputTag(tau+"HplusTauDiscriminationByNProngs"),
+	HChTauID3ProngCombined         = cms.InputTag(tau+"HplusTauDiscriminationBy3ProngCombined"),
+	HChTauID1or3Prongs     	       = cms.InputTag(tau+"HplusTauDiscriminationBy1or3Prongs"),
 	HChTauID		       = cms.InputTag(tau+"HplusTauDiscrimination")
     )
     if(tau=="shrinkingConePFTau"):
