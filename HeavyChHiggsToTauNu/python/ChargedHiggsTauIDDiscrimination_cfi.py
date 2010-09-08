@@ -88,16 +88,16 @@ def addDiscriminatorSequence(process, tau):
 	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
 	                                   cut = cms.double(0.5)
 	                               ),
-	                               deltaD = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                               deltaE = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByDeltaE'),
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               invMass = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByInvMass'),
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               flightPathSig = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByFlightPathSignificance'),
 	                                   cut = cms.double(0.5)
 	                               )
 	                          )
