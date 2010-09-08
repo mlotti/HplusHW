@@ -26,7 +26,7 @@ def tauIDSources(tau):
         HChTauIDtauPolarization        = cms.InputTag(tau+"HplusTauDiscriminationByTauPolarization"),
 	HChTauIDDeltaE		       = cms.InputTag(tau+"HplusTauDiscriminationByDeltaE"),
 	HChTauIDInvMass		       = cms.InputTag(tau+"HplusTauDiscriminationByInvMass"),
-	HChTauIDFlightPathSignif       = cms.InputTag(tau+"HplusTauDiscriminationByFlightPathSignif"),
+	HChTauIDFlightPathSignif       = cms.InputTag(tau+"HplusTauDiscriminationByFlightPathSignificance"),
 	HChTauID1Prong		       = cms.InputTag(tau+"HplusTauDiscriminationBy1Prong"),
 	HChTauID3Prongs		       = cms.InputTag(tau+"HplusTauDiscriminationBy3Prongs"),
 	HChTauID3ProngCombined         = cms.InputTag(tau+"HplusTauDiscriminationBy3ProngCombined"),

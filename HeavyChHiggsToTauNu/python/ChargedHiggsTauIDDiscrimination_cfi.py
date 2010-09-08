@@ -73,7 +73,7 @@ def addDiscriminatorSequence(process, tau):
                                   )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy3Prong",
+    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy3Prongs",
                                 pfRecoTauDiscriminationByNProngs.clone(
                                   nProngs = cms.uint32(3)
                                   )))
@@ -88,23 +88,23 @@ def addDiscriminatorSequence(process, tau):
 	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
 	                                   cut = cms.double(0.5)
 	                               ),
-	                               deltaD = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                               deltaE = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByDeltaE'),
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               invMass = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByInvMass'),
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               flightPathSig = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByFlightPathSignificance'),
 	                                   cut = cms.double(0.5)
 	                               )
 	                          )
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusDiscriminationBy1or3Prongs",
+    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy1or3Prongs",
                                 pfRecoTauDiscriminationByLeadingTrackFinding.clone(
 	 			    Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("or"),
@@ -143,7 +143,7 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        prongs = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusDiscriminationBy1or3Prongs'),
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1or3Prongs'),
 	 			            cut = cms.double(0.5)
 	 			        )
 	 			    )
