@@ -94,6 +94,11 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters
 )
 
+# Print tau discriminators from one tau from one event
+process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
+    src = process.signalAnalysis.tauSelection.src
+)
+#process.tauDiscriminatorPrintPath = cms.Path(process.tauDiscriminatorPrint)
 
 ################################################################################
 
