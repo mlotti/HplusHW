@@ -69,9 +69,20 @@ def printDatasetInfo(datasets):
     for dataset in datasets:
         print (c1fmt % dataset.getName()) + c2fmt%dataset.getCrossSection() + c3fmt%dataset.getNormFactor()
 
-def main(opts):
-    taskdirs = multicrab.getTaskDirectories(opts)
 
+def readCountersDirs(opts, counters):
+    taskdirs = multicrab.getTaskDirectories(opts)
+    for d in taskdirs:
+        files = glob.glob(os.path.join(d, "res", opts.input))
+        if len(files) > 1:
+            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
+            return 1
+        elif len(files) == 0:
+            raise Exception("No files matched to input for task %s" % d)
+
+        counters.addCounter(counter.readCountersFileDir(files[0], opts.counterdir, d, crossSections))
+
+def main(opts):
     crossSections = {}
     for o in opts.xsections:
         (name, value) = o.split(":")
@@ -79,17 +90,11 @@ def main(opts):
 
     counters = counter.Counters()
 
-    for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
-        if len(files) > 1:
-            print "Error: only one file should match the input (%d matched) for task %s" % (len(files), d)
-            return 1
-        elif len(files) == 0:
-            print "Error: no files matched to input for task %s" % d
-            return 1
-
-        counters.addCounter(counter.readCountersFileDir(files[0], opts.counterdir, d, crossSections))
-
+    if len(opts.files) > 0:
+        for f in opts.files:
+            counters.addCounter(counter.readCountersFileDir(f, opts.counterdir, f, crossSections))
+    else:
+        readCountersDirs(opts, counters)
 
     print "============================================================"
     print "Dataset info: "
@@ -110,11 +115,12 @@ def main(opts):
     printCounter(counters.getMainCounters(), printer)
     print 
 
-    for name in counters.getSubCounterNames():
-        print "============================================================"
-        print "Subcounter %s %s: " % (name, printer.name())
-        printCounter(counters.getSubCounters(name), printer)
-        print
+    if not opts.mainCounterOnly:
+        for name in counters.getSubCounterNames():
+            print "============================================================"
+            print "Subcounter %s %s: " % (name, printer.name())
+            printCounter(counters.getSubCounters(name), printer)
+            print
 
     print
 
@@ -125,6 +131,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
+    parser.add_option("-f", dest="files", type="string", action="append", default=[],
+                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect' (default: 'events')")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
@@ -133,6 +141,8 @@ if __name__ == "__main__":
                       help="Override the cross sections in the ROOT file. 'datasetname:xsect' where xsect is the cross section in pb, e.g. 'QCD_Pt170:154'")
     parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
                       help="TDirectory name containing the counters (default: signalAnalysisCounters")
+    parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
+                      help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
