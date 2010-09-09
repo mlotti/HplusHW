@@ -70,7 +70,7 @@ def printDatasetInfo(datasets):
         print (c1fmt % dataset.getName()) + c2fmt%dataset.getCrossSection() + c3fmt%dataset.getNormFactor()
 
 
-def readCountersDirs(opts, counters):
+def readCountersDirs(opts, crossSections, counters):
     taskdirs = multicrab.getTaskDirectories(opts)
     for d in taskdirs:
         files = glob.glob(os.path.join(d, "res", opts.input))
@@ -94,7 +94,7 @@ def main(opts):
         for f in opts.files:
             counters.addCounter(counter.readCountersFileDir(f, opts.counterdir, f, crossSections))
     else:
-        readCountersDirs(opts, counters)
+        readCountersDirs(opts, crossSections, counters)
 
     print "============================================================"
     print "Dataset info: "

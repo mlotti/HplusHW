@@ -30,6 +30,7 @@ class Dataset:
     def __init__(self, name, info):
         self.name = name
         self.info = info
+        self.nAllEvents = None
 
     def getName(self):
         return self.name
@@ -41,10 +42,10 @@ class Dataset:
         return self.info["crossSection"]
 
     def setAllEvents(self, allevTuple):
-        self.normFactor = self.getCrossSection() / allevTuple[1]
+        self.nAllEvents = allevTuple[1]
 
     def getNormFactor(self):
-        return self.normFactor
+        return self.getCrossSection() / self.nAllEvents
 
 class Counter:
     def __init__(self, counter):
@@ -124,8 +125,7 @@ class Counters:
     def getSubCounters(self, name):
         return [x.getSubCounter(name) for x in self.counters]
 
-
-def readCountersFileDir(fname, dirname, datasetname, crossSections):
+def readDataset(fname, counterDir, datasetname, crossSections):
     f = ROOT.TFile.Open(fname)
     info = rescaleInfo(histoToDict(f.Get("configInfo").Get("configinfo")))
 
@@ -133,9 +133,21 @@ def readCountersFileDir(fname, dirname, datasetname, crossSections):
     if datasetname in crossSections:
         dataset.setCrossSection(crossSections[datasetname])
 
+    ctr = histoToCounter(f.Get(counterDir).Get("counter"))
+    dataset.setAllEvents(ctr[0])
+
+    f.Close()
+
+    return dataset
+
+def readCountersFileDir(fname, counterDir, datasetname, crossSections):
+    f = ROOT.TFile.Open(fname)
+
+    dataset = readDataset(fname, counterDir, datasetname, crossSections)
+
     dctr = DatasetCounter(dataset)
 
-    directory = f.Get(dirname)
+    directory = f.Get(counterDir)
     dirlist = directory.GetListOfKeys()
     diriter = dirlist.MakeIterator()
     key = diriter.Next()
@@ -143,11 +155,11 @@ def readCountersFileDir(fname, dirname, datasetname, crossSections):
     while key:
         # main counter
         if key.GetName() == "counter":
-            ctr = histoToCounter(key.ReadObj())
-            dataset.setAllEvents(ctr[0])
-            dctr.setMainCounter(Counter(ctr))
+            dctr.setMainCounter(Counter(histoToCounter(key.ReadObj())))
         else:
             dctr.addSubCounter(key.GetName(), Counter(histoToCounter(key.ReadObj())))
         key = diriter.Next()
+
+    f.Close()
 
     return dctr
