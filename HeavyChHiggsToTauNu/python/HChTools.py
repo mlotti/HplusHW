@@ -1,6 +1,52 @@
 import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
+# Add an array of analysis+counter modules by varying one
+# configuration parameter of the analysis module. This is done by
+# cloning a given example module configuration and then calling a
+# user-supplied function with the module and the value to modify the
+# cloned configuration.
+#
+#
+# process   cms.Process object where to add the modules and cms.Path
+# prefix    Prefix string for the names of the modules and path
+# exemplar  Module object to clone
+# func      Function to be called for modifying one element of the job array
+# values    List of parameter values
+# names     If the str(x) for values produces an invalid python identifier
+#           (e.g. they are floating point numbers with a dot), the names for
+#           them must be given explicitly as a separate list. By default,
+#           str(value) is used. This name is appended to the prefix to obtain
+#           a name for the analysis module.
+
+def addAnalysisArray(process, prefix, exemplar, func, values, names=None):
+    if names == None:
+        names = [str(x) for x in values]
+    
+    for index, value in enumerate(values):
+        name = names[index]
+        
+        # Module and path names
+        analysisName = prefix+name
+        counterName = analysisName+"Counters"
+        pathName = analysisName+"Path"
+
+        # Clone the exemplar and call the modifier function
+        m = exemplar.clone()
+        func(m, value)
+
+        counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+            counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
+            counterInstances = cms.untracked.InputTag(analysisName, "counterInstances"),
+            verbose = cms.untracked.bool(False)
+        )
+
+        # Add modules and path to process
+        process.__setattr__(analysisName, m)
+        process.__setattr__(counterName, counter)
+        process.__setattr__(pathName, cms.Path(m*counter))
+
+
 # Add an object selector, count filter and event counter for one cut
 #
 # process     cms.Process object where the modules are added

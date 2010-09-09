@@ -87,12 +87,26 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
 # python approach)
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances")
+    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
+    verbose = cms.untracked.bool(True)
 )
 process.signalAnalysisPath = cms.Path(
     process.signalAnalysis *
     process.signalAnalysisCounters
 )
+
+# An example how to create an array of analyzers to do the same
+# analysis by varying a single parameter. It is significantly more
+# efficienct to run many analyzers in single crab job than to run many
+# crab jobs with a single analyzer.
+#
+#
+# def setTauPt(m, val):
+#     m.tauSelection.ptCut = val
+# from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
+# addAnalysisArray(process, "signalAnalysisTauPt", process.signalAnalysis, setTauPt,
+#                  [10, 20, 30, 40, 50])
+
 
 # Print tau discriminators from one tau from one event
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",

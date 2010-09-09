@@ -11,7 +11,7 @@ namespace HPlus {
     TLorentzVector myTau;
     myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
     // Calculate cosine of angle between jet and met direction
-    double myEtMiss = sqrt(met.px()*met.px() + met.py()+met.py());
+    double myEtMiss = met.et();
     double myCosPhi = 100;
     if (myEtMiss > 0 && myTau.Pt() > 0)
       myCosPhi = (myTau.X()*met.px() + myTau.Y()*met.py()) / (myTau.Pt()*myEtMiss);
