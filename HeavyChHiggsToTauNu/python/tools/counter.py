@@ -27,10 +27,11 @@ def rescaleInfo(d):
     return ret
 
 class Dataset:
-    def __init__(self, name, info):
+    def __init__(self, name, info, file):
         self.name = name
         self.info = info
         self.nAllEvents = None
+        self.file = file
 
     def getName(self):
         return self.name
@@ -46,6 +47,9 @@ class Dataset:
 
     def getNormFactor(self):
         return self.getCrossSection() / self.nAllEvents
+
+    def getTFile(self):
+        return self.file
 
 class Counter:
     def __init__(self, counter):
@@ -129,21 +133,18 @@ def readDataset(fname, counterDir, datasetname, crossSections):
     f = ROOT.TFile.Open(fname)
     info = rescaleInfo(histoToDict(f.Get("configInfo").Get("configinfo")))
 
-    dataset = Dataset(datasetname, info)
+    dataset = Dataset(datasetname, info, f)
     if datasetname in crossSections:
         dataset.setCrossSection(crossSections[datasetname])
 
     ctr = histoToCounter(f.Get(counterDir).Get("counter"))
     dataset.setAllEvents(ctr[0])
 
-    f.Close()
-
     return dataset
 
 def readCountersFileDir(fname, counterDir, datasetname, crossSections):
-    f = ROOT.TFile.Open(fname)
-
     dataset = readDataset(fname, counterDir, datasetname, crossSections)
+    f = dataset.getTFile()
 
     dctr = DatasetCounter(dataset)
 
@@ -159,7 +160,5 @@ def readCountersFileDir(fname, counterDir, datasetname, crossSections):
         else:
             dctr.addSubCounter(key.GetName(), Counter(histoToCounter(key.ReadObj())))
         key = diriter.Next()
-
-    f.Close()
 
     return dctr
