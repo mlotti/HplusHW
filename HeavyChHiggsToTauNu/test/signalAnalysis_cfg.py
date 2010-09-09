@@ -87,7 +87,8 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
 # python approach)
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances")
+    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
+    verbose = cms.untracked.bool(True)
 )
 process.signalAnalysisPath = cms.Path(
     process.signalAnalysis *

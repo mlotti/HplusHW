@@ -81,11 +81,16 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
   edm::InputTag counterNames;
   edm::InputTag counterInstances;
 
+  bool print;
   bool countersGiven;
   bool counterNamesGiven;
 };
 
-HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset): countersGiven(false) {
+HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
+  print(pset.getUntrackedParameter<bool>("verbose", false)), 
+  countersGiven(false), 
+  counterNamesGiven(false)
+{
   if(pset.exists("counters")) {
     const std::vector<edm::InputTag>& tags = pset.getUntrackedParameter<std::vector<edm::InputTag> >("counters");
     for(size_t i=0; i<tags.size(); ++i) {
@@ -94,7 +99,6 @@ HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
   }
   countersGiven = !counters.empty();
 
-  counterNamesGiven = false;
   if(pset.exists("counterNames")) {
     counterNames = pset.getUntrackedParameter<edm::InputTag>("counterNames");
     counterInstances = pset.getUntrackedParameter<edm::InputTag>("counterInstances");
@@ -217,20 +221,20 @@ void HPlusEventCountAnalyzer::endJob() {
     }
   }
 
-
-
-  bool order = counterNamesGiven || countersGiven;
-  printCounter(cat, order, mainCounter, "main counter");
-  for(size_t i=0; i<subCounters.size(); ++i) {
-    printCounter(cat, order, subCounters[i].counts_, subCounters[i].name_.c_str());
-  }
-
-
   if(fs.isAvailable()) {
     serializeCounter(*fs, mainCounter, "counter");
     for(size_t i=0; i<subCounters.size(); ++i) {
       serializeCounter(*fs, subCounters[i].counts_, subCounters[i].name_.c_str());
     }
+  }
+
+  if(!print)
+    return;
+
+  bool order = counterNamesGiven || countersGiven;
+  printCounter(cat, order, mainCounter, "main counter");
+  for(size_t i=0; i<subCounters.size(); ++i) {
+    printCounter(cat, order, subCounters[i].counts_, subCounters[i].name_.c_str());
   }
 
   if(countersGiven) {
