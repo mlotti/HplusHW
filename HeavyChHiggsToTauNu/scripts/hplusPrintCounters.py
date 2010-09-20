@@ -78,7 +78,8 @@ def readCountersDirs(opts, crossSections, counters):
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
             return 1
         elif len(files) == 0:
-            raise Exception("No files matched to input for task %s" % d)
+            print "Task %s didn't have histograms root file" % d
+            continue
 
         counters.addCounter(counter.readCountersFileDir(files[0], opts.counterdir, d, crossSections))
 
