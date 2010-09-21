@@ -10,6 +10,7 @@
 // Forward declarations
 namespace edm {
   class EDProducer;
+  class EDFilter;
   class LuminosityBlock;
   class EventSetup;
 }
@@ -22,7 +23,8 @@ namespace HPlus {
     struct CountValue {
       CountValue(const std::string& n, const std::string& i, int v);
       bool equalName(std::string n) const;
-      void produces(edm::EDProducer *producer) const;
+      template <typename T>
+      void produces(T *producer) const;
       void produce(edm::LuminosityBlock *block) const;
       void reset();
 
@@ -44,11 +46,15 @@ namespace HPlus {
     }
 
     void produces(edm::EDProducer *producer) const;
+    void produces(edm::EDFilter *producer) const;
 
     void beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) const;
 
   private:
+    template <typename T>
+    void producesInternal(T *producer) const;
+
     Count insert(const std::string& name);
 
     CountVector counter_;

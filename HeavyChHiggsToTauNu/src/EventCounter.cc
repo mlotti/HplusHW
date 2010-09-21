@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
@@ -46,8 +47,9 @@ namespace HPlus {
   bool EventCounter::CountValue::equalName(std::string n) const {
     return name == n;
   }
-  void EventCounter::CountValue::produces(edm::EDProducer *producer) const {
-    producer->produces<edm::MergeableCounter, edm::InLumi>(instance);
+  template <typename T>
+  void EventCounter::CountValue::produces(T *producer) const {
+    producer->template produces<edm::MergeableCounter, edm::InLumi>(instance);
   }
   void EventCounter::CountValue::produce(edm::LuminosityBlock *block) const {
     std::auto_ptr<edm::MergeableCounter> countsPtr(new edm::MergeableCounter);
@@ -100,15 +102,22 @@ namespace HPlus {
     return Count(this, counter_.size()-1);
   }
 
-  void EventCounter::produces(edm::EDProducer *producer) const {
+  template <typename T>
+  void EventCounter::producesInternal(T *producer) const {
     if(finalized)
       throw cms::Exception("LogicError") << "Tried to call EventCounter::produces(), but it had already been called!" << std::endl;
     finalized = true;
 
-    std::for_each(counter_.begin(), counter_.end(), std::bind2nd(std::mem_fun_ref(&EventCounter::CountValue::produces), producer));
-    producer->produces<std::vector<std::string>, edm::InLumi>("counterInstances");
-    producer->produces<std::vector<std::string>, edm::InLumi>("counterNames");
-    
+    std::for_each(counter_.begin(), counter_.end(), std::bind2nd(std::mem_fun_ref(&EventCounter::CountValue::produces<T>), producer));
+    producer->template produces<std::vector<std::string>, edm::InLumi>("counterInstances");
+    producer->template produces<std::vector<std::string>, edm::InLumi>("counterNames");
+  }
+
+  void EventCounter::produces(edm::EDProducer *producer) const {
+    producesInternal(producer);
+  }
+  void EventCounter::produces(edm::EDFilter *producer) const {
+    producesInternal(producer);
   }
 
   void EventCounter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
