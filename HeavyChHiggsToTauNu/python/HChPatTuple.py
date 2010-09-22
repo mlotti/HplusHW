@@ -9,6 +9,7 @@ from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
+import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi as HChTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
@@ -26,6 +27,7 @@ def addPat(process, dataVersion):
     # Tau Discriminators
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
     HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
+    HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -33,6 +35,7 @@ def addPat(process, dataVersion):
     process.hplusPatSequence = cms.Sequence(
 	process.tautagging *
         process.hplusTauDiscriminationSequence *
+	process.hplusTauDiscriminationSequenceCont *
         process.patDefaultSequence
     )
 
@@ -68,6 +71,7 @@ def addPat(process, dataVersion):
 
     # Taus
     classicTauIDSources.extend( HChTaus.HChTauIDSources )
+    classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
 
     addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
 		algoLabel = "caloReco",
