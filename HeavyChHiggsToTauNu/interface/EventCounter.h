@@ -6,10 +6,12 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <map>
 
 // Forward declarations
 namespace edm {
   class EDProducer;
+  class EDFilter;
   class LuminosityBlock;
   class EventSetup;
 }
@@ -22,7 +24,8 @@ namespace HPlus {
     struct CountValue {
       CountValue(const std::string& n, const std::string& i, int v);
       bool equalName(std::string n) const;
-      void produces(edm::EDProducer *producer) const;
+      template <typename T>
+      void produces(T *producer) const;
       void produce(edm::LuminosityBlock *block) const;
       void reset();
 
@@ -44,14 +47,19 @@ namespace HPlus {
     }
 
     void produces(edm::EDProducer *producer) const;
+    void produces(edm::EDFilter *producer) const;
 
     void beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup);
     void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) const;
 
   private:
-    Count insert(const std::string& name);
+    template <typename T>
+    void producesInternal(T *producer) const;
 
     CountVector counter_;
+    std::map<std::string, uint32_t> counterIndices; // yes, map<string, ...> is BAD for performance,
+                                                    // but this is used only at the construction time of the analysis, 
+                                                    // so it should be more or less okay
     mutable bool finalized;
   };
 

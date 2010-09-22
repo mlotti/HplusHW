@@ -30,6 +30,10 @@ namespace HPlus {
       return fSelectedJets;
     }
 
+    uint32_t getMinNumber() const {
+      return fMin;
+    }
+
   private:
     // Input parameters
     edm::InputTag fSrc;
