@@ -89,6 +89,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_*_*_HChSignalAnalysis",
         "drop *_counterNames_*_*",
         "drop *_counterInstances_*_*",
+        "drop edmMergeableCounter_*_subcount*_*"
 #	"drop *",
 #        "keep edmMergeableCounter_*_*_*"
     )

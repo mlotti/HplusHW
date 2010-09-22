@@ -91,7 +91,7 @@ namespace HPlus {
     snprintf(tmp, 20, "%u", index);
     ++index;
 
-    counter_.push_back(CountValue(subname, "count"+stripName(base)+"#"+tmp+stripName(name), 0));
+    counter_.push_back(CountValue(subname, "subcount"+stripName(base)+"#"+tmp+stripName(name), 0));
     return Count(this, counter_.size()-1);
   }
 
