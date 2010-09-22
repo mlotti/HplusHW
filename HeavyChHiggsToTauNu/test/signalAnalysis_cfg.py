@@ -146,7 +146,7 @@ process.signalAnalysisPath = cms.Path(
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
     src = process.signalAnalysis.tauSelection.src
 )
-process.tauDiscriminatorPrintPath = cms.Path(process.tauDiscriminatorPrint)
+#process.tauDiscriminatorPrintPath = cms.Path(process.tauDiscriminatorPrint)
 
 ################################################################################
 
