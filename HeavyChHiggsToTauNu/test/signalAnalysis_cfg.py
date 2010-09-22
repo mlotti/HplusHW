@@ -95,40 +95,6 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters
 )
 
-# process.signalAnalysisNtuple = cms.EDFilter("HPlusSignalAnalysisNtupleProducer",
-#     branchAliasPrefix = cms.untracked.string(""),
-#     tauSelection = process.signalAnalysis.tauSelection,
-#     tauDiscriminators = cms.untracked.VPSet(
-#         cms.untracked.PSet(
-#             discriminator = cms.untracked.string("HChTauIDtauPolarizationCont"),
-#             branch = cms.untracked.string("discrHChTauIDtauPolarizationCont")
-#         )
-#     ),
-#     jetSelection = process.signalAnalysis.jetSelection,
-#     btags = cms.untracked.vstring("trackCountingHighEffBJetTags"),
-#     METs = cms.untracked.VPSet(
-#        cms.untracked.PSet(
-#           src = cms.untracked.InputTag("patMETs"),
-#           label = cms.untracked.string("caloMET"),
-#        ),
-#        cms.untracked.PSet(
-#           src = cms.untracked.InputTag("patMETsPF"),
-#           label = cms.untracked.string("pfMET"),
-#        ),
-#        cms.untracked.PSet(
-#           src = cms.untracked.InputTag("patMETsTC"),
-#           label = cms.untracked.string("tcMET"),
-#        )
-#     )
-# )
-# process.allEvents = cms.EDProducer("EventCountProducer")
-# process.ntupleEvents = cms.EDProducer("EventCountProducer")
-# process.ntuplePath = cms.Path(
-#     process.allEvents *
-#     process.signalAnalysisNtuple *
-#     process.ntupleEvents
-# )
-
 # An example how to create an array of analyzers to do the same
 # analysis by varying a single parameter. It is significantly more
 # efficienct to run many analyzers in single crab job than to run many
@@ -151,14 +117,11 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 ################################################################################
 
 process.out = cms.OutputModule("PoolOutputModule",
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("ntuplePath")
-    ),
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
         "keep *_*_*_HChSignalAnalysis",
-        "drop *_counterNames_*_*",
-        "drop *_counterInstances_*_*"
+        "drop *_*_counterNames_*",
+        "drop *_*_counterInstances_*"
 #	"drop *",
 #        "keep edmMergeableCounter_*_*_*"
     )
