@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <map>
 
 // Forward declarations
 namespace edm {
@@ -55,9 +56,10 @@ namespace HPlus {
     template <typename T>
     void producesInternal(T *producer) const;
 
-    Count insert(const std::string& name);
-
     CountVector counter_;
+    std::map<std::string, uint32_t> counterIndices; // yes, map<string, ...> is BAD for performance,
+                                                    // but this is used only at the construction time of the analysis, 
+                                                    // so it should be more or less okay
     mutable bool finalized;
   };
 

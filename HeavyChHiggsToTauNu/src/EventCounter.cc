@@ -13,33 +13,19 @@
 #include<cstdio>
 
 namespace {
-  /*
-  struct PairFirstEq: public std::binary_function<HPlus::EventCounter::CountValue, std::string, bool> {
-    bool operator()(const HPlus::EventCounter::CountValue& count, const std::string& name) const {
-      return count.first == name;
-    }
-  };
+  std::string stripName(const std::string& str) {
+    std::string result;
+    result.reserve(str.size());
 
-  struct BookProduct: public std::binary_function<HPlus::EventCounter::CountValue, edm::EDProducer *, void> {
-    void operator()(const HPlus::EventCounter::CountValue& count, edm::EDProducer *producer) const {
-      producer->produces<edm::MergeableCounter, edm::InLumi>(count.first);
-    }
-  };
-
-  struct ResetCount: public std::unary_function<HPlus::EventCounter::CountValue, void> {
-    void operator()(HPlus::EventCounter::CountValue& count) const {
-      count.second = 0;
-    }
-  };
-
-  struct ProduceCount: public std::binary_function<HPlus::EventCounter::CountValue, edm::LuminosityBlock *, void> {
-    void operator()(const HPlus::EventCounter::CountValue& count, edm::LuminosityBlock *block) const {
-      std::auto_ptr<edm::MergeableCounter> countsPtr(new edm::MergeableCounter);
-      countsPtr->value = count.second;
-      block->put(countsPtr, count.first);
-    }
-  };
-  */
+    size_t pos = 0;
+    size_t prevPos = 0;
+    do {
+      pos = str.find_first_of(" _", prevPos);
+      result += str.substr(prevPos, pos-prevPos);
+      prevPos = pos+1;
+    } while(pos != std::string::npos);
+    return result;
+  }
 }
 
 namespace HPlus {
@@ -74,12 +60,23 @@ namespace HPlus {
     if(std::find_if(counter_.begin(), counter_.end(), std::bind2nd(std::mem_fun_ref(&EventCounter::CountValue::equalName), name)) != counter_.end())
       throw cms::Exception("LogicError") << "Tried to add counter '" << name << "', but it already exists!" << std::endl;
 
-    return insert(name);
+    
+
+    uint32_t& index = counterIndices["counter"];
+    char tmp[100] = "";
+    snprintf(tmp, 100, "count%u", index);
+    ++index;
+
+    counter_.push_back(CountValue(name, tmp+stripName(name), 0));
+    return Count(this, counter_.size()-1);
   }
 
   Count EventCounter::addSubCounter(const std::string& base, const std::string& name) {
     if(finalized)
       throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but EventCounter::produces has already been called!" << std::endl;
+
+    if(base == "counter")
+      throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but 'counter' is a reserved main counter name";
 
     if(name.find_first_of("#") != std::string::npos || base.find_first_of("#") != std::string::npos)
       throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but it has # in it's name! (# is used to separate the subcounter names)" << std::endl; 
@@ -89,16 +86,12 @@ namespace HPlus {
     if(std::find_if(counter_.begin(), counter_.end(), std::bind2nd(std::mem_fun_ref(&EventCounter::CountValue::equalName), subname)) != counter_.end())
       throw cms::Exception("LogicError") << "Tried to add subcounter '" << name << "' under '" << base << "', but it already exists!" << std::endl;
 
-    return insert(subname);
-  }
+    uint32_t& index = counterIndices[base];
+    char tmp[20] = "";
+    snprintf(tmp, 20, "%u", index);
+    ++index;
 
-  Count EventCounter::insert(const std::string& name) {
-    size_t index = counter_.size()-1;
-
-    char tmp[100] = "";
-    snprintf(tmp, 100, "count%u", index);
-
-    counter_.push_back(CountValue(name, tmp, 0));
+    counter_.push_back(CountValue(subname, "count"+stripName(base)+"#"+tmp+stripName(name), 0));
     return Count(this, counter_.size()-1);
   }
 
