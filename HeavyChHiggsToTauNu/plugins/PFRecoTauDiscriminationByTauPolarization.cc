@@ -36,7 +36,9 @@ double PFRecoTauDiscriminationByTauPolarization::discriminate(const PFTauRef& ta
 
 	double rTau = 0;
 	//if(tau->p() > 0) rTau = tau->leadTrack()->p()/tau->p();
-	if(tau.isNonnull() && tau->p() > 0 && tau->leadTrack().isNonnull()) rTau = tau->leadTrack()->p()/tau->p();
+        // rtau for PFTau has to be calculated for leading PF charged hadronic candidate
+        // calculating it from leadingTrack can (and will) give rtau > 1!
+	if(tau.isNonnull() && tau->p() > 0 && tau->leadPFChargedHadrCand().isNonnull()) rTau = tau->leadPFChargedHadrCand()->p()/tau->p();
 
 	if(booleanOutput) return ( rTau > rTauMin ? 1. : 0. );
 	return rTau;
