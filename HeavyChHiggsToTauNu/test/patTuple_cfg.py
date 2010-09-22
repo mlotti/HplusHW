@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 
 #dataVersion = "35X"
-#dataVersion = "35Xredigi"
-dataVersion = "36X"
+dataVersion = "35Xredigi"
+#dataVersion = "36X"
 #dataVersion = "37X"
 
 options = getOptions()
@@ -25,7 +25,8 @@ process.GlobalTag.globaltag = cms.string("START38_V9::All")
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-    "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"
+#    "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"
+"rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
   )
 )
 
