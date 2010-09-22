@@ -4,6 +4,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 #dataVersion = "35X"
 dataVersion = "35Xredigi"
 #dataVersion = "36X"
+#dataVersion = "36Xspring10"
 #dataVersion = "37X"
 
 options = getOptions()
