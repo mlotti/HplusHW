@@ -42,12 +42,27 @@ import sys
 #HChTriggers = cms.Sequence( HLT8E29 * HLT )
 #HChTriggers = cms.Sequence( HLT8E29 )
 
-def addSpring10(process):
-    process.patTrigger.processName = "HLT"
-    process.patTriggerEvent.processName = "HLT"
+triggerProcessMap = {
+    "35X": "HLT",
+    "35Xredigi": "REDIGI",
+    "36X": "REDIGI36X",
+    "36Xspring10": "REDIGI36",
+    "37X": "REDIGI37X"
+    }
+
+def customise(process, dataVersion):
+    if not dataVersion in triggerProcessMap:
+        print "Incorrect data version '%s'" % dataVersion
+        sys.exit(1)
+
+    name = triggerProcessMap[dataVersion]
+
+    if hasattr(process, "patTrigger"):
+        process.patTrigger.processName = name
+        process.patTriggerEvent.processName = name
 
     process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::HLT"),
+        TriggerResultsName = cms.InputTag("TriggerResults", "", name),
         TriggersToBeApplied = cms.vstring(
         ),
         TriggersToBeSaved = cms.vstring(
@@ -62,106 +77,6 @@ def addSpring10(process):
         ),
         PrintTriggerNames = cms.bool(False)
     )
-
-def addSpring10redigi(process):
-    process.patTrigger.processName = "REDIGI"
-    process.patTriggerEvent.processName = "REDIGI"
-
-    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI"),
-        TriggersToBeApplied = cms.vstring(
-        ),
-        TriggersToBeSaved = cms.vstring(
-    	"HLT_SingleLooseIsoTau20",
-    	"HLT_MET45",
-    	"HLT_MET100",
-    	"HLT_Jet15U",
-    	"HLT_Jet30U",
-    	"HLT_Jet50U",
-    	"HLT_QuadJet15U",
-    	"HLT_Mu9"
-        ),
-        PrintTriggerNames = cms.bool(False)
-    )
-
-def addSummer10(process):
-    process.patTrigger.processName = "REDIGI36X"
-    process.patTriggerEvent.processName = "REDIGI36X"
-
-    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI36X"),
-        TriggersToBeApplied = cms.vstring(
-        ),
-        TriggersToBeSaved = cms.vstring(
-    	"HLT_SingleLooseIsoTau20",
-    	"HLT_MET45",
-    	"HLT_MET100",
-    	"HLT_Jet15U",
-    	"HLT_Jet30U",
-    	"HLT_Jet50U",
-    	"HLT_QuadJet15U",
-    	"HLT_Mu9"
-        ),
-        PrintTriggerNames = cms.bool(False)
-    )
-
-def addSummer10redigiSpring10(process):
-    process.patTrigger.processName = "REDIGI36"
-    process.patTriggerEvent.processName = "REDIGI36"
-
-    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI36"),
-        TriggersToBeApplied = cms.vstring(
-        ),
-        TriggersToBeSaved = cms.vstring(
-    	"HLT_SingleLooseIsoTau20",
-    	"HLT_MET45",
-    	"HLT_MET100",
-    	"HLT_Jet15U",
-    	"HLT_Jet30U",
-    	"HLT_Jet50U",
-    	"HLT_QuadJet15U",
-    	"HLT_Mu9"
-        ),
-        PrintTriggerNames = cms.bool(False)
-    )
-
-def addSummer10_37X(process):
-    process.patTrigger.processName = "REDIGI37X"
-    process.patTriggerEvent.processName = "REDIGI37X"
-
-    process.HLTREDIGI = cms.EDFilter('HPlusTriggering',
-        TriggerResultsName = cms.InputTag("TriggerResults::REDIGI37X"),
-        TriggersToBeApplied = cms.vstring(
-        ),
-        TriggersToBeSaved = cms.vstring(
-    	"HLT_SingleLooseIsoTau20",
-    	"HLT_MET45",
-    	"HLT_MET100",
-    	"HLT_Jet15U",
-    	"HLT_Jet30U",
-    	"HLT_Jet50U",
-    	"HLT_QuadJet15U",
-    	"HLT_Mu9"
-        ),
-        PrintTriggerNames = cms.bool(False)
-    )
-
-def customise(process, dataVersion):
-    if dataVersion == "35Xredigi":
-        addSpring10redigi(process)
-    elif dataVersion == "35X":
-        addSpring10(process)
-    elif dataVersion == "36X":
-        addSummer10(process)
-    elif dataVersion == "36Xspring10":
-        addSummer10redigiSpring10(process)
-    elif dataVersion == "37X":
-        addSummer10_37X(process)
-    else:
-        print "Incorrect data version '%s'" % dataVersion
-        sys.exit(1)
-
     process.HChTriggers = cms.Sequence( process.HLTREDIGI )
 
     return process
