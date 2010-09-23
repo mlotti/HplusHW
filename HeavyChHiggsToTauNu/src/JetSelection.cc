@@ -33,7 +33,7 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  bool JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
+  bool JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
@@ -53,8 +53,8 @@ namespace HPlus {
 
       // remove tau jet
       bool match = false;
-      for(edm::PtrVector<pat::Tau>::const_iterator itertau = taus.begin(); itertau != taus.end(); ++itertau) {
-        edm::Ptr<pat::Tau> iTau = *itertau;
+      for(edm::PtrVector<reco::Candidate>::const_iterator itertau = taus.begin(); itertau != taus.end(); ++itertau) {
+        edm::Ptr<reco::Candidate> iTau = *itertau;
         if(!(ROOT::Math::VectorUtil::DeltaR(iTau->p4(), iJet->p4()) > fMaxDR)) {
           match = true;
           break;
