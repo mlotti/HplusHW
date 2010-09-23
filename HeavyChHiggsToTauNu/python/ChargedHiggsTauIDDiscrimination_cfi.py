@@ -45,11 +45,11 @@ def addDiscriminatorSequence(process, tau):
 
     lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationAgainstElectron",
                                 pfRecoTauDiscriminationAgainstElectron.clone()))
-    lst[-1].Prediscriminants.leadPion.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationAgainstMuon",
                                 pfRecoTauDiscriminationAgainstMuon.clone()))
-    lst[-1].Prediscriminants.leadPion.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByTauPolarization",
                                 pfRecoTauDiscriminationByTauPolarization.clone()))
@@ -160,7 +160,8 @@ def addHplusTauDiscriminationSequence(process):
     process.hplusTauDiscriminationSequence = cms.Sequence(
         addDiscriminatorSequence(process, "fixedConePFTau") *
 	addDiscriminatorSequence(process, "fixedConeHighEffPFTau") *
-        addDiscriminatorSequence(process, "shrinkingConePFTau")
+        addDiscriminatorSequence(process, "shrinkingConePFTau") 
+#	addDiscriminatorSequence(process, "caloTau")
     )
 
     return process.hplusTauDiscriminationSequence

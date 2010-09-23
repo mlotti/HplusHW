@@ -4,11 +4,12 @@ import copy
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-from PhysicsTools.PatAlgos.tools.tauTools import switchToPFTauFixedCone
+from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
+import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi as HChTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
@@ -24,14 +25,17 @@ def addPat(process, dataVersion):
         out = outdict["out"]
 
     # Tau Discriminators
-#    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi")
+    process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
     HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
+    HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     process.hplusPatSequence = cms.Sequence(
+	process.tautagging *
         process.hplusTauDiscriminationSequence *
+	process.hplusTauDiscriminationSequenceCont *
         process.patDefaultSequence
     )
 
@@ -66,44 +70,22 @@ def addPat(process, dataVersion):
 
 
     # Taus
-    switchToPFTauFixedCone(process)
+    classicTauIDSources.extend( HChTaus.HChTauIDSources )
+    classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
 
-    process.patTaus.embedLeadTrack = True
-    process.patTaus.embedSignalTracks = True
-    process.patTaus.embedIsolationTracks = True
+    addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
+		algoLabel = "caloReco",
+		typeLabel = "Tau")
 
-    process.patTaus.embedLeadPFCand = True
-    process.patTaus.embedLeadPFChargedHadrCand = True
-    process.patTaus.embedLeadPFNeutralCand = True
+    addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
+                algoLabel = "shrinkingCone",
+                typeLabel = "PFTau")
 
-    process.patTaus.embedSignalPFCands = True
-    process.patTaus.embedSignalPFChargedHadrCands = True
-    process.patTaus.embedSignalPFNeutralHadrCands = True
-    process.patTaus.embedSignalPFGammaCands = True
+    addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
+                algoLabel = "fixedCone",
+                typeLabel = "PFTau")
 
-    process.patTaus.embedIsolationPFCands = True
-    process.patTaus.embedIsolationPFChargedHadrCands = True
-    process.patTaus.embedIsolationPFNeutralHadrCands = True
-    process.patTaus.embedIsolationPFGammaCands = True
 
-    process.patTaus.tauIDSources = HChTaus.tauIDSources("fixedConePFTau")
-
-    # Continuous tau discriminators
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi")
-    process.hplusTauDiscriminationSequence *= process.hplusTauContinuousDiscriminationSequence
-    HChTausCont.tauIDSourcesCont(process.patTaus.tauIDSources,"fixedConePFTau")    
-
-    process.patPFTauProducerFixedCone = copy.deepcopy(process.patTaus)
-    process.hplusPatSequence *= process.patPFTauProducerFixedCone
-
-    # Preselections of objects
-#    process.selectedPatJets.cut='pt > 10 & abs(eta) < 2.4 & associatedTracks().size() > 0'
-#    process.selectedPatMuons.cut='pt > 10 & abs(eta) < 2.4 & isGlobalMuon() & !track().isNull()'
-#    process.selectedPatElectrons.cut='pt > 10 & abs(eta) < 2.4 & !gsfTrack().isNull()'
-#    process.selectedPatTaus.cut=('pt > 10 & abs(eta) < 2.4'+
-#                                 '& tauID("leadingTrackFinding") > 0.5 & tauID("leadingPionPtCut") > 0.5'+
-#                                 '& tauID("byIsolationUsingLeadingPion") > 0.5'+
-#                                 '& tauID("againstMuon") > 0.5 & tauID("againstElectron") > 0.5')
 
     # Add PAT default event content
     if out != None:
@@ -134,10 +116,6 @@ def addPat(process, dataVersion):
         )
         seq *= process.hplusJptSequence
 
-#    process.hplusPatSequence = cms.Sequence(
-#	process.hplusTauDiscriminationSequence *
-#        process.patDefaultSequence
-#    )
     seq *= process.hplusPatSequence
 
     return seq
