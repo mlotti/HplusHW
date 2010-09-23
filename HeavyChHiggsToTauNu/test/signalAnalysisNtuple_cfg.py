@@ -69,8 +69,15 @@ process.tauNtuple = cms.EDProducer("HPlusTauNtupleProducer",
 )    
 process.jetNtuple = cms.EDProducer("HPlusJetNtupleProducer",
     src = cms.untracked.InputTag("jetSelection"),
-    prefix = cms.untracked.string("jet_"),                              
-    btags = cms.untracked.vstring("trackCountingHighEffBJetTags")
+    prefix = cms.untracked.string("jet_"),
+    # The module takes the *maximum* value of the b-discriminators
+    # from the input jets, and stores that to the event
+    bDiscriminators = cms.untracked.VPSet(
+        cms.untracked.PSet(
+            discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
+            branch = cms.untracked.string("maxBtrackCountingHighEffBJetTags")
+        )
+    )
 )
 
 # All and ntuplized event counters

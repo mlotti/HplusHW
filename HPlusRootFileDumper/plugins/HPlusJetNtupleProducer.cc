@@ -50,13 +50,14 @@ HPlusJetNtupleProducer::HPlusJetNtupleProducer(const edm::ParameterSet& iConfig)
 
   // b-tagging branches (one branch per discriminator, value is the
   // maximum over the jets passing the pt/eta cuts)
-  if(iConfig.exists("btags")) {
-    std::vector<std::string> btagParam = iConfig.getUntrackedParameter<std::vector<std::string> >("btags");
+  if(iConfig.exists("bDiscriminators")) {
+    std::vector<edm::ParameterSet> btagParam = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("bDiscriminators");
     fBDiscriminators.reserve(btagParam.size()); 
+
     for(size_t i=0; i<btagParam.size(); ++i) {
-      fBDiscriminators.push_back(Discriminator(btagParam[i], "maxBtag"+btagParam[i]));
-      name = fBDiscriminators.back().fBranch;
+      name = btagParam[i].getUntrackedParameter<std::string>("branch");
       produces<float>(name).setBranchAlias(fPrefix+name);
+      fBDiscriminators.push_back(Discriminator(btagParam[i].getUntrackedParameter<std::string>("discriminator"), name));
     }
   }
 }
