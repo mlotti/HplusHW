@@ -40,26 +40,16 @@ process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.TFileService.fileName = "histograms.root"
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+
 # Tau ID and jet selection
 process.tauSelection = cms.EDFilter("HPlusTauPtrSelectorFilter",
-    tauSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
-        #src = cms.untracked.InputTag("selectedPatTaus"),
-        ptCut = cms.untracked.double(20),
-        etaCut = cms.untracked.double(2.4),
-        leadingTrackPtCut = cms.untracked.double(10)
-    )
+    tauSelection = param.tauSelection.clone()
 )
+process.tauSelection.tauSelection.ptCut = 20.
 process.jetSelection = cms.EDFilter("HPlusJetPtrSelectorFilter",
     tauSrc = cms.untracked.InputTag("tauSelection"),
-    jetSelection = cms.untracked.PSet(
-        src = cms.untracked.InputTag("selectedPatJets"),
-#        src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
-        cleanTauDR = cms.untracked.double(0.5),
-        ptCut = cms.untracked.double(20),
-        etaCut = cms.untracked.double(2.4),
-        minNumber = cms.untracked.uint32(3)
-    ),
+    jetSelection = param.jetSelection.clone()
 )
 
 # Add trigger bits to the ntuple
@@ -147,13 +137,6 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep int_*_*_HChSignalAnalysis",
         "keep edmMergeableCounter_*_*_*",
         "drop edmMergeableCounter_*_subcount*_HChSignalAnalysis"
-#         "keep *_*_*_HChSignalAnalysis",
-#         "drop *_counterNames_*_*",
-#         "drop *_counterInstances_*_*",
-#         "drop edmMergeableCounter_*_subcount*_*",
-#         "drop *PtrVector_*_*_*"
-#	"drop *",
-#        "keep edmMergeableCounter_*_*_*"
     )
 )
 
