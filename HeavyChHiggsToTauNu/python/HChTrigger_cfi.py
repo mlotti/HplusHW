@@ -42,21 +42,8 @@ import sys
 #HChTriggers = cms.Sequence( HLT8E29 * HLT )
 #HChTriggers = cms.Sequence( HLT8E29 )
 
-triggerProcessMap = {
-    "35X": "HLT",
-    "data": "HLT",
-    "35Xredigi": "REDIGI",
-    "36X": "REDIGI36X",
-    "36Xspring10": "REDIGI36",
-    "37X": "REDIGI37X"
-    }
-
 def customise(process, dataVersion):
-    if not dataVersion in triggerProcessMap:
-        print "Incorrect data version '%s'" % dataVersion
-        sys.exit(1)
-
-    name = triggerProcessMap[dataVersion]
+    name = dataVersion.getTriggerProcess()
 
     if hasattr(process, "patTrigger"):
         process.patTrigger.processName = name

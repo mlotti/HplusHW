@@ -1,8 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
-dataVersion = "35X"
-#dataVersion = "35Xredigi"
+#dataVersion = "35X"
+dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
@@ -11,6 +12,7 @@ options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 print "Assuming data is ", dataVersion
+dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -19,17 +21,16 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string("START38_V9::All")
+process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-#    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
-# For testing in lxplus
-        "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/pattuple_6_1_MSU.root"
-# For testing in jade
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
-        #"dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
+        # For testing in lxplus
+        dataVersion.getAnalysisDefaultFileCastor()
+        # For testing in jade
+        #dataVersion.getAnalysisDefaultFileMadhatter()
+        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
   )
 )
 
