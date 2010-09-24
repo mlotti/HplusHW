@@ -159,7 +159,7 @@ def addDiscriminatorSequence(process, tau):
 def addHplusTauDiscriminationSequence(process):
     process.hplusTauDiscriminationSequence = cms.Sequence(
         addDiscriminatorSequence(process, "fixedConePFTau") *
-	addDiscriminatorSequence(process, "fixedConeHighEffPFTau") *
+#	addDiscriminatorSequence(process, "fixedConeHighEffPFTau") * # not available on all datasets!
         addDiscriminatorSequence(process, "shrinkingConePFTau") 
 #	addDiscriminatorSequence(process, "caloTau")
     )
