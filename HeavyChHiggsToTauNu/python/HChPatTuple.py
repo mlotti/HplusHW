@@ -86,9 +86,13 @@ def addPat(process, dataVersion):
     # calotaus (output module complains about trying to persist
     # transient Ref/Ptr, so I'd guess there's transient RefVector of
     # tracks somewhere in the calotau reconstruction process
-    if not dataVersion.is35X():
-        process.patTaus.embedSignalTracks = True
-        process.patTaus.embedIsolationTracks = True
+
+    # Update: Apparently it doesn't work on 36X collision data
+    # either...
+
+    #if not dataVersion.is35X():
+    #    process.patTaus.embedSignalTracks = True
+    #    process.patTaus.embedIsolationTracks = True
 
     # There's probably a bug in pat::Tau which in practice prevents
     # the emedding of PFCands. Therefore we keep the PFCandidates
