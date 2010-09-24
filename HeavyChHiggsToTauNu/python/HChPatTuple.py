@@ -7,6 +7,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import switchToPFTauFixedCone
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
@@ -33,6 +34,10 @@ def addPat(process, dataVersion):
         process.hplusTauDiscriminationSequence *
         process.patDefaultSequence
     )
+
+    # Remove MC stuff if we have collision data (has to be done any add*Collection!)
+    if dataVersion == "data":
+        removeMCMatching(process, ["All"])
 
     # Jets
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")

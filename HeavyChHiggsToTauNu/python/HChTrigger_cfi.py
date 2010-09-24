@@ -150,7 +150,7 @@ def addSummer10_37X(process):
 def customise(process, dataVersion):
     if dataVersion == "35Xredigi":
         addSpring10redigi(process)
-    elif dataVersion == "35X":
+    elif dataVersion == "35X" or dataVersion == "data":
         addSpring10(process)
     elif dataVersion == "36X":
         addSummer10(process)
