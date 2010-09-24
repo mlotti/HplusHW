@@ -44,6 +44,7 @@ import sys
 
 triggerProcessMap = {
     "35X": "HLT",
+    "data": "HLT",
     "35Xredigi": "REDIGI",
     "36X": "REDIGI36X",
     "36Xspring10": "REDIGI36",
