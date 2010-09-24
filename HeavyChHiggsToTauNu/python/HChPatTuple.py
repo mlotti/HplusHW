@@ -134,7 +134,7 @@ def addPat(process, dataVersion):
     addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                 algoLabel = "hps",
                 typeLabel = "PFTau")
-
+    
 
     # Add PAT default event content
     if out != None:
