@@ -30,6 +30,8 @@ def addPat(process, dataVersion):
     HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
     HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
 
+    process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -37,6 +39,7 @@ def addPat(process, dataVersion):
 	process.tautagging *
         process.hplusTauDiscriminationSequence *
 	process.hplusTauDiscriminationSequenceCont *
+	process.produceAndDiscriminateHPSPFTaus *
         process.patDefaultSequence
     )
 
@@ -128,6 +131,9 @@ def addPat(process, dataVersion):
                 algoLabel = "fixedCone",
                 typeLabel = "PFTau")
 
+    addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+                algoLabel = "hps",
+                typeLabel = "PFTau")
 
 
     # Add PAT default event content
