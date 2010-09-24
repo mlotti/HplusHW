@@ -6,8 +6,9 @@ trigger = cms.untracked.PSet(
 )
 
 tauSelection = cms.untracked.PSet(
-    src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
-    #src = cms.untracked.InputTag("selectedPatTaus"),
+    #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
+    src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"),
+    #src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     ptCut = cms.untracked.double(20),
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(10)
@@ -29,9 +30,8 @@ bTagging = cms.untracked.PSet(
 )
 
 MET = cms.untracked.PSet(
-    src = cms.untracked.InputTag("patMETs"),
-    #src = cms.untracked.InputTag("patMETsPF"),
-    #src = cms.untracked.InputTag("patMETsTC"),
-    METCut = cms.untracked.double(40)
+    src = cms.untracked.InputTag("patMETs"), # calo MET
+    #src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
 )
 
