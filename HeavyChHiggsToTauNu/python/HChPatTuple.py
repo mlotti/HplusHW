@@ -41,7 +41,7 @@ def addPat(process, dataVersion):
     )
 
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
-    if dataVersion == "data":
+    if dataVersion.isData():
         removeMCMatching(process, ["All"])
 
     # Jets
@@ -64,7 +64,7 @@ def addPat(process, dataVersion):
         out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
     #### needed for CMSSW35x data
-    if dataVersion in ["35X", "35Xredigi"]: 
+    if dataVersion.is35X():
         process.load("RecoJets.Configuration.GenJetParticles_cff")
         process.load("RecoJets.Configuration.RecoGenJets_cff")
         ## creating JPT jets
@@ -75,6 +75,40 @@ def addPat(process, dataVersion):
 
 
     # Taus
+
+    # Set default PATTauProducer options here, they should be
+    # replicated to all added tau collections (and the first call to
+    # addTauCollection should replace the default producer modified
+    # here)
+    process.patTaus.embedLeadTrack = True
+
+    # For some reason, embedding these for 35X data does NOT work for
+    # calotaus (output module complains about trying to persist
+    # transient Ref/Ptr, so I'd guess there's transient RefVector of
+    # tracks somewhere in the calotau reconstruction process
+    if not dataVersion.is35X():
+        process.patTaus.embedSignalTracks = True
+        process.patTaus.embedIsolationTracks = True
+
+    # There's probably a bug in pat::Tau which in practice prevents
+    # the emedding of PFCands. Therefore we keep the PFCandidates
+    # collection in the event so that the PFCands can be accessed via
+    # edm::Refs. (note: PFCand embedding works, so it is just the
+    # collection embedding which doesn't. The PFCand embedding is
+    # disabled for consistenty and saving even some disk space.
+
+    # process.patTaus.embedLeadPFCand = True
+    # process.patTaus.embedLeadPFChargedHadrCand = True
+    # process.patTaus.embedLeadPFNeutralCand = True
+    # process.patTaus.embedSignalPFCands = True
+    # process.patTaus.embedSignalPFChargedHadrCands = True
+    # process.patTaus.embedSignalPFNeutralHadrCands = True
+    # process.patTaus.embedSignalPFGammaCands = True
+    # process.patTaus.embedIsolationPFCands = True
+    # process.patTaus.embedIsolationPFChargedHadrCands = True
+    # process.patTaus.embedIsolationPFNeutralHadrCands = True
+    # process.patTaus.embedIsolationPFGammaCands = True
+
     classicTauIDSources.extend( HChTaus.HChTauIDSources )
     classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
 
@@ -116,7 +150,7 @@ def addPat(process, dataVersion):
 
     # Build sequence
     seq = cms.Sequence()
-    if dataVersion in ["35X", "35Xredigi"]: 
+    if dataVersion.is35X():
         process.hplusJptSequence = cms.Sequence(
             process.genJetParticles *
             process.ak5GenJets *

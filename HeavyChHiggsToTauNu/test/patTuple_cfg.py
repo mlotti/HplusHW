@@ -1,18 +1,20 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
 #dataVersion = "35X"
 dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "data" # this is for collision data 
+#dataVersion = "data" # this is for collision data 
 
 options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
 print "Assuming data is ", dataVersion
+dataVersion = DataVersion(dataVersion) # convert string to object
 
 # Create Process
 process = cms.Process("HChPatTuple")
@@ -20,23 +22,16 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-if dataVersion == "data":
-    process.GlobalTag.globaltag = cms.string("GR_R_38X_V13::All")
-else:
-    process.GlobalTag.globaltag = cms.string("START38_V9::All")
+process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 # Source
 process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
-#    "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"
-"rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter()
   )
 )
-if dataVersion == "data":
-    process.source.fileNames = cms.untracked.vstring(
-        "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
-    ) 
 
 # Load common stuff
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -46,7 +41,7 @@ del process.TFileService
 # In case of data, add trigger
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 process.triggerSequence = cms.Sequence()
-if dataVersion == "data":
+if dataVersion.isData():
     process.TriggerFilter = triggerResultsFilter.clone()
     process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", "HLT")
     process.TriggerFilter.l1tResults = cms.InputTag("")
@@ -76,7 +71,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.s = addPat(process, dataVersion)
 
-if dataVersion == "data":
+if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
 else:
     process.out.outputCommands.extend([
