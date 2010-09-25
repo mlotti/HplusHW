@@ -7,7 +7,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
-from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi as HChTauDiscriminatorsCont
@@ -39,6 +39,9 @@ def addPat(process, dataVersion):
 	process.hplusTauDiscriminationSequenceCont *
         process.patDefaultSequence
     )
+
+    # Restrict input to AOD
+    restrictInputToAOD(process, ["All"])
 
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
     if dataVersion.isData():
