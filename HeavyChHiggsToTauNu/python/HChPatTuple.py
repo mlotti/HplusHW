@@ -11,6 +11,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInpu
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi as HChTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsCaloTauIDDiscrimination_cfi as HChCaloTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
@@ -30,6 +31,10 @@ def addPat(process, dataVersion):
     HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
     HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
 
+    HChCaloTauDiscriminators.addHplusCaloTauDiscriminationSequence(process)
+
+    process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
@@ -37,6 +42,8 @@ def addPat(process, dataVersion):
 	process.tautagging *
         process.hplusTauDiscriminationSequence *
 	process.hplusTauDiscriminationSequenceCont *
+	process.produceAndDiscriminateHPSPFTaus *
+	process.hplusCaloTauDiscriminationSequence *
         process.patDefaultSequence
     )
 
@@ -131,7 +138,10 @@ def addPat(process, dataVersion):
                 algoLabel = "fixedCone",
                 typeLabel = "PFTau")
 
-
+    addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+                algoLabel = "hps",
+                typeLabel = "PFTau")
+    
 
     # Add PAT default event content
     if out != None:

@@ -1,0 +1,162 @@
+import FWCore.ParameterSet.Config as cms
+import copy
+
+#from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import *
+#hplusTrackQualityCuts = PFTauQualityCuts.clone()
+#hplusTrackQualityCuts.maxTrackChi2 = cms.double(10.)
+#hplusTrackQualityCuts.minTrackHits = cms.uint32(8)
+
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByLeadingTrackFinding_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByLeadingTrackPtCut_cfi import *
+#from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByCharge_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByCharge_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByECALIsolation_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstElectron_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstMuon_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByTauPolarization_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByDeltaE_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByInvMass_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByNProngs_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTrackIsolation_cfi import *
+
+def addCaloDiscriminator(process, tau, name, module):
+    module.CaloTauProducer = cms.InputTag(tau+"Producer")
+    process.__setattr__(tau+name, module)
+    return module
+
+def addCaloDiscriminatorSequence(process, tau):
+    lst = []
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByLeadingTrackPtCut",
+                                caloRecoTauDiscriminationByLeadingTrackPtCut.clone(
+                                   MinPtLeadingObject = cms.double(20.0),
+                                   )))
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByCharge", 
+                                caloRecoTauDiscriminationByCharge.clone()))
+
+    # index -1 points to the last element in the list
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByECALIsolation", 
+                                caloRecoTauDiscriminationByECALIsolation.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationAgainstElectron",
+                                caloRecoTauDiscriminationAgainstElectron.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationAgainstMuon",
+                                caloRecoTauDiscriminationAgainstMuon.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByTauPolarization",
+                                caloRecoTauDiscriminationByTauPolarization.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByDeltaE",
+                                caloRecoTauDiscriminationByDeltaE.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByInvMass",
+                                caloRecoTauDiscriminationByInvMass.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByFlightPathSignificance",
+                                caloRecoTauDiscriminationByFlightPathSignificance.clone()))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy1Prong",
+                                caloRecoTauDiscriminationByNProngs.clone(
+                                  nProngs = cms.uint32(1)
+                                  )))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy3Prongs",
+                                caloRecoTauDiscriminationByNProngs.clone(
+                                  nProngs = cms.uint32(3)
+                                  )))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy3ProngCombined",
+                                caloRecoTauDiscriminationByNProngs.clone(
+                                  nProngs = cms.uint32(3),
+                                  Prediscriminants = cms.PSet(
+	                               BooleanOperator = cms.string("and"),
+	                               leadTrack = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding'),
+	                                   cut = cms.double(0.5)
+	                               ),
+	                               deltaE = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByDeltaE'),
+	                                   cut = cms.double(0.5)
+	                               ),
+	                               invMass = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByInvMass'),
+	                                   cut = cms.double(0.5)
+	                               ),
+	                               flightPathSig = cms.PSet(
+	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByFlightPathSignificance'),
+	                                   cut = cms.double(0.5)
+	                               )
+	                          )
+                                )))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy1or3Prongs",
+                                caloRecoTauDiscriminationByLeadingTrackFinding.clone(
+	 			    Prediscriminants = cms.PSet(
+	 			        BooleanOperator = cms.string("or"),
+	 			        oneProng = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1Prong'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        threeProng = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy3ProngCombined'),
+	 			            cut = cms.double(0.5)
+	 			        )
+	 			    )
+	 			)))
+    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscrimination",
+       			        caloRecoTauDiscriminationByTrackIsolation.clone(
+	                             Prediscriminants = cms.PSet(
+	 			        BooleanOperator = cms.string("and"),
+	 			        leadingTrack = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        charge = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        ecalIsolation = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        electronVeto = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        polarization = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByTauPolarization'),
+	 			            cut = cms.double(0.5)
+	 			        ),
+	 			        prongs = cms.PSet(
+	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1or3Prongs'),
+	 			            cut = cms.double(0.5)
+	 			        )
+	 			    )
+	 			)))
+
+    sequence = cms.Sequence()
+    for m in lst:
+        sequence *= m
+
+    process.__setattr__(tau+"HplusDiscriminationSequence", sequence)
+    return sequence
+
+def addHplusCaloTauDiscriminationSequence(process):
+    process.hplusCaloTauDiscriminationSequence = cms.Sequence(
+	addCaloDiscriminatorSequence(process, "caloRecoTau")
+    )
+
+    return process.hplusCaloTauDiscriminationSequence
