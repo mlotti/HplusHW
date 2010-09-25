@@ -47,7 +47,7 @@ def addDataSelection(process, dataVersion):
     # https://twiki.cern.ch/twiki/bin/view/CMS/HcalDPGAnomalousSignals
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/HcalNoiseInfoLibrary#How_do_I_reject_events_with_anom
     process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-    process.passedHBHENNoiseFilter = cms.EDProducer("EventCountProducer")
+    process.passedHBHENoiseFilter = cms.EDProducer("EventCountProducer")
     seq *= process.HBHENoiseFilter
     seq *= process.passedHBHENoiseFilter
 
