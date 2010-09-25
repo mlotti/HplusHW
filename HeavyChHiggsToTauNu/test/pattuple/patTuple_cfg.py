@@ -80,10 +80,20 @@ else:
             "keep GenRunInfoProduct_*_*_*"
             ])
 
+# Take our skim, run it independently of the rest of the job, don't
+# use it's result for selecting the events to save. It is used to just
+# to get the decision, which is saved by the framework to the event,
+# and it can be accessed later in the analysis stage.
+process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
+process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
+
 # Create paths
 process.path    = cms.Path(
     process.triggerSequence * # this is supposed to be empty for MC
     process.s 
+)
+process.skimPath = cms.Path(
+    process.heavyChHiggsToTauNuSequence
 )
 process.outpath = cms.EndPath(process.out)
 
