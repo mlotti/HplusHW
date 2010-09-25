@@ -39,19 +39,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
 
 # In case of data, add trigger
-from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
-process.triggerSequence = cms.Sequence()
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
-    process.TriggerFilter = triggerResultsFilter.clone()
-    process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", "HLT")
-    process.TriggerFilter.l1tResults = cms.InputTag("")
-    #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-    process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
-    process.allEvents = cms.EDProducer("EventCountProducer")
-    process.passedTrigger = cms.EDProducer("EventCountProducer")
-    process.triggerSequence *= process.allEvents
-    process.triggerSequence *= process.TriggerFilter
-    process.triggerSequence *= process.passedTrigger
+    process.collisionDataSelection = addDataSelection(process, dataVersion)
 
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
@@ -89,7 +80,7 @@ process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersio
 
 # Create paths
 process.path    = cms.Path(
-    process.triggerSequence * # this is supposed to be empty for MC
+    process.collisionDataSelection * # this is supposed to be empty for MC
     process.s 
 )
 process.skimPath = cms.Path(
