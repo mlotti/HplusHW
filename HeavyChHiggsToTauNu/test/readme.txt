@@ -20,12 +20,20 @@
 	cvs co -r V00-24-00 RecoTauTag/RecoTau
 	cvs co -r V02-07-04 JetMETCorrections/TauJet
 
+24.9.2010/M.Kortelainen CMSSW_3_8_4_patch2
+    Tags needed:
+        cvs co -r V08-00-26 PhysicsTools/PatAlgos
+        cvs up -r 1.29 PhysicsTools/PatAlgos/python/tools/tauTools.py
+        cvs co -r V00-24-00 RecoTauTag/Configuration
+        cvs co -r V00-24-00 RecoTauTag/RecoTau
+        cvs co -r V02-07-04 JetMETCorrections/TauJet
+        cvs co -r lumi2010-Sep21b RecoLuminosity/LumiDB
+        cvs co HiggsAnalysis/Skimming
+        rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+
 
 Multicrab instructions
 https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMultiCrab
 
-# Multicrab doesn't seem to work well with multiple configuration files
-cp multicrab_(pat|analysis).cfg multicrab.cfg 
-  edit multicrab.cfg
-multicrab -create
-multicrab -submit
+Look also the instructions on our twiki
+https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronic
