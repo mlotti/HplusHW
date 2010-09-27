@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
-#dataVersion = "35X"
-dataVersion = "35Xredigi"
+dataVersion = "35X"
+#dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
@@ -59,24 +59,24 @@ HChTrigger.customise(process, dataVersion)
 
 # Tau and jet ntuple producers
 process.tauNtuple = cms.EDProducer("HPlusTauNtupleProducer",
-    src = cms.untracked.InputTag("tauSelection"),
-    prefix = cms.untracked.string("tau_"),
-    tauDiscriminators = cms.untracked.VPSet(
-        cms.untracked.PSet(
-            discriminator = cms.untracked.string("HChTauIDtauPolarizationCont"),
-            branch = cms.untracked.string("discrHChTauIDtauPolarizationCont")
+    src = cms.InputTag("tauSelection"),
+    prefix = cms.string("tau_"),
+    tauDiscriminators = cms.VPSet(
+        cms.PSet(
+            discriminator = cms.string("HChTauIDtauPolarizationCont"),
+            branch = cms.string("discrHChTauIDtauPolarizationCont")
         )
     )
 )    
 process.jetNtuple = cms.EDProducer("HPlusJetNtupleProducer",
-    src = cms.untracked.InputTag("jetSelection"),
-    prefix = cms.untracked.string("jet_"),
+    src = cms.InputTag("jetSelection"),
+    prefix = cms.string("jet_"),
     # The module takes the *maximum* value of the b-discriminators
     # from the input jets, and stores that to the event
-    bDiscriminators = cms.untracked.VPSet(
-        cms.untracked.PSet(
-            discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-            branch = cms.untracked.string("maxBtrackCountingHighEffBJetTags")
+    bDiscriminators = cms.VPSet(
+        cms.PSet(
+            discriminator = cms.string("trackCountingHighEffBJetTags"),
+            branch = cms.string("maxBtrackCountingHighEffBJetTags")
         )
     )
 )
@@ -99,21 +99,21 @@ process.ntuplePath = cms.Path(
 # Helper function for MET producers to decrease the mount of typing
 def addMet(process, src, alias):
     metNtuple = cms.EDProducer("HPlusMETNtupleProducer",
-        src = cms.untracked.InputTag(src),
-        alias = cms.untracked.string(alias)
+        src = cms.InputTag(src),
+        alias = cms.string(alias)
     )
     transverseMass = cms.EDProducer("HPlusTransverseMassProducer",
         tauSrc = cms.InputTag("tauSelection"),
         metSrc = cms.InputTag(src)
     )
     transverseMassNtuple = cms.EDProducer("HPlusMassNtupleProducer",
-        src = cms.untracked.InputTag(alias+"TransverseMass"),
-        alias = cms.untracked.string(alias+"_transverseMass")
+        src = cms.InputTag(alias+"TransverseMass"),
+        alias = cms.string(alias+"_transverseMass")
     )
     deltaPhiNtuple = cms.EDProducer("HPlusDeltaPhiNtupleProducer",
-        src1 = cms.untracked.InputTag("tauSelection"),
-        src2 = cms.untracked.InputTag(src),
-        alias = cms.untracked.string(alias+"_deltaPhi")
+        src1 = cms.InputTag("tauSelection"),
+        src2 = cms.InputTag(src),
+        alias = cms.string(alias+"_deltaPhi")
     )
 
     process.__setattr__(alias+"Ntuple", metNtuple)

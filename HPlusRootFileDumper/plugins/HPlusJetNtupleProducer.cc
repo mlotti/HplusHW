@@ -39,8 +39,8 @@ class HPlusJetNtupleProducer: public edm::EDProducer {
 };
 
 HPlusJetNtupleProducer::HPlusJetNtupleProducer(const edm::ParameterSet& iConfig):
-  fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-  fPrefix(iConfig.getUntrackedParameter<std::string>("prefix"))
+  fSrc(iConfig.getParameter<edm::InputTag>("src")),
+  fPrefix(iConfig.getParameter<std::string>("prefix"))
 {
   std::string name;
 
@@ -51,13 +51,13 @@ HPlusJetNtupleProducer::HPlusJetNtupleProducer(const edm::ParameterSet& iConfig)
   // b-tagging branches (one branch per discriminator, value is the
   // maximum over the jets passing the pt/eta cuts)
   if(iConfig.exists("bDiscriminators")) {
-    std::vector<edm::ParameterSet> btagParam = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("bDiscriminators");
+    std::vector<edm::ParameterSet> btagParam = iConfig.getParameter<std::vector<edm::ParameterSet> >("bDiscriminators");
     fBDiscriminators.reserve(btagParam.size()); 
 
     for(size_t i=0; i<btagParam.size(); ++i) {
-      name = btagParam[i].getUntrackedParameter<std::string>("branch");
+      name = btagParam[i].getParameter<std::string>("branch");
       produces<float>(name).setBranchAlias(fPrefix+name);
-      fBDiscriminators.push_back(Discriminator(btagParam[i].getUntrackedParameter<std::string>("discriminator"), name));
+      fBDiscriminators.push_back(Discriminator(btagParam[i].getParameter<std::string>("discriminator"), name));
     }
   }
 }

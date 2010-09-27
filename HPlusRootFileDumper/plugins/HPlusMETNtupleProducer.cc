@@ -30,8 +30,8 @@ class HPlusMETNtupleProducer: public edm::EDProducer {
 };
 
 HPlusMETNtupleProducer::HPlusMETNtupleProducer(const edm::ParameterSet& iConfig):
-  fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-  fAlias(iConfig.getUntrackedParameter<std::string>("alias"))
+  fSrc(iConfig.getParameter<edm::InputTag>("src")),
+  fAlias(iConfig.getParameter<std::string>("alias"))
 {
   produces<double>().setBranchAlias(fAlias);
 }

@@ -39,8 +39,8 @@ class HPlusTauNtupleProducer: public edm::EDProducer {
 };
 
 HPlusTauNtupleProducer::HPlusTauNtupleProducer(const edm::ParameterSet& iConfig):
-  fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-  fPrefix(iConfig.getUntrackedParameter<std::string>("prefix"))
+  fSrc(iConfig.getParameter<edm::InputTag>("src")),
+  fPrefix(iConfig.getParameter<std::string>("prefix"))
 {
   std::string name;
 
@@ -53,12 +53,12 @@ HPlusTauNtupleProducer::HPlusTauNtupleProducer(const edm::ParameterSet& iConfig)
   produces<double>(name).setBranchAlias(fPrefix+name);
 
   if(iConfig.exists("tauDiscriminators")) {
-    std::vector<edm::ParameterSet> tauParam = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("tauDiscriminators");
+    std::vector<edm::ParameterSet> tauParam = iConfig.getParameter<std::vector<edm::ParameterSet> >("tauDiscriminators");
     fTauDiscriminators.reserve(tauParam.size());
     for(size_t i=0; i<tauParam.size(); ++i) {
-      name = tauParam[i].getUntrackedParameter<std::string>("branch");
+      name = tauParam[i].getParameter<std::string>("branch");
       produces<double>(name).setBranchAlias(fPrefix+name);
-      fTauDiscriminators.push_back(Discriminator(tauParam[i].getUntrackedParameter<std::string>("discriminator"), name));
+      fTauDiscriminators.push_back(Discriminator(tauParam[i].getParameter<std::string>("discriminator"), name));
     }
   }
 }

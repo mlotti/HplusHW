@@ -29,9 +29,9 @@ class HPlusDeltaPhiNtupleProducer: public edm::EDProducer {
 };
 
 HPlusDeltaPhiNtupleProducer::HPlusDeltaPhiNtupleProducer(const edm::ParameterSet& iConfig):
-  fSrc1(iConfig.getUntrackedParameter<edm::InputTag>("src1")),
-  fSrc2(iConfig.getUntrackedParameter<edm::InputTag>("src2")),
-  fAlias(iConfig.getUntrackedParameter<std::string>("alias"))
+  fSrc1(iConfig.getParameter<edm::InputTag>("src1")),
+  fSrc2(iConfig.getParameter<edm::InputTag>("src2")),
+  fAlias(iConfig.getParameter<std::string>("alias"))
 {
   produces<double>().setBranchAlias(fAlias);
 }
