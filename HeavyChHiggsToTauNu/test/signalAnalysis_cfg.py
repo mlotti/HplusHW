@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
-#dataVersion = "35X"
-dataVersion = "35Xredigi"
+dataVersion = "35X"
+#dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
@@ -69,9 +69,9 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
         trigger = cms.untracked.string("HLT_SingleLooseIsoTau20")
     ),
     tauSelection = cms.untracked.PSet(
-        #src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
+        src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
         #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
-        src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"),
+        #src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"),
         #src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
         ptCut = cms.untracked.double(20),
         etaCut = cms.untracked.double(2.4),
