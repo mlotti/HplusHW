@@ -13,6 +13,7 @@ class DataVersion:
             raise Exception("Unknown dataVersion '%s', look HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion for allowed versions")
 
         self.trigger = triggerProcessMap[dataVersion]
+        self.version = dataVersion
 
         if dataVersion == "data":
             self.is_data = True
@@ -23,14 +24,15 @@ class DataVersion:
             self.is_data = False
             self.globalTag = "START38_V9::All"
 
+            if dataVersion == "35X":
+                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/pattuple_6_1_MSU.root"
+                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
+                self.analysisDefaultFileMadhatterDcap = "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
+
             if dataVersion == "35Xredigi":
                 self.patDefaultFileCastor = "rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
             if dataVersion == "36X":
                 self.patDefaultFileMadhatter = "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"
-            
-                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/pattuple_6_1_MSU.root"
-                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
-                self.analysisDefaultFileMadhatterDcap = "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v2/d538bad796104165ef547eb8f3e812a0/pattuple_6_1_MSU.root"
 
         self.is_35X = False
         if dataVersion in ["35X", "35Xredigi"]:
@@ -52,14 +54,22 @@ class DataVersion:
         return self.globalTag
 
     def getPatDefaultFileCastor(self):
+        if not hasattr(self, "patDefaultFileCastor"):
+            raise Exception("No default file for PAT in CASTOR for dataVersion "+self.version)
         return self.patDefaultFileCastor
 
     def getPatDefaultFileMadhatter(self):
+        if not hasattr(self, "patDefaultFileMadhatter"):
+            raise Exception("No default file for PAT in madhatter for dataVersion "+self.version)
         return self.patDefaultFileMadhatter
 
     def getAnalysisDefaultFileCastor(self):
-        return self.getAnalysisDefaultFileCastor
+        if not hasattr(self, "analysisDefaultFileCastor"):
+            raise Exception("No default file for analysis in CASTOR for dataVersion "+self.version)
+        return self.analysisDefaultFileCastor
 
     def getAnalysisDefaultFileMadhatter(self):
-        return self.getAnalysisDefaultFileMadhatter
+        if not hasattr(self, "analysisDefaultFileMadhatter"):
+            raise Exception("No default file for analysis in madhatter for dataVersion "+self.version)
+        return self.analysisDefaultFileMadhatter
 
