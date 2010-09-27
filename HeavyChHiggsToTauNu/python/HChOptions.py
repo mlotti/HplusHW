@@ -5,10 +5,15 @@ import sys
 def getOptions():
     options = VarParsing.VarParsing()
     options.register("crossSection",
-                     0., # default value
+                     -1., # default value
                      options.multiplicity.singleton, # singleton or list
                      options.varType.float,          # string, int, or float
                      "Cross section of the dataset (stored to histograms ROOT file)")
+    options.register("luminosity",
+                     -1., # default value
+                     options.multiplicity.singleton, # singleton or list
+                     options.varType.float,          # string, int, or float
+                     "Integrated luminosity of the dataset (stored to histograms ROOT file)")
     options.register("dataVersion",
                      "", # default value
                      options.multiplicity.singleton, # singleton or list

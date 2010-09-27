@@ -52,14 +52,17 @@ process.TFileService.fileName = "histograms.root"
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
     src = cms.untracked.InputTag("generator")
 )
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
-    crossSection = cms.untracked.double(options.crossSection)
-)
+process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
+if options.crossSection >= 0.:
+    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
+    print "Dataset cross section has been set to %g pb" % options.crossSection
+if options.luminosity >= 0:
+    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
+    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 process.infoPath = cms.Path(
     process.genRunInfo +
     process.configInfo
 )
-print "Dataset cross section has been set to %g pb" % options.crossSection
 
 
 # Signal analysis module
