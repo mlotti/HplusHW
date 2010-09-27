@@ -15,7 +15,7 @@
 21.9.2010/S.Lehti CMSSW_3_8_4
     Tags needed:
 	cvs co -r V08-00-26 PhysicsTools/PatAlgos
-	cvs up -r 1.29 PhysicsTools/PatAlgos/python/tools/tauTools.py
+	cvs up -r 1.30 PhysicsTools/PatAlgos/python/tools/tauTools.py
 	cvs co -r V00-24-00 RecoTauTag/Configuration
 	cvs co -r V00-24-00 RecoTauTag/RecoTau
 	cvs co -r V02-07-04 JetMETCorrections/TauJet
