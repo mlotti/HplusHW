@@ -12,6 +12,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscrimination_cfi as HChTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsTauIDDiscriminationContinuous_cfi as HChTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsCaloTauIDDiscrimination_cfi as HChCaloTauDiscriminators
+import HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsCaloTauIDDiscriminationContinuous_cfi as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 
@@ -32,6 +33,7 @@ def addPat(process, dataVersion):
     HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
 
     HChCaloTauDiscriminators.addHplusCaloTauDiscriminationSequence(process)
+    HChCaloTauDiscriminatorsCont.addHplusCaloTauDiscriminationSequenceCont(process)
 
     process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
 
@@ -44,6 +46,7 @@ def addPat(process, dataVersion):
 	process.hplusTauDiscriminationSequenceCont *
 	process.produceAndDiscriminateHPSPFTaus *
 	process.hplusCaloTauDiscriminationSequence *
+	process.hplusCaloTauDiscriminationSequenceCont *
         process.patDefaultSequence
     )
 
