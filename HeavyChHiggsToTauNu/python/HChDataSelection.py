@@ -32,15 +32,15 @@ def addDataSelection(process, dataVersion):
 
     # Filter out Beam Scraping events, see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Removal_of_Beam_Scraping_Events
-    process.noscraping = cms.EDFilter("FilterOutScraping",
+    process.scrapingVeto = cms.EDFilter("FilterOutScraping",
         applyfilter = cms.untracked.bool(True),
         debugOn = cms.untracked.bool(False),
         numtrack = cms.untracked.uint32(10),
         thresh = cms.untracked.double(0.25)
     )
-    process.passedBeamScraping = cms.EDProducer("EventCountProducer")
-    seq *= process.noscraping
-    seq *= process.passedBeamScraping
+    process.passedScrapingVeto = cms.EDProducer("EventCountProducer")
+    seq *= process.scrapingVeto
+    seq *= process.passedScrapingVeto
 
     # Reject events with anomalous HCAL noise, see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Anomalous_Signals_treatment_reco
