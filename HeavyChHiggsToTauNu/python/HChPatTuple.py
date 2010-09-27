@@ -38,13 +38,22 @@ def addPat(process, dataVersion):
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
+    # Count the number of primary vertices, and put into event
+    process.primaryVertexNumber = cms.EDProducer("HPlusVertexCountProducer",
+        src = cms.InputTag('offlinePrimaryVertices'),
+        alias = cms.string("primaryVertexNumber")
+    )
+    if out != None:
+        out.outputCommands.append("keep int_primaryVertexNumber_*_*")
+
     process.hplusPatSequence = cms.Sequence(
 	process.tautagging *
         process.hplusTauDiscriminationSequence *
 	process.hplusTauDiscriminationSequenceCont *
 	process.produceAndDiscriminateHPSPFTaus *
 	process.hplusCaloTauDiscriminationSequence *
-        process.patDefaultSequence
+        process.patDefaultSequence *
+        process.primaryVertexNumber
     )
 
     # Restrict input to AOD
