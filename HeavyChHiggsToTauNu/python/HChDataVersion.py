@@ -55,21 +55,25 @@ class DataVersion:
 
     def getPatDefaultFileCastor(self):
         if not hasattr(self, "patDefaultFileCastor"):
-            raise Exception("No default file for PAT in CASTOR for dataVersion "+self.version)
+            print "No default file for PAT in CASTOR for dataVersion "+self.version
+            return ""
         return self.patDefaultFileCastor
 
     def getPatDefaultFileMadhatter(self):
         if not hasattr(self, "patDefaultFileMadhatter"):
-            raise Exception("No default file for PAT in madhatter for dataVersion "+self.version)
+            print "No default file for PAT in madhatter for dataVersion "+self.version
+            return ""
         return self.patDefaultFileMadhatter
 
     def getAnalysisDefaultFileCastor(self):
         if not hasattr(self, "analysisDefaultFileCastor"):
-            raise Exception("No default file for analysis in CASTOR for dataVersion "+self.version)
+            print "No default file for analysis in CASTOR for dataVersion "+self.version
+            return ""
         return self.analysisDefaultFileCastor
 
     def getAnalysisDefaultFileMadhatter(self):
         if not hasattr(self, "analysisDefaultFileMadhatter"):
-            raise Exception("No default file for analysis in madhatter for dataVersion "+self.version)
+            print "No default file for analysis in madhatter for dataVersion "+self.version
+            return ""
         return self.analysisDefaultFileMadhatter
 
