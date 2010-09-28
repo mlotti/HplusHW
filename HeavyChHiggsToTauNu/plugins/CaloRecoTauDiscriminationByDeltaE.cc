@@ -59,7 +59,7 @@ double CaloRecoTauDiscriminationByDeltaE::DeltaE(const CaloTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->p() - 1;
+	return tracksE/tau->leadTrackHCAL3x3hitsEtSum() - 1.0;
 }
 
 DEFINE_FWK_MODULE(CaloRecoTauDiscriminationByDeltaE);

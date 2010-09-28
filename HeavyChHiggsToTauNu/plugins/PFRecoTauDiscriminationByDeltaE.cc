@@ -56,7 +56,13 @@ double PFRecoTauDiscriminationByDeltaE::DeltaE(const PFTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->p() - 1;
+
+	double hadrTauP = tau->momentum().r() * (1.0 - tau->emFraction());
+ 	if (tau->emFraction() >= 1.0) {
+  		return -1.0; // electron
+ 	} else {
+  		return tracksE / hadrTauP - 1.0;
+ 	}
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByDeltaE);
