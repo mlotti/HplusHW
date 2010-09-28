@@ -9,13 +9,7 @@
  * based on H+ tau ID by Lauri Wendland
  */
 
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
-
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "TLorentzVector.h"
 
 using namespace reco;
@@ -57,7 +51,6 @@ double CaloRecoTauDiscriminationByDeltaE::discriminate(const CaloTauRef& tau){
 double CaloRecoTauDiscriminationByDeltaE::DeltaE(const CaloTauRef& tau){
 	double tracksE = 0;
 	reco::TrackRefVector signalTracks = tau->signalTracks();
-//	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
 	for(size_t i = 0; i < signalTracks.size(); ++i){
 		TLorentzVector p4;
 		p4.SetXYZM(signalTracks[i]->px(), 

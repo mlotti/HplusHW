@@ -1,6 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-
-//#include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
 /* class CaloRecoTauDiscriminationByInvMass
@@ -9,13 +7,7 @@
  * based on H+ tau ID by Lauri Wendland
  */
 
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
-
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "TLorentzVector.h"
 
 using namespace reco;
@@ -42,7 +34,6 @@ class CaloRecoTauDiscriminationByInvMass : public CaloTauDiscriminationProducerB
 
 	double invMassMin,invMassMax;
 
-//	edm::InputTag PVProducer;
 	bool booleanOutput;
 };
 
@@ -58,7 +49,6 @@ double CaloRecoTauDiscriminationByInvMass::discriminate(const CaloTauRef& tau){
 
 double CaloRecoTauDiscriminationByInvMass::threeProngInvMass(const CaloTauRef& tau){
 	TLorentzVector sum;
-//	PFCandidateRefVector signalTracks = tau->signalPFChargedHadrCands();
 	reco::TrackRefVector signalTracks = tau->signalTracks();
         for(size_t i = 0; i < signalTracks.size(); ++i){                        
                 TLorentzVector p4;
