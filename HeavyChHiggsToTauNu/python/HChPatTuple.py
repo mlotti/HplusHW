@@ -102,7 +102,7 @@ def addPat(process, dataVersion):
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    process.patTaus.embedLeadTrack = True
+    # process.patTaus.embedLeadTrack = True
 
     # For some reason, embedding these for 35X data does NOT work for
     # calotaus (output module complains about trying to persist
@@ -165,6 +165,7 @@ def addPat(process, dataVersion):
                                    #"keep *_patPFTauProducerFixedCone_*_*",
                                    # keep these until the embedding problem with pat::Tau is fixed
                                    "keep recoPFCandidates_particleFlow_*_*",
+                                   "keep recoTracks_generalTracks_*_*"
                                    ])
 
     # MET
