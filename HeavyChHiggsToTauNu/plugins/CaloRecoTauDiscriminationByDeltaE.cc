@@ -3,7 +3,7 @@
 #include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
-/* class CaloRecoTauDiscriminationByDeltaE
+/* class CaloRecoTauDiscriminationByDeltaE 
  * created : September 23 2010,
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
  * based on H+ tau ID by Lauri Wendland
@@ -59,7 +59,7 @@ double CaloRecoTauDiscriminationByDeltaE::DeltaE(const CaloTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->momentum().r() - 1;
+	return tracksE/tau->p() - 1;
 }
 
 DEFINE_FWK_MODULE(CaloRecoTauDiscriminationByDeltaE);

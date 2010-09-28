@@ -56,7 +56,7 @@ double PFRecoTauDiscriminationByDeltaE::DeltaE(const PFTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->momentum().r() - 1;
+	return tracksE/tau->p() - 1;
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByDeltaE);
