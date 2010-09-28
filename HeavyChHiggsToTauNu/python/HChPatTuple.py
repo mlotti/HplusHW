@@ -159,9 +159,10 @@ def addPat(process, dataVersion):
     if out != None:
         out.outputCommands.extend(patEventContentNoCleaning)
 	out.outputCommands.extend(["drop *_selectedPatTaus_*_*",
-                                   "drop *_cleanPatTaus_*_*",
-                                   "drop *_patTaus_*_*",
-                                   "keep *_patPFTauProducerFixedCone_*_*",
+                                   #"keep *_cleanPatTaus_*_*",
+                                   #"drop *_cleanPatTaus_*_*",
+                                   #"keep *_patTaus*_*_*",
+                                   #"keep *_patPFTauProducerFixedCone_*_*",
                                    # keep these until the embedding problem with pat::Tau is fixed
                                    "keep recoPFCandidates_particleFlow_*_*",
                                    ])
