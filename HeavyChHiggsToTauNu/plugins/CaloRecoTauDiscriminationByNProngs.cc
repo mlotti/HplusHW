@@ -7,15 +7,6 @@
  * based on H+ tau ID by Lauri Wendland
  */
 
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
-
-#include "TLorentzVector.h"
-
 using namespace reco;
 using namespace std;
 
@@ -33,8 +24,6 @@ class CaloRecoTauDiscriminationByNProngs : public CaloTauDiscriminationProducerB
 	double discriminate(const reco::CaloTauRef&);
 
     private:
-
-//	CaloTauQualityCutWrapper qualityCuts_;
 
 	uint32_t nprongs;
 	bool booleanOutput;

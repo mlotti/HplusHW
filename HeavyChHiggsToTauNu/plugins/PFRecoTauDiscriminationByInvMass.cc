@@ -1,6 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-//#include "DataFormats/Candidate/interface/LeafCandidate.h"
-#include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
 /* class PFRecoTauDiscriminationByInvMass
@@ -8,13 +6,6 @@
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
  * based on H+ tau ID by Lauri Wendland
  */
-
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
 
 #include "TLorentzVector.h"
 
@@ -42,7 +33,6 @@ class PFRecoTauDiscriminationByInvMass : public PFTauDiscriminationProducerBase 
 
 	double invMassMin,invMassMax;
 
-//	edm::InputTag PVProducer;
 	bool booleanOutput;
 };
 

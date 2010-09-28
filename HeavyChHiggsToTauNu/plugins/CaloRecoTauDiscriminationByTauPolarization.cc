@@ -22,7 +22,6 @@ class CaloRecoTauDiscriminationByTauPolarization : public CaloTauDiscriminationP
 	double discriminate(const CaloTauRef&);
 
     private:
-//	PFTauQualityCutWrapper qualityCuts_;
 
 	bool booleanOutput;
 	double rTauMin;

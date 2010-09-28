@@ -1,5 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-//#include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 
 /* class PFRecoTauDiscriminationByTauPolarization
@@ -35,7 +34,6 @@ void PFRecoTauDiscriminationByTauPolarization::beginEvent(const Event& event, co
 double PFRecoTauDiscriminationByTauPolarization::discriminate(const PFTauRef& tau){
 
 	double rTau = 0;
-	//if(tau->p() > 0) rTau = tau->leadTrack()->p()/tau->p();
         // rtau for PFTau has to be calculated for leading PF charged hadronic candidate
         // calculating it from leadingTrack can (and will) give rtau > 1!
 	if(tau.isNonnull() && tau->p() > 0 && tau->leadPFChargedHadrCand().isNonnull()) rTau = tau->leadPFChargedHadrCand()->p()/tau->p();

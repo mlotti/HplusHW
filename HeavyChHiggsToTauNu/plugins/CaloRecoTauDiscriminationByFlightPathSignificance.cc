@@ -1,6 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-
-//#include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
 /* class CaloRecoTauDiscriminationByFlightPathSignificance
@@ -78,16 +76,10 @@ double CaloRecoTauDiscriminationByFlightPathSignificance::threeProngFlightPathSi
 
 //Secondary vertex	
 	reco::TrackRefVector signalTracks = tau->signalTracks();
-//	const PFCandidateRefVector pfSignalCandidates = tau->signalPFCands();
 	vector<TransientTrack> transientTracks;
-//	RefVector<PFCandidateCollection>::const_iterator iTrack;
-//        for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
 	for(size_t i = 0; i < signalTracks.size(); ++i){
-//		const PFCandidate& pfCand = *(iTrack->get());
-//		if(pfCand.trackRef().isNonnull()){
-                  const TransientTrack transientTrack = transientTrackBuilder->build(signalTracks[i]);
-                  transientTracks.push_back(transientTrack);
-//                }
+        	const TransientTrack transientTrack = transientTrackBuilder->build(signalTracks[i]);
+                transientTracks.push_back(transientTrack);
 	}
         if(transientTracks.size() > 1){
                 KalmanVertexFitter kvf(true);

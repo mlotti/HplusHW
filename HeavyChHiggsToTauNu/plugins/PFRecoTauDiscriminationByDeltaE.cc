@@ -1,6 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-//#include "DataFormats/Candidate/interface/LeafCandidate.h"
-#include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
 /* class PFRecoTauDiscriminationByDeltaE
@@ -8,13 +6,6 @@
  * contributors : Sami Lehti (sami.lehti@cern.ch ; HIP, Helsinki)
  * based on H+ tau ID by Lauri Wendland
  */
-
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
 
 #include "TLorentzVector.h"
 
@@ -39,8 +30,6 @@ class PFRecoTauDiscriminationByDeltaE : public PFTauDiscriminationProducerBase  
 	double DeltaE(const PFTauRef&);
 
 	double chargedPionMass;
-
-//	PFTauQualityCutWrapper qualityCuts_;
 
 	double deltaEmin,deltaEmax;
 	bool booleanOutput;
@@ -67,7 +56,7 @@ double PFRecoTauDiscriminationByDeltaE::DeltaE(const PFTauRef& tau){
                            chargedPionMass);
 		tracksE += p4.E();
 	}
-	return tracksE/tau->momentum().r() - 1;
+	return tracksE/tau->p() - 1;
 }
 
 DEFINE_FWK_MODULE(PFRecoTauDiscriminationByDeltaE);

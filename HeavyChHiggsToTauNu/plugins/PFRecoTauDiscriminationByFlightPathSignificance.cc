@@ -1,5 +1,4 @@
 #include "RecoTauTag/RecoTau/interface/TauDiscriminationProducerBase.h"
-//#include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "RecoTauTag/TauTagTools/interface/PFTauQualityCutWrapper.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -80,7 +79,7 @@ double PFRecoTauDiscriminationByFlightPathSignificance::threeProngFlightPathSig(
 	double flightPathSignificance = 0;
 
 //Secondary vertex	
-	const PFCandidateRefVector pfSignalCandidates = tau->signalPFCands();
+	const PFCandidateRefVector pfSignalCandidates = tau->signalPFChargedHadrCands();
 	vector<TransientTrack> transientTracks;
 	RefVector<PFCandidateCollection>::const_iterator iTrack;
         for(iTrack = pfSignalCandidates.begin(); iTrack!= pfSignalCandidates.end(); iTrack++){
