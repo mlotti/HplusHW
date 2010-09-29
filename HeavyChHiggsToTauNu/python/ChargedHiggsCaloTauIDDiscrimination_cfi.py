@@ -41,10 +41,6 @@ def addCaloDiscriminatorSequence(process, tau):
                                 caloRecoTauDiscriminationByECALIsolation.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationAgainstElectron",
-                                caloRecoTauDiscriminationAgainstElectron.clone()))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
-
     lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationAgainstMuon",
                                 caloRecoTauDiscriminationAgainstMuon.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
@@ -133,7 +129,7 @@ def addCaloDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        electronVeto = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationAgainstElectron'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        polarization = cms.PSet(
