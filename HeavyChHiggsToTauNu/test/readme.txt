@@ -41,6 +41,7 @@
         cvs co -r V02-07-04 JetMETCorrections/TauJet
         cvs co -r lumi2010-Sep21b RecoLuminosity/LumiDB
         cvs co HiggsAnalysis/Skimming
+	cvs co CondFormats/JetMETObjects/data
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
         rm RecoTauTag/RecoTau/plugins/RecoTauMVADiscriminator.cc
 
