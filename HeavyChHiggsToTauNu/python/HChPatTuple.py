@@ -35,6 +35,16 @@ def addPat(process, dataVersion):
     HChCaloTauDiscriminators.addHplusCaloTauDiscriminationSequence(process)
     HChCaloTauDiscriminatorsCont.addHplusCaloTauDiscriminationSequenceCont(process)
 
+    # These are already in 36X AOD, se remove them from the tautagging
+    # sequence
+    if not dataVersion.is35X():
+        process.tautagging.remove(process.jptRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
+        
     process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
 
     # PAT Layer 0+1
