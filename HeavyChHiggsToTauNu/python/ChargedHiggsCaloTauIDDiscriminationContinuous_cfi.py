@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 #import copy
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByTauPolarization_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByDeltaE_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByInvMass_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByNProngs_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTauPolarization_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByDeltaE_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByInvMass_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByNProngs_cfi import *
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsCaloTauIDDiscrimination_cfi import addCaloDiscriminator
 

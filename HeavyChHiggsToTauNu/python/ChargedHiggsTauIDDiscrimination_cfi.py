@@ -12,11 +12,11 @@ from RecoTauTag.RecoTau.PFRecoTauDiscriminationByCharge_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByECALIsolation_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationAgainstElectron_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationAgainstMuon_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByTauPolarization_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByDeltaE_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByInvMass_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByFlightPathSignificance_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationByNProngs_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTauPolarization_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByDeltaE_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByInvMass_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByFlightPathSignificance_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationByNProngs_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByTrackIsolation_cfi import *
 
 def addDiscriminator(process, tau, name, module):

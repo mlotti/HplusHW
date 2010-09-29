@@ -1,23 +1,17 @@
 import FWCore.ParameterSet.Config as cms
 import copy
 
-#from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import *
-#hplusTrackQualityCuts = PFTauQualityCuts.clone()
-#hplusTrackQualityCuts.maxTrackChi2 = cms.double(10.)
-#hplusTrackQualityCuts.minTrackHits = cms.uint32(8)
-
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByLeadingTrackFinding_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByLeadingTrackPtCut_cfi import *
-#from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByCharge_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByCharge_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByCharge_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByECALIsolation_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstElectron_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationAgainstMuon_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByTauPolarization_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByDeltaE_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByInvMass_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationByNProngs_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTauPolarization_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByDeltaE_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByInvMass_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
+from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByNProngs_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTrackIsolation_cfi import *
 
 def addCaloDiscriminator(process, tau, name, module):
