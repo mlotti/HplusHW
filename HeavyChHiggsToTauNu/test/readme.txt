@@ -60,7 +60,8 @@
         cvs co RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
         cvs co RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByNProngs_cfi.py
         cvs co RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByTauPolarization_cfi.py
-	cvs co RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByIsolation_cfi.py
+	cvs co RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs_cfi.py
+	cvs co RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 	cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
         cvs co -r lumi2010-Sep21b RecoLuminosity/LumiDB
         cvs co HiggsAnalysis/Skimming
