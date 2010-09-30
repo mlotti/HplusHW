@@ -7,7 +7,7 @@ from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByInvMass_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
 from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByNProngs_cfi import *
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.ChargedHiggsCaloTauIDDiscrimination_cfi import addCaloDiscriminator
+from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggs_cfi import addCaloDiscriminator
 
 def addCaloDiscriminatorSequenceCont(process, tau):
     lst = []
