@@ -67,13 +67,13 @@ def addDiscriminatorSequence(process, tau):
                                 pfRecoTauDiscriminationByFlightPathSignificance.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy1Prong",
+    lst.append(addDiscriminator(process, tau, "DiscriminationBy1Prong",
                                 pfRecoTauDiscriminationByNProngs.clone(
                                   nProngs = cms.uint32(1)
                                   )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy3Prongs",
+    lst.append(addDiscriminator(process, tau, "DiscriminationBy3Prongs",
                                 pfRecoTauDiscriminationByNProngs.clone(
                                   nProngs = cms.uint32(3)
                                   )))
@@ -109,7 +109,7 @@ def addDiscriminatorSequence(process, tau):
 	 			    Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("or"),
 	 			        oneProng = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1Prong'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationBy1Prong'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        threeProng = cms.PSet(

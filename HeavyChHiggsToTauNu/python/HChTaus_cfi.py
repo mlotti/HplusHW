@@ -6,8 +6,8 @@ HChTauIDSources = [("HChTauIDleadingTrackPtCut", "HplusTauDiscriminationByLeadin
                    ("HChTauIDDeltaE", "DiscriminationByDeltaE"),
                    ("HChTauIDInvMass", "DiscriminationByInvMass"),
                    ("HChTauIDFlightPathSignif", "DiscriminationByFlightPathSignificance"),
-                   ("HChTauID1Prong", "HplusTauDiscriminationBy1Prong"),
-                   ("HChTauID3Prongs", "HplusTauDiscriminationBy3Prongs"),
+                   ("HChTauID1Prong", "DiscriminationBy1Prong"),
+                   ("HChTauID3Prongs", "DiscriminationBy3Prongs"),
                    ("HChTauID3ProngCombined", "HplusTauDiscriminationBy3ProngCombined"),
                    ("HChTauID1or3Prongs", "HplusTauDiscriminationBy1or3Prongs"),
                    ("HChTauID", "HplusTauDiscrimination")]
