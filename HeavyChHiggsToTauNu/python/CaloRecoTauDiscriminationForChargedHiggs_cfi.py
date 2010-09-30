@@ -27,7 +27,7 @@ def addCaloDiscriminatorSequence(process, tau):
                                    MinPtLeadingObject = cms.double(20.0),
                                    )))
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByCharge", 
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationByCharge", 
                                 caloRecoTauDiscriminationByCharge.clone()))
 
     # index -1 points to the last element in the list
@@ -115,7 +115,7 @@ def addCaloDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        charge = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationByCharge'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        ecalIsolation = cms.PSet(

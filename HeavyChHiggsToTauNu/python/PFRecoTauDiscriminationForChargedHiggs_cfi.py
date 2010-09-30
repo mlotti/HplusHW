@@ -35,7 +35,7 @@ def addDiscriminatorSequence(process, tau):
                                    qualityCuts = hplusTrackQualityCuts
                                    )))
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByCharge", 
+    lst.append(addDiscriminator(process, tau, "DiscriminationByCharge", 
                                 pfRecoTauDiscriminationByCharge.clone()))
 
     # index -1 points to the last element in the list
@@ -127,7 +127,7 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        charge = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByCharge'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationByCharge'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        ecalIsolation = cms.PSet(
