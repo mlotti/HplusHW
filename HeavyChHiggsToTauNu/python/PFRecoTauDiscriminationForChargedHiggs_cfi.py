@@ -59,7 +59,7 @@ def addDiscriminatorSequence(process, tau):
                                 pfRecoTauDiscriminationByDeltaE.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
     
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByInvMass",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByInvMass",
                                 pfRecoTauDiscriminationByInvMass.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
@@ -93,7 +93,7 @@ def addDiscriminatorSequence(process, tau):
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               invMass = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByInvMass'),
+	                                   Producer = cms.InputTag(tau+'DiscriminationByInvMass'),
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               flightPathSig = cms.PSet(

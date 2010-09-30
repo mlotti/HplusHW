@@ -24,7 +24,7 @@ def addDiscriminatorSequenceCont(process, tau):
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByInvMassCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByInvMassCont",
                                 pfRecoTauDiscriminationByInvMass.clone(
 					BooleanOutput = cms.bool(False)
 				)))
