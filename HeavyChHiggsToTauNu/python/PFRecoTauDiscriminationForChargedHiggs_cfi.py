@@ -26,10 +26,8 @@ def addDiscriminator(process, tau, name, module):
 
 def addDiscriminatorSequence(process, tau):
     lst = []
-#    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByLeadingTrackFinding", 
-#                                pfRecoTauDiscriminationByLeadingTrackFinding.clone()))
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByLeadingTrackPtCut",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsByLeadingTrackPtCut",
                                 pfRecoTauDiscriminationByLeadingTrackPtCut.clone(
                                    MinPtLeadingObject = cms.double(20.0),
                                    qualityCuts = hplusTrackQualityCuts
@@ -39,15 +37,15 @@ def addDiscriminatorSequence(process, tau):
                                 pfRecoTauDiscriminationByCharge.clone()))
 
     # index -1 points to the last element in the list
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByECALIsolation", 
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsByECALIsolation", 
                                 pfRecoTauDiscriminationByECALIsolation.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationAgainstElectron",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsAgainstElectron",
                                 pfRecoTauDiscriminationAgainstElectron.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationAgainstMuon",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsAgainstMuon",
                                 pfRecoTauDiscriminationAgainstMuon.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
@@ -79,7 +77,7 @@ def addDiscriminatorSequence(process, tau):
                                   )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy3ProngCombined",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsBy3ProngCombined",
                                 pfRecoTauDiscriminationByNProngs.clone(
                                   nProngs = cms.uint32(3),
                                   Prediscriminants = cms.PSet(
@@ -104,7 +102,7 @@ def addDiscriminatorSequence(process, tau):
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationBy1or3Prongs",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggsBy1or3Prongs",
                                 pfRecoTauDiscriminationByLeadingTrackFinding.clone(
 	 			    Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("or"),
@@ -113,17 +111,17 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        threeProng = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy3ProngCombined'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsBy3ProngCombined'),
 	 			            cut = cms.double(0.5)
 	 			        )
 	 			    )
 	 			)))
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscrimination",
+    lst.append(addDiscriminator(process, tau, "DiscriminationForChargedHiggs",
        			        pfRecoTauDiscriminationByTrackIsolation.clone(
 	                             Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("and"),
 	 			        leadingTrack = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsByLeadingTrackPtCut'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        charge = cms.PSet(
@@ -131,11 +129,11 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        ecalIsolation = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsByECALIsolation'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        electronVeto = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationAgainstElectron'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsAgainstElectron'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        polarization = cms.PSet(
@@ -143,7 +141,7 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        prongs = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1or3Prongs'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsBy1or3Prongs'),
 	 			            cut = cms.double(0.5)
 	 			        )
 	 			    )
@@ -156,12 +154,12 @@ def addDiscriminatorSequence(process, tau):
     process.__setattr__(tau+"HplusDiscriminationSequence", sequence)
     return sequence
 
-def addHplusTauDiscriminationSequence(process):
-    process.hplusTauDiscriminationSequence = cms.Sequence(
+def addPFTauDiscriminationSequenceForChargedHiggs(process):
+    process.PFTauDiscriminationSequenceForChargedHiggs = cms.Sequence(
         addDiscriminatorSequence(process, "fixedConePFTau") *
 #	addDiscriminatorSequence(process, "fixedConeHighEffPFTau") * # not available on all datasets!
         addDiscriminatorSequence(process, "shrinkingConePFTau") 
 #	addDiscriminatorSequence(process, "caloTau")
     )
 
-    return process.hplusTauDiscriminationSequence
+    return process.PFTauDiscriminationSequenceForChargedHiggs

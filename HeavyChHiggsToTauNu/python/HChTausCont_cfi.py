@@ -4,4 +4,4 @@ HChTauIDSourcesCont = [("HChTauIDtauPolarizationCont", "DiscriminationByTauPolar
                        ("HChTauIDDeltaECont", "DiscriminationByDeltaECont"),
                        ("HChTauIDInvMassCont", "DiscriminationByInvMassCont"),
                        ("HChTauIDFlightPathSignifCont", "DiscriminationByFlightPathSignificanceCont"),
-                       ("HChTauIDnProngsCont", "HplusTauDiscriminationByNProngsCont")]
+                       ("HChTauIDnProngsCont", "DiscriminationByNProngsCont")]

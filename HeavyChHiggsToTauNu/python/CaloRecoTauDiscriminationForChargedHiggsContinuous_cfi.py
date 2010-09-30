@@ -36,7 +36,7 @@ def addCaloDiscriminatorSequenceCont(process, tau):
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByNProngsCont",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationByNProngsCont",
                                 caloRecoTauDiscriminationByNProngs.clone(
 					BooleanOutput = cms.bool(False),
                                   	nProngs       = cms.uint32(0)
@@ -51,11 +51,10 @@ def addCaloDiscriminatorSequenceCont(process, tau):
 
     return sequence
 
-
-def addHplusCaloTauDiscriminationSequenceCont(process):
-    process.hplusCaloTauDiscriminationSequenceCont = cms.Sequence(
+def addCaloTauDiscriminationSequenceForChargedHiggsCont(process):
+    process.CaloTauDiscriminationSequenceForChargedHiggsCont = cms.Sequence(
         addCaloDiscriminatorSequenceCont(process, "caloRecoTau")
     )
 
-    return process.hplusCaloTauDiscriminationSequenceCont
+    return process.CaloTauDiscriminationSequenceForChargedHiggsCont
 

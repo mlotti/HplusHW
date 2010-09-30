@@ -36,7 +36,7 @@ def addDiscriminatorSequenceCont(process, tau):
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByNProngsCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByNProngsCont",
                                 pfRecoTauDiscriminationByNProngs.clone(
 					BooleanOutput = cms.bool(False),
                                   	nProngs       = cms.uint32(0)
@@ -52,11 +52,11 @@ def addDiscriminatorSequenceCont(process, tau):
     return sequence
 
 
-def addHplusTauDiscriminationSequenceCont(process):
-    process.hplusTauDiscriminationSequenceCont = cms.Sequence(
+def addPFTauDiscriminationSequenceForChargedHiggsCont(process):
+    process.PFTauDiscriminationSequenceForChargedHiggsCont = cms.Sequence(
         addDiscriminatorSequenceCont(process, "fixedConePFTau") *
 #        addDiscriminatorSequenceCont(process, "fixedConeHighEffPFTau") * # not availabel in all datasets!
         addDiscriminatorSequenceCont(process, "shrinkingConePFTau")
     )
 
-    return process.hplusTauDiscriminationSequenceCont
+    return process.PFTauDiscriminationSequenceForChargedHiggsCont

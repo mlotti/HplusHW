@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-HChTauIDSources = [("HChTauIDleadingTrackPtCut", "HplusTauDiscriminationByLeadingTrackPtCut"),
+HChTauIDSources = [("HChTauIDleadingTrackPtCut", "DiscriminationForChargedHiggsByLeadingTrackPtCut"),
                    ("HChTauIDcharge", "DiscriminationByCharge"),
                    ("HChTauIDtauPolarization", "DiscriminationByTauPolarization"),
                    ("HChTauIDDeltaE", "DiscriminationByDeltaE"),
@@ -8,9 +8,9 @@ HChTauIDSources = [("HChTauIDleadingTrackPtCut", "HplusTauDiscriminationByLeadin
                    ("HChTauIDFlightPathSignif", "DiscriminationByFlightPathSignificance"),
                    ("HChTauID1Prong", "DiscriminationBy1Prong"),
                    ("HChTauID3Prongs", "DiscriminationBy3Prongs"),
-                   ("HChTauID3ProngCombined", "HplusTauDiscriminationBy3ProngCombined"),
-                   ("HChTauID1or3Prongs", "HplusTauDiscriminationBy1or3Prongs"),
-                   ("HChTauID", "HplusTauDiscrimination")]
+                   ("HChTauID3ProngCombined", "DiscriminationForChargedHiggsBy3ProngCombined"),
+                   ("HChTauID1or3Prongs", "DiscriminationForChargedHiggsBy1or3Prongs"),
+                   ("HChTauID", "DiscriminationForChargedHiggs")]
 
 def extendEventContent(content, process):
     content.append("keep *_fixedConePFTaus_*_"+process.name_())

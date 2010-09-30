@@ -22,7 +22,7 @@ def addCaloDiscriminator(process, tau, name, module):
 def addCaloDiscriminatorSequence(process, tau):
     lst = []
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByLeadingTrackPtCut",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggsByLeadingTrackPtCut",
                                 caloRecoTauDiscriminationByLeadingTrackPtCut.clone(
                                    MinPtLeadingObject = cms.double(20.0),
                                    )))
@@ -31,11 +31,11 @@ def addCaloDiscriminatorSequence(process, tau):
                                 caloRecoTauDiscriminationByCharge.clone()))
 
     # index -1 points to the last element in the list
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByECALIsolation", 
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggsByECALIsolation", 
                                 caloRecoTauDiscriminationByECALIsolation.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationAgainstMuon",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggsAgainstMuon",
                                 caloRecoTauDiscriminationAgainstMuon.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
@@ -67,7 +67,7 @@ def addCaloDiscriminatorSequence(process, tau):
                                   )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy3ProngCombined",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggsBy3ProngCombined",
                                 caloRecoTauDiscriminationByNProngs.clone(
                                   nProngs = cms.uint32(3),
                                   Prediscriminants = cms.PSet(
@@ -92,7 +92,7 @@ def addCaloDiscriminatorSequence(process, tau):
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationBy1or3Prongs",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggsBy1or3Prongs",
                                 caloRecoTauDiscriminationByLeadingTrackFinding.clone(
 	 			    Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("or"),
@@ -101,17 +101,17 @@ def addCaloDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        threeProng = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy3ProngCombined'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsBy3ProngCombined'),
 	 			            cut = cms.double(0.5)
 	 			        )
 	 			    )
 	 			)))
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscrimination",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationForChargedHiggs",
        			        caloRecoTauDiscriminationByTrackIsolation.clone(
 	                             Prediscriminants = cms.PSet(
 	 			        BooleanOperator = cms.string("and"),
 	 			        leadingTrack = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByLeadingTrackPtCut'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsByLeadingTrackPtCut'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        charge = cms.PSet(
@@ -119,7 +119,7 @@ def addCaloDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        ecalIsolation = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByECALIsolation'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsByECALIsolation'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        electronVeto = cms.PSet(
@@ -131,7 +131,7 @@ def addCaloDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        prongs = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationBy1or3Prongs'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationForChargedHiggsBy1or3Prongs'),
 	 			            cut = cms.double(0.5)
 	 			        )
 	 			    )
@@ -144,9 +144,9 @@ def addCaloDiscriminatorSequence(process, tau):
     process.__setattr__(tau+"HplusDiscriminationSequence", sequence)
     return sequence
 
-def addHplusCaloTauDiscriminationSequence(process):
-    process.hplusCaloTauDiscriminationSequence = cms.Sequence(
+def addCaloTauDiscriminationSequenceForChargedHiggs(process):
+    process.CaloTauDiscriminationSequenceForChargedHiggs = cms.Sequence(
 	addCaloDiscriminatorSequence(process, "caloRecoTau")
     )
 
-    return process.hplusCaloTauDiscriminationSequence
+    return process.CaloTauDiscriminationSequenceForChargedHiggs

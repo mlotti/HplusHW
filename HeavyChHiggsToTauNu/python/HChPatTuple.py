@@ -9,8 +9,8 @@ from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggs_cfi as HChTauDiscriminators
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
@@ -29,11 +29,11 @@ def addPat(process, dataVersion):
 
     # Tau Discriminators
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
-    HChTauDiscriminators.addHplusTauDiscriminationSequence(process)
-    HChTauDiscriminatorsCont.addHplusTauDiscriminationSequenceCont(process)
+    HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
+    HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
 
-    HChCaloTauDiscriminators.addHplusCaloTauDiscriminationSequence(process)
-    HChCaloTauDiscriminatorsCont.addHplusCaloTauDiscriminationSequenceCont(process)
+    HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
+    HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
     # These are already in 36X AOD, se remove them from the tautagging
     # sequence
@@ -60,11 +60,11 @@ def addPat(process, dataVersion):
 
     process.hplusPatSequence = cms.Sequence(
 	process.tautagging *
-        process.hplusTauDiscriminationSequence *
-	process.hplusTauDiscriminationSequenceCont *
+        process.PFTauDiscriminationSequenceForChargedHiggs *
+	process.PFTauDiscriminationSequenceForChargedHiggsCont *
 	process.produceAndDiscriminateHPSPFTaus *
-	process.hplusCaloTauDiscriminationSequence *
-	process.hplusCaloTauDiscriminationSequenceCont *
+	process.CaloTauDiscriminationSequenceForChargedHiggs *
+	process.CaloTauDiscriminationSequenceForChargedHiggsCont *
         process.patDefaultSequence *
         process.primaryVertexNumber
     )
