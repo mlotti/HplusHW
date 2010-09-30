@@ -30,7 +30,7 @@ def addDiscriminatorSequenceCont(process, tau):
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByFlightPathSignificanceCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByFlightPathSignificanceCont",
                                 pfRecoTauDiscriminationByFlightPathSignificance.clone(
                                         BooleanOutput = cms.bool(False)
                                 )))

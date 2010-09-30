@@ -51,7 +51,7 @@ def addCaloDiscriminatorSequence(process, tau):
                                 caloRecoTauDiscriminationByInvMass.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByFlightPathSignificance",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationByFlightPathSignificance",
                                 caloRecoTauDiscriminationByFlightPathSignificance.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
@@ -85,7 +85,7 @@ def addCaloDiscriminatorSequence(process, tau):
 	                                   cut = cms.double(0.5)
 	                               ),
 	                               flightPathSig = cms.PSet(
-	                                   Producer = cms.InputTag(tau+'HplusTauDiscriminationByFlightPathSignificance'),
+	                                   Producer = cms.InputTag(tau+'DiscriminationByFlightPathSignificance'),
 	                                   cut = cms.double(0.5)
 	                               )
 	                          )
