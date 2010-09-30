@@ -12,7 +12,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggs_
 def addCaloDiscriminatorSequenceCont(process, tau):
     lst = []
 
-    lst.append(addCaloDiscriminator(process, tau, "HplusTauDiscriminationByTauPolarizationCont",
+    lst.append(addCaloDiscriminator(process, tau, "DiscriminationByTauPolarizationCont",
                                 caloRecoTauDiscriminationByTauPolarization.clone(
 					BooleanOutput = cms.bool(False)
 				)))

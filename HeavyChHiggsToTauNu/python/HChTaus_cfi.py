@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 HChTauIDSources = [("HChTauIDleadingTrackPtCut", "HplusTauDiscriminationByLeadingTrackPtCut"),
                    ("HChTauIDcharge", "HplusTauDiscriminationByCharge"),
-                   ("HChTauIDtauPolarization", "HplusTauDiscriminationByTauPolarization"),
+                   ("HChTauIDtauPolarization", "DiscriminationByTauPolarization"),
                    ("HChTauIDDeltaE", "HplusTauDiscriminationByDeltaE"),
                    ("HChTauIDInvMass", "HplusTauDiscriminationByInvMass"),
                    ("HChTauIDFlightPathSignif", "HplusTauDiscriminationByFlightPathSignificance"),

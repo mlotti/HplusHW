@@ -51,7 +51,7 @@ def addDiscriminatorSequence(process, tau):
                                 pfRecoTauDiscriminationAgainstMuon.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByTauPolarization",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByTauPolarization",
                                 pfRecoTauDiscriminationByTauPolarization.clone()))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
@@ -139,7 +139,7 @@ def addDiscriminatorSequence(process, tau):
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        polarization = cms.PSet(
-	 			            Producer = cms.InputTag(tau+'HplusTauDiscriminationByTauPolarization'),
+	 			            Producer = cms.InputTag(tau+'DiscriminationByTauPolarization'),
 	 			            cut = cms.double(0.5)
 	 			        ),
 	 			        prongs = cms.PSet(

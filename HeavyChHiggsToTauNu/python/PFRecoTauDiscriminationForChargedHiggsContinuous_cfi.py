@@ -12,7 +12,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggs_cf
 def addDiscriminatorSequenceCont(process, tau):
     lst = []
 
-    lst.append(addDiscriminator(process, tau, "HplusTauDiscriminationByTauPolarizationCont",
+    lst.append(addDiscriminator(process, tau, "DiscriminationByTauPolarizationCont",
                                 pfRecoTauDiscriminationByTauPolarization.clone(
 					BooleanOutput = cms.bool(False)
 				)))
