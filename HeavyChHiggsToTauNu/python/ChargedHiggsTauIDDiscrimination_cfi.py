@@ -156,12 +156,9 @@ def addDiscriminatorSequence(process, tau):
     process.__setattr__(tau+"HplusDiscriminationSequence", sequence)
     return sequence
 
-def addHplusTauDiscriminationSequence(process):
-    process.hplusTauDiscriminationSequence = cms.Sequence(
-        addDiscriminatorSequence(process, "fixedConePFTau") *
-#	addDiscriminatorSequence(process, "fixedConeHighEffPFTau") * # not available on all datasets!
-        addDiscriminatorSequence(process, "shrinkingConePFTau") 
-#	addDiscriminatorSequence(process, "caloTau")
-    )
+def addHplusTauDiscriminationSequence(process, dataVersion):
+    process.hplusTauDiscriminationSequence = cms.Sequence(addDiscriminatorSequence(process, "shrinkingConePFTau"))
+    if not dataVersion.is38X():
+        process.hplusTauDiscriminationSequence *= addDiscriminatorSequence(process, "fixedConePFTau")
 
     return process.hplusTauDiscriminationSequence

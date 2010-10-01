@@ -52,11 +52,9 @@ def addDiscriminatorSequenceCont(process, tau):
     return sequence
 
 
-def addHplusTauDiscriminationSequenceCont(process):
-    process.hplusTauDiscriminationSequenceCont = cms.Sequence(
-        addDiscriminatorSequenceCont(process, "fixedConePFTau") *
-#        addDiscriminatorSequenceCont(process, "fixedConeHighEffPFTau") * # not availabel in all datasets!
-        addDiscriminatorSequenceCont(process, "shrinkingConePFTau")
-    )
+def addHplusTauDiscriminationSequenceCont(process, dataVersion):
+    process.hplusTauDiscriminationSequenceCont = cms.Sequence(addDiscriminatorSequenceCont(process, "shrinkingConePFTau"))
+    if not dataVersion.is38X():
+        process.hplusTauDiscriminationSequenceCont *= addDiscriminatorSequenceCont(process, "fixedConePFTau")
 
     return process.hplusTauDiscriminationSequenceCont

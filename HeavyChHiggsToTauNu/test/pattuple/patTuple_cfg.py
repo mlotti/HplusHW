@@ -7,7 +7,9 @@ dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-#dataVersion = "data" # this is for collision data 
+#dataVersion = "38X"
+#dataVersion = "36Xdata" # this is for collision data 
+#dataVersion = "38Xdata" # this is for collision data 
 
 options = getOptions()
 if options.dataVersion != "":
@@ -77,6 +79,9 @@ else:
 # and it can be accessed later in the analysis stage.
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
+if dataVersion.is38X() and dataVersion.isMC():
+    # SingleLooseIsoTau20 is not available in 38X MC
+    process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ["HLT_SingleIsoTau20_Trk5_MET20"]
 
 # Create paths
 process.path    = cms.Path(
