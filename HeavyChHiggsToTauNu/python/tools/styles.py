@@ -1,9 +1,11 @@
 import ROOT
+import copy
 
 class Style:
-    def __init__(self, style, color):
+    def __init__(self, style, color, fill=False):
         self.style = 22 + style
         self.color = color
+        self.fill = fill
 
     def apply(self, h):
         h.SetLineWidth(2)
@@ -11,7 +13,9 @@ class Style:
         h.SetMarkerColor(self.color)
         h.SetMarkerStyle(self.style)
         h.SetMarkerSize(1)
-        
+
+        if self.fill:
+            h.SetFillColor(self.color)
 
 styles = [
     Style(3, ROOT.kBlack),
@@ -33,3 +37,14 @@ styles = [
 
 def applyStyle(h, ind):
     styles[ind].apply(h)
+
+
+def getStyles():
+    return styles
+
+
+def getStylesFill():
+    stys = copy.deepcopy(styles)
+    for s in stys:
+        s.fill = True
+    return stys
