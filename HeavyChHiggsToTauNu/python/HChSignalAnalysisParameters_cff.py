@@ -33,5 +33,6 @@ MET = cms.untracked.PSet(
     src = cms.untracked.InputTag("patMETs"), # calo MET
     #src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    METCut = cms.untracked.double(40)
 )
 
