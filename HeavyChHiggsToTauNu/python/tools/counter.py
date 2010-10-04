@@ -37,10 +37,26 @@ class Dataset:
         return self.name
 
     def setCrossSection(self, value):
+        if self.isData():
+            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
         return self.info["crossSection"]
+
+    def setLuminosity(self, value):
+        if self.isMC():
+            raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
+        self.info["luminosity"] = value
+
+    def getLuminosity(self):
+        return self.info["luminosity"]
+
+    def isData(self):
+        return "luminosity" in self.info
+
+    def isMC(self):
+        return "crossSection" in self.info
 
     def setAllEvents(self, allevTuple):
         self.nAllEvents = allevTuple[1]
