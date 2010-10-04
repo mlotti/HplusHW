@@ -63,7 +63,7 @@
 	cvs co RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs_cfi.py
 	cvs co RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 	cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
-        cvs co -r lumi2010-Sep21b RecoLuminosity/LumiDB
+        cvs co -r lumi2010-Oct01 RecoLuminosity/LumiDB
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
