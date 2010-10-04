@@ -80,6 +80,8 @@ def addPat(process, dataVersion):
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     process.patJets.addJetID = False
+    if dataVersion.is38X():
+        process.patJets.addTagInfos = False
 
     addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                      'AK5', 'JPT',
@@ -156,9 +158,10 @@ def addPat(process, dataVersion):
                 algoLabel = "shrinkingCone",
                 typeLabel = "PFTau")
 
-    addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
-                algoLabel = "fixedCone",
-                typeLabel = "PFTau")
+    if not dataVersion.is38X():
+        addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
+                         algoLabel = "fixedCone",
+                         typeLabel = "PFTau")
 
     addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                 algoLabel = "hps",
