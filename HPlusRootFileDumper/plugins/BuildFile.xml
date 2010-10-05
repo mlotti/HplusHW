@@ -1,0 +1,9 @@
+<library   file="*.cc" name="HPlusRootFileDumperPlugins">
+  <flags   EDM_PLUGIN="1"/>
+  <use   name="FWCore/Framework"/>
+  <use   name="FWCore/MessageLogger"/>
+  <use   name="FWCore/ServiceRegistry"/>
+  <use   name="DataFormats/Candidate"/>
+  <use   name="DataFormats/PatCandidates"/>
+</library>
+

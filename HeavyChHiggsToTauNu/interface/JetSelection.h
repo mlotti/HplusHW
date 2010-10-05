@@ -4,9 +4,8 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/PatCandidates/interface/Tau.h"
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 namespace edm {
@@ -24,10 +23,14 @@ namespace HPlus {
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
 
     const edm::PtrVector<pat::Jet>& getSelectedJets() const {
       return fSelectedJets;
+    }
+
+    uint32_t getMinNumber() const {
+      return fMin;
     }
 
   private:

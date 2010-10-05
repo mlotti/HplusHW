@@ -1,30 +1,54 @@
 import ROOT
 
+class Style:
+    def __init__(self, style, color):
+        self.style = 22 + style
+        self.color = color
+
+    def apply(self, h):
+        h.SetLineWidth(2)
+        h.SetLineColor(self.color)
+        h.SetMarkerColor(self.color)
+        h.SetMarkerStyle(self.style)
+        h.SetMarkerSize(1)
+
+class StyleFill:
+    def __init__(self, style):
+        self.style = style
+
+    def apply(self, h):
+        self.style.apply(h)
+        h.SetFillColor(self.style.color)
+
+dataStyle = Style(-2, ROOT.kBlack)
+
+styles = [
+    Style(4, ROOT.kBlue),
+    Style(5, ROOT.kRed),
+    Style(1, ROOT.kGreen+2),
+    Style(2, ROOT.kMagenta),
+    Style(6, ROOT.kCyan),
+    Style(7, ROOT.kYellow+2),
+    Style(8, ROOT.kOrange+9),
+    Style(9, ROOT.kOrange+3),
+    Style(10, ROOT.kMagenta+3),
+    Style(11, ROOT.kGray+2),
+    Style(12, ROOT.kBlue+3),
+    Style(13, ROOT.kOrange+1),
+    Style(14, ROOT.kCyan-5),
+    Style(0, ROOT.kBlue),
+    Style(3, ROOT.kBlack)
+    ]
+
+
 def applyStyle(h, ind):
-    styles = [
-        (3, ROOT.kBlack),
-        (4, ROOT.kBlue),
-        (5, ROOT.kRed),
-        (1, ROOT.kGreen+2),
-        (2, ROOT.kMagenta),
-        (6, ROOT.kCyan),
-        (7, ROOT.kYellow+2),
-        (8, ROOT.kOrange+9),
-        (9, ROOT.kOrange+3),
-        (10, ROOT.kMagenta+3),
-        (11, ROOT.kGray+2),
-        (12, ROOT.kBlue+3),
-        (13, ROOT.kOrange+1),
-        (14, ROOT.kCyan-5),
-        (0, ROOT.kBlue),
-        ]
+    styles[ind].apply(h)
 
-    style = 22 + styles[ind][0]
-    color = styles[ind][1]
+def getDataStyle():
+    return dataStyle
 
-    h.SetLineWidth(2)
-    h.SetLineColor(color)
-    h.SetMarkerColor(color)
-    h.SetMarkerStyle(style)
-    h.SetMarkerSize(1)
+def getStyles():
+    return styles
 
+def getStylesFill():
+    return [StyleFill(s) for s in styles]

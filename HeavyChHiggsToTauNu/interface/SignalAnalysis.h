@@ -37,9 +37,12 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     METSelection fMETSelection;
-
+    
+    // Histograms
     TH1 *hTransverseMass;
     TH1 *hDeltaPhi;
+    TH1 *hAlphaT;
+    TH1 *hAlphaTInvMass;
   };
 }
 
