@@ -161,7 +161,6 @@ namespace HPlus {
       sAlpha.fMHt     = fMHt;
       sAlpha.vDiJetMassesNoTau = vDiJetMassesNoTau;
     } //eof: else{
-    std::cout << "\n" << std::endl;
       return sAlpha;
   }
 
@@ -231,11 +230,11 @@ namespace HPlus {
   
   /// Determine the Group without the Tau-jet.
   if(bTauJetInGroupA){
-    std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
+    // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
     vJetsInTauPseudoJet    = vJetsInPseudoJetA;
     vJetsInNonTauPseudoJet = vJetsInPseudoJetB;
   }else{
-    std::cout << "Tau-jet found in Pseudo-Jet B" << std::endl;
+    // std::cout << "Tau-jet found in Pseudo-Jet B" << std::endl;
     vJetsInTauPseudoJet    = vJetsInPseudoJetB;
     vJetsInNonTauPseudoJet = vJetsInPseudoJetA;
   }
