@@ -48,11 +48,6 @@ datasets = getDatasetsFromMulticrabCfg()
 # Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["QCD_Pt120to170"])
 #datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
-tmp = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
-dataset = tmp.getDataset("TTbar_Htaunu_M80")
-dataset.setName("Data")
-dataset.info = {"luminosity": 4}
-datasets.append(dataset)
 
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
@@ -74,6 +69,9 @@ tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
 # Merge all collision data datasets to one, it has name "Data"
 # Note: this must be done before normalizeMCByLuminosity()
 tauPts.mergeDataDatasets()
+
+# Example how to set the luminosity of a data dataset
+#tauPts.getDataset("Data").setLuminosity(5)
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
