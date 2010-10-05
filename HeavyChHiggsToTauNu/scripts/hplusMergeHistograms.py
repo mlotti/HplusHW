@@ -24,12 +24,16 @@ def main(opts, args):
         #ret = subprocess.call(["mergeTFileServiceHistograms",
         #                       "-o", mergeName,
         #                       "-i"]+files)
+        if os.path.exists(mergeName):
+            os.unlink(mergeName)
+
         ret = subprocess.call(["hadd", mergeName]+files) 
         if ret != 0:
             print "Merging failed with exit code %d" % ret
             return 1
         mergedFiles.append(mergeName)
 
+    print
     print "Merged histogram files:"
     for f in mergedFiles:
         print "  %s" % f
