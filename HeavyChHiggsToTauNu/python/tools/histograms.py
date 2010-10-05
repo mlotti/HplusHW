@@ -26,7 +26,7 @@ def createLegend(x1, y1, x2, y2):
     legend = ROOT.TLegend(x1, y1, x2, y2)
     legend.SetFillColor(ROOT.kWhite)
     legend.SetBorderSize(1)
-    legend.SetMargin(0.1)
+    #legend.SetMargin(0.1)
     return legend
 
 class DatasetSet:
@@ -57,8 +57,64 @@ class HistoSetData:
         self.legendStyle = "l"
         self.drawStyle = "HIST"
 
+    def getName(self):
+        return self.dataset.getName()
+
+    def setLegendLabel(self, label):
+        self.legendLabel = label
+
+    def setLegendStyle(self, style):
+        self.legendStyle = style
+
     def addToLegend(self, legend):
         legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
+
+    def applyStyle(self, styleList):
+        style = styleList.pop(0)
+        style.apply(self.histo)
+
+    def getXmin(self):
+        return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+
+    def getXmax(self):
+        return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
+
+class HistoSetDataStacked:
+    def __init__(self, data, name):
+        self.data = data
+        self.drawStyle = "HIST"
+        self.name = name
+        
+        self.histo = ROOT.THStack()
+        histos = [d.histo for d in self.data]
+        histos.reverse()
+        for h in histos:
+            self.histo.Add(h)
+
+    def getName(self):
+        return self.name
+
+    def setLegendLabel(self, label):
+        for d in self.data:
+            d.setLegendLabel(label)
+
+    def setLegendStyle(self, style):
+        for d in self.data:
+            d.setLegendStyle(style)
+
+    def addToLegend(self, legend):
+        for d in self.data:
+            d.addToLegend(legend)
+
+    def applyStyle(self, styleList):
+        for d in self.data:
+            d.applyStyle(styleList)
+
+    def getXmin(self):
+        return min([d.getXmin() for d in self.data])
+
+    def getXmax(self):
+        return max([d.getXmax() for d in self.data])
 
 class HistoSet:
     def __init__(self, datasets, histos):
@@ -77,7 +133,7 @@ class HistoSet:
     def populateMap(self):
         self.datasetMap = {}
         for d in self.data:
-            self.datasetMap[d.dataset.getName()] = d
+            self.datasetMap[d.getName()] = d
 
     def reorderAndSelectDatasets(self, nameList):
         selected = []
@@ -89,7 +145,7 @@ class HistoSet:
     def removeDatasets(self, nameList):
         selected = []
         for d in self.data:
-            if not d.dataset.getName() in nameList:
+            if not d.getName() in nameList:
                 selected.append(d)
         self.data = selected
         self.populateMap()
@@ -101,20 +157,20 @@ class HistoSet:
         return [d.dataset for d in self.data]
 
     def getDatasetNames(self):
-        return [d.dataset.getName() for d in self.data]
+        return [d.getName() for d in self.data]
 
     def getMCDatasetNames(self):
         names = []
         for d in self.data:
             if d.dataset.isMC():
-                names.append(d.dataset.getName())
+                names.append(d.getName())
         return names
 
     def getDataDatasetNames(self):
         names = []
         for d in self.data:
             if d.dataset.isData():
-                names.append(d.dataset.getName())
+                names.append(d.getName())
         return names
 
     def getHisto(self, name):
@@ -124,21 +180,33 @@ class HistoSet:
         return [d.dataset for d in self.data]
 
     def setHistoLegendLabel(self, name, label):
-        self.datasetMap[name].legendLabel = label
+        if not name in self.datasetMap:
+            print "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
+            return
+
+        self.datasetMap[name].setLegendLabel(label)
+
+    def setHistoLegendLabels(self, nameMap):
+        for name, label in nameMap.iteritems():
+            self.setHistoLegendLabel(name, label)
 
     def setHistoLegendStyle(self, name, style):
-        self.datasetMap[name].legendStyle = style
+        if not name in self.datasetMap:
+            print "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
+            return
+
+        self.datasetMap[name].setLegendStyle(style)
 
     def setHistoLegendStyleAll(self, style):
         for d in self.data:
-            d.legendStyle = style
+            d.setLegendStyle(style)
 
     def setHistoDrawStyle(self, name, style):
         self.datasetMap[name].drawStyle = style
 
     def setHistoDrawStyleAll(self, style):
         for d in self.data:
-            d.legendStyle = style
+            d.drawStyle = style
 
     def getLuminosity(self):
         if self.luminosity == None:
@@ -148,12 +216,21 @@ class HistoSet:
     def addLuminosityText(self, x=0.65, y=0.85):
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
+    def applyStyle(self, name, style):
+        if not name in self.datasetMap:
+            print "WARNING: Tried to set histogram style for dataset '%s', which doesn't exist." % name
+            return
+
+        self.datasetMap[name].applyStyle(style)
+
     def applyStyles(self, styleList):
         if len(styleList) < len(self.data):
             raise Exception("len(styleList) = %d < len(self.histos) = %d" % (len(styleList), len(self.histos)))
 
-        for i,d in enumerate(self.data):
-            styleList[i].apply(d.histo)
+        # The list is modified by the applyStyle() methods
+        lst = styleList[:]
+        for d in self.data:
+            d.applyStyle(lst)
 
     def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
         c = ROOT.TCanvas(name)
@@ -164,9 +241,9 @@ class HistoSet:
             ymax = 1.1*ymax
 
         if xmin == None:
-            xmin = min([d.histo.GetXaxis().GetBinLowEdge(d.histo.GetXaxis().GetFirst()) for d in self.data])
+            xmin = min([d.getXmin() for d in self.data])
         if xmax == None:
-            xmax = max([d.histo.GetXaxis().GetBinUpEdge(d.histo.GetXaxis().GetLast()) for d in self.data])
+            xmax = min([d.getXmax() for d in self.data])
 
         frame = c.DrawFrame(xmin, ymin, xmax, ymax)
         frame.GetXaxis().SetTitle(self.data[0].histo.GetXaxis().GetTitle())
@@ -178,42 +255,27 @@ class HistoSet:
         for d in self.data:
             d.addToLegend(legend)
 
-    def draw(self, inReverseOrder=True, stackDatasets=[], stackDrawStyle=""):
-        histos = [(d.histo, d.drawStyle, d.dataset.getName()) for d in self.data]
+    def draw(self, inReverseOrder=True):
+        histos = [(d.histo, d.drawStyle, d.getName()) for d in self.data]
         if inReverseOrder:
             histos.reverse()
 
-        if len(stackDatasets) > 0:
-            tmp = []
-            firstIndex = None
-            stack = ROOT.THStack()
-            for t in histos:
-                if t[2] in stackDatasets:
-                    stack.Add(t[0])
-                    if firstIndex == None:
-                        firstIndex = len(tmp)
-                else:
-                    tmp.append(t)
-            tmp.insert(firstIndex, (stack, stackDrawStyle, "dummy"))
-            histos = tmp
-
         for h, style, dname in histos:
-            print h
             h.Draw(style+" same")
-
-    def drawMCStacked(self, inReverseOrder=True, stackDrawStyle=""):
-        self.draw(inReverseOrder, self.getMCDatasetNames(), stackDrawStyle)
 
     def mergeDataDatasets(self):
         self.mergeDatasets("Data", self.getDataDatasetNames())
 
-    def mergeDatasets(self, newName, datasetNameList):
+    def stackMCDatasets(self):
+        self.stackDatasets("MC", self.getMCDatasetNames())
+
+    def mergeStackInternalHelper(self, datasetNameList, task):
         indices = []
         dataCount = 0
         mcCount = 0
         newData = []
         for i, d in enumerate(self.data):
-            if d.dataset.getName() in datasetNameList:
+            if d.getName() in datasetNameList:
                 indices.append(i)
                 if d.dataset.isData():
                     dataCount += 1
@@ -225,33 +287,37 @@ class HistoSet:
                 newData.append(d)
 
         if dataCount > 0 and mcCount > 0:
-            raise Exception("Can not merge data and MC datasets!")
+            raise Exception("Can not %s data and MC datasets!" % task)
 
         if len(indices) == 0:
-            print "Merging datasets: no datasets '" + ", ".join(datasetNameList) + "' found, not doing anything"
-            return
+            print "Dataset %s: no datasets '"%task + ", ".join(datasetNameList) + "' found, not doing anything"
+            return None
         if len(indices) == 1:
-            print "Merging datasets: one dataset '" + self.data[indices[0]].dataset.getName() + "' found from list '" + ", "+join(datasetNameList)+", not doing anything"
-            return
+            print "Dataset %s: one dataset '"%task + self.data[indices[0]].getName() + "' found from list '" + ", "+join(datasetNameList)+", not doing anything"
+            return None
         if len(indices) != len(datasetNameList):
             dlist = datasetNameList[:]
             for i in indices:
-                ind = dlist.index(self.data[i].dataset.getName())
+                ind = dlist.index(self.data[i].getName())
                 del dlist[ind]
-            print "WARNING: Tried to merge '"+ ", ".join(dlist) +"' which don't exist"
+            print "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+
+        isMC = mcCount > 0    
+        return (indices, newData, isMC)
+
+    def stackDatasets(self, newName, datasetNameList):
+        (indices, newData, isMC) = self.mergeStackInternalHelper(datasetNameList, "stack")
+
+        h = HistoSetDataStacked([self.data[i] for i in indices], newName)
+        newData.insert(indices[0], h)
+        self.data = newData
+        self.populateMap()
+
+    def mergeDatasets(self, newName, datasetNameList):
+        (indices, newData, isMC) = self.mergeStackInternalHelper(datasetNameList, "merge")
 
         dataset = None
-        if dataCount > 0:
-            if self.normalization == "one":
-                raise Exception("Can not merge data datasets after normalizeToOne!")
-
-            # Calculate the total integrated luminosity
-            lumiSum = 0.0
-            for i in indices:
-                lumiSum += self.data[i].dataset.getLuminosity()
-            dataset = counter.Dataset(newName, {"luminosity": lumiSum}, None)
-
-        else:
+        if isMC:
             if not self.normalization in ["byCrossSection", "byLuminosity", "toLuminosity"]:
                 raise Exception("MC datasets must be normalized by cross section or luminosity before merging!")
 
@@ -262,6 +328,15 @@ class HistoSet:
             for i in indices:
                 crossSum += self.data[i].dataset.getCrossSection()
             dataset = counter.Dataset(newName, {"crossSection": crossSum}, None)
+        else:
+            if self.normalization == "one":
+                raise Exception("Can not merge data datasets after normalizeToOne!")
+
+            # Calculate the total integrated luminosity
+            lumiSum = 0.0
+            for i in indices:
+                lumiSum += self.data[i].dataset.getLuminosity()
+            dataset = counter.Dataset(newName, {"luminosity": lumiSum}, None)
 
         # Sum the histograms in question, contents assumed to be
         # directly summable (same code for both methods)

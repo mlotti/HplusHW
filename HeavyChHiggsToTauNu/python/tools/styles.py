@@ -17,8 +17,9 @@ class Style:
         if self.fill:
             h.SetFillColor(self.color)
 
+dataStyle = Style(3, ROOT.kBlack)
+
 styles = [
-    Style(3, ROOT.kBlack),
     Style(4, ROOT.kBlue),
     Style(5, ROOT.kRed),
     Style(1, ROOT.kGreen+2),
@@ -35,13 +36,15 @@ styles = [
     Style(0, ROOT.kBlue),
     ]
 
+
 def applyStyle(h, ind):
     styles[ind].apply(h)
 
+def getDataStyle():
+    return dataStyle
 
 def getStyles():
     return styles
-
 
 def getStylesFill():
     stys = copy.deepcopy(styles)
