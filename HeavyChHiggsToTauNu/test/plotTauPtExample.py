@@ -1,11 +1,22 @@
 #!/usr/bin/env python
 
+###########################################################################
+#
+# This script is only intended as an example, please do NOT modify it.
+# For example, start from scratch and look here for help, or make a
+# copy of it and modify the copy (including removing all unnecessary
+# code).
+#
+###########################################################################
+
+
 import ROOT
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 legendLabels = {
+    "Data":                "Data",
     "TTbar_Htaunu_M80":    "H^{#pm} M=80",
     "TTToHpmToTauNu_M90":  "H^{#pm} M=90",
     "TTToHpmToTauNu_M100": "H^{#pm} M=100",
@@ -23,7 +34,8 @@ legendLabels = {
     "QCD_Pt230to300":      "QCD, 230 < #hat{p}_T < 300"}
 
 
-# Go to batch mode
+# Go to batch mode, comment if interactive mode is wanted (see on the
+# bottom of the script how to make it to wait input from user)
 ROOT.gROOT.SetBatch(True)
 
 # Apply TDR style
@@ -35,6 +47,12 @@ datasets = getDatasetsFromMulticrabCfg()
 
 # Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["QCD_Pt120to170"])
+#datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
+tmp = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
+dataset = tmp.getDataset("TTbar_Htaunu_M80")
+dataset.setName("Data")
+dataset.info = {"luminosity": 4}
+datasets.append(dataset)
 
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
@@ -48,6 +66,14 @@ tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
 # Print the list of datasets in the given HistoSet
 #print "\n".join(tauPts.getDatasetNames())
 
+# Example how to remove some datasets
+#tauPts.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
+#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
+#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
+
+# Merge all collision data datasets to one, it has name "Data"
+# Note: this must be done before normalizeMCByLuminosity()
+tauPts.mergeDataDatasets()
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -59,7 +85,7 @@ tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
 #tauPts.normalizeMCByLuminosity()
-#ylabel = "Events / 1 GeV/c"
+#ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
 tauPts.normalizeMCToLuminosity(4)
@@ -84,10 +110,11 @@ tauPts.setHistoLegendLabels(legendLabels) # many datasets, with dict
 tauPts.setHistoLegendStyleAll("F")
 tauPts.setHistoLegendStyle("Data", "p")
 
-# Apply the default styles
+# Apply the default styles (for all histograms, for MC histograms, for a single histogram)
 #tauPts.applyStyles(styles.getStyles())
-tauPts.applyStyles(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
+tauPts.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
 tauPts.applyStyle("Data", styles.getDataStyle())
+tauPts.setHistoDrawStyle("Data", "EP")
 
 
 # Example how to stack all MC datasets
@@ -107,8 +134,7 @@ legend = createLegend(0.7, 0.5, 0.9, 0.8)
 tauPts.addToLegend(legend)
 
 # Draw the plots
-tauPts.draw() # Normal draw, 
-#tauPts.drawMCStacked() # Draw MC datasets as stacked
+tauPts.draw()
 legend.Draw()
 
 # Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
@@ -119,5 +145,13 @@ addCmsPreliminaryText()
 addEnergyText(x=0.3, y=0.85)
 tauPts.addLuminosityText()
 
+
+# Script execution can be paused like this, it will continue after
+# user has given some input (which must include enter)
+#raw_input("Hit enter to continue")
+
+
 # Save TCanvas as png
 canvas.SaveAs(".png")
+#canvas.SaveAs(".eps")
+#canvas.SaveAs(".C")

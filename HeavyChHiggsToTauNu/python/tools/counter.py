@@ -36,6 +36,9 @@ class Dataset:
     def getName(self):
         return self.name
 
+    def setName(self, name):
+        self.name = name
+
     def setCrossSection(self, value):
         if self.isData():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)

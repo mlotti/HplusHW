@@ -36,13 +36,18 @@ class DatasetSet:
 
     def append(self, dataset):
         self.datasets.append(dataset)
-        self.datasetMap[dataset.getName] = dataset
+        self.datasetMap[dataset.getName()] = dataset
+
+    def extend(self, datasetset):
+        for d in datasetset.datasets:
+            self.append(d)
 
     def getDataset(self, name):
         return self[name]
 
     def __getitem__(self, name):
         return self.datasetMap[name]
+            
 
     def getHistoSet(self, histoName):
         histos = [d.getTFile().Get(histoName) for d in self.datasets]
@@ -59,6 +64,9 @@ class HistoSetData:
 
     def getName(self):
         return self.dataset.getName()
+
+    def setName(self, name):
+        self.dataset.setName(name)
 
     def setLegendLabel(self, label):
         self.legendLabel = label
@@ -93,6 +101,9 @@ class HistoSetDataStacked:
 
     def getName(self):
         return self.name
+
+    def setName(self, name):
+        self.name = name
 
     def setLegendLabel(self, label):
         for d in self.data:
@@ -173,6 +184,19 @@ class HistoSet:
                 names.append(d.getName())
         return names
 
+    def renameDataset(self, oldName, newName):
+        if newName in self.datasetMap:
+            raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
+        self.datasetMap[oldName].setName(newName)
+        self.populateMap()
+
+    def renameDatasets(self, nameMap):
+        for oldName, newName in nameMap.iteritems():
+            if newName in datasetMap:
+                raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
+            self.datasetMap[oldName].setName(newName)
+        self.populateMap()
+
     def getHisto(self, name):
         return self.datasetMap[name].histo
 
@@ -221,7 +245,7 @@ class HistoSet:
             print "WARNING: Tried to set histogram style for dataset '%s', which doesn't exist." % name
             return
 
-        self.datasetMap[name].applyStyle(style)
+        self.datasetMap[name].applyStyle([style])
 
     def applyStyles(self, styleList):
         if len(styleList) < len(self.data):
@@ -231,6 +255,16 @@ class HistoSet:
         lst = styleList[:]
         for d in self.data:
             d.applyStyle(lst)
+
+    def applyStylesMC(self, styleList):
+        mcDatasets = self.getMCDatasetNames()
+        if len(styleList) < len(mcDatasets):
+            raise Exception("len(styleList) = %d < len(mcDatasets) = %d" % (len(styleList), len(mcDatasets)))
+
+        # The list is modified by the applyStyle() methods
+        lst = styleList[:]
+        for name in mcDatasets:
+            self.datasetMap[name].applyStyle(lst)
 
     def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
         c = ROOT.TCanvas(name)
@@ -269,7 +303,7 @@ class HistoSet:
     def stackMCDatasets(self):
         self.stackDatasets("MC", self.getMCDatasetNames())
 
-    def mergeStackInternalHelper(self, datasetNameList, task):
+    def mergeStackInternalHelper(self, newName, datasetNameList, task):
         indices = []
         dataCount = 0
         mcCount = 0
@@ -293,7 +327,8 @@ class HistoSet:
             print "Dataset %s: no datasets '"%task + ", ".join(datasetNameList) + "' found, not doing anything"
             return None
         if len(indices) == 1:
-            print "Dataset %s: one dataset '"%task + self.data[indices[0]].getName() + "' found from list '" + ", "+join(datasetNameList)+", not doing anything"
+            print "Dataset %s: one dataset '"%task + self.data[indices[0]].getName() + "' found from list '" + ", ".join(datasetNameList)+", renaming it to '%s'" % newName
+            self.renameDataset(self.data[indices[0]].getName(), newName)
             return None
         if len(indices) != len(datasetNameList):
             dlist = datasetNameList[:]
@@ -306,7 +341,10 @@ class HistoSet:
         return (indices, newData, isMC)
 
     def stackDatasets(self, newName, datasetNameList):
-        (indices, newData, isMC) = self.mergeStackInternalHelper(datasetNameList, "stack")
+        tpl = self.mergeStackInternalHelper(newName, datasetNameList, "stack")
+        if tpl == None:
+            return
+        (indices, newData, isMC) = tpl
 
         h = HistoSetDataStacked([self.data[i] for i in indices], newName)
         newData.insert(indices[0], h)
@@ -314,7 +352,10 @@ class HistoSet:
         self.populateMap()
 
     def mergeDatasets(self, newName, datasetNameList):
-        (indices, newData, isMC) = self.mergeStackInternalHelper(datasetNameList, "merge")
+        tpl = self.mergeStackInternalHelper(newName, datasetNameList, "merge")
+        if tpl == None:
+            return
+        (indices, newData, isMC) = tpl
 
         dataset = None
         if isMC:
@@ -383,8 +424,10 @@ class HistoSet:
                     raise Exception("Only one data dataset may exist for normalizing byLuminosity; you can remove other data datasets, merge them or use normalizeMCToLuminosity(lumi)")
                 self.luminosity = d.dataset.getLuminosity()
 
+        if self.luminosity == None:
+            raise Exception("No collision data datasets, can not normalize by luminosity (you might want to consider normalizeMCToLuminosity(lumi) with explicit integrated luminosity")
 
-        self.normalizeMCToLuminosity(self, self.luminosity)
+        self.normalizeMCToLuminosity(self.luminosity)
         self.normalization = "byLuminosity"
 
     def normalizeMCToLuminosity(self, lumi):
