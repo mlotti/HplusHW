@@ -11,16 +11,16 @@ tauSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"), # this doesn't exist in 38X samples
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     #src = cms.untracked.InputTag("selectedPatTausHpsPFTau"),
-    ptCut = cms.untracked.double(20),
+    ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4),
-    leadingTrackPtCut = cms.untracked.double(10)
+    leadingTrackPtCut = cms.untracked.double(20)
 )
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
     cleanTauDR = cms.untracked.double(0.5),
-    ptCut = cms.untracked.double(20),
+    ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3)
 )
@@ -32,9 +32,9 @@ bTagging = cms.untracked.PSet(
 )
 
 MET = cms.untracked.PSet(
-    src = cms.untracked.InputTag("patMETs"), # calo MET
-    #src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(40)
+    METCut = cms.untracked.double(60)
 )
 
