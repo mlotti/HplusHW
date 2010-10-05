@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -21,7 +22,10 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms filled in the analysis body
-    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
+    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 250, 0.0, 500.0);
+    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 100, 0.0, 5.0);
+    hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 500, 0.0, 1000.0);
+    
   }
 
   SignalAnalysis::~SignalAnalysis() {}
@@ -43,7 +47,15 @@ namespace HPlus {
 
     if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
-    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
+    /////////////////////
+    EvtTopology myEvtTopology;
+    AlphaStruc sAlphaT = myEvtTopology.alphaT( *(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets() );
+    // std::cout << "sAlphaT.fAlphaT = " << sAlphaT.fAlphaT << std::endl;
+    hAlphaT->Fill(sAlphaT.fAlphaT);
+    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
+    for(int i= 0; i < diJetSize; i++){hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]);}
+
   }
 }
