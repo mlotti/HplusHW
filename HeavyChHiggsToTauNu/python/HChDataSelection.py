@@ -25,7 +25,13 @@ def addDataSelection(process, dataVersion):
     process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
     process.TriggerFilter.l1tResults = cms.InputTag("")
     #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-    process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
+    if dataVersion.isRun2010A():
+        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
+    elif dataVersion.isRun2010B():
+        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleIsoTau20_Trk15_MET20")
+    else:
+        raise Exception("Unsupported data version!")
+
     process.passedTrigger = cms.EDProducer("EventCountProducer")
     seq *= process.TriggerFilter
     seq *= process.passedTrigger

@@ -6,7 +6,8 @@ triggerProcessMap = {
     "36Xspring10": "REDIGI36",
     "37X": "REDIGI37X",
     "38X": "REDIGI38X",
-    "38Xdata": "HLT"
+    "38XdataRun2010A": "HLT",
+    "38XdataRun2010B": "HLT"
     }
 
 class DataVersion:
@@ -17,12 +18,19 @@ class DataVersion:
         self.trigger = triggerProcessMap[dataVersion]
         self.version = dataVersion
 
-        if dataVersion in ["36Xdata", "38Xdata"]:
+        if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
             self.globalTag = "GR_R_38X_V13::All"
 
             if dataVersion == "36Xdata":
                 self.patDefaultFileCastor = "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
+
+            self.is_runA = False
+            self.is_runB = False
+            if dataVersion == "38XdataRun2010A":
+                self.is_runA = True
+            if dataVersion == "38XdataRun2010B":
+                self.is_runB = True
         else:
             self.is_data = False
             self.globalTag = "START38_V12::All"
@@ -44,11 +52,17 @@ class DataVersion:
         self.is_38X = False
         if dataVersion in ["35X", "35Xredigi"]:
             self.is_35X = True
-        elif dataVersion in ["38X", "38Xdata"]:
+        elif dataVersion in ["38X", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_38X = True
 
     def isData(self):
         return self.is_data
+
+    def isRun2010A(self):
+        return self.is_runA
+
+    def isRun2010B(self):
+        return self.is_runB
 
     def isMC(self):
         return not self.is_data
