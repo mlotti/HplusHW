@@ -49,10 +49,8 @@ namespace HPlus {
 
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
-    /////////////////////
-    EvtTopology myEvtTopology;
-    AlphaStruc sAlphaT = myEvtTopology.alphaT( *(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets() );
-    // std::cout << "sAlphaT.fAlphaT = " << sAlphaT.fAlphaT << std::endl;
+
+    AlphaStruc sAlphaT = EvtTopology::alphaT( *(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets() );
     hAlphaT->Fill(sAlphaT.fAlphaT);
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]);}

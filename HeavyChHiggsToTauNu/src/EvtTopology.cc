@@ -56,116 +56,10 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "TLorentzVector.h"
 
-namespace HPlus {
-
-  AlphaStruc EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Description                                                                                                     ///
-  /// Returns the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1 jets. ///
-  /// This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance   ///
-  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the   ///
-  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                               ///
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    /// Declaration of variables 
-    std::vector<float> vEt, vPx, vPy, vPz;
-    std::vector<bool> vPseudo_jet1;
-    const bool bList = true;
-    const bool bTauJetExists = true;
-    /// Tau
-    TLorentzVector myTau;
-    myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
-    /// Fill vectors with Tau-jet information
-    vEt.push_back( myTau.Et() );
-    vPx.push_back( myTau.Px() );
-    vPy.push_back( myTau.Py() );
-    vPz.push_back( myTau.Pz() );
-
-    /// Loop over all selected jets
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
-      edm::Ptr<pat::Jet> iJet = *iter;
-      /// Fill vectors with jets information   
-      vEt.push_back( iJet->et() );
-      vPx.push_back( iJet->px() );
-      vPy.push_back( iJet->py() );
-      vPz.push_back( iJet->pz() );
-    }//eof: for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
-
-    /// Declaration of variables 
-    unsigned iNJets = vEt.size();
-    int iCombinationIndex = -1;
-    TLorentzVector dTmpVectorA;
-    TLorentzVector dTmpVectorB;
-    TLorentzVector dPseudoJetVectorA;
-    TLorentzVector dPseudoJetVectorB;
-    TLorentzVector dTauPseudoJetVector;
-    TLorentzVector dNonTauPseudoJetVector;
-    vector<TLorentzVector> vNonTauPseudoJetVector;
-    vector<TLorentzVector> vTauPseudoJetVector;
-
-    /// Calculate sums
-    fSum_et = accumulate( vEt.begin(), vEt.end(), 0.0 );
-    fSum_px = accumulate( vPx.begin(), vPx.end(), 0.0 );
-    fSum_py = accumulate( vPy.begin(), vPy.end(), 0.0 );
-    /// Minimum Delta Et for two pseudo-jets
-    fMin_delta_sum_et = -1.0;
-    
-    /// @@ iterate through different combinations
-    for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
-      fDelta_sum_et = 0.0;
-      std::vector<bool> jet;
-      /// @@ iterate through jets
-      for ( unsigned l=0; l < vEt.size(); l++ ) { 
-	// Bitwise shift of "k" by "l" positions to the right and compare to 1
-	fDelta_sum_et += vEt[l] * ( 1 - 2 * (int(k>>l)&1) ); 
-	// i.e.: fDelta_sum_et += vEt[l] * ( 1 - 2*0 );  if comparison is un-successful
-	//  or   fDelta_sum_et += vEt[l] * ( 1 - 2*1 );  if comparison is successful
-	// in this way you add up all Et from PseudoJetsGroupA (belonging to 0's group) and subtract that from PseudoJetsGroupB (1's group)
-	if ( bList ) { jet.push_back( (int(k>>l)&1) == 0 ); } 
-      } //eof:  for ( unsigned l=0; l < vEt.size(); l++ ) {
-      /// Find configuration with minimum value of DeltaHt 
-      if ( ( fabs(fDelta_sum_et) < fMin_delta_sum_et || fMin_delta_sum_et < 0.0 ) ) {
-	fMin_delta_sum_et = fabs(fDelta_sum_et);
-	iCombinationIndex = k; /// overwritten everytime a new minimum is found
-	if ( bList && jet.size() == vEt.size() ) {
-	  vPseudo_jet1.resize(jet.size());
-	} //eof: if ( bList && jet.size() == vEt.size() ) {
-      } //eof: if ( ( fabs(fDelta_sum_et) < fMin_delta_sum_et || fMin_delta_sum_et < 0.0 ) ) {
-    } //eof: for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
-
-    /// Get DiJet information from Pseudo-jets
-    vector<float> vDiJetMassesNoTau =  EvtTopology::alphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
-    
-    /// In the case something goes wrong...
-    if ( ( fMin_delta_sum_et < 0.0 ) || (!bTauJetExists) ){ 
-      /// Fill the function structure with -1.0
-      sAlpha.fAlphaT  = -1.0;
-      sAlpha.fJt      = -1.0;
-      sAlpha.fHt      = -1.0;
-      sAlpha.fDeltaHt = -1.0;
-      sAlpha.fMHt     = -1.0;
-    } //eof: if ( ( fMin_delta_sum_et < 0.0 ) || (bTauJetExists) ){
-    else{
-      /// Remember, the Tau-Jet is stored in the "vEt" vector FIRST. The jets (sorted in Energy) are stored right after the Tau-jet.
-      fHt = fSum_et;
-      fJt = fSum_et - vEt[0] - vEt[1]; // Ht without considering the Ldg Jet of the Event & excluding Tau-jet
-      fDeltaHt = fMin_delta_sum_et;
-      fMHt     = sqrt(pow(fSum_px,2) + pow(fSum_py,2));
-      fAlphaT = ( 0.5 * ( fHt - fDeltaHt ) / sqrt( pow(fHt,2) - pow(fMHt,2) ) );
-      /// Fill the function structure
-      sAlpha.fAlphaT  = fAlphaT;
-      sAlpha.fJt      = fJt;
-      sAlpha.fHt      = fHt;
-      sAlpha.fDeltaHt = fDeltaHt;
-      sAlpha.fMHt     = fMHt;
-      sAlpha.vDiJetMassesNoTau = vDiJetMassesNoTau;
-    } //eof: else{
-      return sAlpha;
-  }
-
-  vector<float> EvtTopology::alphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
-
+namespace{
+  
+  vector<float> alphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
+  
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /// Description                                                                                                     ///
   /// This function works in parallel with EvtTopology::alphaT(..). It takes as input the number of jets             ///
@@ -262,6 +156,106 @@ namespace HPlus {
   
   return vDiJetMassesNoTau;
   
-  }//eof: void EvtTopology:: alphaTAux(...){
-  
+  }//eof: static vector<float> alphaTAux(...){
+ 
+}//eof: namespace{
+
+namespace HPlus {
+
+  AlphaStruc EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Description                                                                                                     ///
+  /// Returns the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1 jets. ///
+  /// This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance   ///
+  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the   ///
+  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                               ///
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /// Declaration of variables 
+    std::vector<float> vEt, vPx, vPy, vPz;
+    std::vector<bool> vPseudo_jet1;
+    const bool bList = true;
+    const bool bTauJetExists = true;
+    AlphaStruc sAlpha;
+      /// Tau
+    TLorentzVector myTau;
+    myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
+    /// Fill vectors with Tau-jet information
+    vEt.push_back( myTau.Et() );
+    vPx.push_back( myTau.Px() );
+    vPy.push_back( myTau.Py() );
+    vPz.push_back( myTau.Pz() );
+
+    /// Loop over all selected jets
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
+      edm::Ptr<pat::Jet> iJet = *iter;
+      /// Fill vectors with jets information (jets are SORTED in energy)
+      vEt.push_back( iJet->et() );
+      vPx.push_back( iJet->px() );
+      vPy.push_back( iJet->py() );
+      vPz.push_back( iJet->pz() );
+    }//eof: for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {    
+    /// Declaration of variables 
+    unsigned iNJets = vEt.size();
+    int iCombinationIndex = -1;
+
+    /// Calculate sums
+    float fSum_et = accumulate( vEt.begin(), vEt.end(), 0.0 );
+    float fSum_px = accumulate( vPx.begin(), vPx.end(), 0.0 );
+    float fSum_py = accumulate( vPy.begin(), vPy.end(), 0.0 );
+    /// Minimum Delta Et for two pseudo-jets
+    float fMin_delta_sum_et = -1.0;
+    
+    /// Iterate through different combinations
+    for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
+      float fDelta_sum_et = 0.0;
+      std::vector<bool> jet;
+      /// Iterate through jets
+      for ( unsigned l=0; l < vEt.size(); l++ ) { 
+	// Bitwise shift of "k" by "l" positions to the right and compare to 1 (&1)
+	fDelta_sum_et += vEt[l] * ( 1 - 2 * (int(k>>l)&1) ); 
+	// i.e.: fDelta_sum_et += vEt[l] * ( 1 - 2*0 );  if comparison is un-successful
+	//  or   fDelta_sum_et += vEt[l] * ( 1 - 2*1 );  if comparison is successful
+	// in this way you add up all Et from PseudoJetsGroupA (belonging to 0's group) and subtract that from PseudoJetsGroupB (1's group)
+	if ( bList ) { jet.push_back( (int(k>>l)&1) == 0 ); } 
+      } //eof:  for ( unsigned l=0; l < vEt.size(); l++ ) {
+      /// Find configuration with minimum value of DeltaHt 
+      if ( ( fabs(fDelta_sum_et) < fMin_delta_sum_et || fMin_delta_sum_et < 0.0 ) ) {
+	fMin_delta_sum_et = fabs(fDelta_sum_et);
+	iCombinationIndex = k; /// overwritten everytime a new minimum is found
+	if ( bList && jet.size() == vEt.size() ){vPseudo_jet1.resize(jet.size());}
+      } //eof: if ( ( fabs(fDelta_sum_et) < fMin_delta_sum_et || fMin_delta_sum_et < 0.0 ) ) {
+    } //eof: for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
+    
+    /// Get DiJet information from Pseudo-jets
+    vector<float> vDiJetMassesNoTau =  alphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
+    
+    /// In the case something goes wrong...
+    if ( ( fMin_delta_sum_et < 0.0 ) || (!bTauJetExists) ){ 
+      /// Fill the function structure with -1.0
+      sAlpha.fAlphaT  = -1.0;
+      sAlpha.fJt      = -1.0;
+      sAlpha.fHt      = -1.0;
+      sAlpha.fDeltaHt = -1.0;
+      sAlpha.fMHt     = -1.0;
+    } //eof: if ( ( fMin_delta_sum_et < 0.0 ) || (bTauJetExists) ){
+    else{
+      /// Remember, the Tau-Jet is stored in the "vEt" vector FIRST. The jets (sorted in Energy) are stored right after the Tau-jet.
+      float fHt = fSum_et;
+      float fJt = fSum_et - vEt[0] - vEt[1]; // Ht without considering the Ldg Jet of the Event & excluding Tau-jet
+      float fDeltaHt = fMin_delta_sum_et;
+      float fMHt     = sqrt(pow(fSum_px,2) + pow(fSum_py,2));
+      float fAlphaT = ( 0.5 * ( fHt - fDeltaHt ) / sqrt( pow(fHt,2) - pow(fMHt,2) ) );
+      /// Fill the function structure
+      sAlpha.fAlphaT  = fAlphaT;
+      sAlpha.fJt      = fJt;
+      sAlpha.fHt      = fHt;
+      sAlpha.fDeltaHt = fDeltaHt;
+      sAlpha.fMHt     = fMHt;
+      sAlpha.vDiJetMassesNoTau = vDiJetMassesNoTau;
+    } //eof: else{
+      return sAlpha;
+  }
+
 }//eof: namespace HPlus {

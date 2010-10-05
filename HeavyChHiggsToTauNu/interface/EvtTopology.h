@@ -40,13 +40,13 @@
 
 namespace reco {
   class Candidate;
-  class PtrVector; // delete me
+  //  class PtrVector; // delete me
 }
 
 
 struct  AlphaStruc{
   float fAlphaT;
-  float fJt; // Jt = Ht - LdgJetEt - PFTauEt
+  float fJt; // Jt = Ht - TauJetEt - LdgJetEt
   float fHt;
   float fDeltaHt;
   float fMHt;
@@ -57,35 +57,9 @@ namespace HPlus {
   class EvtTopology {
   public:
 
-    AlphaStruc alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    vector<float> alphaTAux( const unsigned iNJets, const int iCombinationIndex, std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& myTau, bool bTauJetExists );
+    static AlphaStruc alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
 
   private:
-    // Input parameters
-    // edm::InputTag fSrc;
-    // double fMetCut;
-
-    // Counters
-    // Count fMetCutCount;
-
-    // Histograms
-    // TH1 *hTest;
-
-    /// Variables
-    bool bCriterion1;
-    bool bCriterion2;
-    bool bDecision;
-    AlphaStruc sAlpha;
-    float fAlphaT;
-    float fJt; // Jt = Ht - LdgJetEt
-    float fHt;
-    float fDeltaHt;
-    float fMHt;
-    float fSum_et;
-    float fSum_px;
-    float fSum_py;
-    float fDelta_sum_et;
-    float fMin_delta_sum_et;
     
   };
 }
