@@ -38,17 +38,44 @@ namespace HPlus {
     // Counters
     Count fPtCutCount;
     Count fEtaCutCount;
+    Count fagainstMuonCount;
+    Count fagainstElectronCount;
     Count fLeadTrkPtCount;
+    Count fnProngsCount;
+    Count fHChTauIDchargeCount;
+    Count fbyIsolationCount;
+    Count fbyTrackIsolationCount;  
+    Count fecalIsolationCount; 
+    Count fRtauCount;
+    Count fInvMassCount;
 
     Count fAllSubCount;
     Count fPtCutSubCount;
     Count fEtaCutSubCount;
+    Count fagainstMuonSubCount;
+    Count fagainstElectronSubCount;
     Count fLeadTrkPtSubCount;
+    Count fnProngsSubCount;
+    Count fHChTauIDchargeSubCount;
+    Count fbyIsolationSubCount; 
+    Count fbyTrackIsolationSubCount; 
+    Count fecalIsolationSubCount; 
+    Count fRtauSubCount;
+    Count fInvMassSubCount;
 
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hEtaRtau;
     TH1 *hLeadTrkPt;
+    TH1 *hIsolTrkPt;
+    TH1 *hIsolMaxTrkPt;
+    TH1 *hnProngs;
+    TH1 *hDeltaE;
+    TH1 *hRtau;
+    TH1 *hlightPathSignif;
+    TH1 *hInvMass;
+
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTaus;

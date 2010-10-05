@@ -40,11 +40,13 @@ namespace HPlus {
 
     Count fAllSubCount;
     Count fTaggedSubCount;
+    Count fTaggedEtaCutSubCount;
 
     // Histograms
     TH1 *hDiscr;
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hNumberOfBtaggedJets;
 
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;

@@ -17,7 +17,7 @@ namespace HPlus {
     fMetCutCount(eventCounter.addCounter("MET cut"))
   {
     edm::Service<TFileService> fs;
-    hMet = fs->make<TH1F>("met", "met", 100, 0., 100.);
+    hMet = fs->make<TH1F>("met", "met", 100, 0., 200.);
   }
 
   METSelection::~METSelection() {}

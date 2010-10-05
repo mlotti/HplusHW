@@ -30,6 +30,7 @@ namespace HPlus {
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     Count fAllCounter;
+    Count ftransverseMassCutCount;
 
     TriggerSelection fTriggerSelection;
     TauSelection fTauSelection;
@@ -38,6 +39,7 @@ namespace HPlus {
     METSelection fMETSelection;
 
     TH1 *hTransverseMass;
+    TH1 *hDeltaPhi;
   };
 }
 

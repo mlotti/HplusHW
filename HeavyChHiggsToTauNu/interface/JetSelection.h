@@ -51,7 +51,7 @@ namespace HPlus {
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
-
+    TH1 *hNumberOfSelectedJets;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
   };

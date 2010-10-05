@@ -6,7 +6,7 @@ options = getOptions()
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -59,28 +59,28 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     tauSelection = cms.untracked.PSet(
         src = cms.untracked.InputTag("patPFTauProducerFixedCone"),
         #src = cms.untracked.InputTag("selectedPatTaus"),
-        ptCut = cms.untracked.double(20),
+        ptCut = cms.untracked.double(40),
         etaCut = cms.untracked.double(2.4),
-        leadingTrackPtCut = cms.untracked.double(10)
+        leadingTrackPtCut = cms.untracked.double(20)
     ),
     jetSelection = cms.untracked.PSet(
         src = cms.untracked.InputTag("selectedPatJets"),
 #        src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
         cleanTauDR = cms.untracked.double(0.5),
-        ptCut = cms.untracked.double(20),
+        ptCut = cms.untracked.double(30),
         etaCut = cms.untracked.double(2.4),
         minNumber = cms.untracked.uint32(3)
     ),
     bTagging = cms.untracked.PSet(
         discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
         discriminatorCut = cms.untracked.double(1.5),
-        minNumber = cms.untracked.uint32(1)
+        minNumber = cms.untracked.uint32(2)
     ),
     MET = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patMETs"),
-#        src = cms.untracked.InputTag("patMETsPF"),
+#        src = cms.untracked.InputTag("patMETs"),
+        src = cms.untracked.InputTag("patMETsPF"),
 #        src = cms.untracked.InputTag("patMETsTC"),
-        METCut = cms.untracked.double(40)
+        METCut = cms.untracked.double(60)
     )
 )
 # Counter analyzer (in order to produce compatible root file with the

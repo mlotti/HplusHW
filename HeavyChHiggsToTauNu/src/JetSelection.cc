@@ -29,6 +29,7 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 100.);
     hEta = fs->make<TH1F>("jet_eta", "jet_eta", 60, -3., 3.);
+    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 20, 0., 10.);
   }
 
   JetSelection::~JetSelection() {}
@@ -78,6 +79,8 @@ namespace HPlus {
       fSelectedJets.push_back(iJet);
     }
 
+    hNumberOfSelectedJets->Fill(fSelectedJets.size());
+    
     if(cleanPassed < fMin) return false;
     increment(fCleanCutCount);
 

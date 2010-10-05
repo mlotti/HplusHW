@@ -13,12 +13,15 @@ namespace HPlus {
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
     fTaggedCount(eventCounter.addCounter("b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
-    fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged"))
+    fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
+    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut"))
+
   {
     edm::Service<TFileService> fs;
     hDiscr = fs->make<TH1F>("jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 80, -10, 10);
     hPt = fs->make<TH1F>("bjet_pt", "bjet_pt", 100, 0., 100.);
     hEta = fs->make<TH1F>("bjet_eta", "bjet_pt", 60, -3., 3.);
+    hNumberOfBtaggedJets = fs->make<TH1F>("NumberOfBtaggedJets", "NumberOfBtaggedJets", 20, 0., 10.);
   }
 
   BTagging::~BTagging() {}
@@ -34,17 +37,26 @@ namespace HPlus {
 
       increment(fAllSubCount);
 
+
       float discr = iJet->bDiscriminator(fDiscriminator);
       hDiscr->Fill(discr);
       if(!(discr > fDiscrCut)) continue;
       increment(fTaggedSubCount);
-      ++passed;
+      //      ++passed;
 
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
 
+      if(fabs(iJet->eta()) > 1.5 ) continue;
+      increment(fTaggedEtaCutSubCount);
+      ++passed;
+
+
       fSelectedJets.push_back(iJet);
     }
+
+
+    hNumberOfBtaggedJets->Fill(fSelectedJets.size());
 
     if(passed < fMin) return false;
     increment(fTaggedCount);
