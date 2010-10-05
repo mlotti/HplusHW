@@ -7,8 +7,9 @@ trigger = cms.untracked.PSet(
 
 tauSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
-    src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"),
-    #src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    #src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"), # this doesn't exist in 38X samples
+    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    #src = cms.untracked.InputTag("selectedPatTausHpsPFTau"),
     ptCut = cms.untracked.double(20),
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(10)
