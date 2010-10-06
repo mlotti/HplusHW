@@ -187,9 +187,16 @@ def addPat(process, dataVersion):
     if out != None:
         out.outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
 
+    # Muons
+
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+    #process.patMuons.usePV = False
+
 
     # Trigger
-    switchOnTrigger(process)
+    switchOnTrigger(process, outputInProcess= out != None)
     HChTrigger.customise(process, dataVersion)
 
     # Build sequence

@@ -2,8 +2,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 import sys
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
-def getOptions():
-    options = VarParsing.VarParsing()
+def getOptions(options=None):
+    if options == None:
+        options = VarParsing.VarParsing()
     options.register("crossSection",
                      -1., # default value
                      options.multiplicity.singleton, # singleton or list
