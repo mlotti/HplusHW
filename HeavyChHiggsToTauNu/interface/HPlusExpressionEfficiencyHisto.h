@@ -7,7 +7,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHisto.h"
+
 
 #include "TFile.h"
 #include "TH1F.h"
@@ -16,63 +17,10 @@
 #include<limits>
 #include<algorithm>
 
-template<typename T>
-class HPlusExpressionEfficiencyHisto {
- public:
-  HPlusExpressionEfficiencyHisto(const edm::ParameterSet& iConfig);
-  ~HPlusExpressionEfficiencyHisto();
-  
-  void initialize(TFileDirectory& fs);
-  
-private:
-  double min, max;
-  int nbins;
-  std::string name, description;
-
-protected:
-  /**
-   * We don't actually need the total, because we can store the number
-   * of total fills to to the number of entries in passed!
-   */
-  //TH1 *total;
-  TH1 *passed;
-  StringObjectFunction<T> function;
-  //FillFunction fillFunction;
-  std::auto_ptr<HPlus::ExpressionHistoComparison> cmp;
-};
-
-template<typename T>
-HPlusExpressionEfficiencyHisto<T>::HPlusExpressionEfficiencyHisto(const edm::ParameterSet& iConfig):
-  min(iConfig.template getUntrackedParameter<double>("min")),
-  max(iConfig.template getUntrackedParameter<double>("max")),
-  nbins(iConfig.template getUntrackedParameter<int>("nbins")),
-  name(iConfig.template getUntrackedParameter<std::string>("name")),
-  description(iConfig.template getUntrackedParameter<std::string>("description")),
-  passed(0),
-  function(iConfig.template getUntrackedParameter<std::string>("plotquantity"), 
-           iConfig.template getUntrackedParameter<bool>("lazyParsing", false)),
-  cmp(HPlus::ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
-
-  if(cmp.get() == 0)
-    throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
-                                          << "' for variable " << name << "; supported types are '<', '<=', '>', '>='";
-}
-
-template<typename T>
-HPlusExpressionEfficiencyHisto<T>::~HPlusExpressionEfficiencyHisto() {
-}
-
-template<typename T>
-void HPlusExpressionEfficiencyHisto<T>::initialize(TFileDirectory& fs) 
-{
-  passed = fs.make<TH1F>((name+"_passed").c_str(),description.c_str(),nbins,min,max);
-}
-
-
 
 template <typename T>
-class HPlusExpressionEfficiencyHistoPerObject: public HPlusExpressionEfficiencyHisto<T> {
-  typedef HPlusExpressionEfficiencyHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerObject: public HPlus::ExpressionHisto<T> {
+  typedef HPlus::ExpressionHisto<T> Base;
 public:
   HPlusExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig);
   ~HPlusExpressionEfficiencyHistoPerObject();
@@ -90,17 +38,17 @@ template <typename T>
 HPlusExpressionEfficiencyHistoPerObject<T>::~HPlusExpressionEfficiencyHistoPerObject() {}
 template <typename T>
 bool HPlusExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double weight, uint32_t i) {
-  double entries = this->passed->GetEntries();
-  this->cmp->fillEfficiency(this->passed, this->function(element), weight);
-  this->passed->SetEntries(entries+1);
+  double entries = this->histo->GetEntries();
+  this->cmp->fillEfficiency(this->histo, this->function(element), weight);
+  this->histo->SetEntries(entries+1);
   return true;
 }
 
 
 
 template <typename T>
-class HPlusExpressionEfficiencyHistoPerEvent: public HPlusExpressionEfficiencyHisto<T> {
-  typedef HPlusExpressionEfficiencyHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerEvent: public HPlus::ExpressionHisto<T> {
+  typedef HPlus::ExpressionHisto<T> Base;
 public:
   HPlusExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig);
   ~HPlusExpressionEfficiencyHistoPerEvent();
@@ -150,12 +98,12 @@ bool HPlusExpressionEfficiencyHistoPerEvent<T>::fill(const T& element, double we
 }
 template <typename T>
 void HPlusExpressionEfficiencyHistoPerEvent<T>::endEvent() {
-  double entries = this->passed->GetEntries();
+  double entries = this->histo->GetEntries();
 
   if(values_.size() >= minObjects_) {
-    this->cmp->fillEfficiency(this->passed, values_.front(), weight_);
+    this->cmp->fillEfficiency(this->histo, values_.front(), weight_);
   }
-  this->passed->SetEntries(entries+1);
+  this->histo->SetEntries(entries+1);
 
   values_.clear();
   weight_ = 0;
