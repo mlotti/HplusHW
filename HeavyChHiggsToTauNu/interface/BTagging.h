@@ -33,6 +33,8 @@ namespace HPlus {
     // Input parameters
     std::string fDiscriminator;
     double fDiscrCut;
+    double fEtaCut;
+    double fPtCut;
     uint32_t fMin;
 
     // Counters

@@ -8,6 +8,8 @@
 namespace HPlus {
 
   BTagging::BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+    fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
+    fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
@@ -47,7 +49,7 @@ namespace HPlus {
       hPt->Fill(iJet->pt());
       hEta->Fill(iJet->eta());
 
-      if(fabs(iJet->eta()) > 1.5 ) continue;
+      if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
       ++passed;
 
