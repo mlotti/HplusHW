@@ -7,7 +7,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusExpressionEfficiencyHistoComparison.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
 
 #include "TFile.h"
 #include "TH1F.h"
@@ -38,7 +38,7 @@ protected:
   TH1 *passed;
   StringObjectFunction<T> function;
   //FillFunction fillFunction;
-  std::auto_ptr<HPlusExpressionEfficiencyHistoComparison> cmp;
+  std::auto_ptr<HPlus::ExpressionHistoComparison> cmp;
 };
 
 template<typename T>
@@ -51,7 +51,7 @@ HPlusExpressionEfficiencyHisto<T>::HPlusExpressionEfficiencyHisto(const edm::Par
   passed(0),
   function(iConfig.template getUntrackedParameter<std::string>("plotquantity"), 
            iConfig.template getUntrackedParameter<bool>("lazyParsing", false)),
-  cmp(HPlusExpressionEfficiencyHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
+  cmp(HPlus::ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
 
   if(cmp.get() == 0)
     throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
@@ -91,7 +91,7 @@ HPlusExpressionEfficiencyHistoPerObject<T>::~HPlusExpressionEfficiencyHistoPerOb
 template <typename T>
 bool HPlusExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double weight, uint32_t i) {
   double entries = this->passed->GetEntries();
-  this->cmp->fill(this->passed, this->function(element), weight);
+  this->cmp->fillEfficiency(this->passed, this->function(element), weight);
   this->passed->SetEntries(entries+1);
   return true;
 }
@@ -135,7 +135,7 @@ bool HPlusExpressionEfficiencyHistoPerEvent<T>::fill(const T& element, double we
   weight_ = weight;
 
   double value = this->function(element);
-  std::vector<double>::iterator pos = std::lower_bound(values_.begin(), values_.end(), value, HPlusExpressionEfficiencyHistoComparison::Wrapper(this->cmp.get()));
+  std::vector<double>::iterator pos = std::lower_bound(values_.begin(), values_.end(), value, HPlus::ExpressionHistoComparison::Wrapper(this->cmp.get()));
   if(values_.size() >= minObjects_) {
     if(pos != values_.begin()) {
       std::copy(values_.begin()+1, pos, values_.begin());
@@ -153,7 +153,7 @@ void HPlusExpressionEfficiencyHistoPerEvent<T>::endEvent() {
   double entries = this->passed->GetEntries();
 
   if(values_.size() >= minObjects_) {
-    this->cmp->fill(this->passed, values_.front(), weight_);
+    this->cmp->fillEfficiency(this->passed, values_.front(), weight_);
   }
   this->passed->SetEntries(entries+1);
 
