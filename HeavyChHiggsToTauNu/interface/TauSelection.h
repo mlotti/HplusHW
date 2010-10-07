@@ -71,6 +71,7 @@ namespace HPlus {
     TH1 *hEtaRtau;
     TH1 *hLeadTrkPt;
     TH1 *hIsolTrkPt;
+    TH1 *hIsolTrkPtSum;
     TH1 *hIsolMaxTrkPt;
     TH1 *hnProngs;
     TH1 *hDeltaE;

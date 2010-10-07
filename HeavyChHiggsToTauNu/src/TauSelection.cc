@@ -50,6 +50,7 @@ namespace HPlus {
     hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
     hIsolTrkPt = fs->make<TH1F>("tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
+    hIsolTrkPtSum = fs->make<TH1F>("tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
@@ -141,6 +142,7 @@ namespace HPlus {
       */
   
       float ptmax = 0;
+      float ptsum = 0;
 
       //      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
       //      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
@@ -148,13 +150,15 @@ namespace HPlus {
       reco::TrackRefVector::const_iterator iCand = isolCands.begin();
       //      std::cout << " isol cands " << isolCands.size() << std::endl;
       for(; iCand != isolCands.end(); ++iCand) {
-	float pt = (*iCand)->pt(); 
+	float pt = (*iCand)->pt();
+	ptsum += pt; 
 	if (pt > ptmax) ptmax = pt;
 	hIsolTrkPt->Fill(pt);
 	//	std::cout << " isol track pt " << pt << std::endl;
 	//iCand->pt()
       }
       hIsolMaxTrkPt->Fill(ptmax);
+      hIsolTrkPtSum->Fill(ptsum);
 
       // Loopin voi tehdä myös näin
       //      for(size_t i=0; i<isolCands.size(); ++i) {
