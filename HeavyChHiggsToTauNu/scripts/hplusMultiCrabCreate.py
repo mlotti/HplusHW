@@ -33,10 +33,16 @@ def main(argv):
     mc_parser = ConfigParser.ConfigParser()
     mc_parser.read(mc_conf_file)
     crab_conf_file = mc_parser.get("MULTICRAB", "cfg")
+    try:
+        py_conf_file = mc_parser.get("COMMON", "CMSSW.pset")
+    except ConfigParser.NoOptionError:
+        pass
+    
 
     crab_parser = ConfigParser.ConfigParser()
     crab_parser.read(crab_conf_file)
-    py_conf_file = crab_parser.get("CMSSW", "pset")
+    if py_conf_file == None:
+        py_conf_file = crab_parser.get("CMSSW", "pset")
     try:
         json_file = crab_parser.get("CMSSW", "lumi_mask")
     except ConfigParser.NoOptionError:
