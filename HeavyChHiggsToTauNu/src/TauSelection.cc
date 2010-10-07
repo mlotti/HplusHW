@@ -15,6 +15,8 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
+    fInvMassCut(iConfig.getUntrackedParameter<double>("invMassCut")),
     fagainstMuonCount(eventCounter.addCounter("Tau againstMuon discriminator")),
     fagainstElectronCount(eventCounter.addCounter("Tau againstElectron discriminator")),
     fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
@@ -182,7 +184,7 @@ namespace HPlus {
       hRtau->Fill(Rtau);
     
 
-      if(Rtau < 0.8) continue; 
+      if(Rtau < fRtauCut) continue; 
       increment(fRtauSubCount);
       ++RtauCutPassed;
 
@@ -195,7 +197,7 @@ namespace HPlus {
       float InvMass = iTau->tauID("HChTauIDInvMassCont");
       hInvMass->Fill(InvMass);
 
-      if(InvMass > 1.5) continue;
+      if(InvMass > fInvMassCut) continue;
       increment(fInvMassSubCount);
       ++InvMassCutPassed;
 

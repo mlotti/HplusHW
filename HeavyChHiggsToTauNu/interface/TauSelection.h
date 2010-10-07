@@ -34,6 +34,8 @@ namespace HPlus {
     double fPtCut;
     double fEtaCut;
     double fLeadTrkPtCut;
+    double fRtauCut;
+    double fInvMassCut;
 
     // Counters
     Count fPtCutCount;
