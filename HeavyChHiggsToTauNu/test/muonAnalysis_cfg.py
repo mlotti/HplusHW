@@ -94,7 +94,7 @@ if options.runPat != 0:
     print "Running PAT on the fly"
 
     process.collisionDataSelection = cms.Sequence()
-    if options.isData():
+    if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
     process.patSequence = cms.Sequence(
