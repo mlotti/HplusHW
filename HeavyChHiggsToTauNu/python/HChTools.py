@@ -213,7 +213,7 @@ class Histo:
 
 
 class Analysis:
-    def __init__(self, process, seqname, options, allCounterName="countAll"):
+    def __init__(self, process, seqname, options, allCounterName="countAll", additionalCounters=[]):
         self.process = process
 
         # Generator and configuration info analyzers
@@ -237,7 +237,8 @@ class Analysis:
         self.process.__setattr__(seqname, self.sequence)
 
         # Create the count analyzer
-        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag(cms.InputTag(allCounterName)))
+        counters = additionalCounters+[allCounterName]
+        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]))
 
         self.histoIndex = 0
 
@@ -250,7 +251,7 @@ class Analysis:
     def getCountPath(self):
         return self.process.countAnalyzerPath
 
-    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=False):
+    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=True):
         filtername = name+"Trigger"
         countname = "count"+name
 
@@ -272,18 +273,21 @@ class Analysis:
 
         self.histoIndex += 1
 
-    def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
+    def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
         # Create the EDModule objects
         m1 = cms.EDFilter(selector,
                           src = src,
                           cut = cms.string(expression))
         self.process.__setattr__(name, m1)
         self.sequence *= m1
+        return cms.InputTag(name)
 
-        self.addNumberCut(name, cms.InputTag(name), minNumber, maxNumber)
+    def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
+        selected = self.addSelection(name, src, expression, selector)
+        self.addNumberCut(name, selected, minNumber, maxNumber)
 
         # Return the InputTag of the selected collection
-        return cms.InputTag(name)
+        return selected
 
     def addNumberCut(self, name, src, minNumber=1, maxNumber=None):
         filtername = name+"Filter"
@@ -314,6 +318,15 @@ class Analysis:
 
         # Increase the histogram index
         self.histoIndex += 1
+
+    def addAnalyzer(self, postfix, module):
+        name = ("h%02d_"%self.histoIndex)+postfix
+        self.process.__setattr__(name, module)
+        self.sequence *= module
+        return module
+
+    def addCloneAnalyzer(self, postfix, module):
+        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
 
     def addHistoAnalyzer(self, postfix, src, histos):
         return addHistoAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, src, histos)

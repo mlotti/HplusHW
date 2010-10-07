@@ -44,7 +44,14 @@ del process.TFileService
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
-    process.collisionDataSelection = addDataSelection(process, dataVersion)
+    trigger = ""
+    if dataVersion.isRun2010A():
+        trigger = "HLT_SingleLooseIsoTau20"
+    elif dataVersion.isRun2010B():
+        trigger = "HLT_SingleIsoTau20_Trk15_MET20"
+    else:
+        raise Exception("Unsupported data version!")
+    process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
