@@ -8,6 +8,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 
 namespace edm {
   class ParameterSet;
@@ -37,6 +38,7 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     METSelection fMETSelection;
+    EvtTopology fEvtTopology;
     
     // Histograms
     TH1 *hTransverseMass;

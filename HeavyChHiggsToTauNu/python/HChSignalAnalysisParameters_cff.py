@@ -41,4 +41,8 @@ MET = cms.untracked.PSet(
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     METCut = cms.untracked.double(60)
 )
-
+EvtTopology = cms.untracked.PSet(
+    #discriminator = cms.untracked.string("test"),
+    #discriminatorCut = cms.untracked.double(0.0),
+    alphaT = cms.untracked.double(0.00)
+)
