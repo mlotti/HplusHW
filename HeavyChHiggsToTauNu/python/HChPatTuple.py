@@ -21,7 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion):
+def addPat(process, dataVersion, runPatTrigger=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -196,8 +196,9 @@ def addPat(process, dataVersion):
 
 
     # Trigger
-    switchOnTrigger(process, outputInProcess= out != None)
-    HChTrigger.customise(process, dataVersion)
+    if runPatTrigger:
+        switchOnTrigger(process, outputInProcess= out != None)
+        HChTrigger.customise(process, dataVersion)
 
     # Build sequence
     seq = cms.Sequence()

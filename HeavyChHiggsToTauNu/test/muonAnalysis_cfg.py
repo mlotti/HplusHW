@@ -99,7 +99,7 @@ if options.runPat != 0:
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion)
+        addPat(process, dataVersion, runPatTrigger=False)
     )
 
 
