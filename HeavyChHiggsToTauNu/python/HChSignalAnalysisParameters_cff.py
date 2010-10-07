@@ -39,10 +39,10 @@ MET = cms.untracked.PSet(
     #src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(60)
+    METCut = cms.untracked.double(60.0)
 )
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
     #discriminatorCut = cms.untracked.double(0.0),
-    alphaT = cms.untracked.double(0.00)
+    alphaT = cms.untracked.double(0.0)
 )
