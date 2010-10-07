@@ -10,26 +10,19 @@
 //#######################################################################
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_EvtTopology_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_EvtTopology_h
-
 /// ROOT libraries
-#include <TROOT.h>
-#include <TChain.h>
-#include <TFile.h>
-#include <iostream>
-#include <vector>
 #include <Math/Vector3D.h>
 #include <Math/Point3D.h>
-#include <Riostream.h>
 #include <TVector3.h>
 #include <TLorentzVector.h>
-#include <TRotation.h>
-#include <TLorentzRotation.h>
 /// C++ libraries
 #include <functional>
 #include <numeric>
 #include <algorithm>
 #include <cmath>
 #include <assert.h>
+#include <iostream>
+#include <vector>
 /// CMSSW libraries
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
@@ -38,13 +31,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
 
-namespace reco {
-  class Candidate;
-  //  class PtrVector; // delete me
-}
-
-
-struct  AlphaStruc{
+struct AlphaStruc{
   float fAlphaT;
   float fJt; // Jt = Ht - TauJetEt - LdgJetEt
   float fHt;
@@ -53,14 +40,42 @@ struct  AlphaStruc{
   vector<float> vDiJetMassesNoTau;
 };
 
+namespace reco {
+  class Candidate;
+}
+
+namespace edm {
+  class ParameterSet;
+}
+
+class TH1;
+
 namespace HPlus {
+
   class EvtTopology {
   public:
+    EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    ~EvtTopology();
 
-    static AlphaStruc alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-
-  private:
+    bool analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    AlphaStruc alphaT( void );
     
+  private:
+    // Input parameters
+    // std::string fDiscriminator;
+    // double fDiscrCut;
+    double fAlphaTCut;
+
+    // Counters
+    Count fEvtTopologyCount;
+    Count fAlphaTCutCount;
+    
+    // Histograms
+    TH1 *hAlphaT;
+    
+    /// Other variables
+    AlphaStruc sAlpha;
+    MathFunctions oMath;
   };
 }
 
