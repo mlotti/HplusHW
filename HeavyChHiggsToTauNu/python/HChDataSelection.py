@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
-def addDataSelection(process, dataVersion):
+def addDataSelection(process, dataVersion, trigger):
     if not dataVersion.isData():
         raise Exception("Data version is not data!")
 
@@ -25,12 +25,7 @@ def addDataSelection(process, dataVersion):
     process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
     process.TriggerFilter.l1tResults = cms.InputTag("")
     #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-    if dataVersion.isRun2010A():
-        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
-    elif dataVersion.isRun2010B():
-        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleIsoTau20_Trk15_MET20")
-    else:
-        raise Exception("Unsupported data version!")
+    process.TriggerFilter.triggerConditions = cms.vstring(trigger)
 
     process.passedTrigger = cms.EDProducer("EventCountProducer")
     seq *= process.TriggerFilter
@@ -71,3 +66,5 @@ def addDataSelection(process, dataVersion):
     seq *= process.passedPrimaryVertexFilter
 
     return seq
+
+dataSelectionCounters = ["allEvents", "passedTrigger", "passedScrapingVeto", "passedHBHENoiseFilter", "passedPrimaryVertexFilter"]

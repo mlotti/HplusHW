@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusExpressionEfficiencyHistoComparison.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
 
 #include "TH1.h"
 #include "TAxis.h"
@@ -6,41 +6,43 @@
 #include<iostream>
 
 namespace {
-  class Less: public HPlusExpressionEfficiencyHistoComparison {
+  using HPlus::ExpressionHistoComparison;
+
+  class Less: public ExpressionHistoComparison {
   public:
     Less();
     ~Less();
-    void fill(TH1 *passed, double value, double weight);
+    void fillEfficiency(TH1 *passed, double value, double weight);
     bool compare(double a, double b) const;
   };
 
-  class LessEqual: public HPlusExpressionEfficiencyHistoComparison {
+  class LessEqual: public ExpressionHistoComparison {
   public:
     LessEqual();
     ~LessEqual();
-    void fill(TH1 *passed, double value, double weight);
+    void fillEfficiency(TH1 *passed, double value, double weight);
     bool compare(double a, double b) const;
   };
 
-  class Greater: public HPlusExpressionEfficiencyHistoComparison {
+  class Greater: public ExpressionHistoComparison {
   public:
     Greater();
     ~Greater();
-    void fill(TH1 *passed, double value, double weight);
+    void fillEfficiency(TH1 *passed, double value, double weight);
     bool compare(double a, double b) const;
   };
 
-  class GreaterEqual: public HPlusExpressionEfficiencyHistoComparison {
+  class GreaterEqual: public ExpressionHistoComparison {
   public:
     GreaterEqual();
     ~GreaterEqual();
-    void fill(TH1 *passed, double value, double weight);
+    void fillEfficiency(TH1 *passed, double value, double weight);
     bool compare(double a, double b) const;
   };
 
-  Less::Less():HPlusExpressionEfficiencyHistoComparison() {}
+  Less::Less():ExpressionHistoComparison() {}
   Less::~Less() {}
-  void Less::fill(TH1 *passed, double value, double weight) {
+  void Less::fillEfficiency(TH1 *passed, double value, double weight) {
     //std::cout << "### Less::fill(), filling for value " << value << std::endl;
     for(int bin=passed->GetNbinsX(); bin >= 1; --bin) {
       if(value < passed->GetXaxis()->GetBinCenter(bin))
@@ -53,9 +55,9 @@ namespace {
     return a < b;
   }
 
-  LessEqual::LessEqual():HPlusExpressionEfficiencyHistoComparison() {}
+  LessEqual::LessEqual():ExpressionHistoComparison() {}
   LessEqual::~LessEqual() {}
-  void LessEqual::fill(TH1 *passed, double value, double weight) {
+  void LessEqual::fillEfficiency(TH1 *passed, double value, double weight) {
     for(int bin=passed->GetNbinsX(); bin >= 1; --bin) {
       if(value <= passed->GetXaxis()->GetBinCenter(bin))
         passed->AddBinContent(bin, weight);
@@ -67,9 +69,9 @@ namespace {
     return a <= b;
   }
 
-  Greater::Greater():HPlusExpressionEfficiencyHistoComparison() {}
+  Greater::Greater():ExpressionHistoComparison() {}
   Greater::~Greater() {}
-  void Greater::fill(TH1 *passed, double value, double weight) {
+  void Greater::fillEfficiency(TH1 *passed, double value, double weight) {
     //std::cout << "### Greater::fill(), filling for value " << value << std::endl;
     for(int bin=1; bin <= passed->GetNbinsX(); ++bin) {
       if(value > passed->GetXaxis()->GetBinCenter(bin))
@@ -82,9 +84,9 @@ namespace {
     return a > b;
   }
 
-  GreaterEqual::GreaterEqual():HPlusExpressionEfficiencyHistoComparison() {}
+  GreaterEqual::GreaterEqual():ExpressionHistoComparison() {}
   GreaterEqual::~GreaterEqual() {}
-  void GreaterEqual::fill(TH1 *passed, double value, double weight) {
+  void GreaterEqual::fillEfficiency(TH1 *passed, double value, double weight) {
     for(int bin=1; bin <= passed->GetNbinsX(); ++bin) {
       if(value >= passed->GetXaxis()->GetBinCenter(bin))
         passed->AddBinContent(bin, weight);
@@ -98,18 +100,20 @@ namespace {
 
 }
 
-HPlusExpressionEfficiencyHistoComparison::HPlusExpressionEfficiencyHistoComparison() {}
-HPlusExpressionEfficiencyHistoComparison::~HPlusExpressionEfficiencyHistoComparison() {}
+namespace HPlus {
+  ExpressionHistoComparison::ExpressionHistoComparison() {}
+  ExpressionHistoComparison::~ExpressionHistoComparison() {}
 
-HPlusExpressionEfficiencyHistoComparison *HPlusExpressionEfficiencyHistoComparison::create(const std::string& cmp) {
-  if(cmp == "<" || cmp == "lessThan")
-    return new Less();
-  else if(cmp == "<=" || cmp == "lessEqual")
-    return new LessEqual();
-  else if(cmp == ">" || cmp == "greaterThan")
-    return new Greater();
-  else if(cmp == ">=" || cmp == "greaterEqual")
-    return new GreaterEqual();
-  else
-    return 0;
+  ExpressionHistoComparison *ExpressionHistoComparison::create(const std::string& cmp) {
+    if(cmp == "<" || cmp == "lessThan")
+      return new Less();
+    else if(cmp == "<=" || cmp == "lessEqual")
+      return new LessEqual();
+    else if(cmp == ">" || cmp == "greaterThan")
+      return new Greater();
+    else if(cmp == ">=" || cmp == "greaterEqual")
+      return new GreaterEqual();
+    else
+      return 0;
+  }
 }
