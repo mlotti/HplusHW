@@ -59,16 +59,24 @@ def printDatasetInfo(datasets):
     col1hdr = "Dataset"
     col2hdr = "Cross section (pb)"
     col3hdr = "Norm. factor"
+    col4hdr = "Int. lumi (pb^-1)" 
 
     maxlen = max([len(x.getName()) for x in datasets]+[len(col1hdr)])
     c1fmt = "%%-%ds" % (maxlen+2)
     c2fmt = "%%%d.4g" % (len(col2hdr)+2)
     c3fmt = "%%%d.4g" % (len(col3hdr)+2)
+    c4fmt = "%%%d.4g" % (len(col4hdr)+2)
 
-    print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr
+    c2skip = " "*(len(col2hdr)+2)
+    c3skip = " "*(len(col3hdr)+2)
+    c4skip = " "*(len(col4hdr)+2)
+
+    print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr
     for dataset in datasets:
-        print (c1fmt % dataset.getName()) + c2fmt%dataset.getCrossSection() + c3fmt%dataset.getNormFactor()
-
+        if dataset.isMC():
+            print (c1fmt % dataset.getName()) + c2fmt%dataset.getCrossSection() + c3fmt%dataset.getNormFactor()
+        else:
+            print (c1fmt % dataset.getName()) + c2skip+c3skip + c4fmt%dataset.getLuminosity()
 
 def readCountersDirs(opts, crossSections, counters):
     taskdirs = multicrab.getTaskDirectories(opts)
