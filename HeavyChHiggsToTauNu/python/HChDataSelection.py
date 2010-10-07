@@ -26,7 +26,7 @@ def addDataSelection(process, dataVersion):
     process.TriggerFilter.l1tResults = cms.InputTag("")
     #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
     if dataVersion.isRun2010A():
-        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleLooseIsoTau20")
+        process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleIsoTau20_Trk5")
     elif dataVersion.isRun2010B():
         process.TriggerFilter.triggerConditions = cms.vstring("HLT_SingleIsoTau20_Trk15_MET20")
     else:
