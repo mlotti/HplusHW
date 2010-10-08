@@ -17,7 +17,8 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
-    ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut"))
+    ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -49,19 +50,22 @@ namespace HPlus {
 
     if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
 
+    if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
+    std::cout << "fEvtTopology" << std::endl;
 
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
 
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
-
-//    if(transverseMass < 100 ) return;
+    // if(transverseMass < 100 ) return;
     increment(ftransverseMassCutCount);
-    AlphaStruc sAlphaT = EvtTopology::alphaT( *(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets() );
-    hAlphaT->Fill(sAlphaT.fAlphaT);
-    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]);}
 
+    AlphaStruc sAlphaT = fEvtTopology.alphaT();
+    hAlphaT->Fill(sAlphaT.fAlphaT);
+    
+    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
+    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+    
   }
 }

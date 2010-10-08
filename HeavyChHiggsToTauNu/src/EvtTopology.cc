@@ -50,135 +50,153 @@
 // For "k"=15 ( 00010101 in 8bit representation) we have after the second loop: 0 1 1 0 1
 // For "k"=16 ( 00010110 in 8bit representation) we have after the second loop: 0 1 1 1 0
 //#########################################################################################################################################
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
-#include "TLorentzVector.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "TH1F.h"
 
 namespace{
   
-  vector<float> alphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
-  
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Description                                                                                                     ///
-  /// This function works in parallel with EvtTopology::alphaT(..). It takes as input the number of jets             ///
-  /// in the Event and the "winning combination" in terms of minimising the quantity:                               ///
-  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                                ///
-  /// The function then loops over the jets of the "winning combination" and puts the jets into two groups        ///
-  /// differentiated by which one contains the "Tau-jet". Then, for each PseudoJetGroup it loops over all        ///
-  /// possible DiJets combinations and calculates their DiJet mass and stores them in a vector of floats        ///
-  /// It is worth stating here that the number of possible DiJets that can be formed from a pool of iJets is:  ///
-  /// nCr = iNJets! / (iNJtets-2)!2!                                                                          ///
-  /// so, for example: iNJets = 5, nCr = 5! / (3!2!) = 5x2 = 10                                              ///
-  /// so, for example: iNJets = 4, nCr = 4! / (2!2!) = 3x2 = 6                                              ///
-  /// so, for example: iNJets = 3, nCr = 3! / (1!2!) = 3x1 = 3                                             ///
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  /// Variable Declaration
-  bool bPseudoJetsGroupA = 0;
-  bool bTauJetInGroupA   = 0;
-  bool bTauJetInGroupB   = 0;
-  float fDiJetMassNoTau  = 0;
-  vector<float> vDiJetMassesNoTau;
-  vector<float> vEmpty;
-  TLorentzVector tmpJet;
-  vector<TLorentzVector> vJetsInTauPseudoJet;
-  vector<TLorentzVector> vJetsInNonTauPseudoJet;
-  vector<TLorentzVector> vJetsInPseudoJetA;
-  vector<TLorentzVector> vJetsInPseudoJetB;
-  
-  /// The calculation only takes place if a "Tau-jet" exists in the Event.
-  if(!bTauJetExists){return vEmpty;}
-
-  int k = iCombinationIndex;
-  /// @@ iterate through jets for combination k.
-  for ( unsigned l=0; l < iNJets; l++ ){ 
-    // std::cout << "k = " << k << ", l = " << l << std::endl;
-    /// Bitwise shift of "k" by "l" positions to the right and compare to 1. 
-    /// Make a boolean of the comparison so that you can distinguish between PseudoJetGoupA (0's group) from PseudoJetGoupB (1's group)
-    bPseudoJetsGroupA = (Int_t(k>>l)&1);
-    /// 
-    if(bPseudoJetsGroupA){
-      tmpJet.SetPx( vPx[l] );
-      tmpJet.SetPy( vPy[l] );
-      tmpJet.SetPz( vPz[l] );
-      vJetsInPseudoJetA.push_back(tmpJet);
-    } //eof: if(bPseudoJetsGroupA){
-    else{
-      tmpJet.SetPx( vPx[l] );
-      tmpJet.SetPy( vPy[l] );
-      tmpJet.SetPz( vPz[l] );
-    } //eof: else{
-  } //eof:  for ( unsigned l=0; l < iNJets; l++ ) {
-
-  /// Determine in which of the two pseudo-jets the tau-jet is found.
-  for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
-    TLorentzVector tauJetCandidate;
-    tauJetCandidate.SetXYZM(vJetsInPseudoJetA[i].Px(), vJetsInPseudoJetA[i].Py(),vJetsInPseudoJetA[i].Pz(), 1.777);
+  vector<float> AlphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Description                                                                                              
+    /// This function works in parallel with EvtTopology::alphaT(..). It takes as input the number of jets       
+    /// in the Event and the "winning combination" in terms of minimising the quantity:                          
+    /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                            
+    /// The function then loops over the jets of the "winning combination" and puts the jets into two groups     
+    /// differentiated by which one contains the "Tau-jet". Then, for each PseudoJetGroup it loops over all      
+    /// possible DiJets combinations and calculates their DiJet mass and stores them in a vector of floats       
+    /// It is worth stating here that the number of possible DiJets that can be formed from a pool of iJets is:  
+    /// nCr = iNJets! / (iNJtets-2)!2!                                                                         
+    /// so, for example: iNJets = 5, nCr = 5! / (3!2!) = 5x2 = 10                                              
+    /// so, for example: iNJets = 4, nCr = 4! / (2!2!) = 3x2 = 6                                              
+    /// so, for example: iNJets = 3, nCr = 3! / (1!2!) = 3x1 = 3                                             
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /// Variable Declaration
+    bool bPseudoJetsGroupA = 0;
+    bool bTauJetInGroupA   = 0;
+    bool bTauJetInGroupB   = 0;
+    vector<float> vDiJetMassesNoTau;
+    vector<float> vEmpty;
     MathFunctions oMath;
-    float fDeltaR = oMath.getDeltaR( oMath.getDeltaPhi(tauJetCandidate.Phi(),tau.Phi()), oMath.getDeltaEta(tauJetCandidate.Eta(),tau.Eta()) );
-    /// make sure that it is indeed the tau-jet. Comapare Et and deltaR
-    if( (fabs(tau.Et() - tauJetCandidate.Et()) < 2.0) && (fabs(fDeltaR) < 0.5) ){bTauJetInGroupA = 1;}
-  }//eof: for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
-  
-  /// Determine the Group without the Tau-jet.
-  if(bTauJetInGroupA){
-    // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
-    vJetsInTauPseudoJet    = vJetsInPseudoJetA;
-    vJetsInNonTauPseudoJet = vJetsInPseudoJetB;
-  }else{
-    // std::cout << "Tau-jet found in Pseudo-Jet B" << std::endl;
-    vJetsInTauPseudoJet    = vJetsInPseudoJetB;
-    vJetsInNonTauPseudoJet = vJetsInPseudoJetA;
-  }
-  /// We now have a vector containing TLorentzVector of the Jets comprising each PseudoJet. 
-  /// We now want to Calculate the DiJet mass for all combination for each PseudoJet. So, we employ a double loop with the outside 
-  /// index "m" and the inside index "n=m+1" to avoid double counting. For now, we only want to calculate all the DiJet-Masses for all 
-  /// the combinations in the PeudoJet Without the Tau-jet.
-  int iJetsInNonTauPseudoJet = vJetsInNonTauPseudoJet.size();
-  /// If the PseudoJet has less than 2 jets then abort calculation and return an empty vector of floats
-  if(iJetsInNonTauPseudoJet<2){return vEmpty;}
-  for(int m = 0; m < iJetsInNonTauPseudoJet; m++){
-    for(int n = m+1; n < iJetsInNonTauPseudoJet; n++){
-      float E1 = vJetsInNonTauPseudoJet[m].Energy();
-      float E2 = vJetsInNonTauPseudoJet[n].Energy();
-      TLorentzVector P1 = vJetsInNonTauPseudoJet[m];
-      TLorentzVector P2 = vJetsInNonTauPseudoJet[n];
-      fDiJetMassNoTau =  sqrt( (E1+E2)*(E1+E2) - (P1+P2).Mag2() );
-      vDiJetMassesNoTau.push_back(fDiJetMassNoTau);
-    } //eof: for(int n = m+1; m < vJetsInNonTauPseudoJet.size(); n++){
-  } //eof: for(int m = 0; m < vJetsInNonTauPseudoJet.size(); m++){
-  
-  /// Reset variables
-  bTauJetInGroupA = 0;
-  bTauJetInGroupB = 0;
-  
-  return vDiJetMassesNoTau;
-  
+    vector<TLorentzVector> vJetsInTauPseudoJet;
+    vector<TLorentzVector> vJetsInNonTauPseudoJet;
+    vector<TLorentzVector> vJetsInPseudoJetA;
+    vector<TLorentzVector> vJetsInPseudoJetB;
+    
+    /// The calculation only takes place if a "Tau-jet" exists in the Event.
+    if(!bTauJetExists){return vEmpty;}
+    
+    /// Get the "winning combination"
+    const int k = iCombinationIndex;
+    /// Iterate through jets for combination k.
+    for ( unsigned l=0; l < iNJets; l++ ){ 
+      /// Bitwise shift of "k" by "l" positions to the right and compare to 1. 
+      /// Make a boolean of the comparison so that you can distinguish between PseudoJetGoupA (0's group) from PseudoJetGoupB (1's group)
+      bPseudoJetsGroupA = (Int_t(k>>l)&1);
+      
+      /// If current jet is in groupA (1's)
+      if(bPseudoJetsGroupA){
+	TLorentzVector tmpJet;
+	tmpJet.SetPx( vPx[l] );
+	tmpJet.SetPy( vPy[l] );
+	tmpJet.SetPz( vPz[l] );
+	vJetsInPseudoJetA.push_back(tmpJet);
+      } //eof: if(bPseudoJetsGroupA){
+      else{ /// If current jet is in groupB (0's)
+	TLorentzVector tmpJet;
+	tmpJet.SetPx( vPx[l] );
+	tmpJet.SetPy( vPy[l] );
+	tmpJet.SetPz( vPz[l] );
+	vJetsInPseudoJetB.push_back(tmpJet);
+      } //eof: else{
+    } //eof:  for ( unsigned l=0; l < iNJets; l++ ) {
+    
+    /// Determine in which of the two pseudo-jets the tau-jet is found.
+    for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
+      TLorentzVector tauJetCandidate;
+      tauJetCandidate.SetXYZM(vJetsInPseudoJetA[i].Px(), vJetsInPseudoJetA[i].Py(),vJetsInPseudoJetA[i].Pz(), 1.777);
+      float fDeltaR = oMath.getDeltaR( oMath.getDeltaPhi(tauJetCandidate.Phi(),tau.Phi()), oMath.getDeltaEta(tauJetCandidate.Eta(),tau.Eta()) );      
+      /// make sure that it is indeed the tau-jet. Comapare Et and deltaR
+      if( (fabs(tau.Et() - tauJetCandidate.Et()) < 2.0) && (fabs(fDeltaR) < 0.5) ){bTauJetInGroupA = 1;}
+    }//eof: for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
+    if(bTauJetInGroupA){
+      // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
+      vJetsInTauPseudoJet    = vJetsInPseudoJetA;
+      vJetsInNonTauPseudoJet = vJetsInPseudoJetB;
+    }else{
+      // std::cout << "Tau-jet found in Pseudo-Jet B" << std::endl;
+      vJetsInTauPseudoJet    = vJetsInPseudoJetB;
+      vJetsInNonTauPseudoJet = vJetsInPseudoJetA;
+    }
+    /// We now have a vector containing the Jets comprising each PseudoJet. We want to calculate the DiJet mass for all combination for the 
+    /// PseudoJet that doesn't contain the Tau-Jet, hoping to reconstruct the W mass. Use a double loop with the outside index "m" and the 
+    /// inside index "n=m+1" to avoid double counting.
+    int iJetsInNonTauPseudoJet = vJetsInNonTauPseudoJet.size();
+    
+    /// If the PseudoJet has less than 2 jets (impossible to calculate InvMass), abort calculation and return an empty vector
+    if(iJetsInNonTauPseudoJet<2){return vEmpty;}
+    
+    for(int m = 0; m < iJetsInNonTauPseudoJet; m++){
+      for(int n = m+1; n < iJetsInNonTauPseudoJet; n++){
+	
+	float E1 = vJetsInNonTauPseudoJet[m].Energy();
+	float E2 = vJetsInNonTauPseudoJet[n].Energy();
+	
+	TLorentzVector P1 = vJetsInNonTauPseudoJet[m];
+	TLorentzVector P2 = vJetsInNonTauPseudoJet[n];
+	
+	float fDiJetMassNoTau =  sqrt( (E1+E2)*(E1+E2) - (P1+P2).Mag2() );
+	vDiJetMassesNoTau.push_back(fDiJetMassNoTau);
+      } //eof: for(int n = m+1; m < vJetsInNonTauPseudoJet.size(); n++){
+    } //eof: for(int m = 0; m < vJetsInNonTauPseudoJet.size(); m++){
+    
+    /// Reset variables
+    bTauJetInGroupA = 0;
+    bTauJetInGroupB = 0;
+    
+    return vDiJetMassesNoTau;
+    
   }//eof: static vector<float> alphaTAux(...){
- 
+  
 }//eof: namespace{
+
 
 namespace HPlus {
 
-  AlphaStruc EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+    // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
+    // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
+    fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
+    fEvtTopologyCount(eventCounter.addCounter("EvtTopology cut")),
+    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
+  {
+    edm::Service<TFileService> fs;
+    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 200, 0.0, 10.0);
+  }
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Description                                                                                                     ///
-  /// Returns the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1 jets. ///
-  /// This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance   ///
-  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the   ///
-  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                               ///
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  EvtTopology::~EvtTopology() {}
+
+
+  bool EvtTopology::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Description                                                                                                
+  /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1
+  /// jets. This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance
+  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
+  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// Declaration of variables 
     std::vector<float> vEt, vPx, vPy, vPz;
     std::vector<bool> vPseudo_jet1;
     const bool bList = true;
     const bool bTauJetExists = true;
-    AlphaStruc sAlpha;
-      /// Tau
+    bool bPassedCut = false;
+    /// Tau
     TLorentzVector myTau;
     myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
     /// Fill vectors with Tau-jet information
@@ -229,8 +247,8 @@ namespace HPlus {
     } //eof: for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
     
     /// Get DiJet information from Pseudo-jets
-    vector<float> vDiJetMassesNoTau =  alphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
-    
+    vector<float> vDiJetMassesNoTau =  AlphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
+    // std::cout << "3) vDiJetMassesNoTau.size() = " <<  vDiJetMassesNoTau.size() << std::endl;
     /// In the case something goes wrong...
     if ( ( fMin_delta_sum_et < 0.0 ) || (!bTauJetExists) ){ 
       /// Fill the function structure with -1.0
@@ -255,7 +273,30 @@ namespace HPlus {
       sAlpha.fMHt     = fMHt;
       sAlpha.vDiJetMassesNoTau = vDiJetMassesNoTau;
     } //eof: else{
-      return sAlpha;
-  }
+    if( sAlpha.fAlphaT > fAlphaTCut){
+      bPassedCut = true;
+      increment(fAlphaTCutCount);
+    }
+    
+    if(bPassedCut){
+      increment(fEvtTopologyCount);
+    } // in the future one might add Ht cut or Jt cut or Invariant mass Cuts.
+    
+    /// Fill Histos
+    hAlphaT->Fill(sAlpha.fAlphaT);
+    
+    // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
+    
+    return bPassedCut;
+    
+  } //eof: bool EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+
+  AlphaStruc EvtTopology::alphaT(void){
+    
+    return sAlpha;
+    
+  } //eof: AlphaStruc EvtTopology::alphaT(void){
+  
+  
 
 }//eof: namespace HPlus {
