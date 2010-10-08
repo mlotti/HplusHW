@@ -226,8 +226,6 @@ class Analysis:
             process.configInfo.luminosity = cms.untracked.double(options.luminosity)
             print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 
-        print "Dataset cross section has been set to %g pb" % options.crossSection
-
         # Event counter for all events
         countAll = cms.EDProducer("EventCountProducer")
         process.__setattr__(allCounterName, countAll)
