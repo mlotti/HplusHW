@@ -67,6 +67,7 @@ def addDataSelection(process, dataVersion, trigger):
     )
 
     process.passedPrimaryVertexFilter = cms.EDProducer("EventCountProducer")
+    seq *= process.selectedPrimaryVertices
     seq *= process.primaryVertexFilter
     seq *= process.passedPrimaryVertexFilter
 
