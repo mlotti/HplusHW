@@ -47,7 +47,19 @@ class DatasetSet:
 
     def __getitem__(self, name):
         return self.datasetMap[name]
+
+    def remove(self, nameList):
+        selected = []
+        for d in self.datasets:
+            if not d.getName() in nameList:
+                selected.append(d)
+        self.datasets = selected
+        self.populateMap()
             
+    def populateMap(self):
+        self.datasetMap = {}
+        for d in self.datasets:
+            self.datasetMap[d.getName()] = d
 
     def getHistoSet(self, histoName):
         histos = [d.getTFile().Get(histoName) for d in self.datasets]
@@ -80,6 +92,11 @@ class HistoSetData:
     def applyStyle(self, styleList):
         style = styleList.pop(0)
         style.apply(self.histo)
+
+    def applyFunction(self, func):
+        h = func(self.histo)
+        if h != None:
+            self.histo = h
 
     def getXmin(self):
         return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
@@ -185,6 +202,9 @@ class HistoSet:
         return names
 
     def renameDataset(self, oldName, newName):
+        if oldName == newName:
+            return
+
         if newName in self.datasetMap:
             raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
         self.datasetMap[oldName].setName(newName)
@@ -192,10 +212,17 @@ class HistoSet:
 
     def renameDatasets(self, nameMap):
         for oldName, newName in nameMap.iteritems():
+            if oldName == newName:
+                continue
+
             if newName in datasetMap:
                 raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
             self.datasetMap[oldName].setName(newName)
         self.populateMap()
+
+    def forEachHisto(self, func):
+        for d in self.data:
+            d.applyFunction(func)
 
     def getHisto(self, name):
         return self.datasetMap[name].histo
