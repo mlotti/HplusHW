@@ -65,7 +65,7 @@ isolationCut = "%s < 0.15" % relIso
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetMinMultiplicity = 3
 
-applyMuonVeto = False
+applyMuonVeto = True
 muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 
 
@@ -94,7 +94,7 @@ if options.doPat != 0:
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatMET=False)
+        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False)
     )
     removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
     removeCleaning(process, False)    
@@ -118,6 +118,8 @@ histoDB = Histo("trackDB", "dB()", min=-2, max=2, nbins=400, description="Track 
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
 histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=40, description="Track norm chi2")
 
+histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
+
 histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
@@ -126,72 +128,80 @@ jets = cms.InputTag("selectedPatJets")
 #jets = cms.InputTag("selectedPatJetsAK5JPT")
 
 # Beginning
-histoAnalyzer = analysis.addHistoAnalyzer("AllMuons", muons, histosBeginning)
-muonMultipAnalyzer = analysis.addAnalyzer("MuonMultiplicity", cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
-        src = muons,
-        min = cms.untracked.int32(0),
-        max = cms.untracked.int32(5),
-        nbins = cms.untracked.int32(5)))
+histoAnalyzer = analysis.addMultiHistoAnalyzer("AllMuons", [
+        ("muon_", muons, histosBeginning),
+        ("calomet_", cms.InputTag("patMETs"), [histoMet]),
+        ("pfmet_", cms.InputTag("patMETsPF"), [histoMet]),
+        ("tcmet_", cms.InputTag("patMETsTC"), [histoMet])])
+multipAnalyzer = analysis.addAnalyzer("Multiplicity", cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
+        muons = cms.untracked.PSet(
+            src = muons,
+            min = cms.untracked.int32(0),
+            max = cms.untracked.int32(5),
+            nbins = cms.untracked.int32(5)
+        ),
+        jets = cms.untracked.PSet(
+            src = jets,
+            min = cms.untracked.int32(0),
+            max = cms.untracked.int32(10),
+            nbins = cms.untracked.int32(10)
+        )
+))
 
 # Select jets already here (but do not cut on their number), so we can
 # track the multiplicity through the selections
 selectedJets = analysis.addSelection("JetSelection", jets, jetSelection)
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", muonMultipAnalyzer)
-jetMultipAnalyzer.src = selectedJets
-jetMultipAnalyzer.max = 10
-jetMultipAnalyzer.nbins = 10
-
+multipAnalyzer = analysis.addCloneAnalyzer("MultiplicityAfterJetSelection", multipAnalyzer)
+multipAnalyzer.jets.src = selectedJets
 
 
 # Trigger (for MC)
 analysis.addTriggerCut(dataVersion, trigger)
-histoAnalyzer = analysis.addCloneHistoAnalyzer("Triggered", histoAnalyzer)
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("Triggered", histoAnalyzer)
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
 # Tight muon (global + tracker)
 selectedMuons = analysis.addCut("GlobalTrackerMuon", muons, tightMuonCut)
-histoAnalyzer = analysis.addHistoAnalyzer("GlobalTrackerMuons", selectedMuons, histosGlobal)
-histoAnalyzer.src = selectedMuons
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-muonMultipAnalyzer.src = selectedMuons
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("GlobalTrackerMuons", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+histoAnalyzer.muon_.histograms = cms.VPSet([h.pset() for h in histosGlobal])
+
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.muons.src = selectedMuons
 
 # Kinematical cuts
 selectedMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut)
-histoAnalyzer = analysis.addCloneHistoAnalyzer("MuonKin", histoAnalyzer)
-histoAnalyzer.src = selectedMuons
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-muonMultipAnalyzer.src = selectedMuons
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonKin", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.muons.src = selectedMuons
 
 # Quality cuts
 selectedMuons = analysis.addCut("MuonQuality", selectedMuons, qualityCut+" && "+dbCut)
-histoAnalyzer = analysis.addCloneHistoAnalyzer("MuonQuality", histoAnalyzer)
-histoAnalyzer.src = selectedMuons
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-muonMultipAnalyzer.src = selectedMuons
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonQuality", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.muons.src = selectedMuons
 
 # Isolation
 selectedMuons = analysis.addCut("MuonIsolation", selectedMuons, isolationCut)
-histoAnalyzer = analysis.addCloneHistoAnalyzer("MuonIsolation", histoAnalyzer)
-histoAnalyzer.src = selectedMuons
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-muonMultipAnalyzer.src = selectedMuons
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonIsolation", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.muons.src = selectedMuons
 
 # Veto against 2nd muon
 if applyMuonVeto:
-    vetoMuons = analysis.addCut("MuonVeto", muons, muonVeto)
-    histoAnalyzer = analysis.addCloneHistoAnalyzer("MuonVeto", histoAnalyzer, minNumber=0, maxNumber=1)
+    vetoMuons = analysis.addCut("MuonVeto", muons, muonVeto, minNumber=0, maxNumber=1)
+    histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVeto", histoAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer.muons.src = selectedMuons
 
 # Jet selection
 selectedJets = analysis.addNumberCut("JetMultiplicityCut", selectedJets, minNumber=jetMinMultiplicity)
-histoAnalyzer = analysis.addCloneHistoAnalyzer("JetSelection", histoAnalyzer)
-muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)
-muonMultipAnalyzer.src = selectedMuons
-jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("JetSelection", histoAnalyzer)
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.muons.src = selectedMuons
 
 process.analysisPath = cms.Path(
     process.patSequence *
