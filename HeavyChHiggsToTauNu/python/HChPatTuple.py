@@ -66,6 +66,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         src = cms.InputTag('offlinePrimaryVertices'),
         alias = cms.string("primaryVertexNumber")
     )
+    if dataVersion.isData():
+        # See HChDataSelection
+        process.primaryVertexNumber.src = "selectedPrimaryVertices"
     if out != None:
         out.outputCommands.append("keep int_primaryVertexNumber_*_*")
 

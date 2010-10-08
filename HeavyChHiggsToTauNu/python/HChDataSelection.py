@@ -55,12 +55,17 @@ def addDataSelection(process, dataVersion, trigger):
     # Require a good primary vertex (we might want to do this for MC too), see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Good_Vertex_selection
     # This is from rev. 1.4 of DPGAnalysis/Skims/python/GoodVertex_cfg.py
-    process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
-        vertexCollection = cms.InputTag('offlinePrimaryVertices'),
-        minimumNDOF = cms.uint32(4) ,
-        maxAbsZ = cms.double(15),
-        maxd0 = cms.double(2)
+    process.selectedPrimaryVertices = cms.EDFilter("VertexSelector",
+        filter = cms.bool(False),
+        src = cms.InputTag("offlinePrimaryVertices"),
+        cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
     )
+    process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
+        src = cms.InputTag("selectedPrimaryVertices"),
+        minNumber = cms.uint32(1),
+        maxNumber = cms.uint32(999)
+    )
+
     process.passedPrimaryVertexFilter = cms.EDProducer("EventCountProducer")
     seq *= process.primaryVertexFilter
     seq *= process.passedPrimaryVertexFilter
