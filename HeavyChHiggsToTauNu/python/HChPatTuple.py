@@ -7,7 +7,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
-from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
@@ -21,31 +21,42 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, runPatTrigger=True):
+def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
         out = outdict["out"]
 
     # Tau Discriminators
-    process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
-    HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
-    HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
+    process.hplusPatTauSequence = cms.Sequence()
+    if doPatTaus:
+        process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
+        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
+        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
 
-    HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
-    HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+        HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
+        HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
-    # These are already in 36X AOD, se remove them from the tautagging
-    # sequence
-    if not dataVersion.is35X():
-        process.tautagging.remove(process.jptRecoTauProducer)
-        process.tautagging.remove(process.caloRecoTauProducer)
-        process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
+        # These are already in 36X AOD, se remove them from the tautagging
+        # sequence
+        if not dataVersion.is35X():
+            process.tautagging.remove(process.jptRecoTauProducer)
+            process.tautagging.remove(process.caloRecoTauProducer)
+            process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
+            process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
+            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
+            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
         
-    process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+        process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+
+        process.hplusPatTauSequence = cms.Sequence(
+            process.tautagging *
+            process.PFTauDiscriminationSequenceForChargedHiggs *
+            process.PFTauDiscriminationSequenceForChargedHiggsCont *
+            process.produceAndDiscriminateHPSPFTaus *
+            process.CaloTauDiscriminationSequenceForChargedHiggs *
+            process.CaloTauDiscriminationSequenceForChargedHiggsCont
+        )
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -59,12 +70,7 @@ def addPat(process, dataVersion, runPatTrigger=True):
         out.outputCommands.append("keep int_primaryVertexNumber_*_*")
 
     process.hplusPatSequence = cms.Sequence(
-	process.tautagging *
-        process.PFTauDiscriminationSequenceForChargedHiggs *
-	process.PFTauDiscriminationSequenceForChargedHiggsCont *
-	process.produceAndDiscriminateHPSPFTaus *
-	process.CaloTauDiscriminationSequenceForChargedHiggs *
-	process.CaloTauDiscriminationSequenceForChargedHiggsCont *
+        process.hplusPatTauSequence *
         process.patDefaultSequence *
         process.primaryVertexNumber
     )
@@ -147,25 +153,28 @@ def addPat(process, dataVersion, runPatTrigger=True):
     # process.patTaus.embedIsolationPFNeutralHadrCands = True
     # process.patTaus.embedIsolationPFGammaCands = True
 
-    classicTauIDSources.extend( HChTaus.HChTauIDSources )
-    classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
+    if doPatTaus:
+        classicTauIDSources.extend( HChTaus.HChTauIDSources )
+        classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
 
-    addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
-		algoLabel = "caloReco",
-		typeLabel = "Tau")
+        addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
+                         algoLabel = "caloReco",
+                         typeLabel = "Tau")
 
-    addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
-                algoLabel = "shrinkingCone",
-                typeLabel = "PFTau")
-
-    if not dataVersion.is38X():
-        addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
-                         algoLabel = "fixedCone",
+        addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
+                         algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
 
-    addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
-                algoLabel = "hps",
-                typeLabel = "PFTau")
+        if not dataVersion.is38X():
+            addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
+                             algoLabel = "fixedCone",
+                             typeLabel = "PFTau")
+
+        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+                         algoLabel = "hps",
+                         typeLabel = "PFTau")
+    else:
+        removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     
 
     # Add PAT default event content
@@ -182,10 +191,14 @@ def addPat(process, dataVersion, runPatTrigger=True):
                                    ])
 
     # MET
-    addTcMET(process, 'TC')
-    addPfMET(process, 'PF')
-    if out != None:
-        out.outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
+    if doPatMET:
+        addTcMET(process, 'TC')
+        addPfMET(process, 'PF')
+        if out != None:
+            out.outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
+    else:
+        removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
+
 
     # Muons
 
@@ -196,7 +209,7 @@ def addPat(process, dataVersion, runPatTrigger=True):
 
 
     # Trigger
-    if runPatTrigger:
+    if doPatTrigger:
         switchOnTrigger(process, outputInProcess= out != None)
         HChTrigger.customise(process, dataVersion)
 

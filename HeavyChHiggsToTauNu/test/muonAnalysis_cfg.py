@@ -8,13 +8,7 @@ dataVersion = "36X"
 #dataVersion = "37X"
 #dataVersion = "data" # this is for collision data 
 
-options = VarParsing.VarParsing()
-options.register("runPat",
-                 0,
-                 options.multiplicity.singleton,
-                 options.varType.int,
-                 "Run PAT on the fly (needed for RECO/AOD samples)")
-options = getOptions(options)
+options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
@@ -40,7 +34,7 @@ process.source = cms.Source('PoolSource',
         
   )
 )
-if options.runPat != 0:
+if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter(dcap=True))
 
 ################################################################################
@@ -79,7 +73,7 @@ muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.categories.append("EventCounts")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
@@ -89,8 +83,9 @@ process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
+from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
 process.patSequence = cms.Sequence()
-if options.runPat != 0:
+if options.doPat != 0:
     print "Running PAT on the fly"
 
     process.collisionDataSelection = cms.Sequence()
@@ -99,8 +94,10 @@ if options.runPat != 0:
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, runPatTrigger=False)
+        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatMET=False)
     )
+    removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
+    removeCleaning(process, False)    
 
 
 ################################################################################
@@ -161,7 +158,7 @@ muonMultipAnalyzer.src = selectedMuons
 jetMultipAnalyzer = analysis.addCloneAnalyzer("JetMultiplicity", jetMultipAnalyzer)
 
 # Kinematical cuts
-selectMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut)
+selectedMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut)
 histoAnalyzer = analysis.addCloneHistoAnalyzer("MuonKin", histoAnalyzer)
 histoAnalyzer.src = selectedMuons
 muonMultipAnalyzer = analysis.addCloneAnalyzer("MuonMultiplicity", muonMultipAnalyzer)

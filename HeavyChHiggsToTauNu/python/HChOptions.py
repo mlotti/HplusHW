@@ -20,6 +20,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton, # singleton or list
                      options.varType.string,          # string, int, or float
                      "Data version")
+    options.register("doPat",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Run PAT on the fly (needed for RECO/AOD samples)")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):
