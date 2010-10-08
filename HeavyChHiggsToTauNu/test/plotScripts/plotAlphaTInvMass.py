@@ -46,7 +46,7 @@ style = TDRStyle()
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
 ### directory. The returned object is of type DatasetSet.
-#datasets = getDatasetsFromMulticrabCfg() ## uncomment me
+datasets = getDatasetsFromMulticrabCfg()
 
 ### Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["TTToHpmToTauNu_M100"]) ### example: single dataset
@@ -57,8 +57,7 @@ style = TDRStyle()
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
 #datasets = getDatasetsFromRootFiles([("TTbar", "TTbar/res/histograms_3_1_oN4.root")])
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
-datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M120/res/histograms_1_1_nRc.root")]) ## comment me
-
+#datasets = getDatasetsFromRootFiles([("BTau_141950-144114", "BTau_141950-144114/res/histograms_1_1_Dxo.root")])
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
 ### type HistoSet, which contains a histogram from each dataset in
@@ -68,11 +67,6 @@ alphaTInvMass = datasets.getHistoSet("signalAnalysis/alphaT-InvMass")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(alphaTInvMass.getDatasetNames())
-
-### Example how to remove some datasets
-#alphaTInvMass.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
@@ -93,19 +87,24 @@ alphaTInvMass = datasets.getHistoSet("signalAnalysis/alphaT-InvMass")
 ### Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
 #alphaTInvMass.normalizeMCByLuminosity()
-#ylabel = "#tau cands / 1 GeV/c"
+#ylabel = "Events"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-alphaTInvMass.normalizeMCToLuminosity(10)
+#alphaTInvMass.normalizeMCToLuminosity(2.89)
+alphaTInvMass.normalizeMCToLuminosity(500.0)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1
 #alphaTInvMass.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING ###############################
+############################### MERGING & REMOVING DATASETS ###############################
 ### Example how to merge histograms of several datasets
-# alphaTInvMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
+alphaTInvMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+
+### Example how to remove some datasets
+#alphaTInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+alphaTInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
 #alphaTInvMass.removeDatasets(["QCD", "TTbar"])
@@ -128,10 +127,10 @@ alphaTInvMass.applyStyle("Data", styles.getDataStyle())
 #alphaTInvMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = alphaTInvMass.createCanvasFrame("alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=500.0)
+(canvas, frame) = alphaTInvMass.createCanvasFrame("alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=800.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Inv-Mass (GeV/c^{2})")
+frame.GetXaxis().SetTitle("Di-jet InvMass [GeV/c^{2}]")
 frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend

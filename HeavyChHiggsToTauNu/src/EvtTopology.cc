@@ -225,6 +225,8 @@ namespace HPlus {
     /// Minimum Delta Et for two pseudo-jets
     float fMin_delta_sum_et = -1.0;
     
+    if(iNJets > 15){ return false;}
+
     /// Iterate through different combinations
     for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
       float fDelta_sum_et = 0.0;

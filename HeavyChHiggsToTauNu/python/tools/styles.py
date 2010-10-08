@@ -19,6 +19,7 @@ class StyleFill:
     def apply(self, h):
         self.style.apply(h)
         h.SetFillColor(self.style.color)
+        h.SetFillStyle(3002)
 
 dataStyle = Style(-2, ROOT.kBlack)
 

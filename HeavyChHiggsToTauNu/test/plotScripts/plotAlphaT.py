@@ -57,7 +57,7 @@ datasets = getDatasetsFromMulticrabCfg()
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
 #datasets = getDatasetsFromRootFiles([("TTbar", "TTbar/res/histograms_3_1_oN4.root")])
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
-
+#datasets = getDatasetsFromRootFiles([("BTau_141950-144114", "BTau_141950-144114/res/histograms_1_1_Dxo.root")])
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
 ### type HistoSet, which contains a histogram from each dataset in
@@ -67,11 +67,6 @@ alphaT = datasets.getHistoSet("signalAnalysis/alphaT")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(alphaT.getDatasetNames())
-
-### Example how to remove some datasets
-#alphaT.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
@@ -92,19 +87,24 @@ alphaT = datasets.getHistoSet("signalAnalysis/alphaT")
 ### Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
 #alphaT.normalizeMCByLuminosity()
-#ylabel = "#tau cands / 1 GeV/c"
+#ylabel = "Events"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-alphaT.normalizeMCToLuminosity(11)
+#alphaT.normalizeMCToLuminosity(2.89)
+alphaT.normalizeMCToLuminosity(50.0)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1
 #alphaT.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING ###############################
+############################### MERGING & REMOVING DATASETS ###############################
 ### Example how to merge histograms of several datasets
 alphaT.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+
+### Example how to remove some datasets
+#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
 #alphaT.removeDatasets(["QCD", "TTbar"])
@@ -127,7 +127,7 @@ alphaT.applyStyle("Data", styles.getDataStyle())
 #alphaT.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=3.0)
+(canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("#alpha_{T}")
