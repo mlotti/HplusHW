@@ -11,6 +11,7 @@ class Style:
         h.SetMarkerColor(self.color)
         h.SetMarkerStyle(self.style)
         h.SetMarkerSize(1)
+	h.SetFillColor(0)
 
 class StyleFill:
     def __init__(self, style):

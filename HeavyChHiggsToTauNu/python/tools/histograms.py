@@ -62,7 +62,12 @@ class DatasetSet:
             self.datasetMap[d.getName()] = d
 
     def getHistoSet(self, histoName):
-        histos = [d.getTFile().Get(histoName) for d in self.datasets]
+	histos = []
+	for d in self.datasets:
+            h = d.getTFile().Get(histoName)
+            name = h.GetName()+"_"+d.getName()
+            h.SetName(name.translate(None, "-+.:;"))
+            histos.append(h)
         return HistoSet(self.datasets, histos)
 
 
@@ -110,7 +115,7 @@ class HistoSetDataStacked:
         self.drawStyle = "HIST"
         self.name = name
         
-        self.histo = ROOT.THStack()
+        self.histo = ROOT.THStack(name+"stackHist", name+"stackHist")
         histos = [d.histo for d in self.data]
         histos.reverse()
         for h in histos:
