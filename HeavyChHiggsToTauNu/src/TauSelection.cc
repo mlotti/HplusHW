@@ -146,10 +146,10 @@ namespace HPlus {
       float ptmax = 0;
       float ptsum = 0;
 
-      //      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
-      //      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
-      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
-      reco::TrackRefVector::const_iterator iCand = isolCands.begin();
+      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
+      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
+      //  const reco::TrackRefVector& isolCands = iTau->isolationTracks();
+      //reco::TrackRefVector::const_iterator iCand = isolCands.begin();
       //      std::cout << " isol cands " << isolCands.size() << std::endl;
       for(; iCand != isolCands.end(); ++iCand) {
 	float pt = (*iCand)->pt();
