@@ -13,7 +13,7 @@
 import ROOT
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection import as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 legendLabels = {
