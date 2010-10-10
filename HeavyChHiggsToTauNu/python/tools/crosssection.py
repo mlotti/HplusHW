@@ -1,6 +1,6 @@
 # All cross sections are in pb
 
-ttCrossSection = 165
+ttCrossSection = 165.0
 
 # Calculated by Ritva with FeynHiggs 2.7.3, from e-mail 2010-10-06
 hplusBranchRatio = [
@@ -58,15 +58,18 @@ hplusDatasetMass = {
     "TTbar_Htaunu_M140":   140,
     "TTbar_Htaunu_M160":   160}
 
-def hplusTauNuCrossSection(mass, tanbeta):
+def hplusTauNuBRs(mass, tanbeta):
     if not mass in hplusMassIndex:
         raise Exception("Mass %s is not in the table, valid values are %s" % (str(mass), ", ".join([str(x) for x in hplusMassIndex.keys()])))
     if not tanbeta in hplusTanBetaIndex:
         raise Exception("Tan(beta) %s not in the table, valild values are %s" % (str(tanbeta), ", ".join([str(x) for x in hplusTanBetaIndex.keys()])))
 
-    (tHBR, HtaunuBR) = hplusBranchRatio[hplusTanBetaIndex[tanbeta]][hplusMassIndex[mass]]
+    return hplusBranchRatio[hplusTanBetaIndex[tanbeta]][hplusMassIndex[mass]]
 
-    return 2 * tHBR * (1-tHBR) * HtaunuBR
+def hplusTauNuCrossSection(mass, tanbeta):
+    (tHBR, HtaunuBR) = hplusTauNuBRs(mass, tanbeta)
+
+    return 2 * ttCrossSection * tHBR * (1-tHBR) * HtaunuBR
 
 
 def setHplusCrossSections(datasets, tanbeta):
@@ -75,3 +78,22 @@ def setHplusCrossSections(datasets, tanbeta):
             continue
 
         datasets.getDataset(name).setCrossSection(hplusTauNuCrossSection(mass, tanbeta))
+
+def printHplusCrossSections():
+    print "ttbar cross section %f pb" % ttCrossSection
+    print
+    tanbetas = hplusTanBetaIndex.keys()
+    tanbetas.sort()
+    masses = hplusMassIndex.keys()
+    masses.sort()
+    for tanbeta in tanbetas:
+        print "="*68
+        print "tan(beta) = %d" % tanbeta
+        print "H+ M (GeV) | BR(t->bH+) | BR(H+->taunu) | sigma(tt->tbH+->tbtaunu) |"
+        for mass in masses:
+            BR = hplusTauNuBRs(mass, tanbeta)
+            print "%10d | %10f | %13f | %24f |" % (mass, BR[0], BR[1], hplusTauNuCrossSection(mass, tanbeta))
+
+
+if __name__ == "__main__":
+    printHplusCrossSections()
