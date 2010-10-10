@@ -5,6 +5,7 @@ ttCrossSection = 165.0
 # Calculated by Ritva with FeynHiggs 2.7.3, from e-mail 2010-10-06
 hplusBranchRatio = [
     [ # tan(beta) = 10
+        # BR(t->bH+), BR(H+->taunu)
         (0.02436, 0.938), # M=80 (81 actually)
         (0.02139, 0.969), # M=90
         (0.01799, 0.979), # M=100
