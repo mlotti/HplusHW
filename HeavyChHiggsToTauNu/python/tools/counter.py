@@ -1,74 +1,6 @@
 import ROOT
 
-def histoToCounter(histo):
-    ret = []
-
-    for bin in xrange(1, histo.GetNbinsX()+1):
-        ret.append( (histo.GetXaxis().GetBinLabel(bin),
-                     long(histo.GetBinContent(bin))) )
-
-    return ret
-
-def histoToDict(histo):
-    ret = {}
-
-    for bin in xrange(1, histo.GetNbinsX()+1):
-        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)
-
-    return ret
-
-def rescaleInfo(d):
-    factor = 1/d["control"]
-
-    ret = {}
-    for k, v in d.iteritems():
-        ret[k] = v*factor
-
-    return ret
-
-class Dataset:
-    def __init__(self, name, info, file):
-        self.name = name
-        self.info = info
-        self.nAllEvents = None
-        self.file = file
-
-    def getName(self):
-        return self.name
-
-    def setName(self, name):
-        self.name = name
-
-    def setCrossSection(self, value):
-        if self.isData():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
-        self.info["crossSection"] = value
-
-    def getCrossSection(self):
-        return self.info["crossSection"]
-
-    def setLuminosity(self, value):
-        if self.isMC():
-            raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
-        self.info["luminosity"] = value
-
-    def getLuminosity(self):
-        return self.info["luminosity"]
-
-    def isData(self):
-        return "luminosity" in self.info
-
-    def isMC(self):
-        return "crossSection" in self.info
-
-    def setAllEvents(self, allevTuple):
-        self.nAllEvents = allevTuple[1]
-
-    def getNormFactor(self):
-        return self.getCrossSection() / self.nAllEvents
-
-    def getTFile(self):
-        return self.file
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 
 class Counter:
     def __init__(self, counter):
@@ -147,27 +79,6 @@ class Counters:
 
     def getSubCounters(self, name):
         return [x.getSubCounter(name) for x in self.counters]
-
-def readDataset(fname, counterDir, datasetname, crossSections):
-    f = ROOT.TFile.Open(fname)
-    if f == None:
-        raise Exception("Unable to open ROOT file '%s'"%fname)
-    if f.Get("configInfo") == None:
-        raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
-
-    info = rescaleInfo(histoToDict(f.Get("configInfo").Get("configinfo")))
-
-    dataset = Dataset(datasetname, info, f)
-    if datasetname in crossSections:
-        dataset.setCrossSection(crossSections[datasetname])
-
-    if f.Get(counterDir) == None:
-        raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
-
-    ctr = histoToCounter(f.Get(counterDir).Get("counter"))
-    dataset.setAllEvents(ctr[0])
-
-    return dataset
 
 def readCountersFileDir(fname, counterDir, datasetname, crossSections):
     dataset = readDataset(fname, counterDir, datasetname, crossSections)
