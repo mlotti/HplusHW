@@ -30,26 +30,30 @@ legendLabels = {
 
 ROOT.gROOT.SetBatch(True)
 style = TDRStyle()
-#datasets = getDatasetsFromMulticrabCfg(counterdir="countAnalyzer")
+datasets = getDatasetsFromMulticrabCfg(counterdir="countAnalyzer")
 #datasets.remove(["SingleTop_sChannel", "SingleTop_tChannel", "SingleTop_tWChannel"])
-datasets = getDatasetsFromCrabDirs(["Mu_140042-144114",
-                                    "WJets", "TTbarJets", "ZJets",
-                                    "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
-                                    "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
-                                    "QCD_Pt80to120_Fall10"], counterdir="countAnalyzer")
+# datasets = getDatasetsFromCrabDirs(["Mu_140042-144114",
+#                                     "WJets", "TTbarJets", "ZJets",
+#                                     "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
+#                                     "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
+#                                     "QCD_Pt80to120_Fall10"], counterdir="countAnalyzer")
                                     
 
 class Histo:
     def __init__(self, datasets, name):
         self.histos = datasets.getHistoSet(name)
+        #print "\n".join(histos.getDatasetNames())
+
+        self.histos.getDataset("Mu_140042-144114").setLuminosity(3068636.598/1e6) # ub^-1 -> pb^-1
+        self.histos.getDataset("Mu_146240-147116").setLuminosity(3879919.235/1e6)
 
         self.histos.mergeDataDatasets()
-        self.histos.getDataset("Data").setLuminosity(2.941429021)
 
         self.histos.normalizeMCByLuminosity()
 
-        self.histos.mergeDatasets("QCD", ["QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10", "QCD_Pt80to120_Fall10",
-                                          "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
+        self.histos.mergeDatasets("QCD", ["QCD_Pt15to30_Fall10", "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
+                                          "QCD_Pt80to120_Fall10", "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
+        self.histos.mergeDatasets("Single t", ["SingleTop_sChannel", "SingleTop_tChannel", "SingleTop_tWChannel"])
 
         self.histos.setHistoLegendLabels(legendLabels)
 
@@ -78,9 +82,9 @@ class Histo:
 
 
 # After muon selection
-h = Histo(datasets, "h05_JetMultiplicity/multiplicity")
+h = Histo(datasets, "h06_Multiplicity/jets_multiplicity")
 h.histos.stackMCDatasets()
-h.createFrame("njets", ymin=0.1, ymax=20e3)
+h.createFrame("njets", ymin=0.1, ymax=1e6)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
 h.frame.GetYaxis().SetTitle("Number of events")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
@@ -92,7 +96,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # After muon selection + jet multip. cut
-h = Histo(datasets, "h06_JetMultiplicity/multiplicity")
+h = Histo(datasets, "h07_Multiplicity/jets_multiplicity")
 h.histos.stackMCDatasets()
 h.createFrame("njets_afternjetcut", xmin=3)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
@@ -122,7 +126,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon pt after all other cuts
-h.createFrame("muon_pt_log", ymin=0.1, ymax=400)
+h.createFrame("muon_pt_log", ymin=0.1, ymax=1e3)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
@@ -135,7 +139,7 @@ h.save()
 
 # Muon pt after all other cuts
 # h = Histo(datasets, "afterOtherCuts/pt")
-h.createFrame("muon_pt_cut20", xmin=20, ymax=50)
+h.createFrame("muon_pt_cut20", xmin=20, ymax=200)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.draw()
@@ -145,10 +149,10 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon pt after all other cuts
-h = Histo(datasets, "h06_JetSelection/pt")
+h = Histo(datasets, "h07_JetSelection/muon_pt")
 h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCDatasets()
-h.createFrame("muon_pt_cut20_2", xmin=20, ymax=50)
+h.createFrame("muon_pt_cut20_2", xmin=20, ymax=200)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
@@ -160,12 +164,12 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon eta after all other cuts
-h = Histo(datasets, "h06_JetSelection/eta")
-#h.histos.forEachHisto(lambda h: h.Rebin(2))
+h = Histo(datasets, "h07_JetSelection/muon_eta")
+h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCDatasets()
 h.createFrame("muon_eta")
 h.frame.GetXaxis().SetTitle("Muon  #eta")
-h.frame.GetYaxis().SetTitle("Number of muons / 0.1")
+h.frame.GetYaxis().SetTitle("Number of muons / 0.5")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
 #ROOT.gPad.SetLogy(True)
 h.draw()
@@ -175,7 +179,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon isolation after all other cuts
-h = Histo(datasets, "h06_JetSelection/relIso")
+h = Histo(datasets, "h07_JetSelection/muon_relIso")
 #h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCDatasets()
 h.createFrame("muon_reliso", xmax=0.15)
@@ -189,7 +193,6 @@ addEnergyText(x=0.3, y=0.85)
 h.histos.addLuminosityText()
 h.save()
 
-
 h.createFrame("muon_reliso_log", xmax=0.15, ymin=0.1, ymax=200)
 h.frame.GetXaxis().SetTitle("Muon rel. isol. (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons")
@@ -201,3 +204,16 @@ addEnergyText(x=0.23, y=0.85)
 h.histos.addLuminosityText(x=0.45, y=0.85)
 h.save()
 
+# Muon track ip w.r.t. PV
+h = Histo(datasets, "h07_JetSelection/muon_trackDB")
+h.histos.stackMCDatasets()
+h.createFrame("muon_trackdb", xmin=0, xmax=0.2, ymin=0.1, ymax=500)
+h.frame.GetXaxis().SetTitle("Muon track d_{0}(PV) (cm)")
+h.frame.GetYaxis().SetTitle("Number of muons")
+h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
+ROOT.gPad.SetLogy(True)
+h.draw()
+addCmsPreliminaryText()
+addEnergyText(x=0.3, y=0.85)
+h.histos.addLuminosityText()
+h.save()

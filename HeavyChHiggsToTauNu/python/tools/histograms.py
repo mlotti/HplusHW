@@ -45,6 +45,9 @@ class DatasetSet:
     def getDataset(self, name):
         return self[name]
 
+    def hasDataset(self, name):
+        return name in self.datasetMap
+
     def __getitem__(self, name):
         return self.datasetMap[name]
 
