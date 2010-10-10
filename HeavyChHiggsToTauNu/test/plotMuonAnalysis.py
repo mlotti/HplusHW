@@ -51,8 +51,8 @@ class Histo:
 
         self.histos.normalizeMCByLuminosity()
 
-        self.histos.mergeDatasets("QCD", ["QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10", "QCD_Pt80to120_Fall10",
-                                          "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
+        self.histos.mergeDatasets("QCD", ["QCD_Pt15to30_Fall10", "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
+                                          "QCD_Pt80to120_Fall10", "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
         self.histos.mergeDatasets("Single t", ["SingleTop_sChannel", "SingleTop_tChannel", "SingleTop_tWChannel"])
 
         self.histos.setHistoLegendLabels(legendLabels)
@@ -84,7 +84,7 @@ class Histo:
 # After muon selection
 h = Histo(datasets, "h06_Multiplicity/jets_multiplicity")
 h.histos.stackMCDatasets()
-h.createFrame("njets", ymin=0.1, ymax=20e3)
+h.createFrame("njets", ymin=0.1, ymax=1e6)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
 h.frame.GetYaxis().SetTitle("Number of events")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
@@ -126,7 +126,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon pt after all other cuts
-h.createFrame("muon_pt_log", ymin=0.1, ymax=400)
+h.createFrame("muon_pt_log", ymin=0.1, ymax=1e3)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
@@ -139,7 +139,7 @@ h.save()
 
 # Muon pt after all other cuts
 # h = Histo(datasets, "afterOtherCuts/pt")
-h.createFrame("muon_pt_cut20", xmin=20, ymax=50)
+h.createFrame("muon_pt_cut20", xmin=20, ymax=200)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.draw()
@@ -152,7 +152,7 @@ h.save()
 h = Histo(datasets, "h07_JetSelection/muon_pt")
 h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCDatasets()
-h.createFrame("muon_pt_cut20_2", xmin=20, ymax=50)
+h.createFrame("muon_pt_cut20_2", xmin=20, ymax=200)
 h.frame.GetXaxis().SetTitle("Muon p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 5.0 GeV/c")
 h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
