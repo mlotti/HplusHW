@@ -60,8 +60,9 @@ class Histo:
         self.histos.setHistoLegendStyleAll("F")
         self.histos.setHistoLegendStyle("Data", "p")
 
-        self.histos.applyStylesMC(styles.getStylesFill())
-        self.histos.applyStyle("Data", styles.getDataStyle())
+        self.histos.forEachMCHisto(styles.generator(fill=True))
+        styles.getDataStyle()(self.histos.getHisto("Data"))
+
         self.histos.setHistoDrawStyle("Data", "EP")
 
     def createFrame(self, plotname, xmin=None, xmax=None, ymin=None, ymax=None):
