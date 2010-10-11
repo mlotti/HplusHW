@@ -51,7 +51,7 @@ namespace HPlus {
     if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
 
     if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
-    std::cout << "fEvtTopology" << std::endl;
+//    std::cout << "fEvtTopology" << std::endl;
 
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
