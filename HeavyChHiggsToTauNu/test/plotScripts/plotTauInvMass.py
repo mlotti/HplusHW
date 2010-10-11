@@ -69,11 +69,6 @@ tauInvMass = datasets.getHistoSet("signalAnalysis/tau_InvMass")
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(tauInvMass.getDatasetNames())
 
-### Example how to remove some datasets
-#tauInvMass.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
-
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
 ### Note: this must be done before normalizeMCByLuminosity()
@@ -103,13 +98,17 @@ ylabel = "Events"
 #tauInvMass.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING ###############################
+############################### MERGING & REMOVING DATASETS ###############################
 ### Example how to merge histograms of several datasets
-# tauInvMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
+tauInvMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+
+### Example how to remove some datasets
+#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+tauInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
-#tauInvMass.removeDatasets(["QCD", "TTbar"])
-#tauInvMass.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
+#alphaT.removeDatasets(["QCD", "TTbar"])
+#alphaT.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
@@ -128,7 +127,7 @@ tauInvMass.applyStyle("Data", styles.getDataStyle())
 #tauInvMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauInvMass.createCanvasFrame("tauInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
+(canvas, frame) = tauInvMass.createCanvasFrame("tau_InvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("Inv-Mass (GeV/c^{2})")

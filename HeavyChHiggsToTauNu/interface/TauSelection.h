@@ -69,6 +69,8 @@ namespace HPlus {
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hPtAfterTauSelCuts;
+    TH1 *hEtaAfterTauSelCuts;
     TH1 *hEtaRtau;
     TH1 *hLeadTrkPt;
     TH1 *hIsolTrkPt;

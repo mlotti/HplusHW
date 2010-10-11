@@ -51,7 +51,7 @@ style = TDRStyle()
 ### Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["TTToHpmToTauNu_M100"]) ### example: single dataset
 #datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100","TTToHpmToTauNu_M120","TTbar_Htaunu_M140", "TTbar_Htaunu_M160", "QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170"]) ### example: list of datasets
- 
+
 ### Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt50to80", "QCD_Pt50to80/res/histograms_1_1_zCl.root")])
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
@@ -64,82 +64,82 @@ datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M12
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-NBtagJets = datasets.getHistoSet("signalAnalysis/NumberOfBtaggedJets")
+TauNTrksVSPtcut = datasets.getHistoSet("signalAnalysis/tau_ntrks_vs_ptcut")
 
 ### Print the list of datasets in the given HistoSet
-#print "\n".join(NBtagJets.getDatasetNames())
+#print "\n".join(TauNTrksVSPtcut.getDatasetNames())
 
 ### Example how to remove some datasets
-#NBtagJets.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
+#TauNTrksVSPtcut.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
 #                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
 #                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
 ### Note: this must be done before normalizeMCByLuminosity()
-#NBtagJets.mergeDataDatasets()
+#TauNTrksVSPtcut.mergeDataDatasets()
 
 ### Example how to set the luminosity of a data dataset
-#NBtagJets.getDataset("Data").setLuminosity(5)
+#TauNTrksVSPtcut.getDataset("Data").setLuminosity(5)
 
 ### The default normalization is no normalization (i.e. number of MC
 ### events for MC, and number of events for data)
 
 ############################### NORMALISE ###############################
 ### Normalize MC histograms to their cross section
-#NBtagJets.normalizeMCByCrossSection()
+#TauNTrksVSPtcut.normalizeMCByCrossSection()
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
-#NBtagJets.normalizeMCByLuminosity()
+#TauNTrksVSPtcut.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-NBtagJets.normalizeMCToLuminosity(10)
-ylabel = "Events"
+TauNTrksVSPtcut.normalizeMCToLuminosity(10)
+ylabel = "???"
 
 ### Normalize the area of *all* histograms to 1
-#NBtagJets.normalizeToOne()
+#TauNTrksVSPtcut.normalizeToOne()
 #ylabel = "a.u"
 
 ############################### MERGING ###############################
 ### Example how to merge histograms of several datasets
-NBtagJets.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
+# TauNTrksVSPtcut.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
 
 ### Example how to remove given datasets
-#NBtagJets.removeDatasets(["QCD", "TTbar"])
-#NBtagJets.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
+#TauNTrksVSPtcut.removeDatasets(["QCD", "TTbar"])
+#TauNTrksVSPtcut.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-NBtagJets.setHistoLegendLabels(legendLabels) # many datasets, with dict
+TauNTrksVSPtcut.setHistoLegendLabels(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
-NBtagJets.setHistoLegendStyleAll("F")
-NBtagJets.setHistoLegendStyle("Data", "p")
+TauNTrksVSPtcut.setHistoLegendStyleAll("F")
+TauNTrksVSPtcut.setHistoLegendStyle("Data", "p")
 
 ### Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-NBtagJets.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-NBtagJets.applyStyle("Data", styles.getDataStyle())
-#NBtagJets.setHistoDrawStyle("Data", "EP")
+TauNTrksVSPtcut.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
+TauNTrksVSPtcut.applyStyle("Data", styles.getDataStyle())
+#TauNTrksVSPtcut.setHistoDrawStyle("Data", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
-#NBtagJets.stackMCDatasets()
+#TauNTrksVSPtcut.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = NBtagJets.createCanvasFrame("NBtagJets", ymin=0.01, ymax=None, xmin=0.0, xmax=8.0)
+(canvas, frame) = TauNTrksVSPtcut.createCanvasFrame("TauNTrksVSPtcut", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Number of Btag Jets")
+frame.GetXaxis().SetTitle("???")
 frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
-NBtagJets.addToLegend(legend)
+TauNTrksVSPtcut.addToLegend(legend)
 
 ### Draw the plots
-NBtagJets.draw()
+TauNTrksVSPtcut.draw()
 legend.Draw()
 
 ### Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
@@ -148,7 +148,7 @@ ROOT.gPad.SetLogy(True)
 ### The necessary texts, all take the position as arguments
 addCmsPreliminaryText()
 addEnergyText(x=0.3, y=0.85)
-NBtagJets.addLuminosityText() ### need to comment out if normalising to unity 
+TauNTrksVSPtcut.addLuminosityText() ### need to comment out if normalising to unity 
 
 ############################### EXECUTION ###############################
 ### Script execution can be paused like this, it will continue after

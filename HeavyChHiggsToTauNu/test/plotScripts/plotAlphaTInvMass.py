@@ -104,7 +104,7 @@ alphaTInvMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to1
 
 ### Example how to remove some datasets
 #alphaTInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
-alphaTInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+alphaTInvMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
 #alphaTInvMass.removeDatasets(["QCD", "TTbar"])
@@ -127,7 +127,7 @@ alphaTInvMass.applyStyle("Data", styles.getDataStyle())
 #alphaTInvMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = alphaTInvMass.createCanvasFrame("alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=800.0)
+(canvas, frame) = alphaTInvMass.createCanvasFrame("alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=1000.0)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("Di-jet InvMass [GeV/c^{2}]")

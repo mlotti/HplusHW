@@ -68,11 +68,6 @@ transverseMass = datasets.getHistoSet("signalAnalysis/transverseMass")
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(transverseMass.getDatasetNames())
 
-### Example how to remove some datasets
-#transverseMass.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
-
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
 ### Note: this must be done before normalizeMCByLuminosity()
@@ -95,20 +90,24 @@ transverseMass = datasets.getHistoSet("signalAnalysis/transverseMass")
 #ylabel = "#tau cands / 1 GeV/c"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-transverseMass.normalizeMCToLuminosity(11)
+transverseMass.normalizeMCToLuminosity(50.0)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to unity. Canno be used with mergeDatasets
 #transverseMass.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING ###############################
+############################### MERGING & REMOVING DATASETS ###############################
 ### Example how to merge histograms of several datasets
 transverseMass.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
 
+### Example how to remove some datasets
+#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+transverseMass.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+
 ### Example how to remove given datasets
-#transverseMass.removeDatasets(["QCD", "TTbar"])
-transverseMass.removeDatasets(["TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "QCD", "TTbar"])
+#alphaT.removeDatasets(["QCD", "TTbar"])
+#alphaT.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
@@ -127,7 +126,7 @@ transverseMass.applyStyle("Data", styles.getDataStyle())
 #transverseMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = transverseMass.createCanvasFrame("transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=500.0)
+(canvas, frame) = transverseMass.createCanvasFrame("transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=300.0)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("M_{T} GeV/c^{2}")

@@ -50,15 +50,16 @@
 // For "k"=15 ( 00010101 in 8bit representation) we have after the second loop: 0 1 1 0 1
 // For "k"=16 ( 00010110 in 8bit representation) we have after the second loop: 0 1 1 1 0
 //#########################################################################################################################################
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "TH1F.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "TLorentzVector.h"
 
 namespace{
   
-  vector<float> AlphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
-    
+  vector<float> alphaTAux( const unsigned iNJets, int iCombinationIndex, const std::vector<Float_t> vEt, const std::vector<Float_t> vPx, const std::vector<Float_t> vPy, const std::vector<Float_t> vPz, const TLorentzVector& tau, bool bTauJetExists ){
+  
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     /// Description                                                                                              
     /// This function works in parallel with EvtTopology::alphaT(..). It takes as input the number of jets       
@@ -163,40 +164,25 @@ namespace{
   
 }//eof: namespace{
 
-
 namespace HPlus {
 
-  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
-    // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
-    // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
-    fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
-    fEvtTopologyCount(eventCounter.addCounter("EvtTopology cut")),
-    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
-  {
-    edm::Service<TFileService> fs;
-    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 1000, 0.0, 10.0);
-  }
-
-  EvtTopology::~EvtTopology() {}
-
-
-  bool EvtTopology::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /// Description                                                                                                
-  /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1
-  /// jets. This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance
-  /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
-  /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  AlphaStruc EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Description                                                                                                
+    /// Calculates the AlphaT variable, defined as an N-object system where the set of objects is 1 tau-jet and N-1
+    /// jets. This definition reproduces the kinematics of a di-jet system by constructing two pseudo-jets, which balance
+    /// one another in Ht. The two pseudo-jets are formed from the combination of the N objects that minimizes the
+    /// DeltaHt = |Ht_pseudoJet1 - Ht_pseudoJet2| of the pseudo-jets.                                             
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// Declaration of variables 
     std::vector<float> vEt, vPx, vPy, vPz;
     std::vector<bool> vPseudo_jet1;
     const bool bList = true;
     const bool bTauJetExists = true;
-    bool bPassedCut = false;
-    /// Tau
+    AlphaStruc sAlpha;
+      /// Tau
     TLorentzVector myTau;
     myTau.SetXYZM(tau.px(), tau.py(), tau.pz(), 1.777); 
     /// Fill vectors with Tau-jet information
@@ -225,16 +211,6 @@ namespace HPlus {
     /// Minimum Delta Et for two pseudo-jets
     float fMin_delta_sum_et = -1.0;
     
-    if(iNJets > 18){ 
-      // Fill the function structure with -2.0 to indicate that combinatorics too much
-      sAlpha.fAlphaT  = -2.0;
-      sAlpha.fJt      = -2.0;
-      sAlpha.fHt      = -2.0;
-      sAlpha.fDeltaHt = -2.0;
-      sAlpha.fMHt     = -2.0;
-      return false;
-    }
-
     /// Iterate through different combinations
     for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
       float fDelta_sum_et = 0.0;
@@ -257,8 +233,8 @@ namespace HPlus {
     } //eof: for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
     
     /// Get DiJet information from Pseudo-jets
-    vector<float> vDiJetMassesNoTau =  AlphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
-    // std::cout << "3) vDiJetMassesNoTau.size() = " <<  vDiJetMassesNoTau.size() << std::endl;
+    vector<float> vDiJetMassesNoTau =  alphaTAux(iNJets, iCombinationIndex, vEt, vPx, vPy, vPz, myTau, bTauJetExists );
+    
     /// In the case something goes wrong...
     if ( ( fMin_delta_sum_et < 0.0 ) || (!bTauJetExists) ){ 
       /// Fill the function structure with -1.0
@@ -283,30 +259,7 @@ namespace HPlus {
       sAlpha.fMHt     = fMHt;
       sAlpha.vDiJetMassesNoTau = vDiJetMassesNoTau;
     } //eof: else{
-    if( sAlpha.fAlphaT > fAlphaTCut){
-      bPassedCut = true;
-      increment(fAlphaTCutCount);
-    }
-    
-    if(bPassedCut){
-      increment(fEvtTopologyCount);
-    } // in the future one might add Ht cut or Jt cut or Invariant mass Cuts.
-    
-    /// Fill Histos
-    hAlphaT->Fill(sAlpha.fAlphaT);
-    
-    // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
-    
-    return bPassedCut;
-    
-  } //eof: bool EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
-
-  AlphaStruc EvtTopology::alphaT(void){
-    
-    return sAlpha;
-    
-  } //eof: AlphaStruc EvtTopology::alphaT(void){
-  
-  
+      return sAlpha;
+  }
 
 }//eof: namespace HPlus {

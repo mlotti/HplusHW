@@ -104,7 +104,8 @@ alphaT.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "Q
 
 ### Example how to remove some datasets
 #alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
-alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+# alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+alphaT.removeDatasets(["BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
 #alphaT.removeDatasets(["QCD", "TTbar"])
@@ -124,10 +125,10 @@ alphaT.applyStyle("Data", styles.getDataStyle())
 #alphaT.setHistoDrawStyle("Data", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
-#alphaT.stackMCDatasets()
+alphaT.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
+(canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=1.2)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("#alpha_{T}")

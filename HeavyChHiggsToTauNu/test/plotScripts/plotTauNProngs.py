@@ -64,7 +64,7 @@ datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M12
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-tauNProngs = datasets.getHistoSet("signalAnalysis/alphaT-InvMass")
+tauNProngs = datasets.getHistoSet("signalAnalysis/tau_nProngs")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(tauNProngs.getDatasetNames())
@@ -128,7 +128,7 @@ tauNProngs.applyStyle("Data", styles.getDataStyle())
 #tauNProngs.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauNProngs.createCanvasFrame("tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=500.0)
+(canvas, frame) = tauNProngs.createCanvasFrame("tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
 
 ### Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("#tau-jet nProngs")
