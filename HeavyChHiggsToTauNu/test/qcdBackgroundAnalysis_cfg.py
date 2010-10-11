@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
-dataVersion = "35X"
+dataVersion = "38X"
 #dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
@@ -19,7 +19,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -29,7 +29,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
-        dataVersion.getAnalysisDefaultFileCastor()
+        #dataVersion.getAnalysisDefaultFileCastor()
+        'rfio:/castor/cern.ch/user/w/wendland/pattuple_qcd120_170_38X_sample.root'
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -65,6 +66,24 @@ process.infoPath = cms.Path(
 )
 
 
+################################################################################
+# Produce pat::Tau collection of jets matching of trigger 
+################################################################################
+myTriggerNameForMatching = "HLT_SingleIsoTau20_Trk15_MET20"
+#myTriggerNameForMatching = "HLT_SingleLooseIsoTau20"
+#myTriggerNameForMatching = "HLT_Jet30U"
+
+print "Using matching to ", myTriggerNameForMatching
+
+process.tauHLTMatcher = cms.EDProducer("TauHLTMatchProducer",
+    trigger      = cms.InputTag("patTrigger"),
+    triggerEvent = cms.InputTag("patTriggerEvent"),
+    tauCollections = cms.InputTag("selectedPatTausShrinkingConePFTau"),
+    hltTriggerForMatching = cms.string(myTriggerNameForMatching)
+)
+
+################################################################################
+
 # Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
@@ -83,6 +102,8 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     verbose = cms.untracked.bool(True)
 )
 process.signalAnalysisPath = cms.Path(
+#    process.patTriggerSequence *
+    process.tauHLTMatcher *
     process.signalAnalysis *
     process.signalAnalysisCounters
 )
@@ -111,16 +132,16 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalAnalysis",
-        "drop *_*_counterNames_*",
-        "drop *_*_counterInstances_*"
+#        "keep *_*_*_HChSignalAnalysis",
+#        "drop *_*_counterNames_*",
+#        "drop *_*_counterInstances_*"
 #	"drop *",
-#	"keep *",
+	"keep *",
 #        "keep edmMergeableCounter_*_*_*"
     )
 )
 
 # Uncomment the following line to get also the event output (can be
 # useful for debugging purposes)
-#process.outpath = cms.EndPath(process.out)
+process.outpath = cms.EndPath(process.out)
 
