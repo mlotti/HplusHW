@@ -99,7 +99,7 @@ class DatasetHisto:
         h.SetName(h.GetName()+"_cloned")
         if self.normalization == "none":
             return h
-        elif self.normalization = "toOne":
+        elif self.normalization == "toOne":
             return normalizeToOne(h)
 
         # We have to normalize to cross section in any case
@@ -177,7 +177,7 @@ class DatasetHistoMergedMC:
     def __init__(self, datasetHistos, mergedDataset):
         self.datasetHistos = datasetHistos
         self.dataset = mergedDataset
-        self.normalization = "none":
+        self.normalization = "none"
         for h in self.datasetHistos:
             if h.isMC():
                 raise Exception("Internal error")
@@ -222,7 +222,7 @@ class Dataset:
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
-        if self.file..Get("configInfo") == None:
+        if self.file.Get("configInfo") == None:
             raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
         self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
 

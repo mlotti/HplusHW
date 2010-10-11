@@ -4,8 +4,8 @@ from optparse import OptionParser
 
 import ROOT
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import Dataset
+import multicrab
+from dataset import Dataset
 
 def addCmsPreliminaryText(x=0.62, y=0.96):
     l = ROOT.TLatex()

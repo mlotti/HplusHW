@@ -1,6 +1,6 @@
 import ROOT
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
+from dataset import *
 
 class Counter:
     def __init__(self, counter):
