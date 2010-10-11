@@ -51,8 +51,8 @@ namespace HPlus {
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
     hIsolTrkPt = fs->make<TH1F>("tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
     hIsolTrkPtSum = fs->make<TH1F>("tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
-    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 5, 0.5, 1.0, 100, 0., 20.);
-    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 5, 0.5, 1.0,10,0.,10.);
+    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
+    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
