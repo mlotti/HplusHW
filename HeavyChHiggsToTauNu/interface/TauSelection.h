@@ -15,6 +15,7 @@ namespace edm {
 }
 
 class TH1;
+#include "TH2.h"
 
 namespace HPlus {
   class TauSelection {
@@ -68,9 +69,14 @@ namespace HPlus {
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hPtAfterTauSelCuts;
+    TH1 *hEtaAfterTauSelCuts;
     TH1 *hEtaRtau;
     TH1 *hLeadTrkPt;
     TH1 *hIsolTrkPt;
+    TH1 *hIsolTrkPtSum;
+    TH2 *hIsolTrkPtSumVsPtCut;
+    TH2 *hNIsolTrksVsPtCut;
     TH1 *hIsolMaxTrkPt;
     TH1 *hnProngs;
     TH1 *hDeltaE;

@@ -47,9 +47,14 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
     hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
+    hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 100.);
+    hEtaAfterTauSelCuts = fs->make<TH1F>("tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
     hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
     hIsolTrkPt = fs->make<TH1F>("tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
+    hIsolTrkPtSum = fs->make<TH1F>("tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
+    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
+    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
@@ -141,6 +146,7 @@ namespace HPlus {
       */
   
       float ptmax = 0;
+      float ptsum = 0;
 
       const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
       reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
@@ -148,13 +154,29 @@ namespace HPlus {
       //reco::TrackRefVector::const_iterator iCand = isolCands.begin();
       //      std::cout << " isol cands " << isolCands.size() << std::endl;
       for(; iCand != isolCands.end(); ++iCand) {
-	float pt = (*iCand)->pt(); 
+	float pt = (*iCand)->pt();
+	ptsum += pt; 
 	if (pt > ptmax) ptmax = pt;
 	hIsolTrkPt->Fill(pt);
 	//	std::cout << " isol track pt " << pt << std::endl;
 	//iCand->pt()
       }
       hIsolMaxTrkPt->Fill(ptmax);
+      hIsolTrkPtSum->Fill(ptsum);
+
+      for(int iCut = 0; iCut < 5; ++iCut){
+	double cut = 0.5 + 0.1*iCut;
+	double sum  = 0;
+	int nTracks = 0;
+	for(size_t iTr = 0; iTr < isolCands.size(); ++iTr) {
+	  float pt = isolCands[iTr]->pt();
+	  if(pt < cut) continue;
+	  sum+=pt;
+	  nTracks++;
+	}
+	hIsolTrkPtSumVsPtCut->Fill(cut,sum);
+	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
+      } 
 
       // Loopin voi tehdä myös näin
       //      for(size_t i=0; i<isolCands.size(); ++i) {
@@ -201,6 +223,9 @@ namespace HPlus {
       increment(fInvMassSubCount);
       ++InvMassCutPassed;
 
+      // Fill Histos after Tau Selection Cuts
+      hPtAfterTauSelCuts->Fill(iTau->pt());
+      hEtaAfterTauSelCuts->Fill(iTau->eta());
 
       fSelectedTaus.push_back(iTau);
     }
@@ -237,7 +262,7 @@ namespace HPlus {
 
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
-
+    
     /*
     if(fSelectedTaus.size() > 1)
       return false;

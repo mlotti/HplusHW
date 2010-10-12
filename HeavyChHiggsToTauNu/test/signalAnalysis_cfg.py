@@ -73,6 +73,7 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     jetSelection = param.jetSelection,
     bTagging = param.bTagging,
     MET = param.MET,
+    EvtTopology = param.EvtTopology
 )
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
