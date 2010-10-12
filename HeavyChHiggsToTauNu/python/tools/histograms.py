@@ -5,7 +5,7 @@ from optparse import OptionParser
 import ROOT
 
 import multicrab
-import counter
+from dataset import Dataset
 
 def addCmsPreliminaryText(x=0.62, y=0.96):
     l = ROOT.TLatex()
@@ -29,50 +29,8 @@ def createLegend(x1, y1, x2, y2):
     #legend.SetMargin(0.1)
     return legend
 
-class DatasetSet:
-    def __init__(self):
-        self.datasets = []
-        self.datasetMap = {}
-
-    def append(self, dataset):
-        self.datasets.append(dataset)
-        self.datasetMap[dataset.getName()] = dataset
-
-    def extend(self, datasetset):
-        for d in datasetset.datasets:
-            self.append(d)
-
-    def getDataset(self, name):
-        return self[name]
-
-    def hasDataset(self, name):
-        return name in self.datasetMap
-
-    def __getitem__(self, name):
-        return self.datasetMap[name]
-
-    def remove(self, nameList):
-        selected = []
-        for d in self.datasets:
-            if not d.getName() in nameList:
-                selected.append(d)
-        self.datasets = selected
-        self.populateMap()
-            
-    def populateMap(self):
-        self.datasetMap = {}
-        for d in self.datasets:
-            self.datasetMap[d.getName()] = d
-
-    def getHistoSet(self, histoName):
-	histos = []
-	for d in self.datasets:
-            h = d.getTFile().Get(histoName)
-            name = h.GetName()+"_"+d.getName()
-            h.SetName(name.translate(None, "-+.:;"))
-            histos.append(h)
-        return HistoSet(self.datasets, histos)
-
+def getHistoSet(datasetSet, name):
+    return HistoSet(datasetSet.getHistoWrappers(name))
 
 class HistoSetData:
     def __init__(self, dataset, histo):
@@ -81,6 +39,9 @@ class HistoSetData:
         self.legendLabel = dataset.getName()
         self.legendStyle = "l"
         self.drawStyle = "HIST"
+
+    def getHistogram(self):
+        return self.histo
 
     def getName(self):
         return self.dataset.getName()
@@ -96,10 +57,6 @@ class HistoSetData:
 
     def addToLegend(self, legend):
         legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
-
-    def applyStyle(self, styleList):
-        style = styleList.pop(0)
-        style.apply(self.histo)
 
     def call(self, func):
         h = func(self.histo)
@@ -123,6 +80,9 @@ class HistoSetDataStacked:
         histos.reverse()
         for h in histos:
             self.histo.Add(h)
+
+    def getHistogram(self):
+        return self.histo
 
     def getName(self):
         return self.name
@@ -157,97 +117,81 @@ class HistoSetDataStacked:
         return max([d.getXmax() for d in self.data])
 
 class HistoSet:
-    def __init__(self, datasets, histos):
-        if len(datasets) != len(histos):
-            raise Exception("Length of datasets and histos differ! (%d != %d)" % (len(datasets), len(histos)))
-
-        self.data = []
-        self.datasetMap = {}
-        for i, d in enumerate(datasets):
-            self.data.append(HistoSetData(d, histos[i]))
-        self.populateMap()
-                            
-        self.normalization = "none"
+    def __init__(self, histoWrappers):
+        self.histoWrappers = histoWrappers
+        self.data = None
         self.luminosity = None
 
+    def normalizeToOne(self):
+        if self.data != None:
+            raise Exception("Can't normalize after the histograms have been created!")
+        for h in self.histoWrappers:
+            h.normalizeToOne()
+
+    def normalizeMCByCrossSection(self):
+        if self.data != None:
+            raise Exception("Can't normalize after the histograms have been created!")
+        for h in self.histoWrappers:
+            if h.getDataset().isMC():
+                h.normalizeByCrossSection()
+
+    def normalizeMCByLuminosity(self):
+        if self.data != None:
+            raise Exception("Can't normalize after the histograms have been created!")
+        lumi = None
+        for h in self.histoWrappers:
+            if h.getDataset().isData():
+                if lumi != None:
+                    raise Exception("Unable to normalize by luminosity, more than one data datasets (you might want to merge data datasets)")
+                lumi = h.getDataset().getLuminosity()
+
+        if lumi == None:
+            raise Exception("Unable to normalize by luminosity, no data datasets")
+
+        self.normalizeMCToLuminosity(self, sumLumi)
+
+    def normalizeMCToLuminosity(self, lumi):
+        if self.data != None:
+            raise Exception("Can't normalize after the histograms have been created!")
+        for h in self.histoWrappers:
+            if h.getDataset().isMC():
+                h.normalizeToLuminosity(lumi)
+        self.luminosity = lumi
+
+    def createHistogramObjects(self):
+        self.data = []
+        for h in self.histoWrappers:
+            self.data.append(HistoSetData(h.getDataset(), h.getHistogram()))
+        self.populateMap()
+
     def populateMap(self):
-        self.datasetMap = {}
+        self.datasetHistoMap = {}
+        for h in self.data:
+            self.datasetHistoMap[h.getDataset().getName()] = h
+
+    def forEachHisto(self, func):
+        if self.data == None:
+            self.createHistogramObjects()
+
         for d in self.data:
-            self.datasetMap[d.getName()] = d
-
-    def reorderAndSelectDatasets(self, nameList):
-        selected = []
-        for name in nameList:
-            selected.append(self.datasetMap[name])
-        self.data = selected
-        self.populateMap()
-
-    def removeDatasets(self, nameList):
-        selected = []
-        for d in self.data:
-            if not d.getName() in nameList:
-                selected.append(d)
-        self.data = selected
-        self.populateMap()
-
-    def getDataset(self, name):
-        return self.datasetMap[name].dataset
-
-    def getDatasetList(self):
-        return [d.dataset for d in self.data]
-
-    def getDatasetNames(self):
-        return [d.getName() for d in self.data]
-
-    def getMCDatasetNames(self):
-        names = []
-        for d in self.data:
-            if d.dataset.isMC():
-                names.append(d.getName())
-        return names
-
-    def getDataDatasetNames(self):
-        names = []
-        for d in self.data:
-            if d.dataset.isData():
-                names.append(d.getName())
-        return names
-
-    def renameDataset(self, oldName, newName):
-        if oldName == newName:
-            return
-
-        if newName in self.datasetMap:
-            raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
-        self.datasetMap[oldName].setName(newName)
-        self.populateMap()
-
-    def renameDatasets(self, nameMap):
-        for oldName, newName in nameMap.iteritems():
-            if oldName == newName:
-                continue
-
-            if newName in datasetMap:
-                raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
-            self.datasetMap[oldName].setName(newName)
-        self.populateMap()
-
-    def forEachHisto(self, func, datasetSelector=None):
-        for d in self.data:
-            if datasetSelector != None and not datasetSelector(d.dataset):
-                continue
             d.call(func)
 
-    def forEachMCHisto(self, func):
-        self.forEachHisto(func, lambda x: x.isMC())
-
     def getHisto(self, name):
-        return self.datasetMap[name].histo
+        if self.data == None:
+            self.createHistogramObjects()
+
+        return self.datasetHistoMap[name].histo
 
     def getHistoList(self):
-        return [d.dataset for d in self.data]
+        if self.data == None:
+            self.createHistogramObjects()
+
+        return [d.getHistogram() for d in self.data]
 
     def setHistoLegendLabel(self, name, label):
+        if self.data == None:
+            self.createHistogramObjects()
+
         if not name in self.datasetMap:
             print "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
             return
@@ -255,10 +199,16 @@ class HistoSet:
         self.datasetMap[name].setLegendLabel(label)
 
     def setHistoLegendLabels(self, nameMap):
+        if self.data == None:
+            self.createHistogramObjects()
+
         for name, label in nameMap.iteritems():
             self.setHistoLegendLabel(name, label)
 
     def setHistoLegendStyle(self, name, style):
+        if self.data == None:
+            self.createHistogramObjects()
+
         if not name in self.datasetMap:
             print "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
             return
@@ -266,13 +216,22 @@ class HistoSet:
         self.datasetMap[name].setLegendStyle(style)
 
     def setHistoLegendStyleAll(self, style):
+        if self.data == None:
+            self.createHistogramObjects()
+
         for d in self.data:
             d.setLegendStyle(style)
 
     def setHistoDrawStyle(self, name, style):
+        if self.data == None:
+            self.createHistogramObjects()
+
         self.datasetMap[name].drawStyle = style
 
     def setHistoDrawStyleAll(self, style):
+        if self.data == None:
+            self.createHistogramObjects()
+
         for d in self.data:
             d.drawStyle = style
 
@@ -284,33 +243,10 @@ class HistoSet:
     def addLuminosityText(self, x=0.65, y=0.85):
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
-    def applyStyle(self, name, style):
-        if not name in self.datasetMap:
-            print "WARNING: Tried to set histogram style for dataset '%s', which doesn't exist." % name
-            return
-
-        self.datasetMap[name].applyStyle([style])
-
-    def applyStyles(self, styleList):
-        if len(styleList) < len(self.data):
-            raise Exception("len(styleList) = %d < len(self.histos) = %d" % (len(styleList), len(self.histos)))
-
-        # The list is modified by the applyStyle() methods
-        lst = styleList[:]
-        for d in self.data:
-            d.applyStyle(lst)
-
-    def applyStylesMC(self, styleList):
-        mcDatasets = self.getMCDatasetNames()
-        if len(styleList) < len(mcDatasets):
-            raise Exception("len(styleList) = %d < len(mcDatasets) = %d" % (len(styleList), len(mcDatasets)))
-
-        # The list is modified by the applyStyle() methods
-        lst = styleList[:]
-        for name in mcDatasets:
-            self.datasetMap[name].applyStyle(lst)
-
     def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
+        if self.data == None:
+            self.createHistogramObjects()
+
         c = ROOT.TCanvas(name)
         if ymin == None:
             ymin = min([d.histo.GetMinimum() for d in self.data])
@@ -330,10 +266,16 @@ class HistoSet:
         return (c, frame)
 
     def addToLegend(self, legend):
+        if self.data == None:
+            self.createHistogramObjects()
+
         for d in self.data:
             d.addToLegend(legend)
 
     def draw(self, inReverseOrder=True):
+        if self.data == None:
+            self.createHistogramObjects()
+
         histos = [(d.histo, d.drawStyle, d.getName()) for d in self.data]
         if inReverseOrder:
             histos.reverse()
@@ -341,8 +283,8 @@ class HistoSet:
         for h, style, dname in histos:
             h.Draw(style+" same")
 
-    def mergeDataDatasets(self):
-        self.mergeDatasets("Data", self.getDataDatasetNames())
+
+
 
     def stackMCDatasets(self):
         self.stackDatasets("MC", self.getMCDatasetNames())
@@ -395,140 +337,5 @@ class HistoSet:
         self.data = newData
         self.populateMap()
 
-    def mergeDatasets(self, newName, datasetNameList):
-        tpl = self.mergeStackInternalHelper(newName, datasetNameList, "merge")
-        if tpl == None:
-            return
-        (indices, newData, isMC) = tpl
 
-        dataset = None
-        if isMC:
-            if not self.normalization in ["byCrossSection", "byLuminosity", "toLuminosity"]:
-                raise Exception("MC datasets must be normalized by cross section or luminosity before merging!")
-
-            # If we can sum the histograms together, we can sum the
-            # cross sections too. It is purely in the user's
-            # responsibility to decide if this is correct or not
-            crossSum = 0.0
-            for i in indices:
-                crossSum += self.data[i].dataset.getCrossSection()
-            dataset = counter.Dataset(newName, {"crossSection": crossSum}, None)
-        else:
-            if self.normalization == "one":
-                raise Exception("Can not merge data datasets after normalizeToOne!")
-
-            # Calculate the total integrated luminosity
-            lumiSum = 0.0
-            for i in indices:
-                lumiSum += self.data[i].dataset.getLuminosity()
-            dataset = counter.Dataset(newName, {"luminosity": lumiSum}, None)
-
-        # Sum the histograms in question, contents assumed to be
-        # directly summable (same code for both methods)
-        histoSum = self.data[indices[0]].histo.Clone()
-        for i in indices[1:]:
-            histoSum.Add(self.data[i].histo)
-        newData.insert(indices[0], HistoSetData(dataset, histoSum))
-
-        self.data = newData
-        self.populateMap()
-
-    def normalizeToOne(self):
-        if self.normalization != "none":
-            raise Exception("Histograms already normalized")
-
-        for d in self.data:
-            h = d.histo
-            h.Sumw2() # errors are also scaled after this call 
-            h.Scale(1.0/h.Integral())
-        self.normalization = "one"
-
-    def normalizeMCByCrossSection(self):
-        if self.normalization != "none":
-            raise Exception("Histograms already normalized")
-
-        for d in self.data:
-            if d.dataset.isData():
-                continue
-            h = d.histo
-            h.Sumw2() # errors are also scaled after this call
-            h.Scale(d.dataset.getNormFactor())
-            h.GetYaxis().SetTitle("Cross section (pb)")
-                
-        self.normalization = "byCrossSection"
-
-    def normalizeMCByLuminosity(self):
-        if not self.normalization in ["none", "byCrossSection"]:
-            raise Exception("Histograms already normalized")
-
-        self.luminosity = None
-        for d in self.data:
-            if d.dataset.isData():
-                if self.luminosity != None:
-                    raise Exception("Only one data dataset may exist for normalizing byLuminosity; you can remove other data datasets, merge them or use normalizeMCToLuminosity(lumi)")
-                self.luminosity = d.dataset.getLuminosity()
-
-        if self.luminosity == None:
-            raise Exception("No collision data datasets, can not normalize by luminosity (you might want to consider normalizeMCToLuminosity(lumi) with explicit integrated luminosity")
-
-        self.normalizeMCToLuminosity(self.luminosity)
-        self.normalization = "byLuminosity"
-
-    def normalizeMCToLuminosity(self, lumi):
-        if not self.normalization in ["none", "byCrossSection"]:
-            raise Exception("Histograms already normalized")
-
-        if self.normalization == "none":
-            self.normalizeMCByCrossSection()
-
-        for d in self.data:
-            if d.dataset.isData():
-                continue
-            h = d.histo
-            # h.Sumw2() call not needed because the histo is already
-            # normalized by cross section (i.e. it has already been
-            # called)
-            h.Scale(lumi)
-        
-        self.luminosity = lumi
-        self.normalization = "toLuminosity"
-
-
-def addOptions(parser):
-    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    parser.add_option("-f", dest="files", type="string", action="append", default=[],
-                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-
-def getDatasetsFromMulticrabCfg(opts=None, counterdir="signalAnalysisCounters"):
-    return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counterdir)
-
-def getDatasetsFromCrabDirs(taskdirs, opts=None, counterdir="signalAnalysisCounters"):   
-    if opts == None:
-        parser = OptionParser(usage="Usage: %prog [options]")
-        multicrab.addOptions(parser)
-        addOptions(parser)
-        (opts, args) = parser.parse_args()
-        if hasattr(opts, "counterdir"):
-            counterdir = opts.counterdir
-
-    dlist = []
-    for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
-        if len(files) > 1:
-            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
-        elif len(files) == 0:
-            print "No files matched to input for task %s, ignoring the dataset" % d
-            continue
-
-        dlist.append( (d, files[0]) )
-
-    return getDatasetsFromRootFiles(dlist, counterdir)
-
-def getDatasetsFromRootFiles(dlist, counterdir="signalAnalysisCounters"):
-    datasets = DatasetSet()
-    for name, f in dlist:
-        datasets.append(counter.readDataset(f, counterdir, name, {}))
-    return datasets
 
