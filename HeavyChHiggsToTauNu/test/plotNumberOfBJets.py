@@ -56,7 +56,7 @@ datasets = getDatasetsFromMulticrabCfg()
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
+tauPts = datasets.getHistoSet("signalAnalysis/NumberOfBtaggedJets")
 
 # Print the list of datasets in the given HistoSet
 #print "\n".join(tauPts.getDatasetNames())
@@ -96,7 +96,7 @@ tauPts.mergeDataDatasets()
 
 # Normalize MC histograms to an explicit luminosity in pb
 tauPts.normalizeMCToLuminosity(1.473)
-ylabel = "#tau cands / 1 GeV/c"
+ylabel = "Events "
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
@@ -133,11 +133,11 @@ tauPts.setHistoDrawStyle("Data", "EP")
 tauPts.stackDatasets("MC", stackedMcDatasetNames)
 
 # Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauPts.createCanvasFrame("taupt")
-(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=1, ymax=80000000) # for logy
+(canvas, frame) = tauPts.createCanvasFrame("numberOfBJets")
+(canvas, frame) = tauPts.createCanvasFrame("numberOfBJets", ymin=0.005, ymax=0.5) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+frame.GetXaxis().SetTitle("Number of B-tagged Jets")
 frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
@@ -165,4 +165,4 @@ tauPts.addLuminosityText()
 # Save TCanvas as png
 canvas.SaveAs(".png")
 #canvas.SaveAs(".eps")
-canvas.SaveAs(".C")
+#canvas.SaveAs(".C")

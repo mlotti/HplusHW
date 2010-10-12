@@ -56,14 +56,14 @@ datasets = getDatasetsFromMulticrabCfg()
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
+tauPts = datasets.getHistoSet("signalAnalysis/jet_eta")
 
 # Print the list of datasets in the given HistoSet
 #print "\n".join(tauPts.getDatasetNames())
 
 # Example how to remove some datasets
 tauPts.removeDatasets([
-#    "BTau_146240-146729",
+    "BTau_146240-146729",
     "TTbar_Htaunu_M80",
     "TTToHpmToTauNu_M90",
     "TTToHpmToTauNu_M100",
@@ -91,12 +91,12 @@ tauPts.mergeDataDatasets()
 
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
-#tauPts.normalizeMCByLuminosity()
-#ylabel = "#tau cands / 1 GeV/c"
+tauPts.normalizeMCByLuminosity()
+ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
-tauPts.normalizeMCToLuminosity(1.473)
-ylabel = "#tau cands / 1 GeV/c"
+#tauPts.normalizeMCToLuminosity(4)
+#ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
@@ -134,10 +134,10 @@ tauPts.stackDatasets("MC", stackedMcDatasetNames)
 
 # Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = tauPts.createCanvasFrame("taupt")
-(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=1, ymax=80000000) # for logy
+#(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+frame.GetXaxis().SetTitle("#eta_{jet} ")
 frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
@@ -149,7 +149,7 @@ tauPts.draw()
 legend.Draw()
 
 # Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
-ROOT.gPad.SetLogy(True)
+#ROOT.gPad.SetLogy(True)
 
 # The necessary texts, all take the position as arguments
 addCmsPreliminaryText()

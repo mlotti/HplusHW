@@ -56,7 +56,7 @@ datasets = getDatasetsFromMulticrabCfg()
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
+tauPts = datasets.getHistoSet("signalAnalysis/tau_Rtau")
 
 # Print the list of datasets in the given HistoSet
 #print "\n".join(tauPts.getDatasetNames())
@@ -96,7 +96,7 @@ tauPts.mergeDataDatasets()
 
 # Normalize MC histograms to an explicit luminosity in pb
 tauPts.normalizeMCToLuminosity(1.473)
-ylabel = "#tau cands / 1 GeV/c"
+ylabel = "#tau cands "
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
@@ -133,15 +133,16 @@ tauPts.setHistoDrawStyle("Data", "EP")
 tauPts.stackDatasets("MC", stackedMcDatasetNames)
 
 # Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauPts.createCanvasFrame("taupt")
-(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=1, ymax=80000000) # for logy
+(canvas, frame) = tauPts.createCanvasFrame("rtau")
+(canvas, frame) = tauPts.createCanvasFrame("rtau", ymin=0.10, ymax=4500) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+frame.GetXaxis().SetTitle("p^{leading track} / E^{#tau jet}")
 frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
-legend = createLegend(0.7, 0.5, 0.9, 0.8)
+#legend = createLegend(0.7, 0.5, 0.9, 0.8)
+legend = createLegend(0.4, 0.5, 0.6, 0.7)
 tauPts.addToLegend(legend)
 
 # Draw the plots
