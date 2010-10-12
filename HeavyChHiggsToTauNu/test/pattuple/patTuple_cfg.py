@@ -46,7 +46,7 @@ process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
     trigger = ""
     if dataVersion.isRun2010A():
-        trigger = "HLT_SingleLooseIsoTau20"
+        trigger = "HLT_SingleIsoTau20_Trk5"
     elif dataVersion.isRun2010B():
         trigger = "HLT_SingleIsoTau20_Trk15_MET20"
     else:

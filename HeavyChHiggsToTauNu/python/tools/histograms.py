@@ -101,7 +101,7 @@ class HistoSetData:
         style = styleList.pop(0)
         style.apply(self.histo)
 
-    def applyFunction(self, func):
+    def call(self, func):
         h = func(self.histo)
         if h != None:
             self.histo = h
@@ -145,6 +145,10 @@ class HistoSetDataStacked:
     def applyStyle(self, styleList):
         for d in self.data:
             d.applyStyle(styleList)
+
+    def call(self, function):
+        for d in self.data:
+            d.call(function)
 
     def getXmin(self):
         return min([d.getXmin() for d in self.data])
@@ -228,9 +232,14 @@ class HistoSet:
             self.datasetMap[oldName].setName(newName)
         self.populateMap()
 
-    def forEachHisto(self, func):
+    def forEachHisto(self, func, datasetSelector=None):
         for d in self.data:
-            d.applyFunction(func)
+            if datasetSelector != None and not datasetSelector(d.dataset):
+                continue
+            d.call(func)
+
+    def forEachMCHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isMC())
 
     def getHisto(self, name):
         return self.datasetMap[name].histo
