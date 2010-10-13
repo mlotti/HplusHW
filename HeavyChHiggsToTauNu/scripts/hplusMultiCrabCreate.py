@@ -14,7 +14,7 @@ def main(argv):
     mc_conf_file = "multicrab.cfg"
     crab_conf_file = None
     py_conf_file = None
-    json_file = None
+    json_files = []
 
     if len(argv) == 3:
         if argv[1] == '-cfg':
@@ -33,14 +33,30 @@ def main(argv):
     mc_parser = ConfigParser.ConfigParser()
     mc_parser.read(mc_conf_file)
     crab_conf_file = mc_parser.get("MULTICRAB", "cfg")
+    try:
+        py_conf_file = mc_parser.get("COMMON", "CMSSW.pset")
+    except ConfigParser.NoOptionError:
+        pass
+    for s in mc_parser.sections():
+        try:
+            json_files.append(mc_parser.get(s, "CMSSW.lumi_mask"))
+        except ConfigParser.NoOptionError:
+            pass
 
     crab_parser = ConfigParser.ConfigParser()
     crab_parser.read(crab_conf_file)
-    py_conf_file = crab_parser.get("CMSSW", "pset")
+    if py_conf_file == None:
+        py_conf_file = crab_parser.get("CMSSW", "pset")
     try:
-        json_file = crab_parser.get("CMSSW", "lumi_mask")
+        json_files.append(crab_parser.get("CMSSW", "lumi_mask"))
     except ConfigParser.NoOptionError:
         pass
+
+    # Unique list of json files
+    keys = {}
+    for f in json_files:
+        keys[f] = 1
+    json_files = keys.keys()   
 
     if crab_conf_file == None:
         print "Did not find crab configuration file"
@@ -54,8 +70,8 @@ def main(argv):
 
     shutil.copy(mc_conf_file, os.path.join(dirname, "multicrab.cfg"))
     flist = [crab_conf_file, py_conf_file]
-    if json_file != None:
-        flist.append(json_file)
+    if len(json_files) > 0:
+        flist.extend(json_files)
     for f in flist:
         shutil.copy(f, dirname)
 

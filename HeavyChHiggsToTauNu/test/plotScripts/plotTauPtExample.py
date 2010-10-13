@@ -13,6 +13,7 @@
 import ROOT
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 legendLabels = {
@@ -51,6 +52,9 @@ datasets = getDatasetsFromMulticrabCfg()
 
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
+
+# Example how to set new signal cross sections for a given tan(beta)
+xsect.setHplusCrossSections(datasets, tanbeta=20)
 
 # Get set of histograms with the given path. The returned object is of
 # type HistoSet, which contains a histogram from each dataset in

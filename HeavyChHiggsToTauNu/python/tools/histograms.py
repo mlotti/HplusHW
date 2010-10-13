@@ -45,12 +45,32 @@ class DatasetSet:
     def getDataset(self, name):
         return self[name]
 
+    def hasDataset(self, name):
+        return name in self.datasetMap
+
     def __getitem__(self, name):
         return self.datasetMap[name]
+
+    def remove(self, nameList):
+        selected = []
+        for d in self.datasets:
+            if not d.getName() in nameList:
+                selected.append(d)
+        self.datasets = selected
+        self.populateMap()
             
+    def populateMap(self):
+        self.datasetMap = {}
+        for d in self.datasets:
+            self.datasetMap[d.getName()] = d
 
     def getHistoSet(self, histoName):
-        histos = [d.getTFile().Get(histoName) for d in self.datasets]
+	histos = []
+	for d in self.datasets:
+            h = d.getTFile().Get(histoName)
+            name = h.GetName()+"_"+d.getName()
+            h.SetName(name.translate(None, "-+.:;"))
+            histos.append(h)
         return HistoSet(self.datasets, histos)
 
 
@@ -81,6 +101,11 @@ class HistoSetData:
         style = styleList.pop(0)
         style.apply(self.histo)
 
+    def call(self, func):
+        h = func(self.histo)
+        if h != None:
+            self.histo = h
+
     def getXmin(self):
         return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
 
@@ -93,7 +118,7 @@ class HistoSetDataStacked:
         self.drawStyle = "HIST"
         self.name = name
         
-        self.histo = ROOT.THStack()
+        self.histo = ROOT.THStack(name+"stackHist", name+"stackHist")
         histos = [d.histo for d in self.data]
         histos.reverse()
         for h in histos:
@@ -120,6 +145,10 @@ class HistoSetDataStacked:
     def applyStyle(self, styleList):
         for d in self.data:
             d.applyStyle(styleList)
+
+    def call(self, function):
+        for d in self.data:
+            d.call(function)
 
     def getXmin(self):
         return min([d.getXmin() for d in self.data])
@@ -185,6 +214,9 @@ class HistoSet:
         return names
 
     def renameDataset(self, oldName, newName):
+        if oldName == newName:
+            return
+
         if newName in self.datasetMap:
             raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
         self.datasetMap[oldName].setName(newName)
@@ -192,10 +224,22 @@ class HistoSet:
 
     def renameDatasets(self, nameMap):
         for oldName, newName in nameMap.iteritems():
+            if oldName == newName:
+                continue
+
             if newName in datasetMap:
                 raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
             self.datasetMap[oldName].setName(newName)
         self.populateMap()
+
+    def forEachHisto(self, func, datasetSelector=None):
+        for d in self.data:
+            if datasetSelector != None and not datasetSelector(d.dataset):
+                continue
+            d.call(func)
+
+    def forEachMCHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isMC())
 
     def getHisto(self, name):
         return self.datasetMap[name].histo
