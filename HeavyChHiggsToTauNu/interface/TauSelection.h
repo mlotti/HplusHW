@@ -46,6 +46,7 @@ namespace HPlus {
     Count fLeadTrkPtCount;
     Count fnProngsCount;
     Count fHChTauIDchargeCount;
+    Count fbyTaNCCount;
     Count fbyIsolationCount;
     Count fbyTrackIsolationCount;  
     Count fecalIsolationCount; 
@@ -60,6 +61,7 @@ namespace HPlus {
     Count fLeadTrkPtSubCount;
     Count fnProngsSubCount;
     Count fHChTauIDchargeSubCount;
+    Count fbyTaNCSubCount;
     Count fbyIsolationSubCount; 
     Count fbyTrackIsolationSubCount; 
     Count fecalIsolationSubCount; 
@@ -80,6 +82,7 @@ namespace HPlus {
     TH1 *hIsolMaxTrkPt;
     TH1 *hnProngs;
     TH1 *hDeltaE;
+    TH1 *hbyTaNC;
     TH1 *hRtau;
     TH1 *hlightPathSignif;
     TH1 *hInvMass;
