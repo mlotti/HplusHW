@@ -25,7 +25,7 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms filled in the analysis body
-    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
+    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 50, 0., 200.);
     hDeltaPhi = fs->make<TH1F>("deltaPhi", "deltaPhi", 60, 0., 180.);
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    

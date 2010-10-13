@@ -58,9 +58,9 @@ namespace HPlus {
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
-    hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 0.01);
+    hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 0.5);
     hlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 0.01);
-    hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 100, 0., 5.);
+    hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 100, 0., 3.);
   }
 
   TauSelection::~TauSelection() {}
@@ -124,26 +124,16 @@ namespace HPlus {
       ++leadTrkPtCutPassed;
 
 
-      hnProngs->Fill(iTau->signalTracks().size());
-      //      if(iTau->signalTracks().size() != 1 && iTau->signalTracks().size() != 3) continue;
-      //      if(iTau->tauID("HChTauIDnProngs") < 0.5) continue; 
-
-      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+      //      hnProngs->Fill(iTau->signalTracks().size());
+      //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
       //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
-      increment(fnProngsSubCount);
-      ++nProngsCutPassed;
+      //      increment(fnProngsSubCount);
+      //      ++nProngsCutPassed;
 
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
-      /*
-      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta());
-	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
-      }
-      hRtau->Fill(Rtau);
-      */
+
   
       float ptmax = 0;
       float ptsum = 0;
@@ -197,9 +187,15 @@ namespace HPlus {
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
 
+
+      hnProngs->Fill(iTau->signalTracks().size());
+      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+      //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      increment(fnProngsSubCount);
+      ++nProngsCutPassed;
+
      
       float Rtau = leadTrk->p()/iTau->p();
-      //      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
       if (Rtau > 1 ) {
 	hEtaRtau->Fill(iTau->eta());
       }
