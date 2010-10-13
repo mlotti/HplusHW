@@ -72,3 +72,6 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMultiCrab
 
 Look also the instructions on our twiki
 https://twiki.cern.ch/twiki/bin/view/CMS/HiggsChToTauNuFullyHadronic
+
+lumiCalc.py instructions
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
