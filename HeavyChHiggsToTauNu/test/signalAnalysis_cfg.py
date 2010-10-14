@@ -21,7 +21,7 @@ process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -30,9 +30,9 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
+        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
+        #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
   )
 )
@@ -96,6 +96,7 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
+    TriggerMETEmulation = param.TriggerMETEmulation,
     tauSelection = param.tauSelection,
     jetSelection = param.jetSelection,
     bTagging = param.bTagging,
@@ -103,6 +104,9 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
+#if dataVersion.isMC() and dataVersion.is38X():
+#    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
+
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
