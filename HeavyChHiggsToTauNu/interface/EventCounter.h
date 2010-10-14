@@ -67,7 +67,7 @@ namespace HPlus {
   public:
     friend class EventCounter;
 
-    Count();
+    // Construction is by the default copy constructor
     ~Count();
 
     void increment(int value=1) {
@@ -76,6 +76,9 @@ namespace HPlus {
     }
 
   private:
+    // No default construction
+    Count(); // NOT IMPLEMENTED
+
     // Prevent construction outside HPlusEventCounter
     Count(EventCounter *counter, size_t index);
 
