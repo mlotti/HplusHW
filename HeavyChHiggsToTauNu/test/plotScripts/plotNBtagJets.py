@@ -96,7 +96,7 @@ NBtagJets = datasets.getHistoSet("signalAnalysis/NumberOfBtaggedJets")
 #ylabel = "#tau cands / 1 GeV/c"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-NBtagJets.normalizeMCToLuminosity(10)
+NBtagJets.normalizeMCToLuminosity(1.47)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1

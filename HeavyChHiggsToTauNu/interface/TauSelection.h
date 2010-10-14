@@ -28,7 +28,9 @@ namespace HPlus {
     const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
       return fSelectedTaus;
     }
-
+    // variables
+    float Rtau;
+    
   private:
 
     bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);

@@ -31,13 +31,13 @@ namespace HPlus {
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     Count fAllCounter;
-    Count ftransverseMassCutCount;
+    // Count ftransverseMassCutCount;
 
     TriggerSelection fTriggerSelection;
     TauSelection fTauSelection;
     JetSelection fJetSelection;
-    BTagging fBTagging;
     METSelection fMETSelection;
+    BTagging fBTagging;
     EvtTopology fEvtTopology;
     
     // Histograms
@@ -45,6 +45,8 @@ namespace HPlus {
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
+    TH2 *hAlphaTVsRtau;
+
   };
 }
 
