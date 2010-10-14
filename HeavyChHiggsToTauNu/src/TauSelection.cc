@@ -27,7 +27,7 @@ namespace HPlus {
     fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
     fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
     fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
-    // fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
+    fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
     fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
     fRtauCount(eventCounter.addCounter("Tau Rtau cut")),
     fInvMassCount(eventCounter.addCounter("Tau InvMass cut")),
@@ -40,10 +40,11 @@ namespace HPlus {
     fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
     fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
-    //fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
+    fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
+    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
+    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut"))
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
@@ -91,7 +92,7 @@ namespace HPlus {
     size_t nProngsCutPassed = 0;
     size_t HChTauIDchargeCutPassed = 0;
     size_t byIsolationCutPassed = 0;
-    size_t byTrackIsolationCutPassed = 0;
+//    size_t byTrackIsolationCutPassed = 0;
     size_t ecalIsolationCutPassed = 0;
     size_t againstElectronCutPassed = 0;
     size_t againstMuonCutPassed = 0;
