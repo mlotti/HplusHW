@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
+    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 TriggerMETEmulation = cms.untracked.PSet(
     src = cms.untracked.InputTag("patMETs"), # calo MET
