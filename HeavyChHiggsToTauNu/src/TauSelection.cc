@@ -43,7 +43,9 @@ namespace HPlus {
     //fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
+    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
+    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","byTaNC discriminator cut"))
+
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
@@ -91,7 +93,6 @@ namespace HPlus {
     size_t nProngsCutPassed = 0;
     size_t HChTauIDchargeCutPassed = 0;
     size_t byIsolationCutPassed = 0;
-    size_t byTrackIsolationCutPassed = 0;
     size_t ecalIsolationCutPassed = 0;
     size_t againstElectronCutPassed = 0;
     size_t againstMuonCutPassed = 0;
@@ -136,8 +137,6 @@ namespace HPlus {
 
 
       hnProngs->Fill(iTau->signalTracks().size());
-      //      if(iTau->signalTracks().size() != 1 && iTau->signalTracks().size() != 3) continue;
-      //      if(iTau->tauID("HChTauIDnProngs") < 0.5) continue; 
 
       if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
       //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
@@ -147,15 +146,8 @@ namespace HPlus {
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
-      
-//      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-//      if (Rtau > 1 ) {
-//	hEtaRtau->Fill(iTau->eta());
-//	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
-//      }
-//      hRtau->Fill(Rtau);
-      
-  
+     
+     
       float ptmax = 0;
       float ptsum = 0;
 
@@ -189,16 +181,6 @@ namespace HPlus {
 	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
       } 
 
-      // Loopin voi tehdä myös näin
-      //      for(size_t i=0; i<isolCands.size(); ++i) {
-      //	float pt = isolCands[i]->pt();
-      //	std::cout << " isol track pt " << pt << std::endl;
-      //      }
-
-      //      if(ptmax >  0.5) continue; 
-      //increment(fbyTrackIsolationSubCount);
-      //++byTrackIsolationCutPassed;
-
       
       if(iTau->tauID("byIsolation") < 0.5) continue; 
       increment(fbyIsolationSubCount);
@@ -207,21 +189,17 @@ namespace HPlus {
       if(iTau->tauID("ecalIsolation") < 0.5) continue; 
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
-
+    
      
-      // float Rtau = leadTrk->p()/iTau->p();
-      Rtau = leadTrk->p()/iTau->p();
-      //      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta());
-      }
+      float Rtau = leadTrk->p()/iTau->p();
+      //      Rtau = leadTrk->p()/iTau->p();
       hRtau->Fill(Rtau);
     
 
       if(Rtau < fRtauCut) continue; 
       increment(fRtauSubCount);
       ++RtauCutPassed;
-
+      
       float DeltaE = iTau->tauID("HChTauIDDeltaECont");
       hDeltaE->Fill(DeltaE);
 
@@ -230,10 +208,12 @@ namespace HPlus {
 
       float InvMass = iTau->tauID("HChTauIDInvMassCont");
       hInvMass->Fill(InvMass);
-
+      //      continue;
+     
       if(InvMass > fInvMassCut) continue;
       increment(fInvMassSubCount);
       ++InvMassCutPassed;
+
 
       // Fill Histos after Tau Selection Cuts
       hPtAfterTauSelCuts->Fill(iTau->pt());
@@ -256,22 +236,22 @@ namespace HPlus {
 
     if(leadTrkPtCutPassed == 0) return false;
     increment(fLeadTrkPtCount); 
-
+   
     if(nProngsCutPassed == 0) return false;
     increment(fnProngsCount);
-
+     
     if(HChTauIDchargeCutPassed == 0) return false;
     increment(fHChTauIDchargeCount);       
-
+     
     if(byIsolationCutPassed == 0) return false;
     increment(fbyIsolationCount);
-
+	
     if(ecalIsolationCutPassed == 0) return false;
     increment(fecalIsolationCount);
-
+      
     if(RtauCutPassed == 0) return false;
     increment(fRtauCount);
-
+     
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
     

@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
+#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 TriggerMETEmulation = cms.untracked.PSet(
     src = cms.untracked.InputTag("patMETs"), # calo MET
@@ -15,7 +15,7 @@ TriggerMETEmulation = cms.untracked.PSet(
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.8), #no change
@@ -53,7 +53,7 @@ MET = cms.untracked.PSet(
     #src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(50.0)
+    METCut = cms.untracked.double(60.0)
 )
 
 bTagging = cms.untracked.PSet(
