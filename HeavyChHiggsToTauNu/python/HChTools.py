@@ -92,6 +92,7 @@ def addCut(process, sequence, name, src, cut, min=1, selector="HPlusCandViewLazy
 def addModule(process, sequence, name, m):
     process.__setattr__(name, m)
     sequence *= m
+    return m
 
 # Clones a module and adds the clone to process and sequence
 #
@@ -118,7 +119,7 @@ def addHistoAnalyzer(process, sequence, name, src, lst):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    addModule(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos))
+    return addModule(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos))
 
 # Add multiple CandViewHistoAnalyzers to process and sequence
 #
@@ -212,14 +213,18 @@ class Histo:
 
 
 class Analysis:
-    def __init__(self, process, seqname, options, allCounterName="countAll"):
+    def __init__(self, process, seqname, options, allCounterName="countAll", additionalCounters=[]):
         self.process = process
 
         # Generator and configuration info analyzers
         process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
-        process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer", crossSection = cms.untracked.double(options.crossSection))
-
-        print "Dataset cross section has been set to %g pb" % options.crossSection
+        process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
+        if options.crossSection >= 0.:
+            process.configInfo.crossSection = cms.untracked.double(options.crossSection)
+            print "Dataset cross section has been set to %g pb" % options.crossSection
+        if options.luminosity >= 0:
+            process.configInfo.luminosity = cms.untracked.double(options.luminosity)
+            print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 
         # Event counter for all events
         countAll = cms.EDProducer("EventCountProducer")
@@ -230,18 +235,13 @@ class Analysis:
         self.process.__setattr__(seqname, self.sequence)
 
         # Create the count analyzer
-        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag(cms.InputTag(allCounterName)))
-        self.process.countAnalyzerPath = cms.Path(self.process.countAnalyzer)
+        counters = additionalCounters+[allCounterName]
+        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]))
 
         self.histoIndex = 0
 
-        self.triggerProcessMap = {"35X": "HLT",
-                                  "35Xredigi": "REDIGI",
-                                  "36X": "REDIGI36X",
-                                  "37X": "REDIGI37X"}
-
     def getSequence(self):
-        return self.sequence
+        return cms.Sequence(self.sequence * self.process.countAnalyzer)
 
     def appendToSequence(self, module):
         self.sequence *= module
@@ -249,18 +249,12 @@ class Analysis:
     def getCountPath(self):
         return self.process.countAnalyzerPath
 
-    def getTriggerName(self, dataVersion):
-        if dataVersion in self.triggerProcessMap:
-            return self.triggerProcessMap[dataVersion]
-        else:
-            return "HLT"
-
-    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=False):
+    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=True):
         filtername = name+"Trigger"
         countname = "count"+name
 
         m1 = triggerResultsFilter.clone()
-        m1.hltResults = cms.InputTag("TriggerResults", "", self.getTriggerName(dataVersion))
+        m1.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
         m1.l1tResults = cms.InputTag("")
         m1.throw = cms.bool(throw) # Should it throw an exception if the trigger product is not found
         m1.triggerConditions = cms.vstring(triggerConditions)
@@ -277,18 +271,21 @@ class Analysis:
 
         self.histoIndex += 1
 
-    def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
+    def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
         # Create the EDModule objects
         m1 = cms.EDFilter(selector,
                           src = src,
                           cut = cms.string(expression))
         self.process.__setattr__(name, m1)
         self.sequence *= m1
+        return cms.InputTag(name)
 
-        self.addNumberCut(name, cms.InputTag(name), minNumber, maxNumber)
+    def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
+        selected = self.addSelection(name, src, expression, selector)
+        self.addNumberCut(name, selected, minNumber, maxNumber)
 
         # Return the InputTag of the selected collection
-        return cms.InputTag(name)
+        return selected
 
     def addNumberCut(self, name, src, minNumber=1, maxNumber=None):
         filtername = name+"Filter"
@@ -320,10 +317,25 @@ class Analysis:
         # Increase the histogram index
         self.histoIndex += 1
 
+    def addAnalyzer(self, postfix, module):
+        name = ("h%02d_"%self.histoIndex)+postfix
+        self.process.__setattr__(name, module)
+        self.sequence *= module
+        return module
+
+    def addCloneAnalyzer(self, postfix, module):
+        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
+
+    def addHistoAnalyzer(self, postfix, src, histos):
+        return addHistoAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, src, histos)
+
     def addMultiHistoAnalyzer(self, postfix, histos):
         return addMultiAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, histos, "HPlusCandViewMultiHistoAnalyzer")
 
     def addCloneMultiHistoAnalyzer(self, postfix, module):
+        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
+
+    def addCloneHistoAnalyzer(self, postfix, module):
         return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
 
     def addCloneModule(self, name, module):

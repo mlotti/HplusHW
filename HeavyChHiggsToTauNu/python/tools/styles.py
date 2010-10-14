@@ -13,6 +13,9 @@ class Style:
         h.SetMarkerSize(1)
 	h.SetFillColor(0)
 
+    def __call__(self, h):
+        self.apply(h)
+
 class StyleFill:
     def __init__(self, style):
         self.style = style
@@ -21,6 +24,9 @@ class StyleFill:
         self.style.apply(h)
         h.SetFillColor(self.style.color)
         h.SetFillStyle(3002)
+
+    def __call__(self, h):
+        self.apply(h)
 
 dataStyle = Style(-2, ROOT.kBlack)
 
@@ -54,3 +60,21 @@ def getStyles():
 
 def getStylesFill():
     return [StyleFill(s) for s in styles]
+
+class generator:
+    def __init__(self, fill=False):
+        if fill:
+            self.styles = getStylesFill()
+        else:
+            self.styles = getStyles()
+        self.index = 0
+
+    def next(self):
+        self.index = (self.index+1) % len(self.styles)
+
+    def __call__(self, h):
+        self.styles[self.index](h)
+        self.next()
+        
+        
+    
