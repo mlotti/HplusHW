@@ -91,7 +91,7 @@ alphaTInvMass = datasets.getHistoSet("signalAnalysis/alphaT-InvMass")
 
 ### Normalize MC histograms to an explicit luminosity in pb
 #alphaTInvMass.normalizeMCToLuminosity(2.89)
-alphaTInvMass.normalizeMCToLuminosity(500.0)
+alphaTInvMass.normalizeMCToLuminosity(1.47)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1

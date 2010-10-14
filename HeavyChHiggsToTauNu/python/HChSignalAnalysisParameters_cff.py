@@ -27,19 +27,19 @@ jetSelection = cms.untracked.PSet(
     minNumber = cms.untracked.uint32(3)
 )
 
+MET = cms.untracked.PSet(
+    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    METCut = cms.untracked.double(50.0)
+)
+
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminatorCut = cms.untracked.double(1.5), #no change
     ptCut = cms.untracked.double(30), #no change
     etaCut = cms.untracked.double(1.5), #change to 2.4 (was 1.5)
     minNumber = cms.untracked.uint32(1)
-)
-
-MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(50.0)
 )
 
 EvtTopology = cms.untracked.PSet(

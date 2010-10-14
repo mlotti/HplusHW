@@ -17,7 +17,7 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
-    ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
+    //ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
     edm::Service<TFileService> fs;
@@ -40,16 +40,11 @@ namespace HPlus {
   void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllCounter);
 
-    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
-    // std::cout << "fTriggerSelection" << std::endl;
-    if(!fTauSelection.analyze(iEvent, iSetup)) return;
-    // std::cout << "fTauSelection" << std::endl;
-    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return; 
-    // std::cout << "fJetSelection" << std::endl;
-    if(!fMETSelection.analyze(iEvent, iSetup)) return;
-    // std::cout << "fMETSelection" << std::endl;
-    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
-    // std::cout << "fBTagging" << std::endl;
+    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTriggerSelection" << std::endl;
+    if(!fTauSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTauSelection" << std::endl;
+    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return; // std::cout << "fJetSelection" << std::endl;
+    if(!fMETSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fMETSelection" << std::endl;
+    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;     // std::cout << "fBTagging" << std::endl;
     if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
@@ -58,7 +53,7 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
     // if(transverseMass < 100 ) return;
-    increment(ftransverseMassCutCount);
+    // increment(ftransverseMassCutCount);
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
