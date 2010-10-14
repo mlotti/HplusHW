@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 namespace edm {
   class ParameterSet;
@@ -30,16 +31,21 @@ namespace HPlus {
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
+    double  ftransverseMassCut;
+
     Count fAllCounter;
-    Count ftransverseMassCutCount;
 
     TriggerSelection fTriggerSelection;
+    TriggerMETEmulation  fTriggerMETEmulation;
     TauSelection fTauSelection;
     JetSelection fJetSelection;
-    BTagging fBTagging;
     METSelection fMETSelection;
+    BTagging fBTagging;
+
+    Count ftransverseMassCutCount;
+
     EvtTopology fEvtTopology;
-    
+
     // Histograms
     TH1 *hTransverseMass;
     TH1 *hDeltaPhi;

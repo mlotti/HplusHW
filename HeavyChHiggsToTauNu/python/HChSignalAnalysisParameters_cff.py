@@ -5,7 +5,12 @@ trigger = cms.untracked.PSet(
     trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
 #    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
-
+TriggerMETEmulation = cms.untracked.PSet(
+    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    metEmulationCut = cms.untracked.double(20.0)
+)
 tauSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
     #src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"), # this doesn't exist in 38X samples
@@ -41,6 +46,8 @@ MET = cms.untracked.PSet(
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     METCut = cms.untracked.double(60.0)
 )
+
+transverseMassCut = cms.untracked.double(100)
 
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
