@@ -11,8 +11,11 @@
 
 namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+    //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
+    ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter),
+    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
@@ -25,7 +28,8 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms filled in the analysis body
-    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 100, 0., 200.);
+    //    hmetAfterTrigger = fs->make<TH1F>("metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
+    hTransverseMass = fs->make<TH1F>("transverseMass", "transverseMass", 50, 0., 200.);
     hDeltaPhi = fs->make<TH1F>("deltaPhi", "deltaPhi", 60, 0., 180.);
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
@@ -42,6 +46,7 @@ namespace HPlus {
     increment(fAllCounter);
 
     if(!fTriggerSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTriggerSelection" << std::endl;
+    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
     if(!fTauSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTauSelection" << std::endl;
     if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return; // std::cout << "fJetSelection" << std::endl;
     if(!fMETSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fMETSelection" << std::endl;
@@ -53,8 +58,10 @@ namespace HPlus {
 
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
-    // if(transverseMass < 100 ) return;
-    // increment(ftransverseMassCutCount);
+
+    if(transverseMass < ftransverseMassCut ) return;
+    increment(ftransverseMassCutCount);
+
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);

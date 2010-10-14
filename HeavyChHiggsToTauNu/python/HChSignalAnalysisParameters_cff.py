@@ -1,9 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 
+# WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
+# the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
+    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+)
+TriggerMETEmulation = cms.untracked.PSet(
+    src = cms.untracked.InputTag("patMETs"), # calo MET
+    metEmulationCut = cms.untracked.double(30.0)
 )
 
 tauSelectionBase = cms.untracked.PSet(
@@ -39,7 +45,7 @@ jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
-    etaCut = cms.untracked.double(2.4), #no change
+    etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3)
 )
 
@@ -52,11 +58,20 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(1.5), #no change
-    ptCut = cms.untracked.double(30), #no change
-    etaCut = cms.untracked.double(1.5), #change to 2.4 (was 1.5)
+    discriminatorCut = cms.untracked.double(2.0),
+    ptCut = cms.untracked.double(30),
+    etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)
 )
+
+MET = cms.untracked.PSet(
+    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    METCut = cms.untracked.double(60.0)
+)
+
+transverseMassCut = cms.untracked.double(100)
 
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
