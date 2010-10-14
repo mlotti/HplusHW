@@ -30,9 +30,9 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
+        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
+        #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
   )
 )
