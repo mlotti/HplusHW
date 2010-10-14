@@ -282,8 +282,88 @@ namespace HPlus {
   }
 
   bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-	std::cout << "WARNING, no tau selectionByPFTauTaNC implemented yet!" << std::endl;
-	return false;
+
+	// NC input corresponds to isolation and mass 
+
+	edm::Handle<edm::View<pat::Tau> > htaus;
+	iEvent.getByLabel(fSrc, htaus);
+
+	const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
+	fSelectedTaus.clear();
+	fSelectedTaus.reserve(taus.size());
+
+	size_t againstElectronCutPassed = 0;
+	size_t againstMuonCutPassed = 0;
+	size_t ptCutPassed = 0;
+    	size_t etaCutPassed = 0;
+    	size_t leadTrkPtCutPassed = 0;
+	size_t byTaNCCutPassed = 0;
+	size_t RtauCutPassed = 0;
+
+	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+		edm::Ptr<pat::Tau> iTau = *iter;
+		
+		increment(fAllSubCount);
+      		hPt->Fill(iTau->pt());
+      		hEta->Fill(iTau->eta());
+
+      		if(!(iTau->pt() > fPtCut)) continue;
+      		increment(fPtCutSubCount);
+      		++ptCutPassed;
+
+      		if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
+      		increment(fEtaCutSubCount);
+      		++etaCutPassed;
+
+		//////////////////////////////////////////////////////////////////////
+
+		if(iTau->tauID("againstMuon") < 0.5 ) continue;
+      		increment(fagainstMuonSubCount);
+      		++againstMuonCutPassed;
+
+      		if(iTau->tauID("againstElectron") < 0.5 ) continue;
+      		increment(fagainstElectronSubCount);
+      		++againstElectronCutPassed;
+	
+      		reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand();
+      		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt());
+
+      		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
+      		increment(fLeadTrkPtSubCount);
+      		++leadTrkPtCutPassed;
+
+		hbyTaNC->Fill(iTau->tauID("byTaNC"));
+//		if(iTau->tauID("byTaNC") < 0.6) continue;
+//		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
+		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
+		increment(fbyTaNCSubCount);
+		++byTaNCCutPassed;
+
+
+		float Rtau = leadTrk->p()/iTau->p();
+		hRtau->Fill(Rtau);
+
+		if(Rtau < fRtauCut) continue;
+		increment(fRtauSubCount);
+		++RtauCutPassed;
+
+		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
+      		hDeltaE->Fill(DeltaE);
+
+      		float lightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
+      		hlightPathSignif->Fill(lightPathSignif);
+
+      		// Fill Histos after Tau Selection Cuts
+      		hPtAfterTauSelCuts->Fill(iTau->pt());
+      		hEtaAfterTauSelCuts->Fill(iTau->eta());
+
+      		fSelectedTaus.push_back(iTau);
+	}
+
+	return true;
   }
 
   bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup){

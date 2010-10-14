@@ -73,6 +73,7 @@ namespace HPlus {
     Count fecalIsolationSubCount; 
     Count fRtauSubCount;
     Count fInvMassSubCount;
+    Count fbyTaNCSubCount;
 
     // Histograms
     TH1 *hPt;
@@ -91,6 +92,7 @@ namespace HPlus {
     TH1 *hRtau;
     TH1 *hlightPathSignif;
     TH1 *hInvMass;
+    TH1 *hbyTaNC;
 
 
     // Selected tau
