@@ -18,6 +18,7 @@ namespace edm {
 }
 
 class TH1;
+class TH2;
 
 namespace HPlus {
   class SignalAnalysis {
@@ -42,7 +43,7 @@ namespace HPlus {
     METSelection fMETSelection;
     BTagging fBTagging;
 
-    Count ftransverseMassCutCount;
+    // Count ftransverseMassCutCount;
 
     EvtTopology fEvtTopology;
 
@@ -52,6 +53,11 @@ namespace HPlus {
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;
+    // Histograms for validation at every Selection Cut step
+    TH1 *hMet_AfterMETSelection;
+    TH1 *hMet_AfterBTagging;
+    TH1 *hMet_AfterEvtTopology;
+    // TH1 *hMet_AfterEvtSelection;
 
   };
 }

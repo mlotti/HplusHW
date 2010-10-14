@@ -28,7 +28,8 @@ namespace HPlus {
 
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
 
-    hMet->Fill(met->et());
+    fMet = met->et();
+    hMet->Fill(fMet);
     if(!(met->et() > fMetCut)) return false;
 
     increment(fMetCutCount);

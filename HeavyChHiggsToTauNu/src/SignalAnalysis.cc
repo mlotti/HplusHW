@@ -20,7 +20,7 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
-    ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
+    // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
     edm::Service<TFileService> fs;
@@ -34,7 +34,10 @@ namespace HPlus {
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
     hAlphaTVsRtau = fs->make<TH2F>("alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
-      }
+    hMet_AfterMETSelection = fs->make<TH1F>("met_AfterMETSelection", "met_AfterMETSelection", 150, 0.0, 300.0);
+    hMet_AfterBTagging = fs->make<TH1F>("met_AfterBTagging", "met_AfterBTagging", 150, 0.0, 300.0);
+
+  }
 
   SignalAnalysis::~SignalAnalysis() {}
 
@@ -44,13 +47,21 @@ namespace HPlus {
 
   void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllCounter);
-
-    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTriggerSelection" << std::endl;
+    
+    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
+    
     if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
-    if(!fTauSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTauSelection" << std::endl;
-    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return; // std::cout << "fJetSelection" << std::endl;
-    if(!fMETSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fMETSelection" << std::endl;
-    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;     // std::cout << "fBTagging" << std::endl;
+
+    if(!fTauSelection.analyze(iEvent, iSetup)) return;
+
+    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return;
+
+    if(!fMETSelection.analyze(iEvent, iSetup)) return;
+    hMet_AfterMETSelection->Fill(fMETSelection.fMet);
+
+    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
+    hMet_AfterBTagging->Fill(fMETSelection.fMet);
+
     if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
@@ -59,17 +70,16 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
 
-    if(transverseMass < ftransverseMassCut ) return;
-    increment(ftransverseMassCutCount);
+    //  if(transverseMass < ftransverseMassCut ) return;
+    //  increment(ftransverseMassCutCount);
 
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
-    std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
-    hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
+    //std::cout << "fTauSelection.fRtau = " << fTauSelection.fRtau << std::endl;
+    hAlphaTVsRtau->Fill(fTauSelection.fRtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    
   }
 }
