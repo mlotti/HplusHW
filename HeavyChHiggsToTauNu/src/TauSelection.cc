@@ -109,7 +109,7 @@ namespace HPlus {
 
       //////////////////////////////////////////////////////////////////////
 
-      /*     
+         
       // Scrinking cone PF tau    
 
       if(iTau->tauID("againstMuon") < 0.5 ) continue; 
@@ -165,16 +165,6 @@ namespace HPlus {
 	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
       } 
 
-      //       std::cout << " taNC"  << iTau->tauID("byTaNC") << std::endl; 
-       hbyTaNC->Fill(iTau->tauID("byTaNC"));
-       if(iTau->tauID("byTaNC") < 0.6) continue;
-       //       if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;  
-//      if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue; 
-//      if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue; 
-//      if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue; 
-      increment(fbyTaNCSubCount);
-      ++byTaNCCutPassed;
-
   
       if(iTau->tauID("byIsolation") < 0.5) continue; 
       increment(fbyIsolationSubCount);
@@ -188,7 +178,6 @@ namespace HPlus {
       hnProngs->Fill(iTau->signalTracks().size());
 
       if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
       increment(fnProngsSubCount);
       ++nProngsCutPassed;
 
@@ -214,7 +203,7 @@ namespace HPlus {
       increment(fInvMassSubCount);
       ++InvMassCutPassed;
 
-      */        
+             
  
       /////////////////////////////////////////////////////////////////////
       //  HPS tau  
@@ -260,7 +249,7 @@ namespace HPlus {
       */
       // end HPS tau
       /////////////////////////////////////////////////////////////////////
-          
+      /*         
       // taNC      
       reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand(); 
       if(leadTrk.isNonnull())
@@ -283,7 +272,7 @@ namespace HPlus {
       if(Rtau < fRtauCut) continue; 
       increment(fRtauSubCount);
       ++RtauCutPassed;
-
+      */
       //////////////////////////////////////////////////////////////////
 
 
@@ -303,7 +292,7 @@ namespace HPlus {
 
 
     ///////////////////////////////////////////////////////////////
-    /*    
+        
     // Shrinking cone PF tau
     if(againstMuonCutPassed == 0) return false;      
     increment(fagainstMuonCount);
@@ -316,9 +305,6 @@ namespace HPlus {
 
     if(HChTauIDchargeCutPassed == 0) return false;
     increment(fHChTauIDchargeCount);       
-
-    if(byTaNCCutPassed == 0) return false;
-    increment(fbyTaNCCount);
 
     if(byIsolationCutPassed == 0) return false;
     increment(fbyIsolationCount);
@@ -334,7 +320,7 @@ namespace HPlus {
 
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
-    */    
+        
     ////////////////////////////////////////////////////////////////////////////////////
 
     // HPS tau
@@ -360,13 +346,13 @@ namespace HPlus {
 
     /////////////////////////////////////////////////////////////////////////////
     // TaNC
-
+    /*
     if(byTaNCCutPassed == 0) return false;
     increment(fbyTaNCCount);
 
     if(RtauCutPassed == 0) return false;
     increment(fRtauCount);  
-
+    */
     ////////////////////////////////////////////////////////////////////////////////  
     /*
     if(fSelectedTaus.size() > 1)

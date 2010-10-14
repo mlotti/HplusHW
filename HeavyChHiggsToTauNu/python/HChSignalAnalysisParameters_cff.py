@@ -8,10 +8,8 @@ trigger = cms.untracked.PSet(
 #    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 TriggerMETEmulation = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    metEmulationCut = cms.untracked.double(20.0)
+    src = cms.untracked.InputTag("patMETs"), # calo MET
+    metEmulationCut = cms.untracked.double(30.0)
 )
 tauSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
