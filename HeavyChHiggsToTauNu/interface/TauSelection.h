@@ -30,8 +30,16 @@ namespace HPlus {
     }
 
   private:
+
+    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+
+
     // Input parameters
     edm::InputTag fSrc;
+    std::string fSelection;
     double fPtCut;
     double fEtaCut;
     double fLeadTrkPtCut;

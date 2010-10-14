@@ -13,6 +13,7 @@ namespace HPlus {
 
   TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
@@ -66,6 +67,16 @@ namespace HPlus {
   TauSelection::~TauSelection() {}
 
   bool TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+	if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
+	if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
+	if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
+	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
+	std::cout << "WARNING, no tau selection used!" << std::endl;
+	return false;
+  }
+
+  bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
 
@@ -136,14 +147,14 @@ namespace HPlus {
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
-      /*
-      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta());
-	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
-      }
-      hRtau->Fill(Rtau);
-      */
+      
+//      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
+//      if (Rtau > 1 ) {
+//	hEtaRtau->Fill(iTau->eta());
+//	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
+//      }
+//      hRtau->Fill(Rtau);
+      
   
       float ptmax = 0;
       float ptsum = 0;
@@ -263,11 +274,25 @@ namespace HPlus {
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
     
-    /*
-    if(fSelectedTaus.size() > 1)
-      return false;
-    */
-
+    
+//    if(fSelectedTaus.size() > 1)
+//      return false;
+    
     return true;
+  }
+
+  bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+	std::cout << "WARNING, no tau selectionByPFTauTaNC implemented yet!" << std::endl;
+	return false;
+  }
+
+  bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+	std::cout << "WARNING, no tau selectionByHPSTau implemented yet!" << std::endl;
+	return false;
+  }
+
+  bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+	std::cout << "WARNING, no tau selectionByTCTauCuts implemented yet!" << std::endl;
+        return false;
   }
 }

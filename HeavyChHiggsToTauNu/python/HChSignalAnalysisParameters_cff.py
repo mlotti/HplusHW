@@ -6,17 +6,33 @@ trigger = cms.untracked.PSet(
 #    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 
-tauSelection = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("selectedPatTausCaloRecoTau"),
-    #src = cms.untracked.InputTag("selectedPatTausFixedConePFTau"), # this doesn't exist in 38X samples
+tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
-    #src = cms.untracked.InputTag("selectedPatTausHpsPFTau"),
+    selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.8), #no change
     invMassCut = cms.untracked.double(1.5) #no change
 )
+
+tauSelectionCaloTauCutBased = tauSelectionBase.clone()
+tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
+tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
+
+tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
+tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
+
+tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone()
+tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+tauSelectionShrinkingConeTaNCBased.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
+
+tauSelectionHPSTauBased = tauSelectionBase.clone()
+tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
+tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
+
+tauSelection = tauSelectionShrinkingConeCutBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
