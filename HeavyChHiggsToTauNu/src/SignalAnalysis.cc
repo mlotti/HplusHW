@@ -29,7 +29,8 @@ namespace HPlus {
     hDeltaPhi = fs->make<TH1F>("deltaPhi", "deltaPhi", 60, 0., 180.);
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
-  }
+    hAlphaTVsRtau = fs->make<TH2F>("alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
+      }
 
   SignalAnalysis::~SignalAnalysis() {}
 
@@ -57,7 +58,9 @@ namespace HPlus {
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
-    
+    std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
+    hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
+
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
     

@@ -45,6 +45,7 @@ namespace HPlus {
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
+    TH2 *hAlphaTVsRtau;
 
   };
 }

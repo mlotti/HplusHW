@@ -28,7 +28,9 @@ namespace HPlus {
     const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
       return fSelectedTaus;
     }
-
+    // variables
+    float Rtau;
+    
   private:
     // Input parameters
     edm::InputTag fSrc;

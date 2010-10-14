@@ -198,7 +198,8 @@ namespace HPlus {
       ++ecalIsolationCutPassed;
 
      
-      float Rtau = leadTrk->p()/iTau->p();
+      // float Rtau = leadTrk->p()/iTau->p();
+      Rtau = leadTrk->p()/iTau->p();
       //      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
       if (Rtau > 1 ) {
 	hEtaRtau->Fill(iTau->eta());
