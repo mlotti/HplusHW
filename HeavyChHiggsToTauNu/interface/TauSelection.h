@@ -28,10 +28,20 @@ namespace HPlus {
     const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
       return fSelectedTaus;
     }
-
+    // variables
+    float Rtau;
+    
   private:
+
+    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+
+
     // Input parameters
     edm::InputTag fSrc;
+    std::string fSelection;
     double fPtCut;
     double fEtaCut;
     double fLeadTrkPtCut;
@@ -65,10 +75,13 @@ namespace HPlus {
     Count fecalIsolationSubCount; 
     Count fRtauSubCount;
     Count fInvMassSubCount;
+    Count fbyTaNCSubCount;
 
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hPtAfterTauSelCuts;
+    TH1 *hEtaAfterTauSelCuts;
     TH1 *hEtaRtau;
     TH1 *hLeadTrkPt;
     TH1 *hIsolTrkPt;
@@ -81,6 +94,7 @@ namespace HPlus {
     TH1 *hRtau;
     TH1 *hlightPathSignif;
     TH1 *hInvMass;
+    TH1 *hbyTaNC;
 
 
     // Selected tau

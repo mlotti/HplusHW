@@ -7,6 +7,7 @@ dataVersion = "35X"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
+#dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -19,8 +20,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -35,6 +36,9 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
   )
 )
+if options.doPat != 0:
+    process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
+
 
 ################################################################################
 
@@ -47,6 +51,29 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 process.TFileService.fileName = "histograms.root"
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
+process.patSequence = cms.Sequence()
+if options.doPat != 0:
+    print "Running PAT on the fly"
+
+    process.collisionDataSelection = cms.Sequence()
+    if dataVersion.isData():
+        trigger = ""
+        if dataVersion.isRun2010A():
+            trigger = "HLT_SingleLooseIsoTau20"
+        elif dataVersion.isRun2010B():
+            trigger = "HLT_SingleIsoTau20_Trk15_MET20"
+        else:
+            raise Exception("Unsupported data version!")
+
+        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
+
+    process.patSequence = cms.Sequence(
+        process.collisionDataSelection *
+        addPat(process, dataVersion)
+    )
 
 
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
@@ -69,12 +96,17 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
+    TriggerMETEmulation = param.TriggerMETEmulation,
     tauSelection = param.tauSelection,
     jetSelection = param.jetSelection,
-    bTagging = param.bTagging,
     MET = param.MET,
+    bTagging = param.bTagging,
+    transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
+#if dataVersion.isMC() and dataVersion.is38X():
+#    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
+
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
@@ -83,6 +115,7 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     verbose = cms.untracked.bool(True)
 )
 process.signalAnalysisPath = cms.Path(
+    process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
     process.signalAnalysisCounters
 )
@@ -104,7 +137,10 @@ process.signalAnalysisPath = cms.Path(
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
     src = process.signalAnalysis.tauSelection.src
 )
-#process.tauDiscriminatorPrintPath = cms.Path(process.tauDiscriminatorPrint)
+#process.tauDiscriminatorPrintPath = cms.Path(
+#    process.patSequence *
+#    process.tauDiscriminatorPrint
+#)
 
 ################################################################################
 

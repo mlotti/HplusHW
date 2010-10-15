@@ -56,15 +56,24 @@ datasets = getDatasetsFromMulticrabCfg()
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
+tauPts = datasets.getHistoSet("signalAnalysis/met")
 
 # Print the list of datasets in the given HistoSet
 #print "\n".join(tauPts.getDatasetNames())
 
 # Example how to remove some datasets
-#tauPts.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
+tauPts.removeDatasets([
+#    "BTau_146240-146729",
+    "TTbar_Htaunu_M80",
+    "TTToHpmToTauNu_M90",
+    "TTToHpmToTauNu_M100",
+    #"TTToHpmToTauNu_M120",
+    "TTbar_Htaunu_M140",
+    "TTbar_Htaunu_M160",
+    "TTbar",
+    "QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
+    "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
+    "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
 # Merge all collision data datasets to one, it has name "Data"
 # Note: this must be done before normalizeMCByLuminosity()
@@ -86,8 +95,8 @@ tauPts.mergeDataDatasets()
 #ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
-tauPts.normalizeMCToLuminosity(4)
-ylabel = "#tau cands / 1 GeV/c"
+tauPts.normalizeMCToLuminosity(1.473)
+ylabel = "Events / 2 GeV"
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
@@ -97,34 +106,38 @@ ylabel = "#tau cands / 1 GeV/c"
 tauPts.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
                              "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
 
-# Example how to remove given datasets
-#tauPts.removeDatasets(["QCD", "TTbar"])
-
 # Example how to set legend labels from defaults
 #tauPts.setHistoLegendLabel("TTbar_Htaunu_M80", "H^{#pm} M=80") # one dataset at a time
 tauPts.setHistoLegendLabels(legendLabels) # many datasets, with dict
 
+
+mcDatasetNames = tauPts.getMCDatasetNames()
+stackedMcDatasetNames = mcDatasetNames[:]
+del stackedMcDatasetNames[stackedMcDatasetNames.index("TTToHpmToTauNu_M120")]
+
 # Example how to modify legend styles
 tauPts.setHistoLegendStyleAll("F")
 tauPts.setHistoLegendStyle("Data", "p")
+tauPts.setHistoLegendStyle("TTToHpmToTauNu_M120", "l")
 
 # Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-#tauPts.applyStyles(styles.getStyles())
 tauPts.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
 tauPts.applyStyle("Data", styles.getDataStyle())
+tauPts.applyStyle("TTToHpmToTauNu_M120", styles.getStyles()[0])
 tauPts.setHistoDrawStyle("Data", "EP")
 
 
 # Example how to stack all MC datasets
 # Note: this MUST be done after all legend/style manipulation
-tauPts.stackMCDatasets()
+#tauPts.stackMCDatasets()
+tauPts.stackDatasets("MC", stackedMcDatasetNames)
 
 # Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauPts.createCanvasFrame("taupt")
-#(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
+(canvas, frame) = tauPts.createCanvasFrame("met")
+(canvas, frame) = tauPts.createCanvasFrame("met", ymin=0.005, ymax=30) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+frame.GetXaxis().SetTitle("PFmet (GeV)")
 frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
@@ -136,7 +149,7 @@ tauPts.draw()
 legend.Draw()
 
 # Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
-#ROOT.gPad.SetLogy(True)
+ROOT.gPad.SetLogy(True)
 
 # The necessary texts, all take the position as arguments
 addCmsPreliminaryText()
@@ -152,4 +165,4 @@ tauPts.addLuminosityText()
 # Save TCanvas as png
 canvas.SaveAs(".png")
 #canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+canvas.SaveAs(".C")

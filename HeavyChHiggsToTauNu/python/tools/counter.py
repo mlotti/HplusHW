@@ -150,11 +150,19 @@ class Counters:
 
 def readDataset(fname, counterDir, datasetname, crossSections):
     f = ROOT.TFile.Open(fname)
+    if f == None:
+        raise Exception("Unable to open ROOT file '%s'"%fname)
+    if f.Get("configInfo") == None:
+        raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
+
     info = rescaleInfo(histoToDict(f.Get("configInfo").Get("configinfo")))
 
     dataset = Dataset(datasetname, info, f)
     if datasetname in crossSections:
         dataset.setCrossSection(crossSections[datasetname])
+
+    if f.Get(counterDir) == None:
+        raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
 
     ctr = histoToCounter(f.Get(counterDir).Get("counter"))
     dataset.setAllEvents(ctr[0])

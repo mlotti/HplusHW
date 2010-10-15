@@ -13,6 +13,7 @@ namespace HPlus {
 
   TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
@@ -42,17 +43,20 @@ namespace HPlus {
     fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
+    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
+    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut"))
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
     hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
+    hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 100.);
+    hEtaAfterTauSelCuts = fs->make<TH1F>("tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
     hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
     hIsolTrkPt = fs->make<TH1F>("tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
     hIsolTrkPtSum = fs->make<TH1F>("tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
-    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 5, 0.5, 1.0, 100, 0., 20.);
-    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 5, 0.5, 1.0,10,0.,10.);
+    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
+    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
@@ -64,6 +68,16 @@ namespace HPlus {
   TauSelection::~TauSelection() {}
 
   bool TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+	if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
+	if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
+	if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
+	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
+	std::cout << "WARNING, no tau selection used!" << std::endl;
+	return false;
+  }
+
+  bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
 
@@ -78,7 +92,7 @@ namespace HPlus {
     size_t nProngsCutPassed = 0;
     size_t HChTauIDchargeCutPassed = 0;
     size_t byIsolationCutPassed = 0;
-    size_t byTrackIsolationCutPassed = 0;
+//    size_t byTrackIsolationCutPassed = 0;
     size_t ecalIsolationCutPassed = 0;
     size_t againstElectronCutPassed = 0;
     size_t againstMuonCutPassed = 0;
@@ -134,22 +148,22 @@ namespace HPlus {
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
-      /*
-      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta());
-	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
-      }
-      hRtau->Fill(Rtau);
-      */
+      
+//      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
+//      if (Rtau > 1 ) {
+//	hEtaRtau->Fill(iTau->eta());
+//	//	std::cout << " Rtau>1 iTau->pt() " << iTau->pt() << " iTau->eta() " << iTau->eta() << " leadTrk->pt() " <<  leadTrk->pt() <<  " tracks  " << iTau->signalTracks().size() << std::endl;
+//      }
+//      hRtau->Fill(Rtau);
+      
   
       float ptmax = 0;
       float ptsum = 0;
 
-      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
-      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
-      //  const reco::TrackRefVector& isolCands = iTau->isolationTracks();
-      //reco::TrackRefVector::const_iterator iCand = isolCands.begin();
+      //      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
+      //      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
+      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
+      reco::TrackRefVector::const_iterator iCand = isolCands.begin();
       //      std::cout << " isol cands " << isolCands.size() << std::endl;
       for(; iCand != isolCands.end(); ++iCand) {
 	float pt = (*iCand)->pt();
@@ -196,7 +210,8 @@ namespace HPlus {
       ++ecalIsolationCutPassed;
 
      
-      float Rtau = leadTrk->p()/iTau->p();
+      // float Rtau = leadTrk->p()/iTau->p();
+      Rtau = leadTrk->p()/iTau->p();
       //      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
       if (Rtau > 1 ) {
 	hEtaRtau->Fill(iTau->eta());
@@ -221,6 +236,9 @@ namespace HPlus {
       increment(fInvMassSubCount);
       ++InvMassCutPassed;
 
+      // Fill Histos after Tau Selection Cuts
+      hPtAfterTauSelCuts->Fill(iTau->pt());
+      hEtaAfterTauSelCuts->Fill(iTau->eta());
 
       fSelectedTaus.push_back(iTau);
     }
@@ -257,12 +275,106 @@ namespace HPlus {
 
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
-
-    /*
-    if(fSelectedTaus.size() > 1)
-      return false;
-    */
-
+    
+    
+//    if(fSelectedTaus.size() > 1)
+//      return false;
+    
     return true;
+  }
+
+  bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
+	// NC input corresponds to isolation and mass 
+
+	edm::Handle<edm::View<pat::Tau> > htaus;
+	iEvent.getByLabel(fSrc, htaus);
+
+	const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
+	fSelectedTaus.clear();
+	fSelectedTaus.reserve(taus.size());
+
+	size_t againstElectronCutPassed = 0;
+	size_t againstMuonCutPassed = 0;
+	size_t ptCutPassed = 0;
+    	size_t etaCutPassed = 0;
+    	size_t leadTrkPtCutPassed = 0;
+	size_t byTaNCCutPassed = 0;
+	size_t RtauCutPassed = 0;
+
+	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+		edm::Ptr<pat::Tau> iTau = *iter;
+		
+		increment(fAllSubCount);
+      		hPt->Fill(iTau->pt());
+      		hEta->Fill(iTau->eta());
+
+      		if(!(iTau->pt() > fPtCut)) continue;
+      		increment(fPtCutSubCount);
+      		++ptCutPassed;
+/*
+      		if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
+      		increment(fEtaCutSubCount);
+      		++etaCutPassed;
+
+		//////////////////////////////////////////////////////////////////////
+
+		if(iTau->tauID("againstMuon") < 0.5 ) continue;
+      		increment(fagainstMuonSubCount);
+      		++againstMuonCutPassed;
+
+      		if(iTau->tauID("againstElectron") < 0.5 ) continue;
+      		increment(fagainstElectronSubCount);
+      		++againstElectronCutPassed;
+	
+      		reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand();
+      		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt());
+
+      		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
+      		increment(fLeadTrkPtSubCount);
+      		++leadTrkPtCutPassed;
+
+////		hbyTaNC->Fill(iTau->tauID("byTaNC"));
+//		if(iTau->tauID("byTaNC") < 0.6) continue;
+//		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
+////		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
+////		increment(fbyTaNCSubCount);
+////		++byTaNCCutPassed;
+
+
+		float Rtau = leadTrk->p()/iTau->p();
+		hRtau->Fill(Rtau);
+
+		if(Rtau < fRtauCut) continue;
+		increment(fRtauSubCount);
+		++RtauCutPassed;
+
+		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
+      		hDeltaE->Fill(DeltaE);
+
+      		float lightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
+      		hlightPathSignif->Fill(lightPathSignif);
+
+      		// Fill Histos after Tau Selection Cuts
+      		hPtAfterTauSelCuts->Fill(iTau->pt());
+      		hEtaAfterTauSelCuts->Fill(iTau->eta());
+*/
+      		fSelectedTaus.push_back(iTau);
+	}
+
+	return true;
+  }
+
+  bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+	std::cout << "WARNING, no tau selectionByHPSTau implemented yet!" << std::endl;
+	return false;
+  }
+
+  bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+	std::cout << "WARNING, no tau selectionByTCTauCuts implemented yet!" << std::endl;
+        return false;
   }
 }
