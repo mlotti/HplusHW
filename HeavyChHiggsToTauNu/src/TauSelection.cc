@@ -313,7 +313,7 @@ namespace HPlus {
       		if(!(iTau->pt() > fPtCut)) continue;
       		increment(fPtCutSubCount);
       		++ptCutPassed;
-
+/*
       		if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
       		increment(fEtaCutSubCount);
       		++etaCutPassed;
@@ -335,14 +335,14 @@ namespace HPlus {
       		increment(fLeadTrkPtSubCount);
       		++leadTrkPtCutPassed;
 
-		hbyTaNC->Fill(iTau->tauID("byTaNC"));
+////		hbyTaNC->Fill(iTau->tauID("byTaNC"));
 //		if(iTau->tauID("byTaNC") < 0.6) continue;
 //		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
-		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
+////		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
 //		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
 //		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
-		increment(fbyTaNCSubCount);
-		++byTaNCCutPassed;
+////		increment(fbyTaNCSubCount);
+////		++byTaNCCutPassed;
 
 
 		float Rtau = leadTrk->p()/iTau->p();
@@ -361,7 +361,7 @@ namespace HPlus {
       		// Fill Histos after Tau Selection Cuts
       		hPtAfterTauSelCuts->Fill(iTau->pt());
       		hEtaAfterTauSelCuts->Fill(iTau->eta());
-
+*/
       		fSelectedTaus.push_back(iTau);
 	}
 
