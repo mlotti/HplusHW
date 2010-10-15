@@ -39,6 +39,7 @@ tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
 tauSelection = tauSelectionShrinkingConeCutBased
+#tauSelection = tauSelectionShrinkingConeTaNCBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),

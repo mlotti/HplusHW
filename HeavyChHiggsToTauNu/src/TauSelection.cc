@@ -24,11 +24,11 @@ namespace HPlus {
     fPtCutCount(eventCounter.addCounter("Tau pt cut")),
     fEtaCutCount(eventCounter.addCounter("Tau eta cut")),
     fLeadTrkPtCount(eventCounter.addCounter("Tau leading track pt cut")),
+    fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
+    fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
+    fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
     fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
     fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
-    fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
-    // fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
-    fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
     fRtauCount(eventCounter.addCounter("Tau Rtau cut")),
     fInvMassCount(eventCounter.addCounter("Tau InvMass cut")),
     fAllSubCount(eventCounter.addSubCounter("Tau identification", "all tau candidates")),
@@ -37,15 +37,14 @@ namespace HPlus {
     fagainstMuonSubCount(eventCounter.addSubCounter("Tau identification","againstMuon discriminator")),
     fagainstElectronSubCount(eventCounter.addSubCounter("Tau identification","againstElectron discriminator")),
     fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut")),
+    fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
+    fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
     fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
-    fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
-    //fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
     fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
-    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","byTaNC discriminator cut"))
-
+    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut"))
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
@@ -135,14 +134,6 @@ namespace HPlus {
       increment(fLeadTrkPtSubCount);
       ++leadTrkPtCutPassed;
 
-
-      hnProngs->Fill(iTau->signalTracks().size());
-
-      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-      //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
-      increment(fnProngsSubCount);
-      ++nProngsCutPassed;
-
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
@@ -151,10 +142,10 @@ namespace HPlus {
       float ptmax = 0;
       float ptsum = 0;
 
-      //      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
-      //      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
-      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
-      reco::TrackRefVector::const_iterator iCand = isolCands.begin();
+      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
+      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
+      //      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
+      //      reco::TrackRefVector::const_iterator iCand = isolCands.begin();
       //      std::cout << " isol cands " << isolCands.size() << std::endl;
       for(; iCand != isolCands.end(); ++iCand) {
 	float pt = (*iCand)->pt();
@@ -189,13 +180,22 @@ namespace HPlus {
       if(iTau->tauID("ecalIsolation") < 0.5) continue; 
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
-    
-     
+
+        
+      hnProngs->Fill(iTau->signalTracks().size());    
+      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+      //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      increment(fnProngsSubCount);
+      ++nProngsCutPassed;
+ 
+      if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
+      increment(fHChTauIDchargeSubCount);
+      ++HChTauIDchargeCutPassed;
+  
       float Rtau = leadTrk->p()/iTau->p();
       //      Rtau = leadTrk->p()/iTau->p();
       hRtau->Fill(Rtau);
     
-
       if(Rtau < fRtauCut) continue; 
       increment(fRtauSubCount);
       ++RtauCutPassed;
@@ -235,20 +235,20 @@ namespace HPlus {
     increment(fagainstElectronCount);
 
     if(leadTrkPtCutPassed == 0) return false;
-    increment(fLeadTrkPtCount); 
-   
-    if(nProngsCutPassed == 0) return false;
-    increment(fnProngsCount);
-     
-    if(HChTauIDchargeCutPassed == 0) return false;
-    increment(fHChTauIDchargeCount);       
+    increment(fLeadTrkPtCount);  
      
     if(byIsolationCutPassed == 0) return false;
     increment(fbyIsolationCount);
 	
     if(ecalIsolationCutPassed == 0) return false;
     increment(fecalIsolationCount);
-      
+
+    if(nProngsCutPassed == 0) return false;
+    increment(fnProngsCount);
+
+    if(HChTauIDchargeCutPassed == 0) return false;
+    increment(fHChTauIDchargeCount); 
+       
     if(RtauCutPassed == 0) return false;
     increment(fRtauCount);
      
