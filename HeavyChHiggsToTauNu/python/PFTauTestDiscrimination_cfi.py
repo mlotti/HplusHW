@@ -71,7 +71,7 @@ def addTestDiscriminatorSequence(process, tau):
 
 def addPFTauTestDiscriminationSequence(process):
     process.PFTauTestDiscriminationSequence = cms.Sequence(
-#        addTestDiscriminatorSequence(process, "fixedConePFTau") *
+        addTestDiscriminatorSequence(process, "fixedConePFTau") *
         addTestDiscriminatorSequence(process, "shrinkingConePFTau")
     )
 

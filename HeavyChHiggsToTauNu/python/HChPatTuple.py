@@ -4,7 +4,7 @@ import copy
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, tancTauIDSources
+from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects
@@ -163,7 +163,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if doPatTaus:
         classicTauIDSources.extend( HChTaus.HChTauIDSources )
         classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
-	tancTauIDSources.extend( HChTausTest.TestTauIDSources )
+	classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
 
         addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                          algoLabel = "caloReco",
