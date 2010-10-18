@@ -26,6 +26,7 @@ namespace HPlus {
     fLeadTrkPtCount(eventCounter.addCounter("Tau leading track pt cut")),
     fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
     fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
+    fTaNCCount(eventCounter.addCounter("Tau TaNC cut")),
     fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
     fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
     fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
@@ -39,12 +40,12 @@ namespace HPlus {
     fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut")),
     fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
     fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
+    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut")),
     fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
     fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
-    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut"))
+    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
@@ -63,6 +64,7 @@ namespace HPlus {
     hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 0.01);
     hlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 0.01);
     hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 100, 0., 5.);
+    hbyTaNC = fs->make<TH1F>("tau_TaNC", "tau_TaNC", 100, -1., 1.);
   }
 
   TauSelection::~TauSelection() {}
@@ -313,7 +315,7 @@ namespace HPlus {
       		if(!(iTau->pt() > fPtCut)) continue;
       		increment(fPtCutSubCount);
       		++ptCutPassed;
-/*
+
       		if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
       		increment(fEtaCutSubCount);
       		++etaCutPassed;
@@ -327,7 +329,7 @@ namespace HPlus {
       		if(iTau->tauID("againstElectron") < 0.5 ) continue;
       		increment(fagainstElectronSubCount);
       		++againstElectronCutPassed;
-	
+
       		reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand();
       		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt());
 
@@ -335,15 +337,14 @@ namespace HPlus {
       		increment(fLeadTrkPtSubCount);
       		++leadTrkPtCutPassed;
 
-////		hbyTaNC->Fill(iTau->tauID("byTaNC"));
+		hbyTaNC->Fill(iTau->tauID("byTaNC"));
 //		if(iTau->tauID("byTaNC") < 0.6) continue;
 //		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
-////		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
-//		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
+		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
 //		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
-////		increment(fbyTaNCSubCount);
-////		++byTaNCCutPassed;
-
+		increment(fbyTaNCSubCount);
+		++byTaNCCutPassed;
 
 		float Rtau = leadTrk->p()/iTau->p();
 		hRtau->Fill(Rtau);
@@ -361,9 +362,30 @@ namespace HPlus {
       		// Fill Histos after Tau Selection Cuts
       		hPtAfterTauSelCuts->Fill(iTau->pt());
       		hEtaAfterTauSelCuts->Fill(iTau->eta());
-*/
+
       		fSelectedTaus.push_back(iTau);
 	}
+
+    	if(ptCutPassed == 0) return false;
+    	increment(fPtCutCount);
+
+    	if(etaCutPassed == 0) return false;
+    	increment(fEtaCutCount);
+
+    	if(againstMuonCutPassed == 0) return false;
+    	increment(fagainstMuonCount);
+
+    	if(againstElectronCutPassed == 0) return false;
+    	increment(fagainstElectronCount);
+
+    	if(leadTrkPtCutPassed == 0) return false;
+    	increment(fLeadTrkPtCount);
+
+	if(byTaNCCutPassed == 0) return false;
+	increment(fTaNCCount);
+
+    	if(RtauCutPassed == 0) return false;
+    	increment(fRtauCount);
 
 	return true;
   }

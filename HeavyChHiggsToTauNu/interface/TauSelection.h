@@ -56,6 +56,7 @@ namespace HPlus {
     Count fLeadTrkPtCount;
     Count fnProngsCount;
     Count fHChTauIDchargeCount;
+    Count fTaNCCount;
     Count fbyIsolationCount;
     Count fbyTrackIsolationCount;  
     Count fecalIsolationCount; 
@@ -70,12 +71,12 @@ namespace HPlus {
     Count fLeadTrkPtSubCount;
     Count fnProngsSubCount;
     Count fHChTauIDchargeSubCount;
+    Count fbyTaNCSubCount;
     Count fbyIsolationSubCount; 
     Count fbyTrackIsolationSubCount; 
     Count fecalIsolationSubCount; 
     Count fRtauSubCount;
     Count fInvMassSubCount;
-    Count fbyTaNCSubCount;
 
     // Histograms
     TH1 *hPt;
