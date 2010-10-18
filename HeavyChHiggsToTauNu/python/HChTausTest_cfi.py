@@ -1,6 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
-TestTauIDSources = [("byIsolationChargedPtSum", "DiscriminationByIsolationChargedPtSum")
+TestTauIDSources = [("byIsolationChargedPtSum", "DiscriminationByIsolationChargedPtSum"),
+                    ("byIsolation05", "DiscriminationByIsolation05"),
+                    ("byIsolation06", "DiscriminationByIsolation06"),
+                    ("byIsolation07", "DiscriminationByIsolation07"),
+                    ("byIsolation08", "DiscriminationByIsolation08"),
+                    ("byIsolation09", "DiscriminationByIsolation09")
 ]
 
 def extendEventContent(content, process):
