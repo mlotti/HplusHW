@@ -396,7 +396,108 @@ namespace HPlus {
   }
 
   bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-	std::cout << "WARNING, no tau selectionByTCTauCuts implemented yet!" << std::endl;
-        return false;
+
+    	edm::Handle<edm::View<pat::Tau> > htaus;
+    	iEvent.getByLabel(fSrc, htaus);
+
+     	const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
+    	fSelectedTaus.clear();
+    	fSelectedTaus.reserve(taus.size());
+
+    	size_t ptCutPassed = 0;
+    	size_t etaCutPassed = 0;
+    	size_t leadTrkPtCutPassed = 0;
+    	size_t nProngsCutPassed = 0;
+    	size_t HChTauIDchargeCutPassed = 0;
+    	size_t byIsolationCutPassed = 0;
+    	size_t againstElectronCutPassed = 0;
+    	size_t againstMuonCutPassed = 0;
+    	size_t RtauCutPassed = 0;
+    	size_t InvMassCutPassed = 0;
+
+    	// Fill initial histograms and do the first selection
+    	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+      		edm::Ptr<pat::Tau> iTau = *iter;
+
+                increment(fAllSubCount);
+                hPt->Fill(iTau->pt());
+                hEta->Fill(iTau->eta());
+
+                if(!(iTau->pt() > fPtCut)) continue;
+                increment(fPtCutSubCount);
+                ++ptCutPassed;
+
+                if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
+                increment(fEtaCutSubCount);
+                ++etaCutPassed;
+
+                //////////////////////////////////////////////////////////////////////
+
+                if(iTau->tauID("againstMuon") < 0.5 ) continue;
+                increment(fagainstMuonSubCount);
+                ++againstMuonCutPassed;
+
+                if(iTau->tauID("againstElectron") < 0.5 ) continue;
+                increment(fagainstElectronSubCount);
+                ++againstElectronCutPassed;
+
+		if(iTau->tauID("HChTauIDleadingTrackPtCut") < 0.5 ) continue;
+		increment(fLeadTrkPtSubCount);
+		++leadTrkPtCutPassed;
+
+      		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+      		increment(fnProngsSubCount);
+      		++nProngsCutPassed;
+
+      		if(iTau->tauID("HChTauIDcharge") < 0.5) continue;
+      		increment(fHChTauIDchargeSubCount);
+      		++HChTauIDchargeCutPassed;
+
+      		if(iTau->tauID("byIsolation") < 0.5) continue;
+      		increment(fbyIsolationSubCount);
+      		++byIsolationCutPassed;
+
+            	float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
+      		hRtau->Fill(Rtau);
+      		if(Rtau < fRtauCut) continue;
+      		increment(fRtauSubCount);
+      		++RtauCutPassed;
+
+                // Fill Histos after Tau Selection Cuts
+                hPtAfterTauSelCuts->Fill(iTau->pt());
+                hEtaAfterTauSelCuts->Fill(iTau->eta());
+
+                fSelectedTaus.push_back(iTau);
+	}
+
+        if(ptCutPassed == 0) return false;
+        increment(fPtCutCount);
+
+        if(etaCutPassed == 0) return false;
+        increment(fEtaCutCount);
+
+        if(againstMuonCutPassed == 0) return false;
+        increment(fagainstMuonCount);
+
+        if(againstElectronCutPassed == 0) return false;
+        increment(fagainstElectronCount);
+
+        if(leadTrkPtCutPassed == 0) return false;
+        increment(fLeadTrkPtCount);
+
+    	if(nProngsCutPassed == 0) return false;
+    	increment(fnProngsCount);
+
+    	if(HChTauIDchargeCutPassed == 0) return false;
+    	increment(fHChTauIDchargeCount);
+
+    	if(byIsolationCutPassed == 0) return false;
+    	increment(fbyIsolationCount);
+
+    	if(RtauCutPassed == 0) return false;
+    	increment(fRtauCount);
+
+        return true;
   }
 }
