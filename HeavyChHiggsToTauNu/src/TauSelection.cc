@@ -16,13 +16,13 @@ namespace HPlus {
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
     fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
     fInvMassCut(iConfig.getUntrackedParameter<double>("invMassCut")),
-    fagainstMuonCount(eventCounter.addCounter("Tau againstMuon discriminator")),
-    fagainstElectronCount(eventCounter.addCounter("Tau againstElectron discriminator")),
-    fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
     fPtCutCount(eventCounter.addCounter("Tau pt cut")),
     fEtaCutCount(eventCounter.addCounter("Tau eta cut")),
+    fagainstMuonCount(eventCounter.addCounter("Tau againstMuon discriminator")),
+    fagainstElectronCount(eventCounter.addCounter("Tau againstElectron discriminator")),
     fLeadTrkPtCount(eventCounter.addCounter("Tau leading track pt cut")),
     fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
     fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
@@ -391,8 +391,87 @@ namespace HPlus {
   }
 
   bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-	std::cout << "WARNING, no tau selectionByHPSTau implemented yet!" << std::endl;
-	return false;
+
+        edm::Handle<edm::View<pat::Tau> > htaus;
+        iEvent.getByLabel(fSrc, htaus);
+
+        const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
+        fSelectedTaus.clear();
+        fSelectedTaus.reserve(taus.size());
+
+        size_t ptCutPassed = 0;
+        size_t etaCutPassed = 0;
+	//        size_t leadTrkPtCutPassed = 0;
+	//        size_t nProngsCutPassed = 0;
+	//        size_t HChTauIDchargeCutPassed = 0;
+	//        size_t byIsolationCutPassed = 0;
+        size_t againstElectronCutPassed = 0;
+        size_t againstMuonCutPassed = 0;
+	//        size_t RtauCutPassed = 0;
+	//        size_t InvMassCutPassed = 0;
+
+        // Fill initial histograms and do the first selection
+        for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+                edm::Ptr<pat::Tau> iTau = *iter;
+
+                increment(fAllSubCount);
+                hPt->Fill(iTau->pt());
+                hEta->Fill(iTau->eta());
+
+                if(!(iTau->pt() > fPtCut)) continue;
+                increment(fPtCutSubCount);
+                ++ptCutPassed;
+
+                if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
+                increment(fEtaCutSubCount);
+                ++etaCutPassed;
+
+                //////////////////////////////////////////////////////////////////////
+
+                if(iTau->tauID("againstMuon") < 0.5 ) continue;
+                increment(fagainstMuonSubCount);
+                ++againstMuonCutPassed;
+
+                if(iTau->tauID("againstElectron") < 0.5 ) continue;
+                increment(fagainstElectronSubCount);
+                ++againstElectronCutPassed;
+
+                // Fill Histos after Tau Selection Cuts
+                hPtAfterTauSelCuts->Fill(iTau->pt());
+                hEtaAfterTauSelCuts->Fill(iTau->eta());
+
+                fSelectedTaus.push_back(iTau);
+        }
+
+        if(ptCutPassed == 0) return false;
+        increment(fPtCutCount);
+
+        if(etaCutPassed == 0) return false;
+        increment(fEtaCutCount);
+
+        if(againstMuonCutPassed == 0) return false;
+        increment(fagainstMuonCount);
+
+        if(againstElectronCutPassed == 0) return false;
+        increment(fagainstElectronCount);
+/*
+        if(leadTrkPtCutPassed == 0) return false;
+        increment(fLeadTrkPtCount);
+
+        if(nProngsCutPassed == 0) return false;
+        increment(fnProngsCount);
+
+        if(HChTauIDchargeCutPassed == 0) return false;
+        increment(fHChTauIDchargeCount);
+
+        if(byIsolationCutPassed == 0) return false;
+        increment(fbyIsolationCount);
+
+        if(RtauCutPassed == 0) return false;
+        increment(fRtauCount);
+*/
+        return true;
   }
 
   bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
