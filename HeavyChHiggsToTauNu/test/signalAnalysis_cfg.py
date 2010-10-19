@@ -131,6 +131,18 @@ process.signalAnalysisPath = cms.Path(
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 # addAnalysisArray(process, "signalAnalysisTauPt", process.signalAnalysis, setTauPt,
 #                  [10, 20, 30, 40, 50])
+def setTauSelection(m, val):
+    m.tauSelection = val
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
+addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
+		 [param.tauSelectionShrinkingConeCutBased,
+		  param.tauSelectionShrinkingConeTaNCBased,
+		  param.tauSelectionCaloTauCutBased,
+		  param.tauSelectionHPSTauBased],
+		 ["TauSelectionShrinkingConeCutBased",
+		  "TauSelectionShrinkingConeTaNCBased",
+		  "TauSelectionCaloTauCutBased",
+		  "TauSelectionHPSTauBased"])
 
 
 # Print tau discriminators from one tau from one event

@@ -4,7 +4,7 @@ import copy
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources
+from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects
@@ -15,6 +15,8 @@ import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCal
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
 
 # Assumes that process.out is the output module
 #
@@ -33,6 +35,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
+	PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
@@ -53,6 +56,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.tautagging *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
+	    process.PFTauTestDiscriminationSequence *
             process.produceAndDiscriminateHPSPFTaus *
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
@@ -159,6 +163,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if doPatTaus:
         classicTauIDSources.extend( HChTaus.HChTauIDSources )
         classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
+	classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
 
         addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                          algoLabel = "caloReco",
