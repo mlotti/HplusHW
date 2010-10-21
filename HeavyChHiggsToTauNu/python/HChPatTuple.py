@@ -8,7 +8,6 @@ from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDS
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
@@ -218,8 +217,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     # Trigger
     if doPatTrigger:
-        switchOnTrigger(process, outputInProcess= out != None)
-        HChTrigger.customise(process, dataVersion)
+        outMod= ''
+        if out != None:
+            outMod  = 'out'
+        switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
     seq = cms.Sequence()

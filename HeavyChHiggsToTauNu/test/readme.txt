@@ -141,9 +141,9 @@
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
-21.10.2010/M.Kortelainen CMSSW_3_8_5_patch2 (Added revision numbers for files, no real changes)
+21.10.2010/M.Kortelainen CMSSW_3_8_5_patch2 (Updated PatAlgos tag, added revision numbers for files)
     Tags needed:
-        cvs co -r V08-00-26 PhysicsTools/PatAlgos
+        cvs co -r V08-00-29 PhysicsTools/PatAlgos
         cvs up -r 1.30 PhysicsTools/PatAlgos/python/tools/tauTools.py
         cvs co -r V00-24-00 RecoTauTag/Configuration
         cvs co -r V00-24-00 RecoTauTag/RecoTau
