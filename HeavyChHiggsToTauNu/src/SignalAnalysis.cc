@@ -45,7 +45,7 @@ namespace HPlus {
   void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllCounter);
 
-    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTriggerSelection" << std::endl;
+    //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTriggerSelection" << std::endl;
     if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
     if(!fTauSelection.analyze(iEvent, iSetup)) return;     // std::cout << "fTauSelection" << std::endl;
     if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return; // std::cout << "fJetSelection" << std::endl;
@@ -65,7 +65,7 @@ namespace HPlus {
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
-    std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
+    //    std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
     hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
