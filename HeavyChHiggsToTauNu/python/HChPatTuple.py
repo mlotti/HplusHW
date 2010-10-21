@@ -126,7 +126,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    # process.patTaus.embedLeadTrack = True
+    process.patTaus.embedLeadTrack = True
 
     # For some reason, embedding these for 35X data does NOT work for
     # calotaus (output module complains about trying to persist
@@ -147,9 +147,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # collection embedding which doesn't. The PFCand embedding is
     # disabled for consistenty and saving even some disk space.
 
-    # process.patTaus.embedLeadPFCand = True
-    # process.patTaus.embedLeadPFChargedHadrCand = True
-    # process.patTaus.embedLeadPFNeutralCand = True
+    process.patTaus.embedLeadPFCand = True
+    process.patTaus.embedLeadPFChargedHadrCand = True
+    process.patTaus.embedLeadPFNeutralCand = True
     # process.patTaus.embedSignalPFCands = True
     # process.patTaus.embedSignalPFChargedHadrCands = True
     # process.patTaus.embedSignalPFNeutralHadrCands = True
@@ -167,19 +167,26 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                          algoLabel = "caloReco",
                          typeLabel = "Tau")
+        process.patTausCaloRecoTau.embedLeadPFCand = False
+        process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
+        process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
 
         addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
+        # Disable isoDeposits like this untilthe problem with doPFIsoDeposits is fixed 
+        process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
         if not dataVersion.is38X():
             addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
                              algoLabel = "fixedCone",
                              typeLabel = "PFTau")
+            process.patTausFixedConePFTau.isoDeposits = cms.PSet()
 
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
                          typeLabel = "PFTau")
+        process.patTausHpsPFTau.isoDeposits = cms.PSet()
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     
@@ -193,8 +200,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                                    #"keep *_patTaus*_*_*",
                                    #"keep *_patPFTauProducerFixedCone_*_*",
                                    # keep these until the embedding problem with pat::Tau is fixed
-                                   "keep recoPFCandidates_particleFlow_*_*",
-                                   "keep recoTracks_generalTracks_*_*"
+                                   #"keep recoPFCandidates_particleFlow_*_*",
+                                   #"keep recoTracks_generalTracks_*_*"
                                    ])
 
     # MET
