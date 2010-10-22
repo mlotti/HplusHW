@@ -1,11 +1,40 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/plugins/TauHLTMatchProducer.h"
-
 #include "PhysicsTools/PatUtils/interface/TriggerHelper.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include "TMath.h"
 //#include "FWCore/ServiceRegistry/interface/Service.h"
 //#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDProducer.h"
+
+#include <string>
+#include <vector>
+
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+
+#include "DataFormats/PatCandidates/interface/TriggerEvent.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
+
+class TauHLTMatchProducer : public edm::EDProducer {
+ public:
+  TauHLTMatchProducer(const edm::ParameterSet& iConfig);
+  ~TauHLTMatchProducer();
+
+ private:
+  virtual void beginJob() ;
+  virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+  virtual void endJob();
+      
+  edm::InputTag fTriggerSource;
+  edm::InputTag fTriggerEventSource;
+  edm::InputTag fTauSource;
+  std::string fHLTTriggerName;
+
+};
+
 
 TauHLTMatchProducer::TauHLTMatchProducer( const edm::ParameterSet & iConfig ) :
   fTriggerSource(iConfig.getParameter<edm::InputTag>("trigger")),
@@ -22,7 +51,7 @@ void TauHLTMatchProducer::beginJob() {
 
 void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup ) {
   // PAT trigger information
-  edm::Handle<pat::TriggerEvent> myTriggerEvent;
+  /*  edm::Handle<pat::TriggerEvent> myTriggerEvent;
   iEvent.getByLabel(fTriggerEventSource, myTriggerEvent);
   edm::Handle<pat::TriggerPathCollection> myTriggerPaths;
   iEvent.getByLabel(fTriggerSource, myTriggerPaths);
@@ -30,8 +59,15 @@ void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   iEvent.getByLabel(fTriggerSource, myTriggerFilters);
   edm::Handle<pat::TriggerObjectCollection> myTriggerObjects;
   iEvent.getByLabel(fTriggerSource, myTriggerObjects);
+  */
 
-  // PAT object collection
+  // PAT trigger object collection
+  edm::Handle<edm::Association< std::vector<pat::TriggerObject> > > myPatTriggerEvent;
+  iEvent.getByLabel(fPatTriggerEventSource, myPatTriggerEvent);
+  
+
+
+  // PAT tau collection
   edm::Handle<pat::TauCollection> myTaus;
   iEvent.getByLabel(fTauSource, myTaus);
 
