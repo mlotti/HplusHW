@@ -77,8 +77,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     process.hplusPatSequence = cms.Sequence(
         process.hplusPatTauSequence *
-        process.patDefaultSequence *
-        process.primaryVertexNumber
+        process.patDefaultSequence
+#        process.primaryVertexNumber
     )
 
     # Restrict input to AOD
@@ -228,7 +228,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         if out != None:
             outMod  = 'out'
         switchOnTrigger(process)
-        #, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+        # syntax changed, was before (process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
     seq = cms.Sequence()
