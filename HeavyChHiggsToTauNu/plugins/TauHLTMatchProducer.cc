@@ -60,7 +60,7 @@ void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   edm::Handle<pat::TriggerObjectCollection> myTriggerObjects;
   iEvent.getByLabel(fTriggerSource, myTriggerObjects);
   */
-
+  /*
   // PAT trigger object collection
   edm::Handle<edm::Association< std::vector<pat::TriggerObject> > > myPatTriggerEvent;
   iEvent.getByLabel(fPatTriggerEventSource, myPatTriggerEvent);
@@ -94,7 +94,7 @@ void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   }
  
   std::cout << "taus=" << myGoodTaus << "/" << myTaus->size() << " match: DR=" << myBestDeltaR << " index=" << myBestTauIndex << std::endl;
-
+  */
   // mean pt
   
 }

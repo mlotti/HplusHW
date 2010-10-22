@@ -65,8 +65,11 @@ namespace HPlus {
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
-    std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
-    hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
+    // The following code is not correct, because there could be more than one tau jet
+    // passing the tau ID (and hence multiple values of Rtau
+    // Please access the selected tau jets via  fTauSelection.getSelectedTaus()
+    //std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
+    //hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
