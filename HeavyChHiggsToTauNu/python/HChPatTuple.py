@@ -227,7 +227,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         outMod= ''
         if out != None:
             outMod  = 'out'
-        switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+        switchOnTrigger(process)
+        #, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
     seq = cms.Sequence()

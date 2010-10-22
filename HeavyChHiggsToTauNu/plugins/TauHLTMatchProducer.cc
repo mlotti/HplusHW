@@ -28,19 +28,24 @@ class TauHLTMatchProducer : public edm::EDProducer {
   virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
       
-  edm::InputTag fTriggerSource;
-  edm::InputTag fTriggerEventSource;
+  edm::InputTag fPatTriggerSource;
   edm::InputTag fTauSource;
-  std::string fHLTTriggerName;
+  /*  edm::InputTag fTriggerSource;
+  edm::InputTag fTriggerEventSource;
 
+  std::string fHLTTriggerName;
+  */
 };
 
 
 TauHLTMatchProducer::TauHLTMatchProducer( const edm::ParameterSet & iConfig ) :
+  fPatTriggerSource(iConfig.getParameter<edm::InputTag>("patTrigger")),
+  fTauSource(iConfig.getParameter<edm::InputTag>("src"))
+  /*
   fTriggerSource(iConfig.getParameter<edm::InputTag>("trigger")),
   fTriggerEventSource(iConfig.getParameter<edm::InputTag>("triggerEvent")),
-  fTauSource(iConfig.getParameter<edm::InputTag>("tauCollections")),
-  fHLTTriggerName(iConfig.getParameter<std::string>("hltTriggerForMatching")) {
+
+  fHLTTriggerName(iConfig.getParameter<std::string>("hltTriggerForMatching")) */{
 }
 
 TauHLTMatchProducer::~TauHLTMatchProducer() {
@@ -50,6 +55,47 @@ void TauHLTMatchProducer::beginJob() {
 }
 
 void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup ) {
+
+  // PAT trigger object collection
+  //edm::Handle<edm::Association< std::vector<pat::TriggerObject> > > myPatTriggerEvent;
+  //iEvent.getByLabel(fPatTriggerEventSource, myPatTriggerEvent);
+
+  edm::Handle< std::vector<pat::TriggerObject> > myPatTriggerObjects;
+  iEvent.getByLabel(fPatTriggerSource, myPatTriggerObjects);
+
+  edm::Handle< std::vector<pat::TriggerAlgorithm> > myPatTriggerAlgorithms;
+  iEvent.getByLabel(fPatTriggerSource, myPatTriggerAlgorithms);
+
+  edm::Handle< std::vector<pat::TriggerFilter> > myPatTriggerFilters;
+  iEvent.getByLabel(fPatTriggerSource, myPatTriggerFilters);
+
+  // PAT tau collection
+  edm::Handle<pat::TauCollection> myTaus;
+  iEvent.getByLabel(fTauSource, myTaus);
+
+  std::cout << "trigger objects: " << myPatTriggerObjects->size() << std::endl;
+  for (std::vector<pat::TriggerObject>::const_iterator it = myPatTriggerObjects->begin(); it != myPatTriggerObjects->end(); ++it) {
+    std::cout << " collection=" << (*it).collection() << " ids:";
+    for (std::vector<int>::const_iterator i = (*it).filterIds().begin(); i != (*it).filterIds().end(); ++i) {
+      std::cout << " " << *i;
+    }
+    std::cout << std::endl;
+  }
+
+
+  std::cout << "trigger filters:" << std::endl;
+  for (std::vector<pat::TriggerFilter>::const_iterator it = myPatTriggerFilters->begin(); it != myPatTriggerFilters->end(); ++it) {
+    std::cout << "  " << (*it).label() << " type=" << (*it).type() << std::endl;
+  }
+
+  /*
+  std::cout << "trigger algorithms:" << std::endl;
+  for (std::vector<pat::TriggerAlgorithm>::const_iterator it = myPatTriggerAlgorithms->begin(); it != myPatTriggerAlgorithms->end(); ++it) {
+    std::cout << "  " << (*it).name() << " bit=" << (*it).bit() << " prescale=" << (*it).prescale() << std::endl;
+  }
+  */
+
+
   // PAT trigger information
   /*  edm::Handle<pat::TriggerEvent> myTriggerEvent;
   iEvent.getByLabel(fTriggerEventSource, myTriggerEvent);
@@ -60,16 +106,8 @@ void TauHLTMatchProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   edm::Handle<pat::TriggerObjectCollection> myTriggerObjects;
   iEvent.getByLabel(fTriggerSource, myTriggerObjects);
   */
-  /*
-  // PAT trigger object collection
-  edm::Handle<edm::Association< std::vector<pat::TriggerObject> > > myPatTriggerEvent;
-  iEvent.getByLabel(fPatTriggerEventSource, myPatTriggerEvent);
-  
+  /* 
 
-
-  // PAT tau collection
-  edm::Handle<pat::TauCollection> myTaus;
-  iEvent.getByLabel(fTauSource, myTaus);
 
   // PAT trigger helper for trigger matching information
   const pat::helper::TriggerMatchHelper myMatchHelper;
