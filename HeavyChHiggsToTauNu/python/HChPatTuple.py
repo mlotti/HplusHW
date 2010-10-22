@@ -65,15 +65,15 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     # Count the number of primary vertices, and put into event
-    process.primaryVertexNumber = cms.EDProducer("HPlusVertexCountProducer",
-        src = cms.InputTag('offlinePrimaryVertices'),
-        alias = cms.string("primaryVertexNumber")
-    )
-    if dataVersion.isData():
-        # See HChDataSelection
-        process.primaryVertexNumber.src = "selectedPrimaryVertices"
-    if out != None:
-        out.outputCommands.append("keep int_primaryVertexNumber_*_*")
+    #process.primaryVertexNumber = cms.EDProducer("HPlusVertexCountProducer",
+    #    src = cms.InputTag('offlinePrimaryVertices'),
+    #    alias = cms.string("primaryVertexNumber")
+    #)
+    #if dataVersion.isData():
+    #    # See HChDataSelection
+    #    process.primaryVertexNumber.src = "selectedPrimaryVertices"
+    #if out != None:
+    #    out.outputCommands.append("keep int_primaryVertexNumber_*_*")
 
     process.hplusPatSequence = cms.Sequence(
         process.hplusPatTauSequence *
