@@ -319,9 +319,9 @@ namespace HPlus {
       		++leadTrkPtCutPassed;
 
 		hbyTaNC->Fill(iTau->tauID("byTaNC"));
-//		if(iTau->tauID("byTaNC") < 0.6) continue;
+		if(iTau->tauID("byTaNC") < 0.6) continue;
 //		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
-		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
+//		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue;
 		//		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
 //		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
 		increment(fbyTaNCSubCount);
