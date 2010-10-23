@@ -20,12 +20,16 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 # Create Process
 process = cms.Process("HChPatTuple")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
+
+# Jet trigger (for cleaning of tau->HLT matching
+myJetTrigger = "HLT_Jet30U"
+#myJetTrigger = "HLT_Jet50U"
 
 ################################################################################
 # Source
@@ -65,7 +69,9 @@ else:
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
-print "Trigger used for matching: "+myTrigger
+print "Trigger used for tau matching: "+myTrigger
+print "Trigger used for jet matching: "+myJetTrigger
+
 
 ################################################################################
 # Output module
@@ -102,8 +108,12 @@ else:
             ])
 
 ################################################################################
-# Add tau HLT matching
-
+# Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching
+# Produces:
+#   1) a patTauCollection of patTaus matched to the HLT tau trigger and
+#   2) a copy of the same collection with the patTau matching to the HLT jet trigger
+#      removed (needed to remove trigger bias in QCD backround measurement).
+# Yes, I agree that this sounds (and is) a bit compicated :)
 patTauCollectionList = [
     "selectedPatTausShrinkingConePFTau",
     "selectedPatTausHpsPFTau",
@@ -111,7 +121,7 @@ patTauCollectionList = [
     ] # add to the list new sources for patTauCollections, if necessary
 
 patTauTriggerMatchHplusProtoType = cms.EDProducer("PATTriggerMatcherDRLessByR",
-    src                   = cms.InputTag("patTaus"), #cleanLayer1Taus
+    src                   = cms.InputTag("dummy"),
     matched               = cms.InputTag("patTrigger"),
     andOr                 = cms.bool(False),
     filterIdsEnum         = cms.vstring('*'),
@@ -132,8 +142,9 @@ patTauEmptyCleanerProtoType = cms.EDFilter("PATTauSelector",
 process.triggerMatchingSequence = cms.Sequence()
 
 for patTauCollection in patTauCollectionList:
-    print "Matching trigger "+myTrigger+" to patTauCollection "+patTauCollection
-    
+    ###########################################################################
+    # Tau -> HLT tau trigger matching
+    print "Matching patTauCollection "+patTauCollection+" to tau trigger "+myTrigger
     # create DeltaR matcher of trigger objects to a tau collection
     patTauTriggerMatcher = patTauTriggerMatchHplusProtoType.clone(
         src = cms.InputTag(patTauCollection)
@@ -155,24 +166,76 @@ for patTauCollection in patTauCollectionList:
         src     = cms.InputTag(patTauCollection),
         matches = cms.VInputTag(patTauTriggerMatcherName)
     )
-    patTauTriggerEmbedderName = patTauCollection+"TriggerEmbedder"
+    patTauTriggerEmbedderName = patTauCollection+"TauTriggerEmbedder"
     setattr(process, patTauTriggerEmbedderName, patTauTriggerEmbedder)
     process.triggerMatchingSequence += getattr(process, patTauTriggerEmbedderName)
 
     # clean empty pat taus from the embedded tau collection
     patTausTriggerMatchedAndCleaned = patTauEmptyCleanerProtoType.clone(
         src = cms.InputTag(patTauTriggerEmbedderName)
-        )
-    patTausTriggerMatchedAndCleanedName = patTauCollection+"TriggerMatched"
+    )
+    patTausTriggerMatchedAndCleanedName = patTauCollection+"TauTriggerMatched"
     setattr(process, patTausTriggerMatchedAndCleanedName, patTausTriggerMatchedAndCleaned)
     process.triggerMatchingSequence += getattr(process, patTausTriggerMatchedAndCleanedName)
 
+    ###########################################################################
+    # Tau -> HLT jet trigger matching
+    # (needed for removing the tau candidate matching to jet trigger in QCD bkg measurement)
+    print "Matching patTauCollection "+patTauCollection+" to jet trigger "+myJetTrigger
+    # create DeltaR matcher of trigger objects
+    patJetTriggerMatcher = patTauTriggerMatcher.clone(
+        pathNames = cms.vstring(myJetTrigger)
+    )
+    patJetTriggerMatcherName = patTauCollection+"JetTriggerMatcher"
+    setattr(process, patJetTriggerMatcherName, patJetTriggerMatcher)
+    process.triggerMatchingSequence += getattr(process, patJetTriggerMatcherName)
+
+    # produce patTriggerObjectStandAloneedmAssociation object
+    patJetTriggerEvent = process.patTriggerEvent.clone(
+        patTriggerMatches = cms.VInputTag(patJetTriggerMatcherName)
+    )
+    patJetTriggerEventName = patTauCollection+"JetTriggerEvent"
+    setattr(process, patJetTriggerEventName, patJetTriggerEvent)
+    process.triggerMatchingSequence += getattr(process, patJetTriggerEventName)
+
+    # embed the patTriggerObjectStandAloneedmAssociation to a tau collection
+    patJetTriggerEmbedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
+        src     = cms.InputTag(patTauCollection),
+        matches = cms.VInputTag(patJetTriggerMatcherName)
+    )
+    patJetTriggerEmbedderName = patTauCollection+"JetTriggerEmbedder"
+    setattr(process, patJetTriggerEmbedderName, patJetTriggerEmbedder)
+    process.triggerMatchingSequence += getattr(process, patJetTriggerEmbedderName)
+
+    # clean empty pat taus from the embedded tau collection
+    patJetTriggerMatchedAndCleaned = patTauEmptyCleanerProtoType.clone(
+        src = cms.InputTag(patJetTriggerEmbedderName)
+    )
+    patJetTriggerMatchedAndCleanedName = patTauCollection+"JetTriggerMatched"
+    setattr(process, patJetTriggerMatchedAndCleanedName, patJetTriggerMatchedAndCleaned)
+    process.triggerMatchingSequence += getattr(process, patJetTriggerMatchedAndCleanedName)
+
+    ###########################################################################
+    # Remove first tau matching to the jet trigger from the list
+    # of tau -> HLT tau trigger matched patTaus
+    patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
+        tausMatchedToTauTriggerSrc = cms.InputTag(patTausTriggerMatchedAndCleanedName),
+        tausMatchedToJetTriggerSrc = cms.InputTag(patJetTriggerMatchedAndCleanedName),
+    )
+    patJetTriggerCleanedTauTriggerMatchedTausName = patTauCollection+"TauTriggerMatchedAndJetTriggerCleaned"
+    setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
+    process.triggerMatchingSequence += getattr(process, patJetTriggerCleanedTauTriggerMatchedTausName)
 
 process.out.outputCommands.extend([
-    "keep patTaus_*TriggerMatched_*_*",
+    "keep patTaus_*TauTriggerMatched_*_*",
     "drop *_*TauTriggerMatcher_*_*",
     "drop *_*TauTriggerEvent_*_*",
-    "drop *_*TriggerEmbedder_*_*"
+    "drop *_*TauTriggerEmbedder_*_*",
+    "drop patTaus_*JetTriggerMatched_*_*",
+    "drop *_*JetTriggerMatcher_*_*",
+    "drop *_*JetTriggerEvent_*_*",
+    "drop *_*JetTriggerEmbedder_*_*",
+    "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
     ])
 
 ################################################################################
