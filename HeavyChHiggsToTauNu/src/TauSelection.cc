@@ -66,9 +66,9 @@ namespace HPlus {
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
     hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 0.01);
-    hFlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 0.01);
+    hFlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 1);
     hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 100, 0., 5.);
-    hbyTaNC = fs->make<TH1F>("tau_TaNC", "tau_TaNC", 100, -1., 1.);
+    hbyTaNC = fs->make<TH1F>("tau_TaNC", "tau_TaNC", 100, 0., 1.);
   }
 
   TauSelection::~TauSelection() {}
@@ -77,8 +77,8 @@ namespace HPlus {
 	if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
 	if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
 	if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
-	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
-	std::cout << "WARNING, no tau selection used!" << std::endl;
+	//	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
+	//	std::cout << "WARNING, no tau selection used!" << std::endl;
 	return false;
   }
 
@@ -188,15 +188,14 @@ namespace HPlus {
       ++ecalIsolationCutPassed;
 
         
-      //      hnProngs->Fill(iTau->signalTracks().size());    
-      //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-      //      if(iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
-      //     increment(fnProngsSubCount);
-      // ++nProngsCutPassed;
+      hnProngs->Fill(iTau->signalTracks().size());    
+      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      increment(fnProngsSubCount);
+      ++nProngsCutPassed;
  
-      //  if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
-      //increment(fHChTauIDchargeSubCount);
-      //++HChTauIDchargeCutPassed;
+      if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
+      increment(fHChTauIDchargeSubCount);
+      ++HChTauIDchargeCutPassed;
   
       //float Rtau = leadTrk->p()/iTau->p();
       //      Rtau = leadTrk->p()/iTau->p();
@@ -336,13 +335,15 @@ namespace HPlus {
       		++leadTrkPtCutPassed;
 
 		hbyTaNC->Fill(iTau->tauID("byTaNC"));
-		if(iTau->tauID("byTaNC") < 0.6) continue;
+		//		if(iTau->tauID("byTaNC") < 0.6) continue;
 //		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
 		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue; // This is the tightest selection
 //		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
 //		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
 		increment(fbyTaNCSubCount);
 		++byTaNCCutPassed;
+
+		//       std::cout << " after isolation tanC " << std::endl;   
 
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
@@ -465,6 +466,7 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
+       std::cout << " after isolation HSP " << std::endl;   
 
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
