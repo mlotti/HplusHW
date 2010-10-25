@@ -23,6 +23,7 @@ class StyleFill:
     def apply(self, h):
         self.style.apply(h)
         h.SetFillColor(self.style.color)
+        h.SetFillStyle(3002)
 
     def __call__(self, h):
         self.apply(h)

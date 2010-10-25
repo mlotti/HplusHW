@@ -174,7 +174,7 @@ namespace HPlus {
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
   {
     edm::Service<TFileService> fs;
-    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 200, 0.0, 10.0);
+    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 1000, 0.0, 10.0);
   }
 
   EvtTopology::~EvtTopology() {}
@@ -225,6 +225,16 @@ namespace HPlus {
     /// Minimum Delta Et for two pseudo-jets
     float fMin_delta_sum_et = -1.0;
     
+    if(iNJets > 18){ 
+      // Fill the function structure with -2.0 to indicate that combinatorics too much
+      sAlpha.fAlphaT  = -2.0;
+      sAlpha.fJt      = -2.0;
+      sAlpha.fHt      = -2.0;
+      sAlpha.fDeltaHt = -2.0;
+      sAlpha.fMHt     = -2.0;
+      return false;
+    }
+
     /// Iterate through different combinations
     for ( unsigned k=0; k < unsigned(1<<(iNJets-1)); k++ ) { 
       float fDelta_sum_et = 0.0;
