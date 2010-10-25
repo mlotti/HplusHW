@@ -1,11 +1,11 @@
-import os
+import os, sys
 import glob
 from optparse import OptionParser
 
 import ROOT
 
 import multicrab
-from dataset import Dataset
+from dataset import Dataset, mergeStackHelper
 
 def addCmsPreliminaryText(x=0.62, y=0.96):
     l = ROOT.TLatex()
@@ -42,6 +42,12 @@ class HistoSetData:
 
     def getHistogram(self):
         return self.histo
+
+    def isMC(self):
+        return self.dataset.isMC()
+
+    def isData(self):
+        return self.dataset.isData()
 
     def getName(self):
         return self.dataset.getName()
@@ -83,6 +89,12 @@ class HistoSetDataStacked:
 
     def getHistogram(self):
         return self.histo
+
+    def isMC(self):
+        return self.data[0].isMC()
+
+    def isData(self):
+        return self.data[0].isData()
 
     def getName(self):
         return self.name
@@ -148,7 +160,7 @@ class HistoSet:
         if lumi == None:
             raise Exception("Unable to normalize by luminosity, no data datasets")
 
-        self.normalizeMCToLuminosity(self, sumLumi)
+        self.normalizeMCToLuminosity(lumi)
 
     def normalizeMCToLuminosity(self, lumi):
         if self.data != None:
@@ -167,14 +179,21 @@ class HistoSet:
     def populateMap(self):
         self.datasetHistoMap = {}
         for h in self.data:
-            self.datasetHistoMap[h.getDataset().getName()] = h
+            self.datasetHistoMap[h.getName()] = h
 
-    def forEachHisto(self, func):
+    def forEachMCHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isMC())
+
+    def forEachDataHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isData())
+
+    def forEachHisto(self, func, predicate=lambda x: True):
         if self.data == None:
             self.createHistogramObjects()
 
         for d in self.data:
-            d.call(func)
+            if predicate(d):
+                d.call(func)
 
     def getHisto(self, name):
         if self.data == None:
@@ -192,11 +211,11 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetMap:
-            print "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
+        if not name in self.datasetHistoMap:
+            print >> sys.stderr, "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
             return
 
-        self.datasetMap[name].setLegendLabel(label)
+        self.datasetHistoMap[name].setLegendLabel(label)
 
     def setHistoLegendLabels(self, nameMap):
         if self.data == None:
@@ -209,11 +228,11 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetMap:
-            print "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
+        if not name in self.datasetHistoMap:
+            print >> sys.stderr, "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
             return
 
-        self.datasetMap[name].setLegendStyle(style)
+        self.datasetHistoMap[name].setLegendStyle(style)
 
     def setHistoLegendStyleAll(self, style):
         if self.data == None:
@@ -226,7 +245,7 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        self.datasetMap[name].drawStyle = style
+        self.datasetHistoMap[name].drawStyle = style
 
     def setHistoDrawStyleAll(self, style):
         if self.data == None:
@@ -283,58 +302,14 @@ class HistoSet:
         for h, style, dname in histos:
             h.Draw(style+" same")
 
+    def stackDatasets(self, newName, nameList):
+        if self.data == None:
+            self.createHistogramObjects()
 
+        (selected, notSelected, firstIndex) = mergeStackHelper(self.data, nameList, "stack")
 
-
-    def stackMCDatasets(self):
-        self.stackDatasets("MC", self.getMCDatasetNames())
-
-    def mergeStackInternalHelper(self, newName, datasetNameList, task):
-        indices = []
-        dataCount = 0
-        mcCount = 0
-        newData = []
-        for i, d in enumerate(self.data):
-            if d.getName() in datasetNameList:
-                indices.append(i)
-                if d.dataset.isData():
-                    dataCount += 1
-                elif d.dataset.isMC():
-                    mcCount += 1
-                else:
-                    raise Exception("Internal error!")
-            else:
-                newData.append(d)
-
-        if dataCount > 0 and mcCount > 0:
-            raise Exception("Can not %s data and MC datasets!" % task)
-
-        if len(indices) == 0:
-            print "Dataset %s: no datasets '"%task + ", ".join(datasetNameList) + "' found, not doing anything"
-            return None
-        if len(indices) == 1:
-            print "Dataset %s: one dataset '"%task + self.data[indices[0]].getName() + "' found from list '" + ", ".join(datasetNameList)+", renaming it to '%s'" % newName
-            self.renameDataset(self.data[indices[0]].getName(), newName)
-            return None
-        if len(indices) != len(datasetNameList):
-            dlist = datasetNameList[:]
-            for i in indices:
-                ind = dlist.index(self.data[i].getName())
-                del dlist[ind]
-            print "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
-
-        isMC = mcCount > 0    
-        return (indices, newData, isMC)
-
-    def stackDatasets(self, newName, datasetNameList):
-        tpl = self.mergeStackInternalHelper(newName, datasetNameList, "stack")
-        if tpl == None:
-            return
-        (indices, newData, isMC) = tpl
-
-        h = HistoSetDataStacked([self.data[i] for i in indices], newName)
-        newData.insert(indices[0], h)
-        self.data = newData
+        notSelected.insert(firstIndex, HistoSetDataStacked(selected, newName))
+        self.data = notSelected
         self.populateMap()
 
 

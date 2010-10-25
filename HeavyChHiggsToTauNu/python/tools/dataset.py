@@ -1,4 +1,9 @@
+import glob, os, sys
+from optparse import OptionParser
+
 import ROOT
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def histoToCounter(histo):
     ret = []
@@ -53,7 +58,7 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counterdir="signalAnalysisCount
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
             return 1
         elif len(files) == 0:
-            print "No files matched to input for task %s, ignoring the dataset" % d
+            print >> sys.stderr, "No files matched to input for task %s, ignoring the dataset" % d
             continue
 
         dlist.append( (d, files[0]) )
@@ -63,7 +68,7 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counterdir="signalAnalysisCount
 def getDatasetsFromRootFiles(dlist, counterdir="signalAnalysisCounters"):
     datasets = DatasetSet()
     for name, f in dlist:
-        datasets.append(Dataset(f, counterdir, name))
+        datasets.append(Dataset(name, f, counterdir))
     return datasets
 
 def readDataset(fname, counterDir, datasetname, crossSections):
@@ -83,6 +88,42 @@ def normalizeToFactor(h, f):
     return h
 
 
+def mergeStackHelper(datasetList, nameList, task):
+    if not task in ["stack", "merge"]:
+        raise Exception("Task can be either 'stack' or 'merge', was '%s'" % task)
+
+    selected = []
+    notSelected = []
+    firstIndex = None
+    dataCount = 0
+    mcCount = 0
+
+    for i, d in enumerate(datasetList):
+        if d.getName() in nameList:
+            selected.append(d)
+            if firstIndex == None:
+                firstIndex = i
+            if d.isData():
+                dataCount += 1
+            elif d.isMC():
+                mcCount += 1
+            else:
+                raise Exception("Internal error!")
+        else:
+            notSelected.append(d)
+
+    if dataCount > 0 and mcCount > 0:
+        raise Exception("Can not %s data and MC datasets!" % task)
+
+    if len(selected) != len(nameList):
+        dlist = datasetNameList[:]
+        for d in mergeData:
+            ind = dlist.index(d.getName())
+            del dlist[ind]
+        print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
+
+    return (selected, notSelected, firstIndex)
+
 
 class DatasetHisto:
     def __init__(self, histo, dataset):
@@ -92,6 +133,12 @@ class DatasetHisto:
 
     def getDataset(self):
         return self.dataset
+
+    def isData(self):
+        return self.dataset.isData()
+
+    def isMC(self):
+        return self.dataset.isMC()
 
     def getHistogram(self):
         # Always return a clone of the original
@@ -179,7 +226,7 @@ class DatasetHistoMergedMC:
         self.dataset = mergedDataset
         self.normalization = "none"
         for h in self.datasetHistos:
-            if h.isMC():
+            if h.isData():
                 raise Exception("Internal error")
             if h.normalization != "none":
                 raise Exception("Internal error")
@@ -226,9 +273,9 @@ class Dataset:
             raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
         self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
-        if f.Get(counterDir) == None:
+        if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
-        ctr = histoToCounter(f.Get(counterDir).Get("counter"))
+        ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
         self.nAllEvents = ctr[0][1] # first counter, second element of the tuple
 
     def getName(self):
@@ -267,7 +314,7 @@ class Dataset:
         return self.getCrossSection() / self.nAllEvents
 
     def getHistoWrapper(self, name):
-        h = self.file.Get(histoName)
+        h = self.file.Get(name)
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
         return DatasetHisto(h, self)
@@ -275,7 +322,7 @@ class Dataset:
 
 
 class DatasetMerged:
-    def __init__(self, name, datasets, stacked):
+    def __init__(self, name, datasets):
         self.name = name
         #self.stacked = stacked
         self.datasets = datasets
@@ -297,9 +344,6 @@ class DatasetMerged:
 
     def getName(self):
         return self.name
-
-    # def isStacked(self):
-    #     return self.stacked
 
     def setCrossSection(self, value):
         if self.isData():
@@ -360,7 +404,7 @@ class DatasetSet:
         return self.datasetMap[name]
 
     def getHistoWrappers(self, histoName):
-        return [d.getHistogram(histoName) for d in self.datasets]
+        return [d.getHistoWrapper(histoName) for d in self.datasets]
 
     def getAllDatasets(self):
         return self.datasets
@@ -378,6 +422,12 @@ class DatasetSet:
             if d.isData():
                 ret.append(d)
         return ret
+
+    def getMCDatasetNames(self):
+        return [x.getName() for x in self.getMCDatasets()]
+
+    def getDataDatasetNames(self):
+        return [x.getName() for x in self.getDataDatasets()]
 
     def selectAndReorder(self, nameList):
         selected = []
@@ -413,54 +463,21 @@ class DatasetSet:
             self.datasetMap[oldName].setName(newName)
         self.populateMap()
 
-    def mergeStackHelper(self, newName, nameList, task):
-        mergeData = []
-        firstIndex = None
-        dataCount = 0
-        mcCount = 0
-        newData = []
-        for i, d in enumerate(self.datasets):
-            if d.getName() in datasetNameList:
-                mergeData.append(d)
-                if firstIndex != None:
-                    firstIndex = i
-                if d.isData():
-                    dataCount += 1
-                elif d.isMC():
-                    mcCount += 1
-                else:
-                    raise Exception("Internal error!")
-            else:
-                newData.append(d)
-
-        if dataCount > 0 and mcCount > 0:
-            raise Exception("Can not %s data and MC datasets!" % task)
-
-        if len(mergeData) == 0:
-            print "Dataset %s: no datasets '"%task +", ".join(datasetNameList) + "' found, not doing anything"
-            return
-        if len(mergeData) == 1:
-            print "Dataset %s: one dataset '"%task + self.data[firstIndex].getName() + "' found from list '" + ", ".join(datasetNameList)+", renaming it to '%s'" % newName
-            self.rename(self.data[indices[0]].getName(), newName)
-            return
-        if len(mergeData) != len(datasetNameList):
-            dlist = datasetNameList[:]
-            for d in mergeData:
-                ind = dlist.index(d.getName())
-                del dlist[ind]
-            print "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
-
-        if not task in ["stack", "merge"]:
-            raise Exception("Internal error")
-
-        newData.insert(firstIndex, DatasetMerged(mergeData, task=="stack"))
-        self.datasets = newData
-        self.populateMap()
+    def mergeData(self):
+        self.merge("Data", [x.getName() for x in self.getDataDatasets()])
 
     def merge(self, newName, nameList):
-        mergeStackHelper(newName, nameList, "merge")
+        (selected, notSelected, firstIndex) = mergeStackHelper(self.datasets, nameList, "merge")
+        if len(selected) == 0:
+            print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
+            return
+        elif len(selected) == 1:
+            print >> sys.stderr, "Dataset merge: one dataset '" + self.data[firstIndex].getName() + "' found from list '" + ", ".join(nameList)+", renaming it to '%s'" % newName
+            self.rename(self.data[indices[0]].getName(), newName)
+            return 
 
-    # def stack(self, newName, nameList):
-    #     mergeStackHelper(newName, nameList, "stack")
-    
+        notSelected.insert(firstIndex, DatasetMerged(newName, selected))
+        self.datasets = notSelected
+        self.populateMap()
+
         
