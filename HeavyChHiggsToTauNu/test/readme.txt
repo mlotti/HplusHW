@@ -177,8 +177,10 @@
         cvs co -r lumi2010-Oct12 RecoLuminosity/LumiDB
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-	rm HiggsAnalysis/Skimming/interface/HiggsToWW2LeptonsSkim.h 
-	rm HiggsAnalysis/Skimming/src/HiggsToWW2LeptonsSkim.cc
+        rm HiggsAnalysis/Skimming/interface/HiggsToWW2LeptonsSkim.h 
+        rm HiggsAnalysis/Skimming/src/HiggsToWW2LeptonsSkim.cc
+        fgrep -v HiggsToWW2LeptonsSkim HiggsAnalysis/Skimming/src/SealModule.cc > HiggsAnalysis/Skimming/src/SealModule2.cc
+        mv HiggsAnalysis/Skimming/src/SealModule2.cc HiggsAnalysis/Skimming/src/SealModule.cc
 
 
 Multicrab instructions
