@@ -18,6 +18,7 @@ class DataVersion:
         self.trigger = triggerProcessMap[dataVersion]
         self.version = dataVersion
 
+        # Collision data
         if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
             self.globalTag = "GR_R_38X_V13::All"
@@ -33,6 +34,7 @@ class DataVersion:
 
             if dataVersion == "38XdataRun2010B":
                 self.is_runB = True
+        # MC
         else:
             self.is_data = False
             self.globalTag = "START38_V12::All"
@@ -48,6 +50,7 @@ class DataVersion:
                 self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM-pattuple_v3/350234694fe4ac3e4a7c59f3d58cf538/pattuple_9_1_fjh.root"
 
             if dataVersion == "38X":
+                self.patDefaultFileCastor = '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root'
                 self.patDefaultFileMadhatter = "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root"
 
         self.is_35X = False
