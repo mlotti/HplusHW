@@ -65,6 +65,7 @@ namespace HPlus {
 
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT);
+
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau
     // Please access the selected tau jets via  fTauSelection.getSelectedTaus()
