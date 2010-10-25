@@ -46,7 +46,7 @@ style = TDRStyle()
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
 ### directory. The returned object is of type DatasetSet.
-datasets = getDatasetsFromMulticrabCfg()
+#datasets = getDatasetsFromMulticrabCfg() ## uncomment me
 
 ### Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["TTToHpmToTauNu_M100"]) ### example: single dataset
@@ -57,88 +57,89 @@ datasets = getDatasetsFromMulticrabCfg()
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
 #datasets = getDatasetsFromRootFiles([("TTbar", "TTbar/res/histograms_3_1_oN4.root")])
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
+datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M120/res/histograms_1_1_nRc.root")]) ## comment me
 
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-alphaT = datasets.getHistoSet("signalAnalysis/alphaT")
+tauNProngs = datasets.getHistoSet("signalAnalysis/tau_nProngs")
 
 ### Print the list of datasets in the given HistoSet
-#print "\n".join(alphaT.getDatasetNames())
+#print "\n".join(tauNProngs.getDatasetNames())
 
 ### Example how to remove some datasets
-#alphaT.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
+#tauNProngs.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
 #                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
 #                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
 ### Note: this must be done before normalizeMCByLuminosity()
-#alphaT.mergeDataDatasets()
+#tauNProngs.mergeDataDatasets()
 
 ### Example how to set the luminosity of a data dataset
-#alphaT.getDataset("Data").setLuminosity(5)
+#tauNProngs.getDataset("Data").setLuminosity(5)
 
 ### The default normalization is no normalization (i.e. number of MC
 ### events for MC, and number of events for data)
 
 ############################### NORMALISE ###############################
 ### Normalize MC histograms to their cross section
-#alphaT.normalizeMCByCrossSection()
+#tauNProngs.normalizeMCByCrossSection()
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
-#alphaT.normalizeMCByLuminosity()
+#tauNProngs.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 
 ### Normalize MC histograms to an explicit luminosity in pb
-alphaT.normalizeMCToLuminosity(11)
+tauNProngs.normalizeMCToLuminosity(10)
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1
-#alphaT.normalizeToOne()
+#tauNProngs.normalizeToOne()
 #ylabel = "a.u"
 
 ############################### MERGING ###############################
 ### Example how to merge histograms of several datasets
-alphaT.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+# tauNProngs.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
 
 ### Example how to remove given datasets
-#alphaT.removeDatasets(["QCD", "TTbar"])
-#alphaT.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
+#tauNProngs.removeDatasets(["QCD", "TTbar"])
+#tauNProngs.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-alphaT.setHistoLegendLabels(legendLabels) # many datasets, with dict
+tauNProngs.setHistoLegendLabels(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
-alphaT.setHistoLegendStyleAll("F")
-alphaT.setHistoLegendStyle("Data", "p")
+tauNProngs.setHistoLegendStyleAll("F")
+tauNProngs.setHistoLegendStyle("Data", "p")
 
 ### Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-alphaT.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-alphaT.applyStyle("Data", styles.getDataStyle())
-#alphaT.setHistoDrawStyle("Data", "EP")
+tauNProngs.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
+tauNProngs.applyStyle("Data", styles.getDataStyle())
+#tauNProngs.setHistoDrawStyle("Data", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
-#alphaT.stackMCDatasets()
+#tauNProngs.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=3.0)
+(canvas, frame) = tauNProngs.createCanvasFrame("tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("#alpha_{T}")
+frame.GetXaxis().SetTitle("#tau-jet nProngs")
 frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
-alphaT.addToLegend(legend)
+tauNProngs.addToLegend(legend)
 
 ### Draw the plots
-alphaT.draw()
+tauNProngs.draw()
 legend.Draw()
 
 ### Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
@@ -147,7 +148,7 @@ ROOT.gPad.SetLogy(True)
 ### The necessary texts, all take the position as arguments
 addCmsPreliminaryText()
 addEnergyText(x=0.3, y=0.85)
-alphaT.addLuminosityText() ### need to comment out if normalising to unity 
+tauNProngs.addLuminosityText() ### need to comment out if normalising to unity 
 
 ############################### EXECUTION ###############################
 ### Script execution can be paused like this, it will continue after

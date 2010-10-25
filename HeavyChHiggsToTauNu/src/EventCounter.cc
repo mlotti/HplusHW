@@ -130,7 +130,6 @@ namespace HPlus {
     iBlock.put(instances, "counterInstances");
   }
 
-  Count::Count(): counter_(0), index_(0) {}
   Count::Count(EventCounter *counter, size_t index):
     counter_(counter), index_(index) {}
   Count::~Count() {}

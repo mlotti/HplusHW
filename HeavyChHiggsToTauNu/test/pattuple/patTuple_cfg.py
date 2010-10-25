@@ -63,7 +63,12 @@ process.out = cms.OutputModule("PoolOutputModule",
         "drop *",
         "keep edmTriggerResults_*_*_*",
         "keep triggerTriggerEvent_*_*_*",
-        "keep edmMergeableCounter_*_*_*"
+        "keep L1GlobalTriggerReadoutRecord_*_*_*",
+        "keep L1GlobalTriggerObjectMapRecord_*_*_*",
+        "keep *_conditionsInEdm_*_*",
+        "keep edmMergeableCounter_*_*_*", # in lumi block
+        "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
+        "keep *_offlinePrimaryVertices_*_*"
     )
 )
 
@@ -86,6 +91,7 @@ else:
 # and it can be accessed later in the analysis stage.
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
+process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
 if dataVersion.is38X() and (dataVersion.isMC() or (dataVersion.isData() and dataVersion.isRun2010B())):
     # SingleLooseIsoTau20 is not available in 38X MC
     process.heavyChHiggsToTauNuHLTFilter.HLTPaths = ["HLT_SingleIsoTau20_Trk5_MET20"]
