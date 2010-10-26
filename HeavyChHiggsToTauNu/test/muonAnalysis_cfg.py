@@ -3,9 +3,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-dataVersion = "36X"
+#dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
+dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -35,7 +36,10 @@ process.source = cms.Source('PoolSource',
   )
 )
 if options.doPat != 0:
-    process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter(dcap=True))
+    process.source.fileNames = cms.untracked.vstring(
+        #dataVersion.getPatDefaultFileCastor()
+        dataVersion.getPatDefaultFileMadhatter(dcap=True)
+    )
 
 ################################################################################
 
@@ -98,6 +102,11 @@ if options.doPat != 0:
     )
     removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
     removeCleaning(process, False)    
+
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+    process.patMuons.usePV = False
 
 
 ################################################################################
