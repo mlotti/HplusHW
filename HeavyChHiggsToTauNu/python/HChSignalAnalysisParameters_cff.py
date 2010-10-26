@@ -38,8 +38,8 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-#tauSelection = tauSelectionShrinkingConeCutBased
-tauSelection = tauSelectionShrinkingConeTaNCBased
+tauSelection = tauSelectionShrinkingConeCutBased
+#tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
 #tauSelection = tauSelectionHPSTauBased
 
@@ -49,7 +49,7 @@ jetSelection = cms.untracked.PSet(
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(4)
+    minNumber = cms.untracked.uint32(3)
 )
 
 MET = cms.untracked.PSet(
@@ -61,10 +61,10 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(1.5),
+    discriminatorCut = cms.untracked.double(2.0),
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(2)
+    minNumber = cms.untracked.uint32(1)
 )
 
 MET = cms.untracked.PSet(
