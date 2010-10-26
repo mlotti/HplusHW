@@ -56,22 +56,27 @@ trigger = options.trigger
 if len(trigger) == 0:
     trigger = "HLT_Mu9"
 
+print "Using trigger %s" % trigger
+
 tightMuonCut = "isGlobalMuon() && isTrackerMuon()"
 
 ptCut = "pt() > 20"
 etaCut = "abs(eta()) < 2.1"
 
 qualityCut = "muonID('GlobalMuonPromptTight') && "
-qualityCut += "globalTrack().hitPattern().numberOfValidPixelHits() > 0 && " 
 qualityCut += "innerTrack().numberOfValidHits() > 10"
+qualityCut += "innerTrack()->hitPattern().pixelLayersWithMeasurement() >= 1"
+qualityCut += "numberOfMatches() > 1"
 # These two are included in the GlobalMuonPromptThigh ID
 #qualityCut += "globalTrack().normalizedChi2() < 10.0 && " +
 #qualityCut += "globalTrack().hitPattern().numberOfValidMuonHits () > 0 && " 
 
-dbCut = "abs(dB()) < 0.2" # currently w.r.t PV! (not beamspot)
+dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = False, PATMuonProducer takes beam spot from the event, so this could be safe also for 36X data
+
+maxVertexZ = 1.0
 
 relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
-isolationCut = "%s < 0.15" % relIso
+isolationCut = "%s < 0.05" % relIso
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetMinMultiplicity = 3

@@ -271,6 +271,11 @@ class Analysis:
 
         self.histoIndex += 1
 
+    def addFilter(self, name, module):
+        self.process.__setattr__(name, module)
+        self.sequence *= module
+        self.addCountProducer(name)
+
     def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
         # Create the EDModule objects
         m1 = cms.EDFilter(selector,
@@ -289,27 +294,33 @@ class Analysis:
 
     def addNumberCut(self, name, src, minNumber=1, maxNumber=None):
         filtername = name+"Filter"
-        countname = "count"+name
         
-        m2 = None
+        m = None
         if maxNumber == None:
-            m2 = cms.EDFilter("CandViewCountFilter",
+            m = cms.EDFilter("CandViewCountFilter",
                               src = src,
                               minNumber = cms.uint32(minNumber))
         else:
-            m2 = cms.EDFilter("PATCandViewCountFilter",
+            m = cms.EDFilter("PATCandViewCountFilter",
                               src = src,
                               minNumber = cms.uint32(minNumber),
                               maxNumber = cms.uint32(maxNumber))
 
-        m3 = cms.EDProducer("EventCountProducer")
 
         # Add the modules to process and to the analysis sequence
-        self.process.__setattr__(filtername, m2)
-        self.process.__setattr__(countname, m3)
+        self.process.__setattr__(filtername, m)
+        self.sequence *= m
 
         for m in [m2, m3]:
             self.sequence *= m
+
+        self.addCountProducer(name)
+
+    def addCountProducer(self, name):
+        m = cms.EDProducer("EventCountProducer")
+        countname = "count"+name
+        self.process.__setattr__(countname, m)
+        self.sequence *= m
 
         # Add the counter product to the countAnalyzer
         self.process.countAnalyzer.counters.append(cms.InputTag(countname))
