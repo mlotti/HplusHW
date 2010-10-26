@@ -29,9 +29,6 @@ def createLegend(x1, y1, x2, y2):
     #legend.SetMargin(0.1)
     return legend
 
-def getHistoSet(datasetSet, name):
-    return HistoSet(datasetSet.getHistoWrappers(name))
-
 class HistoSetData:
     def __init__(self, dataset, histo):
         self.dataset = dataset
@@ -129,8 +126,9 @@ class HistoSetDataStacked:
         return max([d.getXmax() for d in self.data])
 
 class HistoSet:
-    def __init__(self, histoWrappers):
-        self.histoWrappers = histoWrappers
+    def __init__(self, datasetSet, name):
+        self.datasets = datasetSet
+        self.histoWrappers = datasetSet.getHistoWrappers(name)
         self.data = None
         self.luminosity = None
 
@@ -302,7 +300,10 @@ class HistoSet:
         for h, style, dname in histos:
             h.Draw(style+" same")
 
-    def stackDatasets(self, newName, nameList):
+    def stackMCHistograms(self):
+        self.stackHistograms("Stacked MC", self.datasets.getMCDatasetNames())
+
+    def stackHistograms(self, newName, nameList):
         if self.data == None:
             self.createHistogramObjects()
 

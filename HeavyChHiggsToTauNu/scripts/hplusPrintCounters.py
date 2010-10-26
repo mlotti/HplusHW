@@ -6,90 +6,10 @@ import glob
 from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 
 import ROOT
-
-class EventPrinter:
-    def value(self, counter, ictr):
-        return counter.getCounterValue(ictr)
-    def format(self, width):
-        return "%%%dd"%width
-    def name(self):
-        return "(events)"
-
-class CrossSectionPrinter:
-    def value(self, counter, ictr):
-        return counter.getCounterCrossSection(ictr)
-    def format(self, width):
-        return "%%%d.4g"%width
-    def name(self):
-        return "(cross section in pb)"
-
-# counters is an array of counter.Counter objects, one element per
-# dataset
-def printCounter(counters, printer):
-    if len(counters) == 0:
-        return
-
-    counterNames = counters[0].getNames()
-    maxlen = max([len(x) for x in counterNames])
-
-    clen = []
-    for counter in counters:
-        clen.append(max(15, len(counter.getDataset().getName())+2))
-
-    lfmt = "%%-%ds" % (maxlen+2)
-    dfmt = "%%%ds"
-
-    hdr = lfmt % "Counter"
-    for i, counter in enumerate(counters):
-        hdr += (dfmt%clen[i]) % counter.getDataset().getName()
-    print hdr
-
-    for ictr, ctr in enumerate(counterNames):
-        line = lfmt % ctr
-
-        for i, counter in enumerate(counters):
-            line += printer.format(clen[i]) % printer.value(counter, ictr)
-
-        print line
-
-def printDatasetInfo(datasets):
-    col1hdr = "Dataset"
-    col2hdr = "Cross section (pb)"
-    col3hdr = "Norm. factor"
-    col4hdr = "Int. lumi (pb^-1)" 
-
-    maxlen = max([len(x.getName()) for x in datasets]+[len(col1hdr)])
-    c1fmt = "%%-%ds" % (maxlen+2)
-    c2fmt = "%%%d.4g" % (len(col2hdr)+2)
-    c3fmt = "%%%d.4g" % (len(col3hdr)+2)
-    c4fmt = "%%%d.4g" % (len(col4hdr)+2)
-
-    c2skip = " "*(len(col2hdr)+2)
-    c3skip = " "*(len(col3hdr)+2)
-    c4skip = " "*(len(col4hdr)+2)
-
-    print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr
-    for dataset in datasets:
-        if dataset.isMC():
-            print (c1fmt % dataset.getName()) + c2fmt%dataset.getCrossSection() + c3fmt%dataset.getNormFactor()
-        else:
-            print (c1fmt % dataset.getName()) + c2skip+c3skip + c4fmt%dataset.getLuminosity()
-
-def readCountersDirs(opts, crossSections, counters):
-    taskdirs = multicrab.getTaskDirectories(opts)
-    for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
-        if len(files) > 1:
-            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
-        elif len(files) == 0:
-            print "Task %s didn't have histograms root file" % d
-            continue
-
-        counters.addCounter(counter.readCountersFileDir(files[0], opts.counterdir, d, crossSections))
 
 def main(opts):
     crossSections = {}
@@ -97,41 +17,47 @@ def main(opts):
         (name, value) = o.split(":")
         crossSections[name] = float(value)
 
-    counters = counter.Counters()
-
-    if len(opts.files) > 0:
-        for f in opts.files:
-            counters.addCounter(counter.readCountersFileDir(f, opts.counterdir, f, crossSections))
-    else:
-        readCountersDirs(opts, crossSections, counters)
+    #counters = counter.Counters()
+    #if len(opts.files) > 0:
+    #    for f in opts.files:
+    #        #counters.addCounter(counter.readCountersFileDir(f, opts.counterdir, f, crossSections))
+    #        
+    #else:
+    #    readCountersDirs(opts, crossSections, counters)
+    datasets = dataset.getDatasetsFromMulticrabCfg(opts, opts.counterdir)
+    eventCounter = counter.EventCounter(datasets)
+    
 
     print "============================================================"
     print "Dataset info: "
-    printDatasetInfo(counters.getDatasets())
+    datasets.printInfo()
     print
 
-    printer = None
+    quantity = "events"
     if opts.mode == "events":
-        printer = EventPrinter()
+        pass
     elif opts.mode in ["xsect", "xsection", "crosssection", "crossSection"]:
-        printer = CrossSectionPrinter()
+        eventCounter.normalizeMCByCrossSection()
+        quantity = "MC by cross section, data by events"
     else:
         print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect'" % opts.mode
         return 1
 
     print "============================================================"
-    print "Main counter %s: " % printer.name()
-    printCounter(counters.getMainCounters(), printer)
+    print "Main counter %s: " % quantity
+    eventCounter.getMainCounter().printCounter(counter.FloatAutoFormat())
     print 
 
     if not opts.mainCounterOnly:
-        for name in counters.getSubCounterNames():
+        names = eventCounter.getSubCounterNames()
+        names.sort()
+        for name in names:
             print "============================================================"
-            print "Subcounter %s %s: " % (name, printer.name())
-            printCounter(counters.getSubCounters(name), printer)
+            print "Subcounter %s %s: " % (name, quantity)
+            eventCounter.getSubCounter(name).printCounter(counter.FloatAutoFormat())
             print
 
-    print
+    # print
 
     return 0
 
@@ -140,8 +66,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    parser.add_option("-f", dest="files", type="string", action="append", default=[],
-                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+    #parser.add_option("-f", dest="files", type="string", action="append", default=[],
+    #                  help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect' (default: 'events')")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",

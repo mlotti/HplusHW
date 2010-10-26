@@ -10,7 +10,7 @@ def histoToCounter(histo):
 
     for bin in xrange(1, histo.GetNbinsX()+1):
         ret.append( (histo.GetXaxis().GetBinLabel(bin),
-                     long(histo.GetBinContent(bin))) )
+                     float(histo.GetBinContent(bin))) )
 
     return ret
 
@@ -124,8 +124,7 @@ def mergeStackHelper(datasetList, nameList, task):
 
     return (selected, notSelected, firstIndex)
 
-
-class DatasetHisto:
+class HistoWrapper:
     def __init__(self, histo, dataset):
         self.histo = histo
         self.dataset = dataset
@@ -174,7 +173,7 @@ class DatasetHisto:
         self.luminosity = lumi
 
 
-class DatasetHistoMergedData:
+class HistoWrapperMergedData:
     def __init__(self, datasetHistos, mergedDataset):
         self.datasetHistos = datasetHistos
         self.dataset = mergedDataset
@@ -204,23 +203,7 @@ class DatasetHistoMergedData:
         else:
             return hsum
 
-    # def getHistogramStack(self):
-    #     name = self.dataset.getName()+"_stacked"
-    #     stack = ROOT.THStack(name, name)
-    #     if self.dataset.isStacked():
-    #         norm = 1
-    #         if self.normalization == "toOne":
-    #             hsum = self.getSumHistogram()
-    #             for h in self.datasetHistos:
-    #                 stack.Add(normalizeToFactor(h.getHistogram(), 1.0/hsum.Integral()))
-    #         else:
-    #             for h in self.datasetHistos:
-    #                 stack.Add(h.getHistogram())
-    #     else:
-    #         stack.Add(self.getHistogram())
-    #     return stack
-
-class DatasetHistoMergedMC:
+class HistoWrapperMergedMC:
     def __init__(self, datasetHistos, mergedDataset):
         self.datasetHistos = datasetHistos
         self.dataset = mergedDataset
@@ -277,6 +260,7 @@ class Dataset:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
         ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
         self.nAllEvents = ctr[0][1] # first counter, second element of the tuple
+        self.counterDir = counterDir
 
     def getName(self):
         return self.name
@@ -310,15 +294,32 @@ class Dataset:
     def isMC(self):
         return "crossSection" in self.info
 
+    def getCounterDirectory(self):
+        return self.counterDir
+
     def getNormFactor(self):
         return self.getCrossSection() / self.nAllEvents
 
     def getHistoWrapper(self, name):
         h = self.file.Get(name)
+        if h == None:
+            raise Exception("Unable to find histogram '%s'" % name)
+
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
-        return DatasetHisto(h, self)
+        return HistoWrapper(h, self)
 
+    def getDirectoryContent(self, directory):
+        d = self.file.Get(directory)
+        dirlist = d.GetListOfKeys()
+        diriter = dirlist.MakeIterator()
+        key = diriter.Next()
+
+        ret = []
+        while key:
+            ret.append(key.GetName())
+            key = diriter.Next()
+        return ret
 
 
 class DatasetMerged:
@@ -371,13 +372,29 @@ class DatasetMerged:
     def isMC(self):
         return "crossSection" in self.info
 
+    def getCounterDirectory(self):
+        countDir = self.datasets[0].getCounterDirectory()
+        for d in self.datasets[1:]:
+            if countDir != d.getCounterDirectory():
+                raise Exception("Error: merged datasets have different counter directories")
+        return countDir
+
+    def getNormFactor(self):
+        return None
+
     def getHistoWrapper(self, name):
         wrappers = [d.getHistoWrapper(name) for d in self.datasets]
         if self.isMC():
-            return DatasetHistoMergedMC(wrappers, self)
+            return HistoWrapperMergedMC(wrappers, self)
         else:
-            return DatasetHistoMergedData(wrappers, self)
+            return HistoWrapperMergedData(wrappers, self)
 
+    def getDirectoryContent(self, directory):
+        content = self.datasets[0].getDirectoryContent(directory)
+        for d in self.datasets[1:]:
+            if content != d.getDirectoryContent(directory):
+                raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
+        return content
 
 class DatasetSet:
     def __init__(self):
@@ -480,4 +497,33 @@ class DatasetSet:
         self.datasets = notSelected
         self.populateMap()
 
-        
+    def printInfo(self):
+        col1hdr = "Dataset"
+        col2hdr = "Cross section (pb)"
+        col3hdr = "Norm. factor"
+        col4hdr = "Int. lumi (pb^-1)" 
+
+        maxlen = max([len(x.getName()) for x in self.datasets]+[len(col1hdr)])
+        c1fmt = "%%-%ds" % (maxlen+2)
+        c2fmt = "%%%d.4g" % (len(col2hdr)+2)
+        c3fmt = "%%%d.4g" % (len(col3hdr)+2)
+        c4fmt = "%%%d.4g" % (len(col4hdr)+2)
+
+        c2skip = " "*(len(col2hdr)+2)
+        c3skip = " "*(len(col3hdr)+2)
+        c4skip = " "*(len(col4hdr)+2)
+
+        print (c1fmt%col1hdr)+"  "+col2hdr+"  "+col3hdr+"  "+col4hdr
+        for dataset in self.datasets:
+            line = (c1fmt % dataset.getName())
+            if dataset.isMC():
+                line += c2fmt % dataset.getCrossSection()
+                normFactor = dataset.getNormFactor()
+                if normFactor != None:
+                    line += c3fmt % normFactor
+                else:
+                    line += c3skip
+            else:
+                line += c2skip+c3skip + c4fmt%dataset.getLuminosity()
+            print line
+

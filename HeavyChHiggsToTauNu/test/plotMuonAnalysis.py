@@ -11,8 +11,9 @@
 
 
 import ROOT
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
@@ -48,8 +49,7 @@ datasets.merge("Single t", ["SingleTop_sChannel", "SingleTop_tChannel", "SingleT
 
 class Histo:
     def __init__(self, datasets, name):
-        self.datasets = datasets
-        self.histos = getHistoSet(datasets, name)
+        self.histos = HistoSet(datasets, name)
         #print "\n".join(histos.getDatasetNames())
 
         self.histos.normalizeMCByLuminosity()
@@ -63,9 +63,6 @@ class Histo:
         styles.getDataStyle()(self.histos.getHisto("Data"))
 
         self.histos.setHistoDrawStyle("Data", "EP")
-
-    def stackMCDatasets(self):
-        self.histos.stackDatasets("Stacked MC", self.datasets.getMCDatasetNames())
 
     def createFrame(self, plotname, xmin=None, xmax=None, ymin=None, ymax=None):
         (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
@@ -86,7 +83,7 @@ class Histo:
 
 # After muon selection
 h = Histo(datasets, "h06_Multiplicity/jets_multiplicity")
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("njets", ymin=0.1, ymax=1e6)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
 h.frame.GetYaxis().SetTitle("Number of events")
@@ -100,7 +97,7 @@ h.save()
 
 # After muon selection + jet multip. cut
 h = Histo(datasets, "h07_Multiplicity/jets_multiplicity")
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("njets_afternjetcut", xmin=3)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
 h.frame.GetYaxis().SetTitle("Number of events")
@@ -118,7 +115,7 @@ xlabel = "Muon p_{T} (GeV/c)"
 ylabel = "Number of muons / 5.0 GeV/c"
 h = Histo(datasets, "afterOtherCuts/pt")
 h.histos.forEachHisto(lambda h: h.Rebin(5))
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("muon_pt")
 h.frame.GetXaxis().SetTitle(xlabel)
 h.frame.GetYaxis().SetTitle(ylabel)
@@ -157,7 +154,7 @@ h.save()
 h = Histo(datasets, "h07_JetSelection/muon_pt")
 ylabel = "Number of muons / 5.0 GeV/c"
 h.histos.forEachHisto(lambda h: h.Rebin(5))
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("muon_pt_cut20_2", xmin=20, ymax=200)
 h.frame.GetXaxis().SetTitle(xlabel)
 h.frame.GetYaxis().SetTitle(ylabel)
@@ -172,7 +169,7 @@ h.save()
 # Muon eta after all other cuts
 h = Histo(datasets, "h07_JetSelection/muon_eta")
 h.histos.forEachHisto(lambda h: h.Rebin(5))
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("muon_eta")
 h.frame.GetXaxis().SetTitle("Muon  #eta")
 h.frame.GetYaxis().SetTitle("Number of muons / 0.5")
@@ -187,7 +184,7 @@ h.save()
 # Muon isolation after all other cuts
 h = Histo(datasets, "h07_JetSelection/muon_relIso")
 h.histos.forEachHisto(lambda h: h.Rebin(2))
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("muon_reliso", xmax=0.15)
 h.frame.GetXaxis().SetTitle("Muon rel. isol. (GeV/c)")
 h.frame.GetYaxis().SetTitle("Number of muons / 0.01")
@@ -212,7 +209,7 @@ h.save()
 
 # Muon track ip w.r.t. PV
 h = Histo(datasets, "h07_JetSelection/muon_trackDB")
-h.stackMCDatasets()
+h.histos.stackMCHistograms()
 h.createFrame("muon_trackdb", xmin=0, xmax=0.2, ymin=0.1, ymax=500)
 h.frame.GetXaxis().SetTitle("Muon track d_{0}(PV) (cm)")
 h.frame.GetYaxis().SetTitle("Number of muons")
@@ -223,3 +220,14 @@ addCmsPreliminaryText()
 addEnergyText(x=0.3, y=0.85)
 h.histos.addLuminosityText()
 h.save()
+
+print "============================================================"
+print "Dataset info: "
+datasets.printInfo()
+
+eventCounter = EventCounter(datasets)
+eventCounter.normalizeMCByLuminosity()
+
+print "============================================================"
+print "Main counter (MC normalized by collision data luminosity)"
+eventCounter.getMainCounter().printCounter(FloatFlatFormat(1))
