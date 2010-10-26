@@ -12,7 +12,7 @@ dataVersion = "38X"
 options = VarParsing.VarParsing()
 options.register("trigger",
                  "",
-                 options.multiplicity.singleton, options.vartype.string,
+                 options.multiplicity.singleton, options.varType.string,
                  "Trigger to use")
 options = getOptions(options)
 if options.dataVersion != "":
