@@ -9,7 +9,12 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
-options = getOptions()
+options = VarParsing.VarParsing()
+options.register("trigger",
+                 "",
+                 options.multiplicity.singleton, options.vartype.string,
+                 "Trigger to use")
+options = getOptions(options)
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
@@ -47,7 +52,9 @@ if options.doPat != 0:
 # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
 
 # Configuration
-trigger = "HLT_Mu9"
+trigger = options.trigger
+if len(trigger) == 0:
+    trigger = "HLT_Mu9"
 
 tightMuonCut = "isGlobalMuon() && isTrackerMuon()"
 
