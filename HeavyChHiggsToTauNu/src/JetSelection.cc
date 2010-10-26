@@ -27,9 +27,9 @@ namespace HPlus {
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut"))
   {
     edm::Service<TFileService> fs;
-    hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 100.);
+    hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 200.);
     hEta = fs->make<TH1F>("jet_eta", "jet_eta", 60, -3., 3.);
-    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 20, 0., 10.);
+    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
   }
 
   JetSelection::~JetSelection() {}

@@ -21,9 +21,9 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hDiscr = fs->make<TH1F>("jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 80, -10, 10);
-    hPt = fs->make<TH1F>("bjet_pt", "bjet_pt", 100, 0., 100.);
+    hPt = fs->make<TH1F>("bjet_pt", "bjet_pt", 100, 0., 200.);
     hEta = fs->make<TH1F>("bjet_eta", "bjet_pt", 60, -3., 3.);
-    hNumberOfBtaggedJets = fs->make<TH1F>("NumberOfBtaggedJets", "NumberOfBtaggedJets", 10, 0., 10.);
+    hNumberOfBtaggedJets = fs->make<TH1F>("NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
   }
 
   BTagging::~BTagging() {}

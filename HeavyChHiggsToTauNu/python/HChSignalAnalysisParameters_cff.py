@@ -49,7 +49,7 @@ jetSelection = cms.untracked.PSet(
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3)
+    minNumber = cms.untracked.uint32(4)
 )
 
 MET = cms.untracked.PSet(
@@ -61,10 +61,10 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(2.0),
+    discriminatorCut = cms.untracked.double(1.5),
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(1)
+    minNumber = cms.untracked.uint32(2)
 )
 
 MET = cms.untracked.PSet(
