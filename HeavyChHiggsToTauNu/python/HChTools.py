@@ -311,9 +311,6 @@ class Analysis:
         self.process.__setattr__(filtername, m)
         self.sequence *= m
 
-        for m in [m2, m3]:
-            self.sequence *= m
-
         self.addCountProducer(name)
 
     def addCountProducer(self, name):
