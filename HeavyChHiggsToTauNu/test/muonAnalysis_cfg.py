@@ -42,8 +42,8 @@ process.source = cms.Source('PoolSource',
 )
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter(dcap=True)
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter(dcap=True)
     )
 
 ################################################################################
