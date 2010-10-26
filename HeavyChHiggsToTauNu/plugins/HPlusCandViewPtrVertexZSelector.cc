@@ -33,7 +33,7 @@ class HPlusCandViewPtrVertexZSelector: public edm::EDProducer {
 };
 
 HPlusCandViewPtrVertexZSelector::HPlusCandViewPtrVertexZSelector(const edm::ParameterSet& iConfig):
-  candSrc(iConfig.getParameter<edm::InputTag>("candSrcre")),
+  candSrc(iConfig.getParameter<edm::InputTag>("candSrc")),
   vertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
   maxZ(iConfig.getParameter<double>("maxZ"))
 {

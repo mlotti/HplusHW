@@ -271,6 +271,11 @@ class Analysis:
 
         self.histoIndex += 1
 
+    def addProducer(self, name, module):
+        self.process.__setattr__(name, module)
+        self.sequence *= module
+        return cms.InputTag(name)
+
     def addFilter(self, name, module):
         self.process.__setattr__(name, module)
         self.sequence *= module
@@ -278,12 +283,9 @@ class Analysis:
 
     def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
         # Create the EDModule objects
-        m1 = cms.EDFilter(selector,
-                          src = src,
-                          cut = cms.string(expression))
-        self.process.__setattr__(name, m1)
-        self.sequence *= m1
-        return cms.InputTag(name)
+        return self.addProducer(name, cms.EDFilter(selector,
+                                                   src = src,
+                                                   cut = cms.string(expression)))
 
     def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
         selected = self.addSelection(name, src, expression, selector)
