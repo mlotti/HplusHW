@@ -8,7 +8,6 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "TH1F.h"
-#include "TH2F.h"
 
 namespace HPlus {
 
@@ -28,7 +27,7 @@ namespace HPlus {
     fTaNCCount(eventCounter.addCounter("Tau TaNC cut")),
     fHPSIsolationCount(eventCounter.addCounter("Tau HPS isolation cut")),
     fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
-    // fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
+    fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
     fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
     fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
     fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
@@ -45,13 +44,9 @@ namespace HPlus {
     fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut")),
     fbyHPSIsolationSubCount(eventCounter.addSubCounter("Tau identification","Tau HPS isolation cut")),
     fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
-<<<<<<< HEAD:HeavyChHiggsToTauNu/src/TauSelection.cc
-    // fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
-=======
     fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
     //    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
     fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
->>>>>>> sami/master:HeavyChHiggsToTauNu/src/TauSelection.cc
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
     fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
@@ -103,10 +98,6 @@ namespace HPlus {
     size_t nProngsCutPassed = 0;
     size_t HChTauIDchargeCutPassed = 0;
     size_t byIsolationCutPassed = 0;
-<<<<<<< HEAD:HeavyChHiggsToTauNu/src/TauSelection.cc
-    // size_t byTrackIsolationCutPassed = 0;
-=======
->>>>>>> sami/master:HeavyChHiggsToTauNu/src/TauSelection.cc
     size_t ecalIsolationCutPassed = 0;
     size_t againstElectronCutPassed = 0;
     size_t againstMuonCutPassed = 0;
@@ -152,7 +143,8 @@ namespace HPlus {
       if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
       increment(fHChTauIDchargeSubCount);
       ++HChTauIDchargeCutPassed;
-
+     
+     
       float ptmax = 0;
       float ptsum = 0;
 
@@ -195,6 +187,7 @@ namespace HPlus {
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
 
+        
       hnProngs->Fill(iTau->signalTracks().size());    
       if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
       increment(fnProngsSubCount);
@@ -216,7 +209,8 @@ namespace HPlus {
       }
       hRtau->Fill(Rtau);
 
-      if(fRtau < fRtauCut) continue; 
+
+      if(Rtau < fRtauCut) continue; 
       increment(fRtauSubCount);
       ++RtauCutPassed;
       
@@ -365,7 +359,7 @@ namespace HPlus {
 		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
 		hRtau->Fill(Rtau);
 
-		if(fRtau < fRtauCut) continue;
+		if(Rtau < fRtauCut) continue;
 		increment(fRtauSubCount);
 		++RtauCutPassed;
 
