@@ -25,6 +25,7 @@ process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -42,8 +43,8 @@ process.source = cms.Source('PoolSource',
 )
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(
-        dataVersion.getPatDefaultFileCastor()
-        #dataVersion.getPatDefaultFileMadhatter(dcap=True)
+        #dataVersion.getPatDefaultFileCastor()
+        dataVersion.getPatDefaultFileMadhatter(dcap=True)
     )
 
 ################################################################################
@@ -87,6 +88,16 @@ muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 applyElectronVeto = True
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
 
+metCut = "et() > 40"
+
+muons = cms.InputTag("selectedPatMuons")
+electrons = cms.InputTag("selectedPatElectrons")
+jets = cms.InputTag("selectedPatJets")
+#jets = cms.InputTag("selectedPatJetsAK5JPT")
+
+#met = cms.InputTag("patMETs")
+met = cms.InputTag("patMETsPF")
+#met = cms.InputTag("patMETsTC")
 
 ################################################################################
 
@@ -148,11 +159,6 @@ histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (Ge
 histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
-muons = cms.InputTag("selectedPatMuons")
-electrons = cms.InputTag("selectedPatElectrons")
-jets = cms.InputTag("selectedPatJets")
-#jets = cms.InputTag("selectedPatJetsAK5JPT")
-
 # Beginning
 histoAnalyzer = analysis.addMultiHistoAnalyzer("AllMuons", [
         ("muon_", muons, histosBeginning),
@@ -193,12 +199,15 @@ histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("Triggered", histoAnalyzer)
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
 # Select primary vertex
-selectedPrimaryVertex = analysis.addProducer("PrimaryVertex", cms.EDProducer("HPlusSelectFirstVertex",
-                                                                      src = cms.InputTag("offlinePrimaryVertices")))
-analysis.addFilter("PrimaryVertexFilter", cms.EDFilter("VertexCountFilter",
-                                                       src = selectedPrimaryVertex,
-                                                       minNumber = cms.uint32(1),
-                                                       maxNumber = cms.uint32(999)))
+selectedPrimaryVertex = analysis.addAnalysisModule("PrimaryVertex",
+                                                   selector = cms.EDProducer("HPlusSelectFirstVertex",
+                                                                             src = cms.InputTag("offlinePrimaryVertices")),
+                                                   filter = cms.EDFilter("VertexCountFilter",
+                                                                         src = cms.InputTag("dummy"),
+                                                                         minNumber = cms.uint32(1),
+                                                                         maxNumber = cms.uint32(999)),
+                                                   counter=True).getSelectorInputTag()
+
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("PrimaryVertex", histoAnalyzer)
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
@@ -234,8 +243,11 @@ muonJetCleaner = cleanPatMuons.clone(
             )
     )
 )
-selectedMuons = analysis.addProducer("MuonJetDR", muonJetCleaner)
-analysis.addNumberCut("MuonJetDR", selectedMuons)
+selectedMuons = analysis.addAnalysisModule("MuonCleaningFromJet",
+                                           selector = muonJetCleaner,
+                                           filter = makeCountFilter(cms.InputTag("dummy"), minNumber=1),
+                                           counter=True).getSelectorInputTag()
+
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonJetDR", histoAnalyzer)
 histoAnalyzer.muon_.src = selectedMuons
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
@@ -256,11 +268,13 @@ multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
 
 # Difference in vertex z coordinate
-selectedMuons = analysis.addProducer("MuonVertex", cms.EDProducer("HPlusCandViewPtrVertexZSelector",
-                                                                  candSrc = selectedMuons,
-                                                                  vertexSrc = selectedPrimaryVertex,
-                                                                  maxZ = cms.double(maxVertexZ)))
-analysis.addNumberCut("MuonVertex", selectedMuons)
+selectedMuons = analysis.addAnalysisModule("MuonVertexDiff",
+                                           selector = cms.EDProducer("HPlusCandViewPtrVertexZSelector",
+                                                                     candSrc = selectedMuons,
+                                                                     vertexSrc = selectedPrimaryVertex,
+                                                                     maxZ = cms.double(maxVertexZ)),
+                                           filter = makeCountFilter(cms.InputTag("dummy"), minNumber=1),
+                                           counter = True).getSelectorInputTag()
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVertex", histoAnalyzer)
 histoAnalyzer.muon_.src = selectedMuons
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
@@ -285,42 +299,17 @@ histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("JetSelection", histoAnalyze
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
 
+# MET cut
+selectedMET = analysis.addCut("MET", met, metCut)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("METCut", histoAnalyzer)
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+
 process.analysisPath = cms.Path(
     process.patSequence *
     analysis.getSequence()
 )
 
 ################################################################################
-
-# Trigger
-from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
-process.afterOtherCutsTriggerFilter = triggerResultsFilter.clone(
-    hltResults = "TriggerResults::"+dataVersion.getTriggerProcess(),
-    l1tResults = "",
-    throw = True,
-    triggerConditions = cms.vstring(trigger)
-)
-
-# Primary vertex
-process.afterOtherCutsVertexSelection = cms.EDProducer("HPlusSelectFirstVertex",
-    src = cms.InputTag("offlinePrimaryVertices")
-)
-process.afterOtherCutsVertexFilter = cms.EDFilter("VertexCountFilter",
-    src = cms.InputTag("afterOtherCutsVertexSelection"),
-    minNumber = cms.uint32(1),
-    maxNumber = cms.uint32(999)
-)
-
-# Jet selection
-selectedJets = cms.InputTag("afterOtherCutsJetSelection")
-process.afterOtherCutsJetSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-    src = jets,
-    cut = cms.string(jetSelection)
-)
-process.afterOtherCutsJetSelectionFilter = cms.EDFilter("CandViewCountFilter",
-    src = selectedJets,
-    minNumber = cms.uint32(jetMinMultiplicity)
-)
 
 # Muon preselection
 process.afterOtherCutsMuonPreSelection = muonJetCleaner.clone(
@@ -329,7 +318,7 @@ process.afterOtherCutsMuonPreSelection = muonJetCleaner.clone(
 )
 process.afterOtherCutsMuonVertexSelection = cms.EDProducer("HPlusCandViewPtrVertexZSelector",
     candSrc = cms.InputTag("afterOtherCutsMuonPreSelection"),
-    vertexSrc = cms.InputTag("afterOtherCutsVertexSelection"),
+    vertexSrc = analysis.getAnalysisModule("PrimaryVertex").getSelectorInputTag(),
     maxZ = cms.double(maxVertexZ)
 )
 selectedMuons = cms.InputTag("afterOtherCutsMuonVertexSelection")
@@ -337,39 +326,6 @@ process.afterOtherCutsMuonPreSelectionFilter = cms.EDFilter("CandViewCountFilter
     src = selectedMuons,
     minNumber = cms.uint32(1)
 )
-# Muon veto
-process.afterOtherCutsMuonVetoSeq = cms.Sequence()
-if applyMuonVeto:
-    process.afterOtherCutsMuonVetoSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-        src = muons,
-        cut = cms.string(muonVeto)
-    )
-    process.afterOtherCutsMuonVetoFilter = cms.EDFilter("PATCandViewCountFilter",
-        src = cms.InputTag("afterOtherCutsMuonVetoSelection"),
-        minNumber = cms.uint32(0),
-        maxNumber = cms.uint32(1)
-    )
-    process.afterOtherCutsMuonVetoSeq = cms.Sequence(
-        process.afterOtherCutsMuonVetoSelection *
-        process.afterOtherCutsMuonVetoFilter
-    )
-# Electron veto
-process.afterOtherCutsElectronVetoSeq = cms.Sequence()
-if applyElectronVeto:
-    process.afterOtherCutsElectronVetoSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-        src = electrons,
-        cut = cms.string(electronVeto)
-    )
-    process.afterOtherCutsElectronVetoFilter = cms.EDFilter("PATCandViewCountFilter",
-        src = cms.InputTag("afterOtherCutsElectronVetoSelection"),
-        minNumber = cms.uint32(0),
-        maxNumber = cms.uint32(0)
-    )
-    process.afterOtherCutsMuonElectronSeq = cms.Sequence(
-        process.afterOtherCutsElectronVetoSelection *
-        process.afterOtherCutsElectronVetoFilter
-    )
-
 
 process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyzer",
     src = selectedMuons,
@@ -382,18 +338,20 @@ process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyze
 )
 process.afterOtherCutsPath = cms.Path(
     process.patSequence *
-    process.afterOtherCutsTriggerFilter *
-    process.afterOtherCutsVertexSelection *
-    process.afterOtherCutsVertexFilter *
-    process.afterOtherCutsJetSelection *
-    process.afterOtherCutsJetSelectionFilter *
+    analysis.getAnalysisModule("Trigger").getFilterSequence() *
+    analysis.getAnalysisModule("PrimaryVertex").getFilterSequence() *
+    analysis.getAnalysisModule("JetSelection").getFilterSequence() *
+    analysis.getAnalysisModule("JetMultiplicityCut").getFilterSequence() *
+    analysis.getAnalysisModule("MET").getFilterSequence() *
     process.afterOtherCutsMuonPreSelection *
     process.afterOtherCutsMuonVertexSelection *
-    process.afterOtherCutsMuonPreSelectionFilter *
-    process.afterOtherCutsMuonVetoSeq *     # empty sequence if veto is not applied
-    process.afterOtherCutsElectronVetoSeq * # empty sequence if veto is not applied
-    process.afterOtherCuts
+    process.afterOtherCutsMuonPreSelectionFilter
 )
+if applyMuonVeto:
+    process.afterOtherCutsPath *= analysis.getAnalysisModule("MuonVeto").getFilterSequence()
+if applyElectronVeto:
+    process.afterOtherCutsPath *= analysis.getAnalysisModule("ElectronVeto").getFilterSequence()
+process.afterOtherCutsPath *= process.afterOtherCuts
 
 
 
