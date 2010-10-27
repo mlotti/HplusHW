@@ -193,6 +193,12 @@ class HistoSet:
             if predicate(d):
                 d.call(func)
 
+    def hasHisto(self, name):
+        if self.data == None:
+            self.createHistogramObjects()
+
+        return name in self.datasetHistoMap
+
     def getHisto(self, name):
         if self.data == None:
             self.createHistogramObjects()

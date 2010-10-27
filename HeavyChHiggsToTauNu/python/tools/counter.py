@@ -8,7 +8,7 @@ class FloatAutoFormat:
     def __call__(self, width):
         return self.format % width
 
-class FloatFlatFormat:
+class FloatDecimalFormat:
     def __init__(self, decimals=4):
         self.format = "%%%d."+str(decimals)+"f"
     def __call__(self, width):

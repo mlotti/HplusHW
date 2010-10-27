@@ -450,7 +450,7 @@ class DatasetSet:
         selected = []
         for name in nameList:
             selected.append(self.datasetMap[name])
-        self.data = selected
+        self.datasets = selected
         self.populateMap()
 
     def remove(self, nameList):
