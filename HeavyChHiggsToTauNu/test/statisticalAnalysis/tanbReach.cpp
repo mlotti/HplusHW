@@ -99,7 +99,7 @@ class TanbReach {
 #include <map>
 
 int main(){
-    double luminosity = 100;
+    double luminosity = 50;
     std::string algo = "";
     std::map<std::string,std::vector<double> > values;
     for(int iSelection = 0; iSelection < 2;++ iSelection){
@@ -146,7 +146,7 @@ int main(){
                ymin = 0,
                xmax = 180,
                ymax = 100;
-	Plotter* plotter = new Plotter("title","m_{H^{#pm}}","tan#beta",xmin,ymin,xmax,ymax);
+	Plotter* plotter = new Plotter("title","m_{H^{#pm}} [GeV/c^{2}]","tan(#beta)",xmin,ymin,xmax,ymax);
 //	plotter->setOutputFileName("discoveryReach.root");
 */
 	for(int iMu = 0; iMu < muPoints.size(); ++iMu){
@@ -220,11 +220,12 @@ int main(){
 	}
     }
 
-    double xmin = 50,
-           ymin = 0,
-           xmax = 180,
-           ymax = 100;
-    Plotter* plotter = new Plotter("title","m_{H^{#pm}}","tan#beta",xmin,ymin,xmax,ymax);
+    double xmin = 85,
+           ymin = 20,
+           xmax = 145,
+           ymax = 110;
+    const double textPosX1 = 0.05;
+    Plotter* plotter = new Plotter("title","m_{H^{#pm}} [GeV/c^{2}]","tan(#beta)",xmin,ymin,xmax,ymax);
     plotter->setName("discoveryReach_mu200");
 
     std::string plotFileName = "discoveryReach_mu200_PFTauTaNCBased";
@@ -241,17 +242,18 @@ int main(){
     plotter->x(values[plotFileName+"_x"]);
     plotter->y(values[plotFileName+"_y_err"],2,2,"PFTauCutBased + sys err");
 
-    plotter->text("CMS",xmin + 0.2*(xmax - xmin),ymin + 0.9*(ymax - ymin));
-    plotter->text("Very preliminary",xmin + 0.1*(xmax - xmin),ymin + 0.82*(ymax - ymin));
+    plotter->text("CMS preliminary",xmin + textPosX1*(xmax - xmin),ymin + 0.9*(ymax - ymin));
+    //    plotter->text("Very preliminary",xmin + textPosX1*(xmax - xmin),ymin + 0.82*(ymax - ymin));
     char lumiBuffer[20];
     sprintf (lumiBuffer, "L = %d pb^{-1}", int(luminosity));
-    plotter->text(lumiBuffer,xmin + 0.6*(xmax - xmin),ymin + 0.85*(ymax - ymin));
+    plotter->text(lumiBuffer,xmin + textPosX1*(xmax - xmin),ymin + 0.82*(ymax - ymin));
 
+    const double textPosX2 = 0.05;
     char muBuffer[20];
     sprintf (muBuffer, "mu = %d GeV/c^{2}", 200);
-    plotter->text(muBuffer,xmin + 0.1*(xmax - xmin),ymin + 0.15*(ymax - ymin),0.03);
-    plotter->text("m_{H}^{max} scenario",xmin + 0.1*(xmax - xmin),ymin + 0.2*(ymax - ymin),0.03);
-    plotter->text("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu",xmin + 0.1*(xmax - xmin),ymin + 0.25*(ymax - ymin),0.03);
+    plotter->text(muBuffer,xmin + textPosX2*(xmax - xmin),ymin + 0.75*(ymax - ymin),0.03);
+    plotter->text("m_{H}^{max} scenario",xmin + textPosX2*(xmax - xmin),ymin + 0.7*(ymax - ymin),0.03);
+    plotter->text("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu",xmin + textPosX2*(xmax - xmin),ymin + 0.65*(ymax - ymin),0.03);
 
 //    plotter->associatedText(0,"No errors",90,0.025);
 //    plotter->associatedText(1,"With sys errors",90,0.025);
