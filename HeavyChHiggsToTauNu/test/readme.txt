@@ -178,6 +178,44 @@
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
+27.10.2010/A.Attikis CMSSW_3_8_4 (GlobalElectronVeto and GlobalMuonVeto)
+    Tags needed:
+        cvs co -r V08-00-29 PhysicsTools/PatAlgos
+        cvs up -r 1.30 PhysicsTools/PatAlgos/python/tools/tauTools.py
+        cvs co -r V00-24-00 RecoTauTag/Configuration
+        cvs co -r V00-24-00 RecoTauTag/RecoTau
+	cvs co -r V00-05-03 RecoEgamma/EgammaTools
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByCharge.cc
+        cvs co -r 1.2 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByDeltaE.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByFlightPathSignificance.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByInvMass.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByNProngs.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByTauPolarization.cc
+        cvs co -r 1.3 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByIsolation.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByDeltaE.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByFlightPathSignificance.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByInvMass.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByNProngs.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByTauPolarization.cc
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByCharge_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByDeltaE_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByFlightPathSignificance_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByInvMass_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByNProngs_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByTauPolarization_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByDeltaE_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByFlightPathSignificance_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByNProngs_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByTauPolarization_cfi.py
+        cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs_cfi.py
+        cvs co -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
+        cvs co -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByIsolationChargedPtSum_cfi.py
+        cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
+        cvs co -r lumi2010-Oct12 RecoLuminosity/LumiDB
+        cvs co HiggsAnalysis/Skimming
+        rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+        
 
 Multicrab instructions
 https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMultiCrab
