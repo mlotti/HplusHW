@@ -489,8 +489,8 @@ class DatasetSet:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             return
         elif len(selected) == 1:
-            print >> sys.stderr, "Dataset merge: one dataset '" + self.data[firstIndex].getName() + "' found from list '" + ", ".join(nameList)+", renaming it to '%s'" % newName
-            self.rename(self.data[indices[0]].getName(), newName)
+            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+", renaming it to '%s'" % newName
+            self.rename(selected[0].getName(), newName)
             return 
 
         notSelected.insert(firstIndex, DatasetMerged(newName, selected))
