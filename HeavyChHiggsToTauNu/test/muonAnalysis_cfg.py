@@ -3,12 +3,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-dataVersion = "36X"
+#dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
+dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
-options = getOptions()
+options = VarParsing.VarParsing()
+options.register("trigger",
+                 "",
+                 options.multiplicity.singleton, options.varType.string,
+                 "Trigger to use")
+options = getOptions(options)
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
@@ -19,7 +25,7 @@ process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -35,7 +41,10 @@ process.source = cms.Source('PoolSource',
   )
 )
 if options.doPat != 0:
-    process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter(dcap=True))
+    process.source.fileNames = cms.untracked.vstring(
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter(dcap=True)
+    )
 
 ################################################################################
 
@@ -43,30 +52,40 @@ if options.doPat != 0:
 # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
 
 # Configuration
-trigger = "HLT_Mu9"
+trigger = options.trigger
+if len(trigger) == 0:
+    trigger = "HLT_Mu9"
+
+print "Using trigger %s" % trigger
 
 tightMuonCut = "isGlobalMuon() && isTrackerMuon()"
 
 ptCut = "pt() > 20"
 etaCut = "abs(eta()) < 2.1"
 
-qualityCut = "muonID('GlobalMuonPromptTight') && "
-qualityCut += "globalTrack().hitPattern().numberOfValidPixelHits() > 0 && " 
-qualityCut += "innerTrack().numberOfValidHits() > 10"
+qualityCut = "muonID('GlobalMuonPromptTight')"
+qualityCut += " && innerTrack().numberOfValidHits() > 10"
+#qualityCut += " && innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+#qualityCut += " && numberOfMatches() > 1"
 # These two are included in the GlobalMuonPromptThigh ID
 #qualityCut += "globalTrack().normalizedChi2() < 10.0 && " +
 #qualityCut += "globalTrack().hitPattern().numberOfValidMuonHits () > 0 && " 
 
-dbCut = "abs(dB()) < 0.2" # currently w.r.t PV! (not beamspot)
+dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = False, PATMuonProducer takes beam spot from the event, so this could be safe also for 36X data
+
+maxVertexZ = 1.0
 
 relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
-isolationCut = "%s < 0.15" % relIso
+isolationCut = "%s < 0.05" % relIso
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetMinMultiplicity = 3
 
 applyMuonVeto = True
 muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
+
+applyElectronVeto = True
+electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
 
 
 ################################################################################
@@ -96,8 +115,14 @@ if options.doPat != 0:
         process.collisionDataSelection *
         addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False)
     )
-    removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
+    #removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
+    removeSpecificPATObjects(process, ["Photons"], False)
     removeCleaning(process, False)    
+
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+    process.patMuons.usePV = False
 
 
 ################################################################################
@@ -124,6 +149,7 @@ histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
 muons = cms.InputTag("selectedPatMuons")
+electrons = cms.InputTag("selectedPatElectrons")
 jets = cms.InputTag("selectedPatJets")
 #jets = cms.InputTag("selectedPatJetsAK5JPT")
 
@@ -161,13 +187,23 @@ multipAnalyzer = analysis.addCloneAnalyzer("MultiplicityAfterJetSelection", mult
 multipAnalyzer.jets.src = selectedJets
 
 
-# Trigger (for MC)
+# Trigger
 analysis.addTriggerCut(dataVersion, trigger)
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("Triggered", histoAnalyzer)
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
+# Select primary vertex
+selectedPrimaryVertex = analysis.addProducer("PrimaryVertex", cms.EDProducer("HPlusSelectFirstVertex",
+                                                                      src = cms.InputTag("offlinePrimaryVertices")))
+analysis.addFilter("PrimaryVertexFilter", cms.EDFilter("VertexCountFilter",
+                                                       src = selectedPrimaryVertex,
+                                                       minNumber = cms.uint32(1),
+                                                       maxNumber = cms.uint32(999)))
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("PrimaryVertex", histoAnalyzer)
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+
 # Tight muon (global + tracker)
-selectedMuons = analysis.addCut("GlobalTrackerMuon", muons, tightMuonCut)
+selectedMuons = analysis.addCut("GlobalTrackerMuon", muons, tightMuonCut, selector="PATMuonSelector")
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("GlobalTrackerMuons", histoAnalyzer)
 histoAnalyzer.muon_.src = selectedMuons
 histoAnalyzer.muon_.histograms = cms.VPSet([h.pset() for h in histosGlobal])
@@ -176,8 +212,31 @@ multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
 
 # Kinematical cuts
-selectedMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut)
+selectedMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut, selector="PATMuonSelector")
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonKin", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.selMuons.src = selectedMuons
+
+# DR against the selected jets
+from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
+muonJetCleaner = cleanPatMuons.clone(
+    src = selectedMuons,
+    checkOverlaps = cms.PSet(
+        jets = cms.PSet(
+            src                 = selectedJets,
+            algorithm           = cms.string("byDeltaR"),
+            preselection        = cms.string(""),
+            deltaR              = cms.double(0.3),
+            checkRecoComponents = cms.bool(False),
+            pairCut             = cms.string(""),
+            requireNoOverlaps   = cms.bool(True)
+            )
+    )
+)
+selectedMuons = analysis.addProducer("MuonJetDR", muonJetCleaner)
+analysis.addNumberCut("MuonJetDR", selectedMuons)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonJetDR", histoAnalyzer)
 histoAnalyzer.muon_.src = selectedMuons
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
@@ -196,12 +255,29 @@ histoAnalyzer.muon_.src = selectedMuons
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
 
+# Difference in vertex z coordinate
+selectedMuons = analysis.addProducer("MuonVertex", cms.EDProducer("HPlusCandViewPtrVertexZSelector",
+                                                                  candSrc = selectedMuons,
+                                                                  vertexSrc = selectedPrimaryVertex,
+                                                                  maxZ = cms.double(maxVertexZ)))
+analysis.addNumberCut("MuonVertex", selectedMuons)
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVertex", histoAnalyzer)
+histoAnalyzer.muon_.src = selectedMuons
+multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+multipAnalyzer.selMuons.src = selectedMuons
+
 # Veto against 2nd muon
 if applyMuonVeto:
     vetoMuons = analysis.addCut("MuonVeto", muons, muonVeto, minNumber=0, maxNumber=1)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVeto", histoAnalyzer)
     multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+
+# Veto against electrons
+if applyElectronVeto:
+    vetoElectrons = analysis.addCut("ElectronVeto", electrons, electronVeto, minNumber=0, maxNumber=0)
+    histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("ElectronVeto", histoAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
 # Jet selection
 selectedJets = analysis.addNumberCut("JetMultiplicityCut", selectedJets, minNumber=jetMinMultiplicity)
@@ -216,6 +292,7 @@ process.analysisPath = cms.Path(
 
 ################################################################################
 
+# Trigger
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 process.afterOtherCutsTriggerFilter = triggerResultsFilter.clone(
     hltResults = "TriggerResults::"+dataVersion.getTriggerProcess(),
@@ -224,12 +301,38 @@ process.afterOtherCutsTriggerFilter = triggerResultsFilter.clone(
     triggerConditions = cms.vstring(trigger)
 )
 
-# Muon preselection
-process.afterOtherCutsMuonPreSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-    src = muons,
-    cut = cms.string(tightMuonCut+"&&"+qualityCut)
+# Primary vertex
+process.afterOtherCutsVertexSelection = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
 )
-selectedMuons = cms.InputTag("afterOtherCutsMuonPreSelection")
+process.afterOtherCutsVertexFilter = cms.EDFilter("VertexCountFilter",
+    src = cms.InputTag("afterOtherCutsVertexSelection"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999)
+)
+
+# Jet selection
+selectedJets = cms.InputTag("afterOtherCutsJetSelection")
+process.afterOtherCutsJetSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
+    src = jets,
+    cut = cms.string(jetSelection)
+)
+process.afterOtherCutsJetSelectionFilter = cms.EDFilter("CandViewCountFilter",
+    src = selectedJets,
+    minNumber = cms.uint32(jetMinMultiplicity)
+)
+
+# Muon preselection
+process.afterOtherCutsMuonPreSelection = muonJetCleaner.clone(
+    src = muons,
+    preselection = cms.string(tightMuonCut+"&&"+qualityCut)
+)
+process.afterOtherCutsMuonVertexSelection = cms.EDProducer("HPlusCandViewPtrVertexZSelector",
+    candSrc = cms.InputTag("afterOtherCutsMuonPreSelection"),
+    vertexSrc = cms.InputTag("afterOtherCutsVertexSelection"),
+    maxZ = cms.double(maxVertexZ)
+)
+selectedMuons = cms.InputTag("afterOtherCutsMuonVertexSelection")
 process.afterOtherCutsMuonPreSelectionFilter = cms.EDFilter("CandViewCountFilter",
     src = selectedMuons,
     minNumber = cms.uint32(1)
@@ -250,17 +353,23 @@ if applyMuonVeto:
         process.afterOtherCutsMuonVetoSelection *
         process.afterOtherCutsMuonVetoFilter
     )
+# Electron veto
+process.afterOtherCutsElectronVetoSeq = cms.Sequence()
+if applyElectronVeto:
+    process.afterOtherCutsElectronVetoSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
+        src = electrons,
+        cut = cms.string(electronVeto)
+    )
+    process.afterOtherCutsElectronVetoFilter = cms.EDFilter("PATCandViewCountFilter",
+        src = cms.InputTag("afterOtherCutsElectronVetoSelection"),
+        minNumber = cms.uint32(0),
+        maxNumber = cms.uint32(1)
+    )
+    process.afterOtherCutsMuonElectronSeq = cms.Sequence(
+        process.afterOtherCutsElectronVetoSelection *
+        process.afterOtherCutsElectronVetoFilter
+    )
 
-# Jet selection
-selectedJets = cms.InputTag("afterOtherCutsJetSelection")
-process.afterOtherCutsJetSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-    src = jets,
-    cut = cms.string(jetSelection)
-)
-process.afterOtherCutsJetSelectionFilter = cms.EDFilter("CandViewCountFilter",
-    src = selectedJets,
-    minNumber = cms.uint32(jetMinMultiplicity)
-)
 
 process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyzer",
     src = selectedMuons,
@@ -274,11 +383,15 @@ process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyze
 process.afterOtherCutsPath = cms.Path(
     process.patSequence *
     process.afterOtherCutsTriggerFilter *
-    process.afterOtherCutsMuonPreSelection *
-    process.afterOtherCutsMuonPreSelectionFilter *
-    process.afterOtherCutsMuonVetoSeq * # empty sequence if veto is not applied
+    process.afterOtherCutsVertexSelection *
+    process.afterOtherCutsVertexFilter *
     process.afterOtherCutsJetSelection *
     process.afterOtherCutsJetSelectionFilter *
+    process.afterOtherCutsMuonPreSelection *
+    process.afterOtherCutsMuonVertexSelection *
+    process.afterOtherCutsMuonPreSelectionFilter *
+    process.afterOtherCutsMuonVetoSeq *     # empty sequence if veto is not applied
+    process.afterOtherCutsElectronVetoSeq * # empty sequence if veto is not applied
     process.afterOtherCuts
 )
 

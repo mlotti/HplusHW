@@ -38,6 +38,10 @@ namespace HPlus {
 
     // Histograms
     TH1 *hMet;
+    TH1 *hMetSignif;
+    TH1 *hMetSumEt;
+    TH1 *hMetDivSumEt;
+    TH1 *hMetDivSqrSumEt;
 
     // Selected jets
     edm::Ptr<reco::MET> fSelectedMET;

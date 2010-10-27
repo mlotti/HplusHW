@@ -18,6 +18,10 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hMet = fs->make<TH1F>("met", "met", 50, 0., 200.);
+    hMetSignif = fs->make<TH1F>("metSignif", "metSignif", 50, 0., 500.);
+    hMetSumEt  = fs->make<TH1F>("metSumEt", "metSumEt", 50, 0., 1500.);
+    hMetDivSumEt = fs->make<TH1F>("hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
+    hMetDivSqrSumEt = fs->make<TH1F>("hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
   }
 
   METSelection::~METSelection() {}
@@ -29,6 +33,14 @@ namespace HPlus {
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
 
     hMet->Fill(met->et());
+    hMetSignif->Fill(met->significance());
+    hMetSumEt->Fill(met->sumEt());
+    double sumEt = met->sumEt();
+    if(sumEt != 0){
+        hMetDivSumEt->Fill(met->et()/sumEt);
+        hMetDivSqrSumEt->Fill(met->et()/sumEt);
+    }
+
     if(!(met->et() > fMetCut)) return false;
 
     increment(fMetCutCount);

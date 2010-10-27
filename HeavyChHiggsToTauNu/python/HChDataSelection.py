@@ -58,7 +58,7 @@ def addDataSelection(process, dataVersion, trigger):
     process.selectedPrimaryVertices = cms.EDFilter("VertexSelector",
         filter = cms.bool(False),
         src = cms.InputTag("offlinePrimaryVertices"),
-        cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
+        cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
     )
     process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
         src = cms.InputTag("selectedPrimaryVertices"),
