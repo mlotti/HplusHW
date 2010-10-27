@@ -23,18 +23,21 @@ legendLabels = {
 ROOT.gROOT.SetBatch(True)
 
 QCDdetails = False
-QCDdetails = True
+#QCDdetails = True
 
 style = TDRStyle()
 datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-datasetsQCD = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-datasetsQCD.selectAndReorder(["QCD_Pt15to30_Fall10",
-                              "QCD_Pt30to50_Fall10",
-                              "QCD_Pt50to80_Fall10",
-                              "QCD_Pt80to120_Fall10",
-                              "QCD_Pt120to170_Fall10",
-                              "QCD_Pt170to300_Fall10"
-                              ])
+
+datasetsQCD = None
+if QCDdetails:
+    datasetsQCD = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+    datasetsQCD.selectAndReorder(["QCD_Pt15to30_Fall10",
+                                  "QCD_Pt30to50_Fall10",
+                                  "QCD_Pt50to80_Fall10",
+                                  "QCD_Pt80to120_Fall10",
+                                  "QCD_Pt120to170_Fall10",
+                                  "QCD_Pt170to300_Fall10"
+                                  ])
 
 #datasets.remove(["SingleTop_sChannel", "SingleTop_tChannel", "SingleTop_tWChannel"])
 # datasets = getDatasetsFromCrabDirs(["Mu_140042-144114",
@@ -42,8 +45,8 @@ datasetsQCD.selectAndReorder(["QCD_Pt15to30_Fall10",
 #                                     "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
 #                                     "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
 #                                     "QCD_Pt80to120_Fall10"], counters="countAnalyzer")
-datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
-datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
+#datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
+#datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
 #datasets.remove(["Mu_146240-147116", "Mu_147196-148058"])
 datasets.mergeData()

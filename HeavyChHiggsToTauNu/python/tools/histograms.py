@@ -314,6 +314,8 @@ class HistoSet:
             self.createHistogramObjects()
 
         (selected, notSelected, firstIndex) = mergeStackHelper(self.data, nameList, "stack")
+        if len(selected) == 0:
+            return
 
         notSelected.insert(firstIndex, HistoSetDataStacked(selected, newName))
         self.data = notSelected

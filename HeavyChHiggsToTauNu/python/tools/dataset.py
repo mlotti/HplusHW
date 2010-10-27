@@ -116,8 +116,8 @@ def mergeStackHelper(datasetList, nameList, task):
         raise Exception("Can not %s data and MC datasets!" % task)
 
     if len(selected) != len(nameList):
-        dlist = datasetNameList[:]
-        for d in mergeData:
+        dlist = nameList[:]
+        for d in selected:
             ind = dlist.index(d.getName())
             del dlist[ind]
         print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
