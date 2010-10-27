@@ -55,13 +55,13 @@ class TanbReach {
 		double tanb = 20; // initial guess
 		double BR_top_Hplus = BR_top_Hplus_function(mass,tanb,mu);
 		double xSec = cross_section*BR_top_Hplus;
-		while(fabs(xSec - refXsec) > 0.001 && tanb < 100){
+		while(fabs(xSec - refXsec) > 0.001 && tanb < 140){
 //std::cout << "check tanb " << tanb << std::endl;
 			tanb = tanb - 0.1*(xSec - refXsec)/refXsec*tanb;
 			BR_top_Hplus = BR_top_Hplus_function(mass,tanb,mu);
 			xSec = cross_section*BR_top_Hplus;
 		}
-		if(tanb > 100) return -1;
+		if(tanb > 140) return -1;
 		return tanb;
 	}
 
@@ -230,14 +230,14 @@ int main(){
     plotter->y(values[plotFileName+"_y"],1,1,"PFTauTaNCBased");
 
     plotter->x(values[plotFileName+"_x"]);
-    plotter->y(values[plotFileName+"_y_err"],2,1,"PFTauTaNCBased+err");
+    plotter->y(values[plotFileName+"_y_err"],2,1,"PFTauTaNCBased + sys err");
 
     plotFileName = "discoveryReach_mu200_PFTauCutBased";
     plotter->x(values[plotFileName+"_x"]);
     plotter->y(values[plotFileName+"_y"],1,2,"PFTauCutBased");
 
     plotter->x(values[plotFileName+"_x"]);
-    plotter->y(values[plotFileName+"_y_err"],2,2,"PFTauCutBased+err");
+    plotter->y(values[plotFileName+"_y_err"],2,2,"PFTauCutBased + sys err");
 
     plotter->text("CMS",xmin + 0.2*(xmax - xmin),ymin + 0.9*(ymax - ymin));
     plotter->text("Very preliminary",xmin + 0.1*(xmax - xmin),ymin + 0.82*(ymax - ymin));
@@ -247,14 +247,49 @@ int main(){
 
     char muBuffer[20];
     sprintf (muBuffer, "mu = %d GeV/c^{2}", 200);
-    plotter->text(muBuffer,xmin + 0.1*(xmax - xmin),ymin + 0.1*(ymax - ymin));
-    plotter->text("m_{H}^{max} scenario",xmin + 0.1*(xmax - xmin),ymin + 0.2*(ymax - ymin));
-    plotter->text("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu",xmin + 0.1*(xmax - xmin),ymin + 0.3*(ymax - ymin));
+    plotter->text(muBuffer,xmin + 0.1*(xmax - xmin),ymin + 0.15*(ymax - ymin),0.03);
+    plotter->text("m_{H}^{max} scenario",xmin + 0.1*(xmax - xmin),ymin + 0.2*(ymax - ymin),0.03);
+    plotter->text("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu",xmin + 0.1*(xmax - xmin),ymin + 0.25*(ymax - ymin),0.03);
 
 //    plotter->associatedText(0,"No errors",90,0.025);
 //    plotter->associatedText(1,"With sys errors",90,0.025);
 
-    plotter->setLegend("legendName",0.2,0.7,0.5,0.9);
+    plotter->setLegend("Tau selection",0.6,0.2,0.9,0.4);//0.2,0.7,0.5,0.9);
+
+    plotter->plot();
+
+
+////////
+
+    plotter->setName("discoveryReach_mus_TaNC");
+
+    plotFileName = "discoveryReach_muMinus1000_PFTauTaNCBased";
+    plotter->x(values[plotFileName+"_x"]);
+    plotter->y(values[plotFileName+"_y"],1,1,"#mu = -1000 GeV/c^2");
+
+    plotFileName = "discoveryReach_muMinus200_PFTauTaNCBased";
+    plotter->x(values[plotFileName+"_x"]);
+    plotter->y(values[plotFileName+"_y"],2,1,"#mu = -200 GeV/c^2");
+
+    plotFileName = "discoveryReach_mu200_PFTauTaNCBased";
+    plotter->x(values[plotFileName+"_x"]);
+    plotter->y(values[plotFileName+"_y"],3,1,"#mu = 200 GeV/c^2");
+
+    plotFileName = "discoveryReach_mu1000_PFTauTaNCBased";
+    plotter->x(values[plotFileName+"_x"]);
+    plotter->y(values[plotFileName+"_y"],4,1,"#mu = 1000 GeV/c^2");
+
+    plotter->text("CMS",xmin + 0.2*(xmax - xmin),ymin + 0.9*(ymax - ymin));
+    plotter->text("Very preliminary",xmin + 0.1*(xmax - xmin),ymin + 0.82*(ymax - ymin));
+
+    sprintf (lumiBuffer, "L = %d pb^{-1}", int(luminosity));
+    plotter->text(lumiBuffer,xmin + 0.6*(xmax - xmin),ymin + 0.85*(ymax - ymin));
+
+    plotter->text("m_{H}^{max} scenario",xmin + 0.1*(xmax - xmin),ymin + 0.15*(ymax - ymin),0.03);
+    plotter->text("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu",xmin + 0.1*(xmax - xmin),ymin + 0.2*(ymax - ymin),0.03);
+    plotter->text("No sys errors included",xmin + 0.1*(xmax - xmin),ymin + 0.1*(ymax - ymin),0.03);
+
+    plotter->setLegend("TaNC based tau selection",0.6,0.15,0.9,0.35);
 
     plotter->plot();
 
