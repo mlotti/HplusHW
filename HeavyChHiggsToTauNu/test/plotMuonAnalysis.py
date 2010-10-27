@@ -23,7 +23,7 @@ legendLabels = {
 ROOT.gROOT.SetBatch(True)
 
 QCDdetails = False
-#QCDdetails = True
+QCDdetails = True
 
 style = TDRStyle()
 datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
@@ -45,8 +45,8 @@ if QCDdetails:
 #                                     "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
 #                                     "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
 #                                     "QCD_Pt80to120_Fall10"], counters="countAnalyzer")
-#datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
-#datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
+datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
+datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
 #datasets.remove(["Mu_146240-147116", "Mu_147196-148058"])
 datasets.mergeData()
@@ -234,6 +234,24 @@ addCmsPreliminaryText()
 addEnergyText(x=0.3, y=0.85)
 h.histos.addLuminosityText()
 h.save()
+
+# MET
+def plotMet(met):
+    h = Histo(datasets, "h11_JetSelection/%s_et" % met)
+    h.histos.forEachHisto(lambda h: h.Rebin(5))
+    h.histos.stackMCHistograms()
+    h.createFrame("met_"+met)
+    h.frame.GetXaxis().SetTitle(met)
+    h.frame.GetYaxis().SetTitle("Number of events / 5.0 GeV")
+    h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
+    h.draw()
+    addCmsPreliminaryText()
+    addEnergyText(x=0.3, y=0.85)
+    h.histos.addLuminosityText()
+    h.save()
+plotMet("calomet")
+plotMet("pfmet")
+plotMet("tcmet")
 
 print "============================================================"
 print "Dataset info: "
