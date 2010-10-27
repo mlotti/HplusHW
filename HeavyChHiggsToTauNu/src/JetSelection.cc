@@ -80,7 +80,8 @@ namespace HPlus {
     }
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size());
-    
+    iNHadronicJets = fSelectedJets.size();
+
     if(cleanPassed < fMin) return false;
     increment(fCleanCutCount);
 

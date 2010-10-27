@@ -24,7 +24,10 @@ namespace HPlus {
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
-
+  
+    /// Variables
+    int iNHadronicJets;
+    
     const edm::PtrVector<pat::Jet>& getSelectedJets() const {
       return fSelectedJets;
     }
@@ -32,7 +35,7 @@ namespace HPlus {
     uint32_t getMinNumber() const {
       return fMin;
     }
-
+  
   private:
     // Input parameters
     edm::InputTag fSrc;

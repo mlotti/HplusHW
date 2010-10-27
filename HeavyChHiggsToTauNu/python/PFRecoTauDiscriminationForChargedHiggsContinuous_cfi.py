@@ -54,7 +54,7 @@ def addDiscriminatorSequenceCont(process, tau):
 
 def addPFTauDiscriminationSequenceForChargedHiggsCont(process):
     process.PFTauDiscriminationSequenceForChargedHiggsCont = cms.Sequence(
-        addDiscriminatorSequenceCont(process, "fixedConePFTau") *
+#        addDiscriminatorSequenceCont(process, "fixedConePFTau") *
 #        addDiscriminatorSequenceCont(process, "fixedConeHighEffPFTau") * # not availabel in all datasets!
         addDiscriminatorSequenceCont(process, "shrinkingConePFTau")
     )

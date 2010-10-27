@@ -27,6 +27,8 @@ namespace HPlus {
     const edm::Ptr<reco::MET> getSelectedMET() const {
       return fSelectedMET;
     }
+    // Variables
+    float fMet;
 
   private:
     // Input parameters

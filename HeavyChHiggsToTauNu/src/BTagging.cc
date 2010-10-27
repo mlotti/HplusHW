@@ -59,7 +59,8 @@ namespace HPlus {
 
 
     hNumberOfBtaggedJets->Fill(fSelectedJets.size());
-
+    iNBtags = fSelectedJets.size();
+    
     if(passed < fMin) return false;
     increment(fTaggedCount);
     return true;
