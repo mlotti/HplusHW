@@ -25,6 +25,9 @@ namespace HPlus {
 
     bool analyze(const edm::PtrVector<pat::Jet>& jets);
 
+    /// Variables
+    int iNBtags;
+
     const edm::PtrVector<pat::Jet>& getSelectedJets() const {
       return fSelectedJets;
     }
