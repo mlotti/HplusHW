@@ -15,7 +15,7 @@ TriggerMETEmulation = cms.untracked.PSet(
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.8), #no change
@@ -38,8 +38,10 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-tauSelection = tauSelectionShrinkingConeCutBased
-#tauSelection = tauSelectionShrinkingConeTaNCBased
+#tauSelection = tauSelectionShrinkingConeCutBased
+tauSelection = tauSelectionShrinkingConeTaNCBased
+#tauSelection = tauSelectionCaloTauCutBased
+#tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
@@ -54,7 +56,7 @@ MET = cms.untracked.PSet(
     #src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(50.0)
+    METCut = cms.untracked.double(60.0)
 )
 
 bTagging = cms.untracked.PSet(

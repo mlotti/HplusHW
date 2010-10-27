@@ -54,11 +54,13 @@ namespace HPlus {
     Count fagainstMuonCount;
     Count fagainstElectronCount;
     Count fLeadTrkPtCount;
-    Count fnProngsCount;
-    Count fHChTauIDchargeCount;
+    Count fTaNCCount;
+    Count fHPSIsolationCount;
     Count fbyIsolationCount;
     // Count fbyTrackIsolationCount;  
     Count fecalIsolationCount; 
+    Count fnProngsCount;
+    Count fHChTauIDchargeCount;
     Count fRtauCount;
     Count fInvMassCount;
 
@@ -68,14 +70,15 @@ namespace HPlus {
     Count fagainstMuonSubCount;
     Count fagainstElectronSubCount;
     Count fLeadTrkPtSubCount;
-    Count fnProngsSubCount;
-    Count fHChTauIDchargeSubCount;
+    Count fbyTaNCSubCount;
+    Count fbyHPSIsolationSubCount;
     Count fbyIsolationSubCount; 
     // Count fbyTrackIsolationSubCount; 
     Count fecalIsolationSubCount; 
+    Count fnProngsSubCount;
+    Count fHChTauIDchargeSubCount;
     Count fRtauSubCount;
     Count fInvMassSubCount;
-    Count fbyTaNCSubCount;
 
     // Histograms
     TH1 *hPt;
@@ -92,7 +95,7 @@ namespace HPlus {
     TH1 *hnProngs;
     TH1 *hDeltaE;
     TH1 *hRtau;
-    TH1 *hlightPathSignif;
+    TH1 *hFlightPathSignif;
     TH1 *hInvMass;
     TH1 *hbyTaNC;
 
