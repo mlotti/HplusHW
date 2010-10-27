@@ -176,7 +176,7 @@ int main(){
 	    }
 
             char buffer[50];
-            if(muPoints[iMu] > 0) sprintf (buffer, "reach_mu%d", abs(muPoints[iMu]));
+            if(muPoints[iMu] > 0) sprintf (buffer, "discoveryReach_mu%d", abs(muPoints[iMu]));
             else sprintf (buffer, "discoveryReach_muMinus%d", abs(muPoints[iMu]));
 	    std::string plotFileName = std::string(buffer) + "_" + algo;
 //	    std::cout << "File name " << plotFileName << std::endl;
