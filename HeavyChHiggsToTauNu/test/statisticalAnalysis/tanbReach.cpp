@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include <string>
+#include <cstdlib>
 
 #include "Plotter/interface/Plotter.h"
 
@@ -137,8 +138,9 @@ int main(){
 //	reach->SetLuminosity(luminosity);
 //	reach->SetSysError(0.1);
 	double tt_xsec = 165;
-	double BRtauHadronic = 0.648;
-	reach->SetCrossSection(tt_xsec*BRtauHadronic);
+	double BRhPlusTau = 0.98; // assuming constant BR(H+->tau) , approximately true at high tanb
+	double BRtauHadronic = 0.648; // BR(tau->hadrons)
+	reach->SetCrossSection(2*tt_xsec*BRhPlusTau*BRtauHadronic); // one top or the other, but not both: factor 2
 /*
         double xmin = 50,
                ymin = 0,
