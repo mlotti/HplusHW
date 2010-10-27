@@ -91,7 +91,10 @@ alphaT = datasets.getHistoSet("signalAnalysis/alphaT")
 
 ### Normalize MC histograms to an explicit luminosity in pb
 #alphaT.normalizeMCToLuminosity(2.89)
-alphaT.normalizeMCToLuminosity(1.47)
+alphaT.normalizeMCToLuminosity(1.906883215)
+#alphaT.normalizeMCToLuminosity(1.951264571)
+#BTau_141950-144114 -> 1.951264571
+#BTau_146240-147116 -> 1.906883215
 ylabel = "Events"
 
 ### Normalize the area of *all* histograms to 1
@@ -104,8 +107,11 @@ alphaT.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "Q
 
 ### Example how to remove some datasets
 #alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
-# alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-alphaT.removeDatasets(["TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+
+#alphaT.removeDatasets(["BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+#alphaT.removeDatasets(["BTau_141950-144114", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+alphaT.removeDatasets([",BTau_141950-144114", "BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
 
 ### Example how to remove given datasets
 #alphaT.removeDatasets(["QCD", "TTbar"])
@@ -123,8 +129,10 @@ alphaT.setHistoLegendStyle("Data", "p")
 alphaT.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
 alphaT.applyStyle("Data", styles.getDataStyle())
 #alphaT.setHistoDrawStyle("Data", "EP")
-alphaT.applyStyle("BTau_146240-147116", styles.getDataStyle())
-alphaT.setHistoDrawStyle("BTau_146240-147116", "EP")
+#alphaT.applyStyle("BTau_146240-147116", styles.getDataStyle())
+#alphaT.setHistoDrawStyle("BTau_146240-147116", "EP")
+#alphaT.applyStyle("BTau_141950-144114", styles.getDataStyle())
+#alphaT.setHistoDrawStyle("BTau_141950-144114", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
 alphaT.stackMCDatasets()

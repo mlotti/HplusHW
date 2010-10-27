@@ -29,7 +29,7 @@ namespace HPlus {
       return fSelectedTaus;
     }
     // variables
-    //float Rtau;
+    float fRtau;
     
   private:
 
@@ -57,7 +57,7 @@ namespace HPlus {
     Count fTaNCCount;
     Count fHPSIsolationCount;
     Count fbyIsolationCount;
-    Count fbyTrackIsolationCount;  
+    // Count fbyTrackIsolationCount;  
     Count fecalIsolationCount; 
     Count fnProngsCount;
     Count fHChTauIDchargeCount;
@@ -73,7 +73,7 @@ namespace HPlus {
     Count fbyTaNCSubCount;
     Count fbyHPSIsolationSubCount;
     Count fbyIsolationSubCount; 
-    Count fbyTrackIsolationSubCount; 
+    // Count fbyTrackIsolationSubCount; 
     Count fecalIsolationSubCount; 
     Count fnProngsSubCount;
     Count fHChTauIDchargeSubCount;
