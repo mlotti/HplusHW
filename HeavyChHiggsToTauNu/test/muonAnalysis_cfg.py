@@ -66,8 +66,8 @@ etaCut = "abs(eta()) < 2.1"
 
 qualityCut = "muonID('GlobalMuonPromptTight')"
 qualityCut += " && innerTrack().numberOfValidHits() > 10"
-#qualityCut += " && innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
-#qualityCut += " && numberOfMatches() > 1"
+qualityCut += " && innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
+qualityCut += " && numberOfMatches() > 1"
 # These two are included in the GlobalMuonPromptThigh ID
 #qualityCut += "globalTrack().normalizedChi2() < 10.0 && " +
 #qualityCut += "globalTrack().hitPattern().numberOfValidMuonHits () > 0 && " 
