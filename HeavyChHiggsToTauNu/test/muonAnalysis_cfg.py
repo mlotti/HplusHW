@@ -363,7 +363,7 @@ if applyElectronVeto:
     process.afterOtherCutsElectronVetoFilter = cms.EDFilter("PATCandViewCountFilter",
         src = cms.InputTag("afterOtherCutsElectronVetoSelection"),
         minNumber = cms.uint32(0),
-        maxNumber = cms.uint32(1)
+        maxNumber = cms.uint32(0)
     )
     process.afterOtherCutsMuonElectronSeq = cms.Sequence(
         process.afterOtherCutsElectronVetoSelection *
