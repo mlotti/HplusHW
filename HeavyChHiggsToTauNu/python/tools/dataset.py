@@ -34,17 +34,17 @@ def addOptions(parser):
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
 
 
-def getDatasetsFromMulticrabCfg(opts=None, counterdir="signalAnalysisCounters"):
-    return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counterdir)
+def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
+    return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counters)
 
-def getDatasetsFromCrabDirs(taskdirs, opts=None, counterdir="signalAnalysisCounters"):   
+def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounters"):   
     if opts == None:
         parser = OptionParser(usage="Usage: %prog [options]")
         multicrab.addOptions(parser)
         addOptions(parser)
         (opts, args) = parser.parse_args()
         if hasattr(opts, "counterdir"):
-            counterdir = opts.counterdir
+            counters = opts.counterdir
 
     dlist = []
     for d in taskdirs:
@@ -58,16 +58,16 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counterdir="signalAnalysisCount
 
         dlist.append( (d, files[0]) )
 
-    return getDatasetsFromRootFiles(dlist, counterdir)
+    return getDatasetsFromRootFiles(dlist, counters)
 
-def getDatasetsFromRootFiles(dlist, counterdir="signalAnalysisCounters"):
+def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
     datasets = DatasetSet()
     for name, f in dlist:
-        datasets.append(Dataset(f, counterdir, name))
+        datasets.append(Dataset(f, counters, name))
     return datasets
 
-def readDataset(fname, counterDir, datasetname, crossSections):
-    dataset = Dataset(datasetname, fname, counterDir)
+def readDataset(fname, counters, datasetname, crossSections):
+    dataset = Dataset(datasetname, fname, counters)
     if datasetname in crossSections:
         dataset.setCrossSection(crossSections[datasetname])
     return dataset

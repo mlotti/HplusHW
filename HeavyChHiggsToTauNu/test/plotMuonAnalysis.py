@@ -30,13 +30,20 @@ legendLabels = {
 
 ROOT.gROOT.SetBatch(True)
 style = TDRStyle()
-datasets = getDatasetsFromMulticrabCfg(counterdir="countAnalyzer")
+datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+datasetsQCD = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+datasetsQCD.selectAndReorder(["QCD_Pt30to50_Fall10",
+                              "QCD_Pt50to80_Fall10",
+                              "QCD_Pt80to120_Fall10",
+                              "QCD_Pt120to170_Fall10",
+                              "QCD_Pt170to3+0_Fall10"
+                              ])
 #datasets.remove(["SingleTop_sChannel", "SingleTop_tChannel", "SingleTop_tWChannel"])
 # datasets = getDatasetsFromCrabDirs(["Mu_140042-144114",
 #                                     "WJets", "TTbarJets", "ZJets",
 #                                     "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
 #                                     "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
-#                                     "QCD_Pt80to120_Fall10"], counterdir="countAnalyzer")
+#                                     "QCD_Pt80to120_Fall10"], counters="countAnalyzer")
                                     
 
 class Histo:
