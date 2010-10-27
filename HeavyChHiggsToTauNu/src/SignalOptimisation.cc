@@ -137,12 +137,11 @@ namespace HPlus {
     fMET->push_back(fMETSelection.fMet);
     iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
     iNBtags->push_back(fBTagging.iNBtags);
-    fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
-    //    std::cout << "fGlobalElectronVeto.fSelectedElectronsPt = " << fGlobalElectronVeto.fSelectedElectronsPt << std::endl;
+    fAlphaT->push_back(sAlphaT.fAlphaT);
     fGlobalMuonVetoHighestPt->push_back( fGlobalMuonVeto.getSelectedMuonsPt() );
+    fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
     fTransverseMass->push_back(transverseMass);
     fDeltaPhi->push_back(deltaPhi);
-    fAlphaT->push_back(sAlphaT.fAlphaT);
     
     /// Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
