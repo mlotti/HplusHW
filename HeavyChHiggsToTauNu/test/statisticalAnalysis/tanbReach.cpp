@@ -55,13 +55,13 @@ class TanbReach {
 		double tanb = 20; // initial guess
 		double BR_top_Hplus = BR_top_Hplus_function(mass,tanb,mu);
 		double xSec = cross_section*BR_top_Hplus;
-		while(fabs(xSec - refXsec) > 0.001 && tanb < 140){
+		while(fabs(xSec - refXsec) > 0.001 && tanb < 120){
 //std::cout << "check tanb " << tanb << std::endl;
 			tanb = tanb - 0.1*(xSec - refXsec)/refXsec*tanb;
 			BR_top_Hplus = BR_top_Hplus_function(mass,tanb,mu);
 			xSec = cross_section*BR_top_Hplus;
 		}
-		if(tanb > 140) return -1;
+		if(tanb > 120) return -1;
 		return tanb;
 	}
 
