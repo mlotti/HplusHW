@@ -43,7 +43,7 @@ namespace HPlus {
     const float getSelectedElectronsEta() const {
       return fSelectedElectronsEta;
     }
-    
+   
   private:
 
     bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);

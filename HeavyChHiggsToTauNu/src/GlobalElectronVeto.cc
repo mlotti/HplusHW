@@ -95,7 +95,7 @@ namespace HPlus {
     }
     
     /// Reset/initialise variables
-    float myHighestElecPt = -1;
+    float myHighestElecPt = -1.0;
     float myHighestElecEta = -999.99;
     fSelectedElectronsPt = -1.0;
     fSelectedElectronsEta = -999.99;
@@ -184,14 +184,14 @@ namespace HPlus {
       
       /// Check that track was found
       if (myGsfTrackRef.isNull()){
-	std::cout << "myGsfTrackRef.isNull()" << std::endl;
+	// std::cout << "myGsfTrackRef.isNull()" << std::endl;
 	continue;
       }
       bElecHasGsfTrkOrTrk = true;
       
       /// Fill histos with all-Electrons Pt and Eta
       hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
 
       /// Electron Variables (Pt, Eta etc..)
       float myElectronPt = myGsfTrackRef->pt();  // float myElectronPt = (*iElectron).p4().Pt();
@@ -290,7 +290,7 @@ namespace HPlus {
 
       /// Calculate DeltaR between Electron candidate and Global or Tracker Muon
       myElectronMuonDeltaR = deltaR( myMuonEta, myMuonPhi,myElectronEta, myElectronPhi); 
-      
+
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
       if(myElectronMuonDeltaR < 0.1) continue;
       bElecDeltaRFromGlobalOrTrkerMuonCut = true;
@@ -303,8 +303,7 @@ namespace HPlus {
       if (myElectronPt > myHighestElecPt) {
 	myHighestElecPt = myElectronPt;
 	myHighestElecEta = myElectronEta;
-	fSelectedElectronsPt = myElectronPt;
-	fSelectedElectronsEta = myElectronEta;
+	// std::cout << "myHighestElecPt = " << myHighestElecPt << ", myHighestElecEta = " << myHighestElecEta << std::endl;
       }
       
       /// Fill histos after Selection
@@ -312,7 +311,6 @@ namespace HPlus {
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
-
     // if(bElecSelection) increment(fElecSelectionSubCountElectronSelection);  // if will use eID
     
     if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
@@ -332,14 +330,20 @@ namespace HPlus {
     if(bElecTransvImpactParCut) increment(fElecSelectionSubCountTransvImpactParCut);
     
     if(bElecDeltaRFromGlobalOrTrkerMuonCut) increment(fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut);
-    
+
     if(bElecRelIsolationR03Cut) increment(fElecSelectionSubCountRelIsolationR03Cut);
     
     /// Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bElecNLostHitsInTrkerCut*bElecElectronDeltaCotThetaCut*bElecElectronDistanceCut*bElecRelIsolationR03Cut*bElecTransvImpactParCut*bElecDeltaRFromGlobalOrTrkerMuonCut;
 
+    /// Now store the highest Electron Pt and Eta
+    fSelectedElectronsPt = myHighestElecPt;
+    fSelectedElectronsEta = myHighestElecEta;
+    // std::cout << "fSelectedElectronsPt = " << fSelectedElectronsPt << ", fSelectedElectronsEta = " << fSelectedElectronsEta << std::endl;
+    
     /// If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
+
     /// Otherwise increment counter and return true.
     else increment(fGlobalElectronVetoCounter);
     return true;

@@ -142,7 +142,7 @@ namespace HPlus {
     }
 
     /// Reset/initialise variables
-    float myHighestMuonPt = -1;
+    float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
     fSelectedMuonsPt = -1.0;
     fSelectedMuonsEta = -999.99;
@@ -255,7 +255,7 @@ namespace HPlus {
       
       /// 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
       float relIsol = ( (*iMuon).isolationR03().sumPt )/myMuonPt;
-      std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
+      // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
       if( ( relIsol < 3.0) )continue; 
       bMuonRelIsolationR03Cut = true;
 
@@ -269,8 +269,7 @@ namespace HPlus {
       if (myMuonPt > myHighestMuonPt) {
 	myHighestMuonPt  = myMuonPt;
 	myHighestMuonEta = myMuonEta;
-	fSelectedMuonsPt  = myMuonPt;
-	fSelectedMuonsEta = myMuonEta;
+	// std::cout << "myHighestMuonPt = " << myHighestMuonPt << ", myHighestMuonEta = " << myHighestMuonEta << std::endl;
       } //eof: if (myMuonPt > myHighestMuonPt) {
       
       /// Fill histos after Selection
@@ -309,6 +308,11 @@ namespace HPlus {
 
     /// Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
     bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
+
+    /// Now store the highest Muon Pt and Eta
+    fSelectedMuonsPt  = myHighestMuonPt;
+    fSelectedMuonsEta = myHighestMuonEta;
+    // std::cout << "fSelectedMuonsPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;
 
     /// If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
