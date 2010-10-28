@@ -64,21 +64,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-    # Count the number of primary vertices, and put into event
-    #process.primaryVertexNumber = cms.EDProducer("HPlusVertexCountProducer",
-    #    src = cms.InputTag('offlinePrimaryVertices'),
-    #    alias = cms.string("primaryVertexNumber")
-    #)
-    #if dataVersion.isData():
-    #    # See HChDataSelection
-    #    process.primaryVertexNumber.src = "selectedPrimaryVertices"
-    #if out != None:
-    #    out.outputCommands.append("keep int_primaryVertexNumber_*_*")
-
     process.hplusPatSequence = cms.Sequence(
         process.hplusPatTauSequence *
         process.patDefaultSequence
-#        process.primaryVertexNumber
     )
 
     # Restrict input to AOD
@@ -95,7 +83,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if dataVersion.is38X():
         process.patJets.addTagInfos = False
 
-    addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
+    addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                      'AK5', 'JPT',
                      doJTA        = True,
                      doBTagging   = True,
@@ -105,7 +93,20 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                      doL1Counters = True,
                      genJetCollection = cms.InputTag("ak5GenJets"),
                      doJetID      = False
-                     )
+    )
+
+    addJetCollection(process, cms.InputTag('ak5PFJets'),
+                     'AK5', 'PF',
+                     doJTA        = True,
+                     doBTagging   = True,
+                     jetCorrLabel = ('AK5','PF'),
+                     doType1MET   = False,
+                     doL1Cleaning = False,
+                     doL1Counters = True,
+                     genJetCollection = cms.InputTag("ak5GenJets"),
+                     doJetID      = False
+    )
+
     if out != None:
         out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
@@ -127,18 +128,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # addTauCollection should replace the default producer modified
     # here)
     process.patTaus.embedLeadTrack = True
-
-    # For some reason, embedding these for 35X data does NOT work for
-    # calotaus (output module complains about trying to persist
-    # transient Ref/Ptr, so I'd guess there's transient RefVector of
-    # tracks somewhere in the calotau reconstruction process
-
-    # Update: Apparently it doesn't work on 36X collision data
-    # either...
-
-    #if not dataVersion.is35X():
-    #    process.patTaus.embedSignalTracks = True
-    #    process.patTaus.embedIsolationTracks = True
+    process.patTaus.embedLeadPFCand = True
+    process.patTaus.embedLeadPFChargedHadrCand = True
+    process.patTaus.embedLeadPFNeutralCand = True
 
     # There's probably a bug in pat::Tau which in practice prevents
     # the emedding of PFCands. Therefore we keep the PFCandidates
@@ -147,9 +139,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # collection embedding which doesn't. The PFCand embedding is
     # disabled for consistenty and saving even some disk space.
 
-    process.patTaus.embedLeadPFCand = True
-    process.patTaus.embedLeadPFChargedHadrCand = True
-    process.patTaus.embedLeadPFNeutralCand = True
     # process.patTaus.embedSignalPFCands = True
     # process.patTaus.embedSignalPFChargedHadrCands = True
     # process.patTaus.embedSignalPFNeutralHadrCands = True
@@ -174,7 +163,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
-        # Disable isoDeposits like this untilthe problem with doPFIsoDeposits is fixed 
+        # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
 #        if not dataVersion.is38X():
@@ -215,11 +204,24 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
 
     # Muons
-
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
-    #process.patMuons.usePV = False
+    process.patMuons.usePV = False
+
+    # Electrons
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    process.patElectrons.usePV = False
+
+
+    # Select good primary vertices
+    # For data this is already ran, see HChDataSelection.py
+    if not dataVersion.isData():
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+        process.hplusPatSequence *= process.goodPrimaryVertices
+    if out != None:
+        out.outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
 
 
     # Trigger
@@ -227,8 +229,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         outMod= ''
         if out != None:
             outMod  = 'out'
-        switchOnTrigger(process)
-        # syntax changed, was before (process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+        switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
     seq = cms.Sequence()

@@ -38,8 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        dataVersion.getPatDefaultFileCastor()
-        #dataVersion.getPatDefaultFileMadhatter()
+        #dataVersion.getPatDefaultFileCastor()
+        dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
@@ -89,7 +89,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
         "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
-        "keep *_offlinePrimaryVertices_*_*"
+        "keep *_offlinePrimaryVertices_*_*",
+        "keep recoTracks_generalTracks_*_*"
     )
 )
 
@@ -239,20 +240,6 @@ process.out.outputCommands.extend([
     ])
 
 ################################################################################
-# Collection of good primary vertices
-
-process.goodPrimaryVertices = cms.EDProducer("GoodVertexCounter",
-    vertexCollection = cms.InputTag('offlinePrimaryVertices'),
-    minimumNDOF = cms.uint32(4) ,
-    maxAbsZ = cms.double(15),
-    maxd0 = cms.double(2)
-)
-
-process.out.outputCommands.extend([
-    "keep *_*_GoodVertex*_*"
-    ])
-
-################################################################################
 # Take our skim, run it independently of the rest of the job, don't
 # use it's result for selecting the events to save. It is used to just
 # to get the decision, which is saved by the framework to the event,
@@ -260,8 +247,6 @@ process.out.outputCommands.extend([
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
-#if dataVersion.is38X() and (dataVersion.isMC() or (dataVersion.isData() and dataVersion.isRun2010B())):
-    # SingleLooseIsoTau20 is not available in 38X MC
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 
 
@@ -270,7 +255,6 @@ process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
     process.s 
     * process.triggerMatchingSequence
-    * process.goodPrimaryVertices
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
