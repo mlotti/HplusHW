@@ -55,7 +55,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
     if dataVersion.isRun2010A():
-        myTrigger = "HLT_SingleIsoTau20_Trk5"
+        myTrigger = "HLT_SingleLooseIsoTau20" #HLT_SingleIsoTau20_Trk5"
     elif dataVersion.isRun2010B():
         myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
     else:
@@ -65,7 +65,7 @@ else:
     if dataVersion.is38X():
         myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
     else:
-        myTrigger = "HLT_SingleIsoTau20_Trk5"
+        myTrigger = "HLT_SingleLooseIsoTau20" #HLT_SingleIsoTau20_Trk5"
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
