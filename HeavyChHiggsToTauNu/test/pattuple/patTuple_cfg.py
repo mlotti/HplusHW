@@ -89,8 +89,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
         "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
-        "keep *_offlinePrimaryVertices_*_*",
-        "keep recoTracks_generalTracks_*_*"
+        "keep *_offlinePrimaryVertices_*_*"
     )
 )
 
