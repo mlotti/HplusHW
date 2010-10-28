@@ -17,12 +17,12 @@ if options.dataVersion != "":
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
 
-process = cms.Process("HChSignalAnalysis")
+process = cms.Process("HChSignalOptimisation")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -45,13 +45,13 @@ if options.doPat != 0:
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.categories.append("EventCounts")
-process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
-process.TFileService.fileName = "histograms.root"
+process.TFileService.fileName = "signalOptimisation.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
@@ -92,10 +92,9 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
-
 # Signal analysis module
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
+process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
     tauSelection = param.tauSelection,
@@ -103,22 +102,24 @@ process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology
+    EvtTopology = param.EvtTopology,
+    GlobalMuonVeto = param.GlobalMuonVeto,
+    GlobalElectronVeto = param.GlobalElectronVeto
 )
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
+process.signalOptimisationCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+    counterNames = cms.untracked.InputTag("signalOptimisation", "counterNames"),
+    counterInstances = cms.untracked.InputTag("signalOptimisation", "counterInstances"),
     verbose = cms.untracked.bool(True)
 )
-process.signalAnalysisPath = cms.Path(
+process.signalOptimisationPath = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalAnalysis *
-    process.signalAnalysisCounters
+    process.signalOptimisation *
+    process.signalOptimisationCounters
 )
 
 # An example how to create an array of analyzers to do the same
@@ -130,25 +131,13 @@ process.signalAnalysisPath = cms.Path(
 # def setTauPt(m, val):
 #     m.tauSelection.ptCut = val
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-# addAnalysisArray(process, "signalAnalysisTauPt", process.signalAnalysis, setTauPt,
+# addAnalysisArray(process, "signalOptimisationTauPt", process.signalOptimisation, setTauPt,
 #                  [10, 20, 30, 40, 50])
-def setTauSelection(m, val):
-    m.tauSelection = val
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-		 [param.tauSelectionShrinkingConeCutBased,
-		  param.tauSelectionShrinkingConeTaNCBased,
-		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
-		 ["TauSelectionShrinkingConeCutBased",
-		  "TauSelectionShrinkingConeTaNCBased",
-		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"])
 
 
 # Print tau discriminators from one tau from one event
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
-    src = process.signalAnalysis.tauSelection.src
+    src = process.signalOptimisation.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
 #    process.patSequence *
@@ -156,19 +145,16 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 #)
 
 ################################################################################
-
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalAnalysis",
+        "keep *_*_*_HChSignalOptimisation",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
 #	"drop *",
-#	"keep *",
 #        "keep edmMergeableCounter_*_*_*"
     )
 )
-
 # Uncomment the following line to get also the event output (can be
 # useful for debugging purposes)
 #process.outpath = cms.EndPath(process.out)

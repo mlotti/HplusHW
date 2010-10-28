@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalOptimisation_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalOptimisation_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
@@ -10,6 +10,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "TTree.h"
 
 namespace edm {
   class ParameterSet;
@@ -21,10 +24,10 @@ class TH1;
 class TH2;
 
 namespace HPlus {
-  class SignalAnalysis {
+  class SignalOptimisation {
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
-    ~SignalAnalysis();
+    explicit SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    ~SignalOptimisation();
 
     // Interface towards the EDProducer
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -39,25 +42,29 @@ namespace HPlus {
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
     TauSelection fTauSelection;
-    JetSelection fJetSelection;
     METSelection fMETSelection;
+    JetSelection fJetSelection;
     BTagging fBTagging;
-
-    // Count ftransverseMassCutCount;
-
     EvtTopology fEvtTopology;
-
+    GlobalMuonVeto fGlobalMuonVeto;
+    GlobalElectronVeto fGlobalElectronVeto;
+    
     // Histograms
-    TH1 *hTransverseMass;
-    TH1 *hDeltaPhi;
-    TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
-    TH2 *hAlphaTVsRtau;
-    // Histograms for validation at every Selection Cut step
-    TH1 *hMet_AfterMETSelection;
-    TH1 *hMet_AfterBTagging;
-    TH1 *hMet_AfterEvtTopology;
-    // TH1 *hMet_AfterEvtSelection;
+    
+    /// for Tree
+    TTree *myTree;
+    std::vector<bool> *bTauIDStatus;
+    std::vector<float> *fTauJetEt;
+    std::vector<float> *fMET;
+    std::vector<int> *iNHadronicJets;
+    std::vector<int> *iNBtags;
+    std::vector<float> *fGlobalMuonVetoHighestPt;
+    std::vector<float> *fGlobalElectronVetoHighestPt;
+    std::vector<float> *fTransverseMass;
+    std::vector<float> *fDeltaPhi;
+    std::vector<float> *fAlphaT;
+    
 
   };
 }

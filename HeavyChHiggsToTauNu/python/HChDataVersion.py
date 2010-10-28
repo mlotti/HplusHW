@@ -26,7 +26,7 @@ class DataVersion:
 
             if dataVersion == "36Xdata":
                 self.patDefaultFileCastor = "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
-
+                
             self.is_runA = False
             self.is_runB = False
             if dataVersion == "38XdataRun2010A":
@@ -42,6 +42,7 @@ class DataVersion:
 
             if dataVersion == "35X":
                 self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3/pattuple_6_1_Gv1.root"
+#                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/pattuple_38X.root"                
                 self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3/1c883eb3798701ca362caa0e5457977b/pattuple_6_1_Gv1.root"
 
             if dataVersion == "35Xredigi":
