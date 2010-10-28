@@ -54,10 +54,14 @@ namespace HPlus {
     fMuonIDSubCountOther(eventCounter.addSubCounter("GlobalMuon ID","Other"))    
   {
     edm::Service<TFileService> fs;
+    hMuonPt = fs->make<TH1F>("GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
+    hMuonEta = fs->make<TH1F>("GlobalMuonEta", "GlobalMuonEta", 60, -3., 3.);
     hMuonPt_InnerTrack = fs->make<TH1F>("GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 400, 0., 400.);
     hMuonEta_InnerTrack = fs->make<TH1F>("GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
     hMuonPt_GlobalTrack = fs->make<TH1F>("GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 400, 0., 400.);
     hMuonEta_GlobalTrack = fs->make<TH1F>("GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
+    hMuonPt_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 400, 0., 400.);
+    hMuonEta_AfterSelection = fs->make<TH1F>("GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
     hMuonPt_InnerTrack_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 400, 0., 400.);
     hMuonEta_InnerTrack_AfterSelection = fs->make<TH1F>("GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
     hMuonPt_GlobalTrack_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
@@ -207,18 +211,24 @@ namespace HPlus {
       }
       bMuonHasGlobalOrInnerTrk = true;
       
+      /// Muon Variables (Pt, Eta etc..)
+      // float myMuonPt  = myInnerTrackRef->pt();
+      // float myMuonEta = myInnerTrackRef->eta();
+      // float myMuonPhi = myInnerTrackRef->phi();
+      float myMuonPt  = (*iMuon).pt();
+      float myMuonEta = (*iMuon).eta();
+      float myMuonPhi = (*iMuon).phi();
+      int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
+      int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
+      int myInnerTrackNMuonHits  = myInnerTrackRef->hitPattern().numberOfValidMuonHits();
+
       /// Fill histos with all-Muons Pt and Eta (no requirements on muons)
+      hMuonPt->Fill(myMuonPt);
+      hMuonEta->Fill(myMuonEta);
       hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt());
       hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta());
       hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta());
-
-      /// Muon Variables (Pt, Eta etc..)
-      float myMuonPt = myInnerTrackRef->pt();
-      float myMuonEta = myInnerTrackRef->eta();
-      int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
-      int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
-      int myInnerTrackNMuonHits  = myInnerTrackRef->hitPattern().numberOfValidMuonHits();
 
       /// 1) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
@@ -278,6 +288,8 @@ namespace HPlus {
       } //eof: if (myMuonPt > myHighestMuonPt) {
       
       /// Fill histos after Selection
+      hMuonPt_AfterSelection->Fill(myMuonPt);
+      hMuonEta_AfterSelection->Fill(myMuonPt);
       hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt);
       hMuonEta_InnerTrack_AfterSelection->Fill(myMuonPt);
       hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());

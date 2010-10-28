@@ -39,8 +39,12 @@ namespace HPlus {
     fElecIDSubCountOther(eventCounter.addSubCounter("GlobalElectron ID", "Other (multiple IDs)"))
   {
     edm::Service<TFileService> fs;
+    hElectronPt  = fs->make<TH1F>("GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
+    hElectronEta = fs->make<TH1F>("GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
     hElectronPt_gsfTrack  = fs->make<TH1F>("GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
     hElectronEta_gsfTrack = fs->make<TH1F>("GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 400, 0.0, 400.0);
+    hElectronEta_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
     hElectronPt_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
     hElectronEta_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
   }
@@ -191,14 +195,13 @@ namespace HPlus {
       }
       bElecHasGsfTrkOrTrk = true;
       
-      /// Fill histos with all-Electrons Pt and Eta
-      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
-
       /// Electron Variables (Pt, Eta etc..)
-      float myElectronPt = myGsfTrackRef->pt();  // float myElectronPt = (*iElectron).p4().Pt();
-      float myElectronEta = myGsfTrackRef->eta();
-      float myElectronPhi = myGsfTrackRef->phi();
+      // float myElectronPt = myGsfTrackRef->pt();  // float myElectronPt = (*iElectron).p4().Pt();
+      // float myElectronEta = myGsfTrackRef->eta();
+      // float myElectronPhi = myGsfTrackRef->phi();
+      float myElectronPt  = (*iElectron).pt();  // float myElectronPt = (*iElectron).p4().Pt();
+      float myElectronEta = (*iElectron).eta();
+      float myElectronPhi = (*iElectron).phi();
       float myTrackIso =  (*iElectron).dr03TkSumPt();
       float myEcalIso  =  (*iElectron).dr03EcalRecHitSumEt();
       float myHcalIso  =  (*iElectron).dr03HcalTowerSumEt();
@@ -207,6 +210,12 @@ namespace HPlus {
       // float myTransverseImpactPar = fabs( (*iElectron).gsfTrack()->dxy() ); /// FIX ME?
       float myTransverseImpactPar = fabs( (*iElectron).dB() );  // This is the transverse IP w.r.t to beamline.
       float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt); // isolation cones are dR=0.3 
+
+      /// Fill histos with all-Electrons Pt and Eta
+      hElectronPt->Fill(myElectronPt);
+      hElectronEta->Fill(myElectronEta);
+      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
 
       /// 1) Apply Pt and Eta cut requirements
       if (myElectronPt < fElecPtCut) continue;
@@ -310,6 +319,8 @@ namespace HPlus {
       }
       
       /// Fill histos after Selection
+      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
+      hElectronEta_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       
