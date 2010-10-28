@@ -23,7 +23,15 @@ legendLabels = {
 ROOT.gROOT.SetBatch(True)
 
 QCDdetails = False
-QCDdetails = True
+#QCDdetails = True
+
+#lastSelection = "h11_JetSelection"
+#lastMultip = "h11_Multiplicity"
+
+lastSelection = "h12_METCut"
+lastMultip = "h12_Multiplicity"
+
+
 
 style = TDRStyle()
 datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
@@ -45,7 +53,10 @@ if QCDdetails:
 #                                     "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10",
 #                                     "QCD_Pt30to50_Fall10", "QCD_Pt50to80_Fall10",
 #                                     "QCD_Pt80to120_Fall10"], counters="countAnalyzer")
-datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
+#datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
+#datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
+#datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
+datasets.getDataset("Mu_135821-144114").setLuminosity(1696409.207/1e6) # ub^-1 -> pb^-1
 datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
 #datasets.remove(["Mu_146240-147116", "Mu_147196-148058"])
@@ -108,7 +119,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # After muon selection + jet multip. cut (h11_JetSelection)
-h = Histo(datasets, "h11_Multiplicity/jets_multiplicity")
+h = Histo(datasets, lastMultip+"/jets_multiplicity")
 h.histos.stackMCHistograms()
 h.createFrame("njets_afternjetcut", xmin=3)
 h.frame.GetXaxis().SetTitle("Jet multiplicity")
@@ -165,7 +176,7 @@ if QCDdetails:
     muonPt(Histo(datasetsQCD, "afterOtherCuts/pt", datasets.getDataset("Data").getLuminosity()), "qcd_")
 
 # Muon pt after all other cuts
-h = Histo(datasets, "h11_JetSelection/muon_pt")
+h = Histo(datasets, lastSelection+"/muon_pt")
 ylabel = "Number of muons / 5.0 GeV/c"
 h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCHistograms()
@@ -181,7 +192,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon eta after all other cuts
-h = Histo(datasets, "h11_JetSelection/muon_eta")
+h = Histo(datasets, lastSelection+"/muon_eta")
 h.histos.forEachHisto(lambda h: h.Rebin(5))
 h.histos.stackMCHistograms()
 h.createFrame("muon_eta")
@@ -196,7 +207,7 @@ h.histos.addLuminosityText()
 h.save()
 
 # Muon isolation after all other cuts
-h = Histo(datasets, "h11_JetSelection/muon_relIso")
+h = Histo(datasets, lastSelection+"/muon_relIso")
 h.histos.forEachHisto(lambda h: h.Rebin(2))
 h.histos.stackMCHistograms()
 h.createFrame("muon_reliso", xmax=0.15)
@@ -222,7 +233,7 @@ h.histos.addLuminosityText(x=0.45, y=0.85)
 h.save()
 
 # Muon track ip w.r.t. beam spot
-h = Histo(datasets, "h11_JetSelection/muon_trackDB")
+h = Histo(datasets, lastSelection+"/muon_trackDB")
 h.histos.stackMCHistograms()
 h.createFrame("muon_trackdb", xmin=0, xmax=0.2, ymin=0.1, ymax=500)
 h.frame.GetXaxis().SetTitle("Muon track d_{0}(Bsp) (cm)")
@@ -236,22 +247,42 @@ h.histos.addLuminosityText()
 h.save()
 
 # MET
-def plotMet(met):
-    h = Histo(datasets, "h11_JetSelection/%s_et" % met)
-    h.histos.forEachHisto(lambda h: h.Rebin(5))
+def plotMet(met, selection=lastSelection, prefix="met"):
+    rebin = 5
+    ylabel = "Number of events / 5.0 GeV"
+    xlabel = {"calomet": "Calo MET",
+              "pfmet": "PF MET",
+              "tcmet": "TC MET"}[met] + " (GeV)"
+
+    h = Histo(datasets, selection+"/%s_et" % met)
+    h.histos.forEachHisto(lambda h: h.Rebin(rebin))
     h.histos.stackMCHistograms()
-    h.createFrame("met_"+met)
-    h.frame.GetXaxis().SetTitle(met)
-    h.frame.GetYaxis().SetTitle("Number of events / 5.0 GeV")
+    h.createFrame(prefix+"_"+met, xmax=200)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
     h.addLegend(createLegend(0.7, 0.5, 0.9, 0.8))
     h.draw()
     addCmsPreliminaryText()
     addEnergyText(x=0.3, y=0.85)
     h.histos.addLuminosityText()
     h.save()
+
+    h.createFrame(prefix+"_"+met+"_log", ymin=0.1, ymax=100, xmax=200)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.addLegend(createLegend(0.71, 0.5, 0.91, 0.8))
+    ROOT.gPad.SetLogy(True)
+    h.draw()
+    addCmsPreliminaryText()
+    addEnergyText(x=0.3, y=0.85)
+    h.histos.addLuminosityText()
+    h.save()
+
 plotMet("calomet")
 plotMet("pfmet")
 plotMet("tcmet")
+
+plotMet("pfmet", selection="h11_JetSelection", prefix="met_afterjet")
 
 print "============================================================"
 print "Dataset info: "
