@@ -227,7 +227,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         outMod= ''
         if out != None:
             outMod  = 'out'
-        switchOnTrigger(process)
+        switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
         # syntax changed, was before (process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
