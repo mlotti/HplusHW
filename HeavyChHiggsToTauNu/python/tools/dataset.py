@@ -449,6 +449,9 @@ class DatasetSet:
     def selectAndReorder(self, nameList):
         selected = []
         for name in nameList:
+            if not name in self.datasetMap:
+                print >> sys.stderr, "WARNING: Dataset selectAndReorder: dataset %s doesn't exist" % name
+                continue
             selected.append(self.datasetMap[name])
         self.datasets = selected
         self.populateMap()
