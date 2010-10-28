@@ -80,6 +80,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     process.patJets.addJetID = False
+    process.patJets.embedCaloTowers = False
+    process.patJets.embedPFCandidates = False
     if dataVersion.is38X():
         process.patJets.addTagInfos = False
 
