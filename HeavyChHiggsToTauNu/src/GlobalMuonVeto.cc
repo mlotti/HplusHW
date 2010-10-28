@@ -96,7 +96,7 @@ namespace HPlus {
 
     /// the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
-    /// Create and attach handle to (Offline) Primary Vertices Collection
+   /// Create and attach handle to (Offline) Primary Vertices Collection
     edm::Handle<std::vector<reco::Vertex> > primaryVerticesHandle;
     //    edm::Handle<reco::VertexCollection> primaryVerticesHandle;
     iEvent.getByLabel("offlinePrimaryVertices", primaryVerticesHandle);
@@ -168,25 +168,26 @@ namespace HPlus {
       bMuonPresent = true;
       increment(fMuonIDSubCountAllMuonCandidates);
       
-      /// Keep track of the MuonID's. Just for my information
-      if( (*iMuon).isGood("All") ) increment(fMuonIDSubCountAll);
-      if( (*iMuon).isGood("AllGlobalMuons") ) increment(fMuonIDSubCountAllGlobalMuons);
-      if( (*iMuon).isGood("AllStandAloneMuons") ) increment(fMuonIDSubCountAllStandAloneMuons);
-      if( (*iMuon).isGood("AllTrackerMuons") ) increment(fMuonIDSubCountAllTrackerMuons);  
-      if( (*iMuon).isGood("TrackerMuonArbitrated") ) increment(fMuonIDSubCountTrackerMuonArbitrated);
-      if( (*iMuon).isGood("AllArbitrated") ) increment(fMuonIDSubCountAllArbitrated);
-      if( (*iMuon).isGood("GlobalMuonPromptTight")  ) increment(fMuonIDSubCountGlobalMuonPromptTight);  
-      if( (*iMuon).isGood("TMLastStationLoose") ) increment(fMuonIDSubCountTMLastStationLoose); 
-      if( (*iMuon).isGood("TMLastStationTight") ) increment(fMuonIDSubCountTMLastStationTight); 
-      if( (*iMuon).isGood("TMOneStationLoose") ) increment(fMuonIDSubCountTMOneStationLoose);   
-      if( (*iMuon).isGood("TMLastStationOptimizedLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtLoose);  
-      if( (*iMuon).isGood("TMLastStationOptimizedLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtTight);
-      if( (*iMuon).isGood("GMTkChiCompatibility") ) increment(fMuonIDSubCountGMTkChiCompatibility);  
-      if( (*iMuon).isGood("GMTkKinkTight") ) increment(fMuonIDSubCountGMTkKinkTight); 
-      if( (*iMuon).isGood("TMLastStationAngLoose") ) increment(fMuonIDSubCountTMLastStationAngLoose); 
-      if( (*iMuon).isGood("TMLastStationAngTight") ) increment(fMuonIDSubCountTMLastStationAngTight); 
-      if( (*iMuon).isGood("TMLastStationOptimizedBarrelLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose);
-      if( (*iMuon).isGood("TMLastStationOptimizedBarrelLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight);
+      /// Keep track of the MuonID's. Just for my information. 
+      /// 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
+      if( (*iMuon).muonID("All") ) increment(fMuonIDSubCountAll);
+      if( (*iMuon).muonID("AllGlobalMuons") ) increment(fMuonIDSubCountAllGlobalMuons);
+      if( (*iMuon).muonID("AllStandAloneMuons") ) increment(fMuonIDSubCountAllStandAloneMuons);
+      if( (*iMuon).muonID("AllTrackerMuons") ) increment(fMuonIDSubCountAllTrackerMuons);  
+      if( (*iMuon).muonID("TrackerMuonArbitrated") ) increment(fMuonIDSubCountTrackerMuonArbitrated);
+      if( (*iMuon).muonID("AllArbitrated") ) increment(fMuonIDSubCountAllArbitrated);
+      if( (*iMuon).muonID("GlobalMuonPromptTight")  ) increment(fMuonIDSubCountGlobalMuonPromptTight);  
+      if( (*iMuon).muonID("TMLastStationLoose") ) increment(fMuonIDSubCountTMLastStationLoose); 
+      if( (*iMuon).muonID("TMLastStationTight") ) increment(fMuonIDSubCountTMLastStationTight); 
+      if( (*iMuon).muonID("TMOneStationLoose") ) increment(fMuonIDSubCountTMOneStationLoose);   
+      if( (*iMuon).muonID("TMLastStationOptimizedLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtLoose);  
+      if( (*iMuon).muonID("TMLastStationOptimizedLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedLowPtTight);
+      if( (*iMuon).muonID("GMTkChiCompatibility") ) increment(fMuonIDSubCountGMTkChiCompatibility);  
+      if( (*iMuon).muonID("GMTkKinkTight") ) increment(fMuonIDSubCountGMTkKinkTight); 
+      if( (*iMuon).muonID("TMLastStationAngLoose") ) increment(fMuonIDSubCountTMLastStationAngLoose); 
+      if( (*iMuon).muonID("TMLastStationAngTight") ) increment(fMuonIDSubCountTMLastStationAngTight); 
+      if( (*iMuon).muonID("TMLastStationOptimizedBarrelLowPtLoose") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose);
+      if( (*iMuon).muonID("TMLastStationOptimizedBarrelLowPtTight") ) increment(fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight);
       else{
 	increment(fMuonIDSubCountOther);
       }
@@ -231,11 +232,11 @@ namespace HPlus {
       bMuonGlobalMuonOrTrkerMuon = true;
 
       /// 3) Demand that the selected Muon Identification as defined in the python cfg is satisfied
-      if( (*iMuon).isGood( fMuonSelection ) ) continue;
+      if( !((*iMuon).muonID( fMuonSelection )) ) continue;
       bMuonSelection = true;
       
-      /// 4) NHits cuts (Trk, Pixel, Muon)
-      if ( myInnerTrackNTrkHits < 10) continue;
+      /// 4) NHits cuts (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
+      if ( myInnerTrackNTrkHits <= 10) continue;
       bMuonNTrkerHitsCut = true;
 
       if ( myInnerTrackNPixelHits < 1) continue;
@@ -245,18 +246,22 @@ namespace HPlus {
       bMuonNMuonlHitsCut = true;
 
       /// 5) Global Track Chi Square / ndof must be less than 10
-      if( (*iMuon).normChi2() < 10) continue; 
+      if( (*iMuon).normChi2() > 10) continue; 
       bMuonGlobalTrkChiSqCut = true;
 
       /// 6) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
       /// FIX ME
-      if ( myInnerTrackRef->dxy() < 0.02) continue; /// This is the transverse impact parameter w.r.t to (0,0,0). Replace latter with BeamSpot
+      // if ( myInnerTrackRef->dxy() < 0.02) continue; /// This is the transverse IP w.r.t to (0,0,0). Replace latter with BeamSpot
+      if ((*iMuon).dB() > 0.02) continue; /// This is the transverse IP w.r.t to beamline.
       bMuonImpactParCut = true;
       
       /// 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
-      float relIsol = ( (*iMuon).isolationR03().sumPt )/myMuonPt;
+      float myTrackIso =  (*iMuon).trackIso(); // isolation cones are dR=0.3 
+      float myEcalIso  =  (*iMuon).ecalIso();  // isolation cones are dR=0.3 
+      float myHcalIso  =  (*iMuon).hcalIso();  // isolation cones are dR=0.3 
+      float relIsol = ( myTrackIso + myEcalIso + myHcalIso )/(myMuonPt);
       // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
-      if( ( relIsol < 3.0) )continue; 
+      if( relIsol > 0.15 )continue; 
       bMuonRelIsolationR03Cut = true;
 
       /// 8) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)

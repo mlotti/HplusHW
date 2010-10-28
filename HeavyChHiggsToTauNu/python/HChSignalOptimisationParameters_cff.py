@@ -17,8 +17,8 @@ tauSelectionBase = cms.untracked.PSet(
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(0), # tau-Jet Et will be optimised so don't apply any cut.
     etaCut = cms.untracked.double(2.4), #no change
-    leadingTrackPtCut = cms.untracked.double(20),
-    rtauCut = cms.untracked.double(0.8), #no change
+    leadingTrackPtCut = cms.untracked.double(0),
+    rtauCut = cms.untracked.double(0.7), #no change
     invMassCut = cms.untracked.double(1.5) #no change
 )
 
@@ -33,7 +33,7 @@ tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingCon
 tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone()
 tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 tauSelectionShrinkingConeTaNCBased.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
-tauSelectionShrinkingConeTaNCBased.rtauCut = cms.untracked.double(0.2) ### overwrite default value
+tauSelectionShrinkingConeTaNCBased.rtauCut = cms.untracked.double(0.7) ### overwrite default value
 
 tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")

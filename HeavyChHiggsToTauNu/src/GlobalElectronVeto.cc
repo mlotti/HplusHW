@@ -129,10 +129,19 @@ namespace HPlus {
       bElecPresent = true;
       increment(fElecIDSubCountAllElectronCandidates);
 
-      /// Keep track of the ElectronID's. Just for my information
+      /// Uncomment the piece of code below to cout all eID and result on current electron candidate
+      /* 
       const std::vector<pat::Electron::IdPair>& myElectronIDs = (*iElectron).electronIDs();
       int myPairs = myElectronIDs.size();
-      /// Define some booleans
+      /// Loop over all tags to see which ones were satisfied
+      for (int i = 0; i < myPairs; ++i) {
+	std::string myElecIDtag = myElectronIDs[i].first;
+	float myElecIDresult = myElectronIDs[i].second;
+	std::cout << "idtag=" << myElecIDtag << ", result=" << myElecIDresult << std::endl;
+      }//eof: for (int i = 0; i < myPairs; ++i) {
+      */
+
+      ///  Keep track of the ElectronID's. Just for my information
       bool bElecIDIsLoose = false;
       bool bElecIDIsRobustLoose = false;
       bool bElecIDIsTight = false;
@@ -141,21 +150,14 @@ namespace HPlus {
       bool bElecNoID = false;
       bool bElecAllIDs = false;
       bool bMyElectronIDSelection = false; // put this as true according to your selection (if any used). CURRENTLY NOT USED
-      /// Loop over all tags to see which ones were satisfied
-      for (int i = 0; i < myPairs; ++i) {
-	
-	std::string myElecIDtag = myElectronIDs[i].first;
-	
-	if( (myElecIDtag.compare("eidLoose") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsLoose = true;
-	if( (myElecIDtag.compare("eidRobustLoose") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustLoose = true;
-	if( (myElecIDtag.compare("eidTight") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsTight = true;
-	if( (myElecIDtag.compare("eidRobustTight") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustTight = true;
-	if( (myElecIDtag.compare("eidRobustHighEnergy") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustHighEnergy = true;
-	else{
-	  // std::cout << "idtag=" << myElectronIDs[i].first << ", result=" << myElectronIDs[i].second << std::endl;
-	}
-      }//eof: for (int i = 0; i < myPairs; ++i) {
-      
+      if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
+      if( (*iElectron).electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;
+      if( (*iElectron).electronID("eidTight") ) bElecIDIsTight = true;
+      if( (*iElectron).electronID("eidRobustTight") ) bElecIDIsRobustTight = true;
+      if( (*iElectron).electronID("eidRobustHighEnergy") ) bElecIDIsRobustHighEnergy = true;
+      else{
+	// std::cout << "Other electron ID found..." << std::endl;
+      }
       /// Now take care of eID counters
       if( (!bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
 	bElecNoID = true;
@@ -201,9 +203,10 @@ namespace HPlus {
       float myEcalIso  =  (*iElectron).dr03EcalRecHitSumEt();
       float myHcalIso  =  (*iElectron).dr03HcalTowerSumEt();
       int iNLostHitsInTrker = myGsfTrackRef->hitPattern().numberOfLostHits();
-      // float impactParameter = fabs( (*iElectron).gsfTrack()->dxy(myBeamSpotPosition) ); /// FIXME  
-      float myTransverseImpactPar = fabs( (*iElectron).gsfTrack()->dxy() ); 
-      float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt);
+      // float impactParameter = fabs( (*iElectron).gsfTrack()->dxy(myBeamSpotPosition) ); /// FIX ME?
+      // float myTransverseImpactPar = fabs( (*iElectron).gsfTrack()->dxy() ); /// FIX ME?
+      float myTransverseImpactPar = fabs( (*iElectron).dB() );  // This is the transverse IP w.r.t to beamline.
+      float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt); // isolation cones are dR=0.3 
 
       /// 1) Apply Pt and Eta cut requirements
       if (myElectronPt < fElecPtCut) continue;
