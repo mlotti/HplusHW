@@ -214,6 +214,29 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # beam spot instead of primary vertex, see
     process.patElectrons.usePV = False
 
+    # Electron ID, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+    process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+    process.makePatElectronsIdAndElectrons = cms.Sequence(
+        process.simpleEleIdSequence *
+        process.patElectronIsolation *
+        process.patElectrons
+    )
+    process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
+
+    process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
+    process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
+    process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
+    process.patElectrons.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
+    process.patElectrons.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
+    process.patElectrons.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
+    process.patElectrons.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
+    process.patElectrons.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+    process.patElectrons.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
+    process.patElectrons.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
+    process.patElectrons.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
+    process.patElectrons.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
+
 
     # Select good primary vertices
     # For data this is already ran, see HChDataSelection.py

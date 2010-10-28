@@ -179,13 +179,17 @@
         cvs co HiggsAnalysis/Skimming
         rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
-27.10.2010/A.Attikis CMSSW_3_8_4 (GlobalElectronVeto and GlobalMuonVeto)
+28.10.2010/M.Kortelainen CMSSW_3_8_5_patch3 (Electron ID and additional PAT tags from the release notes)
     Tags needed:
+        cvs co -r V06-01-04 DataFormats/PatCandidates
         cvs co -r V08-00-29 PhysicsTools/PatAlgos
-        cvs up -r 1.30 PhysicsTools/PatAlgos/python/tools/tauTools.py
+        cvs up -r V08-00-27 PhysicsTools/PatAlgos/python/tools/coreTools.py
+        cvs up -r 1.30      PhysicsTools/PatAlgos/python/tools/tauTools.py
+        cvs co -r V00-02-24 PhysicsTools/SelectorUtils 
+        cvs co -r V00-03-13 RecoEgamma/ElectronIdentification
+        cvs co -r V00-02-01 ElectroWeakAnalysis/WENu
         cvs co -r V00-24-00 RecoTauTag/Configuration
         cvs co -r V00-24-00 RecoTauTag/RecoTau
-	cvs co -r V00-05-03 RecoEgamma/EgammaTools
         cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByCharge.cc
         cvs co -r 1.2 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByDeltaE.cc
         cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByFlightPathSignificance.cc
