@@ -9,8 +9,6 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 
-bool QCDuncertainty100 = false;
-
 void calculateAndPlotEventYields(Double_t b, 
 				 Double_t NHBR100, 
 				 Double_t NttNoH, 
@@ -20,7 +18,8 @@ void calculateAndPlotEventYields(Double_t b,
 				 Double_t rangeMax, 
 				 Double_t HiggsMass,
 				 Double_t &retCLlimit, Double_t &retCLstatlimit,
-				 bool doPlots);
+				 bool doPlots,
+				 bool QCDuncertainty100);
 
 
 
@@ -91,7 +90,7 @@ int calcStatError(int nEntries) {
 }
 
 
-void plotPreliminaryText(char * plotTitle) {
+void plotPreliminaryText(char * plotTitle, bool QCDuncertainty100) {
   Double_t top       = 0.85;
   Double_t lineSpace = 0.038;
   Double_t left      = 0.185;
@@ -129,7 +128,6 @@ void plotLuminosityText(Double_t myLumi){
   text.SetTextSize(0.03);
   text.SetNDC();
   char temp[200];
-  cout << "lumi " << myLumi << endl;
   sprintf(temp,"L = %.2f pb^{-1}",myLumi);
   text.DrawLatex(left,top -3*lineSpace,temp);
   return;
@@ -161,7 +159,8 @@ void makePlotEventYields(int nPoints,
 			 int background,
 			 Double_t HiggsMass,
 			 char * plotTitle,
-			 Double_t lumi
+			 Double_t lumi,
+			 bool QCDuncertainty100
 			 )
 {
   TCanvas * mycan = new TCanvas();
@@ -211,7 +210,7 @@ void makePlotEventYields(int nPoints,
 
   l1->Draw();
 
-  plotPreliminaryText(plotTitle);
+  plotPreliminaryText(plotTitle,QCDuncertainty100);
   plotLuminosityText(lumi);
   plotHiggsMassText(HiggsMass);
 
@@ -228,7 +227,8 @@ void makePlotBRlimits(const Int_t nPoints,
 		      Double_t * myYup,
 		      Double_t * myYlow,
 		      char * plotTitle,
-		      Double_t myluminosity){
+		      Double_t myluminosity,
+		      bool QCDuncertainty100){
   TCanvas * mycan = new TCanvas();
   TGraph * mygraup = new TGraph(nPoints,myx,myYup);
   mygraup->SetLineWidth(4);
@@ -305,7 +305,7 @@ void makePlotBRlimits(const Int_t nPoints,
   l1->AddEntry(mygralow, "95% CL", "L");
   l1->Draw();
 
-  plotPreliminaryText(plotTitle);
+  plotPreliminaryText(plotTitle,QCDuncertainty100);
   plotLuminosityText(myluminosity);
 
   char temp[200];
@@ -325,7 +325,8 @@ void makeLuminosityPlot(Double_t b,
 			const Double_t rangeMax, 
 			Double_t HiggsMass,
 			Double_t myLuminosity,
-			char * plotTitle) {
+			char * plotTitle,
+			bool QCDuncertainty100) {
 
   TCanvas * mycan = new TCanvas();
   mycan->SetLogx();
@@ -355,7 +356,8 @@ void makeLuminosityPlot(Double_t b,
 				CLstatlimit,
 				false,
 				plotTitle,
-				myLuminosity);
+				myLuminosity,
+				QCDuncertainty100);
     myydo[i] = CLlimit;
     myyup[i] = CLstatlimit;
 
@@ -373,8 +375,8 @@ void makeLuminosityPlot(Double_t b,
     }
     if (myx[i]<minX) minX = myx[i];
     if (myx[i]>maxX) maxX = myx[i];
-    if (CLstatlimit>maxY) maxY=CLstatlimit;
-        cout << "lumi " << myx[i] << " CL " << myydo[i] << " stat " << myyup[i] << endl;
+    //    if (CLstatlimit>maxY) maxY=CLstatlimit;
+    //        cout << "lumi " << myx[i] << " CL " << myydo[i] << " stat " << myyup[i] << endl;
   }
   
   TGraph *mygraup = new TGraph(lumiPoints,myx,myyup);
@@ -417,7 +419,7 @@ void makeLuminosityPlot(Double_t b,
   l1->AddEntry(mygralow, "95% CL", "L");
   l1->Draw();
 
-  plotPreliminaryText(plotTitle);
+  plotPreliminaryText(plotTitle,QCDuncertainty100);
   plotHiggsMassText(HiggsMass);
 
   mygraup->GetYaxis()->SetNdivisions(410);
@@ -433,7 +435,7 @@ void makeLuminosityPlot(Double_t b,
 }
 
 
-void makePlotEfficiency(Double_t * dataA, Double_t * dataB,Double_t * limitPlotX,const int nMassPoints, Double_t lumi,char *plotTitle)
+void makePlotEfficiency(Double_t * dataA, Double_t * dataB,Double_t * limitPlotX,const int nMassPoints, Double_t lumi,char *plotTitle,bool QCDuncertainty100)
 {
   char temp[200];
   Double_t dataC[nMassPoints];
@@ -481,7 +483,7 @@ void makePlotEfficiency(Double_t * dataA, Double_t * dataB,Double_t * limitPlotX
   l1->AddEntry(myGraph3, "all selections", "l");
   l1->Draw();
 
-  plotPreliminaryText(plotTitle);
+  plotPreliminaryText(plotTitle,QCDuncertainty100);
 
   myGraph1->GetXaxis()->SetNdivisions(410);
   myGraph1->GetXaxis()->SetTitle("M_{H^{#pm}} [GeV/c^{2}]");
@@ -506,7 +508,8 @@ void makePlotEfficiency(Double_t * dataA, Double_t * dataB,Double_t * limitPlotX
   return;
 }
 
-void poisson(int choice=0) {
+void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
+	     bool QCDuncertainty100 = false ) {
   if (choice==0) {
     cout << "No choice made!" << endl << endl
 	 << "Usage in root: .x poisson.C(n)" << endl
@@ -514,7 +517,11 @@ void poisson(int choice=0) {
 	 << "      n=2 for soft cuts, 3 jets" << endl
 	 << "      n=3 for hard cuts, 4 jets, 2 b-jets" << endl
 	 << "      n=4 for soft cuts, 3 jets, 1 b-jet" << endl
-	 << "      n=5 for taNC (soft cuts, 3 jets, 1 b-jet)" << endl;
+	 << "      n=5 for TaNC (soft cuts, 3 jets, 1 b-jet)" << endl
+	 << "      n=6 for TaNC (4 jets)" << endl;
+    cout << "Additionnally, you can - override the default luminosity setting (example 100/pb) and" << endl
+	 << "                       - use 100% uncertainty for QCD" << endl 
+	 << "with this command: .x poisson.C(6,100,true)" << endl;
     return;
   }
 
@@ -548,6 +555,7 @@ void poisson(int choice=0) {
   }
   else if (choice==3)
     {
+      // corrections calculated earlier
       Double_t NHBR100[]    = {0.65445,0.59556,0.64531,0.70310,0.70609,0.45883};
       wjets = 0.015; 
       qcd = 0.0082;
@@ -558,6 +566,7 @@ void poisson(int choice=0) {
     }
   else if (choice==4)
     {
+      // corrections calculated earlier
       Double_t NHBR100[]    = {1.55433,1.55072,1.67255,1.96454,2.11826,1.92707};
       wjets = 0.020; 
       qcd = 0.36; 
@@ -566,12 +575,30 @@ void poisson(int choice=0) {
     }
   else if (choice==5)
     {
+      // corrections calculated earlier
       Double_t NHBR100[]    = {	1.61466, 1.66309, 1.77659, 2.09895, 2.29478, 2.17943 };
       wjets = 0.0266; 
       qcd = 0.1297;
       NttNoH = 0.1926; // tt
-      sprintf(plotTitle,"at least 3 jets, 1 tagged b-jet, taNC");     
+      sprintf(plotTitle,"at least 3 jets, 1 tagged b-jet, TaNC");     
     }
+  else if (choice==6)
+    {
+      //      Double_t NHBR100[]    = {	1.61466, 1.66309, 1.77659, 2.09895, 2.29478, 2.17943 };
+      Double_t NHBR100[]    = {	0.0640, 0.0580, 0.0530, 0.0380, 0.0180, 0.0023 };
+      // calculate corrections here
+      Double_t BR_t_bH[] =    {0.05395, 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
+      Double_t BR_H_taunu[] = {0.95800, 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
+      for (int i=0; i<6; i++){
+	NHBR100[i] = NHBR100[i] /
+	  ( 2.0*BR_t_bH[i]*(1.0-BR_t_bH[i])*BR_H_taunu[i] );
+      }
+      qcd = 0.0165;
+      NttNoH = 0.083; // tt
+      wjets = 0.0176;
+      sprintf(plotTitle,"at least 4 jets, 2 tagged b-jets, TaNC");     
+    }
+
   else {
     cout << "Inappropriate choice!" << endl;
     return;
@@ -588,7 +615,7 @@ void poisson(int choice=0) {
   gROOT->ProcessLine(".L tdrstyle.C");
   setTDRStyle();
 
-  //  makePlotEfficiency(dataA,dataB,limitPlotX,nMassPoints,10,plotTitle);
+  //  makePlotEfficiency(dataA,dataB,limitPlotX,nMassPoints,10,plotTitle,QCDuncertainty100);
 
   Double_t limitPlotYlow[nMassPoints];
   Double_t limitPlotYup[nMassPoints];
@@ -596,7 +623,7 @@ void poisson(int choice=0) {
 
   for (int i=0; i<nMassPoints; i++) {
     Double_t HiggsMass = limitPlotX[i];
-    Double_t myLuminosity = 40;//pb-1
+    //    Double_t myLuminosity = 40;//pb-1
     Double_t myB=b*myLuminosity;
     Double_t myNHBR100=NHBR100[i]*myLuminosity; // if BR=100 required, number of H
     Double_t myNttNoH=NttNoH*myLuminosity,; // number of tt without H or HH
@@ -605,16 +632,16 @@ void poisson(int choice=0) {
     const Double_t rangeMin = 10000;  //enlarged if necessary
     const Double_t rangeMax = 50;//enlarged if necessary
     //    cout << "b " << myB << " " << myNHBR100 << " " <<myNttNoH << " " << nPoints << " " << dataXmax << " " <<rangeMin << " " << rangeMax << " " <<HiggsMass<< " " <<endl; 
-    calculateAndPlotEventYields(myB, myNHBR100, myNttNoH, nPoints, dataXmax, rangeMin, rangeMax, HiggsMass, CLlimit, CLstatlimit,true,plotTitle,myLuminosity);
+    calculateAndPlotEventYields(myB, myNHBR100, myNttNoH, nPoints, dataXmax, rangeMin, rangeMax, HiggsMass, CLlimit, CLstatlimit,true,plotTitle,myLuminosity,QCDuncertainty100);
 
     if (plotLumi)
-      makeLuminosityPlot(myB, myNHBR100, myNttNoH, nPoints, dataXmax, rangeMin, rangeMax, HiggsMass,myLuminosity,plotTitle);
+      makeLuminosityPlot(myB, myNHBR100, myNttNoH, nPoints, dataXmax, rangeMin, rangeMax, HiggsMass,myLuminosity,plotTitle,QCDuncertainty100);
     cout << "---- masspoint" << HiggsMass << ", BR limits " << CLlimit << " and " << CLstatlimit << endl;
     limitPlotYlow[i] = CLlimit;
     limitPlotYup[i]  = CLstatlimit;
   }
 
-  makePlotBRlimits(nMassPoints,limitPlotX,limitPlotYup,limitPlotYlow,plotTitle,myLuminosity);
+  makePlotBRlimits(nMassPoints,limitPlotX,limitPlotYup,limitPlotYlow,plotTitle,myLuminosity,QCDuncertainty100);
 
   return;
 }
@@ -630,7 +657,8 @@ void calculateAndPlotEventYields(Double_t b,
 				 Double_t &retCLlimit, Double_t &retCLstatlimit,
 				 bool doPlots,
 				 char * plotTitle,
-				 Double_t myLuminosity) {
+				 Double_t myLuminosity,
+				 bool QCDuncertainty100) {
 
   retCLlimit = 100; // back-up value in case the limit is not found
 
@@ -654,7 +682,7 @@ void calculateAndPlotEventYields(Double_t b,
   
   if (doPlots){
     //    cout << "making event yields plot for m_H=" << HiggsMass << endl;
-    makePlotEventYields(nPoints,dataX,dataH,dataHH,dataW,b,HiggsMass,plotTitle,myLuminosity);
+    makePlotEventYields(nPoints,dataX,dataH,dataHH,dataW,b,HiggsMass,plotTitle,myLuminosity,QCDuncertainty100);
   }
 
   Double_t x1[nPoints], x2[2*nPoints], x3[2*nPoints], y1[nPoints], y2[2*nPoints], y3[2*nPoints];
@@ -743,7 +771,7 @@ void calculateAndPlotEventYields(Double_t b,
   tg1->Draw("L");
 
   
-  plotPreliminaryText(plotTitle);
+  plotPreliminaryText(plotTitle,QCDuncertainty100);
   plotLuminosityText(myLuminosity);
   plotHiggsMassText(HiggsMass);
   /*

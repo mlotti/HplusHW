@@ -3,7 +3,10 @@
 1) precalculations
 
 You don't necessarily need to precalculate the needed 
-Poisson CL values, but please consider this (see below).  
+Poisson CL values, but please consider this (see below),
+otherwise plotting will be quite slow.  You need to run
+precalculations only once to generate the data file.
+
 
 2) plotting
 
@@ -22,23 +25,18 @@ Then continue by typing for instance ".x poisson.C(2)"
 to produce the plots for the case of soft cuts, 3 jets.
 The png files are generated automatically.
 
+
 3) making new kind of plots
 
+Some changes can be done directly with additional parameters,
+please see the instructions.
+
 To make plots for new cuts, you need to hard-code the 
-new values.
+new values. Make them as a new "choice" so that plots with
+older values can always be regenerated.
 
-To change luminosity, just change this hard-coded value,
-the value in the plots changes accordingly:
-
- Double_t myLuminosity = 40;//pb-1
-
-To use 100% uncertainty in QCD, toggle this global 
-variable (bad style, yes...):
-
- bool QCDuncertainty100 = true;
-
-Tevatron results: toggle the following to show/hide 
-Tevatron results:
+Tevatron results: toggle the following hard-coded value
+to show/hide Tevatron results:
  
  bool plotTevatron1fb = true
 
