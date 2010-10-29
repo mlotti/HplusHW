@@ -39,8 +39,12 @@ namespace HPlus {
     fElecIDSubCountOther(eventCounter.addSubCounter("GlobalElectron ID", "Other (multiple IDs)"))
   {
     edm::Service<TFileService> fs;
+    hElectronPt  = fs->make<TH1F>("GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
+    hElectronEta = fs->make<TH1F>("GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
     hElectronPt_gsfTrack  = fs->make<TH1F>("GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
     hElectronEta_gsfTrack = fs->make<TH1F>("GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 400, 0.0, 400.0);
+    hElectronEta_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
     hElectronPt_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
     hElectronEta_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
   }
@@ -95,7 +99,7 @@ namespace HPlus {
     }
     
     /// Reset/initialise variables
-    float myHighestElecPt = -1;
+    float myHighestElecPt = -1.0;
     float myHighestElecEta = -999.99;
     fSelectedElectronsPt = -1.0;
     fSelectedElectronsEta = -999.99;
@@ -129,10 +133,19 @@ namespace HPlus {
       bElecPresent = true;
       increment(fElecIDSubCountAllElectronCandidates);
 
-      /// Keep track of the ElectronID's. Just for my information
+      /// Uncomment the piece of code below to cout all eID and result on current electron candidate
+      /* 
       const std::vector<pat::Electron::IdPair>& myElectronIDs = (*iElectron).electronIDs();
       int myPairs = myElectronIDs.size();
-      /// Define some booleans
+      /// Loop over all tags to see which ones were satisfied
+      for (int i = 0; i < myPairs; ++i) {
+	std::string myElecIDtag = myElectronIDs[i].first;
+	float myElecIDresult = myElectronIDs[i].second;
+	std::cout << "idtag=" << myElecIDtag << ", result=" << myElecIDresult << std::endl;
+      }//eof: for (int i = 0; i < myPairs; ++i) {
+      */
+
+      ///  Keep track of the ElectronID's. Just for my information
       bool bElecIDIsLoose = false;
       bool bElecIDIsRobustLoose = false;
       bool bElecIDIsTight = false;
@@ -141,21 +154,14 @@ namespace HPlus {
       bool bElecNoID = false;
       bool bElecAllIDs = false;
       bool bMyElectronIDSelection = false; // put this as true according to your selection (if any used). CURRENTLY NOT USED
-      /// Loop over all tags to see which ones were satisfied
-      for (int i = 0; i < myPairs; ++i) {
-	
-	std::string myElecIDtag = myElectronIDs[i].first;
-	
-	if( (myElecIDtag.compare("eidLoose") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsLoose = true;
-	if( (myElecIDtag.compare("eidRobustLoose") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustLoose = true;
-	if( (myElecIDtag.compare("eidTight") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsTight = true;
-	if( (myElecIDtag.compare("eidRobustTight") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustTight = true;
-	if( (myElecIDtag.compare("eidRobustHighEnergy") == 0 ) && (myElectronIDs[i].second == 1) ) bElecIDIsRobustHighEnergy = true;
-	else{
-	  // std::cout << "idtag=" << myElectronIDs[i].first << ", result=" << myElectronIDs[i].second << std::endl;
-	}
-      }//eof: for (int i = 0; i < myPairs; ++i) {
-      
+      if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
+      if( (*iElectron).electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;
+      if( (*iElectron).electronID("eidTight") ) bElecIDIsTight = true;
+      if( (*iElectron).electronID("eidRobustTight") ) bElecIDIsRobustTight = true;
+      if( (*iElectron).electronID("eidRobustHighEnergy") ) bElecIDIsRobustHighEnergy = true;
+      else{
+	// std::cout << "Other electron ID found..." << std::endl;
+      }
       /// Now take care of eID counters
       if( (!bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
 	bElecNoID = true;
@@ -184,26 +190,32 @@ namespace HPlus {
       
       /// Check that track was found
       if (myGsfTrackRef.isNull()){
-	std::cout << "myGsfTrackRef.isNull()" << std::endl;
+	// std::cout << "myGsfTrackRef.isNull()" << std::endl;
 	continue;
       }
       bElecHasGsfTrkOrTrk = true;
       
-      /// Fill histos with all-Electrons Pt and Eta
-      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->pt());
-
       /// Electron Variables (Pt, Eta etc..)
-      float myElectronPt = myGsfTrackRef->pt();  // float myElectronPt = (*iElectron).p4().Pt();
-      float myElectronEta = myGsfTrackRef->eta();
-      float myElectronPhi = myGsfTrackRef->phi();
+      // float myElectronPt = myGsfTrackRef->pt();  // float myElectronPt = (*iElectron).p4().Pt();
+      // float myElectronEta = myGsfTrackRef->eta();
+      // float myElectronPhi = myGsfTrackRef->phi();
+      float myElectronPt  = (*iElectron).pt();  // float myElectronPt = (*iElectron).p4().Pt();
+      float myElectronEta = (*iElectron).eta();
+      float myElectronPhi = (*iElectron).phi();
       float myTrackIso =  (*iElectron).dr03TkSumPt();
       float myEcalIso  =  (*iElectron).dr03EcalRecHitSumEt();
       float myHcalIso  =  (*iElectron).dr03HcalTowerSumEt();
       int iNLostHitsInTrker = myGsfTrackRef->hitPattern().numberOfLostHits();
-      // float impactParameter = fabs( (*iElectron).gsfTrack()->dxy(myBeamSpotPosition) ); /// FIXME  
-      float myTransverseImpactPar = fabs( (*iElectron).gsfTrack()->dxy() ); 
-      float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt);
+      // float impactParameter = fabs( (*iElectron).gsfTrack()->dxy(myBeamSpotPosition) ); /// FIX ME?
+      // float myTransverseImpactPar = fabs( (*iElectron).gsfTrack()->dxy() ); /// FIX ME?
+      float myTransverseImpactPar = fabs( (*iElectron).dB() );  // This is the transverse IP w.r.t to beamline.
+      float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt); // isolation cones are dR=0.3 
+
+      /// Fill histos with all-Electrons Pt and Eta
+      hElectronPt->Fill(myElectronPt);
+      hElectronEta->Fill(myElectronEta);
+      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
 
       /// 1) Apply Pt and Eta cut requirements
       if (myElectronPt < fElecPtCut) continue;
@@ -290,7 +302,7 @@ namespace HPlus {
 
       /// Calculate DeltaR between Electron candidate and Global or Tracker Muon
       myElectronMuonDeltaR = deltaR( myMuonEta, myMuonPhi,myElectronEta, myElectronPhi); 
-      
+
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
       if(myElectronMuonDeltaR < 0.1) continue;
       bElecDeltaRFromGlobalOrTrkerMuonCut = true;
@@ -303,16 +315,16 @@ namespace HPlus {
       if (myElectronPt > myHighestElecPt) {
 	myHighestElecPt = myElectronPt;
 	myHighestElecEta = myElectronEta;
-	fSelectedElectronsPt = myElectronPt;
-	fSelectedElectronsEta = myElectronEta;
+	// std::cout << "myHighestElecPt = " << myHighestElecPt << ", myHighestElecEta = " << myHighestElecEta << std::endl;
       }
       
       /// Fill histos after Selection
+      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
+      hElectronEta_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
-
     // if(bElecSelection) increment(fElecSelectionSubCountElectronSelection);  // if will use eID
     
     if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
@@ -332,14 +344,20 @@ namespace HPlus {
     if(bElecTransvImpactParCut) increment(fElecSelectionSubCountTransvImpactParCut);
     
     if(bElecDeltaRFromGlobalOrTrkerMuonCut) increment(fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut);
-    
+
     if(bElecRelIsolationR03Cut) increment(fElecSelectionSubCountRelIsolationR03Cut);
     
     /// Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bElecNLostHitsInTrkerCut*bElecElectronDeltaCotThetaCut*bElecElectronDistanceCut*bElecRelIsolationR03Cut*bElecTransvImpactParCut*bElecDeltaRFromGlobalOrTrkerMuonCut;
 
+    /// Now store the highest Electron Pt and Eta
+    fSelectedElectronsPt = myHighestElecPt;
+    fSelectedElectronsEta = myHighestElecEta;
+    // std::cout << "fSelectedElectronsPt = " << fSelectedElectronsPt << ", fSelectedElectronsEta = " << fSelectedElectronsEta << std::endl;
+    
     /// If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
+
     /// Otherwise increment counter and return true.
     else increment(fGlobalElectronVetoCounter);
     return true;
