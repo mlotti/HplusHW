@@ -183,11 +183,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
+        try:
+            self.datasetHistoMap[name].call(func)
+        except KeyError:
             print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].call(func)
 
     def forEachMCHisto(self, func):
         self.forEachHisto(func, lambda x: x.isMC())
@@ -225,11 +224,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
+        try:
+            self.datasetHistoMap[name].setLegendLabel(label)
+        except KeyError:
             print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].setLegendLabel(label)
 
     def setHistoLegendLabels(self, nameMap):
         if self.data == None:
@@ -242,11 +240,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
+        try:
+            self.datasetHistoMap[name].setLegendStyle(style)
+        except KeyError:
             print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].setLegendStyle(style)
 
     def setHistoLegendStyleAll(self, style):
         if self.data == None:
@@ -259,11 +256,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
+        try:
+            self.datasetHistoMap[name].drawStyle = style
+        except KeyError:
             print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].drawStyle = style
 
     def setHistoDrawStyleAll(self, style):
         if self.data == None:
