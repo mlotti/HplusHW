@@ -179,6 +179,16 @@ class HistoSet:
         for h in self.data:
             self.datasetHistoMap[h.getName()] = h
 
+    def forHisto(self, name, func):
+        if self.data == None:
+            self.createHistogramObjects()
+
+        if not name in self.datasetHistoMap:
+            print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
+            return
+
+        self.datasetHistoMap[name].call(func)
+
     def forEachMCHisto(self, func):
         self.forEachHisto(func, lambda x: x.isMC())
 
@@ -216,7 +226,7 @@ class HistoSet:
             self.createHistogramObjects()
 
         if not name in self.datasetHistoMap:
-            print >> sys.stderr, "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
+            print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
             return
 
         self.datasetHistoMap[name].setLegendLabel(label)
@@ -233,7 +243,7 @@ class HistoSet:
             self.createHistogramObjects()
 
         if not name in self.datasetHistoMap:
-            print >> sys.stderr, "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
+            print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
             return
 
         self.datasetHistoMap[name].setLegendStyle(style)
@@ -248,6 +258,10 @@ class HistoSet:
     def setHistoDrawStyle(self, name, style):
         if self.data == None:
             self.createHistogramObjects()
+
+        if not name in self.datasetHistoMap:
+            print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
+            return
 
         self.datasetHistoMap[name].drawStyle = style
 
@@ -269,6 +283,9 @@ class HistoSet:
     def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
         if self.data == None:
             self.createHistogramObjects()
+
+        if len(self.data) == 0:
+            raise Exception("Empty set of histograms!")
 
         c = ROOT.TCanvas(name)
         if ymin == None:

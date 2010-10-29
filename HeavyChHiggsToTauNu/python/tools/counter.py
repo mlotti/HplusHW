@@ -145,8 +145,8 @@ class Counter:
 
         raise Exception("No dataset '%s'" % datasetName)
 
-    def printCounter(self, printer):
-        self.getCounts().printCounter(printer)
+    def printCounter(self, format=FloatAutoFormat()):
+        self.getCounts().printCounter(format)
 
 class CounterImpl:
     def __init__(self, countNames, datasetNames, counter):

@@ -417,6 +417,9 @@ class DatasetSet:
         for d in datasetset.datasets:
             self.append(d)
 
+    def hasDataset(self, name):
+        return name in self.datasetMap
+
     def getDataset(self, name):
         return self.datasetMap[name]
 
