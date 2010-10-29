@@ -211,6 +211,67 @@ class Histo:
         
         return p
 
+class AnalysisModule:
+    def __init__(self, process, name, selector=None, filter=None, counter=False):
+        self.selector = selector
+        self.filter = filter
+        self.counter = None
+
+        self.selectorName = name
+        self.filterName = name+"Filter"
+        self.counterName = "count"+name
+        self.sequenceFilterName = name+"FilterSequence"
+        self.sequenceName = name+"Sequence"
+
+        self.filterSequence = cms.Sequence()
+        filterN = 0
+        if selector != None:
+            process.__setattr__(self.selectorName, self.selector)
+            self.filterSequence *= self.selector
+            filterN += 1
+        if filter != None:
+            if selector != None:
+                self.filter.src = cms.InputTag(self.selectorName)
+            process.__setattr__(self.filterName, self.filter)
+            self.filterSequence *= self.filter
+            filterN += 1
+
+        self.sequence = cms.Sequence()
+        if filterN > 0:
+            process.__setattr__(self.sequenceFilterName, self.filterSequence)
+            self.sequence *= self.filterSequence
+        if counter:
+            self.counter = cms.EDProducer("EventCountProducer")
+            process.__setattr__(self.counterName, self.counter)
+            self.sequence *= self.counter
+        
+        process.__setattr__(self.sequenceName, self.sequence)
+
+    def getFilterSequence(self):
+        return self.filterSequence
+
+    def getSequence(self):
+        return self.sequence
+
+    def getSelectorInputTag(self):
+        if self.selector == None:
+            raise Exception("No selector for name %s!" % self.selectorName)
+        return cms.InputTag(self.selectorName)
+
+# Helpers for selector and count filter modules
+def makeSelector(src, expression, selector):
+    return cms.EDFilter(selector, src=src, cut=cms.string(expression))
+
+def makeCountFilter(src, minNumber, maxNumber=None):
+    if maxNumber == None:
+        return cms.EDFilter("CandViewCountFilter",
+                            src = src,
+                            minNumber = cms.uint32(minNumber))
+    else:
+        return cms.EDFilter("PATCandViewCountFilter",
+                            src = src,
+                            minNumber = cms.uint32(minNumber),
+                            maxNumber = cms.uint32(maxNumber))
 
 class Analysis:
     def __init__(self, process, seqname, options, allCounterName="countAll", additionalCounters=[]):
@@ -239,84 +300,65 @@ class Analysis:
         self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]))
 
         self.histoIndex = 0
+        self.modules = {}
 
+    # Main sequence methods
     def getSequence(self):
         return cms.Sequence(self.sequence * self.process.countAnalyzer)
 
     def appendToSequence(self, module):
         self.sequence *= module
 
-    def getCountPath(self):
-        return self.process.countAnalyzerPath
+    # Analysis module methods
+    def hasAnalysisModule(self, name):
+        return name in self.modules
 
-    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=True):
-        filtername = name+"Trigger"
-        countname = "count"+name
+    def getAnalysisModule(self, name):
+        return self.modules[name]
 
-        m1 = triggerResultsFilter.clone()
-        m1.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
-        m1.l1tResults = cms.InputTag("")
-        m1.throw = cms.bool(throw) # Should it throw an exception if the trigger product is not found
-        m1.triggerConditions = cms.vstring(triggerConditions)
+    def addAnalysisModule(self, name, selector=None, filter=None, counter=None):
+        m = AnalysisModule(self.process, name, selector, filter, counter)
+        self.modules[name] = m
 
-        m2 = cms.EDProducer("EventCountProducer")
+        if counter != None:
+            self.process.countAnalyzer.counters.append(cms.InputTag(m.counterName))
+            self.histoIndex += 1
 
-        self.process.__setattr__(filtername, m1)
-        self.process.__setattr__(countname, m2)
+        self.sequence *= m.getSequence()
+        return m
 
-        self.sequence *= m1
-        self.sequence *= m2
+    # Methods using analysis module methods
+    def addProducer(self, name, module):
+        m = self.addAnalysisModule(name, selector=module)
+        return m.getSelectorInputTag()
 
-        self.process.countAnalyzer.counters.append(cms.InputTag(countname))
-
-        self.histoIndex += 1
-
-    def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
-        # Create the EDModule objects
-        m1 = cms.EDFilter(selector,
-                          src = src,
-                          cut = cms.string(expression))
-        self.process.__setattr__(name, m1)
-        self.sequence *= m1
-        return cms.InputTag(name)
+    def addFilter(self, name, module):
+        self.addAnalysisModule(name, filter=module, counter=True)
 
     def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
-        selected = self.addSelection(name, src, expression, selector)
-        self.addNumberCut(name, selected, minNumber, maxNumber)
+        m = self.addAnalysisModule(name,
+                                   selector=makeSelector(src, expression, selector),
+                                   filter=makeCountFilter(cms.InputTag("dummy"), minNumber, maxNumber),
+                                   counter=True)
+        return m.getSelectorInputTag()
 
-        # Return the InputTag of the selected collection
-        return selected
+    # Methods using the methods above
+    def addSelection(self, name, src, expression, selector="HPlusCandViewLazyPtrSelector"):
+        return self.addProducer(name, makeSelector(src, expression, selector))
+
+    def addTriggerCut(self, dataVersion, triggerConditions, name="Trigger", throw=True):
+        m = triggerResultsFilter.clone()
+        m.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+        m.l1tResults = cms.InputTag("")
+        m.throw = cms.bool(throw) # Should it throw an exception if the trigger product is not found
+        m.triggerConditions = cms.vstring(triggerConditions)
+
+        self.addFilter(name, m)
 
     def addNumberCut(self, name, src, minNumber=1, maxNumber=None):
-        filtername = name+"Filter"
-        countname = "count"+name
-        
-        m2 = None
-        if maxNumber == None:
-            m2 = cms.EDFilter("CandViewCountFilter",
-                              src = src,
-                              minNumber = cms.uint32(minNumber))
-        else:
-            m2 = cms.EDFilter("PATCandViewCountFilter",
-                              src = src,
-                              minNumber = cms.uint32(minNumber),
-                              maxNumber = cms.uint32(maxNumber))
+        self.addFilter(name, makeCountFilter(src, minNumber, maxNumber))
 
-        m3 = cms.EDProducer("EventCountProducer")
-
-        # Add the modules to process and to the analysis sequence
-        self.process.__setattr__(filtername, m2)
-        self.process.__setattr__(countname, m3)
-
-        for m in [m2, m3]:
-            self.sequence *= m
-
-        # Add the counter product to the countAnalyzer
-        self.process.countAnalyzer.counters.append(cms.InputTag(countname))
-
-        # Increase the histogram index
-        self.histoIndex += 1
-
+    # Analyzer methods, modifying the the main sequence
     def addAnalyzer(self, postfix, module):
         name = ("h%02d_"%self.histoIndex)+postfix
         self.process.__setattr__(name, module)
