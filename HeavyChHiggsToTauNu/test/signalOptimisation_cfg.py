@@ -45,7 +45,7 @@ if options.doPat != 0:
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.categories.append("EventCounts")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same

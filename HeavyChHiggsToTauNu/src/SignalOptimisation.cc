@@ -101,27 +101,27 @@ namespace HPlus {
     
     /// 4) MET 
     bool bMETSelectionPass = fMETSelection.analyze(iEvent, iSetup);
-    if(!bMETSelectionPass) return; // Only false if MET < MetCut. MetCut value is set to 0 => can use it.
+    // if(!bMETSelectionPass) return; // Only false if MET < MetCut. MetCut value is set to 0 => can use it.
     
     /// 5) Jet Selection    
     bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus());
-    if(!bJetSelectionPass) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    // if(!bJetSelectionPass) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     
     /// 6) BTagging
     bool bBTaggingPass     = fBTagging.analyze(fJetSelection.getSelectedJets());
-    if(!bBTaggingPass) return;
+    // if(!bBTaggingPass) return;
 
     /// 7) AlphaT
     bool bEvtTopologyPass  = fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets());
-    if(!bEvtTopologyPass) return;
+    // if(!bEvtTopologyPass) return;
 
     /// 8) GlobalMuonVeto
     bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    if(!bGlobalMuonVetoPass) return;
+    // if(!bGlobalMuonVetoPass) return;
 
     /// 9) GlobalElectronVeto
     bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if(!bGlobalElectronVetoPass) return;
+    // if(!bGlobalElectronVetoPass) return;
     
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
@@ -130,17 +130,18 @@ namespace HPlus {
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
     bool bDecision = bTriggerSelection*bTriggerMETEmulationPass*bTauSelectionPass*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
+
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(bTauSelectionPass);
     fTauJetEt->push_back((float( (fTauSelection.getSelectedTaus()[0])->pt())));
     fMET->push_back(fMETSelection.fMet);
     iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
     iNBtags->push_back(fBTagging.iNBtags);
-    fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
+    fAlphaT->push_back(sAlphaT.fAlphaT);
     fGlobalMuonVetoHighestPt->push_back( fGlobalMuonVeto.getSelectedMuonsPt() );
+    fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
     fTransverseMass->push_back(transverseMass);
     fDeltaPhi->push_back(deltaPhi);
-    fAlphaT->push_back(sAlphaT.fAlphaT);
     
     /// Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
