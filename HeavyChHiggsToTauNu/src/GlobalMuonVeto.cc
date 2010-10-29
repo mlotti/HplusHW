@@ -220,7 +220,11 @@ namespace HPlus {
       float myMuonPhi = (*iMuon).phi();
       int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
-      int myInnerTrackNMuonHits  = myInnerTrackRef->hitPattern().numberOfValidMuonHits();
+      int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
+      /// Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
+      /// global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
+      /// (i.e. de-associated from the muon). This is the so called "outlier rejection". 
+      /// Note: For the Num
 
       /// Fill histos with all-Muons Pt and Eta (no requirements on muons)
       hMuonPt->Fill(myMuonPt);
@@ -251,8 +255,8 @@ namespace HPlus {
 
       if ( myInnerTrackNPixelHits < 1) continue;
       bMuonNPixelHitsCut = true;
-      
-      if ( myInnerTrackNMuonHits < 1) continue;
+      // std::cout << "myGlobalTrackNMuonHits = " << myGlobalTrackNMuonHits << std::endl;
+      if ( myGlobalTrackNMuonHits < 1) continue;
       bMuonNMuonlHitsCut = true;
 
       /// 5) Global Track Chi Square / ndof must be less than 10
