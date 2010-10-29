@@ -56,7 +56,7 @@ if QCDdetails:
 #datasets.getDataset("Mu_140042-144114").setLuminosity(2126184.794/1e6) # ub^-1 -> pb^-1
 #datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 #datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
-datasets.getDataset("Mu_135821-144114").setLuminosity(1696409.207/1e6) # ub^-1 -> pb^-1
+datasets.getDataset("Mu_135821-144114").setLuminosity(1763049.941/1e6) # ub^-1 -> pb^-1
 datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 datasets.getDataset("Mu_147196-148058").setLuminosity(7618294.554/1e6)
 #datasets.remove(["Mu_146240-147116", "Mu_147196-148058"])

@@ -179,6 +179,15 @@ class HistoSet:
         for h in self.data:
             self.datasetHistoMap[h.getName()] = h
 
+    def forHisto(self, name, func):
+        if self.data == None:
+            self.createHistogramObjects()
+
+        try:
+            self.datasetHistoMap[name].call(func)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
+
     def forEachMCHisto(self, func):
         self.forEachHisto(func, lambda x: x.isMC())
 
@@ -215,11 +224,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
-            print >> sys.stderr, "WARNING: Tried to set legend label for dataset '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].setLegendLabel(label)
+        try:
+            self.datasetHistoMap[name].setLegendLabel(label)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
 
     def setHistoLegendLabels(self, nameMap):
         if self.data == None:
@@ -232,11 +240,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        if not name in self.datasetHistoMap:
-            print >> sys.stderr, "WARNING: Tried to set legend style for dataset '%s', which doesn't exist." % name
-            return
-
-        self.datasetHistoMap[name].setLegendStyle(style)
+        try:
+            self.datasetHistoMap[name].setLegendStyle(style)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
 
     def setHistoLegendStyleAll(self, style):
         if self.data == None:
@@ -249,7 +256,10 @@ class HistoSet:
         if self.data == None:
             self.createHistogramObjects()
 
-        self.datasetHistoMap[name].drawStyle = style
+        try:
+            self.datasetHistoMap[name].drawStyle = style
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
 
     def setHistoDrawStyleAll(self, style):
         if self.data == None:
@@ -269,6 +279,9 @@ class HistoSet:
     def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
         if self.data == None:
             self.createHistogramObjects()
+
+        if len(self.data) == 0:
+            raise Exception("Empty set of histograms!")
 
         c = ROOT.TCanvas(name)
         if ymin == None:
