@@ -86,10 +86,14 @@ namespace HPlus {
     Count fMuonIDSubCountOther;
 
     // Histograms
+    TH1 *hMuonPt;
+    TH1 *hMuonEta;
     TH1 *hMuonPt_InnerTrack;
     TH1 *hMuonEta_InnerTrack;
     TH1 *hMuonPt_GlobalTrack;
     TH1 *hMuonEta_GlobalTrack;
+    TH1 *hMuonPt_AfterSelection;
+    TH1 *hMuonEta_AfterSelection;
     TH1 *hMuonPt_InnerTrack_AfterSelection;
     TH1 *hMuonEta_InnerTrack_AfterSelection;
     TH1 *hMuonPt_GlobalTrack_AfterSelection;

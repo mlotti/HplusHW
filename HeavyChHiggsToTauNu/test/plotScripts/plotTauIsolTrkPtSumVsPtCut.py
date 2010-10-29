@@ -12,6 +12,7 @@
 ########################################################################
 
 import ROOT
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -59,12 +60,16 @@ style = TDRStyle()
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
 datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M120/res/histograms_1_1_nRc.root")]) ## comment me
 
+############################### MERGING ###############################
+### Example how to merge histograms of several datasets
+# datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
+
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-TauIsoltrkPtsumVSPtcut = datasets.getHistoSet("signalAnalysis/tau_isoltrk_ptsum_vs_ptcut")
+TauIsoltrkPtsumVSPtcut = HistoSet(datasets, "signalAnalysis/tau_isoltrk_ptsum_vs_ptcut")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(TauIsoltrkPtsumVSPtcut.getDatasetNames())
@@ -77,7 +82,7 @@ TauIsoltrkPtsumVSPtcut = datasets.getHistoSet("signalAnalysis/tau_isoltrk_ptsum_
 ############################### DATA ###############################
 ### Merge all collision data datasets to one, it has name "Data"
 ### Note: this must be done before normalizeMCByLuminosity()
-#TauIsoltrkPtsumVSPtcut.mergeDataDatasets()
+#TauIsoltrkPtsumVSPtcut.mergeData()
 
 ### Example how to set the luminosity of a data dataset
 #TauIsoltrkPtsumVSPtcut.getDataset("Data").setLuminosity(5)
@@ -103,14 +108,6 @@ ylabel = "??"
 #TauIsoltrkPtsumVSPtcut.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING ###############################
-### Example how to merge histograms of several datasets
-# TauIsoltrkPtsumVSPtcut.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"]) #uncomment me
-
-### Example how to remove given datasets
-#TauIsoltrkPtsumVSPtcut.removeDatasets(["QCD", "TTbar"])
-#TauIsoltrkPtsumVSPtcut.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
-
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
 TauIsoltrkPtsumVSPtcut.setHistoLegendLabels(legendLabels) # many datasets, with dict
@@ -120,8 +117,8 @@ TauIsoltrkPtsumVSPtcut.setHistoLegendStyleAll("F")
 TauIsoltrkPtsumVSPtcut.setHistoLegendStyle("Data", "p")
 
 ### Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-TauIsoltrkPtsumVSPtcut.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-TauIsoltrkPtsumVSPtcut.applyStyle("Data", styles.getDataStyle())
+TauIsoltrkPtsumVSPtcut.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
+TauIsoltrkPtsumVSPtcut.forHisto("Data", styles.getDataStyle())
 #TauIsoltrkPtsumVSPtcut.setHistoDrawStyle("Data", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation

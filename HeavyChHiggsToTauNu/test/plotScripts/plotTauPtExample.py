@@ -11,7 +11,9 @@
 
 
 import ROOT
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -53,29 +55,37 @@ datasets = getDatasetsFromMulticrabCfg()
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
 
+# Print the list of datasets in the given HistoSet
+#print "\n".join([d.getName() for d in datasets.getAllDatasets()])
+
+# Example how to remove some datasets
+#datasets.remove(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
+#                 "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
+#                 "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
+
+
 # Example how to set new signal cross sections for a given tan(beta)
 xsect.setHplusCrossSections(datasets, tanbeta=20)
+
+# Merge all collision data datasets to one, it has name "Data"
+# Note: this must be done before normalizeMCByLuminosity()
+datasets.mergeData()
+
+# Example how to set the luminosity of a data dataset
+#datasets.getDataset("Data").setLuminosity(5)
+
+# Example how to set the cross section of some MC datasets
+# datasets.getDataset("WJets").setCrossSection(30000)
+
+# Example how to merge histograms of several datasets
+datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
+                       "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
 
 # Get set of histograms with the given path. The returned object is of
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = datasets.getHistoSet("signalAnalysis/tau_pt")
-
-# Print the list of datasets in the given HistoSet
-#print "\n".join(tauPts.getDatasetNames())
-
-# Example how to remove some datasets
-#tauPts.removeDatasets(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
-#                       "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
-
-# Merge all collision data datasets to one, it has name "Data"
-# Note: this must be done before normalizeMCByLuminosity()
-tauPts.mergeDataDatasets()
-
-# Example how to set the luminosity of a data dataset
-#tauPts.getDataset("Data").setLuminosity(5)
+tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -97,13 +107,6 @@ ylabel = "#tau cands / 1 GeV/c"
 #tauPts.normalizeToOne()
 #ylabel = "A.u."
 
-# Example how to merge histograms of several datasets
-tauPts.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
-                             "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
-
-# Example how to remove given datasets
-#tauPts.removeDatasets(["QCD", "TTbar"])
-
 # Example how to set legend labels from defaults
 #tauPts.setHistoLegendLabel("TTbar_Htaunu_M80", "H^{#pm} M=80") # one dataset at a time
 tauPts.setHistoLegendLabels(legendLabels) # many datasets, with dict
@@ -113,15 +116,15 @@ tauPts.setHistoLegendStyleAll("F")
 tauPts.setHistoLegendStyle("Data", "p")
 
 # Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-#tauPts.applyStyles(styles.getStyles())
-tauPts.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-tauPts.applyStyle("Data", styles.getDataStyle())
+#tauPts.forEachHisto(styles.generator())
+tauPts.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
+tauPts.forHisto("Data", styles.getDataStyle())
 tauPts.setHistoDrawStyle("Data", "EP")
 
 
 # Example how to stack all MC datasets
 # Note: this MUST be done after all legend/style manipulation
-tauPts.stackMCDatasets()
+tauPts.stackMCHistograms()
 
 # Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = tauPts.createCanvasFrame("taupt")
@@ -157,3 +160,32 @@ tauPts.addLuminosityText()
 canvas.SaveAs(".png")
 #canvas.SaveAs(".eps")
 #canvas.SaveAs(".C")
+
+# Print various information from datasets
+print "============================================================"
+print "Dataset info: "
+datasets.printInfo()
+
+# Construct the event counter
+eventCounter = EventCounter(datasets)
+
+# Normalize MC by the data luminosity
+eventCounter.normalizeMCByLuminosity()
+
+# Normalize MC by cross section
+# eventCounter.normalizeMCByCrossSection
+
+# Normalize MC to specific luminosity
+# eventCounter.normalizeMCToLuminosity(5)
+
+# Example how to print the main counter (the parameter is
+# function/functor giving a format for the printing)
+print "============================================================"
+print "Main counter (MC normalized by collision data luminosity)"
+eventCounter.getMainCounter().printCounter(FloatDecimalFormat(1))
+
+# Example how to print all subcounter names
+for subCounterName in eventCounter.getSubCounterNames():
+    print "============================================================"
+    print "Subcounter %s (MC normalized by collision data luminosity)" % subCounterName
+    eventCounter.getSubCounter(subCounterName).printCounter() # Use the default format

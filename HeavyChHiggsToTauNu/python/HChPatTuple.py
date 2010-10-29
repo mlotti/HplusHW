@@ -22,7 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTes
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True):
+def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
+           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -64,21 +65,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-    # Count the number of primary vertices, and put into event
-    #process.primaryVertexNumber = cms.EDProducer("HPlusVertexCountProducer",
-    #    src = cms.InputTag('offlinePrimaryVertices'),
-    #    alias = cms.string("primaryVertexNumber")
-    #)
-    #if dataVersion.isData():
-    #    # See HChDataSelection
-    #    process.primaryVertexNumber.src = "selectedPrimaryVertices"
-    #if out != None:
-    #    out.outputCommands.append("keep int_primaryVertexNumber_*_*")
-
     process.hplusPatSequence = cms.Sequence(
         process.hplusPatTauSequence *
         process.patDefaultSequence
-#        process.primaryVertexNumber
     )
 
     # Restrict input to AOD
@@ -92,10 +81,12 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     process.patJets.addJetID = False
+    process.patJets.embedCaloTowers = False
+    process.patJets.embedPFCandidates = False
     if dataVersion.is38X():
         process.patJets.addTagInfos = False
 
-    addJetCollection(process,cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
+    addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                      'AK5', 'JPT',
                      doJTA        = True,
                      doBTagging   = True,
@@ -105,7 +96,20 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                      doL1Counters = True,
                      genJetCollection = cms.InputTag("ak5GenJets"),
                      doJetID      = False
-                     )
+    )
+
+    addJetCollection(process, cms.InputTag('ak5PFJets'),
+                     'AK5', 'PF',
+                     doJTA        = True,
+                     doBTagging   = True,
+                     jetCorrLabel = ('AK5','PF'),
+                     doType1MET   = False,
+                     doL1Cleaning = False,
+                     doL1Counters = True,
+                     genJetCollection = cms.InputTag("ak5GenJets"),
+                     doJetID      = False
+    )
+
     if out != None:
         out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
@@ -127,18 +131,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # addTauCollection should replace the default producer modified
     # here)
     process.patTaus.embedLeadTrack = True
-
-    # For some reason, embedding these for 35X data does NOT work for
-    # calotaus (output module complains about trying to persist
-    # transient Ref/Ptr, so I'd guess there's transient RefVector of
-    # tracks somewhere in the calotau reconstruction process
-
-    # Update: Apparently it doesn't work on 36X collision data
-    # either...
-
-    #if not dataVersion.is35X():
-    #    process.patTaus.embedSignalTracks = True
-    #    process.patTaus.embedIsolationTracks = True
+    process.patTaus.embedLeadPFCand = True
+    process.patTaus.embedLeadPFChargedHadrCand = True
+    process.patTaus.embedLeadPFNeutralCand = True
 
     # There's probably a bug in pat::Tau which in practice prevents
     # the emedding of PFCands. Therefore we keep the PFCandidates
@@ -147,9 +142,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # collection embedding which doesn't. The PFCand embedding is
     # disabled for consistenty and saving even some disk space.
 
-    process.patTaus.embedLeadPFCand = True
-    process.patTaus.embedLeadPFChargedHadrCand = True
-    process.patTaus.embedLeadPFNeutralCand = True
     # process.patTaus.embedSignalPFCands = True
     # process.patTaus.embedSignalPFChargedHadrCands = True
     # process.patTaus.embedSignalPFNeutralHadrCands = True
@@ -174,7 +166,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
-        # Disable isoDeposits like this untilthe problem with doPFIsoDeposits is fixed 
+        # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
 #        if not dataVersion.is38X():
@@ -215,11 +207,48 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
 
     # Muons
-
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
-    #process.patMuons.usePV = False
+    process.patMuons.usePV = False
+
+    # Electrons
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    process.patElectrons.usePV = False
+
+    # Electron ID, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+    if doPatElectronID:
+        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+        process.makePatElectronsIdAndElectrons = cms.Sequence(
+            process.simpleEleIdSequence *
+            process.patElectronIsolation *
+            process.patElectrons
+        )
+        process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
+
+        process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
+        process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
+        process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
+        process.patElectrons.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
+        process.patElectrons.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
+        process.patElectrons.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
+        process.patElectrons.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
+        process.patElectrons.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+        process.patElectrons.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
+        process.patElectrons.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
+        process.patElectrons.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
+        process.patElectrons.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
+
+
+    # Select good primary vertices
+    # For data this is already ran, see HChDataSelection.py
+    if not dataVersion.isData():
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+        process.hplusPatSequence *= process.goodPrimaryVertices
+    if out != None:
+        out.outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
 
 
     # Trigger
@@ -227,8 +256,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         outMod= ''
         if out != None:
             outMod  = 'out'
-        switchOnTrigger(process)
-        # syntax changed, was before (process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+        switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
     # Build sequence
     seq = cms.Sequence()
@@ -242,5 +270,153 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     seq *= process.hplusPatSequence
 
+    # Tau+HLT matching
+    if doTauHLTMatching:
+        seq *= addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
+
     return seq
     
+
+
+
+################################################################################
+# Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching
+# Produces:
+#   1) a patTauCollection of patTaus matched to the HLT tau trigger and
+#   2) a copy of the same collection with the patTau matching to the HLT jet trigger
+#      removed (needed to remove trigger bias in QCD backround measurement).
+# Yes, I agree that this sounds (and is) a bit compicated :)
+def addTauHLTMatching(process, tauTrigger, jetTrigger):
+    if tauTrigger == None:
+        raise Exception("Tau trigger missing for matching")
+    if jetTrigger == None:
+        raise Exception("Jet trigger missing for matching")
+
+    patTauCollectionList = [
+        "selectedPatTausShrinkingConePFTau",
+        "selectedPatTausHpsPFTau",
+        "selectedPatTausCaloRecoTau"
+        ] # add to the list new sources for patTauCollections, if necessary
+
+    patTauTriggerMatchHplusProtoType = cms.EDProducer("PATTriggerMatcherDRLessByR",
+        src                   = cms.InputTag("dummy"),
+        matched               = cms.InputTag("patTrigger"),
+        andOr                 = cms.bool(False),
+        filterIdsEnum         = cms.vstring('*'),
+        filterIds             = cms.vint32(0),
+        filterLabels          = cms.vstring('*'),
+        pathNames             = cms.vstring(tauTrigger),
+        collectionTags        = cms.vstring('*'),
+        maxDeltaR             = cms.double(0.4), # start with 0.4; patTrigger pages propose 0.1 or 0.2
+        resolveAmbiguities    = cms.bool(True),
+        resolveByMatchQuality = cms.bool(False)
+    )
+
+    patTauEmptyCleanerProtoType = cms.EDFilter("PATTauSelector",
+        src = cms.InputTag("dummy"),
+        cut = cms.string("!triggerObjectMatchesByPath('"+tauTrigger+"').empty()"),
+    )
+
+    process.triggerMatchingSequence = cms.Sequence()
+
+    for patTauCollection in patTauCollectionList:
+        ###########################################################################
+        # Tau -> HLT tau trigger matching
+        print "Matching patTauCollection "+patTauCollection+" to tau trigger "+tauTrigger
+        # create DeltaR matcher of trigger objects to a tau collection
+        patTauTriggerMatcher = patTauTriggerMatchHplusProtoType.clone(
+            src = cms.InputTag(patTauCollection)
+        )
+        patTauTriggerMatcherName = patTauCollection+"TauTriggerMatcher"
+        setattr(process, patTauTriggerMatcherName, patTauTriggerMatcher)
+        process.triggerMatchingSequence *= patTauTriggerMatcher
+    
+        # produce patTriggerObjectStandAloneedmAssociation object
+        patTauTriggerEvent = process.patTriggerEvent.clone(
+            patTriggerMatches = cms.VInputTag(patTauTriggerMatcherName)
+        )
+        patTauTriggerEventName = patTauCollection+"TauTriggerEvent"
+        setattr(process, patTauTriggerEventName, patTauTriggerEvent)
+        process.triggerMatchingSequence *= patTauTriggerEvent
+    
+        # embed the patTriggerObjectStandAloneedmAssociation to a tau collection
+        patTauTriggerEmbedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
+            src     = cms.InputTag(patTauCollection),
+            matches = cms.VInputTag(patTauTriggerMatcherName)
+        )
+        patTauTriggerEmbedderName = patTauCollection+"TauTriggerEmbedder"
+        setattr(process, patTauTriggerEmbedderName, patTauTriggerEmbedder)
+        process.triggerMatchingSequence *= patTauTriggerEmbedder
+    
+        # clean empty pat taus from the embedded tau collection
+        patTausTriggerMatchedAndCleaned = patTauEmptyCleanerProtoType.clone(
+            src = cms.InputTag(patTauTriggerEmbedderName)
+        )
+        patTausTriggerMatchedAndCleanedName = patTauCollection+"TauTriggerMatched"
+        setattr(process, patTausTriggerMatchedAndCleanedName, patTausTriggerMatchedAndCleaned)
+        process.triggerMatchingSequence *= patTausTriggerMatchedAndCleaned
+    
+        ###########################################################################
+        # Tau -> HLT jet trigger matching
+        # (needed for removing the tau candidate matching to jet trigger in QCD bkg measurement)
+        print "Matching patTauCollection "+patTauCollection+" to jet trigger "+jetTrigger
+        # create DeltaR matcher of trigger objects
+        patJetTriggerMatcher = patTauTriggerMatcher.clone(
+            pathNames = cms.vstring(jetTrigger)
+        )
+        patJetTriggerMatcherName = patTauCollection+"JetTriggerMatcher"
+        setattr(process, patJetTriggerMatcherName, patJetTriggerMatcher)
+        process.triggerMatchingSequence *= patJetTriggerMatcher
+    
+        # produce patTriggerObjectStandAloneedmAssociation object
+        patJetTriggerEvent = process.patTriggerEvent.clone(
+            patTriggerMatches = cms.VInputTag(patJetTriggerMatcherName)
+        )
+        patJetTriggerEventName = patTauCollection+"JetTriggerEvent"
+        setattr(process, patJetTriggerEventName, patJetTriggerEvent)
+        process.triggerMatchingSequence *= patJetTriggerEvent
+    
+        # embed the patTriggerObjectStandAloneedmAssociation to a tau collection
+        patJetTriggerEmbedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
+            src     = cms.InputTag(patTauCollection),
+            matches = cms.VInputTag(patJetTriggerMatcherName)
+        )
+        patJetTriggerEmbedderName = patTauCollection+"JetTriggerEmbedder"
+        setattr(process, patJetTriggerEmbedderName, patJetTriggerEmbedder)
+        process.triggerMatchingSequence *= patJetTriggerEmbedder
+    
+        # clean empty pat taus from the embedded tau collection
+        patJetTriggerMatchedAndCleaned = patTauEmptyCleanerProtoType.clone(
+            src = cms.InputTag(patJetTriggerEmbedderName)
+        )
+        patJetTriggerMatchedAndCleanedName = patTauCollection+"JetTriggerMatched"
+        setattr(process, patJetTriggerMatchedAndCleanedName, patJetTriggerMatchedAndCleaned)
+        process.triggerMatchingSequence *= patJetTriggerMatchedAndCleaned
+    
+        ###########################################################################
+        # Remove first tau matching to the jet trigger from the list
+        # of tau -> HLT tau trigger matched patTaus
+        patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
+            tausMatchedToTauTriggerSrc = cms.InputTag(patTausTriggerMatchedAndCleanedName),
+            tausMatchedToJetTriggerSrc = cms.InputTag(patJetTriggerMatchedAndCleanedName),
+        )
+        patJetTriggerCleanedTauTriggerMatchedTausName = patTauCollection+"TauTriggerMatchedAndJetTriggerCleaned"
+        setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
+        process.triggerMatchingSequence *= patJetTriggerCleanedTauTriggerMatchedTaus
+    
+    out = None
+    outdict = process.outputModules_()
+    if outdict.has_key("out"):
+        outdict["out"].outputCommands.extend([
+            "keep patTaus_*TauTriggerMatched_*_*",
+            "drop *_*TauTriggerMatcher_*_*",
+            "drop *_*TauTriggerEvent_*_*",
+            "drop *_*TauTriggerEmbedder_*_*",
+            "drop patTaus_*JetTriggerMatched_*_*",
+            "drop *_*JetTriggerMatcher_*_*",
+            "drop *_*JetTriggerEvent_*_*",
+            "drop *_*JetTriggerEmbedder_*_*",
+            "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
+        ])
+
+    return process.triggerMatchingSequence

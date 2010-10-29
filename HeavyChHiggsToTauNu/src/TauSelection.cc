@@ -77,8 +77,8 @@ namespace HPlus {
 	if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
 	if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
 	if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
-	//	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
-	//	std::cout << "WARNING, no tau selection used!" << std::endl;
+	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
+	std::cout << "WARNING, no tau selection used!" << std::endl;
 	return false;
   }
 
@@ -463,8 +463,7 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
-       std::cout << " after isolation HSP " << std::endl;   
-
+/*
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
 		increment(fnProngsSubCount);
@@ -501,7 +500,7 @@ namespace HPlus {
 		if(InvMass > fInvMassCut) continue;
 		increment(fInvMassSubCount);
 		++InvMassCutPassed;
-
+*/
                 // Fill Histos after Tau Selection Cuts
                 hPtAfterTauSelCuts->Fill(iTau->pt());
                 hEtaAfterTauSelCuts->Fill(iTau->eta());
@@ -526,7 +525,7 @@ namespace HPlus {
 
 	if(leadTrkPtCutPassed == 0) return false;
 	increment(fLeadTrkPtCount); 
-
+/*
 	if(nProngsCutPassed == 0) return false;
 	increment(fnProngsCount);
 
@@ -539,7 +538,7 @@ namespace HPlus {
 	if(InvMassCutPassed == 0) return false;
 	increment(fInvMassCount);
 
-/*
+
         if(leadTrkPtCutPassed == 0) return false;
         increment(fLeadTrkPtCount);
 
