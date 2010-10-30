@@ -38,18 +38,20 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-#tauSelection = tauSelectionShrinkingConeCutBased
+tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+#tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
+    src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(3)
+    minNumber = cms.untracked.uint32(3),
+    METCut = cms.untracked.double(60.0)
 )
 
 MET = cms.untracked.PSet(

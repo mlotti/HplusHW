@@ -116,6 +116,9 @@ namespace HPlus {
       //      reco::TrackRef leadTrk = iTau->leadTrack();
       //      if(leadTrk.isNonnull())
       //        hLeadTrkPt->Fill(leadTrk->pt());
+      //      uint16_t nSigTk        =  thePFTauRef->signalPFChargedHadrCands().size();
+      uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
+
 
       if(!(iTau->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
@@ -184,9 +187,11 @@ namespace HPlus {
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
 
-        
-      hnProngs->Fill(iTau->signalTracks().size());    
-      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      //      std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;       
+      hnProngs->Fill(nSigTracks);    
+      //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue; 
+      //      if( nSigTracks != 1 ) continue; 
       increment(fnProngsSubCount);
       ++nProngsCutPassed;
  
@@ -343,7 +348,8 @@ namespace HPlus {
 		//       std::cout << " after isolation tanC " << std::endl;   
 
 		hnProngs->Fill(iTau->signalTracks().size());
-		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+		//		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+		if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue;
 		increment(fnProngsSubCount);
 		++nProngsCutPassed;
 

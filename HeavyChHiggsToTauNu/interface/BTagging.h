@@ -5,7 +5,6 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
@@ -51,6 +50,10 @@ namespace HPlus {
     TH1 *hDiscr;
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hPt1;
+    TH1 *hEta1;
+    TH1 *hPt2;
+    TH1 *hEta2;
     TH1 *hNumberOfBtaggedJets;
 
     // Selected jets
