@@ -13,7 +13,10 @@
 namespace HPlus {
 
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+    //    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
+    fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fSrc_met(iConfig.getUntrackedParameter<edm::InputTag>("src_met")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
@@ -27,10 +30,11 @@ namespace HPlus {
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut"))
   {
     edm::Service<TFileService> fs;
-    hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 100.);
-    hEta = fs->make<TH1F>("jet_eta", "jet_eta", 60, -3., 3.);
-    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 20, 0., 10.);
-  }
+    hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 200.);
+    hEta = fs->make<TH1F>("jet_eta", "jet_eta", 100, -5., 5.);
+    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
+    hDeltaPhiJetMet = fs->make<TH1F>("deltaPhiJetMet", "deltaPhiJetMet", 60, 0., 180.); 
+ }
 
   JetSelection::~JetSelection() {}
 
@@ -75,6 +79,21 @@ namespace HPlus {
       if(!(std::abs(iJet->eta()) < fEtaCut)) continue;
       increment(fEtaCutSubCount);
       ++etaCutPassed;
+
+
+      // plot deltaPhi(jet,met)
+      double deltaPhi = -999;
+
+      edm::Handle<edm::View<reco::MET> > hmet;
+      iEvent.getByLabel(fSrc_met, hmet);
+      edm::Ptr<reco::MET> met = hmet->ptrAt(0);
+
+      if ( met->et()>  fMetCut) {
+	//	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(fMETSelection.getSelectedMET()));
+	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
+	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
+      }
+
 
       fSelectedJets.push_back(iJet);
     }

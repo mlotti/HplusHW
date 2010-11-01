@@ -174,7 +174,7 @@ namespace HPlus {
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
   {
     edm::Service<TFileService> fs;
-    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 1000, 0.0, 10.0);
+    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 100, 0.3, 1.0);
   }
 
   EvtTopology::~EvtTopology() {}
