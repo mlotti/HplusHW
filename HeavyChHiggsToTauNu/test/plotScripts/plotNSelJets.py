@@ -12,6 +12,7 @@
 ########################################################################
 
 import ROOT
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -52,6 +53,16 @@ datasets = getDatasetsFromMulticrabCfg()
 #datasets = getDatasetsFromCrabDirs(["TTToHpmToTauNu_M100"]) ### example: single dataset
 #datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100","TTToHpmToTauNu_M120","TTbar_Htaunu_M140", "TTbar_Htaunu_M160", "QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170"]) ### example: list of datasets
 
+############################### MERGING & REMOVING DATASETS ###############################
+### Example how to merge histograms of several datasets
+datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+
+### Example how to remove some datasets
+#NSelJets.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+#NSelJets.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120",  "TTbar_Htaunu_M160"])
+datasets.remove(["TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+
+
 ### Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt50to80", "QCD_Pt50to80/res/histograms_1_1_zCl.root")])
 #datasets = getDatasetsFromRootFiles([("WJets", "WJets/res/histograms_32_1_f4s.root")])
@@ -63,7 +74,7 @@ datasets = getDatasetsFromMulticrabCfg()
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-NSelJets = datasets.getHistoSet("signalAnalysis/NumberOfSelectedJets")
+NSelJets = HistoSet(datasets, "signalAnalysis/NumberOfSelectedJets")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(NSelJets.getDatasetNames())
@@ -98,19 +109,6 @@ ylabel = "Events"
 #NSelJets.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING & REMOVING DATASETS ###############################
-### Example how to merge histograms of several datasets
-NSelJets.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
-
-### Example how to remove some datasets
-#NSelJets.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
-#NSelJets.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120",  "TTbar_Htaunu_M160"])
-NSelJets.removeDatasets(["TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-
-### Example how to remove given datasets
-#NSelJets.removeDatasets(["QCD", "TTbar"])
-#NSelJets.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
-
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
 NSelJets.setHistoLegendLabels(legendLabels) # many datasets, with dict
@@ -120,14 +118,14 @@ NSelJets.setHistoLegendStyleAll("F")
 NSelJets.setHistoLegendStyle("Data", "p")
 
 ### Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-NSelJets.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-NSelJets.applyStyle("Data", styles.getDataStyle())
+NSelJets.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
+NSelJets.forHisto("Data", styles.getDataStyle())
 #NSelJets.setHistoDrawStyle("Data", "EP")
-NSelJets.applyStyle("BTau_146240-147116", styles.getDataStyle())
+NSelJets.forHisto("BTau_146240-147116", styles.getDataStyle())
 NSelJets.setHistoDrawStyle("BTau_146240-147116", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
-NSelJets.stackMCDatasets()
+NSelJets.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = NSelJets.createCanvasFrame("NSelJets", ymin=0.01, ymax=None, xmin=0.0, xmax=10.0)

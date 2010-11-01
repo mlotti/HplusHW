@@ -12,6 +12,7 @@
 ########################################################################
 
 import ROOT
+from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -58,12 +59,27 @@ datasets = getDatasetsFromMulticrabCfg()
 #datasets = getDatasetsFromRootFiles([("TTbar", "TTbar/res/histograms_3_1_oN4.root")])
 #datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M100", "TTToHpmToTauNu_M100/res/histograms_1_1_6Ac.root")])
 #datasets = getDatasetsFromRootFiles([("BTau_141950-144114", "BTau_141950-144114/res/histograms_1_1_Dxo.root")])
+
+############################### MERGING & REMOVING DATASETS ###############################
+### Example how to merge histograms of several datasets
+datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+
+### Example how to remove some datasets
+#datasets.remove(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
+#datasets.remove(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+
+#datasets.remove(["BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+#datasets.remove(["BTau_141950-144114", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+datasets.remove([",BTau_141950-144114", "BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
+
+
+
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
 ### type HistoSet, which contains a histogram from each dataset in
 ### DatasetSet. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-alphaT = datasets.getHistoSet("signalAnalysis/alphaT")
+alphaT = HistoSet(datasets, "signalAnalysis/alphaT")
 
 ### Print the list of datasets in the given HistoSet
 #print "\n".join(alphaT.getDatasetNames())
@@ -101,21 +117,6 @@ ylabel = "Events"
 #alphaT.normalizeToOne()
 #ylabel = "a.u"
 
-############################### MERGING & REMOVING DATASETS ###############################
-### Example how to merge histograms of several datasets
-alphaT.mergeDatasets("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
-
-### Example how to remove some datasets
-#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbarJets", "WJets", "QCD", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M140", "TTbar_Htaunu_M160"])
-#alphaT.removeDatasets(["BTau_141950-144114","BTau_146240-146729", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-
-#alphaT.removeDatasets(["BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-#alphaT.removeDatasets(["BTau_141950-144114", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-alphaT.removeDatasets([",BTau_141950-144114", "BTau_146240-147116", "TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTauNu_M100", "TTToHpmToTauNu_M120", "TTbar_Htaunu_M160"])
-
-### Example how to remove given datasets
-#alphaT.removeDatasets(["QCD", "TTbar"])
-#alphaT.removeDatasets(["TTToHpmToTauNu_M90", "QCD"])
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
@@ -126,16 +127,16 @@ alphaT.setHistoLegendStyleAll("F")
 alphaT.setHistoLegendStyle("Data", "p")
 
 ### Apply the default styles (for all histograms, for MC histograms, for a single histogram)
-alphaT.applyStylesMC(styles.getStylesFill()) # Apply SetFillColor too, needed for histogram stacking
-alphaT.applyStyle("Data", styles.getDataStyle())
+alphaT.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
+alphaT.forHisto("Data", styles.getDataStyle())
 #alphaT.setHistoDrawStyle("Data", "EP")
-#alphaT.applyStyle("BTau_146240-147116", styles.getDataStyle())
+#alphaT.forHisto("BTau_146240-147116", styles.getDataStyle())
 #alphaT.setHistoDrawStyle("BTau_146240-147116", "EP")
-#alphaT.applyStyle("BTau_141950-144114", styles.getDataStyle())
+#alphaT.forHisto("BTau_141950-144114", styles.getDataStyle())
 #alphaT.setHistoDrawStyle("BTau_141950-144114", "EP")
 
 ### Example how to stack all MC datasets. NOTE: this MUST be done after all legend/style manipulation
-alphaT.stackMCDatasets()
+alphaT.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=1.2)

@@ -43,7 +43,7 @@ namespace HPlus {
     const float getSelectedElectronsEta() const {
       return fSelectedElectronsEta;
     }
-    
+   
   private:
 
     bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -80,8 +80,12 @@ namespace HPlus {
     Count fElecIDSubCountElecAllIDs;
     Count fElecIDSubCountOther;
     // Histograms
+    TH1 *hElectronPt;
+    TH1 *hElectronEta;
     TH1 *hElectronPt_gsfTrack;
     TH1 *hElectronEta_gsfTrack;
+    TH1 *hElectronPt_AfterSelection;
+    TH1 *hElectronEta_AfterSelection;
     TH1 *hElectronPt_gsfTrack_AfterSelection;
     TH1 *hElectronEta_gsfTrack_AfterSelection;
 

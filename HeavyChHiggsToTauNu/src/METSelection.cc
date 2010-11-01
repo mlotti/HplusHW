@@ -31,6 +31,7 @@ namespace HPlus {
     iEvent.getByLabel(fSrc, hmet);
 
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
+    fMet = met->et();
 
     hMet->Fill(met->et());
     hMetSignif->Fill(met->significance());
