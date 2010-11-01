@@ -1,9 +1,16 @@
 import os, re, math
+import subprocess
 import getopt
 
-srmls = "/opt/d-cache/srm/bin/srmls -srm_protocol_version=2 -server_mode=passive -streams_num=1 -count=%d -offset=%d"
-srmrm = "/opt/d-cache/srm/bin/srmrm -srm_protocol_version=2 -server_mode=passive"
-srmrmdir = "/opt/d-cache/srm/bin/srmrmdir -srm_protocol_version=2 -server_mode=passive"
+def srmls(count, offset):
+    return ["srmls",  "-srm_protocol_version=2",  "-server_mode=passive",  "-streams_num=1",
+            "-count=%d" % count,
+            "-offset=%d" % offset]
+def srmrm():
+    return ["srmrm", "-srm_protocol_version=2",  "-server_mode=passive"]
+
+def srmrmdir():
+    return ["srmrmdir",  "-srm_protocol_version=2",  "-server_mode=passive"]
 
 skip_re = [re.compile("^java -cp"), re.compile("^SRM_debugging")]
 
@@ -15,9 +22,10 @@ class SrmException(Exception):
         return self.message
 
 def execute(cmd):
-    f = os.popen4(cmd)[1]
-    ret=[]
-    for line in f:
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    output = p.communicate()[0]
+    ret = []
+    for line in output.split("\n"):
         skip = False
         for x in skip_re:
             m = x.search(line)
@@ -28,7 +36,7 @@ def execute(cmd):
             continue
         
         ret.append(line.replace("\n", ""))
-    f.close()
+
     return ret
 
 def ls_internal(url):
@@ -51,7 +59,7 @@ def ls_internal(url):
         offset = iter*count
         iter += 1
 
-        output = execute("%s %s" % (srmls%(count, offset), url))
+        output = execute(srmls(count, offset) + [url])
         if len(output) > 0 and ("srm" in output[0] and "client" in output[0] and "error" in output[0]):
             raise SrmException("\n".join(output))
 
@@ -181,9 +189,9 @@ def rm(urls):
     def internal_rm_wrapper(urls):
         if len(urls) == 0:
             return
-        cmd = "%s %s" % (srmrm, " ".join(urls))
+        cmd = srmrm() + urls
         if verbose:
-            print cmd
+            print " ".join(cmd)
         output = execute(cmd)
         print "\n".join(output)
         
@@ -252,8 +260,8 @@ def rmdir(urls):
     while i < len(urls):
         suburls = urls[i:i+split]
         i += split
-        cmd = "%s %s" % (srmrmdir, " ".join(suburls))
+        cmd = srmrmdir() + suburls
         if verbose:
-            print cmd
+            print " ".join(cmd)
         output = execute(cmd)
         print "\n".join(output)
