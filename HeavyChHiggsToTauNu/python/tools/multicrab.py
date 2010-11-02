@@ -166,7 +166,7 @@ class MulticrabDataset:
         else:
             self.filesToCopy.append(fname)
 
-        self.data["lumi_mask"] = fname
+        self.data["lumi_mask"] = os.path.basename(fname)
 
     def getDatasetPath(self):
         return self.data["datasetpath"]

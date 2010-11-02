@@ -50,4 +50,5 @@ def addOutputName(dataset):
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
-multicrab.createTasks(configOnly=True)
+multicrab.createTasks()
+#multicrab.createTasks(configOnly=True)
