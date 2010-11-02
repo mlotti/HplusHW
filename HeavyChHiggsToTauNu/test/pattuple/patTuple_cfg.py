@@ -51,26 +51,18 @@ del process.TFileService
 
 ################################################################################
 # In case of data, add trigger
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
-process.collisionDataSelection = cms.Sequence()
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 myTrigger = options.trigger
 # Default trigger, deduce from data
 if len(myTrigger) == 0:
-    if dataVersion.isData():
-        if dataVersion.isRun2010A():
-            #myTrigger = "HLT_SingleLooseIsoTau20" # prescaled
-            myTrigger = "HLT_SingleIsoTau20_Trk5" # not prescaled
-        elif dataVersion.isRun2010B():
-            myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
-        else:
-            raise Exception("Unsupported data version!")
-        process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
-    else:
-        if dataVersion.is38X():
-            myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
-        else:
-            myTrigger = "HLT_SingleLooseIsoTau20" # only tau trigger available in 36X MC
-    
+    myTrigger = getSignalTrigger(dataVersion)
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+process.collisionDataSelection = cms.Sequence()
+if dataVersion.isData():
+    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
+
+   
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
 print "Trigger used for tau matching: "+myTrigger
