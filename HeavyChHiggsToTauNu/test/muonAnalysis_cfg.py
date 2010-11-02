@@ -90,9 +90,11 @@ electrons = cms.InputTag("selectedPatElectrons")
 jets = cms.InputTag("selectedPatJets")
 #jets = cms.InputTag("selectedPatJetsAK5JPT")
 
-#met = cms.InputTag("patMETs")
-met = cms.InputTag("patMETsPF")
-#met = cms.InputTag("patMETsTC")
+caloMET = "patMETs"
+pfMET = "patMETsPF"
+tcMET = "patMETsTC"
+
+met = cms.InputTag(pfMET)
 
 ################################################################################
 
@@ -119,7 +121,7 @@ if options.doPat != 0:
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False)
+        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
     )
     #removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
     removeSpecificPATObjects(process, ["Photons"], False)
@@ -151,15 +153,18 @@ histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=
 
 histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
 
+histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
+                            min=0, max=120, nbins=120, description="W transverse mass")
+
 histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
 # Beginning
 histoAnalyzer = analysis.addMultiHistoAnalyzer("AllMuons", [
         ("muon_", muons, histosBeginning),
-        ("calomet_", cms.InputTag("patMETs"), [histoMet]),
-        ("pfmet_", cms.InputTag("patMETsPF"), [histoMet]),
-        ("tcmet_", cms.InputTag("patMETsTC"), [histoMet])])
+        ("calomet_", cms.InputTag(caloMET), [histoMet]),
+        ("pfmet_", cms.InputTag(pfMET), [histoMet]),
+        ("tcmet_", cms.InputTag(tcMET), [histoMet])])
 multipAnalyzer = analysis.addAnalyzer("Multiplicity", cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
         allMuons = cms.untracked.PSet(
             src = muons,
@@ -287,6 +292,21 @@ if applyElectronVeto:
     vetoElectrons = analysis.addCut("ElectronVeto", electrons, electronVeto, minNumber=0, maxNumber=0)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("ElectronVeto", histoAnalyzer)
     multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+
+
+# W transverse mass
+prototype = cms.EDProducer("CandViewShallowCloneCombiner",
+    checkCharge = cms.bool(False),
+    cut = cms.string('sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)>50'),
+    decay = cms.string("dummy")
+)
+wmunuCalo = analysis.addProducer("WMuNuCalo", prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
+wmunuPF   = analysis.addProducer("WMuNuPF",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
+wmunuTC   = analysis.addProducer("WMuNuTC",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
+histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("WMunuCands", histoAnalyzer)
+histoAnalyzer.wmunuCalo_ = cms.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
+histoAnalyzer.wmunuPF_   = cms.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
+histoAnalyzer.wmunuTC_   = cms.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
 
 # Jet selection
 selectedJets = analysis.addNumberCut("JetMultiplicityCut", selectedJets, minNumber=jetMinMultiplicity)
