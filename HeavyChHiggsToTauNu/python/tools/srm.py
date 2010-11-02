@@ -126,14 +126,48 @@ def ls_internal(url):
     return (ret, max_size)
 
 def ls(urls):
+    def ls_recursive(filelist, max_size, level):
+        if level != None:
+            if level == 0:
+                return (filelist, max_size)
+            level -= 1
+
+        ret = []
+        for f, size in filelist:
+            if f[-1] == "/":
+                (res, res_max_size) = ls_internal(f)
+                (res, res_max_size) = ls_recursive(res, res_max_size, level)
+                ret.extend(res)
+                max_size = max(max_size, res_max_size)
+            else:
+                ret.append( (f, size) )
+        return (ret, max_size)
+
     long = False
-    if len(urls) == 2 and urls[0] == "-l":
-        long = True
-        urls = urls[1:]
+    recursive = False
+    recursiveLevel = None
+    if len(urls) > 1:
+        if "-l" in urls:
+            long = True
+            del urls[urls.index("-l")]
+        if "-r" in urls:
+            recursive = True
+            i = urls.index("-r")
+            if i+1 < len(urls):
+                val = urls[i+1]
+                try:
+                    recursiveLevel = int(val)
+                except ValueError:
+                    pass
+                if recursiveLevel != None:
+                    del urls[i+1]
+            del urls[i]
     if len(urls) != 1:
         raise SrmException("ls expects exactly ONE URL (got %d)" % len(urls))
 
     (ret, max_size) = ls_internal(urls[0])
+    if recursive:
+        (ret, max_size) = ls_recursive(ret, max_size, recursiveLevel)
     if long:
         formstr = "%%%dd  %%s"%(int(math.log10(max_size)) +1)
         ret = [formstr % (x[1], x[0]) for x in ret]

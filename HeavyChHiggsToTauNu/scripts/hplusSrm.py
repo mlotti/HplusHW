@@ -31,9 +31,9 @@ def main(argv):
 
 
 def print_help():
-    print "Usage: hplusSrm ls    [-l]    URL"
-    print "       hplusSrm rm    [-r -v] URL"
-    print "       hplusSrm rmdir [-v]    URL"
+    print "Usage: hplusSrm ls    [-l -r [N]] URL"
+    print "       hplusSrm rm    [-r -v]     URL"
+    print "       hplusSrm rmdir [-v]        URL"
 
 
 if __name__ == "__main__":
