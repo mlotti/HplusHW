@@ -38,8 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
@@ -63,6 +63,11 @@ if dataVersion.isData():
     process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
 
    
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+process.collisionDataSelection = cms.Sequence()
+if dataVersion.isData():
+    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
+
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
 print "Trigger used for tau matching: "+myTrigger
