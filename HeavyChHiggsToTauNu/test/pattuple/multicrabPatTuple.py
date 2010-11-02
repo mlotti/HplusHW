@@ -4,7 +4,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 multicrab = Multicrab("crab_pat.cfg")
 
-multicrab.setDatasets([
+multicrab.addDatasets(
+#    "AOD",
+    "RECO",
+    [
         # Data
         "BTau_141950-144114",
         "BTau_146240-148107",
@@ -33,10 +36,7 @@ multicrab.setDatasets([
         "WJets",
         ])
 
-#multicrab.setDataInput("AOD")
-multicrab.setDataInput("RECO")
 multicrab.setDataLumiMask("../Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
-multicrab.addArgAll("doPat=1")
 
 #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
 #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)
@@ -50,5 +50,5 @@ def addOutputName(dataset):
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
-multicrab.createTasks()
-#multicrab.createTasks(configOnly=True)
+#multicrab.createTasks()
+multicrab.createTasks(configOnly=True)

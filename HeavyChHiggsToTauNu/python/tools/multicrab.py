@@ -255,8 +255,7 @@ class Multicrab:
         self.commonLines = []
         self.dataLumiMask = None
 
-        self.datasetNames = None
-        self.dataInput = None
+        self.datasetNames = []
 
         self.datasets = None
 
@@ -281,23 +280,18 @@ class Multicrab:
             self.filesToCopy.append(pyConfig)
             self.commonLines.append("CMSSW.pset = "+pyConfig)
 
-    def setDatasets(self, datasetNames):
-        self.datasetNames = datasetNames
-
-    def setDataInput(self, dataInput):
-        self.dataInput = dataInput
+    def addDatasets(self, dataInput, datasetNames):
+        self.datasetNames.extend([(name, dataInput) for name in datasetNames])
 
     def _createDatasets(self):
-        if self.datasetNames == None:
+        if len(self.datasetNames) == 0:
             raise Exception("Call setDatasets() first!")
-        if self.dataInput == None:
-            raise Exception("Call setDataInput() first!")
 
         self.datasets = []
         self.datasetMap = {}
 
-        for dname in self.datasetNames:
-            dset = MulticrabDataset(dname, self.dataInput)
+        for dname, dinput in self.datasetNames:
+            dset = MulticrabDataset(dname, dinput)
             if self.dataLumiMask != None and dset.isData():
                 dset.setLumiMask(self.dataLumiMask)
             self.datasets.append(dset)
@@ -320,6 +314,9 @@ class Multicrab:
         return self.datasetMap[name]
 
     def forEachDataset(self, function):
+        if self.datasets == None:
+            self._createDatasets()
+
         for d in self.datasets:
             function(d)
 
