@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import ConfigParser
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def print_usage(prog):
     print "Usage: %s [-cfg multicrab_cfg_file.cfg]" % prog
@@ -64,6 +65,9 @@ def main(argv):
     if py_conf_file == None:
         print "Did not find CMSSW python configuration file"
         return 1
+
+    # Check crab environment
+    multicrab.checkCrabInPath()
 
     dirname = "multicrab_" + time.strftime("%y%m%d_%H%M%S")
     os.mkdir(dirname)

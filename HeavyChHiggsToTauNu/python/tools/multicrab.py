@@ -22,3 +22,13 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 def addOptions(parser):
     parser.add_option("--dir", "-d", dest="dirs", type="string", action="append", default=[],
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
+
+
+def checkCrabInPath():
+    try:
+        retcode = subprocess.call(["crab"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except OSError, e:
+        if e.errno == errno.ENOENT:
+            raise Exception("crab executable not found in $PATH. Is the crab environment loaded?")
+        else:
+            raise e
