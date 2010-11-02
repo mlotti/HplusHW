@@ -62,6 +62,9 @@ namespace HPlus {
     if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
     hMet_AfterBTagging->Fill(fMETSelection.fMet);
 
+    CorrelationAnalysis corr;
+    corr.analyze(fTauSelection.getSelectedTaus(),fBTagging.getSelectedJets());
+
     if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
