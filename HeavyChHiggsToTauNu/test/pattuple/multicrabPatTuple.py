@@ -50,5 +50,11 @@ def addOutputName(dataset):
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
-#multicrab.createTasks()
-multicrab.createTasks(configOnly=True)
+# For collision data stageout from US doesn't seem to be a problem
+def blacklistUS(dataset):
+    if dataset.isMC():
+        dataset.addLine("GRID.se_black_list = T2_US")
+multicrab.forEachDataset(blacklistUS)
+
+multicrab.createTasks()
+#multicrab.createTasks(configOnly=True)

@@ -622,7 +622,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 400
+                "number_of_jobs": 450
             },
             "AOD": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/AODSIM",
