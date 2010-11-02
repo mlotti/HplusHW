@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
+    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 TriggerMETEmulation = cms.untracked.PSet(
     src = cms.untracked.InputTag("patMETs"), # calo MET
@@ -83,4 +83,17 @@ EvtTopology = cms.untracked.PSet(
     #discriminatorCut = cms.untracked.double(0.0),
     #alphaT = cms.untracked.double(-5.00)
     alphaT = cms.untracked.double(-5.0)
+)
+GlobalElectronVeto = cms.untracked.PSet(
+    ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
+    ElectronSelection = cms.untracked.string("kTightElectronIdentification"),
+    ElectronPtCut = cms.untracked.double(20.0),
+    ElectronEtaCut = cms.untracked.double(2.5)
+)
+
+GlobalMuonVeto = cms.untracked.PSet(
+    MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
+    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
+    MuonPtCut = cms.untracked.double(20.0),
+    MuonEtaCut = cms.untracked.double(2.5)
 )

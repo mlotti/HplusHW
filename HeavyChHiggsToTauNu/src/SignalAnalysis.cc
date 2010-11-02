@@ -16,6 +16,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter),
+    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
@@ -51,6 +52,8 @@ namespace HPlus {
     if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
     
     if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+
+    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return;
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
 

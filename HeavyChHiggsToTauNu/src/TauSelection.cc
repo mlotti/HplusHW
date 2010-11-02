@@ -148,6 +148,7 @@ namespace HPlus {
       float ptmax = 0;
       float ptsum = 0;
 
+      /*
       const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
       reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
       //      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
@@ -177,7 +178,7 @@ namespace HPlus {
 	hIsolTrkPtSumVsPtCut->Fill(cut,sum);
 	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
       } 
-
+      */
       
       if(iTau->tauID("byIsolation") < 0.5) continue; 
       increment(fbyIsolationSubCount);
