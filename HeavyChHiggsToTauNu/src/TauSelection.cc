@@ -52,9 +52,9 @@ namespace HPlus {
     fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
   {
     edm::Service<TFileService> fs;
-    hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 100.);
+    hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 200.);
     hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
-    hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 100.);
+    hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
     hEtaAfterTauSelCuts = fs->make<TH1F>("tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
     hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
     hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
@@ -65,9 +65,9 @@ namespace HPlus {
     hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
     hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
     hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
-    hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 0.01);
-    hFlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 1);
-    hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 100, 0., 5.);
+    hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 1.);
+    hFlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 10);
+    hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 50, 0., 5.);
     hbyTaNC = fs->make<TH1F>("tau_TaNC", "tau_TaNC", 100, 0., 1.);
   }
 
@@ -116,6 +116,9 @@ namespace HPlus {
       //      reco::TrackRef leadTrk = iTau->leadTrack();
       //      if(leadTrk.isNonnull())
       //        hLeadTrkPt->Fill(leadTrk->pt());
+      //      uint16_t nSigTk        =  thePFTauRef->signalPFChargedHadrCands().size();
+      uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
+
 
       if(!(iTau->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
@@ -140,10 +143,7 @@ namespace HPlus {
       increment(fLeadTrkPtSubCount);
       ++leadTrkPtCutPassed;
 
-      if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
-      increment(fHChTauIDchargeSubCount);
-      ++HChTauIDchargeCutPassed;
-     
+ 
      
       float ptmax = 0;
       float ptsum = 0;
@@ -187,9 +187,11 @@ namespace HPlus {
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
 
-        
-      hnProngs->Fill(iTau->signalTracks().size());    
-      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      //      std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;       
+      hnProngs->Fill(nSigTracks);    
+      //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
+      if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue; 
+      //      if( nSigTracks != 1 ) continue; 
       increment(fnProngsSubCount);
       ++nProngsCutPassed;
  
@@ -346,7 +348,8 @@ namespace HPlus {
 		//       std::cout << " after isolation tanC " << std::endl;   
 
 		hnProngs->Fill(iTau->signalTracks().size());
-		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+		//		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
+		if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue;
 		increment(fnProngsSubCount);
 		++nProngsCutPassed;
 

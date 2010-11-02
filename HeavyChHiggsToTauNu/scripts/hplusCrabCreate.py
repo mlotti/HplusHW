@@ -51,7 +51,19 @@ def main():
     print
     print "Jobs can be submitted by e.g. 'cd %s; multicrab -submit" % dirname
     print
-   
+
+    print
+    print "############################################################"
+    print 
+    print "hplusCrabCreate.py will soon be removed, use"
+    print
+    print "     hplusMultiCrabCreate.py"
+    print
+    print "instead."
+    print
+    print "############################################################"
+    print
+  
     return 0
 
 if __name__ == "__main__":
