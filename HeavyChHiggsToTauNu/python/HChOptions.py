@@ -25,6 +25,10 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Run PAT on the fly (needed for RECO/AOD samples)")
+    options.register("trigger",
+                     "",
+                     options.multiplicity.singleton, options.varType.string,
+                     "Trigger to use")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):

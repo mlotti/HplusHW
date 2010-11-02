@@ -22,7 +22,7 @@ class DataVersion:
         # Collision data
         if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
-            self.globalTag = "GR_R_38X_V13::All"
+            self.globalTag = "GR_R_38X_V14::All"
 
             if dataVersion == "36Xdata":
                 self.patDefaultFileCastor = "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
@@ -38,7 +38,7 @@ class DataVersion:
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START38_V12::All"
+            self.globalTag = "START38_V13::All"
 
             if dataVersion == "35X":
                 self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3/pattuple_6_1_Gv1.root"

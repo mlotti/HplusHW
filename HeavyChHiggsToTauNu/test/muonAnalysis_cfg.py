@@ -9,11 +9,6 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
-options = VarParsing.VarParsing()
-options.register("trigger",
-                 "",
-                 options.multiplicity.singleton, options.varType.string,
-                 "Trigger to use")
 options = getOptions(options)
 if options.dataVersion != "":
     dataVersion = options.dataVersion

@@ -38,8 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
@@ -51,22 +51,22 @@ del process.TFileService
 
 ################################################################################
 # In case of data, add trigger
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
+myTrigger = options.trigger
+# Default trigger, deduce from data
+if len(myTrigger) == 0:
+    myTrigger = getSignalTrigger(dataVersion)
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
-    if dataVersion.isRun2010A():
-        #myTrigger = "HLT_SingleLooseIsoTau20" # prescaled
-        myTrigger = "HLT_SingleIsoTau20_Trk5" # not prescaled
-    elif dataVersion.isRun2010B():
-        myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
-    else:
-        raise Exception("Unsupported data version!")
     process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
-else:
-    if dataVersion.is38X():
-        myTrigger = "HLT_SingleIsoTau20_Trk15_MET20"
-    else:
-        myTrigger = "HLT_SingleLooseIsoTau20" # only tau trigger available in 36X MC
+
+   
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+process.collisionDataSelection = cms.Sequence()
+if dataVersion.isData():
+    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 

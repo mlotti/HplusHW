@@ -18,6 +18,8 @@ def interpolate(mHp,tanb,mu):
 def lowerTanBPoint(mHp,tanbRef,mu):
     returnTanb = 0
     for tanb in hplusBranchingRatio[mHp].keys():
+	if tanb == tanbRef:
+	    return tanb
         if tanb > tanbRef: 
 	    return returnTanb
 	returnTanb = tanb
@@ -27,7 +29,7 @@ def higherTanBPoint(mHp,tanbRef,mu):
     if tanbRef < hplusBranchingRatio[mHp].keys()[0]:
 	return 0
     for tanb in hplusBranchingRatio[mHp].keys():
-        if tanb > tanbRef:
+        if tanb >= tanbRef:
             return tanb
     return 0
 
@@ -35,10 +37,12 @@ def linearInterpolation(mHp,tanb,mu):
     tanb1 = lowerTanBPoint(mHp,tanb,mu)
     tanb2 = higherTanBPoint(mHp,tanb,mu)
 
-    if (tanb1 > int(tanb) or tanb2 < int(tanb)) :
+    if (tanb1 == 0 or tanb2 == 0 or tanb1 > int(tanb) or tanb2 < int(tanb)) :
 	return BranchingRatio(0,0,0)
 
-    fraction = (tanb - tanb1)/(tanb2 - tanb1)
+    fraction = 1
+    if tanb1 < tanb2:
+        fraction = (tanb - tanb1)/(tanb2 - tanb1)
 
     point1 = hplusBranchingRatio[mHp][tanb1][mu]
     point2 = hplusBranchingRatio[mHp][tanb2][mu]
