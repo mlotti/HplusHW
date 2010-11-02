@@ -354,11 +354,11 @@ datasets = {
         "crossSection": 6.035e+06,
         "data": {
             "RECO": {
-                "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
+                "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
                 "number_of_jobs": 60
             },
             "AOD": {
-                "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
+                "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
                 "number_of_jobs": 50,
                 "se_white_list": ["T2_FI_HIP"]
             },
@@ -379,11 +379,11 @@ datasets = {
         "crossSection": 7.519e+05,
         "data": {
             "RECO": {
-                "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
+                "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
                 "number_of_jobs": 60
             },
             "AOD": {
-                "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
+                "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
                 "number_of_jobs": 60,
                 "se_white_list": ["T2_FI_HIP"]
             },
@@ -404,11 +404,11 @@ datasets = {
         "crossSection": 1.120e+05,
         "data": {
             "RECO": {
-                "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
+                "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
                 "number_of_jobs": 60
             },
             "AOD": {
-                "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
+                "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
                 "number_of_jobs": 60,
                 "se_white_list": ["T2_FI_HIP"]
             },
