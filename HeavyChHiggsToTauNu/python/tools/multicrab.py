@@ -381,7 +381,7 @@ class Multicrab:
         print "Wrote multicrab configuration to %s" % filename
         
 
-    def createTasks(self):
+    def createTasks(self, configOnly=False):
         checkCrabInPath()
         dirname = createTaskDir()
 
@@ -404,12 +404,13 @@ class Multicrab:
         print "############################################################"
         print
     
-        os.chdir(dirname)
-        subprocess.call(["multicrab", "-create"])
+        if not configOnly:
+            os.chdir(dirname)
+            subprocess.call(["multicrab", "-create"])
 
-        print
-        print "############################################################"
-        print
-        print "Created multicrab task to subdirectory "+dirname
-        print
+            print
+            print "############################################################"
+            print
+            print "Created multicrab task to subdirectory "+dirname
+            print
 
