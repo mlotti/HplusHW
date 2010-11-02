@@ -9,7 +9,7 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
-options = getOptions(options)
+options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
 
