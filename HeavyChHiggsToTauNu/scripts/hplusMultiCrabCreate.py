@@ -4,7 +4,6 @@ import subprocess
 import shutil
 import os
 import sys
-import time
 import ConfigParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
@@ -68,9 +67,7 @@ def main(argv):
 
     # Check crab environment
     multicrab.checkCrabInPath()
-
-    dirname = "multicrab_" + time.strftime("%y%m%d_%H%M%S")
-    os.mkdir(dirname)
+    dirname = multicrab.createTaskDir()
 
     shutil.copy(mc_conf_file, os.path.join(dirname, "multicrab.cfg"))
     flist = [crab_conf_file, py_conf_file]
