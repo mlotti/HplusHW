@@ -207,7 +207,7 @@ class EventCounter:
 
     def forEachCounter(self, func):
         func(self.mainCounter)
-        for c in self.subCounters.items():
+        for c in self.subCounters.itervalues():
             func(c)
 
     def normalizeToOne(self):

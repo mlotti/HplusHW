@@ -6,6 +6,9 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 namespace edm {
@@ -39,6 +42,9 @@ namespace HPlus {
   private:
     // Input parameters
     edm::InputTag fSrc;
+    edm::InputTag fSrc_met;
+    //    METSelection fMETSelection;
+    double fMetCut;
     double fPtCut;
     double fEtaCut;
     double fMaxDR;
@@ -58,6 +64,7 @@ namespace HPlus {
     TH1 *hPt;
     TH1 *hEta;
     TH1 *hNumberOfSelectedJets;
+    TH1 *hDeltaPhiJetMet;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
   };
