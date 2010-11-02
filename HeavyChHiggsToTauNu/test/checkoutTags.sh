@@ -10,6 +10,7 @@
 # 19.10.2010/M.Kortelainen CMSSW_3_8_5 (lumi tag update)
 # 21.10.2010/M.Kortelainen CMSSW_3_8_5_patch2 (Updated PatAlgos tag, added revision numbers for files)
 # 28.10.2010/M.Kortelainen CMSSW_3_8_5_patch3 (Electron ID and additional PAT tags from the release notes)
+# 2.11.2010/M.Kortelainen CMSSW_3_8_5_patch3 (tag for filterJSON.py etc. scripts) 
 
 
 #TARGET="analysis"
@@ -25,6 +26,7 @@ cvs up -r V08-00-27 PhysicsTools/PatAlgos/python/tools/coreTools.py
 cvs up -r 1.30      PhysicsTools/PatAlgos/python/tools/tauTools.py
 cvs co -r V00-02-24 PhysicsTools/SelectorUtils 
 cvs co -r lumi2010-Oct12 RecoLuminosity/LumiDB
+cvs co -r V01-04-00 FWCore/PythonUtilities
 
 # PATTuple
 #if [ "x$TARGET" = "xpattuple" ]; then

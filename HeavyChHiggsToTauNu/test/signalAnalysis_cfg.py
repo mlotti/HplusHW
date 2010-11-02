@@ -24,9 +24,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
-
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
@@ -54,26 +51,32 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
     print "Running PAT on the fly"
 
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+    process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
+    print "GlobalTag="+dataVersion.getGlobalTag()
+
+    # Jet trigger (for cleaning of tau->HLT matching
+    jetTrigger = "HLT_Jet30U"
+    trigger = options.trigger
+    if len(trigger) == 0:
+        trigger = getSignalTrigger(dataVersion)
+
     process.collisionDataSelection = cms.Sequence()
     if dataVersion.isData():
-        trigger = ""
-        if dataVersion.isRun2010A():
-            trigger = "HLT_SingleLooseIsoTau20"
-        elif dataVersion.isRun2010B():
-            trigger = "HLT_SingleIsoTau20_Trk15_MET20"
-        else:
-            raise Exception("Unsupported data version!")
-
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
+
+    print "Trigger used for tau matching: "+trigger
+    print "Trigger used for jet matching: "+jetTrigger
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion)
+        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
     )
 
 
