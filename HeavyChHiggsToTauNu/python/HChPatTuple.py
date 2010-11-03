@@ -211,11 +211,13 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     process.patMuons.usePV = False
+    process.patMuons.embedTrack = True
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     process.patElectrons.usePV = False
+    process.patElectrons.embedTrack = True
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID

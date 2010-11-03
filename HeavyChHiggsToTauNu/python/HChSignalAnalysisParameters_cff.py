@@ -27,6 +27,7 @@ tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRec
 tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
 
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
+#tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
 tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
 
@@ -55,7 +56,7 @@ jetSelection = cms.untracked.PSet(
 )
 
 MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    # src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     METCut = cms.untracked.double(60.0)
@@ -69,13 +70,6 @@ bTagging = cms.untracked.PSet(
     minNumber = cms.untracked.uint32(1)
 )
 
-MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(60.0)
-)
-
 transverseMassCut = cms.untracked.double(100)
 
 EvtTopology = cms.untracked.PSet(
@@ -83,4 +77,17 @@ EvtTopology = cms.untracked.PSet(
     #discriminatorCut = cms.untracked.double(0.0),
     #alphaT = cms.untracked.double(-5.00)
     alphaT = cms.untracked.double(-5.0)
+)
+GlobalElectronVeto = cms.untracked.PSet(
+    ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
+    ElectronSelection = cms.untracked.string("kTightElectronIdentification"),
+    ElectronPtCut = cms.untracked.double(20.0),
+    ElectronEtaCut = cms.untracked.double(2.5)
+)
+
+GlobalMuonVeto = cms.untracked.PSet(
+    MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
+    MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
+    MuonPtCut = cms.untracked.double(20.0),
+    MuonEtaCut = cms.untracked.double(2.5)
 )
