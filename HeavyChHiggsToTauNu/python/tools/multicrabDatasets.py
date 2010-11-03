@@ -58,7 +58,7 @@ datasets = {
     },
     "BTau_148108-148864": {
         "dataVersion": "38XdataRun2010B",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 148864),
         "data": {
             "RECO": {
