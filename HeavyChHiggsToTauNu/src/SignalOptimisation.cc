@@ -115,20 +115,12 @@ namespace HPlus {
 
     /// MET: Only false if MET < MetCut. MetCut value is set to 0 => can use it.
     bool bMETSelectionPass = fMETSelection.analyze(iEvent, iSetup);
-    if(!bMETSelectionPass) return;
-
-    /// GlobalMuonVeto: Returns false if an isolated Muon is found in the event.
-    bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    if(!bGlobalMuonVetoPass) return; 
-
-    /// GlobalElectronVeto: Returns false if an isolated Electron is found in the event.
-    bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if(!bGlobalElectronVetoPass) return;
+    // if(!bMETSelectionPass) return;
 
     /// TauID
     bool bTauSelectionPass = fTauSelection.analyze(iEvent, iSetup);
     if(!bTauSelectionPass) return;
-
+    
     /// Jet Selection    
     bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, fTauSelection.getTau());
     // if(!bJetSelectionPass) return;
@@ -141,6 +133,14 @@ namespace HPlus {
     bool bEvtTopologyPass  = fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets());
     // if(!bEvtTopologyPass) return;
     
+    /// GlobalMuonVeto: Returns false if an isolated Muon is found in the event.
+    bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    // if(!bGlobalMuonVetoPass) return; 
+
+    /// GlobalElectronVeto: Returns false if an isolated Electron is found in the event.
+    bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    // if(!bGlobalElectronVetoPass) return;
+
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getTau()[0]), *(fMETSelection.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getTau()[0]), *(fMETSelection.getSelectedMET()) );
