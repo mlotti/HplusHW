@@ -29,13 +29,17 @@ namespace {
 }
 
 namespace HPlus {
-  EventCounter::CountValue::CountValue(const std::string& n, const std::string& i, int v, double w): name(n), instance(i), value(v), weight(w), weightSquared(w*w) {}
+  EventCounter::CountValue::CountValue(const std::string& n, const std::string& i, int v, double w):
+    name(n), instance(i), instanceWeights(i+"Weights"), instanceWeightsSquared(i+"WeightsSquared"),
+    value(v), weight(w), weightSquared(w*w) {}
   bool EventCounter::CountValue::equalName(std::string n) const {
     return name == n;
   }
   template <typename T>
   void EventCounter::CountValue::produces(T *producer) const {
     producer->template produces<edm::MergeableCounter, edm::InLumi>(instance);
+    producer->template produces<double, edm::InLumi>(instanceWeights);
+    producer->template produces<double, edm::InLumi>(instanceWeightsSquared);
   }
   void EventCounter::CountValue::produce(edm::LuminosityBlock *block) const {
     std::auto_ptr<edm::MergeableCounter> countsPtr(new edm::MergeableCounter);
@@ -43,10 +47,10 @@ namespace HPlus {
     block->put(countsPtr, instance);
     std::auto_ptr<double> weightsPtr(new double);
     *weightsPtr = weight;
-    block->put(weightsPtr, instance+"Weights");
+    block->put(weightsPtr, instanceWeights);
     std::auto_ptr<double> weightsSquaredPtr(new double);
     *weightsSquaredPtr = weightSquared;
-    block->put(weightsSquaredPtr, instance+"WeightsSquared");
+    block->put(weightsSquaredPtr, instanceWeightsSquared);
   }
   void EventCounter::CountValue::reset() {
     value = 0;

@@ -31,6 +31,8 @@ namespace HPlus {
 
       std::string name;
       std::string instance;
+      std::string instanceWeights;
+      std::string instanceWeightsSquared;
       int value;
       double weight;
       double weightSquared;
