@@ -4,8 +4,8 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
+    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
+#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
 )
 TriggerMETEmulation = cms.untracked.PSet(
     src = cms.untracked.InputTag("patMETs"), # calo MET
@@ -27,6 +27,7 @@ tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRec
 tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
 
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
+#tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
 tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
 
@@ -55,7 +56,7 @@ jetSelection = cms.untracked.PSet(
 )
 
 MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
+    # src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     METCut = cms.untracked.double(60.0)
@@ -67,13 +68,6 @@ bTagging = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)
-)
-
-MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(60.0)
 )
 
 transverseMassCut = cms.untracked.double(100)

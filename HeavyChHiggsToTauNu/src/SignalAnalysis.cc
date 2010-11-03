@@ -21,6 +21,7 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
+    fCorrelationAnalysis(eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
@@ -35,9 +36,11 @@ namespace HPlus {
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
     hAlphaTVsRtau = fs->make<TH2F>("alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
-    hMet_AfterMETSelection = fs->make<TH1F>("met_AfterMETSelection", "met_AfterMETSelection", 150, 0.0, 300.0);
-    hMet_AfterBTagging = fs->make<TH1F>("met_AfterBTagging", "met_AfterBTagging", 150, 0.0, 300.0);
-
+    hMet_AfterTauSelection = fs->make<TH1F>("met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 300.0);
+    hMet_AfterBTagging = fs->make<TH1F>("met_AfterBTagging", "met_AfterBTagging", 100, 0.0, 300.0);
+    hMetBeforeEmul = fs->make<TH1F>("MetBeforeEmul", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetBeforeTrigger = fs->make<TH1F>("MetBeforeTrigger", "MetBeforeTrigger", 100, 0.0, 300.0);
+    hMetAfterTrigger = fs->make<TH1F>("MetAfterTrigger", "MetAfterTrigger", 100, 0.0, 300.0);
   }
 
   SignalAnalysis::~SignalAnalysis() {}
@@ -49,21 +52,38 @@ namespace HPlus {
   void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllCounter);
     
-    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
+    //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
     
-    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+    //    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
 
-    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return;
+    //    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return;
+
+    fMETSelection.analyze(iEvent, iSetup); // just to obtain the MET value
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
+    hMet_AfterTauSelection->Fill(fMETSelection.fMet);
+
+
+    /////////////////////////////////////
+    // test
+    hMetBeforeEmul->Fill(fMETSelection.fMet);
+    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+    hMetBeforeTrigger->Fill(fMETSelection.fMet);
+    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
+    hMetAfterTrigger->Fill(fMETSelection.fMet);
+
+    if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
     if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return;
 
-    if(!fMETSelection.analyze(iEvent, iSetup)) return;
-    hMet_AfterMETSelection->Fill(fMETSelection.fMet);
+    //    if(!fMETSelection.analyze(iEvent, iSetup)) return;
+
 
     if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
     hMet_AfterBTagging->Fill(fMETSelection.fMet);
+
+ 
+    fCorrelationAnalysis.analyze(fTauSelection.getSelectedTaus(),fBTagging.getSelectedJets());
 
     if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
