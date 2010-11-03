@@ -212,7 +212,7 @@ class Histo:
         return p
 
 class AnalysisModule:
-    def __init__(self, process, name, prefix="", selector=None, filter=None, counter=False):
+    def __init__(self, process, name, prefix="", selector=None, filter=None, invertFilter=False, counter=False):
         self.selector = selector
         self.filter = filter
         self.counter = None
@@ -233,7 +233,10 @@ class AnalysisModule:
             if selector != None:
                 self.filter.src = cms.InputTag(self.selectorName)
             process.__setattr__(self.filterName, self.filter)
-            self.filterSequence *= self.filter
+            if invertFilter:
+                self.filterSequence *= ~self.filter
+            else:
+                self.filterSequence *= self.filter
             filterN += 1
 
         self.sequence = cms.Sequence()
@@ -287,18 +290,21 @@ class Analysis:
         setattr(self.process, prefix+seqname, self.sequence)
 
         # Create the count analyzer
-        counters = additionalCounters+[allCounterName]
-        setattr(self.process, prefix+"countAnalyzer",
-                cms.EDAnalyzer("HPlusEventCountAnalyzer",
-                               counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters])
-                ))
+        counters = additionalCounters+[prefix+allCounterName]
+        self.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+            counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters])
+        )
+        setattr(self.process, prefix+"countAnalyzer", self.countAnalyzer)
 
         self.histoIndex = 0
         self.modules = {}
 
+    def getCountAnalyzer(self):
+        return self.countAnalyzer
+
     # Main sequence methods
     def getSequence(self):
-        return cms.Sequence(self.sequence * self.process.countAnalyzer)
+        return cms.Sequence(self.sequence * self.countAnalyzer)
 
     def appendToSequence(self, module):
         self.sequence *= module
@@ -310,12 +316,12 @@ class Analysis:
     def getAnalysisModule(self, name):
         return self.modules[name]
 
-    def addAnalysisModule(self, name, selector=None, filter=None, counter=None):
-        m = AnalysisModule(self.process, name, self.prefix, selector, filter, counter)
+    def addAnalysisModule(self, name, selector=None, filter=None, invertFilter=False, counter=False):
+        m = AnalysisModule(self.process, name, self.prefix, selector, filter, invertFilter, counter)
         self.modules[name] = m
 
-        if counter != None:
-            self.process.countAnalyzer.counters.append(cms.InputTag(m.counterName))
+        if counter:
+            self.countAnalyzer.counters.append(cms.InputTag(m.counterName))
             self.histoIndex += 1
 
         self.sequence *= m.getSequence()
@@ -326,8 +332,8 @@ class Analysis:
         m = self.addAnalysisModule(name, selector=module)
         return m.getSelectorInputTag()
 
-    def addFilter(self, name, module):
-        self.addAnalysisModule(name, filter=module, counter=True)
+    def addFilter(self, name, module, invert=False):
+        self.addAnalysisModule(name, filter=module, invertFilter=invert, counter=True)
 
     def addCut(self, name, src, expression, minNumber=1, maxNumber=None, selector="HPlusCandViewLazyPtrSelector"):
         m = self.addAnalysisModule(name,

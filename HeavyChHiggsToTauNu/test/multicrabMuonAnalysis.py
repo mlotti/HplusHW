@@ -39,6 +39,8 @@ multicrab.addDatasets("AOD", aodDatasets)
 
 multicrab.setDataLumiMask("Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
 
+multicrab.getDataset("TTbarJets").addArg("WDecaySeparate=1")
+multicrab.getDataset("WJets").addArg("WDecaySeparate=1")
 
 for name in aodDatasets:
     multicrab.getDataset(name).addArg("doPat=1")
