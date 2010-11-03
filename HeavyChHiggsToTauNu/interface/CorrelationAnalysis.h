@@ -20,6 +20,7 @@ namespace HPlus {
   class CorrelationAnalysis {
   public:
     CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    CorrelationAnalysis(EventCounter& eventCounter);
     CorrelationAnalysis();
     ~CorrelationAnalysis();
 
@@ -30,8 +31,12 @@ namespace HPlus {
     void init();
 
     // Histograms
-    TH1 *hPt;
-
+    TH1 *hPtB1;
+    TH1 *hPtB2;
+    TH1 *hEtaB1;
+    TH1 *hEtaB2;
+    TH1 *hDeltaR_tauB1;
+    TH1 *hDeltaR_tauB2;
   };
 }
 
