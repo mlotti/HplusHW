@@ -10,7 +10,7 @@
 #include "TNamed.h"
 
 namespace HPlus {
-  SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
@@ -21,6 +21,7 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
+    fEventWeight(eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
     edm::Service<TFileService> fs;
@@ -39,18 +40,23 @@ namespace HPlus {
 
   }
 
-  SignalAnalysis::~SignalAnalysis() {}
+  SignalAnalysis::~SignalAnalysis() { }
 
   void SignalAnalysis::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     analyze(iEvent, iSetup);
   }
 
   void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    fEventWeight.updatePrescale(iEvent); // set prescale
+    
     increment(fAllCounter);
     
     if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
     
     if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+
+    // If factorization is applied to tauID, apply it here
+    // fEventWeight.addWeight(factorizationWeight); 
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
 
