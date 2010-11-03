@@ -33,7 +33,6 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         dataVersion.getAnalysisDefaultFileMadhatter()
-        
   )
 )
 if options.doPat != 0:
@@ -297,16 +296,17 @@ if applyElectronVeto:
 # W transverse mass
 prototype = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(False),
-    cut = cms.string('sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)>50'),
+#    cut = cms.string('sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)>50'),
+    cut = cms.string(""),
     decay = cms.string("dummy")
 )
 wmunuCalo = analysis.addProducer("WMuNuCalo", prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
 wmunuPF   = analysis.addProducer("WMuNuPF",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
 wmunuTC   = analysis.addProducer("WMuNuTC",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("WMunuCands", histoAnalyzer)
-histoAnalyzer.wmunuCalo_ = cms.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
-histoAnalyzer.wmunuPF_   = cms.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
-histoAnalyzer.wmunuTC_   = cms.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
+histoAnalyzer.wmunuCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
+histoAnalyzer.wmunuPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
+histoAnalyzer.wmunuTC_   = cms.untracked.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
 
 # Jet selection
 selectedJets = analysis.addNumberCut("JetMultiplicityCut", selectedJets, minNumber=jetMinMultiplicity)
