@@ -26,19 +26,17 @@ namespace HPlus {
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
-      if(bTauIDdecision) return fSelectedTaus;
-      else return fHighestPtTauCandidate;
-//       if(bTauIDdecision){
-// 	std:: cout << "tauID passed" << std::endl;
-// 	return fSelectedTaus;}
-//       else {
-// 	std:: cout << "tauID failed" << std::endl;
-//       return fHighestPtTauCandidate;
-      }
+      return fSelectedTaus;
     }
-    // variables
-    //float Rtau;
     
+     const edm::PtrVector<pat::Tau>& getTau() const {
+       if( bOnlyOneTauCandidate )   return fHighestPtTauCandidate;
+       if( (bMoreThanOneTauCandidate) && ( !bTauIDdecision) ) return fHighestPtTauCandidate;
+       if( (bMoreThanOneTauCandidate) && (  bTauIDdecision) ) return fSelectedTaus;
+       // Safety measure
+       return fEmptyTauVector;
+     }
+
   private:
 
     bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -91,7 +89,6 @@ namespace HPlus {
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
-    TH1 *hTauIDPass;
     TH1 *hPtAfterTauSelCuts;
     TH1 *hEtaAfterTauSelCuts;
     TH1 *hEtaRtau;
@@ -111,8 +108,12 @@ namespace HPlus {
 
     // Selected tau
     bool bTauIDdecision;
+    bool bOnlyOneTauCandidate;
+    bool bMoreThanOneTauCandidate;
+    bool bNoTauCandidate;
+    edm::PtrVector<pat::Tau> fEmptyTauVector; 
+    edm::PtrVector<pat::Tau> fHighestPtTauCandidate; 
     edm::PtrVector<pat::Tau> fSelectedTaus;
-    edm::PtrVector<pat::Tau> fHighestPtTauCandidate;
   };
 }
 

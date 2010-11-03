@@ -31,12 +31,16 @@ namespace HPlus {
 
     /// Make TTree for SignalOptimisation
     myTree = fs->make<TTree>("HPlusSignalOptimisation","HPlusSignalOptimisation");
+    
     /// Variables used for SignalOptimisation
     bTauIDStatus = new std::vector<bool>;
     myTree->Branch("bTauIDStatus", "std::vector<bool>", &bTauIDStatus);
     
     fTauJetEt = new std::vector<float>;
     myTree->Branch("fTauJetEt", "std::vector<float>", &fTauJetEt);
+
+    fTauJetEta = new std::vector<float>;
+    myTree->Branch("fTauJetEta", "std::vector<float>", &fTauJetEta);
     
     fMET = new std::vector<float>;
     myTree->Branch("fMET", "std::vector<float>", &fMET);
@@ -88,6 +92,18 @@ namespace HPlus {
     fTransverseMass->clear();
     fDeltaPhi->clear();
     fAlphaT->clear();
+    // Reserve size
+    bTauIDStatus->reserve(1);
+    fTauJetEt->reserve(1);
+    fTauJetEta->reserve(1);
+    fMET->reserve(1);
+    iNHadronicJets->reserve(1);
+    iNBtags->reserve(1);
+    fGlobalMuonVetoHighestPt->reserve(1);
+    fGlobalElectronVetoHighestPt->reserve(1);
+    fTransverseMass->reserve(1);
+    fDeltaPhi->reserve(1);
+    fAlphaT->reserve(1);
 
     /// Trigger
     bool bTriggerSelection = fTriggerSelection.analyze(iEvent, iSetup);
@@ -108,27 +124,26 @@ namespace HPlus {
     /// GlobalElectronVeto: Returns false if an isolated Electron is found in the event.
     bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if(!bGlobalElectronVetoPass) return;
-    
+
     /// TauID
     bool bTauSelectionPass = fTauSelection.analyze(iEvent, iSetup);
-    // if(!bTauSelectionPass) return;
-    
+    if(!bTauSelectionPass) return;
+
     /// Jet Selection    
-    bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus());
+    bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, fTauSelection.getTau());
     // if(!bJetSelectionPass) return;
     
     /// BTagging
-    bool bBTaggingPass     = fBTagging.analyze(fJetSelection.getSelectedJets());
+    bool bBTaggingPass = fBTagging.analyze(fJetSelection.getSelectedJets());
     // if(!bBTaggingPass) return;
    
     /// AlphaT
     bool bEvtTopologyPass  = fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets());
     // if(!bEvtTopologyPass) return;
     
-    
     /// Create some variables
-    double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
-    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
+    double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getTau()[0]), *(fMETSelection.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getTau()[0]), *(fMETSelection.getSelectedMET()) );
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
@@ -136,7 +151,8 @@ namespace HPlus {
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(bTauSelectionPass);
-    fTauJetEt->push_back((float( (fTauSelection.getSelectedTaus()[0])->pt())));
+    fTauJetEt->push_back((float( (fTauSelection.getTau()[0])->pt())));
+    fTauJetEta->push_back((float( (fTauSelection.getTau()[0])->eta())));
     fMET->push_back(fMETSelection.fMet);
     iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
     iNBtags->push_back(fBTagging.iNBtags);
@@ -145,7 +161,8 @@ namespace HPlus {
     fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
     fTransverseMass->push_back(transverseMass);
     fDeltaPhi->push_back(deltaPhi);
-    
+    // */
+
     /// Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
 

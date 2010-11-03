@@ -39,22 +39,19 @@ namespace HPlus {
     fagainstMuonSubCount(eventCounter.addSubCounter("Tau identification","againstMuon discriminator")),
     fagainstElectronSubCount(eventCounter.addSubCounter("Tau identification","againstElectron discriminator")),
     fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut")),
-    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
-    //    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut")),
     fbyHPSIsolationSubCount(eventCounter.addSubCounter("Tau identification","Tau HPS isolation cut")),
     fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
     fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
-    //    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
-    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
+    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
+    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
     fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 200.);
     hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
-    hTauIDPass = fs->make<TH1F>("tauID_pass", "tauID_pass", 2, -0.5, 1.5);
     hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
     hEtaAfterTauSelCuts = fs->make<TH1F>("tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
     hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
@@ -76,12 +73,15 @@ namespace HPlus {
 
   bool TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     bTauIDdecision = false;
+    bNoTauCandidate = false;
+    bOnlyOneTauCandidate = false;
+    bMoreThanOneTauCandidate = false;
+   
     if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
     if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
     if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
     if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
     std::cout << "WARNING, no tau selection used!" << std::endl;
-    
     return false;
   }
 
@@ -96,6 +96,8 @@ namespace HPlus {
     fSelectedTaus.reserve(taus.size());
     fHighestPtTauCandidate.clear();
     fHighestPtTauCandidate.reserve(taus.size());
+    fEmptyTauVector.clear();
+    fEmptyTauVector.reserve(1);
 
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
@@ -111,16 +113,27 @@ namespace HPlus {
 
     /// Save highest Pt tau candidates in a vector (Verified that taus are sorted in descending order of Pt)
     fHighestPtTauCandidate.push_back(taus[0]);
-    // std::cout << "\n ******** fHighestPtTauCandidate[0]->pt() = " << fHighestPtTauCandidate[0]->pt() << std::endl;	
     
-    // Fill initial histograms and do the first selection
+    /// The following "if" statements guarantee that a tau will always be present (unless Tau Collection is empty!) even if it fails tauID
+    /// If the tau-Collection is empty return false.
+    if ( !htaus->size() ){
+      bNoTauCandidate = true;
+      return false;
+    }
+    /// If the tau-Collection size is equal to 1 take this tau as the selected tau
+    if ( htaus->size() == 1){
+      bOnlyOneTauCandidate = true;
+      return true;
+    }
+    /// If the tau-Collection size is more than 1 pass the collection to tauID.
+    bMoreThanOneTauCandidate = true;
+
+    /// Perform tauID
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       edm::Ptr<pat::Tau> iTau = *iter;
 
       increment(fAllSubCount);
-      
-      std::cout << "iTau->pt() = " << iTau->pt() << std::endl;
-	
+
       hPt->Fill(iTau->pt());
       hEta->Fill(iTau->eta());
       reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand(); 
@@ -129,7 +142,6 @@ namespace HPlus {
       //        hLeadTrkPt->Fill(leadTrk->pt());
       //      uint16_t nSigTk        =  thePFTauRef->signalPFChargedHadrCands().size();
       uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
-
 
       if(!(iTau->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
@@ -154,6 +166,8 @@ namespace HPlus {
       increment(fLeadTrkPtSubCount);
       ++leadTrkPtCutPassed;
 
+ 
+     
       float ptmax = 0;
       float ptsum = 0;
 
@@ -200,7 +214,7 @@ namespace HPlus {
       hnProngs->Fill(nSigTracks);    
       //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
       if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue; 
-      if( nSigTracks != 1 ) continue;  // for now use only 1-prong taus
+      //      if( nSigTracks != 1 ) continue; 
       increment(fnProngsSubCount);
       ++nProngsCutPassed;
  
@@ -249,9 +263,11 @@ namespace HPlus {
 
       fSelectedTaus.push_back(iTau);
     }
-
-    // std::cout << "FIX ME 1. Also check that you use only 1prongs" << std::endl;
-    if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) || (leadTrkPtCutPassed == 0) || (byIsolationCutPassed == 0) || (ecalIsolationCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) hTauIDPass->Fill(bTauIDdecision);
+    // std::cout << "FIX ME. For now use only 1prongs" << std::endl;
+    if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
+	|| (leadTrkPtCutPassed == 0) || (byIsolationCutPassed == 0) || (ecalIsolationCutPassed == 0) || (nProngsCutPassed == 0) 
+	|| (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
+    else bTauIDdecision = true;
 
     if(ptCutPassed == 0) return false;
     increment(fPtCutCount);
@@ -267,7 +283,7 @@ namespace HPlus {
 
     if(leadTrkPtCutPassed == 0) return false;
     increment(fLeadTrkPtCount);  
-     
+
     if(byIsolationCutPassed == 0) return false;
     increment(fbyIsolationCount);
 	
@@ -286,9 +302,9 @@ namespace HPlus {
     if(InvMassCutPassed == 0) return false;
     increment(fInvMassCount);
     
-    /// Save TauID decision
-    bTauIDdecision = true;
-    hTauIDPass->Fill(bTauIDdecision);
+    // if(fSelectedTaus.size() > 1)
+    // return false;
+    
     return true;
   }
 
@@ -305,6 +321,8 @@ namespace HPlus {
 	fSelectedTaus.reserve(taus.size());
 	fHighestPtTauCandidate.clear();
 	fHighestPtTauCandidate.reserve(taus.size());
+	fEmptyTauVector.clear();
+	fEmptyTauVector.reserve(1);
 
 	size_t againstElectronCutPassed = 0;
 	size_t againstMuonCutPassed = 0;
@@ -316,14 +334,28 @@ namespace HPlus {
 	size_t byTaNCCutPassed = 0;
 	size_t RtauCutPassed = 0;
 	//size_t InvMassCutPassed = 0;
-
+	
 	/// Save highest Pt tau candidates in a vector (Verified that taus are sorted in descending order of Pt)
 	fHighestPtTauCandidate.push_back(taus[0]);
-	// std::cout << "\n ******** fHighestPtTauCandidate[0]->pt() = " << fHighestPtTauCandidate[0]->pt() << std::endl;	
-
+	
+	/// The following "if" statements guarantee that a tau will always be present (unless Tau Collection is empty!) even if it fails tauID
+	/// If the tau-Collection is empty return false.
+	if ( !htaus->size() ){
+	  bNoTauCandidate = true;
+	  return false;
+	}
+	/// If the tau-Collection size is equal to 1 take this tau as the selected tau
+	if ( htaus->size() == 1){
+	  bOnlyOneTauCandidate = true;
+	  return true;
+	}
+	/// If the tau-Collection size is more than 1 pass the collection to tauID.
+	bMoreThanOneTauCandidate = true;
+	
+	/// Perform tauID
 	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
 		edm::Ptr<pat::Tau> iTau = *iter;
-
+		
 		increment(fAllSubCount);
       		hPt->Fill(iTau->pt());
       		hEta->Fill(iTau->eta());
@@ -398,10 +430,12 @@ namespace HPlus {
 		hInvMass->Fill(InvMass);
 	}
 
-	// std::cout << "FIX ME 2. Also check that you use only 1prongs" << std::endl;
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) || (leadTrkPtCutPassed == 0) || (byTaNCCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) ) hTauIDPass->Fill(bTauIDdecision);
-
-    	if(ptCutPassed == 0) return false;
+	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
+	    || (leadTrkPtCutPassed == 0) || (byTaNCCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) 
+	    || (RtauCutPassed == 0) ) bTauIDdecision = false;
+	else bTauIDdecision = true;
+	
+ 	if(ptCutPassed == 0) return false;
     	increment(fPtCutCount);
 
     	if(etaCutPassed == 0) return false;
@@ -428,9 +462,6 @@ namespace HPlus {
     	if(RtauCutPassed == 0) return false;
     	increment(fRtauCount);
 
-	/// Save TauID decision
-	bTauIDdecision = true;
-	hTauIDPass->Fill(bTauIDdecision);
 	return true;
   }
 
@@ -445,7 +476,9 @@ namespace HPlus {
         fSelectedTaus.reserve(taus.size());
 	fHighestPtTauCandidate.clear();
 	fHighestPtTauCandidate.reserve(taus.size());
-    
+	fEmptyTauVector.clear();
+	fEmptyTauVector.reserve(1);
+
         size_t ptCutPassed = 0;
         size_t etaCutPassed = 0;
 	size_t leadTrkPtCutPassed = 0;
@@ -457,15 +490,28 @@ namespace HPlus {
 	size_t RtauCutPassed = 0;
 	size_t InvMassCutPassed = 0;
 
-	/// Save highest Pt tau candidates in a vector (Verified that taus are sorted in descending order of Pt)
+       /// Save highest Pt tau candidates in a vector (Verified that taus are sorted in descending order of Pt)
 	fHighestPtTauCandidate.push_back(taus[0]);
-	// std::cout << "\n ******** fHighestPtTauCandidate[0]->pt() = " << fHighestPtTauCandidate[0]->pt() << std::endl;
-
-        // Fill initial histograms and do the first selection
+	
+	/// The following "if" statements guarantee that a tau will always be present (unless Tau Collection is empty!) even if it fails tauID
+	/// If the tau-Collection is empty return false.
+	if ( !htaus->size() ){
+	  bNoTauCandidate = true;
+	  return false;
+	}
+	/// If the tau-Collection size is equal to 1 take this tau as the selected tau
+	if ( htaus->size() == 1){
+	  bOnlyOneTauCandidate = true;
+	  return true;
+	}
+	/// If the tau-Collection size is more than 1 pass the collection to tauID.
+	bMoreThanOneTauCandidate = true;
+	
+	/// Perform tauID
         for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
                 edm::Ptr<pat::Tau> iTau = *iter;
 
-		increment(fAllSubCount);
+                increment(fAllSubCount);
                 hPt->Fill(iTau->pt());
                 hEta->Fill(iTau->eta());
 		reco::PFCandidateRef leadTrk = iTau->leadPFChargedHadrCand(); // HPS is constructed from PF
@@ -498,7 +544,7 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
-/*
+
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
 		increment(fnProngsSubCount);
@@ -519,7 +565,7 @@ namespace HPlus {
 		if(Rtau < fRtauCut) continue; 
 		increment(fRtauSubCount);
 		++RtauCutPassed;
-
+/*
 		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
 		hDeltaE->Fill(DeltaE);
 
@@ -528,23 +574,25 @@ namespace HPlus {
 
 		// DeltaE and flight path are not applied - why?
 		// They should be applied for 3-prongs only
-
+*/
 		float InvMass = iTau->tauID("HChTauIDInvMassCont");
 		hInvMass->Fill(InvMass);
 
 		if(InvMass > fInvMassCut) continue;
 		increment(fInvMassSubCount);
 		++InvMassCutPassed;
-*/
+
                 // Fill Histos after Tau Selection Cuts
                 hPtAfterTauSelCuts->Fill(iTau->pt());
                 hEtaAfterTauSelCuts->Fill(iTau->eta());
 
                 fSelectedTaus.push_back(iTau);
         }
-	
-	// std::cout << "FIX ME 3. Also check that you use only 1prongs" << std::endl;
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) || (byTightIsolationPassed == 0) || ( leadTrkPtCutPassed == 0) ) hTauIDPass->Fill(bTauIDdecision);
+	// std::cout << "FIX ME. For now use only 1prongs" << std::endl;
+	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
+	    || (byTightIsolationPassed == 0) || ( leadTrkPtCutPassed == 0) || ( nProngsCutPassed == 0) || ( HChTauIDchargeCutPassed == 0) 
+	    || ( RtauCutPassed == 0) || ( InvMassCutPassed == 0) )  bTauIDdecision = false;
+	else bTauIDdecision = true;
 
         if(ptCutPassed == 0) return false;
         increment(fPtCutCount);
@@ -563,7 +611,7 @@ namespace HPlus {
 
 	if(leadTrkPtCutPassed == 0) return false;
 	increment(fLeadTrkPtCount); 
-/*
+
 	if(nProngsCutPassed == 0) return false;
 	increment(fnProngsCount);
 
@@ -576,26 +624,7 @@ namespace HPlus {
 	if(InvMassCutPassed == 0) return false;
 	increment(fInvMassCount);
 
-
-        if(leadTrkPtCutPassed == 0) return false;
-        increment(fLeadTrkPtCount);
-
-        if(nProngsCutPassed == 0) return false;
-        increment(fnProngsCount);
-
-        if(HChTauIDchargeCutPassed == 0) return false;
-        increment(fHChTauIDchargeCount);
-
-        if(byIsolationCutPassed == 0) return false;
-        increment(fbyIsolationCount);
-
-        if(RtauCutPassed == 0) return false;
-        increment(fRtauCount);
-*/
-	/// Save TauID decision
-	bTauIDdecision = true;
-	hTauIDPass->Fill(bTauIDdecision);
-	return true;
+        return true;
   }
 
   bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -609,7 +638,9 @@ namespace HPlus {
     	fSelectedTaus.reserve(taus.size());
 	fHighestPtTauCandidate.clear();
 	fHighestPtTauCandidate.reserve(taus.size());
-    
+	fEmptyTauVector.clear();
+	fEmptyTauVector.reserve(1);
+
     	size_t ptCutPassed = 0;
     	size_t etaCutPassed = 0;
     	size_t leadTrkPtCutPassed = 0;
@@ -620,16 +651,29 @@ namespace HPlus {
     	size_t againstMuonCutPassed = 0;
     	size_t RtauCutPassed = 0;
     	size_t InvMassCutPassed = 0;
-
+	
 	/// Save highest Pt tau candidates in a vector (Verified that taus are sorted in descending order of Pt)
 	fHighestPtTauCandidate.push_back(taus[0]);
-	// std::cout << "\n ******** fHighestPtTauCandidate[0]->pt() = " << fHighestPtTauCandidate[0]->pt() << std::endl;
 	
-    	// Fill initial histograms and do the first selection
+	/// The following "if" statements guarantee that a tau will always be present (unless Tau Collection is empty!) even if it fails tauID
+	/// If the tau-Collection is empty return false.
+	if ( !htaus->size() ){
+	  bNoTauCandidate = true;
+	  return false;
+	}
+	/// If the tau-Collection size is equal to 1 take this tau as the selected tau
+	if ( htaus->size() == 1){
+	  bOnlyOneTauCandidate = true;
+	  return true;
+	}
+	/// If the tau-Collection size is more than 1 pass the collection to tauID.
+	bMoreThanOneTauCandidate = true;
+	
+	/// Perform tauID
     	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       		edm::Ptr<pat::Tau> iTau = *iter;
-		
-		increment(fAllSubCount);
+
+                increment(fAllSubCount);
                 hPt->Fill(iTau->pt());
                 hEta->Fill(iTau->eta());
 
@@ -694,13 +738,15 @@ namespace HPlus {
 
                 fSelectedTaus.push_back(iTau);
 	}
+
+	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
+	    || (leadTrkPtCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) 
+	    || (byIsolationCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
+	else bTauIDdecision = true;
 	
-	// std::cout << "FIX ME 4. Also check that you use only 1prongs" << std::endl;
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) || (leadTrkPtCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) || (byIsolationCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) hTauIDPass->Fill(bTauIDdecision);
-
-	if(ptCutPassed == 0) return false;
+        if(ptCutPassed == 0) return false;
         increment(fPtCutCount);
-
+	
         if(etaCutPassed == 0) return false;
         increment(fEtaCutCount);
 
@@ -728,9 +774,6 @@ namespace HPlus {
 	if(InvMassCutPassed == 0) return false;
 	increment(fInvMassCount);
 
-	/// Save TauID decision
-	bTauIDdecision = true;
-	hTauIDPass->Fill(bTauIDdecision);
         return true;
   }
 }

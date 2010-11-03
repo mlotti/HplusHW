@@ -14,6 +14,7 @@ TriggerMETEmulation = cms.untracked.PSet(
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+#    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTriggerMatchedAndJetTriggerCleaned"),    
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(0), # tau-Jet Et will be optimised so don't apply any cut.
     etaCut = cms.untracked.double(2.4),
@@ -39,10 +40,10 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-#tauSelection = tauSelectionShrinkingConeCutBased
+tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+#tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
