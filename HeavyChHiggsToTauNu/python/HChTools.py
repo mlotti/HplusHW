@@ -175,7 +175,7 @@ class Histo:
         self.max = max
         self.nbins = nbins
         self.name = name
-        self.expr = expr
+        self.plotquantity = expr
         self.lazy = lazy
         self.minObjects = minObjects
         self.cuttype = cuttype
@@ -201,7 +201,7 @@ class Histo:
                      max = cms.untracked.double(self.max),
                      nbins = cms.untracked.int32(self.nbins),
                      name = cms.untracked.string(self.name),
-                     plotquantity = cms.untracked.string(self.expr),
+                     plotquantity = cms.untracked.string(self.plotquantity),
                      description = cms.untracked.string(self.descr),
                      lazyParsing = cms.untracked.bool(self.lazy))
         if self.minObjects != None:
@@ -212,16 +212,16 @@ class Histo:
         return p
 
 class AnalysisModule:
-    def __init__(self, process, name, selector=None, filter=None, counter=False):
+    def __init__(self, process, name, prefix="", selector=None, filter=None, counter=False):
         self.selector = selector
         self.filter = filter
         self.counter = None
 
-        self.selectorName = name
-        self.filterName = name+"Filter"
-        self.counterName = "count"+name
-        self.sequenceFilterName = name+"FilterSequence"
-        self.sequenceName = name+"Sequence"
+        self.selectorName = prefix+name
+        self.filterName = prefix+name+"Filter"
+        self.counterName = prefix+"count"+name
+        self.sequenceFilterName = prefix+name+"FilterSequence"
+        self.sequenceName = prefix+name+"Sequence"
 
         self.filterSequence = cms.Sequence()
         filterN = 0
@@ -274,30 +274,24 @@ def makeCountFilter(src, minNumber, maxNumber=None):
                             maxNumber = cms.uint32(maxNumber))
 
 class Analysis:
-    def __init__(self, process, seqname, options, allCounterName="countAll", additionalCounters=[]):
+    def __init__(self, process, seqname, options, prefix="", allCounterName="countAll", additionalCounters=[]):
         self.process = process
-
-        # Generator and configuration info analyzers
-        process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
-        process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
-        if options.crossSection >= 0.:
-            process.configInfo.crossSection = cms.untracked.double(options.crossSection)
-            print "Dataset cross section has been set to %g pb" % options.crossSection
-        if options.luminosity >= 0:
-            process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-            print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
+        self.prefix = prefix
 
         # Event counter for all events
         countAll = cms.EDProducer("EventCountProducer")
-        process.__setattr__(allCounterName, countAll)
+        setattr(self.process, prefix+allCounterName, countAll)
 
         # Create the analysis sequence
         self.sequence = cms.Sequence(countAll*process.genRunInfo*process.configInfo)
-        self.process.__setattr__(seqname, self.sequence)
+        setattr(self.process, prefix+seqname, self.sequence)
 
         # Create the count analyzer
         counters = additionalCounters+[allCounterName]
-        self.process.countAnalyzer = cms.EDAnalyzer("HPlusEventCountAnalyzer", counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]))
+        setattr(self.process, prefix+"countAnalyzer",
+                cms.EDAnalyzer("HPlusEventCountAnalyzer",
+                               counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters])
+                ))
 
         self.histoIndex = 0
         self.modules = {}
@@ -317,7 +311,7 @@ class Analysis:
         return self.modules[name]
 
     def addAnalysisModule(self, name, selector=None, filter=None, counter=None):
-        m = AnalysisModule(self.process, name, selector, filter, counter)
+        m = AnalysisModule(self.process, name, self.prefix, selector, filter, counter)
         self.modules[name] = m
 
         if counter != None:
@@ -361,7 +355,7 @@ class Analysis:
     # Analyzer methods, modifying the the main sequence
     def addAnalyzer(self, postfix, module):
         name = ("h%02d_"%self.histoIndex)+postfix
-        self.process.__setattr__(name, module)
+        setattr(self.process, self.prefix+name, module)
         self.sequence *= module
         return module
 
@@ -382,6 +376,6 @@ class Analysis:
 
     def addCloneModule(self, name, module):
         m = module.clone()
-        self.process.__setattr__(name, m)
+        setattr(self.process, self.prefix+name, m)
         self.sequence *= m
         return m
