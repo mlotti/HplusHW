@@ -134,8 +134,23 @@ if options.doPat != 0:
 
 ################################################################################
 
-# Analysis by successive cuts
+# Generator and configuration info analyzers
+process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
+process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
+if options.crossSection >= 0.:
+    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
+    print "Dataset cross section has been set to %g pb" % options.crossSection
+if options.luminosity >= 0:
+    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
+    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 
+process.commonSequence = cms.Sequence(
+    process.patSequence +
+    process.genRunInfo +
+    process.configInfo
+)
+
+# Analysis by successive cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 counters = []
 if dataVersion.isData():
@@ -183,6 +198,15 @@ multipAnalyzer = analysis.addAnalyzer("Multiplicity", cms.EDAnalyzer("HPlusCandV
             max = cms.untracked.int32(10),
             nbins = cms.untracked.int32(10)
         )
+))
+
+# MC Event topology selection
+analysis.addAnalysisModule("MCEventTopology", filter=cms.EDFilter("HPlusGenEventTopologyFilter",
+        src = cms.InputTag("genParticles"),
+        particle = cms.string("abs(pdgId()) == 24"),
+        daughter = cms.string("abs(pdgId()) == 13"),
+        minParticles = cms.uint32(1),
+        minDaughters = cms.uint32(1)
 ))
 
 # Select jets already here (but do not cut on their number), so we can
@@ -315,12 +339,12 @@ multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 multipAnalyzer.selMuons.src = selectedMuons
 
 # MET cut
-selectedMET = analysis.addCut("MET", met, metCut)
+selectedMET = analysis.addCut("METCut", met, metCut)
 histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("METCut", histoAnalyzer)
 multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
 
 process.analysisPath = cms.Path(
-    process.patSequence *
+    process.commonSequence *
     analysis.getSequence()
 )
 
@@ -342,7 +366,7 @@ process.afterOtherCutsMuonPreSelectionFilter = cms.EDFilter("CandViewCountFilter
     minNumber = cms.uint32(1)
 )
 
-process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyzer",
+afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyzer",
     src = selectedMuons,
     histograms = cms.VPSet(
         histoPt.pset().clone(cut=cms.untracked.string(ptCut)),
@@ -351,13 +375,12 @@ process.afterOtherCuts = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyze
         histoIso.pset().clone(cut=cms.untracked.string(isolationCut))
     )
 )
+
 process.afterOtherCutsPath = cms.Path(
-    process.patSequence *
+    process.commonSequence *
     analysis.getAnalysisModule("Trigger").getFilterSequence() *
     analysis.getAnalysisModule("PrimaryVertex").getFilterSequence() *
     analysis.getAnalysisModule("JetSelection").getFilterSequence() *
-    analysis.getAnalysisModule("JetMultiplicityCut").getFilterSequence() *
-    analysis.getAnalysisModule("MET").getFilterSequence() *
     process.afterOtherCutsMuonPreSelection *
     process.afterOtherCutsMuonVertexSelection *
     process.afterOtherCutsMuonPreSelectionFilter
@@ -366,7 +389,32 @@ if applyMuonVeto:
     process.afterOtherCutsPath *= analysis.getAnalysisModule("MuonVeto").getFilterSequence()
 if applyElectronVeto:
     process.afterOtherCutsPath *= analysis.getAnalysisModule("ElectronVeto").getFilterSequence()
-process.afterOtherCutsPath *= process.afterOtherCuts
 
+# Plots after vetoes
+process.afterOtherCutsAfterVetoes = afterOtherCuts.clone()
+process.afterOtherCutsPath *= process.afterOtherCutsAfterVetoes
 
+# Plots after jet multiplicity cuts
+process.afterOtherCutsPath *= analysis.getAnalysisModule("JetMultiplicityCut").getFilterSequence()
+process.afterOtherCutsAfterJetMultiplicityCut = afterOtherCuts.clone()
+process.afterOtherCutsPath *= process.afterOtherCutsAfterJetMultiplicityCut
 
+# Plots after MET cut
+process.afterOtherCutsPath *= analysis.getAnalysisModule("METCut").getFilterSequence()
+process.afterOtherCutsAfterMETCut = afterOtherCuts.clone()
+process.afterOtherCutsPath *= process.afterOtherCutsAfterMETCut
+
+# Plots after Wmunu transverse mass cut
+process.afterOtherCutsPath *= analysis.getAnalysisModule("WMuNuPF").getFilterSequence()
+process.afterOtherCutsWMuNuSelector = cms.EDFilter("HPlusCandViewLazyPtrSelector",
+    src = analysis.getAnalysisModule("WMuNuPF").getSelectorInputTag(),
+    cut = cms.string(histoTransverseMass.getPlotQuantity()+ " > 50")
+)
+process.afterOtherCutsWMuNuFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("afterOtherCutsWMuNuSelector"),
+    minNumber = cms.uint32(1)
+)
+process.afterOtherCutsPath *= process.afterOtherCutsWMuNuSelector
+process.afterOtherCutsPath *= process.afterOtherCutsWMuNuFilter
+process.afterOtherCutsAfterWMuNuCut = afterOtherCuts.clone()
+process.afterOtherCutsPath *= process.afterOtherCutsAfterWMuNuCut
