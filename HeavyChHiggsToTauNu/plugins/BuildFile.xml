@@ -11,6 +11,7 @@
   <use   name="DataFormats/VertexReco"/>
   <use   name="DataFormats/PatCandidates"/>
   <use   name="DataFormats/WrappedStdDictionaries"/>
+  <use   name="DataFormats/HepMCCandidate"/>
   <use   name="CommonTools/UtilAlgos"/>
   <use   name="SimDataFormats/GeneratorProducts"/>
   <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>
