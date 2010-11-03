@@ -16,46 +16,49 @@ tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(0), # tau-Jet Et will be optimised so don't apply any cut.
-    etaCut = cms.untracked.double(2.4), #no change
-    leadingTrackPtCut = cms.untracked.double(0),
-    rtauCut = cms.untracked.double(0.7), #no change
-    invMassCut = cms.untracked.double(1.5) #no change
+    etaCut = cms.untracked.double(2.4),
+    leadingTrackPtCut = cms.untracked.double(20), # keep as 20 GeV/c so that we are not biased by different triggers (Lauri)
+    rtauCut = cms.untracked.double(0.2),
+    invMassCut = cms.untracked.double(1.5)
 )
-
+### Copy the tauSelectionBase and overwrite arguments if necessary
+# CaloTau
 tauSelectionCaloTauCutBased = tauSelectionBase.clone()
 tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
 tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
-
+# PF Shrinking Cone Tau
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
 tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
-
+# TaNC (PF Shrinking Cone based)
 tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone()
 tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 tauSelectionShrinkingConeTaNCBased.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
-tauSelectionShrinkingConeTaNCBased.rtauCut = cms.untracked.double(0.7) ### overwrite default value
-
+# HPS (PF Shrinking Cone based)
 tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
 #tauSelection = tauSelectionShrinkingConeCutBased
-tauSelection = tauSelectionShrinkingConeTaNCBased  ### Start with this for signal optimisation
+#tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-#tauSelection = tauSelectionHPSTauBased
+tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
+#   src = cms.untracked.InputTag("selectedPatJetsAK5PF"),
+    src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
-    cleanTauDR = cms.untracked.double(0.5), #no change
+    cleanTauDR = cms.untracked.double(0.5),
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
-    minNumber = cms.untracked.uint32(1)
+    minNumber = cms.untracked.uint32(1),
+    METCut = cms.untracked.double(0.0)
 )
 
 MET = cms.untracked.PSet(
-    #src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    #src = cms.untracked.InputTag("patMETs"), # calo MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
     METCut = cms.untracked.double(0.0)
 )
@@ -67,8 +70,6 @@ bTagging = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(0)
 )
-
-transverseMassCut = cms.untracked.double(100)
 
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
@@ -90,3 +91,5 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonPtCut = cms.untracked.double(20.0),
     MuonEtaCut = cms.untracked.double(2.5)
 )
+
+transverseMassCut = cms.untracked.double(0.0)

@@ -38,7 +38,7 @@ namespace HPlus {
     double  ftransverseMassCut;
 
     Count fAllCounter;
-
+    /// The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
     TauSelection fTauSelection;
@@ -46,8 +46,8 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     EvtTopology fEvtTopology;
-    GlobalMuonVeto fGlobalMuonVeto;
     GlobalElectronVeto fGlobalElectronVeto;
+    GlobalMuonVeto fGlobalMuonVeto;
     
     // Histograms
     TH1 *hAlphaTInvMass;

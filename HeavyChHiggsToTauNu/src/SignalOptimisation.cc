@@ -34,31 +34,31 @@ namespace HPlus {
     /// Variables used for SignalOptimisation
     bTauIDStatus = new std::vector<bool>;
     myTree->Branch("bTauIDStatus", "std::vector<bool>", &bTauIDStatus);
-    //
+    
     fTauJetEt = new std::vector<float>;
     myTree->Branch("fTauJetEt", "std::vector<float>", &fTauJetEt);
-    //
+    
     fMET = new std::vector<float>;
     myTree->Branch("fMET", "std::vector<float>", &fMET);
-    //
+    
     iNHadronicJets = new std::vector<int>;
     myTree->Branch("iNHadronicJets", "std::vector<int>", &iNHadronicJets);
-    //
+    
     iNBtags = new std::vector<int>;
     myTree->Branch("iNBtags", "std::vector<int>", &iNBtags);
-    //
+    
     fGlobalMuonVetoHighestPt = new std::vector<float>;
     myTree->Branch("fGlobalMuonVetoHighestPt", "std::vector<float>", &fGlobalMuonVetoHighestPt);
-    //
+    
     fGlobalElectronVetoHighestPt = new std::vector<float>;
     myTree->Branch("fGlobalElectronVetoHighestPt", "std::vector<float>", &fGlobalElectronVetoHighestPt);
-    //
+    
     fTransverseMass = new std::vector<float>;
     myTree->Branch("fTransverseMass", "std::vector<float>", &fTransverseMass);
-    //
+    
     fDeltaPhi = new std::vector<float>;
     myTree->Branch("fDeltaPhi", "std::vector<float>", &fDeltaPhi);
-    //
+    
     fAlphaT = new std::vector<float>;
     myTree->Branch("fAlphaT", "std::vector<float>", &fAlphaT);
     
@@ -74,7 +74,9 @@ namespace HPlus {
   }
 
   void SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
     increment(fAllCounter);
+    
     /// Clear TTree vectors
     bTauIDStatus->clear();
     fTauJetEt->clear();
@@ -87,41 +89,42 @@ namespace HPlus {
     fDeltaPhi->clear();
     fAlphaT->clear();
 
-    /// 1) Trigger
+    /// Trigger
     bool bTriggerSelection = fTriggerSelection.analyze(iEvent, iSetup);
-    if(!bTriggerSelection) return; /// no Trigger means no Tau => meaningless to continue.
-    
-    /// 2) Trigger Emulation (for MC data)
-    bool bTriggerMETEmulationPass =  fTriggerMETEmulation.analyze(iEvent, iSetup);
-    if(!bTriggerMETEmulationPass) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it.
+    if(!bTriggerSelection) return;
 
-    /// 3) tauID
-    bool bTauSelectionPass = fTauSelection.analyze(iEvent, iSetup);
-    if(!bTauSelectionPass) return; /// without tau-Jet meaningless to compute Mt, deltaPhi, or alphaT.
-    
-    /// 4) MET 
+    /// Trigger Emulation (for MC use to emulate the Data Trigger)
+    bool bTriggerMETEmulationPass =  fTriggerMETEmulation.analyze(iEvent, iSetup);
+    if(!bTriggerMETEmulationPass) return;
+
+    /// MET: Only false if MET < MetCut. MetCut value is set to 0 => can use it.
     bool bMETSelectionPass = fMETSelection.analyze(iEvent, iSetup);
-    // if(!bMETSelectionPass) return; // Only false if MET < MetCut. MetCut value is set to 0 => can use it.
+    if(!bMETSelectionPass) return;
+
+    /// GlobalMuonVeto: Returns false if an isolated Muon is found in the event.
+    bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    if(!bGlobalMuonVetoPass) return; 
+
+    /// GlobalElectronVeto: Returns false if an isolated Electron is found in the event.
+    bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    if(!bGlobalElectronVetoPass) return;
     
-    /// 5) Jet Selection    
+    /// TauID
+    bool bTauSelectionPass = fTauSelection.analyze(iEvent, iSetup);
+    // if(!bTauSelectionPass) return;
+    
+    /// Jet Selection    
     bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus());
-    // if(!bJetSelectionPass) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    // if(!bJetSelectionPass) return;
     
-    /// 6) BTagging
+    /// BTagging
     bool bBTaggingPass     = fBTagging.analyze(fJetSelection.getSelectedJets());
     // if(!bBTaggingPass) return;
-
-    /// 7) AlphaT
+   
+    /// AlphaT
     bool bEvtTopologyPass  = fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets());
     // if(!bEvtTopologyPass) return;
-
-    /// 8) GlobalMuonVeto
-    bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    // if(!bGlobalMuonVetoPass) return;
-
-    /// 9) GlobalElectronVeto
-    bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    // if(!bGlobalElectronVetoPass) return;
+    
     
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));

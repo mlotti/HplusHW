@@ -26,7 +26,15 @@ namespace HPlus {
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
-      return fSelectedTaus;
+      if(bTauIDdecision) return fSelectedTaus;
+      else return fHighestPtTauCandidate;
+//       if(bTauIDdecision){
+// 	std:: cout << "tauID passed" << std::endl;
+// 	return fSelectedTaus;}
+//       else {
+// 	std:: cout << "tauID failed" << std::endl;
+//       return fHighestPtTauCandidate;
+      }
     }
     // variables
     //float Rtau;
@@ -83,6 +91,7 @@ namespace HPlus {
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hTauIDPass;
     TH1 *hPtAfterTauSelCuts;
     TH1 *hEtaAfterTauSelCuts;
     TH1 *hEtaRtau;
@@ -101,7 +110,9 @@ namespace HPlus {
 
 
     // Selected tau
+    bool bTauIDdecision;
     edm::PtrVector<pat::Tau> fSelectedTaus;
+    edm::PtrVector<pat::Tau> fHighestPtTauCandidate;
   };
 }
 
