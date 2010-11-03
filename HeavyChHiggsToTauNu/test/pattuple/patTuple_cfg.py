@@ -38,8 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        dataVersion.getPatDefaultFileCastor()
-        #dataVersion.getPatDefaultFileMadhatter()
+        #dataVersion.getPatDefaultFileCastor()
+        dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
@@ -90,7 +90,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
         "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
-        "keep *_offlinePrimaryVertices_*_*"
+        "keep *_offlinePrimaryVertices_*_*",
+        "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
     )
 )
 
