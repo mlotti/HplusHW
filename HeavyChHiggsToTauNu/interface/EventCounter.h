@@ -22,7 +22,7 @@ namespace HPlus {
   // Prevent copying
   class EventCounter: private boost::noncopyable {
     struct CountValue {
-      CountValue(const std::string& n, const std::string& i, int v);
+      CountValue(const std::string& n, const std::string& i, int v, double w);
       bool equalName(std::string n) const;
       template <typename T>
       void produces(T *producer) const;
@@ -32,6 +32,8 @@ namespace HPlus {
       std::string name;
       std::string instance;
       int value;
+      double weight;
+      double weightSquared;
     };
     typedef std::vector<CountValue> CountVector;
   public:
@@ -44,7 +46,15 @@ namespace HPlus {
 
     void incrementCount(size_t index, int value) {
       counter_[index].value += value;
+      if (eventWeightPointerProvided) {
+        counter_[index].weight += *eventWeightPointer;
+        counter_[index].weightSquared += *eventWeightPointer * *eventWeightPointer;
+      } else {
+        counter_[index].weight += 1.0;
+        counter_[index].weightSquared += 1.0;
+      }
     }
+    void setWeightPointer(double* ptr) { eventWeightPointer = ptr; eventWeightPointerProvided = true; }
 
     void produces(edm::EDProducer *producer) const;
     void produces(edm::EDFilter *producer) const;
@@ -61,6 +71,8 @@ namespace HPlus {
                                                     // but this is used only at the construction time of the analysis, 
                                                     // so it should be more or less okay
     mutable bool finalized;
+    double* eventWeightPointer;
+    bool eventWeightPointerProvided;
   };
 
   class Count {

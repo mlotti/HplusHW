@@ -29,7 +29,7 @@ namespace {
 }
 
 namespace HPlus {
-  EventCounter::CountValue::CountValue(const std::string& n, const std::string& i, int v): name(n), instance(i), value(v) {}
+  EventCounter::CountValue::CountValue(const std::string& n, const std::string& i, int v, double w): name(n), instance(i), value(v), weight(w), weightSquared(w*w) {}
   bool EventCounter::CountValue::equalName(std::string n) const {
     return name == n;
   }
@@ -41,12 +41,20 @@ namespace HPlus {
     std::auto_ptr<edm::MergeableCounter> countsPtr(new edm::MergeableCounter);
     countsPtr->value = value;
     block->put(countsPtr, instance);
+    std::auto_ptr<double> weightsPtr(new double);
+    *weightsPtr = weight;
+    block->put(weightsPtr, instance+"Weights");
+    std::auto_ptr<double> weightsSquaredPtr(new double);
+    *weightsSquaredPtr = weightSquared;
+    block->put(weightsSquaredPtr, instance+"WeightsSquared");
   }
   void EventCounter::CountValue::reset() {
     value = 0;
+    weight = 0;
+    weightSquared = 0;
   }
 
-  EventCounter::EventCounter(): finalized(false) {}
+  EventCounter::EventCounter(): finalized(false), eventWeightPointerProvided(false) {}
   EventCounter::~EventCounter() {}
 
   Count EventCounter::addCounter(const std::string& name) {
@@ -67,7 +75,7 @@ namespace HPlus {
     snprintf(tmp, 100, "count%u", index);
     ++index;
 
-    counter_.push_back(CountValue(name, tmp+stripName(name), 0));
+    counter_.push_back(CountValue(name, tmp+stripName(name), 0, 0));
     return Count(this, counter_.size()-1);
   }
 
@@ -91,7 +99,7 @@ namespace HPlus {
     snprintf(tmp, 20, "%u", index);
     ++index;
 
-    counter_.push_back(CountValue(subname, "subcount"+stripName(base)+"#"+tmp+stripName(name), 0));
+    counter_.push_back(CountValue(subname, "subcount"+stripName(base)+"#"+tmp+stripName(name), 0, 0));
     return Count(this, counter_.size()-1);
   }
 

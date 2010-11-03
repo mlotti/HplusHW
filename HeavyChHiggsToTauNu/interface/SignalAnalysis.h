@@ -11,6 +11,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -24,7 +25,7 @@ class TH2;
 namespace HPlus {
   class SignalAnalysis {
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalAnalysis();
 
     // Interface towards the EDProducer
@@ -45,7 +46,7 @@ namespace HPlus {
     BTagging fBTagging;
 
     // Count ftransverseMassCutCount;
-
+    EventWeight fEventWeight;
     EvtTopology fEvtTopology;
 
     // Histograms
