@@ -54,7 +54,7 @@ namespace HPlus {
     weightSquared = 0;
   }
 
-  EventCounter::EventCounter(): finalized(false) {}
+  EventCounter::EventCounter(): finalized(false), eventWeightPointerProvided(false) {}
   EventCounter::~EventCounter() {}
 
   Count EventCounter::addCounter(const std::string& name) {
