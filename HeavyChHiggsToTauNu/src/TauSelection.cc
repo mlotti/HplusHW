@@ -39,15 +39,13 @@ namespace HPlus {
     fagainstMuonSubCount(eventCounter.addSubCounter("Tau identification","againstMuon discriminator")),
     fagainstElectronSubCount(eventCounter.addSubCounter("Tau identification","againstElectron discriminator")),
     fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut")),
-    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
-    //    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut")),
     fbyHPSIsolationSubCount(eventCounter.addSubCounter("Tau identification","Tau HPS isolation cut")),
     fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
     fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
-    //    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
-    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
+    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
+    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
     fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
   {
