@@ -174,9 +174,9 @@ class CounterImpl:
         for iname, name in enumerate(self.countNames):
             line = nameFmt % name
 
-            for icol, value in enumerate(self.counter[iname]):
-                if value != None:
-                    line += formatFunction(columnWidths[icol]) % value
+            for icol, count in enumerate(self.counter[iname]):
+                if count != None:
+                    line += formatFunction(columnWidths[icol]) % count.value()
                 else:
                     line += " "*columnWidths[icol]
             print line

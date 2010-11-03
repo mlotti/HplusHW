@@ -5,12 +5,24 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+class Count:
+    def __init__(self, value, error):
+        self._value = value
+        self._error = error
+
+    def value(self):
+        return self._value
+
+    def error(self):
+        return self._error
+
 def histoToCounter(histo):
     ret = []
 
     for bin in xrange(1, histo.GetNbinsX()+1):
         ret.append( (histo.GetXaxis().GetBinLabel(bin),
-                     float(histo.GetBinContent(bin))) )
+                     Count(float(histo.GetBinContent(bin)),
+                           float(histo.GetBinError(bin)))) )
 
     return ret
 
@@ -259,7 +271,7 @@ class Dataset:
         if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
         ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
-        self.nAllEvents = ctr[0][1] # first counter, second element of the tuple
+        self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
         self.counterDir = counterDir
 
     def getName(self):
