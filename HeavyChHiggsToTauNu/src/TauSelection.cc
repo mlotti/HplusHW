@@ -14,7 +14,7 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
@@ -50,7 +50,8 @@ namespace HPlus {
     fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
     fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
     fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut"))
+    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 200.);
@@ -130,7 +131,7 @@ namespace HPlus {
       increment(fEtaCutSubCount);
       ++etaCutPassed;
 
-      if(iTau->tauID("againstMuon") < 0.5 ) continue; 
+      if(iTau->tauID("againstMuon") < 0.5 ) continue;
       increment(fagainstMuonSubCount);
       ++againstMuonCutPassed;
 

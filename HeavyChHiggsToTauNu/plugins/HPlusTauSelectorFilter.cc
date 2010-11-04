@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 
 class HPlusTauPtrSelectorFilter: public edm::EDFilter {
@@ -23,6 +24,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
+  HPlus::EventWeight eventWeight;
   HPlus::TauSelection fTauSelection;
 
   // Let's use reco::Candidate as the output type, as the required
@@ -34,7 +36,8 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
-  fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter)
+  eventWeight(iConfig),
+  fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight)
 {
   eventCounter.produces(this);
   produces<Product>();

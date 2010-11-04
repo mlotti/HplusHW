@@ -7,6 +7,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -44,7 +45,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -98,6 +99,9 @@ namespace HPlus {
     Count fRtauSubCount;
     Count fInvMassSubCount;
 
+    // Event weight object
+    EventWeight& fEventWeight;
+    
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
