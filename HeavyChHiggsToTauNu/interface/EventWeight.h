@@ -22,7 +22,7 @@ namespace HPlus {
     /// Reads the prescale for the event and sets the event weight as the prescale
     void updatePrescale(const edm::Event& iEvent);
     /// Adds a weight by multiplying the current weight
-    void addWeight(double w) { fWeight *= w; }
+    void multiplyWeight(double w) { fWeight *= w; }
     /// Getter for weight
     double getWeight() const { return fWeight; }
     /// Getter for weight adress

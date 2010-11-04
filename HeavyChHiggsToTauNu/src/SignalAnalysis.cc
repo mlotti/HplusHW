@@ -56,7 +56,7 @@ namespace HPlus {
     if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
 
     // If factorization is applied to tauID, apply it here
-    // fEventWeight.addWeight(factorizationWeight); 
+    // fEventWeight.multiplyWeight(factorizationWeight); 
 
     if(!fTauSelection.analyze(iEvent, iSetup)) return;
 
