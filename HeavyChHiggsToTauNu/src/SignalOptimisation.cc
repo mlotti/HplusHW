@@ -130,7 +130,7 @@ namespace HPlus {
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent()   *tauData.passedEvent()*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
+    bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent()   *tauData.passedEvent()*bJetSelectionPass*metData.passedEvent()*bBTaggingPass*bEvtTopologyPass;
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());
