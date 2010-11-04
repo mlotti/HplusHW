@@ -10,8 +10,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+
 
 namespace edm {
   class ParameterSet;
@@ -48,8 +50,9 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
-
+    GlobalMuonVeto fGlobalMuonVeto;
     // Count ftransverseMassCutCount;
+    CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
 
     // Histograms
@@ -59,11 +62,12 @@ namespace HPlus {
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;
     // Histograms for validation at every Selection Cut step
-    TH1 *hMet_AfterMETSelection;
+    TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
-    // TH1 *hMet_AfterEvtSelection;
-
+    TH1 *hMetBeforeEmul;
+    TH1 *hMetBeforeTrigger;
+    TH1 *hMetAfterTrigger;
   };
 }
 
