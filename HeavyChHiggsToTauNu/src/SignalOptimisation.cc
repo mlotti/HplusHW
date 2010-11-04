@@ -21,7 +21,7 @@ namespace HPlus {
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
-    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
@@ -104,16 +104,16 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     //if(!metData.passedEvent()) return;
 
-    /// 5) Jet Selection    
-    bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
-    // if(!bJetSelectionPass) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    /// 5) Jet Selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    //if(!jetData.passedEvent()) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     
     /// 6) BTagging
-    bool bBTaggingPass     = fBTagging.analyze(fJetSelection.getSelectedJets());
+    bool bBTaggingPass     = fBTagging.analyze(jetData.getSelectedJets());
     // if(!bBTaggingPass) return;
 
     /// 7) AlphaT
-    bool bEvtTopologyPass  = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), fJetSelection.getSelectedJets());
+    bool bEvtTopologyPass  = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
     // if(!bEvtTopologyPass) return;
 
     /// 8) GlobalMuonVeto
@@ -130,13 +130,18 @@ namespace HPlus {
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent()   *tauData.passedEvent()*bJetSelectionPass*metData.passedEvent()*bBTaggingPass*bEvtTopologyPass;
+    bool bDecision = triggerData.passedEvent() 
+      * triggerMETEmulationData.passedEvent()
+      * tauData.passedEvent()
+      * jetData.passedEvent()
+      * metData.passedEvent()
+      *bBTaggingPass*bEvtTopologyPass;
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());
     fTauJetEt->push_back((float( (tauData.getSelectedTaus()[0])->pt())));
     fMET->push_back(metData.getSelectedMET()->et());
-    iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
+    iNHadronicJets->push_back(jetData.getHadronicJetCount());
     iNBtags->push_back(fBTagging.iNBtags);
     fAlphaT->push_back(sAlphaT.fAlphaT);
     fGlobalMuonVetoHighestPt->push_back( muonVetoData.getSelectedMuonPt() );

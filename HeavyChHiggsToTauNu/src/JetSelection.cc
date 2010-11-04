@@ -11,12 +11,15 @@
 #include "TH1F.h"
 
 namespace HPlus {
-
-  JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  JetSelection::Data::Data(const JetSelection *jetSelection, bool passedEvent):
+    fJetSelection(jetSelection), fPassedEvent(passedEvent) {}
+  JetSelection::Data::~Data() {}
+  
+  JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
-    fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSrc_met(iConfig.getUntrackedParameter<edm::InputTag>("src_met")),
+    fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
@@ -27,7 +30,8 @@ namespace HPlus {
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
-    fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut"))
+    fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 200.);
@@ -38,7 +42,11 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  bool JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
+  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
+    // Reset variables
+    iNHadronicJets = -1;
+    bool passEvent = false;
+  
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);
 
@@ -101,14 +109,16 @@ namespace HPlus {
     hNumberOfSelectedJets->Fill(fSelectedJets.size());
     iNHadronicJets = fSelectedJets.size();
 
-    if(cleanPassed < fMin) return false;
+    passEvent = true;
+    if(cleanPassed < fMin) passEvent = false;
     increment(fCleanCutCount);
 
-    if(ptCutPassed < fMin) return false;
+    if(ptCutPassed < fMin) passEvent = false;
     increment(fPtCutCount);
 
-    if(etaCutPassed < fMin) return false;      
+    if(etaCutPassed < fMin) passEvent = false;
     increment(fEtaCutCount);
-    return true;
+
+    return Data(this, passEvent);
   }
 }

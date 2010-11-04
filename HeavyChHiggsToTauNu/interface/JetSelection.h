@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -22,33 +23,45 @@ class TH1;
 namespace HPlus {
   class JetSelection {
   public:
-    JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+      /**
+     * Class to encapsulate the access to the data members of
+     * TauSelection. If you want to add a new accessor, add it here
+     * and keep all the data of TauSelection private.
+     */
+    class Data {
+    public:
+      // The reason for pointer instead of reference is that const
+      // reference allows temporaries, while const pointer does not.
+      // Here the object pointed-to must live longer than this object.
+      Data(const JetSelection *jetSelection, bool passedEvent);
+      ~Data();
+
+      bool passedEvent() const { return fPassedEvent; }
+      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
+      const uint32_t getMinNumber() const { return fJetSelection->fMin; }
+      const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
+
+    private:
+      const JetSelection *fJetSelection;
+      const bool fPassedEvent;
+    };
+       
+    JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
-  
-    /// Variables
-    int iNHadronicJets;
-    
-    const edm::PtrVector<pat::Jet>& getSelectedJets() const {
-      return fSelectedJets;
-    }
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
 
-    uint32_t getMinNumber() const {
-      return fMin;
-    }
-  
   private:
     // Input parameters
     edm::InputTag fSrc;
     edm::InputTag fSrc_met;
     //    METSelection fMETSelection;
-    double fMetCut;
-    double fPtCut;
-    double fEtaCut;
-    double fMaxDR;
-    uint32_t fMin;
+    const double fMetCut;
+    const double fPtCut;
+    const double fEtaCut;
+    const double fMaxDR;
+    const uint32_t fMin;
 
     // Counters
     Count fCleanCutCount;
@@ -60,6 +73,9 @@ namespace HPlus {
     Count fPtCutSubCount;
     Count fEtaCutSubCount;
 
+    // EventWeight object
+    EventWeight& fEventWeight;
+    
     // Histograms
     TH1 *hPt;
     TH1 *hEta;
@@ -67,6 +83,7 @@ namespace HPlus {
     TH1 *hDeltaPhiJetMet;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
+    int iNHadronicJets;
   };
 }
 

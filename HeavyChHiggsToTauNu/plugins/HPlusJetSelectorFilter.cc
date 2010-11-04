@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/View.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 
 class HPlusJetPtrSelectorFilter: public edm::EDFilter {
@@ -23,6 +24,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
+  HPlus::EventWeight eventWeight;
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
 
@@ -35,11 +37,13 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
 
 HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
-  fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
+  eventWeight(iConfig),
+  fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc"))
 {
   eventCounter.produces(this);
   produces<Product>();
+  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusJetPtrSelectorFilter::~HPlusJetPtrSelectorFilter() {}
 void HPlusJetPtrSelectorFilter::beginJob() {}
@@ -53,9 +57,10 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
 
-  if(!fJetSelection.analyze(iEvent, iSetup, hcand->ptrVector())) return false;
+  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrVector());
+  if(!jetData.passedEvent()) return false;
 
-  iEvent.put(std::auto_ptr<Product>(new Product(fJetSelection.getSelectedJets())));
+  iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
   return true;
 }
 

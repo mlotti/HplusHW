@@ -20,7 +20,7 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     fCorrelationAnalysis(eventCounter),
@@ -98,18 +98,17 @@ namespace HPlus {
     // MET cut
     if(!metData.passedEvent()) return;
 
-    if(!fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus())) return;
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    if(!jetData.passedEvent()) return;
 
-    //    if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
-
-    if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
+    if(!fBTagging.analyze(jetData.getSelectedJets())) return;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
-
  
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(),fBTagging.getSelectedJets());
 
-    if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
+    if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets())) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
