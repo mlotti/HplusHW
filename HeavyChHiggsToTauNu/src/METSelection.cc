@@ -10,11 +10,15 @@
 #include "TH1F.h"
 
 namespace HPlus {
-
-  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  METSelection::Data::Data(const METSelection *metSelection, bool passedEvent):
+    fMETSelection(metSelection), fPassedEvent(passedEvent) {}
+  METSelection::Data::~Data() {}
+  
+  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
-    fMetCutCount(eventCounter.addCounter("MET cut"))
+    fMetCutCount(eventCounter.addCounter("MET cut")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hMet = fs->make<TH1F>("met", "met", 50, 0., 200.);
@@ -26,7 +30,8 @@ namespace HPlus {
 
   METSelection::~METSelection() {}
 
-  bool METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  METSelection::Data METSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    bool passEvent = false;
     edm::Handle<edm::View<reco::MET> > hmet;
     iEvent.getByLabel(fSrc, hmet);
 
@@ -42,10 +47,11 @@ namespace HPlus {
         hMetDivSqrSumEt->Fill(met->et()/sumEt);
     }
 
-    if(!(met->et() > fMetCut)) return false;
+    if(met->et() > fMetCut) passEvent = true;
 
     increment(fMetCutCount);
     fSelectedMET = met;
-    return true;
+    
+    return Data(this, passEvent);
   }
 }

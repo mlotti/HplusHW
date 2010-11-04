@@ -20,7 +20,7 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -101,9 +101,9 @@ namespace HPlus {
     if(!tauData.passedEvent()) return; /// without tau-Jet meaningless to compute Mt, deltaPhi, or alphaT.
     
     /// 4) MET 
-    bool bMETSelectionPass = fMETSelection.analyze(iEvent, iSetup);
-    // if(!bMETSelectionPass) return; // Only false if MET < MetCut. MetCut value is set to 0 => can use it.
-    
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    //if(!metData.passedEvent()) return;
+
     /// 5) Jet Selection    
     bool bJetSelectionPass = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
     // if(!bJetSelectionPass) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
@@ -125,8 +125,8 @@ namespace HPlus {
     if (!electronVetoData.passedEvent()) return; 
     
     /// Create some variables
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
@@ -135,7 +135,7 @@ namespace HPlus {
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());
     fTauJetEt->push_back((float( (tauData.getSelectedTaus()[0])->pt())));
-    fMET->push_back(fMETSelection.fMet);
+    fMET->push_back(metData.getSelectedMET()->et());
     iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
     iNBtags->push_back(fBTagging.iNBtags);
     fAlphaT->push_back(sAlphaT.fAlphaT);

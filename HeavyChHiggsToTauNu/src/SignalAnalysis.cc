@@ -21,7 +21,7 @@ namespace HPlus {
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     fCorrelationAnalysis(eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -62,7 +62,7 @@ namespace HPlus {
 
     //    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return;
 
-    fMETSelection.analyze(iEvent, iSetup); // just to obtain the MET value
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup); // just to obtain the MET value
 
     // If factorization is applied to tauID, apply it here
     // fEventWeight.multiplyWeight(factorizationWeight); 
@@ -70,22 +70,22 @@ namespace HPlus {
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return;
 
-    hMet_AfterTauSelection->Fill(fMETSelection.fMet);
+    hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
 
 
     /////////////////////////////////////
     // test
-    hMetBeforeEmul->Fill(fMETSelection.fMet);
+    hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
     
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
     if(!triggerMETEmulationData.passedEvent()) return;
     
-    hMetBeforeTrigger->Fill(fMETSelection.fMet);
+    hMetBeforeTrigger->Fill(metData.getSelectedMET()->et());
     
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     
-    hMetAfterTrigger->Fill(fMETSelection.fMet);
+    hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
 
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -95,7 +95,8 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return; 
 
-    if(!fMETSelection.analyze(iEvent, iSetup)) return;
+    // MET cut
+    if(!metData.passedEvent()) return;
 
     if(!fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus())) return;
 
@@ -103,17 +104,17 @@ namespace HPlus {
 
 
     if(!fBTagging.analyze(fJetSelection.getSelectedJets())) return;
-    hMet_AfterBTagging->Fill(fMETSelection.fMet);
+    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
 
  
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(),fBTagging.getSelectedJets());
 
     if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
 
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
 
     //  if(transverseMass < ftransverseMassCut ) return;
