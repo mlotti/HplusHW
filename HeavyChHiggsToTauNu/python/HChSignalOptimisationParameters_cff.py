@@ -13,8 +13,8 @@ TriggerMETEmulation = cms.untracked.PSet(
 )
 
 tauSelectionBase = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
-#    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTriggerMatchedAndJetTriggerCleaned"),    
+    # src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTriggerMatchedAndJetTriggerCleaned"),    
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(0), # tau-Jet Et will be optimised so don't apply any cut.
     etaCut = cms.untracked.double(2.4),
@@ -75,13 +75,13 @@ bTagging = cms.untracked.PSet(
 EvtTopology = cms.untracked.PSet(
     #discriminator = cms.untracked.string("test"),
     #discriminatorCut = cms.untracked.double(0.0),
-    #alphaT = cms.untracked.double(-5.00)
-    alphaT = cms.untracked.double(-5.0)
+    alphaT = cms.untracked.double(-10.0)
 )
 
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
-    ElectronSelection = cms.untracked.string("kTightElectronIdentification"),
+    ElectronSelection = cms.untracked.string("simpleEleId70relIso"), 
+    # ElectronSelection = cms.untracked.string("CustomElectronID"), # "" for custom electron ID. Requires "generalTracks" Collection
     ElectronPtCut = cms.untracked.double(20.0),
     ElectronEtaCut = cms.untracked.double(2.5)
 )

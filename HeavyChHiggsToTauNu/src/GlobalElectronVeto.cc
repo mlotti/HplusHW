@@ -20,8 +20,9 @@ namespace HPlus {
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fElecSelectionSubCountElectronPresent(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Present")),
     fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
-    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt")),
+    fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
     fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Eta")),
+    fElecSelectionSubCountElectronSelection(eventCounter.addSubCounter("GlobalElectron Selection", fElecSelection)),
     fElecSelectionSubCountNLostHitsInTrkerCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Num of Lost Hits In Trker")),
     fElecSelectionSubCountmyElectronDeltaCotThetaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Delta Cot(Theta)")),
     fElecSelectionSubCountmyElectronDistanceCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Distance (r-phi)")),
@@ -29,14 +30,17 @@ namespace HPlus {
     fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron DeltaR From Global OrTrker Muon")),
     fElecSelectionSubCountRelIsolationR03Cut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron RelIsolationR03")),
     fElecIDSubCountAllElectronCandidates(eventCounter.addSubCounter("GlobalElectron ID", "All Electron Candidates")),
-    fElecIDSubCountElecIDdLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidLoose only")),
-    fElecIDSubCountElecIDRobustLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustLoose only")),
-    fElecIDSubCountElecIDTight(eventCounter.addSubCounter("GlobalElectron ID", "eidTight only")),
-    fElecIDSubCountElecIDRobustTight(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustTight only")),
-    fElecIDSubCountElecIDRobustHighEnergy(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustHighEnergy only")),
-    fElecIDSubCountElecNoID(eventCounter.addSubCounter("GlobalElectron ID", "No ID")),
-    fElecIDSubCountElecAllIDs(eventCounter.addSubCounter("GlobalElectron ID", "All IDs")),
-    fElecIDSubCountOther(eventCounter.addSubCounter("GlobalElectron ID", "Other (multiple IDs)"))
+    fElecIDSubCountElecIDLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidLoose")),
+    fElecIDSubCountElecIDRobustLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustLoose")),
+    fElecIDSubCountElecIDTight(eventCounter.addSubCounter("GlobalElectron ID", "eidTight")),
+    fElecIDSubCountElecIDRobustTight(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustTight")),
+    fElecIDSubCountElecIDRobustHighEnergy(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustHighEnergy")),
+    fElecIDSubCountSimpleEleId95relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId95relIso")),
+    fElecIDSubCountSimpleEleId90relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId90relIso")),
+    fElecIDSubCountSimpleEleId85relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId85relIso")),
+    fElecIDSubCountSimpleEleId80relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId80relIso")),
+    fElecIDSubCountSimpleEleId70relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId70relIso")),
+    fElecIDSubCountSimpleEleId60relIso(eventCounter.addSubCounter("GlobalElectron ID", "SimpleEleId60relIso"))
   {
     edm::Service<TFileService> fs;
     hElectronPt  = fs->make<TH1F>("GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
@@ -53,17 +57,201 @@ namespace HPlus {
 
   bool GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-    if(fElecSelection == "kNoElectronIdentification")      return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kRobustElectronIdentification")  return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kLooseElectronIdentification")  return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kTightElectronIdentification")   return ElectronSelection(iEvent,iSetup);
+    bDecision = false;
+    bPassedElecID = false;
+    bUseLooseID = false;
+    bUseRobustLooseID = false;
+    bUseTightID = false;
+    bUseRobustTightID = false;
+    bUseRobustHighEnergyID = false;
+    bUseSimpleEleId95relIsoID = false;
+    bUseSimpleEleId90relIsoID = false;
+    bUseSimpleEleId85relIsoID = false;
+    bUseSimpleEleId80relIsoID = false;
+    bUseSimpleEleId70relIsoID = false;
+    bUseSimpleEleId60relIsoID = false;
+
+    if( fElecSelection == "eidLoose") bUseLooseID = true;
+    else if( fElecSelection == "eidRobustLoose") bUseRobustLooseID = true;
+    else if( fElecSelection == "eidTight") bUseTightID = true;
+    else if( fElecSelection == "eidRobustTight") bUseRobustTightID = true;
+    else if( fElecSelection == "eidRobustHighEnergy") bUseRobustHighEnergyID = true;
+    else if( fElecSelection == "simpleEleId95relIso") bUseSimpleEleId95relIsoID = true;
+    else if( fElecSelection == "simpleEleId90relIso") bUseSimpleEleId90relIsoID = true;
+    else if( fElecSelection == "simpleEleId85relIso") bUseSimpleEleId85relIsoID= true;
+    else if( fElecSelection == "simpleEleId80relIso") bUseSimpleEleId80relIsoID= true;
+    else if( fElecSelection == "simpleEleId70relIso") bUseSimpleEleId70relIsoID= true;
+    else if( fElecSelection == "simpleEleId60relIso") bUseSimpleEleId60relIsoID= true;
     else{
-      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n kNoElectronIdentification, kRobustElectronIdentification, kLooseElectronIdentification, kTightElectronIdentification.\n" << std::endl;
+      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n eidLoose, eidRobustLoose, eidTight, eidRobustTight, eidRobustHighEnergy, simpleEleId95relIso, simpleEleId90relIso, simpleEleId85relIso, simpleEleId80relIso, simpleEleId70relIso, simpleEleId60relIso.\n" << std::endl;
+    }
+    return ElectronSelection(iEvent,iSetup);;
+  }
+
+
+  bool GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+    if(fElecSelection == "CustomElectronID")      return CustomElectronSelection(iEvent,iSetup);
+    else{
+      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid using current settings! Please choose \"CustomElectronID\" as the \"ElectronSelection\" variable if you want to run without a standard Electron ID.\n If you want use a specific Electron ID, use the function \" bool GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) \"  instead of the current one -> \"bool GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) \" \n" << std::endl;
       return true;
     }
   }
+
   
   bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+    
+    /// Create and attach handle to Electron Collection
+    edm::Handle<std::vector<pat::Electron> > myElectronHandle;
+    iEvent.getByLabel(fElecCollectionName, myElectronHandle);
+
+    /// In the case where the Electron Collection handle is empty...
+    if ( !myElectronHandle->size() ) return true;
+    
+    /// Reset/initialise variables
+    float myHighestElecPt = -1.0;
+    float myHighestElecEta = -999.99;
+    fSelectedElectronsPt = -1.0;
+    fSelectedElectronsEta = -999.99;
+    /// 
+    bool bElecPresent = false;
+    bool bElecHasGsfTrkOrTrk = false;
+    bool bElecPtCut = false;
+    bool bElecEtaCut = false;
+    
+    /// Loop over all Electrons
+    for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
+
+      /// keep track of the electrons analyzed
+      bElecPresent = true;
+      increment(fElecIDSubCountAllElectronCandidates);
+
+      ///  Keep track of the ElectronID's. Just for my information
+      bool bElecIDIsLoose = false;
+      bool bElecIDIsRobustLoose = false;
+      bool bElecIDIsTight = false;
+      bool bElecIDIsRobustTight = false;
+      bool bElecIDIsRobustHighEnergy = false;
+      bool bElecNoSimpleID = false;
+      bool bElecAllSimpleIDs = false;
+
+      /// Simple Electron ID's return 1 or 0 (true or false)
+      if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
+      if( (*iElectron).electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;
+      if( (*iElectron).electronID("eidTight") ) bElecIDIsTight = true;
+      if( (*iElectron).electronID("eidRobustTight") ) bElecIDIsRobustTight = true;
+      if( (*iElectron).electronID("eidRobustHighEnergy") ) bElecIDIsRobustHighEnergy = true;
+      /// Electron ID's with working points return 0,1,2,3,4,5,6,7.
+      /// Note: 0=fails, 1=passes eID , 2=passes eIsolation , 3=passes eID and eIsolation, 4=passes conversion rejection
+      /// 5=passes conversion rejection and eID, 6=passes conversion rejection and eIsolation, 7=passes the whole selection
+      float fElecIDSimpleEleId95relIso =  (*iElectron).electronID("simpleEleId95relIso");
+      float fElecIDSimpleEleId90relIso =  (*iElectron).electronID("simpleEleId90relIso");
+      float fElecIDSimpleEleId85relIso =  (*iElectron).electronID("simpleEleId85relIso"); 
+      float fElecIDSimpleEleId80relIso =  (*iElectron).electronID("simpleEleId80relIso");
+      float fElecIDSimpleEleId70relIso =  (*iElectron).electronID("simpleEleId70relIso");
+      float fElecIDSimpleEleId60relIso =  (*iElectron).electronID("simpleEleId60relIso");
+
+      /// Take care of the Simple Electron ID counters
+      if( bElecIDIsLoose) increment(fElecIDSubCountElecIDLoose);
+      if( bElecIDIsRobustLoose ) increment(fElecIDSubCountElecIDRobustLoose); 
+      if( bElecIDIsTight ) increment(fElecIDSubCountElecIDTight);
+      if( bElecIDIsRobustTight ) increment(fElecIDSubCountElecIDRobustTight);
+      if( bElecIDIsRobustHighEnergy) increment(fElecIDSubCountElecIDRobustHighEnergy);
+      /// Take care of the Electron ID counters (working points)
+      if( fElecIDSimpleEleId95relIso == 7) increment(fElecIDSubCountSimpleEleId95relIso);
+      if( fElecIDSimpleEleId90relIso == 7) increment(fElecIDSubCountSimpleEleId90relIso);
+      if( fElecIDSimpleEleId85relIso == 7) increment(fElecIDSubCountSimpleEleId85relIso);
+      if( fElecIDSimpleEleId80relIso == 7) increment(fElecIDSubCountSimpleEleId80relIso);
+      if( fElecIDSimpleEleId70relIso == 7) increment(fElecIDSubCountSimpleEleId70relIso);
+      if( fElecIDSimpleEleId60relIso == 7) increment(fElecIDSubCountSimpleEleId60relIso);
+
+      /// Obtain reference to an Electron track
+      reco::GsfTrackRef myGsfTrackRef = (*iElectron).gsfTrack(); /// gsfElecs were selected to create the current PatTuples
+      
+      /// Check that track was found
+      if (myGsfTrackRef.isNull()) continue;
+      bElecHasGsfTrkOrTrk = true;
+      
+      /// Electron Variables (Pt, Eta etc..)
+      float myElectronPt  = (*iElectron).pt();
+      float myElectronEta = (*iElectron).eta();
+      float myElectronPhi = (*iElectron).phi();
+
+      /// Fill histos with all-Electrons Pt and Eta
+      hElectronPt->Fill(myElectronPt);
+      hElectronEta->Fill(myElectronEta);
+      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
+
+      /// 1) Apply Pt cut requirement
+      if (myElectronPt < fElecPtCut) continue;
+      bElecPtCut = true;
+
+      /// 2) Apply Eta cut requirement      
+      if (myElectronEta < fElecEtaCut) continue;
+      bElecEtaCut = true;
+      
+      /// 3) Apply Electron ID (choose low efficiency => High Purity)
+      if( (bUseLooseID) && (bElecIDIsLoose) ) bPassedElecID = true;
+      else if( (bUseRobustLooseID ) && (bElecIDIsRobustLoose) ) bPassedElecID = true;
+      else if( (bUseTightID) && (bElecIDIsTight) ) bPassedElecID = true;
+      else if( (bUseRobustTightID)         && (bElecIDIsRobustTight) ) bPassedElecID = true;
+      else if( (bUseRobustHighEnergyID)    && (bElecIDIsRobustHighEnergy) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId95relIsoID) && (fElecIDSimpleEleId95relIso == 7) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId90relIsoID) && (fElecIDSimpleEleId90relIso == 7) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId85relIsoID) && (fElecIDSimpleEleId85relIso == 7) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId80relIsoID) && (fElecIDSimpleEleId80relIso == 7) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) bPassedElecID = true;
+      else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) bPassedElecID = true;
+      else{
+	/// This should never be called
+	bPassedElecID = false;
+      }
+      
+      /// If Electron survives all cuts (1->3) then it is considered an isolated Electron. Now find the max Electron Pt.
+	if (myElectronPt > myHighestElecPt) {
+	  myHighestElecPt = myElectronPt;
+	  myHighestElecEta = myElectronEta;
+	}
+      
+      /// Fill histos after Selection
+      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
+      hElectronEta_AfterSelection->Fill(myGsfTrackRef->eta());
+      hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
+      hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta());
+      
+    }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
+    
+    if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
+
+    if(bElecHasGsfTrkOrTrk) increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
+    
+    if(bElecPtCut) increment(fElecSelectionSubCountPtCut);
+    
+    if(bElecEtaCut) increment(fElecSelectionSubCountEtaCut);
+    
+    if(bPassedElecID) increment(fElecSelectionSubCountElectronSelection);
+
+    /// Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
+    bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID;
+
+    /// Now store the highest Electron Pt and Eta
+    fSelectedElectronsPt = myHighestElecPt;
+    fSelectedElectronsEta = myHighestElecEta;
+    
+    /// If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
+    if(bDecision) return false;
+
+    /// Otherwise increment counter and return true.
+    else increment(fGlobalElectronVetoCounter);
+    return true;
+    
+  }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+  
+
+
+
+  bool GlobalElectronVeto::CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     /// Create and attach handle to Electron Collection
     edm::Handle<std::vector<pat::Electron> > myElectronHandle;
@@ -95,9 +283,21 @@ namespace HPlus {
     
     /// In the case where the Electron Collection handle is empty...
     if ( !myElectronHandle->size() ){
-      // std::cout << "Electron handle for '" << fElecCollectionName << " is empty!" << std::endl;
+      // std::cout << "WARNING: Electron handle for '" << fElecCollectionName << " is empty! Skipping rest of selection and returning true ..." << std::endl;
+      return true;
+    }
+    /// In the case where the GeneralTracks Collection handle is empty...
+    if ( !myTracksHandle->size() ){
+      std::cout << "WARNING: GeneralTracks handle for \"generalTrackss\" Collection empty! This Collection is required for \"Photon Conversion Rejection\". Skipping rest of selection and returning true..." << std::endl;
+      return true;
+    }
+    /// In the case where the Muon Collection handle is empty...
+    if ( !myMuonHandle->size() ){
+      // std::cout << "WARNING: Muon handle for \"selectedPatMuons\" Collection is empty! This Collection is required for calculating \" DeltaR between the Electron candidate and Global or Tracker Muon\" ". << std::endl;
+      // return true;
     }
     
+
     /// Reset/initialise variables
     float myHighestElecPt = -1.0;
     float myHighestElecEta = -999.99;
@@ -108,7 +308,6 @@ namespace HPlus {
     bool bElecHasGsfTrkOrTrk = false;
     bool bElecPtCut = false;
     bool bElecEtaCut = false;
-    bool bElecSelection = false; // if will use eID
     bool bElecNLostHitsInTrkerCut = false;
     bool bElecElectronDeltaCotThetaCut = false;
     bool bElecElectronDistanceCut = false;
@@ -151,8 +350,8 @@ namespace HPlus {
       bool bElecIDIsTight = false;
       bool bElecIDIsRobustTight = false;
       bool bElecIDIsRobustHighEnergy = false;
-      bool bElecNoID = false;
-      bool bElecAllIDs = false;
+      bool bElecNoSimpleID = false;
+      bool bElecAllSimpleIDs = false;
       bool bMyElectronIDSelection = false; // put this as true according to your selection (if any used). CURRENTLY NOT USED
       if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
       if( (*iElectron).electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;
@@ -164,13 +363,11 @@ namespace HPlus {
       }
       /// Now take care of eID counters
       if( (!bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
-	bElecNoID = true;
-	increment(fElecIDSubCountElecNoID);}
+	bElecNoSimpleID = true;}
       else if( (bElecIDIsLoose) && (bElecIDIsRobustLoose) && (bElecIDIsTight) && (bElecIDIsRobustTight) && (bElecIDIsRobustHighEnergy) ){
-	bElecAllIDs = true;
-	increment(fElecIDSubCountElecAllIDs);}
+	bElecAllSimpleIDs = true;}
       else if( (bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
-	increment(fElecIDSubCountElecIDdLoose);}
+	increment(fElecIDSubCountElecIDLoose);}
       else if( (!bElecIDIsLoose) && (bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
 	increment(fElecIDSubCountElecIDRobustLoose);}
       else if( (!bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (bElecIDIsTight) && (!bElecIDIsRobustTight) && (!bElecIDIsRobustHighEnergy) ){
@@ -179,7 +376,6 @@ namespace HPlus {
 	increment(fElecIDSubCountElecIDRobustTight);}
       else if( (!bElecIDIsLoose) && (!bElecIDIsRobustLoose) && (!bElecIDIsTight) && (!bElecIDIsRobustTight) && (bElecIDIsRobustHighEnergy) ){
 	increment(fElecIDSubCountElecIDRobustHighEnergy);}
-      else if( (!bElecAllIDs) && (!bElecNoID) ){ increment(fElecIDSubCountOther);}
       else {
 	// std::cout << "\n You forgot something !" << std::endl;
       }
@@ -227,30 +423,29 @@ namespace HPlus {
       /// 2) Validation of simple cut based eID (choose low efficiency => High Purity)
       
       /* FIX ME
-      /// ?) Demand that the Electron passed the ? ID 
-      // if(!bMyElectronIDSelection) continue;
-      // bElecSelection = true; // if will use eID
-      /// You can retrieve the value map decision very conveniently from the pat::Electron object as follows:
+     /// ?) Demand that the Electron passed the ? ID 
+     // if(!bMyElectronIDSelection) continue;
+     /// You can retrieve the value map decision very conveniently from the pat::Electron object as follows:
       std::cout << "Electron ID: 95relIso=" << myElec->electronID("simpleEleId95relIso")  
-             << " 90relIso=" << myElec->electronID("simpleEleId90relIso") 
-           << " 85relIso=" << myElec->electronID("simpleEleId85relIso") 
-           << " 80relIso=" << myElec->electronID("simpleEleId80relIso") 
-           << " 70relIso=" << myElec->electronID("simpleEleId70relIso") 
-           << " 60relIso=" << myElec->electronID("simpleEleId60relIso")  << ...... <<
-           << std::endl;
-	   The value map returns a double with the following meaning:
-	   
-	   0: fails
-	   1: passes electron ID only
-	   2: passes electron Isolation only
-	   3: passes electron ID and Isolation only
-	   4: passes conversion rejection
-	   5: passes conversion rejection and ID
-	   6: passes conversion rejection and Isolation
-	   7: passes the whole selection
-	   
-	   // std::cout << "(*iElectron).electronID(\"eidLoose\") = " << (*iElectron).electronID("eidLoose") << std::endl; /// FIX ME
-	   FIX ME */
+      << " 90relIso=" << myElec->electronID("simpleEleId90relIso") 
+      << " 85relIso=" << myElec->electronID("simpleEleId85relIso") 
+      << " 80relIso=" << myElec->electronID("simpleEleId80relIso") 
+      << " 70relIso=" << myElec->electronID("simpleEleId70relIso") 
+      << " 60relIso=" << myElec->electronID("simpleEleId60relIso")  << ...... <<
+      << std::endl;
+      The value map returns a double with the following meaning:
+      
+      0: fails
+      1: passes electron ID only
+      2: passes electron Isolation only
+      3: passes electron ID and Isolation only
+      4: passes conversion rejection
+      5: passes conversion rejection and ID
+      6: passes conversion rejection and Isolation
+      7: passes the whole selection
+      
+      // std::cout << "(*iElectron).electronID(\"eidLoose\") = " << (*iElectron).electronID("eidLoose") << std::endl; /// FIX ME
+      */ // FIX ME
 
       /// 3) Photon conversion rejection (gamma->e+e-)
       /// If an electron has: |dist| < 0.02 && |delta cot(theta)| < 0.02 then it is regarded as coming from a conversion, and rejected
@@ -325,7 +520,6 @@ namespace HPlus {
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
-    // if(bElecSelection) increment(fElecSelectionSubCountElectronSelection);  // if will use eID
     
     if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
 
@@ -362,6 +556,6 @@ namespace HPlus {
     else increment(fGlobalElectronVetoCounter);
     return true;
     
-  }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
-  
+  }//eof: bool GlobalElectronVeto::CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
 }//eof: namespace HPlus {

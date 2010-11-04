@@ -30,7 +30,8 @@ namespace HPlus {
     }
     
      const edm::PtrVector<pat::Tau>& getTau() const {
-       if( bOnlyOneTauCandidate )   return fHighestPtTauCandidate;
+
+       if( bOnlyOneTauCandidate ) return fHighestPtTauCandidate;
        if( (bMoreThanOneTauCandidate) && ( !bTauIDdecision) ) return fHighestPtTauCandidate;
        if( (bMoreThanOneTauCandidate) && (  bTauIDdecision) ) return fSelectedTaus;
        // Safety measure

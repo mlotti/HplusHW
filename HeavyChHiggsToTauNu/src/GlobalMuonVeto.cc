@@ -295,7 +295,7 @@ namespace HPlus {
       hMuonPt_AfterSelection->Fill(myMuonPt);
       hMuonEta_AfterSelection->Fill(myMuonPt);
       hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt);
-      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonPt);
+      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta);
       hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta());
 

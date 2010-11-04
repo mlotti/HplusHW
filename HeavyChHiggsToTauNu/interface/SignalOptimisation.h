@@ -46,25 +46,26 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     EvtTopology fEvtTopology;
-    GlobalMuonVeto fGlobalMuonVeto;
     GlobalElectronVeto fGlobalElectronVeto;
+    GlobalMuonVeto fGlobalMuonVeto;
     
     // Histograms
     TH1 *hAlphaTInvMass;
     
     /// for Tree
     TTree *myTree;
-    std::vector<bool> *bTauIDStatus;
-    std::vector<float> *fTauJetEt;
-    std::vector<float> *fTauJetEta;
-    std::vector<float> *fMET;
-    std::vector<int> *iNHadronicJets;
-    std::vector<int> *iNBtags;
-    std::vector<float> *fGlobalMuonVetoHighestPt;
-    std::vector<float> *fGlobalElectronVetoHighestPt;
-    std::vector<float> *fTransverseMass;
-    std::vector<float> *fDeltaPhi;
-    std::vector<float> *fAlphaT;
+
+    bool bTauIDStatus;
+    float fTauJetEt;
+    float fTauJetEta;
+    float fMET;
+    int iNHadronicJets;
+    int iNBtags;
+    float fGlobalMuonVetoHighestPt;
+    float fGlobalElectronVetoHighestPt;
+    float fTransverseMass;
+    float fDeltaPhi;
+    float fAlphaT;
     
   };
 }

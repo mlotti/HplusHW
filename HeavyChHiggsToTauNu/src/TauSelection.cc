@@ -76,7 +76,7 @@ namespace HPlus {
     bNoTauCandidate = false;
     bOnlyOneTauCandidate = false;
     bMoreThanOneTauCandidate = false;
-   
+    
     if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
     if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
     if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
@@ -167,10 +167,10 @@ namespace HPlus {
       ++leadTrkPtCutPassed;
 
  
-     
       float ptmax = 0;
       float ptsum = 0;
 
+      /*
       const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
       reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
       //      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
@@ -200,7 +200,7 @@ namespace HPlus {
 	hIsolTrkPtSumVsPtCut->Fill(cut,sum);
 	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
       } 
-
+      */
       
       if(iTau->tauID("byIsolation") < 0.5) continue; 
       increment(fbyIsolationSubCount);
@@ -210,7 +210,7 @@ namespace HPlus {
       increment(fecalIsolationSubCount);
       ++ecalIsolationCutPassed;
 
-      //      std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;       
+      // std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;
       hnProngs->Fill(nSigTracks);    
       //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
       if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue; 
@@ -264,10 +264,7 @@ namespace HPlus {
       fSelectedTaus.push_back(iTau);
     }
     // std::cout << "FIX ME. For now use only 1prongs" << std::endl;
-    if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
-	|| (leadTrkPtCutPassed == 0) || (byIsolationCutPassed == 0) || (ecalIsolationCutPassed == 0) || (nProngsCutPassed == 0) 
-	|| (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
-    else bTauIDdecision = true;
+    //    if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0)  || (leadTrkPtCutPassed == 0) || (byIsolationCutPassed == 0) || (ecalIsolationCutPassed == 0) || (nProngsCutPassed == 0)  || (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
 
     if(ptCutPassed == 0) return false;
     increment(fPtCutCount);
@@ -304,7 +301,9 @@ namespace HPlus {
     
     // if(fSelectedTaus.size() > 1)
     // return false;
-    
+
+    bTauIDdecision = true;
+
     return true;
   }
 
@@ -430,10 +429,8 @@ namespace HPlus {
 		hInvMass->Fill(InvMass);
 	}
 
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
-	    || (leadTrkPtCutPassed == 0) || (byTaNCCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) 
-	    || (RtauCutPassed == 0) ) bTauIDdecision = false;
-	else bTauIDdecision = true;
+	//	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0)  || (leadTrkPtCutPassed == 0) || (byTaNCCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) || (RtauCutPassed == 0) ) bTauIDdecision = false;
+	//	else bTauIDdecision = true;
 	
  	if(ptCutPassed == 0) return false;
     	increment(fPtCutCount);
@@ -462,6 +459,7 @@ namespace HPlus {
     	if(RtauCutPassed == 0) return false;
     	increment(fRtauCount);
 
+	bTauIDdecision = true;
 	return true;
   }
 
@@ -589,10 +587,8 @@ namespace HPlus {
                 fSelectedTaus.push_back(iTau);
         }
 	// std::cout << "FIX ME. For now use only 1prongs" << std::endl;
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
-	    || (byTightIsolationPassed == 0) || ( leadTrkPtCutPassed == 0) || ( nProngsCutPassed == 0) || ( HChTauIDchargeCutPassed == 0) 
-	    || ( RtauCutPassed == 0) || ( InvMassCutPassed == 0) )  bTauIDdecision = false;
-	else bTauIDdecision = true;
+	//	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0)  || (byTightIsolationPassed == 0) || ( leadTrkPtCutPassed == 0) || ( nProngsCutPassed == 0) || ( HChTauIDchargeCutPassed == 0) || ( RtauCutPassed == 0) || ( InvMassCutPassed == 0) )  bTauIDdecision = false;
+	//	else bTauIDdecision = true;
 
         if(ptCutPassed == 0) return false;
         increment(fPtCutCount);
@@ -624,6 +620,7 @@ namespace HPlus {
 	if(InvMassCutPassed == 0) return false;
 	increment(fInvMassCount);
 
+	bTauIDdecision = true;
         return true;
   }
 
@@ -739,10 +736,8 @@ namespace HPlus {
                 fSelectedTaus.push_back(iTau);
 	}
 
-	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) 
-	    || (leadTrkPtCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) 
-	    || (byIsolationCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
-	else bTauIDdecision = true;
+	//	if( (ptCutPassed == 0) || (etaCutPassed == 0) || (againstMuonCutPassed == 0) || (againstElectronCutPassed == 0) || (leadTrkPtCutPassed == 0) || (nProngsCutPassed == 0) || (HChTauIDchargeCutPassed == 0) || (byIsolationCutPassed == 0) || (RtauCutPassed == 0) || (InvMassCutPassed == 0) ) bTauIDdecision = false;
+	//	else bTauIDdecision = true;
 	
         if(ptCutPassed == 0) return false;
         increment(fPtCutCount);
@@ -774,6 +769,7 @@ namespace HPlus {
 	if(InvMassCutPassed == 0) return false;
 	increment(fInvMassCount);
 
+	bTauIDdecision = true;
         return true;
   }
 }

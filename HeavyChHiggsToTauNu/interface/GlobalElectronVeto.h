@@ -35,7 +35,8 @@ namespace HPlus {
     GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
     ~GlobalElectronVeto();
 
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Elecectron ID
+    bool analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
 
     const float getSelectedElectronsPt() const {
       return fSelectedElectronsPt;
@@ -46,7 +47,8 @@ namespace HPlus {
    
   private:
 
-    bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Official Elecectron ID
+    bool CustomElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup); // Requires General Tracks
 
 
     // Input parameters
@@ -62,7 +64,7 @@ namespace HPlus {
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
     Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountEtaCut;
-    // Count fElecSelectionSubCountElectronSelection; // yes if eID used
+    Count fElecSelectionSubCountElectronSelection;
     Count fElecSelectionSubCountNLostHitsInTrkerCut;
     Count fElecSelectionSubCountmyElectronDeltaCotThetaCut;
     Count fElecSelectionSubCountmyElectronDistanceCut;
@@ -74,11 +76,16 @@ namespace HPlus {
     Count fElecIDSubCountElecIDRobustHighEnergy;
     Count fElecIDSubCountElecIDRobustLoose;
     Count fElecIDSubCountElecIDRobustTight;
-    Count fElecIDSubCountElecIDdLoose;
+    Count fElecIDSubCountElecIDLoose;
     Count fElecIDSubCountElecIDTight;
-    Count fElecIDSubCountElecNoID;
-    Count fElecIDSubCountElecAllIDs;
-    Count fElecIDSubCountOther;
+
+    Count fElecIDSubCountSimpleEleId95relIso;
+    Count fElecIDSubCountSimpleEleId90relIso;
+    Count fElecIDSubCountSimpleEleId85relIso;
+    Count fElecIDSubCountSimpleEleId80relIso;
+    Count fElecIDSubCountSimpleEleId70relIso;
+    Count fElecIDSubCountSimpleEleId60relIso;
+    
     // Histograms
     TH1 *hElectronPt;
     TH1 *hElectronEta;
@@ -92,6 +99,22 @@ namespace HPlus {
     // Selected Electrons
     float fSelectedElectronsPt;
     float fSelectedElectronsEta;
+
+    // for Electron-ID Selection
+    bool bDecision;
+    bool bPassedElecID;
+    bool bUseLooseID;
+    bool bUseRobustLooseID;
+    bool bUseTightID;
+    bool bUseRobustTightID;
+    bool bUseRobustHighEnergyID;
+    bool bUseSimpleEleId95relIsoID;
+    bool bUseSimpleEleId90relIsoID;
+    bool bUseSimpleEleId85relIsoID;
+    bool bUseSimpleEleId80relIsoID;
+    bool bUseSimpleEleId70relIsoID;
+    bool bUseSimpleEleId60relIsoID;
+
   };
 }
 
