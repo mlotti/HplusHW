@@ -10,6 +10,9 @@
 #include "TH1F.h"
 
 namespace HPlus {
+  TauSelection::Data::Data(const TauSelection *tauSelection, bool passedEvent):
+    fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
+  TauSelection::Data::~Data() {}
 
   TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
@@ -71,13 +74,14 @@ namespace HPlus {
 
   TauSelection::~TauSelection() {}
 
-  bool TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-	if(fSelection == "CaloTauCutBased")             return selectionByTCTauCuts(iEvent,iSetup);
-	if(fSelection == "ShrinkingConePFTauCutBased")  return selectionByPFTauCuts(iEvent,iSetup);
-	if(fSelection == "ShrinkingConePFTauTaNCBased") return selectionByPFTauTaNC(iEvent,iSetup);
-	if(fSelection == "HPSTauBased")                 return selectionByHPSTau(iEvent,iSetup);
-	std::cout << "WARNING, no tau selection used!" << std::endl;
-	return false;
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+        bool passEvent = false;
+	if     (fSelection == "CaloTauCutBased")             passEvent = selectionByTCTauCuts(iEvent,iSetup);
+	else if(fSelection == "ShrinkingConePFTauCutBased")  passEvent = selectionByPFTauCuts(iEvent,iSetup);
+	else if(fSelection == "ShrinkingConePFTauTaNCBased") passEvent = selectionByPFTauTaNC(iEvent,iSetup);
+	else if(fSelection == "HPSTauBased")                 passEvent = selectionByHPSTau(iEvent,iSetup);
+        else std::cout << "WARNING, no tau selection used!" << std::endl;
+        return Data(this, passEvent);
   }
 
   bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup){

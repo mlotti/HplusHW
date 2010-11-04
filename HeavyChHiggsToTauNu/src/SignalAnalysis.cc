@@ -66,7 +66,9 @@ namespace HPlus {
     // If factorization is applied to tauID, apply it here
     // fEventWeight.addWeight(factorizationWeight); 
 
-    if(!fTauSelection.analyze(iEvent, iSetup)) return;
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    if(!tauData.passedEvent()) return;
+
     hMet_AfterTauSelection->Fill(fMETSelection.fMet);
 
 
@@ -80,7 +82,7 @@ namespace HPlus {
 
     if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
-    if(!fJetSelection.analyze(iEvent, iSetup, fTauSelection.getSelectedTaus())) return;
+    if(!fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus())) return;
 
     //    if(!fMETSelection.analyze(iEvent, iSetup)) return;
 
@@ -89,14 +91,14 @@ namespace HPlus {
     hMet_AfterBTagging->Fill(fMETSelection.fMet);
 
  
-    fCorrelationAnalysis.analyze(fTauSelection.getSelectedTaus(),fBTagging.getSelectedJets());
+    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(),fBTagging.getSelectedJets());
 
-    if(!fEvtTopology.analyze(*(fTauSelection.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
+    if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), fJetSelection.getSelectedJets())) return;
 
-    double deltaPhi = DeltaPhi::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
 
-    double transverseMass = TransverseMass::reconstruct(*(fTauSelection.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
 
     //  if(transverseMass < ftransverseMassCut ) return;
@@ -107,9 +109,9 @@ namespace HPlus {
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau
-    // Please access the selected tau jets via  fTauSelection.getSelectedTaus()
-    //std::cout << "fTauSelection.Rtau = " << fTauSelection.Rtau << std::endl;
-    //hAlphaTVsRtau->Fill(fTauSelection.Rtau, sAlphaT.fAlphaT);
+    // Please access the selected tau jets via  tauData.getSelectedTaus()
+    //std::cout << "tauData.Rtau = " << tauData.Rtau << std::endl;
+    //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
