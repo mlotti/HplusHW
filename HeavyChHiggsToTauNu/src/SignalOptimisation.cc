@@ -16,7 +16,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter),
+    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
@@ -93,8 +93,8 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return; /// no Trigger means no Tau => meaningless to continue.
     
     /// 2) Trigger Emulation (for MC data)
-    bool bTriggerMETEmulationPass =  fTriggerMETEmulation.analyze(iEvent, iSetup);
-    if(!bTriggerMETEmulationPass) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it.
+    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
+    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it.
 
     /// 3) tauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
@@ -130,7 +130,7 @@ namespace HPlus {
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    bool bDecision = triggerData.passedEvent()    *bTriggerMETEmulationPass*tauData.passedEvent()*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
+    bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent()   *tauData.passedEvent()*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());

@@ -16,7 +16,7 @@ namespace HPlus {
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter),
+    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
@@ -75,7 +75,10 @@ namespace HPlus {
     /////////////////////////////////////
     // test
     hMetBeforeEmul->Fill(fMETSelection.fMet);
-    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+    
+    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
+    if(!triggerMETEmulationData.passedEvent()) return;
+    
     hMetBeforeTrigger->Fill(fMETSelection.fMet);
     
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
