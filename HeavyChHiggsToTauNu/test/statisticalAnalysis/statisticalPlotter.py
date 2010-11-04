@@ -12,8 +12,7 @@ style = TDRStyle()
 gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
-def getLegend(x):
-#    lege = TLegend(x, 0.7, 0.95, 0.93)
+def getLegend():
     lege = TLegend(0.2, 0.48, 0.55, 0.68)
     lege.SetFillStyle(0)
     lege.SetBorderSize(0)
@@ -97,26 +96,12 @@ def main():
 	    tanbReachTheory = []
             nPoints = 5
             data[selection][mu] = {}
-            data[selection][mu]["ExclNoErr"] = {
-                "mass":array( 'd' ),
-                "tanb":array( 'd' )
-                }
-            data[selection][mu]["ExclWErr"] = {
-                "mass":array( 'd' ),
-                "tanb":array( 'd' )
-                }
-            data[selection][mu]["ReachNoErr"] = {
-                "mass":array( 'd' ),
-                "tanb":array( 'd' )
-                }
-            data[selection][mu]["ReachWErr"] = {
-                "mass":array( 'd' ),
-                "tanb":array( 'd' )
-                }
-            data[selection][mu]["ReachTheory"] = {
-                "mass":array( 'd' ),
-                "tanb":array( 'd' )
-                }
+            listOfGraphs = ["ExclNoErr","ExclWErr","ReachNoErr","ReachWErr","ReachTheory"]
+            for thisGraphType in listOfGraphs:
+                data[selection][mu][thisGraphType] = {
+                    "mass":array( 'd' ),
+                    "tanb":array( 'd' )
+                    }
             massArray, tanbExclNoErrArray, tanbExclWErrArray, tanbReachNoErrArray, tanbReachWErrArray, tanbReachTheoryArray = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ),array( 'd' )
 	    for mass in mHps :
 		tanbTheoryReach = tanbForTheoryLimit(mass,mu)
@@ -155,22 +140,6 @@ def main():
                     data[selection][mu]["ReachTheory"]["mass"].append(mass)
                     data[selection][mu]["ReachTheory"]["tanb"].append(tanbTheoryReach)
                     
-# Plot everything in one canvas
-#    c1 = TCanvas( 'c1', 'tanbReach', 200, 10, 700, 500 )
-#    graphExclNoErr   = TGraph(nPoints,massArray,tanbExclNoErrArray)
-#    graphExclWErr    = TGraph(nPoints,massArray,tanbExclWErrArray)
-#    graphReachNoErr  = TGraph(nPoints,massArray,tanbReachNoErrArray)
-#    graphReachWErr   = TGraph(nPoints,massArray,tanbReachWErrArray)
-#    graphReachTheory = TGraph(nPoints,massArray,tanbReachTheoryArray)
-#    graphExclNoErr.Draw('ALP')   
-#    graphExclWErr.Draw('LP')    
-#    graphReachNoErr.Draw('LP')      
-#    graphReachWErr.Draw('LP')       
-#    graphReachTheory.Draw('LP')
-#    addCmsPreliminaryText()
-#    c1.Update()
-#    c1.SaveAs(".png")
-
     ## Graph: different mu values
     ## plot theory reach & 5sigmaNoErr & Tevatron exclusion
     for selection in massPoints.keys() :
@@ -178,7 +147,7 @@ def main():
         print 'muPlot'+selection
         c1 = TCanvas( 'muPlot'+selection, 'tanbReach'+selection, 200, 10, 700, 500 )
         multi = TMultiGraph()
-        lege = getLegend(0.6)
+        lege = getLegend()
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.84)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
@@ -222,14 +191,14 @@ def main():
     for index, setOfGraphs in enumerate(setOfSetOfGraphs):
         c1 = TCanvas("exclusions"+str(index),"exclusions"+str(index),200, 10, 700, 500 )
         multi = TMultiGraph()
-        lege = getLegend(0.5)
-        mymu = 200
+        lege = getLegend()
+        fixedMu = 200
         color = 1
         for selection in massPoints.keys() :
             for oneGraph in setOfGraphs:
-                graph = TGraph(len(data[selection][mymu][oneGraph]["mass"]),
-                               data[selection][mymu][oneGraph]["mass"],
-                               data[selection][mymu][oneGraph]["tanb"])
+                graph = TGraph(len(data[selection][fixedMu][oneGraph]["mass"]),
+                               data[selection][fixedMu][oneGraph]["mass"],
+                               data[selection][fixedMu][oneGraph]["tanb"])
                 graph.SetLineColor(color)
                 graph.SetMarkerColor(color)
                 lege.AddEntry(graph,selection+", "+oneGraph,"l")
@@ -256,7 +225,5 @@ def main():
 
 #    print signif(50,50,0)
 #    print signalAtNsigma(50,0,5)
-
-
 
 main()
