@@ -6,7 +6,7 @@ def signif(nSignal,nBackgr,sysErrorBackgr):
 	return 0
 
     if nBackgr > 0 :
-	return sqrt(2*((nSignal+nBackgr)*log(1+nSignal/(nBackgr*(1+sysErrorBackgr)))-nSignal))
+	return sqrt(2*((nSignal+nBackgr*(1+sysErrorBackgr))*log(1+nSignal/(nBackgr*(1+sysErrorBackgr)))-nSignal))
 #	return nSignal/sqrt(nBackgr)
 
     return 0
