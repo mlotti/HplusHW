@@ -6,8 +6,11 @@
 #include "TH1F.h"
 
 namespace HPlus {
+  BTagging::Data::Data(const BTagging *bTagging, bool passedEvent):
+    fBTagging(bTagging), fPassedEvent(passedEvent) {}
+  BTagging::Data::~Data() {}
 
-  BTagging::BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  BTagging::BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
@@ -16,8 +19,8 @@ namespace HPlus {
     fTaggedCount(eventCounter.addCounter("b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
-    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut"))
-
+    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hDiscr = fs->make<TH1F>("jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 80, -10, 10);
@@ -32,7 +35,11 @@ namespace HPlus {
 
   BTagging::~BTagging() {}
 
-  bool BTagging::analyze(const edm::PtrVector<pat::Jet>& jets) {
+  BTagging::Data BTagging::analyze(const edm::PtrVector<pat::Jet>& jets) {
+    // Reset variables
+    iNBtags = -1;
+    bool passEvent = false;
+
     fSelectedJets.clear();
     fSelectedJets.reserve(jets.size());
 
@@ -80,9 +87,10 @@ namespace HPlus {
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
 
-   
-    if(passed < fMin) return false;
+    passEvent = true;
+    if(passed < fMin) passEvent = false;
     increment(fTaggedCount);
-    return true;
+
+    return Data(this, passEvent);
   }
 }

@@ -22,7 +22,7 @@ namespace HPlus {
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
+    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
@@ -109,8 +109,8 @@ namespace HPlus {
     //if(!jetData.passedEvent()) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     
     /// 6) BTagging
-    bool bBTaggingPass     = fBTagging.analyze(jetData.getSelectedJets());
-    // if(!bBTaggingPass) return;
+    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    //if(!btagData.passedEvent()) return;
 
     /// 7) AlphaT
     bool bEvtTopologyPass  = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
@@ -135,14 +135,15 @@ namespace HPlus {
       * tauData.passedEvent()
       * jetData.passedEvent()
       * metData.passedEvent()
-      *bBTaggingPass*bEvtTopologyPass;
+      * btagData.passedEvent()
+      * bEvtTopologyPass;
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());
     fTauJetEt->push_back((float( (tauData.getSelectedTaus()[0])->pt())));
     fMET->push_back(metData.getSelectedMET()->et());
     iNHadronicJets->push_back(jetData.getHadronicJetCount());
-    iNBtags->push_back(fBTagging.iNBtags);
+    iNBtags->push_back(btagData.getBJetCount());
     fAlphaT->push_back(sAlphaT.fAlphaT);
     fGlobalMuonVetoHighestPt->push_back( muonVetoData.getSelectedMuonPt() );
     fGlobalElectronVetoHighestPt->push_back( electronVetoData.getSelectedElectronPt() );

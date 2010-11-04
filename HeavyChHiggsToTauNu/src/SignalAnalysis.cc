@@ -22,7 +22,7 @@ namespace HPlus {
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
-    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
+    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
@@ -102,11 +102,12 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     if(!jetData.passedEvent()) return;
 
-
-    if(!fBTagging.analyze(jetData.getSelectedJets())) return;
+    // b tagging
+    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    if(!btagData.passedEvent()) return;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
  
-    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(),fBTagging.getSelectedJets());
+    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
     if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets())) return;
 
