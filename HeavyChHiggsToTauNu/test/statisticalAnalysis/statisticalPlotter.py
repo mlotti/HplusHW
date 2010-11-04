@@ -1,7 +1,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions import *
 
 import ROOT
-from ROOT import TTree, gROOT, TGraph, TCanvas, TMultiGraph, TLegend, TAxis
+from ROOT import TTree, gROOT, TGraph, TCanvas, TMultiGraph, TLegend, TAxis, TLatex
 #from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
@@ -13,6 +13,21 @@ style = TDRStyle()
 gROOT.Reset()
 ROOT.gROOT.SetBatch(True) 
 
+def getLegend():
+    lege = TLegend(0.6, 0.7, 0.95, 0.93)
+    lege.SetFillStyle(0)
+    lege.SetBorderSize(0)
+    lege.SetTextSize(0.035)
+    return lege
+
+def writeText( myText, y ):
+    text = TLatex()
+    text.SetTextAlign(12)
+    text.SetTextSize(0.04)
+    text.SetNDC()
+    text.DrawLatex(0.2,y,myText)
+    return 0
+        
 def main():
 
     luminosity = 100
@@ -113,9 +128,11 @@ def main():
         print 'muPlot'+selection
         c1 = TCanvas( 'muPlot'+selection, 'tanbReach'+selection, 200, 10, 700, 500 )
         multi = TMultiGraph();
-        lege = TLegend(0.75, 0.8, 0.95, 0.93)
-        lege.SetFillStyle(0)
-        lege.SetBorderSize(0)
+        lege = getLegend()
+        writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
+        writeText("m_{H}^{max} scenario",0.84)
+        writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
+        writeText("no syst. errors", 0.72)
         for mu in mus :
             yvalues, massArray = array( 'd' ), array( 'd' )
             print "mu = ",mu
@@ -136,11 +153,15 @@ def main():
             color = color + 1
         # Tevatron result
         graphTeva = TGraph(len(tanbExclwErrTevatronArray),massTevatronArray,tanbExclwErrTevatronArray)
+        graphTeva.SetLineStyle(2)
+        graphTeva.SetLineWidth(2)
         multi.Add(graphTeva,"lp")
         lege.AddEntry(graphTeva,"Tevatron 1/fb exclusion","l")
         lege.Draw()
         multi.Draw("a")
         c1.Update()
+        multi.GetYaxis().SetRangeUser(0,200)
+#        multi.GetXaxis().SetRangeUser(80,160) #does not work
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
         addCmsPreliminaryText()
