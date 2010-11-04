@@ -57,6 +57,10 @@ namespace HPlus {
   GlobalElectronVeto::~GlobalElectronVeto() {}
 
   GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    // Reset data variables
+    fSelectedElectronPt = -1.0;
+    fSelectedElectronEta = -999.99;
+    // Get result
     bool passEvent = false;
     if(fElecSelection == "kNoElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
     else if(fElecSelection == "kRobustElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
@@ -106,8 +110,6 @@ namespace HPlus {
     /// Reset/initialise variables
     float myHighestElecPt = -1.0;
     float myHighestElecEta = -999.99;
-    fSelectedElectronPt = -1.0;
-    fSelectedElectronEta = -999.99;
     ///
     bool bElecPresent = false;
     bool bElecHasGsfTrkOrTrk = false;

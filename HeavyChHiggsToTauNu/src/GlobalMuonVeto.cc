@@ -12,8 +12,11 @@
 #include "TH2F.h"
 
 namespace HPlus {
+  GlobalMuonVeto::Data::Data(const GlobalMuonVeto *globalMuonVeto, bool passedEvent):
+    fGlobalMuonVeto(globalMuonVeto), fPassedEvent(passedEvent) {}
+  GlobalMuonVeto::Data::~Data() {}
 
-  GlobalMuonVeto::GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  GlobalMuonVeto::GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fMuonCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollectionName")),
     fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
@@ -51,7 +54,8 @@ namespace HPlus {
     fMuonIDSubCountTMLastStationAngTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationAngTight")),
     fMuonIDSubCountTMLastStationOptimizedBarrelLowPtLoose(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedBarrelLowPtLoose")),
     fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight(eventCounter.addSubCounter("GlobalMuon ID","TMLastStationOptimizedBarrelLowPtTight")),
-    fMuonIDSubCountOther(eventCounter.addSubCounter("GlobalMuon ID","Other"))    
+    fMuonIDSubCountOther(eventCounter.addSubCounter("GlobalMuon ID","Other")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hMuonPt = fs->make<TH1F>("GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
@@ -66,34 +70,39 @@ namespace HPlus {
     hMuonEta_InnerTrack_AfterSelection = fs->make<TH1F>("GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
     hMuonPt_GlobalTrack_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
     hMuonEta_GlobalTrack_AfterSelection = fs->make<TH1F>("GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
+  
+    // Check here that the muon selection is reasonable
+    if(fMuonSelection != "All" &&
+       fMuonSelection != "AllGlobalMuons" &&
+       fMuonSelection != "AllStandAloneMuons" && 
+       fMuonSelection != "AllTrackerMuons" && 
+       fMuonSelection != "TrackerMuonArbitrated" && 
+       fMuonSelection != "AllArbitrated" && 
+       fMuonSelection != "GlobalMuonPromptTight" && 
+       fMuonSelection != "TMLastStationLoose" && 
+       fMuonSelection != "TMLastStationTight" && 
+       fMuonSelection != "TMOneStationLoose" && 
+       fMuonSelection != "TMLastStationOptimizedLowPtLoose" && 
+       fMuonSelection != "TMLastStationOptimizedLowPtTight" && 
+       fMuonSelection != "GMTkChiCompatibility" && 
+       fMuonSelection != "GMTkKinkTight" && 
+       fMuonSelection != "TMLastStationAngLoose" && 
+       fMuonSelection != "TMLastStationAngTight" && 
+       fMuonSelection != "TMLastStationOptimizedBarrelLowPtLoose" && 
+       fMuonSelection != "TMLastStationOptimizedBarrelLowPtTight") { 
+      throw cms::Exception("Error") << "The MuonSelection \"" << fMuonSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n All, AllGlobalMuons, AllStandAloneMuons, AllTrackerMuons, TrackerMuonArbitrated, AllArbitrated, GlobalMuonPromptTight, TMLastStationLoose, TMLastStationTight, TMOneStationLoose, TMLastStationOptimizedLowPtLoose, TMLastStationOptimizedLowPtTight, GMTkChiCompatibility, GMTkKinkTight, TMLastStationAngLoose, TMLastStationAngTight, TMLastStationOptimizedBarrelLowPtLoose, TMLastStationOptimizedBarrelLowPtTight.\n" << std::endl;
+    }
   }
 
   GlobalMuonVeto::~GlobalMuonVeto() {}
 
-  bool GlobalMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
-    if( fMuonSelection == "All" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "AllGlobalMuons" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "AllStandAloneMuons" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "AllTrackerMuons" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TrackerMuonArbitrated" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "AllArbitrated" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "GlobalMuonPromptTight" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationLoose" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationTight" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMOneStationLoose" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationOptimizedLowPtLoose" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationOptimizedLowPtTight" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "GMTkChiCompatibility" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "GMTkKinkTight" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationAngLoose" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationAngTight" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationOptimizedBarrelLowPtLoose" ) return MuonSelection(iEvent,iSetup); 
-    else if( fMuonSelection == "TMLastStationOptimizedBarrelLowPtTight" ) return MuonSelection(iEvent,iSetup); 
-    else{
-      throw cms::Exception("Error") << "The MuonSelection \"" << fMuonSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n All, AllGlobalMuons, AllStandAloneMuons, AllTrackerMuons, TrackerMuonArbitrated, AllArbitrated, GlobalMuonPromptTight, TMLastStationLoose, TMLastStationTight, TMOneStationLoose, TMLastStationOptimizedLowPtLoose, TMLastStationOptimizedLowPtTight, GMTkChiCompatibility, GMTkKinkTight, TMLastStationAngLoose, TMLastStationAngTight, TMLastStationOptimizedBarrelLowPtLoose, TMLastStationOptimizedBarrelLowPtTight.\n" << std::endl;
-      return true;
-    }
+  GlobalMuonVeto::Data GlobalMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    // Reset data variables
+    fSelectedMuonPt = -1.0;
+    fSelectedMuonEta = -999.99;
+    // Get result
+    bool passEvent = MuonSelection(iEvent,iSetup);
+    return Data(this, passEvent);
   }
 
   bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -148,8 +157,6 @@ namespace HPlus {
     /// Reset/initialise variables
     float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
-    fSelectedMuonsPt = -1.0;
-    fSelectedMuonsEta = -999.99;
     /// 
     bool bMuonPresent = false;
     bool bMuonHasGlobalOrInnerTrk = false;
@@ -331,9 +338,9 @@ namespace HPlus {
     bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
 
     /// Now store the highest Muon Pt and Eta
-    fSelectedMuonsPt  = myHighestMuonPt;
-    fSelectedMuonsEta = myHighestMuonEta;
-    // std::cout << "fSelectedMuonsPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;
+    fSelectedMuonPt  = myHighestMuonPt;
+    fSelectedMuonEta = myHighestMuonEta;
+    // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;
 
     /// If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;

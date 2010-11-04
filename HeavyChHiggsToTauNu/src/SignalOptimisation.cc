@@ -18,7 +18,7 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
-    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
+    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
@@ -117,8 +117,8 @@ namespace HPlus {
     // if(!bEvtTopologyPass) return;
 
     /// 8) GlobalMuonVeto
-    bool bGlobalMuonVetoPass = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    // if(!bGlobalMuonVetoPass) return;
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    if (!muonVetoData.passedEvent()) return; 
 
     /// 9) GlobalElectronVeto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -139,7 +139,7 @@ namespace HPlus {
     iNHadronicJets->push_back(fJetSelection.iNHadronicJets);
     iNBtags->push_back(fBTagging.iNBtags);
     fAlphaT->push_back(sAlphaT.fAlphaT);
-    fGlobalMuonVetoHighestPt->push_back( fGlobalMuonVeto.getSelectedMuonsPt() );
+    fGlobalMuonVetoHighestPt->push_back( muonVetoData.getSelectedMuonPt() );
     fGlobalElectronVetoHighestPt->push_back( electronVetoData.getSelectedElectronPt() );
     fTransverseMass->push_back(transverseMass);
     fDeltaPhi->push_back(deltaPhi);

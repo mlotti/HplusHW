@@ -8,6 +8,7 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h" 
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 /// The class is designed so that when the methond analyze is called it returns FALSE if a Global Muon is found passing all criteria. 
 /// It returns TRUE if no muons are found or if the muons present do NOT satisfy the "Selection of muons" as chosen by TTbar analyses.
@@ -22,30 +23,42 @@ class TH1;
 
 namespace HPlus {
   class GlobalMuonVeto {
-
   public:
-    GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    /**
+     * Class to encapsulate the access to the data members of
+     * TauSelection. If you want to add a new accessor, add it here
+     * and keep all the data of TauSelection private.
+     */
+    class Data {
+    public:
+      // The reason for pointer instead of reference is that const
+      // reference allows temporaries, while const pointer does not.
+      // Here the object pointed-to must live longer than this object.
+      Data(const GlobalMuonVeto *globalMuonVeto, bool passedEvent);
+      ~Data();
+
+      bool passedEvent() const { return fPassedEvent; }
+      const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
+      const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
+    
+    private:
+      const GlobalMuonVeto *fGlobalMuonVeto;
+      const bool fPassedEvent;
+    };
+    
+    GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~GlobalMuonVeto();
 
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    const float getSelectedMuonsPt() const {
-      return fSelectedMuonsPt;
-    }
-    const float getSelectedMuonsEta() const {
-      return fSelectedMuonsEta;
-    }
-    
   private:
-
     bool MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
-    std::string fMuonSelection;
-    double fMuonPtCut;
-    double fMuonEtaCut;
+    const std::string fMuonSelection;
+    const double fMuonPtCut;
+    const double fMuonEtaCut;
     
     /// Counter
     Count fGlobalMuonVetoCounter;
@@ -85,6 +98,9 @@ namespace HPlus {
     Count fMuonIDSubCountTMLastStationOptimizedBarrelLowPtTight;
     Count fMuonIDSubCountOther;
 
+    // EventWeight object
+    EventWeight& fEventWeight;
+
     // Histograms
     TH1 *hMuonPt;
     TH1 *hMuonEta;
@@ -99,9 +115,9 @@ namespace HPlus {
     TH1 *hMuonPt_GlobalTrack_AfterSelection;
     TH1 *hMuonEta_GlobalTrack_AfterSelection;
 
-    // Selected Muons
-    float fSelectedMuonsPt;
-    float fSelectedMuonsEta;
+    // pt and eta of muon with highest pt passing the selections
+    float fSelectedMuonPt;
+    float fSelectedMuonEta;
   };
 }
 
