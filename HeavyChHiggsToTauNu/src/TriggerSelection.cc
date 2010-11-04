@@ -5,16 +5,21 @@
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 
 namespace HPlus {
-
-  TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, bool passedEvent):
+    fTriggerSelection(triggerSelection), fPassedEvent(passedEvent) {}
+  TriggerSelection::Data::~Data() {}
+  
+  TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPath(iConfig.getUntrackedParameter<std::string>("trigger")),
-    fTriggerCount(eventCounter.addCounter("Triggered ("+fPath+")"))
+    fTriggerCount(eventCounter.addCounter("Triggered ("+fPath+")")),
+    fEventWeight(eventWeight)
   {}
 
   TriggerSelection::~TriggerSelection() {}
 
-  bool TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    bool passEvent = false;
     edm::Handle<pat::TriggerEvent> trigger;
     iEvent.getByLabel(fSrc, trigger);
     
@@ -22,9 +27,9 @@ namespace HPlus {
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
         increment(fTriggerCount);
-        return true;
+         passEvent = true;
       }
     }
-    return false;
+    return Data(this, passEvent);
   }
 }

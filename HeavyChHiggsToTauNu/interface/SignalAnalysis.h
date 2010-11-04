@@ -46,11 +46,12 @@ namespace HPlus {
 
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
+    GlobalMuonVeto fGlobalMuonVeto;
     TauSelection fTauSelection;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
-    GlobalMuonVeto fGlobalMuonVeto;
+    
     // Count ftransverseMassCutCount;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;

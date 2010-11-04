@@ -10,20 +10,21 @@
 #include "TNamed.h"
 
 namespace HPlus {
-  SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
-    fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter),
+    fEventWeight(eventWeight),
+    fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter),
+    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter),
+    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter),
-    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter),
-    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter),
-    fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter)
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -88,8 +89,8 @@ namespace HPlus {
     fAlphaT->clear();
 
     /// 1) Trigger
-    bool bTriggerSelection = fTriggerSelection.analyze(iEvent, iSetup);
-    if(!bTriggerSelection) return; /// no Trigger means no Tau => meaningless to continue.
+    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
+    if(!triggerData.passedEvent()) return; /// no Trigger means no Tau => meaningless to continue.
     
     /// 2) Trigger Emulation (for MC data)
     bool bTriggerMETEmulationPass =  fTriggerMETEmulation.analyze(iEvent, iSetup);
@@ -129,7 +130,7 @@ namespace HPlus {
     AlphaStruc sAlphaT = fEvtTopology.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    bool bDecision = bTriggerSelection*bTriggerMETEmulationPass*tauData.passedEvent()*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
+    bool bDecision = triggerData.passedEvent()    *bTriggerMETEmulationPass*tauData.passedEvent()*bJetSelectionPass*bMETSelectionPass*bBTaggingPass*bEvtTopologyPass;
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());

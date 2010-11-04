@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalOptimisation_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
@@ -26,7 +27,7 @@ class TH2;
 namespace HPlus {
   class SignalOptimisation {
   public:
-    explicit SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    explicit SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalOptimisation();
 
     // Interface towards the EDProducer
@@ -38,16 +39,17 @@ namespace HPlus {
     double  ftransverseMassCut;
 
     Count fAllCounter;
+    EventWeight& fEventWeight;
 
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
+    GlobalElectronVeto fGlobalElectronVeto;
+    GlobalMuonVeto fGlobalMuonVeto;
     TauSelection fTauSelection;
     METSelection fMETSelection;
     JetSelection fJetSelection;
     BTagging fBTagging;
     EvtTopology fEvtTopology;
-    GlobalMuonVeto fGlobalMuonVeto;
-    GlobalElectronVeto fGlobalElectronVeto;
     
     // Histograms
     TH1 *hAlphaTInvMass;

@@ -3,6 +3,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalOptimisation.h"
 
 class HPlusSignalOptimisationProducer: public edm::EDProducer {
@@ -20,13 +21,15 @@ class HPlusSignalOptimisationProducer: public edm::EDProducer {
   virtual void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
+  HPlus::EventWeight eventWeight;
   HPlus::SignalOptimisation analysis;
 };
 
 HPlusSignalOptimisationProducer::HPlusSignalOptimisationProducer(const edm::ParameterSet& pset):
-  eventCounter(), analysis(pset, eventCounter)
+  eventCounter(), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
 {
   eventCounter.produces(this);
+  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusSignalOptimisationProducer::~HPlusSignalOptimisationProducer() {}
 void HPlusSignalOptimisationProducer::beginJob() {}
