@@ -17,6 +17,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
+    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter),
@@ -85,6 +86,11 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return;
     
     hMetAfterTrigger->Fill(fMETSelection.fMet);
+
+    // Global electron veto
+    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    if (!electronVetoData.passedEvent()) return; 
+
 
     if(!fMETSelection.analyze(iEvent, iSetup)) return;
 

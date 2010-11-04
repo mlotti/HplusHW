@@ -17,7 +17,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
-    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter),
+    fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
@@ -121,8 +121,8 @@ namespace HPlus {
     // if(!bGlobalMuonVetoPass) return;
 
     /// 9) GlobalElectronVeto
-    bool bGlobalElectronVetoPass = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    // if(!bGlobalElectronVetoPass) return;
+    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    if (!electronVetoData.passedEvent()) return; 
     
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(fMETSelection.getSelectedMET()));
@@ -140,7 +140,7 @@ namespace HPlus {
     iNBtags->push_back(fBTagging.iNBtags);
     fAlphaT->push_back(sAlphaT.fAlphaT);
     fGlobalMuonVetoHighestPt->push_back( fGlobalMuonVeto.getSelectedMuonsPt() );
-    fGlobalElectronVetoHighestPt->push_back( fGlobalElectronVeto.getSelectedElectronsPt() );
+    fGlobalElectronVetoHighestPt->push_back( electronVetoData.getSelectedElectronPt() );
     fTransverseMass->push_back(transverseMass);
     fDeltaPhi->push_back(deltaPhi);
     

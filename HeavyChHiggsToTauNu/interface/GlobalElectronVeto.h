@@ -7,6 +7,7 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include <DataFormats/BeamSpot/interface/BeamSpot.h>
@@ -30,34 +31,46 @@ class TH1;
 
 namespace HPlus {
   class GlobalElectronVeto {
-
   public:
-    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    /**
+     * Class to encapsulate the access to the data members of
+     * TauSelection. If you want to add a new accessor, add it here
+     * and keep all the data of TauSelection private.
+     */
+    class Data {
+    public:
+      // The reason for pointer instead of reference is that const
+      // reference allows temporaries, while const pointer does not.
+      // Here the object pointed-to must live longer than this object.
+      Data(const GlobalElectronVeto *globalElectronVeto, bool passedEvent);
+      ~Data();
+
+      bool passedEvent() const { return fPassedEvent; }
+      const float getSelectedElectronPt() const { return fGlobalElectronVeto->fSelectedElectronPt; }
+      const float getSelectedElectronEta() const { return fGlobalElectronVeto->fSelectedElectronEta; }
+
+    private:
+      const GlobalElectronVeto *fGlobalElectronVeto;
+      const bool fPassedEvent;
+    };
+
+    GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~GlobalElectronVeto();
 
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
-    const float getSelectedElectronsPt() const {
-      return fSelectedElectronsPt;
-    }
-    const float getSelectedElectronsEta() const {
-      return fSelectedElectronsEta;
-    }
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
    
   private:
-
     bool ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
 
     // Input parameters
     edm::InputTag fElecCollectionName;
-    std::string fElecSelection;
-    double fElecPtCut;
-    double fElecEtaCut;
+    const std::string fElecSelection;
+    const double fElecPtCut;
+    const double fElecEtaCut;
     
-    /// Counter
+    // Counter
     Count fGlobalElectronVetoCounter;
-    /// Sub-Counter to Counter
+    // Sub-Counter to Counter
     Count fElecSelectionSubCountElectronPresent;
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
     Count fElecSelectionSubCountPtCut;
@@ -69,7 +82,7 @@ namespace HPlus {
     Count fElecSelectionSubCountTransvImpactParCut;
     Count fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut;
     Count fElecSelectionSubCountRelIsolationR03Cut;
-    /// Sub-Counter (ElectronID) - just for my information
+    // Sub-Counter (ElectronID) - just for my information
     Count fElecIDSubCountAllElectronCandidates;
     Count fElecIDSubCountElecIDRobustHighEnergy;
     Count fElecIDSubCountElecIDRobustLoose;
@@ -79,6 +92,10 @@ namespace HPlus {
     Count fElecIDSubCountElecNoID;
     Count fElecIDSubCountElecAllIDs;
     Count fElecIDSubCountOther;
+
+    // EventWeight object
+    EventWeight& fEventWeight;
+
     // Histograms
     TH1 *hElectronPt;
     TH1 *hElectronEta;
@@ -89,9 +106,9 @@ namespace HPlus {
     TH1 *hElectronPt_gsfTrack_AfterSelection;
     TH1 *hElectronEta_gsfTrack_AfterSelection;
 
-    // Selected Electrons
-    float fSelectedElectronsPt;
-    float fSelectedElectronsEta;
+    // pt and eta of highest pt electron passing the selection
+    float fSelectedElectronPt;
+    float fSelectedElectronEta;
   };
 }
 

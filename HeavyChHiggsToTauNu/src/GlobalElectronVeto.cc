@@ -11,8 +11,11 @@
 #include "TH2F.h"
 
 namespace HPlus {
-
-  GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  GlobalElectronVeto::Data::Data(const GlobalElectronVeto *globalElectronVeto, bool passedEvent):
+    fGlobalElectronVeto(globalElectronVeto), fPassedEvent(passedEvent) {}
+  GlobalElectronVeto::Data::~Data() {}
+  
+  GlobalElectronVeto::GlobalElectronVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fElecCollectionName(iConfig.getUntrackedParameter<edm::InputTag>("ElectronCollectionName")),
     fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
@@ -29,14 +32,16 @@ namespace HPlus {
     fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron DeltaR From Global OrTrker Muon")),
     fElecSelectionSubCountRelIsolationR03Cut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron RelIsolationR03")),
     fElecIDSubCountAllElectronCandidates(eventCounter.addSubCounter("GlobalElectron ID", "All Electron Candidates")),
-    fElecIDSubCountElecIDdLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidLoose only")),
-    fElecIDSubCountElecIDRobustLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustLoose only")),
-    fElecIDSubCountElecIDTight(eventCounter.addSubCounter("GlobalElectron ID", "eidTight only")),
-    fElecIDSubCountElecIDRobustTight(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustTight only")),
     fElecIDSubCountElecIDRobustHighEnergy(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustHighEnergy only")),
+    
+    fElecIDSubCountElecIDRobustLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustLoose only")),
+    fElecIDSubCountElecIDRobustTight(eventCounter.addSubCounter("GlobalElectron ID", "eidRobustTight only")),
+    fElecIDSubCountElecIDdLoose(eventCounter.addSubCounter("GlobalElectron ID", "eidLoose only")),
+    fElecIDSubCountElecIDTight(eventCounter.addSubCounter("GlobalElectron ID", "eidTight only")),
     fElecIDSubCountElecNoID(eventCounter.addSubCounter("GlobalElectron ID", "No ID")),
     fElecIDSubCountElecAllIDs(eventCounter.addSubCounter("GlobalElectron ID", "All IDs")),
-    fElecIDSubCountOther(eventCounter.addSubCounter("GlobalElectron ID", "Other (multiple IDs)"))
+    fElecIDSubCountOther(eventCounter.addSubCounter("GlobalElectron ID", "Other (multiple IDs)")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hElectronPt  = fs->make<TH1F>("GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
@@ -51,16 +56,16 @@ namespace HPlus {
 
   GlobalElectronVeto::~GlobalElectronVeto() {}
 
-  bool GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
-    if(fElecSelection == "kNoElectronIdentification")      return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kRobustElectronIdentification")  return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kLooseElectronIdentification")  return ElectronSelection(iEvent,iSetup);
-    else if(fElecSelection == "kTightElectronIdentification")   return ElectronSelection(iEvent,iSetup);
+  GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    bool passEvent = false;
+    if(fElecSelection == "kNoElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
+    else if(fElecSelection == "kRobustElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
+    else if(fElecSelection == "kLooseElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
+    else if(fElecSelection == "kTightElectronIdentification") passEvent = ElectronSelection(iEvent,iSetup);
     else{
       throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n kNoElectronIdentification, kRobustElectronIdentification, kLooseElectronIdentification, kTightElectronIdentification.\n" << std::endl;
-      return true;
     }
+    return Data(this, passEvent);
   }
   
   bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -101,8 +106,8 @@ namespace HPlus {
     /// Reset/initialise variables
     float myHighestElecPt = -1.0;
     float myHighestElecEta = -999.99;
-    fSelectedElectronsPt = -1.0;
-    fSelectedElectronsEta = -999.99;
+    fSelectedElectronPt = -1.0;
+    fSelectedElectronEta = -999.99;
     ///
     bool bElecPresent = false;
     bool bElecHasGsfTrkOrTrk = false;
@@ -351,9 +356,9 @@ namespace HPlus {
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bElecNLostHitsInTrkerCut*bElecElectronDeltaCotThetaCut*bElecElectronDistanceCut*bElecRelIsolationR03Cut*bElecTransvImpactParCut*bElecDeltaRFromGlobalOrTrkerMuonCut;
 
     /// Now store the highest Electron Pt and Eta
-    fSelectedElectronsPt = myHighestElecPt;
-    fSelectedElectronsEta = myHighestElecEta;
-    // std::cout << "fSelectedElectronsPt = " << fSelectedElectronsPt << ", fSelectedElectronsEta = " << fSelectedElectronsEta << std::endl;
+    fSelectedElectronPt = myHighestElecPt;
+    fSelectedElectronEta = myHighestElecEta;
+    // std::cout << "fSelectedElectronPt = " << fSelectedElectronPt << ", fSelectedElectronEta = " << fSelectedElectronEta << std::endl;
     
     /// If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;

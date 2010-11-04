@@ -50,6 +50,8 @@ namespace HPlus {
 
     // Counters
     Count fTriggerCount;
+
+    // EventWeight object
     EventWeight& fEventWeight;
   };
 }
