@@ -48,11 +48,12 @@ bool HPlusTauPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  if(!fTauSelection.analyze(iEvent, iSetup)) return false;
+  HPlus::TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+  if(!tauData.passedEvent()) return false;
 
   //iEvent.put(std::auto_ptr<Product>(new Product(fTauSelection.getSelectedTaus())));
   std::auto_ptr<Product> ret(new Product());
-  ret->push_back(fTauSelection.getSelectedTaus()[0]);
+  ret->push_back(tauData.getSelectedTaus()[0]);
   iEvent.put(ret);
   return true;
 }

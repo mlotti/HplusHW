@@ -20,17 +20,35 @@ class TH1;
 namespace HPlus {
   class TauSelection {
   public:
+    /**
+     * Class to encapsulate the access to the data members of
+     * TauSelection. If you want to add a new accessor, add it here
+     * and keep all the data of TauSelection private.
+     */
+    class Data {
+    public:
+      // The reason for pointer instead of reference is that const
+      // reference allows temporaries, while const pointer does not.
+      // Here the object pointed-to must live longer than this object.
+      Data(const TauSelection *tauSelection, bool passedEvent);
+      ~Data();
+
+      bool passedEvent() const { return fPassedEvent; }
+
+      const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
+        return fTauSelection->fSelectedTaus;
+      }
+
+    private:
+      const TauSelection *fTauSelection;
+      const bool fPassedEvent;
+    };
+
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
     ~TauSelection();
 
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-    const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
-      return fSelectedTaus;
-    }
-    // variables
-    //float Rtau;
-    
   private:
 
     bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
