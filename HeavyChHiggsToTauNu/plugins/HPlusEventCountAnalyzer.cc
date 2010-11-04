@@ -21,10 +21,13 @@
 
 namespace {
   struct MainCounter {
-    MainCounter(const std::string& name, long long count): name_(name), count_(count) {}
+    MainCounter(const std::string& name, long long count, double weight, double weightSquared):
+      name_(name), count_(count), weight_(weight), weightSquared_(weightSquared) {}
 
     std::string name_;
     long long count_;
+    double weight_;
+    double weightSquared_;
   };
 
   struct SubCounters {
@@ -62,12 +65,15 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
 
   class Counter {
   public:
-    Counter(const edm::InputTag& tag): tag_(tag), name_(tag.encode()), count_(0) {}
-    Counter(const edm::InputTag& tag, const std::string& name): tag_(tag), name_(name), count_(0) {}
+    Counter(const edm::InputTag& tag): tag_(tag), name_(tag.encode()), count_(0), weight_(0), weightSquared_(0) {}
+    Counter(const edm::InputTag& tag, const std::string& name): tag_(tag), name_(name),
+                                                                count_(0), weight_(0), weightSquared_(0) {}
 
     edm::InputTag tag_;
     std::string name_;
     long long count_;
+    double weight_;
+    double weightSquared_;
   };
 
   struct CounterEq: public std::binary_function<Counter, edm::InputTag, bool> {
@@ -116,7 +122,7 @@ void HPlusEventCountAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 
 void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lumi, const edm::EventSetup & setup) {
   if(counterNamesGiven || countersGiven) {
-    // Add the explicitly given counters before the ones read from a string vector
+    // Read first the plain edm::MergeableCounters 
     if(countersGiven) {
       edm::Handle<edm::MergeableCounter> count;
       for(size_t i=0; i<counters.size(); ++i) {
@@ -124,6 +130,7 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
         counters[i].count_ += count->value;
       }
     }
+    // Then, read the ones produced in EventCounter
     if(counterNamesGiven) {
       edm::Handle<std::vector<std::string> > names;
       lumi.getByLabel(counterNames, names);
@@ -136,6 +143,7 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
                                            << "; names is from " << counterNames.encode() << " and instances from " << counterInstances.encode() << std::endl;
 
       edm::Handle<edm::MergeableCounter> count;
+      edm::Handle<double> weight;
       for(size_t i=0; i<instances->size(); ++i) {
         edm::InputTag tag(counterInstances.label(), instances->at(i), counterNames.process());
         lumi.getByLabel(tag, count);
@@ -143,6 +151,19 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
         if(found == counters.end())
           found = counters.insert(counters.end(), Counter(tag, names->at(i)));
         found->count_ += count->value;
+
+        edm::InputTag tag2(counterInstances.label(), instances->at(i)+"Weights", counterNames.process());
+        if(lumi.getByLabel(tag2, weight)) {
+          found->weight_ += *weight;
+
+          edm::InputTag tag3(counterInstances.label(), instances->at(i)+"WeightsSquared", counterNames.process());
+          lumi.getByLabel(tag3, weight);
+          found->weightSquared_ += *weight;
+        }
+        else {
+          found->weight_ += count->value;
+          found->weightSquared_ += count->value;
+        }
       }
     }
 
@@ -185,11 +206,22 @@ void printCounter(const std::string& cat, bool order, const std::vector<MainCoun
     edm::LogVerbatim(cat) << std::setw(name_w) << std::left << counter[i].name_ << std::setw(count_w) << std::right << counter[i].count_ << std::endl;
 }
 
-void serializeCounter(TFileService& service, const std::vector<MainCounter>& counter, const char *name) {
-  TH1F * counts = service.make<TH1F>(name, name, counter.size(), 0, counter.size());
+void serializeCounter(TFileDirectory& dir, TFileDirectory& weightDir, const std::vector<MainCounter>& counter, const char *name) {
+  TH1F * counts = dir.make<TH1F>(name, name, counter.size(), 0, counter.size());
+  counts->Sumw2();
   for(size_t i=0; i<counter.size(); ++i) {
     size_t bin = i+1;
     counts->SetBinContent(bin, counter[i].count_);
+    counts->SetBinError(bin, std::sqrt(static_cast<double>(counter[i].count_)));
+    counts->GetXaxis()->SetBinLabel(bin, counter[i].name_.c_str());
+  }
+
+  counts = weightDir.make<TH1F>(name, name, counter.size(), 0, counter.size());
+  counts->Sumw2();
+  for(size_t i=0; i<counter.size(); ++i) {
+    size_t bin = i+1;
+    counts->SetBinContent(bin, counter[i].weight_);
+    counts->SetBinError(bin, std::sqrt(counter[i].weightSquared_));
     counts->GetXaxis()->SetBinLabel(bin, counter[i].name_.c_str());
   }
 }
@@ -209,22 +241,24 @@ void HPlusEventCountAnalyzer::endJob() {
       std::string subname = counters[i].name_.substr(subIndex+1, std::string::npos);
       std::vector<SubCounters>::iterator found = std::find_if(subCounters.begin(), subCounters.end(), std::bind2nd(SubCounterEq(), name));
       if(found != subCounters.end()) {
-        found->counts_.push_back(MainCounter(subname, counters[i].count_));
+        found->counts_.push_back(MainCounter(subname, counters[i].count_, counters[i].weight_, counters[i].weightSquared_));
       }
       else {
         subCounters.push_back(SubCounters(name));
-        subCounters.back().counts_.push_back(MainCounter(subname, counters[i].count_));
+        subCounters.back().counts_.push_back(MainCounter(subname, counters[i].count_, counters[i].weight_, counters[i].weightSquared_));
       }
     }
     else {
-      mainCounter.push_back(MainCounter(counters[i].name_, counters[i].count_));
+      mainCounter.push_back(MainCounter(counters[i].name_, counters[i].count_, counters[i].weight_, counters[i].weightSquared_));
     }
   }
 
   if(fs.isAvailable()) {
-    serializeCounter(*fs, mainCounter, "counter");
+    TFileDirectory weightDir = fs->mkdir("weighted");
+
+    serializeCounter(*fs, weightDir, mainCounter, "counter");
     for(size_t i=0; i<subCounters.size(); ++i) {
-      serializeCounter(*fs, subCounters[i].counts_, subCounters[i].name_.c_str());
+      serializeCounter(*fs, weightDir, subCounters[i].counts_, subCounters[i].name_.c_str());
     }
   }
 
