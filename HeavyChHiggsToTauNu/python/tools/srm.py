@@ -137,8 +137,11 @@ def ls(urls):
             if f[-1] == "/":
                 (res, res_max_size) = ls_internal(f)
                 (res, res_max_size) = ls_recursive(res, res_max_size, level)
-                ret.extend(res)
-                max_size = max(max_size, res_max_size)
+                if len(res) > 0:
+                    ret.extend(res)
+                    max_size = max(max_size, res_max_size)
+                else:
+                    ret.append( (f, size) )
             else:
                 ret.append( (f, size) )
         return (ret, max_size)
