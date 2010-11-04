@@ -48,15 +48,10 @@ namespace HPlus {
 
     void incrementCount(size_t index, int value) {
       counter_[index].value += value;
-      if (eventWeightPointerProvided) {
-        counter_[index].weight += *eventWeightPointer;
-        counter_[index].weightSquared += *eventWeightPointer * *eventWeightPointer;
-      } else {
-        counter_[index].weight += 1.0;
-        counter_[index].weightSquared += 1.0;
-      }
+      counter_[index].weight += *eventWeightPointer;
+      counter_[index].weightSquared += *eventWeightPointer * *eventWeightPointer;
     }
-    void setWeightPointer(double* ptr) { eventWeightPointer = ptr; eventWeightPointerProvided = true; }
+    void setWeightPointer(const double* ptr) { eventWeightPointer = ptr; }
 
     void produces(edm::EDProducer *producer) const;
     void produces(edm::EDFilter *producer) const;
@@ -73,8 +68,7 @@ namespace HPlus {
                                                     // but this is used only at the construction time of the analysis, 
                                                     // so it should be more or less okay
     mutable bool finalized;
-    double* eventWeightPointer;
-    bool eventWeightPointerProvided;
+    const double* eventWeightPointer;
   };
 
   class Count {

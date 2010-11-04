@@ -26,7 +26,7 @@ namespace HPlus {
     /// Getter for weight
     double getWeight() const { return fWeight; }
     /// Getter for weight adress
-    double* getWeightPtr() { return &fWeight; }
+    const double* getWeightPtr() const { return &fWeight; }
 
    private:
     edm::InputTag fPrescaleSrc;

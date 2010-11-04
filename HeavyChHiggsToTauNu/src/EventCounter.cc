@@ -26,6 +26,8 @@ namespace {
     } while(pos != std::string::npos);
     return result;
   }
+
+  static const double defaultWeight = 1.0;
 }
 
 namespace HPlus {
@@ -58,7 +60,7 @@ namespace HPlus {
     weightSquared = 0;
   }
 
-  EventCounter::EventCounter(): finalized(false), eventWeightPointerProvided(false) {}
+  EventCounter::EventCounter(): finalized(false), eventWeightPointer(&defaultWeight) {}
   EventCounter::~EventCounter() {}
 
   Count EventCounter::addCounter(const std::string& name) {
