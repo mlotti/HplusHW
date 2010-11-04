@@ -34,6 +34,10 @@ namespace HPlus {
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
+    // We need a reference in order to use the same object (and not a
+    // copied one) given in HPlusSignalAnalysisProducer
+    EventWeight& fEventWeight;
+
     double  ftransverseMassCut;
 
     Count fAllCounter;
@@ -46,7 +50,6 @@ namespace HPlus {
     BTagging fBTagging;
 
     // Count ftransverseMassCutCount;
-    EventWeight fEventWeight;
     EvtTopology fEvtTopology;
 
     // Histograms
