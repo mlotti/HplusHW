@@ -2,7 +2,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions import *
 
 import ROOT
 from ROOT import TTree, gROOT, TGraph, TCanvas, TMultiGraph, TLegend, TAxis, TLatex
-#from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
@@ -11,13 +10,14 @@ from array import array
 ### Apply TDR style
 style = TDRStyle()
 gROOT.Reset()
-ROOT.gROOT.SetBatch(True) 
+ROOT.gROOT.SetBatch(True)
 
-def getLegend():
-    lege = TLegend(0.6, 0.7, 0.95, 0.93)
+def getLegend(x):
+#    lege = TLegend(x, 0.7, 0.95, 0.93)
+    lege = TLegend(0.2, 0.48, 0.55, 0.68)
     lege.SetFillStyle(0)
     lege.SetBorderSize(0)
-    lege.SetTextSize(0.035)
+    lege.SetTextSize(0.03)
     return lege
 
 def writeText( myText, y ):
@@ -27,37 +27,50 @@ def writeText( myText, y ):
     text.SetNDC()
     text.DrawLatex(0.2,y,myText)
     return 0
-        
+
+def fillDataTeva( ):
+    ## Tevatron 1/fb results, D0
+    dataTevaMhMax = {
+        "mass":array( 'd' ),
+        "tanb":array( 'd' )
+        }
+    dataTevaMhMax["mass"].append(90)
+    dataTevaMhMax["tanb"].append(30.8)
+    dataTevaMhMax["mass"].append(100)
+    dataTevaMhMax["tanb"].append(33.5)
+    dataTevaMhMax["mass"].append(120)
+    dataTevaMhMax["tanb"].append(50)
+    dataTevaMhMax["mass"].append(140)
+    dataTevaMhMax["tanb"].append(103.5)
+    dataTevaMhMax["mass"].append(145)
+    dataTevaMhMax["tanb"].append(147.6)
+    return dataTevaMhMax
+
+def getGraphTevatron():
+    dataTevaMhMax = fillDataTeva()
+    myGraph = TGraph(len(dataTevaMhMax["mass"]),dataTevaMhMax["mass"],dataTevaMhMax["tanb"])
+    myGraph.SetLineStyle(2)
+    myGraph.SetLineWidth(2)
+    return myGraph
+    
 def main():
 
     luminosity = 100
 
-    ## Tevatron 1/fb results
-    tanbExclwErrTevatronArray = array( 'd' )
-    tanbExclwErrTevatronArray.append(30.8)
-    tanbExclwErrTevatronArray.append(33.5)
-    tanbExclwErrTevatronArray.append(50)
-    tanbExclwErrTevatronArray.append(103.5)
-    massTevatronArray = array( 'd' )
-    massTevatronArray.append(90)
-    massTevatronArray.append(100)
-    massTevatronArray.append(120)
-    massTevatronArray.append(140)
-                             
     massPoints = {
         "PFTauCutBased": {
 	    90:  MassPoint(luminosity*0.1359,20,luminosity*(0.3601+0.2010)),
 	    100: MassPoint(luminosity*0.1262,20,luminosity*(0.3601+0.2010)),
 	    120: MassPoint(luminosity*0.0943,20,luminosity*(0.3601+0.2010)),
 	    140: MassPoint(luminosity*0.0381,20,luminosity*(0.3601+0.2010)),
-#	    160: MassPoint(luminosity*0.00833,20,luminosity*(0.3601+0.2010))
+	    160: MassPoint(luminosity*0.00833,20,luminosity*(0.3601+0.2010))
 	},
 	"PFTauTaNCBased": {
             90:  MassPoint(luminosity*0.148,20,luminosity*(0.1297+0.2192)),
             100: MassPoint(luminosity*0.1349,20,luminosity*(0.1297+0.2192)),
             120: MassPoint(luminosity*0.1015,20,luminosity*(0.1297+0.2192)),
             140: MassPoint(luminosity*0.0520,20,luminosity*(0.1297+0.2192)),
-#            160: MassPoint(luminosity*0.0095,20,luminosity*(0.1297+0.2192))
+            160: MassPoint(luminosity*0.0095,20,luminosity*(0.1297+0.2192))
 	}
     }
 
@@ -67,11 +80,14 @@ def main():
 #    mus  = [200]
 #    mHps = [120]
 
+    data = {}
+        
     nSigma = 5
     clSigma = 1.95996
     sysError = 0.1
     for selection in massPoints.keys() :
 	print selection
+        data[selection] = {}
 	for mu in mus :
 	    print "mu = ",mu
 	    tanbExclNoErr   = []
@@ -79,7 +95,28 @@ def main():
 	    tanbReachNoErr  = []
 	    tanbReachWErr   = []
 	    tanbReachTheory = []
-            nPoints = 4
+            nPoints = 5
+            data[selection][mu] = {}
+            data[selection][mu]["ExclNoErr"] = {
+                "mass":array( 'd' ),
+                "tanb":array( 'd' )
+                }
+            data[selection][mu]["ExclWErr"] = {
+                "mass":array( 'd' ),
+                "tanb":array( 'd' )
+                }
+            data[selection][mu]["ReachNoErr"] = {
+                "mass":array( 'd' ),
+                "tanb":array( 'd' )
+                }
+            data[selection][mu]["ReachWErr"] = {
+                "mass":array( 'd' ),
+                "tanb":array( 'd' )
+                }
+            data[selection][mu]["ReachTheory"] = {
+                "mass":array( 'd' ),
+                "tanb":array( 'd' )
+                }
             massArray, tanbExclNoErrArray, tanbExclWErrArray, tanbReachNoErrArray, tanbReachWErrArray, tanbReachTheoryArray = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ),array( 'd' )
 	    for mass in mHps :
 		tanbTheoryReach = tanbForTheoryLimit(mass,mu)
@@ -99,9 +136,25 @@ def main():
                 tanbExclNoErrArray.append(tanbAt5sigmaNoErr)
                 tanbExclWErrArray.append(tanbAt5sigmaWErr)
                 tanbReachNoErrArray.append(tanbAt95CLNoErr)
-                tanbReachWErrArray.append(tanbAt95CLNoErr)
-                tanbReachTheoryArray.append(tanbAt95CLWErr)
+                tanbReachWErrArray.append(tanbAt95CLWErr)
+                tanbReachTheoryArray.append(tanbTheoryReach)
 
+                if tanbAt5sigmaNoErr>0:
+                    data[selection][mu]["ExclNoErr"]["mass"].append(mass)
+                    data[selection][mu]["ExclNoErr"]["tanb"].append(tanbAt5sigmaNoErr)
+                if tanbAt5sigmaWErr>0:
+                    data[selection][mu]["ExclWErr"]["mass"].append(mass)
+                    data[selection][mu]["ExclWErr"]["tanb"].append(tanbAt5sigmaWErr)
+                if tanbAt95CLNoErr>0:    
+                    data[selection][mu]["ReachNoErr"]["mass"].append(mass)
+                    data[selection][mu]["ReachNoErr"]["tanb"].append(tanbAt95CLNoErr)
+                if tanbAt95CLWErr>0:
+                    data[selection][mu]["ReachWErr"]["mass"].append(mass)
+                    data[selection][mu]["ReachWErr"]["tanb"].append(tanbAt95CLWErr)
+                if tanbTheoryReach>0:
+                    data[selection][mu]["ReachTheory"]["mass"].append(mass)
+                    data[selection][mu]["ReachTheory"]["tanb"].append(tanbTheoryReach)
+                    
 # Plot everything in one canvas
 #    c1 = TCanvas( 'c1', 'tanbReach', 200, 10, 700, 500 )
 #    graphExclNoErr   = TGraph(nPoints,massArray,tanbExclNoErrArray)
@@ -109,14 +162,11 @@ def main():
 #    graphReachNoErr  = TGraph(nPoints,massArray,tanbReachNoErrArray)
 #    graphReachWErr   = TGraph(nPoints,massArray,tanbReachWErrArray)
 #    graphReachTheory = TGraph(nPoints,massArray,tanbReachTheoryArray)
-#    graphTevatron = TGraph(nPoints,massTevatronArray,tanbExclwErrTevatronArray)
 #    graphExclNoErr.Draw('ALP')   
 #    graphExclWErr.Draw('LP')    
 #    graphReachNoErr.Draw('LP')      
 #    graphReachWErr.Draw('LP')       
 #    graphReachTheory.Draw('LP')
-#    graphTevatron.SetLineColor(2)     
-#    graphTevatron.Draw('LP')     
 #    addCmsPreliminaryText()
 #    c1.Update()
 #    c1.SaveAs(".png")
@@ -127,8 +177,8 @@ def main():
         color = 1
         print 'muPlot'+selection
         c1 = TCanvas( 'muPlot'+selection, 'tanbReach'+selection, 200, 10, 700, 500 )
-        multi = TMultiGraph();
-        lege = getLegend()
+        multi = TMultiGraph()
+        lege = getLegend(0.6)
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.84)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
@@ -152,21 +202,53 @@ def main():
                 lege.AddEntry(graphMus,"5 sigma, mu = "+str(mu),"l")
             color = color + 1
         # Tevatron result
-        graphTeva = TGraph(len(tanbExclwErrTevatronArray),massTevatronArray,tanbExclwErrTevatronArray)
-        graphTeva.SetLineStyle(2)
-        graphTeva.SetLineWidth(2)
+        graphTeva = getGraphTevatron()
         multi.Add(graphTeva,"lp")
-        lege.AddEntry(graphTeva,"Tevatron 1/fb exclusion","l")
+        lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
         lege.Draw()
         multi.Draw("a")
         c1.Update()
         multi.GetYaxis().SetRangeUser(0,200)
-#        multi.GetXaxis().SetRangeUser(80,160) #does not work
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
         addCmsPreliminaryText()
         c1.SaveAs(".png")
-                
+
+## Plot comparison of reach and exclusion for 2 selections
+## fix mu=200       
+## make one plot without errors, one with errors
+    setOfSetOfGraphs = [ ["ExclNoErr","ReachNoErr"],
+                         ["ExclWErr","ReachWErr"]]
+    for index, setOfGraphs in enumerate(setOfSetOfGraphs):
+        c1 = TCanvas("exclusions"+str(index),"exclusions"+str(index),200, 10, 700, 500 )
+        multi = TMultiGraph()
+        lege = getLegend(0.5)
+        mymu = 200
+        color = 1
+        for selection in massPoints.keys() :
+            for oneGraph in setOfGraphs:
+                graph = TGraph(len(data[selection][mymu][oneGraph]["mass"]),
+                               data[selection][mymu][oneGraph]["mass"],
+                               data[selection][mymu][oneGraph]["tanb"])
+                graph.SetLineColor(color)
+                graph.SetMarkerColor(color)
+                lege.AddEntry(graph,selection+", "+oneGraph,"l")
+                multi.Add(graph,"lp")
+                color = color + 1
+        graphTeva = getGraphTevatron()
+        multi.Add(graphTeva,"lp")
+        lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
+        multi.Draw("a")
+        lege.Draw()
+        addCmsPreliminaryText()
+        writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
+        writeText("m_{H}^{max} scenario",0.84)
+        writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
+        multi.GetYaxis().SetRangeUser(0,200)
+        multi.GetYaxis().SetTitle("tan(#beta)")
+        multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
+        c1.SaveAs(".png")
+
     ############################### EXECUTION ###############################
     ### Script execution can be paused like this, it will continue after
     ### user has given some input (which must include enter)
