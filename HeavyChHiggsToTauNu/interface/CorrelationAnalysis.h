@@ -7,6 +7,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -19,7 +20,7 @@ class TH1;
 namespace HPlus {
   class CorrelationAnalysis {
   public:
-    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter);
+    CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     CorrelationAnalysis(EventCounter& eventCounter);
     CorrelationAnalysis();
     ~CorrelationAnalysis();
@@ -29,7 +30,10 @@ namespace HPlus {
   
   private:
     void init();
-
+    
+    // EventWeight object
+    EventWeight& fEventWeight;
+    
     // Histograms
     TH1 *hPtB1;
     TH1 *hPtB2;

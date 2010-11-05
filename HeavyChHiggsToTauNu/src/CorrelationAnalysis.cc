@@ -9,7 +9,8 @@
 
 namespace HPlus {
 
-  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter) {
+  CorrelationAnalysis::CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight)
+  : fEventWeight(eventWeight) {
     init();
   }
   CorrelationAnalysis::CorrelationAnalysis(EventCounter& eventCounter) {

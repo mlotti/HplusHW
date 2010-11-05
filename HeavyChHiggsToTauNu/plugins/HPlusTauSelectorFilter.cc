@@ -41,6 +41,7 @@ HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iC
 {
   eventCounter.produces(this);
   produces<Product>();
+  eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusTauPtrSelectorFilter::~HPlusTauPtrSelectorFilter() {}
 void HPlusTauPtrSelectorFilter::beginJob() {}
