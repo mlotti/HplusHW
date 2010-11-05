@@ -165,13 +165,17 @@ namespace{
 
 
 namespace HPlus {
+  EvtTopology::Data::Data(const EvtTopology *evtTopology, bool passedEvent):
+    fEvtTopology(evtTopology), fPassedEvent(passedEvent) {}
+  EvtTopology::Data::~Data() {}
 
-  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter):
+  EvtTopology::EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
     fEvtTopologyCount(eventCounter.addCounter("EvtTopology cut")),
-    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT"))
+    fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 100, 0.3, 1.0);
@@ -179,8 +183,7 @@ namespace HPlus {
 
   EvtTopology::~EvtTopology() {}
 
-
-  bool EvtTopology::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
+  EvtTopology::Data EvtTopology::analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /// Description                                                                                                
@@ -232,7 +235,7 @@ namespace HPlus {
       sAlpha.fHt      = -2.0;
       sAlpha.fDeltaHt = -2.0;
       sAlpha.fMHt     = -2.0;
-      return false;
+      return Data(this, false);
     }
 
     /// Iterate through different combinations
@@ -296,17 +299,9 @@ namespace HPlus {
     hAlphaT->Fill(sAlpha.fAlphaT);
     
     // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
-    
-    return bPassedCut;
-    
+
+    return Data(this, bPassedCut);
   } //eof: bool EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
 
-  AlphaStruc EvtTopology::alphaT(void){
-    
-    return sAlpha;
-    
-  } //eof: AlphaStruc EvtTopology::alphaT(void){
-  
-  
 
 }//eof: namespace HPlus {

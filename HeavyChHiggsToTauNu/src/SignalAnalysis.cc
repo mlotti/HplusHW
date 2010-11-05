@@ -25,7 +25,7 @@ namespace HPlus {
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -109,7 +109,9 @@ namespace HPlus {
  
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
-    if(!fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets())) return;
+    // Alpha T
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
+    //if(!evtTopologyData.passedEvent()) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
@@ -120,8 +122,8 @@ namespace HPlus {
     //  if(transverseMass < ftransverseMassCut ) return;
     //  increment(ftransverseMassCutCount);
 
-    AlphaStruc sAlphaT = fEvtTopology.alphaT();
-    hAlphaT->Fill(sAlphaT.fAlphaT);
+    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+    hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau

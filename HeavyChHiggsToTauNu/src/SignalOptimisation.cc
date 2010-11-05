@@ -24,7 +24,7 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter)
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -113,8 +113,8 @@ namespace HPlus {
     //if(!btagData.passedEvent()) return;
 
     /// 7) AlphaT
-    bool bEvtTopologyPass  = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
-    // if(!bEvtTopologyPass) return;
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
+    //if(!evtTopologyData.passedEvent()) return;
 
     /// 8) GlobalMuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
@@ -127,7 +127,7 @@ namespace HPlus {
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    AlphaStruc sAlphaT = fEvtTopology.alphaT();
+    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
     bool bDecision = triggerData.passedEvent() 
@@ -136,7 +136,7 @@ namespace HPlus {
       * jetData.passedEvent()
       * metData.passedEvent()
       * btagData.passedEvent()
-      * bEvtTopologyPass;
+      * evtTopologyData.passedEvent();
 
     /// Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus->push_back(tauData.passedEvent());
