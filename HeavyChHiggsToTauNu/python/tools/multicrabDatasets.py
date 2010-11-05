@@ -235,7 +235,7 @@ datasets = {
     },
     # Fall 10
     "TTToHplusBWB_M90": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval", # The trigger process was HLT, hence 38Xrelval is suitable here
         "crossSection": 16.442915,
         "data": {
             "RECO": {
@@ -249,7 +249,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M100": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 14.057857,
         "data": {
             "RECO": {
@@ -268,7 +268,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M120": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 8.984715,
         "data": {
             "RECO": {
@@ -287,7 +287,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M140": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 4.223402,
         "data": {
             "RECO": {
@@ -306,7 +306,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M160": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 0.811493,
         "data": {
             "RECO": {
