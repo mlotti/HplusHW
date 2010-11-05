@@ -76,10 +76,10 @@ namespace HPlus {
     /// 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return; /// no Trigger means no Tau => meaningless to continue.
-    
+        
     /// 2) Trigger Emulation (for MC data)
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it.
+    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it
 
     /// 3) tauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);

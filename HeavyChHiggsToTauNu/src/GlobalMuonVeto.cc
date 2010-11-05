@@ -107,21 +107,21 @@ namespace HPlus {
 
   bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
-    /// the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
+    // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
-   /// Create and attach handle to (Offline) Primary Vertices Collection
+   // Create and attach handle to (Offline) Primary Vertices Collection
     edm::Handle<std::vector<reco::Vertex> > primaryVerticesHandle;
     //    edm::Handle<reco::VertexCollection> primaryVerticesHandle;
     iEvent.getByLabel("offlinePrimaryVertices", primaryVerticesHandle);
-    /// Create an XYZ position to store the Primary Vertex
+    // Create an XYZ position to store the Primary Vertex
     math::XYZPoint PVPosition;
 
-    /// Loop over all PV's. PV's are stored with decending Event Pt (PV candidate with highest associated Evt Trk Pt is stored first)
+    // Loop over all PV's. PV's are stored with decending Event Pt (PV candidate with highest associated Evt Trk Pt is stored first)
     for(unsigned int iPV = 0; iPV < primaryVerticesHandle->size(); ++iPV) {
-      /// Get PV candidate
+      // Get PV candidate
       reco::Vertex myPV = primaryVerticesHandle->at(iPV);
-      /// Apply some quality to the PV candidate: a) PV is not fake, b) has more than 4 normalised degrees of freedom, 
-      /// c) has a z position less than 15 cm, and d) distance in the XY plane less than 2 cm.
+      // Apply some quality to the PV candidate: a) PV is not fake, b) has more than 4 normalised degrees of freedom, 
+      // c) has a z position less than 15 cm, and d) distance in the XY plane less than 2 cm.
       if( !(myPV.isFake()) && (myPV.ndof()) > 4  && ( abs( myPV.z() < 15) ) && (myPV.position().Rho() < 2) ){
 	PVPosition = primaryVerticesHandle->at(0).position();
 	break; //once a good PV is found exit loop.
@@ -135,7 +135,7 @@ namespace HPlus {
     FIX ME */
 
     /* FIX ME
-    /// Get beam spot
+    // Get beam spot
     edm::Handle<reco::BeamSpot> BeamSpotHandle;
     iEvent.getByLabel(beamSpotCollection, BeamSpotHandle);
     const reco::BeamSpot *myBeamSpot = BeamSpotHandle.product();
@@ -145,19 +145,19 @@ namespace HPlus {
     FIX ME */ 
 
 
-    /// Create and attach handle to Muon Collection
+    // Create and attach handle to Muon Collection
     edm::Handle<std::vector<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
     
-    /// In the case where the handle is empty...
+    // In the case where the handle is empty...
     if ( !myMuonHandle->size() ){
       // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
     }
 
-    /// Reset/initialise variables
+    // Reset/initialise variables
     float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
-    /// 
+    // 
     bool bMuonPresent = false;
     bool bMuonHasGlobalOrInnerTrk = false;
     bool bMuonPtCut = false;
@@ -172,15 +172,15 @@ namespace HPlus {
     bool bMuonRelIsolationR03Cut = false;
     bool bMuonGoodPVCut = false;
     
-    /// Loop over all Muons
+    // Loop over all Muons
     for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
 
-      /// Keep track of the muons analyzed
+      // Keep track of the muons analyzed
       bMuonPresent = true;
       increment(fMuonIDSubCountAllMuonCandidates);
       
-      /// Keep track of the MuonID's. Just for my information. 
-      /// 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
+      // Keep track of the MuonID's. Just for my information. 
+      // 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
       if( (*iMuon).muonID("All") ) increment(fMuonIDSubCountAll);
       if( (*iMuon).muonID("AllGlobalMuons") ) increment(fMuonIDSubCountAllGlobalMuons);
       if( (*iMuon).muonID("AllStandAloneMuons") ) increment(fMuonIDSubCountAllStandAloneMuons);
@@ -203,11 +203,11 @@ namespace HPlus {
 	increment(fMuonIDSubCountOther);
       }
 
-      /// Obtain reference to a Muon track
+      // Obtain reference to a Muon track
       reco::TrackRef myGlobalTrackRef = (*iMuon).globalTrack();
       reco::TrackRef myInnerTrackRef = (*iMuon).innerTrack(); // inner tracks give best resolution for muons with Pt up to 200 GeV/c
 
-      /// Check that track was found.
+      // Check that track was found.
       if ( myInnerTrackRef.isNull() || myGlobalTrackRef.isNull() ){
 	// std::cout << "myInnerTrackRef.isNull()" << std::endl;
 	// std::cout << "(*iMuon).isStandAloneMuon() = " << (*iMuon).isStandAloneMuon() << std::endl;
@@ -218,7 +218,7 @@ namespace HPlus {
       }
       bMuonHasGlobalOrInnerTrk = true;
       
-      /// Muon Variables (Pt, Eta etc..)
+      // Muon Variables (Pt, Eta etc..)
       // float myMuonPt  = myInnerTrackRef->pt();
       // float myMuonEta = myInnerTrackRef->eta();
       // float myMuonPhi = myInnerTrackRef->phi();
@@ -228,12 +228,12 @@ namespace HPlus {
       int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
       int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
       int myGlobalTrackNMuonHits  = myGlobalTrackRef->hitPattern().numberOfValidMuonHits(); 
-      /// Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
-      /// global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
-      /// (i.e. de-associated from the muon). This is the so called "outlier rejection". 
-      /// Note: For the Num
+      // Note: It is possible for a Global Muon to have zero muon hits. This happens because once the inner and outter tracks used to create
+      // global fit to the muon track that covers all of the detector, hits that are incompatible to the new trajectory are removed 
+      // (i.e. de-associated from the muon). This is the so called "outlier rejection". 
+      // Note: For the Num
 
-      /// Fill histos with all-Muons Pt and Eta (no requirements on muons)
+      // Fill histos with all-Muons Pt and Eta (no requirements on muons)
       hMuonPt->Fill(myMuonPt);
       hMuonEta->Fill(myMuonEta);
       hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt());
@@ -241,22 +241,22 @@ namespace HPlus {
       hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt());
       hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta());
 
-      /// 1) Apply Pt and Eta cut requirements
+      // 1) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
 
       if ( fabs(myMuonEta) > fMuonEtaCut) continue;
       bMuonEtaCut = true;
       
-      /// 2) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
+      // 2) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
       if( (!(*iMuon).isGlobalMuon()) || (!(*iMuon).isTrackerMuon()) ) continue;
       bMuonGlobalMuonOrTrkerMuon = true;
 
-      /// 3) Demand that the selected Muon Identification as defined in the python cfg is satisfied
+      // 3) Demand that the selected Muon Identification as defined in the python cfg is satisfied
       if( !((*iMuon).muonID( fMuonSelection )) ) continue;
       bMuonSelection = true;
       
-      /// 4) NHits cuts (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
+      // 4) NHits cuts (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
       if ( myInnerTrackNTrkHits <= 10) continue;
       bMuonNTrkerHitsCut = true;
 
@@ -266,17 +266,17 @@ namespace HPlus {
       if ( myGlobalTrackNMuonHits < 1) continue;
       bMuonNMuonlHitsCut = true;
 
-      /// 5) Global Track Chi Square / ndof must be less than 10
+      // 5) Global Track Chi Square / ndof must be less than 10
       if( (*iMuon).normChi2() > 10) continue; 
       bMuonGlobalTrkChiSqCut = true;
 
-      /// 6) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
-      /// FIX ME
-      // if ( myInnerTrackRef->dxy() < 0.02) continue; /// This is the transverse IP w.r.t to (0,0,0). Replace latter with BeamSpot
-      if ((*iMuon).dB() > 0.02) continue; /// This is the transverse IP w.r.t to beamline.
+      // 6) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
+      // FIX ME
+      // if ( myInnerTrackRef->dxy() < 0.02) continue; // This is the transverse IP w.r.t to (0,0,0). Replace latter with BeamSpot
+      if ((*iMuon).dB() > 0.02) continue; // This is the transverse IP w.r.t to beamline.
       bMuonImpactParCut = true;
       
-      /// 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
+      // 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
       float myTrackIso =  (*iMuon).trackIso(); // isolation cones are dR=0.3 
       float myEcalIso  =  (*iMuon).ecalIso();  // isolation cones are dR=0.3 
       float myHcalIso  =  (*iMuon).hcalIso();  // isolation cones are dR=0.3 
@@ -285,20 +285,20 @@ namespace HPlus {
       if( relIsol > 0.15 )continue; 
       bMuonRelIsolationR03Cut = true;
 
-      /// 8) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
-      /// FIX ME
-      if ( fabs(myInnerTrackRef->dz()) < 1.0) continue; /// This is the z-impact parameter w.r.t to (0,0,0). Replace latter with BeamSpot
+      // 8) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
+      // FIX ME
+      if ( fabs(myInnerTrackRef->dz()) < 1.0) continue; // This is the z-impact parameter w.r.t to (0,0,0). Replace latter with BeamSpot
       bMuonGoodPVCut = true;      
 
       
-      /// If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
+      // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
       if (myMuonPt > myHighestMuonPt) {
 	myHighestMuonPt  = myMuonPt;
 	myHighestMuonEta = myMuonEta;
 	// std::cout << "myHighestMuonPt = " << myHighestMuonPt << ", myHighestMuonEta = " << myHighestMuonEta << std::endl;
       } //eof: if (myMuonPt > myHighestMuonPt) {
       
-      /// Fill histos after Selection
+      // Fill histos after Selection
       hMuonPt_AfterSelection->Fill(myMuonPt);
       hMuonEta_AfterSelection->Fill(myMuonPt);
       hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt);
@@ -334,17 +334,17 @@ namespace HPlus {
     
     if(bMuonGoodPVCut) increment(fMuonSelectionSubCountGoodPVCut);
 
-    /// Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
+    // Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
     bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
 
-    /// Now store the highest Muon Pt and Eta
+    // Now store the highest Muon Pt and Eta
     fSelectedMuonPt  = myHighestMuonPt;
     fSelectedMuonEta = myHighestMuonEta;
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;
 
-    /// If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
+    // If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
-    /// Otherwise increment counter and return true.
+    // Otherwise increment counter and return true.
     else increment(fGlobalMuonVetoCounter);
     return true;
     
