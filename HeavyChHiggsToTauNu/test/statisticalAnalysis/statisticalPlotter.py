@@ -9,6 +9,7 @@ from array import array
 
 ### Apply TDR style
 style = TDRStyle()
+
 gROOT.Reset()
 ROOT.gROOT.SetBatch(True)
 
@@ -29,28 +30,22 @@ def writeText( myText, y ):
 
 def fillDataTeva( ):
     ## Tevatron 1/fb results, D0
-    dataTevaMhMax = {
+    tevaData = {
         "mass":array( 'd' ),
         "tanb":array( 'd' )
         }
-    dataTevaMhMax["mass"].append(90)
-    dataTevaMhMax["tanb"].append(30.8)
-    dataTevaMhMax["mass"].append(100)
-    dataTevaMhMax["tanb"].append(33.5)
-    dataTevaMhMax["mass"].append(120)
-    dataTevaMhMax["tanb"].append(50)
-    dataTevaMhMax["mass"].append(140)
-    dataTevaMhMax["tanb"].append(103.5)
-    dataTevaMhMax["mass"].append(145)
-    dataTevaMhMax["tanb"].append(147.6)
-    return dataTevaMhMax
+    tevaData["mass"].extend([  90,  100,  110, 120,  130,   140, 145  , 148.4])
+    tevaData["tanb"].extend([30.8, 33.5, 39.8,  50, 68.4, 103.5, 147.6, 200  ])
+    return tevaData
 
 def getGraphTevatron():
     dataTevaMhMax = fillDataTeva()
     myGraph = TGraph(len(dataTevaMhMax["mass"]),dataTevaMhMax["mass"],dataTevaMhMax["tanb"])
     myGraph.SetLineStyle(2)
     myGraph.SetLineWidth(2)
+    myGraph.SetMarkerStyle(8)
     return myGraph
+
     
 def main():
 
@@ -124,24 +119,25 @@ def main():
                 tanbReachWErrArray.append(tanbAt95CLWErr)
                 tanbReachTheoryArray.append(tanbTheoryReach)
 
-                if tanbAt5sigmaNoErr>0:
+                if tanbAt95CLNoErr>0:
                     data[selection][mu]["ExclNoErr"]["mass"].append(mass)
-                    data[selection][mu]["ExclNoErr"]["tanb"].append(tanbAt5sigmaNoErr)
-                if tanbAt5sigmaWErr>0:
-                    data[selection][mu]["ExclWErr"]["mass"].append(mass)
-                    data[selection][mu]["ExclWErr"]["tanb"].append(tanbAt5sigmaWErr)
-                if tanbAt95CLNoErr>0:    
-                    data[selection][mu]["ReachNoErr"]["mass"].append(mass)
-                    data[selection][mu]["ReachNoErr"]["tanb"].append(tanbAt95CLNoErr)
+                    data[selection][mu]["ExclNoErr"]["tanb"].append(tanbAt95CLNoErr)
                 if tanbAt95CLWErr>0:
+                    data[selection][mu]["ExclWErr"]["mass"].append(mass)
+                    data[selection][mu]["ExclWErr"]["tanb"].append(tanbAt95CLWErr)
+                if tanbAt5sigmaNoErr>0:    
+                    data[selection][mu]["ReachNoErr"]["mass"].append(mass)
+                    data[selection][mu]["ReachNoErr"]["tanb"].append(tanbAt5sigmaNoErr)
+                if tanbAt5sigmaWErr>0:
                     data[selection][mu]["ReachWErr"]["mass"].append(mass)
-                    data[selection][mu]["ReachWErr"]["tanb"].append(tanbAt95CLWErr)
+                    data[selection][mu]["ReachWErr"]["tanb"].append(tanbAt5sigmaWErr)
                 if tanbTheoryReach>0:
                     data[selection][mu]["ReachTheory"]["mass"].append(mass)
                     data[selection][mu]["ReachTheory"]["tanb"].append(tanbTheoryReach)
                     
     ## Graph: different mu values
     ## plot theory reach & 5sigmaNoErr & Tevatron exclusion
+    ## this code could be improved to use the data structure "data"                    
     for selection in massPoints.keys() :
         color = 1
         print 'muPlot'+selection
@@ -183,11 +179,11 @@ def main():
         addCmsPreliminaryText()
         c1.SaveAs(".png")
 
-## Plot comparison of reach and exclusion for 2 selections
+## Plot comparison of reach and exclusion for the 2 selections
 ## fix mu=200       
 ## make one plot without errors, one with errors
-    setOfSetOfGraphs = [ ["ExclNoErr","ReachNoErr"],
-                         ["ExclWErr","ReachWErr"]]
+    setOfSetOfGraphs = [ ["ReachNoErr","ExclNoErr"],
+                         ["ReachWErr", "ExclWErr"]   ]
     for index, setOfGraphs in enumerate(setOfSetOfGraphs):
         c1 = TCanvas("exclusions"+str(index),"exclusions"+str(index),200, 10, 700, 500 )
         multi = TMultiGraph()
@@ -202,17 +198,18 @@ def main():
                 graph.SetLineColor(color)
                 graph.SetMarkerColor(color)
                 lege.AddEntry(graph,selection+", "+oneGraph,"l")
-                multi.Add(graph,"lp")
+                multi.Add(graph,"cp")
                 color = color + 1
         graphTeva = getGraphTevatron()
-        multi.Add(graphTeva,"lp")
+        multi.Add(graphTeva,"cp")
         lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
         multi.Draw("a")
         lege.Draw()
         addCmsPreliminaryText()
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
-        writeText("m_{H}^{max} scenario",0.84)
-        writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
+        writeText("m_{H}^{max} scenario",0.85)
+        writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)
+        writeText("#mu = 200", 0.75)
         multi.GetYaxis().SetRangeUser(0,200)
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
