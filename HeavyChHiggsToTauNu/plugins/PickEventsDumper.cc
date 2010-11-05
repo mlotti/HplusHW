@@ -51,7 +51,9 @@ void PickEventsDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 }
 
 void PickEventsDumper::endJob() {
+	std::cout << std::endl;
 	std::cout << "Saving PickEvents list to " << fOUTName << std::endl;
+	std::cout << "  picked " << counter << " events" << std::endl;
 	std::ofstream fOUT(fOUTName.c_str());
 	for(size_t i = 0; i < events.size(); ++i){
 		fOUT << events[i].Run << ":" 
