@@ -473,7 +473,7 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
-
+/* ONLY HPS discriminators available, please do not uncomment unless sure the are included!
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
 		increment(fnProngsSubCount);
@@ -494,7 +494,7 @@ namespace HPlus {
 		if(Rtau < fRtauCut) continue; 
 		increment(fRtauSubCount);
 		++RtauCutPassed;
-/*
+
 		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
 		hDeltaE->Fill(DeltaE);
 
@@ -503,14 +503,14 @@ namespace HPlus {
 
 		// DeltaE and flight path are not applied - why?
 		// They should be applied for 3-prongs only
-*/
+
 		float InvMass = iTau->tauID("HChTauIDInvMassCont");
 		hInvMass->Fill(InvMass);
 
 		if(InvMass > fInvMassCut) continue;
 		increment(fInvMassSubCount);
 		++InvMassCutPassed;
-
+*/
                 // Fill Histos after Tau Selection Cuts
                 hPtAfterTauSelCuts->Fill(iTau->pt());
                 hEtaAfterTauSelCuts->Fill(iTau->eta());
