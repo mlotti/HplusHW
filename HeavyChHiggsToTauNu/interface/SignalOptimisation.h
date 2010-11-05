@@ -41,6 +41,7 @@ namespace HPlus {
     Count fAllCounter;
     EventWeight& fEventWeight;
 
+    /// The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
     GlobalElectronVeto fGlobalElectronVeto;
@@ -56,18 +57,19 @@ namespace HPlus {
     
     /// for Tree
     TTree *myTree;
-    std::vector<bool> *bTauIDStatus;
-    std::vector<float> *fTauJetEt;
-    std::vector<float> *fMET;
-    std::vector<int> *iNHadronicJets;
-    std::vector<int> *iNBtags;
-    std::vector<float> *fGlobalMuonVetoHighestPt;
-    std::vector<float> *fGlobalElectronVetoHighestPt;
-    std::vector<float> *fTransverseMass;
-    std::vector<float> *fDeltaPhi;
-    std::vector<float> *fAlphaT;
-    
 
+    bool bTauIDStatus;
+    float fTauJetEt;
+    float fTauJetEta;
+    float fMET;
+    int iNHadronicJets;
+    int iNBtags;
+    float fGlobalMuonVetoHighestPt;
+    float fGlobalElectronVetoHighestPt;
+    float fTransverseMass;
+    float fDeltaPhi;
+    float fAlphaT;
+    
   };
 }
 

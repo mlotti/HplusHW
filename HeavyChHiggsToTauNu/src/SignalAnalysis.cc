@@ -23,7 +23,7 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
-    fCorrelationAnalysis(eventCounter),
+    fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
   {

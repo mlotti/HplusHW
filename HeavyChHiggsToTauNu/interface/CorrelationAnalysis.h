@@ -21,8 +21,8 @@ namespace HPlus {
   class CorrelationAnalysis {
   public:
     CorrelationAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    CorrelationAnalysis(EventCounter& eventCounter);
-    CorrelationAnalysis();
+    CorrelationAnalysis(EventCounter& eventCounter, EventWeight& eventWeight);
+    //CorrelationAnalysis();
     ~CorrelationAnalysis();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate

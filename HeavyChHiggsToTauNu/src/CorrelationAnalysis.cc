@@ -13,12 +13,13 @@ namespace HPlus {
   : fEventWeight(eventWeight) {
     init();
   }
-  CorrelationAnalysis::CorrelationAnalysis(EventCounter& eventCounter) {
+  CorrelationAnalysis::CorrelationAnalysis(EventCounter& eventCounter, EventWeight& eventWeight)
+  : fEventWeight(eventWeight) {
     init();
   }
-  CorrelationAnalysis::CorrelationAnalysis(){
+/*  CorrelationAnalysis::CorrelationAnalysis(){
     init();
-  }
+  }*/
 
   CorrelationAnalysis::~CorrelationAnalysis() {}
 

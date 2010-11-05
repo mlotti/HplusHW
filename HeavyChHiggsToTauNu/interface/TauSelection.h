@@ -99,9 +99,9 @@ namespace HPlus {
     Count fRtauSubCount;
     Count fInvMassSubCount;
 
-    // Event weight object
+    // EventWeight object
     EventWeight& fEventWeight;
-    
+
     // Histograms
     TH1 *hPt;
     TH1 *hEta;

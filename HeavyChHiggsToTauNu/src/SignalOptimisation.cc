@@ -32,36 +32,19 @@ namespace HPlus {
 
     /// Make TTree for SignalOptimisation
     myTree = fs->make<TTree>("HPlusSignalOptimisation","HPlusSignalOptimisation");
+    
     /// Variables used for SignalOptimisation
-    bTauIDStatus = new std::vector<bool>;
-    myTree->Branch("bTauIDStatus", "std::vector<bool>", &bTauIDStatus);
-    //
-    fTauJetEt = new std::vector<float>;
-    myTree->Branch("fTauJetEt", "std::vector<float>", &fTauJetEt);
-    //
-    fMET = new std::vector<float>;
-    myTree->Branch("fMET", "std::vector<float>", &fMET);
-    //
-    iNHadronicJets = new std::vector<int>;
-    myTree->Branch("iNHadronicJets", "std::vector<int>", &iNHadronicJets);
-    //
-    iNBtags = new std::vector<int>;
-    myTree->Branch("iNBtags", "std::vector<int>", &iNBtags);
-    //
-    fGlobalMuonVetoHighestPt = new std::vector<float>;
-    myTree->Branch("fGlobalMuonVetoHighestPt", "std::vector<float>", &fGlobalMuonVetoHighestPt);
-    //
-    fGlobalElectronVetoHighestPt = new std::vector<float>;
-    myTree->Branch("fGlobalElectronVetoHighestPt", "std::vector<float>", &fGlobalElectronVetoHighestPt);
-    //
-    fTransverseMass = new std::vector<float>;
-    myTree->Branch("fTransverseMass", "std::vector<float>", &fTransverseMass);
-    //
-    fDeltaPhi = new std::vector<float>;
-    myTree->Branch("fDeltaPhi", "std::vector<float>", &fDeltaPhi);
-    //
-    fAlphaT = new std::vector<float>;
-    myTree->Branch("fAlphaT", "std::vector<float>", &fAlphaT);
+    myTree->Branch("bTauIDStatus", &bTauIDStatus);
+    myTree->Branch("fTauJetEt",  &fTauJetEt);
+    myTree->Branch("fTauJetEta", &fTauJetEta);
+    myTree->Branch("fMET", &fMET);
+    myTree->Branch("iNHadronicJets", &iNHadronicJets);
+    myTree->Branch("iNBtags", &iNBtags);
+    myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
+    myTree->Branch("fGlobalElectronVetoHighestPt", &fGlobalElectronVetoHighestPt);
+    myTree->Branch("fTransverseMass", &fTransverseMass);
+    myTree->Branch("fDeltaPhi",  &fDeltaPhi);
+    myTree->Branch("fAlphaT", &fAlphaT);
     
     // Book histograms filled in the analysis body
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
@@ -76,17 +59,19 @@ namespace HPlus {
 
   void SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     increment(fAllCounter);
-    /// Clear TTree vectors
-    bTauIDStatus->clear();
-    fTauJetEt->clear();
-    fMET->clear();
-    iNHadronicJets->clear();
-    iNBtags->clear();
-    fGlobalMuonVetoHighestPt->clear();
-    fGlobalElectronVetoHighestPt->clear();
-    fTransverseMass->clear();
-    fDeltaPhi->clear();
-    fAlphaT->clear();
+    
+    // Reset variables
+    bTauIDStatus = -5.0;
+    fTauJetEt = -5.0;
+    fTauJetEta = -999.99;
+    fMET = -5.0;
+    iNHadronicJets = -5.0;
+    iNBtags = -5.0;
+    fGlobalMuonVetoHighestPt = -5.0;
+    fGlobalElectronVetoHighestPt = -5.0;
+    fTransverseMass = -5.0;
+    fDeltaPhi = -5.0;
+    fAlphaT = -5.0;
 
     /// 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
@@ -139,19 +124,19 @@ namespace HPlus {
       * evtTopologyData.passedEvent();
 
     /// Fill Vectors for HPlusSignalOptimisation
-    bTauIDStatus->push_back(tauData.passedEvent());
-    fTauJetEt->push_back((float( (tauData.getSelectedTaus()[0])->pt())));
-    fMET->push_back(metData.getSelectedMET()->et());
-    iNHadronicJets->push_back(jetData.getHadronicJetCount());
-    iNBtags->push_back(btagData.getBJetCount());
-    fAlphaT->push_back(sAlphaT.fAlphaT);
-    fGlobalMuonVetoHighestPt->push_back( muonVetoData.getSelectedMuonPt() );
-    fGlobalElectronVetoHighestPt->push_back( electronVetoData.getSelectedElectronPt() );
-    fTransverseMass->push_back(transverseMass);
-    fDeltaPhi->push_back(deltaPhi);
+    bTauIDStatus = tauData.passedEvent();
+    fTauJetEt = static_cast<float>((tauData.getSelectedTaus()[0])->pt());
+    fTauJetEt = static_cast<float>((tauData.getSelectedTaus()[0])->eta());
+    fMET = metData.getSelectedMET()->et();
+    iNHadronicJets = jetData.getHadronicJetCount();
+    iNBtags = btagData.getBJetCount();
+    fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
+    fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();
+    fTransverseMass = transverseMass;
+    fDeltaPhi = deltaPhi;
+    fAlphaT = sAlphaT.fAlphaT;
     
     /// Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
-
   }
 }
