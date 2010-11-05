@@ -143,8 +143,6 @@ namespace HPlus {
       bool bElecIDIsTight = false;
       bool bElecIDIsRobustTight = false;
       bool bElecIDIsRobustHighEnergy = false;
-      bool bElecNoSimpleID = false;
-      bool bElecAllSimpleIDs = false;
 
       // Simple Electron ID's return 1 or 0 (true or false)
       if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
@@ -186,7 +184,7 @@ namespace HPlus {
       // Electron Variables (Pt, Eta etc..)
       float myElectronPt  = (*iElectron).pt();
       float myElectronEta = (*iElectron).eta();
-      float myElectronPhi = (*iElectron).phi();
+      // float myElectronPhi = (*iElectron).phi();
 
       // Fill histos with all-Electrons Pt and Eta
       hElectronPt->Fill(myElectronPt);
@@ -331,7 +329,7 @@ namespace HPlus {
       double myElectronDistance = convInfo.dist();
       // Define the minimal distance between the electron and its closest opposite sign track |Delta cot(Theta) | > 0.02
       double myElectronDeltaCotTheta = convInfo.dcot();
-      double convradius = convInfo.radiusOfConversion();
+      // double convradius = convInfo.radiusOfConversion(); // not used in code
       math::XYZPoint convPoint = convInfo.pointOfConversion();
       
       // keep track of the electrons analyzed
@@ -358,7 +356,7 @@ namespace HPlus {
       bool bElecIDIsRobustHighEnergy = false;
       bool bElecNoSimpleID = false;
       bool bElecAllSimpleIDs = false;
-      bool bMyElectronIDSelection = false; // put this as true according to your selection (if any used). CURRENTLY NOT USED
+
       if( (*iElectron).electronID("eidLoose") ) bElecIDIsLoose = true;
       if( (*iElectron).electronID("eidRobustLoose") ) bElecIDIsRobustLoose = true;
       if( (*iElectron).electronID("eidTight") ) bElecIDIsTight = true;
@@ -427,31 +425,7 @@ namespace HPlus {
       bElecEtaCut = true;
       
       // 2) Validation of simple cut based eID (choose low efficiency => High Purity)
-      
-      /* FIX ME
-     // ?) Demand that the Electron passed the ? ID 
-     // if(!bMyElectronIDSelection) continue;
-     // You can retrieve the value map decision very conveniently from the pat::Electron object as follows:
-      std::cout << "Electron ID: 95relIso=" << myElec->electronID("simpleEleId95relIso")  
-      << " 90relIso=" << myElec->electronID("simpleEleId90relIso") 
-      << " 85relIso=" << myElec->electronID("simpleEleId85relIso") 
-      << " 80relIso=" << myElec->electronID("simpleEleId80relIso") 
-      << " 70relIso=" << myElec->electronID("simpleEleId70relIso") 
-      << " 60relIso=" << myElec->electronID("simpleEleId60relIso")  << ...... <<
-      << std::endl;
-      The value map returns a double with the following meaning:
-      
-      0: fails
-      1: passes electron ID only
-      2: passes electron Isolation only
-      3: passes electron ID and Isolation only
-      4: passes conversion rejection
-      5: passes conversion rejection and ID
-      6: passes conversion rejection and Isolation
-      7: passes the whole selection
-      
-      // std::cout << "(*iElectron).electronID(\"eidLoose\") = " << (*iElectron).electronID("eidLoose") << std::endl; // FIX ME
-      */ // FIX ME
+      // Not implemented.
 
       // 3) Photon conversion rejection (gamma->e+e-)
       // If an electron has: |dist| < 0.02 && |delta cot(theta)| < 0.02 then it is regarded as coming from a conversion, and rejected
@@ -490,7 +464,7 @@ namespace HPlus {
       }
 
       // Muon Variables (Pt, Eta etc..)
-      float myMuonPt = myInnerTrackRef->pt();
+      // float myMuonPt = myInnerTrackRef->pt();
       float myMuonEta = myInnerTrackRef->eta();
       float myMuonPhi = myInnerTrackRef->phi();
       int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();

@@ -71,9 +71,8 @@ namespace HPlus {
     const double fElecPtCut;
     const double fElecEtaCut;
     
-    // Counter
+    // Counters
     Count fGlobalElectronVetoCounter;
-    // Sub-Counter to Counter
     Count fElecSelectionSubCountElectronPresent;
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
     Count fElecSelectionSubCountPtCut;
@@ -85,20 +84,20 @@ namespace HPlus {
     Count fElecSelectionSubCountTransvImpactParCut;
     Count fElecSelectionSubCountDeltaRFromGlobalOrTrkerMuonCut;
     Count fElecSelectionSubCountRelIsolationR03Cut;
-    // Sub-Counter (ElectronID) - just for my information
+    // Sub-Counters (ElectronID) - just for my information
     Count fElecIDSubCountAllElectronCandidates;
-    Count fElecIDSubCountElecIDRobustHighEnergy;
-    Count fElecIDSubCountElecIDRobustLoose;
-    Count fElecIDSubCountElecIDRobustTight;
     Count fElecIDSubCountElecIDLoose;
+    Count fElecIDSubCountElecIDRobustLoose;
     Count fElecIDSubCountElecIDTight;
+    Count fElecIDSubCountElecIDRobustTight;
+    Count fElecIDSubCountElecIDRobustHighEnergy;
     Count fElecIDSubCountSimpleEleId95relIso;
     Count fElecIDSubCountSimpleEleId90relIso;
     Count fElecIDSubCountSimpleEleId85relIso;
     Count fElecIDSubCountSimpleEleId80relIso;
     Count fElecIDSubCountSimpleEleId70relIso;
     Count fElecIDSubCountSimpleEleId60relIso;
-
+    
     // EventWeight object
     EventWeight& fEventWeight;
 
