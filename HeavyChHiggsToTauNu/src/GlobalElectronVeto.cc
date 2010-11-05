@@ -69,7 +69,8 @@ namespace HPlus {
     bUseSimpleEleId80relIsoID = false;
     bUseSimpleEleId70relIsoID = false;
     bUseSimpleEleId60relIsoID = false;
-    // FIXME: inefficient code: move such checks to constructor
+    bUseCustomElectronID = false;
+    // Check Whether official eID will be applied
     if( fElecSelection == "eidLoose") bUseLooseID = true;
     else if( fElecSelection == "eidRobustLoose") bUseRobustLooseID = true;
     else if( fElecSelection == "eidTight") bUseTightID = true;
@@ -81,8 +82,9 @@ namespace HPlus {
     else if( fElecSelection == "simpleEleId80relIso") bUseSimpleEleId80relIsoID= true;
     else if( fElecSelection == "simpleEleId70relIso") bUseSimpleEleId70relIsoID= true;
     else if( fElecSelection == "simpleEleId60relIso") bUseSimpleEleId60relIsoID= true;
+    else if( fElecSelection == "CustomElectronID") bUseCustomElectronID= true;
     else{
-      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid! Please choose one of the following valid options:\n eidLoose, eidRobustLoose, eidTight, eidRobustTight, eidRobustHighEnergy, simpleEleId95relIso, simpleEleId90relIso, simpleEleId85relIso, simpleEleId80relIso, simpleEleId70relIso, simpleEleId60relIso.\n" << std::endl;
+      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid!\nPlease choose one of the following valid options:\n***** Official electron ID ***** \n\"eidLoose\", \"eidRobustLoose\", \"eidTight\", \"eidRobustTight\", \"eidRobustHighEnergy\",\n\"simpleEleId95relIso\", \"simpleEleId90relIso\", \"simpleEleId85relIso\", \"simpleEleId80relIso\", \"simpleEleId70relIso\", \"simpleEleId60relIso\".\n***** Custom electron ID ***** \n\"CustomElectronID\" \nNOTE: If you want use a custom Electron ID, use the function: \n\"GlobalElectronVeto::Data GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"\ninstead of the default one, which is:\n\"GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"" << std::endl;
     }
   }
 
@@ -92,20 +94,22 @@ namespace HPlus {
     // Reset data variables
     fSelectedElectronPt = -1.0;
     fSelectedElectronEta = -999.99;
-    
-    return Data(this, ElectronSelection(iEvent,iSetup));
+    if(!bUseCustomElectronID) return Data(this, ElectronSelection(iEvent,iSetup));
+    else{
+      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" cannot be called with the function:\n\"GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"\nFor this selection you must call the function:\n\"GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"" << std::endl;      
+      return Data(this, false);
+    }
   }
-
-
+  
   GlobalElectronVeto::Data GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
     fSelectedElectronEta = -999.99;
-
-    if (fElecSelection == "CustomElectronID") // FIXME: inefficient code: move such check to constructor
-      return Data(this, CustomElectronSelection(iEvent,iSetup));
+    
+    if(bUseCustomElectronID) return Data(this, CustomElectronSelection(iEvent,iSetup));
     else{
-      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" used as input in the python config file is invalid using current settings! Please choose \"CustomElectronID\" as the \"ElectronSelection\" variable if you want to run without a standard Electron ID.\n If you want use a specific Electron ID, use the function \" bool GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) \"  instead of the current one -> \"bool GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) \" \n" << std::endl;
+      throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" cannot be called with the function:\n\"GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"\nFor this selection you must call the function:\n\"GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"" << std::endl;
+      return Data(this, false);
     }
   }
 

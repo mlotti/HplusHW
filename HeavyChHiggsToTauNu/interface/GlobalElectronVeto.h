@@ -130,7 +130,7 @@ namespace HPlus {
     bool bUseSimpleEleId80relIsoID;
     bool bUseSimpleEleId70relIsoID;
     bool bUseSimpleEleId60relIsoID;
-
+    bool bUseCustomElectronID;
   };
 }
 

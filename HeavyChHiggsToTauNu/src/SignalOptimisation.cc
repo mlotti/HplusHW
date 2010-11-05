@@ -106,9 +106,10 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return; 
 
     /// 9) GlobalElectronVeto
+    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if (!electronVetoData.passedEvent()) return; 
-    
+     if (!electronVetoData.passedEvent()) return; 
+     
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
