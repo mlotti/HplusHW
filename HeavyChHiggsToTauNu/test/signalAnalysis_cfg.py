@@ -99,7 +99,7 @@ process.infoPath = cms.Path(
 
 # Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,

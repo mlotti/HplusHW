@@ -32,10 +32,10 @@ namespace HPlus {
     ~SignalAnalysis();
 
     // Interface towards the EDProducer
-    void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
