@@ -37,7 +37,7 @@ else:
     aodDatasets.extend(patDatasets)
 multicrab.addDatasets("AOD", aodDatasets)
 
-multicrab.setDataLumiMask("Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
 
 
 for name in aodDatasets:

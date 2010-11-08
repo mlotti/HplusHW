@@ -43,7 +43,7 @@ multicrab.addDatasets(
 #        "WJets",
         ])
 
-multicrab.setDataLumiMask("../Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
 
 #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
 #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)
