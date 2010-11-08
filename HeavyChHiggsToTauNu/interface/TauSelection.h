@@ -58,17 +58,15 @@ namespace HPlus {
     /// Default tauID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on a given sample of taus 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& taus);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
 
   private:
-    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& taus);
-    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& taus);
-    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& taus);
-    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup,
-    edm::Handle<edm::View<pat::Tau> >& taus);
-
+    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
 
     // Input parameters
     edm::InputTag fSrc;

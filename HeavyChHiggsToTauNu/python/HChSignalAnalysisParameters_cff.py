@@ -12,12 +12,10 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(30.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(True)
-if (useFactorizedTauID == 'cms.untracked.bool(True)'):
-    print "Using Factorized tau ID"
+useFactorizedTauID = cms.untracked.bool(False)
 
 tauSelectionBase = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
+    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4), #no change
@@ -27,20 +25,20 @@ tauSelectionBase = cms.untracked.PSet(
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone()
-tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
+tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTauTauTriggerMatched")
 tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
 
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
 #tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
-tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
 tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
 
 tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone()
-tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
 tauSelectionShrinkingConeTaNCBased.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
 
 tauSelectionHPSTauBased = tauSelectionBase.clone()
-tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
+tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
 tauSelection = tauSelectionShrinkingConeCutBased

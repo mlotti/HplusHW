@@ -88,14 +88,18 @@ namespace HPlus {
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
     // Do selection
-    if     (fTauIDType == kTauIDCaloTauCutBased)             passEvent = selectionByTCTauCuts(iEvent,iSetup,htaus);
-    else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)  passEvent = selectionByPFTauCuts(iEvent,iSetup,htaus);
-    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased) passEvent = selectionByPFTauTaNC(iEvent,iSetup,htaus);
-    else if(fTauIDType == kTauIDHPSTauBased)                 passEvent = selectionByHPSTau(iEvent,iSetup,htaus);
+    if     (fTauIDType == kTauIDCaloTauCutBased)
+      passEvent = selectionByTCTauCuts(iEvent,iSetup,htaus->ptrVector());
+    else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)
+      passEvent = selectionByPFTauCuts(iEvent,iSetup,htaus->ptrVector());
+    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased)
+      passEvent = selectionByPFTauTaNC(iEvent,iSetup,htaus->ptrVector());
+    else if(fTauIDType == kTauIDHPSTauBased)
+      passEvent = selectionByHPSTau(iEvent,iSetup,htaus->ptrVector());
     return Data(this, passEvent);
   }
 
-  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& taus) {
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
     bool passEvent = false;
     // Do selection
     if     (fTauIDType == kTauIDCaloTauCutBased)             passEvent = selectionByTCTauCuts(iEvent,iSetup,taus);
@@ -105,9 +109,7 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& htaus){
-    const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
-
+  bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
 
@@ -301,11 +303,8 @@ namespace HPlus {
     return true;
   }
 
-  bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& htaus){
+  bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
 	// NC input corresponds to isolation and mass 
-
-	const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
-
 	fSelectedTaus.clear();
 	fSelectedTaus.reserve(taus.size());
 
@@ -427,9 +426,7 @@ namespace HPlus {
 	return true;
   }
 
-  bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& htaus){
-        const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
-
+  bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
         fSelectedTaus.clear();
         fSelectedTaus.reserve(taus.size());
 
@@ -559,9 +556,7 @@ namespace HPlus {
         return true;
   }
 
-  bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::Handle<edm::View<pat::Tau> >& htaus){
-     	const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
-
+  bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     	fSelectedTaus.clear();
     	fSelectedTaus.reserve(taus.size());
 
@@ -682,7 +677,8 @@ namespace HPlus {
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
     fSelectedTaus.clear();
     fSelectedTaus.reserve(1);
-    fSelectedTaus.push_back(tau);
+    if (tau.isNonnull())
+      fSelectedTaus.push_back(tau);
     return Data(this, passEvent);
   }
 }

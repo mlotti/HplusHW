@@ -77,7 +77,6 @@ namespace HPlus {
 
     hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
 
-
     /////////////////////////////////////
     // test
     hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
