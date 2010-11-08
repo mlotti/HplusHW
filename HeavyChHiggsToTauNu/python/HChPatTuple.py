@@ -54,11 +54,12 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
 
         process.hplusPatTauSequence = cms.Sequence(
-            process.tautagging *
+	    process.PFTau *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
 	    process.PFTauTestDiscriminationSequence *
-            process.produceAndDiscriminateHPSPFTaus *
+#            process.produceAndDiscriminateHPSPFTaus *
+	    process.TCTau *
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
@@ -67,9 +68,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     process.hplusPatSequence = cms.Sequence(
-	process.PFTau *
-        process.hplusPatTauSequence *
-        process.patDefaultSequence
+        process.hplusPatTauSequence 
+#        process.patDefaultSequence
     )
 
     # Restrict input to AOD
