@@ -12,6 +12,10 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(30.0)
 )
 
+useFactorizedTauID = cms.untracked.bool(False)
+if (useFactorizedTauID):
+    print "Using Factorized tau ID"
+
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
