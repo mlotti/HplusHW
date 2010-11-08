@@ -13,14 +13,12 @@ multicrab.addDatasets(
 #        "BTau_146240-148107",
 #        "BTau_148108-148864",
         # Signal MC
-#        "TTbar_Htaunu_M80",
 #        "TTToHpmToTauNu_M90",
 #        "TTToHpmToTauNu_M100",
 #        "TTToHpmToTauNu_M120",
 #        "TTbar_Htaunu_M140",
 #        "TTbar_Htaunu_M160",
         # Signal Fall10 MC
-#        "TTToHplusBWB_M80",
 #        "TTToHplusBWB_M90",
 #        "TTToHplusBWB_M100",
 #        "TTToHplusBWB_M120",
