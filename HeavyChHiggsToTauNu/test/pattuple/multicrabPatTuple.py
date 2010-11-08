@@ -9,9 +9,10 @@ multicrab.addDatasets(
     "RECO",
     [
         # Data
-#        "BTau_141950-144114",
-#        "BTau_146240-148107",
-#        "BTau_148108-148864",
+#        "BTau_141950-144114", # HLT_SingleIsoTau20_Trk5
+#        "BTau_146240-148107", # HLT_SingleIsoTau20_Trk15_MET20
+#        "BTau_148108-149182", # HLT_SingleIsoTau20_Trk15_MET25_v3
+#        "BTau_149291-149442", # HLT_SingleIsoTau20_Trk15_MET25_v4
         # Signal MC
 #        "TTToHpmToTauNu_M90",
 #        "TTToHpmToTauNu_M100",

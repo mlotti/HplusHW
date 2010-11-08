@@ -90,6 +90,38 @@ datasets = {
             }
         },
     },
+    "BTau_148108-149182": {
+        "dataVersion": "38XdataRun2010B",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
+        "runs": (148108, 149182),
+        "data": {
+            "RECO": {
+                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
+            },
+            "AOD": {
+                "fallback": "RECO",
+            }
+        },
+    },
+    "BTau_149291-149442": {
+        "dataVersion": "38XdataRun2010B",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
+        "runs": (149291, 149442),
+        "data": {
+            "RECO": {
+                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
+            },
+            "AOD": {
+                "fallback": "RECO",
+            }
+        },
+    },
     # Mu PD (for electroweak background analysis)
     "Mu_135821-144114": {
         "dataVersion": "38XdataRun2010A",
