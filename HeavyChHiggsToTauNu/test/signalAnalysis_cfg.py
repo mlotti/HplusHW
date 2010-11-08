@@ -28,8 +28,9 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
 	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
+        "rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_4_1_pvITTToHpmToTauNu_M100_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1.root" 
         # For testing in lxplus
-        dataVersion.getAnalysisDefaultFileCastor()
+        #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -107,8 +108,9 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     tauSelection = param.tauSelection,
     useFactorizedTauID = param.useFactorizedTauID,
     jetSelection = param.jetSelection,
-    MET = param.MET,
+#    MET = param.MET,
     bTagging = param.bTagging,
+    MET = param.MET,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )

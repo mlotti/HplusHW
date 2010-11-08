@@ -12,7 +12,7 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(30.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(False)
+useFactorizedTauID = cms.untracked.bool(True)
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
