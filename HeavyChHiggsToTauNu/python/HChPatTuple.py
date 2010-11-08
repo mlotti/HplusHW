@@ -32,6 +32,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus:
+	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
@@ -66,6 +67,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     process.hplusPatSequence = cms.Sequence(
+	process.PFTau *
         process.hplusPatTauSequence *
         process.patDefaultSequence
     )
