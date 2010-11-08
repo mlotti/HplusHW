@@ -13,6 +13,7 @@ namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
+    bUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
@@ -20,6 +21,7 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
+    fTauSelectionFactorized(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, fTauSelection),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -82,8 +84,14 @@ namespace HPlus {
     if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it
 
     /// 3) tauID
+    // TauID (with optional factorization (recommended only for data and QCD))
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return; /// without tau-Jet meaningless to compute Mt, deltaPhi, or alphaT.
+    if (bUseFactorizedTauID) { // Returns 0 or 1 tau; see TauSelectionFactorized.cc for details
+      TauSelectionFactorized::Data factorizedTauData = fTauSelectionFactorized.analyze(iEvent, iSetup);
+      tauData = factorizedTauData.tauSelectionData(); // Update tau data object with tau data object from factorization
+      fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
+    }
+    if(!tauData.passedEvent()) return; // No tau found!
     
     /// 4) MET 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
