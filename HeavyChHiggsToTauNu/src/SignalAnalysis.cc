@@ -86,11 +86,11 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return false;
     
     hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
-/* FIXME/5.11.2010/SL
+
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false; 
-*/
+
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return false; 
