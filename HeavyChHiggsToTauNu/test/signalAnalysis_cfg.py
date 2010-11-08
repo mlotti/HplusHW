@@ -105,12 +105,17 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,
+    useFactorizedTauID = param.useFactorizedTauID,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
+print "TauSelection src:", process.signalAnalysis.tauSelection.src
+print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
+
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
