@@ -7,8 +7,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-#dataVersion = "38X"
-dataVersion = "38Xrelval"
+dataVersion = "38X"
+#dataVersion = "38Xrelval"
 #dataVersion = "36Xdata" # this is for collision data 
 #dataVersion = "38Xdata" # this is for collision data 
 
@@ -38,8 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter()
   )
 )
 

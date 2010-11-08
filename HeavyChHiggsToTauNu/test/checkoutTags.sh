@@ -21,11 +21,11 @@
 #echo "Checking out tags for $TARGET"
 
 # Common
-cvs co -r V06-01-04 DataFormats/PatCandidates
+cvs co -r V06-02-06 DataFormats/PatCandidates
 cvs co -r V08-01-09 PhysicsTools/PatAlgos
 #cvs up -r V08-00-27 PhysicsTools/PatAlgos/python/tools/coreTools.py
 #cvs up -r 1.30      PhysicsTools/PatAlgos/python/tools/tauTools.py
-cvs co -r V00-02-24 PhysicsTools/SelectorUtils 
+cvs co -r V00-02-26 PhysicsTools/SelectorUtils 
 cvs co -r lumi2010-Oct12 RecoLuminosity/LumiDB
 cvs co -r V01-04-00 FWCore/PythonUtilities
 
@@ -34,10 +34,10 @@ cvs co -r V01-04-00 FWCore/PythonUtilities
 cvs co -r V00-03-13 RecoEgamma/ElectronIdentification
 cvs co -r V00-02-01 ElectroWeakAnalysis/WENu
 cvs co -r V01-00-00 DataFormats/TauReco
-cvs co -r V01-00-01 RecoTauTag/Configuration
+cvs co -r V01-00-03 RecoTauTag/Configuration
 cvs co -r V01-00-05 RecoTauTag/RecoTau
 cvs co -r V01-00-00 RecoTauTag/TauTagTools
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-addpkg -f ~slehti/public/tau_tags.txt
+#addpkg -f ~slehti/public/tau_tags.txt
 #fi

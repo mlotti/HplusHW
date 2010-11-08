@@ -175,10 +175,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 #                             typeLabel = "PFTau")
 #            process.patTausFixedConePFTau.isoDeposits = cms.PSet()
 
-        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
-                         algoLabel = "hps",
-                         typeLabel = "PFTau")
-        process.patTausHpsPFTau.isoDeposits = cms.PSet()
+#        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+#                         algoLabel = "hps",
+#                         typeLabel = "PFTau")
+#        process.patTausHpsPFTau.isoDeposits = cms.PSet()
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     
