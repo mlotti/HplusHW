@@ -23,6 +23,12 @@ datasets = {
                 "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO-pattuple_v3_3-1a3cae4f0de91fe807e595c3536a6777/USER",
                 "luminosity": 1.951264571,
                 "number_of_jobs": 5
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
+                "luminosity": 2.139732871,
+                "number_of_jobs": 5
             }
         }
 
@@ -53,6 +59,12 @@ datasets = {
             },
             "AOD": {
                 "fallback": "RECO",
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_1-43c3132ebadd44967499e6cca288e3ab/USER",
+                "luminosity": 5.899172590,
+                "number_of_jobs": 10
             }
         },
     },
@@ -69,6 +81,12 @@ datasets = {
             },
             "AOD": {
                 "fallback": "RECO",
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_1-87e2c0e398f5cb72e5974e2df0c2a6a6/USER",
+                "luminosity": 4.600225784,
+                "number_of_jobs": 3
             }
         },
     },
@@ -444,6 +462,11 @@ datasets = {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/QCD_Pt-170to230_7TeV-pythia8/local-Summer10_START36_V10_S09_v2_AODSIM-pattuple_v3-350234694fe4ac3e4a7c59f3d58cf538/USER",
                 "number_of_jobs": 2
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/QCD_Pt-170to230_7TeV-pythia8/local-Summer10_START36_V10_S09_v2_GEN-SIM-RECO_pattuple_v6_1-2366fe480375ff6f751e0b7e8ec70b52/USER",
+                "number_of_jobs": 2
             }
         },
     },
@@ -492,7 +515,7 @@ datasets = {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
                 "number_of_jobs": 10
             },
-            "pattuple_v6_1": {
+            "pattuple_v6": {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
                 "number_of_jobs": 10
@@ -540,6 +563,11 @@ datasets = {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
                 "number_of_jobs": 10
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
+                "number_of_jobs": 10
             }
         },
     },
@@ -559,6 +587,11 @@ datasets = {
             "pattuple_v3": {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
+                "number_of_jobs": 10
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
                 "number_of_jobs": 10
             }
         },
@@ -655,6 +688,11 @@ datasets = {
             "pattuple_v3": {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM-pattuple_v3-350234694fe4ac3e4a7c59f3d58cf538/USER",
+                "number_of_jobs": 40
+            },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1-2366fe480375ff6f751e0b7e8ec70b52/USER",
                 "number_of_jobs": 40
             }
         },
