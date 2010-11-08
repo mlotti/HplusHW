@@ -76,10 +76,10 @@ namespace HPlus {
     /// 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return; /// no Trigger means no Tau => meaningless to continue.
-    
+        
     /// 2) Trigger Emulation (for MC data)
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it.
+    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it
 
     /// 3) tauID
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
@@ -106,9 +106,10 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return; 
 
     /// 9) GlobalElectronVeto
+    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if (!electronVetoData.passedEvent()) return; 
-    
+     if (!electronVetoData.passedEvent()) return; 
+     
     /// Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );

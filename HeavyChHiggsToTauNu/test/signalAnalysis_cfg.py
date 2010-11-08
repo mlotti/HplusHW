@@ -99,7 +99,7 @@ process.infoPath = cms.Path(
 
 # Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
@@ -121,10 +121,12 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
     verbose = cms.untracked.bool(True)
 )
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
-    process.signalAnalysisCounters
+    process.signalAnalysisCounters 
+#    process.PickEvents
 )
 
 # An example how to create an array of analyzers to do the same

@@ -49,20 +49,20 @@ namespace HPlus {
 
   SignalAnalysis::~SignalAnalysis() { }
 
-  void SignalAnalysis::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    analyze(iEvent, iSetup);
+  bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    return analyze(iEvent, iSetup);
   }
 
-  void SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.updatePrescale(iEvent); // set prescale
     
     increment(fAllCounter);
     
-    //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return;
+    //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return false;
     
-    //    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return;
+    //    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return false;
 
-    //    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return;
+    //    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return false;
 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup); // just to obtain the MET value
 
@@ -73,7 +73,7 @@ namespace HPlus {
       tauData = factorizedTauData.tauSelectionData(); // Update tau data object with tau data object from factorization
       fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
     }
-    if(!tauData.passedEvent()) return;
+    if(!tauData.passedEvent()) return false;
 
     hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
 
@@ -83,40 +83,40 @@ namespace HPlus {
     hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
     
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return;
+    if(!triggerMETEmulationData.passedEvent()) return false;
     
     hMetBeforeTrigger->Fill(metData.getSelectedMET()->et());
     
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    if(!triggerData.passedEvent()) return;
+    if(!triggerData.passedEvent()) return false;
     
     hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
 
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if (!electronVetoData.passedEvent()) return; 
+    if (!electronVetoData.passedEvent()) return false; 
 
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    if (!muonVetoData.passedEvent()) return; 
+    if (!muonVetoData.passedEvent()) return false; 
 
     // MET cut
-    if(!metData.passedEvent()) return;
+    if(!metData.passedEvent()) return false;
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    if(!jetData.passedEvent()) return;
+    if(!jetData.passedEvent()) return false;
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
-    if(!btagData.passedEvent()) return;
+    if(!btagData.passedEvent()) return false;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
  
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
     // Alpha T
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
-    //if(!evtTopologyData.passedEvent()) return;
+    //if(!evtTopologyData.passedEvent()) return false;
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
@@ -124,7 +124,7 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
 
-    //  if(transverseMass < ftransverseMassCut ) return;
+    //  if(transverseMass < ftransverseMassCut ) return false;
     //  increment(ftransverseMassCutCount);
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
@@ -138,5 +138,7 @@ namespace HPlus {
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+
+    return true;
   }
 }

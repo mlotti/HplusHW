@@ -31,7 +31,7 @@ class DataVersion:
             self.is_runB = False
             if dataVersion == "38XdataRun2010A":
                 self.is_runA = True
-                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_141950-144114/BTau/Run2010A_Sep17ReReco_v2_RECO-pattuple_v3/1d049b82d733c4e0c4cf310a669f3cab/pattuple_6_1_uH5.root"
+                #self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_141950-144114/BTau/Run2010A_Sep17ReReco_v2_RECO-pattuple_v3/1d049b82d733c4e0c4cf310a669f3cab/pattuple_6_1_uH5.root"
 
             if dataVersion == "38XdataRun2010B":
                 self.is_runB = True
@@ -41,16 +41,16 @@ class DataVersion:
             self.globalTag = "START38_V13::All"
 
             if dataVersion == "35X":
-                #self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3/pattuple_6_1_Gv1.root"
-                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_7_1_u9H_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1.root" 
+                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_4_1_pvITTToHpmToTauNu_M100_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1.root"
+# 35X??/SL               self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_7_1_u9H_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1.root" 
 #                self.analysisDefaultFileCastor = "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/pattuple_38X.root"                
-                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v3/1c883eb3798701ca362caa0e5457977b/pattuple_6_1_Gv1.root"
+                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1/94799423eedb9d1f02c6c0ed06eb3738/pattuple_4_1_pvI.root"
 
             if dataVersion == "35Xredigi":
                 self.patDefaultFileCastor = "rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
             if dataVersion == "36X":
                 self.patDefaultFileMadhatter = "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"
-                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM-pattuple_v3/350234694fe4ac3e4a7c59f3d58cf538/pattuple_9_1_fjh.root"
+                #self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM-pattuple_v3/350234694fe4ac3e4a7c59f3d58cf538/pattuple_9_1_fjh.root"
 
             if dataVersion == "38X":
                 self.patDefaultFileMadhatter = "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root"

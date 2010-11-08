@@ -81,6 +81,8 @@ class MulticrabDataset:
         self.filesToCopy = []
         self.data = {}
 
+        self.blackWhiteListParams = ["ce_white_list", "se_white_list", "ce_black_list", "se_black_list"]
+
         try:
             config = multicrabDatasets.datasets[name]
         except KeyError:
@@ -130,6 +132,12 @@ class MulticrabDataset:
     def isMC(self):
         return not self._isData
 
+    def getName(self):
+        return self.name
+
+    def getDatasetPath(self):
+        return self.data["datasetpath"]
+
     def setNumberOfJobs(self, njobs):
         if "lumis_per_job" in self.data:
             raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
@@ -168,14 +176,19 @@ class MulticrabDataset:
 
         self.data["lumi_mask"] = os.path.basename(fname)
 
-    def getDatasetPath(self):
-        return self.data["datasetpath"]
-
     def addArg(self, arg):
         self.args.append(arg)
 
     def addLine(self, line):
         self.lines.append(line)
+
+    def addBlackWhiteList(self, blackWhiteList, sites):
+        if blackWhiteList not in self.blackWhiteListParams:
+            raise Exception("Black/white list parameter is '%s', should be on of %s" % (blackWhiteList, ", ".join(self.blackWhiteListParams)))
+        if blackWhiteList in self.data:
+            self.data[blackWhiteList].extend(sites)
+        else:
+            self.data[blackWhiteList] = sites[:]
 
     def writeGeneratedFiles(self, directory):
         for fname, content in self.generatedFiles:
@@ -346,6 +359,12 @@ class Multicrab:
             self._createDatasets()
         for d in self.datasets:
             d.addLine(line)
+
+    def addBlackWhiteListAll(self, blackWhiteList, sites):
+        if self.datasets == None:
+            self._createDatasets()
+        for d in self.datasets:
+            d.addBlackWhiteList(blackWhiteList, sites)
 
     def addCommonLine(self, line):
         self.commonLines = []
