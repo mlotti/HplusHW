@@ -12,8 +12,8 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(30.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(False)
-if (useFactorizedTauID):
+useFactorizedTauID = cms.untracked.bool(True)
+if (useFactorizedTauID == 'cms.untracked.bool(True)'):
     print "Using Factorized tau ID"
 
 tauSelectionBase = cms.untracked.PSet(
