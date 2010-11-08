@@ -9,18 +9,17 @@ multicrab.addDatasets(
     "RECO",
     [
         # Data
-#        "BTau_141950-144114",
-#        "BTau_146240-148107",
-#        "BTau_148108-148864",
+#        "BTau_141950-144114", # HLT_SingleIsoTau20_Trk5
+#        "BTau_146240-148107", # HLT_SingleIsoTau20_Trk15_MET20
+#        "BTau_148108-149182", # HLT_SingleIsoTau20_Trk15_MET25_v3
+#        "BTau_149291-149442", # HLT_SingleIsoTau20_Trk15_MET25_v4
         # Signal MC
-#        "TTbar_Htaunu_M80",
 #        "TTToHpmToTauNu_M90",
 #        "TTToHpmToTauNu_M100",
 #        "TTToHpmToTauNu_M120",
 #        "TTbar_Htaunu_M140",
 #        "TTbar_Htaunu_M160",
         # Signal Fall10 MC
-#        "TTToHplusBWB_M80",
 #        "TTToHplusBWB_M90",
 #        "TTToHplusBWB_M100",
 #        "TTToHplusBWB_M120",
@@ -43,7 +42,7 @@ multicrab.addDatasets(
 #        "WJets",
         ])
 
-multicrab.setDataLumiMask("../Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
 
 #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
 #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)

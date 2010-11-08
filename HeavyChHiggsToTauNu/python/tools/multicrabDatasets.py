@@ -90,6 +90,38 @@ datasets = {
             }
         },
     },
+    "BTau_148108-149182": {
+        "dataVersion": "38XdataRun2010B",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
+        "runs": (148108, 149182),
+        "data": {
+            "RECO": {
+                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
+            },
+            "AOD": {
+                "fallback": "RECO",
+            }
+        },
+    },
+    "BTau_149291-149442": {
+        "dataVersion": "38XdataRun2010B",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
+        "runs": (149291, 149442),
+        "data": {
+            "RECO": {
+                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
+            },
+            "AOD": {
+                "fallback": "RECO",
+            }
+        },
+    },
     # Mu PD (for electroweak background analysis)
     "Mu_135821-144114": {
         "dataVersion": "38XdataRun2010A",
@@ -264,6 +296,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-78d4b6b79bb86567b5da3e176aad4eb3/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M100": {
@@ -278,11 +315,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            # "pattuple_v6": {
-            #     "dbs_url": pattuple_dbs,
-            #     "datasetpath": "",
-            #     "number_of_jobs": 1
-            # },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-78d4b6b79bb86567b5da3e176aad4eb3/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M120": {
@@ -297,12 +334,12 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            # "pattuple_v6": {
-            #     "dbs_url": pattuple_dbs,
-            #     "datasetpath": "",
-            #     "number_of_jobs": 1
-            # },
-        }
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-78d4b6b79bb86567b5da3e176aad4eb3/USER",
+                "number_of_jobs": 1
+            },
+ER         }
     },
     "TTToHplusBWB_M140": {
         "dataVersion": "38Xrelval",
@@ -316,11 +353,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            # "pattuple_v6": {
-            #     "dbs_url": pattuple_dbs,
-            #     "datasetpath": "",
-            #     "number_of_jobs": 1
-            # },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-78d4b6b79bb86567b5da3e176aad4eb3/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M160": {
@@ -335,11 +372,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            # "pattuple_v6": {
-            #     "dbs_url": pattuple_dbs,
-            #     "datasetpath": "",
-            #     "number_of_jobs": 1
-            # },
+            "pattuple_v6": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-78d4b6b79bb86567b5da3e176aad4eb3/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     # Background MC
