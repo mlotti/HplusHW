@@ -39,5 +39,5 @@ cvs co -r V01-00-05 RecoTauTag/RecoTau
 cvs co -r V01-00-00 RecoTauTag/TauTagTools
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-addpkg -f ~friis/public/tau_tags.txt
+addpkg -f ~slehti/public/tau_tags.txt
 #fi
