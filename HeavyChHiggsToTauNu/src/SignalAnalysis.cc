@@ -42,9 +42,6 @@ namespace HPlus {
     hAlphaTVsRtau = fs->make<TH2F>("alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
     hMet_AfterTauSelection = fs->make<TH1F>("met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 300.0);
     hMet_AfterBTagging = fs->make<TH1F>("met_AfterBTagging", "met_AfterBTagging", 100, 0.0, 300.0);
-    hMetBeforeEmul = fs->make<TH1F>("MetBeforeEmul", "MetBeforeEmul", 100, 0.0, 300.0);
-    hMetBeforeTrigger = fs->make<TH1F>("MetBeforeTrigger", "MetBeforeTrigger", 100, 0.0, 300.0);
-    hMetAfterTrigger = fs->make<TH1F>("MetAfterTrigger", "MetAfterTrigger", 100, 0.0, 300.0);
   }
 
   SignalAnalysis::~SignalAnalysis() { }
@@ -58,6 +55,9 @@ namespace HPlus {
     
     increment(fAllCounter);
     
+    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
+    if(!triggerData.passedEvent()) return false;
+
     //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return false;
     
     //    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return false;
@@ -75,21 +75,18 @@ namespace HPlus {
     }
     if(!tauData.passedEvent()) return false;
 
-    hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
+    //hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
 
     /////////////////////////////////////
     // test
-    hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
+    //hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
     
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return false;
+    //if(!triggerMETEmulationData.passedEvent()) return false;
     
-    hMetBeforeTrigger->Fill(metData.getSelectedMET()->et());
-    
-    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    if(!triggerData.passedEvent()) return false;
-    
-    hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
+    //hMetBeforeTrigger->Fill(metData.getSelectedMET()->et());
+
+    //hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
 
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);

@@ -71,9 +71,6 @@ namespace HPlus {
     TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
-    TH1 *hMetBeforeEmul;
-    TH1 *hMetBeforeTrigger;
-    TH1 *hMetAfterTrigger;
   };
 }
 

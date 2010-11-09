@@ -29,12 +29,12 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     hPtSelectedTaus = fs->make<TH1F>("factorized_tau_pt", "tau_pt", 100, 0., 200.);
     hEtaSelectedTaus = fs->make<TH1F>("factorized_tau_eta", "tau_eta", 60, -3., 3.);
-    hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt;#tau jet p_{T}, GeV/c;N", 20, 0., 200.);
-    hPtAfterTauID = fs->make<TH1F>("factorization_calculation_pt_after_tauID", "tau_pt;#tau jet p_{T}, GeV/c;N", 20, 0., 200.);
-    hEtaBeforeTauID = fs->make<TH1F>("factorization_calculation_eta_before_tauID", "tau_eta;#tau jet #eta;N", 60, -3., 3.);
-    hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta;#tau jet #eta;N", 60, -3., 3.);
-    hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
-    hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauID = fs->make<TH1F>("factorization_calculation_pt_after_tauID", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauID = fs->make<TH1F>("factorization_calculation_eta_before_tauID", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
 
     hCategory = fs->make<TH1F>("factorized_tau_category", "factorized_tau_category", 5, 0, 5);
     hCategory->GetXaxis()->SetBinLabel(1, "All events");

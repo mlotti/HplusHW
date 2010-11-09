@@ -296,7 +296,7 @@ namespace HPlus {
     } // in the future one might add Ht cut or Jt cut or Invariant mass Cuts.
     
     /// Fill Histos
-    hAlphaT->Fill(sAlpha.fAlphaT);
+    hAlphaT->Fill(sAlpha.fAlphaT, fEventWeight.getWeight());
     
     // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
 

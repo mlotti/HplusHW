@@ -234,12 +234,12 @@ namespace HPlus {
       // Note: For the Num
 
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
-      hMuonPt->Fill(myMuonPt);
-      hMuonEta->Fill(myMuonEta);
-      hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt());
-      hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta());
-      hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt());
-      hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta());
+      hMuonPt->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta->Fill(myMuonEta, fEventWeight.getWeight());
+      hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta(), fEventWeight.getWeight());
+      hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
       // 1) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
@@ -299,12 +299,12 @@ namespace HPlus {
       } //eof: if (myMuonPt > myHighestMuonPt) {
       
       // Fill histos after Selection
-      hMuonPt_AfterSelection->Fill(myMuonPt);
-      hMuonEta_AfterSelection->Fill(myMuonPt);
-      hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt);
-      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta);
-      hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());
-      hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta());
+      hMuonPt_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta, fEventWeight.getWeight());
+      hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
   
