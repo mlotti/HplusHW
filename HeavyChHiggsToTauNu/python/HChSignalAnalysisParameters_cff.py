@@ -93,3 +93,8 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonPtCut = cms.untracked.double(20.0),
     MuonEtaCut = cms.untracked.double(2.5)
 )
+
+fakeMETVeto = cms.untracked.PSet(
+  src = MET.src,
+  maxDeltaR = cms.untracked.double(999.)
+)

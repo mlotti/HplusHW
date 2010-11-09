@@ -110,6 +110,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
+    fakeMETVeto = param.fakeMETVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
