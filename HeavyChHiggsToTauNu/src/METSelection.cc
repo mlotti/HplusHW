@@ -17,7 +17,7 @@ namespace HPlus {
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
-    fMetCutCount(eventCounter.addCounter("MET cut")),
+    fMetCutCount(eventCounter.addSubCounter("MET","MET cut")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
