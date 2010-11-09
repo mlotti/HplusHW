@@ -51,6 +51,7 @@ if options.doPat != 0:
 
 # References for muon selection:
 # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+# https://twiki.cern.ch/twiki/bin/view/CMS/TopLeptonPlusJetsRefSel_mu
 
 # Configuration
 trigger = options.trigger
@@ -104,6 +105,7 @@ met = cms.InputTag(pfMET)
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
+#process.options.wantSummary = cms.untracked.bool(True)
 process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
@@ -124,9 +126,10 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
+    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
+        process.patPlainSequence
     )
     #removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
     removeSpecificPATObjects(process, ["Photons"], False)
