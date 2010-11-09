@@ -80,6 +80,7 @@ namespace HPlus {
       hCategory->Fill(1.0, fEventWeight.getWeight());
       passEvent = false;
     } else {
+      passEvent = true;
       if (myFilteredTaus.size() == 1) {
         // Only one tau in the tau collection: take as tau the only tau object
         fSelectedTau = myFilteredTaus[0];
@@ -87,7 +88,6 @@ namespace HPlus {
       } else {
         // More than one tau exists in the tau collection
         // Strategy: apply tauID and see if any of the candidates pass
-        passEvent = true;
         if (myTauSelectionData.passedEvent()) {
           // At least one tau object has passed tauID, take as tau the tau object with highest ET
           fSelectedTau = myTauSelectionData.getSelectedTaus()[0];
