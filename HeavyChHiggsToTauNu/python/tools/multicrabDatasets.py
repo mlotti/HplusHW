@@ -11,12 +11,14 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/BTau/Run2010A-Sep17ReReco_v2/RECO",
+                #"datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 200,
+                "lumis_per_job": 100,
                 "lumiMaskRequired": True
             },
             "AOD": {
                 "fallback": "RECO",
+                #"datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
             },
             "pattuple_v3": {
                 "dbs_url": pattuple_dbs,
@@ -54,7 +56,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 200,
+                "lumis_per_job": 100,
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -73,15 +75,6 @@ datasets = {
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 148864),
         "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 50,
-                "lumiMaskRequired": True
-            },
-            "AOD": {
-                "fallback": "RECO",
-            },
             "pattuple_v6": {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_1-87e2c0e398f5cb72e5974e2df0c2a6a6/USER",
@@ -98,7 +91,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 50,
+                "lumis_per_job": 30,
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -114,7 +107,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 50,
+                "lumis_per_job": 30,
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -513,7 +506,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-230to300_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 70
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-230to300_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
@@ -659,7 +652,7 @@ datasets = {
         },
     },
 
-    # Electroweak
+    # Electroweak (Summer10)
     "TTbar": {
         "dataVersion": "36X",
         "crossSection": 165,
@@ -690,7 +683,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTbarJets_Tauola-madgraph/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 80
+                "number_of_jobs": 120
             },
             "AOD": {
                 "datasetpath": "/TTbarJets_Tauola-madgraph/Summer10-START36_V9_S09-v1/AODSIM",
@@ -715,7 +708,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 450
+                "number_of_jobs": 490
             },
             "AOD": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/AODSIM",
@@ -735,7 +728,60 @@ datasets = {
         },
     },
 
-    # Backgrounds for electroweak background measurement
+    # Electroweak (Fall10)
+    "TTJets": {
+        "dataVersion": "38X",
+        "crossSection": 165,
+        "data": {
+            "RECO": {
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v2/GEN-SIM-RECO",
+                "number_of_jobs": 100
+            },
+            "AOD": {
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v2/AODSIM",
+                "number_of_jobs": 100,
+            }
+        },
+    },
+
+
+    # Backgrounds for electroweak background measurement (Fall10)
+    "TToBLNu_s-channel": {
+        "dataVersion": "38X",
+        "crossSection": 0.99,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 10,
+            }
+        },
+    },
+    "TToBLNu_t-channel": {
+        "dataVersion": "38X",
+        "crossSection": 63./3.,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-START38_V12-v2/AODSIM",
+                "number_of_jobs": 10,
+            }
+        },
+    },
+    "TToBLNu_tW-channel": {
+        "dataVersion": "38X",
+        "crossSection": 10.56,
+        "data": {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-START38_V12-v2/GEN-SIM-RECO",
+                "number_of_jobs": 10,
+            },
+            "AOD": {
+                "fallback": "RECO",
+            },
+        },
+    },
+
+
+    # Backgrounds for electroweak background measurement (Summer10)
     "ZJets": {
         "dataVersion": "37X",
         "crossSection": 2400,
