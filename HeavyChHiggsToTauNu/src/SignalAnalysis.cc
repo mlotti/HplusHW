@@ -16,7 +16,7 @@ namespace HPlus {
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
-    //    fTriggerCounter(eventCounter.addCounter("trigger")),
+    fTriggerCounter(eventCounter.addCounter("trigger")),
     fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
@@ -26,7 +26,6 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
-   fTriggerCounter(eventCounter.addCounter("trigger")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
@@ -68,9 +67,9 @@ namespace HPlus {
     increment(fAllCounter);
 
     // Apply trigger 
-    //    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    //    if(!triggerData.passedEvent()) return false;
-    //    increment(fTriggerCounter);
+    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
+    if(!triggerData.passedEvent()) return false;
+    increment(fTriggerCounter);
 
     // Trigger MET emulation
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup);
@@ -119,11 +118,6 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-
-    // Apply trigger 
-    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    if(!triggerData.passedEvent()) return false;
-    increment(fTriggerCounter);
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
