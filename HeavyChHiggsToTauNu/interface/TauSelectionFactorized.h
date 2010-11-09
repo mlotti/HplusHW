@@ -61,6 +61,8 @@ namespace HPlus {
     const double fEtaCut;
 
     // Counters
+    Count fInitialTausCount;
+    Count fTriggerMatchedTausExistCount;
     Count fPtCutCount;
     Count fEtaCutCount;
     Count fTauFoundCount;

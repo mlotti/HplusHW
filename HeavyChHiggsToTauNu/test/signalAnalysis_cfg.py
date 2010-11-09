@@ -114,6 +114,11 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
+
+# FIXME: hack for 38X trigger
+process.signalAnalysis.trigger.trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20")
+
+print "Trigger:", process.signalAnalysis.trigger.trigger
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID

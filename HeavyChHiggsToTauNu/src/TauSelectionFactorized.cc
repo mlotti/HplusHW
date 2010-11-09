@@ -20,6 +20,8 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fInitialTausCount(eventCounter.addSubCounter("Factorized Tau","Total events")),
+    fTriggerMatchedTausExistCount(eventCounter.addSubCounter("Factorized Tau","Collection (trg matched) has taus")),
     fPtCutCount(eventCounter.addSubCounter("Factorized Tau","tau pt cut")),
     fEtaCutCount(eventCounter.addSubCounter("Factorized Tau","tau eta cut")),
     fTauFoundCount(eventCounter.addSubCounter("Factorized Tau","tau found")),
@@ -51,25 +53,32 @@ namespace HPlus {
     bool passEvent = false;
     fFactorization = 1.0;
     fSelectedTau = edm::Ptr<pat::Tau>(); // initializes the tau with a zero pointer
-
+    increment(fInitialTausCount);
+    
     // Get tau collection
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
+    if (htaus->size())
+      increment(fTriggerMatchedTausExistCount);
 
     // Apply jet ET and eta cuts
+    int myPtCutPassedCounter = 0;
+    int myEtaCutPassedCounter = 0;
     edm::PtrVector<pat::Tau> myFilteredTaus;
     const edm::PtrVector<pat::Tau>& myTaus(htaus->ptrVector());
     for(edm::PtrVector<pat::Tau>::const_iterator iter = myTaus.begin(); iter != myTaus.end(); ++iter) {
       edm::Ptr<pat::Tau> iTau = *iter;
       // Apply jet ET cut
       if(!(iTau->pt() > fPtCut)) continue;
-      increment(fPtCutCount);
+      ++myPtCutPassedCounter;
       // Apply jet eta cut 
       if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-      increment(fEtaCutCount);
+      ++myEtaCutPassedCounter;
       // Store passed taus
       myFilteredTaus.push_back(iTau);
     }
+    if (myPtCutPassedCounter) increment(fPtCutCount);
+    if (myEtaCutPassedCounter) increment(fEtaCutCount);
 
     // Calculate tau ID to obtain factorization coefficients (for lookup table determination and/or cross-checking)
     TauSelection::Data myTauSelectionData = evaluateFactorizationCoefficients(iEvent, iSetup, myFilteredTaus);
