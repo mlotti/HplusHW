@@ -96,7 +96,7 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
-    TriggerMETEmulation = param.TriggerMETEmulation,
+#    TriggerMETEmulation = param.TriggerMETEmulation,
     tauSelection = param.tauSelection,
     useFactorizedTauID = cms.untracked.bool(False), #param.useFactorizedTauID,
     jetSelection = param.jetSelection,
