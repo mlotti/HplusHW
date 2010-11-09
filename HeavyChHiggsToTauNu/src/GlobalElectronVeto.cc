@@ -197,7 +197,7 @@ namespace HPlus {
       bElecPtCut = true;
 
       // 2) Apply Eta cut requirement      
-      if (myElectronEta < fElecEtaCut) continue;
+      if (std::fabs(myElectronEta) < fElecEtaCut) continue;
       bElecEtaCut = true;
       
       // 3) Apply Electron ID (choose low efficiency => High Purity)
@@ -231,15 +231,21 @@ namespace HPlus {
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     
-    if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
-
-    if(bElecHasGsfTrkOrTrk) increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
-    
-    if(bElecPtCut) increment(fElecSelectionSubCountPtCut);
-    
-    if(bElecEtaCut) increment(fElecSelectionSubCountEtaCut);
-    
-    if(bPassedElecID) increment(fElecSelectionSubCountElectronSelection);
+    if(bElecPresent) {
+      increment(fElecSelectionSubCountElectronPresent);
+      if(bElecHasGsfTrkOrTrk) { 
+        increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
+        if(bElecPtCut) { 
+          increment(fElecSelectionSubCountPtCut);
+          if(bElecEtaCut) {
+            increment(fElecSelectionSubCountEtaCut);
+            if(bPassedElecID) {
+              increment(fElecSelectionSubCountElectronSelection);
+            }
+          }
+        }
+      }
+    }
 
     // Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID;
@@ -249,10 +255,11 @@ namespace HPlus {
     fSelectedElectronEta = myHighestElecEta;
     
     // If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
-    if(bDecision) return false;
-
+    if(bDecision)
+      return false;
     // Otherwise increment counter and return true.
-    else increment(fGlobalElectronVetoCounter);
+    else 
+      increment(fGlobalElectronVetoCounter);
     return true;
     
   }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){

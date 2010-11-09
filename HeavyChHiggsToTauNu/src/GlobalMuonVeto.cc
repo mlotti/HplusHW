@@ -245,7 +245,7 @@ namespace HPlus {
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
 
-      if ( fabs(myMuonEta) > fMuonEtaCut) continue;
+      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
       bMuonEtaCut = true;
       
       // 2) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
@@ -308,31 +308,45 @@ namespace HPlus {
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
   
-    if(bMuonPresent) increment(fMuonSelectionSubCountMuonPresent);
-    
-    if(bMuonHasGlobalOrInnerTrk) increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
-    
-    if(bMuonPtCut) increment(fMuonSelectionSubCountPtCut);
-    
-    if(bMuonEtaCut) increment(fMuonSelectionSubCountEtaCut);
-    
-    if(bMuonGlobalMuonOrTrkerMuon) increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
-    
-    if(bMuonSelection) increment(fMuonSelectionSubCountMuonSelection);
-    
-    if(bMuonNTrkerHitsCut) increment(fMuonSelectionSubCountNTrkerHitsCut);
-    
-    if(bMuonNPixelHitsCut) increment(fMuonSelectionSubCountNPixelHitsCut);
-    
-    if(bMuonNMuonlHitsCut) increment(fMuonSelectionSubCountNMuonlHitsCut);
-    
-    if(bMuonGlobalTrkChiSqCut) increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
-    
-    if(bMuonImpactParCut) increment(fMuonSelectionSubCountImpactParCut);
-    
-    if(bMuonRelIsolationR03Cut) increment(fMuonSelectionSubCountRelIsolationR03Cut);
-    
-    if(bMuonGoodPVCut) increment(fMuonSelectionSubCountGoodPVCut);
+    if(bMuonPresent) {
+      increment(fMuonSelectionSubCountMuonPresent);
+      if(bMuonHasGlobalOrInnerTrk) {
+        increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
+        if(bMuonPtCut) {
+          increment(fMuonSelectionSubCountPtCut);
+          if(bMuonEtaCut) {
+            increment(fMuonSelectionSubCountEtaCut);
+            if(bMuonGlobalMuonOrTrkerMuon) {
+              increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
+              if(bMuonSelection) {
+                increment(fMuonSelectionSubCountMuonSelection);
+                if(bMuonNTrkerHitsCut) {
+                  increment(fMuonSelectionSubCountNTrkerHitsCut);
+                  if(bMuonNPixelHitsCut) {
+                    increment(fMuonSelectionSubCountNPixelHitsCut);
+                    if(bMuonNMuonlHitsCut) {
+                      increment(fMuonSelectionSubCountNMuonlHitsCut);
+                      if(bMuonGlobalTrkChiSqCut) {
+                        increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
+                        if(bMuonImpactParCut) {
+                          increment(fMuonSelectionSubCountImpactParCut);
+                          if(bMuonRelIsolationR03Cut) {
+                            increment(fMuonSelectionSubCountRelIsolationR03Cut);
+                            if(bMuonGoodPVCut) {
+                              increment(fMuonSelectionSubCountGoodPVCut);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 
     // Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
     bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
