@@ -173,7 +173,7 @@ namespace HPlus {
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
-    fEvtTopologyCount(eventCounter.addCounter("EvtTopology cut")),
+    fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
     fEventWeight(eventWeight)
   {
@@ -296,7 +296,7 @@ namespace HPlus {
     } // in the future one might add Ht cut or Jt cut or Invariant mass Cuts.
     
     /// Fill Histos
-    hAlphaT->Fill(sAlpha.fAlphaT);
+    hAlphaT->Fill(sAlpha.fAlphaT, fEventWeight.getWeight());
     
     // if(vDiJetMassesNoTau.size()>1){std::cout << "*** bool EvtTopology::analyze(...) *** Found " << vDiJetMassesNoTau.size() << " jets in the Pseudo-Jet without the tau-Jet. This means there are " << (oMath.Factorial(vDiJetMassesNoTau.size())/(oMath.Factorial(vDiJetMassesNoTau.size()-2)*2)) << " possible DiJet mass combinations." << std::endl;}
 

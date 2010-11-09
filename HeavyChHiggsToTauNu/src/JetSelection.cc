@@ -24,9 +24,9 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
-    fCleanCutCount(eventCounter.addCounter("Jet cleaning")),
-    fPtCutCount(eventCounter.addCounter("Jet pt cut")),
-    fEtaCutCount(eventCounter.addCounter("Jet eta cut")),
+    fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
+    fPtCutCount(eventCounter.addSubCounter("Jet main","Jet pt cut")),
+    fEtaCutCount(eventCounter.addSubCounter("Jet main","Jet eta cut")),
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
@@ -77,8 +77,8 @@ namespace HPlus {
       increment(fCleanCutSubCount);
       ++cleanPassed;
 
-      hPt->Fill(iJet->pt());
-      hEta->Fill(iJet->eta());
+      hPt->Fill(iJet->pt(), fEventWeight.getWeight());
+      hEta->Fill(iJet->eta(), fEventWeight.getWeight());
 
       if(!(iJet->pt() > fPtCut)) continue;
       increment(fPtCutSubCount);
@@ -99,14 +99,14 @@ namespace HPlus {
       if ( met->et()>  fMetCut) {
 	//	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(fMETSelection.getSelectedMET()));
 	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
-	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
+	  hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
       }
 
 
       fSelectedJets.push_back(iJet);
     }
 
-    hNumberOfSelectedJets->Fill(fSelectedJets.size());
+    hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
 
     passEvent = true;

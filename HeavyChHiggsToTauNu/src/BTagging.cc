@@ -16,7 +16,7 @@ namespace HPlus {
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
-    fTaggedCount(eventCounter.addCounter("b-tagging")),
+    fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
     fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
@@ -52,13 +52,13 @@ namespace HPlus {
 
 
       float discr = iJet->bDiscriminator(fDiscriminator);
-      hDiscr->Fill(discr);
+      hDiscr->Fill(discr, fEventWeight.getWeight());
       if(!(discr > fDiscrCut)) continue;
       increment(fTaggedSubCount);
       //      ++passed;
 
-      hPt->Fill(iJet->pt());
-      hEta->Fill(iJet->eta());
+      hPt->Fill(iJet->pt(), fEventWeight.getWeight());
+      hEta->Fill(iJet->eta(), fEventWeight.getWeight());
 
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
@@ -68,17 +68,17 @@ namespace HPlus {
     }
 
 
-    hNumberOfBtaggedJets->Fill(fSelectedJets.size());
+    hNumberOfBtaggedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     iNBtags = fSelectedJets.size();
 
     ////////////////////////////////
     if( passed > 0) {
-      hPt1->Fill(fSelectedJets[0]->pt());
-      hEta1->Fill(fSelectedJets[0]->eta());
+      hPt1->Fill(fSelectedJets[0]->pt(), fEventWeight.getWeight());
+      hEta1->Fill(fSelectedJets[0]->eta(), fEventWeight.getWeight());
     }
     if( passed > 1) {
-      hPt2->Fill(fSelectedJets[1]->pt());
-      hEta2->Fill(fSelectedJets[1]->eta());
+      hPt2->Fill(fSelectedJets[1]->pt(), fEventWeight.getWeight());
+      hEta2->Fill(fSelectedJets[1]->eta(), fEventWeight.getWeight());
     }
        // plot deltaPhi(bjet,tau jet)
     //      double deltaPhi = -999;    

@@ -20,7 +20,7 @@ namespace HPlus {
     fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
     fElecEtaCut(iConfig.getUntrackedParameter<double>("ElectronEtaCut")),
-    fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
+    fGlobalElectronVetoCounter(eventCounter.addSubCounter("GlobalElectron Selection","GlobalElectronVeto")),
     fElecSelectionSubCountElectronPresent(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Present")),
     fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
     fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
@@ -187,17 +187,18 @@ namespace HPlus {
       // float myElectronPhi = (*iElectron).phi();
 
       // Fill histos with all-Electrons Pt and Eta
-      hElectronPt->Fill(myElectronPt);
-      hElectronEta->Fill(myElectronEta);
-      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
+      hElectronPt->Fill(myElectronPt, fEventWeight.getWeight());
+      hElectronEta->Fill(myElectronEta, fEventWeight.getWeight());
+      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
 
       // 1) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
 
+
       // 2) Apply Eta cut requirement      
-      if (fabs(myElectronEta) > fElecEtaCut) continue;
+      if (std::fabs(myElectronEta) > fElecEtaCut) continue;
       bElecEtaCut = true;
       
       // 3) Apply Electron ID (choose low efficiency => High Purity)
@@ -224,22 +225,28 @@ namespace HPlus {
 	}
       
       // Fill histos after Selection
-      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronEta_AfterSelection->Fill(myGsfTrackRef->eta());
-      hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta());
+      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_AfterSelection->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
+      hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     
-    if(bElecPresent) increment(fElecSelectionSubCountElectronPresent);
-
-    if(bElecHasGsfTrkOrTrk) increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
-    
-    if(bElecPtCut) increment(fElecSelectionSubCountPtCut);
-    
-    if(bElecEtaCut) increment(fElecSelectionSubCountEtaCut);
-    
-    if(bPassedElecID) increment(fElecSelectionSubCountElectronSelection);
+    if(bElecPresent) {
+      increment(fElecSelectionSubCountElectronPresent);
+      if(bElecHasGsfTrkOrTrk) { 
+        increment(fElecSelectionSubCountElectronHasGsfTrkOrTrk);
+        if(bElecPtCut) { 
+          increment(fElecSelectionSubCountPtCut);
+          if(bElecEtaCut) {
+            increment(fElecSelectionSubCountEtaCut);
+            if(bPassedElecID) {
+              increment(fElecSelectionSubCountElectronSelection);
+            }
+          }
+        }
+      }
+    }
 
     // Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
     bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID;
@@ -249,10 +256,11 @@ namespace HPlus {
     fSelectedElectronEta = myHighestElecEta;
     
     // If a Global Electron (passing all selection criteria) is found, do not increment counter. Return false.
-    if(bDecision) return false;
-
+    if(bDecision)
+      return false;
     // Otherwise increment counter and return true.
-    else increment(fGlobalElectronVetoCounter);
+    else 
+      increment(fGlobalElectronVetoCounter);
     return true;
     
   }//eof: bool GlobalElectronVeto::ElectronSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
@@ -412,10 +420,10 @@ namespace HPlus {
       float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt); // isolation cones are dR=0.3 
 
       // Fill histos with all-Electrons Pt and Eta
-      hElectronPt->Fill(myElectronPt);
-      hElectronEta->Fill(myElectronEta);
-      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta());
+      hElectronPt->Fill(myElectronPt, fEventWeight.getWeight());
+      hElectronEta->Fill(myElectronEta, fEventWeight.getWeight());
+      hElectronPt_gsfTrack->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_gsfTrack->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
 
       // 1) Apply Pt and Eta cut requirements
       if (myElectronPt < fElecPtCut) continue;
@@ -494,10 +502,10 @@ namespace HPlus {
       }
       
       // Fill histos after Selection
-      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronEta_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
-      hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt());
+      hElectronPt_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+      hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
       
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     

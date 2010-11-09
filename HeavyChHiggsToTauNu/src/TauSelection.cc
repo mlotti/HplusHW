@@ -22,20 +22,20 @@ namespace HPlus {
     fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
     fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
     fInvMassCut(iConfig.getUntrackedParameter<double>("invMassCut")),
-    fPtCutCount(eventCounter.addCounter("Tau pt cut")),
-    fEtaCutCount(eventCounter.addCounter("Tau eta cut")),
-    fagainstMuonCount(eventCounter.addCounter("Tau againstMuon discriminator")),
-    fagainstElectronCount(eventCounter.addCounter("Tau againstElectron discriminator")),
-    fLeadTrkPtCount(eventCounter.addCounter("Tau leading track pt cut")),
-    fTaNCCount(eventCounter.addCounter("Tau TaNC cut")),
-    fHPSIsolationCount(eventCounter.addCounter("Tau HPS isolation cut")),
-    fbyIsolationCount(eventCounter.addCounter("Tau byIsolation discriminator")),
-    fbyTrackIsolationCount(eventCounter.addCounter("Tau byTrackIsolation cut")),
-    fecalIsolationCount(eventCounter.addCounter("Tau ecalIsolation discriminator")),
-    fnProngsCount(eventCounter.addCounter("Tau number of prongs cut")),
-    fHChTauIDchargeCount(eventCounter.addCounter("Tau charge cut")),
-    fRtauCount(eventCounter.addCounter("Tau Rtau cut")),
-    fInvMassCount(eventCounter.addCounter("Tau InvMass cut")),
+    fPtCutCount(eventCounter.addSubCounter("Tau main","Tau pt cut")),
+    fEtaCutCount(eventCounter.addSubCounter("Tau main","Tau eta cut")),
+    fagainstMuonCount(eventCounter.addSubCounter("Tau main","Tau againstMuon discriminator")),
+    fagainstElectronCount(eventCounter.addSubCounter("Tau main","Tau againstElectron discriminator")),
+    fLeadTrkPtCount(eventCounter.addSubCounter("Tau main","Tau leading track pt cut")),
+    fTaNCCount(eventCounter.addSubCounter("Tau main","Tau TaNC cut")),
+    fHPSIsolationCount(eventCounter.addSubCounter("Tau main","Tau HPS isolation cut")),
+    fbyIsolationCount(eventCounter.addSubCounter("Tau main","Tau byIsolation discriminator")),
+    fbyTrackIsolationCount(eventCounter.addSubCounter("Tau main","Tau byTrackIsolation cut")),
+    fecalIsolationCount(eventCounter.addSubCounter("Tau main","Tau ecalIsolation discriminator")),
+    fnProngsCount(eventCounter.addSubCounter("Tau main","Tau number of prongs cut")),
+    fHChTauIDchargeCount(eventCounter.addSubCounter("Tau main","Tau charge cut")),
+    fRtauCount(eventCounter.addSubCounter("Tau main","Tau Rtau cut")),
+    fInvMassCount(eventCounter.addSubCounter("Tau main","Tau InvMass cut")),
     fAllSubCount(eventCounter.addSubCounter("Tau identification", "all tau candidates")),
     fPtCutSubCount(eventCounter.addSubCounter("Tau identification", "pt cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Tau identification", "eta cut")),
@@ -131,12 +131,12 @@ namespace HPlus {
 
       increment(fAllSubCount);
 
-      hPt->Fill(iTau->pt());
-      hEta->Fill(iTau->eta());
+      hPt->Fill(iTau->pt(), fEventWeight.getWeight());
+      hEta->Fill(iTau->eta(), fEventWeight.getWeight());
       reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand(); 
       //      reco::TrackRef leadTrk = iTau->leadTrack();
       //      if(leadTrk.isNonnull())
-      //        hLeadTrkPt->Fill(leadTrk->pt());
+      //        hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
       //      uint16_t nSigTk        =  thePFTauRef->signalPFChargedHadrCands().size();
       uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
 
@@ -158,7 +158,7 @@ namespace HPlus {
       ++againstElectronCutPassed;
 
       if(leadTrk.isNonnull())
-        hLeadTrkPt->Fill(leadTrk->pt());
+        hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
 
       if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
       increment(fLeadTrkPtSubCount);
@@ -179,12 +179,12 @@ namespace HPlus {
 	float pt = (*iCand)->pt();
 	ptsum += pt; 
 	if (pt > ptmax) ptmax = pt;
-	hIsolTrkPt->Fill(pt);
+	hIsolTrkPt->Fill(pt, fEventWeight.getWeight());
 	//	std::cout << " isol track pt " << pt << std::endl;
 	//iCand->pt()
       }
-      hIsolMaxTrkPt->Fill(ptmax);
-      hIsolTrkPtSum->Fill(ptsum);
+      hIsolMaxTrkPt->Fill(ptmax, fEventWeight.getWeight());
+      hIsolTrkPtSum->Fill(ptsum, fEventWeight.getWeight());
 
       for(int iCut = 0; iCut < 5; ++iCut){
 	double cut = 0.5 + 0.1*iCut;
@@ -196,8 +196,8 @@ namespace HPlus {
 	  sum+=pt;
 	  nTracks++;
 	}
-	hIsolTrkPtSumVsPtCut->Fill(cut,sum);
-	hNIsolTrksVsPtCut->Fill(cut,float(nTracks));
+	hIsolTrkPtSumVsPtCut->Fill(cut,sum, fEventWeight.getWeight());
+	hNIsolTrksVsPtCut->Fill(cut,float(nTracks), fEventWeight.getWeight());
       } 
       */
       
@@ -210,7 +210,7 @@ namespace HPlus {
       ++ecalIsolationCutPassed;
 
       //      std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;       
-      hnProngs->Fill(nSigTracks);    
+      hnProngs->Fill(nSigTracks, fEventWeight.getWeight());    
       //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
       if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue; 
       //      if( nSigTracks != 1 ) continue; 
@@ -223,15 +223,15 @@ namespace HPlus {
   
       //float Rtau = leadTrk->p()/iTau->p();
       //      Rtau = leadTrk->p()/iTau->p();
-      //hRtau->Fill(Rtau);
+      //hRtau->Fill(Rtau, fEventWeight.getWeight());
     
       //float Rtau = 0;
       //if (iTau->p() > 0) leadTrk->p()/iTau->p();
       float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
       if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta());
+	hEtaRtau->Fill(iTau->eta(), fEventWeight.getWeight());
       }
-      hRtau->Fill(Rtau);
+      hRtau->Fill(Rtau, fEventWeight.getWeight());
 
 
       if(Rtau < fRtauCut) continue; 
@@ -239,16 +239,16 @@ namespace HPlus {
       ++RtauCutPassed;
       
       float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-      hDeltaE->Fill(DeltaE);
+      hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
 
       float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-      hFlightPathSignif->Fill(flightPathSignif);
+      hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
 
       // DeltaE and flight path are not applied - why?
       // They should be applied for 3-prongs only
 
       float InvMass = iTau->tauID("HChTauIDInvMassCont");
-      hInvMass->Fill(InvMass);
+      hInvMass->Fill(InvMass, fEventWeight.getWeight());
       //      continue;
      
       if(InvMass > fInvMassCut) continue;
@@ -257,8 +257,8 @@ namespace HPlus {
 
 
       // Fill Histos after Tau Selection Cuts
-      hPtAfterTauSelCuts->Fill(iTau->pt());
-      hEtaAfterTauSelCuts->Fill(iTau->eta());
+      hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
+      hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
 
       fSelectedTaus.push_back(iTau);
     }
@@ -323,8 +323,8 @@ namespace HPlus {
 		edm::Ptr<pat::Tau> iTau = *iter;
 		
 		increment(fAllSubCount);
-      		hPt->Fill(iTau->pt());
-      		hEta->Fill(iTau->eta());
+      		hPt->Fill(iTau->pt(), fEventWeight.getWeight());
+      		hEta->Fill(iTau->eta(), fEventWeight.getWeight());
 
       		if(!(iTau->pt() > fPtCut)) continue;
       		increment(fPtCutSubCount);
@@ -345,13 +345,13 @@ namespace HPlus {
       		++againstElectronCutPassed;
 
       		reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand();
-      		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt());
+      		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
 
       		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
       		increment(fLeadTrkPtSubCount);
       		++leadTrkPtCutPassed;
 
-		hbyTaNC->Fill(iTau->tauID("byTaNC"));
+		hbyTaNC->Fill(iTau->tauID("byTaNC"), fEventWeight.getWeight());
 		//		if(iTau->tauID("byTaNC") < 0.6) continue;
 //		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
 		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) continue; // This is the tightest selection
@@ -362,7 +362,7 @@ namespace HPlus {
 
 		//       std::cout << " after isolation tanC " << std::endl;   
 
-		hnProngs->Fill(iTau->signalTracks().size());
+		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
 		//		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
 		if(iTau->tauID("HChTauID1Prong") < 0.5 ) continue;
 		increment(fnProngsSubCount);
@@ -375,25 +375,25 @@ namespace HPlus {
 		//float Rtau = 0;
 		//if (iTau->p() > 0) leadTrk->p()/iTau->p();
 		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-		hRtau->Fill(Rtau);
+		hRtau->Fill(Rtau, fEventWeight.getWeight());
 
 		if(Rtau < fRtauCut) continue;
 		increment(fRtauSubCount);
 		++RtauCutPassed;
 
 		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-      		hDeltaE->Fill(DeltaE);
+      		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
 
       		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-      		hFlightPathSignif->Fill(flightPathSignif);
+      		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
 
       		// Fill Histos after Tau Selection Cuts
-      		hPtAfterTauSelCuts->Fill(iTau->pt());
-      		hEtaAfterTauSelCuts->Fill(iTau->eta());
+      		hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
+      		hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
 
       		fSelectedTaus.push_back(iTau);
 		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass);
+		hInvMass->Fill(InvMass, fEventWeight.getWeight());
 	}
 
     	if(ptCutPassed == 0) return false;
@@ -446,8 +446,8 @@ namespace HPlus {
                 edm::Ptr<pat::Tau> iTau = *iter;
 
                 increment(fAllSubCount);
-                hPt->Fill(iTau->pt());
-                hEta->Fill(iTau->eta());
+                hPt->Fill(iTau->pt(), fEventWeight.getWeight());
+                hEta->Fill(iTau->eta(), fEventWeight.getWeight());
 		reco::PFCandidateRef leadTrk = iTau->leadPFChargedHadrCand(); // HPS is constructed from PF
 
                 if(!(iTau->pt() > fPtCut)) continue;
@@ -473,7 +473,7 @@ namespace HPlus {
 		++byTightIsolationPassed;
 
 		if(leadTrk.isNonnull())
-		  hLeadTrkPt->Fill(leadTrk->pt());
+		  hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
 
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
@@ -494,7 +494,7 @@ namespace HPlus {
 		++RtauCutPassed;
 
 /* ONLY HPS discriminators available, please do not uncomment unless sure the are included!
-		hnProngs->Fill(iTau->signalTracks().size());
+		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
 		increment(fnProngsSubCount);
 		++nProngsCutPassed;
@@ -507,33 +507,33 @@ namespace HPlus {
 		//if (iTau->p() > 0) leadTrk->p()/iTau->p();
 		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
 		if (Rtau > 1 ) {
-		  hEtaRtau->Fill(iTau->eta());
+		  hEtaRtau->Fill(iTau->eta(), fEventWeight.getWeight());
 		}
-		hRtau->Fill(Rtau);
+		hRtau->Fill(Rtau, fEventWeight.getWeight());
     
 		if(Rtau < fRtauCut) continue; 
 		increment(fRtauSubCount);
 		++RtauCutPassed;
 
 		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-		hDeltaE->Fill(DeltaE);
+		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
 
 		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-		hFlightPathSignif->Fill(flightPathSignif);
+		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
 
 		// DeltaE and flight path are not applied - why?
 		// They should be applied for 3-prongs only
 
 		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass);
+		hInvMass->Fill(InvMass, fEventWeight.getWeight());
 
 		if(InvMass > fInvMassCut) continue;
 		increment(fInvMassSubCount);
 		++InvMassCutPassed;
 */
                 // Fill Histos after Tau Selection Cuts
-                hPtAfterTauSelCuts->Fill(iTau->pt());
-                hEtaAfterTauSelCuts->Fill(iTau->eta());
+                hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
+                hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
 
                 fSelectedTaus.push_back(iTau);
         }
@@ -591,8 +591,8 @@ namespace HPlus {
       		edm::Ptr<pat::Tau> iTau = *iter;
 
                 increment(fAllSubCount);
-                hPt->Fill(iTau->pt());
-                hEta->Fill(iTau->eta());
+                hPt->Fill(iTau->pt(), fEventWeight.getWeight());
+                hEta->Fill(iTau->eta(), fEventWeight.getWeight());
 
                 if(!(iTau->pt() > fPtCut)) continue;
                 increment(fPtCutSubCount);
@@ -629,29 +629,29 @@ namespace HPlus {
       		++byIsolationCutPassed;
 
             	float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      		hRtau->Fill(Rtau);
+      		hRtau->Fill(Rtau, fEventWeight.getWeight());
       		if(Rtau < fRtauCut) continue;
       		increment(fRtauSubCount);
       		++RtauCutPassed;
 
 		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-		hDeltaE->Fill(DeltaE);
+		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
 
 		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-		hFlightPathSignif->Fill(flightPathSignif);
+		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
 
 		// DeltaE and flight path are not applied - why?
 		// They should be applied for 3-prongs only
 
 		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass);
+		hInvMass->Fill(InvMass, fEventWeight.getWeight());
 		if(InvMass > fInvMassCut) continue;
 		increment(fInvMassSubCount);
 		++InvMassCutPassed;
 
                 // Fill Histos after Tau Selection Cuts
-                hPtAfterTauSelCuts->Fill(iTau->pt());
-                hEtaAfterTauSelCuts->Fill(iTau->eta());
+                hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
+                hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
 
                 fSelectedTaus.push_back(iTau);
 	}

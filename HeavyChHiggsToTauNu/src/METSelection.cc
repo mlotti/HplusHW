@@ -17,7 +17,7 @@ namespace HPlus {
   METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
-    fMetCutCount(eventCounter.addCounter("MET cut")),
+    fMetCutCount(eventCounter.addSubCounter("MET","MET cut")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -38,18 +38,19 @@ namespace HPlus {
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
     fMet = met->et();
 
-    hMet->Fill(met->et());
-    hMetSignif->Fill(met->significance());
-    hMetSumEt->Fill(met->sumEt());
+    hMet->Fill(met->et(), fEventWeight.getWeight());
+    hMetSignif->Fill(met->significance(), fEventWeight.getWeight());
+    hMetSumEt->Fill(met->sumEt(), fEventWeight.getWeight());
     double sumEt = met->sumEt();
     if(sumEt != 0){
-        hMetDivSumEt->Fill(met->et()/sumEt);
-        hMetDivSqrSumEt->Fill(met->et()/sumEt);
+        hMetDivSumEt->Fill(met->et()/sumEt, fEventWeight.getWeight());
+        hMetDivSqrSumEt->Fill(met->et()/sumEt, fEventWeight.getWeight());
     }
 
-    if(met->et() > fMetCut) passEvent = true;
-
-    increment(fMetCutCount);
+    if(met->et() > fMetCut) {
+      passEvent = true;
+      increment(fMetCutCount);
+    }
     fSelectedMET = met;
     
     return Data(this, passEvent);

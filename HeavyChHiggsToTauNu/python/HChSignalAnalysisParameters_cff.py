@@ -41,10 +41,10 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-#tauSelection = tauSelectionShrinkingConeCutBased
+tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+#tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJets"),
@@ -92,4 +92,9 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(20.0),
     MuonEtaCut = cms.untracked.double(2.5)
+)
+
+fakeMETVeto = cms.untracked.PSet(
+  src = MET.src,
+  maxDeltaR = cms.untracked.double(999.)
 )

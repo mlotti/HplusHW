@@ -52,7 +52,7 @@ namespace HPlus {
   private:
     // Input parameters
     edm::InputTag fSrc;
-    double fmetEmulationCut;
+    const double fmetEmulationCut;
 
     // Counters
     Count fmetEmulationCutCount;
@@ -61,7 +61,8 @@ namespace HPlus {
     EventWeight& fEventWeight;
 
     // Histograms
-    TH1 *hmetAfterTrigger;
+    TH1 *hMetBeforeEmulation;
+    TH1 *hMetAfterEmulation;
 
     // Selected jets
     edm::Ptr<reco::MET> fSelectedTriggerMET;
