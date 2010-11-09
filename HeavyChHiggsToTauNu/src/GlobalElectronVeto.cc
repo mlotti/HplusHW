@@ -20,7 +20,7 @@ namespace HPlus {
     fElecSelection(iConfig.getUntrackedParameter<std::string>("ElectronSelection")),
     fElecPtCut(iConfig.getUntrackedParameter<double>("ElectronPtCut")),
     fElecEtaCut(iConfig.getUntrackedParameter<double>("ElectronEtaCut")),
-    fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
+    fGlobalElectronVetoCounter(eventCounter.addSubCounter("GlobalElectron Selection","GlobalElectronVeto")),
     fElecSelectionSubCountElectronPresent(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Present")),
     fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
     fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),

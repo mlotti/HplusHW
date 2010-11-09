@@ -20,9 +20,9 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
-    fPtCutCount(eventCounter.addCounter("Factorized tau pt cut")),
-    fEtaCutCount(eventCounter.addCounter("Factorized tau eta cut")),
-    fTauFoundCount(eventCounter.addCounter("Factorized tau found")),
+    fPtCutCount(eventCounter.addSubCounter("Factorized Tau","tau pt cut")),
+    fEtaCutCount(eventCounter.addSubCounter("Factorized Tau","tau eta cut")),
+    fTauFoundCount(eventCounter.addSubCounter("Factorized Tau","tau found")),
     fEventWeight(eventWeight),
     fTauSelection(tauSelectionObject)
   {

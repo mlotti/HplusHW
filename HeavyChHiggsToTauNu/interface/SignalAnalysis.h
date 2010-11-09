@@ -46,6 +46,15 @@ namespace HPlus {
     const bool fUseFactorizedTauID;
 
     Count fAllCounter;
+    Count fTriggerCounter;
+    Count fTriggerEmulationCounter;
+    Count fTausExistCounter;
+    Count fOneTauCounter;
+    Count fElectronVetoCounter;
+    Count fMuonVetoCounter;
+    Count fMETCounter;
+    Count fNJetsCounter;
+    Count fBTaggingCounter;
 
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;

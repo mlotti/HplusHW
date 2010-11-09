@@ -73,7 +73,7 @@ if not runPatOnTheFly:
 # adjusted for the pattuple file size, and when only histograms or
 # small ntuples are produced, stageout is not the issue
 if runPatOnTheFly:
-    multicrab.setDataLumiMask("Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
+    multicrab.setDataLumiMask("Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
     multicrab.addArgAll("doPat=1")
 
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)

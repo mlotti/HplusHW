@@ -12,7 +12,7 @@ namespace HPlus {
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPath(iConfig.getUntrackedParameter<std::string>("trigger")),
-    fTriggerCount(eventCounter.addCounter("Triggered ("+fPath+")")),
+    fTriggerCount(eventCounter.addSubCounter("Trigger","Triggered ("+fPath+")")),
     fEventWeight(eventWeight)
   {}
 

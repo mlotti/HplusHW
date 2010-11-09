@@ -16,6 +16,15 @@ namespace HPlus {
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
+    fTriggerCounter(eventCounter.addCounter("trigger")),
+    fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
+    fTausExistCounter(eventCounter.addCounter("taus > 0")),
+    fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fElectronVetoCounter(eventCounter.addCounter("electron veto")),
+    fMuonVetoCounter(eventCounter.addCounter("muon veto")),
+    fMETCounter(eventCounter.addCounter("MET")),
+    fNJetsCounter(eventCounter.addCounter("njets")),
+    fBTaggingCounter(eventCounter.addCounter("btagging")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
@@ -54,17 +63,16 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent); // set prescale
     
     increment(fAllCounter);
-    
-    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
+
+    // Apply trigger 
+    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
+    increment(fTriggerCounter);
 
-    //    if(!fTriggerSelection.analyze(iEvent, iSetup)) return false;
-    
-    //    if(!fTriggerMETEmulation.analyze(iEvent, iSetup)) return false;
-
-    //    if(fGlobalMuonVeto.analyze(iEvent, iSetup)) return false;
-
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup); // just to obtain the MET value
+    // Trigger MET emulation
+    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup);
+    if(!triggerMETEmulationData.passedEvent()) return false;
+    increment(fTriggerEmulationCounter);
 
     // TauID (with optional factorization)
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
@@ -72,41 +80,37 @@ namespace HPlus {
       TauSelectionFactorized::Data factorizedTauData = fTauSelectionFactorized.analyze(iEvent, iSetup);
       tauData = factorizedTauData.tauSelectionData(); // Update tau data object with tau data object from factorization
       fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
-    }
-    if(!tauData.passedEvent()) return false;
-
-    //hMet_AfterTauSelection->Fill(metData.getSelectedMET()->et());
-
-    /////////////////////////////////////
-    // test
-    //hMetBeforeEmul->Fill(metData.getSelectedMET()->et());
-    
-    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    //if(!triggerMETEmulationData.passedEvent()) return false;
-    
-    //hMetBeforeTrigger->Fill(metData.getSelectedMET()->et());
-
-    //hMetAfterTrigger->Fill(metData.getSelectedMET()->et());
+    }    
+    if(!tauData.passedEvent()) return false; // Require at least one tau
+    increment(fTausExistCounter);
+    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    increment(fOneTauCounter);
 
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if (!electronVetoData.passedEvent()) return false; 
+    if (!electronVetoData.passedEvent()) return false;
+    increment(fElectronVetoCounter);
 
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    if (!muonVetoData.passedEvent()) return false; 
+    if (!muonVetoData.passedEvent()) return false;
+    increment(fMuonVetoCounter);
 
     // MET cut
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return false;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
+    increment(fBTaggingCounter);
  
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 

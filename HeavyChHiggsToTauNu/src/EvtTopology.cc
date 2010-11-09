@@ -173,7 +173,7 @@ namespace HPlus {
     // fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     // fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fAlphaTCut(iConfig.getUntrackedParameter<double>("alphaT")),
-    fEvtTopologyCount(eventCounter.addCounter("EvtTopology cut")),
+    fEvtTopologyCount(eventCounter.addSubCounter("EvtTopology main","EvtTopology cut")),
     fAlphaTCutCount(eventCounter.addSubCounter("EvtTopology", "alphaT")),
     fEventWeight(eventWeight)
   {
