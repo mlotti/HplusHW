@@ -99,18 +99,23 @@ process.infoPath = cms.Path(
 
 # Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,
+    useFactorizedTauID = param.useFactorizedTauID,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
+print "TauSelection src:", process.signalAnalysis.tauSelection.src
+print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
+
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
@@ -121,10 +126,12 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
     verbose = cms.untracked.bool(True)
 )
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
-    process.signalAnalysisCounters
+    process.signalAnalysisCounters 
+#    process.PickEvents
 )
 
 # An example how to create an array of analyzers to do the same

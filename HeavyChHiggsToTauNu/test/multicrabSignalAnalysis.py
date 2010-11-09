@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v3"
-#pattupleVersion = "pattuple_v6"
+#pattupleVersion = "pattuple_v3"
+pattupleVersion = "pattuple_v6"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -26,10 +26,10 @@ if runPatOnTheFly:
 multicrab.addDatasets(pattupleVersion,
     [
         # Data
-#        "BTau_141950-144114",  # v3
-#        "BTau_146240-147454",  # v3
-#        "BTau_146240-148107", # not yet ready 
-#        "BTau_148108-148864", # not yet ready
+#        "BTau_141950-144114", # v3, v6
+#        "BTau_146240-147454", # v3
+#        "BTau_146240-148107", # v6
+#        "BTau_148108-148864", # v6
         # MC Signal Fall10
 #        "TTToHplusBWB_M90",  # not yet ready
 #        "TTToHplusBWB_M100", # not yet ready
@@ -45,19 +45,19 @@ multicrab.addDatasets(pattupleVersion,
         # MC Background Fall10
 #        "QCD_Pt30to50_Fall10",   # v3, v6
 #        "QCD_Pt50to80_Fall10",   # v3, v6
-#        "QCD_Pt80to120_Fall10",  # v3
-#        "QCD_Pt120to170_Fall10", # v3
+#        "QCD_Pt80to120_Fall10",  # v3, v6
+#        "QCD_Pt120to170_Fall10", # v3, v6
 #        "QCD_Pt170to300_Fall10", # v3, v6
         # MC Background Summer10
 #        "QCD_Pt30to50",   # v3, v6
 #        "QCD_Pt50to80",   # v3, v6
 #        "QCD_Pt80to120",  # v3, v6
 #        "QCD_Pt120to170", # v3, v6
-#        "QCD_Pt170to230", # v3
+#        "QCD_Pt170to230", # v3, v6
 #        "QCD_Pt230to300", # v3, v6
 #        "TTbar",          # v3, v6
 #        "TTbarJets",      # v3, v6
-#        "WJets",          # v3
+#        "WJets",          # v3, v6
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
@@ -73,7 +73,7 @@ if not runPatOnTheFly:
 # adjusted for the pattuple file size, and when only histograms or
 # small ntuples are produced, stageout is not the issue
 if runPatOnTheFly:
-    multicrab.setDataLumiMask("Cert_132440-148864_7TeV_StreamExpress_Collisions10_JSON.txt")
+    multicrab.setDataLumiMask("Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
     multicrab.addArgAll("doPat=1")
 
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)

@@ -1,4 +1,4 @@
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
@@ -6,7 +6,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 
-class HPlusSignalAnalysisProducer: public edm::EDProducer {
+class HPlusSignalAnalysisProducer: public edm::EDFilter {
  public:
 
   explicit HPlusSignalAnalysisProducer(const edm::ParameterSet&);
@@ -14,11 +14,11 @@ class HPlusSignalAnalysisProducer: public edm::EDProducer {
 
  private:
   virtual void beginJob();
-  virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+  virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
-  virtual void beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
-  virtual void endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
+  virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
@@ -34,16 +34,18 @@ HPlusSignalAnalysisProducer::HPlusSignalAnalysisProducer(const edm::ParameterSet
 HPlusSignalAnalysisProducer::~HPlusSignalAnalysisProducer() {}
 void HPlusSignalAnalysisProducer::beginJob() {}
 
-void HPlusSignalAnalysisProducer::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+bool HPlusSignalAnalysisProducer::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
   eventCounter.beginLuminosityBlock(iBlock, iSetup);
+  return true;
 }
 
-void HPlusSignalAnalysisProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  analysis.produce(iEvent, iSetup);
+bool HPlusSignalAnalysisProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  return analysis.filter(iEvent, iSetup);
 }
 
-void HPlusSignalAnalysisProducer::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
+bool HPlusSignalAnalysisProducer::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
   eventCounter.endLuminosityBlock(iBlock, iSetup);
+  return true;
 }
 
 void HPlusSignalAnalysisProducer::endJob() {

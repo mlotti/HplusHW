@@ -21,6 +21,13 @@ class TH1;
 namespace HPlus {
   class TauSelection {
   public:
+    enum TauIDTypeEnumerator {
+      kTauIDCaloTauCutBased,
+      kTauIDShrinkingConePFTauCutBased,
+      kTauIDShrinkingConePFTauTaNCBased,
+      kTauIDHPSTauBased
+    };
+
     /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -42,30 +49,34 @@ namespace HPlus {
 
     private:
       const TauSelection *fTauSelection;
-      const bool fPassedEvent;
+      bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
     };
 
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauSelection();
 
+    /// Default tauID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    /// tau ID on a given sample of taus 
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// Method for setting selected tau (from factorization)
+    Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
 
   private:
-
-    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
+    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
 
     // Input parameters
     edm::InputTag fSrc;
-    std::string fSelection;
-    double fPtCut;
-    double fEtaCut;
-    double fLeadTrkPtCut;
-    double fRtauCut;
-    double fInvMassCut;
+    const std::string fSelection;
+    const double fPtCut;
+    const double fEtaCut;
+    const double fLeadTrkPtCut;
+    const double fRtauCut;
+    const double fInvMassCut;
+    TauIDTypeEnumerator fTauIDType;
 
     // Counters
     Count fPtCutCount;
@@ -120,7 +131,6 @@ namespace HPlus {
     TH1 *hFlightPathSignif;
     TH1 *hInvMass;
     TH1 *hbyTaNC;
-
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTaus;

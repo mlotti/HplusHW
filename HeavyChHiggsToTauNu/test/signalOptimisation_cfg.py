@@ -98,6 +98,7 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
     tauSelection = param.tauSelection,
+    useFactorizedTauID = cms.untracked.bool(False), #param.useFactorizedTauID,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -106,6 +107,10 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     GlobalMuonVeto = param.GlobalMuonVeto,
     GlobalElectronVeto = param.GlobalElectronVeto
 )
+print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
+print "TauSelection src:", process.signalAnalysis.tauSelection.src
+print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
+
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
