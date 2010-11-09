@@ -197,7 +197,7 @@ namespace HPlus {
       bElecPtCut = true;
 
       // 2) Apply Eta cut requirement      
-      if (myElectronEta < fElecEtaCut) continue;
+      if (fabs(myElectronEta) > fElecEtaCut) continue;
       bElecEtaCut = true;
       
       // 3) Apply Electron ID (choose low efficiency => High Purity)

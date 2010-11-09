@@ -478,6 +478,21 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
+
+
+
+		float Rtau = 0;
+		if (iTau->p() > 0) Rtau =  leadTrk->p()/iTau->p();
+		//		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
+		if (Rtau > 1 ) {
+		  hEtaRtau->Fill(iTau->eta());
+		}
+		hRtau->Fill(Rtau);
+    
+		if(Rtau < fRtauCut) continue; 
+		increment(fRtauSubCount);
+		++RtauCutPassed;
+
 /* ONLY HPS discriminators available, please do not uncomment unless sure the are included!
 		hnProngs->Fill(iTau->signalTracks().size());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
@@ -541,17 +556,17 @@ namespace HPlus {
 	if(leadTrkPtCutPassed == 0) return false;
 	increment(fLeadTrkPtCount); 
 
-	if(nProngsCutPassed == 0) return false;
-	increment(fnProngsCount);
+	//	if(nProngsCutPassed == 0) return false;
+	//	increment(fnProngsCount);
 
-	if(HChTauIDchargeCutPassed == 0) return false;
-	increment(fHChTauIDchargeCount);       
+	//	if(HChTauIDchargeCutPassed == 0) return false;
+	//	increment(fHChTauIDchargeCount);       
 
 	if(RtauCutPassed == 0) return false;
 	increment(fRtauCount);
 
-	if(InvMassCutPassed == 0) return false;
-	increment(fInvMassCount);
+	//	if(InvMassCutPassed == 0) return false;
+	//	increment(fInvMassCount);
 
         return true;
   }
