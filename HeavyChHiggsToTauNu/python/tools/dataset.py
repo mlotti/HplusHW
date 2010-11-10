@@ -321,7 +321,7 @@ class Dataset:
         h.SetName(name.translate(None, "-+.:;"))
         return HistoWrapper(h, self)
 
-    def getDirectoryContent(self, directory):
+    def getDirectoryContent(self, directory, predicate=lambda x: True):
         d = self.file.Get(directory)
         dirlist = d.GetListOfKeys()
         diriter = dirlist.MakeIterator()
@@ -329,7 +329,8 @@ class Dataset:
 
         ret = []
         while key:
-            ret.append(key.GetName())
+            if predicate(key.ReadObj()):
+                ret.append(key.GetName())
             key = diriter.Next()
         return ret
 
@@ -401,10 +402,10 @@ class DatasetMerged:
         else:
             return HistoWrapperMergedData(wrappers, self)
 
-    def getDirectoryContent(self, directory):
-        content = self.datasets[0].getDirectoryContent(directory)
+    def getDirectoryContent(self, directory, predicate=lambda x: True):
+        content = self.datasets[0].getDirectoryContent(directory, predicate)
         for d in self.datasets[1:]:
-            if content != d.getDirectoryContent(directory):
+            if content != d.getDirectoryContent(directory, predicate):
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
 

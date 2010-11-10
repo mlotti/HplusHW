@@ -181,6 +181,9 @@ class CounterImpl:
                     line += " "*columnWidths[icol]
             print line
 
+def isHistogram(obj):
+    return isinstance(obj, ROOT.TH1)
+
 # Many counters
 class EventCounter:
     def __init__(self, datasets):
@@ -195,7 +198,7 @@ class EventCounter:
                 if counterDir != dataset.getCounterDirectory():
                     raise Exception("Sanity check failed, datasets have different counter directories!")
 
-            for name in dataset.getDirectoryContent(counterDir):
+            for name in dataset.getDirectoryContent(counterDir, isHistogram):
                 counterNames[name] = 1
 
         del counterNames["counter"]
