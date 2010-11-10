@@ -208,6 +208,8 @@ class EventCounter:
         for subname in counterNames.keys():
             self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname))
 
+        self.normalization = "None"
+
     def forEachCounter(self, func):
         func(self.mainCounter)
         for c in self.subCounters.itervalues():
@@ -215,15 +217,19 @@ class EventCounter:
 
     def normalizeToOne(self):
         self.forEachCounter(lambda x: x.normalizeToOne())
+        self.normalization = "All normalized to unit area"
 
     def normalizeMCByCrossSection(self):
         self.forEachCounter(lambda x: x.normalizeMCToCrossSection())
+        self.normalization = "MC normalized to cross section (pb)"
 
     def normalizeMCByLuminosity(self):
         self.forEachCounter(lambda x: x.normalizeMCByLuminosity())
+        self.normalization = "MC normalized by data luminosity"
 
     def normalizeMCToLuminosity(self, lumi):
         self.forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
+        self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
 
     def getMainCounter(self):
         return self.mainCounter
@@ -233,3 +239,6 @@ class EventCounter:
 
     def getSubCounter(self, name):
         return self.subCounters[name]
+
+    def getNormalizationString(self):
+        return self.normalization
