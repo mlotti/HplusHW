@@ -20,21 +20,21 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
-    fPtCutCount(eventCounter.addCounter("Factorized tau pt cut")),
-    fEtaCutCount(eventCounter.addCounter("Factorized tau eta cut")),
-    fTauFoundCount(eventCounter.addCounter("Factorized tau found")),
+    fPtCutCount(eventCounter.addSubCounter("Factorized Tau","tau pt cut")),
+    fEtaCutCount(eventCounter.addSubCounter("Factorized Tau","tau eta cut")),
+    fTauFoundCount(eventCounter.addSubCounter("Factorized Tau","tau found")),
     fEventWeight(eventWeight),
     fTauSelection(tauSelectionObject)
   {
     edm::Service<TFileService> fs;
     hPtSelectedTaus = fs->make<TH1F>("factorized_tau_pt", "tau_pt", 100, 0., 200.);
     hEtaSelectedTaus = fs->make<TH1F>("factorized_tau_eta", "tau_eta", 60, -3., 3.);
-    hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt;#tau jet p_{T}, GeV/c;N", 20, 0., 200.);
-    hPtAfterTauID = fs->make<TH1F>("factorization_calculation_pt_after_tauID", "tau_pt;#tau jet p_{T}, GeV/c;N", 20, 0., 200.);
-    hEtaBeforeTauID = fs->make<TH1F>("factorization_calculation_eta_before_tauID", "tau_eta;#tau jet #eta;N", 60, -3., 3.);
-    hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta;#tau jet #eta;N", 60, -3., 3.);
-    hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
-    hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauID = fs->make<TH1F>("factorization_calculation_pt_after_tauID", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauID = fs->make<TH1F>("factorization_calculation_eta_before_tauID", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
 
     hCategory = fs->make<TH1F>("factorized_tau_category", "factorized_tau_category", 5, 0, 5);
     hCategory->GetXaxis()->SetBinLabel(1, "All events");
@@ -80,6 +80,7 @@ namespace HPlus {
       hCategory->Fill(1.0, fEventWeight.getWeight());
       passEvent = false;
     } else {
+      passEvent = true;
       if (myFilteredTaus.size() == 1) {
         // Only one tau in the tau collection: take as tau the only tau object
         fSelectedTau = myFilteredTaus[0];
@@ -87,7 +88,6 @@ namespace HPlus {
       } else {
         // More than one tau exists in the tau collection
         // Strategy: apply tauID and see if any of the candidates pass
-        passEvent = true;
         if (myTauSelectionData.passedEvent()) {
           // At least one tau object has passed tauID, take as tau the tau object with highest ET
           fSelectedTau = myTauSelectionData.getSelectedTaus()[0];

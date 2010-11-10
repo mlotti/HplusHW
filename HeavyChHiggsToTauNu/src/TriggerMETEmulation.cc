@@ -17,11 +17,12 @@ namespace HPlus {
   TriggerMETEmulation::TriggerMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
-    fmetEmulationCutCount(eventCounter.addCounter("met emulation cut")),
+    fmetEmulationCutCount(eventCounter.addSubCounter("Trigger","met emulation cut")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hmetAfterTrigger = fs->make<TH1F>("metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
+    hMetBeforeEmulation = fs->make<TH1F>("MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetAfterEmulation = fs->make<TH1F>("MetAfterEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
   }
 
   TriggerMETEmulation::~TriggerMETEmulation() {}
@@ -34,11 +35,12 @@ namespace HPlus {
 
     edm::Ptr<reco::MET> met = hmet->ptrAt(0);
 
-    hmetAfterTrigger->Fill(met->et());
-    if(met->et() > fmetEmulationCut) 
+    hMetBeforeEmulation->Fill(met->et(), fEventWeight.getWeight());
+    if(met->et() > fmetEmulationCut) {
       passEvent = true;
-
-    increment(fmetEmulationCutCount);
+      hMetAfterEmulation->Fill(met->et(), fEventWeight.getWeight());
+      increment(fmetEmulationCutCount);
+    }
     fSelectedTriggerMET = met;
     return Data(this, passEvent);
   }

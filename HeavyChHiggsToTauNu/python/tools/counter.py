@@ -125,7 +125,7 @@ class Counter:
         self.forEachDataset(lambda x: x.normalizeToOne())
 
     def normalizeMCByCrossSection(self):
-        self.forEachDataset(lambda x: x.normalizeMCToCrossSection())
+        self.forEachDataset(lambda x: x.normalizeMCByCrossSection())
 
     def normalizeMCByLuminosity(self):
         lumi = None
@@ -234,6 +234,9 @@ class CounterImpl:
                     line += " "*columnWidths[icol]
             print line
 
+def isHistogram(obj):
+    return isinstance(obj, ROOT.TH1)
+
 # Many counters
 class EventCounter:
     def __init__(self, datasets):
@@ -248,7 +251,7 @@ class EventCounter:
                 if counterDir != dataset.getCounterDirectory():
                     raise Exception("Sanity check failed, datasets have different counter directories!")
 
-            for name in dataset.getDirectoryContent(counterDir):
+            for name in dataset.getDirectoryContent(counterDir, isHistogram):
                 counterNames[name] = 1
 
         del counterNames["counter"]
@@ -258,6 +261,8 @@ class EventCounter:
         for subname in counterNames.keys():
             self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname))
 
+        self.normalization = "None"
+
     def forEachCounter(self, func):
         func(self.mainCounter)
         for c in self.subCounters.itervalues():
@@ -265,15 +270,19 @@ class EventCounter:
 
     def normalizeToOne(self):
         self.forEachCounter(lambda x: x.normalizeToOne())
+        self.normalization = "All normalized to unit area"
 
     def normalizeMCByCrossSection(self):
-        self.forEachCounter(lambda x: x.normalizeMCToCrossSection())
+        self.forEachCounter(lambda x: x.normalizeMCByCrossSection())
+        self.normalization = "MC normalized to cross section (pb)"
 
     def normalizeMCByLuminosity(self):
         self.forEachCounter(lambda x: x.normalizeMCByLuminosity())
+        self.normalization = "MC normalized by data luminosity"
 
     def normalizeMCToLuminosity(self, lumi):
         self.forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
+        self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
 
     def getMainCounter(self):
         return self.mainCounter
@@ -283,3 +292,6 @@ class EventCounter:
 
     def getSubCounter(self, name):
         return self.subCounters[name]
+
+    def getNormalizationString(self):
+        return self.normalization

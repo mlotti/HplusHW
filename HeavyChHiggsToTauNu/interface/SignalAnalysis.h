@@ -14,6 +14,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
 
@@ -46,6 +47,16 @@ namespace HPlus {
     const bool fUseFactorizedTauID;
 
     Count fAllCounter;
+    Count fTriggerCounter;
+    Count fTriggerEmulationCounter;
+    Count fTausExistCounter;
+    Count fOneTauCounter;
+    Count fElectronVetoCounter;
+    Count fMuonVetoCounter;
+    Count fMETCounter;
+    Count fNJetsCounter;
+    Count fBTaggingCounter;
+    Count fFakeMETVetoCounter;
 
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
@@ -56,6 +67,7 @@ namespace HPlus {
     JetSelection fJetSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
+    FakeMETVeto fFakeMETVeto;
     
     // Count ftransverseMassCutCount;
     CorrelationAnalysis fCorrelationAnalysis;
@@ -71,9 +83,6 @@ namespace HPlus {
     TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
-    TH1 *hMetBeforeEmul;
-    TH1 *hMetBeforeTrigger;
-    TH1 *hMetAfterTrigger;
   };
 }
 

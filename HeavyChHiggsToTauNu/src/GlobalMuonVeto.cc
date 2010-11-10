@@ -21,7 +21,7 @@ namespace HPlus {
     fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
-    fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
+    fGlobalMuonVetoCounter(eventCounter.addSubCounter("GlobalMuon Selection","GlobalMuonVeto")),
     fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("GlobalMuon Selection","Muon present")),
     fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("GlobalMuon Selection","Muon has Global OR Inner Trk")),
     fMuonSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon Pt")),
@@ -234,18 +234,18 @@ namespace HPlus {
       // Note: For the Num
 
       // Fill histos with all-Muons Pt and Eta (no requirements on muons)
-      hMuonPt->Fill(myMuonPt);
-      hMuonEta->Fill(myMuonEta);
-      hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt());
-      hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta());
-      hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt());
-      hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta());
+      hMuonPt->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta->Fill(myMuonEta, fEventWeight.getWeight());
+      hMuonPt_InnerTrack->Fill(myInnerTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_InnerTrack->Fill(myInnerTrackRef->eta(), fEventWeight.getWeight());
+      hMuonPt_GlobalTrack->Fill(myGlobalTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_GlobalTrack->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
       // 1) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
 
-      if ( fabs(myMuonEta) > fMuonEtaCut) continue;
+      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
       bMuonEtaCut = true;
       
       // 2) Demand that the Muon is both a "GlobalMuon" And a "TrackerMuon"
@@ -299,40 +299,54 @@ namespace HPlus {
       } //eof: if (myMuonPt > myHighestMuonPt) {
       
       // Fill histos after Selection
-      hMuonPt_AfterSelection->Fill(myMuonPt);
-      hMuonEta_AfterSelection->Fill(myMuonPt);
-      hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt);
-      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta);
-      hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt());
-      hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta());
+      hMuonPt_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonPt_InnerTrack_AfterSelection->Fill(myMuonPt, fEventWeight.getWeight());
+      hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta, fEventWeight.getWeight());
+      hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt(), fEventWeight.getWeight());
+      hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
   
-    if(bMuonPresent) increment(fMuonSelectionSubCountMuonPresent);
-    
-    if(bMuonHasGlobalOrInnerTrk) increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
-    
-    if(bMuonPtCut) increment(fMuonSelectionSubCountPtCut);
-    
-    if(bMuonEtaCut) increment(fMuonSelectionSubCountEtaCut);
-    
-    if(bMuonGlobalMuonOrTrkerMuon) increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
-    
-    if(bMuonSelection) increment(fMuonSelectionSubCountMuonSelection);
-    
-    if(bMuonNTrkerHitsCut) increment(fMuonSelectionSubCountNTrkerHitsCut);
-    
-    if(bMuonNPixelHitsCut) increment(fMuonSelectionSubCountNPixelHitsCut);
-    
-    if(bMuonNMuonlHitsCut) increment(fMuonSelectionSubCountNMuonlHitsCut);
-    
-    if(bMuonGlobalTrkChiSqCut) increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
-    
-    if(bMuonImpactParCut) increment(fMuonSelectionSubCountImpactParCut);
-    
-    if(bMuonRelIsolationR03Cut) increment(fMuonSelectionSubCountRelIsolationR03Cut);
-    
-    if(bMuonGoodPVCut) increment(fMuonSelectionSubCountGoodPVCut);
+    if(bMuonPresent) {
+      increment(fMuonSelectionSubCountMuonPresent);
+      if(bMuonHasGlobalOrInnerTrk) {
+        increment(fMuonSelectionSubCountMuonHasGlobalOrInnerTrk);
+        if(bMuonPtCut) {
+          increment(fMuonSelectionSubCountPtCut);
+          if(bMuonEtaCut) {
+            increment(fMuonSelectionSubCountEtaCut);
+            if(bMuonGlobalMuonOrTrkerMuon) {
+              increment(fMuonSelectionSubCountMuonGlobalMuonOrTrkerMuon); 
+              if(bMuonSelection) {
+                increment(fMuonSelectionSubCountMuonSelection);
+                if(bMuonNTrkerHitsCut) {
+                  increment(fMuonSelectionSubCountNTrkerHitsCut);
+                  if(bMuonNPixelHitsCut) {
+                    increment(fMuonSelectionSubCountNPixelHitsCut);
+                    if(bMuonNMuonlHitsCut) {
+                      increment(fMuonSelectionSubCountNMuonlHitsCut);
+                      if(bMuonGlobalTrkChiSqCut) {
+                        increment(fMuonSelectionSubCountGlobalTrkChiSqCut);
+                        if(bMuonImpactParCut) {
+                          increment(fMuonSelectionSubCountImpactParCut);
+                          if(bMuonRelIsolationR03Cut) {
+                            increment(fMuonSelectionSubCountRelIsolationR03Cut);
+                            if(bMuonGoodPVCut) {
+                              increment(fMuonSelectionSubCountGoodPVCut);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 
     // Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
     bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;

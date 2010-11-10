@@ -12,7 +12,7 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(30.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(False)
+useFactorizedTauID = cms.untracked.bool(True)
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
@@ -92,4 +92,9 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(20.0),
     MuonEtaCut = cms.untracked.double(2.5)
+)
+
+fakeMETVeto = cms.untracked.PSet(
+  src = MET.src,
+  maxDeltaR = cms.untracked.double(999.)
 )
