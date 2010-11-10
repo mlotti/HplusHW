@@ -72,7 +72,7 @@ class Counter:
         self.forEachDataset(lambda x: x.normalizeToOne())
 
     def normalizeMCByCrossSection(self):
-        self.forEachDataset(lambda x: x.normalizeMCToCrossSection())
+        self.forEachDataset(lambda x: x.normalizeMCByCrossSection())
 
     def normalizeMCByLuminosity(self):
         lumi = None
@@ -220,7 +220,7 @@ class EventCounter:
         self.normalization = "All normalized to unit area"
 
     def normalizeMCByCrossSection(self):
-        self.forEachCounter(lambda x: x.normalizeMCToCrossSection())
+        self.forEachCounter(lambda x: x.normalizeMCByCrossSection())
         self.normalization = "MC normalized to cross section (pb)"
 
     def normalizeMCByLuminosity(self):
