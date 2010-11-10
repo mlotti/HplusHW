@@ -117,6 +117,7 @@ process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
+from HiggsAnalysis.HeavyChHiggsToTauNu,HChPrimaryVertex_cfi import *
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
@@ -226,9 +227,11 @@ def createAnalysis(process, prefix="", functionBegin=None):
     multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
     
     # Select primary vertex
+    selectedPrimaryVertex = analysis.addProducer("FirstPrimaryVertex", 
+                                                 cms.EDProducer("HPlusSelectFirstVertex",
+                                                                src = cms.InputTag("offlinePrimaryVertices")))
     selectedPrimaryVertex = analysis.addAnalysisModule("PrimaryVertex",
-                                                       selector = cms.EDProducer("HPlusSelectFirstVertex",
-                                                                                 src = cms.InputTag("offlinePrimaryVertices")),
+                                                       selector = goodPrimaryVertices.clone(src = selectedPrimaryVertex),
                                                        filter = cms.EDFilter("VertexCountFilter",
                                                                              src = cms.InputTag("dummy"),
                                                                              minNumber = cms.uint32(1),

@@ -2,7 +2,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_analysis.cfg", "muonAnalysis_cfg.py")
+multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py")
 
 aodDatasets = [
     # Data
