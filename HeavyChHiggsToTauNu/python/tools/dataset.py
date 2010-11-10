@@ -232,12 +232,13 @@ class HistoWrapperMergedMC:
     def normalizeToOne(self):
         self.normalization = "toOne"
         for h in self.datasetHistos:
-            h.normalizeByCrossSection
+            h.normalizeByCrossSection()
+	raise Exception("Not implemented yet!")
 
     def normalizeByCrossSection(self):
         self.normalization = "byCrossSection"
         for h in self.datasetHistos:
-            h.normalizeByCrossSection
+            h.normalizeByCrossSection()
 
     def normalizeToLuminosity(self, lumi):
         self.normalization = "toLuminosity"
