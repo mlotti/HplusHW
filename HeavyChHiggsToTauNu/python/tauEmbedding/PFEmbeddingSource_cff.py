@@ -22,8 +22,6 @@ newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 #        fileNames = cms.untracked.vstring('/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/E250F96A-CF7B-DF11-99E5-001BFCDBD1BE.root')
 #)
 
-muonSelectionPlaceholder = cms.Sequence()
-
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
    muonSrc = cms.untracked.InputTag("selectedPatMuons"),
    metSrc = cms.untracked.InputTag("patMETsPF")
@@ -44,4 +42,4 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     target =  cms.untracked.int32(1) 
 )
 
-ProductionFilterSequence = cms.Sequence(muonSelectionPlaceholder*adaptedMuonsFromWmunu*dimuonsGlobal*generator*filterEmptyEv)
+ProductionFilterSequence = cms.Sequence(adaptedMuonsFromWmunu*dimuonsGlobal*generator*filterEmptyEv)

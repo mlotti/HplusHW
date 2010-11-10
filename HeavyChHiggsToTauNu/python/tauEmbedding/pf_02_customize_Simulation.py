@@ -61,6 +61,7 @@ def customise(process):
     elif outdict.has_key("out"):
         outputModule = outdict["out"]
 
+    recoProcessName = "RECO"
     hltProcessName = "EMBEDDINGHLT"
     processName = process.name_()
 
@@ -68,11 +69,21 @@ def customise(process):
     outputModule.outputCommands = cms.untracked.vstring("drop *")
     outputModule.outputCommands.extend(process.RECOSIMEventContent.outputCommands)
     outputModule.outputCommands.extend([
-            "drop *_*_*_RECO",
-            "keep *_pfMet_*_RECO",
+            "drop *_*_*_%s" % recoProcessName,
+            "keep *_pfMet_*_%s" % recoProcessName,
+            "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
+            "keep *_generalTracks_*_%s" % recoProcessName,
+            "keep *_offlineBeamSpot_*_%s" % recoProcessName,
+
             "drop *_*_*_%s" % hltProcessName,
             "keep *_tightMuons_*_%s" % hltProcessName,
-            "drop *_*_*_%s" % processName
+            "keep *_generator_weight_%s" % hltProcessName,
+
+            "drop *_*_*_%s" % processName,
+            "keep *_genParticles_*_%s" % processName,
+            "keep *_particleFlow*_*_%s" % processName,
+            "keep *_generalTracks_*_%s" % processName,
+            "keep *_muons_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
     #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [

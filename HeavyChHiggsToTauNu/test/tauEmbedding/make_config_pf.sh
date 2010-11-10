@@ -12,7 +12,7 @@ cmsDriver.py HiggsAnalysis/HeavyChHiggsToTauNu/python/tauEmbedding/PFEmbeddingSo
     -n $NEVENTS \
     --conditions=$CONDITIONS \
     --process=EMBEDDINGHLT \
-    --filein=/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/E250F96A-CF7B-DF11-99E5-001BFCDBD1BE.root \
+    --filein=file:skim.root \
     --fileout=embedded_HLT.root  \
     --python_filename=embed_HLT.py \
     --customise=HiggsAnalysis/HeavyChHiggsToTauNu/tauEmbedding/pf_01_customize_HLT.py
