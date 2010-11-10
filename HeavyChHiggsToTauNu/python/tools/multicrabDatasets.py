@@ -729,8 +729,22 @@ datasets = {
     },
 
     # Electroweak (Fall10)
+    "TT": {
+        "dataVersion": "38Xrelval",
+        "crossSection": 165,
+        "data": {
+            "RECO": {
+                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 100
+            },
+            "AOD": {
+                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 100,
+            }
+        },
+    },
     "TTJets": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 165,
         "data": {
             "RECO": {
@@ -746,8 +760,22 @@ datasets = {
 
 
     # Backgrounds for electroweak background measurement (Fall10)
-    "TToBLNu_s-channel": {
+    "QCD_Pt20_MuEnriched": {
         "dataVersion": "38X",
+        "crossSection": 296600000.,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 100,
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 100,
+            }
+        },
+    },
+    "TToBLNu_s-channel": {
+        "dataVersion": "38Xrelval",
         "crossSection": 0.99,
         "data": {
             "AOD": {
@@ -757,7 +785,7 @@ datasets = {
         },
     },
     "TToBLNu_t-channel": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 63./3.,
         "data": {
             "AOD": {
@@ -767,7 +795,7 @@ datasets = {
         },
     },
     "TToBLNu_tW-channel": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 10.56,
         "data": {
             "RECO": {
