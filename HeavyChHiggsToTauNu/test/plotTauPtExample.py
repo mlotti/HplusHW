@@ -91,6 +91,10 @@ datasets.remove([
 #    "QCD_Pt80to120_Fall10",
 #    "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"
     ])
+selectedSignal = "TTToHplusBWB_M120"
+
+datasets.getDataset("BTau_146240-148107").setLuminosity(5.899172590)
+#datasets.getDataset("BTau_148108-148864").setLuminosity(4.600225784)
 
 # Example how to remove some datasets
 #datasets.remove(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
@@ -131,12 +135,12 @@ tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
 
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
-#tauPts.normalizeMCByLuminosity()
-#ylabel = "#tau cands / 1 GeV/c"
+tauPts.normalizeMCByLuminosity()
+ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
-tauPts.normalizeMCToLuminosity(5.899)
-ylabel = "#tau cands / 1 GeV/c"
+#tauPts.normalizeMCToLuminosity(5.899)
+#ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
@@ -146,24 +150,32 @@ ylabel = "#tau cands / 1 GeV/c"
 #tauPts.setHistoLegendLabel("TTbar_Htaunu_M80", "H^{#pm} M=80") # one dataset at a time
 tauPts.setHistoLegendLabels(legendLabels) # many datasets, with dict
 
+mcDatasetNames = datasets.getMCDatasetNames()
+stackedMcDatasetNames = mcDatasetNames[:]
+del stackedMcDatasetNames[stackedMcDatasetNames.index(selectedSignal)]
+
 # Example how to modify legend styles
 tauPts.setHistoLegendStyleAll("F")
 tauPts.setHistoLegendStyle("Data", "p")
+tauPts.setHistoLegendStyle(selectedSignal, "l")
+
 
 # Apply the default styles (for all histograms, for MC histograms, for a single histogram)
 #tauPts.forEachHisto(styles.generator())
 tauPts.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
+tauPts.forHisto(selectedSignal, styles.generator())
 tauPts.forHisto("Data", styles.getDataStyle())
 tauPts.setHistoDrawStyle("Data", "EP")
 
 
 # Example how to stack all MC datasets
 # Note: this MUST be done after all legend/style manipulation
-tauPts.stackMCHistograms()
+#tauPts.stackMCHistograms()
+tauPts.stackHistograms("MC", stackedMcDatasetNames)
 
 # Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = tauPts.createCanvasFrame("taupt")
-(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
+(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=0.001, ymax=1e6) # for logy
 
 # Set the frame options, e.g. axis labels
 frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
