@@ -114,7 +114,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology
 )
-process.signalAnalysis.trigger.trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20")
+#######process.signalAnalysis.trigger.trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20")
 
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
