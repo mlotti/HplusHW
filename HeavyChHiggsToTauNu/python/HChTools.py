@@ -286,7 +286,9 @@ class Analysis:
         setattr(self.process, prefix+allCounterName, countAll)
 
         # Create the analysis sequence
-        self.sequence = cms.Sequence(countAll*process.genRunInfo*process.configInfo)
+        self.sequence = cms.Sequence(countAll*process.configInfo)
+        if hasattr(process, "genRunInfo"):
+            self.sequence *= process.genRunInfo
         setattr(self.process, prefix+seqname, self.sequence)
 
         # Create the count analyzer
