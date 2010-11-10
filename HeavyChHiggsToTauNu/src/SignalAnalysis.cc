@@ -17,7 +17,7 @@ namespace HPlus {
     fUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("trigger")),
-    fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
+//    fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
@@ -27,7 +27,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
+//    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
@@ -70,12 +70,12 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
-
+/*
     // Trigger MET emulation
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup);
     if(!triggerMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);
-
+*/
     // TauID (with optional factorization)
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
     if (fUseFactorizedTauID) {
