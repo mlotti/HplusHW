@@ -13,7 +13,7 @@ multicrab.addDatasets(
 #        "Mu_147196-149442", # HLT_Mu15_v1
         # Signal MC
 #        "TTbarJets",
-#        "WJets",
+        "WJets",
         ])
 
 multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
@@ -27,7 +27,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_tauembedding_skim_v1"
+    name += "_tauembedding_skim_v2"
 
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
