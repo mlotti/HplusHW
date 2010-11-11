@@ -62,7 +62,7 @@ class FormatText:
         if error == None and errorLow == None:
             return ret
 
-        fmt = "%"+str(self.errorPrecision)"."+self.format
+        fmt = "%"+str(self.errorPrecision)+"."+self.format
         if error != None:
             ret += " +- " + fmt%error
             return ret

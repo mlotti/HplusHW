@@ -87,12 +87,15 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
   edm::InputTag counterNames;
   edm::InputTag counterInstances;
 
+  size_t countersPlainEnd;
+
   bool print;
   bool countersGiven;
   bool counterNamesGiven;
 };
 
 HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
+  countersPlainEnd(0),
   print(pset.getUntrackedParameter<bool>("verbose", false)), 
   countersGiven(false), 
   counterNamesGiven(false)
@@ -103,6 +106,7 @@ HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
       counters.push_back(tags[i]);
     }
   }
+  countersPlainEnd = counters.size();
   countersGiven = !counters.empty();
 
   if(pset.exists("counterNames")) {
@@ -125,7 +129,7 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
     // Read first the plain edm::MergeableCounters 
     if(countersGiven) {
       edm::Handle<edm::MergeableCounter> count;
-      for(size_t i=0; i<counters.size(); ++i) {
+      for(size_t i=0; i<countersPlainEnd; ++i) {
         lumi.getByLabel(counters[i].tag_, count);
         counters[i].count_ += count->value;
       }
