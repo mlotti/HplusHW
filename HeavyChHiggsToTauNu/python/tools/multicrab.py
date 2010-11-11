@@ -415,12 +415,13 @@ class Multicrab:
         for f in files:
             shutil.copy(f, dirname)
         print "Copied %s to %s" % (", ".join(files), dirname)
-        print "Creating multicrab task"
-        print 
-        print "############################################################"
-        print
     
         if not configOnly:
+            print "Creating multicrab task"
+            print 
+            print "############################################################"
+            print
+
             os.chdir(dirname)
             subprocess.call(["multicrab", "-create"])
 
