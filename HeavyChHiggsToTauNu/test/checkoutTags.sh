@@ -61,6 +61,7 @@ cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs
 cvs co -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 cvs co -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByIsolationChargedPtSum_cfi.py
 cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
+cvs co -r V00-00-07 TauAnalysis/MCEmbeddingTools
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 #fi
