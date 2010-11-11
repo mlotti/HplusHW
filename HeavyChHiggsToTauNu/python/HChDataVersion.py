@@ -35,6 +35,8 @@ class DataVersion:
 
             if dataVersion == "38XdataRun2010B":
                 self.is_runB = True
+                self.analysisDefaultFileMadhatter = "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_146240-148107/BTau/Run2010B_PromptReco_v2_RECO_pattuple_v6_1/43c3132ebadd44967499e6cca288e3ab/pattuple_7_1_cJr.root"
+
         # MC
         else:
             self.is_data = False
