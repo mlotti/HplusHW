@@ -724,6 +724,11 @@ datasets = {
                 "dbs_url": pattuple_dbs,
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1-2366fe480375ff6f751e0b7e8ec70b52/USER",
                 "number_of_jobs": 40
+            },
+            "tauembedding_skim_v1": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v1-99df8e9f20fb187ff5807dad98f3d61d/USER",
+                "number_of_jobs": 10
             }
         },
     },
@@ -766,11 +771,25 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 100,
+                "number_of_jobs": 100, # adjusted for PAT on the fly
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 100,
+            }
+        },
+    },
+    "DYJetsToLL": { # Z+jets
+        "dataVersion": "38X",
+        "crossSection": 2321,
+        "data": {
+            "RECO": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-START38_V12-v2/GEN-SIM-RECO",
+                "number_of_jobs": 15, # adjusted for PAT on the fly
+            },
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-START38_V12-v2/AODSIM",
+                "number_of_jobs": 15,
             }
         },
     },
@@ -780,7 +799,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 10,
+                "number_of_jobs": 10, # adjusted for PAT on the fly
             }
         },
     },
@@ -790,7 +809,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-START38_V12-v2/AODSIM",
-                "number_of_jobs": 10,
+                "number_of_jobs": 10, # adjusted for PAT on the fly
             }
         },
     },
@@ -800,7 +819,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-START38_V12-v2/GEN-SIM-RECO",
-                "number_of_jobs": 10,
+                "number_of_jobs": 10, # adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO",
@@ -816,7 +835,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/ZJets-madgraph/Summer10-START37_V5_S09-v1/AODSIM",
-                "number_of_jobs": 15,
+                "number_of_jobs": 15, # adjusted for PAT on the fly
             }
         },
     },
@@ -826,7 +845,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_sChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10,
+                "number_of_jobs": 10, # adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"
@@ -839,7 +858,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_tChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 15,
+                "number_of_jobs": 15, # adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"
@@ -852,7 +871,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_tWChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10,
+                "number_of_jobs": 10, # adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"

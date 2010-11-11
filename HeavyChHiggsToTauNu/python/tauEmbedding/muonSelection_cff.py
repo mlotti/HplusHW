@@ -15,17 +15,17 @@ muonTrigger.triggerConditions = cms.vstring("HLT_Mu9")
 muonSelectionTriggered = cms.EDProducer("EventCountProducer")
 
 
-firstPrimaryVertex = cms.EDProducer(
+muonFirstPrimaryVertex = cms.EDProducer(
     "HPlusSelectFirstVertex",
     src = cms.InputTag("offlinePrimaryVertices")
 )
-goodPrimaryVertex = cms.EDFilter("VertexSelector",
+muonGoodPrimaryVertex = cms.EDFilter("VertexSelector",
     filter = cms.bool(False),
-    src = cms.InputTag("firstPrimaryVertex"),
+    src = cms.InputTag("muonFirstPrimaryVertex"),
     cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
 )
-primaryVertexFilter = cms.EDFilter("VertexCountFilter",
-    src = cms.InputTag("goodPrimaryVertex"),
+muonPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
+    src = cms.InputTag("muonGoodPrimaryVertex"),
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999)
 )
@@ -77,7 +77,7 @@ tightMuons = cleanPatMuons.clone(
 )
 tightMuonsZ = cms.EDProducer("HPlusCandViewPtrVertexZSelector",
     candSrc = cms.InputTag("tightMuons"),
-    vertexSrc = cms.InputTag("goodPrimaryVertex"),
+    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
     maxZ = cms.double(1.0)
 )
 tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
@@ -116,7 +116,7 @@ muonSelectionElectronVeto = cms.EDProducer("EventCountProducer")
 muonSelectionSequence = cms.Sequence(
     muonSelectionAllEvents
     * muonTrigger * muonSelectionTriggered
-    * firstPrimaryVertex * goodPrimaryVertex * primaryVertexFilter * muonSelectionPrimaryVertex
+    * muonFirstPrimaryVertex * muonGoodPrimaryVertex * muonPrimaryVertexFilter * muonSelectionPrimaryVertex
     * goodJets      * goodJetFilter * muonSelectionJets
 #    * goodMet       * goodMetFilter * muonSelectionMet
     * tightMuons    * tightMuonsZ    * tightMuonsFilter * muonSelectionMuons

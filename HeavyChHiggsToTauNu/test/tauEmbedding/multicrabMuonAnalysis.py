@@ -9,17 +9,26 @@ aodDatasets = [
     "Mu_135821-144114",
     "Mu_146240-147116",
     "Mu_147196-149442",
-    # Background MC
-    "ZJets",
-    "SingleTop_sChannel",
-    "SingleTop_tChannel",
-    "SingleTop_tWChannel",
+    # Signal MC (Fall10)
+#    "TT",
+    "TTJets",
+    # Background MC (Fall10)
+    "QCD_Pt20_MuEnriched",
+    "DYJetsToLL", # Z+jets
+    "TToBLNu_s-channel",
+    "TToBLNu_t-channel",
+    "TToBLNu_tW-channel",
+    # Background MC (Summer10)
+#    "ZJets",
+#    "SingleTop_sChannel",
+#    "SingleTop_tChannel",
+#    "SingleTop_tWChannel",
     ]
 patDatasets = [
     # Signal MC
-#    "TTbar",
-    "TTbarJets",
-    "WJets",
+#    "TT",
+#    "TTJets", # Fall10
+    "WJets", # Summer10
     # Background MC
     "QCD_Pt30to50_Fall10",
     "QCD_Pt50to80_Fall10",
@@ -28,25 +37,34 @@ patDatasets = [
     "QCD_Pt170to300_Fall10",
 ]
 
-#usePatTuples = True
-usePatTuples = False
+usePatTuples = True
+#usePatTuples = False
 
-if usePatTuples:
-    multicrab.addDatasets("pattuple_v3", patDatasets)
-else:
+if not usePatTuples:
     aodDatasets.extend(patDatasets)
 multicrab.addDatasets("AOD", aodDatasets)
+if usePatTuples:
+    multicrab.addDatasets("pattuple_v6", patDatasets)
 
-multicrab.setDataLumiMask("Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
 
-multicrab.getDataset("TTbarJets").addArg("WDecaySeparate=1")
-multicrab.getDataset("WJets").addArg("WDecaySeparate=1")
+decaySeparate = ["TTJets",
+                 "WJets",
+                 "TToBLNu_s-channel",
+                 "TToBLNu_t-channel",
+                 "TToBLNu_tW-channel"]
+def modify(dataset):
+    if dataset.getName() in aodDatasets:
+        dataset.addArg("doPat=1")
+    if dataset.getName() in decaySeparate:
+        dataset.addArg("WDecaySeparate=1")
+    if dataset.getName() == "TTJets":
+        dataset.setNumberOfJobs(5)
 
-for name in aodDatasets:
-    multicrab.getDataset(name).addArg("doPat=1")
+multicrab.forEachDataset(modify)
 
 #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
 #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)
 
-#multicrab.createTasks()
-multicrab.createTasks(configOnly=True)
+multicrab.createTasks()
+#multicrab.createTasks(configOnly=True)
