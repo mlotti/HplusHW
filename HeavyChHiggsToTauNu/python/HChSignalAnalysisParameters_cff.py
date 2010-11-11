@@ -4,7 +4,6 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
     triggers = cms.untracked.vstring("HLT_SingleIsoTau20_Trk5",
                                      "HLT_SingleIsoTau20_Trk15_MET20",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",

@@ -71,7 +71,7 @@ datasets = getDatasetsFromMulticrabCfg(
 #print "\n".join([d.getName() for d in datasets.getAllDatasets()])
 datasets.remove([
 #    "BTau_146240-146729",
-    "BTau_148108-148864",
+#    "BTau_148108-148864",
     "TTbar_Htaunu_M80",
     "TTToHpmToTauNu_M90",
     "TTToHpmToTauNu_M100",
@@ -94,7 +94,7 @@ datasets.remove([
 selectedSignal = "TTToHplusBWB_M120"
 
 datasets.getDataset("BTau_146240-148107").setLuminosity(5.899172590)
-#datasets.getDataset("BTau_148108-148864").setLuminosity(4.600225784)
+datasets.getDataset("BTau_148108-148864").setLuminosity(4.600225784)
 
 # Example how to remove some datasets
 #datasets.remove(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
@@ -136,7 +136,7 @@ tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoSet
 tauPts.normalizeMCByLuminosity()
-ylabel = "#tau cands / 1 GeV/c"
+ylabel = "Events / 1 GeV"
 
 # Normalize MC histograms to an explicit luminosity in pb
 #tauPts.normalizeMCToLuminosity(5.899)
@@ -178,7 +178,7 @@ tauPts.stackHistograms("MC", stackedMcDatasetNames)
 (canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=0.001, ymax=1e6) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+frame.GetXaxis().SetTitle("E_{T}^{#tau jet} (GeV)")
 frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
@@ -220,10 +220,10 @@ eventCounter = EventCounter(datasets)
 #eventCounter.normalizeMCByLuminosity()
 
 # Normalize MC by cross section
-eventCounter.normalizeMCByCrossSection()
+##############eventCounter.normalizeMCByCrossSection()
 
 # Normalize MC to specific luminosity
-#eventCounter.normalizeMCToLuminosity(tauPts.getLuminosity())
+eventCounter.normalizeMCToLuminosity(tauPts.getLuminosity())
 
 # Example how to print the main counter (the parameter is
 # function/functor giving a format for the printing)
