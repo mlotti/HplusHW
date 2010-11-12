@@ -17,14 +17,11 @@ def main(opts):
         (name, value) = o.split(":")
         crossSections[name] = float(value)
 
-    #counters = counter.Counters()
-    #if len(opts.files) > 0:
-    #    for f in opts.files:
-    #        #counters.addCounter(counter.readCountersFileDir(f, opts.counterdir, f, crossSections))
-    #        
-    #else:
-    #    readCountersDirs(opts, crossSections, counters)
-    datasets = dataset.getDatasetsFromMulticrabCfg(opts, opts.counterdir)
+    datasets = None
+    if len(opts.files) > 0:
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts.counterdir )
+    else:
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts, opts.counterdir)
     eventCounter = counter.EventCounter(datasets)
     
 
@@ -66,8 +63,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    #parser.add_option("-f", dest="files", type="string", action="append", default=[],
-    #                  help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+    parser.add_option("-f", dest="files", type="string", action="append", default=[],
+                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect' (default: 'events')")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
