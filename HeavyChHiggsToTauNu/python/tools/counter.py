@@ -1,3 +1,4 @@
+import math
 import ROOT
 
 from dataset import *
@@ -19,6 +20,58 @@ class FloatExpFormat:
         self.format = "%%%d."+str(decimals)+"e"
     def __call__(self, width):
         return self.format % width
+
+class FormatText:
+    def __init__(self, valuePrecision=4, errorPrecision=4,
+                 begin="", separator = "  ", end = "",
+                 numberFormat="g"): # f, e, g as for printf
+        self.valuePrecision = valuePrecision
+        self.errorPrecision = errorPrecision
+        self.errorEpsilon = math.pow(10., -1.0*errorPrecision)
+        self.begin = begin
+        self.separator = separator
+        self.end = end
+        self.format = numberFormat
+                 
+    def beginTable(self):
+        return ""
+
+    def endTable(self):
+        return ""
+
+    def beginLine(self):
+        return self.begin
+
+    def endLine(self):
+        return self.end
+
+    def beginColumn(self):
+        return ""
+
+    def endColumn(self):
+        return self.separator
+
+    def number(self, value, error=None, errorLow=None, errorHigh=None):
+        if error != None and (errorLow != None or errorHigh != None):
+            raise Exception("Only either error or errorLow and errorHigh can be set")
+        if errorLow != None and errorHigh == None or errorLow == None and errorHigh != None:
+            raise Exception("Both errorLow and errorHigh must be set")
+
+        fmt = "%"+str(self.valuePrecision)+"."+self.format
+        ret = fmt % value
+        if error == None and errorLow == None:
+            return ret
+
+        fmt = "%"+str(self.errorPrecision)+"."+self.format
+        if error != None:
+            ret += " +- " + fmt%error
+            return ret
+
+        if abs(errorHigh-errorLow)/errorHigh < self.errorEpsilon:
+            ret += " +- " + fmt%errorLow
+        else:
+            ret += " + "+fmt%errorHigh + " - "+fmt%errorLow
+
 
 # Counter for one dataset
 class SimpleCounter:

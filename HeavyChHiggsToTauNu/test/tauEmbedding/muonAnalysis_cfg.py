@@ -25,8 +25,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -51,6 +51,7 @@ if options.doPat != 0:
 
 # References for muon selection:
 # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+# https://twiki.cern.ch/twiki/bin/view/CMS/TopLeptonPlusJetsRefSel_mu
 
 # Configuration
 trigger = options.trigger
@@ -104,6 +105,7 @@ met = cms.InputTag(pfMET)
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
+#process.options.wantSummary = cms.untracked.bool(True)
 process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
@@ -115,6 +117,7 @@ process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi import *
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
@@ -124,9 +127,10 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
+    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
+        process.patPlainSequence
     )
     #removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
     removeSpecificPATObjects(process, ["Photons"], False)
@@ -149,6 +153,11 @@ if options.crossSection >= 0.:
 if options.luminosity >= 0:
     process.configInfo.luminosity = cms.untracked.double(options.luminosity)
     print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
+
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.patSequence *= process.firstPrimaryVertex
 
 process.commonSequence = cms.Sequence(
     process.patSequence +
@@ -173,15 +182,22 @@ histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daug
 histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
+vertexCollections = ["offlinePrimaryVertices"]
+if dataVersion.isData():
+    vertexCollections.append("goodPrimaryVertices")
+
 def createAnalysis(process, prefix="", functionBegin=None):
     counters = []
     if dataVersion.isData():
         counters = dataSelectionCounters
     analysis = Analysis(process, "analysis", options, prefix=prefix, additionalCounters=counters)
-    analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
+#    analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
     
     if functionBegin != None:
         functionBegin(analysis)
+
+    multipName = "Multiplicity"
+    pileupName = "VertexCount"
 
     # Beginning
     histoAnalyzer = analysis.addMultiHistoAnalyzer("AllMuons", [
@@ -189,7 +205,7 @@ def createAnalysis(process, prefix="", functionBegin=None):
             ("calomet_", cms.InputTag(caloMET), [histoMet]),
             ("pfmet_", cms.InputTag(pfMET), [histoMet]),
             ("tcmet_", cms.InputTag(tcMET), [histoMet])])
-    multipAnalyzer = analysis.addAnalyzer("Multiplicity", cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
+    multipAnalyzer = analysis.addAnalyzer(multipName, cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
             allMuons = cms.untracked.PSet(
                 src = muons,
                 min = cms.untracked.int32(0),
@@ -209,7 +225,16 @@ def createAnalysis(process, prefix="", functionBegin=None):
                 nbins = cms.untracked.int32(10)
             )
     ))
-    
+    pileupAnalyzer = None
+    if functionBegin == None:
+        pileupAnalyzer = analysis.addAnalyzer(pileupName, cms.EDAnalyzer(
+                "HPlusVertexCountAnalyzer",
+                src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
+                nbins = cms.untracked.int32(10),
+                min = cms.untracked.double(0),
+                max = cms.untracked.double(20)
+        ))
+        
     # Select jets already here (but do not cut on their number), so we can
     # track the multiplicity through the selections
     selectedJets = analysis.addSelection("JetSelection", jets, jetSelection)
@@ -220,12 +245,16 @@ def createAnalysis(process, prefix="", functionBegin=None):
     # Trigger
     analysis.addTriggerCut(dataVersion, trigger)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("Triggered", histoAnalyzer)
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Select primary vertex
+    #selectedPrimaryVertex = analysis.addProducer("FirstPrimaryVertex", 
+    #                                             cms.EDProducer("HPlusSelectFirstVertex",
+    #                                                            src = cms.InputTag("offlinePrimaryVertices")))
     selectedPrimaryVertex = analysis.addAnalysisModule("PrimaryVertex",
-                                                       selector = cms.EDProducer("HPlusSelectFirstVertex",
-                                                                                 src = cms.InputTag("offlinePrimaryVertices")),
+                                                       selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
                                                        filter = cms.EDFilter("VertexCountFilter",
                                                                              src = cms.InputTag("dummy"),
                                                                              minNumber = cms.uint32(1),
@@ -233,7 +262,9 @@ def createAnalysis(process, prefix="", functionBegin=None):
                                                        counter=True).getSelectorInputTag()
     
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("PrimaryVertex", histoAnalyzer)
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Tight muon (global + tracker)
     selectedMuons = analysis.addCut("GlobalTrackerMuon", muons, tightMuonCut, selector="PATMuonSelector")
@@ -241,15 +272,19 @@ def createAnalysis(process, prefix="", functionBegin=None):
     histoAnalyzer.muon_.src = selectedMuons
     histoAnalyzer.muon_.histograms = cms.VPSet([h.pset() for h in histosGlobal])
     
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Kinematical cuts
     selectedMuons = analysis.addCut("MuonKin", selectedMuons, ptCut + " && " + etaCut, selector="PATMuonSelector")
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonKin", histoAnalyzer)
     histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # DR against the selected jets
     from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
@@ -274,21 +309,25 @@ def createAnalysis(process, prefix="", functionBegin=None):
     
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonJetDR", histoAnalyzer)
     histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Quality cuts
     selectedMuons = analysis.addCut("MuonQuality", selectedMuons, qualityCut+" && "+dbCut)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonQuality", histoAnalyzer)
     histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Isolation
     selectedMuons = analysis.addCut("MuonIsolation", selectedMuons, isolationCut)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonIsolation", histoAnalyzer)
     histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
     
     # Difference in vertex z coordinate
@@ -301,33 +340,39 @@ def createAnalysis(process, prefix="", functionBegin=None):
                                                counter = True).getSelectorInputTag()
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVertex", histoAnalyzer)
     histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Veto against 2nd muon
     if applyMuonVeto:
         vetoMuons = analysis.addCut("MuonVeto", muons, muonVeto, minNumber=0, maxNumber=1)
         histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonVeto", histoAnalyzer)
-        multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+        multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
         multipAnalyzer.selMuons.src = selectedMuons
+        if pileupAnalyzer:
+            pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Veto against electrons
     if applyElectronVeto:
         vetoElectrons = analysis.addCut("ElectronVeto", electrons, electronVeto, minNumber=0, maxNumber=0)
         histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("ElectronVeto", histoAnalyzer)
-        multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+        multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
+        if pileupAnalyzer:
+            pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     
     # W transverse mass
-    prototype = cms.EDProducer("CandViewShallowCloneCombiner",
+    candCombinerPrototype = cms.EDProducer("CandViewShallowCloneCombiner",
         checkCharge = cms.bool(False),
     #    cut = cms.string('sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)>50'),
         cut = cms.string(""),
         decay = cms.string("dummy")
     )
-    wmunuCalo = analysis.addProducer("WMuNuCalo", prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
-    wmunuPF   = analysis.addProducer("WMuNuPF",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
-    wmunuTC   = analysis.addProducer("WMuNuTC",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
+    wmunuCalo = analysis.addProducer("WMuNuCalo", candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
+    wmunuPF   = analysis.addProducer("WMuNuPF",   candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
+    wmunuTC   = analysis.addProducer("WMuNuTC",   candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("WMunuCands", histoAnalyzer)
     histoAnalyzer.wmunuCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
     histoAnalyzer.wmunuPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
@@ -336,13 +381,17 @@ def createAnalysis(process, prefix="", functionBegin=None):
     # Jet selection
     selectedJets = analysis.addNumberCut("JetMultiplicityCut", selectedJets, minNumber=jetMinMultiplicity)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("JetSelection", histoAnalyzer)
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
     multipAnalyzer.selMuons.src = selectedMuons
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # MET cut
     selectedMET = analysis.addCut("METCut", met, metCut)
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("METCut", histoAnalyzer)
-    multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
+    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
+    if pileupAnalyzer:
+        pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     setattr(process, prefix+"analysisPath", cms.Path(
         process.commonSequence *
@@ -415,9 +464,11 @@ def createAnalysis(process, prefix="", functionBegin=None):
     path *= m
     
     # Plots after Wmunu transverse mass cut
-    path *= analysis.getAnalysisModule("WMuNuPF").getFilterSequence()
+    m = candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET))
+    setattr(process, prefix+"afterOtherCutsWMuNuPF", m)
+    path *= m
     m = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-        src = analysis.getAnalysisModule("WMuNuPF").getSelectorInputTag(),
+        src = cms.InputTag(prefix+"afterOtherCutsWMuNuPF"),
         cut = cms.string(histoTransverseMass.getPlotQuantity()+ " > 50")
     )
     setattr(process, prefix+"afterOtherCutsWMuNuSelector", m)
@@ -450,8 +501,25 @@ class AddGenEventFilter:
             invertFilter=self.invert
         )
 
+class AddVertexCountFilter:
+    def __init__(self, maxVertices):
+        self.maxVertices = maxVertices
+
+    def __call__(self, analysis):
+        analysis.addAnalysisModule("VertexCount", filter=cms.EDFilter("VertexCountFilter",
+                src = cms.InputTag("goodPrimaryVertices"),
+                minNumber = cms.uint32(1),
+                maxNumber = cms.uint32(self.maxVertices)
+        ))
+
 
 createAnalysis(process)
 if options.WDecaySeparate > 0:
     createAnalysis(process, "WMuNu", AddGenEventFilter())
-    createAnalysis(process, "WOther", AddGenEventFilter(True))
+    createAnalysis(process, "WOther", AddGenEventFilter(invert=True))
+
+if dataVersion.isData():
+    for i in xrange(1, 11):
+        createAnalysis(process, "PileupV%d"%i, AddVertexCountFilter(i))
+
+#print process.dumpPython()

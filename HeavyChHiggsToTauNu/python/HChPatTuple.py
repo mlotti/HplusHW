@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import copy
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
-from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection
+from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
@@ -23,6 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTes
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
+           doPatCalo=True,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
@@ -61,6 +62,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
+        if not doPatCalo:
+            process.hplusPatTauSequence.remove(process.tautagging)
+            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
+            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -86,30 +91,40 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if dataVersion.is38X():
         process.patJets.addTagInfos = False
 
-    addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
-                     'AK5', 'JPT',
-                     doJTA        = True,
-                     doBTagging   = True,
-                     jetCorrLabel = ('AK5','JPT'),
-                     doType1MET   = False,
-                     doL1Cleaning = False,
-                     doL1Counters = True,
-                     genJetCollection = cms.InputTag("ak5GenJets"),
-                     doJetID      = False
-    )
-
-    addJetCollection(process, cms.InputTag('ak5PFJets'),
-                     'AK5', 'PF',
-                     doJTA        = True,
-                     doBTagging   = True,
-                     jetCorrLabel = ('AK5','PF'),
-                     doType1MET   = False,
-                     doL1Cleaning = False,
-                     doL1Counters = True,
-                     genJetCollection = cms.InputTag("ak5GenJets"),
-                     doJetID      = False
-    )
-
+    if doPatCalo:
+        addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
+                         'AK5', 'JPT',
+                         doJTA        = True,
+                         doBTagging   = True,
+                         jetCorrLabel = ('AK5','JPT'),
+                         doType1MET   = False,
+                         doL1Cleaning = False,
+                         doL1Counters = True,
+                         genJetCollection = cms.InputTag("ak5GenJets"),
+                         doJetID      = False
+        )
+    
+        addJetCollection(process, cms.InputTag('ak5PFJets'),
+                         'AK5', 'PF',
+                         doJTA        = True,
+                         doBTagging   = True,
+                         jetCorrLabel = ('AK5','PF'),
+                         doType1MET   = False,
+                         doL1Cleaning = False,
+                         doL1Counters = True,
+                         genJetCollection = cms.InputTag("ak5GenJets"),
+                         doJetID      = False
+        )
+    else:
+        switchJetCollection(process, cms.InputTag('ak5PFJets'),
+                            doJTA        = True,
+                            doBTagging   = True,
+                            jetCorrLabel = ('AK5','PF'),
+                            doType1MET   = False,
+                            genJetCollection = cms.InputTag("ak5GenJets"),
+                            doJetID      = False
+        )
+    
     if out != None:
         out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
@@ -156,13 +171,14 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
 	classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
 
-        addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
-                         algoLabel = "caloReco",
-                         typeLabel = "Tau")
-        process.patTausCaloRecoTau.embedLeadPFCand = False
-        process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
-        process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
-
+        if doPatCalo:
+            addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
+                             algoLabel = "caloReco",
+                             typeLabel = "Tau")
+            process.patTausCaloRecoTau.embedLeadPFCand = False
+            process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
+            process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
+    
         addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")

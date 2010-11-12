@@ -7,7 +7,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
-#include<string>
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
+
+#include <string>
+#include <vector>
 
 namespace edm {
   class ParameterSet;
@@ -18,6 +21,26 @@ namespace edm {
 namespace HPlus {
   class TriggerSelection {
   public:
+    class Data;
+    class TriggerPath {
+        public:
+            TriggerPath(const edm::ParameterSet&, std::string, EventCounter&, EventWeight&);
+            ~TriggerPath();
+
+            Data analyze(const edm::Event&, const edm::EventSetup&);
+
+        private:
+            // Input parameters
+            edm::InputTag fSrc;
+            std::string fPath;
+
+            // Counters
+            Count fTriggerCount;
+
+            // EventWeight object
+            EventWeight& fEventWeight;
+    };
+
       /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -28,31 +51,28 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerSelection *triggerSelection, bool passedEvent);
+      Data(const TriggerPath *triggerPath, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
 
     private:
-      const TriggerSelection *fTriggerSelection;
+      const TriggerPath *fTriggerPath;
       const bool fPassedEvent;
     };
-    
+
+
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TriggerSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    // Input parameters
-    edm::InputTag fSrc;
-    std::string fPath;
+    TriggerMETEmulation fTriggerMETEmulation;
+    std::vector<TriggerPath* > triggerPaths;
 
     // Counters
     Count fTriggerCount;
-
-    // EventWeight object
-    EventWeight& fEventWeight;
   };
 }
 
