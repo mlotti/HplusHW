@@ -59,8 +59,8 @@ def modify(dataset):
         dataset.addArg("doPat=1")
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
-#    if dataset.getName() == "TTJets":
-#        dataset.setNumberOfJobs(5)
+    if dataset.getName() == "TTJets":
+        dataset.setNumberOfJobs(40)
 
 multicrab.forEachDataset(modify)
 

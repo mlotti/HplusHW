@@ -13,7 +13,7 @@ datasets = {
                 "datasetpath": "/BTau/Run2010A-Sep17ReReco_v2/RECO",
                 #"datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 100,
+                "lumis_per_job": 100, # Adjusted for PATtuple file size
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -56,7 +56,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 100,
+                "lumis_per_job": 100, # Adjusted for PATtuple file size
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -91,7 +91,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 30,
+                "lumis_per_job": 30, # Adjusted for PATtuple file size
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -107,7 +107,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 30,
+                "lumis_per_job": 30, # Adjusted for PATtuple file size
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -123,7 +123,7 @@ datasets = {
             "RECO": {
                 "datasetpath": "/Mu/Run2010A-Sep17ReReco_v2/RECO",
                 "luminosity": 0,
-                "lumis_per_job": 500,
+                "lumis_per_job": 500, # Adjusted for PAT on the fly
                 "lumiMaskRequired": True
             },
             "AOD": {
@@ -139,7 +139,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 600,
+                "lumis_per_job": 600, # Adjusted for PAT on the fly
                 "lumiMaskRequired": True
             }
         }
@@ -152,7 +152,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 500,
+                "lumis_per_job": 500, # Adjusted for PAT on the fly
                 "lumiMaskRequired": True
             }
         }
@@ -167,7 +167,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/Spring10-START3X_V26-v1/GEN-SIM-RECO",
-                "number_of_jobs": 40
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "fallback": "RECO",
@@ -190,7 +190,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10-START3X_V26-v1/GEN-SIM-RECO",
-                "number_of_jobs": 4,
+                "number_of_jobs": 4, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "fallback": "RECO",
@@ -213,7 +213,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHpmToTauNu_M-120_7TeV-pythia6-tauola/Spring10-START3X_V26-v1/GEN-SIM-RECO",
-                "number_of_jobs": 4,
+                "number_of_jobs": 4, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "fallback": "RECO",
@@ -236,7 +236,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTbar_Htaunu_M140/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 4,
+                "number_of_jobs": 4, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "fallback": "RECO",
@@ -259,7 +259,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTbar_Htaunu_M160/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 4,
+                "number_of_jobs": 4, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "fallback": "RECO",
@@ -283,7 +283,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 20,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -302,7 +302,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 20,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -321,7 +321,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 20,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -340,7 +340,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 20,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -359,7 +359,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 20,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -381,7 +381,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-30to50_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 60 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-30to50_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
@@ -406,7 +406,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 60 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-50to80_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
@@ -431,7 +431,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 60 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-80to120_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
@@ -456,7 +456,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 60 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-120to170_7TeV-pythia8/Summer10-START36_V10_S09-v1/AODSIM",
@@ -481,7 +481,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-170to230_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
-                "number_of_jobs": 60
+                "number_of_jobs": 60 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-170to230_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
@@ -506,7 +506,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-230to300_7TeV-pythia8/Summer10-START36_V10_S09-v2/GEN-SIM-RECO",
-                "number_of_jobs": 70
+                "number_of_jobs": 70 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-230to300_7TeV-pythia8/Summer10-START36_V10_S09-v2/AODSIM",
@@ -533,7 +533,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -558,7 +558,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -583,7 +583,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -607,7 +607,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -632,7 +632,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -659,7 +659,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTbar/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 50
+                "number_of_jobs": 50 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTbar/Summer10-START36_V9_S09-v1/AODSIM",
@@ -683,7 +683,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTbarJets_Tauola-madgraph/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 120
+                "number_of_jobs": 120 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTbarJets_Tauola-madgraph/Summer10-START36_V9_S09-v1/AODSIM",
@@ -708,7 +708,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 490
+                "number_of_jobs": 490 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/AODSIM",
@@ -740,7 +740,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 100
+                "number_of_jobs": 100 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Fall10-START38_V12-v1/AODSIM",
@@ -754,7 +754,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v2/GEN-SIM-RECO",
-                "number_of_jobs": 100
+                "number_of_jobs": 100 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v2/AODSIM",
@@ -771,7 +771,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 100, # adjusted for PAT on the fly
+                "number_of_jobs": 100, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
@@ -785,7 +785,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-START38_V12-v2/GEN-SIM-RECO",
-                "number_of_jobs": 15, # adjusted for PAT on the fly
+                "number_of_jobs": 15, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-START38_V12-v2/AODSIM",
@@ -799,7 +799,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 10, # adjusted for PAT on the fly
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             }
         },
     },
@@ -809,7 +809,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-START38_V12-v2/AODSIM",
-                "number_of_jobs": 10, # adjusted for PAT on the fly
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             }
         },
     },
@@ -819,7 +819,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-START38_V12-v2/GEN-SIM-RECO",
-                "number_of_jobs": 10, # adjusted for PAT on the fly
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO",
@@ -835,7 +835,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/ZJets-madgraph/Summer10-START37_V5_S09-v1/AODSIM",
-                "number_of_jobs": 15, # adjusted for PAT on the fly
+                "number_of_jobs": 15, # Adjusted for PAT on the fly
             }
         },
     },
@@ -845,7 +845,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_sChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10, # adjusted for PAT on the fly
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"
@@ -858,7 +858,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_tChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 15, # adjusted for PAT on the fly
+                "number_of_jobs": 15, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"
@@ -871,7 +871,7 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/SingleTop_tWChannel-madgraph/Summer10-START37_V5_S09-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10, # adjusted for PAT on the fly
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "fallback": "RECO"
