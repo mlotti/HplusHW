@@ -4,6 +4,8 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include <string>
@@ -53,12 +55,17 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerPath *triggerPath, bool passedEvent);
+      Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
 
+      pat::TriggerObjectRef getHltMetObject() const {
+	return fTriggerSelection->fHltMet;
+      }
+
     private:
+      const TriggerSelection *fTriggerSelection;
       const TriggerPath *fTriggerPath;
       const bool fPassedEvent;
     };
@@ -80,7 +87,13 @@ namespace HPlus {
     Count fTriggerPathCount;
     Count fTriggerCount;
 
+    Count fTriggerHltMetExistsCount;
+
+    // Histograms
     TH1 *hHltMet;
+
+    // Analysis results
+    pat::TriggerObjectRef fHltMet;
   };
 }
 

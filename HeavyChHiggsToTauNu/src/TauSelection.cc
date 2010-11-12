@@ -468,9 +468,6 @@ namespace HPlus {
                 increment(fagainstElectronSubCount);
                 ++againstElectronCutPassed;
 
-		if(iTau->tauID("byTightIsolation") < 0.5 ) continue;
-		increment(fbyHPSIsolationSubCount);
-		++byTightIsolationPassed;
 
 		if(leadTrk.isNonnull())
 		  hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
@@ -479,6 +476,15 @@ namespace HPlus {
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
 
+		if(iTau->tauID("byTightIsolation") < 0.5 ) continue;
+		increment(fbyHPSIsolationSubCount);
+		++byTightIsolationPassed;
+
+		uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
+		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
+		if(nSigTracks != 1 ) continue;
+		increment(fnProngsSubCount);
+		++nProngsCutPassed;
 
 
 		float Rtau = 0;
@@ -550,14 +556,15 @@ namespace HPlus {
         if(againstElectronCutPassed == 0) return false;
         increment(fagainstElectronCount);
 
-	if(byTightIsolationPassed == 0) return false;
-	increment(fHPSIsolationCount);
 
 	if(leadTrkPtCutPassed == 0) return false;
 	increment(fLeadTrkPtCount); 
 
-	//	if(nProngsCutPassed == 0) return false;
-	//	increment(fnProngsCount);
+	if(byTightIsolationPassed == 0) return false;
+	increment(fHPSIsolationCount);
+
+	if(nProngsCutPassed == 0) return false;
+	increment(fnProngsCount);
 
 	//	if(HChTauIDchargeCutPassed == 0) return false;
 	//	increment(fHChTauIDchargeCount);       

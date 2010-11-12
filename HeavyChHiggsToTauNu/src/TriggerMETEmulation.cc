@@ -22,7 +22,7 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hMetBeforeEmulation = fs->make<TH1F>("MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
-    hMetAfterEmulation = fs->make<TH1F>("MetAfterEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetAfterEmulation = fs->make<TH1F>("MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
   }
 
   TriggerMETEmulation::~TriggerMETEmulation() {}
