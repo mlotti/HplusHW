@@ -12,11 +12,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import ROOT
 
 def main(opts):
-    crossSections = {}
-    for o in opts.xsections:
-        (name, value) = o.split(":")
-        crossSections[name] = float(value)
-
     datasets = None
     if len(opts.files) > 0:
         datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts.counterdir )
@@ -69,8 +64,6 @@ if __name__ == "__main__":
                       help="Output mode; available: 'events', 'xsect' (default: 'events')")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
 #                      help="Output format; available: 'text' (default: 'text')")
-    parser.add_option("--xsection", "-x", dest="xsections", type="string", action="append", default=[],
-                      help="Override the cross sections in the ROOT file. 'datasetname:xsect' where xsect is the cross section in pb, e.g. 'QCD_Pt170:154'")
     parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
                       help="TDirectory name containing the counters (default: signalAnalysisCounters")
     parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
