@@ -64,16 +64,28 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
             counters = opts.counterdir
 
     dlist = []
+    noFiles = False
     for d in taskdirs:
         files = glob.glob(os.path.join(d, "res", opts.input))
         if len(files) > 1:
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
             return 1
         elif len(files) == 0:
-            print >> sys.stderr, "No files matched to input for task %s, ignoring the dataset" % d
+            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, opts.input, os.path.join(d, "res"))
+            noFiles = True
             continue
 
         dlist.append( (d, files[0]) )
+
+    if noFiles:
+        print >> sys.stderr, ""
+        print >> sys.stderr, "  There were datasets without files. Have you merged the files with hplusMergeHistograms.py?"
+        print >> sys.stderr, ""
+        if len(dlist) == 0:
+            raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
+
+    if len(dlist) == 0:
+        raise Exception("No datasets")
 
     return getDatasetsFromRootFiles(dlist, counters)
 

@@ -242,6 +242,9 @@ class EventCounter:
     def __init__(self, datasets):
         counterNames = {}
 
+        if len(datasets.getAllDatasets()) == 0:
+            raise Exception("No datasets")
+
         # Pick all possible names of counters
         counterDir = None
         for dataset in datasets.getAllDatasets():
@@ -254,7 +257,10 @@ class EventCounter:
             for name in dataset.getDirectoryContent(counterDir, isHistogram):
                 counterNames[name] = 1
 
-        del counterNames["counter"]
+        try:
+            del counterNames["counter"]
+        except KeyError:
+            raise Exception("Internal error: no 'counter' histogram in the '%s' directories" % counterDir)
 
         self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"))
         self.subCounters = {}
