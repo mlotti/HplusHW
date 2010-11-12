@@ -25,8 +25,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -364,15 +364,15 @@ def createAnalysis(process, prefix="", functionBegin=None):
     
     
     # W transverse mass
-    prototype = cms.EDProducer("CandViewShallowCloneCombiner",
+    candCombinerPrototype = cms.EDProducer("CandViewShallowCloneCombiner",
         checkCharge = cms.bool(False),
     #    cut = cms.string('sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)>50'),
         cut = cms.string(""),
         decay = cms.string("dummy")
     )
-    wmunuCalo = analysis.addProducer("WMuNuCalo", prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
-    wmunuPF   = analysis.addProducer("WMuNuPF",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
-    wmunuTC   = analysis.addProducer("WMuNuTC",   prototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
+    wmunuCalo = analysis.addProducer("WMuNuCalo", candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+caloMET)))
+    wmunuPF   = analysis.addProducer("WMuNuPF",   candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET)))
+    wmunuTC   = analysis.addProducer("WMuNuTC",   candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+tcMET)))
     histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("WMunuCands", histoAnalyzer)
     histoAnalyzer.wmunuCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
     histoAnalyzer.wmunuPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
@@ -464,9 +464,11 @@ def createAnalysis(process, prefix="", functionBegin=None):
     path *= m
     
     # Plots after Wmunu transverse mass cut
-    path *= analysis.getAnalysisModule("WMuNuPF").getFilterSequence()
+    m = candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET))
+    setattr(process, prefix+"afterOtherCutsWMuNuPF", m)
+    path *= m
     m = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-        src = analysis.getAnalysisModule("WMuNuPF").getSelectorInputTag(),
+        src = cms.InputTag(prefix+"afterOtherCutsWMuNuPF"),
         cut = cms.string(histoTransverseMass.getPlotQuantity()+ " > 50")
     )
     setattr(process, prefix+"afterOtherCutsWMuNuSelector", m)
