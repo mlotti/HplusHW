@@ -159,6 +159,14 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
 )
 process.patSequence *= process.firstPrimaryVertex
 
+process.vertexCountAnalyzer = cms.EDAnalyzer("HPlusVertexCountAnalyzer",
+    src = cms.untracked.VInputTag(cms.untracked.InputTag("offlinePrimaryVertices")),
+    nbins = cms.untracked.int32(10),
+    min = cms.untracked.double(0),
+    max = cms.untracked.double(10)
+)
+process.patSequence *= process.vertexCountAnalyzer
+
 process.commonSequence = cms.Sequence(
     process.patSequence +
     process.genRunInfo +
