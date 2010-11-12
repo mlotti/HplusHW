@@ -12,7 +12,7 @@
 # 28.10.2010/M.Kortelainen CMSSW_3_8_5_patch3 (Electron ID and additional PAT tags from the release notes)
 # 2.11.2010/M.Kortelainen CMSSW_3_8_5_patch3 (tag for filterJSON.py etc. scripts) 
 # 11.11.2010/M.Kortelainen CMSSW_3_8_6 Moved the tau embedding tag here since it is needed for compilation
-
+# 12.11.2010/M.Kortelainen CMSSW_3_8_6 Removed the tau embedding tag (added workaround)
 
 #TARGET="analysis"
 #if [ "x$#" = "x1" ]; then
@@ -66,6 +66,3 @@ cvs co -r V00-00-07 TauAnalysis/MCEmbeddingTools
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 #fi
-
-# Tau embedding
-cvs co -r V00-00-07 TauAnalysis/MCEmbeddingTools
