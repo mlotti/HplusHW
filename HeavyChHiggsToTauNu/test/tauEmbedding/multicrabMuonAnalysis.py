@@ -37,31 +37,34 @@ patDatasets = [
     "QCD_Pt170to300_Fall10",
 ]
 
-#usePatTuples = True
-usePatTuples = False
+usePatTuples = True
+#usePatTuples = False
 
-if usePatTuples:
-    multicrab.addDatasets("pattuple_v6", patDatasets)
-else:
+if not usePatTuples:
     aodDatasets.extend(patDatasets)
 multicrab.addDatasets("AOD", aodDatasets)
+if usePatTuples:
+    multicrab.addDatasets("pattuple_v6", patDatasets)
 
-multicrab.setDataLumiMask("Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
 
-#multicrab.getDataset("TTbarJets").addArg("WDecaySeparate=1")
-multicrab.getDataset("TTJets").addArg("WDecaySeparate=1")
-multicrab.getDataset("TTJets").setNumberOfJobs(5)
-multicrab.getDataset("WJets").addArg("WDecaySeparate=1")
-multicrab.getDataset("TToBLNu_s-channel").addArg("WDecaySeparate=1")
-multicrab.getDataset("TToBLNu_t-channel").addArg("WDecaySeparate=1")
-multicrab.getDataset("TToBLNu_tW-channel").addArg("WDecaySeparate=1")
+decaySeparate = ["TTJets",
+                 "WJets",
+                 "TToBLNu_s-channel",
+                 "TToBLNu_t-channel",
+                 "TToBLNu_tW-channel"]
+def modify(dataset):
+    if dataset.getName() in aodDatasets:
+        dataset.addArg("doPat=1")
+    if dataset.getName() in decaySeparate:
+        dataset.addArg("WDecaySeparate=1")
+    if dataset.getName() == "TTJets":
+        dataset.setNumberOfJobs(5)
 
-
-for name in aodDatasets:
-    multicrab.getDataset(name).addArg("doPat=1")
+multicrab.forEachDataset(modify)
 
 #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
 #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)
 
-#multicrab.createTasks()
-multicrab.createTasks(configOnly=True)
+multicrab.createTasks()
+#multicrab.createTasks(configOnly=True)

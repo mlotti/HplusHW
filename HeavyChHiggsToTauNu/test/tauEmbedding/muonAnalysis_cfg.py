@@ -117,7 +117,7 @@ process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-from HiggsAnalysis.HeavyChHiggsToTauNu,HChPrimaryVertex_cfi import *
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi import *
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
 process.patSequence = cms.Sequence()
 if options.doPat != 0:

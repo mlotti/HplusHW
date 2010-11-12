@@ -27,8 +27,8 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
+        dataVersion.getPatDefaultFileCastor()
+        #dataVersion.getPatDefaultFileMadhatter()
     )
 )
 
@@ -49,11 +49,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         SelectEvents = cms.vstring("path")
     ),
     fileName = cms.untracked.string('skim.root'),
-    outputCommands = cms.untracked.vstring(
-        "keep *",
-        "drop *_*_*_MUONSKIM",
-        "keep *_tightMuons_*_*"
-    )
+    outputCommands = cms.untracked.vstring()
 )
 
 process.selectionSequence = cms.Sequence()
@@ -77,6 +73,13 @@ if options.doPat != 0:
         process.collisionDataSelection * 
         process.patSequence
     )
+
+# Override the outputCommands here, since PAT modifies it
+process.out.outputCommands = cms.untracked.vstring(
+    "keep *",
+    "drop *_*_*_MUONSKIM",
+    "keep *_tightMuons_*_MUONSKIM"
+)
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
 process.selectionSequence *= process.muonSelectionSequence
