@@ -10,13 +10,6 @@ TauolaPolar = cms.PSet(
    UseTauolaPolarization = cms.bool(True)
 )
 
-
-from TauAnalysis.MCEmbeddingTools.MCParticleReplacer_cfi import *
-newSource.algorithm = "ZTauTau"
-newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0)
-newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
-newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
-
 #source = cms.Source("PoolSource",
 #        skipEvents = cms.untracked.uint32(0),
 #        fileNames = cms.untracked.vstring('/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/E250F96A-CF7B-DF11-99E5-001BFCDBD1BE.root')
@@ -34,12 +27,26 @@ dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
     keepMuonTrack = cms.bool(False)
 )
 
-generator = newSource.clone()
-generator.src = cms.InputTag("adaptedMuonsFromWmunu")
-
 filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     minEvents = cms.untracked.int32(1),
     target =  cms.untracked.int32(1) 
 )
 
-ProductionFilterSequence = cms.Sequence(adaptedMuonsFromWmunu*dimuonsGlobal*generator*filterEmptyEv)
+# Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing
+try:
+    from TauAnalysis.MCEmbeddingTools.MCParticleReplacer_cfi import *
+    newSource.algorithm = "ZTauTau"
+    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0)
+    newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
+    newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
+
+    generator = newSource.clone()
+    generator.src = cms.InputTag("adaptedMuonsFromWmunu")
+
+    ProductionFilterSequence = cms.Sequence(adaptedMuonsFromWmunu*dimuonsGlobal*generator*filterEmptyEv)
+except ImportError:
+    print
+    print "  TauAnalysis/MCEmbeddingTools package is missing"
+    print
+    pass
+
