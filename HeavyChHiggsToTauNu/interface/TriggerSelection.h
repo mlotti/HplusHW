@@ -5,9 +5,6 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>
 #include <vector>
@@ -18,27 +15,32 @@ namespace edm {
   class EventSetup;
 }
 
+namespace pat {
+  class TriggerEvent;
+}
+
+class TH1;
+
 namespace HPlus {
+  class EventWeight;
+  class EventCounter;
+
   class TriggerSelection {
   public:
     class Data;
     class TriggerPath {
         public:
-            TriggerPath(const edm::ParameterSet&, std::string, EventCounter&, EventWeight&);
+      TriggerPath(const std::string& path, EventCounter& eventCounter);
             ~TriggerPath();
 
-            Data analyze(const edm::Event&, const edm::EventSetup&);
+            bool analyze(const pat::TriggerEvent& trigger);
 
         private:
             // Input parameters
-            edm::InputTag fSrc;
             std::string fPath;
 
             // Counters
             Count fTriggerCount;
-
-            // EventWeight object
-            EventWeight& fEventWeight;
     };
 
       /**
@@ -68,11 +70,17 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    TriggerMETEmulation fTriggerMETEmulation;
     std::vector<TriggerPath* > triggerPaths;
+    edm::InputTag fSrc;
+    double fMetCut;
+
+    EventWeight& fEventWeight;
 
     // Counters
+    Count fTriggerPathCount;
     Count fTriggerCount;
+
+    TH1 *hHltMet;
   };
 }
 
