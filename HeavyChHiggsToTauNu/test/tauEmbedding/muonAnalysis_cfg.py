@@ -154,6 +154,11 @@ if options.luminosity >= 0:
     process.configInfo.luminosity = cms.untracked.double(options.luminosity)
     print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.patSequence *= process.firstPrimaryVertex
+
 process.commonSequence = cms.Sequence(
     process.patSequence +
     process.genRunInfo +
@@ -227,11 +232,11 @@ def createAnalysis(process, prefix="", functionBegin=None):
     multipAnalyzer = analysis.addCloneAnalyzer("Multiplicity", multipAnalyzer)
     
     # Select primary vertex
-    selectedPrimaryVertex = analysis.addProducer("FirstPrimaryVertex", 
-                                                 cms.EDProducer("HPlusSelectFirstVertex",
-                                                                src = cms.InputTag("offlinePrimaryVertices")))
+    #selectedPrimaryVertex = analysis.addProducer("FirstPrimaryVertex", 
+    #                                             cms.EDProducer("HPlusSelectFirstVertex",
+    #                                                            src = cms.InputTag("offlinePrimaryVertices")))
     selectedPrimaryVertex = analysis.addAnalysisModule("PrimaryVertex",
-                                                       selector = goodPrimaryVertices.clone(src = selectedPrimaryVertex),
+                                                       selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
                                                        filter = cms.EDFilter("VertexCountFilter",
                                                                              src = cms.InputTag("dummy"),
                                                                              minNumber = cms.uint32(1),
@@ -456,8 +461,25 @@ class AddGenEventFilter:
             invertFilter=self.invert
         )
 
+class AddVertexCountFilter:
+    def __init__(self, maxVertices):
+        self.maxVertices = maxVertices
+
+    def __call__(self, analysis):
+        analysis.addAnalysisModule("VertexCount", filter=cms.EDFilter("VertexCountFilter",
+                src = cms.InputTag("goodPrimaryVertices"),
+                minNumber = cms.uint32(1),
+                maxNumber = cms.uint32(self.maxVertices)
+        ))
+
 
 createAnalysis(process)
 if options.WDecaySeparate > 0:
     createAnalysis(process, "WMuNu", AddGenEventFilter())
-    createAnalysis(process, "WOther", AddGenEventFilter(True))
+    createAnalysis(process, "WOther", AddGenEventFilter(invert=True))
+
+if dataVersion.isData():
+    for i in [1, 2, 3, 4, 5, 10, 20]:
+        createAnalysis(process, "PileupV%d"%i, AddVertexCountFilter(i))
+
+#print process.dumpPython()
