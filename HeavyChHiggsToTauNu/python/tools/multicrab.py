@@ -5,8 +5,6 @@ import shutil
 import ConfigParser
 import OrderedDict
 
-from FWCore.PythonUtilities.LumiList import LumiList
-
 import multicrabDatasets
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
@@ -163,6 +161,9 @@ class MulticrabDataset:
             raise Exception("Tried to set lumi mask for dataset '%s' which is MC" % self.name)
 
         if "runs" in self.data:
+
+            from FWCore.PythonUtilities.LumiList import LumiList
+
             (runMin, runMax) = self.data["runs"]
             lumiList = filterRuns(LumiList(filename=fname), runMin, runMax)
 

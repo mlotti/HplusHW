@@ -95,11 +95,11 @@ def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
         datasets.append(Dataset(name, f, counters))
     return datasets
 
-def readDataset(fname, counters, datasetname, crossSections):
-    dataset = Dataset(datasetname, fname, counters)
-    if datasetname in crossSections:
-        dataset.setCrossSection(crossSections[datasetname])
-    return dataset
+#def readDataset(fname, counters, datasetname, crossSections):
+#    dataset = Dataset(datasetname, fname, counters)
+#    if datasetname in crossSections:
+#        dataset.setCrossSection(crossSections[datasetname])
+#    return dataset
 
 
 def normalizeToOne(h):

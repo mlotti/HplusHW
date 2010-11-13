@@ -13,8 +13,8 @@
 #include "TH1F.h"
 
 namespace HPlus {
-  TriggerSelection::Data::Data(const TriggerPath *triggerPath, bool passedEvent):
-    fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
+  TriggerSelection::Data::Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent):
+    fTriggerSelection(triggerSelection), fTriggerPath(triggerPath), fPassedEvent(passedEvent) {}
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
@@ -22,7 +22,8 @@ namespace HPlus {
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
     fEventWeight(eventWeight),
     fTriggerPathCount(eventCounter.addSubCounter("Trigger", "Path passed")),
-    fTriggerCount(eventCounter.addSubCounter("Trigger","Passed"))
+    fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
+    fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists"))
   {
 	std::vector<std::string> paths = iConfig.getUntrackedParameter<std::vector<std::string> >("triggers");
     	for(size_t i = 0; i < paths.size(); ++i){
@@ -31,7 +32,7 @@ namespace HPlus {
     	}
 
         edm::Service<TFileService> fs;
-        hHltMet = fs->make<TH1F>("hlt_met", "hlt_met", 100, 0., 100.);
+        hHltMet = fs->make<TH1F>("hlt_met", "hlt_met", 200, 0., 200.);
 
   }
 
@@ -52,23 +53,31 @@ namespace HPlus {
 			returnPath = *i;
 		}
 	}
-
-        // Cut on HLT MET
-        if(passEvent) {
+        if(passEvent)
           increment(fTriggerPathCount);
 
-          pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
-          // precaution
-          if(hltMets.size() != 1)
-            throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() << " instead of 1" << std::endl;
-          pat::TriggerObjectRef hltMet = hltMets[0];
-          hHltMet->Fill(hltMet->et(), fEventWeight.getWeight());
-          if(hltMet->et() <= fMetCut)
-            passEvent = false;
-        }
+	// Get HLT MET object
+	pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
+	if(hltMets.size() == 0) {
+	  fHltMet = pat::TriggerObjectRef();
+	  if(fMetCut >= 0)
+	    passEvent = false;
+	}
+	else if(hltMets.size() == 1) {
+	  increment(fTriggerHltMetExistsCount);
+	  fHltMet = hltMets[0];
+	  hHltMet->Fill(fHltMet->et(), fEventWeight.getWeight());
+
+	  // Cut on HLT MET
+	  if(fHltMet->et() <= fMetCut)
+	    passEvent = false;
+	}
+	else
+	  // precaution
+	  throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() << " instead of 1" << std::endl;
  
         if(passEvent) increment(fTriggerCount);
-	return Data(returnPath, passEvent);
+	return Data(this, returnPath, passEvent);
   }
 
 
