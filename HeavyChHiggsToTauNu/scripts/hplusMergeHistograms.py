@@ -3,6 +3,7 @@
 import os
 import sys
 import glob
+import shutil
 import subprocess
 from optparse import OptionParser
 
@@ -25,7 +26,7 @@ def main(opts, args):
         #                       "-o", mergeName,
         #                       "-i"]+files)
         if os.path.exists(mergeName):
-            os.unlink(mergeName)
+            shutil.move(mergeName, mergeName+".backup")
 
         ret = subprocess.call(["hadd", mergeName]+files) 
         if ret != 0:
