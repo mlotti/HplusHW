@@ -147,7 +147,7 @@ datasets = {
     "Mu_147196-149442": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Mu15_v1",
-        "runs": (147116, 149442),
+        "runs": (147196, 149442),
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
