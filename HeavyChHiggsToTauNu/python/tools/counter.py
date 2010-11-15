@@ -280,6 +280,39 @@ class CounterData:
     def formatFirstColumn(self, irow):
         return self.countNameFormat % self.countNames[irow]
 
+class CounterEfficiency:
+    def __init__(self, counterData):
+        self.counterData = counterData
+        self._calculateEfficiencies()
+
+    def _calculateEfficiencies(self):
+        self.efficiencies = []
+        for i in xrange(0, self.counterData.getNrows()):
+            self.efficiencies.append([])
+
+        prevData = [None] * self.counterData.getNcolumns()
+        for irow in xrange(0, self.counterData.getNrows()):
+            for icol in xrange(0, self.counterData.getNcolumns()):
+                count = self.counterData.getCount(irow, icol)
+                prevCount = prevData[icol]
+
+                value = None
+                if count != None and prevCount != None:
+                    try:
+                        value = Count(count.value() / prevCount.value(), None)
+                    except ZeroDivisionError:
+                        pass
+                prevData[icol] = count
+                self.efficiencies[irow].append(value)
+
+    # Delegate all non-implemented methods to CounterData
+    def __getattr__(self, name):
+        return getattr(self.counterData, name)
+
+    def getCount(self, irow, icol):
+        return self.efficiencies[irow][icol]
+                
+
 
 def isHistogram(obj):
     return isinstance(obj, ROOT.TH1)
