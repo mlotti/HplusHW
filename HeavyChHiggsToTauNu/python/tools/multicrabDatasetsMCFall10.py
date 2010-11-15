@@ -268,11 +268,11 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 100, # Adjusted for PAT on the fly
+                "number_of_jobs": 200, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
+                "number_of_jobs": 200,
             }
         },
     },

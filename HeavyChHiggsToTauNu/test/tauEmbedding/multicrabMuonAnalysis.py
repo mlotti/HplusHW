@@ -55,15 +55,35 @@ decaySeparate = ["TTJets",
                  "TToBLNu_s-channel",
                  "TToBLNu_t-channel",
                  "TToBLNu_tW-channel"]
+numberOfJobs = {}
+if usePatTuples:
+    numberOfJobs.update({
+            "QCD_Pt30to50_Fall10": 5,
+            "QCD_Pt50to80_Fall10": 5,
+            "QCD_Pt80to120_Fall10": 5,
+            "QCD_Pt120to170_Fall10": 5,
+            "QCD_Pt170to300_Fall10": 5,
+            "WJets": 30
+    })
+else:
+    numberOfJobs.update({
+            "TTJets": 40
+    })
+    
+
 def modify(dataset):
     if dataset.getName() in aodDatasets:
         dataset.addArg("doPat=1")
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
-    if dataset.getName() == "TTJets":
-        dataset.setNumberOfJobs(40)
     if dataset.getName() == "Mu_135821-144114":
         dataset.setLumiMask(sep17rerecoLumiMask)
+
+    try:
+        njobs = numberOfJobs[dataset.getName()]
+        dataset.setNumberOfJobs(njobs)
+    except KeyError:
+        pass
 
 multicrab.forEachDataset(modify)
 
