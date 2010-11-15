@@ -251,6 +251,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v2/AODSIM",
                 "number_of_jobs": 100,
+            },
+            "pattuple_v6": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall10_START38_V12_v2_GEN-SIM-RECO_pattuple_v6_1-07f034ca14f38db495c4c9937f852e0b/USER",
+                "number_of_jobs": 5
             }
         },
     },
