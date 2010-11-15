@@ -130,7 +130,9 @@ print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTa
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
-    verbose = cms.untracked.bool(True)
+    printMainCounter = cms.untracked.bool(True),
+    printSubCounters = cms.untracked.bool(False),
+    printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
     process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])

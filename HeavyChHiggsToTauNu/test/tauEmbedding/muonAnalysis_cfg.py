@@ -191,7 +191,9 @@ def createAnalysis(process, prefix="", functionBegin=None):
     if dataVersion.isData():
         counters = dataSelectionCounters
     analysis = Analysis(process, "analysis", options, prefix=prefix, additionalCounters=counters)
-#    analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
+    analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
+    #analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
+    #analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
     
     if functionBegin != None:
         functionBegin(analysis)

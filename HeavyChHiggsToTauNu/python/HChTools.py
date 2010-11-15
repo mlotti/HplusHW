@@ -38,7 +38,9 @@ def addAnalysisArray(process, prefix, exemplar, func, values, names=None, preSeq
         counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
             counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
             counterInstances = cms.untracked.InputTag(analysisName, "counterInstances"),
-            verbose = cms.untracked.bool(False)
+            printMainCounter = cms.untracked.bool(False),
+            printSubCounters = cms.untracked.bool(False),
+            printAvailableCounters = cms.untracked.bool(False),
         )
         if len(additionalCounters) > 0:
             counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
