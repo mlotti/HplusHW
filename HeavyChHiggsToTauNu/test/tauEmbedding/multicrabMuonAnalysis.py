@@ -47,7 +47,8 @@ if len(aodDatasets) > 0:
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
 
-multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v2.txt")
+sep17rerecoLumiMask = "../Cert_132440-144114_7TeV_Sep17ReReco_Collisions10_JSON.txt"
 
 decaySeparate = ["TTJets",
                  "WJets",
@@ -61,6 +62,8 @@ def modify(dataset):
         dataset.addArg("WDecaySeparate=1")
     if dataset.getName() == "TTJets":
         dataset.setNumberOfJobs(40)
+    if dataset.getName() == "Mu_135821-144114":
+        dataset.setLumiMask(sep17rerecoLumiMask)
 
 multicrab.forEachDataset(modify)
 
