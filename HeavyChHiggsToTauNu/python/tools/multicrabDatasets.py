@@ -141,13 +141,19 @@ datasets = {
                 "luminosity": 0,
                 "lumis_per_job": 600, # Adjusted for PAT on the fly
                 "lumiMaskRequired": True
+            },
+            "tauembedding_skim_v2": {
+                "dbs_url": pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_PromptReco_v2_AOD_tauembedding_skim_v2-df8d5a0675762f7704edd4730bf7a6a7/USER",
+                "number_of_jobs": 1
             }
+
         }
     },
     "Mu_147196-149442": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Mu15_v1",
-        "runs": (147116, 149442),
+        "runs": (147196, 149442),
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
@@ -725,9 +731,9 @@ datasets = {
                 "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1-2366fe480375ff6f751e0b7e8ec70b52/USER",
                 "number_of_jobs": 40
             },
-            "tauembedding_skim_v1": {
+            "tauembedding_skim_v2": {
                 "dbs_url": pattuple_dbs,
-                "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v1-99df8e9f20fb187ff5807dad98f3d61d/USER",
+                "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v2-52e54222a22093cabccf53a197393901/USER",
                 "number_of_jobs": 10
             }
         },
