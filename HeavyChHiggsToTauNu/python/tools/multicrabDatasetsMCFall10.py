@@ -264,7 +264,7 @@ datasets = {
     # Backgrounds for electroweak background measurement (Fall10)
     "QCD_Pt20_MuEnriched": {
         "dataVersion": "38X",
-        "crossSection": 296600000.,
+        "crossSection": 296600000.*0.0002855,
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
