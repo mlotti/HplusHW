@@ -14,6 +14,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "TTree.h"
 
 namespace edm {
@@ -53,7 +54,9 @@ namespace HPlus {
     METSelection fMETSelection;
     JetSelection fJetSelection;
     BTagging fBTagging;
+    FakeMETVeto fFakeMETVeto;
     EvtTopology fEvtTopology;
+
     
     // Histograms
     TH1 *hAlphaTInvMass;
@@ -65,6 +68,7 @@ namespace HPlus {
     float fTauJetEt;
     float fTauJetEta;
     float fMET;
+    float fFakeMETDeltaR;
     int iNHadronicJets;
     int iNBtags;
     float fGlobalMuonVetoHighestPt;

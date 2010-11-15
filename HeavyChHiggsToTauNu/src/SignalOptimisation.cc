@@ -25,6 +25,7 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
   {
@@ -32,14 +33,15 @@ namespace HPlus {
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
-    /// Make TTree for SignalOptimisation
+    // Make TTree for SignalOptimisation
     myTree = fs->make<TTree>("HPlusSignalOptimisation","HPlusSignalOptimisation");
     
-    /// Variables used for SignalOptimisation
+    // Variables used for SignalOptimisation
     myTree->Branch("bTauIDStatus", &bTauIDStatus);
     myTree->Branch("fTauJetEt",  &fTauJetEt);
     myTree->Branch("fTauJetEta", &fTauJetEta);
     myTree->Branch("fMET", &fMET);
+    myTree->Branch("fFakeMETDeltaR", &fFakeMETDeltaR);
     myTree->Branch("iNHadronicJets", &iNHadronicJets);
     myTree->Branch("iNBtags", &iNBtags);
     myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
@@ -67,6 +69,7 @@ namespace HPlus {
     fTauJetEt = -5.0;
     fTauJetEta = -999.99;
     fMET = -5.0;
+    fFakeMETDeltaR = -5.0;
     iNHadronicJets = -5.0;
     iNBtags = -5.0;
     fGlobalMuonVetoHighestPt = -5.0;
@@ -75,15 +78,24 @@ namespace HPlus {
     fDeltaPhi = -5.0;
     fAlphaT = -5.0;
 
-    /// 1) Trigger
+    // 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    if(!triggerData.passedEvent()) return; /// no Trigger means no Tau => meaningless to continue.
+    if(!triggerData.passedEvent()) return;
         
-    /// 2) Trigger Emulation (for MC data)
+    // 2) Trigger Emulation (for MC data)
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return; /// I need to emulate the Data Trigger => to get DataSample of interest and optimise it
+    if(!triggerMETEmulationData.passedEvent()) return;
 
-    /// 3) tauID
+    // 3) GlobalMuonVeto
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    if (!muonVetoData.passedEvent()) return; 
+
+    // 4) GlobalElectronVeto
+    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
+    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    if (!electronVetoData.passedEvent()) return; 
+    
+    // 5) tauID
     // TauID (with optional factorization (recommended only for data and QCD))
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
     if (bUseFactorizedTauID) { // Returns 0 or 1 tau; see TauSelectionFactorized.cc for details
@@ -93,50 +105,41 @@ namespace HPlus {
     }
     if(!tauData.passedEvent()) return; // No tau found!
     
-    /// 4) MET 
+    // 6) MET 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     //if(!metData.passedEvent()) return;
 
-    /// 5) Jet Selection
+    // 7) Jet Selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    //if(!jetData.passedEvent()) return; /// after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    //if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     
-    /// 6) BTagging
+    // 8) BTagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
     //if(!btagData.passedEvent()) return;
 
-    /// 7) AlphaT
+    // 9) FakeMETVeto
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    // if (!fakeMETData.passedEvent()) return;
+    
+    // 10) AlphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
     //if(!evtTopologyData.passedEvent()) return;
 
-    /// 8) GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
-    if (!muonVetoData.passedEvent()) return; 
-
-    /// 9) GlobalElectronVeto
-    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
-    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-     if (!electronVetoData.passedEvent()) return; 
      
-    /// Create some variables
+    // Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
-    bool bDecision = triggerData.passedEvent() 
-      * triggerMETEmulationData.passedEvent()
-      * tauData.passedEvent()
-      * jetData.passedEvent()
-      * metData.passedEvent()
-      * btagData.passedEvent()
-      * evtTopologyData.passedEvent();
+    // bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent() * tauData.passedEvent() * jetData.passedEvent() * metData.passedEvent() * btagData.passedEvent() * evtTopologyData.passedEvent();
 
-    /// Fill Vectors for HPlusSignalOptimisation
+    // Fill Vectors for HPlusSignalOptimisation
     bTauIDStatus = tauData.passedEvent();
-    fTauJetEt = static_cast<float>((tauData.getSelectedTaus()[0])->pt());
-    fTauJetEt = static_cast<float>((tauData.getSelectedTaus()[0])->eta());
+    fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
+    fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
     fMET = metData.getSelectedMET()->et();
+    fFakeMETDeltaR = fakeMETData.closestDeltaR();
     iNHadronicJets = jetData.getHadronicJetCount();
     iNBtags = btagData.getBJetCount();
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
@@ -145,7 +148,7 @@ namespace HPlus {
     fDeltaPhi = deltaPhi;
     fAlphaT = sAlphaT.fAlphaT;
     
-    /// Fill TTree for HPlusSignalOptimisation
+    // Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
   }
 }
