@@ -16,8 +16,8 @@ TauolaPolar = cms.PSet(
 #)
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
-   muonSrc = cms.untracked.InputTag("selectedPatMuons"),
-   metSrc = cms.untracked.InputTag("patMETsPF")
+   muonSrc = cms.untracked.InputTag("tightMuons"),
+   metSrc = cms.untracked.InputTag("pfMet")
 )
 
 
