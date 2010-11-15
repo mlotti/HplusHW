@@ -100,7 +100,14 @@ def printCounterEfficiency(counterData, formatFunction=FloatAutoFormat()):
             count = counterData.getCount(irow, icol)
             prevCount = prevData[icol]
             if count != None and prevCount != None:
-                line += formatFunction(counterData.getColumnWidth(icol)) % (count.value() / prevCount.value())
+                value = float('NaN')
+                try:
+                    value = count.value() / prevCount.value()
+                except ZeroDivisionError:
+                    # Use the nan default
+                    pass
+                line += formatFunction(counterData.getColumnWidth(icol)) % value
+
             else:
                 line += " "*counterData.getColumnWidth(icol)
             prevData[icol] = count
