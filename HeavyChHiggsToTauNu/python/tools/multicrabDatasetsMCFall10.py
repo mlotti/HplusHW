@@ -264,20 +264,20 @@ datasets = {
     # Backgrounds for electroweak background measurement (Fall10)
     "QCD_Pt20_MuEnriched": {
         "dataVersion": "38X",
-        "crossSection": 296600000.,
+        "crossSection": 296600000.*0.0002855,
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 100, # Adjusted for PAT on the fly
+                "number_of_jobs": 200, # Adjusted for PAT on the fly
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
+                "number_of_jobs": 200,
             }
         },
     },
     "DYJetsToLL": { # Z+jets
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 2321,
         "data": {
             "RECO": {
