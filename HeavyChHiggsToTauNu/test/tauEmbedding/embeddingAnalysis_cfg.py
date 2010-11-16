@@ -18,7 +18,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("TauEmbeddingAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -26,6 +26,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/local_local_Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v2_52e54222a22093cabccf53a197393901_USER_tauembedding_generation_v2_30de4d1810b82a43ef34b86cea04d93e_USER_tauembedding_embedding_v2/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_2_1_fTj.root",
         "file:embedded_RECO.root"
   )
 )
@@ -110,8 +111,16 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("pfmet_", pfMET, [histoMet]),
         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
 
+process.embeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    tauSrc = cms.untracked.InputTag(taus.value()),
+    metSrc = cms.untracked.InputTag(pfMET.value()),
+    origMetSrc = cms.untracked.InputTag(pfMETOriginal.value())
+)
+
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    analysis.getSequence()
+    analysis.getSequence() *
+    process.embeddingAnalyzer
 )
