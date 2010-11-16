@@ -277,7 +277,7 @@ datasets = {
         },
     },
     "DYJetsToLL": { # Z+jets
-        "dataVersion": "38X",
+        "dataVersion": "38Xrelval",
         "crossSection": 2321,
         "data": {
             "RECO": {
