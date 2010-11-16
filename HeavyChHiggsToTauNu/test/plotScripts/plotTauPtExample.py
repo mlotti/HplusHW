@@ -182,10 +182,10 @@ eventCounter.normalizeMCByLuminosity()
 # function/functor giving a format for the printing)
 print "============================================================"
 print "Main counter (MC normalized by collision data luminosity)"
-printCounter(eventCounter.getMainCounterTable(), FloatDecimalFormat(1))
+print eventCounter.getMainCounterTable().format(FloatDecimalFormat(1))
 
 # Example how to print all subcounter names
 for subCounterName in eventCounter.getSubCounterNames():
     print "============================================================"
     print "Subcounter %s (MC normalized by collision data luminosity)" % subCounterName
-    printCounter(eventCounter.getSubCounterTable()) # Use the default format
+    print eventCounter.getSubCounterTable().format() # Use the default format

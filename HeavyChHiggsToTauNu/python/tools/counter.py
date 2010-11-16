@@ -73,23 +73,6 @@ class FormatText:
         else:
             ret += " + "+fmt%errorHigh + " - "+fmt%errorLow
 
-
-# Print the given counter table
-def printCounter(counterData, formatFunction=FloatAutoFormat()):
-    print counterData.formatHeader()
-
-    for irow in xrange(0, counterData.getNrows()):
-        line = counterData.formatFirstColumn(irow)
-
-        for icol in xrange(0, counterData.getNcolumns()):
-            count = counterData.getValue(irow, icol)
-            if count != None:
-                line += formatFunction(counterData.getColumnWidth(icol)) % count.value()
-            else:
-                line += " "*counterData.getColumnWidth(icol)
-
-        print line
-
 # Create a new counter table with the counter efficiencies
 def counterEfficiency(counterTable):
     result = counterTable.deepCopy()
@@ -107,6 +90,7 @@ def counterEfficiency(counterTable):
             result.setValue(irow, icol, value)
     return result
 
+# Counter column
 class CounterColumn:
     def __init__(self, name, rowNames, values):
         self.name = name
@@ -275,6 +259,23 @@ class CounterTable:
 
             irow += 1
 
+    def format(self, formatFunction=FloatAutoFormat()):
+        content = [self.formatHeader()]
+
+        for irow in xrange(0, self.getNrows()):
+            line = self.formatFirstColumn(irow)
+    
+            for icol in xrange(0, self.getNcolumns()):
+                count = self.getValue(irow, icol)
+                if count != None:
+                    line += formatFunction(self.getColumnWidth(icol)) % count.value()
+                else:
+                    line += " "*self.getColumnWidth(icol)
+    
+            content.append(line)
+        return "\n".join(content)
+            
+
 # Counter for one dataset
 class SimpleCounter:
     def __init__(self, histoWrapper):
@@ -361,7 +362,7 @@ class Counter:
         return table
 
     def printCounter(self, format=FloatAutoFormat()):
-        printCounter(self.getCounterTable(), format)
+        print self.getTable().format(format)
 
 # Many counters
 class EventCounter:
