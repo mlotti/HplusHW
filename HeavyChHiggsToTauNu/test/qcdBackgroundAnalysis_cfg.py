@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
-dataVersion = "38X"
+dataVersion = "38Xrelval"
 #dataVersion = "35Xredigi"
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
