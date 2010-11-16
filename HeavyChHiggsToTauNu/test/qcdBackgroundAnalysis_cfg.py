@@ -40,7 +40,6 @@ process.source = cms.Source('PoolSource',
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 # Uncomment the following in order to print the counters at the end of

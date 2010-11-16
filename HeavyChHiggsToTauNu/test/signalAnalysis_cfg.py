@@ -43,7 +43,6 @@ if options.doPat != 0:
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Uncomment the following in order to print the counters at the end of
