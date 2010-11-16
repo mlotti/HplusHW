@@ -169,6 +169,9 @@ class HistoWrapper:
     def isMC(self):
         return self.dataset.isMC()
 
+    def getBinLabels(self):
+        return [x[0] for x in histoToCounter(self.histo)]
+
     def getHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
@@ -217,6 +220,9 @@ class HistoWrapperMergedData:
     def getDataset(self):
         return self.dataset
 
+    def getBinLabels(self):
+        return self.datasetHistos[0].getBinLabels()
+
     def normalizeToOne(self):
         self.normalization = "toOne"
 
@@ -246,6 +252,9 @@ class HistoWrapperMergedMC:
 
     def getDataset(self):
         return self.dataset
+
+    def getBinLabels(self):
+        return self.datasetHistos[0].getBinLabels()
 
     def normalizeToOne(self):
         self.normalization = "toOne"

@@ -1,4 +1,5 @@
 import math
+import copy
 import ROOT
 
 from dataset import *
@@ -73,6 +74,7 @@ class FormatText:
             ret += " + "+fmt%errorHigh + " - "+fmt%errorLow
 
 
+# Print the given counter table
 def printCounter(counterData, formatFunction=FloatAutoFormat()):
     print counterData.formatHeader()
 
@@ -80,46 +82,205 @@ def printCounter(counterData, formatFunction=FloatAutoFormat()):
         line = counterData.formatFirstColumn(irow)
 
         for icol in xrange(0, counterData.getNcolumns()):
-            count = counterData.getCount(irow, icol)
+            count = counterData.getValue(irow, icol)
             if count != None:
                 line += formatFunction(counterData.getColumnWidth(icol)) % count.value()
             else:
                 line += " "*counterData.getColumnWidth(icol)
 
         print line
-            
-def printCounterEfficiency(counterData, formatFunction=FloatAutoFormat()):
-    print counterData.formatHeader()
 
-    prevData = [None] * counterData.getNcolumns()
-
-    for irow in xrange(0, counterData.getNrows()):
-        line = counterData.formatFirstColumn(irow)
-
-        for icol in xrange(0, counterData.getNcolumns()):
-            count = counterData.getCount(irow, icol)
-            prevCount = prevData[icol]
-            if count != None and prevCount != None:
-                value = float('NaN')
+# Create a new counter table with the counter efficiencies
+def counterEfficiency(counterTable):
+    result = counterTable.deepCopy()
+    for icol in xrange(0, counterTable.getNcolumns()):
+        prev = None
+        for irow in xrange(0, counterTable.getNrows()):
+            count = counterTable.getValue(irow, icol)
+            value = None
+            if count != None and prev != None:
                 try:
-                    value = count.value() / prevCount.value()
+                    value = Count(count.value() / prev.value(), None)
                 except ZeroDivisionError:
-                    # Use the nan default
                     pass
-                line += formatFunction(counterData.getColumnWidth(icol)) % value
+            prev = count
+            result.setValue(irow, icol, value)
+    return result
 
-            else:
-                line += " "*counterData.getColumnWidth(icol)
-            prevData[icol] = count
+class CounterColumn:
+    def __init__(self, name, rowNames, values):
+        self.name = name
+        self.rowNames = rowNames
+        self.values = values
 
-        print line
+        if len(rowNames) != len(values):
+            raise Exception("len(rowNames) != len(values) (%d != %d)" % (len(rowNames), len(values)))
 
+    def getName(self):
+        return self.name
+
+    def setName(self, name):
+        self.name = name
+
+    def getNrows(self):
+        return len(self.values)
+
+    def getRowName(self, irow):
+        return self.rowNames[irow]
+
+    def getValue(self, irow):
+        return self.values[irow]
+
+# Counter table, separated from Counter class in order to contain only
+# the table and to have the table operations separate
+class CounterTable:
+    def __init__(self):
+        self.rowNames = []
+        self.columnNames = []
+        self.table = [] # table[row][column]
+
+        self._updateRowColumnWidths()
+
+    def _updateRowColumnWidths(self):
+        rowNameWidth = 0
+        if len(self.rowNames) > 0:
+            rowNameWidth = max([len(x) for x in self.rowNames])
+        self.columnWidths = [max(15, len(x)+1) for x in self.columnNames]
+
+        self.rowNameFormat = "%%-%ds" % (rowNameWidth+2)
+        self.columnFormat = "%%%ds"
+
+    def deepCopy(self):
+        return copy.deepcopy(self)
+
+    def getNrows(self):
+        return len(self.table)
+
+    def getNcolumns(self):
+        if self.getNrows() == 0:
+            return 0
+        return len(self.table[0])
+
+    def getColumnWidth(self, icol):
+        return self.columnWidths[icol]
+
+    def getValue(self, irow, icol):
+        return self.table[irow][icol]
+
+    def setValue(self, irow, icol, value):
+        self.table[irow][icol] = value
+
+    def formatHeader(self):
+        header = self.rowNameFormat % "Counter"
+        for i, cname in enumerate(self.columnNames):
+            header += (self.columnFormat%self.columnWidths[i]) % cname
+        return header
+
+    def formatFirstColumn(self, irow):
+        return self.rowNameFormat % self.rowNames[irow]
+
+    def indexColumn(self, name):
+        return self.columnNames.index(name)
+
+    def appendColumn(self, column):
+        self.insertColumn(self.getNcolumns(), column)
+
+    def insertColumn(self, icol, column):
+        iname = 0
+        icount = 0
+
+        beginColumns = 0
+        if len(self.table) > 0:
+            beginColumns = len(self.table[0])
+
+        while iname < len(self.rowNames)  and icount < column.getNrows():
+            # Check if the current indices give the same counter name for both
+            if self.rowNames[iname] == column.getRowName(icount):
+                self.table[iname].insert(icol, column.getValue(icount))
+                iname += 1
+                icount += 1
+                continue
+
+            # Search the list of names for the name of count
+            found = False
+            for i in xrange(iname, len(self.rowNames)):
+                if self.rowNames[i] == column.getRowName(icount):
+                    self.table[i].insert(icol, column.getValue(icount))
+                    iname = i+1
+                    icount += 1
+                    found = True
+                    break
+                else:
+                    self.table[i].insert(icol, None)
+            if found:
+                continue
+
+            # Count not found, insert the count after the previous
+            # found name
+            self.rowNames.insert(iname, column.getRowName(icount))
+            row = [None]*(beginColumns+1)
+            row[icol] = column.getValue(icount)
+            self.table.insert(iname, row)
+            iname += 1
+            icount += 1
+
+        # Add the remaining counters from column
+        for i in xrange(icount, column.getNrows()):
+            self.rowNames.append(column.getRowName(i))
+            row = [None]*(beginColumns+1)
+            row[icol] = column.getValue(i)
+            self.table.append(row)
+
+        # Sanity check
+        for row in self.table:
+            if len(row) < beginColumns+1:
+                print row
+                raise Exception("Internal error: len(row) = %d, beginColumns = %d" % (len(row), beginColumns))
+
+        self.columnNames.insert(icol, column.getName())
+        self._updateRowColumnWidths()
+
+    def getColumn(self, icol):
+        # Extract the data for the column
+        rowNames = self.rowNames[:]
+        colValues = [self.table[irow][icol] for irow in xrange(0, self.getNrows())]
+
+        # Filter out Nones
+        i = 0
+        while i < len(colValues):
+            if colValues[i] == None:
+                del rowNames[i]
+                del colValues[i]
+                i -= 1
+            i += 1
+
+        # Construct the column object
+        return CounterColumn(self.columnNames[icol], rowNames, colValues)
+
+    def removeColumn(self, icol):
+        def rowAllNone(row):
+            for col in row:
+                if col != None:
+                    return False
+            return True
+
+        del self.columnNames[icol]
+        irow = 0
+        while irow < len(self.table):
+            del self.table[irow][icol]
+            if rowAllNone(self.table[irow]):
+                del self.rowNames[irow]
+                del self.table[irow]
+                irow -= 1
+
+            irow += 1
 
 # Counter for one dataset
 class SimpleCounter:
     def __init__(self, histoWrapper):
         self.histoWrapper = histoWrapper
         self.counter = None
+        self.countNames = histoWrapper.getBinLabels()
 
     def normalizeToOne(self):
         if self.counter != None:
@@ -138,20 +299,29 @@ class SimpleCounter:
         if self.histoWrapper.getDataset().isMC():
             self.histoWrapper.normalizeToLuminosity(lumi)
 
-    def createCounter(self):
-        self.counter = histoToCounter(self.histoWrapper.getHistogram())
+    def _createCounter(self):
+        self.counter = [x[1] for x in histoToCounter(self.histoWrapper.getHistogram())]
 
-    def getCounts(self):
-        if self.counter == None:
-            self.createCounter()
-        return self.counter
+    def getName(self):
+        return self.histoWrapper.getDataset().getName()
 
-    def getCountValue(self, name):
+    def getNrows(self):
+        return len(self.countNames)
+
+    def getRowName(self, icount):
+        return self.countNames[icount]
+
+    def getValue(self, icount):
         if self.counter == None:
-            self.createCounter()
-        for c in self.counter:
-            if c[0] == name:
-                return c[1]
+            self._createCounter()
+        return self.counter[icount]
+
+    def getCountByName(self, name):
+        if self.counter == None:
+            self._createCounter()
+        for i, cn in enumerate(self.countNames):
+            if cn == name:
+                return self.counter[i]
         raise Exception("No counter '%s'" % name)
 
 # Counter for many datasets
@@ -184,138 +354,14 @@ class Counter:
     def normalizeMCToLuminosity(self, lumi):
         self.forEachDataset(lambda x: x.normalizeMCToLuminosity(lumi))
 
-    def getCounterData(self):
-        names = []
-
-        # 2D list, counter[cut][dataset] (cut[row][column])
-        counter = []
-
-        # Loop over datasets
-        for icounter, c in enumerate(self.counters):
-            counts = c.getCounts()
-
-            iname = 0
-            icount = 0
-
-            while iname < len(names) and icount < len(counts):
-                # Check if the current indices give the same counter name for both
-                if names[iname] == counts[icount][0]:
-                    counter[iname].append(counts[icount][1])
-                    iname += 1
-                    icount += 1
-                    continue
-
-                # Search the list of names for the name of count
-                found = False
-                for i in xrange(iname, len(names)):
-                    if names[i] == counts[icount][0]:
-                        counter[i].append(counts[icount][1])
-                        iname = i+1
-                        icount += 1
-                        found = True
-                        continue
-                if found:
-                    continue
-
-                # Count not found, insert the count after the previous
-                # found name
-                names.insert(iname, counts[icount][0])
-                counter.insert(iname, [None]*icounter+[counts[icount][1]])
-                iname += 1
-                icount += 1
-
-            if icount < len(counts):
-                for name, count in counts[icount:]:
-                    names.append(name)
-                    counter.append([None]*icounter+[count])
-
-            for c in counter:
-                if len(c) < icounter+1:
-                    c.extend([None] * (icounter+1-len(c)))
-
-        return CounterData(names, [c.histoWrapper.getDataset().getName() for c in self.counters], counter)
-
-    def getCountValue(self, datasetName, countName):
-        for c in self.counters:
-            if c.histoWrapper.getDataset().getName() == datasetName:
-                return c.getCountValue(countName)
-
-        raise Exception("No dataset '%s'" % datasetName)
+    def getTable(self):
+        table = CounterTable()
+        for h in self.counters:
+            table.appendColumn(h)
+        return table
 
     def printCounter(self, format=FloatAutoFormat()):
-        printCounter(self.getCounterData(), format)
-
-class CounterData:
-    def __init__(self, countNames, columnNames, counter):
-        self.countNames = countNames
-        self.columnNames = columnNames
-        self.counter = counter
-
-        nameWidth = max([len(x) for x in self.countNames])
-        self.countNameFormat = "%%-%ds" % (nameWidth+2)
-
-        self.columnWidths = []
-        for dname in self.columnNames:
-            self.columnWidths.append(max(15, len(dname)+2))
-        self.columnFormat = "%%%ds"
-
-    def getNrows(self):
-        return len(self.counter)
-
-    def getNcolumns(self):
-        return len(self.counter[0])
-
-    def getColumnWidth(self, icol):
-        return self.columnWidths[icol]
-
-    def getCount(self, irow, icol):
-        return self.counter[irow][icol]
-
-    def formatHeader(self):
-        header = self.countNameFormat % "Counter"
-        for i, dname in enumerate(self.columnNames):
-            header += (self.columnFormat%self.columnWidths[i]) % dname
-        return header
-
-    def formatFirstColumn(self, irow):
-        return self.countNameFormat % self.countNames[irow]
-
-class CounterEfficiency:
-    def __init__(self, counterData):
-        self.counterData = counterData
-        self._calculateEfficiencies()
-
-    def _calculateEfficiencies(self):
-        self.efficiencies = []
-        for i in xrange(0, self.counterData.getNrows()):
-            self.efficiencies.append([])
-
-        prevData = [None] * self.counterData.getNcolumns()
-        for irow in xrange(0, self.counterData.getNrows()):
-            for icol in xrange(0, self.counterData.getNcolumns()):
-                count = self.counterData.getCount(irow, icol)
-                prevCount = prevData[icol]
-
-                value = None
-                if count != None and prevCount != None:
-                    try:
-                        value = Count(count.value() / prevCount.value(), None)
-                    except ZeroDivisionError:
-                        pass
-                prevData[icol] = count
-                self.efficiencies[irow].append(value)
-
-    # Delegate all non-implemented methods to CounterData
-    def __getattr__(self, name):
-        return getattr(self.counterData, name)
-
-    def getCount(self, irow, icol):
-        return self.efficiencies[irow][icol]
-                
-
-
-def isHistogram(obj):
-    return isinstance(obj, ROOT.TH1)
+        printCounter(self.getCounterTable(), format)
 
 # Many counters
 class EventCounter:
@@ -334,7 +380,7 @@ class EventCounter:
                 if counterDir != dataset.getCounterDirectory():
                     raise Exception("Sanity check failed, datasets have different counter directories!")
 
-            for name in dataset.getDirectoryContent(counterDir, isHistogram):
+            for name in dataset.getDirectoryContent(counterDir, lambda obj: isinstance(obj, ROOT.TH1)):
                 counterNames[name] = 1
 
         try:
@@ -373,8 +419,8 @@ class EventCounter:
     def getMainCounter(self):
         return self.mainCounter
 
-    def getMainCounterData(self):
-        return self.mainCounter.getCounterData()
+    def getMainCounterTable(self):
+        return self.mainCounter.getTable()
 
     def getSubCounterNames(self):
         return self.subCounters.keys()
@@ -382,8 +428,8 @@ class EventCounter:
     def getSubCounter(self, name):
         return self.subCounters[name]
 
-    def getSubCounterData(self, name):
-        return self.subCounters[name].getCounterData()
+    def getSubCounterTable(self, name):
+        return self.subCounters[name].getTable()
 
     def getNormalizationString(self):
         return self.normalization

@@ -320,15 +320,25 @@ eventCounter.normalizeMCByLuminosity()
 
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
-printCounter(eventCounter.getMainCounterData(), FloatDecimalFormat(1))
-print "------------------------------------------------------------"
-printCounterEfficiency(eventCounter.getMainCounterData(), FloatDecimalFormat(4))
+printCounter(eventCounter.getMainCounterTable(), FloatDecimalFormat(1))
+# print "------------------------------------------------------------"
+# printCounter(counterEfficiency(eventCounter.getMainCounterTable()), FloatDecimalFormat(4))
+
+# mainTable = eventCounter.getMainCounterTable()
+# effTable = counterEfficiency(mainTable)
+# for icol in xrange(0, effTable.getNcolumns()):
+#     column = effTable.getColumn(icol)
+#     column.setName(column.getName()+" eff")
+#     mainTable.insertColumn(icol*2+1, column)
+
+# print "------------------------------------------------------------"
+# printCounter(mainTable, FloatDecimalFormat(4))
 
 
 eventCounter = EventCounter(datasetsMC)
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
-printCounter(eventCounter.getMainCounterData(), FloatDecimalFormat(0))
+printCounter(eventCounter.getMainCounterTable(), FloatDecimalFormat(0))
 
 if QCDdetails:
     print "============================================================"
