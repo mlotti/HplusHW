@@ -4,10 +4,9 @@
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 
 #include <string>
 #include <vector>
@@ -18,27 +17,32 @@ namespace edm {
   class EventSetup;
 }
 
+namespace pat {
+  class TriggerEvent;
+}
+
+class TH1;
+
 namespace HPlus {
+  class EventWeight;
+  class EventCounter;
+
   class TriggerSelection {
   public:
     class Data;
     class TriggerPath {
         public:
-            TriggerPath(const edm::ParameterSet&, std::string, EventCounter&, EventWeight&);
+      TriggerPath(const std::string& path, EventCounter& eventCounter);
             ~TriggerPath();
 
-            Data analyze(const edm::Event&, const edm::EventSetup&);
+            bool analyze(const pat::TriggerEvent& trigger);
 
         private:
             // Input parameters
-            edm::InputTag fSrc;
             std::string fPath;
 
             // Counters
             Count fTriggerCount;
-
-            // EventWeight object
-            EventWeight& fEventWeight;
     };
 
       /**
@@ -51,12 +55,17 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const TriggerPath *triggerPath, bool passedEvent);
+      Data(const TriggerSelection *triggerSelection, const TriggerPath *triggerPath, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
 
+      pat::TriggerObjectRef getHltMetObject() const {
+	return fTriggerSelection->fHltMet;
+      }
+
     private:
+      const TriggerSelection *fTriggerSelection;
       const TriggerPath *fTriggerPath;
       const bool fPassedEvent;
     };
@@ -68,11 +77,23 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    TriggerMETEmulation fTriggerMETEmulation;
     std::vector<TriggerPath* > triggerPaths;
+    edm::InputTag fSrc;
+    double fMetCut;
+
+    EventWeight& fEventWeight;
 
     // Counters
+    Count fTriggerPathCount;
     Count fTriggerCount;
+
+    Count fTriggerHltMetExistsCount;
+
+    // Histograms
+    TH1 *hHltMet;
+
+    // Analysis results
+    pat::TriggerObjectRef fHltMet;
   };
 }
 

@@ -196,6 +196,7 @@ namespace HPlus {
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
 
+
       // 2) Apply Eta cut requirement      
       if (std::fabs(myElectronEta) > fElecEtaCut) continue;
       bElecEtaCut = true;

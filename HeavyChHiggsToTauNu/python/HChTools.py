@@ -19,7 +19,7 @@ from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 #           str(value) is used. This name is appended to the prefix to obtain
 #           a name for the analysis module.
 
-def addAnalysisArray(process, prefix, exemplar, func, values, names=None):
+def addAnalysisArray(process, prefix, exemplar, func, values, names=None, preSequence=None, additionalCounters=[]):
     if names == None:
         names = [str(x) for x in values]
     
@@ -38,13 +38,23 @@ def addAnalysisArray(process, prefix, exemplar, func, values, names=None):
         counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
             counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
             counterInstances = cms.untracked.InputTag(analysisName, "counterInstances"),
-            verbose = cms.untracked.bool(False)
+            printMainCounter = cms.untracked.bool(False),
+            printSubCounters = cms.untracked.bool(False),
+            printAvailableCounters = cms.untracked.bool(False),
         )
+        if len(additionalCounters) > 0:
+            counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+
+        path = cms.Path()
+        if preSequence != None:
+            path *= preSequence
+        path *= m
+        path *= counter
 
         # Add modules and path to process
-        process.__setattr__(analysisName, m)
-        process.__setattr__(counterName, counter)
-        process.__setattr__(pathName, cms.Path(m*counter))
+        setattr(process, analysisName, m)
+        setattr(process, counterName, counter)
+        setattr(process, pathName, path)
 
 
 # Add an object selector, count filter and event counter for one cut
@@ -286,7 +296,9 @@ class Analysis:
         setattr(self.process, prefix+allCounterName, countAll)
 
         # Create the analysis sequence
-        self.sequence = cms.Sequence(countAll*process.genRunInfo*process.configInfo)
+        self.sequence = cms.Sequence(countAll*process.configInfo)
+        if hasattr(process, "genRunInfo"):
+            self.sequence *= process.genRunInfo
         setattr(self.process, prefix+seqname, self.sequence)
 
         # Create the count analyzer

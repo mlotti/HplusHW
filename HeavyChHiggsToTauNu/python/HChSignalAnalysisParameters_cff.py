@@ -4,24 +4,19 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-#    trigger = cms.untracked.string("HLT_SingleLooseIsoTau20") # in 36X/35X MC and Run2010A data
-#    trigger = cms.untracked.string("HLT_SingleIsoTau20_Trk5_MET20") # in 38X MC and Run2010B data
     triggers = cms.untracked.vstring("HLT_SingleIsoTau20_Trk5",
-                                     "HLT_SingleIsoTau20_Trk5_MET20",
+                                     "HLT_SingleIsoTau20_Trk15_MET20",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4"
     ),
-    TriggerMETEmulation = cms.untracked.PSet(
-        src = cms.untracked.InputTag("patMETs"), # calo MET
-        metEmulationCut = cms.untracked.double(30.0)
-    )
+    hltMetCut = cms.untracked.double(20.0),
 )
 #TriggerMETEmulation = cms.untracked.PSet(
 #    src = cms.untracked.InputTag("patMETs"), # calo MET
 #    metEmulationCut = cms.untracked.double(30.0)
 #)
 
-useFactorizedTauID = cms.untracked.bool(True)
+useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
@@ -30,7 +25,8 @@ tauSelectionBase = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.8), #no change
-    invMassCut = cms.untracked.double(1.5) #no change
+    invMassCut = cms.untracked.double(1.5), #no change
+    nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: use it in TauSelection.cc
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone()
@@ -56,9 +52,10 @@ tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPatJets"),
+    #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
+    #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
+    src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
-    #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"),
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),

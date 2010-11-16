@@ -87,13 +87,20 @@ class HPlusEventCountAnalyzer: public edm::EDAnalyzer {
   edm::InputTag counterNames;
   edm::InputTag counterInstances;
 
-  bool print;
+  size_t countersPlainEnd;
+
+  bool printMainCounter;
+  bool printSubCounters;
+  bool printAvailableCounters;
   bool countersGiven;
   bool counterNamesGiven;
 };
 
 HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
-  print(pset.getUntrackedParameter<bool>("verbose", false)), 
+  countersPlainEnd(0),
+  printMainCounter(pset.getUntrackedParameter<bool>("printMainCounter", false)), 
+  printSubCounters(pset.getUntrackedParameter<bool>("printSubCounters", false)), 
+  printAvailableCounters(pset.getUntrackedParameter<bool>("printAvailableCounters", false)), 
   countersGiven(false), 
   counterNamesGiven(false)
 {
@@ -103,6 +110,7 @@ HPlusEventCountAnalyzer::HPlusEventCountAnalyzer(const edm::ParameterSet& pset):
       counters.push_back(tags[i]);
     }
   }
+  countersPlainEnd = counters.size();
   countersGiven = !counters.empty();
 
   if(pset.exists("counterNames")) {
@@ -125,7 +133,7 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
     // Read first the plain edm::MergeableCounters 
     if(countersGiven) {
       edm::Handle<edm::MergeableCounter> count;
-      for(size_t i=0; i<counters.size(); ++i) {
+      for(size_t i=0; i<countersPlainEnd; ++i) {
         lumi.getByLabel(counters[i].tag_, count);
         counters[i].count_ += count->value;
       }
@@ -167,14 +175,18 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
       }
     }
 
-    std::vector<edm::Handle<edm::MergeableCounter> > counts;
-    lumi.getManyByType(counts);
-    for(size_t i=0; i<counts.size(); ++i) {
-      const edm::Provenance *prov = counts[i].provenance();
-      edm::InputTag tag(prov->moduleLabel(), prov->productInstanceName(), prov->processName());
-      std::vector<edm::InputTag> ::iterator found = std::find(available.begin(),  available.end(), tag);
-      if(found == available.end())
-        available.push_back(tag);
+    // Minor performance improvement: there's no need to gather the
+    // information of available counters if they're not printed.
+    if(printAvailableCounters) {
+      std::vector<edm::Handle<edm::MergeableCounter> > counts;
+      lumi.getManyByType(counts);
+      for(size_t i=0; i<counts.size(); ++i) {
+        const edm::Provenance *prov = counts[i].provenance();
+        edm::InputTag tag(prov->moduleLabel(), prov->productInstanceName(), prov->processName());
+        std::vector<edm::InputTag> ::iterator found = std::find(available.begin(),  available.end(), tag);
+        if(found == available.end())
+          available.push_back(tag);
+      }
     }
   }
   else {
@@ -262,16 +274,17 @@ void HPlusEventCountAnalyzer::endJob() {
     }
   }
 
-  if(!print)
-    return;
-
   bool order = counterNamesGiven || countersGiven;
-  printCounter(cat, order, mainCounter, "main counter");
-  for(size_t i=0; i<subCounters.size(); ++i) {
-    printCounter(cat, order, subCounters[i].counts_, subCounters[i].name_.c_str());
+  if(printMainCounter) {
+    printCounter(cat, order, mainCounter, "main counter");
+  }
+  if(printSubCounters) {
+    for(size_t i=0; i<subCounters.size(); ++i) {
+      printCounter(cat, order, subCounters[i].counts_, subCounters[i].name_.c_str());
+    }
   }
 
-  if(countersGiven) {
+  if(printAvailableCounters && countersGiven) {
     edm::LogVerbatim(cat) << std::endl;
     edm::LogVerbatim(cat) << "Available counters in the file" << std::endl;
     for(size_t i=0; i<available.size(); ++i) {

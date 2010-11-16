@@ -468,9 +468,6 @@ namespace HPlus {
                 increment(fagainstElectronSubCount);
                 ++againstElectronCutPassed;
 
-		if(iTau->tauID("byTightIsolation") < 0.5 ) continue;
-		increment(fbyHPSIsolationSubCount);
-		++byTightIsolationPassed;
 
 		if(leadTrk.isNonnull())
 		  hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
@@ -478,6 +475,30 @@ namespace HPlus {
 		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
 		increment(fLeadTrkPtSubCount);
 		++leadTrkPtCutPassed;
+
+		if(iTau->tauID("byTightIsolation") < 0.5 ) continue;
+		increment(fbyHPSIsolationSubCount);
+		++byTightIsolationPassed;
+
+		uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
+		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
+		if(nSigTracks != 1 ) continue;
+		increment(fnProngsSubCount);
+		++nProngsCutPassed;
+
+
+		float Rtau = 0;
+		if (iTau->p() > 0) Rtau =  leadTrk->p()/iTau->p();
+		//		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
+		if (Rtau > 1 ) {
+		  hEtaRtau->Fill(iTau->eta());
+		}
+		hRtau->Fill(Rtau);
+    
+		if(Rtau < fRtauCut) continue; 
+		increment(fRtauSubCount);
+		++RtauCutPassed;
+
 /* ONLY HPS discriminators available, please do not uncomment unless sure the are included!
 		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
 		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
@@ -535,23 +556,24 @@ namespace HPlus {
         if(againstElectronCutPassed == 0) return false;
         increment(fagainstElectronCount);
 
-	if(byTightIsolationPassed == 0) return false;
-	increment(fHPSIsolationCount);
 
 	if(leadTrkPtCutPassed == 0) return false;
 	increment(fLeadTrkPtCount); 
 
+	if(byTightIsolationPassed == 0) return false;
+	increment(fHPSIsolationCount);
+
 	if(nProngsCutPassed == 0) return false;
 	increment(fnProngsCount);
 
-	if(HChTauIDchargeCutPassed == 0) return false;
-	increment(fHChTauIDchargeCount);       
+	//	if(HChTauIDchargeCutPassed == 0) return false;
+	//	increment(fHChTauIDchargeCount);       
 
 	if(RtauCutPassed == 0) return false;
 	increment(fRtauCount);
 
-	if(InvMassCutPassed == 0) return false;
-	increment(fInvMassCount);
+	//	if(InvMassCutPassed == 0) return false;
+	//	increment(fInvMassCount);
 
         return true;
   }

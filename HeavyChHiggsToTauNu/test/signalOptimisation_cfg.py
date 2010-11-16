@@ -107,6 +107,7 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     GlobalMuonVeto = param.GlobalMuonVeto,
     GlobalElectronVeto = param.GlobalElectronVeto
 )
+
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID

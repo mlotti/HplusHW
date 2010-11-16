@@ -1,3 +1,4 @@
+import math
 import ROOT
 
 from dataset import *
@@ -19,6 +20,58 @@ class FloatExpFormat:
         self.format = "%%%d."+str(decimals)+"e"
     def __call__(self, width):
         return self.format % width
+
+class FormatText:
+    def __init__(self, valuePrecision=4, errorPrecision=4,
+                 begin="", separator = "  ", end = "",
+                 numberFormat="g"): # f, e, g as for printf
+        self.valuePrecision = valuePrecision
+        self.errorPrecision = errorPrecision
+        self.errorEpsilon = math.pow(10., -1.0*errorPrecision)
+        self.begin = begin
+        self.separator = separator
+        self.end = end
+        self.format = numberFormat
+                 
+    def beginTable(self):
+        return ""
+
+    def endTable(self):
+        return ""
+
+    def beginLine(self):
+        return self.begin
+
+    def endLine(self):
+        return self.end
+
+    def beginColumn(self):
+        return ""
+
+    def endColumn(self):
+        return self.separator
+
+    def number(self, value, error=None, errorLow=None, errorHigh=None):
+        if error != None and (errorLow != None or errorHigh != None):
+            raise Exception("Only either error or errorLow and errorHigh can be set")
+        if errorLow != None and errorHigh == None or errorLow == None and errorHigh != None:
+            raise Exception("Both errorLow and errorHigh must be set")
+
+        fmt = "%"+str(self.valuePrecision)+"."+self.format
+        ret = fmt % value
+        if error == None and errorLow == None:
+            return ret
+
+        fmt = "%"+str(self.errorPrecision)+"."+self.format
+        if error != None:
+            ret += " +- " + fmt%error
+            return ret
+
+        if abs(errorHigh-errorLow)/errorHigh < self.errorEpsilon:
+            ret += " +- " + fmt%errorLow
+        else:
+            ret += " + "+fmt%errorHigh + " - "+fmt%errorLow
+
 
 # Counter for one dataset
 class SimpleCounter:
@@ -72,7 +125,7 @@ class Counter:
         self.forEachDataset(lambda x: x.normalizeToOne())
 
     def normalizeMCByCrossSection(self):
-        self.forEachDataset(lambda x: x.normalizeMCToCrossSection())
+        self.forEachDataset(lambda x: x.normalizeMCByCrossSection())
 
     def normalizeMCByLuminosity(self):
         lumi = None
@@ -181,10 +234,16 @@ class CounterImpl:
                     line += " "*columnWidths[icol]
             print line
 
+def isHistogram(obj):
+    return isinstance(obj, ROOT.TH1)
+
 # Many counters
 class EventCounter:
     def __init__(self, datasets):
         counterNames = {}
+
+        if len(datasets.getAllDatasets()) == 0:
+            raise Exception("No datasets")
 
         # Pick all possible names of counters
         counterDir = None
@@ -195,15 +254,20 @@ class EventCounter:
                 if counterDir != dataset.getCounterDirectory():
                     raise Exception("Sanity check failed, datasets have different counter directories!")
 
-            for name in dataset.getDirectoryContent(counterDir):
+            for name in dataset.getDirectoryContent(counterDir, isHistogram):
                 counterNames[name] = 1
 
-        del counterNames["counter"]
+        try:
+            del counterNames["counter"]
+        except KeyError:
+            raise Exception("Internal error: no 'counter' histogram in the '%s' directories" % counterDir)
 
         self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"))
         self.subCounters = {}
         for subname in counterNames.keys():
             self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname))
+
+        self.normalization = "None"
 
     def forEachCounter(self, func):
         func(self.mainCounter)
@@ -212,15 +276,19 @@ class EventCounter:
 
     def normalizeToOne(self):
         self.forEachCounter(lambda x: x.normalizeToOne())
+        self.normalization = "All normalized to unit area"
 
     def normalizeMCByCrossSection(self):
-        self.forEachCounter(lambda x: x.normalizeMCToCrossSection())
+        self.forEachCounter(lambda x: x.normalizeMCByCrossSection())
+        self.normalization = "MC normalized to cross section (pb)"
 
     def normalizeMCByLuminosity(self):
         self.forEachCounter(lambda x: x.normalizeMCByLuminosity())
+        self.normalization = "MC normalized by data luminosity"
 
     def normalizeMCToLuminosity(self, lumi):
         self.forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
+        self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
 
     def getMainCounter(self):
         return self.mainCounter
@@ -230,3 +298,6 @@ class EventCounter:
 
     def getSubCounter(self, name):
         return self.subCounters[name]
+
+    def getNormalizationString(self):
+        return self.normalization

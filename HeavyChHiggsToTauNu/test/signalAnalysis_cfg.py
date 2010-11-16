@@ -20,17 +20,17 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
 	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
-	"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root"
+	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root"
         # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
+        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -52,7 +52,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 500
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 process.TFileService.fileName = "histograms.root"
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
@@ -80,6 +80,9 @@ if options.doPat != 0:
         process.collisionDataSelection *
         addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
     )
+additionalCounters = []
+if dataVersion.isData():
+    additionalCounters = dataSelectionCounters[:]
 
 
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
@@ -115,7 +118,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     EvtTopology = param.EvtTopology
 )
 
-print "Trigger:", process.signalAnalysis.trigger.trigger
+print "Trigger:", process.signalAnalysis.trigger
+print "Cut on HLT MET: ", process.signalAnalysis.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
@@ -128,8 +132,13 @@ print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTa
 process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
-    verbose = cms.untracked.bool(True)
+    printMainCounter = cms.untracked.bool(True),
+    printSubCounters = cms.untracked.bool(False),
+    printAvailableCounters = cms.untracked.bool(False),
 )
+if len(additionalCounters) > 0:
+    process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
@@ -149,6 +158,7 @@ process.signalAnalysisPath = cms.Path(
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 # addAnalysisArray(process, "signalAnalysisTauPt", process.signalAnalysis, setTauPt,
 #                  [10, 20, 30, 40, 50])
+
 def setTauSelection(m, val):
     m.tauSelection = val
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
@@ -157,10 +167,12 @@ addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelect
 		  param.tauSelectionShrinkingConeTaNCBased,
 		  param.tauSelectionCaloTauCutBased,
 		  param.tauSelectionHPSTauBased],
-		 ["TauSelectionShrinkingConeCutBased",
+		 names = ["TauSelectionShrinkingConeCutBased",
 		  "TauSelectionShrinkingConeTaNCBased",
 		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"])
+		  "TauSelectionHPSTauBased"],
+                 preSequence = process.patSequence,
+                 additionalCounters = additionalCounters)
 
 
 # Print tau discriminators from one tau from one event

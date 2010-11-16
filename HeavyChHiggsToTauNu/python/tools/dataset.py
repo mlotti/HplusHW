@@ -64,16 +64,28 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
             counters = opts.counterdir
 
     dlist = []
+    noFiles = False
     for d in taskdirs:
         files = glob.glob(os.path.join(d, "res", opts.input))
         if len(files) > 1:
             raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
             return 1
         elif len(files) == 0:
-            print >> sys.stderr, "No files matched to input for task %s, ignoring the dataset" % d
+            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, opts.input, os.path.join(d, "res"))
+            noFiles = True
             continue
 
         dlist.append( (d, files[0]) )
+
+    if noFiles:
+        print >> sys.stderr, ""
+        print >> sys.stderr, "  There were datasets without files. Have you merged the files with hplusMergeHistograms.py?"
+        print >> sys.stderr, ""
+        if len(dlist) == 0:
+            raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
+
+    if len(dlist) == 0:
+        raise Exception("No datasets")
 
     return getDatasetsFromRootFiles(dlist, counters)
 
@@ -83,11 +95,11 @@ def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
         datasets.append(Dataset(name, f, counters))
     return datasets
 
-def readDataset(fname, counters, datasetname, crossSections):
-    dataset = Dataset(datasetname, fname, counters)
-    if datasetname in crossSections:
-        dataset.setCrossSection(crossSections[datasetname])
-    return dataset
+#def readDataset(fname, counters, datasetname, crossSections):
+#    dataset = Dataset(datasetname, fname, counters)
+#    if datasetname in crossSections:
+#        dataset.setCrossSection(crossSections[datasetname])
+#    return dataset
 
 
 def normalizeToOne(h):
@@ -232,12 +244,13 @@ class HistoWrapperMergedMC:
     def normalizeToOne(self):
         self.normalization = "toOne"
         for h in self.datasetHistos:
-            h.normalizeByCrossSection
+            h.normalizeByCrossSection()
+	raise Exception("Not implemented yet!")
 
     def normalizeByCrossSection(self):
         self.normalization = "byCrossSection"
         for h in self.datasetHistos:
-            h.normalizeByCrossSection
+            h.normalizeByCrossSection()
 
     def normalizeToLuminosity(self, lumi):
         self.normalization = "toLuminosity"
@@ -321,7 +334,7 @@ class Dataset:
         h.SetName(name.translate(None, "-+.:;"))
         return HistoWrapper(h, self)
 
-    def getDirectoryContent(self, directory):
+    def getDirectoryContent(self, directory, predicate=lambda x: True):
         d = self.file.Get(directory)
         dirlist = d.GetListOfKeys()
         diriter = dirlist.MakeIterator()
@@ -329,7 +342,8 @@ class Dataset:
 
         ret = []
         while key:
-            ret.append(key.GetName())
+            if predicate(key.ReadObj()):
+                ret.append(key.GetName())
             key = diriter.Next()
         return ret
 
@@ -401,10 +415,10 @@ class DatasetMerged:
         else:
             return HistoWrapperMergedData(wrappers, self)
 
-    def getDirectoryContent(self, directory):
-        content = self.datasets[0].getDirectoryContent(directory)
+    def getDirectoryContent(self, directory, predicate=lambda x: True):
+        content = self.datasets[0].getDirectoryContent(directory, predicate)
         for d in self.datasets[1:]:
-            if content != d.getDirectoryContent(directory):
+            if content != d.getDirectoryContent(directory, predicate):
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
 
