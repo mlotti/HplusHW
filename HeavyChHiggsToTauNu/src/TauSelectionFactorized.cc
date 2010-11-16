@@ -29,6 +29,7 @@ namespace HPlus {
     fTauSelection(tauSelectionObject)
   {
     edm::Service<TFileService> fs;
+    // Weighted histograms
     hPtSelectedTaus = fs->make<TH1F>("factorized_tau_pt", "tau_pt", 100, 0., 200.);
     hEtaSelectedTaus = fs->make<TH1F>("factorized_tau_eta", "tau_eta", 60, -3., 3.);
     hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
@@ -37,6 +38,13 @@ namespace HPlus {
     hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
     hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
     hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    // Unweighted histograms
+    hPtBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_before_tauID_unweighted", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_after_tauID_unweighted", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_before_tauID_unweighted", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_after_tauID_unweighted", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID_unweighted", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID_unweighted", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
 
     hCategory = fs->make<TH1F>("factorized_tau_category", "factorized_tau_category", 5, 0, 5);
     hCategory->GetXaxis()->SetBinLabel(1, "All events");
@@ -127,6 +135,9 @@ namespace HPlus {
       hPtBeforeTauID->Fill(iTau->pt(), fEventWeight.getWeight());
       hEtaBeforeTauID->Fill(iTau->eta(), fEventWeight.getWeight());
       hPtVsEtaBeforeTauID->Fill(iTau->pt(), iTau->eta(), fEventWeight.getWeight());
+      hPtBeforeTauIDUnweighted->Fill(iTau->pt());
+      hEtaBeforeTauIDUnweighted->Fill(iTau->eta());
+      hPtVsEtaBeforeTauIDUnweighted->Fill(iTau->pt(), iTau->eta());
     }
     // Do tau ID
     TauSelection::Data myTauSelectionData = fTauSelection.analyze(iEvent, iSetup, taus);
@@ -138,6 +149,9 @@ namespace HPlus {
       hPtAfterTauID->Fill(iTau->pt(), fEventWeight.getWeight());
       hEtaAfterTauID->Fill(iTau->eta(), fEventWeight.getWeight());
       hPtVsEtaAfterTauID->Fill(iTau->pt(), iTau->eta(), fEventWeight.getWeight());
+      hPtAfterTauIDUnweighted->Fill(iTau->pt());
+      hEtaAfterTauIDUnweighted->Fill(iTau->eta());
+      hPtVsEtaAfterTauIDUnweighted->Fill(iTau->pt(), iTau->eta());
     }
 
     // Return the tau selection data

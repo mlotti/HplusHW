@@ -77,12 +77,20 @@ namespace HPlus {
     TH1 *hPtSelectedTaus;
     TH1 *hEtaSelectedTaus;
     TH1 *hCategory;
+    // Weighted histograms
     TH1 *hPtBeforeTauID;
     TH1 *hPtAfterTauID;
     TH1 *hEtaBeforeTauID;
     TH1 *hEtaAfterTauID;
     TH2 *hPtVsEtaBeforeTauID;
     TH2 *hPtVsEtaAfterTauID;
+    // Unweighted histograms (needed to obtain the statistical error)
+    TH1 *hPtBeforeTauIDUnweighted;
+    TH1 *hPtAfterTauIDUnweighted;
+    TH1 *hEtaBeforeTauIDUnweighted;
+    TH1 *hEtaAfterTauIDUnweighted;
+    TH2 *hPtVsEtaBeforeTauIDUnweighted;
+    TH2 *hPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
     double fFactorization;
