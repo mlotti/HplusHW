@@ -35,14 +35,14 @@ def main(opts):
         print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect', 'eff'" % opts.mode
         return 1
 
-    printFunc = lambda data: counter.printCounter(data, counter.FloatAutoFormat())
+    formatFunc = lambda table: table.format(counter.FloatAutoFormat())
     if opts.mode == "eff":
-        printFunc = lambda data: counter.printCounterEfficiency(data, counter.FloatDecimalFormat(4))
+        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.FloatDecimalFormat(4))
         quantity = "Cut efficiencies"
 
     print "============================================================"
     print "Main counter %s: " % quantity
-    printFunc(eventCounter.getMainCounterData())
+    print formatFunc(eventCounter.getMainCounterTable())
     print 
 
     if not opts.mainCounterOnly:
@@ -51,7 +51,7 @@ def main(opts):
         for name in names:
             print "============================================================"
             print "Subcounter %s %s: " % (name, quantity)
-            printFunc(eventCounter.getSubCounterData())
+            print formatFunc(eventCounter.getMainCounterTable())
             print
 
     # print
