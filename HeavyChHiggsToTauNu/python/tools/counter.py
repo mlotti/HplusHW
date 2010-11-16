@@ -278,10 +278,13 @@ class CounterTable:
 
 # Counter for one dataset
 class SimpleCounter:
-    def __init__(self, histoWrapper):
+    def __init__(self, histoWrapper, countNameFunction):
         self.histoWrapper = histoWrapper
         self.counter = None
-        self.countNames = histoWrapper.getBinLabels()
+        if countNameFunction != None:
+            self.countNames = [countNameFunction(x) for x in histoWrapper.getBinLabels()]
+        else:
+            self.countNames = histoWrapper.getBinLabels()
 
     def normalizeToOne(self):
         if self.counter != None:
@@ -327,8 +330,8 @@ class SimpleCounter:
 
 # Counter for many datasets
 class Counter:
-    def __init__(self, histoWrappers):
-        self.counters = [SimpleCounter(h) for h in histoWrappers]
+    def __init__(self, histoWrappers, countNameFunction):
+        self.counters = [SimpleCounter(h, countNameFunction) for h in histoWrappers]
 
     def forEachDataset(self, func):
         for c in self.counters:
@@ -366,7 +369,7 @@ class Counter:
 
 # Many counters
 class EventCounter:
-    def __init__(self, datasets):
+    def __init__(self, datasets, countNameFunction=None):
         counterNames = {}
 
         if len(datasets.getAllDatasets()) == 0:
@@ -387,34 +390,34 @@ class EventCounter:
         try:
             del counterNames["counter"]
         except KeyError:
-            raise Exception("Internal error: no 'counter' histogram in the '%s' directories" % counterDir)
+            raise Exception("Error: no 'counter' histogram in the '%s' directories" % counterDir)
 
-        self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"))
+        self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         for subname in counterNames.keys():
-            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname))
+            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname, countNameFunction))
 
         self.normalization = "None"
 
-    def forEachCounter(self, func):
+    def _forEachCounter(self, func):
         func(self.mainCounter)
         for c in self.subCounters.itervalues():
             func(c)
 
     def normalizeToOne(self):
-        self.forEachCounter(lambda x: x.normalizeToOne())
+        self._forEachCounter(lambda x: x.normalizeToOne())
         self.normalization = "All normalized to unit area"
 
     def normalizeMCByCrossSection(self):
-        self.forEachCounter(lambda x: x.normalizeMCByCrossSection())
+        self._forEachCounter(lambda x: x.normalizeMCByCrossSection())
         self.normalization = "MC normalized to cross section (pb)"
 
     def normalizeMCByLuminosity(self):
-        self.forEachCounter(lambda x: x.normalizeMCByLuminosity())
+        self._forEachCounter(lambda x: x.normalizeMCByLuminosity())
         self.normalization = "MC normalized by data luminosity"
 
     def normalizeMCToLuminosity(self, lumi):
-        self.forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
+        self._forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
         self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
 
     def getMainCounter(self):
