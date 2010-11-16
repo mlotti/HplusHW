@@ -15,6 +15,16 @@ namespace HPlus {
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     bUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
+    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET Cut")),
+    fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation")),
+    fClobalMuonVetoCounter(eventCounter.addCounter("Global Muon Veto")),
+    fClobalElectronVetoCounter(eventCounter.addCounter("Global Electron Veto")),
+    fTauSelectionCounter(eventCounter.addCounter("Tau selection")),
+    fMETCounter(eventCounter.addCounter("MET")),
+    fJetSelectionCounter(eventCounter.addCounter("Jet Selection")),
+    fBTaggingCounter(eventCounter.addCounter("BTagging")),
+    fFakeMETVetoCounter(eventCounter.addCounter("Fake MET Veto")),
+    fEvtTopologyCounter(eventCounter.addCounter("Evt Topology")),
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
@@ -81,20 +91,24 @@ namespace HPlus {
     // 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
-        
+    increment(fTriggerAndHLTMetCutCounter);
+         
     // 2) Trigger Emulation (for MC data)
     TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
     if(!triggerMETEmulationData.passedEvent()) return;
-
+    increment(fTriggerEmulationCounter);
+    
     // 3) GlobalMuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return; 
-
+    increment(fClobalMuonVetoCounter);
+    
     // 4) GlobalElectronVeto
     // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 
-    
+    increment(fClobalElectronVetoCounter);
+
     // 5) tauID
     // TauID (with optional factorization (recommended only for data and QCD))
     TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
@@ -104,27 +118,32 @@ namespace HPlus {
       fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
     }
     if(!tauData.passedEvent()) return; // No tau found!
+    increment(fTauSelectionCounter);
     
     // 6) MET 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     //if(!metData.passedEvent()) return;
+    increment(fMETCounter);
 
     // 7) Jet Selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     //if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    increment(fJetSelectionCounter);
     
     // 8) BTagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
     //if(!btagData.passedEvent()) return;
+    increment(fBTaggingCounter);
 
     // 9) FakeMETVeto
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     // if (!fakeMETData.passedEvent()) return;
+    increment(fFakeMETVetoCounter);
     
     // 10) AlphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
     //if(!evtTopologyData.passedEvent()) return;
-
+    increment(fEvtTopologyCounter);
      
     // Create some variables
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));

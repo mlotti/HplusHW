@@ -41,10 +41,22 @@ namespace HPlus {
     const double  ftransverseMassCut;
     const bool bUseFactorizedTauID;
 
+    // Counters
     Count fAllCounter;
+    Count fTriggerAndHLTMetCutCounter;
+    Count fTriggerEmulationCounter;
+    Count fClobalMuonVetoCounter;
+    Count fClobalElectronVetoCounter;
+    Count fTauSelectionCounter;
+    Count fMETCounter;
+    Count fJetSelectionCounter;
+    Count fBTaggingCounter;
+    Count fFakeMETVetoCounter;
+    Count fEvtTopologyCounter;
+    //
     EventWeight& fEventWeight;
 
-    /// The order here defines the order the counters are printed at the program termination
+    // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
     GlobalElectronVeto fGlobalElectronVeto;
@@ -61,7 +73,7 @@ namespace HPlus {
     // Histograms
     TH1 *hAlphaTInvMass;
     
-    /// for Tree
+    // for Tree
     TTree *myTree;
 
     bool bTauIDStatus;

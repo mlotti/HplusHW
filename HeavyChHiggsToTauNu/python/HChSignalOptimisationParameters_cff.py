@@ -8,7 +8,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk15_MET20",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4"
-    ),
+                                     ),
     hltMetCut = cms.untracked.double(30.0),
 )
 TriggerMETEmulation = cms.untracked.PSet(
@@ -16,7 +16,7 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(0.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(True)
+useFactorizedTauID = cms.untracked.bool(False) # only use for QCD. Otherwise set to "False"
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
@@ -24,7 +24,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(20),
-    rtauCut = cms.untracked.double(0.7), # 0.3 or 0.7
+    rtauCut = cms.untracked.double(0.3), # 0.3 or 0.7
     invMassCut = cms.untracked.double(1.5)
 )
 
