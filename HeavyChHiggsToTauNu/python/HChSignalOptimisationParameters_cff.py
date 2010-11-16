@@ -4,7 +4,8 @@ import FWCore.ParameterSet.Config as cms
 # the data version
 trigger = cms.untracked.PSet(
     src = cms.untracked.InputTag("patTriggerEvent"),
-    triggers = cms.untracked.vstring("HLT_SingleIsoTau20_Trk5",
+    triggers = cms.untracked.vstring("HLT_SingleLooseIsoTau20", #35X/36X MC and Run2010A data (prescaled with values 20,50)
+                                     "HLT_SingleIsoTau20_Trk5",
                                      "HLT_SingleIsoTau20_Trk15_MET20",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4"
@@ -16,7 +17,7 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(0.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(False) # only use for QCD. Otherwise set to "False"
+useFactorizedTauID = cms.untracked.bool(True) # only use for QCD. Otherwise set to "False"
 
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
@@ -44,10 +45,11 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-tauSelection = tauSelectionShrinkingConeCutBased
+#tauSelection = tauSelectionShrinkingConeCutBased
+tauSelection = tauSelectionHPSTauBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-#tauSelection = tauSelectionHPSTauBased
+
 
 jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
