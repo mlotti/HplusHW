@@ -20,6 +20,8 @@ def customise(process):
 
     #process.TFileService = cms.Service("TFileService",  fileName = cms.string("histo_simulation.root")          )
 
+    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+
     processName = process.name_()
 
     print "Adjusting event content to RAWSIM+misc"
@@ -32,7 +34,7 @@ def customise(process):
 
     outputModule.outputCommands.extend([
             "keep *_generalTracks_*_*",
-            "keep *_tightMuons_*_%s" % processName,
+            "keep *_tightMuons_*_*",
             "keep *_adaptedMuonsFromWmunu_*_%s" % processName,
             "keep *_dimuonsGlobal_*_%s" % processName,
             "keep *_generator_*_%s" % processName

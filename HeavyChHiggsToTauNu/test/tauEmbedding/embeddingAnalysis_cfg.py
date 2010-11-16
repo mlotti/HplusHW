@@ -33,7 +33,6 @@ options.doPat = 1
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 
@@ -57,7 +56,7 @@ if options.doPat != 0:
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
     process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
-                                      doPatCalo=False, doPatMET=False, doPatElectronID=False)
+                                      doPatCalo=False, doBTagging=False, doPatMET=False, doPatElectronID=False)
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
         process.patPlainSequence

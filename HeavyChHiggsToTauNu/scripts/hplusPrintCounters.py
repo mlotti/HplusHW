@@ -28,16 +28,21 @@ def main(opts):
     quantity = "events"
     if opts.mode == "events":
         pass
-    elif opts.mode in ["xsect", "xsection", "crosssection", "crossSection"]:
+    elif opts.mode in ["xsect", "xsection", "crosssection", "crossSection", "eff"]:
         eventCounter.normalizeMCByCrossSection()
         quantity = "MC by cross section, data by events"
     else:
-        print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect'" % opts.mode
+        print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect', 'eff'" % opts.mode
         return 1
+
+    formatFunc = lambda table: table.format(counter.FloatAutoFormat())
+    if opts.mode == "eff":
+        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.FloatDecimalFormat(4))
+        quantity = "Cut efficiencies"
 
     print "============================================================"
     print "Main counter %s: " % quantity
-    eventCounter.getMainCounter().printCounter(counter.FloatAutoFormat())
+    print formatFunc(eventCounter.getMainCounterTable())
     print 
 
     if not opts.mainCounterOnly:
@@ -46,7 +51,7 @@ def main(opts):
         for name in names:
             print "============================================================"
             print "Subcounter %s %s: " % (name, quantity)
-            eventCounter.getSubCounter(name).printCounter(counter.FloatAutoFormat())
+            print formatFunc(eventCounter.getMainCounterTable())
             print
 
     # print
@@ -61,7 +66,7 @@ if __name__ == "__main__":
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
-                      help="Output mode; available: 'events', 'xsect' (default: 'events')")
+                      help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
 #                      help="Output format; available: 'text' (default: 'text')")
     parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",

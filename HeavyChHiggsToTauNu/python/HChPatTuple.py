@@ -23,7 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTes
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True,
+           doPatCalo=True, doBTagging=True,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
@@ -95,7 +95,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                          'AK5', 'JPT',
                          doJTA        = True,
-                         doBTagging   = True,
+                         doBTagging   = doBTagging,
                          jetCorrLabel = ('AK5','JPT'),
                          doType1MET   = False,
                          doL1Cleaning = False,
@@ -107,7 +107,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         addJetCollection(process, cms.InputTag('ak5PFJets'),
                          'AK5', 'PF',
                          doJTA        = True,
-                         doBTagging   = True,
+                         doBTagging   = doBTagging,
                          jetCorrLabel = ('AK5','PF'),
                          doType1MET   = False,
                          doL1Cleaning = False,
@@ -118,7 +118,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     else:
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
-                            doBTagging   = True,
+                            doBTagging   = doBTagging,
                             jetCorrLabel = ('AK5','PF'),
                             doType1MET   = False,
                             genJetCollection = cms.InputTag("ak5GenJets"),

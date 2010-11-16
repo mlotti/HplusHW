@@ -16,6 +16,9 @@ class Count:
     def error(self):
         return self._error
 
+    def __str__(self):
+        return "%f"%self._value
+
 def histoToCounter(histo):
     ret = []
 
@@ -107,7 +110,10 @@ def normalizeToOne(h):
     return h
 
 def normalizeToFactor(h, f):
+    backup = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kError
     h.Sumw2() # errors are also scaled after this call 
+    ROOT.gErrorIgnoreLevel = backup
     h.Scale(f)
     return h
 
@@ -163,6 +169,9 @@ class HistoWrapper:
     def isMC(self):
         return self.dataset.isMC()
 
+    def getBinLabels(self):
+        return [x[0] for x in histoToCounter(self.histo)]
+
     def getHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
@@ -211,6 +220,9 @@ class HistoWrapperMergedData:
     def getDataset(self):
         return self.dataset
 
+    def getBinLabels(self):
+        return self.datasetHistos[0].getBinLabels()
+
     def normalizeToOne(self):
         self.normalization = "toOne"
 
@@ -240,6 +252,9 @@ class HistoWrapperMergedMC:
 
     def getDataset(self):
         return self.dataset
+
+    def getBinLabels(self):
+        return self.datasetHistos[0].getBinLabels()
 
     def normalizeToOne(self):
         self.normalization = "toOne"
@@ -281,11 +296,28 @@ class Dataset:
             raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
         self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
+        self.prefix = ""
+        self.originalCounterDir = counterDir
+        self._readCounter(counterDir)
+
+    def _readCounter(self, counterDir):
         if self.file.Get(counterDir) == None:
-            raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, fname))
+            raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
         ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
         self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
         self.counterDir = counterDir
+
+    def setPrefix(self, prefix):
+        self.prefix = prefix
+        self._readCounter(prefix+self.originalCounterDir)
+
+    def getPrefix(self):
+        return self.prefix
+
+    def deepCopy(self):
+        d = Dataset(self.name, self.file.GetName(), self.counterDir)
+        d.info.update(self.info)
+        return d
 
     def getName(self):
         return self.name
@@ -320,22 +352,23 @@ class Dataset:
         return "crossSection" in self.info
 
     def getCounterDirectory(self):
-        return self.counterDir
+        return self.originalCounterDir
 
     def getNormFactor(self):
         return self.getCrossSection() / self.nAllEvents
 
     def getHistoWrapper(self, name):
-        h = self.file.Get(name)
+        pname = self.prefix+name
+        h = self.file.Get(pname)
         if h == None:
-            raise Exception("Unable to find histogram '%s'" % name)
+            raise Exception("Unable to find histogram '%s'" % pname)
 
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
         return HistoWrapper(h, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
-        d = self.file.Get(directory)
+        d = self.file.Get(self.prefix+directory)
         dirlist = d.GetListOfKeys()
         diriter = dirlist.MakeIterator()
         key = diriter.Next()
@@ -368,6 +401,24 @@ class DatasetMerged:
             for d in self.datasets:
                 lumiSum += d.getLuminosity()
             self.info["luminosity"] = lumiSum
+
+    def setPrefix(self, prefix):
+        for d in self.datasets:
+            d.setPrefix(prefix)
+
+    def getPrefix(self):
+        prefix = None
+        for d in self.datasets:
+            if prefix == None:
+                prefix = d.getPrefix()
+            elif prefix != d.getPrefix():
+                raise Exception("Internal error")
+        return prefix
+
+    def deepCopy(self):
+        dm = DatasetMerged(self.name, [d.deepCopy() for d in self.datasets])
+        dm.info.update(self.info)
+        return dm
 
     def getName(self):
         return self.name
@@ -442,6 +493,17 @@ class DatasetSet:
     def extend(self, datasetset):
         for d in datasetset.datasets:
             self.append(d)
+
+    def shallowCopy(self):
+        copy = DatasetSet()
+        copy.extend(self)
+        return copy
+
+    def deepCopy(self):
+        copy = DatasetSet()
+        for d in self.datasets:
+            copy.append(d.deepCopy())
+        return copy
 
     def hasDataset(self, name):
         return name in self.datasetMap
