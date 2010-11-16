@@ -25,7 +25,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(20),
-    rtauCut = cms.untracked.double(0.3), # 0.3 or 0.7
+    rtauCut = cms.untracked.double(0.7), # 0.3 or 0.7
     invMassCut = cms.untracked.double(1.5)
 )
 

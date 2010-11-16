@@ -19,8 +19,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("HChSignalOptimisation")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -118,6 +118,7 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
 print "Cut on HLT MET: ", process.signalOptimisation.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
 print "TauSelection src:", process.signalOptimisation.tauSelection.src
+print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
 print "TauSelection factorization used:", process.signalOptimisation.useFactorizedTauID
 
 #if dataVersion.isMC() and dataVersion.is38X():

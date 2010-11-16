@@ -11,7 +11,7 @@
 
 namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
+    // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     bUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
