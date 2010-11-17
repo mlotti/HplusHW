@@ -25,8 +25,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -106,7 +106,6 @@ met = cms.InputTag(pfMET)
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.options.wantSummary = cms.untracked.bool(True)
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 # Uncomment the following in order to print the counters at the end of
@@ -186,7 +185,7 @@ vertexCollections = ["offlinePrimaryVertices"]
 if dataVersion.isData():
     vertexCollections.append("goodPrimaryVertices")
 
-def createAnalysis(process, prefix="", functionBegin=None):
+def createAnalysis(process, prefix="", beginSequence=None):
     counters = []
     if dataVersion.isData():
         counters = dataSelectionCounters
@@ -195,8 +194,8 @@ def createAnalysis(process, prefix="", functionBegin=None):
     #analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
     #analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
     
-    if functionBegin != None:
-        functionBegin(analysis)
+    if beginSequence != None:
+        analysis.appendToSequence(beginSequence)
 
     multipName = "Multiplicity"
     pileupName = "VertexCount"
@@ -228,7 +227,7 @@ def createAnalysis(process, prefix="", functionBegin=None):
             )
     ))
     pileupAnalyzer = None
-    if functionBegin == None:
+    if beginSequence == None:
         pileupAnalyzer = analysis.addAnalyzer(pileupName, cms.EDAnalyzer(
                 "HPlusVertexCountAnalyzer",
                 src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
@@ -402,12 +401,12 @@ def createAnalysis(process, prefix="", functionBegin=None):
     
     ################################################################################
 
-    path = cms.Path(
-        process.commonSequence *
-        analysis.getAnalysisModule("Trigger").getFilterSequence() *
-        analysis.getAnalysisModule("PrimaryVertex").getFilterSequence() *
-        analysis.getAnalysisModule("JetSelection").getFilterSequence()
-    )
+    path = cms.Path(process.commonSequence)
+    if beginSequence != None:
+        path *= beginSequence
+    path *= analysis.getAnalysisModule("Trigger").getFilterSequence()
+    path *= analysis.getAnalysisModule("PrimaryVertex").getFilterSequence()
+    path *= analysis.getAnalysisModule("JetSelection").getFilterSequence()
     
     # Muon preselection
     m = muonJetCleaner.clone(
@@ -517,11 +516,34 @@ class AddVertexCountFilter:
 
 createAnalysis(process)
 if options.WDecaySeparate > 0:
-    createAnalysis(process, "WMuNu", AddGenEventFilter())
-    createAnalysis(process, "WOther", AddGenEventFilter(invert=True))
+    process.mcEventTopology = cms.EDFilter("HPlusGenEventTopologyFilter",
+        src = cms.InputTag("genParticles"),
+        particle = cms.string("abs(pdgId()) == 24"),
+        daughter = cms.string("abs(pdgId()) == 13"),
+        minParticles = cms.uint32(1),
+        minDaughters = cms.uint32(1)
+    )
+    process.wMuNuSequence = cms.Sequence(
+        process.mcEventTopology
+    )
+    process.wOtherSequence = cms.Sequence(
+        ~process.mcEventTopology
+    )
+
+    createAnalysis(process, "WMuNu", process.wMuNuSequence)
+    createAnalysis(process, "WOther", process.wOtherSequence)
 
 if dataVersion.isData():
     for i in xrange(1, 11):
-        createAnalysis(process, "PileupV%d"%i, AddVertexCountFilter(i))
+        m = cms.EDFilter("VertexCountFilter",
+            src = cms.InputTag("goodPrimaryVertices"),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(i)
+        )
+        s = cms.Sequence(m)
+        setattr(process, "pileupV%dVertexCount"%i, m)
+        setattr(process, "pileupV%dVertexCountSequence"%i, s)
+
+        createAnalysis(process, "PileupV%d"%i, s)
 
 #print process.dumpPython()
