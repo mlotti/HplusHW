@@ -55,12 +55,14 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 100,
                 "lumiMaskRequired": True
             },
             "AOD": {
                 "fallback": "RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
             },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
@@ -90,12 +92,14 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 30,
                 "lumiMaskRequired": True
             },
             "AOD": {
                 "fallback": "RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
             }
         },
     },
@@ -106,12 +110,14 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 30,
                 "lumiMaskRequired": True
             },
             "AOD": {
                 "fallback": "RECO",
+                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
             }
         },
     },
@@ -123,13 +129,15 @@ datasets = {
         "trigger": "HLT_Mu9",
         "data": {
             "RECO": {
-                "datasetpath": "/Mu/Run2010A-Sep17ReReco_v2/RECO",
+                "datasetpath": "/Mu/Run2010A-Sep17ReReco_v2/RECO", # runs 135821-144114
+                #"datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/RECO", # runs 135821-144114
                 "luminosity": 0,
                 "lumis_per_job": 500,
                 "lumiMaskRequired": True
             },
             "AOD": {
                 "fallback": "RECO",
+                #"datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/AOD", # runs 135821-144114
             }
         }
     },
@@ -140,6 +148,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
+                #"datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 600,
                 "lumiMaskRequired": True
@@ -153,6 +162,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
+                #"datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500,
                 "lumiMaskRequired": True
