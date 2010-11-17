@@ -14,6 +14,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "TTree.h"
 
 namespace edm {
@@ -40,10 +41,22 @@ namespace HPlus {
     const double  ftransverseMassCut;
     const bool bUseFactorizedTauID;
 
+    // Counters
     Count fAllCounter;
+    Count fTriggerAndHLTMetCutCounter;
+    Count fTriggerEmulationCounter;
+    Count fClobalMuonVetoCounter;
+    Count fClobalElectronVetoCounter;
+    Count fTauSelectionCounter;
+    Count fMETCounter;
+    Count fJetSelectionCounter;
+    Count fBTaggingCounter;
+    Count fFakeMETVetoCounter;
+    Count fEvtTopologyCounter;
+    //
     EventWeight& fEventWeight;
 
-    /// The order here defines the order the counters are printed at the program termination
+    // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
     GlobalElectronVeto fGlobalElectronVeto;
@@ -53,18 +66,21 @@ namespace HPlus {
     METSelection fMETSelection;
     JetSelection fJetSelection;
     BTagging fBTagging;
+    FakeMETVeto fFakeMETVeto;
     EvtTopology fEvtTopology;
+
     
     // Histograms
     TH1 *hAlphaTInvMass;
     
-    /// for Tree
+    // for Tree
     TTree *myTree;
 
     bool bTauIDStatus;
     float fTauJetEt;
     float fTauJetEta;
     float fMET;
+    float fFakeMETDeltaR;
     int iNHadronicJets;
     int iNBtags;
     float fGlobalMuonVetoHighestPt;
