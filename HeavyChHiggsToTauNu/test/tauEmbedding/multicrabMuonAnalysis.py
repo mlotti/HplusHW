@@ -10,24 +10,29 @@ aodDatasets = [
     "Mu_146240-147116",
     "Mu_147196-149442",
     # Signal MC (Fall10)
-#    "TT",
-    "TTJets",
+##    "TT",
     # Background MC (Fall10)
     "QCD_Pt20_MuEnriched",
+    "QCD_Pt20to30_MuEnriched",
+    "QCD_Pt30to50_MuEnriched",
+    "QCD_Pt50to80_MuEnriched",
+    "QCD_Pt80to120_MuEnriched",
+    "QCD_Pt120to150_MuEnriched",
+    "QCD_Pt150_MuEnriched",
     "DYJetsToLL", # Z+jets
     "TToBLNu_s-channel",
     "TToBLNu_t-channel",
     "TToBLNu_tW-channel",
     # Background MC (Summer10)
-#    "ZJets",
-#    "SingleTop_sChannel",
-#    "SingleTop_tChannel",
-#    "SingleTop_tWChannel",
+##    "ZJets",
+##    "SingleTop_sChannel",
+##    "SingleTop_tChannel",
+##    "SingleTop_tWChannel",
     ]
 patDatasets = [
     # Signal MC
-#    "TT",
-#    "TTJets", # Fall10
+##    "TT",
+    "TTJets", # Fall10
     "WJets", # Summer10
     # Background MC
     "QCD_Pt30to50_Fall10",
@@ -65,10 +70,10 @@ if usePatTuples:
             "QCD_Pt170to300_Fall10": 5,
             "WJets": 30
     })
-else:
-    numberOfJobs.update({
-            "TTJets": 40
-    })
+#else:
+#    numberOfJobs.update({
+#            "TTJets": 40
+#    })
     
 
 def modify(dataset):
