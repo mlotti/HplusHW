@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
 multicrab = Multicrab("crab_pat.cfg")
 
@@ -48,8 +49,16 @@ multicrab.addDatasets(
 # The recommendation is to use different lists for the Sep17ReReco and
 # Run2010B_PromptReco, see e.g.
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1011.html
-multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v2.txt")
-multicrab.getDataset("BTau_141950-144114").setLumiMask("../Cert_132440-144114_7TeV_Sep17ReReco_Collisions10_JSON.txt")
+mask = lumi.getFile("StreamExpress")
+multicrab.setDataLumiMask("../"+mask)
+print "Using lumi file", mask
+try:
+    mask = lumi.getFile("Sep17ReReco")
+    multicrab.getDataset("BTau_141950-144114").setLumiMask("../"+mask)
+    print "Using lumi file %s for BTau_141950-144114" % mask
+except KeyError:
+    pass
+
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
