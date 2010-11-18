@@ -48,7 +48,7 @@ multicrab.addDatasets(
 # The recommendation is to use different lists for the Sep17ReReco and
 # Run2010B_PromptReco, see e.g.
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1011.html
-multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v2.txt")
+multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v3.txt")
 multicrab.getDataset("BTau_141950-144114").setLumiMask("../Cert_132440-144114_7TeV_Sep17ReReco_Collisions10_JSON.txt")
 
 # local_stage_out doesn't work due to denied permission because we're
