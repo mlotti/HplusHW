@@ -5,7 +5,13 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
 def customise(process):
-    options = getOptions()
+    options = VarParsing.VarParsing()
+    options.register('overrideBeamSpot',
+                     0, # default value, false
+                     VarParsing.VarParsing.multiplicity.singleton,
+                     VarParsing.VarParsing.varType.int,
+                     "should I override beamspot in globaltag?")
+    options = getOptions(options)
     dataVersion = "38X"
     if options.dataVersion != "":
         dataVersion = options.dataVersion
@@ -20,9 +26,12 @@ def customise(process):
 
     #process.TFileService = cms.Service("TFileService",  fileName = cms.string("histo_simulation.root")          )
 
+    print "TAUOLA mdtau =", process.generator.ZTauTau.TauolaOptions.InputCards.mdtau
+
     process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
     processName = process.name_()
+    process.hltTrigReport.HLTriggerResults.setProcessName(processName)
 
     print "Adjusting event content to RAWSIM+misc"
     #outputModule.outputCommands = cms.untracked.vstring("keep *")
@@ -47,6 +56,20 @@ def customise(process):
             del outputModule.outputCommands[index]
             index -= 1
         index += 1
+
+
+    # Do we have to override the beam spot for data?
+    if options.overrideBeamSpot !=  0:
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_v16_offline") # 38x data gt
+        process.GlobalTag.toGet = cms.VPSet(
+            cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
+                     tag = bs,
+                     connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BEAMSPOT")
+            )
+        )
+        print "BeamSpot in globaltag set to ", bs
+    else:
+        print "BeamSpot in globaltag not changed"
 
     #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     #process.generation_step *= process.printGenParticles
