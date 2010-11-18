@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
 multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py")
 
@@ -52,8 +53,9 @@ if len(aodDatasets) > 0:
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
 
-multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v2.txt")
-sep17rerecoLumiMask = "../Cert_132440-144114_7TeV_Sep17ReReco_Collisions10_JSON.txt"
+mask = lumi.getFile("StreamExpress")
+multicrab.setDataLumiMask("../"+mask)
+print "Lumi file", mask
 
 decaySeparate = ["TTJets",
                  "WJets",
@@ -82,7 +84,9 @@ def modify(dataset):
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
     if dataset.getName() == "Mu_135821-144114":
-        dataset.setLumiMask(sep17rerecoLumiMask)
+        mask = lumi.getFile("Sep17ReReco")
+        dataset.setLumiMask("../"+mask)
+        print "Lumi file %s for Mu_135821-144114" % mask
 
     try:
         njobs = numberOfJobs[dataset.getName()]
