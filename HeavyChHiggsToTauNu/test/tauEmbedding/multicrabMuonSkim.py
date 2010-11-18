@@ -1,25 +1,32 @@
 #!/usr/bin/env python
 
+import re
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab.cfg", "muonSkim_cfg.py")
-
-step = "skim"
-#step = "generation"
+#step = "skim"
+step = "generation"
 #step = "embedding"
 #step = "analysis"
 
-inputData = {"skim": "AOD",
-             "generation": "tauembedding_skim_v1",
-             "embedding": "tauembedding_generation_v1",
-             "analysis": "tauembedding_analysis_v1"}[step]
+config = {"skim":       {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
+          "generation": {"input": "tauembedding_skim_v2",       "config": "embed_HLT.py", "output": "embedded_HLT.root"},
+          "embedding":  {"input": "tauembedding_generation_v2", "config": "embed_RECO.py", "output": "embedded_RECO.root"},
+          "analysis":   {"input": "tauembedding_embedding_v2",  "config": "embeddingAnalysis_cfg.py"}}
+
+crabcfg = "crab.cfg"
+if step == "analysis":
+    crabcfg = "../crab_analysis.cfg"
+
+
+multicrab = Multicrab(crabcfg, config[step]["config"])
          
 multicrab.addDatasets(
-    inputData,
+    config[step]["input"],
     [
         # Data
 #        "Mu_135821-144114", # HLT_Mu9
-#        "Mu_146240-147116", # HLT_Mu9
+        "Mu_146240-147116", # HLT_Mu9
 #        "Mu_147196-149442", # HLT_Mu15_v1
         # Signal MC
 #        "TTbarJets",
@@ -30,14 +37,25 @@ if step == "skim":
     multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
     multicrab.getDataset("WJets").setNumberOfJobs(50)
 
-def addOutputName(dataset):
+path_re = re.compile("_tauembedding_.*")
+tauname = "_tauembedding_%s_v2" % step
+
+def modify(dataset):
+    name = ""
+
     path = dataset.getDatasetPath().split("/")
-    name = path[2].replace("-", "_")
-    name += "_"+path[3]
-    name += "_tauembedding_%s_v1" % step
+    if step == "skim":
+        name = path[2].replace("-", "_")
+        name += "_"+path[3]
+        name += tauname
+    else:
+        name = path_re.sub(tauname, path[2])
 
     dataset.addLine("USER.publish_data_name = "+name)
-multicrab.forEachDataset(addOutputName)
+    dataset.addLine("CMSSW.output_file = "+config[step]["output"])
+
+if step != "analysis":
+    multicrab.forEachDataset(modify)
 
 multicrab.createTasks()
 #multicrab.createTasks(configOnly=True)
