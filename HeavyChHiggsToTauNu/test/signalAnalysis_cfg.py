@@ -123,6 +123,7 @@ print "Cut on HLT MET: ", process.signalAnalysis.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
+print "TauSelection factorization source:", process.signalAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"

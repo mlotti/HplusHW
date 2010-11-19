@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FactorizationTable.h"
 
 namespace edm {
   class ParameterSet;
@@ -38,7 +39,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       TauSelection::Data tauSelectionData() const { return fTauSelectionData; }
       const edm::Ptr<pat::Tau>& getSelectedTau() const { return fTauSelectionFactorized->fSelectedTau; }
-      double factorizationCoefficient() const { return fTauSelectionFactorized->fFactorization; }
+      double factorizationCoefficient() const { return fTauSelectionFactorized->fFactorizationCoefficient; }
 
     private:
       const TauSelectionFactorized *fTauSelectionFactorized;
@@ -72,6 +73,9 @@ namespace HPlus {
     
     // Tau selection object
     TauSelection fTauSelection;
+    
+    // Factorization table objects
+    FactorizationTable fFactorizationTable;
 
     // Histograms
     TH1 *hPtSelectedTaus;
@@ -93,7 +97,7 @@ namespace HPlus {
     TH2 *hPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
-    double fFactorization;
+    double fFactorizationCoefficient;
     edm::Ptr<pat::Tau> fSelectedTau;
   };
 }

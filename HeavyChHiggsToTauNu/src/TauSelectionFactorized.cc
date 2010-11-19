@@ -26,7 +26,8 @@ namespace HPlus {
     fEtaCutCount(eventCounter.addSubCounter("Factorized Tau","tau eta cut")),
     fTauFoundCount(eventCounter.addSubCounter("Factorized Tau","tau found")),
     fEventWeight(eventWeight),
-    fTauSelection(tauSelectionObject)
+    fTauSelection(tauSelectionObject),
+    fFactorizationTable(iConfig)
   {
     edm::Service<TFileService> fs;
     // Weighted histograms
@@ -59,7 +60,7 @@ namespace HPlus {
   TauSelectionFactorized::Data TauSelectionFactorized::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset variables
     bool passEvent = false;
-    fFactorization = 1.0;
+    fFactorizationCoefficient = 1.0;
     fSelectedTau = edm::Ptr<pat::Tau>(); // initializes the tau with a zero pointer
     increment(fInitialTausCount);
     
@@ -123,7 +124,11 @@ namespace HPlus {
       increment(fTauFoundCount);
     }
     // Obtain factorization constant from lookup table
-    // FIXME: to be implemented
+    if (!fSelectedTau.isNull()) {
+      fFactorizationCoefficient = 
+        fFactorizationTable.getWeightByPtAndEta(fSelectedTau->pt(), fSelectedTau->eta());
+      //std::cout << "debug: coeff=" << fFactorizationCoefficient << std::endl;
+    }
 
     return Data(this, passEvent, fTauSelection.setSelectedTau(fSelectedTau, passEvent));
   }
