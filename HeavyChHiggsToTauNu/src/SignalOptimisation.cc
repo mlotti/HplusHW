@@ -51,7 +51,7 @@ namespace HPlus {
     myTree->Branch("fTauJetEt",  &fTauJetEt);
     myTree->Branch("fTauJetEta", &fTauJetEta);
     myTree->Branch("fMET", &fMET);
-    myTree->Branch("fFakeMETDeltaR", &fFakeMETDeltaR);
+    myTree->Branch("fFakeMETDeltaPhi", &fFakeMETDeltaPhi);
     myTree->Branch("iNHadronicJets", &iNHadronicJets);
     myTree->Branch("iNBtags", &iNBtags);
     myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
@@ -79,7 +79,7 @@ namespace HPlus {
     fTauJetEt = -5.0;
     fTauJetEta = -999.99;
     fMET = -5.0;
-    fFakeMETDeltaR = -5.0;
+    fFakeMETDeltaPhi = -5.0;
     iNHadronicJets = -5.0;
     iNBtags = -5.0;
     fGlobalMuonVetoHighestPt = -5.0;
@@ -158,7 +158,7 @@ namespace HPlus {
     fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
     fMET = metData.getSelectedMET()->et();
-    fFakeMETDeltaR = fakeMETData.closestDeltaPhi();
+    fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
     iNHadronicJets = jetData.getHadronicJetCount();
     iNBtags = btagData.getBJetCount();
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
