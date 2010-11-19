@@ -62,7 +62,7 @@ print "Using trigger %s" % trigger
 
 tightMuonCut = "isGlobalMuon() && isTrackerMuon()"
 
-ptCut = "pt() > 20"
+ptCut = "pt() > 40"
 etaCut = "abs(eta()) < 2.1"
 
 qualityCut = "muonID('GlobalMuonPromptTight')"
@@ -83,11 +83,14 @@ isolationCut = "%s < 0.05" % relIso
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetMinMultiplicity = 3
 
-applyMuonVeto = True
+applyMuonVeto = False
 muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 
-applyElectronVeto = True
+applyElectronVeto = False
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
+
+applyZVeto = True
+zVetoMuonSelection ="isGlobalMuon && pt > 20. && abs(eta) < 2.5"
 
 metCut = "et() > 40"
 
@@ -230,7 +233,7 @@ def createAnalysis(process, prefix="", beginSequence=None):
                 "HPlusVertexCountAnalyzer",
                 src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
                 min = cms.untracked.double(0),
-                max = cms.untracked.double(20)
+                max = cms.untracked.double(20),
                 nbins = cms.untracked.int32(20),
         ))
         
@@ -249,9 +252,6 @@ def createAnalysis(process, prefix="", beginSequence=None):
         pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Select primary vertex
-    #selectedPrimaryVertex = analysis.addProducer("FirstPrimaryVertex", 
-    #                                             cms.EDProducer("HPlusSelectFirstVertex",
-    #                                                            src = cms.InputTag("offlinePrimaryVertices")))
     selectedPrimaryVertex = analysis.addAnalysisModule("PrimaryVertex",
                                                        selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
                                                        filter = cms.EDFilter("VertexCountFilter",
@@ -323,11 +323,11 @@ def createAnalysis(process, prefix="", beginSequence=None):
         pileupAnalyzer = analysis.addCloneAnalyzer(pileupName, pileupAnalyzer)
     
     # Isolation
-    selectedMuons = analysis.addCut("MuonIsolation", selectedMuons, isolationCut)
-    histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonIsolation", histoAnalyzer)
-    histoAnalyzer.muon_.src = selectedMuons
-    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
-    multipAnalyzer.selMuons.src = selectedMuons
+#    selectedMuons = analysis.addCut("MuonIsolation", selectedMuons, isolationCut)
+#    histoAnalyzer = analysis.addCloneMultiHistoAnalyzer("MuonIsolation", histoAnalyzer)
+#    histoAnalyzer.muon_.src = selectedMuons
+#    multipAnalyzer = analysis.addCloneAnalyzer(multipName, multipAnalyzer)
+#    multipAnalyzer.selMuons.src = selectedMuons
     
     # Difference in vertex z coordinate
     selectedMuons = analysis.addAnalysisModule("MuonVertexDiff",
@@ -441,26 +441,29 @@ def createAnalysis(process, prefix="", beginSequence=None):
             histoPt.pset().clone(cut=cms.untracked.string(ptCut)),
             histoEta.pset().clone(cut=cms.untracked.string(etaCut)),
             histoDB.pset().clone(cut=cms.untracked.string(dbCut)),
-            histoIso.pset().clone(cut=cms.untracked.string(isolationCut))
         )
     )
+    afterOtherCutsIso = afterOtherCuts.clone()
+    afterOtherCutsIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(isolationCut)))
+
+    def addAfterCuts(path, name):
+        m = afterOtherCuts.clone()
+        setattr(process, prefix+"afterOtherCuts"+name, m)
+        path *= m
+        m = afterOtherCutsIso.clone()
+        setattr(process, prefix+"afterOtherCutsIso"+name, m)
+        path *= m
     
     # Plots after vetoes
-    m = afterOtherCuts.clone()
-    setattr(process, prefix+"afterOtherCutsAfterVetoes", m)
-    path *= m
+    addAfterCuts(path, "AfterVetoes")
     
     # Plots after jet multiplicity cuts
     path *= analysis.getAnalysisModule("JetMultiplicityCut").getFilterSequence()
-    m = afterOtherCuts.clone()
-    setattr(process, prefix+"afterOtherCutsAfterJetMultiplicityCut", m)
-    path *= m
+    addAfterCuts(path, "AfterJetMultiplicityCut")
     
     # Plots after MET cut
     path *= analysis.getAnalysisModule("METCut").getFilterSequence()
-    m = afterOtherCuts.clone()
-    setattr(process, prefix+"afterOtherCutsAfterMETCut", m)
-    path *= m
+    addAfterCuts(path, "AfterMETCut")
     
     # Plots after Wmunu transverse mass cut
     m = candCombinerPrototype.clone(decay = cms.string(selectedMuons.getModuleLabel()+" "+pfMET))
@@ -479,9 +482,7 @@ def createAnalysis(process, prefix="", beginSequence=None):
     setattr(process, prefix+"afterOtherCutsWMuNuFilter", m)
     path *= m
 
-    m = afterOtherCuts.clone()
-    setattr(process, prefix+"afterOtherCutsAfterWMuNuCut", m)
-    path *= m
+    addAfterCuts(path, "AfterWMuNuCut")
 
     setattr(process, prefix+"afterOtherCutsPath", path)
 
