@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
 multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py")
 
@@ -10,24 +11,29 @@ aodDatasets = [
     "Mu_146240-147116",
     "Mu_147196-149442",
     # Signal MC (Fall10)
-#    "TT",
-    "TTJets",
+##    "TT",
     # Background MC (Fall10)
     "QCD_Pt20_MuEnriched",
+    "QCD_Pt20to30_MuEnriched",
+    "QCD_Pt30to50_MuEnriched",
+    "QCD_Pt50to80_MuEnriched",
+    "QCD_Pt80to120_MuEnriched",
+    "QCD_Pt120to150_MuEnriched",
+    "QCD_Pt150_MuEnriched",
     "DYJetsToLL", # Z+jets
     "TToBLNu_s-channel",
     "TToBLNu_t-channel",
     "TToBLNu_tW-channel",
     # Background MC (Summer10)
-#    "ZJets",
-#    "SingleTop_sChannel",
-#    "SingleTop_tChannel",
-#    "SingleTop_tWChannel",
+##    "ZJets",
+##    "SingleTop_sChannel",
+##    "SingleTop_tChannel",
+##    "SingleTop_tWChannel",
     ]
 patDatasets = [
     # Signal MC
-#    "TT",
-#    "TTJets", # Fall10
+##    "TT",
+    "TTJets", # Fall10
     "WJets", # Summer10
     # Background MC
     "QCD_Pt30to50_Fall10",
@@ -47,8 +53,9 @@ if len(aodDatasets) > 0:
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
 
-multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON_v2.txt")
-sep17rerecoLumiMask = "../Cert_132440-144114_7TeV_Sep17ReReco_Collisions10_JSON.txt"
+mask = lumi.getFile("StreamExpress")
+multicrab.setDataLumiMask("../"+mask)
+print "Lumi file", mask
 
 decaySeparate = ["TTJets",
                  "WJets",
@@ -65,10 +72,10 @@ if usePatTuples:
             "QCD_Pt170to300_Fall10": 5,
             "WJets": 30
     })
-else:
-    numberOfJobs.update({
-            "TTJets": 40
-    })
+#else:
+#    numberOfJobs.update({
+#            "TTJets": 40
+#    })
     
 
 def modify(dataset):
@@ -77,7 +84,9 @@ def modify(dataset):
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
     if dataset.getName() == "Mu_135821-144114":
-        dataset.setLumiMask(sep17rerecoLumiMask)
+        mask = lumi.getFile("Sep17ReReco")
+        dataset.setLumiMask("../"+mask)
+        print "Lumi file %s for Mu_135821-144114" % mask
 
     try:
         njobs = numberOfJobs[dataset.getName()]

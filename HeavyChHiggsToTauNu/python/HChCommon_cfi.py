@@ -4,6 +4,9 @@ import FWCore.ParameterSet.Config as cms
 from FWCore.MessageService.MessageLogger_cfi import *
 MessageLogger.categories.append("HPlusRootFileDumper")
 MessageLogger.categories.append("hltPrescaleTable")
+MessageLogger.categories.append("EventCounts")  # HPlusEventCountAnalyzer
+MessageLogger.categories.append("HLTTableInfo") # HPlusHLTTableAnalyzer
+
 MessageLogger.cerr.FwkReport.reportEvery = 100
 
 MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(reportEvery = MessageLogger.cerr.FwkReport.reportEvery)

@@ -276,6 +276,90 @@ datasets = {
             }
         },
     },
+    "QCD_Pt20to30_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 236300000*0.00518,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-20to30_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-20to30_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 150,
+            },
+        },
+    },
+    "QCD_Pt30to50_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 53070000*0.01090,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-30to50_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-30to50_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 150,
+            },
+        },
+    },
+    "QCD_Pt50to80_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 6351000*0.02274,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-50to80_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-50to80_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 150,
+            },
+        },
+    },
+    "QCD_Pt80to120_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 785100*0.03700,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-80to120_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 100 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-80to120_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 100,
+            },
+        },
+    },
+    "QCD_Pt120to150_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 92950*0.04777,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-120to150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-120to150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 40,
+            },
+        },
+    },
+    "QCD_Pt150_MuEnriched": {
+        "dataVersion": "38X",
+        "crossSection": 47580*0.05964,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+            "AOD": {
+                "datasetpath": "/QCD_Pt-150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 40,
+            },
+        },
+    },
     "DYJetsToLL": { # Z+jets
         "dataVersion": "38Xrelval",
         "crossSection": 2321,

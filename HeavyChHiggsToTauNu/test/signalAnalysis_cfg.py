@@ -7,7 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38X"
+dataVersion = "38Xrelval"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -43,7 +43,6 @@ if options.doPat != 0:
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Uncomment the following in order to print the counters at the end of

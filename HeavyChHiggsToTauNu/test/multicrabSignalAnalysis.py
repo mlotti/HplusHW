@@ -2,7 +2,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_analysis.cfg")
+multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v3"

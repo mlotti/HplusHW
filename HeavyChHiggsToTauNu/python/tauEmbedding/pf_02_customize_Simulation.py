@@ -41,6 +41,8 @@ class SeqVisitor(object):
 def customise(process):
     processName = process.name_()
 
+    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+
     process.tmfTracks = cms.EDProducer("RecoTracksMixer",
         trackCol1 = cms.InputTag("dimuonsGlobal"),
         trackCol2 = cms.InputTag("generalTracks","",processName)
@@ -73,10 +75,11 @@ def customise(process):
             "keep *_pfMet_*_%s" % recoProcessName,
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
+            "keep *_muons_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % hltProcessName,
-            "keep *_tightMuons_*_%s" % hltProcessName,
+            "keep *_tightMuons_*_*",
             "keep *_generator_weight_%s" % hltProcessName,
 
             "drop *_*_*_%s" % processName,

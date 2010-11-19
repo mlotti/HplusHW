@@ -61,13 +61,16 @@ def getStyles():
 def getStylesFill():
     return [StyleFill(s) for s in styles]
 
-class generator:
-    def __init__(self, fill=False):
-        if fill:
-            self.styles = getStylesFill()
-        else:
-            self.styles = getStyles()
+class Generator:
+    def __init__(self, styles):
+        self.styles = styles
         self.index = 0
+
+    def reset(self):
+        self.index = 0
+
+    def reorder(self, indices):
+        self.styles = [self.styles[i] for i in indices]
 
     def next(self):
         self.index = (self.index+1) % len(self.styles)
@@ -75,6 +78,9 @@ class generator:
     def __call__(self, h):
         self.styles[self.index](h)
         self.next()
-        
-        
-    
+
+def generator(fill=False):
+    if fill:
+        return Generator(getStylesFill())
+    else:
+        return Generator(getStyles())
