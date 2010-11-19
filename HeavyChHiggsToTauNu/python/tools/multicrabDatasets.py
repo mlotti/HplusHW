@@ -10,3 +10,19 @@ datasets.update(mcSummer10.datasets)
 datasets.update(mcFall10.datasets)
 
 tauEmbedding.addTo(datasets)
+
+def printAllDatasets(details=False):
+    names = datasets.keys()
+    names.sort()
+
+    for name in names:
+        line = name
+        if details:
+            content = datasets[name]
+            inputs = content["data"].keys()
+            inputs.sort()
+            line += " : " + ", ".join(inputs)
+        print line
+
+if __name__ == "__main__":
+    printAllDatasets(True)

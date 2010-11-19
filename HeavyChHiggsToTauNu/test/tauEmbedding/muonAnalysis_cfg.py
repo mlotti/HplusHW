@@ -144,7 +144,6 @@ if options.doPat != 0:
 ################################################################################
 
 # Generator and configuration info analyzers
-process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
 process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
 if options.crossSection >= 0.:
     process.configInfo.crossSection = cms.untracked.double(options.crossSection)
@@ -160,20 +159,19 @@ process.patSequence *= process.firstPrimaryVertex
 
 process.commonSequence = cms.Sequence(
     process.patSequence +
-    process.genRunInfo +
     process.configInfo
 )
 
 # Analysis by successive cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
-histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
+histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="muon pt (GeV/c)")
+histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="muon eta")
 histoIso = Histo("relIso", relIso, min=0, max=0.5, nbins=100, description="Relative isolation")
-histoDB = Histo("trackDB", "dB()", min=-2, max=2, nbins=400, description="Track ip @ PV (cm)")
+histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
-histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=40, description="Track norm chi2")
+histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=100, description="Track norm chi2")
 
-histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
+histoMet = Histo("et", "et()", min=0., max=400., nbins=400, description="MET (GeV)")
 
 histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
                             min=0, max=120, nbins=120, description="W transverse mass")
@@ -210,20 +208,20 @@ def createAnalysis(process, prefix="", beginSequence=None):
             allMuons = cms.untracked.PSet(
                 src = muons,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(5),
-                nbins = cms.untracked.int32(5)
+                max = cms.untracked.int32(10),
+                nbins = cms.untracked.int32(10)
             ),
             selMuons = cms.untracked.PSet(
                 src = muons,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(5),
-                nbins = cms.untracked.int32(5)
+                max = cms.untracked.int32(10),
+                nbins = cms.untracked.int32(10)
             ),
             jets = cms.untracked.PSet(
                 src = jets,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(10),
-                nbins = cms.untracked.int32(10)
+                max = cms.untracked.int32(20),
+                nbins = cms.untracked.int32(20)
             )
     ))
     pileupAnalyzer = None
@@ -231,9 +229,9 @@ def createAnalysis(process, prefix="", beginSequence=None):
         pileupAnalyzer = analysis.addAnalyzer(pileupName, cms.EDAnalyzer(
                 "HPlusVertexCountAnalyzer",
                 src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
-                nbins = cms.untracked.int32(10),
                 min = cms.untracked.double(0),
                 max = cms.untracked.double(20)
+                nbins = cms.untracked.int32(20),
         ))
         
     # Select jets already here (but do not cut on their number), so we can
@@ -547,3 +545,4 @@ if dataVersion.isData():
         createAnalysis(process, "PileupV%d"%i, s)
 
 #print process.dumpPython()
+

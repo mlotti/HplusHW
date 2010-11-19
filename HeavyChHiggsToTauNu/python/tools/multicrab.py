@@ -45,17 +45,7 @@ def createTaskDir():
     return dirname
 
 def printAllDatasets(details=False):
-    names = multicrabDatasets.datasets.keys()
-    names.sort()
-
-    for name in names:
-        line = name
-        if details:
-            content = multicrabDatasets.datasets[name]
-            inputs = content["data"].keys()
-            inputs.sort()
-            line += " : " + ", ".join(inputs)
-        print line
+    multicrabDatasets.printAllDatasets(details)
 
 def filterRuns(lumiList, runMin, runMax):
     # From FWCore/PythonUtilities/scripts/filterJSON.py
