@@ -105,9 +105,17 @@ if dataVersion.isData():
 analysis = Analysis(process, "analysis", options, additionalCounters=counters)
 analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 
+selectedTaus = analysis.addSelection("LooseTauId", taus,
+                                     "abs(eta) < 2.5 "
+                                     "&& leadPFChargedHadrCand().isNonnull() "
+                                     #"&& leadPFChargedHadrCand().pt() > xx "
+                                     "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
+                                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5",
+                                     selector="PATTauSelector")
+
 histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("muon_", muons, [histoMuonPt, histoMuonEta]),
-        ("tau_", taus, [histoTauPt, histoTauEta]),
+        ("tau_", selectedTaus, [histoTauPt, histoTauEta]),
         ("pfmet_", pfMET, [histoMet]),
         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
 
@@ -115,12 +123,18 @@ process.embeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
     metSrc = cms.untracked.InputTag(pfMET.value()),
-    origMetSrc = cms.untracked.InputTag(pfMETOriginal.value())
+    origMetSrc = cms.untracked.InputTag(pfMETOriginal.value()),
+
+    muonTauMatchingCone = cms.untracked.double(0.5),
+)
+process.tauidembeddingAnalyzer = process.embeddingAnalyzer.clone(
+    tauSrc = cms.untracked.InputTag(selectedTaus.value())
 )
 
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
     analysis.getSequence() *
-    process.embeddingAnalyzer
+    process.embeddingAnalyzer *
+    process.tauidembeddingAnalyzer
 )
