@@ -18,6 +18,7 @@ TriggerMETEmulation = cms.untracked.PSet(
 
 useFactorizedTauID = cms.untracked.bool(False) # only use for QCD. Otherwise set to "False"
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
@@ -25,7 +26,8 @@ tauSelectionBase = cms.untracked.PSet(
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.3), # 0.3 or 0.7
-    invMassCut = cms.untracked.double(1.5)
+    invMassCut = cms.untracked.double(1.5),
+    factorization = factorizationParams.tauIDFactorizationParameters
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone()
