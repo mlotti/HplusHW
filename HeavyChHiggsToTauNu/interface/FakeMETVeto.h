@@ -23,7 +23,7 @@ namespace edm {
 
 namespace HPlus {
   /**
-   * Class for checking the smallest DeltaR of the MET and the selected jets and 
+   * Class for checking the smallest DeltaPhi of the MET and the selected jets and 
    */
   class FakeMETVeto {
   public:
@@ -41,7 +41,7 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      double closestDeltaR() const { return fFakeMETVeto->fClosestDeltaR; }
+      double closestDeltaPhi() const { return fFakeMETVeto->fClosestDeltaPhi; }
 
     private:
       const FakeMETVeto *fFakeMETVeto;
@@ -56,7 +56,7 @@ namespace HPlus {
   private:
     // Input parameters
     edm::InputTag fSrc;
-    const double fMaxDeltaR;
+    const double fMaxDeltaPhi;
 
     // Counters
     //Count f;
@@ -65,15 +65,15 @@ namespace HPlus {
     EventWeight& fEventWeight;
     
     // Data
-    /// Smallest DeltaR of MET and selected jets or tau
-    double fClosestDeltaR;
-    double fClosestDeltaRToJets;
-    double fClosestDeltaRToTaus;
+    /// Smallest DeltaPhi of MET and selected jets or tau
+    double fClosestDeltaPhi;
+    double fClosestDeltaPhiToJets;
+    double fClosestDeltaPhiToTaus;
     
     // Histograms
-    TH1 *hClosestDeltaR;
-    TH1 *hClosestDeltaRToJets;
-    TH1 *hClosestDeltaRToTaus;
+    TH1 *hClosestDeltaPhi;
+    TH1 *hClosestDeltaPhiToJets;
+    TH1 *hClosestDeltaPhiToTaus;
   };
 }
 

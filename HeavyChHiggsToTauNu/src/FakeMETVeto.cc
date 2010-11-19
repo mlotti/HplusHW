@@ -2,7 +2,7 @@
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -16,13 +16,13 @@ namespace HPlus {
   
   FakeMETVeto::FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fMaxDeltaR(iConfig.getUntrackedParameter<double>("maxDeltaR")),
+    fMaxDeltaPhi(iConfig.getUntrackedParameter<double>("maxDeltaPhi")),
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
-    hClosestDeltaR = fs->make<TH1F>("Closest_DeltaR_of_MET_and_selected_jets_or_taus", "min DeltaR(MET,selected jets or taus;#DeltaR;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaRToJets = fs->make<TH1F>("Closest_DeltaR_of_MET_and_selected_jets", "min DeltaR(MET,selected jets;#DeltaR;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaRToTaus = fs->make<TH1F>("Closest_DeltaR_of_MET_and_selected_jets", "min DeltaR(MET,selected taus;#DeltaR;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhi = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhiToJets = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhiToTaus = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
   }
 
   FakeMETVeto::~FakeMETVeto() {}
@@ -34,34 +34,34 @@ namespace HPlus {
     edm::Ptr<reco::MET> met = metHandle->ptrAt(0);
 
     // Loop over selected taus
-    fClosestDeltaRToTaus = 999.;
+    fClosestDeltaPhiToTaus = 999.;
     for(edm::PtrVector<reco::Candidate>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-      double myDeltaR = reco::deltaR(*met, **iter);
-      if (myDeltaR < fClosestDeltaRToTaus)
-        fClosestDeltaRToTaus = myDeltaR;
+      double myDeltaPhi = reco::deltaPhi(*met, **iter);
+      if (myDeltaPhi < fClosestDeltaPhiToTaus)
+        fClosestDeltaPhiToTaus = myDeltaPhi;
     }
-    hClosestDeltaRToTaus->Fill(fClosestDeltaRToTaus, fEventWeight.getWeight());
+    hClosestDeltaPhiToTaus->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
     
     // Loop over selected jets
-    fClosestDeltaRToJets = 999.;
+    fClosestDeltaPhiToJets = 999.;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-      double myDeltaR = reco::deltaR(*met, **iter);
-      if (myDeltaR < fClosestDeltaRToJets)
-        fClosestDeltaRToJets = myDeltaR;
+      double myDeltaPhi = reco::deltaPhi(*met, **iter);
+      if (myDeltaPhi < fClosestDeltaPhiToJets)
+        fClosestDeltaPhiToJets = myDeltaPhi;
     }
-    hClosestDeltaRToJets->Fill(fClosestDeltaRToJets, fEventWeight.getWeight());
+    hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
 
     // Combine results
-    if (fClosestDeltaRToJets < fClosestDeltaRToTaus) {
-      fClosestDeltaR = fClosestDeltaRToJets;
+    if (fClosestDeltaPhiToJets < fClosestDeltaPhiToTaus) {
+      fClosestDeltaPhi = fClosestDeltaPhiToJets;
     } else {
-      fClosestDeltaR = fClosestDeltaRToTaus;
+      fClosestDeltaPhi = fClosestDeltaPhiToTaus;
     }
-    hClosestDeltaR->Fill(fClosestDeltaR, fEventWeight.getWeight());
+    hClosestDeltaPhi->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
 
     // Make cut
     passEvent = true; 
-    if (fClosestDeltaR > fMaxDeltaR)
+    if (fClosestDeltaPhi > fMaxDeltaPhi)
       passEvent = false;
 
     return Data(this, passEvent);
