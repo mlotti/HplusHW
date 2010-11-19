@@ -81,9 +81,10 @@ def customise(process):
             "drop *_*_*_%s" % hltProcessName,
             "keep *_tightMuons_*_*",
             "keep *_generator_weight_%s" % hltProcessName,
+            "keep *_genParticles_*_%s" % hltProcessName,
+            "keep recoGenJets_*_*_%s" % hltProcessName,
 
             "drop *_*_*_%s" % processName,
-            "keep *_genParticles_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
             "keep *_generalTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,

@@ -36,7 +36,10 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
 try:
     from TauAnalysis.MCEmbeddingTools.MCParticleReplacer_cfi import *
     newSource.algorithm = "ZTauTau"
-    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0)
+
+    # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideTauolaInterface for mdtau parameter
+    #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
+    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
     newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
     newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 
