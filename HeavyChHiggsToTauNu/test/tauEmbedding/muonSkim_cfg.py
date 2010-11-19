@@ -19,7 +19,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("MUONSKIM")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -27,8 +27,8 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        dataVersion.getPatDefaultFileCastor()
-        #dataVersion.getPatDefaultFileMadhatter()
+        #dataVersion.getPatDefaultFileCastor()
+        dataVersion.getPatDefaultFileMadhatter()
     )
 )
 
@@ -39,7 +39,6 @@ if len(trigger) == 0:
     trigger = "HLT_Mu9"
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 del process.TFileService
 
@@ -78,7 +77,8 @@ if options.doPat != 0:
 process.out.outputCommands = cms.untracked.vstring(
     "keep *",
     "drop *_*_*_MUONSKIM",
-    "keep *_tightMuons_*_MUONSKIM"
+    "keep *_selectedPatMuons_*_MUONSKIM",
+    "keep *_tauEmbeddingMuons_*_MUONSKIM"
 )
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
