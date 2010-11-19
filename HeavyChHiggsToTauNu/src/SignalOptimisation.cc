@@ -158,7 +158,7 @@ namespace HPlus {
     fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
     fMET = metData.getSelectedMET()->et();
-    fFakeMETDeltaR = fakeMETData.closestDeltaR();
+    fFakeMETDeltaR = fakeMETData.closestDeltaPhi();
     iNHadronicJets = jetData.getHadronicJetCount();
     iNBtags = btagData.getBJetCount();
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();

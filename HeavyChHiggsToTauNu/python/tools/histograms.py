@@ -7,27 +7,99 @@ import ROOT
 import multicrab
 from dataset import Dataset, mergeStackHelper
 
-def addCmsPreliminaryText(x=0.62, y=0.96):
+class TextDefaults:
+    def __init__(self):
+        self._setDefaults("cmsPreliminary", 0.62, 0.96, 0.05)
+        self._setDefaults("energy", 0.3, 0.96, 0.05)
+        self._setDefaults("lumi", 0.65, 0.85, 0.05)
+
+    def _setDefaults(self, name, x, y, size):
+        if x != None:
+            setattr(self, name+"_x", x)
+        if y != None:
+            setattr(self, name+"_y", y)
+        if size != None:
+            setattr(self, name+"_size", size)
+            
+    def setCmsPreliminaryDefaults(self, x=None, y=None, size=None):
+        self._setDefaults("cmsPreliminary", x, y, size)
+
+    def setEnergyDefaults(self, x=None, y=None, size=None):
+        self._setDefaults("energy", x, y, size)
+        
+    def setLuminosityDefaults(self, x=None, y=None, size=None):
+        self._setDefaults("lumi", x, y, size)
+
+    def getValues(self, name, x, y):
+        if x == None:
+            x = getattr(self, name+"_x")
+        if y == None:
+            y = getattr(self, name+"_y")
+        return (x, y)
+
+    def getSize(self, name):
+        return getattr(self, name+"_size")
+
+textDefaults = TextDefaults()
+
+def addCmsPreliminaryText(x=None, y=None):
+    (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextSize(textDefaults.getSize("cmsPreliminary"))
     l.DrawLatex(x, y, "CMS Preliminary")
 
-def addEnergyText(x=0.3, y=0.96, s="7 TeV"):
+def addEnergyText(x=None, y=None, s="7 TeV"):
+    (x, y) = textDefaults.getValues("energy", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextSize(textDefaults.getSize("energy"))
     l.DrawLatex(x, y, "#sqrt{s} = "+s)
 
 def addLuminosityText(x, y, lumi, unit="pb^{1}"):
+    (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextSize(textDefaults.getSize("lumi"))
     l.DrawLatex(x, y, "#intL=%.2f %s" % (lumi, unit))
 
-def createLegend(x1, y1, x2, y2):
-    legend = ROOT.TLegend(x1, y1, x2, y2)
-    legend.SetFillColor(ROOT.kWhite)
-    legend.SetBorderSize(1)
-    #legend.SetMargin(0.1)
-    return legend
+class LegendCreator:
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def copy(self):
+        return LegendCreator(self.x1, self.y1, self.x2, self.y2)
+
+    def setDefaults(self, x1=None, y1=None, x2=None, y2=None):
+        if x1 != None:
+            self.x1 = x1
+        if y1 != None:
+            self.y1 = y1
+        if x2 != None:
+            self.x2 = x2
+        if y2 != None:
+            self.y2 = y2
+
+    def __call__(self, x1=None, y1=None, x2=None, y2=None):
+        if x1 == None:
+            x1 = self.x1
+        if y1 == None:
+            y1 = self.y1
+        if x2 == None:
+            x2 = self.x2
+        if y2 == None:
+            y2 = self.y2
+
+        legend = ROOT.TLegend(x1, y1, x2, y2)
+        legend.SetFillColor(ROOT.kWhite)
+        legend.SetBorderSize(1)
+        #legend.SetMargin(0.1)
+        return legend
+
+createLegend = LegendCreator(0.7, 0.6, 0.92, 0.92)
 
 class HistoSetData:
     def __init__(self, dataset, histo):
@@ -273,10 +345,10 @@ class HistoSet:
             raise Exception("No normalization by or to luminosity!")
         return self.luminosity
 
-    def addLuminosityText(self, x=0.65, y=0.85):
+    def addLuminosityText(self, x=None, y=None): # Nones for the default values
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
-    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None):
+    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None, yfactor=1.1):
         if self.data == None:
             self.createHistogramObjects()
 
@@ -288,7 +360,7 @@ class HistoSet:
             ymin = min([d.histo.GetMinimum() for d in self.data])
         if ymax == None:
             ymax = max([d.histo.GetMaximum() for d in self.data])
-            ymax = 1.1*ymax
+            ymax = yfactor*ymax
 
         if xmin == None:
             xmin = min([d.getXmin() for d in self.data])

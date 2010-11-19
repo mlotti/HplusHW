@@ -16,17 +16,24 @@ trigger = cms.untracked.PSet(
 #    metEmulationCut = cms.untracked.double(30.0)
 #)
 
-useFactorizedTauID = cms.untracked.bool(False)
+useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
-    rtauCut = cms.untracked.double(0.8), #no change
-    invMassCut = cms.untracked.double(1.5) #no change
+    rtauCut = cms.untracked.double(0.7), #no change
+    invMassCut = cms.untracked.double(999.), #no change
+    nprongs = cms.untracked.uint32(1), # not used at the moment FIXME: use it in TauSelection.cc
+    factorization = factorizationParams.tauIDFactorizationParameters
 )
+
+#tauSelectionFactorized = tauSelection.clone()
+#tauSelectionFactorized.extend(factorizationParams)
+
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone()
 tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTauTauTriggerMatched")
@@ -45,9 +52,9 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
-tauSelection = tauSelectionShrinkingConeCutBased
+#tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
-#tauSelection = tauSelectionCaloTauCutBased
+tauSelection = tauSelectionCaloTauCutBased
 #tauSelection = tauSelectionHPSTauBased
 
 jetSelection = cms.untracked.PSet(
@@ -101,5 +108,5 @@ GlobalMuonVeto = cms.untracked.PSet(
 
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
-  maxDeltaR = cms.untracked.double(999.)
+  maxDeltaPhi = cms.untracked.double(999.)
 )

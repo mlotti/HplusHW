@@ -85,7 +85,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # Jets
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
-    process.patJets.addJetID = False
+    process.patJets.addJetID = True
     process.patJets.embedCaloTowers = False
     process.patJets.embedPFCandidates = False
     if dataVersion.is38X():
@@ -101,7 +101,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          doL1Cleaning = False,
                          doL1Counters = True,
                          genJetCollection = cms.InputTag("ak5GenJets"),
-                         doJetID      = False
+                         doJetID      = True
         )
     
         addJetCollection(process, cms.InputTag('ak5PFJets'),
@@ -113,7 +113,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          doL1Cleaning = False,
                          doL1Counters = True,
                          genJetCollection = cms.InputTag("ak5GenJets"),
-                         doJetID      = False
+                         doJetID      = True
         )
     else:
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
@@ -122,7 +122,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                             jetCorrLabel = ('AK5','PF'),
                             doType1MET   = False,
                             genJetCollection = cms.InputTag("ak5GenJets"),
-                            doJetID      = False
+                            doJetID      = True
         )
     
     if out != None:

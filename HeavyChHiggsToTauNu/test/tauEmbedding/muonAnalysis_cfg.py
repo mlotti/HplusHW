@@ -25,8 +25,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -106,7 +106,6 @@ met = cms.InputTag(pfMET)
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.options.wantSummary = cms.untracked.bool(True)
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 # Uncomment the following in order to print the counters at the end of
@@ -145,7 +144,6 @@ if options.doPat != 0:
 ################################################################################
 
 # Generator and configuration info analyzers
-process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer", src = cms.untracked.InputTag("generator"))
 process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
 if options.crossSection >= 0.:
     process.configInfo.crossSection = cms.untracked.double(options.crossSection)
@@ -161,20 +159,19 @@ process.patSequence *= process.firstPrimaryVertex
 
 process.commonSequence = cms.Sequence(
     process.patSequence +
-    process.genRunInfo +
     process.configInfo
 )
 
 # Analysis by successive cuts
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
-histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
+histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="muon pt (GeV/c)")
+histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="muon eta")
 histoIso = Histo("relIso", relIso, min=0, max=0.5, nbins=100, description="Relative isolation")
-histoDB = Histo("trackDB", "dB()", min=-2, max=2, nbins=400, description="Track ip @ PV (cm)")
+histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
-histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=40, description="Track norm chi2")
+histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=100, description="Track norm chi2")
 
-histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
+histoMet = Histo("et", "et()", min=0., max=400., nbins=400, description="MET (GeV)")
 
 histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
                             min=0, max=120, nbins=120, description="W transverse mass")
@@ -186,7 +183,7 @@ vertexCollections = ["offlinePrimaryVertices"]
 if dataVersion.isData():
     vertexCollections.append("goodPrimaryVertices")
 
-def createAnalysis(process, prefix="", functionBegin=None):
+def createAnalysis(process, prefix="", beginSequence=None):
     counters = []
     if dataVersion.isData():
         counters = dataSelectionCounters
@@ -195,8 +192,8 @@ def createAnalysis(process, prefix="", functionBegin=None):
     #analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
     #analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
     
-    if functionBegin != None:
-        functionBegin(analysis)
+    if beginSequence != None:
+        analysis.appendToSequence(beginSequence)
 
     multipName = "Multiplicity"
     pileupName = "VertexCount"
@@ -211,30 +208,30 @@ def createAnalysis(process, prefix="", functionBegin=None):
             allMuons = cms.untracked.PSet(
                 src = muons,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(5),
-                nbins = cms.untracked.int32(5)
+                max = cms.untracked.int32(10),
+                nbins = cms.untracked.int32(10)
             ),
             selMuons = cms.untracked.PSet(
                 src = muons,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(5),
-                nbins = cms.untracked.int32(5)
+                max = cms.untracked.int32(10),
+                nbins = cms.untracked.int32(10)
             ),
             jets = cms.untracked.PSet(
                 src = jets,
                 min = cms.untracked.int32(0),
-                max = cms.untracked.int32(10),
-                nbins = cms.untracked.int32(10)
+                max = cms.untracked.int32(20),
+                nbins = cms.untracked.int32(20)
             )
     ))
     pileupAnalyzer = None
-    if functionBegin == None:
+    if beginSequence == None:
         pileupAnalyzer = analysis.addAnalyzer(pileupName, cms.EDAnalyzer(
                 "HPlusVertexCountAnalyzer",
                 src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
-                nbins = cms.untracked.int32(10),
                 min = cms.untracked.double(0),
                 max = cms.untracked.double(20)
+                nbins = cms.untracked.int32(20),
         ))
         
     # Select jets already here (but do not cut on their number), so we can
@@ -402,12 +399,12 @@ def createAnalysis(process, prefix="", functionBegin=None):
     
     ################################################################################
 
-    path = cms.Path(
-        process.commonSequence *
-        analysis.getAnalysisModule("Trigger").getFilterSequence() *
-        analysis.getAnalysisModule("PrimaryVertex").getFilterSequence() *
-        analysis.getAnalysisModule("JetSelection").getFilterSequence()
-    )
+    path = cms.Path(process.commonSequence)
+    if beginSequence != None:
+        path *= beginSequence
+    path *= analysis.getAnalysisModule("Trigger").getFilterSequence()
+    path *= analysis.getAnalysisModule("PrimaryVertex").getFilterSequence()
+    path *= analysis.getAnalysisModule("JetSelection").getFilterSequence()
     
     # Muon preselection
     m = muonJetCleaner.clone(
@@ -517,11 +514,35 @@ class AddVertexCountFilter:
 
 createAnalysis(process)
 if options.WDecaySeparate > 0:
-    createAnalysis(process, "WMuNu", AddGenEventFilter())
-    createAnalysis(process, "WOther", AddGenEventFilter(invert=True))
+    process.mcEventTopology = cms.EDFilter("HPlusGenEventTopologyFilter",
+        src = cms.InputTag("genParticles"),
+        particle = cms.string("abs(pdgId()) == 24"),
+        daughter = cms.string("abs(pdgId()) == 13"),
+        minParticles = cms.uint32(1),
+        minDaughters = cms.uint32(1)
+    )
+    process.wMuNuSequence = cms.Sequence(
+        process.mcEventTopology
+    )
+    process.wOtherSequence = cms.Sequence(
+        ~process.mcEventTopology
+    )
+
+    createAnalysis(process, "WMuNu", process.wMuNuSequence)
+    createAnalysis(process, "WOther", process.wOtherSequence)
 
 if dataVersion.isData():
     for i in xrange(1, 11):
-        createAnalysis(process, "PileupV%d"%i, AddVertexCountFilter(i))
+        m = cms.EDFilter("VertexCountFilter",
+            src = cms.InputTag("goodPrimaryVertices"),
+            minNumber = cms.uint32(1),
+            maxNumber = cms.uint32(i)
+        )
+        s = cms.Sequence(m)
+        setattr(process, "pileupV%dVertexCount"%i, m)
+        setattr(process, "pileupV%dVertexCountSequence"%i, s)
+
+        createAnalysis(process, "PileupV%d"%i, s)
 
 #print process.dumpPython()
+
