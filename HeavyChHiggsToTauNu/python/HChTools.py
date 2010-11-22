@@ -125,11 +125,14 @@ def cloneModule(process, sequence, name, mod):
 # name      Name of the module
 # src       Source collection InputTag
 # lst       List of Histo objects, one histogram is booked for each
-def addHistoAnalyzer(process, sequence, name, src, lst):
+def createHistoAnalyzer(src, lst):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    return addModule(process, sequence, name, cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos))
+    return cms.EDanalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
+
+def addHistoAnalyzer(process, sequence, name, src, lst):
+    return addModule(process, sequence, name, createHistoAnalyzer(src, lst))
 
 # Add multiple CandViewHistoAnalyzers to process and sequence
 #
@@ -145,14 +148,17 @@ def addHistoAnalyzers(process, sequence, prefix, lst):
     for t in lst:
         addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2])
 
-def addMultiAnalyzer(process, sequence, name, lst, analyzer):
+def createMultiAnalyzer(lst, analyzer):
     m = cms.EDAnalyzer(analyzer)
     for t in lst:
         histos = cms.VPSet()
         for histo in t[2]:
             histos.append(histo.pset())
-        
-        m.__setattr__(t[0], cms.untracked.PSet(src = t[1], histograms = histos))
+        setattr(m, t[0], cms.untracked.PSet(src = t[1], histograms = histos))
+    return m
+
+def addMultiAnalyzer(process, sequence, name, lst, analyzer):
+    m = createMultiAnalyzer(lst, analyzer)
     process.__setattr__(name, m)
     sequence *= m
     return m
@@ -377,23 +383,19 @@ class Analysis:
         self.sequence *= module
         return module
 
+    def addHistoAnalyzer(self, postfix, src, histos):
+        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createHistoAnalyzer(src, histos))
+
+    def addMultiHistoAnalyzer(self, postfix, histos):
+        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createMultiAnalyzer(histos, "HPlusCandViewMultiHistoAnalyzer"))
+
     def addCloneAnalyzer(self, postfix, module):
         return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
 
-    def addHistoAnalyzer(self, postfix, src, histos):
-        return addHistoAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, src, histos)
-
-    def addMultiHistoAnalyzer(self, postfix, histos):
-        return addMultiAnalyzer(self.process, self.sequence, ("h%02d_"%self.histoIndex)+postfix, histos, "HPlusCandViewMultiHistoAnalyzer")
-
-    def addCloneMultiHistoAnalyzer(self, postfix, module):
-        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
-
-    def addCloneHistoAnalyzer(self, postfix, module):
-        return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)
-
     def addCloneModule(self, name, module):
-        m = module.clone()
-        setattr(self.process, self.prefix+name, m)
-        self.sequence *= m
-        return m
+        return self.addModule(name, module.clone())
+
+    def addModule(self, name, module):
+        setattr(self.process, self.prefix+name, module)
+        self.sequence *= module
+        return module
