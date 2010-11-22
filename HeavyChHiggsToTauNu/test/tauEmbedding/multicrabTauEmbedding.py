@@ -2,10 +2,11 @@
 
 import re
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
-step = "generation"
+step = "skim"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 
@@ -26,19 +27,20 @@ multicrab.addDatasets(
     [
         # Data
 #        "Mu_135821-144114", # HLT_Mu9
-        "Mu_146240-147116", # HLT_Mu9
+#        "Mu_146240-147116", # HLT_Mu9
 #        "Mu_147196-149442", # HLT_Mu15_v1
         # Signal MC
 #        "TTbarJets",
-#        "WJets",
+        "WJets",
         ])
 
 if step == "skim":
-    multicrab.setDataLumiMask("../Cert_132440-149442_7TeV_StreamExpress_Collisions10_JSON.txt")
-    multicrab.getDataset("WJets").setNumberOfJobs(50)
+    mask = lumi.getFile("StreamExpress")
+    multicrab.setDataLumiMask("../"+mask)
+    print "Lumi file", mask
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v2" % step
+tauname = "_tauembedding_%s_v3" % step
 
 def modify(dataset):
     name = ""
@@ -50,6 +52,14 @@ def modify(dataset):
         name += tauname
     else:
         name = path_re.sub(tauname, path[2])
+
+    if step == "skim":
+        if dataset.getName() == "WJets":
+            dataset.setNumberOfJobs(50)
+            dataset.addBlackWhiteList("se_white_list", ["T2_FI_HIP"])
+
+#    if "Mu_" in dataset.getName():
+#        dataset.addArg("overrideBeamSpot=1")
 
     dataset.addLine("USER.publish_data_name = "+name)
     dataset.addLine("CMSSW.output_file = "+config[step]["output"])
