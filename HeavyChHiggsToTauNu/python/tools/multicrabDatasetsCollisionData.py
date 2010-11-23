@@ -30,10 +30,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
                 "luminosity": 2.139732871,
-                "number_of_jobs": 5
+                "number_of_jobs": 10
+            },
+            "pattuple_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_2-b9b1bac3463fc5700035eeb83da514a6/USER",
+                "luminosity": 2.027848248,
+                "number_of_jobs": 10
             },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_1"
+                "fallback": "pattuple_v6_2"
             }
         }
 
@@ -73,8 +79,14 @@ datasets = {
                 "luminosity": 5.899172590,
                 "number_of_jobs": 10
             },
+            "pattuple_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-43c3132ebadd44967499e6cca288e3ab/USER",
+                "luminosity": 5.867011630,
+                "number_of_jobs": 10
+            },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_1"
+                "fallback": "pattuple_v6_2"
             }
         },
     },
@@ -109,6 +121,15 @@ datasets = {
             "AOD": {
                 "fallback": "RECO",
                 #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+            },
+            "pattuple_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-87e2c0e398f5cb72e5974e2df0c2a6a6/USER",
+                "luminosity": 13.821016530,
+                "number_of_jobs": 10
+            },
+            "pattuple_v6": {
+                "fallback": "pattuple_v6_2"
             }
         },
     },
@@ -127,6 +148,15 @@ datasets = {
             "AOD": {
                 "fallback": "RECO",
                 #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+            },
+            "pattuple_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-377aee71049a82c7ea12a489f5d5e3ef/USER",
+                "luminosity": 2.131303202,
+                "number_of_jobs": 2
+            },
+            "pattuple_v6": {
+                "fallback": "pattuple_v6_2"
             }
         },
     },
