@@ -10,15 +10,16 @@ datasets = {
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
             "RECO": {
-                "datasetpath": "/BTau/Run2010A-Sep17ReReco_v2/RECO",
-                #"datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
+                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 50,
                 "lumiMaskRequired": True
             },
             "AOD": {
-                "fallback": "RECO",
-                #"datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
+                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -63,15 +64,16 @@ datasets = {
         "runs": (146240, 148107),
         "data": {
             "RECO": {
-                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 50,
                 "lumiMaskRequired": True
             },
             "AOD": {
-                "fallback": "RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50,
+                "lumiMaskRequired": True
             },
             "pattuple_v6_1": {
                 "dbs_url": common.pattuple_dbs,
@@ -112,15 +114,16 @@ datasets = {
         "runs": (148108, 149182),
         "data": {
             "RECO": {
-                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 15,
                 "lumiMaskRequired": True
             },
             "AOD": {
-                "fallback": "RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 15,
+                "lumiMaskRequired": True
             },
             "pattuple_v6_2": {
                 "dbs_url": common.pattuple_dbs,
@@ -139,15 +142,16 @@ datasets = {
         "runs": (149291, 149442),
         "data": {
             "RECO": {
-                "datasetpath": "/BTau/Run2010B-PromptReco-v2/RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 20,
                 "lumiMaskRequired": True
             },
             "AOD": {
-                "fallback": "RECO",
-                #"datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 20,
+                "lumiMaskRequired": True
             },
             "pattuple_v6_2": {
                 "dbs_url": common.pattuple_dbs,
@@ -168,15 +172,16 @@ datasets = {
         "trigger": "HLT_Mu9",
         "data": {
             "RECO": {
-                "datasetpath": "/Mu/Run2010A-Sep17ReReco_v2/RECO", # runs 135821-144114
-                #"datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/RECO", # runs 135821-144114
+                "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/RECO", # runs 135821-144114
                 "luminosity": 0,
                 "lumis_per_job": 500,
                 "lumiMaskRequired": True
             },
             "AOD": {
-                "fallback": "RECO",
-                #"datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/AOD", # runs 135821-144114
+                "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/AOD", # runs 135821-144114
+                "luminosity": 0,
+                "lumis_per_job": 500,
+                "lumiMaskRequired": True
             }
         }
     },
@@ -186,8 +191,7 @@ datasets = {
         "runs": (146240, 147116),
         "data": {
             "AOD": {
-                "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
-                #"datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 600,
                 "lumiMaskRequired": True
@@ -200,8 +204,7 @@ datasets = {
         "runs": (147116, 148058),
         "data": {
             "AOD": {
-                "datasetpath": "/Mu/Run2010B-PromptReco-v2/AOD",
-                #"datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500,
                 "lumiMaskRequired": True
