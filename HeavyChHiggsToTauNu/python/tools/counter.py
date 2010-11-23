@@ -395,7 +395,7 @@ class EventCounter:
         self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         for subname in counterNames.keys():
-            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname, countNameFunction))
+            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname), countNameFunction)
 
         self.normalization = "None"
 

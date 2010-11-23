@@ -16,14 +16,14 @@ TauolaPolar = cms.PSet(
 #)
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
-   muonSrc = cms.untracked.InputTag("tightMuons"),
+   muonSrc = cms.untracked.InputTag("tauEmbeddingMuons"),
    metSrc = cms.untracked.InputTag("pfMet")
 )
 
 
 dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
     tracks = cms.InputTag("generalTracks"),
-    selectedMuons = cms.InputTag("adaptedMuonsFromWmunu"),
+    selectedMuons = cms.InputTag("tauEmbeddingMuons"),
     keepMuonTrack = cms.bool(False)
 )
 
@@ -36,7 +36,10 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
 try:
     from TauAnalysis.MCEmbeddingTools.MCParticleReplacer_cfi import *
     newSource.algorithm = "ZTauTau"
-    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0)
+
+    # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideTauolaInterface for mdtau parameter
+    #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
+    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
     newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
     newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 
