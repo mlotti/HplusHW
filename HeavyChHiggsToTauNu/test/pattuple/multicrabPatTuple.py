@@ -46,18 +46,15 @@ multicrab.addDatasets(
 #        "WJets",
         ])
 
-# The recommendation is to use different lists for the Sep17ReReco and
-# Run2010B_PromptReco, see e.g.
-# https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1011.html
-mask = lumi.getFile("StreamExpress")
+mask = lumi.getFile("Nov4ReReco")
 multicrab.setDataLumiMask("../"+mask)
 print "Using lumi file", mask
-try:
-    mask = lumi.getFile("Sep17ReReco")
-    multicrab.getDataset("BTau_141950-144114").setLumiMask("../"+mask)
-    print "Using lumi file %s for BTau_141950-144114" % mask
-except KeyError:
-    pass
+#try:
+#    mask = lumi.getFile("Sep17ReReco")
+#    multicrab.getDataset("BTau_141950-144114").setLumiMask("../"+mask)
+#    print "Using lumi file %s for BTau_141950-144114" % mask
+#except KeyError:
+#    pass
 
 
 # local_stage_out doesn't work due to denied permission because we're
@@ -71,7 +68,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v6_1"
+    name += "_pattuple_v6_3"
 
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
