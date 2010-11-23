@@ -118,7 +118,7 @@ class DataVersion:
             print "No default file for PAT in madhatter for dataVersion "+self.version
             return ""
         if dcap:
-            return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.patDefaultFileMadhatter
+            return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.patMadhatter
         else:
             return self.patMadhatter
 
@@ -133,7 +133,7 @@ class DataVersion:
             print "No default file for analysis in madhatter for dataVersion "+self.version
             return ""
         if dcap:
-            return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.analysisDefaultFileMadhatter
+            return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.analysisMadhatter
         else:
             return self.analysisMadhatter
 
