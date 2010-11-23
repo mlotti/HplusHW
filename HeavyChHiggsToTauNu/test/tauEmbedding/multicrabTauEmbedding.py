@@ -54,6 +54,7 @@ def modify(dataset):
         name += tauname
     else:
         name = path_re.sub(tauname, path[2])
+        name = name.replace("local-", "")
 
     if step == "skim":
         if dataset.getName() == "WJets":
