@@ -79,7 +79,7 @@ def customise(process):
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % hltProcessName,
-            "keep *_tightMuons_*_*",
+            "keep *_tauEmbeddingMuons_*_*",
             "keep *_generator_weight_%s" % hltProcessName,
             "keep *_genParticles_*_%s" % hltProcessName,
             "keep recoGenJets_*_*_%s" % hltProcessName,
