@@ -45,6 +45,7 @@ namespace HPlus {
   JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
     // Reset variables
     iNHadronicJets = -1;
+    iNHadronicJetsInFwdDir = -1;
     bool passEvent = false;
   
     edm::Handle<edm::View<pat::Jet> > hjets;
