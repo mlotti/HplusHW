@@ -25,7 +25,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
@@ -440,16 +440,27 @@ class MuonAnalysis:
     def muonVertexDiff(self):
         name = "MuonVertexDiff"
         self.selectedMuons = self.analysis.addAnalysisModule(name,
-            selector = cms.EDProducer("HPlusCandViewPtrVertexZSelector",
-                                      candSrc = self.selectedMuons,
-                                      vertexSrc = self.selectedPrimaryVertex,
-                                      maxZ = cms.double(maxVertexZ)),
+            selector = cms.EDFilter("HPlusCandViewPtrVertexZSelector",
+                                    src = self.selectedMuons,
+                                    vertexSrc = self.selectedPrimaryVertex,
+                                    maxZ = cms.double(maxVertexZ)),
             filter = makeCountFilter(cms.InputTag("dummy"), minNumber=1),
             counter = True).getSelectorInputTag()
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
             self.clonePileupAnalyzer()
+        return name
+
+    def muonLargestPt(self):
+        name = "MuonLargestPt"
+        self.selectedMuons = self.analysis.addAnalysisModule(name,
+            selector = cms.EDFilter("HPlusLargestPtCandViewPtrSelector",
+                src = self.selectedMuons,
+                filter = cms.bool(False),
+                maxNumber = cms.uint32(1))).getSelectorInputTag()
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
         return name
 
     def muonVeto(self):
@@ -494,27 +505,29 @@ class MuonAnalysis:
         self.triggerPrimaryVertex()
         self.jetSelection()
         self.tightMuonSelection()
-
         if not self.afterOtherCuts:
             self.muonKinematicSelection()
-            self.muonCleaningFromJet()
-            self.muonQuality()
-            self.muonImpactParameter()
+
+        self.muonCleaningFromJet()
+        self.muonQuality()
+        self.muonImpactParameter()
+
+        if not self.afterOtherCuts:
             self.muonIsolation()
-            self.muonVertexDiff()
+
+        self.muonVertexDiff()
+
+        if not self.afterOtherCuts:
             self.addWtransverseMassHistos()
             self.addZMassHistos()
-            self.muonVeto()
-            self.electronVeto()
-            self.jetMultiplicityFilter()
-        else:
-            self.muonCleaningFromJet()
-            self.muonQuality()
-            self.muonVertexDiff()
-            self.muonVeto()
-            name = self.electronVeto()
+
+        self.muonVeto()
+        name = self.electronVeto()
+        if self.afterOtherCuts:
             self.addAfterOtherCutsAnalyzer(name)
-            name = self.jetMultiplicityFilter()
+           
+        name = self.jetMultiplicityFilter()
+        if self.afterOtherCuts:
             self.addAfterOtherCutsAnalyzer(name)
             
     def topMuJetRef(self):
@@ -532,26 +545,30 @@ class MuonAnalysis:
         self.triggerPrimaryVertex()
         self.jetSelection()
         self.tightMuonSelection()
+
         if not self.afterOtherCuts:
             self.muonKinematicSelection()
-            self.muonCleaningFromJet()
-            self.muonQuality()
-            self.muonImpactParameter()
-            self.muonVertexDiff()
-            self.jetMultiplicityFilter()
-            self.metCut()
+
+        self.muonCleaningFromJet()
+        self.muonQuality()
+        self.muonImpactParameter()
+        self.muonVertexDiff()
+        name = self.muonLargestPt()
+
+        if not self.afterOtherCuts:
+            self.addWtransverseMassHistos()
+            self.addZMassHistos()
         else:
-            self.muonCleaningFromJet()
-            self.muonQuality()
-
-            name = self.muonVertexDiff()
+            self.addAfterOtherCutsAnalyzer(name)
+            
+        name = self.jetMultiplicityFilter()
+        if self.afterOtherCuts:
             self.addAfterOtherCutsAnalyzer(name)
 
-            name = self.jetMultiplicityFilter()
+        name = self.metCut()
+        if self.afterOtherCuts:
             self.addAfterOtherCutsAnalyzer(name)
 
-            name = self.metCut()
-            self.addAfterOtherCutsAnalyzer(name)
         self.createAnalysisPath()
             
 def createAnalysis(name, postfix="", **kwargs):
