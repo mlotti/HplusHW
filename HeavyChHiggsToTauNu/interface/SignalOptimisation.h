@@ -72,7 +72,8 @@ namespace HPlus {
     
     // Histograms
     TH1 *hAlphaTInvMass;
-    
+    TH1 *hAlphaTDiJetMassClosestToW;
+
     // for Tree
     TTree *myTree;
 
@@ -89,7 +90,9 @@ namespace HPlus {
     float fTransverseMass;
     float fDeltaPhi;
     float fAlphaT;
-    
+    float fHt;
+    float fJt; // Jt = Ht - TauJetEt - LdgJetEt
+    float fDiJetMassClosestToW;
   };
 }
 

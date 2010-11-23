@@ -60,9 +60,13 @@ namespace HPlus {
     myTree->Branch("fTransverseMass", &fTransverseMass);
     myTree->Branch("fDeltaPhi",  &fDeltaPhi);
     myTree->Branch("fAlphaT", &fAlphaT);
-    
+    myTree->Branch("fHt", &fHt);
+    myTree->Branch("fJt", &fJt);
+    myTree->Branch("fDiJetMassClosestToW", &fDiJetMassClosestToW);
+
     // Book histograms filled in the analysis body
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
+    hAlphaTDiJetMassClosestToW= fs->make<TH1F>("alphaT-DiJetMassClosestToW", "alphaT-DiJetMassClosestToW", 150, 0.0, 300.0);    
     
   }
 
@@ -89,7 +93,10 @@ namespace HPlus {
     fTransverseMass = -5.0;
     fDeltaPhi = -5.0;
     fAlphaT = -5.0;
-
+    fHt = -5.0;
+    fJt = -5.0;
+    fDiJetMassClosestToW = -5.0;
+    
     // 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
@@ -152,7 +159,16 @@ namespace HPlus {
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+    
+    float myDiJetMassClosestToW = 100000;
+    float fMassW = 80.399; // PDG value
+    for(int i= 0; i < diJetSize; i++){ 
+      hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); 
+      if( fabs(sAlphaT.vDiJetMassesNoTau[i]-fMassW) < (myDiJetMassClosestToW-fMassW) ){
+	myDiJetMassClosestToW = sAlphaT.vDiJetMassesNoTau[i];
+      }
+    }
+       
     // bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent() * tauData.passedEvent() * jetData.passedEvent() * metData.passedEvent() * btagData.passedEvent() * evtTopologyData.passedEvent();
 
     // Fill Vectors for HPlusSignalOptimisation
@@ -169,7 +185,12 @@ namespace HPlus {
     fTransverseMass = transverseMass;
     fDeltaPhi = deltaPhi;
     fAlphaT = sAlphaT.fAlphaT;
+    fHt = sAlphaT.fHt;
+    fJt = sAlphaT.fJt;
+    fDiJetMassClosestToW = myDiJetMassClosestToW;
     
+    /// Fill histos
+    hAlphaTDiJetMassClosestToW->Fill(fDiJetMassClosestToW);
     // Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
   }
