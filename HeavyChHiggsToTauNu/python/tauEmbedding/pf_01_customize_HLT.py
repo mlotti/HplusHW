@@ -43,7 +43,7 @@ def customise(process):
 
     outputModule.outputCommands.extend([
             "keep *_generalTracks_*_*",
-            "keep *_tightMuons_*_*",
+            "keep *_tauEmbeddingMuons_*_*",
             "keep *_adaptedMuonsFromWmunu_*_%s" % processName,
             "keep *_dimuonsGlobal_*_%s" % processName,
             "keep *_generator_*_%s" % processName

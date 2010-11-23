@@ -16,14 +16,14 @@ TauolaPolar = cms.PSet(
 #)
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
-   muonSrc = cms.untracked.InputTag("tightMuons"),
+   muonSrc = cms.untracked.InputTag("tauEmbeddingMuons"),
    metSrc = cms.untracked.InputTag("pfMet")
 )
 
 
 dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
     tracks = cms.InputTag("generalTracks"),
-    selectedMuons = cms.InputTag("adaptedMuonsFromWmunu"),
+    selectedMuons = cms.InputTag("tauEmbeddingMuons"),
     keepMuonTrack = cms.bool(False)
 )
 

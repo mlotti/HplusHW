@@ -38,6 +38,8 @@ if step == "skim":
     mask = lumi.getFile("StreamExpress")
     multicrab.setDataLumiMask("../"+mask)
     print "Lumi file", mask
+if step in ["generation", "embedding"]:
+    multicrab.addArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v3" % step
