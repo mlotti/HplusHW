@@ -53,6 +53,7 @@ namespace HPlus {
     myTree->Branch("fMET", &fMET);
     myTree->Branch("fFakeMETDeltaPhi", &fFakeMETDeltaPhi);
     myTree->Branch("iNHadronicJets", &iNHadronicJets);
+    myTree->Branch("iNHadronicJetsInFwdDir", &iNHadronicJetsInFwdDir);
     myTree->Branch("iNBtags", &iNBtags);
     myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
     myTree->Branch("fGlobalElectronVetoHighestPt", &fGlobalElectronVetoHighestPt);
@@ -81,6 +82,7 @@ namespace HPlus {
     fMET = -5.0;
     fFakeMETDeltaPhi = -5.0;
     iNHadronicJets = -5.0;
+    iNHadronicJetsInFwdDir = -5.0;
     iNBtags = -5.0;
     fGlobalMuonVetoHighestPt = -5.0;
     fGlobalElectronVetoHighestPt = -5.0;
@@ -160,6 +162,7 @@ namespace HPlus {
     fMET = metData.getSelectedMET()->et();
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
     iNHadronicJets = jetData.getHadronicJetCount();
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
     iNBtags = btagData.getBJetCount();
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
     fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();

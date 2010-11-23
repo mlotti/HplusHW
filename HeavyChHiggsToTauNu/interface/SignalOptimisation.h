@@ -82,6 +82,7 @@ namespace HPlus {
     float fMET;
     float fFakeMETDeltaPhi;
     int iNHadronicJets;
+    int iNHadronicJetsInFwdDir;
     int iNBtags;
     float fGlobalMuonVetoHighestPt;
     float fGlobalElectronVetoHighestPt;
