@@ -68,7 +68,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v6_2"
+    name += "_pattuple_v6_3"
 
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
