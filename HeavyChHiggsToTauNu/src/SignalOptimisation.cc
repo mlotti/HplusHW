@@ -158,9 +158,11 @@ namespace HPlus {
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+
+    float myDiJetMassClosestToW = 999;
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
+    if(diJetSize < 1){myDiJetMassClosestToW = -1.0;}
     
-    float myDiJetMassClosestToW = 100000;
     float fMassW = 80.399; // PDG value
     for(int i= 0; i < diJetSize; i++){ 
       hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); 
