@@ -18,7 +18,10 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
         sections = mc_parser.sections()
 
         for i in mc_ignore:
-            sections.remove(i)
+            try:
+                sections.remove(i)
+            except ValueError:
+                pass
 
 #        sections.sort()
 
