@@ -12,19 +12,18 @@ def addTo(datasets):
     #     "number_of_jobs": 14
     # }
 
-    # datasets["WJets"]["data"]["tauembedding_generation_v2"] = {
-    #     "dbs_url": common.pattuple_dbs,
-    #     "datasetpath": "/WJets_7TeV-madgraph-tauola/local-local_Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v2_52e54222a22093cabccf53a197393901_USER_tauembedding_generation_v2-30de4d1810b82a43ef34b86cea04d93e/USER",
-    #     "number_of_jobs": 2
-    # }
-    # datasets["WJets"]["data"]["tauembedding_embedding_v2"] = {
-    #     "dbs_url": common.pattuple_dbs,
-    #     "datasetpath": "/WJets_7TeV-madgraph-tauola/local-local_local_Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v2_52e54222a22093cabccf53a197393901_USER_tauembedding_generation_v2_30de4d1810b82a43ef34b86cea04d93e_USER_tauembedding_embedding_v2-ed6563e15d1b423a9bd5d11109ca1e30/USER",
-    #     "number_of_jobs": 2
-    # }
-
     datasets["WJets"]["data"]["tauembedding_skim_v3"] = {
         "dbs_url": common.pattuple_dbs,
         "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v3-1e74944f713fc616dfdc12e43491e68c/USER",
         "number_of_jobs": 10
+    }
+    datasets["WJets"]["data"]["tauembedding_generation_v3"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/WJets_7TeV-madgraph-tauola/local-local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_generation_v3-9f5e22d4b16076b49568a537f31b168c/USER",
+        "number_of_jobs": 10
+    }
+    datasets["WJets"]["data"]["tauembedding_embedding_v3_2"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_2-ed6563e15d1b423a9bd5d11109ca1e30/USER",
+        "number_of_jobs": 5
     }

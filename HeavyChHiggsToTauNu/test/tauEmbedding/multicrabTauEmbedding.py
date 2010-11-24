@@ -5,15 +5,15 @@ import re
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
+#step = "skim"
 #step = "generation"
 #step = "embedding"
-#step = "analysis"
+step = "analysis"
 
 config = {"skim":       {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation": {"input": "tauembedding_skim_v2",       "config": "embed_HLT.py", "output": "embedded_HLT.root"},
-          "embedding":  {"input": "tauembedding_generation_v2", "config": "embed_RECO.py", "output": "embedded_RECO.root"},
-          "analysis":   {"input": "tauembedding_embedding_v2",  "config": "embeddingAnalysis_cfg.py"}}
+          "generation": {"input": "tauembedding_skim_v3",       "config": "embed_HLT.py", "output": "embedded_HLT.root"},
+          "embedding":  {"input": "tauembedding_generation_v3", "config": "embed_RECO.py", "output": "embedded_RECO.root"},
+          "analysis":   {"input": "tauembedding_embedding_v3_2",  "config": "embeddingAnalysis_cfg.py"}}
 
 crabcfg = "crab.cfg"
 if step == "analysis":
@@ -42,7 +42,7 @@ if step in ["generation", "embedding"]:
     multicrab.addArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v3" % step
+tauname = "_tauembedding_%s_v3_2" % step
 
 def modify(dataset):
     name = ""
