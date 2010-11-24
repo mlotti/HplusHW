@@ -26,7 +26,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/local_local_Summer10_START36_V9_S09_v1_AODSIM_tauembedding_skim_v2_52e54222a22093cabccf53a197393901_USER_tauembedding_generation_v2_30de4d1810b82a43ef34b86cea04d93e_USER_tauembedding_embedding_v2/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_2_1_fTj.root",
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/local-local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_1/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_1_1_Onz.root"
         "file:embedded_RECO.root"
   )
 )
@@ -83,6 +83,33 @@ process.commonSequence = cms.Sequence(
 
 ################################################################################
 
+# Recalculate gen MET
+from RecoMET.Configuration.GenMETParticles_cff import genParticlesForMETAllVisible
+process.genParticlesForMETAllVisibleOriginal = genParticlesForMETAllVisible.clone(src=cms.InputTag("genParticles", "", "HLT"))
+process.genParticlesForMETAllVisibleOriginalSelected = cms.EDProducer("HPlusGenParticleCleaner",
+    src = cms.InputTag("genParticlesForMETAllVisibleOriginal"),
+    candSrc = cms.InputTag("tauEmbeddingMuons"),
+    maxDeltaR = cms.double(0.2)
+)
+from RecoMET.METProducers.genMetTrue_cfi import genMetTrue
+process.genMetTrueOriginal = genMetTrue.clone(src=cms.InputTag("genParticlesForMETAllVisibleOriginalSelected"))
+process.genMetTrueEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
+    src = cms.VInputTag(cms.InputTag("genMetTrueOriginal"), cms.InputTag("genMetTrue", "", "EMBEDDINGHLT"))
+)
+process.genMetSequence = cms.Sequence(
+    process.genParticlesForMETAllVisibleOriginal *
+    process.genParticlesForMETAllVisibleOriginalSelected *
+    process.genMetTrueOriginal *
+    process.genMetTrueEmbedded
+)
+
+process.commonSequence *= process.genMetSequence
+
+
+
+################################################################################
+
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 histoMuonPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
 histoMuonEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
@@ -93,8 +120,8 @@ histoTauEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="tau et
 histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (GeV)")
 
 
-muons = cms.InputTag("tightMuons")
-taus = cms.InputTag("selectedPatTaus")
+muons = cms.InputTag("tauEmbeddingMuons")
+taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
 pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", "RECO")
 
@@ -108,10 +135,18 @@ analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 selectedTaus = analysis.addSelection("LooseTauId", taus,
                                      "abs(eta) < 2.5 "
                                      "&& leadPFChargedHadrCand().isNonnull() "
-                                     #"&& leadPFChargedHadrCand().pt() > xx "
                                      "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
                                      "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5",
                                      selector="PATTauSelector")
+
+selectedTausPt = analysis.addSelection("LooseTauPtId", taus,
+                                       "pt > 40"
+                                       "&& abs(eta) < 2.5 "
+                                       "&& leadPFChargedHadrCand().isNonnull() "
+                                       "&& leadPFChargedHadrCand().pt() > 20 "
+                                       "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
+                                       "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5",
+                                       selector="PATTauSelector")
 
 histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("muon_", muons, [histoMuonPt, histoMuonEta]),
@@ -119,15 +154,20 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("pfmet_", pfMET, [histoMet]),
         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
 
-process.embeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
+process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
     metSrc = cms.untracked.InputTag(pfMET.value()),
     origMetSrc = cms.untracked.InputTag(pfMETOriginal.value()),
+    genMetSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
+    origGenMetSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X"),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
 )
-process.tauidembeddingAnalyzer = process.embeddingAnalyzer.clone(
+process.tauIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
+    tauSrc = cms.untracked.InputTag(selectedTaus.value())
+)
+process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
     tauSrc = cms.untracked.InputTag(selectedTaus.value())
 )
 
@@ -135,6 +175,7 @@ process.tauidembeddingAnalyzer = process.embeddingAnalyzer.clone(
 process.analysisPath = cms.Path(
     process.commonSequence *
     analysis.getSequence() *
-    process.embeddingAnalyzer *
-    process.tauidembeddingAnalyzer
+    process.EmbeddingAnalyzer *
+    process.tauIdEmbeddingAnalyzer *
+    process.tauPtIdEmbeddingAnalyzer
 )
