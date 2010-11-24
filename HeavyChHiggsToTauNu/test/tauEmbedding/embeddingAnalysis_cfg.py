@@ -96,11 +96,20 @@ process.genMetTrueOriginal = genMetTrue.clone(src=cms.InputTag("genParticlesForM
 process.genMetTrueEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
     src = cms.VInputTag(cms.InputTag("genMetTrueOriginal"), cms.InputTag("genMetTrue", "", "EMBEDDINGHLT"))
 )
+process.genMetNuOriginal = cms.EDProducer("HPlusGenMETFromNuProducer",
+    src = cms.InputTag("genParticles", "", "HLT")
+)
+process.genMetNuEmbedded = cms.EDProducer("HPlusGenMETFromNuProducer",
+    src = cms.InputTag("genParticles", "", "HLT"),
+    embeddedSrc = cms.InputTag("genParticles", "", "EMBEDDINGHLT")
+)
 process.genMetSequence = cms.Sequence(
     process.genParticlesForMETAllVisibleOriginal *
     process.genParticlesForMETAllVisibleOriginalSelected *
     process.genMetTrueOriginal *
-    process.genMetTrueEmbedded
+    process.genMetTrueEmbedded *
+    process.genMetNuOriginal *
+    process.genMetNuEmbedded
 )
 
 process.commonSequence *= process.genMetSequence
@@ -161,6 +170,9 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     origMetSrc = cms.untracked.InputTag(pfMETOriginal.value()),
     genMetSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
     origGenMetSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X"),
+    nuMetSrc = cms.untracked.InputTag("genMetNuEmbedded"),
+    origNuMetSrc = cms.untracked.InputTag("genMetNuOriginal"),
+    genParticleSrc = cms.untracked.InputTag("genParticles"),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
 )
