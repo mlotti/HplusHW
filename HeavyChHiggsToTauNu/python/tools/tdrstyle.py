@@ -8,11 +8,14 @@ class TDRStyle:
         self.defaultStat = ""
         self.mode = ""
 
+        self.canvasH = 600
+        self.canvasW = 600
+
         # for the canvas
         self.tdrStyle.SetCanvasBorderMode(0)
         self.tdrStyle.SetCanvasColor(ROOT.kWhite)
-        self.tdrStyle.SetCanvasDefH(600) # Height of canvas
-        self.tdrStyle.SetCanvasDefW(600) # Width of canvas
+        self.tdrStyle.SetCanvasDefH(self.canvasH) # Height of canvas
+        self.tdrStyle.SetCanvasDefW(self.canvasW) # Width of canvas
         # These modifications are in order to get the frame area square
         # Cf. SetPad*Margin
         #self.tdrStyle.SetCanvasDefH(740) # Height of canvas
@@ -82,12 +85,13 @@ class TDRStyle:
         # self.tdrStyle.SetStatY(Float_t y = 0)
 
         # Margins:
+        self.rightMargin = 0.05
         self.tdrStyle.SetPadTopMargin(0.05) # default
         #self.tdrStyle.SetPadTopMargin(0.13)
         self.tdrStyle.SetPadBottomMargin(0.13)
         #self.tdrStyle.SetPadLeftMargin(0.13)
         self.tdrStyle.SetPadLeftMargin(0.16)
-        self.tdrStyle.SetPadRightMargin(0.05) # default
+        self.tdrStyle.SetPadRightMargin(self.rightMargin) # default
         #self.tdrStyle.SetPadRightMargin(0.13)
 
         # For the Global title:
@@ -150,11 +154,14 @@ class TDRStyle:
 
         self.tdrStyle.cd()
 
-    def SetGrid(self, onoff):
+    def setGrid(self, onoff):
         self.tdrStyle.SetPadGridX(onoff)
         self.tdrStyle.SetPadGridX(onoff)
 
-    def SetPalette(self):
+    def setPalettePretty(self):
+        self.tdrStyle.SetPalette(1)
+
+    def setPaletteMy(self):
         mycolors = [51,
                     60,
                     65,
@@ -165,3 +172,11 @@ class TDRStyle:
                     100]
         
         self.tdrStyle.SetPalette(len(mycolors), array("i", mycolors))
+
+    def setWide(self, onoff):
+        if onoff:
+            self.tdrStyle.SetCanvasDefW(int(1.08*self.canvasW))
+            self.tdrStyle.SetPadRightMargin(0.08+self.rightMargin)
+        else:
+            self.tdrStyle.SetCanvasDefW(self.canvasW)
+            self.tdrStyle.SetPadRightMargin(self.rightMargin)
