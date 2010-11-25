@@ -209,7 +209,7 @@ def main():
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.85)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)
-        writeText("#mu = 200", 0.75)
+        writeText("#mu = "+str(fixedMu)+" GeV/c^{2}", 0.75)
         multi.GetYaxis().SetRangeUser(0,210)
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
