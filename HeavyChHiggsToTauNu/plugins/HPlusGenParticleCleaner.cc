@@ -24,12 +24,14 @@ class HPlusGenParticleCleaner: public edm::EDProducer {
   edm::InputTag src;
   edm::InputTag candSrc;
   const double maxDeltaR;
+  std::vector<int> pdgIds;
 };
 
 HPlusGenParticleCleaner::HPlusGenParticleCleaner(const edm::ParameterSet& iConfig):
   src(iConfig.getParameter<edm::InputTag>("src")),
   candSrc(iConfig.getParameter<edm::InputTag>("candSrc")),
-  maxDeltaR(iConfig.getParameter<double>("maxDeltaR"))
+  maxDeltaR(iConfig.getParameter<double>("maxDeltaR")),
+  pdgIds(iConfig.getParameter<std::vector<int> >("pdgIdsOnly"))
 {
   produces<reco::GenParticleRefVector>();
 }
@@ -47,16 +49,24 @@ void HPlusGenParticleCleaner::produce(edm::Event& iEvent, const edm::EventSetup&
 
   for(size_t i=0; i<hgen->size(); ++i) {
     bool matched = false;
-    for(edm::View<reco::Candidate>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
-      if(reco::deltaR(*iCand, *(hgen->at(i))) < maxDeltaR) {
-        matched = true;
-        break;
+    if(!pdgIds.empty() and std::find(pdgIds.begin(), pdgIds.end(), std::abs(hgen->at(i)->pdgId())) != pdgIds.end()) {
+      for(edm::View<reco::Candidate>::const_iterator iCand = hcand->begin(); iCand != hcand->end(); ++iCand) {
+        if(reco::deltaR(*iCand, *(hgen->at(i))) < maxDeltaR) {
+          matched = true;
+          break;
+        }
       }
     }
-    if(!matched)
+    if(!matched) {
       //ret->push_back(edm::Ref<reco::GenParticleCollection>(hgen, i));
       //ret->push_back(hgen->refAt(i));
       ret->push_back(hgen->at(i));
+    }
+    /*
+    else {
+      std::cout << "Removing genParticle " << hgen->at(i)->pdgId() << " status " << hgen->at(i)->status() << " px " << hgen->at(i)->px() << " py " << hgen->at(i)->py() << " pt " << hgen->at(i)->pt() << std::endl;
+    }
+    */
   }
 
   iEvent.put(ret);

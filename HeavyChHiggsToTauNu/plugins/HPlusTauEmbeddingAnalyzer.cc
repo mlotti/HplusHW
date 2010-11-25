@@ -87,7 +87,12 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
   };
 
   struct HistoMet {
-    HistoMet(): hMet(0), hMetX(0), hOrigMet(0), hOrigMetX(0), hOrigMetY(0), hMetMet(0), hMetMetX(0), hMetMetY(0) {}
+    HistoMet(double metCut): metCut_(metCut),
+                             hMet(0), hMetX(0), hMetY(0),
+                             hOrigMet(0), hOrigMetX(0), hOrigMetY(0),
+                             hOrigMetAfterCut(0),
+                             hMetMet(0), hMetMetX(0), hMetMetY(0)
+    {}
 
     void init(TFileDirectory& dir, const std::string& name) {
       hMet = dir.make<TH1F>((name+"Met").c_str(), "Tau+jets MET", 400, 0., 400.);
@@ -97,6 +102,8 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hOrigMet = dir.make<TH1F>((name+"MetOriginal").c_str(), "Mu+jets MET", 400, 0., 400.);
       hOrigMetX = dir.make<TH1F>((name+"MetOriginal_x").c_str(), "Mu+jets MET", 400, -200., 200.);
       hOrigMetY = dir.make<TH1F>((name+"MetOriginal_y").c_str(), "Mu+jets MET", 400, -200., 200.);
+
+      hOrigMetAfterCut = dir.make<TH1F>((name+"MetOriginalAfterCut").c_str(), "Tau+jets MET", 400, 0., 400.);
 
       hMetMet = dir.make<TH2F>((name+"MetMet").c_str(), "Mu vs. tau+jets MET", 400,0.,400., 400,0.,400.);
       hMetMetX = dir.make<TH2F>((name+"MetMet_x").c_str(), "Mu. vs. tau+jets MET x", 400,-200,200, 400,-200,200);
@@ -112,11 +119,16 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hOrigMetX->Fill(metOrig.px());
       hOrigMetY->Fill(metOrig.py());
 
+      if(met.et() > metCut_)
+        hOrigMetAfterCut->Fill(metOrig.et());
+
       hMetMet->Fill(metOrig.et(), met.et());
       hMetMetX->Fill(metOrig.px(), met.px());
       hMetMetY->Fill(metOrig.py(), met.py());
 
     }
+
+    double metCut_;
 
     TH1 *hMet;
     TH1 *hMetX;
@@ -126,33 +138,52 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     TH1 *hOrigMetX;
     TH1 *hOrigMetY;
 
+    TH1 *hOrigMetAfterCut;
+
     TH2 *hMetMet;
     TH2 *hMetMetX;
     TH2 *hMetMetY;
   };
 
-  HistoMet hMet;
-  HistoMet hMetMatched;
-  HistoMet hGenMet;
-  HistoMet hGenMetMatched;
-  HistoMet hNuMet;
-  HistoMet hNuMetMatched;
+  struct HistoAll {
+    HistoAll(double metCut): hMet(metCut), hGenMet(metCut), hNuMet(metCut) {}
 
-  Histo hMuon;
-  Histo hTau;
-  Histo hTauMatched;
-  Histo hTauGen;
-  Histo hNuGen;
-  Histo hTauGenMatched;
-  Histo hNuGenMatched;
+    void init(TFileDirectory& dir) {
+      hMet.init(dir, "");
+      hGenMet.init(dir, "Gen");
+      hNuMet.init(dir, "Nu");
 
-  Histo2 hMuonTau;
-  Histo2 hMuonTauMatched;
+      hMuon.init(dir, "muon", "Muon");
+      hTau.init(dir, "tau", "Tau");
+      hTauGen.init(dir, "tauGen", "Tau gen");
+      hNuGen.init(dir, "nuGen", "Nu gen");
 
-  TH1 *hMuonTauDR;
-  TH1 *hTauNuGenDR;
-  TH1 *hTauNuGenDEta;
-  TH1 *hTauNuGenDPhi;
+      hMuonTau.init(dir, "muonTau", "Mu vs. tau");
+
+      hMuonTauDR = dir.make<TH1F>("muonTauDR", "DR(muon, tau)", 700, 0, 7);
+      hTauNuGenDR = dir.make<TH1F>("tauNuGenDR", "DR(tau, nu) gen", 700, 0, 7);
+      hTauNuGenDEta = dir.make<TH1F>("tauNuGenDEta", "DEta(tau, nu) gen", 700, 0, 7);
+      hTauNuGenDPhi = dir.make<TH1F>("tauNuGenDPhi", "DPhi(tau, nu) gen", 350, 0, 3.5);
+    }
+
+    HistoMet hMet;
+    HistoMet hGenMet;
+    HistoMet hNuMet;
+    Histo hMuon;
+    Histo hTau;
+    Histo hTauGen;
+    Histo hNuGen;
+
+    Histo2 hMuonTau;
+
+    TH1 *hMuonTauDR;
+    TH1 *hTauNuGenDR;
+    TH1 *hTauNuGenDEta;
+    TH1 *hTauNuGenDPhi;
+  };
+
+  HistoAll histos;
+  HistoAll histosMatched;
 
 };
 
@@ -166,35 +197,15 @@ HPlusTauEmbeddingAnalyzer::HPlusTauEmbeddingAnalyzer(const edm::ParameterSet& iC
   nuMetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("nuMetSrc")),
   origNuMetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("origNuMetSrc")),
   genParticleSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
-  muonTauCone_(iConfig.getUntrackedParameter<double>("muonTauMatchingCone"))
+  muonTauCone_(iConfig.getUntrackedParameter<double>("muonTauMatchingCone")),
+  histos(iConfig.getUntrackedParameter<double>("metCut")),
+  histosMatched(iConfig.getUntrackedParameter<double>("metCut"))
 {
   edm::Service<TFileService> fs;
 
-  hMet.init(*fs, "");
-  hMetMatched.init(*fs, "tauMatched");
-
-  hGenMet.init(*fs, "Gen");
-  hGenMetMatched.init(*fs, "tauMatchedGen");
-
-  hNuMet.init(*fs, "Nu");
-  hNuMetMatched.init(*fs, "tauMatchedNu");
-
-  hMuon.init(*fs, "muon", "Muon");
-  hTau.init(*fs, "tau", "Tau");
-  hTauMatched.init(*fs, "tauMatched", "Tau");
-  hTauGen.init(*fs, "tauGen", "Tau gen");
-  hTauGenMatched.init(*fs, "tauGenMatched", "Tau gen");
-  hNuGen.init(*fs, "nuGen", "Nu gen");
-  hNuGenMatched.init(*fs, "nuGenMatched", "Nu gen");
-
-  hMuonTau.init(*fs, "muonTau", "Mu vs. tau");
-  hMuonTauMatched.init(*fs, "muonTauMatched", "Mu vs. tau");
-
-  hMuonTauDR = fs->make<TH1F>("muonTauDR", "DR(muon, tau)", 700, 0, 7);
-  hTauNuGenDR = fs->make<TH1F>("tauNuGenDR", "DR(tau, nu) gen", 700, 0, 7);
-  hTauNuGenDEta = fs->make<TH1F>("tauNuGenDEta", "DEta(tau, nu) gen", 700, 0, 7);
-  hTauNuGenDPhi = fs->make<TH1F>("tauNuGenDPhi", "DPhi(tau, nu) gen", 350, 0, 3.5);
-  
+  histos.init(*fs);
+  TFileDirectory mdir = fs->mkdir("matched");
+  histosMatched.init(mdir);
 }
 HPlusTauEmbeddingAnalyzer::~HPlusTauEmbeddingAnalyzer() {}
 
@@ -249,32 +260,38 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
 
   GenParticlePair nuTau = findTauNu(hgen->begin(), hgen->end());
 
-  hMet.fill(*met, *origMet);
-  hGenMet.fill(*genMet, *origGenMet);
-  hNuMet.fill(*nuMet, *origNuMet);
+  histos.hMet.fill(*met, *origMet);
+  histos.hGenMet.fill(*genMet, *origGenMet);
+  histos.hNuMet.fill(*nuMet, *origNuMet);
 
-  hMuon.fill(*muon);
-  hMuonTauDR->Fill(minDR);
-  hTau.fill(*tau);
-  hMuonTau.fill(*muon, *tau);
+  histos.hMuon.fill(*muon);
+  histos.hMuonTauDR->Fill(minDR);
+  histos.hTau.fill(*tau);
+  histos.hMuonTau.fill(*muon, *tau);
 
-  hTauGen.fill(*nuTau.second);
-  hNuGen.fill(*nuTau.first);
+  histos.hTauGen.fill(*nuTau.second);
+  histos.hNuGen.fill(*nuTau.first);
 
-  hTauNuGenDR->Fill(reco::deltaR(*nuTau.first, *nuTau.second));
-  hTauNuGenDPhi->Fill(reco::deltaPhi(nuTau.first->phi(), nuTau.second->phi()));
-  hTauNuGenDEta->Fill(std::abs(nuTau.first->eta()-nuTau.second->eta()));
+  histos.hTauNuGenDR->Fill(reco::deltaR(*nuTau.first, *nuTau.second));
+  histos.hTauNuGenDPhi->Fill(reco::deltaPhi(nuTau.first->phi(), nuTau.second->phi()));
+  histos.hTauNuGenDEta->Fill(std::abs(nuTau.first->eta()-nuTau.second->eta()));
                     
-
   if(minDR < muonTauCone_) {
-    hTauMatched.fill(*tau);
-    hMuonTauMatched.fill(*muon, *tau);
-    hMetMatched.fill(*met, *origMet);
-    hGenMetMatched.fill(*genMet, *origGenMet);
-    hNuMetMatched.fill(*nuMet, *origNuMet);
+    histosMatched.hMet.fill(*met, *origMet);
+    histosMatched.hGenMet.fill(*genMet, *origGenMet);
+    histosMatched.hNuMet.fill(*nuMet, *origNuMet);
 
-    hTauGenMatched.fill(*nuTau.second);
-    hNuGenMatched.fill(*nuTau.first);
+    histosMatched.hMuon.fill(*muon);
+    histosMatched.hMuonTauDR->Fill(minDR);
+    histosMatched.hTau.fill(*tau);
+    histosMatched.hMuonTau.fill(*muon, *tau);
+
+    histosMatched.hTauGen.fill(*nuTau.second);
+    histosMatched.hNuGen.fill(*nuTau.first);
+
+    histosMatched.hTauNuGenDR->Fill(reco::deltaR(*nuTau.first, *nuTau.second));
+    histosMatched.hTauNuGenDPhi->Fill(reco::deltaPhi(nuTau.first->phi(), nuTau.second->phi()));
+    histosMatched.hTauNuGenDEta->Fill(std::abs(nuTau.first->eta()-nuTau.second->eta()));
   }
 
 }

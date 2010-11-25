@@ -18,7 +18,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("TauEmbeddingAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -26,8 +27,8 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/local-local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_1/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_1_1_Onz.root"
-        "file:embedded_RECO.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_2/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_8_1_JTn.root"
+        #"file:embedded_RECO.root"
   )
 )
 options.doPat = 1
@@ -35,6 +36,7 @@ options.doPat = 1
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
 process.TFileService.fileName = "histograms.root"
@@ -89,7 +91,8 @@ process.genParticlesForMETAllVisibleOriginal = genParticlesForMETAllVisible.clon
 process.genParticlesForMETAllVisibleOriginalSelected = cms.EDProducer("HPlusGenParticleCleaner",
     src = cms.InputTag("genParticlesForMETAllVisibleOriginal"),
     candSrc = cms.InputTag("tauEmbeddingMuons"),
-    maxDeltaR = cms.double(0.2)
+    maxDeltaR = cms.double(0.2),
+    pdgIdsOnly = cms.vint32(13)
 )
 from RecoMET.METProducers.genMetTrue_cfi import genMetTrue
 process.genMetTrueOriginal = genMetTrue.clone(src=cms.InputTag("genParticlesForMETAllVisibleOriginalSelected"))
@@ -114,6 +117,8 @@ process.genMetSequence = cms.Sequence(
 
 process.commonSequence *= process.genMetSequence
 
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
+#process.commonSequence *= process.printGenParticles
 
 
 ################################################################################
@@ -175,12 +180,13 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     genParticleSrc = cms.untracked.InputTag("genParticles"),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
+    metCut = cms.untracked.double(60)
 )
 process.tauIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
     tauSrc = cms.untracked.InputTag(selectedTaus.value())
 )
 process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
-    tauSrc = cms.untracked.InputTag(selectedTaus.value())
+    tauSrc = cms.untracked.InputTag(selectedTausPt.value())
 )
 
 #process.analysisSequence = 
