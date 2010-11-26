@@ -147,7 +147,7 @@ def main():
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.84)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.78)
-        writeText("no syst. errors", 0.72)
+        writeText(selection+", no syst. errors", 0.72)
         for mu in mus :
             yvalues, massArray = array( 'd' ), array( 'd' )
             print "mu = ",mu
