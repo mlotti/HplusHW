@@ -191,8 +191,8 @@ selectedTaus = analysis.addSelection("LooseTauId", taus,
                                      "abs(eta) < 2.5 "
                                      "&& leadPFChargedHadrCand().isNonnull() "
                                      "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
-                                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5",
-                                     selector="PATTauSelector")
+#                                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
+                                     , selector="PATTauSelector")
 
 selectedTausPt = analysis.addSelection("LooseTauPtId", taus,
                                        "pt > 40"
@@ -200,8 +200,8 @@ selectedTausPt = analysis.addSelection("LooseTauPtId", taus,
                                        "&& leadPFChargedHadrCand().isNonnull() "
                                        "&& leadPFChargedHadrCand().pt() > 20 "
                                        "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
-                                       "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5",
-                                       selector="PATTauSelector")
+#                                       "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
+                                       , selector="PATTauSelector")
 
 histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("muon_", muons, [histoMuonPt, histoMuonEta]),
