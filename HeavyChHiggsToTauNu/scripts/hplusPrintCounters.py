@@ -51,7 +51,7 @@ def main(opts):
         for name in names:
             print "============================================================"
             print "Subcounter %s %s: " % (name, quantity)
-            print formatFunc(eventCounter.getMainCounterTable())
+            print formatFunc(eventCounter.getSubCounterTable(name))
             print
 
     # print
