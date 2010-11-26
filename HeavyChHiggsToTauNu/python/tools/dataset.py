@@ -370,7 +370,7 @@ class Dataset:
         pname = self.prefix+name
         h = self.file.Get(pname)
         if h == None:
-            raise Exception("Unable to find histogram '%s'" % pname)
+            raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
 
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
