@@ -86,7 +86,8 @@ process.commonSequence = cms.Sequence(
 ################################################################################
 
 # Recalculate gen MET
-from RecoMET.Configuration.GenMETParticles_cff import genParticlesForMETAllVisible
+# True MET
+from RecoMET.Configuration.GenMETParticles_cff import genParticlesForMETAllVisible, genCandidatesForMET
 process.genParticlesForMETAllVisibleOriginal = genParticlesForMETAllVisible.clone(src=cms.InputTag("genParticles", "", "HLT"))
 process.genParticlesForMETAllVisibleOriginalSelected = cms.EDProducer("HPlusGenParticleCleaner",
     src = cms.InputTag("genParticlesForMETAllVisibleOriginal"),
@@ -97,8 +98,37 @@ process.genParticlesForMETAllVisibleOriginalSelected = cms.EDProducer("HPlusGenP
 from RecoMET.METProducers.genMetTrue_cfi import genMetTrue
 process.genMetTrueOriginal = genMetTrue.clone(src=cms.InputTag("genParticlesForMETAllVisibleOriginalSelected"))
 process.genMetTrueEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
+#    src = cms.VInputTag(cms.InputTag("genMetTrue", "", "HLT"), cms.InputTag("genMetTrue", "", "EMBEDDINGHLT"))
     src = cms.VInputTag(cms.InputTag("genMetTrueOriginal"), cms.InputTag("genMetTrue", "", "EMBEDDINGHLT"))
 )
+
+# Calo MET
+#process.genCandidatesForMETOriginal = genCandidatesForMET.clone(src=cms.InputTag("genParticles", "", "HLT"))
+#process.genCandidatesForMETOriginalSelected = process.genParticlesForMETAllVisibleOriginalSelected.clone(
+#    src = cms.InputTag("genCandidatesForMETOriginal")
+#)
+#from RecoMET.METProducers.genMetCalo_cfi import genMetCalo
+#process.genMetCaloOriginal = genMetCalo.clone(src=cms.InputTag("genCandidatesForMETOriginalSelected"))
+process.genMetCaloEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
+    src = cms.VInputTag(cms.InputTag("genMetCalo", "", "REDIGI36X"), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
+#    src = cms.VInputTag(cms.InputTag("genMetCaloOriginal"), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
+)                                            
+
+# CaloAndNonPromt MET
+#from RecoJets.Configuration.GenJetParticles_cff import genParticlesForJetsNoMuNoNu
+#process.genParticlesForJetsNoMuNoNuOriginal = genParticlesForJetsNoMuNoNu.clone(src=cms.InputTag("genParticles", "", "HLT"))
+#process.genParticlesForJetsNoMuNoNuOriginalSelected = process.genParticlesForMETAllVisibleOriginalSelected.clone(
+#    src = cms.InputTag("genParticlesForJetsNoMuNoNuOriginal")
+#)
+#from RecoMET.METProducers.genMetCaloAndNonPrompt_cfi import genMetCaloAndNonPrompt
+#process.genMetCaloAndNonPromptOriginal = genMetCaloAndNonPrompt.clone(src=cms.InputTag("genParticlesForJetsNoMuNoNuOriginalSelected"))
+process.genMetCaloAndNonPromptEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
+    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X"), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
+#    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPromptOriginal"), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
+)
+
+
+# Nu MET                  
 process.genMetNuOriginal = cms.EDProducer("HPlusGenMETFromNuProducer",
     src = cms.InputTag("genParticles", "", "HLT")
 )
@@ -111,6 +141,17 @@ process.genMetSequence = cms.Sequence(
     process.genParticlesForMETAllVisibleOriginalSelected *
     process.genMetTrueOriginal *
     process.genMetTrueEmbedded *
+
+#    process.genCandidatesForMETOriginal *
+#    process.genCandidatesForMETOriginalSelected *
+#    process.genMetCaloOriginal *
+    process.genMetCaloEmbedded *
+
+#    process.genParticlesForJetsNoMuNoNuOriginal *
+#    process.genParticlesForJetsNoMuNoNuOriginalSelected *
+#    process.genMetCaloAndNonPromptOriginal *
+    process.genMetCaloAndNonPromptEmbedded *
+
     process.genMetNuOriginal *
     process.genMetNuEmbedded
 )
@@ -171,13 +212,29 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
-    metSrc = cms.untracked.InputTag(pfMET.value()),
-    origMetSrc = cms.untracked.InputTag(pfMETOriginal.value()),
-    genMetSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
-    origGenMetSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X"),
-    nuMetSrc = cms.untracked.InputTag("genMetNuEmbedded"),
-    origNuMetSrc = cms.untracked.InputTag("genMetNuOriginal"),
     genParticleSrc = cms.untracked.InputTag("genParticles"),
+    mets = cms.untracked.PSet(
+        Met = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag(pfMET.value()),
+            originalSrc = cms.untracked.InputTag(pfMETOriginal.value())
+        ),
+        GenMetTrue = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
+            originalSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X")
+        ),
+        GenMetCalo = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
+            originalSrc = cms.untracked.InputTag("genMetCalo", "", "REDIGI36X")
+        ),
+        GenMetCaloAndNonPrompt = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
+            originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X")
+        ),
+        GenMetNu = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
+            originalSrc = cms.untracked.InputTag("genMetNuOriginal")
+        ),
+    ),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
     metCut = cms.untracked.double(60)
