@@ -17,7 +17,7 @@ TriggerMETEmulation = cms.untracked.PSet(
     metEmulationCut = cms.untracked.double(0.0)
 )
 
-useFactorizedTauID = cms.untracked.bool(False) # only use for QCD. Otherwise set to "False"
+useFactorizedTauID = cms.untracked.bool(True) # only use for QCD. Otherwise set to "False"
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
@@ -26,7 +26,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     leadingTrackPtCut = cms.untracked.double(20),
-    rtauCut = cms.untracked.double(0.8), # 0.3 or 0.7. Try 0.8 now
+    rtauCut = cms.untracked.double(0.8), # 0.3 or 0.7 or 0.8
     invMassCut = cms.untracked.double(1.5),
     factorization = factorizationParams.tauIDFactorizationParameters
 )
@@ -49,9 +49,8 @@ tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionHPSTauBased
-#tauSelection = tauSelectionShrinkingConeTaNCBased
 tauSelection = tauSelectionCaloTauCutBased
-
+#tauSelection = tauSelectionShrinkingConeTaNCBased
 
 jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets

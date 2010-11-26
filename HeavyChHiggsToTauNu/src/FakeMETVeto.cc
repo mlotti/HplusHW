@@ -37,8 +37,8 @@ namespace HPlus {
     fClosestDeltaPhiToTaus = 999.;
     for(edm::PtrVector<reco::Candidate>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       double myDeltaPhi = reco::deltaPhi(*met, **iter);
-      if (myDeltaPhi < fClosestDeltaPhiToTaus)
-        fClosestDeltaPhiToTaus = myDeltaPhi;
+      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToTaus)
+        fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
     }
     hClosestDeltaPhiToTaus->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
     
@@ -46,8 +46,8 @@ namespace HPlus {
     fClosestDeltaPhiToJets = 999.;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       double myDeltaPhi = reco::deltaPhi(*met, **iter);
-      if (myDeltaPhi < fClosestDeltaPhiToJets)
-        fClosestDeltaPhiToJets = myDeltaPhi;
+      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToJets)
+        fClosestDeltaPhiToJets = fabs(myDeltaPhi);
     }
     hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
 
