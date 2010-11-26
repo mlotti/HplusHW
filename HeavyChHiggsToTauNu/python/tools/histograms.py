@@ -101,9 +101,20 @@ class LegendCreator:
 
 createLegend = LegendCreator(0.7, 0.6, 0.92, 0.92)
 
+def updatePaletteStyle(histo):
+    ROOT.gPad.Update()
+    paletteAxis = histo.GetListOfFunctions().FindObject("palette")
+    if paletteAxis == None:
+        return
+    paletteAxis.SetLabelColor(ROOT.gStyle.GetLabelColor())
+    paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont())
+    paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
+    paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
+
 class HistoSetData:
     def __init__(self, dataset, histo):
         self.dataset = dataset
+        self.name = dataset.getName()
         self.histo = histo
         self.legendLabel = dataset.getName()
         self.legendStyle = "l"
@@ -119,10 +130,10 @@ class HistoSetData:
         return self.dataset.isData()
 
     def getName(self):
-        return self.dataset.getName()
+        return self.name
 
     def setName(self, name):
-        self.dataset.setName(name)
+        self.name = name
 
     def setLegendLabel(self, label):
         self.legendLabel = label
@@ -197,12 +208,139 @@ class HistoSetDataStacked:
     def getXmax(self):
         return max([d.getXmax() for d in self.data])
 
+
+class HistoSetImpl:
+    def __init__(self, histos=[]):
+        self.histos = histos
+        self._populateMap()
+
+    def append(self, histoWrapper):
+        self.histos.append(histoWrapper)
+        self._populateMap()
+
+    def extend(self, histoWrappers):
+        self.histos.extend(histoWrappers)
+        self._populateMap()
+
+    def _populateMap(self):
+        self.nameHistoMap = {}
+        for h in self.histos:
+            self.nameHistoMap[h.getName()] = h
+
+    def forHisto(self, name, func):
+        try:
+            self.nameHistoMap[name].call(func)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
+
+    def forEachMCHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isMC())
+
+    def forEachDataHisto(self, func):
+        self.forEachHisto(func, lambda x: x.isData())
+
+    def forEachHisto(self, func, predicate=lambda x: True):
+        for d in self.histos:
+            if predicate(d):
+                d.call(func)
+
+    def hasHisto(self, name):
+        return name in self.nameHistoMap
+
+    def getHisto(self, name):
+        return self.nameHistoMap[name].histo
+
+    def getHistoList(self):
+        return [d.getHistogram() for d in self.histos]
+
+    def setHistoLegendLabel(self, name, label):
+        try:
+            self.nameHistoMap[name].setLegendLabel(label)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
+
+    def setHistoLegendLabels(self, nameMap):
+        for name, label in nameMap.iteritems():
+            self.setHistoLegendLabel(name, label)
+
+    def setHistoLegendStyle(self, name, style):
+        try:
+            self.nameHistoMap[name].setLegendStyle(style)
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
+
+    def setHistoLegendStyleAll(self, style):
+        for d in self.histos:
+            d.setLegendStyle(style)
+
+    def setHistoDrawStyle(self, name, style):
+        try:
+            self.nameHistoMap[name].drawStyle = style
+        except KeyError:
+            print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
+
+    def setHistoDrawStyleAll(self, style):
+        for d in self.histos:
+            d.drawStyle = style
+
+    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None, yfactor=1.1):
+        if len(self.histos) == 0:
+            raise Exception("Empty set of histograms!")
+
+        c = ROOT.TCanvas(name)
+        if ymin == None:
+            ymin = min([d.histo.GetMinimum() for d in self.histos])
+        if ymax == None:
+            ymax = max([d.histo.GetMaximum() for d in self.histos])
+            ymax = yfactor*ymax
+
+        if xmin == None:
+            xmin = min([d.getXmin() for d in self.histos])
+        if xmax == None:
+            xmax = min([d.getXmax() for d in self.histos])
+
+        frame = c.DrawFrame(xmin, ymin, xmax, ymax)
+        frame.GetXaxis().SetTitle(self.histos[0].histo.GetXaxis().GetTitle())
+        frame.GetYaxis().SetTitle(self.histos[0].histo.GetYaxis().GetTitle())
+
+        return (c, frame)
+
+    def addToLegend(self, legend):
+        for d in self.histos:
+            d.addToLegend(legend)
+
+    def draw(self, inReverseOrder=True):
+        histos = [(d.histo, d.drawStyle, d.getName()) for d in self.histos]
+        if inReverseOrder:
+            histos.reverse()
+
+        for h, style, dname in histos:
+            h.Draw(style+" same")
+
+    def stackHistograms(self, newName, nameList):
+        (selected, notSelected, firstIndex) = mergeStackHelper(self.histos, nameList, "stack")
+        if len(selected) == 0:
+            return
+
+        notSelected.insert(firstIndex, HistoSetDataStacked(selected, newName))
+        self.histos = notSelected
+        self._populateMap()
+
+
+
+
 class HistoSet:
     def __init__(self, datasetSet, name):
         self.datasets = datasetSet
         self.histoWrappers = datasetSet.getHistoWrappers(name)
         self.data = None
         self.luminosity = None
+
+    # Delegate methods calls to HistoSetImpl object
+    def __getattr__(self, name):
+        if self.data == None:
+            self._createHistogramObjects()
+        return getattr(self.data, name)
 
     def normalizeToOne(self):
         if self.data != None:
@@ -240,106 +378,6 @@ class HistoSet:
                 h.normalizeToLuminosity(lumi)
         self.luminosity = lumi
 
-    def createHistogramObjects(self):
-        self.data = []
-        for h in self.histoWrappers:
-            self.data.append(HistoSetData(h.getDataset(), h.getHistogram()))
-        self.populateMap()
-
-    def populateMap(self):
-        self.datasetHistoMap = {}
-        for h in self.data:
-            self.datasetHistoMap[h.getName()] = h
-
-    def forHisto(self, name, func):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        try:
-            self.datasetHistoMap[name].call(func)
-        except KeyError:
-            print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
-
-    def forEachMCHisto(self, func):
-        self.forEachHisto(func, lambda x: x.isMC())
-
-    def forEachDataHisto(self, func):
-        self.forEachHisto(func, lambda x: x.isData())
-
-    def forEachHisto(self, func, predicate=lambda x: True):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        for d in self.data:
-            if predicate(d):
-                d.call(func)
-
-    def hasHisto(self, name):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        return name in self.datasetHistoMap
-
-    def getHisto(self, name):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        return self.datasetHistoMap[name].histo
-
-    def getHistoList(self):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        return [d.getHistogram() for d in self.data]
-
-    def setHistoLegendLabel(self, name, label):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        try:
-            self.datasetHistoMap[name].setLegendLabel(label)
-        except KeyError:
-            print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
-
-    def setHistoLegendLabels(self, nameMap):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        for name, label in nameMap.iteritems():
-            self.setHistoLegendLabel(name, label)
-
-    def setHistoLegendStyle(self, name, style):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        try:
-            self.datasetHistoMap[name].setLegendStyle(style)
-        except KeyError:
-            print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
-
-    def setHistoLegendStyleAll(self, style):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        for d in self.data:
-            d.setLegendStyle(style)
-
-    def setHistoDrawStyle(self, name, style):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        try:
-            self.datasetHistoMap[name].drawStyle = style
-        except KeyError:
-            print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
-
-    def setHistoDrawStyleAll(self, style):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        for d in self.data:
-            d.drawStyle = style
-
     def getLuminosity(self):
         if self.luminosity == None:
             raise Exception("No normalization by or to luminosity!")
@@ -348,63 +386,11 @@ class HistoSet:
     def addLuminosityText(self, x=None, y=None): # Nones for the default values
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
-    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None, yfactor=1.1):
-        if self.data == None:
-            self.createHistogramObjects()
+    def createHistogramObjects(self):
+        return [HistoSetData(h.getDataset(), h.getHistogram()) for h in self.histoWrappers]
 
-        if len(self.data) == 0:
-            raise Exception("Empty set of histograms!")
-
-        c = ROOT.TCanvas(name)
-        if ymin == None:
-            ymin = min([d.histo.GetMinimum() for d in self.data])
-        if ymax == None:
-            ymax = max([d.histo.GetMaximum() for d in self.data])
-            ymax = yfactor*ymax
-
-        if xmin == None:
-            xmin = min([d.getXmin() for d in self.data])
-        if xmax == None:
-            xmax = min([d.getXmax() for d in self.data])
-
-        frame = c.DrawFrame(xmin, ymin, xmax, ymax)
-        frame.GetXaxis().SetTitle(self.data[0].histo.GetXaxis().GetTitle())
-        frame.GetYaxis().SetTitle(self.data[0].histo.GetYaxis().GetTitle())
-
-        return (c, frame)
-
-    def addToLegend(self, legend):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        for d in self.data:
-            d.addToLegend(legend)
-
-    def draw(self, inReverseOrder=True):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        histos = [(d.histo, d.drawStyle, d.getName()) for d in self.data]
-        if inReverseOrder:
-            histos.reverse()
-
-        for h, style, dname in histos:
-            h.Draw(style+" same")
+    def _createHistogramObjects(self):
+        self.data = HistoSetImpl(self.createHistogramObjects())
 
     def stackMCHistograms(self):
         self.stackHistograms("Stacked MC", self.datasets.getMCDatasetNames())
-
-    def stackHistograms(self, newName, nameList):
-        if self.data == None:
-            self.createHistogramObjects()
-
-        (selected, notSelected, firstIndex) = mergeStackHelper(self.data, nameList, "stack")
-        if len(selected) == 0:
-            return
-
-        notSelected.insert(firstIndex, HistoSetDataStacked(selected, newName))
-        self.data = notSelected
-        self.populateMap()
-
-
-
