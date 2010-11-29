@@ -292,13 +292,16 @@ class Dataset:
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
-        if self.file.Get("configInfo") == None:
-            raise Exception("Unable to find directory 'configInfo' from ROOT file '%s'"%fname)
-        self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
+
+        self.info = {}
+        configInfo = self.file.Get("configInfo")
+        if configInfo != None:
+            self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
         self.prefix = ""
-        self.originalCounterDir = counterDir
-        self._readCounter(counterDir)
+        if counterDir != None:
+            self.originalCounterDir = counterDir
+            self._readCounter(counterDir)
 
     def _readCounter(self, counterDir):
         if self.file.Get(counterDir) == None:
@@ -326,22 +329,22 @@ class Dataset:
         self.name = name
 
     def setCrossSection(self, value):
-        if self.isData():
+        if not self.isMC():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
-        if self.isData():
+        if not self.isMC():
             raise Exception("Dataset %s is data, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
-        if self.isMC():
+        if not self.isData():
             raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
         self.info["luminosity"] = value
 
     def getLuminosity(self):
-        if self.isMC():
+        if not self.isData():
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         return self.info["luminosity"]
 
@@ -354,14 +357,20 @@ class Dataset:
     def getCounterDirectory(self):
         return self.originalCounterDir
 
+    def setNAllEvents(self, nAllEvents):
+        self.nAllEvents = nAllEvents
+
     def getNormFactor(self):
+        if not hasattr(self, "nAllEvents"):
+            raise Exception("Number of all events is not set! The counter directory was not given, and setNallEvents() was not called.")
+
         return self.getCrossSection() / self.nAllEvents
 
     def getHistoWrapper(self, name):
         pname = self.prefix+name
         h = self.file.Get(pname)
         if h == None:
-            raise Exception("Unable to find histogram '%s'" % pname)
+            raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
 
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))

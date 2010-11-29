@@ -139,8 +139,10 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
 if len(additionalCounters) > 0:
     process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
+    process.JESsequence *
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
     process.signalAnalysisCounters 

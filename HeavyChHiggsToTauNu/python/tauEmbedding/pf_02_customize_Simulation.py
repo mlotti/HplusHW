@@ -79,10 +79,11 @@ def customise(process):
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % hltProcessName,
-            "keep *_tightMuons_*_*",
+            "keep *_tauEmbeddingMuons_*_*",
             "keep *_generator_weight_%s" % hltProcessName,
             "keep *_genParticles_*_%s" % hltProcessName,
             "keep recoGenJets_*_*_%s" % hltProcessName,
+            "keep recoGenMETs_*_*_%s" % hltProcessName,
 
             "drop *_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
@@ -100,6 +101,10 @@ def customise(process):
             del outputModule.outputCommands[index]
             index -= 1
         index += 1
+
+    # Disable lumi producer
+    #process.localreco_HcalNZS.remove(process.lumiProducer)
+    #process.localreco.remove(process.lumiProducer)
 
 
     if  hasattr(process,"iterativeTracking"):

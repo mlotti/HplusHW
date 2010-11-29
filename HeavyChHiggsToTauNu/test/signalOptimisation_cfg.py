@@ -7,7 +7,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38X"
+dataVersion = "38Xrelval"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -41,7 +41,6 @@ if options.doPat != 0:
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Uncomment the following in order to print the counters at the end of
@@ -99,7 +98,7 @@ process.infoPath = cms.Path(
 )
 
 
-# Signal optimisations module
+# Signal optimisation module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
@@ -119,6 +118,7 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
 print "Cut on HLT MET: ", process.signalOptimisation.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
 print "TauSelection src:", process.signalOptimisation.tauSelection.src
+print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
 print "TauSelection factorization used:", process.signalOptimisation.useFactorizedTauID
 
 #if dataVersion.isMC() and dataVersion.is38X():
@@ -140,8 +140,8 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalOptimisationPath = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalOptimisation *
-    process.signalOptimisationCounters 
-#    process.PickEvents
+    process.signalOptimisationCounters *
+    process.PickEvents
 )
 
 # An example how to create an array of analyzers to do the same

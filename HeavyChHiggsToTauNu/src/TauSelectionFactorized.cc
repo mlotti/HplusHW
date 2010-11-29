@@ -20,13 +20,17 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fInitialTausCount(eventCounter.addSubCounter("Factorized Tau","Total events")),
+    fTriggerMatchedTausExistCount(eventCounter.addSubCounter("Factorized Tau","Collection (trg matched) has taus")),
     fPtCutCount(eventCounter.addSubCounter("Factorized Tau","tau pt cut")),
     fEtaCutCount(eventCounter.addSubCounter("Factorized Tau","tau eta cut")),
     fTauFoundCount(eventCounter.addSubCounter("Factorized Tau","tau found")),
     fEventWeight(eventWeight),
-    fTauSelection(tauSelectionObject)
+    fTauSelection(tauSelectionObject),
+    fFactorizationTable(iConfig)
   {
     edm::Service<TFileService> fs;
+    // Weighted histograms
     hPtSelectedTaus = fs->make<TH1F>("factorized_tau_pt", "tau_pt", 100, 0., 200.);
     hEtaSelectedTaus = fs->make<TH1F>("factorized_tau_eta", "tau_eta", 60, -3., 3.);
     hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
@@ -35,6 +39,13 @@ namespace HPlus {
     hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
     hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
     hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    // Unweighted histograms
+    hPtBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_before_tauID_unweighted", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_after_tauID_unweighted", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_before_tauID_unweighted", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_after_tauID_unweighted", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID_unweighted", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID_unweighted", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
 
     hCategory = fs->make<TH1F>("factorized_tau_category", "factorized_tau_category", 5, 0, 5);
     hCategory->GetXaxis()->SetBinLabel(1, "All events");
@@ -49,27 +60,34 @@ namespace HPlus {
   TauSelectionFactorized::Data TauSelectionFactorized::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset variables
     bool passEvent = false;
-    fFactorization = 1.0;
+    fFactorizationCoefficient = 1.0;
     fSelectedTau = edm::Ptr<pat::Tau>(); // initializes the tau with a zero pointer
-
+    increment(fInitialTausCount);
+    
     // Get tau collection
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
+    if (htaus->size())
+      increment(fTriggerMatchedTausExistCount);
 
     // Apply jet ET and eta cuts
+    int myPtCutPassedCounter = 0;
+    int myEtaCutPassedCounter = 0;
     edm::PtrVector<pat::Tau> myFilteredTaus;
     const edm::PtrVector<pat::Tau>& myTaus(htaus->ptrVector());
     for(edm::PtrVector<pat::Tau>::const_iterator iter = myTaus.begin(); iter != myTaus.end(); ++iter) {
       edm::Ptr<pat::Tau> iTau = *iter;
       // Apply jet ET cut
       if(!(iTau->pt() > fPtCut)) continue;
-      increment(fPtCutCount);
+      ++myPtCutPassedCounter;
       // Apply jet eta cut 
       if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-      increment(fEtaCutCount);
+      ++myEtaCutPassedCounter;
       // Store passed taus
       myFilteredTaus.push_back(iTau);
     }
+    if (myPtCutPassedCounter) increment(fPtCutCount);
+    if (myEtaCutPassedCounter) increment(fEtaCutCount);
 
     // Calculate tau ID to obtain factorization coefficients (for lookup table determination and/or cross-checking)
     TauSelection::Data myTauSelectionData = evaluateFactorizationCoefficients(iEvent, iSetup, myFilteredTaus);
@@ -106,7 +124,11 @@ namespace HPlus {
       increment(fTauFoundCount);
     }
     // Obtain factorization constant from lookup table
-    // FIXME: to be implemented
+    if (!fSelectedTau.isNull()) {
+      fFactorizationCoefficient = 
+        fFactorizationTable.getWeightByPtAndEta(fSelectedTau->pt(), fSelectedTau->eta());
+      //std::cout << "debug: coeff=" << fFactorizationCoefficient << std::endl;
+    }
 
     return Data(this, passEvent, fTauSelection.setSelectedTau(fSelectedTau, passEvent));
   }
@@ -118,6 +140,9 @@ namespace HPlus {
       hPtBeforeTauID->Fill(iTau->pt(), fEventWeight.getWeight());
       hEtaBeforeTauID->Fill(iTau->eta(), fEventWeight.getWeight());
       hPtVsEtaBeforeTauID->Fill(iTau->pt(), iTau->eta(), fEventWeight.getWeight());
+      hPtBeforeTauIDUnweighted->Fill(iTau->pt());
+      hEtaBeforeTauIDUnweighted->Fill(iTau->eta());
+      hPtVsEtaBeforeTauIDUnweighted->Fill(iTau->pt(), iTau->eta());
     }
     // Do tau ID
     TauSelection::Data myTauSelectionData = fTauSelection.analyze(iEvent, iSetup, taus);
@@ -129,6 +154,9 @@ namespace HPlus {
       hPtAfterTauID->Fill(iTau->pt(), fEventWeight.getWeight());
       hEtaAfterTauID->Fill(iTau->eta(), fEventWeight.getWeight());
       hPtVsEtaAfterTauID->Fill(iTau->pt(), iTau->eta(), fEventWeight.getWeight());
+      hPtAfterTauIDUnweighted->Fill(iTau->pt());
+      hEtaAfterTauIDUnweighted->Fill(iTau->eta());
+      hPtVsEtaAfterTauIDUnweighted->Fill(iTau->pt(), iTau->eta());
     }
 
     // Return the tau selection data
