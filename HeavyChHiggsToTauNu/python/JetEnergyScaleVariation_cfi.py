@@ -41,15 +41,15 @@ JESMinus05ShrinkingConeTaNC.JESVariation = cms.double("-0.05")
 JESMinus05ShrinkingConeTaNC.tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
 
 # HPS
-JESPlus05ShrinkingConeTaNC = jesVariation.clone()
-JESPlus05ShrinkingConeTaNC.JESVariation = cms.double("0.05")
-JESPlus05ShrinkingConeTaNC.tauSrc = cms.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
+JESPlus05HPS = jesVariation.clone()
+JESPlus05HPS.JESVariation = cms.double("0.05")
+JESPlus05HPS.tauSrc = cms.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 
-JESMinus05ShrinkingConeTaNC = jesVariation.clone()
-JESMinus05ShrinkingConeTaNC.JESVariation = cms.double("-0.05")
-JESMinus05ShrinkingConeTaNC.tauSrc = cms.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
+JESMinus05HPS = jesVariation.clone()
+JESMinus05HPS.JESVariation = cms.double("-0.05")
+JESMinus05HPS.tauSrc = cms.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 
 
 ### Define the Sequence
-JESsequence = cms.Sequence( JESPlus05CaloRecoTau * JESMinus05CaloRecoTau * JESPlus05ShrinkingConePFTau * JESMinus05ShrinkingConePFTau * JESPlus05ShrinkingConeTaNC * JESMinus05ShrinkingConeTaNC * JESPlus05ShrinkingConeTaNC * JESMinus05ShrinkingConeTaNC )
+JESsequence = cms.Sequence( JESPlus05CaloRecoTau * JESMinus05CaloRecoTau * JESPlus05ShrinkingConePFTau * JESMinus05ShrinkingConePFTau * JESPlus05ShrinkingConeTaNC * JESMinus05ShrinkingConeTaNC * JESPlus05HPS * JESMinus05HPS )
 #JESsequence = cms.Sequence(JESPlus05 * JESMinus05)

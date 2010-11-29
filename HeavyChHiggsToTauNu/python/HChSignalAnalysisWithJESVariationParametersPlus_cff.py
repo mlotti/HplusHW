@@ -20,7 +20,7 @@ useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
-    src = cms.untracked.InputTag("JESPlus05"),
+    src = cms.untracked.InputTag("JESPlus05HPS"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40),
     etaCut = cms.untracked.double(2.4), #no change
@@ -68,8 +68,8 @@ tauSelectionHPSTauBasedJESMinus05.src = cms.untracked.InputTag("JESMinus05Shrink
 tauSelectionHPSTauBasedJESMinus05.selection = cms.untracked.string("HPSTauBased")
 
 ### JESPlus05
-#tauSelection = tauSelectionShrinkingConeCutBasedJESPlus05
-tauSelection = tauSelectionShrinkingConeTaNCBasedJESPlus05
+tauSelection = tauSelectionShrinkingConeCutBasedJESPlus05
+#tauSelection = tauSelectionShrinkingConeTaNCBasedJESPlus05
 #tauSelection = tauSelectionCaloTauCutBasedJESPlus05
 #tauSelection = tauSelectionHPSTauBasedJESPlus05
 
@@ -80,14 +80,11 @@ tauSelection = tauSelectionShrinkingConeTaNCBasedJESPlus05
 #tauSelection = tauSelectionHPSTauBasedJESMinus05
 
 
-
-
-
 jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     #src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    src = cms.untracked.InputTag("JESPlus05"),  # PF jets
+    src = cms.untracked.InputTag("JESPlus05HPS"),  # PF jets
     src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
@@ -100,7 +97,7 @@ MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
     # src = cms.untracked.InputTag("patMETsPF"), # PF MET
     # src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    src = cms.untracked.InputTag("JESPlus05"), # PF MET with JES
+    src = cms.untracked.InputTag("JESPlus05HPS"), # PF MET with JES
     METCut = cms.untracked.double(60.0)
 )
 
