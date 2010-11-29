@@ -73,10 +73,19 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	edm::Handle<edm::View<reco::MET> > hmet;
 	iEvent.getByLabel(metSrc, hmet);
 	edm::Ptr<reco::MET> met = hmet->ptrAt(0);
-
+/*
+For the general case, you would basically do it in 3 steps (within a
+loop over jets):
+1. Add the x,y component of the jets to the x,y component of the MET:
+   ME(X,Y) += JetP(X,Y)
+2. Vary by X% the JES and obtain a new JetP(X,Y)
+3. Then: ME(X,Y) -= JetP(X,Y)
+*/
 	reco::MET scaledMet = *met;
-	double newX = met->p4().Px() + dpx;
-	double newY = met->p4().Py() + dpy;
+//	double newX = met->p4().Px() + dpx;
+//	double newY = met->p4().Py() + dpy;
+double newX = met->p4().Px()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation 
+double newY = met->p4().Py()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation
 	double newZ = 0;//met->p4().Pz();
 	double newE = sqrt(newX*newX + newY*newY);//met->p4().E();
 
