@@ -39,8 +39,14 @@ datasets = {
                 "luminosity": 2.027848248,
                 "number_of_jobs": 10
             },
+            "pattuple_v6_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_3-dfc6d27ce5aa60b808b4a2bcd34b7c86/USER",
+                "luminosity": 2.799065107,
+                "number_of_jobs": 20
+            },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_2"
+                "fallback": "pattuple_v6_3"
             }
         }
 
@@ -87,8 +93,14 @@ datasets = {
                 "luminosity": 5.867011630,
                 "number_of_jobs": 10
             },
+            "pattuple_v6_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ba8b03606ed700d03389442a6378453f/USER",
+                "luminosity": 14.527814041,
+                "number_of_jobs": 20
+            },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_2"
+                "fallback": "pattuple_v6_3"
             }
         },
     },
@@ -131,8 +143,14 @@ datasets = {
                 "luminosity": 13.821016530,
                 "number_of_jobs": 10
             },
+            "pattuple_v6_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-9e6b3ce3f61ebd1c080721235dd644e5/USER",
+                "luminosity": 16.166113934,
+                "number_of_jobs": 10
+            },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_2"
+                "fallback": "pattuple_v6_3"
             }
         },
     },
@@ -159,8 +177,14 @@ datasets = {
                 "luminosity": 2.131303202,
                 "number_of_jobs": 2
             },
+            "pattuple_v6_3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ae876897d946fa7a17cf73f63fd66244/USER",
+                "luminosity": 2.270540967,
+                "number_of_jobs": 2
+            },
             "pattuple_v6": {
-                "fallback": "pattuple_v6_2"
+                "fallback": "pattuple_v6_3"
             }
         },
     },
