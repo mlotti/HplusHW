@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FactorizationTable.h"
 
 namespace edm {
   class ParameterSet;
@@ -38,7 +39,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       TauSelection::Data tauSelectionData() const { return fTauSelectionData; }
       const edm::Ptr<pat::Tau>& getSelectedTau() const { return fTauSelectionFactorized->fSelectedTau; }
-      double factorizationCoefficient() const { return fTauSelectionFactorized->fFactorization; }
+      double factorizationCoefficient() const { return fTauSelectionFactorized->fFactorizationCoefficient; }
 
     private:
       const TauSelectionFactorized *fTauSelectionFactorized;
@@ -61,6 +62,8 @@ namespace HPlus {
     const double fEtaCut;
 
     // Counters
+    Count fInitialTausCount;
+    Count fTriggerMatchedTausExistCount;
     Count fPtCutCount;
     Count fEtaCutCount;
     Count fTauFoundCount;
@@ -70,20 +73,31 @@ namespace HPlus {
     
     // Tau selection object
     TauSelection fTauSelection;
+    
+    // Factorization table objects
+    FactorizationTable fFactorizationTable;
 
     // Histograms
     TH1 *hPtSelectedTaus;
     TH1 *hEtaSelectedTaus;
     TH1 *hCategory;
+    // Weighted histograms
     TH1 *hPtBeforeTauID;
     TH1 *hPtAfterTauID;
     TH1 *hEtaBeforeTauID;
     TH1 *hEtaAfterTauID;
     TH2 *hPtVsEtaBeforeTauID;
     TH2 *hPtVsEtaAfterTauID;
+    // Unweighted histograms (needed to obtain the statistical error)
+    TH1 *hPtBeforeTauIDUnweighted;
+    TH1 *hPtAfterTauIDUnweighted;
+    TH1 *hEtaBeforeTauIDUnweighted;
+    TH1 *hEtaAfterTauIDUnweighted;
+    TH2 *hPtVsEtaBeforeTauIDUnweighted;
+    TH2 *hPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
-    double fFactorization;
+    double fFactorizationCoefficient;
     edm::Ptr<pat::Tau> fSelectedTau;
   };
 }

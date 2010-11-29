@@ -40,7 +40,8 @@ namespace HPlus {
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fJetSelection->fSelectedJets; }
       const uint32_t getMinNumber() const { return fJetSelection->fMin; }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
-
+      const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
+      
     private:
       const JetSelection *fJetSelection;
       const bool fPassedEvent;
@@ -83,7 +84,10 @@ namespace HPlus {
     TH1 *hDeltaPhiJetMet;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
+    // Not Selected jets
+    edm::PtrVector<pat::Jet> fNotSelectedJets;
     int iNHadronicJets;
+    int iNHadronicJetsInFwdDir;
   };
 }
 

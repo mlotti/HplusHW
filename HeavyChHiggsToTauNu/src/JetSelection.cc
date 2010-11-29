@@ -45,6 +45,7 @@ namespace HPlus {
   JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
     // Reset variables
     iNHadronicJets = -1;
+    iNHadronicJetsInFwdDir = -1;
     bool passEvent = false;
   
     edm::Handle<edm::View<pat::Jet> > hjets;
@@ -54,6 +55,8 @@ namespace HPlus {
 
     fSelectedJets.clear();
     fSelectedJets.reserve(jets.size());
+    fNotSelectedJets.clear();
+    fNotSelectedJets.reserve(jets.size());
 
     size_t cleanPassed = 0;
     size_t ptCutPassed = 0;
@@ -84,7 +87,10 @@ namespace HPlus {
       increment(fPtCutSubCount);
       ++ptCutPassed;
 
-      if(!(std::abs(iJet->eta()) < fEtaCut)) continue;
+      if(!(std::abs(iJet->eta()) < fEtaCut)){
+	fNotSelectedJets.push_back(iJet);
+	continue;
+      }
       increment(fEtaCutSubCount);
       ++etaCutPassed;
 
@@ -108,7 +114,7 @@ namespace HPlus {
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
-
+    iNHadronicJetsInFwdDir = fNotSelectedJets.size();
     passEvent = true;
     if(cleanPassed < fMin) passEvent = false;
     increment(fCleanCutCount);
