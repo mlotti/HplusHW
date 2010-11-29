@@ -11,7 +11,7 @@
 
 namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
+    // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     bUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
@@ -51,17 +51,22 @@ namespace HPlus {
     myTree->Branch("fTauJetEt",  &fTauJetEt);
     myTree->Branch("fTauJetEta", &fTauJetEta);
     myTree->Branch("fMET", &fMET);
-    myTree->Branch("fFakeMETDeltaR", &fFakeMETDeltaR);
+    myTree->Branch("fFakeMETDeltaPhi", &fFakeMETDeltaPhi);
     myTree->Branch("iNHadronicJets", &iNHadronicJets);
+    myTree->Branch("iNHadronicJetsInFwdDir", &iNHadronicJetsInFwdDir);
     myTree->Branch("iNBtags", &iNBtags);
     myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
     myTree->Branch("fGlobalElectronVetoHighestPt", &fGlobalElectronVetoHighestPt);
     myTree->Branch("fTransverseMass", &fTransverseMass);
     myTree->Branch("fDeltaPhi",  &fDeltaPhi);
     myTree->Branch("fAlphaT", &fAlphaT);
-    
+    myTree->Branch("fHt", &fHt);
+    myTree->Branch("fJt", &fJt);
+    myTree->Branch("fDiJetMassClosestToW", &fDiJetMassClosestToW);
+
     // Book histograms filled in the analysis body
     hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
+    hAlphaTDiJetMassClosestToW= fs->make<TH1F>("alphaT-DiJetMassClosestToW", "alphaT-DiJetMassClosestToW", 150, 0.0, 300.0);    
     
   }
 
@@ -79,15 +84,19 @@ namespace HPlus {
     fTauJetEt = -5.0;
     fTauJetEta = -999.99;
     fMET = -5.0;
-    fFakeMETDeltaR = -5.0;
+    fFakeMETDeltaPhi = -5.0;
     iNHadronicJets = -5.0;
+    iNHadronicJetsInFwdDir = -5.0;
     iNBtags = -5.0;
     fGlobalMuonVetoHighestPt = -5.0;
     fGlobalElectronVetoHighestPt = -5.0;
     fTransverseMass = -5.0;
     fDeltaPhi = -5.0;
     fAlphaT = -5.0;
-
+    fHt = -5.0;
+    fJt = -5.0;
+    fDiJetMassClosestToW = -5.0;
+    
     // 1) Trigger
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
@@ -149,8 +158,19 @@ namespace HPlus {
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+
+    float myDiJetMassClosestToW = 999;
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+    if(diJetSize < 1){myDiJetMassClosestToW = -1.0;}
+    
+    float fMassW = 80.399; // PDG value
+    for(int i= 0; i < diJetSize; i++){ 
+      hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); 
+      if( fabs(sAlphaT.vDiJetMassesNoTau[i]-fMassW) < (myDiJetMassClosestToW-fMassW) ){
+	myDiJetMassClosestToW = sAlphaT.vDiJetMassesNoTau[i];
+      }
+    }
+       
     // bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent() * tauData.passedEvent() * jetData.passedEvent() * metData.passedEvent() * btagData.passedEvent() * evtTopologyData.passedEvent();
 
     // Fill Vectors for HPlusSignalOptimisation
@@ -158,15 +178,21 @@ namespace HPlus {
     fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
     fMET = metData.getSelectedMET()->et();
-    fFakeMETDeltaR = fakeMETData.closestDeltaR();
+    fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
     iNHadronicJets = jetData.getHadronicJetCount();
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
     iNBtags = btagData.getBJetCount();
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
     fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();
     fTransverseMass = transverseMass;
     fDeltaPhi = deltaPhi;
     fAlphaT = sAlphaT.fAlphaT;
+    fHt = sAlphaT.fHt;
+    fJt = sAlphaT.fJt;
+    fDiJetMassClosestToW = myDiJetMassClosestToW;
     
+    /// Fill histos
+    hAlphaTDiJetMassClosestToW->Fill(fDiJetMassClosestToW);
     // Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
   }

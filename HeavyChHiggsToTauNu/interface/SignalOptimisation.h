@@ -72,7 +72,8 @@ namespace HPlus {
     
     // Histograms
     TH1 *hAlphaTInvMass;
-    
+    TH1 *hAlphaTDiJetMassClosestToW;
+
     // for Tree
     TTree *myTree;
 
@@ -80,15 +81,18 @@ namespace HPlus {
     float fTauJetEt;
     float fTauJetEta;
     float fMET;
-    float fFakeMETDeltaR;
+    float fFakeMETDeltaPhi;
     int iNHadronicJets;
+    int iNHadronicJetsInFwdDir;
     int iNBtags;
     float fGlobalMuonVetoHighestPt;
     float fGlobalElectronVetoHighestPt;
     float fTransverseMass;
     float fDeltaPhi;
     float fAlphaT;
-    
+    float fHt;
+    float fJt; // Jt = Ht - TauJetEt - LdgJetEt
+    float fDiJetMassClosestToW;
   };
 }
 
