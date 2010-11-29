@@ -7,11 +7,11 @@ jesVariation = cms.EDProducer("JetEnergyScaleVariation",
     JESVariation = cms.double("0.05") # use sign, +/-
 )
 
-#JESPlus05 = jesVariation.clone()
-#JESPlus05.JESVariation = cms.double("0.05")
+JESPlus05 = jesVariation.clone()
+JESPlus05.JESVariation = cms.double("0.05")
 #
-#JESMinus05 = jesVariation.clone()
-#JESMinus05.JESVariation = cms.double("-0.05")
+JESMinus05 = jesVariation.clone()
+JESMinus05.JESVariation = cms.double("-0.05")
 
 # CaloRecoTau
 JESPlus05CaloRecoTau = jesVariation.clone()

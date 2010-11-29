@@ -444,7 +444,7 @@ namespace HPlus {
         // Fill initial histograms and do the first selection
         for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
                 edm::Ptr<pat::Tau> iTau = *iter;
-
+		// std::cout << " ======> iTau->pt() = " <<  iTau->pt() << std::endl;
                 increment(fAllSubCount);
                 hPt->Fill(iTau->pt(), fEventWeight.getWeight());
                 hEta->Fill(iTau->eta(), fEventWeight.getWeight());

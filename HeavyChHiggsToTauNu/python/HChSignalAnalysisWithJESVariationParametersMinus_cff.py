@@ -20,7 +20,7 @@ useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
+    src = cms.untracked.InputTag("blahblahblah"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4), #no change
@@ -34,45 +34,70 @@ tauSelectionBase = cms.untracked.PSet(
 #tauSelectionFactorized = tauSelection.clone()
 #tauSelectionFactorized.extend(factorizationParams)
 
+# Reco CaloTau
+tauSelectionCaloTauCutBasedJESPlus05 = tauSelectionBase.clone()
+tauSelectionCaloTauCutBasedJESPlus05.src = cms.untracked.InputTag("JESPlus05CaloRecoTau")
+tauSelectionCaloTauCutBasedJESPlus05.selection = cms.untracked.string("CaloTauCutBased")
+#
+tauSelectionCaloTauCutBasedJESMinus05 = tauSelectionBase.clone()
+tauSelectionCaloTauCutBasedJESMinus05.src = cms.untracked.InputTag("JESMinus05CaloRecoTau")
+tauSelectionCaloTauCutBasedJESMinus05.selection = cms.untracked.string("CaloTauCutBased")
+# PF Shrinking Cone
+tauSelectionShrinkingConeCutBasedJESPlus05 = tauSelectionBase.clone()
+tauSelectionShrinkingConeCutBasedJESPlus05.src = cms.untracked.InputTag("JESPlus05ShrinkingConePFTau")
+tauSelectionShrinkingConeCutBasedJESPlus05.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
+#
+tauSelectionShrinkingConeCutBasedJESMinus05 = tauSelectionBase.clone()
+tauSelectionShrinkingConeCutBasedJESMinus05.src = cms.untracked.InputTag("JESMinus05ShrinkingConePFTau")
+tauSelectionShrinkingConeCutBasedJESMinus05.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
+# TaNC
+tauSelectionShrinkingConeTaNCBasedJESPlus05 = tauSelectionBase.clone()
+tauSelectionShrinkingConeTaNCBasedJESPlus05.src = cms.untracked.InputTag("JESPlus05ShrinkingConeTaNC")
+tauSelectionShrinkingConeTaNCBasedJESPlus05.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
+#
+tauSelectionShrinkingConeTaNCBasedJESMinus05 = tauSelectionBase.clone()
+tauSelectionShrinkingConeTaNCBasedJESMinus05.src = cms.untracked.InputTag("JESMinus05ShrinkingConeTaNC")
+tauSelectionShrinkingConeTaNCBasedJESMinus05.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
+# HPS
+tauSelectionHPSTauBasedJESPlus05 = tauSelectionBase.clone()
+tauSelectionHPSTauBasedJESPlus05.src = cms.untracked.InputTag("JESPlus05HPS")
+tauSelectionHPSTauBasedJESPlus05.selection = cms.untracked.string("HPSTauBased")
+#
+tauSelectionHPSTauBasedJESMinus05 = tauSelectionBase.clone()
+tauSelectionHPSTauBasedJESMinus05.src = cms.untracked.InputTag("JESMinus05HPS")
+tauSelectionHPSTauBasedJESMinus05.selection = cms.untracked.string("HPSTauBased")
 
-tauSelectionCaloTauCutBased = tauSelectionBase.clone()
-tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTauTauTriggerMatched")
-tauSelectionCaloTauCutBased.selection = cms.untracked.string("CaloTauCutBased")
-
-tauSelectionShrinkingConeCutBased = tauSelectionBase.clone()
-#tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
-tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
-tauSelectionShrinkingConeCutBased.selection = cms.untracked.string("ShrinkingConePFTauCutBased")
-
-tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone()
-tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched")
-tauSelectionShrinkingConeTaNCBased.selection = cms.untracked.string("ShrinkingConePFTauTaNCBased")
-
-tauSelectionHPSTauBased = tauSelectionBase.clone()
-tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
-tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
-
-#tauSelection = tauSelectionShrinkingConeCutBased
-#tauSelection = tauSelectionShrinkingConeTaNCBased
-#tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+### JESPlus05
+#tauSelection = tauSelectionShrinkingConeCutBasedJESPlus05
+#tauSelection = tauSelectionShrinkingConeTaNCBasedJESPlus05
+#tauSelection = tauSelectionCaloTauCutBasedJESPlus05
+#tauSelection = tauSelectionHPSTauBasedJESPlus05
+### JESMinus05
+#tauSelection = tauSelectionShrinkingConeCutBasedJESMinus05
+#tauSelection = tauSelectionShrinkingConeTaNCBasedJESMinus05
+#tauSelection = tauSelectionCaloTauCutBasedJESMinus05
+tauSelection = tauSelectionHPSTauBasedJESMinus05
+print "tauSelection.src :", tauSelection.src
 
 jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
-    src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
+    #src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+    src = tauSelection.src, 
+    src_met = tauSelection.src,
+    #src_met = cms.untracked.InputTag("patMETsPF"), # calo MET
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
-    METCut = cms.untracked.double(60.0)
+    METCut = cms.untracked.double(70.0)
 )
 
 MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
-    #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    # src = cms.untracked.InputTag("patMETsPF"), # PF MET
+    # src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    src = tauSelection.src, 
     METCut = cms.untracked.double(70.0)
 )
 
