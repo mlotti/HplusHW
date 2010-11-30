@@ -9,6 +9,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
+debug = False
+#debug = True
+
 options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
@@ -16,10 +19,15 @@ if options.dataVersion != "":
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
 
+if debug:
+    print "In debugging mode"
+
 process = cms.Process("TauEmbeddingAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+if debug:
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+else:
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -36,7 +44,8 @@ options.doPat = 1
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+if debug:
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
 process.TFileService.fileName = "histograms.root"
@@ -158,8 +167,9 @@ process.genMetSequence = cms.Sequence(
 
 process.commonSequence *= process.genMetSequence
 
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
-#process.commonSequence *= process.printGenParticles
+if debug:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
+    process.commonSequence *= process.printGenParticles
 
 
 ################################################################################
@@ -212,7 +222,8 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
-    genParticleSrc = cms.untracked.InputTag("genParticles"),
+    genParticleOriginalSrc = cms.untracked.InputTag("genParticles", "", "HLT"),
+    genParticleEmbeddedSrc = cms.untracked.InputTag("genParticles"),
     mets = cms.untracked.PSet(
         Met = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
