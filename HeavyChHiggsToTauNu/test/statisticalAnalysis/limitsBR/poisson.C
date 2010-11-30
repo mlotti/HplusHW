@@ -156,7 +156,7 @@ void makePlotEventYields(int nPoints,
 			 Double_t * dataH,
 			 Double_t * dataHH,
 			 Double_t * dataW,
-			 int background,
+			 Double_t background,
 			 Double_t HiggsMass,
 			 char * plotTitle,
 			 Double_t lumi,
@@ -202,7 +202,7 @@ void makePlotEventYields(int nPoints,
   //  myLine->SetLineStyle(10);
   myLine->SetLineStyle(2);
   //  myLine->SetLineColor(kOrange);
-  myLine->SetLineColor(414);
+  myLine->SetLineColor(414);//green
   myLine->Draw();
   char temp[200];
   sprintf(temp,"other bkg at %i (QCD + W jets)", background);
@@ -519,7 +519,10 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
 	 << "      n=4 for soft cuts, 3 jets, 1 b-jet" << endl
 	 << "      n=5 for TaNC (soft cuts, 3 jets, 1 b-jet)" << endl
 	 << "      n=6 for TaNC (4 jets)" << endl
-	 << "      n=7 for 29.11.2010 data" << endl;
+	 << "      n=7 for HPS Tau ID (3 jets, 1 b-jet, MET>70, tau jet ET>30)" << endl; //    qcd = 0.0016;
+    NttNoH = 0.0522; // tt
+    wjets = 0.0257;
+
     cout << "Additionnally, you can - override the default luminosity setting (example 100/pb) and" << endl
 	 << "                       - use 100% uncertainty for QCD" << endl 
 	 << "with this command: .x poisson.C(6,100,true)" << endl;
@@ -528,9 +531,9 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
 
   bool plotLumi = true; // if false, the time-consuming luminosity plot is skipped
  
-  const Int_t nMassPoints = 6;
-  Double_t limitPlotX[] = {  80,    90,    100,  120, 140   , 160};
-
+  const Int_t nMaxMassPoints = 6; // needed for array initializations
+  Int_t nMassPoints = 6;
+  Double_t limitPlotX[] = {  80,    90,    100,  120, 140   , 160}; // default
 
   char plotTitle[200];
 
@@ -590,7 +593,7 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
       // calculate corrections here
       Double_t BR_t_bH[] =    {0.05395, 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
       Double_t BR_H_taunu[] = {0.95800, 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
-      for (int i=0; i<6; i++){
+      for (int i=0; i<nMassPoints; i++){
 	NHBR100[i] = NHBR100[i] /
 	  ( 2.0*BR_t_bH[i]*(1.0-BR_t_bH[i])*BR_H_taunu[i] );
       }
@@ -601,21 +604,31 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
     }
   else if (choice==7)
     {
-      // todo: make nmasspoints variable (6 or 5)
-      // add vector with mass points
+      // Here only 5 mass points, no point m=80
+
       // change 0.04 to correct values
-      Double_t NHBR100[]    = {	0.04, 0.04812, 0.04, 0.0334, 0.0169, 0.00324 };
+
+      nMassPoints = 5;
+      int i=0;
+      limitPlotX[i++] = 90;
+      limitPlotX[i++] = 100;
+      limitPlotX[i++] = 120;
+      limitPlotX[i++] = 140;
+      limitPlotX[i++] = 160;
+
+      Double_t NHBR100[]    = {	0.04812, 0.044, 0.0334, 0.0169, 0.00324 };
       // calculate corrections here
-      Double_t BR_t_bH[] =    {0.05395, 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
-      Double_t BR_H_taunu[] = {0.95800, 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
-      for (int i=0; i<6; i++){
+      Double_t BR_t_bH[] =    { 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
+      Double_t BR_H_taunu[] = { 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
+      for (int i=0; i<nMassPoints; i++){
 	NHBR100[i] = NHBR100[i] /
 	  ( 2.0*BR_t_bH[i]*(1.0-BR_t_bH[i])*BR_H_taunu[i] );
       }
-      qcd = 0.0165;
-      NttNoH = 0.083; // tt
-      wjets = 0.0176;
-      sprintf(plotTitle,"29.11.2010 data");     
+      qcd = 0.0016;
+      NttNoH = 0.0522; // tt
+      wjets = 0.0257;
+      sprintf(plotTitle,"HPS TauID, MET>70 GeV, 3 jets");     
+	      //HPS Tau ID (3 jets, 1 b-jet, MET>70, tau jet ET>30)
     }
 
   else {
@@ -623,11 +636,11 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
     return;
   }
 
-  Double_t b;
+  Double_t backgr;
   if (QCDuncertainty100)
-    b = wjets + 2*qcd;
+    backgr = wjets + 2*qcd;
   else
-    b = wjets +   qcd;
+    backgr = wjets +   qcd;
 
   cout << endl << "Making plots for " << plotTitle << endl;
 
@@ -636,14 +649,14 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
 
   //  makePlotEfficiency(dataA,dataB,limitPlotX,nMassPoints,10,plotTitle,QCDuncertainty100);
 
-  Double_t limitPlotYlow[nMassPoints];
-  Double_t limitPlotYup[nMassPoints];
+  Double_t limitPlotYlow[nMaxMassPoints];
+  Double_t limitPlotYup[nMaxMassPoints];
   Double_t CLlimit=0, CLstatlimit=0;
 
   for (int i=0; i<nMassPoints; i++) {
     Double_t HiggsMass = limitPlotX[i];
     //    Double_t myLuminosity = 40;//pb-1
-    Double_t myB=b*myLuminosity;
+    Double_t myB=backgr*myLuminosity;
     Double_t myNHBR100=NHBR100[i]*myLuminosity; // if BR=100 required, number of H
     Double_t myNttNoH=NttNoH*myLuminosity,; // number of tt without H or HH
     const Int_t nPoints = 200;
