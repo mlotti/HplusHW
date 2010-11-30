@@ -20,6 +20,9 @@ if os.path.exists("histograms.root"):
 else:
     datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
 
+textDefaults.setEnergyDefaults(x=0.17)
+textDefaults.setCmsPreliminaryDefaults(x=0.6)
+
 def getHisto(datasets, path, name, func=None):
     h = HistoSet(datasets, path)
     h = h.createHistogramObjects()[0]
@@ -55,17 +58,141 @@ class Histo:
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         self.canvas.SaveAs(".png")
+        self.canvas.SaveAs(".eps")
         ROOT.gErrorIgnoreLevel = backup
 
 def muonTau(an, q):
+    rebin = 2
+    xlabel = "p_{T} (GeV/c)"
+    ylabel = "Number of MC events / %d.0 GeV/c" % rebin
+    
+
+    if q == "Eta":
+        rebin = 1
+        xlabel = "#eta"
+        ylabel = "Number of MC events / 0.1"
+    elif q == "Phi":
+        rebin = 1
+        xlabel = "#phi"
+        ylabel = "Number of MC events / 0.1"
+
     an_name = an.replace("/", "_")
     h = Histo(datasets, [an+"/tau"+q, an+"/muon"+q])
+    h.histos.forEachHisto(lambda h: h.Rebin(2))
     h.histos.setHistoLegendLabels({"muon"+q: "#mu", "tau"+q: "#tau"})
-    h.createFrame(an_name+"_muonTau"+q)
-    h.frame.GetXaxis().SetTitle("p_{T} (GeV/c)")
-    h.frame.GetYaxis().SetTitle("# entries / 1.0 GeV/c")
+    h.createFrame(an_name+"_muonTau"+q, yfactor=1.2)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(createLegend(y1=0.8))
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+
+    if q == "Pt":
+        h.createFrame(an_name+"_muonTau"+q+"_log", ymin=0.1, yfactor=2)
+        h.frame.GetXaxis().SetTitle(xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(createLegend(y1=0.8))
+        ROOT.gPad.SetLogy(True)
+        h.draw()
+        addCmsPreliminaryText()
+        addEnergyText()
+        h.save()
+
+    xmin, ymin = 0, 0
+    xmax, ymax = 200, 200
+    label = "p_{T}^{%s} (GeV/c)"
+    if q == "Eta":
+        xmin, ymin = -2.5, -2.5
+        xmax, ymax = 2.5, 2.5
+        label = "#eta_{%s}"
+    elif q == "Phi":
+        xmin, ymin = -3.5, -3.5
+        xmax, ymax = 3.5, 3.5
+        label = "#phi_{%s}"
+
+    style.setWide(True)
+    h = Histo(datasets, [an+"/muonTau"+q])
+    h.histos.forEachHisto(lambda h: h.Rebin2D(rebin, rebin))
+    h.createFrame(an_name+"_muonTau"+q+"2D", xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    h.frame.GetXaxis().SetTitle(label%"#mu")
+    h.frame.GetYaxis().SetTitle(label%"#tau")
+    h.histos.setHistoDrawStyleAll("COLZ")
+    h.draw()
+    updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+    style.setWide(False)
+
+def tauNuGen(an, q):
+    rebin = 2
+    xlabel = "p_{T} (GeV/c)"
+    ylabel = "Number of MC events / %d.0 GeV/c" % rebin
+    
+
+    if q == "Eta":
+        rebin = 1
+        xlabel = "#eta"
+        ylabel = "Number of MC events / 0.1"
+    elif q == "Phi":
+        rebin = 1
+        xlabel = "#phi"
+        ylabel = "Number of MC events / 0.1"
+
+    an_name = an.replace("/", "_")
+
+    h = Histo(datasets, [an+"/tauGen"+q, an+"/nuGen"+q])
+    h.histos.forEachHisto(lambda h: h.Rebin(2))
+    h.histos.setHistoLegendLabels({"tauGen"+q: "Gen #tau", "nuGen"+q: "Gen #nu_{#tau}"})
+    h.createFrame(an_name+"_tauNuGen"+q, yfactor=1.2)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(createLegend(y1=0.8))
+    h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+
+    xmin, ymin = 0, 0
+    xmax, ymax = 200, 200
+    label = "p_{T}^{%s} (GeV/c)"
+    if q == "Eta":
+        xmin, ymin = -2.5, -2.5
+        xmax, ymax = 2.5, 2.5
+        label = "#eta_{%s}"
+    elif q == "Phi":
+        xmin, ymin = -3.5, -3.5
+        xmax, ymax = 3.5, 3.5
+        label = "#phi_{%s}"
+
+    style.setWide(True)
+    h = Histo(datasets, [an+"/tauNuGen"+q])
+    h.histos.forEachHisto(lambda h: h.Rebin2D(rebin, rebin))
+    h.createFrame(an_name+"_tauNuGen"+q+"2D", xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+    h.frame.GetXaxis().SetTitle(label%"#mu")
+    h.frame.GetYaxis().SetTitle(label%"#tau")
+    h.histos.setHistoDrawStyleAll("COLZ")
+    h.draw()
+    updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+    style.setWide(False)
+
+def tauGenMass(an):
+    an_name = an.replace("/", "_")
+
+    h = Histo(datasets, [an+"/tauGenMass", an+"/tauGenDecayMass"])
+    h.histos.setHistoLegendLabels({"tauGenMass": "#tau",
+                                   "tauGenDecayMass": "#tau decays"})
+    h.createFrame(an_name+"_tauGenMass")
+    h.frame.GetXaxis().SetTitle("M (GeV/c^{2})")
+    h.frame.GetYaxis().SetTitle("Number of MC events / 0.02")
+    h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
 
 def muonTauIso(an):
@@ -73,11 +200,13 @@ def muonTauIso(an):
 
     style.setWide(True)
     h = Histo(datasets, [an+"/muonIsoTrkTauPtSum"])
-    h.createFrame(an_name+"_muonIsoTrkTauPtSum", xmax=30, ymax=100)
+    h.createFrame(an_name+"_muonIsoTrkTauPtSum", xmax=25, ymax=80)
     h.frame.GetXaxis().SetTitle("#mu tracker isolation #Sigma p_{T} (GeV/c)")
     h.frame.GetYaxis().SetTitle("#tau isolation charged cand #Sigma p_{T} (GeV/c)")
     h.histos.setHistoDrawStyleAll("COLZ")
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     style.setWide(False)
 
@@ -93,18 +222,20 @@ def muonTauIso(an):
 
     style.setWide(True)
     h = Histo(datasets, [an+"/muonIsoTauPtSumRel"])
-    h.createFrame(an_name+"_muonIsoTauPtSumRel", xmax=0.5, ymax=20)
+    h.createFrame(an_name+"_muonIsoTauPtSumRel", xmax=0.5, ymax=10)
     h.frame.GetXaxis().SetTitle("#mu rel. iso")
     h.frame.GetYaxis().SetTitle("#tau isol. chrg cand #Sigma p_{T}/p^{#tau}_{T}")
     h.histos.setHistoDrawStyleAll("COLZ")
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     style.setWide(False)
 
 
 def muonTauDR(an):
     rebin = 1
-    ylabel = "Number of events / %.2f" % (0.01*rebin)
+    ylabel = "Number of MC events / %.2f" % (0.01*rebin)
 
     an_name = an.replace("/", "_")
     h = Histo(datasets, [an+"/muonTauDR"])
@@ -114,6 +245,8 @@ def muonTauDR(an):
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
 
     h = Histo(datasets, [an+"/muonTauLdgDR"])
@@ -123,6 +256,8 @@ def muonTauDR(an):
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
 
 def met(an, t="Met", q=""):
@@ -130,7 +265,7 @@ def met(an, t="Met", q=""):
     rebin = 2
     #rebin = 5
 
-    ylabel = "Number of events / %d.0 GeV" % rebin
+    ylabel = "Number of MC events / %d.0 GeV" % rebin
 
     xlabel = "MET (GeV)"
     if q == "_x":
@@ -148,6 +283,8 @@ def met(an, t="Met", q=""):
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(createLegend(y1=0.8))
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
 
     if t == "Met" and q == "":
@@ -157,6 +294,8 @@ def met(an, t="Met", q=""):
         h.frame.GetXaxis().SetTitle("#mu+jets "+xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.draw()
+        addCmsPreliminaryText()
+        addEnergyText()
         h.save()
     
     ymin=0
@@ -184,34 +323,45 @@ def met(an, t="Met", q=""):
     h.draw()
     line.Draw("L")
     updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     style.setWide(False)
 
 
 def muonTauMetDeltaPhi(an, t="Met"):
     rebin = 10
-    ylabel = "# entries / "
+    ylabel = "Number of MC events / "
     if rebin == 1:
         ylabel += "0.01"
     elif rebin == 10:
         ylabel += "0.1"
+    elif rebin == 50:
+        ylabel += "0.5"
 
     rebinMet = 5
-    ylabelMet = "#entries / %d.0 GeV" % rebinMet
+    ylabelMet = "Number of MC events / %d.0 GeV" % rebinMet
 
     an_name = an.replace("/", "_")
-    h = Histo(datasets, [an+"/muon"+t+"DPhi", an+"/muon"+t+"OriginalDPhi",
-                         an+"/tau"+t+"DPhi", an+"/tau"+t+"OriginalDPhi"])
-    h.histos.setHistoLegendLabels({"muon"+t+"DPhi": "#Delta#Phi(#mu, MET_{#tau})",
-                                   "muon"+t+"OriginalDPhi": "#Delta#Phi(#mu, MET_{#mu})",
-                                   "tau"+t+"DPhi": "#Delta#Phi(#tau, MET_{#tau})",
-                                   "tau"+t+"OriginalDPhi": "#Delta#Phi(#tau, MET_{#mu})"})
+    h = Histo(datasets, [
+            #an+"/muon"+t+"DPhi",
+            an+"/tau"+t+"DPhi",
+            an+"/muon"+t+"OriginalDPhi",
+            #an+"/tau"+t+"OriginalDPhi"
+            ])
+    h.histos.setHistoLegendLabels({#"muon"+t+"DPhi": "#Delta#phi(#mu, MET_{#tau})",
+                                   "muon"+t+"OriginalDPhi": "#Delta#phi(#mu, MET_{#mu})",
+                                   "tau"+t+"DPhi": "#Delta#phi(#tau, MET_{#tau})",
+                                   #"tau"+t+"OriginalDPhi": "#Delta#phi(#tau, MET_{#mu})"
+                                   })
     h.histos.forEachHisto(lambda h: h.Rebin(rebin))
     h.createFrame(an_name+"_muonTau"+t+"DeltaPhi")
     h.frame.GetXaxis().SetTitle("#Delta#phi")
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(createLegend(y1=0.75))
     h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
 
     style.setWide(True)
@@ -223,6 +373,8 @@ def muonTauMetDeltaPhi(an, t="Met"):
     h.histos.setHistoDrawStyleAll("COLZ")
     h.draw()
     updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     style.setWide(False)
 
@@ -242,6 +394,8 @@ def muonTauMetDeltaPhi(an, t="Met"):
     #box.SetY1NDC(0.8)
     #box.SetY2NDC(0.92)
     #box.Draw()
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     #style.setOptStat(0)
 
@@ -254,31 +408,68 @@ def muonTauMetDeltaPhi(an, t="Met"):
     h.histos.setHistoDrawStyleAll("COLZ")
     h.draw()
     updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
     h.save()
     style.setWide(False)
 
+    numEventsAll = h.histos.getHistoList()[0].GetEntries()
 
+    h = Histo(datasets, [
+            an+"/muonTauGenNu"+t+"DPhi",
+            an+"/muonGenNu"+t+"OriginalDPhi",
+            ])
+    h.histos.setHistoLegendLabels({"muonTauGenNu"+t+"DPhi": "#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau})",
+                                   "muonGenNu"+t+"OriginalDPhi": "#Delta#phi(#nu_{#mu}, MET_{#nu})"})
+    h.histos.forEachHisto(lambda h: h.Rebin(rebin))
+    h.createFrame(an_name+"_muonTauGenNu"+t+"DeltaPhi")
+    h.frame.GetXaxis().SetTitle("#Delta#phi")
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(createLegend(x1=0.6, y1=0.8))
+    h.draw()
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+
+    numEventsGenMu = h.histos.getHistoList()[0].GetEntries()
+    print "%s: N(W->munu) / N(all) = %d/%d = %.1f %%" % (an, numEventsGenMu, numEventsAll, numEventsGenMu/numEventsAll*100)
+    
+    style.setWide(True)
+    h = Histo(datasets, [an+"/muonGenNu"+t+"OriginalMuonTauGenNu"+t+"DPhi"])
+    h.histos.forEachHisto(lambda h: h.Rebin2D(rebin, rebin))
+    h.createFrame(an_name+"_muonTauGenNu"+t+"DeltaPhi2D", xmin=-3.5, ymin=-3.5, xmax=3.5, ymax=3.5)
+    h.frame.GetXaxis().SetTitle("#Delta#phi(#nu_{#mu}, MET_{#mu})")
+    h.frame.GetYaxis().SetTitle("#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau}")
+    h.histos.setHistoDrawStyleAll("COLZ")
+    h.draw()
+    updatePaletteStyle(h.histos.getHistoList()[0])
+    addCmsPreliminaryText()
+    addEnergyText()
+    h.save()
+    style.setWide(False)
 
 for analysis in [
     "EmbeddingAnalyzer",
 #    "tauIdEmbeddingAnalyzer",
 #    "tauPtIdEmbeddingAnalyzer"
-#    "EmbeddingAnalyzer/matched",
+    "EmbeddingAnalyzer/matched",
 #    "tauIdEmbeddingAnalyzer/matched",
-    "tauPtIdEmbeddingAnalyzer/matched"
+#    "tauPtIdEmbeddingAnalyzer/matched"
     ]:
     for q in ["Pt", "Eta", "Phi"]:
         muonTau(analysis, q)
+        tauNuGen(analysis, q)
     muonTauDR(analysis)
     muonTauIso(analysis)
+    tauGenMass(analysis)
 
     #muonTauMetDeltaPhi(analysis, "Met")
     for t in [
         "Met",
-#        "GenMetTrue",
+        "GenMetTrue",
 #        "GenMetCalo",
 #        "GenMetCaloAndNonPrompt",
-#        "GenMetNu"
+        "GenMetNu"
         ]:
         muonTauMetDeltaPhi(analysis, t)
         for q in [
