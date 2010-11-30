@@ -46,61 +46,127 @@ def getGraphTevatron():
     myGraph.SetMarkerStyle(8)
     return myGraph
 
+def fillDataTheory(mu):
+    theoryData  = {
+        "mass":array( 'd' ),
+        "tanb":array( 'd' )}
+    # can only use the following values
+    masses = [  90,  100,  120, 140, 160]
+    for mass in masses:
+        theoryValue = tanbForTheoryLimit(mass,mu)
+        if theoryValue>0:
+            theoryData["tanb"].append( theoryValue )
+            theoryData["mass"].append( mass )
+#         else:
+#             maxTanbTheory = 219
+#             theoryData["tanb"].append( maxTanbTheory )
+#             theoryData["mass"].append( mass )
+#        print "Theoretical m:",mass,", mu:",mu,", tanb:",theoryValue
+    return theoryData
+
+def getGraphTheory(mu):
+    # can only go as high as calculated in FeynHiggs
+    dataTheory = fillDataTheory(mu)
+    myGraph = TGraph(len(dataTheory["mass"]),dataTheory["mass"],dataTheory["tanb"])
+    myGraph.SetLineColor(1)
+    ## exclWidth = 10
+    ## myGraph.SetLineWidth(100*exclWidth+3)
+    myGraph.SetLineStyle(1)
+    ## myGraph.SetFillStyle(3005)
+    myGraph.SetMarkerStyle(8)
+    return myGraph
+
+def fillAreaTheory(mu):
+    theoryArea  = {
+        "mass":array( 'd' ),
+        "tanb":array( 'd' )}
+    # can only use the following values
+    masses = [  90,  100,  120, 140, 160]
+    for mass in masses:
+        theoryValue = tanbForTheoryLimit(mass,mu)
+        theoryMax = theoryValue + 20
+        if theoryValue>0:
+            theoryArea["tanb"].insert( 0, theoryValue )
+            theoryArea["mass"].insert( 0, mass )
+            theoryArea["tanb"].append( theoryMax )
+            theoryArea["mass"].append( mass )
+    return theoryArea
+
+
+def getAreaTheory(mu):
+    # can only go as high as calculated in FeynHiggs
+    dataTheory = fillAreaTheory(mu)
+    myArea = TGraph(len(dataTheory["mass"]),dataTheory["mass"],dataTheory["tanb"])
+#    myArea.SetLineColor(1)
+#    myArea.SetLineWidth(0)
+#    myArea.SetFillStyle(3)
+    myArea.SetFillColor(1);
+    myArea.SetFillStyle(3004);
+    myArea.SetLineColor(418);
+    myArea.SetLineWidth(0);
+    myArea.SetLineColor(0);
+    return myArea
     
 def main():
 
-    luminosity = 100
+    luminosity = 80  #35.76
 
+    # add here data to be plotted
+#     dataName = "PFTauCutBased"
+#     background = 0.3601+0.2010
+#     sigmas = [ 0.1359, 0.1262, 0.0943, 0.0381, 0.00833 ]
+    
+#     dataName = "PFTauTaNCBased"
+#     qcd = 0.1297
+#     wjets = 0.0266
+#     NttNoH = 0.1926
+#     background = qcd + wjets + NttNoH
+#     sigmas = [ 0.148, 0.1349, 0.1015, 0.0520, 0.0095 ] # signaalin vaikutusala
+
+    dataName = "HPS_TauID"#"HPS TauID, MET>70 GeV, 3 jets"
+    qcd = 0.0016
+    wjets = 0.0257
+    NttNoH = 0.0522
+    background = qcd + wjets + NttNoH
+    sigmas = [ 0.04812, 0.044, 0.0334, 0.0169, 0.00324 ]
+#    [  0.540728, 0.579466, 0.690689, 0.745804, 0.7433 ]
+            #      0.148, 0.1349, 0.1015, 0.0520, 0.0095 ]
+    
     massPoints = {
-        "PFTauCutBased": {
-	    90:  MassPoint(luminosity*0.1359,20,luminosity*(0.3601+0.2010)),
-	    100: MassPoint(luminosity*0.1262,20,luminosity*(0.3601+0.2010)),
-	    120: MassPoint(luminosity*0.0943,20,luminosity*(0.3601+0.2010)),
-	    140: MassPoint(luminosity*0.0381,20,luminosity*(0.3601+0.2010)),
-	    160: MassPoint(luminosity*0.00833,20,luminosity*(0.3601+0.2010))
-	},
-	"PFTauTaNCBased": {
-            90:  MassPoint(luminosity*0.148,20,luminosity*(0.1297+0.2192)),
-            100: MassPoint(luminosity*0.1349,20,luminosity*(0.1297+0.2192)),
-            120: MassPoint(luminosity*0.1015,20,luminosity*(0.1297+0.2192)),
-            140: MassPoint(luminosity*0.0520,20,luminosity*(0.1297+0.2192)),
-            160: MassPoint(luminosity*0.0095,20,luminosity*(0.1297+0.2192))
+	dataName: {
+            90:  MassPoint(luminosity*sigmas[0],20,luminosity*background),
+            100: MassPoint(luminosity*sigmas[1],20,luminosity*background),
+            120: MassPoint(luminosity*sigmas[2],20,luminosity*background),
+            140: MassPoint(luminosity*sigmas[3],20,luminosity*background),
+            160: MassPoint(luminosity*sigmas[4],20,luminosity*background)
 	}
     }
 
-    mus  = [-1000,-200,200,1000] # mu parameters
-    mHps  = massPoints["PFTauCutBased"].keys() # H+ masses
+    mus  = [-1000,-200,200,1000] # mu parameters for plot with different mus
+    mHps  = massPoints[dataName].keys() # H+ masses
     mHps.sort()
-#    mus  = [200]
-#    mHps = [120]
 
     data = {}
         
     nSigma = 5
     clSigma = 1.95996
-    sysError = 0.1
+    sysError = 0.2
     for selection in massPoints.keys() :
 	print selection
         data[selection] = {}
 	for mu in mus :
 	    print "mu = ",mu
-	    tanbExclNoErr   = []
-	    tanbExclWErr    = []
-	    tanbReachNoErr  = []
-	    tanbReachWErr   = []
-	    tanbReachTheory = []
             nPoints = 5
             data[selection][mu] = {}
-            listOfGraphs = ["ExclNoErr","ExclWErr","ReachNoErr","ReachWErr","ReachTheory"]
+            listOfGraphs = ["Exclusion","exclusion_syst","ReachNoErr","ReachWErr","ReachTheory"]
             for thisGraphType in listOfGraphs:
                 data[selection][mu][thisGraphType] = {
                     "mass":array( 'd' ),
                     "tanb":array( 'd' )
                     }
-            massArray, tanbExclNoErrArray, tanbExclWErrArray, tanbReachNoErrArray, tanbReachWErrArray, tanbReachTheoryArray = array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ), array( 'd' ),array( 'd' )
+            massArray  = array( 'd' )
 	    for mass in mHps :
 		tanbTheoryReach = tanbForTheoryLimit(mass,mu)
-		tanbReachTheory.append(tanbTheoryReach)
 #		print massPoints[selection][mass].nSignal,massPoints[selection][mass].tanbRef,massPoints[selection][mass].nBackgr,mass,mu
 #		print signif(massPoints[selection][mass].nSignal,massPoints[selection][mass].nBackgr,0),signalAtNsigma(massPoints[selection][mass].nBackgr,0,5)
 		tanbAt5sigmaNoErr = tanbAtNsigma(massPoints[selection][mass].nSignal,massPoints[selection][mass].tanbRef,massPoints[selection][mass].nBackgr,0,mass,mu,nSigma)
@@ -108,23 +174,15 @@ def main():
 		tanbAt95CLNoErr = tanbAtNsigma(massPoints[selection][mass].nSignal,massPoints[selection][mass].tanbRef,massPoints[selection][mass].nBackgr,0,mass,mu,clSigma)
 		tanbAt95CLWErr = tanbAtNsigma(massPoints[selection][mass].nSignal,massPoints[selection][mass].tanbRef,massPoints[selection][mass].nBackgr,sysError,mass,mu,clSigma)
 		print "mass,th-reach,reach,reach(sys),excl,excl(sys) = ",mass,tanbTheoryReach,tanbAt5sigmaNoErr,tanbAt5sigmaWErr,tanbAt95CLNoErr,tanbAt95CLWErr
-		tanbReachNoErr.append(tanbAt5sigmaNoErr)
-		tanbReachWErr.append(tanbAt5sigmaWErr)
-		tanbExclNoErr.append(tanbAt95CLNoErr)
-		tanbExclWErr.append(tanbAt95CLWErr)
                 massArray.append(mass)
-                tanbExclNoErrArray.append(tanbAt5sigmaNoErr)
-                tanbExclWErrArray.append(tanbAt5sigmaWErr)
-                tanbReachNoErrArray.append(tanbAt95CLNoErr)
-                tanbReachWErrArray.append(tanbAt95CLWErr)
-                tanbReachTheoryArray.append(tanbTheoryReach)
 
+                # Fill data structures
                 if tanbAt95CLNoErr>0:
-                    data[selection][mu]["ExclNoErr"]["mass"].append(mass)
-                    data[selection][mu]["ExclNoErr"]["tanb"].append(tanbAt95CLNoErr)
+                    data[selection][mu]["Exclusion"]["mass"].append(mass)
+                    data[selection][mu]["Exclusion"]["tanb"].append(tanbAt95CLNoErr)
                 if tanbAt95CLWErr>0:
-                    data[selection][mu]["ExclWErr"]["mass"].append(mass)
-                    data[selection][mu]["ExclWErr"]["tanb"].append(tanbAt95CLWErr)
+                    data[selection][mu]["exclusion_syst"]["mass"].append(mass)
+                    data[selection][mu]["exclusion_syst"]["tanb"].append(tanbAt95CLWErr)
                 if tanbAt5sigmaNoErr>0:    
                     data[selection][mu]["ReachNoErr"]["mass"].append(mass)
                     data[selection][mu]["ReachNoErr"]["tanb"].append(tanbAt5sigmaNoErr)
@@ -140,7 +198,7 @@ def main():
     ## this code could be improved to use the data structure "data"                    
     for selection in massPoints.keys() :
         color = 1
-        print 'muPlot'+selection
+#        print 'muPlot'+selection
         c1 = TCanvas( 'muPlot'+selection, 'tanbReach'+selection, 200, 10, 700, 500 )
         multi = TMultiGraph()
         lege = getLegend()
@@ -150,7 +208,7 @@ def main():
         writeText(selection+", no syst. errors", 0.72)
         for mu in mus :
             yvalues, massArray = array( 'd' ), array( 'd' )
-            print "mu = ",mu
+#            print "mu = ",mu
             for mass in mHps :
                 tanbTheoryReach = tanbForTheoryLimit(mass,mu)
                 tanbAt5sigmaNoErr = tanbAtNsigma(massPoints[selection][mass].nSignal,massPoints[selection][mass].tanbRef,massPoints[selection][mass].nBackgr,0,mass,mu,nSigma)
@@ -158,7 +216,7 @@ def main():
                 if tanbAt5sigmaNoErr != -1 :
                     yvalues.append( tanbAt5sigmaNoErr )
                     massArray.append(mass)
-                print "graph1, theory & 5sigma & mass: ",tanbTheoryReach,tanbAt5sigmaNoErr, mass
+#                print "graph1, theory & 5sigma & mass: ",tanbTheoryReach,tanbAt5sigmaNoErr, mass
             if len(massArray)>0:
                 graphMus = TGraph(len(massArray),massArray,yvalues)
                 graphMus.SetLineColor(color)
@@ -182,8 +240,8 @@ def main():
 ## Plot comparison of reach and exclusion for the 2 selections
 ## fix mu=200       
 ## make one plot without errors, one with errors
-    setOfSetOfGraphs = [ ["ReachNoErr","ExclNoErr"],
-                         ["ReachWErr", "ExclWErr"]   ]
+    setOfSetOfGraphs = [ ["ReachNoErr","Exclusion"],
+                         ["ReachWErr", "exclusion_syst"]   ]
     for index, setOfGraphs in enumerate(setOfSetOfGraphs):
         c1 = TCanvas("exclusions"+str(index),"exclusions"+str(index),200, 10, 700, 500 )
         multi = TMultiGraph()
@@ -209,8 +267,53 @@ def main():
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
         writeText("m_{H}^{max} scenario",0.85)
         writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)
-        writeText("#mu = "+str(fixedMu)+" GeV/c^{2}", 0.75)
+        writeText("#mu = "+str(fixedMu)+" GeV/c^{2}, "+str(100*sysError)+"% syst.error", 0.75)
         multi.GetYaxis().SetRangeUser(0,210)
+        multi.GetYaxis().SetTitle("tan(#beta)")
+        multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
+        c1.SaveAs(".png")
+
+    ## Plot reach in 
+    ## fix mu=200       
+    ## make one plot without errors, one with errors
+    setOfSetOfGraphs = [ ["ReachNoErr","ReachWErr"],
+                         ["Exclusion","exclusion_syst"] ]
+    for index, setOfGraphs in enumerate(setOfSetOfGraphs):
+        c1 = TCanvas("newexclusions"+str(index),"exclusions"+str(index),200, 10, 700, 500 )
+        multi = TMultiGraph()
+        lege = getLegend()
+        fixedMu = 200
+        color = 1
+        for selection in massPoints.keys() :
+            for oneGraph in setOfGraphs:
+                graph = TGraph(len(data[selection][fixedMu][oneGraph]["mass"]),
+                               data[selection][fixedMu][oneGraph]["mass"],
+                               data[selection][fixedMu][oneGraph]["tanb"])
+                graph.SetLineColor(color)
+                graph.SetMarkerColor(color)
+                lege.AddEntry(graph,selection+", "+oneGraph,"l")
+                multi.Add(graph)
+                color = color + 1
+        graphTeva = getGraphTevatron()
+#        multi.Add(graphTeva,"cp")
+        multi.Add(graphTeva)
+        lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
+        graphTheory = getGraphTheory(fixedMu)
+        graphTheoryArea = getAreaTheory(fixedMu)
+#        multi.Add(graphTheory,"lp")
+        multi.Add(graphTheory)
+#        multi.Add(graphTheoryArea,"f")
+        lege.AddEntry(graphTheory,"Theoretically inaccessible","l")
+        multi.Draw("alp")
+        graphTheoryArea.Draw("f")
+        multi.Draw("lp")
+        lege.Draw()
+        addCmsPreliminaryText()
+        writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
+        writeText("m_{H}^{max} scenario",0.85)
+        writeText("t#rightarrowbH#pm#rightarrowb#tau#nu#rightarrowhadrons + #nu", 0.8)
+        writeText("#mu = "+str(fixedMu)+" GeV/c^{2}, "+str(100*sysError)+"% syst.error", 0.75)
+        multi.GetYaxis().SetRangeUser(0,215)
         multi.GetYaxis().SetTitle("tan(#beta)")
         multi.GetXaxis().SetTitle("M_{H^{#pm}} [GeV/c^{2}]")
         c1.SaveAs(".png")
