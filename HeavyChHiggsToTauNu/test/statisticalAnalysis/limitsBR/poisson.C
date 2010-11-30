@@ -518,7 +518,8 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
 	 << "      n=3 for hard cuts, 4 jets, 2 b-jets" << endl
 	 << "      n=4 for soft cuts, 3 jets, 1 b-jet" << endl
 	 << "      n=5 for TaNC (soft cuts, 3 jets, 1 b-jet)" << endl
-	 << "      n=6 for TaNC (4 jets)" << endl;
+	 << "      n=6 for TaNC (4 jets)" << endl
+	 << "      n=7 for 29.11.2010 data" << endl;
     cout << "Additionnally, you can - override the default luminosity setting (example 100/pb) and" << endl
 	 << "                       - use 100% uncertainty for QCD" << endl 
 	 << "with this command: .x poisson.C(6,100,true)" << endl;
@@ -597,6 +598,24 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
       NttNoH = 0.083; // tt
       wjets = 0.0176;
       sprintf(plotTitle,"at least 4 jets, 2 tagged b-jets, TaNC");     
+    }
+  else if (choice==7)
+    {
+      // todo: make nmasspoints variable (6 or 5)
+      // add vector with mass points
+      // change 0.04 to correct values
+      Double_t NHBR100[]    = {	0.04, 0.04812, 0.04, 0.0334, 0.0169, 0.00324 };
+      // calculate corrections here
+      Double_t BR_t_bH[] =    {0.05395, 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
+      Double_t BR_H_taunu[] = {0.95800, 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
+      for (int i=0; i<6; i++){
+	NHBR100[i] = NHBR100[i] /
+	  ( 2.0*BR_t_bH[i]*(1.0-BR_t_bH[i])*BR_H_taunu[i] );
+      }
+      qcd = 0.0165;
+      NttNoH = 0.083; // tt
+      wjets = 0.0176;
+      sprintf(plotTitle,"29.11.2010 data");     
     }
 
   else {
