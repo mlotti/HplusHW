@@ -35,7 +35,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_2/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_8_1_JTn.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
         #"file:embedded_RECO.root"
   )
 )
@@ -93,6 +93,11 @@ process.commonSequence = cms.Sequence(
 )
 
 ################################################################################
+
+# Calculate PF MET for 
+from PhysicsTools.PFCandProducer.pfMET_cfi import pfMET
+process.pfMETOriginalNoMuon = pfMET.clone(src=cms.InputTag("dimuonsGlobal", "forMixing"))
+process.commonSequence *= process.pfMETOriginalNoMuon
 
 # Recalculate gen MET
 # True MET
@@ -229,6 +234,10 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
             originalSrc = cms.untracked.InputTag(pfMETOriginal.value())
         ),
+        MetNoMuon = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag(pfMET.value()),
+            originalSrc = cms.untracked.InputTag("pfMETOriginalNoMuon")
+        ),
         GenMetTrue = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
             originalSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X")
@@ -241,7 +250,7 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
             embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
             originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X")
         ),
-        GenMetNu = cms.untracked.PSet(
+        GenMetNuSum = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
             originalSrc = cms.untracked.InputTag("genMetNuOriginal")
         ),

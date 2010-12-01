@@ -439,7 +439,7 @@ def muonTauMetDeltaPhi(an, t="Met"):
     h.histos.forEachHisto(lambda h: h.Rebin2D(rebin, rebin))
     h.createFrame(an_name+"_muonTauGenNu"+t+"DeltaPhi2D", xmin=-3.5, ymin=-3.5, xmax=3.5, ymax=3.5)
     h.frame.GetXaxis().SetTitle("#Delta#phi(#nu_{#mu}, MET_{#mu})")
-    h.frame.GetYaxis().SetTitle("#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau}")
+    h.frame.GetYaxis().SetTitle("#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau})")
     h.histos.setHistoDrawStyleAll("COLZ")
     h.draw()
     updatePaletteStyle(h.histos.getHistoList()[0])
@@ -466,9 +466,11 @@ for analysis in [
     #muonTauMetDeltaPhi(analysis, "Met")
     for t in [
         "Met",
-        "GenMetTrue",
+#        "MetNoMuon",
+#        "GenMetTrue",
 #        "GenMetCalo",
 #        "GenMetCaloAndNonPrompt",
+#        "GenMetNuSum",
         "GenMetNu"
         ]:
         muonTauMetDeltaPhi(analysis, t)

@@ -94,6 +94,10 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hMuonMetDPhi(0), hMuonOrigMetDPhi(0), hTauMetDPhi(0), hTauOrigMetDPhi(0), hMuonOrigMetTauMetDPhi(0)
     {}
 
+    explicit HistoMet(double metCut):
+      metCut_(metCut)
+    {}
+
     void init(TFileDirectory& dir, const std::string& name) {
       hMet = dir.make<TH1F>(name.c_str(), "Tau+jets MET", 400, 0., 400.);
       hMetX = dir.make<TH1F>((name+"_x").c_str(), "Tau+jets MET", 400, -200., 200.);
@@ -141,18 +145,24 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       iEvent.getByLabel(originalSrc_, horigMet);
       const reco::MET& metOrig = horigMet->at(0);
 
-      hMet->Fill(met.et());
+      fill(muon, tau, muonNu, tauNu, metOrig.p4(), met.p4());
+    }
+
+    void fill(const pat::Muon& muon, const reco::BaseTau& tau,
+              const reco::GenParticle *muonNu, const reco::GenParticle *tauNu,
+              const reco::MET::LorentzVector& metOrig, const reco::MET::LorentzVector& met) {
+      hMet->Fill(met.Et());
       hMetX->Fill(met.px());
       hMetY->Fill(met.py());
 
-      hOrigMet->Fill(metOrig.et());
+      hOrigMet->Fill(metOrig.Et());
       hOrigMetX->Fill(metOrig.px());
       hOrigMetY->Fill(metOrig.py());
 
-      if(met.et() > metCut_)
-        hOrigMetAfterCut->Fill(metOrig.et());
+      if(met.Et() > metCut_)
+        hOrigMetAfterCut->Fill(metOrig.Et());
 
-      hMetMet->Fill(metOrig.et(), met.et());
+      hMetMet->Fill(metOrig.Et(), met.Et());
       hMetMetX->Fill(metOrig.px(), met.px());
       hMetMetY->Fill(metOrig.py(), met.py());
 
@@ -168,13 +178,18 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       if(muonNu && tauNu) {
         reco::GenParticle::LorentzVector muonTauNu = muonNu->p4()+tauNu->p4();
         double muonNuOrigMetDphi = reco::deltaPhi(*muonNu, metOrig);
-        double muonTauNuMetDphi = reco::deltaPhi(muonTauNu, met);
+        double muonTauNuMetDphi = reco::deltaPhi(muonTauNu.phi(), met.phi());
         hMuonNuOrigMetDPhi->Fill(muonNuOrigMetDphi);
         hMuonTauNuMetDPhi->Fill(muonTauNuMetDphi);
         hMuonNuOrigMetMuonTauNuMetDPhi->Fill(muonNuOrigMetDphi, muonTauNuMetDphi);
+        /*
+        std::cout << "Orig. met phi " << metOrig.phi() << " embedded met phi " << met.phi()
+                  << " nu_mu phi " << muonNu->phi() << " nu_tau phi " << tauNu->phi() << " nu_mu+nu_tau phi " << muonTauNu.phi()
+                  << std::endl;
+        */
       }
 
-      double diff = met.et() - metOrig.et();
+      double diff = met.Et() - metOrig.Et();
       hMetOrigDiff->Fill(diff);
       hMuonOrigMetDPhiMetOrigDiff->Fill(muonOrigMetDphi, diff);
     }
@@ -213,7 +228,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
   };
 
   struct HistoAll {
-    HistoAll(double metCut): metCut_(metCut) {}
+    HistoAll(double metCut): metCut_(metCut), hMetNu(metCut) {}
     ~HistoAll() {
       for(size_t i=0; i<hMets.size(); ++i) {
         delete hMets[i];
@@ -223,10 +238,13 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     void init(const edm::ParameterSet& pset, TFileDirectory& dir) {
       std::vector<std::string> metNames = pset.getParameterNames();
       for(std::vector<std::string>::const_iterator iName = metNames.begin(); iName != metNames.end(); ++iName) {
+        if(*iName == "GenMetNu")
+          throw cms::Exception("Configuration") << "GenMetNu is a reserved MET name" << std::endl;
         HistoMet *met = new HistoMet(pset.getUntrackedParameter<edm::ParameterSet>(*iName), metCut_);
         met->init(dir, *iName);
         hMets.push_back(met);
       }
+      hMetNu.init(dir, "GenMetNu");      
 
       hMuon.init(dir, "muon", "Muon");
       hMuonTrkIso = dir.make<TH1F>("muonIsoTrk", "Muon track isolation", 100, 0, 100);
@@ -306,6 +324,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
     double metCut_;
     std::vector<HistoMet *> hMets;
+    HistoMet hMetNu;
 
     Histo hMuon;
     TH1 *hMuonTrkIso;
@@ -404,6 +423,11 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   double tauDecayMass = tauDecaySum.M();
 
   histos.fillMets(*muon, *tau, nuMuon.first, nuTau.first, iEvent);
+  reco::GenParticle::LorentzVector nuMuonTauSum;
+  if(nuMuon.first && nuTau.first) {
+    nuMuonTauSum = nuMuon.first->p4()+nuTau.first->p4();
+    histos.hMetNu.fill(*muon, *tau, nuMuon.first, nuTau.first, nuMuon.first->p4(), nuMuonTauSum);
+  }
 
   histos.hMuon.fill(*muon);
   histos.hMuonTauDR->Fill(minDR);
@@ -432,6 +456,9 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
                     
   if(minDR < muonTauCone_) {
     histosMatched.fillMets(*muon, *tau, nuMuon.first, nuTau.first, iEvent);
+    if(nuMuon.first && nuTau.first) {
+      histosMatched.hMetNu.fill(*muon, *tau, nuMuon.first, nuTau.first, nuMuon.first->p4(), nuMuonTauSum);
+    }
 
     histosMatched.hMuon.fill(*muon);
     histosMatched.hMuonTauDR->Fill(minDR);
