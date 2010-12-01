@@ -74,6 +74,8 @@ def getGraphTheory(mu):
     myGraph.SetLineStyle(1)
     ## myGraph.SetFillStyle(3005)
     myGraph.SetMarkerStyle(8)
+    myGraph.SetFillColor(1);
+    myGraph.SetFillStyle(3004);
     return myGraph
 
 def fillAreaTheory(mu):
@@ -261,7 +263,14 @@ def main():
         graphTeva = getGraphTevatron()
         multi.Add(graphTeva,"cp")
         lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
-        multi.Draw("a")
+
+        graphTheory = getGraphTheory(fixedMu)
+        graphTheoryArea = getAreaTheory(fixedMu)
+        multi.Add(graphTheory)
+        lege.AddEntry(graphTheory,"Theoretically inaccessible","f")
+        multi.Draw("alp")
+        graphTheoryArea.Draw("f")
+        multi.Draw("lp")
         lege.Draw()
         addCmsPreliminaryText()
         writeText("L = "+str(luminosity)+" pb^{-1}", 0.9)
@@ -300,10 +309,8 @@ def main():
         lege.AddEntry(graphTeva,"Tevatron 1fb^{-1} exclusion","l")
         graphTheory = getGraphTheory(fixedMu)
         graphTheoryArea = getAreaTheory(fixedMu)
-#        multi.Add(graphTheory,"lp")
         multi.Add(graphTheory)
-#        multi.Add(graphTheoryArea,"f")
-        lege.AddEntry(graphTheory,"Theoretically inaccessible","l")
+        lege.AddEntry(graphTheory,"Theoretically inaccessible","f")
         multi.Draw("alp")
         graphTheoryArea.Draw("f")
         multi.Draw("lp")
