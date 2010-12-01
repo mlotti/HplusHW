@@ -56,7 +56,7 @@ def linearInterpolation(mHp,tanb,mu):
 def getTanb(mHp,mu,targetBRt2bH):
     tanb = 20 # initial guess
     BRt2bH = interpolate(mHp,tanb,mu).BRt2bH
-    while abs(BRt2bH - targetBRt2bH)/targetBRt2bH > 0.00001 and tanb < 100 :
+    while abs(BRt2bH - targetBRt2bH)/targetBRt2bH > 0.00001 and tanb < 219 :
         tanb = tanb - 0.01*tanb*(BRt2bH - targetBRt2bH)/targetBRt2bH
 	BRt2bH = interpolate(mHp,tanb,mu).BRt2bH
 	#print targetBRt2bH,BRt2bH,tanb
