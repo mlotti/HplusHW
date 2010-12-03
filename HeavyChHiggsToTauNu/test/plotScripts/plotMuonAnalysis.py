@@ -23,13 +23,13 @@ legendLabels = {
     "QCD_Pt80to120_Fall10":  "QCD, 80 < #hat{p}_{T} < 120",
     "QCD_Pt120to170_Fall10": "QCD, 120 < #hat{p}_{T} < 170",
     "QCD_Pt170to300_Fall10": "QCD, 170 < #hat{p}_{T} < 300",
-    "QCD_Pt20_MuEnriched": "QCD (#mu enrich.), #hat{p}_{T} > 20",
-    "QCD_Pt20to30_MuEnriched": "QCD (#mu enrich.), 20 < #hat{p}_{T} < 30",
-    "QCD_Pt30to50_MuEnriched": "QCD (#mu enrich.), 30 < #hat{p}_{T} < 50",
-    "QCD_Pt50to80_MuEnriched": "QCD (#mu enrich.), 50 < #hat{p}_{T} < 80",
-    "QCD_Pt80to120_MuEnriched": "QCD (#mu enrich.), 80 < #hat{p}_{T} < 120",
-    "QCD_Pt120to150_MuEnriched": "QCD (#mu enrich.), 120 < #hat{p}_{T} < 150",
-    "QCD_Pt150_MuEnriched": "QCD (#mu enrich.), #hat{p}_{T} > 150"
+    "QCD_Pt20_MuEnriched": "QCD (#mu enr.), #hat{p}_{T} > 20",
+    "QCD_Pt20to30_MuEnriched": "QCD (#mu enr.), 20 < #hat{p}_{T} < 30",
+    "QCD_Pt30to50_MuEnriched": "QCD (#mu enr.), 30 < #hat{p}_{T} < 50",
+    "QCD_Pt50to80_MuEnriched": "QCD (#mu enr.), 50 < #hat{p}_{T} < 80",
+    "QCD_Pt80to120_MuEnriched": "QCD (#mu enr.), 80 < #hat{p}_{T} < 120",
+    "QCD_Pt120to150_MuEnriched": "QCD (#mu enr.), 120 < #hat{p}_{T} < 150",
+    "QCD_Pt150_MuEnriched": "QCD (#mu enr.), #hat{p}_{T} > 150"
 }
 
 
@@ -57,6 +57,7 @@ lastSelection = "noIsoNoVetoMeth10_METCut"
 lastSelectionBeforeMet = "noIsoNoVetoMeth09_JetMultiplicityCut"
 lastMultip = "noIsoNoVetoMeth10_Multiplicity"
 lastSelectionOther = "noIsoNoVetoMetAoch09_METCutAfterOtherCuts"
+lastSelectionBeforeMetOther = "noIsoNoVetoMetAoch08_JetMultiplicityCutAfterOtherCuts"
 lastSelectionBeforeMetOtherIso = "noIsoNoVetoMetAoch08_JetMultiplicityCutAfterOtherCutsIso"
 lastSelectionOtherIso = "noIsoNoVetoMetAoch09_METCutAfterOtherCutsIso"
 
@@ -82,9 +83,9 @@ datasetsQCD.selectAndReorder(QCD_datasets)
 #datasets.getDataset("Mu_135821-144114").setLuminosity(3051760.115/1e6) # ub^-1 -> pb^-1
 #datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 #datasets.getDataset("Mu_147196-149442").setLuminosity(27384630.974/1e6)
-datasets.getDataset("Mu_135821-144114").setLuminosity(57290.040/1e6) # ub^-1 -> pb^-1
-datasets.getDataset("Mu_146240-147116").setLuminosity(3932345.374/1e6)
-datasets.getDataset("Mu_147196-149442").setLuminosity(20758814.155/1e6)
+datasets.getDataset("Mu_135821-144114").setLuminosity(2863224.758/1e6) # ub^-1 -> pb^-1
+datasets.getDataset("Mu_146240-147116").setLuminosity(3977060.866/1e6)
+datasets.getDataset("Mu_147196-149442").setLuminosity(27907588.871/1e6)
 datasets.mergeData()
 
 datasetsMC = datasets.deepCopy()
@@ -144,6 +145,7 @@ datasets.selectAndReorder(
 #textDefaults.setCmsPreliminaryDefaults()
 textDefaults.setEnergyDefaults(x=0.17)
 textDefaults.setLuminosityDefaults(x=0.4, size=0.04)
+createLegend.setDefaults(x1=0.65,y1=0.7)
 
 style = TDRStyle()
 
@@ -186,7 +188,7 @@ class Histo:
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         self.canvas.SaveAs(".png")
-        #self.canvas.SaveAs(".eps")
+        self.canvas.SaveAs(".eps")
         #self.canvas.SaveAs(".C")
         ROOT.gErrorIgnoreLevel = backup
 
@@ -224,12 +226,14 @@ def jetMultiplicity():
 # Muon pt after all other cuts
 def muonPt(h, prefix=""):
     xlabel = "Muon p_{T} (GeV/c)"
-    ylabel = "Number of muons / 5.0 GeV/c"
+    #ylabel = "Number of muons / 5.0 GeV/c"
+    ylabel = "Number of events / 5.0 GeV/c"
     ptcut = 40
+    xmax = 350
 
     h.histos.forEachHisto(lambda h: h.Rebin(5))
     h.histos.stackMCHistograms()
-    h.createFrame(prefix+"muon_pt")
+    h.createFrame(prefix+"muon_pt", xmax=xmax)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(createLegend())
@@ -240,7 +244,7 @@ def muonPt(h, prefix=""):
     h.histos.addLuminosityText()
     h.save()
 
-    h.createFrame(prefix+"muon_pt_log", ymin=0.1, ymax=1e3)
+    h.createFrame(prefix+"muon_pt_log", ymin=0.01, yfactor=2, xmax=xmax)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
@@ -250,7 +254,7 @@ def muonPt(h, prefix=""):
     h.histos.addLuminosityText()
     h.save()
 
-    h.createFrame(prefix+"muon_pt_cut%d"%ptcut, xmin=ptcut, ymax=200)
+    h.createFrame(prefix+"muon_pt_cut%d"%ptcut, xmin=ptcut, xmax=xmax, ymax=200)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
@@ -259,7 +263,7 @@ def muonPt(h, prefix=""):
     h.histos.addLuminosityText()
     h.save()
 
-    h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, xmin=ptcut, ymin=0.1, ymax=1e3)
+    h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, xmin=ptcut, xmax=xmax, ymin=0.1, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
@@ -333,12 +337,12 @@ class PrintNumEvents:
     def __init__(self, minMet):
         self.minMet = minMet
         self.results = {}
-        print "MET cut %d" % self.minMet
+        #print "MET cut %d" % self.minMet
 
     def __call__(self, name, histo):
         bin = histo.FindBin(self.minMet)
         n = histo.Integral(bin, histo.GetNbinsX()+1)
-        print "Dataset %s: %.1f passes MET cut" % (name, n)
+        #print "Dataset %s: %.1f passes MET cut" % (name, n)
         self.results[name] = n
 
     def printQcdFraction(self):
@@ -349,7 +353,14 @@ class PrintNumEvents:
         for name, value in self.results.iteritems():
             if name != "Data":
                 s += value
-        print "Fraction of QCD of all MC %.1f %%" % (self.results["QCD"]/s*100)
+
+        print "MET cut %d" % self.minMet
+        for name, value in self.results.iteritems():
+            if name == "Data":
+                print "Dataset %s: %.1f passes" % (name, value)
+            else:
+                print "Dataset %s: %.1f passes, %.1f %%" % (name, value, value/s*100)
+                #print "Fraction of name of all MC %.1f %%" % (value/s*100)
         
 # MET
 def plotMet(met, selection=lastSelection, prefix="met", calcNumEvents=False):
@@ -380,7 +391,7 @@ def plotMet(met, selection=lastSelection, prefix="met", calcNumEvents=False):
     h.histos.addLuminosityText()
     h.save()
 
-    h.createFrame(selection+"_"+prefix+"_"+met+"_log", ymin=0.1, ymax=200, xmax=300)
+    h.createFrame(selection+"_"+prefix+"_"+met+"_log", ymin=0.01, ymax=200, xmax=300)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(createLegend())
@@ -394,6 +405,7 @@ def plotMet(met, selection=lastSelection, prefix="met", calcNumEvents=False):
 
 jetMultiplicity()
 muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
+muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
 muonPt(Histo(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
 muonEta(Histo(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
 muonD0()
