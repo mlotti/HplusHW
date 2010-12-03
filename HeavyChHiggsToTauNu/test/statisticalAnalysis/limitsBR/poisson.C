@@ -9,6 +9,8 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 
+const Double_t shadeWidth = 1.8;
+
 void calculateAndPlotEventYields(Double_t b, 
 				 Double_t NHBR100, 
 				 Double_t NttNoH, 
@@ -205,7 +207,7 @@ void makePlotEventYields(int nPoints,
   myLine->SetLineColor(414);//green
   myLine->Draw();
   char temp[200];
-  sprintf(temp,"other bkg at %i (QCD + W jets)", background);
+  sprintf(temp,"other bkg at %.1f (QCD + W jets)", background);
   l1->AddEntry(myLine,temp,"l");
 
   l1->Draw();
@@ -234,7 +236,8 @@ void makePlotBRlimits(const Int_t nPoints,
   mygraup->SetLineWidth(4);
   mygraup->SetLineColor(418);
   mygraup->SetMarkerColor(418);
-  mygraup->SetMarkerSize(1.4);
+  mygraup->SetMarkerStyle(20); // default: 20=disc
+  mygraup->SetMarkerSize(1.5);
   mygraup->Draw("ALP");
   int brlimitymax = 28;
   mygraup->GetYaxis()->SetRangeUser(0,brlimitymax);
@@ -243,7 +246,8 @@ void makePlotBRlimits(const Int_t nPoints,
   mygralow->SetLineColor(4);
   mygralow->SetLineStyle(2);
   mygralow->SetMarkerColor(4);
-  mygralow->SetMarkerSize(1.4);
+  mygralow->SetMarkerStyle(21); // 21=square
+  mygralow->SetMarkerSize(1.6);
   mygralow->SetFillColor(4);
   mygralow->SetFillStyle(3021);
   mygralow->Draw("LP");
@@ -252,18 +256,25 @@ void makePlotBRlimits(const Int_t nPoints,
   Double_t areaYup[nPoints*2];
   Double_t areaYlow[nPoints*2];
   for (int i=0; i<nPoints; i++){
+    const int sw = shadeWidth; //shade width
     areaX[i]=myx[i];
     areaYup[i]=myYup[i];
     areaYlow[i]=myYlow[i];
     areaX[2*nPoints-1-i]=myx[i];
-    areaYup[2*nPoints-1-i]=myYlow[i];
-    areaYlow[2*nPoints-1-i]=0;
-    //    cout << "x1 " << areaX[i] << "  y " << areaYup[i] << endl;
-    //    cout << "x1 " << areaX[2*nPoints-1-i] << "  y " << areaYup[2*nPoints-1-i] << endl;
+    areaYup[2*nPoints-1-i]=myYup[i] + sw;
+    areaYlow[2*nPoints-1-i]=myYlow[i] + sw;
+    // following 6 lines for lower-side shading
+//     areaX[i]=myx[i];
+//     areaYup[i]=myYup[i];
+//     areaYlow[i]=myYlow[i];
+//     areaX[2*nPoints-1-i]=myx[i];
+//     areaYup[2*nPoints-1-i]=myYlow[i];
+//     areaYlow[2*nPoints-1-i]=0;
   }
   TGraph * upperArea = new TGraph(2*nPoints,areaX,areaYup);
   upperArea->SetFillColor(418);
-  upperArea->SetFillStyle(3004);
+  //  upperArea->SetFillStyle(3004);
+  upperArea->SetFillStyle(3007);
   upperArea->SetLineColor(418);
   upperArea->SetLineWidth(0);
   upperArea->Draw("F");
@@ -281,15 +292,26 @@ void makePlotBRlimits(const Int_t nPoints,
   
   bool plotTevatron1fb = true;
   TGraph * tevaGraph;
+  TGraph * tevaGraphShade;
   if (plotTevatron1fb) {
     Double_t tevax[] = {  90,  110,  130,  150};
     Double_t tevay[] = {  15,   15,   17,   19};
+    const int h=shadeWidth; // shade width
+    Double_t tevax2[] = {  90,  110,  130,  150, 150, 130, 110, 90};
+    Double_t tevay2[] = {  15,   15,   17,   19,19+h,17+h,15+h,15+h};
     tevaGraph = new TGraph(4,tevax,tevay);
     tevaGraph->SetLineColor(kRed);
     tevaGraph->SetLineStyle(2);
     tevaGraph->SetLineWidth(4);
     tevaGraph->SetMarkerColor(kRed);
-    tevaGraph->SetMarkerSize(1.4);
+    tevaGraph->SetMarkerStyle(22); // 22=triangle
+    tevaGraph->SetMarkerSize(1.8);
+    tevaGraph->Draw("LP");
+    tevaGraphArea = new TGraph(2*4,tevax2,tevay2);
+    tevaGraphArea->SetLineWidth(0);
+    tevaGraphArea->SetFillColor(kRed);
+    tevaGraphArea->SetFillStyle(3004);
+    tevaGraphArea->Draw("f");
     tevaGraph->Draw("LP");
   }
 
@@ -300,9 +322,9 @@ void makePlotBRlimits(const Int_t nPoints,
   if (plotTevatron1fb)
     l1->AddEntry(tevaGraph, "Tevatron limits with 1 fb^{-1}", "LP");
   //  l1->AddEntry(upperArea, "95% CL + 10% syst. error", "F");
-  l1->AddEntry(mygraup, "95% CL + 10% syst. error", "L");
+  l1->AddEntry(mygraup, "95% CL + 10% syst. error", "LP");
   //  l1->AddEntry(lowerArea, "95% CL", "F");
-  l1->AddEntry(mygralow, "95% CL", "L");
+  l1->AddEntry(mygralow, "95% CL", "LP");
   l1->Draw();
 
   plotPreliminaryText(plotTitle,QCDuncertainty100);
@@ -406,7 +428,8 @@ void makeLuminosityPlot(Double_t b,
   upperArea->Draw("F");
   TGraph * lowerArea = new TGraph(2*lumiPoints,areaX,areaYlow);
   lowerArea->SetFillColor(4);
-  lowerArea->SetFillStyle(3021);
+  //  lowerArea->SetFillStyle(3021);
+  lowerArea->SetFillStyle(3020);
   lowerArea->SetLineColor(4);
   lowerArea->SetLineWidth(0);
   lowerArea->Draw("F");
@@ -620,10 +643,13 @@ void poisson(int choice=0, Double_t myLuminosity = 40,//pb-1
       // calculate corrections here
       Double_t BR_t_bH[] =    { 0.04809, 0.04050, 0.02526, 0.01165, 0.002216};
       Double_t BR_H_taunu[] = { 0.97200, 0.97700, 0.98200, 0.98400, 0.985700};
+      cout << "Using sigmas: ";
       for (int i=0; i<nMassPoints; i++){
 	NHBR100[i] = NHBR100[i] /
 	  ( 2.0*BR_t_bH[i]*(1.0-BR_t_bH[i])*BR_H_taunu[i] );
+	cout << NHBR100[i] << ", ";
       }
+      cout << endl;
       qcd = 0.0016;
       NttNoH = 0.0522; // tt
       wjets = 0.0257;
