@@ -25,8 +25,8 @@ namespace hplus {
     Histo::~Histo() {}
     void Histo::init(TFileDirectory& dir, const std::string& name, const std::string& title) {
       hPt = dir.make<TH1F>((name+"_Pt").c_str(), (title+" pt").c_str(), 200, 0., 200.);
-      hEta = dir.make<TH1F>((name+"_Eta").c_str(), (title+" eta").c_str(), 60, -3, 3.);
-      hPhi = dir.make<TH1F>((name+"_Phi").c_str(), (title+" phi").c_str(), 70, -3.5, 3.5);
+      hEta = dir.make<TH1F>((name+"_Eta").c_str(), (title+" eta").c_str(), 600, -3, 3.);
+      hPhi = dir.make<TH1F>((name+"_Phi").c_str(), (title+" phi").c_str(), 700, -3.5, 3.5);
     }
 
     void Histo::fill(const reco::Candidate& cand) {
@@ -42,13 +42,17 @@ namespace hplus {
 
     void Histo2::init(TFileDirectory& dir, const std::string& name, const std::string& title) {
       hPt = dir.make<TH2F>((name+"_Pt").c_str(), (title+" pt").c_str(), 200,0,200, 200,0,200);
-      hEta = dir.make<TH2F>((name+"_Eta").c_str(), (title+" eta").c_str(), 60,-3,3, 60,-3,3);
-      hPhi = dir.make<TH2F>((name+"_Phi").c_str(), (title+" phi").c_str(), 70,-3.5,3.5, 70,-3.5, 3.5);
+      hEta = dir.make<TH2F>((name+"_Eta").c_str(), (title+" eta").c_str(), 600,-3,3, 600,-3,3);
+      hPhi = dir.make<TH2F>((name+"_Phi").c_str(), (title+" phi").c_str(), 700,-3.5,3.5, 700,-3.5, 3.5);
 
-      hDPt = dir.make<TH1F>((name+"_DPt").c_str(), (title+" pt diff").c_str(), 400,-200,200);
-      hDR = dir.make<TH1F>((name+"_DR").c_str(), (title+" #Delta R").c_str(), 700,0,7);
-      hDPhi = dir.make<TH1F>((name+"_DPhi").c_str(), (title+" #Delta#phi").c_str(), 700,-3.5,3.5);
-      hDEta = dir.make<TH1F>((name+"_DEta").c_str(), (title+" #Delta#eta").c_str(), 600,-3,3);
+      std::string name2 = name;
+      size_t pos = name.find_first_of('_');
+      if(pos != std::string::npos)
+        name2[pos] = ',';
+      hDPt = dir.make<TH1F>((name2+"_DPt").c_str(), (title+" pt diff").c_str(), 400,-200,200);
+      hDR = dir.make<TH1F>((name2+"_DR").c_str(), (title+" #Delta R").c_str(), 700,0,7);
+      hDPhi = dir.make<TH1F>((name2+"_DPhi").c_str(), (title+" #Delta#phi").c_str(), 700,-3.5,3.5);
+      hDEta = dir.make<TH1F>((name2+"_DEta").c_str(), (title+" #Delta#eta").c_str(), 600,-3,3);
     }
 
     void Histo2::fill(const reco::Candidate& x, const reco::Candidate& y) {

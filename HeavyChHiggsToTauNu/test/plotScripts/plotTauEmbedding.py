@@ -170,7 +170,7 @@ class PlotGenTauNu:
             xlabelDiff = "#phi^{#tau} - #phi^{#nu} (GeV/c)"
     
         h = Histo(datasets, an, ["GenTau_"+q, "GenTauNu_"+q])
-        h.histos.forEachHisto(lambda h: h.Rebin(2))
+        h.histos.forEachHisto(lambda h: h.Rebin(rebin))
         h.histos.setHistoLegendLabels({"GenTau_"+q: "Gen #tau", "GenTauNu_"+q: "Gen #nu_{#tau}"})
         h.createFrame("GenTau_GenTauNu_"+q, yfactor=1.2)
         h.frame.GetXaxis().SetTitle(xlabel)
@@ -181,7 +181,7 @@ class PlotGenTauNu:
         addEnergyText()
         h.save()
 
-        name = "GenTau_GenTauNu_D"+q
+        name = "GenTau,GenTauNu_D"+q
         h = Histo(datasets, an, [name])
         h.histos.forEachHisto(lambda h: h.Rebin(rebin))
         h.createFrame(name)
@@ -223,7 +223,7 @@ class PlotGenTauNu:
         ylabel = self.ylabels["DR"](rebin)
         xlabel = "#DeltaR(#tau, #nu)"
 
-        name = "GenTau_GenTauNu_DR"
+        name = "GenTau,GenTauNu_DR"
         h = Histo(datasets, an, [name])
         h.histos.forEachHisto(lambda h: h.Rebin(rebin))
         h.createFrame(name)
@@ -365,6 +365,7 @@ class PlotMet:
         
         xmin, ymin = [0]*2
         xmax, ymax = [200]*2
+        #ymin = 60
     
         if q in ["X", "Y"]:
             ymin = -ymax/2
@@ -375,7 +376,9 @@ class PlotMet:
             xmin, ymin = [-3.5]*2
             xmax, ymax = [3.5]*2
     
-        line = ROOT.TGraph(2, array("d", [xmin, xmax]), array("d", [ymin, ymax]))
+        low = max(xmin, ymin)
+        high = min(xmax, ymax)
+        line = ROOT.TGraph(2, array("d", [low, high]), array("d", [low, high]))
         line.SetLineStyle(2)
         line.SetLineWidth(2)
     
@@ -386,6 +389,7 @@ class PlotMet:
         name = t+"Original_"+t+"_"+q
         h = Histo(datasets, an, [name])
         h.histos.forEachHisto(lambda h: h.Rebin2D(rebin, rebin))
+        #h.histos.forEachHisto(lambda h: h.SetAxisRange(ymin, ymax, "Y"))
         h.createFrame(name, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
         h.frame.GetXaxis().SetTitle("Original "+xlabel)
         h.frame.GetYaxis().SetTitle("Embedded "+xlabel)
@@ -396,6 +400,19 @@ class PlotMet:
         addCmsPreliminaryText()
         addEnergyText()
         h.save()
+
+        h.createFrame(name+"_log", xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
+        h.frame.GetXaxis().SetTitle("Original "+xlabel)
+        h.frame.GetYaxis().SetTitle("Embedded "+xlabel)
+        h.histos.setHistoDrawStyleAll("COLZ")
+        ROOT.gPad.SetLogz(True)
+        h.draw()
+        line.Draw("L")
+        updatePaletteStyle(h.histos.getHistoList()[0])
+        addCmsPreliminaryText()
+        addEnergyText()
+        h.save()
+
         style.setWide(False)
 
     def plotOne(self, datasets, an, t="Met", q="Et"):
@@ -431,6 +448,7 @@ class PlotMuonTauMetDeltaPhi:
             raise Exception("Unsupported rebin value %d" % rebin)
 
         self.ylabelMet = "Number of MC events / %d.0 GeV" % rebinMet
+        
 
 
     def plot(self, datasets, an, t="Met"):
@@ -469,6 +487,18 @@ class PlotMuonTauMetDeltaPhi:
         addEnergyText()
         h.save()
         style.setWide(False)
+
+        name = t+","+t+"Original_DPhi"
+        h = Histo(datasets, an, [name])
+        h.histos.forEachHisto(lambda h: h.Rebin(self.rebin))
+        h.histos.forEachHisto(lambda h: h.SetStats(True))
+        h.createFrame(name)
+        h.frame.GetXaxis().SetTitle("#Delta#phi(MET_{#tau},MET_{#mu}) (rad)")
+        h.frame.GetYaxis().SetTitle(self.ylabel)
+        h.draw()
+        addCmsPreliminaryText()
+        addEnergyText()
+        h.save()
     
         #style.setOptStat(1)
         name = t+","+t+"Original_DEt"
@@ -491,20 +521,7 @@ class PlotMuonTauMetDeltaPhi:
         addEnergyText()
         h.save()
         #style.setOptStat(0)
-
-        # name = t+","+t+"Original_DPhi"
-        # h = Histo(datasets, an, [name])
-        # h.histos.forEachHisto(lambda h: h.Rebin(self.rebinMet))
-        # h.histos.forEachHisto(lambda h: h.SetStats(True))
-        # h.createFrame(name)
-        # h.frame.GetXaxis().SetTitle("#Delta#phi(MET_{#tau},MET_{#mu}) (rad)")
-        # h.frame.GetYaxis().SetTitle(self.ylabelMet)
-        # h.draw()
-        # addCmsPreliminaryText()
-        # addEnergyText()
-        # h.save()
-
-    
+   
         style.setWide(True)
         name = "Muon,"+t+"Original_DPhi_"+name
         h = Histo(datasets, an, [name])
@@ -616,13 +633,18 @@ def tauPlots():
     met = PlotMet()
 
     for analysis in [
-        "GenPt0TauAnalyzer",
-        #"GenPt40TauAnalyzer"
+        "TauAnalyzer",
+        "GenPt40TauAnalyzer",
+        "GenPt40Eta21TauAnalyzer"
         ]:
         for q in ["Pt", "Eta", "Phi"]:
             genTauNu.plot(datasets, analysis, q)
         genTauNu.plotDR(datasets, analysis)
         tauMetDeltaPhi.plot(datasets, analysis, "GenMetNu")
+
+        met.plot(datasets, analysis, "GenMetNu", "Et")
+        met.plot(datasets, analysis, "GenMetNu", "Phi")
+
         for t in [
             "Met",
             "GenMetNuSum",
@@ -642,6 +664,6 @@ def embeddingVsTauPlots():
     datasetsTau = getDatasetsFromRootFiles[("WJets", "histograms.root")], counters=None
 
 
-#embeddingPlots()
-tauPlots()
+embeddingPlots()
+#tauPlots()
 #embeddingVsTauPlots()

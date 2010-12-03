@@ -54,6 +54,7 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
 
   double genTauMatch_;
   double genTauPt_;
+  double genTauEta_;
 
   struct HistoAll {
     HistoAll(): hMetNu(0.0) {}
@@ -124,6 +125,7 @@ HPlusTauEmbeddingTauAnalyzer::HPlusTauEmbeddingTauAnalyzer(const edm::ParameterS
   genParticleSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genParticleSrc")),
   genTauMatch_(iConfig.getUntrackedParameter<double>("genTauMatchingCone")),
   genTauPt_(iConfig.getUntrackedParameter<double>("genTauPtCut")),
+  genTauEta_(iConfig.getUntrackedParameter<double>("genTauEtaCut")),
   histos()
 {
   edm::Service<TFileService> fs;
@@ -154,7 +156,9 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
 
   for(size_t i=0; i<tauNusAll.size(); ++i) {
     const GenParticleTriple& tauNus = tauNusAll[i];
-    if(tauNus.tau->pt() < genTauPt_)
+    if(genTauPt_ > 0 && tauNus.tau->pt() < genTauPt_)
+      continue;
+    if(genTauEta_ > 0 && std::abs(tauNus.tau->eta()) >= genTauEta_)
       continue;
 
     edm::Ptr<pat::Tau> tau;
