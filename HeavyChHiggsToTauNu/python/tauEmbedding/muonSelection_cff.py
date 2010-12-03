@@ -52,7 +52,7 @@ from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import *
 tightMuons = cleanPatMuons.clone(
     preselection = 
     "isGlobalMuon() && isTrackerMuon()"
-    "&& pt() > 40 && abs(eta()) < 2.1"
+    "&& pt() > 30 && abs(eta()) < 2.1"
     "&& muonID('GlobalMuonPromptTight')"
     "&& innerTrack().numberOfValidHits() > 10"
     "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
