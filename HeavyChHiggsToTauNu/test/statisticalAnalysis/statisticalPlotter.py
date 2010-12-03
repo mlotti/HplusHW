@@ -30,6 +30,11 @@ def writeText( myText, y ):
 
 def fillDataTeva( ):
     ## Tevatron 1/fb results, D0
+    # these data from
+    #     Phys.Lett.B682:278-286,2009
+    #     FERMILB-PUB-09/393-E
+    #     arXiv:0908.1811v2 [hep-ex]
+    # page 10, FIG. 8, excluded 95% CL region (blue solid line)
     tevaData = {
         "mass":array( 'd' ),
         "tanb":array( 'd' )
