@@ -96,12 +96,6 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
       hMuonTau.init(dir, "Muon_Tau", "Mu vs. tau");
       hMuonTauLdg.init(dir, "Muon_TauLdg", "Mu vs. tau ldg cand");
-
-      hMuonTauDR = dir.make<TH1F>("Muon,Tau_DR", "DR(muon, tau)", 700, 0, 7);
-      hMuonTauLdgDR = dir.make<TH1F>("Muon,TauLdg_DR", "DR(muon, tau ldg cand)", 700, 0, 7);
-      hTauNuGenDR = dir.make<TH1F>("GenTau,GenTauNu_DR", "DR(tau, nu) gen", 700, 0, 7);
-      hTauNuGenDEta = dir.make<TH1F>("GenTau,GenTauNu_DEta", "DEta(tau, nu) gen", 600, -3, 3);
-      hTauNuGenDPhi = dir.make<TH1F>("GenTau,GenTauNu_DPhi", "DPhi(tau, nu) gen", 700, -3.5, 3.5);
     }
 
     void fillMets(const reco::Muon& muon, const reco::BaseTau& tau,
@@ -177,12 +171,6 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
     Histo2 hMuonTau;
     Histo2 hMuonTauLdg;
-
-    TH1 *hMuonTauDR;
-    TH1 *hMuonTauLdgDR;
-    TH1 *hTauNuGenDR;
-    TH1 *hTauNuGenDEta;
-    TH1 *hTauNuGenDPhi;
   };
 
   HistoAll histos;
@@ -253,7 +241,6 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   }
 
   histos.hMuon.fill(*muon);
-  histos.hMuonTauDR->Fill(minDR);
   histos.hTau.fill(*tau);
   histos.hMuonTau.fill(*muon, *tau);
 
@@ -261,7 +248,6 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   if(leadCand.isNonnull()) {
     if(tau->p() > 0)
       histos.hTauR->Fill(leadCand->p()/tau->p());
-    histos.hMuonTauLdgDR->Fill(reco::deltaR(*muon, *leadCand));
     histos.hMuonTauLdg.fill(*muon, *leadCand);
   }
                             
@@ -275,10 +261,6 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   histos.hTauGenMass->Fill(nuTau.second->p4().M());
   histos.hTauGenDecayMass->Fill(tauDecayMass);
 
-  histos.hTauNuGenDR->Fill(reco::deltaR(*nuTau.first, *nuTau.second));
-  histos.hTauNuGenDPhi->Fill(reco::deltaPhi(nuTau.first->phi(), nuTau.second->phi()));
-  histos.hTauNuGenDEta->Fill(nuTau.second->eta() - nuTau.first->eta());
-                    
   if(minDR < muonTauCone_) {
     histosMatched.fillMets(*muon, *tau, nuW.first, nuTau.first, iEvent);
     if(nuW.first && nuTau.first) {
@@ -286,13 +268,11 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     }
 
     histosMatched.hMuon.fill(*muon);
-    histosMatched.hMuonTauDR->Fill(minDR);
     histosMatched.hTau.fill(*tau);
     histosMatched.hMuonTau.fill(*muon, *tau);
     if(leadCand.isNonnull()) {
       if(tau->p() > 0)
         histosMatched.hTauR->Fill(leadCand->p()/tau->p());
-      histosMatched.hMuonTauLdgDR->Fill(reco::deltaR(*muon, *leadCand));
       histosMatched.hMuonTauLdg.fill(*muon, *leadCand);
     }
 
@@ -304,12 +284,7 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
 
     histosMatched.hTauGenMass->Fill(nuTau.second->p4().M());
     histosMatched.hTauGenDecayMass->Fill(tauDecayMass);
-  
-    histosMatched.hTauNuGenDR->Fill(reco::deltaR(*nuTau.first, *nuTau.second));
-    histosMatched.hTauNuGenDPhi->Fill(reco::deltaPhi(nuTau.first->phi(), nuTau.second->phi()));
-    histosMatched.hTauNuGenDEta->Fill(nuTau.second->eta() - nuTau.first->eta());
   }
-
 }
 
 template <typename I>

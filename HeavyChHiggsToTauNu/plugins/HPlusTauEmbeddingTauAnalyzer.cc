@@ -84,10 +84,6 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
       hTauNuGen.init(dir, "GenTau_GenTauNu", "Gen tau vs. nu");
 
       hTauGenDR = dir.make<TH1F>("Tau,GenTau_DR", "DR(tau, gen tau)", 700, 0, 7);
-
-      hTauNuGenDR = dir.make<TH1F>("GenTau,GenTauNu_DR", "DR(tau, nu) gen", 700, 0, 7);
-      hTauNuGenDEta = dir.make<TH1F>("GenTau,GenTauNu_DEta", "DEta(tau, nu) gen", 600, -3, 3);
-      hTauNuGenDPhi = dir.make<TH1F>("GenTau,GenTauNu_DPhi", "DPhi(tau, nu) gen", 700, -3.5, 3.5);
     }
 
     void fillMets(const reco::BaseTau& tau,
@@ -117,10 +113,6 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
     Histo2 hTauNuGen;
 
     TH1 *hTauGenDR;
-
-    TH1 *hTauNuGenDR;
-    TH1 *hTauNuGenDEta;
-    TH1 *hTauNuGenDPhi;
   };
 
   HistoAll histos;
@@ -190,9 +182,6 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
     histos.hTauGen.fill(*tauNus.tau);
     histos.hNuGen.fill(*tauNus.taunu);
     histos.hTauNuGen.fill(*tauNus.tau, *tauNus.taunu);
-    histos.hTauNuGenDR->Fill(reco::deltaR(*tauNus.tau, *tauNus.taunu));
-    histos.hTauNuGenDEta->Fill(tauNus.tau - tauNus.taunu);
-    histos.hTauNuGenDPhi->Fill(reco::deltaPhi(tauNus.tau->phi(), tauNus.taunu->phi()));
 
     if(minDR < genTauMatch_) {
       histosMatched.hTauGenDR->Fill(minDR);
@@ -208,16 +197,53 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
       histosMatched.hTauGen.fill(*tauNus.tau);
       histosMatched.hNuGen.fill(*tauNus.taunu);
       histosMatched.hTauNuGen.fill(*tauNus.tau, *tauNus.taunu);
-      histosMatched.hTauNuGenDR->Fill(reco::deltaR(*tauNus.tau, *tauNus.taunu));
-      histosMatched.hTauNuGenDEta->Fill(tauNus.tau - tauNus.taunu);
-      histosMatched.hTauNuGenDPhi->Fill(reco::deltaPhi(tauNus.tau->phi(), tauNus.taunu->phi()));
     }
+  }
+}
+
+namespace {
+  const reco::Candidate *findLastDaughter(const reco::Candidate& particle, int pdgId) {
+    for(reco::Candidate::const_iterator id = particle.begin(); id != particle.end(); ++id) {
+      if(std::abs(id->pdgId()) == pdgId) {
+        const reco::Candidate *daughter = findLastDaughter(*id, pdgId);
+        if(daughter != 0)
+          return daughter;
+        else
+          return &(*id);
+      }
+    }
+    return &particle;
   }
 }
 
 template <typename I>
 void HPlusTauEmbeddingTauAnalyzer::findTauNuFromW(I begin, I end, std::vector<GenParticleTriple>& result) const {
   for(I iGen = begin; iGen != end; ++iGen) {
+    int pdgId = std::abs(iGen->pdgId());
+    if(pdgId != 24)
+      continue;
+
+    const reco::GenParticle *w = &(*iGen);
+    const reco::GenParticle *tau = 0;
+    const reco::GenParticle *nu = 0;
+    for(reco::GenParticle::const_iterator iwd = w->begin(); iwd != w->end(); ++iwd) {
+      if(std::abs(iwd->pdgId()) == 15) { // tau
+        tau = dynamic_cast<const reco::GenParticle *>(findLastDaughter(*iwd, 15));
+      }
+      else if(std::abs(iwd->pdgId()) == 16) { // tau neutrino
+        nu = dynamic_cast<const reco::GenParticle *>(findLastDaughter(*iwd, 16));
+      }
+    }
+    if(tau != 0 && nu != 0) {
+      const reco::GenParticle *tauNu = dynamic_cast<const reco::GenParticle *>(findLastDaughter(*tau, 16));
+      if(tauNu != 0) {
+        result.push_back(GenParticleTriple(tau, nu, tauNu));
+      }
+    }
+  }
+
+
+    /*
     int pdgId = std::abs(iGen->pdgId());
     if(pdgId == 12 || pdgId == 14 || pdgId == 16) {
       const reco::GenParticle *particle = &(*(iGen));
@@ -240,7 +266,7 @@ void HPlusTauEmbeddingTauAnalyzer::findTauNuFromW(I begin, I end, std::vector<Ge
         }
       }
     }
-  }
+    */
 }
 
 

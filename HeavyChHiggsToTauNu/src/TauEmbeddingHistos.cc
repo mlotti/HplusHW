@@ -44,12 +44,22 @@ namespace hplus {
       hPt = dir.make<TH2F>((name+"_Pt").c_str(), (title+" pt").c_str(), 200,0,200, 200,0,200);
       hEta = dir.make<TH2F>((name+"_Eta").c_str(), (title+" eta").c_str(), 60,-3,3, 60,-3,3);
       hPhi = dir.make<TH2F>((name+"_Phi").c_str(), (title+" phi").c_str(), 70,-3.5,3.5, 70,-3.5, 3.5);
+
+      hDPt = dir.make<TH1F>((name+"_DPt").c_str(), (title+" pt diff").c_str(), 400,-200,200);
+      hDR = dir.make<TH1F>((name+"_DR").c_str(), (title+" #Delta R").c_str(), 700,0,7);
+      hDPhi = dir.make<TH1F>((name+"_DPhi").c_str(), (title+" #Delta#phi").c_str(), 700,-3.5,3.5);
+      hDEta = dir.make<TH1F>((name+"_DEta").c_str(), (title+" #Delta#eta").c_str(), 600,-3,3);
     }
 
-    void Histo2::fill(const reco::Candidate& ref, const reco::Candidate& cand) {
-      hPt->Fill(ref.pt(), cand.pt());
-      hEta->Fill(ref.eta(), cand.eta());
-      hPhi->Fill(ref.phi(), cand.phi());
+    void Histo2::fill(const reco::Candidate& x, const reco::Candidate& y) {
+      hPt->Fill(x.pt(), y.pt());
+      hEta->Fill(x.eta(), y.eta());
+      hPhi->Fill(x.phi(), y.phi());
+
+      hDPt->Fill(y.pt()-x.pt());
+      hDR->Fill(reco::deltaR(y, x));
+      hDPhi->Fill(reco::deltaPhi(y.phi(), x.phi()));
+      hDEta->Fill(y.eta() - x.eta());
     }
 
     ////////////////////////////////////////
