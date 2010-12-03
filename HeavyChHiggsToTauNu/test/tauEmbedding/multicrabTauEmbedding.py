@@ -8,15 +8,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 #step = "skim"
 #step = "generation"
 #step = "embedding"
-step = "analysis"
+#step = "analysis"
+step = "analysisTau"
 
-config = {"skim":       {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation": {"input": "tauembedding_skim_v3",       "config": "embed_HLT.py", "output": "embedded_HLT.root"},
-          "embedding":  {"input": "tauembedding_generation_v3", "config": "embed_RECO.py", "output": "embedded_RECO.root"},
-          "analysis":   {"input": "tauembedding_embedding_v3_2",  "config": "embeddingAnalysis_cfg.py"}}
+config = {"skim":       {"input": "RECO",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
+          "generation": {"input": "tauembedding_skim_v3",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
+          "embedding":  {"input": "tauembedding_generation_v3",   "config": "embed_RECO.py", "output": "embedded_RECO.root"},
+          "analysis":   {"input": "tauembedding_embedding_v3_3",  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau": {"input": "pattuple_v6",               "config": "tauAnalysis_cfg.py"},
+          }
 
 crabcfg = "crab.cfg"
-if step == "analysis":
+if step in ["analysis", "analysisTau"]:
     crabcfg = "../crab_analysis.cfg"
 
 
@@ -30,19 +33,19 @@ multicrab.addDatasets(
 #        "Mu_146240-147116", # HLT_Mu9
 #        "Mu_147196-149442", # HLT_Mu15_v1
         # Signal MC
-#        "TTbarJets",
+#        "TTbar",
         "WJets",
         ])
 
 if step == "skim":
-    mask = lumi.getFile("StreamExpress")
+    mask = lumi.getFile("Nov4ReReco")
     multicrab.setDataLumiMask("../"+mask)
     print "Lumi file", mask
 if step in ["generation", "embedding"]:
     multicrab.addArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v3_2" % step
+tauname = "_tauembedding_%s_v4" % step
 
 def modify(dataset):
     name = ""
@@ -59,15 +62,24 @@ def modify(dataset):
     if step == "skim":
         if dataset.getName() == "WJets":
             dataset.setNumberOfJobs(50)
-            dataset.addBlackWhiteList("se_white_list", ["T2_FI_HIP"])
-
-#    if "Mu_" in dataset.getName():
-#        dataset.addArg("overrideBeamSpot=1")
+            if config[step]["input"] == "AOD":
+                dataset.addBlackWhiteList("se_white_list", ["T2_FI_HIP"])
+        if dataset.getName() == "TTJets":
+            dataset.setNumberOfJobs(20)
 
     dataset.addLine("USER.publish_data_name = "+name)
     dataset.addLine("CMSSW.output_file = "+config[step]["output"])
 
-if step != "analysis":
+def modifyAnalysis(dataset):
+    dataset.addBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
+#    if step == "analysisTau":
+#        if dataset.getName() == "WJets":
+#            dataset.setNumberOfJobs(100)
+
+
+if step in ["analysis", "analysisTau"]:
+    multicrab.forEachDataset(modifyAnalysis)
+else:
     multicrab.forEachDataset(modify)
 
 multicrab.createTasks()

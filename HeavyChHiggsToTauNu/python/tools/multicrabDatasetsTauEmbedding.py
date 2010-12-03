@@ -27,3 +27,8 @@ def addTo(datasets):
         "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_2-ed6563e15d1b423a9bd5d11109ca1e30/USER",
         "number_of_jobs": 5
     }
+    datasets["WJets"]["data"]["tauembedding_embedding_v3_3"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/WJets_7TeV-madgraph-tauola/local-Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3-ed6563e15d1b423a9bd5d11109ca1e30/USER",
+        "number_of_jobs": 5
+    }
