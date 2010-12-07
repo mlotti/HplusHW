@@ -62,7 +62,7 @@ print "Using trigger %s" % trigger
 
 tightMuonCut = "isGlobalMuon() && isTrackerMuon()"
 
-ptCut = "pt() > 40"
+ptCutString = "pt() > %d"
 etaCut = "abs(eta()) < 2.1"
 
 qualityCut = "muonID('GlobalMuonPromptTight')"
@@ -88,7 +88,7 @@ electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSu
 zMassVetoMuons ="isGlobalMuon && pt > 20. && abs(eta) < 2.5"
 zMassVeto = "76 < mass() && mass < 106"
 
-metCut = "et() > 40"
+metCutString = "et() > %d"
 
 muons = cms.InputTag("selectedPatMuons")
 electrons = cms.InputTag("selectedPatElectrons")
@@ -185,10 +185,12 @@ if dataVersion.isData():
 
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
-    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False):
+    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False, muonPtCut=30, metCut=20):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
+        self._ptCut = ptCutString % muonPtCut
+        self._metCut = metCutString % metCut
 
         counters = []
         if dataVersion.isData():
@@ -270,7 +272,7 @@ class MuonAnalysis:
             self.afterOtherCutsModule = cms.EDAnalyzer("HPlusCandViewHistoAfterOtherCutsAnalyzer",
                 src = cms.InputTag("dummy"),
                 histograms = cms.VPSet(
-                    histoPt.pset().clone(cut=cms.untracked.string(ptCut)),
+                    histoPt.pset().clone(cut=cms.untracked.string(self._ptCut)),
                     histoEta.pset().clone(cut=cms.untracked.string(etaCut)),
                     histoDB.pset().clone(cut=cms.untracked.string(dbCut)),
                 )
@@ -393,7 +395,7 @@ class MuonAnalysis:
 
     def muonKinematicSelection(self):
         name = "MuonKin"
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, ptCut + " && " + etaCut, selector="PATMuonSelector")
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._ptCut + " && " + etaCut, selector="PATMuonSelector")
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -492,7 +494,7 @@ class MuonAnalysis:
 
     def metCut(self):
         name = "METCut"
-        selectedMET = self.analysis.addCut(name, met, metCut)
+        selectedMET = self.analysis.addCut(name, met, self._metCut)
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name)
             self.cloneMultipAnalyzer()
@@ -579,7 +581,9 @@ def createAnalysis(name, postfix="", **kwargs):
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", **kwargs)
-    createAnalysis("noIsoNoVetoMet", **kwargs)
+    for pt, met in [(30, 20), (30, 30), (30, 40),
+                    (40, 20), (40, 30), (40, 40)]:
+        createAnalysis("noIsoNoVetoMet", postfix="Pt%d"%pt, muonPtCut=pt, **kwargs)
 
 createAnalysis2()
 if options.WDecaySeparate > 0:

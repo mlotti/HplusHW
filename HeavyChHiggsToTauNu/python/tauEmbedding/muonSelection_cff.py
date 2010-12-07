@@ -29,7 +29,8 @@ muonSelectionPrimaryVertex = cms.EDProducer("EventCountProducer")
 
 
 goodJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("selectedPatJets"),
+#    src = cms.InputTag("selectedPatJets"),
+    src = cms.InputTag("selectedPatJetsAK5PF"),
     cut = cms.string("pt() > 30 && abs(eta()) < 2.4")
 )
 goodJetFilter = cms.EDFilter("CandViewCountFilter",

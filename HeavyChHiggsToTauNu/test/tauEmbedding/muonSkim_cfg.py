@@ -25,7 +25,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
+    #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         dataVersion.getPatDefaultFileMadhatter()
@@ -78,7 +78,8 @@ process.out.outputCommands = cms.untracked.vstring(
     "keep *",
     "drop *_*_*_MUONSKIM",
     "keep *_selectedPatMuons_*_MUONSKIM",
-    "keep *_tauEmbeddingMuons_*_MUONSKIM"
+    "keep *_tauEmbeddingMuons_*_MUONSKIM",
+    "keep edmMergeableCounter_*_*_*", # in lumi block
 )
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")

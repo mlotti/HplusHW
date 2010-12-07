@@ -214,6 +214,12 @@ datasets = {
         "trigger": "HLT_Mu9",
         "runs": (146240, 147116),
         "data": {
+            "RECO": {
+                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 600, # Adjusted for PAT on the fly
+                "lumiMaskRequired": True
+            },
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
@@ -227,6 +233,12 @@ datasets = {
         "trigger": "HLT_Mu15_v1",
         "runs": (147196, 149442),
         "data": {
+            "RECO": {
+                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
+                "luminosity": 0,
+                "lumis_per_job": 500, # Adjusted for PAT on the fly
+                "lumiMaskRequired": True
+            },
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
