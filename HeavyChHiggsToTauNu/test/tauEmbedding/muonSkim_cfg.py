@@ -40,7 +40,6 @@ if len(trigger) == 0:
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
 
 # Output module
@@ -77,6 +76,7 @@ if options.doPat != 0:
 # Override the outputCommands here, since PAT modifies it
 process.out.outputCommands = cms.untracked.vstring(
     "keep *",
+    "drop *_MEtoEDMConverter_*_*", # drop DQM histos
     "drop *_*_*_MUONSKIM",
     "keep *_selectedPatMuons_*_MUONSKIM",
     "keep *_tauEmbeddingMuons_*_MUONSKIM",
