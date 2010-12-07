@@ -40,6 +40,7 @@ if len(trigger) == 0:
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 del process.TFileService
 
 # Output module
@@ -79,10 +80,11 @@ process.out.outputCommands = cms.untracked.vstring(
     "drop *_*_*_MUONSKIM",
     "keep *_selectedPatMuons_*_MUONSKIM",
     "keep *_tauEmbeddingMuons_*_MUONSKIM",
-    "keep edmMergeableCounter_*_*_*", # in lumi block
+    "keep edmMergeableCounter_*_*_MUONSKIM", # in lumi block
 )
 
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff")
 process.selectionSequence *= process.muonSelectionSequence
 process.muonTrigger.hltResults.setProcessName(dataVersion.getTriggerProcess())
 process.muonTrigger.triggerConditions = cms.vstring(trigger)
@@ -93,3 +95,9 @@ process.path = cms.Path(
 process.endPath = cms.EndPath(
     process.out
 )
+
+#process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+#    printMainCounter = cms.untracked.bool(True),
+#    printAvailableCounters = cms.untracked.bool(True),
+#)
+#process.path *= process.counters

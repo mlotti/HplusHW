@@ -27,48 +27,17 @@ muonPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
 )
 muonSelectionPrimaryVertex = cms.EDProducer("EventCountProducer")
 
-
-goodJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("selectedPatJets"),
-    cut = cms.string("pt() > 30 && abs(eta()) < 2.4")
-)
-goodJetFilter = cms.EDFilter("CandViewCountFilter",
-    src = cms.InputTag("goodJets"),
-    minNumber = cms.uint32(3)
-)
-muonSelectionJets = cms.EDProducer("EventCountProducer")
-
-# goodMet = cms.EDFilter("PATMETSelector",
-#     src = cms.InputTag("patMETsPF"),
-#     cut = cms.string("et() > 40")
-# )
-# goodMetFilter = cms.EDFilter("CandViewCountFilter",
-#     src = cms.InputTag("goodMet"),
-#     minNumber = cms.uint32(1)
-# )
-# muonSelectionMet = cms.EDProducer("EventCountProducer")
-
-from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import *
-tightMuons = cleanPatMuons.clone(
-    preselection = 
+tightMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("selectedPatMuons"),
+    cut = cms.string(
     "isGlobalMuon() && isTrackerMuon()"
     "&& pt() > 30 && abs(eta()) < 2.1"
     "&& muonID('GlobalMuonPromptTight')"
     "&& innerTrack().numberOfValidHits() > 10"
     "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
     "&& numberOfMatches() > 1"
-    "&& abs(dB()) < 0.02",
+    "&& abs(dB()) < 0.02"
 #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
-    checkOverlaps = cms.PSet(
-        jets = cms.PSet(
-            src                 = cms.InputTag("goodJets"),
-            algorithm           = cms.string("byDeltaR"),
-            preselection        = cms.string(""),
-            deltaR              = cms.double(0.3),
-            checkRecoComponents = cms.bool(False),
-            pairCut             = cms.string(""),
-            requireNoOverlaps   = cms.bool(True),
-        )
     )
 )
 tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
@@ -88,15 +57,49 @@ tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
 muonSelectionMuons = cms.EDProducer("EventCountProducer")
 
 
+from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
+goodJets = cleanPatJets.clone(
+    src = cms.InputTag("selectedPatJetsAK5PF"),
+    preselection = "pt() > 30 && abs(eta()) < 2.4",
+    checkOverlaps = cms.PSet(
+        muons = cms.PSet(
+            src                 = cms.InputTag("tightMuonsZ"),
+            algorithm           = cms.string("byDeltaR"),
+            preselection        = cms.string(""),
+            deltaR              = cms.double(0.1),
+            checkRecoComponents = cms.bool(False),
+            pairCut             = cms.string(""),
+            requireNoOverlaps   = cms.bool(True),
+        )
+    )
+)
+goodJetFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("goodJets"),
+    minNumber = cms.uint32(3)
+)
+muonSelectionJets = cms.EDProducer("EventCountProducer")
+
+# goodMet = cms.EDFilter("PATMETSelector",
+#     src = cms.InputTag("patMETsPF"),
+#     cut = cms.string("et() > 40")
+# )
+# goodMetFilter = cms.EDFilter("CandViewCountFilter",
+#     src = cms.InputTag("goodMet"),
+#     minNumber = cms.uint32(1)
+# )
+# muonSelectionMet = cms.EDProducer("EventCountProducer")
+
+
+
 muonSelectionSequence = cms.Sequence(
     muonSelectionAllEvents
     * muonTrigger * muonSelectionTriggered
     * muonFirstPrimaryVertex * muonGoodPrimaryVertex * muonPrimaryVertexFilter * muonSelectionPrimaryVertex
-    * goodJets      * goodJetFilter * muonSelectionJets
-#    * goodMet       * goodMetFilter * muonSelectionMet
     * tightMuons 
     * tightMuonsZ 
     * tightMuonsFilter
     * tauEmbeddingMuons 
     * muonSelectionMuons
+    * goodJets      * goodJetFilter * muonSelectionJets
+#    * goodMet       * goodMetFilter * muonSelectionMet
 )
