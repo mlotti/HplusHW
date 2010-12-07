@@ -86,7 +86,7 @@ namespace hplus {
       ~Histo2();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
-      void fill(const reco::Candidate& cand1, const reco::Candidate& cand2);
+      void fill(const reco::Candidate& x, const reco::Candidate& y);
 
     private:
       TH2 *hPt;
