@@ -189,6 +189,44 @@ datasets = {
         },
     },
 
+    # Jet PD (for QCD background analysis"
+    "JetMETTau_135821-141887": {
+        "dataVersion": "38XdataRun2010A",
+        "trigger": "HLT_Jet30U",
+        "data": {
+            "RECO": {
+                "datasetpath": "/JetMETTau/Run2010A-Nov4ReReco_v1/RECO",
+                "luminosity": 0,
+                "number_of_jobs": 400, # Guessed for PATtuple
+                "lumiMaskRequired": True
+            },
+        }
+    },
+    "JetMET_141950-144114": {
+        "dataVersion": "38XdataRun2010A",
+        "trigger": "HLT_Jet30U",
+        "data": {
+            "RECO": {
+                "datasetpath": "/JetMET/Run2010A-Nov4ReReco_v1/RECO",
+                "luminosity": 0,
+                "number_of_jobs": 100, # Guessed for PATtuple
+                "lumiMaskRequired": True
+            },
+        }
+    },
+    "Jet_146240-149442": {
+        "dataVersion": "38XdataRun2010B",
+        "trigger": "HLT_Jet30U",
+        "data": {
+            "RECO": {
+                "datasetpath": "/Jet/Run2010B-Nov4ReReco_v1/RECO",
+                "luminosity": 0,
+                "number_of_jobs": 50, # Guessed for PATtuple
+                "lumiMaskRequired": True
+            },
+        }
+    },
+
 
     # Mu PD (for electroweak background analysis)
     "Mu_135821-144114": {

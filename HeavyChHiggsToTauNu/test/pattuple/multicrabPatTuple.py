@@ -9,11 +9,15 @@ multicrab.addDatasets(
 #    "AOD",
     "RECO",
     [
-        # Data
+        # Data (Tau)
 #        "BTau_141950-144114", # HLT_SingleIsoTau20_Trk5
 #        "BTau_146240-148107", # HLT_SingleIsoTau20_Trk15_MET20
 #        "BTau_148108-149182", # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149442", # HLT_SingleIsoTau20_Trk15_MET25_v4
+        # Data (Jet)
+#        "JetMETTau_135821-141887", # HLT_Jet30U
+#        "JetMET_141950-144114",    # HLT_Jet30U
+#        "Jet_146240-149442",       # HLT_Jet30U
         # Signal Fall10 MC
 #        "TTToHplusBWB_M90",
 #        "TTToHplusBWB_M100",
@@ -61,9 +65,6 @@ print "Using lumi file", mask
 # writing to /store/group/local ...
 #multicrab.addLineAll("USER.local_stage_out=1")
 
-#multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*0.5)
-#multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*2)
-
 def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
@@ -84,5 +85,8 @@ multicrab.forEachDataset(blacklistUS)
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
 multicrab.addBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
 
+# Create multicrab task configuration and run 'multicrab -create'
 multicrab.createTasks()
+
+# Create task configuration only
 #multicrab.createTasks(configOnly=True)
