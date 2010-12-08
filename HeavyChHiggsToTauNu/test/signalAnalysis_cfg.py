@@ -34,7 +34,8 @@ process.source = cms.Source('PoolSource',
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-  )
+#        "file:pattuple.root"
+    )
 )
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
@@ -104,7 +105,7 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
-#    TriggerMETEmulation = param.TriggerMETEmulation,
+    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,

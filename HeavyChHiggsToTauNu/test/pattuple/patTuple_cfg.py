@@ -38,8 +38,9 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-        #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter()
+	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Fall10-START38_V12-v1_RAW_RECO.root"
+#        dataVersion.getPatDefaultFileCastor()
+#        dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
@@ -119,10 +120,15 @@ process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersio
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
+process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
+process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
+process.out.outputCommands.extend(["keep recoTracks_*_*_*"])
 
 # Create paths
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
+    process.HLTTauEmu *
     process.s 
     * process.triggerMatchingSequence
 )
