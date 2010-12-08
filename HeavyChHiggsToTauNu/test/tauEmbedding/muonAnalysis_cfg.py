@@ -81,7 +81,6 @@ relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
 isolationCut = "%s < 0.05" % relIso
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
-jetMinMultiplicity = 3
 
 muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
@@ -185,12 +184,13 @@ if dataVersion.isData():
 
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
-    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False, muonPtCut=30, metCut=20):
+    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False, muonPtCut=30, metCut=20, njets=3):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
         self._ptCut = ptCutString % muonPtCut
         self._metCut = metCutString % metCut
+        self._njets = njets
 
         counters = []
         if dataVersion.isData():
@@ -206,6 +206,7 @@ class MuonAnalysis:
         self.pileupName = "VertexCount"
 
         self.selectedMuons = muons
+        self.selectedJets = jets
 
         # Setup the analyzers
         if not self.afterOtherCuts:
@@ -253,6 +254,22 @@ class MuonAnalysis:
                     algorithm           = cms.string("byDeltaR"),
                     preselection        = cms.string(""),
                     deltaR              = cms.double(0.3),
+                    checkRecoComponents = cms.bool(False),
+                    pairCut             = cms.string(""),
+                    requireNoOverlaps   = cms.bool(True)
+                )
+            )
+        )
+        # Create the prototype for jet cleaner
+        from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+        self.jetMuonCleanerPrototype = cleanPatJets.clone(
+            src = cms.InputTag("dummy"),
+            checkOverlaps = cms.PSet(
+                muons = cms.PSet(
+                    src                 = cms.InputTag("dummy"),
+                    algorithm           = cms.string("byDeltaR"),
+                    preselection        = cms.string(""),
+                    deltaR              = cms.double(0.1),
                     checkRecoComponents = cms.bool(False),
                     pairCut             = cms.string(""),
                     requireNoOverlaps   = cms.bool(True)
@@ -369,14 +386,14 @@ class MuonAnalysis:
     def jetSelection(self, analyze=True):
         # Select jets already here (but do not cut on their number), so we can
         # track the multiplicity through the selections
-        self.selectedJets = self.analysis.addSelection("JetSelection", jets, jetSelection)
+        self.selectedJets = self.analysis.addSelection("JetSelection", self.selectedJets, jetSelection)
         if not self.afterOtherCuts:
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetSelection")
             self.multipAnalyzer.jets.src = self.selectedJets
 
     def jetMultiplicityFilter(self, analyze=True):
         name = "JetMultiplicityCut"
-        self.selectedJets = self.analysis.addNumberCut(name, self.selectedJets, minNumber=jetMinMultiplicity)
+        self.selectedJets = self.analysis.addNumberCut(name, self.selectedJets, minNumber=self._njets)
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name)
             self.cloneMultipAnalyzer()
@@ -412,6 +429,16 @@ class MuonAnalysis:
             self.cloneHistoAnalyzer("MuonJetDR", muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
             self.clonePileupAnalyzer()
+
+    def jetCleaningFromMuon(self):
+        m = self.jetMuonCleanerPrototype.clone(src=self.selectedJets)
+        m.checkOverlaps.muons.src = self.selectedMuons
+        self.selectedJets = self.analysis.addAnalysisModule(
+            "JetCleaningFromMuon",
+            selector = m).getSelectorInputTag()
+        if not self.afterOtherCuts:
+            self.cloneMultipAnalyzer(name="MultiplicityAfterJetCleaning")
+            self.multipAnalyzer.jets.src = self.selectedJets
 
     def muonQuality(self):
         name = "MuonQuality"
@@ -572,7 +599,38 @@ class MuonAnalysis:
             self.addAfterOtherCutsAnalyzer(name)
 
         self.createAnalysisPath()
-            
+
+    def noIsoNoVetoMetPF(self):
+        self.triggerPrimaryVertex()
+        self.tightMuonSelection()
+
+        if not self.afterOtherCuts:
+            self.muonKinematicSelection()
+
+        self.muonQuality()
+        self.muonImpactParameter()
+        self.muonVertexDiff()
+        name = self.muonLargestPt()
+
+        if not self.afterOtherCuts:
+            self.addWtransverseMassHistos()
+            self.addZMassHistos()
+        else:
+            self.addAfterOtherCutsAnalyzer(name)
+
+        self.jetCleaningFromMuon()
+        self.jetSelection()
+        name = self.jetMultiplicityFilter()
+        if self.afterOtherCuts:
+            self.addAfterOtherCutsAnalyzer(name)
+
+        name = self.metCut()
+        if self.afterOtherCuts:
+            self.addAfterOtherCutsAnalyzer(name)
+
+        self.createAnalysisPath()
+        
+
 def createAnalysis(name, postfix="", **kwargs):
     a = MuonAnalysis(process, prefix=name+postfix, **kwargs)
     getattr(a, name)()
@@ -581,9 +639,24 @@ def createAnalysis(name, postfix="", **kwargs):
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", **kwargs)
-    for pt, met in [(30, 20), (30, 30), (30, 40),
-                    (40, 20), (40, 30), (40, 40)]:
-        createAnalysis("noIsoNoVetoMet", postfix="Pt%d"%pt, muonPtCut=pt, **kwargs)
+
+    postfix = ""
+    if "postfix" in kwargs:
+        postfix = kwargs["postfix"]
+        del kwargs["postfix"]
+
+    for nj in [1, 2, 3]:
+        createAnalysis("noIsoNoVetoMet", postfix="NJets%d%s"%(nj, postfix), njets=nj, **kwargs)
+        
+    #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
+    #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
+    #                       (40, 20, 3), (40, 30, 3), (40, 40, 3)]:
+    for pt, met, njets in [(30, 20, 1), (30, 20, 2),
+                           (30, 20, 3), (40, 20, 3)]:
+        kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
+        kwargs["muonPtCut"] = pt
+        kwargs["metCut"] = met
+        createAnalysis("noIsoNoVetoMetPF", **kwargs)
 
 createAnalysis2()
 if options.WDecaySeparate > 0:
