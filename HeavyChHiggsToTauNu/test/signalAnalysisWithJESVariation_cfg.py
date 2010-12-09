@@ -34,8 +34,7 @@ process.source = cms.Source('PoolSource',
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#        "file:pattuple.root"
-    )
+  )
 )
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
@@ -105,7 +104,7 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
-    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
+#    TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,
@@ -140,8 +139,10 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
 if len(additionalCounters) > 0:
     process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
+    process.JESsequence *
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
     process.signalAnalysisCounters 

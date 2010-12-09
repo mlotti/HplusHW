@@ -11,10 +11,19 @@ trigger = cms.untracked.PSet(
     ),
     hltMetCut = cms.untracked.double(20.0),
 )
-#TriggerMETEmulation = cms.untracked.PSet(
-#    src = cms.untracked.InputTag("patMETs"), # calo MET
-#    metEmulationCut = cms.untracked.double(30.0)
-#)
+TriggerTauMETEmulation = cms.untracked.PSet(
+    L1TauSrc            = cms.InputTag("l1extraParticles", "Tau"),
+    L1CenSrc            = cms.InputTag("l1extraParticles", "Central"),
+    L1TauPtCut          = cms.double(20),
+    L1CenPtCut          = cms.double(30),
+
+    tauSrc              = cms.InputTag("caloTauHLTTauEmu"),
+    TauPtCut            = cms.double(20),
+    TauLeadTrkPtCut     = cms.double(15),
+
+    metSrc              = cms.InputTag("patMETs"),
+    METCut              = cms.double(35)
+)
 
 useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 

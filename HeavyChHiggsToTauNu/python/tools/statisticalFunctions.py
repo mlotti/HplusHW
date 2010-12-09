@@ -36,12 +36,12 @@ def tanbForXsec(xSecAtLimit,mHp,tanbRef,mu):
     tanb = tanbRef
 
     xSec = crossSection(mHp,tanb,mu)
-    while(abs(xSecAtLimit - xSec)/xSecAtLimit > 0.001 and xSec > 0 and tanb < 100 ):
+    while(abs(xSecAtLimit - xSec)/xSecAtLimit > 0.001 and xSec > 0 and tanb < 219 ):
         tanb = tanb + 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
 	xSec = crossSection(mHp,tanb,mu)
 #        print "       tanbForXsec loop, tanb, xsec ",tanb,xSec
 #    print "check tanbForXsec ",tanb
-    if tanb > 100 or xSec <= 0:
+    if tanb > 219 or xSec <= 0:
 	return -1
     return tanb
 

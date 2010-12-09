@@ -6,6 +6,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Event.h"
 
+#include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 
@@ -28,16 +29,19 @@ class JetEnergyScaleVariation: public edm::EDProducer {
   	virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
   	virtual void endJob();
 
+	edm::InputTag tauSrc;
 	edm::InputTag jetSrc;
 	edm::InputTag metSrc;
 	double JESVariation;
 };
 
 JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfig) :
+	tauSrc(iConfig.getParameter<edm::InputTag>("tauSrc")),
 	jetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
 	metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
 	JESVariation(iConfig.getParameter<double>("JESVariation"))
 {
+	produces<pat::TauCollection>();
 	produces<pat::JetCollection>();
 	produces<pat::METCollection>();
 }
@@ -48,8 +52,22 @@ void JetEnergyScaleVariation::beginJob() {
 }
 
 void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+	std::auto_ptr<pat::TauCollection> rescaledTaus(new pat::TauCollection);
 	std::auto_ptr<pat::JetCollection> rescaledJets(new pat::JetCollection);
 	std::auto_ptr<pat::METCollection> rescaledMET(new pat::METCollection);
+
+	// Taus
+        edm::Handle<edm::View<pat::Tau> > htaus;
+        iEvent.getByLabel(tauSrc, htaus);
+        const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
+        for(edm::PtrVector<pat::Tau>::iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+                edm::Ptr<pat::Tau> iTau = *iter;
+                const LorentzVector& p4 = iTau->p4() * (1 + JESVariation);
+                pat::Tau tau = *iTau;
+                tau.setP4(p4);
+                rescaledTaus->push_back(tau);
+        }
 
 	// Jets
 	edm::Handle<edm::View<pat::Jet> > hjets;
@@ -73,10 +91,19 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	edm::Handle<edm::View<reco::MET> > hmet;
 	iEvent.getByLabel(metSrc, hmet);
 	edm::Ptr<reco::MET> met = hmet->ptrAt(0);
-
+/*
+For the general case, you would basically do it in 3 steps (within a
+loop over jets):
+1. Add the x,y component of the jets to the x,y component of the MET:
+   ME(X,Y) += JetP(X,Y)
+2. Vary by X% the JES and obtain a new JetP(X,Y)
+3. Then: ME(X,Y) -= JetP(X,Y)
+*/
 	reco::MET scaledMet = *met;
-	double newX = met->p4().Px() + dpx;
-	double newY = met->p4().Py() + dpy;
+//	double newX = met->p4().Px() + dpx;
+//	double newY = met->p4().Py() + dpy;
+double newX = met->p4().Px()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation 
+double newY = met->p4().Py()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation
 	double newZ = 0;//met->p4().Pz();
 	double newE = sqrt(newX*newX + newY*newY);//met->p4().E();
 
@@ -85,6 +112,7 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 
 	rescaledMET->push_back(scaledMet);
 
+	iEvent.put(rescaledTaus);
 	iEvent.put(rescaledJets);
 	iEvent.put(rescaledMET);
 }
