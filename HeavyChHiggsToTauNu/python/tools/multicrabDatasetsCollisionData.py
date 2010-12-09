@@ -190,14 +190,14 @@ datasets = {
     },
 
     # Jet PD (for QCD background analysis"
-    "JetMETTau_135821-141887": {
+    "JetMETTau_136033-141887": { # first run actually 135821, but lumi list starts from this one
         "dataVersion": "38XdataRun2010A",
         "trigger": "HLT_Jet30U",
         "data": {
             "RECO": {
                 "datasetpath": "/JetMETTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
-                "number_of_jobs": 400, # Guessed for PATtuple
+                "number_of_jobs": 100, # Adjusted for PATtuple
                 "lumiMaskRequired": True
             },
         }
@@ -209,19 +209,20 @@ datasets = {
             "RECO": {
                 "datasetpath": "/JetMET/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
-                "number_of_jobs": 100, # Guessed for PATtuple
+                "number_of_jobs": 300, # Adjusted for PATtuple
                 "lumiMaskRequired": True
             },
         }
     },
-    "Jet_146240-149442": {
+    "Jet_146240-148058": { # last run really 149442, but last run with HLT_Jet30U is this one
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Jet30U",
+        "runs": (146240, 148058),
         "data": {
             "RECO": {
                 "datasetpath": "/Jet/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
-                "number_of_jobs": 50, # Guessed for PATtuple
+                "number_of_jobs": 40, # Adjusted for PATtuple
                 "lumiMaskRequired": True
             },
         }
