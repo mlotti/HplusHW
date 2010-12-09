@@ -180,3 +180,6 @@ class TDRStyle:
         else:
             self.tdrStyle.SetCanvasDefW(self.canvasW)
             self.tdrStyle.SetPadRightMargin(self.rightMargin)
+
+    def setOptStat(self, stat):
+        self.tdrStyle.SetOptStat(stat)
