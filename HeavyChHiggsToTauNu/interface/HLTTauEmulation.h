@@ -11,9 +11,10 @@ typedef math::XYZTLorentzVector LorentzVector;
 
 class HLTTauEmulation {
     public:
-	HLTTauEmulation(const edm::ParameterSet&,double,double);
+	HLTTauEmulation(const edm::ParameterSet&);
 	~HLTTauEmulation();
 
+	void setParameters(double,double);
 	bool passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup,LorentzVector);
 
     private:

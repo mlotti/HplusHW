@@ -1,15 +1,17 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/L1Emulation.h"
 
-L1Emulation::L1Emulation(const edm::ParameterSet& iConfig,int n,double ptTau,double ptCen) :
+L1Emulation::L1Emulation(const edm::ParameterSet& iConfig) :
     l1tauSrc(iConfig.getParameter<edm::InputTag>("L1TauSrc")),
     l1cenSrc(iConfig.getParameter<edm::InputTag>("L1CenSrc"))
-{
-	njets      = n;
-	l1tauPtCut = ptTau;
-	l1cenPtCut = ptCen;
-}
+{}
 
 L1Emulation::~L1Emulation(){}
+
+void L1Emulation::setParameters(int n,double ptTau,double ptCen){
+        njets      = n;
+        l1tauPtCut = ptTau;
+        l1cenPtCut = ptCen;
+}
 
 bool L1Emulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup){
         bool passed = false;
@@ -17,6 +19,7 @@ bool L1Emulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& i
 
 // L1 tau
         edm::Handle<l1extra::L1JetParticleCollection> l1TauHandle;
+std::cout << "l1tauSrc " << l1tauSrc.label() << std::endl;
         iEvent.getByLabel(l1tauSrc, l1TauHandle);
         const l1extra::L1JetParticleCollection & l1Taus = *(l1TauHandle.product());
         l1extra::L1JetParticleCollection::const_iterator iJet;

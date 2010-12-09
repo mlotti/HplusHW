@@ -1,12 +1,14 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HLTPFMHTEmulation.h"
 
-HLTPFMHTEmulation::HLTPFMHTEmulation(const edm::ParameterSet& iConfig,double theCut) :
+HLTPFMHTEmulation::HLTPFMHTEmulation(const edm::ParameterSet& iConfig) :
     jetSrc(iConfig.getParameter<edm::InputTag>("jetSrc"))
-{
-        mhtCut = theCut;
-}
+{}
 
 HLTPFMHTEmulation::~HLTPFMHTEmulation(){}
+
+void HLTPFMHTEmulation::setParameters(double theCut){
+	mhtCut = theCut;
+}
 
 bool HLTPFMHTEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup){
         edm::Handle<edm::View<reco::PFJet> > hjets;

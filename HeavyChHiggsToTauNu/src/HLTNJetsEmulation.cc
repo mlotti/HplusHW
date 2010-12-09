@@ -2,14 +2,16 @@
 #include "Math/VectorUtil.h"
 
 
-HLTNJetsEmulation::HLTNJetsEmulation(const edm::ParameterSet& iConfig,int nJets,double ptCut) :
+HLTNJetsEmulation::HLTNJetsEmulation(const edm::ParameterSet& iConfig) :
   jetSrc(iConfig.getParameter<edm::InputTag>("jetSrc"))
-{
-	jetPtCut = ptCut;
-	nJetsMin = nJets;
-}
+{}
 
 HLTNJetsEmulation::~HLTNJetsEmulation(){}
+
+void HLTNJetsEmulation::setParameters(int nJets,double ptCut){
+        jetPtCut = ptCut;
+        nJetsMin = nJets;
+}
 
 bool HLTNJetsEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup, std::vector<LorentzVector> l1jets){
 

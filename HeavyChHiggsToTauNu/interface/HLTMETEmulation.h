@@ -1,5 +1,5 @@
-#ifndef HLTTauEmulation_h
-#define HLTTauEmulation_h
+#ifndef HLTMETEmulation_h
+#define HLTMETEmulation_h
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -9,9 +9,10 @@
 
 class HLTMETEmulation {
     public:
-        HLTMETEmulation(const edm::ParameterSet&,double);
+        HLTMETEmulation(const edm::ParameterSet&);
         ~HLTMETEmulation();
 
+	void setParameters(double);
         bool passedEvent(const edm::Event&, const edm::EventSetup&);
 
     private:

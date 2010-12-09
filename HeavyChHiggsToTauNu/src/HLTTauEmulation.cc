@@ -3,16 +3,16 @@
 #include "Math/VectorUtil.h"
 
 
-HLTTauEmulation::HLTTauEmulation(const edm::ParameterSet& iConfig,double tauPt,double lTrackPt) :
-  tauSrc(iConfig.getParameter<edm::InputTag>("tauSrc")),
-  tauPtCut(iConfig.getParameter<double>("TauPtCut")),
-  tauLTrkCut(iConfig.getParameter<double>("TauLeadTrkPtCut"))
-{
-	tauPtCut    = tauPt;
-	tauLTrkCut = lTrackPt;
-}
+HLTTauEmulation::HLTTauEmulation(const edm::ParameterSet& iConfig) :
+  tauSrc(iConfig.getParameter<edm::InputTag>("tauSrc"))
+{}
 
 HLTTauEmulation::~HLTTauEmulation(){}
+
+void HLTTauEmulation::setParameters(double tauPt,double lTrackPt) {
+        tauPtCut    = tauPt;
+        tauLTrkCut = lTrackPt;
+}
 
 bool HLTTauEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup, LorentzVector cand){
 

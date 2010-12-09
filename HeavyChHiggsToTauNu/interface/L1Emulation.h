@@ -13,11 +13,10 @@ typedef math::XYZTLorentzVector LorentzVector;
 
 class L1Emulation {
     public:
-//	typedef math::XYZTLorentzVector LorentzVector;
-
-	L1Emulation(const edm::ParameterSet&,int,double,double);
+	L1Emulation(const edm::ParameterSet&);
 	~L1Emulation();
 
+	void setParameters(int,double,double);
 	bool passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 	std::vector<LorentzVector> L1Jets();
 

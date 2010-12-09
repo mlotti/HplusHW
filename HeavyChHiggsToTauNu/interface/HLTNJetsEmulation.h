@@ -13,9 +13,10 @@ typedef math::XYZTLorentzVector LorentzVector;
 
 class HLTNJetsEmulation {
     public:
-        HLTNJetsEmulation(const edm::ParameterSet&,int,double);
+        HLTNJetsEmulation(const edm::ParameterSet&);
         ~HLTNJetsEmulation();
 
+	void setParameters(int,double);
         bool passedEvent(const edm::Event&, const edm::EventSetup&,std::vector<LorentzVector>);
 
     private:

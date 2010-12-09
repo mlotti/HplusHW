@@ -24,6 +24,8 @@ TriggerTauMETEmulation = cms.untracked.PSet(
     metSrc              = cms.InputTag("patMETs"),
     METCut              = cms.double(35)
 )
+from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
+
 
 useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
