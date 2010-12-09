@@ -50,16 +50,34 @@ WdecaySeparate = False
 #lastMultip = "h12_Multiplicity"
 #lastSelectionOther = "afterOtherCutsAfterMETCut"
 
+noIsoNoVetoMet = ["noIsoNoVetoMet"+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_GlobalTrackerMuon",
+        "h04_MuonKin",
+        "h05_MuonJetDR",
+        "h06_MuonQuality",
+        "h07_MuonIP",
+        "h08_MuonVertexDiff",
+        "h09_JetMultiplicityCut",
+        "h10_METCut"]]
+noIsoNoVetoMetAoc = ["noIsoNoVetoMetAoc"+x+"AfterOtherCuts" for x in [
+        "h07_MuonLargestPt",
+        "h08_JetMultiplicityCut",
+        "h09_METCut"]]
+
+
 multip_beforeJet = "noIsoNoVetoMeth08_Multiplicity"
 multip_afterJet = "noIsoNoVetoMeth09_Multiplicity"
 
-lastSelection = "noIsoNoVetoMeth10_METCut"
-lastSelectionBeforeMet = "noIsoNoVetoMeth09_JetMultiplicityCut"
+lastSelection = noIsoNoVetoMet[-1]
+lastSelectionBeforeMet = noIsoNoVetoMet[-2]
 lastMultip = "noIsoNoVetoMeth10_Multiplicity"
-lastSelectionOther = "noIsoNoVetoMetAoch09_METCutAfterOtherCuts"
-lastSelectionBeforeMetOther = "noIsoNoVetoMetAoch08_JetMultiplicityCutAfterOtherCuts"
-lastSelectionBeforeMetOtherIso = "noIsoNoVetoMetAoch08_JetMultiplicityCutAfterOtherCutsIso"
-lastSelectionOtherIso = "noIsoNoVetoMetAoch09_METCutAfterOtherCutsIso"
+lastSelectionOther = noIsoNoVetoMetAoc[-1]
+lastSelectionOtherIso = noIsoNoVetoMetAoc[-1]+"Iso"
+lastSelectionBeforeMetOther = noIsoNoVetoMetAoc[-2]
+lastSelectionBeforeMetOtherIso = noIsoNoVetoMetAoc[-2]+"Iso"
 
 QCD_datasets = ["QCD_Pt30to50_Fall10",
                 "QCD_Pt50to80_Fall10",
@@ -83,9 +101,16 @@ datasetsQCD.selectAndReorder(QCD_datasets)
 #datasets.getDataset("Mu_135821-144114").setLuminosity(3051760.115/1e6) # ub^-1 -> pb^-1
 #datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 #datasets.getDataset("Mu_147196-149442").setLuminosity(27384630.974/1e6)
+
 datasets.getDataset("Mu_135821-144114").setLuminosity(2863224.758/1e6) # ub^-1 -> pb^-1
 datasets.getDataset("Mu_146240-147116").setLuminosity(3977060.866/1e6)
 datasets.getDataset("Mu_147196-149442").setLuminosity(27907588.871/1e6)
+# datasets.remove([
+#         "Mu_135821-144114",
+#         "Mu_146240-147116",
+#         "Mu_147196-149442"
+#         ])
+
 datasets.mergeData()
 
 datasetsMC = datasets.deepCopy()
@@ -178,17 +203,19 @@ class Histo:
 
     def setLegend(self, legend):
         self.legend = legend
-        self.histos.addToLegend(legend)
+        if legend != None:
+            self.histos.addToLegend(legend)
 
     def draw(self):
         self.histos.draw()
-        self.legend.Draw()
+        if hasattr(self, "legend") and self.legend != None:
+            self.legend.Draw()
 
     def save(self):
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
         self.canvas.SaveAs(".png")
-        self.canvas.SaveAs(".eps")
+        #self.canvas.SaveAs(".eps")
         #self.canvas.SaveAs(".C")
         ROOT.gErrorIgnoreLevel = backup
 
@@ -363,15 +390,25 @@ class PrintNumEvents:
                 #print "Fraction of name of all MC %.1f %%" % (value/s*100)
         
 # MET
-def plotMet(met, selection=lastSelection, prefix="met", calcNumEvents=False):
-    rebin = 5
-    ylabel = "Number of events / 5.0 GeV"
-    xlabel = {"calomet": "Calo MET",
-              "pfmet": "PF MET",
-              "tcmet": "TC MET"}[met] + " (GeV)"
+class PlotMet:
+    def __init__(self, rebin=2, postfix=""):
+        self.rebin = rebin
+        self.postfix = postfix
+        if len(postfix) > 0:
+            self.postfix = "_"+self.postfix
+        self.ylabel = "Number of events / %d.0 GeV" % self.rebin
+        self.xlabels = {"calomet": "Calo MET",
+                        "pfmet": "PF MET",
+                        "tcmet": "TC MET"}
 
-    h = Histo(datasets, selection+"/%s_et" % met)
-    if calcNumEvents:
+        self.ymax = 200
+        self.xmax = 300
+        self.xmax = 50
+
+    def xlabel(self, met):
+        return self.xlabels[met]+" (GeV)"
+
+    def _calculateNumEvents(self, h):
         for pn in [0, 15, 20, 30, 40]:
             pn = PrintNumEvents(pn)
             for name in [d.getName() for d in datasets.getAllDatasets()]:
@@ -379,30 +416,46 @@ def plotMet(met, selection=lastSelection, prefix="met", calcNumEvents=False):
             pn.printQcdFraction()
             print
 
-    h.histos.forEachHisto(lambda h: h.Rebin(rebin))
-    h.histos.stackMCHistograms()
-    h.createFrame(selection+"_"+prefix+"_"+met, ymax=200, xmax=300)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(createLegend())
-    h.draw()
-    addCmsPreliminaryText()
-    addEnergyText()
-    h.histos.addLuminosityText()
-    h.save()
+    def _plotLinear(self, h, selection, met):
+        h.createFrame(selection+"_"+met+self.postfix, ymax=self.ymax, xmax=self.xmax)
+        h.frame.GetXaxis().SetTitle(self.xlabel(met))
+        h.frame.GetYaxis().SetTitle(self.ylabel)
+        h.setLegend(createLegend())
+        h.draw()
+        addCmsPreliminaryText()
+        addEnergyText()
+        h.histos.addLuminosityText()
+        h.save()
 
-    h.createFrame(selection+"_"+prefix+"_"+met+"_log", ymin=0.01, ymax=200, xmax=300)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(createLegend())
-    ROOT.gPad.SetLogy(True)
-    h.draw()
-    addCmsPreliminaryText()
-    addEnergyText()
-    h.histos.addLuminosityText()
-    h.save()
+    def _plotLog(self, h, selection, met):
+        h.createFrame(selection+"_"+met+"_log"+self.postfix, yminfactor=0.01, yfactor=2, xmax=self.xmax)
+        h.frame.GetXaxis().SetTitle(self.xlabel(met))
+        h.frame.GetYaxis().SetTitle(self.ylabel)
+        h.setLegend(None)
+        ROOT.gPad.SetLogy(True)
+        h.draw()
+        addCmsPreliminaryText()
+        addEnergyText()
+        #h.histos.addLuminosityText()
+        h.save()
 
+    def _createHisto(self, met, selection, calcNumEvents=False):
+        h = Histo(datasets, selection+"/%s_et" % met)
+        h.histos.forEachHisto(lambda h: h.Rebin(self.rebin))
+        if calcNumEvents:
+            self._calculateNumEvents(h)
+        h.histos.stackMCHistograms()
+        return h
 
+    def plot(self, met, selection=lastSelection, calcNumEvents=False):
+        h = self._createHisto(met, selection, calcNumEvents)
+        self._plotLinear(h, selection, met)
+        self._plotLog(h, selection, met)
+
+    def plotLog(self, met, selection=lastSelection):
+        h = self._createHisto(met, selection)
+        self._plotLog(h, selection, met)
+        
 jetMultiplicity()
 muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
 muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
@@ -415,11 +468,22 @@ muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
 #muonIso(Histo(datasets, lastSelectionOther+"/relIso"), lastSelectionOther+"_")
 #muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
 
-plotMet("calomet")
-plotMet("pfmet")
-plotMet("tcmet")
+plotMet = PlotMet()
+plotMet.plot("calomet")
+plotMet.plot("pfmet")
+plotMet.plot("tcmet")
 
-plotMet("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
+plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
+
+for x in noIsoNoVetoMet[:-1]:
+    plotMet.plotLog("pfmet", selection=x)
+    #for met in ["calomet", "pfmet", "tcmet"]:
+    #    plotMet.plotLog(met, selection=x)
+
+#for rebin in [1, 2, 4, 5, 8, 10, 15, 16, 20]:
+#    pm = PlotMet(rebin, postfix="%d"%rebin)
+#    for sel in [noIsoNoVetoMet[-3], lastSelectionBeforeMet]:
+#        pm.plotLog("pfmet", selection=sel)
 
 if QCDdetails:
     muonPt(Histo(datasetsQCD, lastSelectionOther+"/pt", dataLumi), lastSelectionOther+"_qcd_")
