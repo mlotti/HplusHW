@@ -283,7 +283,7 @@ class HistoSetImpl:
         for d in self.histos:
             d.drawStyle = style
 
-    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None, yfactor=1.1):
+    def createCanvasFrame(self, name, ymin=None, ymax=None, xmin=None, xmax=None, yfactor=1.1, yminfactor=None):
         if len(self.histos) == 0:
             raise Exception("Empty set of histograms!")
 
@@ -293,6 +293,8 @@ class HistoSetImpl:
         if ymax == None:
             ymax = max([d.histo.GetMaximum() for d in self.histos])
             ymax = yfactor*ymax
+        if yminfactor != None:
+            ymin = yminfactor*ymax
 
         if xmin == None:
             xmin = min([d.getXmin() for d in self.histos])
