@@ -62,7 +62,7 @@ class DataVersion:
         # Collision data
         if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
-            self.globalTag = "GR_R_38X_V14::All"
+            self.globalTag = "GR_R_38X_V15::All"
 
             self.is_runA = False
             self.is_runB = False
@@ -74,7 +74,7 @@ class DataVersion:
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START38_V13::All"
+            self.globalTag = "START38_V14::All"
 
         self.is_35X = False
         self.is_38X = False
