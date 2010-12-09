@@ -80,7 +80,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
     if dataVersion.isData():
-        removeMCMatching(process, ["All"])
+        removeMCMatching(process, ["All"], outputInProcess= out!=None)
 
     # Jets
     corrections = ["L2Relative", "L3Absolute"]
