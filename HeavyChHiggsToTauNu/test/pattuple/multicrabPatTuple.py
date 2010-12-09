@@ -15,9 +15,9 @@ multicrab.addDatasets(
 #        "BTau_148108-149182", # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149442", # HLT_SingleIsoTau20_Trk15_MET25_v4
         # Data (Jet)
-#        "JetMETTau_135821-141887", # HLT_Jet30U
+#        "JetMETTau_136033-141887", # HLT_Jet30U
 #        "JetMET_141950-144114",    # HLT_Jet30U
-#        "Jet_146240-149442",       # HLT_Jet30U
+#        "Jet_146240-148058",       # HLT_Jet30U
         # Signal Fall10 MC
 #        "TTToHplusBWB_M90",
 #        "TTToHplusBWB_M100",
@@ -69,7 +69,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v6_3"
+    name += "_pattuple_v6_4"
 
     dataset.addLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
