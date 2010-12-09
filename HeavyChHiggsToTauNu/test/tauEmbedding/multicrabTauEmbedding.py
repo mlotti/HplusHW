@@ -2,7 +2,6 @@
 
 import re
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
@@ -23,7 +22,7 @@ if step in ["analysis", "analysisTau"]:
     crabcfg = "../crab_analysis.cfg"
 
 
-multicrab = Multicrab(crabcfg, config[step]["config"])
+multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
          
 multicrab.addDatasets(
     config[step]["input"],
@@ -37,10 +36,6 @@ multicrab.addDatasets(
         "WJets",
         ])
 
-if step == "skim":
-    mask = lumi.getFile("Nov4ReReco")
-    multicrab.setDataLumiMask("../"+mask)
-    print "Lumi file", mask
 if step in ["generation", "embedding"]:
     multicrab.addArgAll("overrideBeamSpot=1")
 

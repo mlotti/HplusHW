@@ -3,7 +3,7 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
-multicrab = Multicrab("crab_pat.cfg")
+multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 multicrab.addDatasets(
 #    "AOD",
@@ -49,17 +49,6 @@ multicrab.addDatasets(
 #        "TTbarJets",
 #        "WJets",
         ])
-
-mask = lumi.getFile("Nov4ReReco")
-multicrab.setDataLumiMask("../"+mask)
-print "Using lumi file", mask
-#try:
-#    mask = lumi.getFile("Sep17ReReco")
-#    multicrab.getDataset("BTau_141950-144114").setLumiMask("../"+mask)
-#    print "Using lumi file %s for BTau_141950-144114" % mask
-#except KeyError:
-#    pass
-
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...

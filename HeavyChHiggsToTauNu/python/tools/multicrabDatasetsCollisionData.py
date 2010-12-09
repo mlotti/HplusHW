@@ -13,13 +13,13 @@ datasets = {
                 "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 50,
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -73,13 +73,13 @@ datasets = {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 50,
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "pattuple_v6_1": {
                 "dbs_url": common.pattuple_dbs,
@@ -129,13 +129,13 @@ datasets = {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 15, # Adjusted for PATtuple file size
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 15,
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "pattuple_v6_2": {
                 "dbs_url": common.pattuple_dbs,
@@ -163,13 +163,13 @@ datasets = {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 20, # Adjusted for PATtuple file size
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 20,
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "pattuple_v6_2": {
                 "dbs_url": common.pattuple_dbs,
@@ -198,7 +198,7 @@ datasets = {
                 "datasetpath": "/JetMETTau/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "number_of_jobs": 100, # Adjusted for PATtuple
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
         }
     },
@@ -210,7 +210,7 @@ datasets = {
                 "datasetpath": "/JetMET/Run2010A-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "number_of_jobs": 300, # Adjusted for PATtuple
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
         }
     },
@@ -223,7 +223,7 @@ datasets = {
                 "datasetpath": "/Jet/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "number_of_jobs": 40, # Adjusted for PATtuple
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
         }
     },
@@ -238,13 +238,13 @@ datasets = {
                 "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/RECO", # runs 135821-144114
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/AOD", # runs 135821-144114
                 "luminosity": 0,
                 "lumis_per_job": 500,
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             }
         }
     },
@@ -257,13 +257,13 @@ datasets = {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 600, # Adjusted for PAT on the fly
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 600, # Adjusted for PAT on the fly
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             }
         }
     },
@@ -276,13 +276,13 @@ datasets = {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             },
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMaskRequired": True
+                "lumiMask": "Nov4ReReco"
             }
         }
     },

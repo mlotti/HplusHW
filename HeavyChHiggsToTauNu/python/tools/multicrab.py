@@ -6,6 +6,7 @@ import ConfigParser
 import OrderedDict
 
 import multicrabDatasets
+import certifiedLumi
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
@@ -64,7 +65,7 @@ def filterRuns(lumiList, runMin, runMax):
     return lumiList
 
 class MulticrabDataset:
-    def __init__(self, name, dataInput):
+    def __init__(self, name, dataInput, lumiMaskDir):
         self.name = name
         self.args = []
         self.lines = []
@@ -110,10 +111,30 @@ class MulticrabDataset:
         if "data" in self.data["dataVersion"]:
             self._isData = True
         
-        self._lumiMaskRequired = False
         try:
-            self._lumiMaskRequired = self.data["lumiMaskRequired"]
-            del self.data["lumiMaskRequired"]
+            lumiKey = self.data["lumiMask"]
+            if not self.isData():
+                raise Exception("Lumi mask specified for datasets '%s' which is MC" % self.name)
+            lumiMaskFile = os.path.join(lumiMaskDir, certifiedLumi.getFile(lumiKey))
+
+            print "Using lumi file", lumiMaskFile
+            if "runs" in self.data:
+                from FWCore.PythonUtilities.LumiList import LumiList
+
+                (runMin, runMax) = self.data["runs"]
+                lumiList = filterRuns(LumiList(filename=lumiMaskFile), runMin, runMax)
+
+                info = "_runs_%s_%s" % (str(runMin), str(runMax))
+
+                ext_re = re.compile("(\.[^.]+)$")
+                lumiMaskFile = ext_re.sub(info+"\g<1>", os.path.basename(lumiMaskFile))
+                self.generatedFiles.append( (lumiMaskFile, str(lumiList)) )
+            else:
+                self.filesToCopy.append(lumiMaskFile)
+
+            self.data["lumi_mask"] = os.path.basename(lumiMaskFile)
+
+            del self.data["lumiMask"]
         except KeyError:
             pass
 
@@ -148,27 +169,6 @@ class MulticrabDataset:
         if "number_of_jobs" in self.data:
             raise Exception("Unable modify number_of_jobs, lumis_per_job already set")
         self.data["lumis_per_job"] = int(func(self.data["lumis_per_job"]))
-
-    def setLumiMask(self, fname):
-        if not self.isData():
-            raise Exception("Tried to set lumi mask for dataset '%s' which is MC" % self.name)
-
-        if "runs" in self.data:
-
-            from FWCore.PythonUtilities.LumiList import LumiList
-
-            (runMin, runMax) = self.data["runs"]
-            lumiList = filterRuns(LumiList(filename=fname), runMin, runMax)
-
-            info = "_runs_%s_%s" % (str(runMin), str(runMax))
-
-            ext_re = re.compile("(\.[^.]+)$")
-            fname = ext_re.sub(info+"\g<1>", os.path.basename(fname))
-            self.generatedFiles.append( (fname, str(lumiList)) )
-        else:
-            self.filesToCopy.append(fname)
-
-        self.data["lumi_mask"] = os.path.basename(fname)
 
     def addArg(self, arg):
         self.args.append(arg)
@@ -258,7 +258,7 @@ class MulticrabDataset:
 
 
 class Multicrab:
-    def __init__(self, crabConfig, pyConfig=None):
+    def __init__(self, crabConfig, pyConfig=None, lumiMaskDir=""):
         if not os.path.exists(crabConfig):
             raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
 
@@ -266,7 +266,7 @@ class Multicrab:
         self.filesToCopy = [crabConfig]
 
         self.commonLines = []
-        self.dataLumiMask = None
+        self.lumiMaskDir = lumiMaskDir
 
         self.datasetNames = []
 
@@ -304,21 +304,9 @@ class Multicrab:
         self.datasetMap = {}
 
         for dname, dinput in self.datasetNames:
-            dset = MulticrabDataset(dname, dinput)
-            if self.dataLumiMask != None and dset.isData():
-                dset.setLumiMask(self.dataLumiMask)
+            dset = MulticrabDataset(dname, dinput, self.lumiMaskDir)
             self.datasets.append(dset)
             self.datasetMap[dname] = dset
-
-    def setDataLumiMask(self, fname):
-        if not os.path.exists(fname):
-            raise Exception("Lumi mask file '%s' doesn't exist!" % fname)
-
-        self.dataLumiMask = fname
-        if self.datasets != None:
-            for d in self.datasets:
-                if d.isData():
-                    d.setLumiMask(self.dataLumiMask)
 
     def getDataset(self, name):
         if self.datasets == None:
