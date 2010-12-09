@@ -1,6 +1,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/L1Emulation.h"
 
-L1Emulation::L1Emulation(int n,double ptTau,double ptCen){
+L1Emulation::L1Emulation(const edm::ParameterSet& iConfig,int n,double ptTau,double ptCen) :
+    l1tauSrc(iConfig.getParameter<edm::InputTag>("L1TauSrc")),
+    l1cenSrc(iConfig.getParameter<edm::InputTag>("L1CenSrc"))
+{
 	njets      = n;
 	l1tauPtCut = ptTau;
 	l1cenPtCut = ptCen;
