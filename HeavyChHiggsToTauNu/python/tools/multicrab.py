@@ -105,7 +105,7 @@ class MulticrabDataset:
         if "lumis_per_job" in self.data and "number_of_jobs" in self.data:
             raise Exception("Only one of 'lumis_per_job' and 'number_of_jobs' is allowed for dataset '%s'" % name)
         if "lumi_mask" in self.data:
-            raise Exception("Setting lumi_mask in multicrabDatasets.py is not supported, use Multicrab.setDataLumiMask() instead")
+            raise Exception("Setting lumi_mask in multicrabDatasets.py is not supported. The lumi mask files are set in HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi, and they are assigned to datasets with lumiMask parameter.")
 
         self._isData = False
         if "data" in self.data["dataVersion"]:
@@ -217,19 +217,12 @@ class MulticrabDataset:
         ret += "CMSSW.pycfg_params = %s\n" % ":".join(args)
         del dataKeys[dataKeys.index("datasetpath")]
 
-        for key in ["dbs_url", "lumis_per_job", "number_of_jobs"]:
+        for key in ["dbs_url", "lumis_per_job", "number_of_jobs", "lumi_mask"]:
             try:
                 ret += "CMSSW.%s = %s\n" % (key, self.data[key])
                 del dataKeys[dataKeys.index(key)]
             except KeyError:
                 pass
-        try:
-            ret += "CMSSW.lumi_mask = %s\n" % self.data["lumi_mask"]
-            del dataKeys[dataKeys.index("lumi_mask")]
-        except KeyError:
-            if self._lumiMaskRequired:
-                raise Exception("Dataset '%s' requires lumi mask but doesn't have lumi_mask set!" % self.name)
-
         for key in ["ce_white_list", "se_white_list", "ce_black_list", "se_black_list"]:
             try:
                 ret += "GRID.%s = %s\n" % (key, ",".join(self.data[key]))
