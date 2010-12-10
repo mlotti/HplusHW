@@ -9,6 +9,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
 
+debug = False
+#debug = True
+
 options = getOptions()
 if options.dataVersion != "":
     dataVersion = options.dataVersion
@@ -16,10 +19,15 @@ if options.dataVersion != "":
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
 
+if debug:
+    print "In debugging mode"
+
 process = cms.Process("TauEmbeddingAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+if debug:
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+else:
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -27,7 +35,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_2/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_8_1_JTn.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
         #"file:embedded_RECO.root"
   )
 )
@@ -36,7 +44,8 @@ options.doPat = 1
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
-#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+if debug:
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
 process.TFileService.fileName = "histograms.root"
@@ -84,6 +93,11 @@ process.commonSequence = cms.Sequence(
 )
 
 ################################################################################
+
+# Calculate PF MET for 
+from PhysicsTools.PFCandProducer.pfMET_cfi import pfMET
+process.pfMETOriginalNoMuon = pfMET.clone(src=cms.InputTag("dimuonsGlobal", "forMixing"))
+process.commonSequence *= process.pfMETOriginalNoMuon
 
 # Recalculate gen MET
 # True MET
@@ -158,8 +172,9 @@ process.genMetSequence = cms.Sequence(
 
 process.commonSequence *= process.genMetSequence
 
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
-#process.commonSequence *= process.printGenParticles
+if debug:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
+    process.commonSequence *= process.printGenParticles
 
 
 ################################################################################
@@ -212,11 +227,16 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
-    genParticleSrc = cms.untracked.InputTag("genParticles"),
+    genParticleOriginalSrc = cms.untracked.InputTag("genParticles", "", "HLT"),
+    genParticleEmbeddedSrc = cms.untracked.InputTag("genParticles"),
     mets = cms.untracked.PSet(
         Met = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
             originalSrc = cms.untracked.InputTag(pfMETOriginal.value())
+        ),
+        MetNoMuon = cms.untracked.PSet(
+            embeddedSrc = cms.untracked.InputTag(pfMET.value()),
+            originalSrc = cms.untracked.InputTag("pfMETOriginalNoMuon")
         ),
         GenMetTrue = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
@@ -230,7 +250,7 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
             embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
             originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X")
         ),
-        GenMetNu = cms.untracked.PSet(
+        GenMetNuSum = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
             originalSrc = cms.untracked.InputTag("genMetNuOriginal")
         ),

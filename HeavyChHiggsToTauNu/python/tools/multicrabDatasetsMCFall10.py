@@ -352,11 +352,11 @@ datasets = {
         "data": {
             "RECO": {
                 "datasetpath": "/QCD_Pt-150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 40 # Adjusted for PATtuple file size
+                "number_of_jobs": 20 # Adjusted for PATtuple file size
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt-150_MuPt5Enriched_TuneZ2_7TeV-pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 40,
+                "number_of_jobs": 20,
             },
         },
     },

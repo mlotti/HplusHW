@@ -227,6 +227,21 @@ class Histo:
         
         return p
 
+def moduleConfEqual(m1, m2):
+    if m1.type_() != m2.type_():
+        return False
+
+    names1 = m1.parameterNames_()
+    names2 = m2.parameterNames_()
+    if names1 != names2:
+        return False
+
+    for n in names1:
+        if m1.getParameter(n).value() != m2.getParameter(n).value():
+            return False
+
+    return True
+
 class AnalysisModule:
     def __init__(self, process, name, prefix="", selector=None, filter=None, invertFilter=False, counter=False):
         self.selector = selector
@@ -242,9 +257,11 @@ class AnalysisModule:
         self.filterSequence = cms.Sequence()
         filterN = 0
         if selector != None:
+            #if not self._findSelector(process):
             process.__setattr__(self.selectorName, self.selector)
             self.filterSequence *= self.selector
             filterN += 1
+
         if filter != None:
             if selector != None:
                 self.filter.src = cms.InputTag(self.selectorName)
@@ -265,6 +282,15 @@ class AnalysisModule:
             self.sequence *= self.counter
         
         process.__setattr__(self.sequenceName, self.sequence)
+
+    # def _findSelector(self, process):
+    #     filters = process.filters_()
+    #     for name, module in filters.iteritems():
+    #         if moduleConfEqual(module, self.selector):
+    #             self.selectorName = name
+    #             self.selector = module
+    #             return True
+    #     return False
 
     def getFilterSequence(self):
         return self.filterSequence

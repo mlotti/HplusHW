@@ -53,7 +53,7 @@ if len(aodDatasets) > 0:
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
 
-mask = lumi.getFile("StreamExpress")
+mask = lumi.getFile("Nov4ReReco")
 multicrab.setDataLumiMask("../"+mask)
 print "Lumi file", mask
 
@@ -83,10 +83,10 @@ def modify(dataset):
         dataset.addArg("doPat=1")
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
-    if dataset.getName() == "Mu_135821-144114":
-        mask = lumi.getFile("Sep17ReReco")
-        dataset.setLumiMask("../"+mask)
-        print "Lumi file %s for Mu_135821-144114" % mask
+#    if dataset.getName() == "Mu_135821-144114":
+#        mask = lumi.getFile("Sep17ReReco")
+#        dataset.setLumiMask("../"+mask)
+#        print "Lumi file %s for Mu_135821-144114" % mask
 
     try:
         njobs = numberOfJobs[dataset.getName()]

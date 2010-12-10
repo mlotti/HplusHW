@@ -25,7 +25,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
+    #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         dataVersion.getPatDefaultFileMadhatter()
@@ -76,12 +76,15 @@ if options.doPat != 0:
 # Override the outputCommands here, since PAT modifies it
 process.out.outputCommands = cms.untracked.vstring(
     "keep *",
+    "drop *_MEtoEDMConverter_*_*", # drop DQM histos
     "drop *_*_*_MUONSKIM",
     "keep *_selectedPatMuons_*_MUONSKIM",
-    "keep *_tauEmbeddingMuons_*_MUONSKIM"
+    "keep *_tauEmbeddingMuons_*_MUONSKIM",
+    "keep edmMergeableCounter_*_*_MUONSKIM", # in lumi block
 )
 
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff")
 process.selectionSequence *= process.muonSelectionSequence
 process.muonTrigger.hltResults.setProcessName(dataVersion.getTriggerProcess())
 process.muonTrigger.triggerConditions = cms.vstring(trigger)
@@ -92,3 +95,9 @@ process.path = cms.Path(
 process.endPath = cms.EndPath(
     process.out
 )
+
+#process.counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+#    printMainCounter = cms.untracked.bool(True),
+#    printAvailableCounters = cms.untracked.bool(True),
+#)
+#process.path *= process.counters
