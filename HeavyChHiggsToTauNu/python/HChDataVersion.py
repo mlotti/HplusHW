@@ -9,6 +9,7 @@
 config = {
     "35X": {
         "triggerProcess": "HLT",
+        "patMadhatter": "/store/mc/Spring10/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/GEN-SIM-RECO/START3X_V26-v1/0014/F6753C2F-0664-DF11-8236-001E688E628A.root",
         "analysisCastor": "/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1/94799423eedb9d1f02c6c0ed06eb3738/pattuple_4_1_pvI.root",
     },
