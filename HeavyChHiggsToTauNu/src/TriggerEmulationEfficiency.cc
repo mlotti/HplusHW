@@ -10,15 +10,17 @@ TriggerEmulationEfficiency::TriggerEmulationEfficiency(const edm::ParameterSet& 
 	hltPFMHTEmulation = new HLTPFMHTEmulation(iConfig);
 	hltNJetsEmulation = new HLTNJetsEmulation(iConfig);
 
-	allEvents = 0;
-	l1tau     = 0;
-	l1_3j     = 0;
-	l1quad    = 0;
-	hltTau    = 0;
-        hltMet    = 0;
-        hltpfmht  = 0;
-        hlt3jets  = 0;
-        hlt4jets  = 0;
+	allEvents        = 0;
+	passedL1tau      = 0;
+	passedL1_3j      = 0;
+	passedL1quad     = 0;
+	passedhlttau     = 0;
+	passedhlttau3j   = 0;
+	passedhlttau4j   = 0;
+        passedhltMet     = 0;
+        passedhltpfmht   = 0;
+        passedhlt3jets   = 0;
+        passedhlt4jets   = 0;
 
         passedTauMET     = 0;
         passedTauPFMHT   = 0;
@@ -31,14 +33,16 @@ TriggerEmulationEfficiency::TriggerEmulationEfficiency(const edm::ParameterSet& 
 }
 TriggerEmulationEfficiency::~TriggerEmulationEfficiency(){
 	cout << "All events       " << allEvents << endl;
-	cout << "L1 tau passed    " << l1tau << endl;
-        cout << "L1 3jets passed  " << l1_3j << endl;
-	cout << "L1 quad passed   " << l1quad << endl;
-	cout << "HLT Tau passed   " << hltTau << endl;
-	cout << "HLT Met passed   " << hltMet << endl;
-	cout << "HLT pfmht passed " << hltpfmht << endl;
-	cout << "HLT 3jets passed " << hlt3jets << endl;
-	cout << "HLT 4jets passed " << hlt4jets << endl;
+	cout << "L1 tau passed    " << passedL1tau << endl;
+        cout << "L1 3jets passed  " << passedL1_3j << endl;
+	cout << "L1 quad passed   " << passedL1quad << endl;
+	cout << "HLT Tau passed   " << passedhlttau << endl;
+	cout << "HLT Tau3j passed " << passedhlttau3j << endl;
+	cout << "HLT Tau4j passed " << passedhlttau4j << endl;
+	cout << "HLT Met passed   " << passedhltMet << endl;
+	cout << "HLT pfmht passed " << passedhltpfmht << endl;
+	cout << "HLT 3jets passed " << passedhlt3jets << endl;
+	cout << "HLT 4jets passed " << passedhlt4jets << endl;
 	cout << endl;
 	cout << "TauMET           " << passedTauMET << endl;
 	cout << "TauPFMHT         " << passedTauPFMHT << endl;
@@ -64,46 +68,51 @@ void TriggerEmulationEfficiency::analyse(const edm::Event& iEvent, const edm::Ev
 	l1Emulation->setParameters(1,20,30);//n,ptTau,ptCen
 	bool passedL1Tau = l1Emulation->passedEvent(iEvent,iSetup);
 	std::vector<LorentzVector> l1jets = l1Emulation->L1Jets();
-
-	if(passedL1Tau) l1tau++;
+	if(passedL1Tau) passedL1tau++;
 
         l1Emulation->setParameters(3,25,25);
         bool passedL1_3Jet = l1Emulation->passedEvent(iEvent,iSetup);
         std::vector<LorentzVector> l1_3jets = l1Emulation->L1Jets();
-
-        if(passedL1_3Jet) l1_3j++;
+        if(passedL1_3Jet) passedL1_3j++;
 
         l1Emulation->setParameters(4,8,8);
         bool passedL1QuadJet = l1Emulation->passedEvent(iEvent,iSetup);
         std::vector<LorentzVector> l1quadjets = l1Emulation->L1Jets();
-
-	if(passedL1QuadJet) l1quad++;
+	if(passedL1QuadJet) passedL1quad++;
 
 // HLT
 	// Jets
 	hltNJetsEmulation->setParameters(3,20);//pt
 	bool passedL1_3jHLT3Jets = hltNJetsEmulation->passedEvent(iEvent,iSetup,l1_3jets);
 	std::vector<LorentzVector> hlt3jets = hltNJetsEmulation->HLTJets();
+	if(passedL1_3jHLT3Jets) passedhlt3jets++;
 
 	hltNJetsEmulation->setParameters(4,20);
 	bool passedL1quadHLT4Jets = hltNJetsEmulation->passedEvent(iEvent,iSetup,l1quadjets);
 	std::vector<LorentzVector> hlt4jets = hltNJetsEmulation->HLTJets();
+	if(passedL1quadHLT4Jets) passedhlt4jets++;
 
 	// Tau
 	hltTauEmulation->setParameters(20,15);//pt,ltr_pt
 	bool passedL1TauHLTTau = hltTauEmulation->passedEvent(iEvent,iSetup,l1jets);
+	if(passedL1TauHLTTau) passedhlttau++;
 
 	bool passedL1_3jHLTTau = hltTauEmulation->passedEvent(iEvent,iSetup,hlt3jets);
+	if(passedL1_3jHLTTau) passedhlttau3j++;
 
 	bool passedL1quadHLTTau = hltTauEmulation->passedEvent(iEvent,iSetup,hlt4jets);
+	if(passedL1quadHLTTau) passedhlttau4j++;
 
 	// MET
 	hltMETEmulation->setParameters(35);
 	bool passedHLTMET = hltMETEmulation->passedEvent(iEvent,iSetup);
+	if(passedHLTMET) passedhltMet++;
 
 	// PFMHT
 	hltPFMHTEmulation->setParameters(35);
 	bool passedHLTPFMHT = hltPFMHTEmulation->passedEvent(iEvent,iSetup);
+	if(passedHLTPFMHT) passedhltpfmht++;
+
 
 // cross triggers
 	if(passedL1Tau && passedL1TauHLTTau && passedHLTMET) passedTauMET++;

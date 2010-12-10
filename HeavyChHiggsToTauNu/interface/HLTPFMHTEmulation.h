@@ -16,7 +16,7 @@ class HLTPFMHTEmulation {
         bool passedEvent(const edm::Event&, const edm::EventSetup&);
 
     private:
-        edm::InputTag jetSrc;
+        edm::InputTag pfjetSrc;
 
         double mhtCut;
 };
