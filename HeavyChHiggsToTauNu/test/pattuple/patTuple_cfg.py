@@ -123,7 +123,8 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
 process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
-process.out.outputCommands.extend(["keep recoTracks_*_*_*"])
+process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
+process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
 # Create paths
 process.path    = cms.Path(

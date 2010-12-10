@@ -115,7 +115,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
     transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology
+    EvtTopology = param.EvtTopology,
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
 
 print "Trigger:", process.signalAnalysis.trigger

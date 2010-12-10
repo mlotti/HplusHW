@@ -38,7 +38,8 @@ namespace HPlus {
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
+    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -65,7 +66,7 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent); // set prescale
     
     increment(fAllCounter);
-
+//fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger 
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
@@ -146,6 +147,8 @@ namespace HPlus {
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
     for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+
+//    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 
     return true;
   }
