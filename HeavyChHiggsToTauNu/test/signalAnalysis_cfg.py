@@ -105,7 +105,7 @@ process.infoPath = cms.Path(
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
-    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
+####    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,

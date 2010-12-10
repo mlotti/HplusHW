@@ -11,21 +11,7 @@ trigger = cms.untracked.PSet(
     ),
     hltMetCut = cms.untracked.double(20.0),
 )
-TriggerTauMETEmulation = cms.untracked.PSet(
-    L1TauSrc            = cms.InputTag("l1extraParticles", "Tau"),
-    L1CenSrc            = cms.InputTag("l1extraParticles", "Central"),
-    L1TauPtCut          = cms.double(20),
-    L1CenPtCut          = cms.double(30),
-
-    tauSrc              = cms.InputTag("caloTauHLTTauEmu"),
-    TauPtCut            = cms.double(20),
-    TauLeadTrkPtCut     = cms.double(15),
-
-    metSrc              = cms.InputTag("patMETs"),
-    METCut              = cms.double(35)
-)
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
-
 
 useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
 
@@ -33,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizat
 tauSelectionBase = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(40),
+    ptCut = cms.untracked.double(30),
     etaCut = cms.untracked.double(2.4), #no change
     leadingTrackPtCut = cms.untracked.double(20),
     rtauCut = cms.untracked.double(0.8), #no change
@@ -84,7 +70,7 @@ MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
     src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
-    METCut = cms.untracked.double(60.0)
+    METCut = cms.untracked.double(70.0)
 )
 
 bTagging = cms.untracked.PSet(
