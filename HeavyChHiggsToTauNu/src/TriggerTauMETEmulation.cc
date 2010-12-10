@@ -22,17 +22,11 @@ namespace HPlus {
   TriggerTauMETEmulation::Data::~Data() {}
 
   TriggerTauMETEmulation::TriggerTauMETEmulation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    l1tauSrc(iConfig.getParameter<edm::InputTag>("L1TauSrc")),
-    l1cenSrc(iConfig.getParameter<edm::InputTag>("L1CenSrc")),
-    tauSrc(iConfig.getParameter<edm::InputTag>("tauSrc")),
-    metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
-    l1tauPtCut(iConfig.getParameter<double>("L1TauPtCut")),
-    l1cenPtCut(iConfig.getParameter<double>("L1CenPtCut")),
-    tauPtCut(iConfig.getParameter<double>("TauPtCut")),
-    tauLTrkCut(iConfig.getParameter<double>("TauLeadTrkPtCut")),
-    metCut(iConfig.getParameter<double>("METCut")),
     fEventWeight(eventWeight)
   {
+        l1Emulation     = new L1Emulation(iConfig);
+        hltTauEmulation = new HLTTauEmulation(iConfig);
+        hltMETEmulation = new HLTMETEmulation(iConfig);
 /*
         edm::Service<TFileService> fs;
         h_alltau = fs->make<TH1F>("h_alltau", "h_alltau", 25, 0, 100);
@@ -44,94 +38,29 @@ namespace HPlus {
 */
   }
 
-  TriggerTauMETEmulation::~TriggerTauMETEmulation() {}
+  TriggerTauMETEmulation::~TriggerTauMETEmulation() {
+	delete l1Emulation;
+	delete hltTauEmulation;
+	delete hltMETEmulation;
+  }
 
   TriggerTauMETEmulation::Data TriggerTauMETEmulation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
-        bool tau = tauSelection(iEvent);
-        bool met = metSelection(iEvent);
+	// L1
+        l1Emulation->setParameters(1,20,30);//n,ptTau,ptCen
+        bool passedL1Tau = l1Emulation->passedEvent(iEvent,iSetup);
+        std::vector<LorentzVector> l1jets = l1Emulation->L1Jets();
 
-        if(tau) {
-//                ++counter_tau;
-        }
-        if(met) {
-//                ++counter_met;
-        }
-        if(tau && met) {
-//                ++counter_taumet;
-        }
-        bool passEvent = tau && met;
+        // Tau
+        hltTauEmulation->setParameters(20,15);//pt,ltr_pt
+        bool passedL1TauHLTTau = hltTauEmulation->passedEvent(iEvent,iSetup,l1jets);
+
+        // MET
+        hltMETEmulation->setParameters(35);
+        bool passedHLTMET = hltMETEmulation->passedEvent(iEvent,iSetup);
+
+        bool passEvent = passedL1Tau && passedL1TauHLTTau && passedHLTMET;
     	return Data(this, passEvent);
   }
 
-
-  bool TriggerTauMETEmulation::tauSelection(const edm::Event& iEvent){
-        bool tauFound = false;
-
-// L1 tau
-        edm::Handle<l1extra::L1JetParticleCollection> l1TauHandle;
-        iEvent.getByLabel(l1tauSrc, l1TauHandle);
-        const l1extra::L1JetParticleCollection & l1Taus = *(l1TauHandle.product());
-        l1extra::L1JetParticleCollection::const_iterator iJet;
-        for(iJet = l1Taus.begin(); iJet != l1Taus.end(); ++iJet) {
-                if(iJet->et() < l1tauPtCut) continue;
-//                counter_l1tau++;
-                tauFound = HLTTauFound(iEvent,iJet->p4());
-        }
-
-        edm::Handle<l1extra::L1JetParticleCollection> l1CentralJetHandle;
-        iEvent.getByLabel(l1cenSrc, l1CentralJetHandle);
-        const l1extra::L1JetParticleCollection & l1CentralJets = *(l1CentralJetHandle.product());
-        for(iJet = l1CentralJets.begin(); iJet != l1CentralJets.end(); ++iJet) {
-                if(iJet->et() < l1cenPtCut) continue;
-//                counter_l1cen++;
-                tauFound = HLTTauFound(iEvent,iJet->p4());
-        }
-
-        return tauFound;
-  }
-
-  bool TriggerTauMETEmulation::HLTTauFound(const edm::Event& iEvent,const LorentzVector& p4){
-        bool tauFound = false;
-//std::cout << "check TauMETTriggerEmulator::HLTTauFound L1Tau " << p4.Eta() << " " << p4.Phi() << std::endl;
-// HLT tau
-
-        edm::Handle<edm::View<reco::CaloTau> > htaus;
-        iEvent.getByLabel(tauSrc, htaus);
-        edm::PtrVector<reco::CaloTau> taus = htaus->ptrVector();
-
-        for(edm::PtrVector<reco::CaloTau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-                edm::Ptr<reco::CaloTau> iTau = *iter;
-
-                double DR = ROOT::Math::VectorUtil::DeltaR(p4,iTau->p4());
-
-                if(DR > 0.4) continue;
-//std::cout << "check HLTTau " << iTau->p4().eta() << " " << iTau->p4().eta() << " " << DR << std::endl;
-                if(iTau->isolationECALhitsEtSum() > 5) continue;
-
-                if(!(iTau->pt() > tauPtCut)) continue;
-//                counter_l2++;
-
-                reco::TrackRef leadTrk = iTau->leadTrack();
-                if(leadTrk.isNull() || !(leadTrk->pt() > tauLTrkCut)) continue;
-//                counter_l25++;
-
-                if(iTau->isolationTracks().size()) continue;
-//                counter_l3++;
-
-                tauFound = true;
-        }
-
-        return tauFound;
-  }
-
-  bool TriggerTauMETEmulation::metSelection(const edm::Event& iEvent){
-
-        edm::Handle<edm::View<reco::MET> > hmet;
-        iEvent.getByLabel(metSrc, hmet);
-
-        edm::Ptr<reco::MET> met = hmet->ptrAt(0);
-
-        return met->et() > metCut;
-  }
 }

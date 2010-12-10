@@ -11,6 +11,10 @@
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/L1Emulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HLTTauEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HLTMETEmulation.h"
+
 namespace edm {
   class ParameterSet;
   class Event;
@@ -48,27 +52,11 @@ namespace HPlus {
     typedef math::XYZTLorentzVector LorentzVector;
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-/*
-    const edm::Ptr<reco::MET> getSelectedMET() const {
-      return fSelectedTriggerMET;
-    }
-*/
+
   private:
-    bool tauSelection(const edm::Event&);
-    bool metSelection(const edm::Event&);
-    bool HLTTauFound(const edm::Event&,const LorentzVector&);
-
-    // Input parameters
-    edm::InputTag l1tauSrc;
-    edm::InputTag l1cenSrc;
-    edm::InputTag tauSrc;
-    edm::InputTag metSrc;
-
-    double l1tauPtCut;
-    double l1cenPtCut;
-    double tauPtCut;
-    double tauLTrkCut;
-    double metCut;
+    L1Emulation* l1Emulation;
+    HLTTauEmulation* hltTauEmulation;
+    HLTMETEmulation* hltMETEmulation;
 /*
     TH1* h_alltau;
     TH1* h_allmet;
@@ -83,12 +71,6 @@ namespace HPlus {
     // Event weight object
     EventWeight& fEventWeight;
 
-    // Histograms
-//    TH1 *hMetBeforeEmulation;
-//    TH1 *hMetAfterEmulation;
-
-    // Selected jets
-//    edm::Ptr<reco::MET> fSelectedTriggerMET;
   };
 }
 

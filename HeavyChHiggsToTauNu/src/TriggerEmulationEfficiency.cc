@@ -32,28 +32,29 @@ TriggerEmulationEfficiency::TriggerEmulationEfficiency(const edm::ParameterSet& 
         passedTau4jPFMHT = 0;
 }
 TriggerEmulationEfficiency::~TriggerEmulationEfficiency(){
-	cout << "All events       " << allEvents << endl;
-	cout << "L1 tau passed    " << passedL1tau << endl;
-        cout << "L1 3jets passed  " << passedL1_3j << endl;
-	cout << "L1 quad passed   " << passedL1quad << endl;
-	cout << "HLT Tau passed   " << passedhlttau << endl;
-	cout << "HLT Tau3j passed " << passedhlttau3j << endl;
-	cout << "HLT Tau4j passed " << passedhlttau4j << endl;
-	cout << "HLT Met passed   " << passedhltMet << endl;
-	cout << "HLT pfmht passed " << passedhltpfmht << endl;
-	cout << "HLT 3jets passed " << passedhlt3jets << endl;
-	cout << "HLT 4jets passed " << passedhlt4jets << endl;
-	cout << endl;
-	cout << "TauMET           " << passedTauMET << endl;
-	cout << "TauPFMHT         " << passedTauPFMHT << endl;
-	cout << "Tau3j            " << passedTau3j << endl;
-	cout << "Tau3jMET         " << passedTau3jMET << endl;
-	cout << "Tau3jPFMHT       " << passedTau3jPFMHT << endl;
-	cout << "Tau4j            " << passedTau4j << endl;
-	cout << "Tau4jMET         " << passedTau4jMET << endl;
-	cout << "Tau4jPFMHT       " << passedTau4jPFMHT << endl;
-	cout << endl;
-
+      	if(allEvents > 0) {
+	  cout << "All events       " << allEvents << endl;
+	  cout << "L1 tau passed    " << passedL1tau << endl;
+          cout << "L1 3jets passed  " << passedL1_3j << endl;
+	  cout << "L1 quad passed   " << passedL1quad << endl;
+	  cout << "HLT Tau passed   " << passedhlttau << endl;
+	  cout << "HLT Tau3j passed " << passedhlttau3j << endl;
+	  cout << "HLT Tau4j passed " << passedhlttau4j << endl;
+	  cout << "HLT Met passed   " << passedhltMet << endl;
+	  cout << "HLT pfmht passed " << passedhltpfmht << endl;
+	  cout << "HLT 3jets passed " << passedhlt3jets << endl;
+	  cout << "HLT 4jets passed " << passedhlt4jets << endl;
+	  cout << endl;
+	  cout << "TauMET           " << passedTauMET << endl;
+	  cout << "TauPFMHT         " << passedTauPFMHT << endl;
+	  cout << "Tau3j            " << passedTau3j << endl;
+	  cout << "Tau3jMET         " << passedTau3jMET << endl;
+	  cout << "Tau3jPFMHT       " << passedTau3jPFMHT << endl;
+	  cout << "Tau4j            " << passedTau4j << endl;
+	  cout << "Tau4jMET         " << passedTau4jMET << endl;
+	  cout << "Tau4jPFMHT       " << passedTau4jPFMHT << endl;
+	  cout << endl;
+      	}
 	delete l1Emulation;
 	delete hltNJetsEmulation;
 	delete hltTauEmulation;
