@@ -20,8 +20,8 @@ caloTauTagInfoForHLTTauEmuProducer.tkmaxipt = cms.double(0.3) # FIXME, check uni
 
 
 #CaloTau Producer
-from RecoTauTag.RecoTau.CaloRecoTauProducer_cfi import *
-caloTauHLTTauEmu = caloRecoTauProducer.clone()
+from RecoTauTag.RecoTau.CaloRecoTauProducer_cfi import caloRecoTauProducer as caloRecoTauProducerPrototype
+caloTauHLTTauEmu = caloRecoTauProducerPrototype.clone()
 caloTauHLTTauEmu.PVProducer = cms.InputTag('pixelVertices')
 caloTauHLTTauEmu.MatchingConeSizeFormula = cms.string('0.20')
 caloTauHLTTauEmu.TrackerSignalConeSizeFormula = cms.string('0.15')
