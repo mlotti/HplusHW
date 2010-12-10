@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelectionFactorized.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -31,23 +32,23 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     // Weighted histograms
-    hPtSelectedTaus = fs->make<TH1F>("factorized_tau_pt", "tau_pt", 100, 0., 200.);
-    hEtaSelectedTaus = fs->make<TH1F>("factorized_tau_eta", "tau_eta", 60, -3., 3.);
-    hPtBeforeTauID = fs->make<TH1F>("factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
-    hPtAfterTauID = fs->make<TH1F>("factorization_calculation_pt_after_tauID", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
-    hEtaBeforeTauID = fs->make<TH1F>("factorization_calculation_eta_before_tauID", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
-    hEtaAfterTauID = fs->make<TH1F>("factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
-    hPtVsEtaBeforeTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
-    hPtVsEtaAfterTauID = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtSelectedTaus = makeTH<TH1F>(*fs, "factorized_tau_pt", "tau_pt", 100, 0., 200.);
+    hEtaSelectedTaus = makeTH<TH1F>(*fs, "factorized_tau_eta", "tau_eta", 60, -3., 3.);
+    hPtBeforeTauID = makeTH<TH1F>(*fs, "factorization_calculation_pt_before_tauID", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauID = makeTH<TH1F>(*fs, "factorization_calculation_pt_after_tauID", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauID = makeTH<TH1F>(*fs, "factorization_calculation_eta_before_tauID", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauID = makeTH<TH1F>(*fs, "factorization_calculation_eta_after_tauID", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauID = makeTH<TH2F>(*fs, "factorization_calculation_pt_vs_eta_before_tauID", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauID = makeTH<TH2F>(*fs, "factorization_calculation_pt_vs_eta_after_tauID", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
     // Unweighted histograms
-    hPtBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_before_tauID_unweighted", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
-    hPtAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_pt_after_tauID_unweighted", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
-    hEtaBeforeTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_before_tauID_unweighted", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
-    hEtaAfterTauIDUnweighted = fs->make<TH1F>("factorization_calculation_eta_after_tauID_unweighted", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
-    hPtVsEtaBeforeTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_before_tauID_unweighted", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
-    hPtVsEtaAfterTauIDUnweighted = fs->make<TH2F>("factorization_calculation_pt_vs_eta_after_tauID_unweighted", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtBeforeTauIDUnweighted = makeTH<TH1F>(*fs, "factorization_calculation_pt_before_tauID_unweighted", "tau_pt_before;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hPtAfterTauIDUnweighted = makeTH<TH1F>(*fs, "factorization_calculation_pt_after_tauID_unweighted", "tau_pt_after;#tau jet p_{T}, GeV/c;N", 60, 0., 300.);
+    hEtaBeforeTauIDUnweighted = makeTH<TH1F>(*fs, "factorization_calculation_eta_before_tauID_unweighted", "tau_eta_before;#tau jet #eta;N", 60, -3., 3.);
+    hEtaAfterTauIDUnweighted = makeTH<TH1F>(*fs, "factorization_calculation_eta_after_tauID_unweighted", "tau_eta_after;#tau jet #eta;N", 60, -3., 3.);
+    hPtVsEtaBeforeTauIDUnweighted = makeTH<TH2F>(*fs, "factorization_calculation_pt_vs_eta_before_tauID_unweighted", "tau_pt_vs_eta_before;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
+    hPtVsEtaAfterTauIDUnweighted = makeTH<TH2F>(*fs, "factorization_calculation_pt_vs_eta_after_tauID_unweighted", "tau_pt_vs_eta_after;#tau jet p_{T}, GeV/c;#tau jet #eta", 20, 0., 200., 60, -3., 3.);
 
-    hCategory = fs->make<TH1F>("factorized_tau_category", "factorized_tau_category", 5, 0, 5);
+    hCategory = makeTH<TH1F>(*fs, "factorized_tau_category", "factorized_tau_category", 5, 0, 5);
     hCategory->GetXaxis()->SetBinLabel(1, "All events");
     hCategory->GetXaxis()->SetBinLabel(2, "No trigger matched taus");
     hCategory->GetXaxis()->SetBinLabel(3, "Only one trg matched tau");

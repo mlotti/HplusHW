@@ -51,6 +51,7 @@
 // For "k"=16 ( 00010110 in 8bit representation) we have after the second loop: 0 1 1 1 0
 //#########################################################################################################################################
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TH1F.h"
@@ -178,7 +179,7 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hAlphaT = fs->make<TH1F>("alphaT", "alphaT", 100, 0.3, 1.0);
+    hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.3, 1.0);
   }
 
   EvtTopology::~EvtTopology() {}

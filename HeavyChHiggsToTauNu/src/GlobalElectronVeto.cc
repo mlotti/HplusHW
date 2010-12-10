@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -47,14 +48,14 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hElectronPt  = fs->make<TH1F>("GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
-    hElectronEta = fs->make<TH1F>("GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack  = fs->make<TH1F>("GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
-    hElectronEta_gsfTrack = fs->make<TH1F>("GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
-    hElectronPt_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 400, 0.0, 400.0);
-    hElectronEta_AfterSelection = fs->make<TH1F>("GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
-    hElectronEta_gsfTrack_AfterSelection = fs->make<TH1F>("GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt  = makeTH<TH1F>(*fs, "GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
+    hElectronEta = makeTH<TH1F>(*fs, "GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack  = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
+    hElectronEta_gsfTrack = makeTH<TH1F>(*fs, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 400, 0.0, 400.0);
+    hElectronEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
+    hElectronEta_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
 
     bDecision = false;
     bPassedElecID = false;
