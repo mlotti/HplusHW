@@ -14,7 +14,7 @@ void HLTTauEmulation::setParameters(double tauPt,double lTrackPt) {
         tauLTrkCut = lTrackPt;
 }
 
-bool HLTTauEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup, LorentzVector cand){
+bool HLTTauEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup, std::vector<LorentzVector> cands){
 
 	bool passed = false;
 
@@ -22,10 +22,11 @@ bool HLTTauEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetu
         iEvent.getByLabel(tauSrc, htaus);
         edm::PtrVector<reco::CaloTau> taus = htaus->ptrVector();
 
-        for(edm::PtrVector<reco::CaloTau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+	for(std::vector<LorentzVector>::const_iterator iCand = cands.begin(); iCand!= cands.end(); ++iCand){
+          for(edm::PtrVector<reco::CaloTau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
                 edm::Ptr<reco::CaloTau> iTau = *iter;
 
-                double DR = ROOT::Math::VectorUtil::DeltaR(cand,iTau->p4());
+                double DR = ROOT::Math::VectorUtil::DeltaR(*iCand,iTau->p4());
 
                 if(DR > 0.4) continue;
 
@@ -41,6 +42,7 @@ bool HLTTauEmulation::passedEvent(const edm::Event& iEvent, const edm::EventSetu
 //                counter_l3++;
 
                 passed = true;
+	  }
         }
 
 	return passed;

@@ -18,12 +18,15 @@ class HLTNJetsEmulation {
 
 	void setParameters(int,double);
         bool passedEvent(const edm::Event&, const edm::EventSetup&,std::vector<LorentzVector>);
+	std::vector<LorentzVector> HLTJets();
 
     private:
         edm::InputTag jetSrc;
 
 	int    nJetsMin;
         double jetPtCut;
+
+	std::vector<LorentzVector> passedJets;
 };
 
 #endif

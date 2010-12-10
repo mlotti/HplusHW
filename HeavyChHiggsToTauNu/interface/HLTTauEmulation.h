@@ -7,6 +7,8 @@
 
 #include "DataFormats/TauReco/interface/CaloTau.h"
 
+#include <vector>
+
 typedef math::XYZTLorentzVector LorentzVector;
 
 class HLTTauEmulation {
@@ -15,7 +17,7 @@ class HLTTauEmulation {
 	~HLTTauEmulation();
 
 	void setParameters(double,double);
-	bool passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup,LorentzVector);
+	bool passedEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup,std::vector<LorentzVector>);
 
     private:
     	edm::InputTag tauSrc;

@@ -28,7 +28,15 @@ class TriggerEmulationEfficiency {
 	HLTPFMHTEmulation* hltPFMHTEmulation;
 	HLTNJetsEmulation* hltNJetsEmulation;
 
-	int allEvents,l1tau,l1quad,hltTau,hltMet,hltpfmht,hlt3jets,hlt4jets;
+	int allEvents,l1tau,l1_3j,l1quad,hltTau,hltMet,hltpfmht,hlt3jets,hlt4jets;
+	int passedTauMET,
+            passedTauPFMHT,
+            passedTau3j,
+            passedTau3jMET,
+            passedTau3jPFMHT,
+            passedTau4j,
+            passedTau4jMET,
+            passedTau4jPFMHT;
 };
 
 #endif
