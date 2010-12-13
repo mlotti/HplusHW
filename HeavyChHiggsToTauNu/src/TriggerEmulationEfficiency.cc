@@ -45,14 +45,14 @@ TriggerEmulationEfficiency::~TriggerEmulationEfficiency(){
 	  cout << "HLT 3jets passed " << passedhlt3jets << endl;
 	  cout << "HLT 4jets passed " << passedhlt4jets << endl;
 	  cout << endl;
-	  cout << "TauMET           " << passedTauMET << endl;
-	  cout << "TauPFMHT         " << passedTauPFMHT << endl;
-	  cout << "Tau3j            " << passedTau3j << endl;
-	  cout << "Tau3jMET         " << passedTau3jMET << endl;
-	  cout << "Tau3jPFMHT       " << passedTau3jPFMHT << endl;
-	  cout << "Tau4j            " << passedTau4j << endl;
-	  cout << "Tau4jMET         " << passedTau4jMET << endl;
-	  cout << "Tau4jPFMHT       " << passedTau4jPFMHT << endl;
+	  cout << "TauMET           " << passedTauMET << " " << float(passedTauMET)/allEvents << endl;
+	  cout << "TauPFMHT         " << passedTauPFMHT << " " << float(passedTauPFMHT)/allEvents << endl;
+	  cout << "Tau3j            " << passedTau3j << " " << float(passedTau3j)/allEvents << endl;
+	  cout << "Tau3jMET         " << passedTau3jMET << " " << float(passedTau3jMET)/allEvents << endl;
+	  cout << "Tau3jPFMHT       " << passedTau3jPFMHT << " " << float(passedTau3jPFMHT)/allEvents << endl;
+	  cout << "Tau4j            " << passedTau4j << " " << float(passedTau4j)/allEvents << endl;
+	  cout << "Tau4jMET         " << passedTau4jMET << " " << float(passedTau4jMET)/allEvents << endl;
+	  cout << "Tau4jPFMHT       " << passedTau4jPFMHT << " " << float(passedTau4jPFMHT)/allEvents << endl;
 	  cout << endl;
       	}
 	delete l1Emulation;
