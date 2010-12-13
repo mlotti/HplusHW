@@ -34,16 +34,16 @@ TriggerEmulationEfficiency::TriggerEmulationEfficiency(const edm::ParameterSet& 
 TriggerEmulationEfficiency::~TriggerEmulationEfficiency(){
       	if(allEvents > 0) {
 	  cout << "All events       " << allEvents << endl;
-	  cout << "L1 tau passed    " << passedL1tau << endl;
-          cout << "L1 3jets passed  " << passedL1_3j << endl;
-	  cout << "L1 quad passed   " << passedL1quad << endl;
-	  cout << "HLT Tau passed   " << passedhlttau << endl;
-	  cout << "HLT Tau3j passed " << passedhlttau3j << endl;
-	  cout << "HLT Tau4j passed " << passedhlttau4j << endl;
-	  cout << "HLT Met passed   " << passedhltMet << endl;
-	  cout << "HLT pfmht passed " << passedhltpfmht << endl;
-	  cout << "HLT 3jets passed " << passedhlt3jets << endl;
-	  cout << "HLT 4jets passed " << passedhlt4jets << endl;
+	  cout << "L1 tau passed    " << passedL1tau << " " << float(passedL1tau)/allEvents << endl;
+          cout << "L1 3jets passed  " << passedL1_3j << " " << float(passedL1_3j)/allEvents << endl;
+	  cout << "L1 quad passed   " << passedL1quad << " " << float(passedL1quad)/allEvents << endl;
+	  cout << "HLT Tau passed   " << passedhlttau << " " << float(passedhlttau)/allEvents << endl;
+	  cout << "HLT Tau3j passed " << passedhlttau3j << " " << float(passedhlttau3j)/allEvents << endl;
+	  cout << "HLT Tau4j passed " << passedhlttau4j << " " << float(passedhlttau4j)/allEvents << endl;
+	  cout << "HLT Met passed   " << passedhltMet << " " << float(passedhltMet)/allEvents << endl;
+	  cout << "HLT pfmht passed " << passedhltpfmht << " " << float(passedhltpfmht)/allEvents << endl;
+	  cout << "HLT 3jets passed " << passedhlt3jets << " " << float(passedhlt3jets)/allEvents << endl;
+	  cout << "HLT 4jets passed " << passedhlt4jets << " " << float(passedhlt4jets)/allEvents << endl;
 	  cout << endl;
 	  cout << "TauMET           " << passedTauMET << " " << float(passedTauMET)/allEvents << endl;
 	  cout << "TauPFMHT         " << passedTauPFMHT << " " << float(passedTauPFMHT)/allEvents << endl;
