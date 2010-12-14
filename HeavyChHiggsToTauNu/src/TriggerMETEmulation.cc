@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -21,8 +22,8 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hMetBeforeEmulation = fs->make<TH1F>("MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
-    hMetAfterEmulation = fs->make<TH1F>("MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
+    hMetBeforeEmulation = makeTH<TH1F>(*fs, "MetBeforeEmulation", "MetBeforeEmul", 100, 0.0, 300.0);
+    hMetAfterEmulation = makeTH<TH1F>(*fs, "MetAfterEmulation", "MetAfterEmul", 100, 0.0, 300.0);
   }
 
   TriggerMETEmulation::~TriggerMETEmulation() {}

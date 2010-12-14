@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -34,10 +35,10 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPt = fs->make<TH1F>("jet_pt", "het_pt", 100, 0., 200.);
-    hEta = fs->make<TH1F>("jet_eta", "jet_eta", 100, -5., 5.);
-    hNumberOfSelectedJets = fs->make<TH1F>("NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = fs->make<TH1F>("deltaPhiJetMet", "deltaPhiJetMet", 60, 0., 180.); 
+    hPt = makeTH<TH1F>(*fs, "jet_pt", "het_pt", 100, 0., 200.);
+    hEta = makeTH<TH1F>(*fs, "jet_eta", "jet_eta", 100, -5., 5.);
+    hNumberOfSelectedJets = makeTH<TH1F>(*fs, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
+    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 60, 0., 180.); 
  }
 
   JetSelection::~JetSelection() {}

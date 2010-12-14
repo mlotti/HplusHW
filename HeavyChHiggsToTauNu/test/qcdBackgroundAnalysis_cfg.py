@@ -83,9 +83,16 @@ process.tauHLTMatcher = cms.EDProducer("TauHLTMatchProducer",
 
 ################################################################################
 
+# Prescale weight
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = ["HLT_Jet30U"]
+
+
 # Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 process.signalAnalysis = cms.EDProducer("HPlusSignalAnalysisProducer",
+    prescaleSource = cms.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
     tauSelection = param.tauSelection,
     jetSelection = param.jetSelection,
@@ -103,6 +110,7 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
 process.signalAnalysisPath = cms.Path(
 #    process.patTriggerSequence *
     process.tauHLTMatcher *
+    process.hplusPrescaleWeightProducer
     process.signalAnalysis *
     process.signalAnalysisCounters
 )

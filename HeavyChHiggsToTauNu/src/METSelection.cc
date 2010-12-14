@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -21,11 +22,11 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hMet = fs->make<TH1F>("met", "met", 50, 0., 200.);
-    hMetSignif = fs->make<TH1F>("metSignif", "metSignif", 50, 0., 500.);
-    hMetSumEt  = fs->make<TH1F>("metSumEt", "metSumEt", 50, 0., 1500.);
-    hMetDivSumEt = fs->make<TH1F>("hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
-    hMetDivSqrSumEt = fs->make<TH1F>("hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
+    hMet = makeTH<TH1F>(*fs, "met", "met", 50, 0., 200.);
+    hMetSignif = makeTH<TH1F>(*fs, "metSignif", "metSignif", 50, 0., 500.);
+    hMetSumEt  = makeTH<TH1F>(*fs, "metSumEt", "metSumEt", 50, 0., 1500.);
+    hMetDivSumEt = makeTH<TH1F>(*fs, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
+    hMetDivSqrSumEt = makeTH<TH1F>(*fs, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
   }
 
   METSelection::~METSelection() {}

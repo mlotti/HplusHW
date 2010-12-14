@@ -16,7 +16,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 
 namespace edm {
   class ParameterSet;
@@ -72,6 +72,9 @@ namespace HPlus {
     // Count ftransverseMassCutCount;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
+
+    //
+    TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     // Histograms
     TH1 *hTransverseMass;

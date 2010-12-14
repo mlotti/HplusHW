@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -58,18 +59,18 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hMuonPt = fs->make<TH1F>("GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
-    hMuonEta = fs->make<TH1F>("GlobalMuonEta", "GlobalMuonEta", 60, -3., 3.);
-    hMuonPt_InnerTrack = fs->make<TH1F>("GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 400, 0., 400.);
-    hMuonEta_InnerTrack = fs->make<TH1F>("GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
-    hMuonPt_GlobalTrack = fs->make<TH1F>("GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 400, 0., 400.);
-    hMuonEta_GlobalTrack = fs->make<TH1F>("GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
-    hMuonPt_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 400, 0., 400.);
-    hMuonEta_AfterSelection = fs->make<TH1F>("GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
-    hMuonPt_InnerTrack_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 400, 0., 400.);
-    hMuonEta_InnerTrack_AfterSelection = fs->make<TH1F>("GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
-    hMuonPt_GlobalTrack_AfterSelection  = fs->make<TH1F>("GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
-    hMuonEta_GlobalTrack_AfterSelection = fs->make<TH1F>("GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
+    hMuonPt = makeTH<TH1F>(*fs, "GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
+    hMuonEta = makeTH<TH1F>(*fs, "GlobalMuonEta", "GlobalMuonEta", 60, -3., 3.);
+    hMuonPt_InnerTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 400, 0., 400.);
+    hMuonEta_InnerTrack = makeTH<TH1F>(*fs, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
+    hMuonPt_GlobalTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 400, 0., 400.);
+    hMuonEta_GlobalTrack = makeTH<TH1F>(*fs, "GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
+    hMuonPt_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 400, 0., 400.);
+    hMuonEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
+    hMuonPt_InnerTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 400, 0., 400.);
+    hMuonEta_InnerTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
+    hMuonPt_GlobalTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
+    hMuonEta_GlobalTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
   
     // Check here that the muon selection is reasonable
     if(fMuonSelection != "All" &&

@@ -40,6 +40,9 @@ process.source = cms.Source('PoolSource',
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
 
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
+print "GlobalTag="+dataVersion.getGlobalTag()
 
 ################################################################################
 
@@ -58,10 +61,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
     print "Running PAT on the fly"
-
-    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-    process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
-    print "GlobalTag="+dataVersion.getGlobalTag()
 
     # Jet trigger (for cleaning of tau->HLT matching
     jetTrigger = "HLT_Jet30U"
@@ -101,9 +100,17 @@ process.infoPath = cms.Path(
 )
 
 
-# Signal analysis module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Prescale weight
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+process.patSequence *= process.hplusPrescaleWeightProducer
+
+
+# Signal analysis module
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
+    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
     TriggerTauMETEmulation = param.TriggerTauMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
@@ -115,7 +122,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
     transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology
+    EvtTopology = param.EvtTopology,
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
 
 print "Trigger:", process.signalAnalysis.trigger

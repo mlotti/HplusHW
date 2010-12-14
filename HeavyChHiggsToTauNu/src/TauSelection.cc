@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -54,23 +55,23 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPt = fs->make<TH1F>("tau_pt", "tau_pt", 100, 0., 200.);
-    hEta = fs->make<TH1F>("tau_eta", "tau_eta", 60, -3., 3.);
-    hPtAfterTauSelCuts = fs->make<TH1F>("tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
-    hEtaAfterTauSelCuts = fs->make<TH1F>("tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
-    hEtaRtau = fs->make<TH1F>("tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
-    hLeadTrkPt = fs->make<TH1F>("tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
-    hIsolTrkPt = fs->make<TH1F>("tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
-    hIsolTrkPtSum = fs->make<TH1F>("tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
-    hIsolTrkPtSumVsPtCut = fs->make<TH2F>("tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
-    hNIsolTrksVsPtCut = fs->make<TH2F>("tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
-    hIsolMaxTrkPt = fs->make<TH1F>("tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
-    hnProngs = fs->make<TH1F>("tau_nProngs", "tau_nProngs", 10, 0., 10.);
-    hRtau = fs->make<TH1F>("tau_Rtau", "tau_Rtau", 100, 0., 1.2);
-    hDeltaE = fs->make<TH1F>("tau_DeltaE", "tau_DeltaE", 100, 0., 1.);
-    hFlightPathSignif = fs->make<TH1F>("tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 10);
-    hInvMass = fs->make<TH1F>("tau_InvMass", "tau_InvMass", 50, 0., 5.);
-    hbyTaNC = fs->make<TH1F>("tau_TaNC", "tau_TaNC", 100, 0., 1.);
+    hPt = makeTH<TH1F>(*fs, "tau_pt", "tau_pt", 100, 0., 200.);
+    hEta = makeTH<TH1F>(*fs, "tau_eta", "tau_eta", 60, -3., 3.);
+    hPtAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
+    hEtaAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
+    hEtaRtau = makeTH<TH1F>(*fs, "tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
+    hLeadTrkPt = makeTH<TH1F>(*fs, "tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
+    hIsolTrkPt = makeTH<TH1F>(*fs, "tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
+    hIsolTrkPtSum = makeTH<TH1F>(*fs, "tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
+    hIsolTrkPtSumVsPtCut = makeTH<TH2F>(*fs, "tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
+    hNIsolTrksVsPtCut = makeTH<TH2F>(*fs, "tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
+    hIsolMaxTrkPt = makeTH<TH1F>(*fs, "tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
+    hnProngs = makeTH<TH1F>(*fs, "tau_nProngs", "tau_nProngs", 10, 0., 10.);
+    hRtau = makeTH<TH1F>(*fs, "tau_Rtau", "tau_Rtau", 100, 0., 1.2);
+    hDeltaE = makeTH<TH1F>(*fs, "tau_DeltaE", "tau_DeltaE", 100, 0., 1.);
+    hFlightPathSignif = makeTH<TH1F>(*fs, "tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 10);
+    hInvMass = makeTH<TH1F>(*fs, "tau_InvMass", "tau_InvMass", 50, 0., 5.);
+    hbyTaNC = makeTH<TH1F>(*fs, "tau_TaNC", "tau_TaNC", 100, 0., 1.);
     
     // Check that tauID algorithm selection is ok
     if     (fSelection == "CaloTauCutBased")             fTauIDType = kTauIDCaloTauCutBased;

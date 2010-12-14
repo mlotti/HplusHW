@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -25,12 +26,12 @@ namespace HPlus {
 
   void CorrelationAnalysis::init(){
     edm::Service<TFileService> fs;
-    hPtB1 = fs->make<TH1F>("bjet1_pt", "bjet1_pt", 100, 0., 200.);
-    hPtB2 = fs->make<TH1F>("bjet2_pt", "bjet2_pt", 100, 0., 200.);
-    hEtaB1 = fs->make<TH1F>("bjet1_eta", "bjet1_eta", 60, -3., 3.);
-    hEtaB2 = fs->make<TH1F>("bjet2_eta", "bjet2_eta", 60, -3., 3.);
-    hDeltaR_tauB1 = fs->make<TH1F>("DeltaR_tauB1", "DeltaR_tauB1", 100, 0., 5.);
-    hDeltaR_tauB2 = fs->make<TH1F>("DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
+    hPtB1 = makeTH<TH1F>(*fs, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
+    hPtB2 = makeTH<TH1F>(*fs, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
+    hEtaB1 = makeTH<TH1F>(*fs, "bjet1_eta", "bjet1_eta", 60, -3., 3.);
+    hEtaB2 = makeTH<TH1F>(*fs, "bjet2_eta", "bjet2_eta", 60, -3., 3.);
+    hDeltaR_tauB1 = makeTH<TH1F>(*fs, "DeltaR_tauB1", "DeltaR_tauB1", 100, 0., 5.);
+    hDeltaR_tauB2 = makeTH<TH1F>(*fs, "DeltaR_tauB2", "DeltaR_tauB2", 100, 0., 5.);
   }
 
   void CorrelationAnalysis::analyze(const edm::PtrVector<reco::Candidate>& input1,const edm::PtrVector<reco::Candidate>& input2){
