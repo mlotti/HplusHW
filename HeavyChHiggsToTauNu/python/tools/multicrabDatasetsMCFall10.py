@@ -119,8 +119,7 @@ datasets = {
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
-                "se_white_list": ["T2_FI_HIP"]
+                "number_of_jobs": 150,
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -144,8 +143,7 @@ datasets = {
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
-                "se_white_list": ["T2_FI_HIP"]
+                "number_of_jobs": 150,
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -193,8 +191,7 @@ datasets = {
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
-                "se_white_list": ["T2_FI_HIP"]
+                "number_of_jobs": 150,
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -218,8 +215,7 @@ datasets = {
             },
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 100,
-                "se_white_list": ["T2_FI_HIP"]
+                "number_of_jobs": 150,
             },
             "pattuple_v3": {
                 "dbs_url": common.pattuple_dbs,
@@ -290,7 +286,7 @@ datasets = {
             },
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v1/AODSIM",
-                "number_of_jobs": 620,
+                "number_of_jobs": 1000,
                 "use_server": 1,
             },
         },
