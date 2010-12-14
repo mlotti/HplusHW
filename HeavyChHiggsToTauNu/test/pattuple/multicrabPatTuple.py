@@ -64,7 +64,7 @@ def addOutputName(dataset):
 multicrab.forEachDataset(addOutputName)
 
 # For collision data stageout from US doesn't seem to be a problem
-allowUS = ["TT", "TTJets"]
+allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
 def blacklistUS(dataset):
     if dataset.isMC() and not dataset.getName() in allowUS:
         dataset.addBlackWhiteList("se_black_list", ["T2_US"])
