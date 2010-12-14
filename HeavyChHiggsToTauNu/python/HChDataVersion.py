@@ -121,7 +121,7 @@ class DataVersion:
         if not hasattr(self, "patMadhatter"):
             print "No default file for PAT in madhatter for dataVersion "+self.version
             return ""
-        if dcap:
+        if dcap and self.patMadhatter.find("/store") == 0:
             return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.patMadhatter
         else:
             return self.patMadhatter
@@ -136,7 +136,7 @@ class DataVersion:
         if not hasattr(self, "analysisMadhatter"):
             print "No default file for analysis in madhatter for dataVersion "+self.version
             return ""
-        if dcap:
+        if dcap and self.analysisMadhatter.find("/store") == 0:
             return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.analysisMadhatter
         else:
             return self.analysisMadhatter
