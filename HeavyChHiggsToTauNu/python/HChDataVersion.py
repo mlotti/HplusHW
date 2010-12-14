@@ -32,6 +32,9 @@ config = {
         "triggerProcess": "REDIGI38X",
         "patMadhatter": "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root"
     },
+    "38XredigiPU": {
+        "triggerProcess": "REDIGI38XPU"
+    },
     "38Xrelval": {
         "triggerProcess": "HLT",
         "patCastor": '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root',
