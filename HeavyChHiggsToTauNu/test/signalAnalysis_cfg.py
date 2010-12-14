@@ -102,15 +102,15 @@ process.infoPath = cms.Path(
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Prescale weight
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-process.patSequence *= process.hplusPrescaleWeightProducer
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+#process.patSequence *= process.hplusPrescaleWeightProducer
 
 
 # Signal analysis module
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
-    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
+#    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
     TriggerTauMETEmulation = param.TriggerTauMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
