@@ -281,6 +281,26 @@ datasets = {
             }
         },
     },
+    "QCD_Pt300to380": {
+        "dataVersion": "36X",
+        "crossSection": 9.593e+02,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-300to380_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt380to470": {
+        "dataVersion": "36X",
+        "crossSection": 2.434e+02,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-380to470_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+        },
+    },
 
     # Electroweak (Summer10)
     "TTbar": {

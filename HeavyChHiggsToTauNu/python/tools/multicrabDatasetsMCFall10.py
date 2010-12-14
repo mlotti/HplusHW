@@ -233,6 +233,16 @@ datasets = {
             }
         },
     },
+    "QCD_Pt300to470_Fall10": {
+        "dataVersion": "38X",
+        "crossSection": 1.168e+03,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 150 # Adjusted for PATtuple file size
+            },
+        },
+    },
 
 
     # Electroweak (Fall10)
