@@ -38,6 +38,7 @@ multicrab.addDatasets(
 #        "QCD_Pt170to300_Fall10",
 #        "TT",
 #        "TTJets",
+#        "WJets_Fall10"
         # Background MC
 #        "QCD_Pt30to50",
 #        "QCD_Pt50to80",
