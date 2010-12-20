@@ -196,7 +196,7 @@ class MuonAnalysis:
         if dataVersion.isData():
             counters = dataSelectionCounters
         self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=counters)
-        self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
+        #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
 
@@ -656,6 +656,7 @@ def createAnalysis2(**kwargs):
         kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
         kwargs["muonPtCut"] = pt
         kwargs["metCut"] = met
+        kwargs["njets"] = njets
         createAnalysis("noIsoNoVetoMetPF", **kwargs)
 
 createAnalysis2()
