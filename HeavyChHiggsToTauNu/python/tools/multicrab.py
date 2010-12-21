@@ -242,11 +242,11 @@ class MulticrabDataset:
         if use: value=1
         self.data["use_server"] = value
 
-    def addArg(self, arg):
+    def appendArg(self, arg):
         """Append an argument to pycfg_params list."""
         self.args.append(arg)
 
-    def addLine(self, line):
+    def appendLine(self, line):
         """Append a line to multicrab.cfg configuration (for this dataset only).
 
         Line can be any string multicrab eats, e.g.
@@ -256,7 +256,7 @@ class MulticrabDataset:
 
         self.lines.append(line)
 
-    def addBlackWhiteList(self, blackWhiteList, sites):
+    def extendBlackWhiteList(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites.
 
         Parameters:
@@ -402,7 +402,7 @@ class Multicrab:
             self.filesToCopy.append(pyConfig)
             self.commonLines.append("CMSSW.pset = "+pyConfig)
 
-    def addDatasets(self, dataInput, datasetNames):
+    def extendDatasets(self, dataInput, datasetNames):
         """Extend the list of datasets for which the multicrab configuration is generated.
         Parameters:
 
@@ -488,14 +488,14 @@ class Multicrab:
             if "lumis_per_job" in d.data:
                 d.modifyLumisPerJob(func)
     
-    def addArgAll(self, arg):
+    def appendArgAll(self, arg):
         """Append an argument to the pycfg_params list for all datasets."""
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
-            d.addArg(arg)
+            d.appendArg(arg)
 
-    def addLineAll(self, line):
+    def appendLineAll(self, line):
         """Append a line to multicrab.cfg configuration for all datasets.
 
         Line can be any string multicrab eats, e.g.
@@ -505,9 +505,9 @@ class Multicrab:
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
-            d.addLine(line)
+            d.appendLine(line)
 
-    def addBlackWhiteListAll(self, blackWhiteList, sites):
+    def extendBlackWhiteListAll(self, blackWhiteList, sites):
         """Extend the CE/SE black/white list with a list of sites for all datasets.
 
         Parameters:
@@ -519,7 +519,7 @@ class Multicrab:
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
-            d.addBlackWhiteList(blackWhiteList, sites)
+            d.extendBlackWhiteList(blackWhiteList, sites)
 
     def addCommonLine(self, line):
         """Append a line to multicrab.cfg configuration to the [COMMON] section.

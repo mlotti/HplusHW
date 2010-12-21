@@ -23,7 +23,7 @@ if runPatOnTheFly:
 
 # Uncomment below the datasets you want to process
 # The dataset definitions are in python/tools/multicrabDatasets.py
-multicrab.addDatasets(pattupleVersion,
+multicrab.extendDatasets(pattupleVersion,
     [
         # Data
 #        "BTau_141950-144114", # v3, v6
@@ -64,7 +64,7 @@ multicrab.addDatasets(pattupleVersion,
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
 # CMS jobs typically go to korundi).
 if not runPatOnTheFly:
-    multicrab.addBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
 # If PAT is ran on the fly, add the
@@ -73,7 +73,7 @@ if not runPatOnTheFly:
 # adjusted for the pattuple file size, and when only histograms or
 # small ntuples are produced, stageout is not the issue
 if runPatOnTheFly:
-    multicrab.addArgAll("doPat=1")
+    multicrab.appendArgAll("doPat=1")
 
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)

@@ -48,7 +48,7 @@ usePatTuples = True
 if not usePatTuples:
     aodDatasets.extend(patDatasets)
 if len(aodDatasets) > 0:
-    multicrab.addDatasets("AOD", aodDatasets)
+    multicrab.extendDatasets("AOD", aodDatasets)
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
 
@@ -75,7 +75,7 @@ if usePatTuples:
 
 def modify(dataset):
     if dataset.getName() in aodDatasets:
-        dataset.addArg("doPat=1")
+        dataset.appendArg("doPat=1")
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
 

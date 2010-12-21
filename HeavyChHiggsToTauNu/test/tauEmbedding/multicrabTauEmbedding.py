@@ -24,7 +24,7 @@ if step in ["analysis", "analysisTau"]:
 
 multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
          
-multicrab.addDatasets(
+multicrab.extendDatasets(
     config[step]["input"],
     [
         # Data
@@ -37,7 +37,7 @@ multicrab.addDatasets(
         ])
 
 if step in ["generation", "embedding"]:
-    multicrab.addArgAll("overrideBeamSpot=1")
+    multicrab.appendArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v4" % step
@@ -58,15 +58,15 @@ def modify(dataset):
         if dataset.getName() == "WJets":
             dataset.setNumberOfJobs(50)
             if config[step]["input"] == "AOD":
-                dataset.addBlackWhiteList("se_white_list", ["T2_FI_HIP"])
+                dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
         if dataset.getName() == "TTJets":
             dataset.setNumberOfJobs(20)
 
-    dataset.addLine("USER.publish_data_name = "+name)
-    dataset.addLine("CMSSW.output_file = "+config[step]["output"])
+    dataset.appendLine("USER.publish_data_name = "+name)
+    dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
 
 def modifyAnalysis(dataset):
-    dataset.addBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
+    dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
 #    if step == "analysisTau":
 #        if dataset.getName() == "WJets":
 #            dataset.setNumberOfJobs(100)
