@@ -78,7 +78,6 @@ dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = Fals
 maxVertexZ = 1.0
 
 relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
-isolationCut = "%s < 0.05" % relIso
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetId = "emEnergyFraction() > 0.01 && jetID().n90Hits > 1 && jetID().fHPD < 0.98"
@@ -186,7 +185,8 @@ if dataVersion.isData():
 
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
-    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False, muonPtCut=30, metCut=20, njets=3, jets=jets, doJetId=False):
+    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False,
+                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
@@ -195,6 +195,7 @@ class MuonAnalysis:
         self._metCut = metCutString % metCut
         self._njets = njets
         self._jets = jets
+        self._isolationCut = "%s < %f" % (relIso, muonIsolationCut)
 
         counters = []
         if dataVersion.isData():
@@ -299,7 +300,7 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(isolationCut)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCutString)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
@@ -474,7 +475,15 @@ class MuonAnalysis:
 
     def muonIsolation(self):
         name = "MuonIsolation"
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, isolationCut)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCutString)
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonIsolationCustom(self, postfix, cut):
+        name = "MuonIsolation"+postfix
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (relIso, cut))
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -653,7 +662,26 @@ class MuonAnalysis:
 
         self.createAnalysisPath()
 
+    def muonLast(self):
+        self.triggerPrimaryVertex()
+        self.jetSelection()
+        if self.doJetId:
+            self.jetId()
+        self.jetMultiplicityFilter()
+        self.muonCleaningFromJet()
+
+        self.tightMuonSelection()
+        self.muonKinematicSelection()
+        self.muonQuality()
+        self.muonImpactParameter()
+        self.muonVertexDiff()
+        self.muonIsolationCustom("050", 0.5)
+        self.muonIsolationCustom("015", 0.15)
+        self.muonIsolationCustom("010", 0.1)
+        self.muonIsolationCustom("005", 0.05)
+
     def noMuon(self):
+        self.triggerPrimaryVertex()
         self.jetSelection()
         if self.doJetId:
             self.jetId()
@@ -663,6 +691,7 @@ class MuonAnalysis:
         self.createAnalysisPath()
 
     def noMuonPF(self):
+        self.triggerPrimaryVertex()
         self.jetSelection()
         if self.doJetId:
             self.jetId(pf=True)
