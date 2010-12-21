@@ -300,7 +300,7 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCutString)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCut)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
@@ -408,7 +408,7 @@ class MuonAnalysis:
 
     def jetMultiplicityFilter(self, analyze=True):
         name = "JetMultiplicityCut"
-        self.selectedJets = self.analysis.addNumberCut(name, self.selectedJets, minNumber=self._njets)
+        self.analysis.addNumberCut(name, self.selectedJets, minNumber=self._njets)
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name)
             self.cloneMultipAnalyzer()
@@ -475,7 +475,7 @@ class MuonAnalysis:
 
     def muonIsolation(self):
         name = "MuonIsolation"
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCutString)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCut)
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -679,6 +679,10 @@ class MuonAnalysis:
         self.muonIsolationCustom("015", 0.15)
         self.muonIsolationCustom("010", 0.1)
         self.muonIsolationCustom("005", 0.05)
+        self.muonVeto()
+        self.electronVeto()
+
+        self.createAnalysisPath()
 
     def noMuon(self):
         self.triggerPrimaryVertex()
@@ -722,6 +726,7 @@ def createAnalysis2(**kwargs):
         createAnalysis("noIsoNoVetoMet", **kwargs)
         createAnalysis("noMuon", **kwargs)
         createAnalysis("noMuonPF", jets=jetsPF, **kwargs)
+        createAnalysis("muonLast", **kwargs)
 
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
