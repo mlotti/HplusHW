@@ -13,6 +13,7 @@
   <use   name="DataFormats/WrappedStdDictionaries"/>
   <use   name="DataFormats/HepMCCandidate"/>
   <use   name="CommonTools/UtilAlgos"/>
+  <use   name="CommonTools/TriggerUtils"/>
   <use   name="HLTrigger/HLTcore"/>
   <use   name="SimDataFormats/GeneratorProducts"/>
   <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>

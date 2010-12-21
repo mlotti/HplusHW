@@ -230,10 +230,16 @@ class MulticrabDataset:
             if self._lumiMaskRequired:
                 raise Exception("Dataset '%s' requires lumi mask but doesn't have lumi_mask set!" % self.name)
 
-
         for key in ["ce_white_list", "se_white_list", "ce_black_list", "se_black_list"]:
             try:
                 ret += "GRID.%s = %s\n" % (key, ",".join(self.data[key]))
+                del dataKeys[dataKeys.index(key)]
+            except KeyError:
+                pass
+
+        for key in ["use_server"]:
+            try:
+                ret += "CRAB.%s = %s\n" % (key, self.data[key])
                 del dataKeys[dataKeys.index(key)]
             except KeyError:
                 pass

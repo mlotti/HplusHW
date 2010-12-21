@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -32,7 +33,7 @@ namespace HPlus {
     	}
 
         edm::Service<TFileService> fs;
-        hHltMet = fs->make<TH1F>("hlt_met", "hlt_met", 200, 0., 200.);
+        hHltMet = makeTH<TH1F>(*fs, "hlt_met", "hlt_met", 200, 0., 200.);
 
   }
 

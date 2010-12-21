@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -20,9 +21,9 @@ namespace HPlus {
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
-    hClosestDeltaPhi = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaPhiToJets = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets;#Delta#phi;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaPhiToTaus = fs->make<TH1F>("Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
   }
 
   FakeMETVeto::~FakeMETVeto() {}

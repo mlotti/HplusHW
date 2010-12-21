@@ -1,4 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -23,14 +25,14 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hDiscr = fs->make<TH1F>("jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 80, -10, 10);
-    hPt = fs->make<TH1F>("bjet_pt", "bjet_pt", 100, 0., 200.);
-    hPt1 = fs->make<TH1F>("bjet1_pt", "bjet1_pt", 100, 0., 200.);
-    hPt2 = fs->make<TH1F>("bjet2_pt", "bjet2_pt", 100, 0., 200.);
-    hEta = fs->make<TH1F>("bjet_eta", "bjet_pt", 60, -3., 3.);
-    hEta1 = fs->make<TH1F>("bjet1_eta", "bjet1_pt", 60, -3., 3.);
-    hEta2 = fs->make<TH1F>("bjet2_eta", "bjet2_pt", 60, -3., 3.);
-    hNumberOfBtaggedJets = fs->make<TH1F>("NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    hDiscr = makeTH<TH1F>(*fs, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 80, -10, 10);
+    hPt = makeTH<TH1F>(*fs, "bjet_pt", "bjet_pt", 100, 0., 200.);
+    hPt1 = makeTH<TH1F>(*fs, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
+    hPt2 = makeTH<TH1F>(*fs, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
+    hEta = makeTH<TH1F>(*fs, "bjet_eta", "bjet_pt", 60, -3., 3.);
+    hEta1 = makeTH<TH1F>(*fs, "bjet1_eta", "bjet1_pt", 60, -3., 3.);
+    hEta2 = makeTH<TH1F>(*fs, "bjet2_eta", "bjet2_pt", 60, -3., 3.);
+    hNumberOfBtaggedJets = makeTH<TH1F>(*fs, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
   }
 
   BTagging::~BTagging() {}

@@ -259,6 +259,22 @@ datasets = {
             }
         },
     },
+    "WJets_Fall10": {
+        "dataVersion": "38Xrelval",
+        "crossSection": 24640,
+        "data": {
+            "RECO": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 1000,
+                "use_server": 1,
+            },
+            "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall10-START38_V12-v1/AODSIM",
+                "number_of_jobs": 620,
+                "use_server": 1,
+            },
+        },
+    },
 
 
     # Backgrounds for electroweak background measurement (Fall10)

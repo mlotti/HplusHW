@@ -2,6 +2,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -65,8 +66,8 @@ namespace HPlus {
     myTree->Branch("fDiJetMassClosestToW", &fDiJetMassClosestToW);
 
     // Book histograms filled in the analysis body
-    hAlphaTInvMass = fs->make<TH1F>("alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
-    hAlphaTDiJetMassClosestToW= fs->make<TH1F>("alphaT-DiJetMassClosestToW", "alphaT-DiJetMassClosestToW", 150, 0.0, 300.0);    
+    hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
+    hAlphaTDiJetMassClosestToW= makeTH<TH1F>(*fs, "alphaT-DiJetMassClosestToW", "alphaT-DiJetMassClosestToW", 150, 0.0, 300.0);    
     
   }
 
