@@ -9,6 +9,16 @@ import multicrabDatasets
 import certifiedLumi
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
+    """Returns the list of CRAB task directories from a MultiCRAB configuration.
+    
+    The order of the task names is the same as they are in the
+    configuration file.
+
+    If opts object contains 'dirs' attribute, the content of it is
+    returned instead. The use case is that one can give e.g.
+    OptionParser object, whose 'dirs' option is optional, to override
+    the default behaviour of reading the configuration file.
+    """
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
         return opts.dirs
     else:
@@ -30,11 +40,13 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 
 
 def addOptions(parser):
+    """Add common MultiCRAB options to OptionParser object."""
     parser.add_option("--dir", "-d", dest="dirs", type="string", action="append", default=[],
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
 
 
 def checkCrabInPath():
+    """Raise OSError if 'crab' command is not found in $PATH."""
     try:
         retcode = subprocess.call(["crab"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError, e:
@@ -44,6 +56,7 @@ def checkCrabInPath():
             raise e
 
 def createTaskDir():
+    """Create 'standard' multicrab task directory and return the name of it."""
     dirname = "multicrab_" + time.strftime("%y%m%d_%H%M%S")
     os.mkdir(dirname)
     return dirname
@@ -52,6 +65,13 @@ def printAllDatasets(details=False):
     multicrabDatasets.printAllDatasets(details)
 
 def filterRuns(lumiList, runMin, runMax):
+    """Select runs [runMin, runMax] from lumiList.
+
+    lumiList is assumed to be FWCore.PythonUtilities.LumiList.LumiList
+    object.
+
+    Returns the modified LumiList object.
+    """
     # From FWCore/PythonUtilities/scripts/filterJSON.py
     runsToRemove = []
     allRuns = lumiList.getRuns()
@@ -65,7 +85,26 @@ def filterRuns(lumiList, runMin, runMax):
     return lumiList
 
 class MulticrabDataset:
+    """Dataset class for generating multicrab.cfg."""
+
     def __init__(self, name, dataInput, lumiMaskDir):
+        """Constructor.
+
+        Parameters:
+        name         Name of the dataset (i.e. dataset goes to [name] section
+                     in multicrab.cfg.
+        dataInput    String of data input type (e.g. 'RECO', 'AOD', 'pattuple_v6'),
+                     technically the key to the 'data' dictionary in multicrab dataset
+                     configuration.
+        lumiMaskDir  Directory where lumi mask (aka JSON) files are
+                     (can be absolute or relative to the working directory)
+
+        The constructor fetches the dataset configuration from
+        multicrabDatasets module. It makes some sanity checks for the
+        configuration, and also filters the runs of the lumi mask if
+        a run range is explicitly given.
+        """
+
         self.name = name
         self.args = []
         self.lines = []
@@ -156,6 +195,15 @@ class MulticrabDataset:
         self.data["number_of_jobs"] = int(njobs)
 
     def modifyNumberOfJobs(self, func):
+        """Modify number of jobs with a function.
+
+        The function gets the original number of jobs as an argument,
+        and the function should return a number for the new number of
+        jobs.
+
+        Example:  obj.modifyNumberOfJobs(lambda n: 2*n)
+        """
+
         if"lumis_per_job" in self.data:
             raise Exception("Unable to modify number_of_jobs, lumis_per_job already set!")
         self.data["number_of_jobs"] = int(func(self.data["number_of_jobs"]))
@@ -166,17 +214,57 @@ class MulticrabDataset:
         self.data["lumis_per_job"] = int(nlumis)
 
     def modifyLumisPerJob(self, func):
+        """Modify number of lumis per job with a function.
+
+        The function gets the original number of lumis as an argument,
+        and the function should return a number for the new number of
+        lumis per job
+
+        Example:  obj.modifyLumisPerJob(lambda n: 2*n)
+        """
+
         if "number_of_jobs" in self.data:
             raise Exception("Unable modify number_of_jobs, lumis_per_job already set")
         self.data["lumis_per_job"] = int(func(self.data["lumis_per_job"]))
 
+    def useServer(self, use):
+        """Set the use_server flag.
+
+        Parameters:
+        use   Boolean, True for use_server=1, False for use_server=0
+
+        The use of CRAB server can be controlled at dataset level
+        granularity. This method can be used to override the default
+        behaviour taken from the configuration in multicrabDatasets module.
+        """
+
+        value=0
+        if use: value=1
+        self.data["use_server"] = value
+
     def addArg(self, arg):
+        """Append an argument to pycfg_params list."""
         self.args.append(arg)
 
     def addLine(self, line):
+        """Append a line to multicrab.cfg configuration (for this dataset only).
+
+        Line can be any string multicrab eats, e.g.
+        'USER.publish_dataset = foo'
+        'CMSSW.output_file = foo.root'
+        """
+
         self.lines.append(line)
 
     def addBlackWhiteList(self, blackWhiteList, sites):
+        """Extend the CE/SE black/white list with a list of sites.
+
+        Parameters:
+        blackWhiteList    String specifying which list is modified
+                          ('ce_black_list', 'ce_white_list', 'se_black_list', 'se_white_list')
+        sites             List of sites to extend the given black/white list
+        """
+
         if blackWhiteList not in self.blackWhiteListParams:
             raise Exception("Black/white list parameter is '%s', should be on of %s" % (blackWhiteList, ", ".join(self.blackWhiteListParams)))
         if blackWhiteList in self.data:
@@ -184,16 +272,30 @@ class MulticrabDataset:
         else:
             self.data[blackWhiteList] = sites[:]
 
-    def writeGeneratedFiles(self, directory):
+    def _writeGeneratedFiles(self, directory):
+        """Write generated files to a directory.
+
+        The method was intended to be called from the Multicrab class.
+        """
         for fname, content in self.generatedFiles:
             f = open(os.path.join(directory, fname), "wb")
             f.write(content)
             f.close()
 
-    def getCopyFiles(self):
+    def _getCopyFiles(self):
+        """Get the list of files to be copied to the multicrab task directory.
+
+        The method was intended to be called from Multicrab class.
+        """
+
         return self.filesToCopy
 
-    def getConfig(self):
+    def _getConfig(self):
+        """Generate the multicrab.cfg configuration fragment.
+
+        The method was intended to be called from Multicrab class.
+        """
+
         dataKeys = self.data.keys()
 
         args = ["dataVersion=%s" % self.data["dataVersion"]]
@@ -251,7 +353,21 @@ class MulticrabDataset:
 
 
 class Multicrab:
+    """Represents the entire multicrab configuration for the configuration generation."""
+
     def __init__(self, crabConfig, pyConfig=None, lumiMaskDir=""):
+        """Constructor.
+
+        Parameters:
+        crabConfig   String for crab configuration file
+        pyConfig     If set, override the python CMSSW configuration file
+                     of crabConfig
+        lumiMaskDir  The directory for lumi mask (aka JSON) files, can
+                     be absolute or relative path
+
+        Parses the crabConfig file for CMSSW.pset and CMSSW.lumi_mask.
+        Ensures that the CMSSW configuration file exists.
+        """
         if not os.path.exists(crabConfig):
             raise Exception("CRAB configuration file '%s' doesn't exist!" % crabConfig)
 
@@ -287,11 +403,27 @@ class Multicrab:
             self.commonLines.append("CMSSW.pset = "+pyConfig)
 
     def addDatasets(self, dataInput, datasetNames):
+        """Extend the list of datasets for which the multicrab configuration is generated.
+        Parameters:
+
+        dataInput    String of data input type (e.g. 'RECO', 'AOD', 'pattuple_v6'),
+                     technically the key to the 'data' dictionary in multicrab dataset
+                     configuration.
+        datasetNames List of strings of the dataset names.
+        """
+        if self.datasets != None:
+            raise Exception("Unable to add more datasets, the dataset objects are already created")
+
         self.datasetNames.extend([(name, dataInput) for name in datasetNames])
 
     def _createDatasets(self):
+        """Create the MulticrabDataset objects.
+
+        This method was intended to be called internally.
+        """
+
         if len(self.datasetNames) == 0:
-            raise Exception("Call setDatasets() first!")
+            raise Exception("Call addDatasets() first!")
 
         self.datasets = []
         self.datasetMap = {}
@@ -302,12 +434,23 @@ class Multicrab:
             self.datasetMap[dname] = dset
 
     def getDataset(self, name):
+        """Get MulticrabDataset object for name."""
+
         if self.datasets == None:
             self._createDatasets()
 
         return self.datasetMap[name]
 
     def forEachDataset(self, function):
+        """Apply a function for each MulticrabDataset.
+
+        The function should take the MulticrabDataset object as an
+        argument. The return value of the function is not used.
+
+        Example:
+        obj.forEachDataset(lambda d: d.setNumberOfJobs(6))
+        """
+
         if self.datasets == None:
             self._createDatasets()
 
@@ -315,6 +458,14 @@ class Multicrab:
             function(d)
 
     def modifyNumberOfJobsAll(self, func):
+        """Modify the number of jobs of all dataset with a function.
+
+        The function gets the original number of jobs as an argument,
+        and the function should return a number for the new number of
+        jobs.
+
+        Example:  obj.modifyNumberOfJobsAll(lambda n: 2*n)
+        """
         if self.datasets == None:
             self._createDatasets()
 
@@ -323,6 +474,14 @@ class Multicrab:
                 d.modifyNumberOfJobs(func)
 
     def modifyLumisPerJobAll(self, func):
+        """Modify the lumis per job s of all dataset with a function.
+
+        The function gets the original lumis per job as an argument,
+        and the function should return a number for the new number of
+        lumis per job.
+
+        Example:  obj.modifyLumisPerJobAll(lambda n: 2*n)
+        """
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
@@ -330,27 +489,53 @@ class Multicrab:
                 d.modifyLumisPerJob(func)
     
     def addArgAll(self, arg):
+        """Append an argument to the pycfg_params list for all datasets."""
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
             d.addArg(arg)
 
     def addLineAll(self, line):
+        """Append a line to multicrab.cfg configuration for all datasets.
+
+        Line can be any string multicrab eats, e.g.
+        'USER.publish_dataset = foo'
+        'CMSSW.output_file = foo.root'
+        """
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
             d.addLine(line)
 
     def addBlackWhiteListAll(self, blackWhiteList, sites):
+        """Extend the CE/SE black/white list with a list of sites for all datasets.
+
+        Parameters:
+        blackWhiteList    String specifying which list is modified
+                          ('ce_black_list', 'ce_white_list', 'se_black_list', 'se_white_list')
+        sites             List of sites to extend the given black/white list
+        """
+
         if self.datasets == None:
             self._createDatasets()
         for d in self.datasets:
             d.addBlackWhiteList(blackWhiteList, sites)
 
     def addCommonLine(self, line):
-        self.commonLines = []
+        """Append a line to multicrab.cfg configuration to the [COMMON] section.
 
-    def getConfig(self):
+        Line can be any string multicrab eats, e.g.
+        'USER.publish_dataset = foo'
+        'CMSSW.output_file = foo.root'
+        """
+        self.commonLines.append(line)
+
+    def _getConfig(self):
+        """Generate the multicrab configration as a string.
+
+        This method was intended to be called internally.
+        """
+
         if self.datasets == None:
             self._createDatasets()
 
@@ -362,31 +547,46 @@ class Multicrab:
             ret += line + "\n"
 
         for d in self.datasets:
-            ret += "\n" + d.getConfig()
+            ret += "\n" + d._getConfig()
 
         return ret
 
-    def writeConfig(self, filename):
+    def _writeConfig(self, filename):
+        """Write the multicrab configuration to a given file name.
+
+        This method was intended to be called internally.
+        """
         f = open(filename, "wb")
-        f.write(self.getConfig())
+        f.write(self._getConfig())
         f.close()
 
         directory = os.path.dirname(filename)
         for d in self.datasets:
-            d.writeGeneratedFiles(directory)
+            d._writeGeneratedFiles(directory)
 
         print "Wrote multicrab configuration to %s" % filename
         
 
     def createTasks(self, configOnly=False):
+        """Create the multicrab task.
+
+        Parameters:
+        configOnly   If true, generate the configuration only.
+
+        Creates a new directory for the CRAB tasks, generates the
+        multicrab.cfg in there, copies and generates the necessary
+        files to the directory and optionally run 'multicrab -create'
+        in the directory.
+        """
+
         checkCrabInPath()
         dirname = createTaskDir()
 
-        self.writeConfig(os.path.join(dirname, "multicrab.cfg"))
+        self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
 
         files = self.filesToCopy[:]
         for d in self.datasets:
-            files.extend(d.getCopyFiles())
+            files.extend(d._getCopyFiles())
         
         # Unique list of files
         keys = {}
