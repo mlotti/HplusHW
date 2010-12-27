@@ -10,5 +10,9 @@ def getSignalTrigger(dataVersion):
     else:
         if dataVersion.is38X():
             return "HLT_SingleIsoTau20_Trk15_MET20"
-        else:
+        if dataVersion.is39X():
+            return "HLT_SingleIsoTau20_Trk15_MET25_v4"
+        elif dataVersion.is36X():
             return "HLT_SingleLooseIsoTau20" # only tau trigger available in 36X MC
+        else:
+            raise Exception("Unsupported data version!")
