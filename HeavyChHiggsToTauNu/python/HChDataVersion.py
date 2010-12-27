@@ -55,7 +55,7 @@ config = {
 class DataVersion:
     def __init__(self, dataVersion):
         if not dataVersion in config:
-            raise Exception("Unknown dataVersion '%s', look HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion for allowed versions")
+            raise Exception("Unknown dataVersion '%s', look HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion for allowed versions" % dataVersion)
 
         conf = config[dataVersion]
 
@@ -69,8 +69,8 @@ class DataVersion:
         # Collision data
         if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
-            self.globalTag = "GR_R_38X_V15::All"
-
+            self.globalTag = "GR_R_39X_V5::All"
+            
             self.is_runA = False
             self.is_runB = False
             if dataVersion == "38XdataRun2010A":
@@ -81,14 +81,20 @@ class DataVersion:
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START38_V14::All"
+            self.globalTag = "START39_V8::All"
 
         self.is_35X = False
+        self.is_36X = False
         self.is_38X = False
+        self.is_39X = False
         if dataVersion in ["35X", "35Xredigi"]:
             self.is_35X = True
+        elif dataVersion in ["36X", "36Xdata", "36Xsptring10"]:
+            self.is_36X = True
         elif dataVersion in ["38X", "38Xrelval", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_38X = True
+        elif dataVersion in ["39Xredigi"]:
+            self.is_39X = True
 
     def isData(self):
         return self.is_data
@@ -105,8 +111,14 @@ class DataVersion:
     def is35X(self):
         return self.is_35X
 
+    def is36X(self):
+        return self.is_36X
+
     def is38X(self):
         return self.is_38X
+
+    def is39X(self):
+        return self.is_39X
 
     def getTriggerProcess(self):
         return self.trigger
