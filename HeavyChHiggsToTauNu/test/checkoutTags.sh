@@ -14,6 +14,7 @@
 # 11.11.2010/M.Kortelainen CMSSW_3_8_6 Moved the tau embedding tag here since it is needed for compilation
 # 12.11.2010/M.Kortelainen CMSSW_3_8_6 Removed the tau embedding tag (added workaround)
 # 9.12.2010/M.Kortelainen CMSSW_3_8_7 Updated PAT tags to latest recipe, updated lumi tag
+# 27.12.2010/M.Kortelainen CMSSW_3_9_7 Updated tags to latest recipes
 
 #TARGET="analysis"
 #if [ "x$#" = "x1" ]; then
@@ -23,18 +24,12 @@
 
 # Common
 
-cvs co -r V06-01-08 DataFormats/PatCandidates
-cvs co -r V08-00-54 PhysicsTools/PatAlgos
-cvs up -r 1.30      PhysicsTools/PatAlgos/python/tools/tauTools.py
-cvs co -r V03-09-16 PhysicsTools/PatUtils
-cvs co -r V02-01-01 RecoLuminosity/LumiDB
-cvs co -r V01-04-00 FWCore/PythonUtilities
 
 # PATTuple
 #if [ "x$TARGET" = "xpattuple" ]; then
-cvs co -r V00-02-01 ElectroWeakAnalysis/WENu
-cvs co -r V00-24-00 RecoTauTag/Configuration
-cvs co -r V00-24-00 RecoTauTag/RecoTau
+cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
+cvs co -r V00-03-00 ElectroWeakAnalysis/WENu
+addpkg RecoTauTag/RecoTau
 cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByCharge.cc
 cvs co -r 1.2 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByDeltaE.cc
 cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByFlightPathSignificance.cc
