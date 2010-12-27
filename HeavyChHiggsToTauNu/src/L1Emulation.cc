@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/L1Emulation.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 L1Emulation::L1Emulation(const edm::ParameterSet& iConfig) :
     l1tauSrc(iConfig.getParameter<edm::InputTag>("L1TauSrc")),

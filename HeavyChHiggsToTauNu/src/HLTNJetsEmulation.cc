@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HLTNJetsEmulation.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "Math/VectorUtil.h"
 
 

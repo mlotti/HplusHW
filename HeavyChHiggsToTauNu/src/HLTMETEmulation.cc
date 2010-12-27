@@ -1,4 +1,5 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HLTMETEmulation.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 HLTMETEmulation::HLTMETEmulation(const edm::ParameterSet& iConfig) :
     metSrc(iConfig.getParameter<edm::InputTag>("metSrc"))
