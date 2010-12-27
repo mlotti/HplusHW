@@ -19,7 +19,7 @@ bool L1Emulation::passedEvent(const edm::Event& iEvent, const edm::EventSetup& i
 
 // L1 tau
         edm::Handle<l1extra::L1JetParticleCollection> l1TauHandle;
-std::cout << "l1tauSrc " << l1tauSrc.label() << std::endl;
+
         iEvent.getByLabel(l1tauSrc, l1TauHandle);
         const l1extra::L1JetParticleCollection & l1Taus = *(l1TauHandle.product());
         l1extra::L1JetParticleCollection::const_iterator iJet;

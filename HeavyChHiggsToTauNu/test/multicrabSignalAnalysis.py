@@ -30,12 +30,16 @@ multicrab.extendDatasets(pattupleVersion,
 #        "BTau_146240-147454", # v3
 #        "BTau_146240-148107", # v6
 #        "BTau_148108-148864", # v6
+        # Data for QCD
+#        "JetMETTau_136033-141887", # v6
+#        "JetMET_141950-144114",    # v6
+#        "Jet_146240-148058",       # v6
         # MC Signal Fall10
-#        "TTToHplusBWB_M90",  # not yet ready
-#        "TTToHplusBWB_M100", # not yet ready
-#        "TTToHplusBWB_M120", # not yet ready
-#        "TTToHplusBWB_M140", # not yet ready
-#        "TTToHplusBWB_M160", # not yet ready
+#        "TTToHplusBWB_M90",  # v6
+#        "TTToHplusBWB_M100", # v6
+#        "TTToHplusBWB_M120", # v6
+#        "TTToHplusBWB_M140", # v6
+#        "TTToHplusBWB_M160", # v6
         # MC Signal Spring10
 #        "TTToHpmToTauNu_M90",  # v3, v6
 #        "TTToHpmToTauNu_M100", # v3, v6

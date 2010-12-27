@@ -100,10 +100,10 @@ loop over jets):
 3. Then: ME(X,Y) -= JetP(X,Y)
 */
 	reco::MET scaledMet = *met;
-//	double newX = met->p4().Px() + dpx;
-//	double newY = met->p4().Py() + dpy;
-double newX = met->p4().Px()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation 
-double newY = met->p4().Py()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation
+	double newX = met->p4().Px() + dpx;
+	double newY = met->p4().Py() + dpy;
+//double newX = met->p4().Px()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation 
+//double newY = met->p4().Py()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation
 	double newZ = 0;//met->p4().Pz();
 	double newE = sqrt(newX*newX + newY*newY);//met->p4().E();
 
