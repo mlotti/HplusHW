@@ -93,8 +93,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.patJets.addJetID = True
     process.patJets.embedCaloTowers = False
     process.patJets.embedPFCandidates = False
-    if dataVersion.is38X():
-        process.patJets.addTagInfos = False
+    process.patJets.addTagInfos = False
 
     if doPatCalo:
         # Add JPT jets
@@ -201,12 +200,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          typeLabel = "PFTau")
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
-
-#        if not dataVersion.is38X():
-#            addTauCollection(process,cms.InputTag('fixedConePFTauProducer'),
-#                             algoLabel = "fixedCone",
-#                             typeLabel = "PFTau")
-#            process.patTausFixedConePFTau.isoDeposits = cms.PSet()
 
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
