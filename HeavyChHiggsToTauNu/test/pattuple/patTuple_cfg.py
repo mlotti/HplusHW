@@ -120,16 +120,16 @@ process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersio
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
-process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
-process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
-process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
-process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
+#process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
+#process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
+#process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
+#process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
 # Create paths
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
-    process.HLTTauEmu *
+#    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
     process.s 
     * process.triggerMatchingSequence
 )
