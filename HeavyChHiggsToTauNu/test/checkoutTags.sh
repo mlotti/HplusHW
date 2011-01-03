@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # Tag list modification history
 # 7.7.2010/S.Lehti CMSSW_3_6_3
 # 9.8.2010/M.Kortelainen CMSSW_3_7_0_patch_3
