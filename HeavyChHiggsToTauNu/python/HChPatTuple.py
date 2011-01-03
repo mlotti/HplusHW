@@ -6,7 +6,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
-from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects, removeCleaning
+from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
@@ -80,14 +80,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     restrictInputToAOD(process, ["All"])
 
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
+    # This also adds the L2L3Residual JEC correction to the process.patJetCorrFactors
     if dataVersion.isData():
-        removeMCMatching(process, ["All"], outputInProcess= out!=None)
+        runOnData(process, outputInProcess = out!=None)
 
     # Jets
-    corrections = ["L2Relative", "L3Absolute"]
-    if dataVersion.isData():
-        corrections.append("L2L3Residual")
-
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
@@ -96,13 +93,18 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.patJets.embedPFCandidates = False
     process.patJets.addTagInfos = False
 
+    # The default JEC to be embedded to pat::Jets are L2Relative,
+    # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
+    # adds the L2L3Residual to the list. The default JEC to be applied
+    # is L2L3Residual, or L3Absolute, or Uncorrected (in this order).
+
     if doPatCalo:
         # Add JPT jets
         addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                          'AK5', 'JPT',
                          doJTA        = True,
                          doBTagging   = doBTagging,
-                         jetCorrLabel = ('AK5JPT', cms.vstring(corrections)),
+                         jetCorrLabel = ('AK5JPT', process.patJetCorrFactors.levels),
                          doType1MET   = False,
                          doL1Cleaning = False,
                          doL1Counters = True,
@@ -115,7 +117,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          'AK5', 'PF',
                          doJTA        = True,
                          doBTagging   = doBTagging,
-                         jetCorrLabel = ('AK5PF', cms.vstring(corrections)),
+                         jetCorrLabel = ('AK5PF', process.patJetCorrFactors.levels),
                          doType1MET   = False,
                          doL1Cleaning = False,
                          doL1Counters = True,
@@ -123,20 +125,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          doJetID      = True
         )
 
-        # Use switchJetCollection to get the correct JEC for calo jets
-        switchJetCollection(process, cms.InputTag('ak5CaloJets'),
-                            doJTA        = True,
-                            doBTagging   = doBTagging,
-                            jetCorrLabel = ('AK5Calo', cms.vstring(corrections)),
-                            doType1MET   = False,
-                            genJetCollection = cms.InputTag("ak5GenJets"),
-                            doJetID      = True
-        )
     else:
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
                             doBTagging   = doBTagging,
-                            jetCorrLabel = ('AK5PF', cms.vstring(corrections)),
+                            jetCorrLabel = ('AK5PF', process.patJetCorrFactors.levels),
                             doType1MET   = False,
                             genJetCollection = cms.InputTag("ak5GenJets"),
                             doJetID      = True
