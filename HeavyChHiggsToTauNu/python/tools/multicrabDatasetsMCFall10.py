@@ -121,11 +121,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 150,
             },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
-                "number_of_jobs": 10
-            },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
@@ -144,11 +139,6 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 150,
-            },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
-                "number_of_jobs": 10
             },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
@@ -169,11 +159,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 150,
             },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
-                "number_of_jobs": 10
-            },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
@@ -193,11 +178,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 150,
             },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
-                "number_of_jobs": 10
-            },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b-38ae4fe7f537aab1b1e19a9c13e79d63/USER",
@@ -216,11 +196,6 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 150,
-            },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/local-Fall10_START38_V12_v1_AODSIM-pattuple_v3-77a027b4f9e83a8f0edf7612e8721105/USER",
-                "number_of_jobs": 10
             },
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,

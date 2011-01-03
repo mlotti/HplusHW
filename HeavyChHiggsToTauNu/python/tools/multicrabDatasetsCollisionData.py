@@ -21,12 +21,6 @@ datasets = {
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO-pattuple_v3_3-1a3cae4f0de91fe807e595c3536a6777/USER",
-                "luminosity": 1.951264571,
-                "number_of_jobs": 10
-            },
             "pattuple_v6_1": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
@@ -50,19 +44,6 @@ datasets = {
             }
         }
 
-    },
-    "BTau_146240-147454": {
-        "dataVersion": "38XdataRun2010B",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "runs": (146240, 147454),
-        "data": {
-            "pattuple_v3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_V2_RECO-pattuple_v3_3-ca0cc7472f6f10c326285176dfa5387f/USER",
-                "luminosity": 7.390799812,
-                "number_of_jobs": 5
-            }
-        },
     },
     "BTau_146240-148107": {
         "dataVersion": "38XdataRun2010B",
