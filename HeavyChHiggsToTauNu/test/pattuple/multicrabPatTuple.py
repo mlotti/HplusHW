@@ -6,9 +6,30 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
 multicrab.extendDatasets(
-#    "AOD",
-    "RECO",
+    "AOD",
+#    "RECO",
     [
+########
+#
+# 39X
+#
+########
+        # Background MC
+#        "QCD_Pt30to50_TuneZ2_Winter10",
+#        "QCD_Pt80to120_TuneZ2_Winter10",
+#        "QCD_Pt120to170_TuneZ2_Winter10",
+#        "QCD_Pt170to300_TuneZ2_Winter10",
+#        "QCD_Pt300to470_TuneZ2_Winter10",
+#        "TTJets_TuneD6T_Winter10",
+#        "TTJets_TuneZ2_Winter10",
+#        "WJets_TuneD6T_Winter10",
+#        "WJets_TuneZ2_Winter10_noPU",
+
+########
+#
+# 38X
+#
+########
         # Data (Tau)
 #        "BTau_141950-144114", # HLT_SingleIsoTau20_Trk5
 #        "BTau_146240-148107", # HLT_SingleIsoTau20_Trk15_MET20
@@ -59,17 +80,17 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v7_test2"
+    name += "_pattuple_v8"
 
     dataset.appendLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
 # For collision data stageout from US doesn't seem to be a problem
-allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
-def blacklistUS(dataset):
-    if dataset.isMC() and not dataset.getName() in allowUS:
-        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
-multicrab.forEachDataset(blacklistUS)
+#allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
+#def blacklistUS(dataset):
+#    if dataset.isMC() and not dataset.getName() in allowUS:
+#        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
+#multicrab.forEachDataset(blacklistUS)
 
 # Many failures with 60307 and 70500 from T2_UK_London_Brunel for
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
