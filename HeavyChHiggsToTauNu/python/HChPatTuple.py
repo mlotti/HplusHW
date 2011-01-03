@@ -358,14 +358,6 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger):
         setattr(process, patTauTriggerMatcherName, patTauTriggerMatcher)
         process.triggerMatchingSequence *= patTauTriggerMatcher
     
-        # produce patTriggerObjectStandAloneedmAssociation object
-        patTauTriggerEvent = process.patTriggerEvent.clone(
-            patTriggerMatches = cms.VInputTag(patTauTriggerMatcherName)
-        )
-        patTauTriggerEventName = patTauCollection+"TauTriggerEvent"
-        setattr(process, patTauTriggerEventName, patTauTriggerEvent)
-        process.triggerMatchingSequence *= patTauTriggerEvent
-    
         # embed the patTriggerObjectStandAloneedmAssociation to a tau collection
         patTauTriggerEmbedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
             src     = cms.InputTag(patTauCollection),
@@ -394,14 +386,6 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger):
         patJetTriggerMatcherName = patTauCollection+"JetTriggerMatcher"
         setattr(process, patJetTriggerMatcherName, patJetTriggerMatcher)
         process.triggerMatchingSequence *= patJetTriggerMatcher
-    
-        # produce patTriggerObjectStandAloneedmAssociation object
-        patJetTriggerEvent = process.patTriggerEvent.clone(
-            patTriggerMatches = cms.VInputTag(patJetTriggerMatcherName)
-        )
-        patJetTriggerEventName = patTauCollection+"JetTriggerEvent"
-        setattr(process, patJetTriggerEventName, patJetTriggerEvent)
-        process.triggerMatchingSequence *= patJetTriggerEvent
     
         # embed the patTriggerObjectStandAloneedmAssociation to a tau collection
         patJetTriggerEmbedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
@@ -437,11 +421,9 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger):
         outdict["out"].outputCommands.extend([
             "keep patTaus_*TauTriggerMatched_*_*",
             "drop *_*TauTriggerMatcher_*_*",
-            "drop *_*TauTriggerEvent_*_*",
             "drop *_*TauTriggerEmbedder_*_*",
             "drop patTaus_*JetTriggerMatched_*_*",
             "drop *_*JetTriggerMatcher_*_*",
-            "drop *_*JetTriggerEvent_*_*",
             "drop *_*JetTriggerEmbedder_*_*",
             "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
         ])
