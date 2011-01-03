@@ -9,6 +9,9 @@ _patTauCollectionsDefault = [
 def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault):
     seq = cms.Sequence()
 
+    if isinstance(trigger, basestring):
+        trigger = [trigger]
+
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
@@ -25,11 +28,11 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     selectorPrototype = cms.EDFilter("PATTauSelector",
         src = cms.InputTag("dummy"),
-        cut = cms.string("!triggerObjectMatchesByPath('%s').empty()" % trigger),
+        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s').empty()"%t for t in trigger])),
     )
 
     for collection in collections:
-        print "Matching collection %s to trigger %s" % (collection, trigger)
+        print "Matching collection %s to trigger(s) %s" % (collection, ",".join(trigger))
 
         # DeltaR matching between the trigger object and the PAT objects
         matcher = matcherPrototype.clone(
