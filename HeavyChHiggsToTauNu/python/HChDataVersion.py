@@ -55,7 +55,9 @@ config = {
 class DataVersion:
     def __init__(self, dataVersion):
         if not dataVersion in config:
-            raise Exception("Unknown dataVersion '%s', look HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion for allowed versions" % dataVersion)
+            names = config.keys()
+            names.sort()
+            raise Exception("Unknown dataVersion '%s',  allowed versions are %s" % (dataVersion, ", ".join(names)))
 
         conf = config[dataVersion]
 
