@@ -62,7 +62,7 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
     
-    process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
+    process.patSequence = addPat(process, dataVersion, doPatTrigger=False,
                                  doPatTaus=False, doPatElectronID=False)
     removeSpecificPATObjects(process, ["Photons"], False)
     removeCleaning(process, False)    

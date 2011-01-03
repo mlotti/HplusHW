@@ -125,7 +125,7 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
-    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
+    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False)
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
         process.patPlainSequence

@@ -55,6 +55,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 500
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 process.TFileService.fileName = "histograms.root"
 
+# Run PAT pn the fly if the command line argument has been set
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
@@ -63,7 +64,6 @@ if options.doPat != 0:
     print "Running PAT on the fly"
 
     # Jet trigger (for cleaning of tau->HLT matching
-    jetTrigger = "HLT_Jet30U"
     trigger = options.trigger
     if len(trigger) == 0:
         trigger = getSignalTrigger(dataVersion)
@@ -72,18 +72,16 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
-    print "Trigger used for tau matching: "+trigger
-    print "Trigger used for jet matching: "+jetTrigger
-
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
+        addPat(process, dataVersion)
     )
 additionalCounters = []
 if dataVersion.isData():
     additionalCounters = dataSelectionCounters[:]
 
 
+# Add the information histograms to histograms.root
 process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
     src = cms.untracked.InputTag("generator")
 )
@@ -99,8 +97,14 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+
+# Matching of pat::Taus to HLT taus
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
+process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
+process.patSequence *= process.triggerMatching
+
+
 # Prescale weight
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
