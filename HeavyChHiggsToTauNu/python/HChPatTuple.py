@@ -1,13 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 import copy
 
-from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
 from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
-from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching, restrictInputToAOD, removeSpecificPATObjects, removeCleaning
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
@@ -29,6 +28,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     outdict = process.outputModules_()
     if outdict.has_key("out"):
         out = outdict["out"]
+
+    outputCommands = []
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
@@ -141,8 +142,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                             doJetID      = True
         )
     
-    if out != None:
-        out.outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
+    outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
     #### needed for CMSSW35x data
     if dataVersion.is35X():
@@ -209,25 +209,21 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     
 
-    # Add PAT default event content
-    if out != None:
-        out.outputCommands.extend(patEventContentNoCleaning)
-	out.outputCommands.extend(["drop *_selectedPatTaus_*_*",
-                                   #"keep *_cleanPatTaus_*_*",
-                                   #"drop *_cleanPatTaus_*_*",
-                                   #"keep *_patTaus*_*_*",
-                                   #"keep *_patPFTauProducerFixedCone_*_*",
-                                   # keep these until the embedding problem with pat::Tau is fixed
-                                   #"keep recoPFCandidates_particleFlow_*_*",
-                                   #"keep recoTracks_generalTracks_*_*"
-                                   ])
+    outputCommands.extend(["drop *_selectedPatTaus_*_*",
+                           #"keep *_cleanPatTaus_*_*",
+                           #"drop *_cleanPatTaus_*_*",
+                           #"keep *_patTaus*_*_*",
+                           #"keep *_patPFTauProducerFixedCone_*_*",
+                           # keep these until the embedding problem with pat::Tau is fixed
+                           #"keep recoPFCandidates_particleFlow_*_*",
+                           #"keep recoTracks_generalTracks_*_*"
+                           ])
 
     # MET
     if doPatMET:
         addTcMET(process, 'TC')
         addPfMET(process, 'PF')
-        if out != None:
-            out.outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
+        outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
     else:
         removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
 
@@ -275,8 +271,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if not dataVersion.isData():
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         process.hplusPatSequence *= process.goodPrimaryVertices
-    if out != None:
-        out.outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
+    outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
 
 
     # Trigger
@@ -285,6 +280,17 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         if out != None:
             outMod  = 'out'
         switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+
+    # Remove cleaning step and set the event content
+    if out == None:
+        removeCleaning(process, False)
+    else:
+        backup = process.out.outputCommands[:]
+        removeCleaning(process, True)
+        backup_pat = process.out.outputCommands[:]
+        process.out.outputCommands = backup
+        process.out.outputCommands.extend(backup_pat)
+        process.out.outputCommands.extend(outputCommands)
 
     # Build sequence
     seq = cms.Sequence()
