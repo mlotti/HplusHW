@@ -1,4 +1,5 @@
 import glob, os, sys
+import json
 from optparse import OptionParser
 
 import ROOT
@@ -1052,6 +1053,23 @@ class DatasetSet:
         notSelected.insert(firstIndex, DatasetMerged(newName, selected))
         self.datasets = notSelected
         self._populateMap()
+
+    def loadLuminosities(self, fname):
+        """Load integrated luminosities from a JSON file.
+
+        Parameters:
+        fname  Path to the file
+
+        The JSON file should be formatted like this:
+
+        '{
+           "dataset_name": value_in_pb,
+           "Mu_135821-144114": 2.863224758
+         }'
+        """
+        data = json.load(open(fname))
+        for name, value in data.iteritems():
+            self.getDataset(name).setLuminosity(value)
 
     def printInfo(self):
         """Print dataset information."""
