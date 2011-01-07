@@ -60,7 +60,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 150,
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
         },
     },
@@ -80,7 +80,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 150,
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
         },
     },
@@ -90,7 +90,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 150,
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
         },
     },
@@ -100,7 +100,12 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 150,
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+            "pattuple_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v8-399e3794c630ab5bd4c05a030cfeb22a/USER",
+                "number_of_jobs": 10
             },
         },
     },
@@ -110,7 +115,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_300to470_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 150 # Adjusted for PATtuple file size
+                "number_of_jobs": 450 # Adjusted for PATtuple file size
             },
         },
     },
@@ -123,7 +128,12 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 100,
+                "number_of_jobs": 400,
+            },
+            "pattuple_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v8-399e3794c630ab5bd4c05a030cfeb22a/USER",
+                "number_of_jobs": 5
             },
         },
     }, 
@@ -133,7 +143,12 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 100,
+                "number_of_jobs": 400,
+            },
+            "pattuple_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneD6T_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v8-399e3794c630ab5bd4c05a030cfeb22a/USER",
+                "number_of_jobs": 5
             },
         },
     },
@@ -143,8 +158,17 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-START39_V8-v1/AODSIM",
-                "number_of_jobs": 1000, # Adjusted for PATtuple file size
+                "number_of_jobs": 1500, # Adjusted for PATtuple file
+                                        # size. CRAB doesn't really
+                                        # create this many jobs, but
+                                        # the large number seems to be
+                                        # needed to get enough jobs
                 "use_server": 1,
+            },
+            "pattuple_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Winter10_START39_V8_v1_AODSIM_pattuple_v8-399e3794c630ab5bd4c05a030cfeb22a/USER",
+                "number_of_jobs": 60
             },
         },
     },
@@ -154,7 +178,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 1000, # Adjusted for PATtuple file size
+                "number_of_jobs": 1500, # Adjusted for PATtuple file size
                 "use_server": 1,
             },
         },

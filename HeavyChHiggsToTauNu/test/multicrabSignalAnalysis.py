@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-#pattupleVersion = "pattuple_v3"
 pattupleVersion = "pattuple_v6"
+#pattupleVersion = "pattuple_v8"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -26,8 +26,7 @@ if runPatOnTheFly:
 multicrab.extendDatasets(pattupleVersion,
     [
         # Data
-#        "BTau_141950-144114", # v3, v6
-#        "BTau_146240-147454", # v3
+#        "BTau_141950-144114", # v6
 #        "BTau_146240-148107", # v6
 #        "BTau_148108-148864", # v6
         # Data for QCD
@@ -41,27 +40,32 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TTToHplusBWB_M140", # v6
 #        "TTToHplusBWB_M160", # v6
         # MC Signal Spring10
-#        "TTToHpmToTauNu_M90",  # v3, v6
-#        "TTToHpmToTauNu_M100", # v3, v6
-#        "TTToHpmToTauNu_M120", # v3, v6
-#        "TTbar_Htaunu_M140",   # v3, v6
-#        "TTbar_Htaunu_M160",   # v3, v6
+#        "TTToHpmToTauNu_M90",  # v6
+#        "TTToHpmToTauNu_M100", # v6
+#        "TTToHpmToTauNu_M120", # v6
+#        "TTbar_Htaunu_M140",   # v6
+#        "TTbar_Htaunu_M160",   # v6
+        # MC Background Winter10
+#        "QCD_Pt170to300_TuneZ2_Winter10", # v8
+#        "TTJets_TuneZ2_Winter10",         # v8
+#        "TTJets_TuneD6T_Winter10",        # v8 
+#        "WJets_TuneZ2_Winter10_noPU",     # v8
         # MC Background Fall10
-#        "QCD_Pt30to50_Fall10",   # v3, v6
-#        "QCD_Pt50to80_Fall10",   # v3, v6
-#        "QCD_Pt80to120_Fall10",  # v3, v6
-#        "QCD_Pt120to170_Fall10", # v3, v6
-#        "QCD_Pt170to300_Fall10", # v3, v6
+#        "QCD_Pt30to50_Fall10",   # v6
+#        "QCD_Pt50to80_Fall10",   # v6
+#        "QCD_Pt80to120_Fall10",  # v6
+#        "QCD_Pt120to170_Fall10", # v6
+#        "QCD_Pt170to300_Fall10", # v6
         # MC Background Summer10
-#        "QCD_Pt30to50",   # v3, v6
-#        "QCD_Pt50to80",   # v3, v6
-#        "QCD_Pt80to120",  # v3, v6
-#        "QCD_Pt120to170", # v3, v6
-#        "QCD_Pt170to230", # v3, v6
-#        "QCD_Pt230to300", # v3, v6
-#        "TTbar",          # v3, v6
-#        "TTbarJets",      # v3, v6
-#        "WJets",          # v3, v6
+#        "QCD_Pt30to50",   # v6
+#        "QCD_Pt50to80",   # v6
+#        "QCD_Pt80to120",  # v6
+#        "QCD_Pt120to170", # v6
+#        "QCD_Pt170to230", # v6
+#        "QCD_Pt230to300", # v6
+#        "TTbar",          # v6
+#        "TTbarJets",      # v6
+#        "WJets",          # v6
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
