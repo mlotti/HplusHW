@@ -46,10 +46,15 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TTbar_Htaunu_M140",   # v6
 #        "TTbar_Htaunu_M160",   # v6
         # MC Background Winter10
+#        "QCD_Pt30to50_TuneZ2_Winter10",   # v8
+#        "QCD_Pt80to120_TuneZ2_Winter10",  # v8
+#        "QCD_Pt120to170_TuneZ2_Winter10", # v8
 #        "QCD_Pt170to300_TuneZ2_Winter10", # v8
+#        "QCD_Pt300to470_TuneZ2_Winter10", # v8
 #        "TTJets_TuneZ2_Winter10",         # v8
 #        "TTJets_TuneD6T_Winter10",        # v8 
 #        "WJets_TuneZ2_Winter10_noPU",     # v8
+#        "WJets_TuneD6T_Winter10",         # v8
         # MC Background Fall10
 #        "QCD_Pt30to50_Fall10",   # v6
 #        "QCD_Pt50to80_Fall10",   # v6
