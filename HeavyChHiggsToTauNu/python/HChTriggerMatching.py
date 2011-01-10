@@ -60,54 +60,5 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
         seq *= selector
 
     return seq
+    
 
-
-
-################################################################################
-# Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching
-# Produces:
-#   1) a patTauCollection of patTaus matched to the HLT tau trigger and
-#   2) a copy of the same collection with the patTau matching to the HLT jet trigger
-#      removed (needed to remove trigger bias in QCD backround measurement).
-# Yes, I agree that this sounds (and is) a bit compicated :)
-def addTauHLTMatching(process, sequenceName, tauTrigger, jetTrigger):
-    if tauTrigger == None:
-        raise Exception("Tau trigger missing for matching")
-    if jetTrigger == None:
-        raise Exception("Jet trigger missing for matching")
-
-    tauSeq = HChTriggerMatching.addTauTriggerMatching(process, tauTrigger, "Tau")
-    jetSeq = HChTriggerMatching.addTauTriggerMatching(process, jetTrigger, "Jet")
-
-    setattr(process, "tau"+sequenceName, tauSeq)
-    setattr(process, "jet"+sequenceName, jetSeq)
-
-    seq = cms.Sequence(tauSeq * jetSeq)
-    setattr(process, sequenceName, seq)
-
-    ###########################################################################
-    # Remove first tau matching to the jet trigger from the list
-    # of tau -> HLT tau trigger matched patTaus
-    for collection in HChTriggerMatching._patTauCollectionsDefault:
-        patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
-            tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
-            tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
-        )
-        patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"
-        setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
-        seq *= patJetTriggerCleanedTauTriggerMatchedTaus
-
-    out = None
-    outdict = process.outputModules_()
-    if outdict.has_key("out"):
-        outdict["out"].outputCommands.extend([
-            "keep patTaus_*TauTriggerMatched_*_*",
-            "drop *_*TauTriggerMatcher_*_*",
-            "drop *_*TauTriggerEmbedder_*_*",
-            "drop patTaus_*JetTriggerMatched_*_*",
-            "drop *_*JetTriggerMatcher_*_*",
-            "drop *_*JetTriggerEmbedder_*_*",
-            "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
-        ])
-
-    return seq

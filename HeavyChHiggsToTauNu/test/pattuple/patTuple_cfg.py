@@ -28,6 +28,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
+# Jet trigger (for cleaning of tau->HLT matching
+myJetTrigger = "HLT_Jet30U"
+#myJetTrigger = "HLT_Jet50U"
+
 ################################################################################
 # Source
 process.source = cms.Source('PoolSource',
@@ -49,15 +53,26 @@ del process.TFileService
 ################################################################################
 # In case of data, add trigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
-trigger = options.trigger
+myTrigger = options.trigger
 # Default trigger, deduce from data
-if len(trigger) == 0:
-    trigger = getSignalTrigger(dataVersion)
+if len(myTrigger) == 0:
+    myTrigger = getSignalTrigger(dataVersion)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
-    process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
+    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
+
+   
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+process.collisionDataSelection = cms.Sequence()
+if dataVersion.isData():
+    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
+
+#myTrigger = "HLT_Jet30U" # use only for debugging
+
+print "Trigger used for tau matching: "+myTrigger
+print "Trigger used for jet matching: "+myJetTrigger
 
 
 ################################################################################
@@ -84,7 +99,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.s = addPat(process, dataVersion)
+process.s = addPat(process, dataVersion, matchingTauTrigger=myTrigger, matchingJetTrigger=myJetTrigger)
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
@@ -103,25 +118,21 @@ else:
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
-process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [trigger]
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 
-# Hopefully we don't need the HLT Tau emulation for 39X samples as the
-# tau trigger problems should be fixed
-if not dataVersion.is39X():
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
-    process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
-    process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
-    process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
-    process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
+#process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
+#process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
+#process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
+#process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
 # Create paths
 process.path    = cms.Path(
-    process.collisionDataSelection # this is supposed to be empty for MC
+    process.collisionDataSelection * # this is supposed to be empty for MC
+#    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
+    process.s 
+    * process.triggerMatchingSequence
 )
-if not dataVersion.is39X():
-    process.path *= process.HLTTauEmu
-process.path *= process. s
-
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
 )

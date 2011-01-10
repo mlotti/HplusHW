@@ -7,7 +7,6 @@ from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDS
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
-from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
@@ -16,6 +15,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 
 # Assumes that process.out is the output module
 #
@@ -23,7 +23,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTes
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True):
+           doPatCalo=True, doBTagging=True,
+           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -274,10 +275,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             outMod  = 'out'
         switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
-        # StandAlone trigger objects are needed for trigger matching
-        # at the analysis phase
-        outputCommands.extend(patTriggerStandAloneEventContent)
-
     # Remove cleaning step and set the event content
     if out == None:
         removeCleaning(process, False)
@@ -301,8 +298,59 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     seq *= process.hplusPatSequence
 
+    # Tau+HLT matching
+    if doTauHLTMatching:
+        seq *= addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
+
     return seq
     
 
 
 
+################################################################################
+# Do tau -> HLT tau trigger matching and tau -> HLT jet trigger matching
+# Produces:
+#   1) a patTauCollection of patTaus matched to the HLT tau trigger and
+#   2) a copy of the same collection with the patTau matching to the HLT jet trigger
+#      removed (needed to remove trigger bias in QCD backround measurement).
+# Yes, I agree that this sounds (and is) a bit compicated :)
+def addTauHLTMatching(process, tauTrigger, jetTrigger):
+    if tauTrigger == None:
+        raise Exception("Tau trigger missing for matching")
+    if jetTrigger == None:
+        raise Exception("Jet trigger missing for matching")
+
+    process.tauTriggerMatchingSequence = HChTriggerMatching.addTauTriggerMatching(process, tauTrigger, "Tau")
+    process.jetTriggerMatchingSequence = HChTriggerMatching.addTauTriggerMatching(process, jetTrigger, "Jet")
+
+    process.triggerMatchingSequence = cms.Sequence(
+        process.tauTriggerMatchingSequence *
+        process.jetTriggerMatchingSequence
+    )
+
+    ###########################################################################
+    # Remove first tau matching to the jet trigger from the list
+    # of tau -> HLT tau trigger matched patTaus
+    for collection in HChTriggerMatching._patTauCollectionsDefault:
+        patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
+            tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
+            tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
+        )
+        patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"
+        setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
+        process.triggerMatchingSequence *= patJetTriggerCleanedTauTriggerMatchedTaus
+
+    out = None
+    outdict = process.outputModules_()
+    if outdict.has_key("out"):
+        outdict["out"].outputCommands.extend([
+            "keep patTaus_*TauTriggerMatched_*_*",
+            "drop *_*TauTriggerMatcher_*_*",
+            "drop *_*TauTriggerEmbedder_*_*",
+            "drop patTaus_*JetTriggerMatched_*_*",
+            "drop *_*JetTriggerMatcher_*_*",
+            "drop *_*JetTriggerEmbedder_*_*",
+            "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
+        ])
+
+    return process.triggerMatchingSequence

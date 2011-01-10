@@ -61,6 +61,7 @@ if options.doPat != 0:
     print "GlobalTag="+dataVersion.getGlobalTag()
 
     # Jet trigger (for cleaning of tau->HLT matching
+    jetTrigger = "HLT_Jet30U"
     trigger = options.trigger
     if len(trigger) == 0:
         trigger = getSignalTrigger(dataVersion)
@@ -69,9 +70,12 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
+    print "Trigger used for tau matching: "+trigger
+    print "Trigger used for jet matching: "+jetTrigger
+
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion)
+        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
     )
 additionalCounters = []
 if dataVersion.isData():
@@ -94,14 +98,8 @@ process.infoPath = cms.Path(
 )
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
-
-# Matching of pat::Taus to HLT taus
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
-process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
-process.patSequence *= process.triggerMatching
-
 # Signal optimisation module
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
