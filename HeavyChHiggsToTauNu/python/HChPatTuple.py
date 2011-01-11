@@ -7,6 +7,7 @@ from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDS
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
+from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
@@ -274,6 +275,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         if out != None:
             outMod  = 'out'
         switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+
+        # Keep StandAlone trigger objects for enabling trigger
+        # matching in the analysis phase with PAT tools
+        outputCommands.extend(patTriggerStandAloneEventContent)
+
 
     # Remove cleaning step and set the event content
     if out == None:
