@@ -78,11 +78,12 @@ class HPlusMuonJetMetAnalyzer: public edm::EDAnalyzer {
     explicit CandSelector(const edm::ParameterSet& pset, TFileDirectory& fd, const TH1F& prototype, int *hindex):
       selector(pset.getUntrackedParameter<std::string>("cut"))
     {
-      histo = fd.make<TH1F>(prototype);
       char tmp[10] = "";
       std::snprintf(tmp, 10, "h%02d_", *hindex);
       *hindex += 1;
-      histo->SetName((tmp+pset.getUntrackedParameter<std::string>("name")).c_str());
+
+      TFileDirectory sub = fd.mkdir(tmp+pset.getUntrackedParameter<std::string>("name"));
+      histo = sub.make<TH1F>(prototype);
     }
 
     StringCutObjectSelector<T> selector;
@@ -107,7 +108,8 @@ HPlusMuonJetMetAnalyzer::HPlusMuonJetMetAnalyzer(const edm::ParameterSet& iConfi
 {
   edm::Service<TFileService> fs;
 
-  hAllMet = fs->make<TH1F>("h00_All", "MET", 200, 0., 200.);
+  TFileDirectory sub = fs->mkdir("h00_All");
+  hAllMet = sub.make<TH1F>("pfmet_et", "MET", 200, 0., 200.);
   int hindex=1;
 
   std::vector<edm::ParameterSet> jetSelections = iConfig.getUntrackedParameter<std::vector<edm::ParameterSet> >("jetSelections");
