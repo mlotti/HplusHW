@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 _patTauCollectionsDefault = [
     "selectedPatTausShrinkingConePFTau",
     "selectedPatTausHpsPFTau",
+    "selectedPatTausHpsTancPFTau",
     "selectedPatTausCaloRecoTau"
     ] # add to the list new sources for patTauCollections, if necessary
 

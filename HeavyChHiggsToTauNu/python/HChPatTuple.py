@@ -33,6 +33,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     outputCommands = []
 
+    # PAT Layer 0+1
+    process.load("PhysicsTools.PatAlgos.patSequences_cff")
+
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus:
@@ -45,6 +48,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
+        # Disable these until the code is fixed
+        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet()
+        process.shrinkingConePFTauDiscriminationByInvMassCont.select = cms.PSet()
+        
+
         # These are already in 36X AOD, se remove them from the tautagging
         # sequence
         if not dataVersion.is35X():
@@ -55,15 +63,19 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
         
-        process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+        #process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+
+        # process.PFTau = cms.Sequence(process.ak5PFJetTracksAssociatorAtVertex*process.pfRecoTauTagInfoProducer*process.ak5PFJetsRecoTauPiZeros*process.ak5PFJetsLegacyTaNCPiZeros*process.produceAndDiscriminateShrinkingConePFTaus*process.produceShrinkingConeDiscriminationByTauNeuralClassifier*process.ak5PFJetsLegacyHPSPiZeros*process.combinatoricRecoTaus*process.produceAndDiscriminateHPSPFTaus*process.hpsTancTauSequence)
 
         process.hplusPatTauSequence = cms.Sequence(
-	    process.PFTau *
+            process.tautagging *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
 	    process.PFTauTestDiscriminationSequence *
-#            process.produceAndDiscriminateHPSPFTaus *
-	    process.TCTau *
+            process.ak5PFJetsRecoTauPiZeros *         # for HPS+TaNC
+            process.combinatoricRecoTaus *            # for HPS+TaNC
+            process.produceAndDiscriminateHPSPFTaus * # for HPS+TaNC
+            process.hpsTancTauSequence *              # for HPS+TaNC
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
@@ -72,12 +84,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
             process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
 
-    # PAT Layer 0+1
-    process.load("PhysicsTools.PatAlgos.patSequences_cff")
-
     process.hplusPatSequence = cms.Sequence(
-        process.hplusPatTauSequence 
-#        process.patDefaultSequence
+        process.hplusPatTauSequence *
+        process.patDefaultSequence
     )
 
     # Restrict input to AOD
@@ -198,10 +207,15 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
-#        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
-#                         algoLabel = "hps",
-#                         typeLabel = "PFTau")
-#        process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+                         algoLabel = "hps",
+                         typeLabel = "PFTau")
+        process.patTausHpsPFTau.isoDeposits = cms.PSet()
+
+        addTauCollection(process,cms.InputTag('hpsTancTaus'),
+                         algoLabel = "hpsTanc",
+                         typeLabel = "PFTau")
+        process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     

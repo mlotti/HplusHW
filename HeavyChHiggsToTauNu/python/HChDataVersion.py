@@ -48,7 +48,8 @@ config = {
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_146240-148107/BTau/Run2010B_PromptReco_v2_RECO_pattuple_v6_1/43c3132ebadd44967499e6cca288e3ab/pattuple_7_1_cJr.root"
     },
     "39Xredigi": {
-        "triggerProcess": "REDIGI39X"
+        "triggerProcess": "REDIGI39X",
+        "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/GEN-SIM-RECO/72A60727-0513-E011-92AF-0024E8768C30.root",
     }
 }
 
