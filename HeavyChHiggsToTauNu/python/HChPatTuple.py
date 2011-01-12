@@ -48,7 +48,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         # Disable these until the code is fixed
         process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet()
         process.shrinkingConePFTauDiscriminationByInvMassCont.select = cms.PSet()
-        
+
+        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below realted to this)
+        process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
 
         # These are already in 36X AOD, se remove them from the tautagging
         # sequence
@@ -216,6 +218,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          algoLabel = "hpsTanc",
                          typeLabel = "PFTau")
         process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+        # Disable againstCaloMuon, requires RECO (there is one removal above realted to this) 
+        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
     
