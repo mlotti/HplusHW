@@ -5,7 +5,7 @@ datasets = {
     # Collision data
     #
     # BTau PD (for signal analysis)
-    "BTau_141950-144114": {
+    "BTau_141950-144114_Nov4": {
         "dataVersion": "38XdataRun2010A",
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
@@ -45,7 +45,7 @@ datasets = {
         }
 
     },
-    "BTau_146240-148107": {
+    "BTau_146240-148107_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "runs": (146240, 148107),
@@ -85,7 +85,7 @@ datasets = {
             }
         },
     },
-    "BTau_148108-148864": {
+    "BTau_148108-148864_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 148864),
@@ -101,7 +101,7 @@ datasets = {
             }
         },
     },
-    "BTau_148108-149182": {
+    "BTau_148108-149182_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 149182),
@@ -135,7 +135,7 @@ datasets = {
             }
         },
     },
-    "BTau_149291-149442": {
+    "BTau_149291-149442_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "runs": (149291, 149442),
@@ -171,7 +171,7 @@ datasets = {
     },
 
     # Jet PD (for QCD background analysis"
-    "JetMETTau_136033-141887": { # first run actually 135821, but lumi list starts from this one
+    "JetMETTau_136033-141887_Nov4": { # first run actually 135821, but lumi list starts from this one
         "dataVersion": "38XdataRun2010A",
         "trigger": "HLT_Jet30U",
         "data": {
@@ -192,7 +192,7 @@ datasets = {
             }
         }
     },
-    "JetMET_141950-144114": {
+    "JetMET_141950-144114_Nov4": {
         "dataVersion": "38XdataRun2010A",
         "trigger": "HLT_Jet30U",
         "data": {
@@ -213,7 +213,7 @@ datasets = {
             }
         }
     },
-    "Jet_146240-148058": { # last run really 149442, but last run with HLT_Jet30U is this one
+    "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Jet30U",
         "runs": (146240, 148058),
@@ -238,7 +238,7 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
-    "Mu_135821-144114": {
+    "Mu_135821-144114_Nov4": {
         "dataVersion": "38XdataRun2010A",
         "trigger": "HLT_Mu9",
         "data": {
@@ -256,7 +256,7 @@ datasets = {
             }
         }
     },
-    "Mu_146240-147116": {
+    "Mu_146240-147116_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Mu9",
         "runs": (146240, 147116),
@@ -275,7 +275,7 @@ datasets = {
             }
         }
     },
-    "Mu_147196-149442": {
+    "Mu_147196-149442_Nov4": {
         "dataVersion": "38XdataRun2010B",
         "trigger": "HLT_Mu15_v1",
         "runs": (147196, 149442),
