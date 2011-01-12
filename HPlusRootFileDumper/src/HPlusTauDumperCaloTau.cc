@@ -46,6 +46,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include <string>
+#include <iostream>
 
 namespace HPlusAnalysis {
 
@@ -193,7 +194,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   for (size_t i = 0; i < myDiscriminatorCount; ++i) {
     edm::Handle<reco::CaloTauDiscriminator> myEmptyHandle;
     myDiscriminatorHandles.push_back(myEmptyHandle);
-    //    cout <<  "Discriminator label " << fTauDiscriminators[i].label() << std::endl;
+    //    std::cout <<  "Discriminator label " << fTauDiscriminators[i].label() << std::endl;
     if (!iEvent.getByLabel(fTauDiscriminators[i], myDiscriminatorHandles[i])) {
       throw cms::Exception("HPlus") << "Discriminator " << fTauDiscriminators[i].label() << " not found in dataset!" << std::endl;
     }
@@ -210,16 +211,16 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 
   // calo tau discriminators // FIXME: duplicate code
   /*//   
-  Handle<CaloTauDiscriminator> theCaloTauDiscriminatorByLeadingTrackFinding;
+  edm::Handle<reco::CaloTauDiscriminator> theCaloTauDiscriminatorByLeadingTrackFinding;
   iEvent.getByLabel("caloRecoTauDiscriminationByLeadingTrackFinding",theCaloTauDiscriminatorByLeadingTrackFinding);
   //
-  Handle<CaloTauDiscriminator> theCaloTauDiscriminatorByLeadingTrackPtCut;
+  edm::Handle<reco::CaloTauDiscriminator> theCaloTauDiscriminatorByLeadingTrackPtCut;
   iEvent.getByLabel("caloRecoTauDiscriminationByLeadingTrackPtCut",theCaloTauDiscriminatorByLeadingTrackPtCut);
   //
-  Handle<CaloTauDiscriminator> theCaloTauDiscriminatorByIsolation;
+  end::Handle<reco::CaloTauDiscriminator> theCaloTauDiscriminatorByIsolation;
   iEvent.getByLabel("caloRecoTauDiscriminationByIsolation",theCaloTauDiscriminatorByIsolation);
   //
-  Handle<CaloTauDiscriminator> theCaloTauDiscriminatorAgainstElectron;
+  edm::Handle<reco::CaloTauDiscriminator> theCaloTauDiscriminatorAgainstElectron;
   iEvent.getByLabel("caloRecoTauDiscriminationAgainstElectron",theCaloTauDiscriminatorAgainstElectron);
 */
   edm::Handle<edm::ValueMap<reco::JetID> > jetsID;
@@ -262,7 +263,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   *myDataPV = myPV;
   // FIXME: end of block to be moved 
 
-  //  cout << " calo tau vertex  " << nvtx << " calo tau vertex tracks " << ntrkV << endl;
+  //  std::cout << " calo tau vertex  " << nvtx << " calo tau vertex tracks " << ntrkV << std::endl;
   int jtau = 0;
 
   double DRMAX = 1000.;
@@ -295,6 +296,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     // check that tauinfo is not zero pointer
     if (myInfo.isNull())continue;
     const reco::CaloJetRef myJetRef = myInfo->calojetRef();
+////    const reco::CaloJetRef myJetRef = theCaloTau.caloJetRef();
     // check that jetref is not zero pointer
     if (myJetRef.isNull())continue;    
         
@@ -374,7 +376,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     fdAgainstElectron = DiscriminatorAgainstElectron;*/
     
     
-    //    std::cout << " DiscriminatorByLeadingTrackFinding =" << DiscriminatorByLeadingTrackFinding  << "   DiscriminatorByLeadingTrackPtCut " << DiscriminatorByLeadingTrackPtCut << "    DiscriminatorByIsolation " <<  DiscriminatorByIsolation  << " DiscriminatorAgainstElectron " << DiscriminatorAgainstElectron << endl;
+    //    std::cout << " DiscriminatorByLeadingTrackFinding =" << DiscriminatorByLeadingTrackFinding  << "   DiscriminatorByLeadingTrackPtCut " << DiscriminatorByLeadingTrackPtCut << "    DiscriminatorByIsolation " <<  DiscriminatorByIsolation  << " DiscriminatorAgainstElectron " << DiscriminatorAgainstElectron << std::endl;
     
     // Charged track isolation
     double d_trackIsolation = 
@@ -405,7 +407,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
       myDataRtau->push_back(-1.);
     }
     
-    //	  cout << " rtau  " << fRtau << "  fLdgChargedHadronIPT " << fLdgChargedHadronIPT  <<endl;  
+    //	  std::cout << " rtau  " << fRtau << "  fLdgChargedHadronIPT " << fLdgChargedHadronIPT  <<std::endl;  
     
     // Charged track isolation, signal cone
     const reco::TrackRefVector signalTracks = op.tracksInCone(myLdgChargedHadronTrackRef->momentum(),metric,signalConeSize,ptOtherTracksMin);
@@ -544,11 +546,11 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
  
     if( calojets->size() > 0 ) {
       int jc = 0;
-      for( CaloJetCollection::const_iterator cjet = calojets->begin(); 
+      for( reco::CaloJetCollection::const_iterator cjet = calojets->begin(); 
            cjet != calojets->end(); ++cjet ){ 
         
         // raw jet selection 
-        RefToBase<Jet> jetRef(Ref<CaloJetCollection>(calojets,jc));
+        RefToBase<Jet> jetRef(Ref<reco::CaloJetCollection>(calojets,jc));
         double mN90  = (*calojets)[jc].n90();
         double mEmf  = (*calojets)[jc].emEnergyFraction(); 
 	if (jetRef.isNull())continue;   
@@ -591,13 +593,13 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
         float DiscriminatorByIsolation           = 0;
         float DiscriminatorAgainstElectron       = 0;
 
-	CaloTauRef theSelectedCaloTauRef;
+	reco::CaloTauRef theSelectedCaloTauRef;
         for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++) {
           double DR = deltaR(cjet->eta(),cjet->phi(),iTau->eta(),iTau->phi());
           if(DR < DRMAX) {
             theCaloTau = *iTau;
             DRMAX = DR;
-            CaloTauRef  theCaloTauRef(theCaloTauHandle,iTauInd);
+            reco::CaloTauRef  theCaloTauRef(theCaloTauHandle,iTauInd);
 	    if (theCaloTauRef.isNonnull()) {
 	      theSelectedCaloTauRef = theCaloTauRef;
 	      iTauInd++;
@@ -617,7 +619,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 	//	if (theSelectedCaloTauRef.isNull()) continue;
 	if (theSelectedCaloTauRef.isNonnull()) {
 
-	//   cout << " theCaloTau.isolationECALhitsEtSum()   " << theSelectedCaloTauRef->isolationECALhitsEtSum()  << endl;     
+	//   std::cout << " theCaloTau.isolationECALhitsEtSum()   " << theSelectedCaloTauRef->isolationECALhitsEtSum()  << std::endl;     
       
         // e.m. isolation
         float pisol = 1000.;
@@ -639,7 +641,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
         double ptOtherTracksMin  = 0.;
         //      double ptLeadingTrackMin = 6.;
         //      double ptOtherTracksMin  = 1.;
-        string metric = "DR"; // can be DR,angle,area
+        std::string metric = "DR"; // can be DR,angle,area
         unsigned int isolationAnnulus_Tracksmaxn = 0;
 
         CaloTauElementsOperators op(theCaloTau);
@@ -679,7 +681,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 	 
 ////	}
        	 
-	//	  cout <<  " rtau " << fRtau << endl;	
+	//	  std::cout <<  " rtau " << fRtau << std::endl;	
 
     
 	// tracks in signal cone
@@ -710,7 +712,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 	fMinSignalTrackPt = pTtrkMin;
 	fChargeSum = myChargeSum;
        
-	//	  cout <<  " signalTracks.size() " << signalTracks.size() << endl;	
+	//	  std::cout <<  " signalTracks.size() " << signalTracks.size() << std::endl;	
 	/// Charged track isolation
 	// const double tracktorefpoint_maxDZ,const double refpoint_Z)const;
 	double myHighestIsolationTrackPt = 0;
