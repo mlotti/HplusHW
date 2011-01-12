@@ -100,9 +100,9 @@ HPlusTauDumperCaloTau::HPlusTauDumperCaloTau(edm::EDProducer& producer,
 }
 
 HPlusTauDumperCaloTau::~HPlusTauDumperCaloTau() {
-  cout << " counted events " << eventCount << endl;
-  cout << " counted jets " << jetCount << endl;
-  cout << " counted jets > 1 " << jet2Count << endl;
+  std::cout << " counted events " << eventCount << std::endl;
+  std::cout << " counted jets " << jetCount << std::endl;
+  std::cout << " counted jets > 1 " << jet2Count << std::endl;
 }
 
 /*
@@ -199,13 +199,13 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     }
   }
   // calo jets
-  edm::Handle<CaloJetCollection> calojets;
+  edm::Handle<reco::CaloJetCollection> calojets;
   iEvent.getByLabel(calojetsSrc, calojets); // FIXME set to InputTag instead of string 
 
   // calo taus
-  Handle<CaloTauCollection> theCaloTauHandle;
+  edm::Handle<reco::CaloTauCollection> theCaloTauHandle;
   iEvent.getByLabel("caloRecoTauProducer",theCaloTauHandle);
-  const CaloTauCollection & caloTaus = *(theCaloTauHandle.product());
+  const reco::CaloTauCollection & caloTaus = *(theCaloTauHandle.product());
   int nCaloTaus = caloTaus.size();
 
   // calo tau discriminators // FIXME: duplicate code
@@ -222,14 +222,14 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   Handle<CaloTauDiscriminator> theCaloTauDiscriminatorAgainstElectron;
   iEvent.getByLabel("caloRecoTauDiscriminationAgainstElectron",theCaloTauDiscriminatorAgainstElectron);
 */
-  Handle<ValueMap<reco::JetID> > jetsID;
+  edm::Handle<edm::ValueMap<reco::JetID> > jetsID;
   iEvent.getByLabel(jetsIDSrc,jetsID);
   if (!jetsID.isValid()) {
     std::cout << "jetsID handle is a zero pointer" << std::endl;
   }
   
     // get vertex // FIXME: vertex handling to base class
-  Handle<reco::VertexCollection> recVtxs;
+  edm::Handle<reco::VertexCollection> recVtxs;
   iEvent.getByLabel("offlinePrimaryVertices",recVtxs);
   
   // FIXME: move this PV code to base class 
@@ -266,9 +266,9 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   int jtau = 0;
 
   double DRMAX = 1000.;
-  CaloTau theCaloTau;
+  reco::CaloTau theCaloTau;
 
-  CaloTauCollection::const_iterator iTau;
+  reco::CaloTauCollection::const_iterator iTau;
   int iTauInd = 0;
 
   // FIXME: not used at all
@@ -277,24 +277,24 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
   float DiscriminatorByIsolation           = 0;
   float DiscriminatorAgainstElectron       = 0;
 
-  CaloTauRef theSelectedCaloTauRef;
+  reco::CaloTauRef theSelectedCaloTauRef;
 
   if( (nvtx != 1) || (ntrkV < 3) || (ntrkV > 100) ) return false;
 
-  std::vector<CaloTauRef> mySelectedCaloTauRefs;
+  std::vector<reco::CaloTauRef> mySelectedCaloTauRefs;
   // Loop over CaloTau's
   for(iTau = caloTaus.begin(); iTau != caloTaus.end(); iTau++) {
     // Make first cuts and check that the required objects exist
     
     theCaloTau = *iTau;
     iTauInd++;
-    CaloTauTagInfoRef myInfo = theCaloTau.caloTauTagInfoRef();
+    reco::CaloTauTagInfoRef myInfo = theCaloTau.caloTauTagInfoRef();
     //std::cout << "tau tag info count=" << myInfoCollection->size() << std::endl;
     //for (myInfoCollection::iterator iTauInfo = myInfoCollection->begin();
     //   iTauInfo = myInfoCollection->end(); ++iTauInfo) {
     // check that tauinfo is not zero pointer
     if (myInfo.isNull())continue;
-    const CaloJetRef myJetRef = myInfo->calojetRef();
+    const reco::CaloJetRef myJetRef = myInfo->calojetRef();
     // check that jetref is not zero pointer
     if (myJetRef.isNull())continue;    
         
@@ -316,7 +316,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
 
     
     // Obtain leading track (0.5 around jet axis) // FIXME: Set the cut values in config file
-    string metric = "DR"; // can be DR,angle,area
+    std::string metric = "DR"; // can be DR,angle,area
     double ip = -1;
     // settings for tau isolation
     double matchingConeSize  = 0.10;
@@ -330,10 +330,10 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     unsigned int isolationAnnulus_Tracksmaxn = 0;
     
     CaloTauElementsOperators op(theCaloTau);
-    const TrackRef myLdgChargedHadronTrackRef = op.leadTk(metric,isolationConeSize,ptLeadingTrackMin);
+    const reco::TrackRef myLdgChargedHadronTrackRef = op.leadTk(metric,isolationConeSize,ptLeadingTrackMin);
     if (myLdgChargedHadronTrackRef.isNull()) continue;
 
-    CaloTauRef theCaloTauRef(theCaloTauHandle,iTauInd);
+    reco::CaloTauRef theCaloTauRef(theCaloTauHandle,iTauInd);
     if (theCaloTauRef.isNull()) continue;
 
     // NOTE: No more continue-calls after this line!!!
@@ -361,8 +361,8 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     }  
     */
 
-    cout << " theCaloTau.isolationECALhitsEtSum()   " << theCaloTau.isolationECALhitsEtSum()  << endl;     
-    cout << " theCaloTau.isolationTracksEtSum()   " << theCaloTau.isolationTracksPtSum()  << endl;      
+    std::cout << " theCaloTau.isolationECALhitsEtSum()   " << theCaloTau.isolationECALhitsEtSum()  << std::endl;     
+    std::cout << " theCaloTau.isolationTracksEtSum()   " << theCaloTau.isolationTracksPtSum()  << std::endl;      
         // e.m. isolation
     float pisol = -1.;
     if (DiscriminatorByLeadingTrackPtCut == 1.) { pisol = theCaloTau.isolationECALhitsEtSum();} // FIXME
@@ -408,7 +408,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     //	  cout << " rtau  " << fRtau << "  fLdgChargedHadronIPT " << fLdgChargedHadronIPT  <<endl;  
     
     // Charged track isolation, signal cone
-    const TrackRefVector signalTracks = op.tracksInCone(myLdgChargedHadronTrackRef->momentum(),metric,signalConeSize,ptOtherTracksMin);
+    const reco::TrackRefVector signalTracks = op.tracksInCone(myLdgChargedHadronTrackRef->momentum(),metric,signalConeSize,ptOtherTracksMin);
     //	    ntrsign->push_back(signalTracks.size());
     double pTtrkMin = 1000.;
     double pTmin = 1000.;
@@ -439,7 +439,7 @@ bool HPlusTauDumperCaloTau::setData(edm::Event& iEvent, const edm::EventSetup& i
     // FIXME: does this look at the tracks in isolation cone or isolation annulus? 
     double myHighestIsolationTrackPt = 0;
     int myIsolationTrackCount = 0;
-    const TrackRefVector isolatTracks = op.tracksInCone(myLdgChargedHadronTrackRef->momentum(),metric,isolationConeSize,ptOtherTracksMin);
+    const reco::TrackRefVector isolatTracks = op.tracksInCone(myLdgChargedHadronTrackRef->momentum(),metric,isolationConeSize,ptOtherTracksMin);
     pTtrkMin = 1000.;
     pTmin = 1000.;
     double dzMax = 0.;
