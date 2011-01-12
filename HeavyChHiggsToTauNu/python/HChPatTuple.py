@@ -47,6 +47,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
+        # Disable these until the code is fixed
+        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet()
+        process.shrinkingConePFTauDiscriminationByInvMassCont.select = cms.PSet()
+        
+
         # These are already in 36X AOD, se remove them from the tautagging
         # sequence
         if not dataVersion.is35X():
