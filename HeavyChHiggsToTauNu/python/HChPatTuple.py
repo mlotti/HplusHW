@@ -33,9 +33,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     outputCommands = []
 
-    # PAT Layer 0+1
-    process.load("PhysicsTools.PatAlgos.patSequences_cff")
-
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus:
@@ -83,6 +80,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.hplusPatTauSequence.remove(process.tautagging)
             process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
             process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+
+    # PAT Layer 0+1
+    process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
     process.hplusPatSequence = cms.Sequence(
         process.hplusPatTauSequence *
