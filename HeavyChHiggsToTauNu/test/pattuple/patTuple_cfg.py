@@ -21,7 +21,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 # Create Process
 process = cms.Process("HChPatTuple")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -38,7 +38,8 @@ process.source = cms.Source('PoolSource',
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
-	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Fall10-START38_V12-v1_RAW_RECO.root"
+#	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Fall10-START38_V12-v1_RAW_RECO.root"
+	"rfio:/castor/cern.ch/user/s/slehti/testData/test_H120_100_1_08t_RAW_RECO.root"
 #        dataVersion.getPatDefaultFileCastor()
 #        dataVersion.getPatDefaultFileMadhatter()
   )
@@ -74,6 +75,16 @@ if dataVersion.isData():
 print "Trigger used for tau matching: "+myTrigger
 print "Trigger used for jet matching: "+myJetTrigger
 
+################################################################################
+# Visible tau
+process.VisibleTaus = cms.EDProducer("HLTTauMCProducer",
+    GenParticles  = cms.untracked.InputTag("genParticles"),
+    ptMinTau      = cms.untracked.double(3),
+    ptMinMuon     = cms.untracked.double(3),
+    ptMinElectron = cms.untracked.double(3),
+    BosonID       = cms.untracked.vint32(23),
+    EtaMax         = cms.untracked.double(2.5)
+)
 
 ################################################################################
 # Output module
@@ -107,7 +118,8 @@ else:
     process.out.outputCommands.extend([
             "keep *_genParticles_*_*",
             "keep GenEventInfoProduct_*_*_*",
-            "keep GenRunInfoProduct_*_*_*"
+            "keep GenRunInfoProduct_*_*_*",
+	    "keep *_VisibleTaus_*_*"
             ])
 
 ################################################################################
@@ -127,6 +139,10 @@ process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
 process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
 # Create paths
+if not dataVersion.isData():
+    process.mcVisibleTauPath = cms.Path(
+        process.VisibleTaus
+    )
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
     process.HLTTauEmu *
