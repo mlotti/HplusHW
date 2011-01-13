@@ -55,9 +55,7 @@ WdecaySeparate = False
 
 #prefix = "noIsoNoVetoMetNJets3"
 #prefix = "noIsoNoVetoMetPFPt30Met20NJets3JetId"
-#prefix = "noMuonNJets3"
 #prefix = "topMuJetRefMet"
-prefix = "muonLastNJets3JetId"
 
 topMuJetRefMet = [prefix+x for x in [
         "h00_AllMuons",
@@ -109,42 +107,6 @@ noIsoNoVetoMetPFAoc = [prefix+"Aoc"+x+"AfterOtherCuts" for x in [
         "h07_JetMultiplicityCut",
         "h08_METCut"]]
 
-noMuon = [prefix+x for x in [
-        "h00_AllMuons",
-        "h01_Triggered",
-        "h02_PrimaryVertex",
-        "h03_JetMultiplicityCut",
-        "h04_METCut"]]
-noMuonAoc = []
-
-muonLast = [prefix+x for x in [
-        "h00_AllMuons",
-        "h01_Triggered",
-        "h02_PrimaryVertex",
-        "h03_JetMultiplicityCut",
-        "h04_MuonJetDR",
-        "h05_GlobalTrackerMuon",
-        #"h06_MuonKin",
-        "h06_MuonEta",
-        "h07_MuonPt5",
-        "h08_MuonPt10",
-        "h09_MuonPt15",
-        "h10_MuonPt20",
-        "h11_MuonPt25",
-        "h12_MuonPt30",
-        "h13_MuonPt35",
-        "h14_MuonPt40",
-        "h15_MuonQuality",
-        "h16_MuonIP",
-        "h17_MuonVertexDiff",
-        "h18_MuonIsolation050",
-        "h19_MuonIsolation015",
-        "h20_MuonIsolation010",
-        "h21_MuonIsolation005",
-        "h22_MuonVeto",
-        "h23_ElectronVeto"]]
-muonLastAoc = []
-
 selections = noIsoNoVetoMet
 selectionsAoc = noIsoNoVetoMetAoc
 index = 8
@@ -152,19 +114,10 @@ if "noIsoNoVetoMetPF" in prefix:
     selections = noIsoNoVetoMetPF
     selectionsAoc = noIsoNoVetoMetPFAoc
     index = 7
-elif "noMuon" in prefix:
-    selections = noMuon
-    selectionsAoc = noMuonAoc
-    index = 2
 elif "topMuJetRefMet" in prefix:
     selections = topMuJetRefMet
     selectionsAoc = topMuJetRefMetAoc
     index = 11
-elif "muonLast" in prefix:
-    selections = muonLast
-    selectionsAco = muonLastAoc
-    index = 2
-
 
 multip_beforeJet = prefix+"h%02d_Multiplicity" % index; index += 1
 multip_afterJet = prefix+"h%02d_Multiplicity" % index; index += 1
@@ -583,29 +536,29 @@ class PlotMet:
         h = self._createHisto(met, selection)
         self._plotLog(h, selection, met)
         
-#jetMultiplicity()
-#muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
-#muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
-#muonPt(Histo(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
-#muonEta(Histo(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
-#muonD0()
-#muonIso(Histo(datasets, lastSelectionBeforeMetOtherIso+"/relIso"), lastSelectionBeforeMetOtherIso+"_")
-#muonIso(Histo(datasets, lastSelectionOtherIso+"/relIso"), lastSelectionOtherIso+"_")
-#muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
-#muonIso(Histo(datasets, lastSelectionOther+"/relIso"), lastSelectionOther+"_")
-#muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
+jetMultiplicity()
+muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
+muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
+muonPt(Histo(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
+muonEta(Histo(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
+muonD0()
+muonIso(Histo(datasets, lastSelectionBeforeMetOtherIso+"/relIso"), lastSelectionBeforeMetOtherIso+"_")
+muonIso(Histo(datasets, lastSelectionOtherIso+"/relIso"), lastSelectionOtherIso+"_")
+muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
+muonIso(Histo(datasets, lastSelectionOther+"/relIso"), lastSelectionOther+"_")
+muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
  
 plotMet = PlotMet()
-#plotMet.plot("calomet")
-#plotMet.plot("pfmet")
-#plotMet.plot("tcmet")
-#plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
+plotMet.plot("calomet")
+plotMet.plot("pfmet")
+plotMet.plot("tcmet")
+plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
 
 #for x in selections[:-1]:
-for x in selections:
-    plotMet.plotLog("pfmet", selection=x)
-    #for met in ["calomet", "pfmet", "tcmet"]:
-    #    plotMet.plotLog(met, selection=x)
+#for x in selections:
+#    plotMet.plotLog("pfmet", selection=x)
+#    #for met in ["calomet", "pfmet", "tcmet"]:
+#    #    plotMet.plotLog(met, selection=x)
 
 #for rebin in [1, 2, 4, 5, 8, 10, 15, 16, 20]:
 #    pm = PlotMet(rebin, postfix="%d"%rebin)
