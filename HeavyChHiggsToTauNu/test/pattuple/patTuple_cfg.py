@@ -53,11 +53,7 @@ del process.TFileService
 
 ################################################################################
 # In case of data, add trigger
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 myTrigger = options.trigger
-# Default trigger, deduce from data
-if len(myTrigger) == 0:
-    myTrigger = getSignalTrigger(dataVersion)
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
 process.collisionDataSelection = cms.Sequence()

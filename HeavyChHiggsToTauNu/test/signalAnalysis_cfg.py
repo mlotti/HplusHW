@@ -56,7 +56,6 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 500
 process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
@@ -65,8 +64,6 @@ if options.doPat != 0:
     # Jet trigger (for cleaning of tau->HLT matching
     jetTrigger = "HLT_Jet30U"
     trigger = options.trigger
-    if len(trigger) == 0:
-        trigger = getSignalTrigger(dataVersion)
 
     process.collisionDataSelection = cms.Sequence()
     if dataVersion.isData():
