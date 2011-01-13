@@ -64,27 +64,10 @@ process.collisionDataSelection = cms.Sequence()
 if dataVersion.isData():
     process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
 
-   
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
-process.collisionDataSelection = cms.Sequence()
-if dataVersion.isData():
-    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
-
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
 print "Trigger used for tau matching: "+myTrigger
 print "Trigger used for jet matching: "+myJetTrigger
-
-################################################################################
-# Visible tau
-process.VisibleTaus = cms.EDProducer("HLTTauMCProducer",
-    GenParticles  = cms.untracked.InputTag("genParticles"),
-    ptMinTau      = cms.untracked.double(3),
-    ptMinMuon     = cms.untracked.double(3),
-    ptMinElectron = cms.untracked.double(3),
-    BosonID       = cms.untracked.vint32(23),
-    EtaMax         = cms.untracked.double(2.5)
-)
 
 ################################################################################
 # Output module
@@ -119,7 +102,6 @@ else:
             "keep *_genParticles_*_*",
             "keep GenEventInfoProduct_*_*_*",
             "keep GenRunInfoProduct_*_*_*",
-	    "keep *_VisibleTaus_*_*"
             ])
 
 ################################################################################

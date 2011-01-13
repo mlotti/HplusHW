@@ -232,9 +232,21 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
         # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
         del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+
+        # Add visible taus    
+        if dataVersion.isMC():
+            process.VisibleTaus = cms.EDProducer("HLTTauMCProducer",
+                GenParticles  = cms.untracked.InputTag("genParticles"),
+                ptMinTau      = cms.untracked.double(3),
+                ptMinMuon     = cms.untracked.double(3),
+                ptMinElectron = cms.untracked.double(3),
+                BosonID       = cms.untracked.vint32(23),
+                EtaMax         = cms.untracked.double(2.5)
+            )
+            outputCommands.append("keep *_VisibleTaus_*_*")
+
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
-    
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
                            #"keep *_cleanPatTaus_*_*",
