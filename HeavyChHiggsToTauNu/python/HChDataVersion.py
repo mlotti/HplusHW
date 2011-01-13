@@ -42,15 +42,17 @@ config = {
         "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v7_test2/pattuple_10_1_m2M.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHplusBWB_M120/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b/78d4b6b79bb86567b5da3e176aad4eb3/pattuple_9_1_RL8.root"
     },
-    "38XdataRun2010A": {"triggerProcess": "HLT"},
-    "38XdataRun2010B": {
+    "38Xdata": {
         "triggerProcess": "HLT",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_146240-148107/BTau/Run2010B_PromptReco_v2_RECO_pattuple_v6_1/43c3132ebadd44967499e6cca288e3ab/pattuple_7_1_cJr.root"
     },
     "39Xredigi": {
         "triggerProcess": "REDIGI39X",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/GEN-SIM-RECO/72A60727-0513-E011-92AF-0024E8768C30.root",
-    }
+    },
+    "39Xdata": {
+        "triggerProcess": "HLT",
+    },
 }
 
 
@@ -71,16 +73,9 @@ class DataVersion:
                 setattr(self, f, conf[f])
 
         # Collision data
-        if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
+        if dataVersion in ["36Xdata", "38Xdata"]:
             self.is_data = True
             self.globalTag = "GR_R_39X_V5::All"
-            
-            self.is_runA = False
-            self.is_runB = False
-            if dataVersion == "38XdataRun2010A":
-                self.is_runA = True
-            if dataVersion == "38XdataRun2010B":
-                self.is_runB = True
 
         # MC
         else:
@@ -95,19 +90,13 @@ class DataVersion:
             self.is_35X = True
         elif dataVersion in ["36X", "36Xdata", "36Xsptring10"]:
             self.is_36X = True
-        elif dataVersion in ["38X", "38Xrelval", "38XdataRun2010A", "38XdataRun2010B"]:
+        elif dataVersion in ["38X", "38Xrelval", "38Xdata", "38Xdata"]:
             self.is_38X = True
         elif dataVersion in ["39Xredigi"]:
             self.is_39X = True
 
     def isData(self):
         return self.is_data
-
-    def isRun2010A(self):
-        return self.is_runA
-
-    def isRun2010B(self):
-        return self.is_runB
 
     def isMC(self):
         return not self.is_data
