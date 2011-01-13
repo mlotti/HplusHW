@@ -432,6 +432,22 @@ class MuonAnalysis:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
             self.clonePileupAnalyzer()
+
+    def muonKinematicEtaSelection(self):
+        name = "MuonEta"
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, etaCut, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonKinematicPtCustomSelection(self, pt):
+        name = "MuonPt%d" % pt
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "pt() > %d" % pt, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
         
     def muonCleaningFromJet(self):
         m = self.muonJetCleanerPrototype.clone(src=self.selectedMuons)
@@ -671,7 +687,16 @@ class MuonAnalysis:
         self.muonCleaningFromJet()
 
         self.tightMuonSelection()
-        self.muonKinematicSelection()
+        #self.muonKinematicSelection()
+        self.muonKinematicEtaSelection()
+        self.muonKinematicPtCustomSelection(5)
+        self.muonKinematicPtCustomSelection(10)
+        self.muonKinematicPtCustomSelection(15)
+        self.muonKinematicPtCustomSelection(20)
+        self.muonKinematicPtCustomSelection(25)
+        self.muonKinematicPtCustomSelection(30)
+        self.muonKinematicPtCustomSelection(35)
+        self.muonKinematicPtCustomSelection(40)
         self.muonQuality()
         self.muonImpactParameter()
         self.muonVertexDiff()

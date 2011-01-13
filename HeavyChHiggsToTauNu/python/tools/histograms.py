@@ -227,6 +227,10 @@ class HistoSetDataStacked:
         """Get the THStack histogram."""
         return self.histo
 
+    def getAllHistograms(self):
+        """Get the original histograms."""
+        return [x.getHistogram() for x in self.data]
+
     def isMC(self):
         return self.data[0].isMC()
 
@@ -265,6 +269,63 @@ class HistoSetDataStacked:
     def getXmax(self):
         return max([d.getXmax() for d in self.data])
 
+class HistoStatError:
+    """Class to represent combined statistical errors of many histograms."""
+
+    def __init__(self, histoData, name):
+        self.histos = histoData
+        self.name = name
+        self.legendLabel = name
+        self.legendStyle = "F"
+        self.drawStyle = "E2"
+
+        histos = []
+        for h in self.histos:
+            try:
+                # If h is HistoSetDataStacked
+                hl = h.getAllHistograms()
+                histos.extend(hl)
+            except AttributeError:
+                # If h is HistoSetData
+                histos.append(h.getHistogram())
+
+        self.histo = histos[0].Clone()
+        self.histo.SetName(self.histo.GetName()+"_errors")
+        for h in histos[1:]:
+            self.histo.Add(h)
+
+    def isMC(self):
+        return self.histos[0].isMC()
+
+    def isData(self):
+        return self.histos[0].isData()
+
+    def getName(self):
+        return self.name
+
+    def setName(self):
+        self.name = name
+
+    def setLegendLabel(self, label):
+        self.legendLabel = label
+
+    def setLegendStyle(self, style):
+        self.legendStyle = style
+
+    def addToLegend(self, legend):
+        legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
+
+    def call(self, function):
+        h = function(self.histo)
+        if h != None:
+            self.histo = h
+
+    def getXmin(self):
+        return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+
+    def getXmax(self):
+        return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
+        
 
 class HistoSetImpl:
     """Implementation of HistoSet.
@@ -345,6 +406,9 @@ class HistoSetImpl:
     def getHistoList(self):
         """Get list of TH1 histograms."""
         return [d.getHistogram() for d in self.histos]
+
+    def getHistoDataList(self):
+        return self.histos
 
     def setHistoLegendLabel(self, name, label):
         """Set legend name for a given histogram.
