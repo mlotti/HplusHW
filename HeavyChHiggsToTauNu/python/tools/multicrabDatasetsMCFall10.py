@@ -410,6 +410,10 @@ datasets = {
         "dataVersion": "38Xrelval",
         "crossSection": 0.99,
         "data": {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
+            },
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-START38_V12-v1/AODSIM",
                 "number_of_jobs": 10, # Adjusted for PAT on the fly
@@ -420,6 +424,10 @@ datasets = {
         "dataVersion": "38Xrelval",
         "crossSection": 63./3.,
         "data": {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-START38_V12-v2/GEN-SIM-RECO",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
+            },
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-START38_V12-v2/AODSIM",
                 "number_of_jobs": 10, # Adjusted for PAT on the fly
@@ -435,7 +443,8 @@ datasets = {
                 "number_of_jobs": 10, # Adjusted for PAT on the fly
             },
             "AOD": {
-                "fallback": "RECO",
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-START38_V12-v2/AODSIM",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
             },
         },
     },

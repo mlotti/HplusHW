@@ -784,5 +784,69 @@ if options.WDecaySeparate > 0:
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
 
+process.muonJetMetAnalyzer = cms.EDAnalyzer(
+    "HPlusMuonJetMetAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    jetSrc = cms.untracked.InputTag(jetsPF.value()),
+    metSrc = cms.untracked.InputTag(pfMET),
+    njets = cms.untracked.uint32(1),
+    jetSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(jetSelection),
+            name = cms.untracked.string("JetKinematic")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string(jetIdPF),
+            name = cms.untracked.string("JetId")
+        )
+    ),
+    muonSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(tightMuonCut),
+            name = cms.untracked.string("MuonTight")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("abs(eta()) < 1.4"),
+            name = cms.untracked.string("MuonEta")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 5"),
+            name = cms.untracked.string("MuonPt5")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 10"),
+            name = cms.untracked.string("MuonPt10")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 15"),
+            name = cms.untracked.string("MuonPt15")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 20"),
+            name = cms.untracked.string("MuonPt20")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 25"),
+            name = cms.untracked.string("MuonPt25")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 30"),
+            name = cms.untracked.string("MuonPt30")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 35"),
+            name = cms.untracked.string("MuonPt35")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 40"),
+            name = cms.untracked.string("MuonPt40")
+        ),
+    )
+)
+
+process.muonJetMetPath = cms.Path(
+    process.muonJetMetAnalyzer
+)
+
 #print process.dumpPython()
 
