@@ -2,7 +2,7 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Signal
-    "TTToHplusBWB_M90": {
+    "TTToHplusBWB_M90_Fall10": {
         "dataVersion": "38Xrelval", # The trigger process was HLT, hence 38Xrelval is suitable here
         "crossSection": 16.442915,
         "data": {
@@ -26,7 +26,7 @@ datasets = {
             },
         }
     },
-    "TTToHplusBWB_M100": {
+    "TTToHplusBWB_M100_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 14.057857,
         "data": {
@@ -45,7 +45,7 @@ datasets = {
             },
         }
     },
-    "TTToHplusBWB_M120": {
+    "TTToHplusBWB_M120_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 8.984715,
         "data": {
@@ -64,7 +64,7 @@ datasets = {
             },
         }
     },
-    "TTToHplusBWB_M140": {
+    "TTToHplusBWB_M140_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 4.223402,
         "data": {
@@ -83,7 +83,7 @@ datasets = {
             },
         }
     },
-    "TTToHplusBWB_M160": {
+    "TTToHplusBWB_M160_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 0.811493,
         "data": {
@@ -109,7 +109,7 @@ datasets = {
     },
 
     # QCD Fall10
-    "QCD_Pt30to50_Fall10": {
+    "QCD_Pt30to50_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 5.312e+07,
         "data": {
@@ -128,7 +128,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt50to80_Fall10": {
+    "QCD_Pt50to80_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 6.359e+06,
         "data": {
@@ -147,7 +147,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt80to120_Fall10": {
+    "QCD_Pt80to120_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 7.843e+05,
         "data": {
@@ -166,7 +166,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt120to170_Fall10": {
+    "QCD_Pt120to170_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 1.151e+05,
         "data": {
@@ -185,7 +185,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt170to300_Fall10": {
+    "QCD_Pt170to300_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 2.426e+04,
         "data": {
@@ -204,7 +204,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt300to470_Fall10": {
+    "QCD_Pt300to470_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 1.168e+03,
         "data": {
@@ -217,7 +217,7 @@ datasets = {
 
 
     # Electroweak (Fall10)
-    "TT": {
+    "TT_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 165,
         "data": {
@@ -231,7 +231,7 @@ datasets = {
             }
         },
     },
-    "TTJets": {
+    "TTJets_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 165,
         "data": {
@@ -250,7 +250,7 @@ datasets = {
             }
         },
     },
-    "WJets_Fall10": {
+    "WJets_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 24640,
         "data": {
@@ -269,7 +269,7 @@ datasets = {
 
 
     # Backgrounds for electroweak background measurement (Fall10)
-    "QCD_Pt20_MuEnriched": {
+    "QCD_Pt20_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 296600000.*0.0002855,
         "data": {
@@ -283,7 +283,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt20to30_MuEnriched": {
+    "QCD_Pt20to30_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 236300000*0.00518,
         "data": {
@@ -297,7 +297,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt30to50_MuEnriched": {
+    "QCD_Pt30to50_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 53070000*0.01090,
         "data": {
@@ -311,7 +311,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt50to80_MuEnriched": {
+    "QCD_Pt50to80_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 6351000*0.02274,
         "data": {
@@ -325,7 +325,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt80to120_MuEnriched": {
+    "QCD_Pt80to120_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 785100*0.03700,
         "data": {
@@ -339,7 +339,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt120to150_MuEnriched": {
+    "QCD_Pt120to150_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 92950*0.04777,
         "data": {
@@ -353,7 +353,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt150_MuEnriched": {
+    "QCD_Pt150_MuEnriched_TuneZ2_Fall10": {
         "dataVersion": "38X",
         "crossSection": 47580*0.05964,
         "data": {
@@ -367,7 +367,7 @@ datasets = {
             },
         },
     },
-    "DYJetsToLL": { # Z+jets
+    "DYJetsToLL_TuneZ2_Fall10": { # Z+jets
         "dataVersion": "38Xrelval",
         "crossSection": 2321,
         "data": {
@@ -381,7 +381,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_s-channel": {
+    "TToBLNu_s-channel_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 0.99,
         "data": {
@@ -391,7 +391,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_t-channel": {
+    "TToBLNu_t-channel_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 63./3.,
         "data": {
@@ -401,7 +401,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_tW-channel": {
+    "TToBLNu_tW-channel_TuneZ2_Fall10": {
         "dataVersion": "38Xrelval",
         "crossSection": 10.56,
         "data": {

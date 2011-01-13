@@ -45,11 +45,16 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
-        # Disable these until the code is fixed
-        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet()
-        process.shrinkingConePFTauDiscriminationByInvMassCont.select = cms.PSet()
+        # Disable PFRecoTauDiscriminationByInvMass and knock-ons until fixed (there are removals below related to this)
+        for x in [
+            process.shrinkingConePFTauDiscriminationByInvMass,
+            process.shrinkingConePFTauDiscriminationForChargedHiggsBy3ProngCombined,
+            process.shrinkingConePFTauDiscriminationForChargedHiggsBy1or3Prongs,
+            process.shrinkingConePFTauDiscriminationForChargedHiggs]:
+            process.shrinkingConePFTauHplusDiscriminationSequence.remove(x)
+        process.shrinkingConePFTauHplusDiscriminationSequenceCont.remove(process.shrinkingConePFTauDiscriminationByInvMassCont)
 
-        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below realted to this)
+        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
 
         # These are already in 36X AOD, se remove them from the tautagging
@@ -209,6 +214,13 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
+        # Disable PFRecoTauDiscriminationByInvMass and knock-ons until fixed (there are removals above related to this)
+        del process.patTausShrinkingConePFTau.tauIDSources.HChTauIDInvMass
+        del process.patTausShrinkingConePFTau.tauIDSources.HChTauIDInvMassCont
+        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID3ProngCombined
+        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID1or3Prongs
+        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID
+
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
                          typeLabel = "PFTau")
@@ -218,7 +230,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          algoLabel = "hpsTanc",
                          typeLabel = "PFTau")
         process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
-        # Disable againstCaloMuon, requires RECO (there is one removal above realted to this) 
+        # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
         del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)

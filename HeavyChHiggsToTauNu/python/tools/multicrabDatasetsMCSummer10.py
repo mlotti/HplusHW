@@ -2,7 +2,7 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Signal MC
-    "TTToHpmToTauNu_M90": {
+    "TTToHpmToTauNu_M90_Spring10": {
         "dataVersion": "35X",
         "crossSection": 16.442915,
         "data": {
@@ -25,7 +25,7 @@ datasets = {
             }
         }
     },
-    "TTToHpmToTauNu_M100": {
+    "TTToHpmToTauNu_M100_Spring10": {
         "dataVersion": "35X",
         "crossSection": 14.057857,
         "data": {
@@ -43,7 +43,7 @@ datasets = {
             }
         }
     },
-    "TTToHpmToTauNu_M120": {
+    "TTToHpmToTauNu_M120_Spring10": {
         "dataVersion": "35X",
         "crossSection": 8.984715,
         "data": {
@@ -61,7 +61,7 @@ datasets = {
             }
         }
     },
-    "TTbar_Htaunu_M140": {
+    "TTbar_Htaunu_M140_Spring10": {
         "dataVersion": "35Xredigi",
         "crossSection": 4.223402,
         "data": {
@@ -79,7 +79,7 @@ datasets = {
             }
         }
     },
-    "TTbar_Htaunu_M160": {
+    "TTbar_Htaunu_M160_Spring10": {
         "dataVersion": "35Xredigi",
         "crossSection": 0.811493,
         "data": {
@@ -106,7 +106,7 @@ datasets = {
     # Background MC
 
     # QCD Summer10
-    "QCD_Pt30to50": {
+    "QCD_Pt30to50_Summer10": {
         "dataVersion": "36X",
         "crossSection": 5.018e+07,
         "data": {
@@ -126,7 +126,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt50to80": {
+    "QCD_Pt50to80_Summer10": {
         "dataVersion": "36X",
         "crossSection": 6.035e+06,
         "data": {
@@ -146,7 +146,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt80to120": {
+    "QCD_Pt80to120_Summer10": {
         "dataVersion": "36X",
         "crossSection": 7.519e+05,
         "data": {
@@ -166,7 +166,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt120to170": {
+    "QCD_Pt120to170_Summer10": {
         "dataVersion": "36X",
         "crossSection": 1.120e+05,
         "data": {
@@ -186,7 +186,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt170to230": {
+    "QCD_Pt170to230_Summer10": {
         "dataVersion": "36X",
         "crossSection": 1.994e+04,
         "data": {
@@ -206,7 +206,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt230to300": {
+    "QCD_Pt230to300_Summer10": {
         "dataVersion": "36X",
         "crossSection": 4.123e+03,
         "data": {
@@ -226,7 +226,7 @@ datasets = {
             }
         },
     },
-    "QCD_Pt300to380": {
+    "QCD_Pt300to380_Summer10": {
         "dataVersion": "36X",
         "crossSection": 9.593e+02,
         "data": {
@@ -236,7 +236,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt380to470": {
+    "QCD_Pt380to470_Summer10": {
         "dataVersion": "36X",
         "crossSection": 2.434e+02,
         "data": {
@@ -248,7 +248,7 @@ datasets = {
     },
 
     # Electroweak (Summer10)
-    "TTbar": {
+    "TTbar_Summer10": {
         "dataVersion": "36X",
         "crossSection": 165,
         "data": {
@@ -267,7 +267,7 @@ datasets = {
             }
         },
     },
-    "TTbarJets": {
+    "TTbarJets_Summer10": {
         "dataVersion": "36X",
         "crossSection": 165,
         "data": {
@@ -287,7 +287,7 @@ datasets = {
             }
         },
     },
-    "WJets": {
+    "WJets_Summer10": {
         "dataVersion": "36X",
         "crossSection": 25090,
         "data": {
@@ -309,7 +309,7 @@ datasets = {
     },
 
     # Backgrounds for electroweak background measurement (Summer10)
-    "ZJets": {
+    "ZJets_Summer10": {
         "dataVersion": "37X",
         "crossSection": 2400,
         "data": {
@@ -319,7 +319,7 @@ datasets = {
             }
         },
     },
-    "SingleTop_sChannel": {
+    "SingleTop_sChannel_Summer10": {
         "dataVersion": "37X",
         "crossSection": 0.99,
         "data": {
@@ -332,7 +332,7 @@ datasets = {
             }
         },
     },
-    "SingleTop_tChannel": {
+    "SingleTop_tChannel_Summer10": {
         "dataVersion": "37X",
         "crossSection": 20.16,
         "data": {
@@ -345,7 +345,7 @@ datasets = {
             }
         },
     },
-    "SingleTop_tWChannel": {
+    "SingleTop_tWChannel_Summer10": {
         "dataVersion": "37X",
         "crossSection": 10.56,
         "data": {
