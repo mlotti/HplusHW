@@ -4,11 +4,11 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
+step = "skim"
 #step = "generation"
 #step = "embedding"
 #step = "analysis"
-step = "analysisTau"
+#step = "analysisTau"
 
 config = {"skim":       {"input": "RECO",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation": {"input": "tauembedding_skim_v3",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
@@ -28,12 +28,18 @@ multicrab.extendDatasets(
     config[step]["input"],
     [
         # Data
-#        "Mu_135821-144114", # HLT_Mu9
-#        "Mu_146240-147116", # HLT_Mu9
-#        "Mu_147196-149442", # HLT_Mu15_v1
+        "Mu_135821-144114", # HLT_Mu9
+        "Mu_146240-147116", # HLT_Mu9
+        "Mu_147196-149442", # HLT_Mu15_v1
         # Signal MC
-#        "TTbar",
+        "TTbar",
         "WJets",
+        # Background MC
+        "QCD_Pt20_MuEnriched",
+        "DYJetsToLL",
+        "TToBLNu_s-channel",
+        "TToBLNu_t-channel",
+        "TToBLNu_tW-channel",
         ])
 
 if step in ["generation", "embedding"]:
@@ -41,6 +47,13 @@ if step in ["generation", "embedding"]:
 
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v4" % step
+
+skimNjobs = {
+    "WJets": 50,
+    "TTJets": 20,
+    "QCD_Pt20_MuEnriched": 100,
+    }
+    
 
 def modify(dataset):
     name = ""
@@ -55,12 +68,13 @@ def modify(dataset):
         name = name.replace("local-", "")
 
     if step == "skim":
-        if dataset.getName() == "WJets":
-            dataset.setNumberOfJobs(50)
-            if config[step]["input"] == "AOD":
-                dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
-        if dataset.getName() == "TTJets":
-            dataset.setNumberOfJobs(20)
+        try:
+            dataset.setNumberOfJobs(skimNjobs[dataset.getName()])
+        except KeyError:
+            pass
+
+        if config[step]["input"] == "AOD":
+            dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
 
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])

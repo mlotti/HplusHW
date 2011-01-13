@@ -75,7 +75,7 @@ datasets = {
     #     },
     # },
     "QCD_Pt80to120_Winter10": {
-        "dataVersion": "39Xredigi"
+        "dataVersion": "39Xredigi",
         "crossSection": 7.843e+05,
         "data": {
             "AOD": {
