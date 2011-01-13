@@ -40,6 +40,9 @@ QCDdetails = False
 QCD = "Mu"
 #QCD = "MuBinned"
 
+pileup = False
+#pileup = True
+
 WdecaySeparate = False
 #WdecaySeparate = True
 
@@ -50,7 +53,30 @@ WdecaySeparate = False
 #lastMultip = "h12_Multiplicity"
 #lastSelectionOther = "afterOtherCutsAfterMETCut"
 
-noIsoNoVetoMet = ["noIsoNoVetoMet"+x for x in [
+#prefix = "noIsoNoVetoMetNJets3"
+#prefix = "noIsoNoVetoMetPFPt30Met20NJets3JetId"
+#prefix = "noMuonNJets3"
+#prefix = "topMuJetRefMet"
+prefix = "muonLastNJets3JetId"
+
+topMuJetRefMet = [prefix+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_GlobalTrackerMuon",
+        "h04_MuonKin",
+        "h05_MuonJetDR",
+        "h06_MuonQuality",
+        "h07_MuonIP",
+        "h08_MuonIsolation",
+        "h09_MuonVertexDiff",
+        "h10_MuonVeto",
+        "h11_ElectronVeto",
+        "h12_JetMultiplicityCut",
+        "h13_METCut"]]
+topMuJetRefMetAoc = []
+
+noIsoNoVetoMet = [prefix+x for x in [
         "h00_AllMuons",
         "h01_Triggered",
         "h02_PrimaryVertex",
@@ -62,22 +88,94 @@ noIsoNoVetoMet = ["noIsoNoVetoMet"+x for x in [
         "h08_MuonVertexDiff",
         "h09_JetMultiplicityCut",
         "h10_METCut"]]
-noIsoNoVetoMetAoc = ["noIsoNoVetoMetAoc"+x+"AfterOtherCuts" for x in [
+noIsoNoVetoMetAoc = [prefix+"Aoc"+x+"AfterOtherCuts" for x in [
         "h07_MuonLargestPt",
         "h08_JetMultiplicityCut",
         "h09_METCut"]]
 
+noIsoNoVetoMetPF = [prefix+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_GlobalTrackerMuon",
+        "h04_MuonKin",
+        "h05_MuonQuality",
+        "h06_MuonIP",
+        "h07_MuonVertexDiff",
+        "h08_JetMultiplicityCut",
+        "h09_METCut"]]
+noIsoNoVetoMetPFAoc = [prefix+"Aoc"+x+"AfterOtherCuts" for x in [
+        "h06_MuonLargestPt",
+        "h07_JetMultiplicityCut",
+        "h08_METCut"]]
 
-multip_beforeJet = "noIsoNoVetoMeth08_Multiplicity"
-multip_afterJet = "noIsoNoVetoMeth09_Multiplicity"
+noMuon = [prefix+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_JetMultiplicityCut",
+        "h04_METCut"]]
+noMuonAoc = []
 
-lastSelection = noIsoNoVetoMet[-1]
-lastSelectionBeforeMet = noIsoNoVetoMet[-2]
-lastMultip = "noIsoNoVetoMeth10_Multiplicity"
-lastSelectionOther = noIsoNoVetoMetAoc[-1]
-lastSelectionOtherIso = noIsoNoVetoMetAoc[-1]+"Iso"
-lastSelectionBeforeMetOther = noIsoNoVetoMetAoc[-2]
-lastSelectionBeforeMetOtherIso = noIsoNoVetoMetAoc[-2]+"Iso"
+muonLast = [prefix+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_JetMultiplicityCut",
+        "h04_MuonJetDR",
+        "h05_GlobalTrackerMuon",
+        #"h06_MuonKin",
+        "h06_MuonEta",
+        "h07_MuonPt5",
+        "h08_MuonPt10",
+        "h09_MuonPt15",
+        "h10_MuonPt20",
+        "h11_MuonPt25",
+        "h12_MuonPt30",
+        "h13_MuonPt35",
+        "h14_MuonPt40",
+        "h15_MuonQuality",
+        "h16_MuonIP",
+        "h17_MuonVertexDiff",
+        "h18_MuonIsolation050",
+        "h19_MuonIsolation015",
+        "h20_MuonIsolation010",
+        "h21_MuonIsolation005",
+        "h22_MuonVeto",
+        "h23_ElectronVeto"]]
+muonLastAoc = []
+
+selections = noIsoNoVetoMet
+selectionsAoc = noIsoNoVetoMetAoc
+index = 8
+if "noIsoNoVetoMetPF" in prefix:
+    selections = noIsoNoVetoMetPF
+    selectionsAoc = noIsoNoVetoMetPFAoc
+    index = 7
+elif "noMuon" in prefix:
+    selections = noMuon
+    selectionsAoc = noMuonAoc
+    index = 2
+elif "topMuJetRefMet" in prefix:
+    selections = topMuJetRefMet
+    selectionsAoc = topMuJetRefMetAoc
+    index = 11
+elif "muonLast" in prefix:
+    selections = muonLast
+    selectionsAco = muonLastAoc
+    index = 2
+
+
+multip_beforeJet = prefix+"h%02d_Multiplicity" % index; index += 1
+multip_afterJet = prefix+"h%02d_Multiplicity" % index; index += 1
+lastMultip = prefix+"h%02d_Multiplicity" % index; index += 1
+
+lastSelection = selections[-1]
+lastSelectionBeforeMet = selections[-2]
+lastSelectionOther = selectionsAoc[-1]
+lastSelectionOtherIso = selectionsAoc[-1]+"Iso"
+lastSelectionBeforeMetOther = selectionsAoc[-2]
+lastSelectionBeforeMetOtherIso = selectionsAoc[-2]+"Iso"
 
 QCD_datasets = ["QCD_Pt30to50_Fall10",
                 "QCD_Pt50to80_Fall10",
@@ -94,7 +192,18 @@ elif QCD == "MuBinned":
                     "QCD_Pt120to150_MuEnriched",
                     "QCD_Pt150_MuEnriched"]
 
-datasets = getDatasetsFromMulticrabCfg(counters="noIsoNoVetoMetcountAnalyzer")
+datasets = getDatasetsFromMulticrabCfg(counters=prefix+"countAnalyzer")
+if pileup:
+    for name, isMC in [(d.getName(), d.isMC()) for d in datasets.getAllDatasets()]:
+        if isMC and "_PU" not in name:
+            datasets.remove([name])
+            datasets.rename(name+"_PU", name)
+else:
+    for name, isMC in [(d.getName(), d.isMC()) for d in datasets.getAllDatasets()]:
+        if isMC and "_PU" in name:
+            datasets.remove([name])
+#datasets.rename("WJets_Fall10", "WJets")
+
 datasetsQCD = datasets.shallowCopy()
 datasetsQCD.selectAndReorder(QCD_datasets)
 
@@ -102,9 +211,15 @@ datasetsQCD.selectAndReorder(QCD_datasets)
 #datasets.getDataset("Mu_146240-147116").setLuminosity(4390660.197/1e6)
 #datasets.getDataset("Mu_147196-149442").setLuminosity(27384630.974/1e6)
 
-datasets.getDataset("Mu_135821-144114").setLuminosity(2863224.758/1e6) # ub^-1 -> pb^-1
+#datasets.getDataset("Mu_135821-144114").setLuminosity(2863224.758/1e6) # ub^-1 -> pb^-1
 datasets.getDataset("Mu_146240-147116").setLuminosity(3977060.866/1e6)
 datasets.getDataset("Mu_147196-149442").setLuminosity(27907588.871/1e6)
+#datasets.loadLuminosities("lumis.txt")
+
+#datasets.getDataset("Mu_135821-144114").setLuminosity(3178937.706/1e6) # ub^-1 -> pb^-1
+#datasets.getDataset("Mu_146240-147116").setLuminosity(5056880.071/1e6)
+#datasets.getDataset("Mu_147196-149442").setLuminosity(27907588.871/1e6)
+
 # datasets.remove([
 #         "Mu_135821-144114",
 #         "Mu_146240-147116",
@@ -198,6 +313,17 @@ class Histo:
             styles.getDataStyle()(self.histos.getHisto("Data"))
             self.histos.setHistoDrawStyle("Data", "EP")
 
+    def addMCStatError(self):
+        histoData = filter(lambda x: x.isMC(), self.histos.getHistoDataList())
+        if len(histoData) == 0:
+            # Only data histograms
+            return
+
+        ROOT.gStyle.SetErrorX(0.5)
+        hse = HistoStatError(histoData, "MC Stat. Err.")
+        hse.call(styles.getErrorStyle())
+        self.histos.append(hse)
+
     def createFrame(self, plotname, **kwargs):
         (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, **kwargs)
 
@@ -260,6 +386,7 @@ def muonPt(h, prefix=""):
 
     h.histos.forEachHisto(lambda h: h.Rebin(5))
     h.histos.stackMCHistograms()
+    h.addMCStatError()
     h.createFrame(prefix+"muon_pt", xmax=xmax)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
@@ -403,7 +530,7 @@ class PlotMet:
 
         self.ymax = 200
         self.xmax = 300
-        self.xmax = 50
+        self.xmax = 100
 
     def xlabel(self, met):
         return self.xlabels[met]+" (GeV)"
@@ -456,26 +583,26 @@ class PlotMet:
         h = self._createHisto(met, selection)
         self._plotLog(h, selection, met)
         
-jetMultiplicity()
-muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
-muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
-muonPt(Histo(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
-muonEta(Histo(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
-muonD0()
-muonIso(Histo(datasets, lastSelectionBeforeMetOtherIso+"/relIso"), lastSelectionBeforeMetOtherIso+"_")
-muonIso(Histo(datasets, lastSelectionOtherIso+"/relIso"), lastSelectionOtherIso+"_")
-muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
+#jetMultiplicity()
+#muonPt(Histo(datasets, lastSelectionOther+"/pt"), lastSelectionOther+"_")
+#muonPt(Histo(datasets, lastSelectionBeforeMetOther+"/pt"), lastSelectionBeforeMetOther+"_")
+#muonPt(Histo(datasets, lastSelection+"/muon_pt"), lastSelection+"_")
+#muonEta(Histo(datasets, lastSelection+"/muon_eta"), lastSelection+"_")
+#muonD0()
+#muonIso(Histo(datasets, lastSelectionBeforeMetOtherIso+"/relIso"), lastSelectionBeforeMetOtherIso+"_")
+#muonIso(Histo(datasets, lastSelectionOtherIso+"/relIso"), lastSelectionOtherIso+"_")
+#muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
 #muonIso(Histo(datasets, lastSelectionOther+"/relIso"), lastSelectionOther+"_")
 #muonIso(Histo(datasets, lastSelection+"/muon_relIso"), lastSelection+"_")
-
+ 
 plotMet = PlotMet()
-plotMet.plot("calomet")
-plotMet.plot("pfmet")
-plotMet.plot("tcmet")
+#plotMet.plot("calomet")
+#plotMet.plot("pfmet")
+#plotMet.plot("tcmet")
+#plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
 
-plotMet.plot("pfmet", selection=lastSelectionBeforeMet, calcNumEvents=True)
-
-for x in noIsoNoVetoMet[:-1]:
+#for x in selections[:-1]:
+for x in selections:
     plotMet.plotLog("pfmet", selection=x)
     #for met in ["calomet", "pfmet", "tcmet"]:
     #    plotMet.plotLog(met, selection=x)
