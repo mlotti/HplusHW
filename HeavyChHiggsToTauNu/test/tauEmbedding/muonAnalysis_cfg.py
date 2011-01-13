@@ -770,10 +770,6 @@ process.muonJetMetAnalyzer = cms.EDAnalyzer(
             cut = cms.untracked.string(jetSelection),
             name = cms.untracked.string("JetKinematic")
         ),
-        cms.PSet(
-            cut = cms.untracked.string(jetIdPF),
-            name = cms.untracked.string("JetId")
-        )
     ),
     muonSelections = cms.untracked.VPSet(
         cms.PSet(
@@ -819,9 +815,18 @@ process.muonJetMetAnalyzer = cms.EDAnalyzer(
     )
 )
 
+process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
+process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
+    cut = cms.untracked.string(jetIdPF),
+    name = cms.untracked.string("JetId")
+))
+
 process.muonJetMetPath = cms.Path(
-    process.muonJetMetAnalyzer
+    process.commonSequence *
+    process.muonJetMetAnalyzer *
+    process.muonJetMetAnalyzerJetId
 )
+
 
 #print process.dumpPython()
 
