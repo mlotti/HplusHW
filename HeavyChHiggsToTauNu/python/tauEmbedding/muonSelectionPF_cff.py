@@ -46,7 +46,7 @@ tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
     maxZ = cms.double(1.0)
 )
 tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
-    src = cms.InputTag("tightMuons"),
+    src = cms.InputTag("tightMuonsZ"),
     minNumber = cms.uint32(1)
 )
 tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
