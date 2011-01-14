@@ -113,12 +113,6 @@ def addTo(datasets):
                 "number_of_jobs": 150,
             },
             })
-    add("QCD_Pt300to470_Fall10", {
-            "RECO": {
-                "datasetpath": "/QCD_Pt_300to470_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 150, # Adjusted for PATtuple file size
-            },
-            })
 
 
     # Electroweak
@@ -144,57 +138,3 @@ def addTo(datasets):
                 "use_server": 1,
             },
             })
-
-
-    # Backgrounds for electroweak background measurement
-    add("QCD_Pt20_MuEnriched", {
-            "RECO": {
-                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 200, # Adjusted for PAT on the fly
-            },
-            "AOD": {
-                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
-                "number_of_jobs": 200,
-            },
-            })
-    add("DYJetsToLL", {
-            "RECO": {
-                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 15, # Adjusted for PAT on the fly
-            },
-            "AOD": {
-                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
-                "number_of_jobs": 15,
-            },
-            })
-    add("TToBLNu_s-channel", {
-            "RECO": {
-                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            },
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
-                "number_of_jobs": 10,
-            },
-            })
-    add("TToBLNu_t-channel", {
-            "RECO": {
-                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            },
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
-                "number_of_jobs": 10,
-            },
-            })
-    add("TToBLNu_tW-channel", {
-            "RECO": {
-                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            },
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
-                "number_of_jobs": 10,
-            },
-            })
-
