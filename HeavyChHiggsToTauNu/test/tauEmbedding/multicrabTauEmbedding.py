@@ -30,14 +30,14 @@ datasets = [
     "Mu_146240-147116", # HLT_Mu9
     "Mu_147196-149442", # HLT_Mu15_v1
     # Signal MC
-    "TTbar",
-    "WJets",
+    "TTJets_PU",
+    "WJets_Fall10_PU",
     # Background MC
-    "QCD_Pt20_MuEnriched",
-    "DYJetsToLL",
-    "TToBLNu_s-channel",
-    "TToBLNu_t-channel",
-    "TToBLNu_tW-channel",
+    "QCD_Pt20_MuEnriched_PU",
+    "DYJetsToLL_PU",
+    "TToBLNu_s-channel_PU",
+    "TToBLNu_t-channel_PU",
+    "TToBLNu_tW-channel_PU",
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -50,10 +50,10 @@ tauname = "_tauembedding_%s_v5" % step
 
 skimNjobs = {
     "Mu_135821-144114": 50,
-    "WJets": 50,
-    "TTJets": 20,
-    "QCD_Pt20_MuEnriched": 200,
-    "DYJetsToLL": 30,
+    "WJets_Fall10_PU": 50,
+    "TTJets_PY": 20,
+    "QCD_Pt20_MuEnriched_PU": 200,
+    "DYJetsToLL_PU": 30,
     }
     
 
