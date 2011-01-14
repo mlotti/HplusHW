@@ -49,9 +49,11 @@ path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v4" % step
 
 skimNjobs = {
+    "Mu_135821-144114": 50,
     "WJets": 50,
     "TTJets": 20,
-    "QCD_Pt20_MuEnriched": 100,
+    "QCD_Pt20_MuEnriched": 200,
+    "DYJetsToLL": 30,
     }
     
 
