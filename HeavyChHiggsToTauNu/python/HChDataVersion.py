@@ -7,6 +7,7 @@ triggerProcessMap = {
     "37X": "REDIGI37X",
     "38X": "REDIGI38X",
     "38Xrelval": "HLT",
+    "38XredigiPU": "REDIGI38XPU",
     "38XdataRun2010A": "HLT",
     "38XdataRun2010B": "HLT"
     }
@@ -60,7 +61,7 @@ class DataVersion:
         self.is_38X = False
         if dataVersion in ["35X", "35Xredigi"]:
             self.is_35X = True
-        elif dataVersion in ["38X", "38Xrelval", "38XdataRun2010A", "38XdataRun2010B"]:
+        elif dataVersion in ["38X", "38Xrelval", "38XredigiPU", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_38X = True
 
     def isData(self):
