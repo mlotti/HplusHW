@@ -56,7 +56,7 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
     l.SetTextSize(textDefaults.getSize("energy"))
     l.DrawLatex(x, y, "#sqrt{s} = "+s)
 
-def addLuminosityText(x, y, lumi, unit="pb^{1}"):
+def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
