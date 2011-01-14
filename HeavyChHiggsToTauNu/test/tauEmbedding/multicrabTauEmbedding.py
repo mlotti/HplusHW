@@ -11,9 +11,9 @@ step = "skim"
 #step = "analysisTau"
 
 config = {"skim":       {"input": "RECO",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation": {"input": "tauembedding_skim_v3",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
-          "embedding":  {"input": "tauembedding_generation_v3",   "config": "embed_RECO.py", "output": "embedded_RECO.root"},
-          "analysis":   {"input": "tauembedding_embedding_v3_3",  "config": "embeddingAnalysis_cfg.py"},
+          "generation": {"input": "tauembedding_skim_v5",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
+          "embedding":  {"input": "tauembedding_generation_v5",   "config": "embed_RECO.py", "output": "embedded_RECO.root"},
+          "analysis":   {"input": "tauembedding_embedding_v5",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau": {"input": "pattuple_v6",               "config": "tauAnalysis_cfg.py"},
           }
 
@@ -23,30 +23,30 @@ if step in ["analysis", "analysisTau"]:
 
 
 multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
-         
-multicrab.extendDatasets(
-    config[step]["input"],
-    [
-        # Data
-        "Mu_135821-144114", # HLT_Mu9
-        "Mu_146240-147116", # HLT_Mu9
-        "Mu_147196-149442", # HLT_Mu15_v1
-        # Signal MC
-        "TTbar",
-        "WJets",
-        # Background MC
-        "QCD_Pt20_MuEnriched",
-        "DYJetsToLL",
-        "TToBLNu_s-channel",
-        "TToBLNu_t-channel",
-        "TToBLNu_tW-channel",
-        ])
+
+datasets = [
+    # Data
+    "Mu_135821-144114", # HLT_Mu9
+    "Mu_146240-147116", # HLT_Mu9
+    "Mu_147196-149442", # HLT_Mu15_v1
+    # Signal MC
+    "TTbar",
+    "WJets",
+    # Background MC
+    "QCD_Pt20_MuEnriched",
+    "DYJetsToLL",
+    "TToBLNu_s-channel",
+    "TToBLNu_t-channel",
+    "TToBLNu_tW-channel",
+    ]
+
+multicrab.extendDatasets(config[step]["input"], datasets)
 
 if step in ["generation", "embedding"]:
     multicrab.appendArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v4" % step
+tauname = "_tauembedding_%s_v5" % step
 
 skimNjobs = {
     "Mu_135821-144114": 50,
