@@ -22,7 +22,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
     "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTbar_Htaunu_M80/TTbar_Htaunu_M80/Spring10_START3X_V26_S09_v1_GEN-SIM-RECO-pattuple_test5/744fc999107787b3f27dc1fe1e804784/pattuple_4_1_pCt.root"

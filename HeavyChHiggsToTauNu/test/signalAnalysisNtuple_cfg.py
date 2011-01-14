@@ -24,7 +24,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
         dataVersion.getAnalysisDefaultFileCastor()

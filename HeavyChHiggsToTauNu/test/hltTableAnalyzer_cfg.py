@@ -40,7 +40,6 @@ process.options = cms.untracked.PSet(
 )
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(options.inputFiles)
 )
 if options.printPaths == 0:

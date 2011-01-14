@@ -35,7 +35,6 @@ myJetTrigger = "HLT_Jet30U"
 ################################################################################
 # Source
 process.source = cms.Source('PoolSource',
-  duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
 #	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Fall10-START38_V12-v1_RAW_RECO.root"
