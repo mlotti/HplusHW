@@ -34,9 +34,25 @@ def addTo(datasets):
     }
 
 
-    datasets["Mu_135821-144114"]["data"]["tauembedding_skim_v4"] = {
+    datasets["Mu_135821-144114"]["data"]["tauembedding_skim_v5"] = {
         "dbs_url": common.pattuple_dbs,
-        "datasetpath": "/Mu/local-Run2010A_Nov4ReReco_v1_RECO_tauembedding_skim_v4-98a281b688d6e3c666617a7ef53bc078/USER",
-        "number_of_jobs": 10
+        "datasetpath": "/Mu/local-Run2010A_Nov4ReReco_v1_RECO_tauembedding_skim_v5-d9acfcd152bd91559f102d8a462838a1/USER",
+        "number_of_jobs": 7 # ~100 ev/job
+    }
+    datasets["Mu_146240-147116"]["data"]["tauembedding_skim_v5"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/Mu/local-Run2010B_Nov4ReReco_v1_RECO_tauembedding_skim_v5-d9acfcd152bd91559f102d8a462838a1/USER",
+        "number_of_jobs": 12 # ~100 ev/job
+    }
+    datasets["Mu_147196-149442"]["data"]["tauembedding_skim_v5"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/Mu/local-Run2010B_Nov4ReReco_v1_RECO_tauembedding_skim_v5-1b92bf46a5f97420ad6d4abe5c819f95/USER",
+        "number_of_jobs":  # ~100 ev/job
+    }
+
+    datasets["DYJetsToLL_PU"]["data"]["tauembedding_skim_v5"] = {
+        "dbs_url": common.pattuple_dbs,
+        "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_tauembedding_skim_v5-f0f5761dbef0a56e664c9bfa3bb2c570/USER",
+        "number_of_jobs": 60 # ~100 ev/job
     }
 

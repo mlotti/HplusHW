@@ -48,8 +48,11 @@ if step in ["generation", "embedding"]:
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v5" % step
 
+skimNlumis = {
+    "Mu_135821-144114": 1000
+    }
+
 skimNjobs = {
-    "Mu_135821-144114": 50,
     "WJets_Fall10_PU": 50,
     "TTJets_PY": 20,
     "QCD_Pt20_MuEnriched_PU": 200,
@@ -72,6 +75,10 @@ def modify(dataset):
     if step == "skim":
         try:
             dataset.setNumberOfJobs(skimNjobs[dataset.getName()])
+        except KeyError:
+            pass
+        try:
+            dataset.setLumisPerJob(skimNlumis[dataset.getName()])
         except KeyError:
             pass
 
