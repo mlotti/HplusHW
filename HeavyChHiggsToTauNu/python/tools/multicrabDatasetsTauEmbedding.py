@@ -47,7 +47,7 @@ def addTo(datasets):
     datasets["Mu_147196-149442"]["data"]["tauembedding_skim_v5"] = {
         "dbs_url": common.pattuple_dbs,
         "datasetpath": "/Mu/local-Run2010B_Nov4ReReco_v1_RECO_tauembedding_skim_v5-1b92bf46a5f97420ad6d4abe5c819f95/USER",
-        "number_of_jobs":  # ~100 ev/job
+        "number_of_jobs": 70 # ~100 ev/job
     }
 
     datasets["DYJetsToLL_PU"]["data"]["tauembedding_skim_v5"] = {
