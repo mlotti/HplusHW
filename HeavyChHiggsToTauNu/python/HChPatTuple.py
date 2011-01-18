@@ -45,14 +45,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
-        # Disable PFRecoTauDiscriminationByInvMass and knock-ons until fixed (there are removals below related to this)
-        for x in [
-            process.shrinkingConePFTauDiscriminationByInvMass,
-            process.shrinkingConePFTauDiscriminationForChargedHiggsBy3ProngCombined,
-            process.shrinkingConePFTauDiscriminationForChargedHiggsBy1or3Prongs,
-            process.shrinkingConePFTauDiscriminationForChargedHiggs]:
-            process.shrinkingConePFTauHplusDiscriminationSequence.remove(x)
-        process.shrinkingConePFTauHplusDiscriminationSequenceCont.remove(process.shrinkingConePFTauDiscriminationByInvMassCont)
+        # Reconfigure PFRecoTauDiscriminationByInvMass because there is no updated configuration in the CVS
+        process.shrinkingConePFTauDiscriminationByInvMass.select.min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin
+        process.shrinkingConePFTauDiscriminationByInvMass.select.max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
 
         # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
@@ -213,13 +208,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          typeLabel = "PFTau")
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
-
-        # Disable PFRecoTauDiscriminationByInvMass and knock-ons until fixed (there are removals above related to this)
-        del process.patTausShrinkingConePFTau.tauIDSources.HChTauIDInvMass
-        del process.patTausShrinkingConePFTau.tauIDSources.HChTauIDInvMassCont
-        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID3ProngCombined
-        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID1or3Prongs
-        del process.patTausShrinkingConePFTau.tauIDSources.HChTauID
 
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
