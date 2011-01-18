@@ -9,16 +9,19 @@
 config = {
     "35X": {
         "triggerProcess": "HLT",
+        "signalTrigger": "HLT_SingleLooseIsoTau20",
         "patMadhatter": "/store/mc/Spring10/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/GEN-SIM-RECO/START3X_V26-v1/0014/F6753C2F-0664-DF11-8236-001E688E628A.root",
         "analysisCastor": "/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1/94799423eedb9d1f02c6c0ed06eb3738/pattuple_4_1_pvI.root",
     },
     "35Xredigi": {
         "triggerProcess": "REDIGI",
+        "signalTrigger": "HLT_SingleLooseIsoTau20",
         "patCastor": "rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
     },
     "36X": {
         "triggerProcess": "REDIGI36X",
+        "signalTrigger": "HLT_SingleLooseIsoTau20",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/AODSIM/5874EB44-B175-DF11-9D04-002618943932.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1/2366fe480375ff6f751e0b7e8ec70b52/pattuple_93_1_xbp.root"
     },
@@ -26,18 +29,24 @@ config = {
         "triggerProcess": "HLT",
         "patCastor": "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
     },
-    "36Xspring10": {"triggerProcess": "REDIGI36"},
+    "36Xspring10": {
+        "triggerProcess": "REDIGI36",
+        "signalTrigger": "HLT_SingleLooseIsoTau20",
+    },
     "37X": {"triggerProcess": "REDIGI37X"},
     "38X": {
         "triggerProcess": "REDIGI38X",
+        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "patCastor": "fio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
         "patMadhatter": "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root",
     },
     "38XredigiPU": {
-        "triggerProcess": "REDIGI38XPU"
+        "triggerProcess": "REDIGI38XPU",
+        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
     },
     "38Xrelval": {
         "triggerProcess": "HLT",
+        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "patCastor": '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root',
         "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v7_test2/pattuple_10_1_m2M.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHplusBWB_M120/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b/78d4b6b79bb86567b5da3e176aad4eb3/pattuple_9_1_RL8.root"
@@ -48,6 +57,7 @@ config = {
     },
     "39Xredigi": {
         "triggerProcess": "REDIGI39X",
+        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/GEN-SIM-RECO/72A60727-0513-E011-92AF-0024E8768C30.root",
     },
     "39Xdata": {
@@ -82,6 +92,12 @@ class DataVersion:
             self.is_data = False
             self.globalTag = "START39_V8::All"
 
+            try:
+                self.signalTrigger = conf["signalTrigger"]
+            except KeyError:
+                pass
+                
+
         self.is_35X = False
         self.is_36X = False
         self.is_38X = False
@@ -115,6 +131,13 @@ class DataVersion:
 
     def getTriggerProcess(self):
         return self.trigger
+
+    def getDefaultSignalTrigger(self):
+        # The trigger names in data can change so often that encoding
+        # it in the dataVersion is not flexible enough
+        if self.isData():
+            raise Exception("Default signal trigger is available only for MC")
+        return self.signalTrigger
 
     def getGlobalTag(self):
         return self.globalTag
