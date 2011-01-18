@@ -75,7 +75,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.tautagging *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
-	    process.PFTauTestDiscriminationSequence *
+            process.PFTauTestDiscriminationSequence *
+            process.ak5PFJetTracksAssociatorAtVertex * # for HPS and HPS+TaNC for 35X/36X MC
+            process.pfRecoTauTagInfoProducer *        # for HPS and HPS+TaNC for 35X/36X MC
             process.ak5PFJetsRecoTauPiZeros *         # for HPS+TaNC
             process.combinatoricRecoTaus *            # for HPS+TaNC
             process.produceAndDiscriminateHPSPFTaus * # for HPS+TaNC
