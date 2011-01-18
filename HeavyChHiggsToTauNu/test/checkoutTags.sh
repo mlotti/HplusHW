@@ -18,6 +18,7 @@ set -e
 # 9.12.2010/M.Kortelainen CMSSW_3_8_7 Updated PAT tags to latest recipe, updated lumi tag
 # 27.12.2010/M.Kortelainen CMSSW_3_9_7 Updated tags to latest recipes
 # 12.1.2011/M.Kortelainen CMSSW_3_9_7 Added HPS+TaNC tags
+# 18.1.2011/M.Kortelainen CMSSW_3_9_7 Update PFRecoTauDiscriminationByInvMass.cc
 
 # HPS+TaNC
 cvs co -r1.26 RecoTauTag/tau_tags.txt
@@ -27,6 +28,7 @@ cvs co -r1.26 RecoTauTag/tau_tags.txt
 # RecoTauTag/Configuration
 # DataFormats/TauReco
 addpkg -f RecoTauTag/tau_tags.txt
+cvs up -r 1.3 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByInvMass.cc
 cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
 # This checkouts
 # DataFormats/PatCandidates 
