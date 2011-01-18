@@ -48,6 +48,8 @@ if step in ["generation", "embedding"]:
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v5" % step
 
+reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
+
 skimNlumis = {
     "Mu_135821-144114": 1000
     }
@@ -55,8 +57,11 @@ skimNlumis = {
 skimNjobs = {
     "WJets_Fall10_PU": 50,
     "TTJets_PY": 20,
-    "QCD_Pt20_MuEnriched_PU": 200,
+    "QCD_Pt20_MuEnriched_PU": 300,
     "DYJetsToLL_PU": 30,
+    "TToBLNu_s-channel_PU": 100,
+    "TToBLNu_t-channel_PU": 100,
+    "TToBLNu_tW-channel_PU": 100,
     }
     
 
@@ -68,6 +73,12 @@ def modify(dataset):
         name = path[2].replace("-", "_")
         name += "_"+path[3]
         name += tauname
+
+        if dataset.isData():
+            frun = dataset.getName().split("_")[1].split("-")[0]
+            m = reco_re.search(name)
+            name = reco_re.sub(m.group("reco")+frun+"_", name)
+
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
@@ -82,8 +93,9 @@ def modify(dataset):
         except KeyError:
             pass
 
-        if config[step]["input"] == "AOD":
-            dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
+        #if config[step]["input"] == "AOD":
+        #    dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
+        dataset.useServer(False)
 
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
