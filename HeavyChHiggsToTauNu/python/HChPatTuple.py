@@ -67,21 +67,23 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
         
-        #process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
 
-        # process.PFTau = cms.Sequence(process.ak5PFJetTracksAssociatorAtVertex*process.pfRecoTauTagInfoProducer*process.ak5PFJetsRecoTauPiZeros*process.ak5PFJetsLegacyTaNCPiZeros*process.produceAndDiscriminateShrinkingConePFTaus*process.produceShrinkingConeDiscriminationByTauNeuralClassifier*process.ak5PFJetsLegacyHPSPiZeros*process.combinatoricRecoTaus*process.produceAndDiscriminateHPSPFTaus*process.hpsTancTauSequence)
+        # Sequence to produce HPS and HPS+TaNC taus. Remove the
+        # shrinking cone PFTau and the TaNC classifier from the
+        # sequence as they are already produced as a part of standard
+        # RECO, and we don't want to reproduce them here (i.e. we
+        # prefer the objects in RECO/AOD over reproducing them on the
+        # fly).
+        process.PFTau.remove(process.ak5PFJetsLegacyTaNCPiZeros)
+        process.PFTau.remove(process.produceAndDiscriminateShrinkingConePFTaus)
+        process.PFTau.remove(process.produceShrinkingConeDiscriminationByTauNeuralClassifier)
 
         process.hplusPatTauSequence = cms.Sequence(
             process.tautagging *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
             process.PFTauTestDiscriminationSequence *
-            process.ak5PFJetTracksAssociatorAtVertex * # for HPS and HPS+TaNC for 35X/36X MC
-            process.pfRecoTauTagInfoProducer *        # for HPS and HPS+TaNC for 35X/36X MC
-            process.ak5PFJetsRecoTauPiZeros *         # for HPS+TaNC
-            process.combinatoricRecoTaus *            # for HPS+TaNC
-            process.produceAndDiscriminateHPSPFTaus * # for HPS+TaNC
-            process.hpsTancTauSequence *              # for HPS+TaNC
+            process.PFTau * # for HPS+TaNC
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
