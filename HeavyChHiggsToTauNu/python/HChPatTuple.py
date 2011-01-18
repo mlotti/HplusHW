@@ -46,8 +46,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
         # Reconfigure PFRecoTauDiscriminationByInvMass because there is no updated configuration in the CVS
-        process.shrinkingConePFTauDiscriminationByInvMass.select.min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin
-        process.shrinkingConePFTauDiscriminationByInvMass.select.max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
+        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet(
+            min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
+            max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
+        )
 
         # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
