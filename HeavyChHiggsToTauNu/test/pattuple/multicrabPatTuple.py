@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import re
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
@@ -76,11 +78,20 @@ multicrab.extendDatasets(
 # writing to /store/group/local ...
 #multicrab.addLineAll("USER.local_stage_out=1")
 
+reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
+
 def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
     name += "_pattuple_v8"
+
+    # Add the begin run in the dataset name to the publish name in
+    # order to distinguish pattuple datasets from the same PD
+    if dataset.isData():
+        frun = dataset.getName().split("_")[1].split("-")[0]
+        m = reco_re.search(name)
+        name = reco_re.sub(m.group("reco")+frun+"_", name)
 
     dataset.appendLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
