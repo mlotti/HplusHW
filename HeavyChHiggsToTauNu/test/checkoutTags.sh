@@ -13,6 +13,7 @@
 # 2.11.2010/M.Kortelainen CMSSW_3_8_5_patch3 (tag for filterJSON.py etc. scripts) 
 # 11.11.2010/M.Kortelainen CMSSW_3_8_6 Moved the tau embedding tag here since it is needed for compilation
 # 12.11.2010/M.Kortelainen CMSSW_3_8_6 Removed the tau embedding tag (added workaround)
+# 9.12.2010/M.Kortelainen CMSSW_3_8_7 Updated PAT tags to latest recipe, updated lumi tag
 
 #TARGET="analysis"
 #if [ "x$#" = "x1" ]; then
@@ -21,17 +22,16 @@
 #echo "Checking out tags for $TARGET"
 
 # Common
-cvs co -r V06-01-04 DataFormats/PatCandidates
-cvs co -r V08-00-29 PhysicsTools/PatAlgos
-cvs up -r V08-00-27 PhysicsTools/PatAlgos/python/tools/coreTools.py
+
+cvs co -r V06-01-08 DataFormats/PatCandidates
+cvs co -r V08-00-54 PhysicsTools/PatAlgos
 cvs up -r 1.30      PhysicsTools/PatAlgos/python/tools/tauTools.py
-cvs co -r V00-02-24 PhysicsTools/SelectorUtils 
-cvs co -r lumi2010-Oct12 RecoLuminosity/LumiDB
+cvs co -r V03-09-16 PhysicsTools/PatUtils
+cvs co -r V02-01-01 RecoLuminosity/LumiDB
 cvs co -r V01-04-00 FWCore/PythonUtilities
 
 # PATTuple
 #if [ "x$TARGET" = "xpattuple" ]; then
-cvs co -r V00-03-13 RecoEgamma/ElectronIdentification
 cvs co -r V00-02-01 ElectroWeakAnalysis/WENu
 cvs co -r V00-24-00 RecoTauTag/Configuration
 cvs co -r V00-24-00 RecoTauTag/RecoTau
@@ -62,7 +62,6 @@ cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs
 cvs co -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 cvs co -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByIsolationChargedPtSum_cfi.py
 cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
-cvs co -r V00-00-07 TauAnalysis/MCEmbeddingTools
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 #fi

@@ -78,9 +78,10 @@ dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = Fals
 maxVertexZ = 1.0
 
 relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
-isolationCut = "%s < 0.05" % relIso
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
+jetId = "emEnergyFraction() > 0.01 && jetID().n90Hits > 1 && jetID().fHPD < 0.98"
+jetIdPF = "numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 
 muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
@@ -92,7 +93,7 @@ metCutString = "et() > %d"
 muons = cms.InputTag("selectedPatMuons")
 electrons = cms.InputTag("selectedPatElectrons")
 jets = cms.InputTag("selectedPatJets")
-#jets = cms.InputTag("selectedPatJetsAK5JPT")
+jetsPF = cms.InputTag("selectedPatJetsAK5PF")
 
 caloMET = "patMETs"
 pfMET = "patMETsPF"
@@ -184,19 +185,23 @@ if dataVersion.isData():
 
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
-    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False, muonPtCut=30, metCut=20, njets=3):
+    def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False,
+                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
+        self.doJetId = doJetId
         self._ptCut = ptCutString % muonPtCut
         self._metCut = metCutString % metCut
         self._njets = njets
+        self._jets = jets
+        self._isolationCut = "%s < %f" % (relIso, muonIsolationCut)
 
         counters = []
         if dataVersion.isData():
             counters = dataSelectionCounters
         self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=counters)
-        self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
+        #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
 
@@ -206,7 +211,7 @@ class MuonAnalysis:
         self.pileupName = "VertexCount"
 
         self.selectedMuons = muons
-        self.selectedJets = jets
+        self.selectedJets = self._jets
 
         # Setup the analyzers
         if not self.afterOtherCuts:
@@ -229,7 +234,7 @@ class MuonAnalysis:
                         nbins = cms.untracked.int32(10)
                     ),
                     jets = cms.untracked.PSet(
-                        src = jets,
+                        src = self._jets,
                         min = cms.untracked.int32(0),
                         max = cms.untracked.int32(20),
                         nbins = cms.untracked.int32(20)
@@ -295,7 +300,7 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(isolationCut)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCut)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
@@ -391,9 +396,19 @@ class MuonAnalysis:
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetSelection")
             self.multipAnalyzer.jets.src = self.selectedJets
 
+    def jetId(self, pf=False):
+        idstr = jetId
+        if pf:
+            idstr = jetIdPF
+
+        self.selectedJets = self.analysis.addSelection("JetId", self.selectedJets, idstr)
+        if not self.afterOtherCuts:
+            self.cloneMultipAnalyzer(name="MultiplicityAfterJetId")
+            self.multipAnalyzer.jets.src = self.selectedJets
+
     def jetMultiplicityFilter(self, analyze=True):
         name = "JetMultiplicityCut"
-        self.selectedJets = self.analysis.addNumberCut(name, self.selectedJets, minNumber=self._njets)
+        self.analysis.addNumberCut(name, self.selectedJets, minNumber=self._njets)
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name)
             self.cloneMultipAnalyzer()
@@ -413,6 +428,22 @@ class MuonAnalysis:
     def muonKinematicSelection(self):
         name = "MuonKin"
         self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._ptCut + " && " + etaCut, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonKinematicEtaSelection(self):
+        name = "MuonEta"
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, etaCut, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonKinematicPtCustomSelection(self, pt):
+        name = "MuonPt%d" % pt
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "pt() > %d" % pt, selector="PATMuonSelector")
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -460,7 +491,15 @@ class MuonAnalysis:
 
     def muonIsolation(self):
         name = "MuonIsolation"
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, isolationCut)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCut)
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonIsolationCustom(self, postfix, cut):
+        name = "MuonIsolation"+postfix
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (relIso, cut))
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -533,6 +572,9 @@ class MuonAnalysis:
     def _topMuJetRef(self):
         self.triggerPrimaryVertex()
         self.jetSelection()
+        if self.doJetId:
+            self.jetId()
+
         self.tightMuonSelection()
         if not self.afterOtherCuts:
             self.muonKinematicSelection()
@@ -573,6 +615,9 @@ class MuonAnalysis:
     def noIsoNoVetoMet(self):
         self.triggerPrimaryVertex()
         self.jetSelection()
+        if self.doJetId:
+            self.jetId()
+
         self.tightMuonSelection()
 
         if not self.afterOtherCuts:
@@ -620,6 +665,9 @@ class MuonAnalysis:
 
         self.jetCleaningFromMuon()
         self.jetSelection()
+        if self.doJetId:
+            self.jetId(pf=True)
+
         name = self.jetMultiplicityFilter()
         if self.afterOtherCuts:
             self.addAfterOtherCutsAnalyzer(name)
@@ -629,13 +677,65 @@ class MuonAnalysis:
             self.addAfterOtherCutsAnalyzer(name)
 
         self.createAnalysisPath()
-        
+
+    def muonLast(self):
+        self.triggerPrimaryVertex()
+        self.jetSelection()
+        if self.doJetId:
+            self.jetId()
+        self.jetMultiplicityFilter()
+        self.muonCleaningFromJet()
+
+        self.tightMuonSelection()
+        #self.muonKinematicSelection()
+        self.muonKinematicEtaSelection()
+        self.muonKinematicPtCustomSelection(5)
+        self.muonKinematicPtCustomSelection(10)
+        self.muonKinematicPtCustomSelection(15)
+        self.muonKinematicPtCustomSelection(20)
+        self.muonKinematicPtCustomSelection(25)
+        self.muonKinematicPtCustomSelection(30)
+        self.muonKinematicPtCustomSelection(35)
+        self.muonKinematicPtCustomSelection(40)
+        self.muonQuality()
+        self.muonImpactParameter()
+        self.muonVertexDiff()
+        self.muonIsolationCustom("050", 0.5)
+        self.muonIsolationCustom("015", 0.15)
+        self.muonIsolationCustom("010", 0.1)
+        self.muonIsolationCustom("005", 0.05)
+        self.muonVeto()
+        self.electronVeto()
+
+        self.createAnalysisPath()
+
+    def noMuon(self):
+        self.triggerPrimaryVertex()
+        self.jetSelection()
+        if self.doJetId:
+            self.jetId()
+        self.jetMultiplicityFilter()
+        self.metCut()
+
+        self.createAnalysisPath()
+
+    def noMuonPF(self):
+        self.triggerPrimaryVertex()
+        self.jetSelection()
+        if self.doJetId:
+            self.jetId(pf=True)
+        self.jetMultiplicityFilter()
+        self.metCut()
+
+        self.createAnalysisPath()
 
 def createAnalysis(name, postfix="", **kwargs):
     a = MuonAnalysis(process, prefix=name+postfix, **kwargs)
     getattr(a, name)()
-    a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
     getattr(a, name)()
+    #a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    #getattr(a, name)()
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", **kwargs)
@@ -646,8 +746,13 @@ def createAnalysis2(**kwargs):
         del kwargs["postfix"]
 
     for nj in [1, 2, 3]:
-        createAnalysis("noIsoNoVetoMet", postfix="NJets%d%s"%(nj, postfix), njets=nj, **kwargs)
-        
+        kwargs["postfix"] = "NJets%d%s"%(nj, postfix)
+        kwargs["njets"] = nj
+        createAnalysis("noIsoNoVetoMet", **kwargs)
+        createAnalysis("noMuon", **kwargs)
+        createAnalysis("noMuonPF", jets=jetsPF, **kwargs)
+        createAnalysis("muonLast", **kwargs)
+
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
     #                       (40, 20, 3), (40, 30, 3), (40, 40, 3)]:
@@ -656,6 +761,8 @@ def createAnalysis2(**kwargs):
         kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
         kwargs["muonPtCut"] = pt
         kwargs["metCut"] = met
+        kwargs["njets"] = njets
+        kwargs["jets"] = jetsPF
         createAnalysis("noIsoNoVetoMetPF", **kwargs)
 
 createAnalysis2()
@@ -676,6 +783,75 @@ if options.WDecaySeparate > 0:
 
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
+
+process.muonJetMetAnalyzer = cms.EDAnalyzer(
+    "HPlusMuonJetMetAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    jetSrc = cms.untracked.InputTag(jetsPF.value()),
+    metSrc = cms.untracked.InputTag(pfMET),
+    njets = cms.untracked.uint32(1),
+    jetSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(jetSelection),
+            name = cms.untracked.string("JetKinematic")
+        ),
+    ),
+    muonSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(tightMuonCut),
+            name = cms.untracked.string("MuonTight")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("abs(eta()) < 1.4"),
+            name = cms.untracked.string("MuonEta")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 5"),
+            name = cms.untracked.string("MuonPt5")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 10"),
+            name = cms.untracked.string("MuonPt10")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 15"),
+            name = cms.untracked.string("MuonPt15")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 20"),
+            name = cms.untracked.string("MuonPt20")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 25"),
+            name = cms.untracked.string("MuonPt25")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 30"),
+            name = cms.untracked.string("MuonPt30")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 35"),
+            name = cms.untracked.string("MuonPt35")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 40"),
+            name = cms.untracked.string("MuonPt40")
+        ),
+    )
+)
+
+process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
+process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
+    cut = cms.untracked.string(jetIdPF),
+    name = cms.untracked.string("JetId")
+))
+
+process.muonJetMetPath = cms.Path(
+    process.commonSequence *
+    process.muonJetMetAnalyzer *
+    process.muonJetMetAnalyzerJetId
+)
+
 
 #print process.dumpPython()
 

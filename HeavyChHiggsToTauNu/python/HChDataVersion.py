@@ -9,6 +9,7 @@
 config = {
     "35X": {
         "triggerProcess": "HLT",
+        "patMadhatter": "/store/mc/Spring10/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/GEN-SIM-RECO/START3X_V26-v1/0014/F6753C2F-0664-DF11-8236-001E688E628A.root",
         "analysisCastor": "/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1/94799423eedb9d1f02c6c0ed06eb3738/pattuple_4_1_pvI.root",
     },
@@ -31,6 +32,9 @@ config = {
         "triggerProcess": "REDIGI38X",
         "patMadhatter": "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root"
     },
+    "38XredigiPU": {
+        "triggerProcess": "REDIGI38XPU"
+    },
     "38Xrelval": {
         "triggerProcess": "HLT",
         "patCastor": '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root',
@@ -44,6 +48,9 @@ config = {
     "38XdataRun2010B": {
         "triggerProcess": "HLT",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_146240-148107/BTau/Run2010B_PromptReco_v2_RECO_pattuple_v6_1/43c3132ebadd44967499e6cca288e3ab/pattuple_7_1_cJr.root"
+    },
+    "39Xredigi": {
+        "triggerProcess": "REDIGI39X"
     }
 }
 
@@ -65,7 +72,7 @@ class DataVersion:
         # Collision data
         if dataVersion in ["36Xdata", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_data = True
-            self.globalTag = "GR_R_38X_V14::All"
+            self.globalTag = "GR_R_38X_V15::All"
 
             self.is_runA = False
             self.is_runB = False
@@ -77,7 +84,7 @@ class DataVersion:
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START38_V13::All"
+            self.globalTag = "START38_V14::All"
 
         self.is_35X = False
         self.is_38X = False
@@ -120,7 +127,7 @@ class DataVersion:
         if not hasattr(self, "patMadhatter"):
             print "No default file for PAT in madhatter for dataVersion "+self.version
             return ""
-        if dcap:
+        if dcap and self.patMadhatter.find("/store") == 0:
             return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.patMadhatter
         else:
             return self.patMadhatter
@@ -135,7 +142,7 @@ class DataVersion:
         if not hasattr(self, "analysisMadhatter"):
             print "No default file for analysis in madhatter for dataVersion "+self.version
             return ""
-        if dcap:
+        if dcap and self.analysisMadhatter.find("/store") == 0:
             return "dcap://madhatter.csc.fi:22125/pnfs/csc.fi/data/cms"+self.analysisMadhatter
         else:
             return self.analysisMadhatter

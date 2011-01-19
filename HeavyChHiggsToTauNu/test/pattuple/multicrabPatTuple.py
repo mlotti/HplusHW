@@ -3,9 +3,9 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
-multicrab = Multicrab("crab_pat.cfg")
+multicrab = Multicrab("crab_pat.cfg", lumiMaskDir="..")
 
-multicrab.addDatasets(
+multicrab.extendDatasets(
 #    "AOD",
     "RECO",
     [
@@ -51,17 +51,6 @@ multicrab.addDatasets(
 #        "WJets",
         ])
 
-mask = lumi.getFile("Nov4ReReco")
-multicrab.setDataLumiMask("../"+mask)
-print "Using lumi file", mask
-#try:
-#    mask = lumi.getFile("Sep17ReReco")
-#    multicrab.getDataset("BTau_141950-144114").setLumiMask("../"+mask)
-#    print "Using lumi file %s for BTau_141950-144114" % mask
-#except KeyError:
-#    pass
-
-
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
 #multicrab.addLineAll("USER.local_stage_out=1")
@@ -70,21 +59,21 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v6_4"
+    name += "_pattuple_v7_test2"
 
-    dataset.addLine("USER.publish_data_name = "+name)
+    dataset.appendLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
 # For collision data stageout from US doesn't seem to be a problem
-allowUS = ["TT", "TTJets"]
+allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
 def blacklistUS(dataset):
     if dataset.isMC() and not dataset.getName() in allowUS:
-        dataset.addBlackWhiteList("se_black_list", ["T2_US"])
+        dataset.extendBlackWhiteList("se_black_list", ["T2_US"])
 multicrab.forEachDataset(blacklistUS)
 
 # Many failures with 60307 and 70500 from T2_UK_London_Brunel for
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
-multicrab.addBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
+multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
 
 # Create multicrab task configuration and run 'multicrab -create'
 multicrab.createTasks()

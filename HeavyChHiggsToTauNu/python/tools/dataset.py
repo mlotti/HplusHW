@@ -1,4 +1,5 @@
 import glob, os, sys
+import json
 from optparse import OptionParser
 
 import ROOT
@@ -6,6 +7,7 @@ import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 class Count:
+    """Represents counter count value with error."""
     def __init__(self, value, error):
         self._value = value
         self._error = error
@@ -20,6 +22,12 @@ class Count:
         return "%f"%self._value
 
 def histoToCounter(histo):
+    """Transform histogram (TH1) to a list of (name, Count) pairs.
+
+    The name is taken from the x axis label and the count is Count
+    object with value and (statistical) uncertainty.
+    """
+
     ret = []
 
     for bin in xrange(1, histo.GetNbinsX()+1):
@@ -30,6 +38,12 @@ def histoToCounter(histo):
     return ret
 
 def histoToDict(histo):
+    """Transform histogram (TH1) to a dictionary.
+
+    The key is taken from the x axis label, and the value is the bin
+    content.
+    """
+
     ret = {}
 
     for bin in xrange(1, histo.GetNbinsX()+1):
@@ -38,6 +52,21 @@ def histoToDict(histo):
     return ret
 
 def rescaleInfo(d):
+    """Rescales info dictionary.
+
+    Assumes that d has a 'control' key for a numeric value, and then
+    normalizes all items in the dictionary such that the 'control'
+    becomes one.
+
+    The use case is to have a dictionary from histoToDict() function,
+    where the original histogram is merged from multiple jobs. It is
+    assumed that each histogram as a one bin with 'control' label, and
+    the value of this bin is 1 for each job. Then the bin value for
+    the merged histogram tells the number of jobs. Naturally the
+    scheme works correctly only if the histograms from jobs are
+    identical, and hence is appropriate only for dataset-like
+    information.
+    """
     factor = 1/d["control"]
 
     ret = {}
@@ -48,6 +77,7 @@ def rescaleInfo(d):
 
 
 def addOptions(parser):
+    """Add common dataset options to OptionParser object."""
     parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
@@ -55,9 +85,33 @@ def addOptions(parser):
 
 
 def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
+    """Construct DatasetSet from a multicrab.cfg.
+
+    Parameters:
+    opts       Optional OptionParser object. Should have options added with
+               addOptions() and multicrab.addOptions().
+    counters   String for a directory name inside the ROOT files for the
+               event counter histograms
+
+
+    The section names in multicrab.cfg are taken as the dataset names
+    in the DatasetSet object.
+    """
     return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counters)
 
 def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounters"):   
+    """Construct DatasetSet from a list of CRAB task directory names.
+
+    Parameters:
+    taskdirs   List of strings for the CRAB task directories (relative
+               to the working directory)
+    opts       Optional OptionParser object. Should have options added with
+               addOptions() and multicrab.addOptions().
+    counters   String for a directory name inside the ROOT files for the
+               event counter histograms
+
+    The task directories are taken as the dataset names in the DatasetSet object.
+    """
     if opts == None:
         parser = OptionParser(usage="Usage: %prog [options]")
         multicrab.addOptions(parser)
@@ -93,23 +147,42 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
     return getDatasetsFromRootFiles(dlist, counters)
 
 def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
+    """Construct DatasetSet from a list of CRAB task directory names.
+
+    Parameters:
+    dlist      List of (name, filename) pairs (both should be strings).
+               'name' is taken as the dataset name, and 'filename' as
+               the path to the ROOT file.
+    counters   String for a directory name inside the ROOT files for the
+               event counter histograms
+    """
     datasets = DatasetSet()
     for name, f in dlist:
         datasets.append(Dataset(name, f, counters))
     return datasets
 
-#def readDataset(fname, counters, datasetname, crossSections):
-#    dataset = Dataset(datasetname, fname, counters)
-#    if datasetname in crossSections:
-#        dataset.setCrossSection(crossSections[datasetname])
-#    return dataset
-
-
 def normalizeToOne(h):
+    """Normalize TH1 to unit area.
+
+    Parameters:
+    h   TH1 histogram
+
+    Returns the normalized histogram (which is the same as the
+    parameter, i.e. no copy is made).
+    """
     return normalizeToFactor(1.0/h.Integral())
     return h
 
 def normalizeToFactor(h, f):
+    """Scale TH1 with a given factor.
+
+    Parameters:
+    h   TH1 histogram
+    f   Scale factor
+
+    TH1.Sumw2() is called before the TH1.Scale() in order to scale the
+    histogram errors correctly.
+    """
     backup = ROOT.gErrorIgnoreLevel
     ROOT.gErrorIgnoreLevel = ROOT.kError
     h.Sumw2() # errors are also scaled after this call 
@@ -119,6 +192,23 @@ def normalizeToFactor(h, f):
 
 
 def mergeStackHelper(datasetList, nameList, task):
+    """Helper function for merging/stacking a set of datasets.
+
+    Parameters:
+    datasetList  List of all Dataset objects to consider
+    nameList     List of the names of Dataset objects to merge/stack
+    task         String to identify merge/stack task (can be 'stack' or 'merge')
+
+    Returns a triple of:
+    - list of selected Dataset objects
+    - list of non-selected Dataset objects
+    - index of the first selected Dataset object in the original list
+      of all Datasets
+
+    The Datasets to merge/stack are selected from the list of all
+    Datasets, and it is checked that all of them are either data or MC
+    (i.e. merging/stacking of data and MC datasets is forbidden).
+    """
     if not task in ["stack", "merge"]:
         raise Exception("Task can be either 'stack' or 'merge', was '%s'" % task)
 
@@ -155,7 +245,32 @@ def mergeStackHelper(datasetList, nameList, task):
     return (selected, notSelected, firstIndex)
 
 class HistoWrapper:
+    """Wrapper for a single TH1 histogram and the corresponding Dataset.
+
+    The wrapper holds the normalization of the histogram. User should
+    set the current normalization scheme with the normalize* methods,
+    and then get a clone of the original histogram, which is then
+    normalized according to the current scheme.
+
+    This makes the class very flexible with respect to the many
+    possible normalizations user could want to apply within a plot
+    script. The first use case was MC counters, which could be printed
+    first normalized to the luminosity of the data, and also
+    normalized to the cross section.
+
+    The histogram wrapper classes also abstract the signel histogram, and
+    merged data and MC histograms behind a common interface.
+    """
+
     def __init__(self, histo, dataset):
+        """Constructor.
+
+        Parameters:
+        histo    TH1 histogram
+        dataset  Corresponding Dataset object
+
+        Sets the initial normalization to 'none'
+        """
         self.histo = histo
         self.dataset = dataset
         self.normalization = "none"
@@ -170,9 +285,12 @@ class HistoWrapper:
         return self.dataset.isMC()
 
     def getBinLabels(self):
+        """Get list of the bin labels of the histogram."""
         return [x[0] for x in histoToCounter(self.histo)]
 
     def getHistogram(self):
+        """Get a clone of the wrapped histogram normalized correctly."""
+
         # Always return a clone of the original
         h = self.histo.Clone()
         h.SetName(h.GetName()+"_cloned")
@@ -191,14 +309,36 @@ class HistoWrapper:
             raise Exception("Internal error")
 
     def normalizeToOne(self):
+        """Set the current normalization scheme to 'to one'.
+
+        The histogram is normalized to unit area.
+        """
         self.normalization = "toOne"
 
     def normalizeByCrossSection(self):
+        """Set the current normalization scheme to 'by cross section'.
+
+        The histogram is normalized to the cross section of the
+        corresponding dataset. The normalization can be applied only
+        to MC histograms.
+        """
+
         if self.dataset.isData():
             raise Exception("Can't normalize data histogram by cross section")
         self.normalization = "byCrossSection"
 
     def normalizeToLuminosity(self, lumi):
+        """Set the current normalization scheme to 'to luminosity'.
+
+        Parameters:
+        lumi   Integrated luminosity in pb^-1 to normalize to
+
+        The histogram is normalized first normalized to the cross
+        section of the corresponding dataset, and then to a given
+        luminosity. The normalization can be applied only to MC
+        histograms.
+        """
+
         if self.dataset.isData():
             raise Exception("Can't normalize data histogram to luminosity")
 
@@ -207,12 +347,28 @@ class HistoWrapper:
 
 
 class HistoWrapperMergedData:
-    def __init__(self, datasetHistos, mergedDataset):
-        self.datasetHistos = datasetHistos
+    """Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
+
+    The merged data histograms can only be normalized 'to one'.
+
+    See also the documentation of HistoWrapper class.
+    """
+
+    def __init__(self, histoWrappers, mergedDataset):
+        """Constructor.
+
+        Parameters:
+        histoWrappers   List of HistoWrapper objects to merge
+        mergedDataset   The corresponding DatasetMerged object
+
+        The constructor checks that all histoWrappers are data, and
+        are not yet normalized.
+        """
+        self.histoWrappers = histoWrappers
         self.dataset = mergedDataset
         self.normalization = "none"
-        for h in self.datasetHistos:
-            if h.isMC():
+        for h in self.histoWrappers:
+            if not h.isData():
                 raise Exception("Internal error")
             if h.normalization != "none":
                 raise Exception("Internal error")
@@ -221,30 +377,57 @@ class HistoWrapperMergedData:
         return self.dataset
 
     def getBinLabels(self):
-        return self.datasetHistos[0].getBinLabels()
+        """Get list of the bin labels of the first of the merged histogram."""
+        return self.histoWrappers[0].getBinLabels()
 
     def normalizeToOne(self):
+        """Set the current normalization scheme to 'to one'.
+
+        The histogram is normalized to unit area.
+        """
         self.normalization = "toOne"
 
-    def getSumHistogram(self):
-        hsum = self.datasetHistos[0].getHistogram() # we get a clone
-        for h in self.datasetHistos[1:]:
+    def _getSumHistogram(self):
+        """Calculate the sum of the histograms (i.e. merge).
+
+        Intended for internal use only.
+        """
+        hsum = self.histoWrappers[0].getHistogram() # we get a clone
+        for h in self.histoWrappers[1:]:
             hsum.Add(h.getHistogram())
         return hsum
 
     def getHistogram(self):
-        hsum = self.getSumHistogram()
+        """Merge the histograms and apply the current normalization.
+
+        The returned histogram is a clone, so client code can do
+        anything it wishes with it.
+        """
+        hsum = self._getSumHistogram()
         if self.normalization == "toOne":
             return normalizeToOne(hsum)
         else:
             return hsum
 
 class HistoWrapperMergedMC:
-    def __init__(self, datasetHistos, mergedDataset):
-        self.datasetHistos = datasetHistos
+    """Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
+
+    See also the documentation of HistoWrapper class.
+    """
+    def __init__(self, histoWrappers, mergedDataset):
+        """Constructor.
+
+        Parameters:
+        histoWrappers   List of HistoWrapper objects to merge
+        mergedDataset   The corresponding DatasetMerged object
+
+        The constructor checks that all histoWrappers are MC, and are
+        not yet normalized.
+        """
+        self.histoWrappers = histoWrappers
         self.dataset = mergedDataset
         self.normalization = "none"
-        for h in self.datasetHistos:
+        for h in self.histoWrappers:
             if h.isData():
                 raise Exception("Internal error")
             if h.normalization != "none":
@@ -254,30 +437,73 @@ class HistoWrapperMergedMC:
         return self.dataset
 
     def getBinLabels(self):
-        return self.datasetHistos[0].getBinLabels()
+        """Get list of the bin labels of the first of the merged histogram."""
+        return self.histoWrappers[0].getBinLabels()
 
     def normalizeToOne(self):
+        """Set the current normalization scheme to 'to one'.
+
+        The histogram is normalized to unit area.
+
+        Sets the normalization of the underlying histoWrappers to 'by
+        cross section' in order to be able to sum them. The
+        normalization 'to one' is then done for the summed histogram.
+        """
         self.normalization = "toOne"
-        for h in self.datasetHistos:
+        for h in self.histoWrappers:
             h.normalizeByCrossSection()
-	raise Exception("Not implemented yet!")
 
     def normalizeByCrossSection(self):
+        """Set the current normalization scheme to 'by cross section'.
+
+        The histogram is normalized to the cross section of the
+        corresponding dataset.
+
+        Sets the normalization of the underlying histoWrappers to 'by
+        cross section'. Then they can be summed directly, and the
+        summed histogram is automatically correctly normalized to the
+        total cross section of the merged Datasets.
+        """
         self.normalization = "byCrossSection"
-        for h in self.datasetHistos:
+        for h in self.histoWrappers:
             h.normalizeByCrossSection()
 
     def normalizeToLuminosity(self, lumi):
+        """Set the current normalization scheme to 'to luminosity'.
+
+        Parameters:
+        lumi   Integrated luminosity in pb^-1 to normalize to
+
+        The histogram is normalized first normalized to the cross
+        section of the corresponding dataset, and then to a given
+        luminosity.
+
+        Sets the normalization of the underlying histoWrappers to 'to
+        luminosity'. Then they can be summed directly, and the summed
+        histogram is automatically correctly normalized to the given
+        integrated luminosity.
+        """
         self.normalization = "toLuminosity"
-        for h in self.datasetHistos:
+        for h in self.histoWrappers:
             h.normalizeToLuminosity(lumi)
 
     def getHistogram(self):
+        """Merge the histograms and apply the current normalization.
+
+        The returned histogram is a clone, so client code can do
+        anything it wishes with it.
+
+        The merged MC histograms must be normalized in some way,
+        otherwise they can not be summed (or they can be, but the
+        contents of the summed histogram doesn't make any sense as it
+        is just the sum of the MC events of the separate datasets
+        which in general have different cross sections).
+        """
         if self.normalization == "none":
             raise Exception("Merged MC histograms must be normalized to something!")
 
-        hsum = self.datasetHistos[0].getHistogram() # we get a clone
-        for h in self.datasetHistos[1:]:
+        hsum = self.histoWrappers[0].getHistogram() # we get a clone
+        for h in self.histoWrappers[1:]:
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
@@ -287,7 +513,33 @@ class HistoWrapperMergedMC:
 
 
 class Dataset:
+    """Dataset class for histogram access from one ROOT file.
+
+    The default values for cross section/luminosity are read from
+    'configInfo/configInfo' histogram (if it exists). The data/MC
+    datasets are differentiated by the existence of 'crossSection'
+    (for MC) and 'luminosity' (for data) keys in the histogram.
+    """
+
     def __init__(self, name, fname, counterDir):
+        """Constructor.
+
+        Parameters:
+        name        Name of the dataset (can be anything)
+        fname       Path to the ROOT file of the dataset
+        counterDir  Name of the directory in the ROOT file for event
+                    counter histograms. If None is given, it is
+                    assumed that the dataset has no counters. This
+                    also means that the histograms from this dataset
+                    can not be normalized unless the number of all
+                    events is explictly set with setNAllEvents()
+                    method.
+
+        Opens the ROOT file, reads 'configInfo/configInfo' histogram
+        (if it exists), and reads the main event counter
+        ('counterDir/counters') if counterDir is not None.
+        """
+
         self.name = name
         self.file = ROOT.TFile.Open(fname)
         if self.file == None:
@@ -304,6 +556,17 @@ class Dataset:
             self._readCounter(counterDir)
 
     def _readCounter(self, counterDir):
+        """Read the number of all events from the event counters.
+
+        Parameters:
+        counterDir  Name of the directory for event counter histograms.
+
+        Reads 'counterDir/counters' histogram, and takes the value of
+        the first bin as the number of all events.
+
+        Intended for internal use only.
+        """
+
         if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
         ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
@@ -311,6 +574,23 @@ class Dataset:
         self.counterDir = counterDir
 
     def setPrefix(self, prefix):
+        """Set a prefix for the directory access.
+
+        Parameters:
+        prefix   Prefix for event counter and histogram directories.
+
+        The number of all events (for normalization) are re-read from
+        a directory prefix+original_counter_directory. The prefix is
+        also used for the histogram paths in getHistogram() method.
+
+        The use case is the following:
+        - The same analysis is run many times with different
+          parameters in one CMSSW jobs. The different analyses have
+          different prefixes but the same base name (e.g. 'analysis,
+          'foo1analysis', 'foo2analysis' etc.)
+        - The different analyses can then be selected easily by
+          calling this method with a prefix
+        """
         self.prefix = prefix
         self._readCounter(prefix+self.originalCounterDir)
 
@@ -318,6 +598,10 @@ class Dataset:
         return self.prefix
 
     def deepCopy(self):
+        """Make a deep copy of a Dataset object.
+
+        Nothing is shared between the returned copy and this object.
+        """
         d = Dataset(self.name, self.file.GetName(), self.counterDir)
         d.info.update(self.info)
         return d
@@ -329,21 +613,25 @@ class Dataset:
         self.name = name
 
     def setCrossSection(self, value):
+        """Set cross section of MC dataset (in pb)."""
         if not self.isMC():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
+        """Get cross section of MC dataset (in pb)."""
         if not self.isMC():
             raise Exception("Dataset %s is data, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
+        """Set the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
             raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
         self.info["luminosity"] = value
 
     def getLuminosity(self):
+        """Get the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         return self.info["luminosity"]
@@ -358,15 +646,35 @@ class Dataset:
         return self.originalCounterDir
 
     def setNAllEvents(self, nAllEvents):
+        """Set the number of all events (for normalization).
+
+        This allows both overriding the value read from the event
+        counter, or creating a dataset without event counter at all.
+        """
         self.nAllEvents = nAllEvents
 
     def getNormFactor(self):
+        """Get the cross section normalization factor.
+
+        The normalization factor is defined as crossSection/N(all
+        events), so by multiplying the number of MC events with the
+        factor one gets the corresponding cross section.
+        """
         if not hasattr(self, "nAllEvents"):
             raise Exception("Number of all events is not set! The counter directory was not given, and setNallEvents() was not called.")
 
         return self.getCrossSection() / self.nAllEvents
 
     def getHistoWrapper(self, name):
+        """Get the HistoWrapper object for a named histogram.
+
+        Parameters:
+        name   Path of the histogram in the ROOT file
+
+        If the prefix is set (setPrefix() method), it is prepended to
+        the name before TFile.Get() call.
+        """
+
         pname = self.prefix+name
         h = self.file.Get(pname)
         if h == None:
@@ -377,6 +685,21 @@ class Dataset:
         return HistoWrapper(h, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
+        """Get the directory content of a given directory in the ROOT file.
+
+        Parameters:
+        directory   Path of the directory in the ROOT file
+        predicate   Append the directory name to the return list only if
+                    predicate returns true for the name. Predicate
+                    should be a function taking a string as an
+                    argument and returning a boolean.
+
+        Returns a list of names in the directory.
+
+        If the prefix is set (setPrefix() method), it is prepended to
+        the bame before TFile.Get() call.
+        """
+
         d = self.file.Get(self.prefix+directory)
         dirlist = d.GetListOfKeys()
         diriter = dirlist.MakeIterator()
@@ -391,7 +714,23 @@ class Dataset:
 
 
 class DatasetMerged:
+    """Dataset class for histogram access for a dataset merged from Dataset objects.
+
+    The merged datasets are required to be either MC or data.
+
+    """
+
     def __init__(self, name, datasets):
+        """Constructor.
+
+        Parameters:
+        name      Name of the merged dataset
+        datasets  List of Dataset objects to merge
+
+        Calculates the total cross section (luminosity) for MC (data)
+        datasets.
+        """
+
         self.name = name
         #self.stacked = stacked
         self.datasets = datasets
@@ -412,6 +751,13 @@ class DatasetMerged:
             self.info["luminosity"] = lumiSum
 
     def setPrefix(self, prefix):
+        """Set a prefix for the directory access.
+
+        Parameters:
+        prefix   Prefix for event counter and histogram directories.
+
+        See Dataset.setPrefix() for more documentation.
+        """
         for d in self.datasets:
             d.setPrefix(prefix)
 
@@ -425,6 +771,11 @@ class DatasetMerged:
         return prefix
 
     def deepCopy(self):
+        """Make a deep copy of a DatasetMerged object.
+
+        Nothing is shared between the returned copy and this object.
+        """
+
         dm = DatasetMerged(self.name, [d.deepCopy() for d in self.datasets])
         dm.info.update(self.info)
         return dm
@@ -436,21 +787,25 @@ class DatasetMerged:
         self.name = name
 
     def setCrossSection(self, value):
+        """Set cross section of MC dataset (in pb)."""
         if self.isData():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
+        """Get cross section of MC dataset (in pb)."""
         if self.isData():
             raise Exception("Dataset %s is data, no cross section available" % self.name)
         return self.info["crossSection"]
 
     def setLuminosity(self, value):
+        """Set the integrated luminosity of data dataset (in pb^-1)."""
         if self.isMC():
             raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
         self.info["luminosity"] = value
 
     def getLuminosity(self):
+        """Get the integrated luminosity of data dataset (in pb^-1)."""
         if self.isMC():
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         return self.info["luminosity"]
@@ -472,6 +827,11 @@ class DatasetMerged:
         return None
 
     def getHistoWrapper(self, name):
+        """Get the HistoWrapperMergedMC/HistoWrapperMergedData object for a named histogram.
+
+        Parameters:
+        name   Path of the histogram in the ROOT file
+        """
         wrappers = [d.getHistoWrapper(name) for d in self.datasets]
         if self.isMC():
             return HistoWrapperMergedMC(wrappers, self)
@@ -479,6 +839,18 @@ class DatasetMerged:
             return HistoWrapperMergedData(wrappers, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
+        """Get the directory content of a given directory in the ROOT file.
+
+        Parameters:
+        directory   Path of the directory in the ROOT file
+        predicate   Append the directory name to the return list only if
+                    predicate returns true for the name. Predicate
+                    should be a function taking a string as an
+                    argument and returning a boolean.
+
+        Returns a list of names in the directory. The contents of the
+        directories of the merged datasets are required to be identical.
+        """
         content = self.datasets[0].getDirectoryContent(directory, predicate)
         for d in self.datasets[1:]:
             if content != d.getDirectoryContent(directory, predicate):
@@ -486,16 +858,34 @@ class DatasetMerged:
         return content
 
 class DatasetSet:
+    """Collection of Dataset objects which are managed together.
+
+    Holds both an ordered list of Dataset objects, and a name->object
+    map for convenient access by dataset name.
+    """
+
     def __init__(self):
         self.datasets = []
         self.datasetMap = {}
 
-    def populateMap(self):
+    def _populateMap(self):
+        """Populate the datasetMap member from the datasets list.
+
+        Intended only for internal use.
+        """
         self.datasetMap = {}
         for d in self.datasets:
             self.datasetMap[d.getName()] = d
 
     def append(self, dataset):
+        """Append a Dataset object to the set.
+
+        Parameters:
+        dataset    Dataset object
+
+        The new Dataset must have a different name than the already existing ones.
+        """
+
         if dataset.getName() in self.datasetMap:
             raise Exception("Dataset '%s' already exists in this DatasetSet" % dataset.getName())
 
@@ -503,15 +893,33 @@ class DatasetSet:
         self.datasetMap[dataset.getName()] = dataset
 
     def extend(self, datasetset):
+        """Extend the set of Datasets from another DatasetSet object.
+
+        Parameters:
+        datasetset   DatasetSet object
+
+        Note that the Dataset objects of datasetset are appended to
+        self by reference, i.e. the Dataset objects will be shared
+        between them.
+        """
         for d in datasetset.datasets:
             self.append(d)
 
     def shallowCopy(self):
+        """Make a shallow copy of the DatasetSet object.
+
+        The Dataset objects are shared between the DatasetSets.
+        """
+
         copy = DatasetSet()
         copy.extend(self)
         return copy
 
     def deepCopy(self):
+        """Make a deep copy of the DatasetSet object.
+
+        Nothing is shared between the DatasetSets.
+        """
         copy = DatasetSet()
         for d in self.datasets:
             copy.append(d.deepCopy())
@@ -524,12 +932,19 @@ class DatasetSet:
         return self.datasetMap[name]
 
     def getHistoWrappers(self, histoName):
+        """Get a list of HistoWrapper objects for a given name.
+
+        Parameters:
+        histoName   Path to the histogram in each ROOT file.
+        """
         return [d.getHistoWrapper(histoName) for d in self.datasets]
 
     def getAllDatasets(self):
+        """Get a list of all Dataset objects."""
         return self.datasets
 
     def getMCDatasets(self):
+        """Get a list of MC Dataset objects."""
         ret = []
         for d in self.datasets:
             if d.isMC():
@@ -537,6 +952,7 @@ class DatasetSet:
         return ret
 
     def getDataDatasets(self):
+        """Get a list of data Dataset objects."""
         ret = []
         for d in self.datasets:
             if d.isData():
@@ -544,12 +960,22 @@ class DatasetSet:
         return ret
 
     def getMCDatasetNames(self):
+        """Get a list of names of MC Dataset objects."""
         return [x.getName() for x in self.getMCDatasets()]
 
     def getDataDatasetNames(self):
+        """Get a list of names of data Dataset objects."""
         return [x.getName() for x in self.getDataDatasets()]
 
     def selectAndReorder(self, nameList):
+        """Select and reorder Datasets.
+
+        Parameters:
+        nameList   Ordered list of Dataset names to select
+
+        This method can be used to either select a set of Datasets,
+        reorder them, or both.
+        """
         selected = []
         for name in nameList:
             try:
@@ -558,26 +984,42 @@ class DatasetSet:
                 print >> sys.stderr, "WARNING: Dataset selectAndReorder: dataset %s doesn't exist" % name
 
         self.datasets = selected
-        self.populateMap()
+        self._populateMap()
 
     def remove(self, nameList):
+        """Remove Datasets.
+
+        Parameters:
+        nameList    List of Dataset names ro remove
+        """
         selected = []
         for d in self.datasets:
             if not d.getName() in nameList:
                 selected.append(d)
         self.datasets = selected
-        self.populateMap()
+        self._populateMap()
 
     def rename(self, oldName, newName):
+        """Rename a Dataset.
+
+        Parameters:
+        oldName   The current name of a Dataset
+        newName   The new name of a Dataset
+        """
         if oldName == newName:
             return
 
         if newName in self.datasetMap:
             raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
         self.datasetMap[oldName].setName(newName)
-        self.populateMap()
+        self._populateMap()
 
     def renameMany(self, nameMap):
+        """Rename many Datasets.
+
+        Parameters:
+        nameMap   Dictionary containing oldName->newName mapping
+        """
         for oldName, newName in nameMap.iteritems():
             if oldName == newName:
                 continue
@@ -585,12 +1027,20 @@ class DatasetSet:
             if newName in datasetMap:
                 raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
             self.datasetMap[oldName].setName(newName)
-        self.populateMap()
+        self._populateMap()
 
     def mergeData(self):
+        """Merge all data Datasets to one with a name 'Data'."""
         self.merge("Data", [x.getName() for x in self.getDataDatasets()])
 
     def merge(self, newName, nameList):
+        """Merge Datasets.
+
+        Parameters:
+        newName    Name of the merged Dataset
+        nameList   List of Dataset names to merge
+        """
+        
         (selected, notSelected, firstIndex) = mergeStackHelper(self.datasets, nameList, "merge")
         if len(selected) == 0:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
@@ -602,9 +1052,27 @@ class DatasetSet:
 
         notSelected.insert(firstIndex, DatasetMerged(newName, selected))
         self.datasets = notSelected
-        self.populateMap()
+        self._populateMap()
+
+    def loadLuminosities(self, fname):
+        """Load integrated luminosities from a JSON file.
+
+        Parameters:
+        fname  Path to the file
+
+        The JSON file should be formatted like this:
+
+        '{
+           "dataset_name": value_in_pb,
+           "Mu_135821-144114": 2.863224758
+         }'
+        """
+        data = json.load(open(fname))
+        for name, value in data.iteritems():
+            self.getDataset(name).setLuminosity(value)
 
     def printInfo(self):
+        """Print dataset information."""
         col1hdr = "Dataset"
         col2hdr = "Cross section (pb)"
         col3hdr = "Norm. factor"

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.certifiedLumi as lumi
 
-multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py")
+multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py", lumiMaskDir="..")
 
 aodDatasets = [
     # Data
@@ -46,16 +45,19 @@ patDatasets = [
 usePatTuples = True
 #usePatTuples = False
 
+aodDatasets = [
+    "Mu_146240-147116",
+    "Mu_147196-149442",
+    ]
+
+patDatasets = []
+
 if not usePatTuples:
     aodDatasets.extend(patDatasets)
 if len(aodDatasets) > 0:
-    multicrab.addDatasets("AOD", aodDatasets)
+    multicrab.extendDatasets("AOD", aodDatasets)
 if usePatTuples and len(patDatasets) > 0:
     multicrab.addDatasets("pattuple_v6", patDatasets)
-
-mask = lumi.getFile("Nov4ReReco")
-multicrab.setDataLumiMask("../"+mask)
-print "Lumi file", mask
 
 decaySeparate = ["TTJets",
                  "WJets",
@@ -80,13 +82,9 @@ if usePatTuples:
 
 def modify(dataset):
     if dataset.getName() in aodDatasets:
-        dataset.addArg("doPat=1")
+        dataset.appendArg("doPat=1")
     if dataset.getName() in decaySeparate:
         dataset.addArg("WDecaySeparate=1")
-#    if dataset.getName() == "Mu_135821-144114":
-#        mask = lumi.getFile("Sep17ReReco")
-#        dataset.setLumiMask("../"+mask)
-#        print "Lumi file %s for Mu_135821-144114" % mask
 
     try:
         njobs = numberOfJobs[dataset.getName()]

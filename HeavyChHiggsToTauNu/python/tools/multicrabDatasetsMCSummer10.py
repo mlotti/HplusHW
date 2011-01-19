@@ -22,6 +22,11 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/local-Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1-94799423eedb9d1f02c6c0ed06eb3738/USER",
                 "number_of_jobs": 4
+            },
+            "pattuple_v7_test2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/local-Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v7_test2-fc14f3c26d9a8f9a0fd353fdbd35603a/USER",
+                "number_of_jobs": 4
             }
         }
     },
@@ -113,6 +118,11 @@ datasets = {
             "pattuple_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTbar_Htaunu_M160/local-Spring10_START3X_V26_S09_v1_GEN-SIM-RECO_pattuple_v6_1-d218fa5d37dadfdf66e47c6123dae86a/USER",
+                "number_of_jobs": 1
+            },
+            "pattuple_v7_test2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTbar_Htaunu_M160/local-Spring10_START3X_V26_S09_v1_GEN-SIM-RECO_pattuple_v7_test2-cebce8ef23a98681703cb28b83ff791d/USER",
                 "number_of_jobs": 1
             }
         }
@@ -269,6 +279,26 @@ datasets = {
                 "datasetpath": "/QCD_Pt-230to300_7TeV-pythia8/local-Summer10_START36_V10_S09_v2_GEN-SIM-RECO_pattuple_v6_1-2366fe480375ff6f751e0b7e8ec70b52/USER",
                 "number_of_jobs": 2
             }
+        },
+    },
+    "QCD_Pt300to380": {
+        "dataVersion": "36X",
+        "crossSection": 9.593e+02,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-300to380_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt380to470": {
+        "dataVersion": "36X",
+        "crossSection": 2.434e+02,
+        "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt-380to470_7TeV-pythia8/Summer10-START36_V10_S09-v1/GEN-SIM-RECO",
+                "number_of_jobs": 40 # Adjusted for PATtuple file size
+            },
         },
     },
 

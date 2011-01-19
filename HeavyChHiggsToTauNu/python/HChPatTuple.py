@@ -80,9 +80,14 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
     if dataVersion.isData():
-        removeMCMatching(process, ["All"])
+        removeMCMatching(process, ["All"], outputInProcess= out!=None)
 
     # Jets
+    corrections = ["L2Relative", "L3Absolute"]
+    if dataVersion.isData():
+        corrections.append("L2L3Residual")
+
+    # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     process.patJets.addJetID = True
@@ -92,11 +97,12 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         process.patJets.addTagInfos = False
 
     if doPatCalo:
+        # Add JPT jets
         addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
                          'AK5', 'JPT',
                          doJTA        = True,
                          doBTagging   = doBTagging,
-                         jetCorrLabel = ('AK5','JPT'),
+                         jetCorrLabel = ('AK5JPT', cms.vstring(corrections)),
                          doType1MET   = False,
                          doL1Cleaning = False,
                          doL1Counters = True,
@@ -104,22 +110,33 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          doJetID      = True
         )
     
+        # Add PF jets
         addJetCollection(process, cms.InputTag('ak5PFJets'),
                          'AK5', 'PF',
                          doJTA        = True,
                          doBTagging   = doBTagging,
-                         jetCorrLabel = ('AK5','PF'),
+                         jetCorrLabel = ('AK5PF', cms.vstring(corrections)),
                          doType1MET   = False,
                          doL1Cleaning = False,
                          doL1Counters = True,
                          genJetCollection = cms.InputTag("ak5GenJets"),
                          doJetID      = True
         )
+
+        # Use switchJetCollection to get the correct JEC for calo jets
+        switchJetCollection(process, cms.InputTag('ak5CaloJets'),
+                            doJTA        = True,
+                            doBTagging   = doBTagging,
+                            jetCorrLabel = ('AK5Calo', cms.vstring(corrections)),
+                            doType1MET   = False,
+                            genJetCollection = cms.InputTag("ak5GenJets"),
+                            doJetID      = True
+        )
     else:
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
                             doBTagging   = doBTagging,
-                            jetCorrLabel = ('AK5','PF'),
+                            jetCorrLabel = ('AK5PF', cms.vstring(corrections)),
                             doType1MET   = False,
                             genJetCollection = cms.InputTag("ak5GenJets"),
                             doJetID      = True

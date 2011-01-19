@@ -234,3 +234,44 @@ def addTo(datasets):
                 "fallback": "pattuple_v6_4"
             },
             })
+    add("DYJetsToLL", {
+            "RECO": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 15, # Adjusted for PAT on the fly
+            },
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
+                "number_of_jobs": 15,
+            },
+            })
+    add("TToBLNu_s-channel", {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
+            },
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
+                "number_of_jobs": 10,
+            },
+            })
+    add("TToBLNu_t-channel", {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
+            },
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
+                "number_of_jobs": 10,
+            },
+            })
+    add("TToBLNu_tW-channel", {
+            "RECO": {
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO",
+                "number_of_jobs": 10, # Adjusted for PAT on the fly
+            },
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
+                "number_of_jobs": 10,
+            },
+            })
+
