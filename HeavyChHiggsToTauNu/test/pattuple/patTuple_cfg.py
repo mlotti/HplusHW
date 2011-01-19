@@ -7,8 +7,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-#dataVersion = "38X"
-dataVersion = "38Xrelval"
+#dataVersion = "38Xredigi"
+dataVersion = "38X"
 #dataVersion = "36Xdata" # this is for collision data 
 #dataVersion = "38Xdata" # this is for collision data 
 
@@ -53,7 +53,6 @@ del process.TFileService
 ################################################################################
 # In case of data, add trigger
 myTrigger = options.trigger
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChMCTrigger import getMCSignalTrigger
 if len(myTrigger) == 0:
     myTrigger = dataVersion.getDefaultSignalTrigger()
 
