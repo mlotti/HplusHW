@@ -71,6 +71,7 @@ def modify(dataset):
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
+        dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
 
     if step == "skim":
         try:
