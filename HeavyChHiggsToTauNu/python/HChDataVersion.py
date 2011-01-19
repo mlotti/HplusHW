@@ -41,6 +41,9 @@ config = {
         "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v7_test2/pattuple_10_1_m2M.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHplusBWB_M120/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b/78d4b6b79bb86567b5da3e176aad4eb3/pattuple_9_1_RL8.root"
     },
+    "38XredigiPU": {
+        "triggerProcess": "REDIGI38XPU",
+    },
     "38XdataRun2010A": {"triggerProcess": "HLT"},
     "38XdataRun2010B": {
         "triggerProcess": "HLT",
@@ -91,9 +94,9 @@ class DataVersion:
         self.is_39X = False
         if dataVersion in ["35X", "35Xredigi"]:
             self.is_35X = True
-        elif dataVersion in ["36X", "36Xdata", "36Xsptring10"]:
+        elif dataVersion in ["36X", "36Xdata", "36Xspring10"]:
             self.is_36X = True
-        elif dataVersion in ["38X", "38Xrelval", "38XdataRun2010A", "38XdataRun2010B"]:
+        elif dataVersion in ["38X", "38Xrelval", "38XredigiPU", "38XdataRun2010A", "38XdataRun2010B"]:
             self.is_38X = True
         elif dataVersion in ["39Xredigi"]:
             self.is_39X = True

@@ -45,6 +45,13 @@ patDatasets = [
 usePatTuples = True
 #usePatTuples = False
 
+aodDatasets = [
+    "Mu_146240-147116",
+    "Mu_147196-149442",
+    ]
+
+patDatasets = []
+
 if not usePatTuples:
     aodDatasets.extend(patDatasets)
 if len(aodDatasets) > 0:

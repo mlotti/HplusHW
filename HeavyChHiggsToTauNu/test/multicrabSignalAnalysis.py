@@ -39,6 +39,12 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TTToHplusBWB_M120", # v6
 #        "TTToHplusBWB_M140", # v6
 #        "TTToHplusBWB_M160", # v6
+        # MC Signal Fall10 PU
+#        "TTToHplusBWB_M90_PU",  # v6
+#        "TTToHplusBWB_M100_PU", # v6
+#        "TTToHplusBWB_M120_PU", # v6
+#        "TTToHplusBWB_M140_PU", # v6
+#        "TTToHplusBWB_M160_PU", # v6
         # MC Signal Spring10
 #        "TTToHpmToTauNu_M90",  # v6
 #        "TTToHpmToTauNu_M100", # v6
@@ -61,6 +67,16 @@ multicrab.extendDatasets(pattupleVersion,
 #        "QCD_Pt80to120_Fall10",  # v6
 #        "QCD_Pt120to170_Fall10", # v6
 #        "QCD_Pt170to300_Fall10", # v6
+#        "TTJets",                # v6 
+#        "WJets_Fall10",          # v6
+        # MC Background Fall10 PU
+#        "QCD_Pt30to50_Fall10_PU",   # v6
+#        "QCD_Pt50to80_Fall10_PU",   # v6
+#        "QCD_Pt80to120_Fall10_PU",  # v6
+#        "QCD_Pt120to170_Fall10_PU", # v6
+#        "QCD_Pt170to300_Fall10_PU", # v6
+#        "TTJets_PU",                # v6 
+#        "WJets_Fall10_PU",          # v6
         # MC Background Summer10
 #        "QCD_Pt30to50",   # v6
 #        "QCD_Pt50to80",   # v6
