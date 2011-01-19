@@ -106,7 +106,7 @@ class DataVersion:
             self.is_35X = True
         elif dataVersion in ["36X", "36Xdata", "36Xspring10"]:
             self.is_36X = True
-        elif dataVersion in ["38X", "38Xrelval", 38XredigiPU", "38Xdata"]:
+        elif dataVersion in ["38X", "38Xrelval", "38XredigiPU", "38Xdata"]:
             self.is_38X = True
         elif dataVersion in ["39Xredigi"]:
             self.is_39X = True
