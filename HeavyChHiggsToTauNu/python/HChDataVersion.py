@@ -34,7 +34,7 @@ config = {
         "signalTrigger": "HLT_SingleLooseIsoTau20",
     },
     "37X": {"triggerProcess": "REDIGI37X"},
-    "38X": {
+    "38Xredigi": {
         "triggerProcess": "REDIGI38X",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "patCastor": "fio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
@@ -44,7 +44,7 @@ config = {
         "triggerProcess": "REDIGI38XPU",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
     },
-    "38Xrelval": {
+    "38X": {
         "triggerProcess": "HLT",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "patCastor": '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root',

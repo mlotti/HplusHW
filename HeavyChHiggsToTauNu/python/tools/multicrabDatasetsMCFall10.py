@@ -3,7 +3,7 @@ import multicrabDatasetsCommon as common
 datasets = {
     # Signal
     "TTToHplusBWB_M90_Fall10": {
-        "dataVersion": "38Xrelval", # The trigger process was HLT, hence 38Xrelval is suitable here
+        "dataVersion": "38X", # The trigger process was HLT, hence 38Xrelval is suitable here
         "crossSection": 16.442915,
         "data": {
             "RECO": {
@@ -27,7 +27,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M100_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 14.057857,
         "data": {
             "RECO": {
@@ -46,7 +46,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M120_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 8.984715,
         "data": {
             "RECO": {
@@ -65,7 +65,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M140_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 4.223402,
         "data": {
             "RECO": {
@@ -84,7 +84,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M160_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 0.811493,
         "data": {
             "RECO": {
@@ -110,7 +110,7 @@ datasets = {
 
     # QCD Fall10
     "QCD_Pt30to50_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 5.312e+07,
         "data": {
             "RECO": {
@@ -129,7 +129,7 @@ datasets = {
         },
     },
     "QCD_Pt50to80_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 6.359e+06,
         "data": {
             "RECO": {
@@ -148,7 +148,7 @@ datasets = {
         },
     },
     "QCD_Pt80to120_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 7.843e+05,
         "data": {
             "RECO": {
@@ -167,7 +167,7 @@ datasets = {
         },
     },
     "QCD_Pt120to170_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 1.151e+05,
         "data": {
             "RECO": {
@@ -186,7 +186,7 @@ datasets = {
         },
     },
     "QCD_Pt170to300_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 2.426e+04,
         "data": {
             "RECO": {
@@ -205,7 +205,7 @@ datasets = {
         },
     },
     "QCD_Pt300to470_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 1.168e+03,
         "data": {
             "RECO": {
@@ -218,7 +218,7 @@ datasets = {
 
     # Electroweak (Fall10)
     "TT_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 165,
         "data": {
             "RECO": {
@@ -232,7 +232,7 @@ datasets = {
         },
     },
     "TTJets_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 165,
         "data": {
             "RECO": {
@@ -251,7 +251,7 @@ datasets = {
         },
     },
     "WJets_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 24640,
         "data": {
             "RECO": {
@@ -270,7 +270,7 @@ datasets = {
 
     # Backgrounds for electroweak background measurement (Fall10)
     "QCD_Pt20_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 296600000.*0.0002855,
         "data": {
             "RECO": {
@@ -284,7 +284,7 @@ datasets = {
         },
     },
     "QCD_Pt20to30_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 236300000*0.00518,
         "data": {
             "RECO": {
@@ -298,7 +298,7 @@ datasets = {
         },
     },
     "QCD_Pt30to50_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 53070000*0.01090,
         "data": {
             "RECO": {
@@ -312,7 +312,7 @@ datasets = {
         },
     },
     "QCD_Pt50to80_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 6351000*0.02274,
         "data": {
             "RECO": {
@@ -326,7 +326,7 @@ datasets = {
         },
     },
     "QCD_Pt80to120_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 785100*0.03700,
         "data": {
             "RECO": {
@@ -340,7 +340,7 @@ datasets = {
         },
     },
     "QCD_Pt120to150_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 92950*0.04777,
         "data": {
             "RECO": {
@@ -354,7 +354,7 @@ datasets = {
         },
     },
     "QCD_Pt150_MuEnriched_TuneZ2_Fall10": {
-        "dataVersion": "38X",
+        "dataVersion": "38Xredigi",
         "crossSection": 47580*0.05964,
         "data": {
             "RECO": {
@@ -368,7 +368,7 @@ datasets = {
         },
     },
     "DYJetsToLL_TuneZ2_Fall10": { # Z+jets
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 2321,
         "data": {
             "RECO": {
@@ -382,7 +382,7 @@ datasets = {
         },
     },
     "TToBLNu_s-channel_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 0.99,
         "data": {
             "RECO": {
@@ -396,7 +396,7 @@ datasets = {
         },
     },
     "TToBLNu_t-channel_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 63./3.,
         "data": {
             "RECO": {
@@ -410,7 +410,7 @@ datasets = {
         },
     },
     "TToBLNu_tW-channel_TuneZ2_Fall10": {
-        "dataVersion": "38Xrelval",
+        "dataVersion": "38X",
         "crossSection": 10.56,
         "data": {
             "RECO": {
