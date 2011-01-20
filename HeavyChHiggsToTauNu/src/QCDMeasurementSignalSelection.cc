@@ -11,6 +11,7 @@
 
 namespace HPlus {
   QCDMeasurementSignalSelection::QCDMeasurementSignalSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+    fEventWeight(eventWeight),
     // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET cut")),
@@ -22,7 +23,6 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("MET cut")),
     fBTaggingCounter(eventCounter.addCounter("B-tagging cut")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMET veto")),
-    fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),

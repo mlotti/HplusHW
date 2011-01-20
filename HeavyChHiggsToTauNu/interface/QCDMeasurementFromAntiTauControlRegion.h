@@ -5,8 +5,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelectionByIsolationVeto.h"
-// #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 // #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelectionFactorized.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
@@ -64,7 +63,7 @@ namespace HPlus {
     // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerMETEmulation  fTriggerMETEmulation;
-    TauSelectionByIsolationVeto fTauSelection;
+    TauSelection fTauSelection;
     // TauSelectionFactorized fTauSelectionFactorized;
     JetSelection fJetSelection;
     GlobalElectronVeto fGlobalElectronVeto;

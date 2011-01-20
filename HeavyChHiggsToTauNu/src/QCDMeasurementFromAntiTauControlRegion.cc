@@ -11,6 +11,7 @@
 
 namespace HPlus {
   QCDMeasurementFromAntiTauControlRegion::QCDMeasurementFromAntiTauControlRegion(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+    fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("trigger")),
     fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
@@ -22,13 +23,12 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMETVeto")),
     fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt0AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt40AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt50AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt60AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt70AfterWholeSelection")),
-    fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
-    fEventWeight(eventWeight),
+    fMETgt30AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
+    fMETgt40AfterWholeSelectionCounter(eventCounter.addCounter("METgt40AfterWholeSelection")),
+    fMETgt50AfterWholeSelectionCounter(eventCounter.addCounter("METgt50AfterWholeSelection")),
+    fMETgt60AfterWholeSelectionCounter(eventCounter.addCounter("METgt60AfterWholeSelection")),
+    fMETgt70AfterWholeSelectionCounter(eventCounter.addCounter("METgt70AfterWholeSelection")),
+    fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
@@ -46,6 +46,11 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
+
+    // Configure tau ID to anti-tau ID 
+    //fTauSelection.setToAntiTaggingMode();
+    fTauSelection.setToAntiTaggingModeIsolationOnly();
+    fTauSelection.disableProngCut();
 
     // Book histograms 
     hMETAfterWholeSelection = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
@@ -77,13 +82,15 @@ namespace HPlus {
     increment(fTriggerEmulationCounter);
 
     // Apply Isolation Veto to taus
-    TauSelectionByIsolationVeto::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // At least one tau candidate was found which was isolated.
     increment(fTauSelectionCounter);
+    edm::PtrVector<pat::Tau> mySelectedAntiTau;
+    mySelectedAntiTau.push_back(tauData.getSelectedAntiTaus()[0]);
 
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    // JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getHighestEtNonIsolatedCandidate());
+    // JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedAntiTau);
     if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     increment(fJetSelectionCounter);
     
@@ -101,14 +108,14 @@ namespace HPlus {
     // Obtain MET, btagging and fake MET veto data objects
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedAntiTau, jetData.getSelectedJets());
     
     // Fill additional counters before dropping events because of MET cut
     if (btagData.passedEvent() && fakeMETData.passedEvent()) {
       double myMETValue = metData.getSelectedMET()->et();
       if (myMETValue > 0 && myMETValue < 30) {
         increment(fMETgt0AfterWholeSelectionCounter);
-      else if (myMETValue < 40) {
+      } else if (myMETValue < 40) {
         increment(fMETgt30AfterWholeSelectionCounter);
       } else if (myMETValue < 50) {
         increment(fMETgt40AfterWholeSelectionCounter);
@@ -122,7 +129,7 @@ namespace HPlus {
         increment(fMETgt80AfterWholeSelectionCounter);
       }
       // Fill histogram of MET distribution of selected events (needed for MET extrapolation)
-      hMETAfterWholeSelection->Fill(myMETValue, fEventWeight->getWeight());
+      hMETAfterWholeSelection->Fill(myMETValue, fEventWeight.getWeight());
     }
 
     // MET 

@@ -53,7 +53,6 @@ namespace HPlus {
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
-    EventWeight& fEventWeight;
 
     // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;

@@ -46,6 +46,9 @@ namespace HPlus {
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
         return fTauSelection->fSelectedTaus;
       }
+      const edm::PtrVector<pat::Tau>& getSelectedAntiTaus() const {
+        return fTauSelection->fSelectedAntiTaus;
+      }
 
     private:
       const TauSelection *fTauSelection;
@@ -64,6 +67,14 @@ namespace HPlus {
     /// Method for obtaining the tau ID algorithm type
     TauIDTypeEnumerator getTauIDType() const { return fTauIDType; }
 
+    // Setters for options
+    /// Disables the cut on the number of signal tracks
+    void disableProngCut() { fApplyProngCutStatus = true; }
+    /// Sets the tau ID to work as an anti-tau tagger (passed is true, if no tau candidates are identified as taus)   
+    void setToAntiTaggingMode() { fAntiTagModeStatus = true; }
+    /// Sets the tau ID to work as an anti-tau tagger (passed is true, if no tau candidates are isolated; ET and eta cuts are applied)   
+    void setToAntiTaggingModeIsolationOnly() { fAntiTagModeIsolationOnlyStatus = true; }
+
   private:
     bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
@@ -79,7 +90,15 @@ namespace HPlus {
     const double fRtauCut;
     const double fInvMassCut;
     TauIDTypeEnumerator fTauIDType;
-
+    
+    // Options
+    /// If true (true=default), the cut on the number of signal tracks is applied
+    bool fApplyProngCutStatus;
+    /// If true (false=default), anti-tau tagging is applied (all cuts except ET and eta)
+    bool fAntiTagModeStatus;
+    /// If true (false=default), anti-tau tagging is applied (isolation only; ET and eta cuts are applied)
+    bool fAntiTagModeIsolationOnlyStatus;
+    
     // Counters
     Count fPtCutCount;
     Count fEtaCutCount;
@@ -133,9 +152,11 @@ namespace HPlus {
     TH1 *hFlightPathSignif;
     TH1 *hInvMass;
     TH1 *hbyTaNC;
+    TH1 *hTauIdOperatingMode;
 
     // Selected tau
     edm::PtrVector<pat::Tau> fSelectedTaus;
+    edm::PtrVector<pat::Tau> fSelectedAntiTaus;
   };
 }
 
