@@ -104,8 +104,8 @@ def customise(process):
         index += 1
 
     # Disable lumi producer
-    #process.localreco_HcalNZS.remove(process.lumiProducer)
-    #process.localreco.remove(process.lumiProducer)
+    process.localreco_HcalNZS.remove(process.lumiProducer)
+    process.localreco.remove(process.lumiProducer)
 
 
     if  hasattr(process,"iterativeTracking"):
