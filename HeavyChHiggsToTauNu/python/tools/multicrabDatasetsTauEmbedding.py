@@ -52,6 +52,13 @@ def addTo(datasets):
                 "number_of_jobs": 10 # ~100 ev/job
             },
             })
+    datasets["Mu_146240-147116"]["data"].update({
+            "tauembedding_skim_v5": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Nov4ReReco_v1_RECO_146240_tauembedding_skim_v5-d9acfcd152bd91559f102d8a462838a1/USER",
+                "number_of_jobs": 10 # ~100 ev/job
+            },
+            })
 
     datasets["TTJets_PU"]["data"].update({
             "tauembedding_skim_v5": {
