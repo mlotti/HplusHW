@@ -76,6 +76,9 @@ def customise(process):
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
+            "keep *_gsfElectrons_*_%s" % recoProcessName,
+            "keep *_gsfElectronCores_*_%s" % recoProcessName,
+            "keep *_electronGsfTracks_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % hltProcessName,
