@@ -82,6 +82,8 @@ namespace HPlus {
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Anti-isolated tau");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "Prong cut applied");
     
+    fSubCounters = new SelectionCounterPackager(eventCounter);
+    
     // Check that tauID algorithm selection is ok
     if     (fSelection == "CaloTauCutBased")             fTauIDType = kTauIDCaloTauCutBased;
     else if(fSelection == "ShrinkingConePFTauCutBased")  fTauIDType = kTauIDShrinkingConePFTauCutBased;
@@ -91,7 +93,9 @@ namespace HPlus {
     else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
   }
 
-  TauSelection::~TauSelection() {}
+  TauSelection::~TauSelection() {
+    delete fSubCounters;
+  }
 
   TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     if (fAntiTagModeStatus)

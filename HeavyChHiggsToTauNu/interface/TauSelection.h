@@ -8,6 +8,7 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
 
 namespace edm {
   class ParameterSet;
@@ -106,7 +107,7 @@ namespace HPlus {
     bool fAntiTagModeStatus;
     /// If true (false=default), anti-tau tagging is applied (isolation only; ET and eta cuts are applied)
     bool fAntiTagModeIsolationOnlyStatus;
-    
+       
     // Counters
     Count fPtCutCount;
     Count fEtaCutCount;
@@ -139,6 +140,9 @@ namespace HPlus {
     Count fRtauSubCount;
     Count fInvMassSubCount;
 
+    // Subcounters packaged in one object
+    SelectionCounterPackager* fSubCounters;
+    
     // EventWeight object
     EventWeight& fEventWeight;
 
