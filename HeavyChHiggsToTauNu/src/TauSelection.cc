@@ -87,6 +87,7 @@ namespace HPlus {
     else if(fSelection == "ShrinkingConePFTauCutBased")  fTauIDType = kTauIDShrinkingConePFTauCutBased;
     else if(fSelection == "ShrinkingConePFTauTaNCBased") fTauIDType = kTauIDShrinkingConePFTauTaNCBased;
     else if(fSelection == "HPSTauBased")                 fTauIDType = kTauIDHPSTauBased;
+    else if(fSelection == "CombinedHPSTaNCBased")        fTauIDType = kTauIDCombinedHPSTaNCTauBased;
     else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
   }
 
@@ -112,9 +113,11 @@ namespace HPlus {
     else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)
       passEvent = selectionByPFTauCuts(iEvent,iSetup,htaus->ptrVector());
     else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased)
-      passEvent = selectionByPFTauTaNC(iEvent,iSetup,htaus->ptrVector());
+      passEvent = selectionByPFTauTaNCCuts(iEvent,iSetup,htaus->ptrVector());
     else if(fTauIDType == kTauIDHPSTauBased)
-      passEvent = selectionByHPSTau(iEvent,iSetup,htaus->ptrVector());
+      passEvent = selectionByHPSTauCuts(iEvent,iSetup,htaus->ptrVector());
+    else if(fTauIDType == kTauIDCombinedHPSTaNCTauBased)
+      passEvent = selectionByCombinedHPSTaNCTauCuts(iEvent,iSetup,htaus->ptrVector());
     return Data(this, passEvent);
   }
 
@@ -123,8 +126,10 @@ namespace HPlus {
     // Do selection
     if     (fTauIDType == kTauIDCaloTauCutBased)             passEvent = selectionByTCTauCuts(iEvent,iSetup,taus);
     else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)  passEvent = selectionByPFTauCuts(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased) passEvent = selectionByPFTauTaNC(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDHPSTauBased)                 passEvent = selectionByHPSTau(iEvent,iSetup,taus);
+    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased) passEvent = selectionByPFTauTaNCCuts(iEvent,iSetup,taus);
+    else if(fTauIDType == kTauIDHPSTauBased)                 passEvent = selectionByHPSTauCuts(iEvent,iSetup,taus);
+    else if(fTauIDType == kTauIDCombinedHPSTaNCTauBased)     passEvent = selectionByCombinedHPSTaNCTauCuts(iEvent,iSetup,taus);
+    
     return Data(this, passEvent);
   }
 
@@ -353,7 +358,7 @@ namespace HPlus {
     return true;
   }
 
-  bool TauSelection::selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+  bool TauSelection::selectionByPFTauTaNCCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
 	// NC input corresponds to isolation and mass 
 	fSelectedTaus.clear();
 	fSelectedTaus.reserve(taus.size());
@@ -508,7 +513,7 @@ namespace HPlus {
 	return true;
   }
 
-  bool TauSelection::selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+  bool TauSelection::selectionByHPSTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
         fSelectedTaus.clear();
         fSelectedTaus.reserve(taus.size());
         fSelectedAntiTaus.clear();
@@ -839,6 +844,12 @@ namespace HPlus {
         return true;
   }
 
+  bool TauSelection::selectionByCombinedHPSTaNCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+    // FIXME: cuts to be added
+
+    return true;
+  }
+  
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
     fSelectedTaus.clear();
     fSelectedTaus.reserve(1);

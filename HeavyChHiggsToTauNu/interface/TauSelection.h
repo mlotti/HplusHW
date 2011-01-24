@@ -25,7 +25,8 @@ namespace HPlus {
       kTauIDCaloTauCutBased,
       kTauIDShrinkingConePFTauCutBased,
       kTauIDShrinkingConePFTauTaNCBased,
-      kTauIDHPSTauBased
+      kTauIDHPSTauBased,
+      kTauIDCombinedHPSTaNCTauBased
     };
 
     /**
@@ -76,10 +77,17 @@ namespace HPlus {
     void setToAntiTaggingModeIsolationOnly() { fAntiTagModeIsolationOnlyStatus = true; }
 
   private:
+    /// TauID specific to TCTau
     bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// TauID specific to PF shrinking cone tau
     bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    bool selectionByPFTauTaNC(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    bool selectionByHPSTau(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// TauID specific to TaNC (neural network on top of PF shrinking cone tau)
+    bool selectionByPFTauTaNCCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const 
+    edm::PtrVector<pat::Tau>& taus);
+    /// TauID specific to HPS (Hadron+strips algorithm on top of PF shrinking cone tau)
+    bool selectionByHPSTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// TauID specific to combined HPS+TaNC algorithms
+    bool selectionByCombinedHPSTaNCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
 
     // Input parameters
     edm::InputTag fSrc;
