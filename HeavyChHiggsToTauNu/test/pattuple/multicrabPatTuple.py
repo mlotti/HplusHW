@@ -16,6 +16,13 @@ multicrab.extendDatasets(
 # 39X
 #
 ########
+        # Signal MC
+#        "TTToHplusBWB_M90_Winter10",
+#        "TTToHplusBWB_M100_Winter10",
+#        "TTToHplusBWB_M120_Winter10",
+#        "TTToHplusBWB_M140_Winter10",
+#        "TTToHplusBWB_M160_Winter10",
+
         # Background MC
 #        "QCD_Pt30to50_TuneZ2_Winter10",
 #        "QCD_Pt80to120_TuneZ2_Winter10",
