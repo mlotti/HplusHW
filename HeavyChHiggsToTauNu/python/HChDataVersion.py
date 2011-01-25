@@ -59,6 +59,7 @@ config = {
         "triggerProcess": "REDIGI39X",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/GEN-SIM-RECO/72A60727-0513-E011-92AF-0024E8768C30.root",
+        "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9/pattuple_9_1_KJi.root",
     },
     "39Xdata": {
         "triggerProcess": "HLT",

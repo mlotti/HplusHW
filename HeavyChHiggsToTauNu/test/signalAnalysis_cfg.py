@@ -7,8 +7,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38Xrelval"
-#dataVersion = "data" # this is for collision data 
+#dataVersion = "38X"
+dataVersion = "39Xredigi"
 
 options = getOptions()
 if options.dataVersion != "":
