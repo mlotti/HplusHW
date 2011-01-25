@@ -21,6 +21,9 @@ set -e
 # 18.1.2011/M.Kortelainen CMSSW_3_9_7 Update PFRecoTauDiscriminationByInvMass.cc
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 
+# addpkg requires cmsenv
+cmsenv
+
 # HPS+TaNC
 cvs co -r1.28 RecoTauTag/tau_tags.txt
 # This checkouts
