@@ -22,7 +22,7 @@ set -e
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 
 # addpkg requires cmsenv
-cmsenv
+eval $(scram runtime -sh)
 
 # HPS+TaNC
 cvs co -r1.28 RecoTauTag/tau_tags.txt
