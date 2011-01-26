@@ -16,6 +16,12 @@ multicrab.extendDatasets(
 # 39X
 #
 ########
+        # Data (tau)
+#        "BTau_141956-144114_Dec22", # HLT_SingleIsoTau20_Trk5
+#        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20
+#        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3
+#        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4
+
         # Signal MC
 #        "TTToHplusBWB_M90_Winter10",
 #        "TTToHplusBWB_M100_Winter10",

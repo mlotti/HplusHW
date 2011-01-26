@@ -5,22 +5,63 @@ datasets = {
     # Collision data
     #
     # BTau PD (for signal analysis)
+    "BTau_141956-144114_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk5",
+        "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "BTau_146428-148058_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
+        "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "BTau_148822-149182_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
+        "runs": (148822, 149182), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 15, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "BTau_149291-149294_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
+        "runs": (149291, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 20, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+
     "BTau_141950-144114_Nov4": {
         "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 50,
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
             "pattuple_v6_1": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
