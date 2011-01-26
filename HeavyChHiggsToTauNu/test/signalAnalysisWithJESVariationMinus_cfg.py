@@ -4,10 +4,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
 #dataVersion = "35X"
 #dataVersion = "35Xredigi"
-dataVersion = "36X"
+#dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-#dataVersion = "38Xrelval"
+dataVersion = "38Xrelval"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -17,17 +17,18 @@ if options.dataVersion != "":
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
 
-process = cms.Process("HChSignalOptimisation")
+process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
+    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-	"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
+	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
 	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root"
         # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
+        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -49,6 +50,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 500
 process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
@@ -61,6 +63,8 @@ if options.doPat != 0:
     # Jet trigger (for cleaning of tau->HLT matching
     jetTrigger = "HLT_Jet30U"
     trigger = options.trigger
+    if len(trigger) == 0:
+        trigger = getSignalTrigger(dataVersion)
 
     process.collisionDataSelection = cms.Sequence()
     if dataVersion.isData():
@@ -94,11 +98,11 @@ process.infoPath = cms.Path(
 )
 
 
-# Signal optimisation module
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
-process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
+# Signal analysis module
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisWithJESVariationParametersMinus_cff as param
+process.signalAnalysisWithJESVariationMinus = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
-    TriggerMETEmulation = param.TriggerMETEmulation,
+#    TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,
@@ -111,33 +115,36 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     EvtTopology = param.EvtTopology
 )
 
-print "Cut on HLT MET: ", process.signalOptimisation.trigger.hltMetCut
-print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
-print "TauSelection src:", process.signalOptimisation.tauSelection.src
-print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
-print "TauSelection factorization used:", process.signalOptimisation.useFactorizedTauID
+print "Trigger:", process.signalAnalysisWithJESVariationMinus.trigger
+print "Cut on HLT MET: ", process.signalAnalysisWithJESVariationMinus.trigger.hltMetCut
+print "TauSelection algorithm:", process.signalAnalysisWithJESVariationMinus.tauSelection.selection
+print "TauSelection src:", process.signalAnalysisWithJESVariationMinus.tauSelection.src
+print "TauSelection factorization used:", process.signalAnalysisWithJESVariationMinus.useFactorizedTauID
+print "TauSelection factorization source:", process.signalAnalysisWithJESVariationMinus.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalOptimisationCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalOptimisation", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalOptimisation", "counterInstances"),
+process.signalAnalysisWithJESVariationMinusCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+    counterNames = cms.untracked.InputTag("signalAnalysisWithJESVariationMinus", "counterNames"),
+    counterInstances = cms.untracked.InputTag("signalAnalysisWithJESVariationMinus", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
     printSubCounters = cms.untracked.bool(False),
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
-    process.signalOptimisationCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.signalAnalysisWithJESVariationMinusCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.signalOptimisationPath = cms.Path(
-    process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalOptimisation *
-    process.signalOptimisationCounters *
-    process.PickEvents
+process.signalAnalysisWithJESVariationMinusPath = cms.Path(
+   process.JESsequence *
+   process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+   process.signalAnalysisWithJESVariationMinus *
+   process.signalAnalysisWithJESVariationMinusCounters *
+   process.PickEvents
 )
 
 # An example how to create an array of analyzers to do the same
@@ -149,28 +156,28 @@ process.signalOptimisationPath = cms.Path(
 # def setTauPt(m, val):
 #     m.tauSelection.ptCut = val
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-# addAnalysisArray(process, "signalOptimisationTauPt", process.signalOptimisation, setTauPt,
+# addAnalysisArray(process, "signalAnalysisWithJESVariationMinusTauPt", process.signalAnalysisWithJESVariationMinus, setTauPt,
 #                  [10, 20, 30, 40, 50])
 
 def setTauSelection(m, val):
     m.tauSelection = val
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-addAnalysisArray(process, "signalOptimisation", process.signalOptimisation, setTauSelection,
-		 [param.tauSelectionShrinkingConeCutBased,
-		  param.tauSelectionShrinkingConeTaNCBased,
-		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
-		 names = ["TauSelectionShrinkingConeCutBased",
-		  "TauSelectionShrinkingConeTaNCBased",
-		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+addAnalysisArray(process, "signalAnalysisWithJESVariationMinus", process.signalAnalysisWithJESVariationMinus, setTauSelection,
+		 [param.tauSelectionCaloTauCutBasedJESMinus05, param.tauSelectionShrinkingConeCutBasedJESMinus05,
+                  param.tauSelectionShrinkingConeTaNCBasedJESMinus05, param.tauSelectionHPSTauBasedJESMinus05],
+		 names = ["TauSelectionCaloTauCutBasedJESMinus05", "TauSelectionShrinkingConeCutBasedJESMinus05",
+                          "TauSelectionShrinkingConeTaNCBasedJESMinus05", "TauSelectionHPSTauBasedJESMinus05"],
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
+
+#addAnalysisArray(process, "signalAnalysisWithJESVariationMinus", process.signalAnalysisWithJESVariationMinus, setTauSelection,
+#		 [param.tauSelectionShrinkingConeCutBasedJESMinus05], names = ["TauSelectionShrinkingConeCutBasedJESMinus05"],
+#                 preSequence = process.patSequence, additionalCounters = additionalCounters)
 
 
 # Print tau discriminators from one tau from one event
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
-    src = process.signalOptimisation.tauSelection.src
+    src = process.signalAnalysisWithJESVariationMinus.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
 #    process.patSequence *
@@ -182,7 +189,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalOptimisation",
+        "keep *_*_*_HChSignalAnalysis",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
 #	"drop *",
