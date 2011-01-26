@@ -84,7 +84,7 @@ class DataVersion:
                 setattr(self, f, conf[f])
 
         # Collision data
-        if dataVersion in ["36Xdata", "38Xdata"]:
+        if dataVersion in ["36Xdata", "38Xdata", "39Xdata"]:
             self.is_data = True
             self.globalTag = "GR_R_39X_V5::All"
 
