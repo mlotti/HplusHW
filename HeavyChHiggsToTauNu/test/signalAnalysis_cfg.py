@@ -211,9 +211,9 @@ def addJESVariation(process, name, variation):
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET
     analysis = process.signalAnalysis.clone()
-    analysis.tauSelection.src = cms.untracked.InputTag(name)
-    analysis.jetSelection.src = cms.untracked.InputTag(name)
-    analysis.MET.src = cms.untracked.InputTag(name)
+    analysis.tauSelection.src = cms.untracked.InputTag(variationName)
+    analysis.jetSelection.src = cms.untracked.InputTag(variationName)
+    analysis.MET.src = cms.untracked.InputTag(variationName)
     setattr(process, analysisName, analysis)
     
     # Construct the counters module
