@@ -19,8 +19,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("HChSignalAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -32,15 +32,11 @@ process.source = cms.Source('PoolSource',
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#        "file:pattuple.root"
-    )
+  )
 )
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
-print "GlobalTag="+dataVersion.getGlobalTag()
 
 ################################################################################
 
@@ -59,6 +55,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
     print "Running PAT on the fly"
+
+    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+    process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
+    print "GlobalTag="+dataVersion.getGlobalTag()
 
     # Jet trigger (for cleaning of tau->HLT matching
     jetTrigger = "HLT_Jet30U"
@@ -98,19 +98,11 @@ process.infoPath = cms.Path(
 )
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-# Prescale weight
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.patSequence *= process.hplusPrescaleWeightProducer
-
-
 # Signal analysis module
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
-#    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisWithJESVariationParametersPlus_cff as param
+process.signalAnalysisWithJESVariationPlus = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
-####    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
+#    TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelection,
@@ -120,38 +112,39 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
     transverseMassCut = param.transverseMassCut,
-    EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
+    EvtTopology = param.EvtTopology
 )
 
-print "Trigger:", process.signalAnalysis.trigger
-print "Cut on HLT MET: ", process.signalAnalysis.trigger.hltMetCut
-print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
-print "TauSelection src:", process.signalAnalysis.tauSelection.src
-print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
-print "TauSelection factorization source:", process.signalAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
+print "Trigger:", process.signalAnalysisWithJESVariationPlus.trigger
+print "Cut on HLT MET: ", process.signalAnalysisWithJESVariationPlus.trigger.hltMetCut
+print "TauSelection algorithm:", process.signalAnalysisWithJESVariationPlus.tauSelection.selection
+print "TauSelection src:", process.signalAnalysisWithJESVariationPlus.tauSelection.src
+print "TauSelection factorization used:", process.signalAnalysisWithJESVariationPlus.useFactorizedTauID
+print "TauSelection factorization source:", process.signalAnalysisWithJESVariationPlus.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 #if dataVersion.isMC() and dataVersion.is38X():
 #    process.trigger.trigger = "HLT_SingleIsoTau20_Trk5_MET20"
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
-process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
-    counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
+process.signalAnalysisWithJESVariationPlusCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+    counterNames = cms.untracked.InputTag("signalAnalysisWithJESVariationPlus", "counterNames"),
+    counterInstances = cms.untracked.InputTag("signalAnalysisWithJESVariationPlus", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
     printSubCounters = cms.untracked.bool(False),
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
-    process.signalAnalysisCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.signalAnalysisWithJESVariationPlusCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.signalAnalysisPath = cms.Path(
-    process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.signalAnalysis *
-    process.signalAnalysisCounters *
-    process.PickEvents
+process.signalAnalysisWithJESVariationPlusPath = cms.Path(
+   process.JESsequence *
+   process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+   process.signalAnalysisWithJESVariationPlus *
+   process.signalAnalysisWithJESVariationPlusCounters *
+   process.PickEvents
 )
 
 # An example how to create an array of analyzers to do the same
@@ -163,28 +156,28 @@ process.signalAnalysisPath = cms.Path(
 # def setTauPt(m, val):
 #     m.tauSelection.ptCut = val
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-# addAnalysisArray(process, "signalAnalysisTauPt", process.signalAnalysis, setTauPt,
+# addAnalysisArray(process, "signalAnalysisWithJESVariationPlusTauPt", process.signalAnalysisWithJESVariationPlus, setTauPt,
 #                  [10, 20, 30, 40, 50])
 
 def setTauSelection(m, val):
     m.tauSelection = val
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-		 [param.tauSelectionShrinkingConeCutBased,
-		  param.tauSelectionShrinkingConeTaNCBased,
-		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
-		 names = ["TauSelectionShrinkingConeCutBased",
-		  "TauSelectionShrinkingConeTaNCBased",
-		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+addAnalysisArray(process, "signalAnalysisWithJESVariationPlus", process.signalAnalysisWithJESVariationPlus, setTauSelection,
+		 [param.tauSelectionCaloTauCutBasedJESPlus05, param.tauSelectionShrinkingConeCutBasedJESPlus05,
+                  param.tauSelectionShrinkingConeTaNCBasedJESPlus05, param.tauSelectionHPSTauBasedJESPlus05],
+		 names = ["TauSelectionCaloTauCutBasedJESPlus05", "TauSelectionShrinkingConeCutBasedJESPlus05",
+                          "TauSelectionShrinkingConeTaNCBasedJESPlus05", "TauSelectionHPSTauBasedJESPlus05"],
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
+
+#addAnalysisArray(process, "signalAnalysisWithJESVariationPlus", process.signalAnalysisWithJESVariationPlus, setTauSelection,
+#		 [param.tauSelectionShrinkingConeCutBasedJESPlus05], names = ["TauSelectionShrinkingConeCutBasedJESPlus05"],
+#                 preSequence = process.patSequence, additionalCounters = additionalCounters)
 
 
 # Print tau discriminators from one tau from one event
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
-    src = process.signalAnalysis.tauSelection.src
+    src = process.signalAnalysisWithJESVariationPlus.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
 #    process.patSequence *
