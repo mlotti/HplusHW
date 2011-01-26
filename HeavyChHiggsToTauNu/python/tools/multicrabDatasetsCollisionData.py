@@ -319,6 +319,11 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
+    "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu9",
+        "data": {}
+    },
     "Mu_136035-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
