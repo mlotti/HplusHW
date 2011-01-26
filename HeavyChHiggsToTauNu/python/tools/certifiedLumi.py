@@ -8,7 +8,10 @@ files = {
 }
 
 def getFile(name):
-    return files[name]
+    try:
+        return files[name]
+    except KeyError:
+        raise Exception("No key '%s' for certified lumi file" % name)
 
 if __name__ == "__main__":
     print "Lumi files"
