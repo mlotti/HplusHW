@@ -57,7 +57,7 @@ namespace HPlus {
     return true;
   }
 
-  bool TauIDPFShrinkingConeHPS::passIsolation(pat::Tau& tau) {
+  bool TauIDPFShrinkingConeHPS::passAntiIsolation(pat::Tau& tau) {
     if (tau.tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true

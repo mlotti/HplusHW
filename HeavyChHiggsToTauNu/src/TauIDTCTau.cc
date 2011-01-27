@@ -63,7 +63,7 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDTCTau::passRTauCut(pat::Tau& tau) {
+  bool TauIDTCTau::passAntiRTauCut(pat::Tau& tau) {
     double myRtauValue = tau.leadTrack()->pt() / tau.pt();
     hRtauVsEta->Fill(myRtauValue, tau.eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);

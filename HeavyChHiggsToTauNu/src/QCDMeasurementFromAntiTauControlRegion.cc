@@ -15,7 +15,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("trigger")),
     fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
-    fTauSelectionCounter(eventCounter.addCounter("tauSelection")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
@@ -31,8 +31,7 @@ namespace HPlus {
     fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    // fTauSelectionFactorized(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, fTauSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
@@ -46,11 +45,6 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
-
-    // Configure tau ID to anti-tau ID 
-    //fTauSelection.setToAntiTaggingMode();
-    fTauSelection.setToAntiTaggingModeIsolationOnly();
-    fTauSelection.disableProngCut();
 
     // Book histograms 
     hMETAfterWholeSelection = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
@@ -82,11 +76,11 @@ namespace HPlus {
     increment(fTriggerEmulationCounter);
 
     // Apply Isolation Veto to taus
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // At least one tau candidate was found which was isolated.
-    increment(fTauSelectionCounter);
+    increment(fOneProngTauSelectionCounter);
     edm::PtrVector<pat::Tau> mySelectedAntiTau;
-    mySelectedAntiTau.push_back(tauData.getSelectedAntiTaus()[0]);
+    mySelectedAntiTau.push_back(tauData.getSelectedTaus()[0]);
 
     // Clean jet collection from selected tau and apply NJets>=3 cut
     // JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());

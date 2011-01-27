@@ -15,7 +15,6 @@ namespace HPlus {
     fEventWeight(eventWeight),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
-    fUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("trigger")),
     fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
@@ -31,8 +30,7 @@ namespace HPlus {
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    fTauSelectionFactorized(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, fTauSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -79,12 +77,7 @@ namespace HPlus {
     increment(fTriggerEmulationCounter);
 */
     // TauID (with optional factorization)
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
-    if (fUseFactorizedTauID) {
-      TauSelectionFactorized::Data factorizedTauData = fTauSelectionFactorized.analyze(iEvent, iSetup);
-      tauData = factorizedTauData.tauSelectionData(); // Update tau data object with tau data object from factorization
-      fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
-    }    
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau

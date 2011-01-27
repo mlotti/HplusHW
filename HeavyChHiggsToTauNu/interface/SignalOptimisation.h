@@ -6,7 +6,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelectionFactorized.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
@@ -39,7 +38,6 @@ namespace HPlus {
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const double  ftransverseMassCut;
-    const bool bUseFactorizedTauID;
 
     // Counters
     Count fAllCounter;
@@ -47,7 +45,7 @@ namespace HPlus {
     Count fTriggerEmulationCounter;
     Count fClobalMuonVetoCounter;
     Count fClobalElectronVetoCounter;
-    Count fTauSelectionCounter;
+    Count fOneProngTauSelectionCounter;
     Count fMETCounter;
     Count fJetSelectionCounter;
     Count fBTaggingCounter;
@@ -61,8 +59,7 @@ namespace HPlus {
     TriggerMETEmulation  fTriggerMETEmulation;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
-    TauSelection fTauSelection;
-    TauSelectionFactorized fTauSelectionFactorized;
+    TauSelection fOneProngTauSelection;
     METSelection fMETSelection;
     JetSelection fJetSelection;
     BTagging fBTagging;

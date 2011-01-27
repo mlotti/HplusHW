@@ -16,7 +16,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET cut")),
     fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation cut")),
-    fTauSelectionCounter(eventCounter.addCounter("Tau selection")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
     fJetSelectionCounter(eventCounter.addCounter("Jet selection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("Global electron veto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("Global muon veto")),
@@ -25,8 +25,7 @@ namespace HPlus {
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMET veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    // fTauSelectionFactorized(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, fTauSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
@@ -65,10 +64,10 @@ namespace HPlus {
     if(!triggerMETEmulationData.passedEvent()) return;
     increment(fTriggerEmulationCounter);
 
-    // Apply Isolation Veto to taus
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+    // Apply anti-tau tag taus (configure in cfg file)
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // No tau found!
-    increment(fTauSelectionCounter);
+    increment(fOneProngTauSelectionCounter);
     
     // Clean jet collection from selected tau and apply NJets>=3 cut
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 

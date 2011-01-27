@@ -14,13 +14,12 @@ namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
-    bUseFactorizedTauID(iConfig.getUntrackedParameter<bool>("useFactorizedTauID")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET Cut")),
     fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation")),
     fClobalMuonVetoCounter(eventCounter.addCounter("Global Muon Veto")),
     fClobalElectronVetoCounter(eventCounter.addCounter("Global Electron Veto")),
-    fTauSelectionCounter(eventCounter.addCounter("Tau selection")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fJetSelectionCounter(eventCounter.addCounter("Jet Selection")),
     fBTaggingCounter(eventCounter.addCounter("BTagging")),
@@ -31,8 +30,7 @@ namespace HPlus {
     fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight),
-    fTauSelectionFactorized(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, fTauSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -121,14 +119,9 @@ namespace HPlus {
 
     // 5) tauID
     // TauID (with optional factorization (recommended only for data and QCD))
-    TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
-    if (bUseFactorizedTauID) { // Returns 0 or 1 tau; see TauSelectionFactorized.cc for details
-      TauSelectionFactorized::Data factorizedTauData = fTauSelectionFactorized.analyze(iEvent, iSetup);
-      tauData = factorizedTauData.tauSelectionData(); // Update tau data object with tau data object from factorization
-      fEventWeight.multiplyWeight(factorizedTauData.factorizationCoefficient()); // Apply event weight
-    }
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // No tau found!
-    increment(fTauSelectionCounter);
+    increment(fOneProngTauSelectionCounter);
     
     // 6) MET 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);

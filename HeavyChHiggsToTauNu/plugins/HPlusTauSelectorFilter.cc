@@ -25,7 +25,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
-  HPlus::TauSelection fTauSelection;
+  HPlus::TauSelection fOneProngTauSelection;
 
   // Let's use reco::Candidate as the output type, as the required
   // dictionaries for edm::PtrVector<pat:Tau> do not exist, and I
@@ -37,7 +37,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight)
+  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1)
 {
   eventCounter.produces(this);
   produces<Product>();
@@ -52,10 +52,10 @@ bool HPlusTauPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::TauSelection::Data tauData = fTauSelection.analyze(iEvent, iSetup);
+  HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
   if(!tauData.passedEvent()) return false;
 
-  //iEvent.put(std::auto_ptr<Product>(new Product(fTauSelection.getSelectedTaus())));
+  //iEvent.put(std::auto_ptr<Product>(new Product(fOneProngTauSelection.getSelectedTaus())));
   std::auto_ptr<Product> ret(new Product());
   ret->push_back(tauData.getSelectedTaus()[0]);
   iEvent.put(ret);
