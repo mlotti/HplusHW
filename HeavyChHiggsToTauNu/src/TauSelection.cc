@@ -22,10 +22,10 @@ namespace HPlus {
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fProngNumber(prongNumber),
+    fTauID(0),
     fOperationMode(kNormalTauID),
     fFactorizationTable(iConfig),
-    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")),
-    fTauID(0),
+    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")), // FIXME: include prong number into counter name
     fEventWeight(eventWeight)
   {
     // Histograms
@@ -44,41 +44,40 @@ namespace HPlus {
     TH1 *hPtTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
-      myJetPtBins, myJetPtMin, myJetPtMax);
+      myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     TH1 *hPtCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
-      myJetPtBins, myJetPtMin, myJetPtMax);
+      myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     TH1 *hPtSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
-      myJetPtBins, myJetPtMin, myJetPtMax);
+      myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     TH1 *hEtaTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
-      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+      myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     TH1 *hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
-      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+      myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     TH1 *hEtaSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
-      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+      myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     TH1 *hNumberOfTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
-      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+      myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
     TH1 *hNumberOfCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
-      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+      myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
     TH1 *hNumberOfSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
-      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+      myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-
     hTauIdOperatingMode = makeTH<TH1F>(*fs, "tau_operating_mode", "tau_operating_mode;;N_{events}", 5, 0., 5.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
@@ -86,7 +85,6 @@ namespace HPlus {
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "Anti-tau ID");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "Anti-isolated tau");
 
-    edm::Service<TFileService> fs;
     // Factorization / general histograms
     // NB! change binning and range only if you ARE sure what you are doing ...
     int myFactorizationJetPtBins = 60;
@@ -194,7 +192,7 @@ namespace HPlus {
   }
 
   TauSelection::~TauSelection() {
-    if (tauID) delete tauID;
+    if (fTauID) delete fTauID;
   }
 
   TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {   
