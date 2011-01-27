@@ -13,6 +13,13 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
     if isinstance(trigger, basestring):
         trigger = [trigger]
 
+#    check = cms.EDAnalyzer("HPlusTriggerCheck",
+#        src = cms.untracked.InputTag("patTriggerEvent"),
+#        pathNames = cms.untracked.vstring(trigger)
+#    )
+#    setattr(process, postfix+"TriggerCheck", check)
+#    seq *= check
+
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
