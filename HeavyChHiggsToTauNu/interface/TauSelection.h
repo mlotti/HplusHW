@@ -8,7 +8,8 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FactorizationTable.h"
 
 namespace edm {
   class ParameterSet;
@@ -22,14 +23,6 @@ class TH1;
 namespace HPlus {
   class TauSelection {
   public:
-    enum TauIDTypeEnumerator {
-      kTauIDCaloTauCutBased,
-      kTauIDShrinkingConePFTauCutBased,
-      kTauIDShrinkingConePFTauTaNCBased,
-      kTauIDHPSTauBased,
-      kTauIDCombinedHPSTaNCTauBased
-    };
-
     /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -48,8 +41,8 @@ namespace HPlus {
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
         return fTauSelection->fSelectedTaus;
       }
-      const edm::PtrVector<pat::Tau>& getSelectedAntiTaus() const {
-        return fTauSelection->fSelectedAntiTaus;
+      const edm::PtrVector<pat::Tau>& getCleanedTauCandidates() const {
+        return fTauSelection->fCleanedTauCandidates;
       }
 
     private:
@@ -57,7 +50,14 @@ namespace HPlus {
       bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    enum TauSelectionOperationMode {
+      kNormalTauID,
+      kFactorizedTauID,
+      kAntiTauTag, // Selects anti-tagged taus
+      kAntiTauTagIsolationOnly // Selects anti-isolated tau jets
+    };
+
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber);
     ~TauSelection();
 
     /// Default tauID
@@ -66,109 +66,75 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
-    /// Method for obtaining the tau ID algorithm type
-    TauIDTypeEnumerator getTauIDType() const { return fTauIDType; }
-
-    // Setters for options
-    /// Disables the cut on the number of signal tracks
-    void disableProngCut() { fApplyProngCutStatus = true; }
-    /// Sets the tau ID to work as an anti-tau tagger (passed is true, if no tau candidates are identified as taus)   
-    void setToAntiTaggingMode() { fAntiTagModeStatus = true; }
-    /// Sets the tau ID to work as an anti-tau tagger (passed is true, if no tau candidates are isolated; ET and eta cuts are applied)   
-    void setToAntiTaggingModeIsolationOnly() { fAntiTagModeIsolationOnlyStatus = true; }
 
   private:
-    /// TauID specific to TCTau
-    bool selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    /// TauID specific to PF shrinking cone tau
-    bool selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    /// TauID specific to TaNC (neural network on top of PF shrinking cone tau)
-    bool selectionByPFTauTaNCCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const 
-    edm::PtrVector<pat::Tau>& taus);
-    /// TauID specific to HPS (Hadron+strips algorithm on top of PF shrinking cone tau)
-    bool selectionByHPSTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    /// TauID specific to combined HPS+TaNC algorithms
-    bool selectionByCombinedHPSTaNCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// Method for doing tau selection
+    bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// Method for handling the result of tauID factorization 
+    bool doFactorizationLookup();
+    // Internal histogramming routines
+    /// Fills the histogram that describes the mode in which the tau selection was run
+    void fillOperationModeHistogram();
 
+    void fillHistogramsForTauCandidates(pat::Tau& tau, const edm::Event& iEvent);
+    void fillHistogramsForCleanedTauCandidates(pat::Tau& tau, const edm::Event& iEvent);
+    void fillHistogramsForSelectedTaus(pat::Tau& tau, const edm::Event& iEvent);
+
+
+  private:
     // Input parameters
     edm::InputTag fSrc;
     const std::string fSelection;
-    const double fPtCut;
-    const double fEtaCut;
-    const double fLeadTrkPtCut;
-    const double fRtauCut;
-    const double fInvMassCut;
-    TauIDTypeEnumerator fTauIDType;
-    
-    // Options
-    /// If true (true=default), the cut on the number of signal tracks is applied
-    bool fApplyProngCutStatus;
-    /// If true (false=default), anti-tau tagging is applied (all cuts except ET and eta)
-    bool fAntiTagModeStatus;
-    /// If true (false=default), anti-tau tagging is applied (isolation only; ET and eta cuts are applied)
-    bool fAntiTagModeIsolationOnlyStatus;
-       
+    const int fProngNumber;
+
+    /// TauID object
+    TauIDBase* fTauID;
+    /// Operation mode of tau selection
+    TauSelectionOperationMode fOperationMode;
+
+    /// Factorization table objects
+    FactorizationTable fFactorizationTable;
+
     // Counters
-    Count fPtCutCount;
-    Count fEtaCutCount;
-    Count fagainstMuonCount;
-    Count fagainstElectronCount;
-    Count fLeadTrkPtCount;
-    Count fTaNCCount;
-    Count fHPSIsolationCount;
-    Count fbyIsolationCount;
-    Count fbyTrackIsolationCount;  
-    Count fecalIsolationCount; 
-    Count fnProngsCount;
-    Count fHChTauIDchargeCount;
-    Count fRtauCount;
-    Count fInvMassCount;
+    Count fTauFound;
 
-    Count fAllSubCount;
-    Count fPtCutSubCount;
-    Count fEtaCutSubCount;
-    Count fagainstMuonSubCount;
-    Count fagainstElectronSubCount;
-    Count fLeadTrkPtSubCount;
-    Count fbyTaNCSubCount;
-    Count fbyHPSIsolationSubCount;
-    Count fbyIsolationSubCount; 
-    Count fbyTrackIsolationSubCount; 
-    Count fecalIsolationSubCount; 
-    Count fnProngsSubCount;
-    Count fHChTauIDchargeSubCount;
-    Count fRtauSubCount;
-    Count fInvMassSubCount;
-
-    // Subcounters packaged in one object
-    SelectionCounterPackager* fSubCounters;
-    
     // EventWeight object
     EventWeight& fEventWeight;
 
     // Histograms
-    TH1 *hPt;
-    TH1 *hEta;
-    TH1 *hPtAfterTauSelCuts;
-    TH1 *hEtaAfterTauSelCuts;
-    TH1 *hEtaRtau;
-    TH1 *hLeadTrkPt;
-    TH1 *hIsolTrkPt;
-    TH1 *hIsolTrkPtSum;
-    TH2 *hIsolTrkPtSumVsPtCut;
-    TH2 *hNIsolTrksVsPtCut;
-    TH1 *hIsolMaxTrkPt;
-    TH1 *hnProngs;
-    TH1 *hDeltaE;
-    TH1 *hRtau;
-    TH1 *hFlightPathSignif;
-    TH1 *hInvMass;
-    TH1 *hbyTaNC;
     TH1 *hTauIdOperatingMode;
+    TH1 *hPtTauCandidates; // Tau candidates == all taus in the pat::Tau collection
+    TH1 *hPtCleanedTauCandidates; // Cleaned tau candidates == taus after jet et, jet eta, ldg pt, e/mu veto 
+    TH1 *hPtSelectedTaus; // Selected taus == after all tauID cuts
+    TH1 *hEtaTauCandidates;
+    TH1 *hEtaCleanedTauCandidates;
+    TH1 *hEtaSelectedTaus;
+    TH1 *hNumberOfTauCandidates;
+    TH1 *hNumberOfCleanedTauCandidates;
+    TH1 *hNumberOfSelectedTaus;
+
+    // Factorization / selected taus
+    TH1 *hFactorizationPtSelectedTaus;
+    TH1 *hFactorizationEtaSelectedTaus;
+    TH1 *hFactorizationCategory;
+    // Factorization / weighted histograms
+    TH1 *hFactorizationPtBeforeTauID;
+    TH1 *hFactorizationPtAfterTauID;
+    TH1 *hFactorizationEtaBeforeTauID;
+    TH1 *hFactorizationEtaAfterTauID;
+    TH2 *hFactorizationPtVsEtaBeforeTauID;
+    TH2 *hFactorizationPtVsEtaAfterTauID;
+    // Factorization / unweighted histograms (needed to obtain the statistical error)
+    TH1 *hFactorizationPtBeforeTauIDUnweighted;
+    TH1 *hFactorizationPtAfterTauIDUnweighted;
+    TH1 *hFactorizationEtaBeforeTauIDUnweighted;
+    TH1 *hFactorizationEtaAfterTauIDUnweighted;
+    TH2 *hFactorizationPtVsEtaBeforeTauIDUnweighted;
+    TH2 *hFactorizationPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
+    edm::PtrVector<pat::Tau> fCleanedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;
-    edm::PtrVector<pat::Tau> fSelectedAntiTaus;
   };
 }
 

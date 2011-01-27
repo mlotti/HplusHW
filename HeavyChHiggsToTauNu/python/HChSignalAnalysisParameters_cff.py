@@ -13,10 +13,13 @@ trigger = cms.untracked.PSet(
 )
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
-useFactorizedTauID = cms.untracked.bool(True) # FIXME: set to false
-
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 tauSelectionBase = cms.untracked.PSet(
+    # Operating mode options: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
+    operatingMode = cms.untracked.string("standard"),
+#    operatingMode = cms.untracked.string("factorized"),
+#    operatingMode = cms.untracked.string("antitautag"),
+#    operatingMode = cms.untracked.string("antiisolatedtau"),
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(30),

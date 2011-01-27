@@ -1,6 +1,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDPFTauBasedAlgorithms.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDTCTau.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -15,845 +18,395 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
-    fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
-    fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
-    fLeadTrkPtCut(iConfig.getUntrackedParameter<double>("leadingTrackPtCut")),
-    fRtauCut(iConfig.getUntrackedParameter<double>("rtauCut")),
-    fInvMassCut(iConfig.getUntrackedParameter<double>("invMassCut")),
-    fApplyProngCutStatus(true),
-    fAntiTagModeStatus(false),
-    fAntiTagModeIsolationOnlyStatus(false),
-    fPtCutCount(eventCounter.addSubCounter("Tau main","Tau pt cut")),
-    fEtaCutCount(eventCounter.addSubCounter("Tau main","Tau eta cut")),
-    fagainstMuonCount(eventCounter.addSubCounter("Tau main","Tau againstMuon discriminator")),
-    fagainstElectronCount(eventCounter.addSubCounter("Tau main","Tau againstElectron discriminator")),
-    fLeadTrkPtCount(eventCounter.addSubCounter("Tau main","Tau leading track pt cut")),
-    fTaNCCount(eventCounter.addSubCounter("Tau main","Tau TaNC cut")),
-    fHPSIsolationCount(eventCounter.addSubCounter("Tau main","Tau HPS isolation cut")),
-    fbyIsolationCount(eventCounter.addSubCounter("Tau main","Tau byIsolation discriminator")),
-    fbyTrackIsolationCount(eventCounter.addSubCounter("Tau main","Tau byTrackIsolation cut")),
-    fecalIsolationCount(eventCounter.addSubCounter("Tau main","Tau ecalIsolation discriminator")),
-    fnProngsCount(eventCounter.addSubCounter("Tau main","Tau number of prongs cut")),
-    fHChTauIDchargeCount(eventCounter.addSubCounter("Tau main","Tau charge cut")),
-    fRtauCount(eventCounter.addSubCounter("Tau main","Tau Rtau cut")),
-    fInvMassCount(eventCounter.addSubCounter("Tau main","Tau InvMass cut")),
-    fAllSubCount(eventCounter.addSubCounter("Tau identification", "all tau candidates")),
-    fPtCutSubCount(eventCounter.addSubCounter("Tau identification", "pt cut")),
-    fEtaCutSubCount(eventCounter.addSubCounter("Tau identification", "eta cut")),
-    fagainstMuonSubCount(eventCounter.addSubCounter("Tau identification","againstMuon discriminator")),
-    fagainstElectronSubCount(eventCounter.addSubCounter("Tau identification","againstElectron discriminator")),
-    fLeadTrkPtSubCount(eventCounter.addSubCounter("Tau identification", "leading track pt cut")),
-    fbyTaNCSubCount(eventCounter.addSubCounter("Tau identification","Tau TaNC cut")),
-    fbyHPSIsolationSubCount(eventCounter.addSubCounter("Tau identification","Tau HPS isolation cut")),
-    fbyIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byIsolation discriminator")),
-    fbyTrackIsolationSubCount(eventCounter.addSubCounter("Tau identification", "byTrackIsolation cut")),
-    fecalIsolationSubCount(eventCounter.addSubCounter("Tau identification", "ecalIsolation discriminator")),
-    fnProngsSubCount(eventCounter.addSubCounter("Tau identification", "number of prongs cut")),
-    fHChTauIDchargeSubCount(eventCounter.addSubCounter("Tau identification", "Tau charge cut")),
-    fRtauSubCount(eventCounter.addSubCounter("Tau identification","Tau Rtau cut")),
-    fInvMassSubCount(eventCounter.addSubCounter("Tau identification","Tau InvMass cut")),
+    fProngNumber(prongNumber),
+    fOperationMode(kNormalTauID),
+    fFactorizationTable(iConfig),
+    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")),
+    fTauID(0),
     fEventWeight(eventWeight)
   {
     // Histograms
     edm::Service<TFileService> fs;
-    hPt = makeTH<TH1F>(*fs, "tau_pt", "tau_pt", 100, 0., 200.);
-    hEta = makeTH<TH1F>(*fs, "tau_eta", "tau_eta", 60, -3., 3.);
-    hPtAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
-    hEtaAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
-    hEtaRtau = makeTH<TH1F>(*fs, "tau_eta_Rtau", "tau_eta_Rtau", 60, -3., 3.);
-    hLeadTrkPt = makeTH<TH1F>(*fs, "tau_leadtrk_pt", "tau_leadtrk_pt", 100, 0., 100.);
-    hIsolTrkPt = makeTH<TH1F>(*fs, "tau_isoltrk_pt", "tau_isoltrk_pt", 100, 0., 20.);
-    hIsolTrkPtSum = makeTH<TH1F>(*fs, "tau_isoltrk_ptsum", "tau_isoltrk_ptsum", 100, 0., 20.);
-    hIsolTrkPtSumVsPtCut = makeTH<TH2F>(*fs, "tau_isoltrk_ptsum_vs_ptcut", "tau_isoltrk_ptsum_vs_ptcut", 6, 0.45, 1.05, 100, 0., 20.);
-    hNIsolTrksVsPtCut = makeTH<TH2F>(*fs, "tau_ntrks_vs_ptcut", "tau_ntrks_vs_ptcut", 6, 0.45, 1.05,10,0.,10.);
-    hIsolMaxTrkPt = makeTH<TH1F>(*fs, "tau_isomaxltrk_pt", "tau_isolmaxtrk_pt", 100, 0., 20.);
-    hnProngs = makeTH<TH1F>(*fs, "tau_nProngs", "tau_nProngs", 10, 0., 10.);
-    hRtau = makeTH<TH1F>(*fs, "tau_Rtau", "tau_Rtau", 100, 0., 1.2);
-    hDeltaE = makeTH<TH1F>(*fs, "tau_DeltaE", "tau_DeltaE", 100, 0., 1.);
-    hFlightPathSignif = makeTH<TH1F>(*fs, "tau_lightPathSignif", "tau_lightPathSignif", 100, 0., 10);
-    hInvMass = makeTH<TH1F>(*fs, "tau_InvMass", "tau_InvMass", 50, 0., 5.);
-    hbyTaNC = makeTH<TH1F>(*fs, "tau_TaNC", "tau_TaNC", 100, 0., 1.);
-    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tau_operating_mode", "tau_operating_mode;;N_{events}", 4, 0., 4.);
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Standard tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Anti-tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Anti-isolated tau");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "Prong cut applied");
+
+    // Selected tau pt, eta, and N_jets distributions
+    int myTauJetPtBins = 60;
+    float myTauJetPtMin = 0.;
+    float myTauJetPtMax = 300.; 
+    int myTauJetEtaBins = 60;
+    float myTauJetEtaMin = -3.;
+    float myTauJetEtaMax = 3.;
+    int myTauJetNumberBins = 20;
+    float myTauJetNumberMin = 0.;
+    float myTauJetNumberMax = 20.; 
+    TH1 *hPtTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_tau_candidates_pt",
+      "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      myJetPtBins, myJetPtMin, myJetPtMax);
+    TH1 *hPtCleanedTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_cleaned_tau_candidates_pt",
+      "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      myJetPtBins, myJetPtMin, myJetPtMax);
+    TH1 *hPtSelectedTaus = makeTH<TH1F>(*fs,
+      "tauID_selected_tau_pt",
+      "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      myJetPtBins, myJetPtMin, myJetPtMax);
+    TH1 *hEtaTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_tau_candidates_eta",
+      "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
+      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+    TH1 *hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_cleaned_tau_candidates_eta",
+      "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
+      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+    TH1 *hEtaSelectedTaus = makeTH<TH1F>(*fs,
+      "tauID_selected_tau_eta",
+      "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
+      myJetEtaBins, myJetEtaMin, myJetEtaMax);
+    TH1 *hNumberOfTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_tau_candidates_N",
+      "tau_candidates_N;Number of #tau's;N_{jets}",
+      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+    TH1 *hNumberOfCleanedTauCandidates = makeTH<TH1F>(*fs,
+      "tauID_cleaned_tau_candidates_N",
+      "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
+      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+    TH1 *hNumberOfSelectedTaus = makeTH<TH1F>(*fs,
+      "tauID_selected_tau_N",
+      "selected_tau_N;Number of #tau's;N_{jets}",
+      myJetNumberBins, myJetNumberMin, myJetNumberMax);
+    // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
+
+    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tau_operating_mode", "tau_operating_mode;;N_{events}", 5, 0., 5.);
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Factorized tau ID");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "Anti-tau ID");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "Anti-isolated tau");
+
+    edm::Service<TFileService> fs;
+    // Factorization / general histograms
+    // NB! change binning and range only if you ARE sure what you are doing ...
+    int myFactorizationJetPtBins = 60;
+    float myFactorizationJetPtMin = 0.;
+    float myFactorizationJetPtMax = 300.; 
+    int myFactorizationJetEtaBins = 60;
+    float myFactorizationJetEtaMin = -3.;
+    float myFactorizationJetEtaMax = 3.;
+    hFactorizationPtSelectedTaus = makeTH<TH1F>(*fs,
+      "tauID_factorization_selected_tau_pt",
+      "factorized_selected_tau_pt;Selected #tau p_{T}, GeV/c;N_{events} / 5 GeV/c",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
+    hFactorizationEtaSelectedTaus = makeTH<TH1F>(*fs,
+      "tauID_factorization_selected_tau_eta",
+      "factorized_selected_tau_eta;Selected #tau #eta;N_{events} / 0.1",
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationCategory = makeTH<TH1F>(*fs,
+      "tauID_factorized_tau_category",
+      "factorized_tau_category",
+      5, 0, 5);
+    hFactorizationCategory->GetXaxis()->SetBinLabel(1, "All events");
+    hFactorizationCategory->GetXaxis()->SetBinLabel(2, "No tau candidates");
+    hFactorizationCategory->GetXaxis()->SetBinLabel(3, "Only one tau candidate");
+    hFactorizationCategory->GetXaxis()->SetBinLabel(4, "Highest tau that passed tauID");
+    hFactorizationCategory->GetXaxis()->SetBinLabel(5, "No tau after tauID; tau=highest tau candidate");
+    // Factorization / weighted histograms
+    hFactorizationPtBeforeTauID = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_pt_before_tauID",
+      "tau_pt_before_weighted;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
+    hFactorizationPtAfterTauID = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_pt_after_tauID",
+      "tau_pt_after_weighted;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
+    hFactorizationEtaBeforeTauID = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_eta_before_tauID",
+      "tau_eta_before_weighted;#tau jet #eta;N_{jets} / 0.1", 
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationEtaAfterTauID = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_eta_after_tauID",
+      "tau_eta_after_weighted;#tau jet #eta;N_{jets} / 0.1",
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationPtVsEtaBeforeTauID = makeTH<TH2F>(*fs,
+      "tauID_factorization_calculation_pt_vs_eta_before_tauID",
+      "tau_pt_vs_eta_before_weighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax,
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationPtVsEtaAfterTauID = makeTH<TH2F>(*fs,
+      "tauID_factorization_calculation_pt_vs_eta_after_tauID",
+      "tau_pt_vs_eta_after_weighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax,
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    // Factorization / unweighted histograms
+    hFactorizationPtBeforeTauIDUnweighted = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_pt_before_tauID_unweighted",
+      "tau_pt_before_unweighted;#tau jet p_{T}, GeV/c;N",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
+    hFactorizationPtAfterTauIDUnweighted = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_pt_after_tauID_unweighted",
+      "tau_pt_after_unweighted;#tau jet p_{T}, GeV/c;N",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
+    hFactorizationEtaBeforeTauIDUnweighted = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_eta_before_tauID_unweighted",
+      "tau_eta_before_unweighted;#tau jet #eta;N",
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationEtaAfterTauIDUnweighted = makeTH<TH1F>(*fs,
+      "tauID_factorization_calculation_eta_after_tauID_unweighted",
+      "tau_eta_after_unweighted;#tau jet #eta;N",
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationPtVsEtaBeforeTauIDUnweighted = makeTH<TH2F>(*fs,
+      "tauID_factorization_calculation_pt_vs_eta_before_tauID_unweighted",
+      "tau_pt_vs_eta_before_unweighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax, 
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+    hFactorizationPtVsEtaAfterTauIDUnweighted = makeTH<TH2F>(*fs,
+      "tauID_factorization_calculation_pt_vs_eta_after_tauID_unweighted",
+      "tau_pt_vs_eta_after_unweighted;#tau jet p_{T}, GeV/c;#tau jet #eta", 
+      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax, 
+      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
+
+    // Create tauID algorithm handler
+    if     (fSelection == "CaloTauCutBased")
+      fTauID = new TauIDTCTau(iConfig, eventCounter, eventWeight);
+    else if(fSelection == "ShrinkingConePFTauCutBased")
+      fTauID = new TauIDPFShrinkingCone(iConfig, eventCounter, eventWeight);
+    else if(fSelection == "ShrinkingConePFTauTaNCBased")
+      fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight);
+    else if(fSelection == "HPSTauBased")
+      fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight);
+    else if(fSelection == "CombinedHPSTaNCBased")
+      fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight);
+    else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCBased" << std::endl;
     
-    fSubCounters = new SelectionCounterPackager(eventCounter);
-    
-    // Check that tauID algorithm selection is ok
-    if     (fSelection == "CaloTauCutBased")             fTauIDType = kTauIDCaloTauCutBased;
-    else if(fSelection == "ShrinkingConePFTauCutBased")  fTauIDType = kTauIDShrinkingConePFTauCutBased;
-    else if(fSelection == "ShrinkingConePFTauTaNCBased") fTauIDType = kTauIDShrinkingConePFTauTaNCBased;
-    else if(fSelection == "HPSTauBased")                 fTauIDType = kTauIDHPSTauBased;
-    else if(fSelection == "CombinedHPSTaNCBased")        fTauIDType = kTauIDCombinedHPSTaNCTauBased;
-    else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
+    // Define tau selection operation mode
+    std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
+    if      (myOperatingModeSelection == "standard")
+      fOperationMode = kNormalTauID;
+    else if (myOperatingModeSelection == "factorized")
+      fOperationMode = kFactorizedTauID;
+    else if (myOperatingModeSelection == "antitautag")
+      fOperationMode = kAntiTauTag;
+    else if (myOperatingModeSelection == "antiisolatedtau")
+      fOperationMode = kAntiTauTagIsolationOnly;
+    else throw cms::Exception("Error") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'" << std::endl;
   }
 
   TauSelection::~TauSelection() {
-    delete fSubCounters;
+    if (tauID) delete tauID;
   }
 
-  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    if (fAntiTagModeStatus)
-      hTauIdOperatingMode->Fill(2);
-    else if (fAntiTagModeIsolationOnlyStatus)
-      hTauIdOperatingMode->Fill(3);
-    else
-      hTauIdOperatingMode->Fill(1);
-    if (fApplyProngCutStatus)
-      hTauIdOperatingMode->Fill(4);
-    
+  TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {   
     bool passEvent = false;
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
     // Do selection
-    if     (fTauIDType == kTauIDCaloTauCutBased)
-      passEvent = selectionByTCTauCuts(iEvent,iSetup,htaus->ptrVector());
-    else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)
-      passEvent = selectionByPFTauCuts(iEvent,iSetup,htaus->ptrVector());
-    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased)
-      passEvent = selectionByPFTauTaNCCuts(iEvent,iSetup,htaus->ptrVector());
-    else if(fTauIDType == kTauIDHPSTauBased)
-      passEvent = selectionByHPSTauCuts(iEvent,iSetup,htaus->ptrVector());
-    else if(fTauIDType == kTauIDCombinedHPSTaNCTauBased)
-      passEvent = selectionByCombinedHPSTaNCTauCuts(iEvent,iSetup,htaus->ptrVector());
+    passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector());
     return Data(this, passEvent);
   }
 
   TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
     bool passEvent = false;
     // Do selection
-    if     (fTauIDType == kTauIDCaloTauCutBased)             passEvent = selectionByTCTauCuts(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDShrinkingConePFTauCutBased)  passEvent = selectionByPFTauCuts(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDShrinkingConePFTauTaNCBased) passEvent = selectionByPFTauTaNCCuts(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDHPSTauBased)                 passEvent = selectionByHPSTauCuts(iEvent,iSetup,taus);
-    else if(fTauIDType == kTauIDCombinedHPSTaNCTauBased)     passEvent = selectionByCombinedHPSTaNCTauCuts(iEvent,iSetup,taus);
-    
+    passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector());
     return Data(this, passEvent);
   }
 
-  bool TauSelection::selectionByPFTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+  bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
+    // Document operation mode
+    fillOperationModeHistogram();
+    
+    // Initialize
     fSelectedTaus.clear();
     fSelectedTaus.reserve(taus.size());
-    fSelectedAntiTaus.clear();
-    fSelectedAntiTaus.reserve(taus.size());
+    fCleanedTauCandidates.clear();
+    fCleanedTauCandidates.reserve(taus.size());
+    bool fAntiTauTagStatus = true;
 
-    size_t ptCutPassed = 0;
-    size_t etaCutPassed = 0;
-    size_t leadTrkPtCutPassed = 0;
-    size_t nProngsCutPassed = 0;
-    size_t HChTauIDchargeCutPassed = 0;
-    size_t byIsolationCutPassed = 0;
-    size_t ecalIsolationCutPassed = 0;
-    size_t againstElectronCutPassed = 0;
-    size_t againstMuonCutPassed = 0;
-    size_t RtauCutPassed = 0;
-    size_t InvMassCutPassed = 0;
-
-    // Fill initial histograms and do the first selection
+    // Loop over the taus
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       edm::Ptr<pat::Tau> iTau = *iter;
 
-      increment(fAllSubCount);
-
-      hPt->Fill(iTau->pt(), fEventWeight.getWeight());
-      hEta->Fill(iTau->eta(), fEventWeight.getWeight());
-      reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand(); 
-      //      reco::TrackRef leadTrk = iTau->leadTrack();
-      //      if(leadTrk.isNonnull())
-      //        hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
-      //      uint16_t nSigTk        =  thePFTauRef->signalPFChargedHadrCands().size();
-      uint16_t nSigTracks        =  iTau->signalPFChargedHadrCands().size();
-
-
-      if(!(iTau->pt() > fPtCut)) continue;
-      increment(fPtCutSubCount);
-      ++ptCutPassed;
-
-      if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-      increment(fEtaCutSubCount);
-      ++etaCutPassed;
-
-      if(iTau->tauID("againstMuon") < 0.5 ) continue; 
-      increment(fagainstMuonSubCount);
-      ++againstMuonCutPassed;
-
-      if(iTau->tauID("againstElectron") < 0.5 ) continue; 
-      increment(fagainstElectronSubCount);
-      ++againstElectronCutPassed;
-
-      if(leadTrk.isNonnull())
-        hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
-
-      if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
-      increment(fLeadTrkPtSubCount);
-      ++leadTrkPtCutPassed;
-
-      /*
-      float ptmax = 0;
-      float ptsum = 0;
-
-      const reco::PFCandidateRefVector& isolCands = iTau->isolationPFChargedHadrCands();
-      reco::PFCandidateRefVector::const_iterator iCand = isolCands.begin();
-      //      const reco::TrackRefVector& isolCands = iTau->isolationTracks();
-      //      reco::TrackRefVector::const_iterator iCand = isolCands.begin();
-      //      std::cout << " isol cands " << isolCands.size() << std::endl;
-      for(; iCand != isolCands.end(); ++iCand) {
-	float pt = (*iCand)->pt();
-	ptsum += pt; 
-	if (pt > ptmax) ptmax = pt;
-	hIsolTrkPt->Fill(pt, fEventWeight.getWeight());
-	//	std::cout << " isol track pt " << pt << std::endl;
-	//iCand->pt()
-      }
-      hIsolMaxTrkPt->Fill(ptmax, fEventWeight.getWeight());
-      hIsolTrkPtSum->Fill(ptsum, fEventWeight.getWeight());
-
-      for(int iCut = 0; iCut < 5; ++iCut){
-	double cut = 0.5 + 0.1*iCut;
-	double sum  = 0;
-	int nTracks = 0;
-	for(size_t iTr = 0; iTr < isolCands.size(); ++iTr) {
-	  float pt = isolCands[iTr]->pt();
-	  if(pt < cut) continue;
-	  sum+=pt;
-	  nTracks++;
-	}
-	hIsolTrkPtSumVsPtCut->Fill(cut,sum, fEventWeight.getWeight());
-	hNIsolTrksVsPtCut->Fill(cut,float(nTracks), fEventWeight.getWeight());
-      } 
-      */
+      fillHistogramsForAllTauCandidates(iTau);
       
-      if(iTau->tauID("byIsolation") < 0.5) {
-        fSelectedAntiTaus.push_back(iTau);
-        continue;
-      }
-      increment(fbyIsolationSubCount);
-      ++byIsolationCutPassed;
-
-      if(iTau->tauID("ecalIsolation") < 0.5) {
-        fSelectedAntiTaus.push_back(iTau);
-        continue;
-      }
-      increment(fecalIsolationSubCount);
-      ++ecalIsolationCutPassed;
-
-      //      std::cout << " signal trk  " << nSigTracks  <<  "  iTau->signalTracks().size()) "  <<  iTau->signalTracks().size() << std::endl;       
-      hnProngs->Fill(nSigTracks, fEventWeight.getWeight());    
-      //      if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue; 
-      if (fApplyProngCutStatus) {
-        if(iTau->tauID("HChTauID1Prong") < 0.5 ) {
-          fSelectedAntiTaus.push_back(iTau);
+      // Tau candidate selections
+      if (!fTauID->passTauCandidateSelection(iTau)) continue;
+      if (!fTauID->passLeadingTrackCuts(iTau)) continue;
+      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
+      fillHistogramsForCleanedTauCandidates(iTau);
+      fCleanedTauCandidates.push_back(iTau);
+      
+      // Tau ID selections
+      if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
+        // Standard tau ID or factorized tau ID (necessary for the tau selection logic) 
+        if (!fTauID->passIsolation(iTau)) continue;
+        if (fProngNumber == 1) {
+          if (!fTauID->passOneProngCut(iTau)) continue;
+          if (!fTauID->passChargeCut(iTau)) continue;
+          if (!fTauID->passRTauCut(iTau)) continue;
+        } else if (fProngNumber == 3) {
+          if (!fTauID->passThreeProngCut(iTau)) continue;
+          if (!fTauID->passChargeCut(iTau)) continue;
+          //if (!fTauID->passInvMassCut(iTau)) continue; // FIXME: not tested, not validated
+          //if (!fTauID->passDeltaECut(iTau)) continue; // FIXME: not tested, not validated
+          //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
+          if (!fTauID->passRTauCut(iTau)) continue;
+        }
+      } else if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly) {
+        // Anti-tau tag
+        if (fProngNumber == 1) {
+          if (!fTauID->passOneProngCut(iTau)) continue;
+        } else if (fProngNumber == 3) {
+          if (!fTauID->passThreeProngCut(iTau)) continue;
+        }
+        if (!fTauID->passAntiIsolation(iTau)) {
+          fAntiTauTagStatus = false; // Reject event if even one isolated jet exists
           continue;
         }
-        //      if( nSigTracks != 1 ) continue; 
-        increment(fnProngsSubCount);
-        ++nProngsCutPassed;
+        if (fOperationMode == kAntiTauTag) {
+          if (!fTauID->passAntiRTauCut(iTau)) {
+            fAntiTauTagStatus = false; // Reject event if even one jet fails the anti rtau cut
+            continue;
+          }
+          // NOTE: it is possible to add here some cut on E(hadr.energy)/E(jet) 
+          //if (!fTauID->passAntiDeltaECut(iTau)) continue;
+        }
       }
- 
-      if(iTau->tauID("HChTauIDcharge") < 0.5) {
-        fSelectedAntiTaus.push_back(iTau);
-        continue; 
-      }
-      increment(fHChTauIDchargeSubCount);
-      ++HChTauIDchargeCutPassed;
-  
-      //float Rtau = leadTrk->p()/iTau->p();
-      //      Rtau = leadTrk->p()/iTau->p();
-      //hRtau->Fill(Rtau, fEventWeight.getWeight());
-    
-      //float Rtau = 0;
-      //if (iTau->p() > 0) leadTrk->p()/iTau->p();
-      float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      if (Rtau > 1 ) {
-	hEtaRtau->Fill(iTau->eta(), fEventWeight.getWeight());
-      }
-      hRtau->Fill(Rtau, fEventWeight.getWeight());
-
-      if(Rtau < fRtauCut) {
-        fSelectedAntiTaus.push_back(iTau);
-        continue;
-      }
-      increment(fRtauSubCount);
-      ++RtauCutPassed;
-      
-      float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-      hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
-
-      float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-      hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
-
-      // DeltaE and flight path are not applied - why?
-      // They should be applied for 3-prongs only
-
-      float InvMass = iTau->tauID("HChTauIDInvMassCont");
-      hInvMass->Fill(InvMass, fEventWeight.getWeight());
-      if(InvMass > fInvMassCut) {
-        fSelectedAntiTaus.push_back(iTau);
-        continue;
-      }
-      increment(fInvMassSubCount);
-      ++InvMassCutPassed;
-
-      // Fill Histos after Tau Selection Cuts
-      hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
-      hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
-
+      // All cuts have been passed, save tau
+      fillHistogramsForSelectedTaus(iTau);
       fSelectedTaus.push_back(iTau);
     }
+    // Fill number of taus histograms
+    hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()), fEventWeight.getWeight());
+    hNumberOfCleanedTauCandidates->Fill(static_cast<float>(fCleanedTauCandidates.size()), fEventWeight.getWeight());
+    hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
 
-    // Determine result for anti-tau tagging
-    if (fAntiTagModeStatus) {
-      if (InvMassCutPassed == 0)
-        return true;
-      else 
+    // Handle result of factorized tau ID
+    if (fOperationMode == fFactorizeTauID) {
+      if (!doFactorizationLookup())
+        // No tau found
         return false;
+      // Selected tau is the first entry in the fSelectedTaus vector
+      double myTauPt = fSelectedTaus.at(0)->pt();
+      double myTauEta = fSelectedTaus.at(0)->eta();
+      hFactorizationPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
+      hFactorizationEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
+      increment(fTauFoundCount);
+      // Update event weight with the factorization coefficient
+      fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(myTauPt, myTauEta));
     }
-    if (fAntiTagModeIsolationOnlyStatus) {
-      if (byIsolationCutPassed == 0)
-        return true;
-      else 
-        return false;
-    }
 
-    // Determine result for tau tagging
-    if(ptCutPassed == 0) return false;
-    increment(fPtCutCount);
-
-    if(etaCutPassed == 0) return false;      
-    increment(fEtaCutCount);
-
-    if(againstMuonCutPassed == 0) return false;      
-    increment(fagainstMuonCount);
-
-    if(againstElectronCutPassed == 0) return false;      
-    increment(fagainstElectronCount);
-
-    if(leadTrkPtCutPassed == 0) return false;
-    increment(fLeadTrkPtCount);  
-     
-    if(byIsolationCutPassed == 0) return false;
-    increment(fbyIsolationCount);
-	
-    if(ecalIsolationCutPassed == 0) return false;
-    increment(fecalIsolationCount);
-
-    if(nProngsCutPassed == 0 && fApplyProngCutStatus) return false;
-    increment(fnProngsCount);
-
-    if(HChTauIDchargeCutPassed == 0) return false;
-    increment(fHChTauIDchargeCount); 
-       
-    if(RtauCutPassed == 0) return false;
-    increment(fRtauCount);
-     
-    if(InvMassCutPassed == 0) return false;
-    increment(fInvMassCount);
+    // Check if taus have been found
+    if (fSelectedTaus.size() == 0)
+      return false;
+    // Found at least 1 tau beyond this line
+    increment(fTauFoundCount);
     
-    
-//    if(fSelectedTaus.size() > 1)
-//      return false;
-    
+    // Handle result of standard tau ID 
+    if (fOperationMode == kNormalTauID)
+      return true;
+
+    // Handle result of anti-tau tag
+    if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly)
+      return fAntiTauTagStatus;
+
+    // Never reached
     return true;
   }
 
-  bool TauSelection::selectionByPFTauTaNCCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
-	// NC input corresponds to isolation and mass 
-	fSelectedTaus.clear();
-	fSelectedTaus.reserve(taus.size());
-        fSelectedAntiTaus.clear();
-        fSelectedAntiTaus.reserve(taus.size());
-
-	size_t againstElectronCutPassed = 0;
-	size_t againstMuonCutPassed = 0;
-	size_t ptCutPassed = 0;
-    	size_t etaCutPassed = 0;
-    	size_t leadTrkPtCutPassed = 0;
-	size_t nProngsCutPassed = 0;
-	size_t HChTauIDchargeCutPassed = 0;
-	size_t byTaNCCutPassed = 0;
-	size_t RtauCutPassed = 0;
-	//size_t InvMassCutPassed = 0;
-
-	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-		edm::Ptr<pat::Tau> iTau = *iter;
-		
-		increment(fAllSubCount);
-      		hPt->Fill(iTau->pt(), fEventWeight.getWeight());
-      		hEta->Fill(iTau->eta(), fEventWeight.getWeight());
-
-      		if(!(iTau->pt() > fPtCut)) continue;
-      		increment(fPtCutSubCount);
-      		++ptCutPassed;
-
-      		if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-      		increment(fEtaCutSubCount);
-      		++etaCutPassed;
-
-		//////////////////////////////////////////////////////////////////////
-
-		if(iTau->tauID("againstMuon") < 0.5 ) continue;
-      		increment(fagainstMuonSubCount);
-      		++againstMuonCutPassed;
-
-      		if(iTau->tauID("againstElectron") < 0.5 ) continue;
-      		increment(fagainstElectronSubCount);
-      		++againstElectronCutPassed;
-
-      		reco::PFCandidateRef  leadTrk = iTau->leadPFChargedHadrCand();
-      		if(leadTrk.isNonnull()) hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
-
-      		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
-      		increment(fLeadTrkPtSubCount);
-      		++leadTrkPtCutPassed;
-
-		hbyTaNC->Fill(iTau->tauID("byTaNC"), fEventWeight.getWeight());
-		//		if(iTau->tauID("byTaNC") < 0.6) continue;
-//		if(iTau->tauID("byTaNCfrQuarterPercent") < 0.5) continue;
-		if(iTau->tauID("byTaNCfrTenthPercent") < 0.5) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue; // This is the tightest selection
-                }
-//		if(iTau->tauID("byTaNCfrOnePercent") < 0.5) continue;
-//		if(iTau->tauID("byTaNCfrHalfPercent") < 0.5) continue;
-		increment(fbyTaNCSubCount);
-		++byTaNCCutPassed;
-
-		//       std::cout << " after isolation tanC " << std::endl;   
-
-		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
-		
-                if (fApplyProngCutStatus) {
-                  //		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-		  if(iTau->tauID("HChTauID1Prong") < 0.5 ) {
-                    fSelectedAntiTaus.push_back(iTau);
-                    continue;
-                  }
-		  increment(fnProngsSubCount);
-		  ++nProngsCutPassed;
-                }
-
-		if(iTau->tauID("HChTauIDcharge") < 0.5) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-		increment(fHChTauIDchargeSubCount);
-		++HChTauIDchargeCutPassed;
-
-		//float Rtau = 0;
-		//if (iTau->p() > 0) leadTrk->p()/iTau->p();
-		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-		hRtau->Fill(Rtau, fEventWeight.getWeight());
-
-		if(Rtau < fRtauCut) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-		increment(fRtauSubCount);
-		++RtauCutPassed;
-
-		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-      		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
-
-      		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-      		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
-
-      		// Fill Histos after Tau Selection Cuts
-      		hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
-      		hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
-
-      		fSelectedTaus.push_back(iTau);
-		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass, fEventWeight.getWeight());
-	}
-
-        // Determine result for anti-tau tagging
-        if (fAntiTagModeStatus) {
-          if (RtauCutPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-        if (fAntiTagModeIsolationOnlyStatus) {
-          if (byTaNCCutPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-
-        // Determine result for tau tagging
-    	if(ptCutPassed == 0) return false;
-    	increment(fPtCutCount);
-
-    	if(etaCutPassed == 0) return false;
-    	increment(fEtaCutCount);
-
-    	if(againstMuonCutPassed == 0) return false;
-    	increment(fagainstMuonCount);
-
-    	if(againstElectronCutPassed == 0) return false;
-    	increment(fagainstElectronCount);
-
-    	if(leadTrkPtCutPassed == 0) return false;
-    	increment(fLeadTrkPtCount);
-
-	if(byTaNCCutPassed == 0) return false;
-	increment(fTaNCCount);
-
-	if(nProngsCutPassed == 0 && fApplyProngCutStatus) return false;
-	increment(fnProngsCount);
-
-	if(HChTauIDchargeCutPassed == 0) return false;
-	increment(fHChTauIDchargeCount);       
-
-    	if(RtauCutPassed == 0) return false;
-    	increment(fRtauCount);
-
-	return true;
-  }
-
-  bool TauSelection::selectionByHPSTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
-        fSelectedTaus.clear();
-        fSelectedTaus.reserve(taus.size());
-        fSelectedAntiTaus.clear();
-        fSelectedAntiTaus.reserve(taus.size());
-
-        size_t ptCutPassed = 0;
-        size_t etaCutPassed = 0;
-	size_t leadTrkPtCutPassed = 0;
-	size_t nProngsCutPassed = 0;
-	//size_t HChTauIDchargeCutPassed = 0;
-        size_t againstElectronCutPassed = 0;
-        size_t againstMuonCutPassed = 0;
-	size_t byTightIsolationPassed = 0;
-	size_t RtauCutPassed = 0;
-	//size_t InvMassCutPassed = 0;
-
-        // Fill initial histograms and do the first selection
-        for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-                edm::Ptr<pat::Tau> iTau = *iter;
-
-                increment(fAllSubCount);
-                hPt->Fill(iTau->pt(), fEventWeight.getWeight());
-                hEta->Fill(iTau->eta(), fEventWeight.getWeight());
-		reco::PFCandidateRef leadTrk = iTau->leadPFChargedHadrCand(); // HPS is constructed from PF
-
-                if(!(iTau->pt() > fPtCut)) continue;
-                increment(fPtCutSubCount);
-                ++ptCutPassed;
-
-                if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-                increment(fEtaCutSubCount);
-                ++etaCutPassed;
-
-                //////////////////////////////////////////////////////////////////////
-
-                if(iTau->tauID("againstMuon") < 0.5) continue;
-                increment(fagainstMuonSubCount);
-                ++againstMuonCutPassed;
-
-                if(iTau->tauID("againstElectron") < 0.5) continue;
-                increment(fagainstElectronSubCount);
-                ++againstElectronCutPassed;
-
-
-		if(leadTrk.isNonnull())
-		  hLeadTrkPt->Fill(leadTrk->pt(), fEventWeight.getWeight());
-
-		if(leadTrk.isNull() || !(leadTrk->pt() > fLeadTrkPtCut)) continue;
-		increment(fLeadTrkPtSubCount);
-		++leadTrkPtCutPassed;
-
-		if(iTau->tauID("byTightIsolation") < 0.5) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-		increment(fbyHPSIsolationSubCount);
-		++byTightIsolationPassed;
-
-		if (fApplyProngCutStatus) {
-                  uint16_t nSigTracks = iTau->signalPFChargedHadrCands().size();
-		  hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
-		  if(nSigTracks != 1 ) {
-                    fSelectedAntiTaus.push_back(iTau);
-                    continue;
-                  }
-		  increment(fnProngsSubCount);
-		  ++nProngsCutPassed;
-                }
-
-		float Rtau = 0;
-		if (iTau->p() > 0) Rtau =  leadTrk->p()/iTau->p();
-		//		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-		if (Rtau > 1 ) {
-		  hEtaRtau->Fill(iTau->eta());
-		}
-		hRtau->Fill(Rtau);
-    
-		if(Rtau < fRtauCut) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-		increment(fRtauSubCount);
-		++RtauCutPassed;
-
-/* ONLY HPS discriminators available, please do not uncomment unless sure the are included!
-		hnProngs->Fill(iTau->signalTracks().size(), fEventWeight.getWeight());
-		if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-		increment(fnProngsSubCount);
-		++nProngsCutPassed;
-
-		if(iTau->tauID("HChTauIDcharge") < 0.5) continue; 
-		increment(fHChTauIDchargeSubCount);
-		++HChTauIDchargeCutPassed;
-
-		//float Rtau = 0;
-		//if (iTau->p() > 0) leadTrk->p()/iTau->p();
-		float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-		if (Rtau > 1 ) {
-		  hEtaRtau->Fill(iTau->eta(), fEventWeight.getWeight());
-		}
-		hRtau->Fill(Rtau, fEventWeight.getWeight());
-    
-		if(Rtau < fRtauCut) continue; 
-		increment(fRtauSubCount);
-		++RtauCutPassed;
-
-		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
-
-		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
-
-		// DeltaE and flight path are not applied - why?
-		// They should be applied for 3-prongs only
-
-		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass, fEventWeight.getWeight());
-
-		if(InvMass > fInvMassCut) continue;
-		increment(fInvMassSubCount);
-		++InvMassCutPassed;
-*/
-                // Fill Histos after Tau Selection Cuts
-                hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
-                hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
-
-                fSelectedTaus.push_back(iTau);
-        }
-
-        // Determine result for anti-tau tagging
-        if (fAntiTagModeStatus) {
-          if (RtauCutPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-        if (fAntiTagModeIsolationOnlyStatus) {
-          if (byTightIsolationPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-
-        // Determine result for tau tagging
-        if(ptCutPassed == 0) return false;
-        increment(fPtCutCount);
-
-        if(etaCutPassed == 0) return false;
-        increment(fEtaCutCount);
-
-        if(againstMuonCutPassed == 0) return false;
-        increment(fagainstMuonCount);
-
-        if(againstElectronCutPassed == 0) return false;
-        increment(fagainstElectronCount);
-
-	if(leadTrkPtCutPassed == 0) return false;
-	increment(fLeadTrkPtCount); 
-
-	if(byTightIsolationPassed == 0) return false;
-	increment(fHPSIsolationCount);
-
-	if(nProngsCutPassed == 0 && fApplyProngCutStatus) return false;
-	increment(fnProngsCount);
-
-	//	if(HChTauIDchargeCutPassed == 0) return false;
-	//	increment(fHChTauIDchargeCount);       
-
-	if(RtauCutPassed == 0) return false;
-	increment(fRtauCount);
-
-	//	if(InvMassCutPassed == 0) return false;
-	//	increment(fInvMassCount);
-
-        return true;
-  }
-
-  bool TauSelection::selectionByTCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
-    	fSelectedTaus.clear();
-    	fSelectedTaus.reserve(taus.size());
-        fSelectedAntiTaus.clear();
-        fSelectedAntiTaus.reserve(taus.size());
-
-    	size_t ptCutPassed = 0;
-    	size_t etaCutPassed = 0;
-    	size_t leadTrkPtCutPassed = 0;
-    	size_t nProngsCutPassed = 0;
-    	size_t HChTauIDchargeCutPassed = 0;
-    	size_t byIsolationCutPassed = 0;
-    	size_t againstElectronCutPassed = 0;
-    	size_t againstMuonCutPassed = 0;
-    	size_t RtauCutPassed = 0;
-    	size_t InvMassCutPassed = 0;
-
-    	// Fill initial histograms and do the first selection
-    	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-      		edm::Ptr<pat::Tau> iTau = *iter;
-
-                increment(fAllSubCount);
-                hPt->Fill(iTau->pt(), fEventWeight.getWeight());
-                hEta->Fill(iTau->eta(), fEventWeight.getWeight());
-
-                if(!(iTau->pt() > fPtCut)) continue;
-                increment(fPtCutSubCount);
-                ++ptCutPassed;
-
-                if(!(std::abs(iTau->eta()) < fEtaCut)) continue;
-                increment(fEtaCutSubCount);
-                ++etaCutPassed;
-
-                //////////////////////////////////////////////////////////////////////
-
-                if(iTau->tauID("againstMuon") < 0.5 ) continue;
-                increment(fagainstMuonSubCount);
-                ++againstMuonCutPassed;
-
-                if(iTau->tauID("againstElectron") < 0.5 ) continue;
-                increment(fagainstElectronSubCount);
-                ++againstElectronCutPassed;
-
-		if(iTau->tauID("HChTauIDleadingTrackPtCut") < 0.5 ) continue;
-		increment(fLeadTrkPtSubCount);
-		++leadTrkPtCutPassed;
-
-                if(iTau->tauID("byIsolation") < 0.5) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-                increment(fbyIsolationSubCount);
-                ++byIsolationCutPassed;
-
-                if (fApplyProngCutStatus) {
-                  //if(iTau->tauID("HChTauID1Prong") < 0.5 && iTau->tauID("HChTauID3Prongs") < 0.5) continue;
-                  if(iTau->tauID("HChTauID1Prong") < 0.5) {
-                    fSelectedAntiTaus.push_back(iTau);
-                    continue;
-                  }
-                  increment(fnProngsSubCount);
-                  ++nProngsCutPassed;
-                }
-
-      		if(iTau->tauID("HChTauIDcharge") < 0.5) { 
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-      		increment(fHChTauIDchargeSubCount);
-      		++HChTauIDchargeCutPassed;
-
-            	float Rtau = iTau->tauID("HChTauIDtauPolarizationCont");
-      		hRtau->Fill(Rtau, fEventWeight.getWeight());
-      		if(Rtau < fRtauCut) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-      		increment(fRtauSubCount);
-      		++RtauCutPassed;
-
-		float DeltaE = iTau->tauID("HChTauIDDeltaECont");
-		hDeltaE->Fill(DeltaE, fEventWeight.getWeight());
-
-		float flightPathSignif = iTau->tauID("HChTauIDFlightPathSignifCont");
-		hFlightPathSignif->Fill(flightPathSignif, fEventWeight.getWeight());
-
-		// DeltaE and flight path are not applied - why?
-		// They should be applied for 3-prongs only
-
-		float InvMass = iTau->tauID("HChTauIDInvMassCont");
-		hInvMass->Fill(InvMass, fEventWeight.getWeight());
-		if(InvMass > fInvMassCut) {
-                  fSelectedAntiTaus.push_back(iTau);
-                  continue;
-                }
-		increment(fInvMassSubCount);
-		++InvMassCutPassed;
-
-                // Fill Histos after Tau Selection Cuts
-                hPtAfterTauSelCuts->Fill(iTau->pt(), fEventWeight.getWeight());
-                hEtaAfterTauSelCuts->Fill(iTau->eta(), fEventWeight.getWeight());
-
-                fSelectedTaus.push_back(iTau);
-	}
-       
-        // Determine result for anti-tau tagging
-        if (fAntiTagModeStatus) {
-          if (InvMassCutPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-        if (fAntiTagModeIsolationOnlyStatus) {
-          if (byIsolationCutPassed == 0)
-            return true;
-          else 
-            return false;
-        }
-
-        // Determine result for tau tagging
-        if(ptCutPassed == 0) return false;
-        increment(fPtCutCount);
-
-        if(etaCutPassed == 0) return false;
-        increment(fEtaCutCount);
-
-        if(againstMuonCutPassed == 0) return false;
-        increment(fagainstMuonCount);
-
-        if(againstElectronCutPassed == 0) return false;
-        increment(fagainstElectronCount);
-
-        if(leadTrkPtCutPassed == 0) return false;
-        increment(fLeadTrkPtCount);
-
-        if(byIsolationCutPassed == 0) return false;
-        increment(fbyIsolationCount);
-
-    	if(nProngsCutPassed == 0 && fApplyProngCutStatus) return false;
-    	increment(fnProngsCount);
-
-    	if(HChTauIDchargeCutPassed == 0) return false;
-    	increment(fHChTauIDchargeCount);
-
-    	if(RtauCutPassed == 0) return false;
-    	increment(fRtauCount);
-
-	if(InvMassCutPassed == 0) return false;
-	increment(fInvMassCount);
-
-        return true;
-  }
-
-  bool TauSelection::selectionByCombinedHPSTaNCTauCuts(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
-    // FIXME: cuts to be added
-
+  bool TauSelection::doFactorizationLookup() {
+    // If the method returns true, the selected tau is the first entry of the fSelectedTaus vector
+  
+    // Check if there are entries in the tau collection
+    hCategory->Fill(0.0, fEventWeight.getWeight());
+    if (!fCleanedTauCandidates.size()) {
+      hCategory->Fill(1.0, fEventWeight.getWeight());
+      return false;
+    }
+    if (fCleanedTauCandidates.size() == 1) {
+      // Only one tau in the cleaned tau candidate collection: take as tau the only tau object
+      fSelectedTaus.clear();
+      fSelectedTaus.push_back(fCleanedTauCandidates[0]);
+      hCategory->Fill(2.0, fEventWeight.getWeight());
+      return true;
+    }
+    // More than one tau exists in the cleaned tau candidate collection
+    // Strategy: apply tauID and see if any of the candidates pass
+    if (fSelectedTaus.size()) {
+      // At least one tau object has passed tauID, take as tau the tau object with highest ET
+      hCategory->Fill(3.0, fEventWeight.getWeight());
+      return true;
+    }
+    // No tau objects have passed the tauID, take as tau the tau object with the highest ET
+    fSelectedTau = myFilteredTaus[0];
+    fSelectedTaus.clear();
+    fSelectedTaus.push_back(fCleanedTauCandidates[0]);
+    hCategory->Fill(4.0, fEventWeight.getWeight());
     return true;
+  }
+
+  void TauSelection::fillOperationModeHistogram() {
+    hTauIdOperatingMode->Fill(1); // Control
+    if (fOperationMode == kNormalTauID)
+      hTauIdOperatingMode->Fill(2);
+    else if (fOperationMode == kFactorizedTauID)
+      hTauIdOperatingMode->Fill(3);
+    else if (fOperationMode == kAntiTauTag)
+      hTauIdOperatingMode->Fill(4);
+    else if (fOperationMode == kAntiTauTagIsolationOnly)
+      hTauIdOperatingMode->Fill(5);
+  }
+
+  void TauSelection::fillHistogramsForTauCandidates(pat::Tau& tau, const edm::Event& iEvent) {
+    double myTauPt = tau->pt();
+    double myTauEta = tau->eta();
+    hPtTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
+    hEtaTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
   }
   
+  void TauSelection::fillHistogramsForCleanedTauCandidates(pat::Tau& tau, const edm::Event& iEvent) {
+    double myTauPt = tau->pt();
+    double myTauEta = tau->eta();
+    hPtCleanedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
+    hEtaCleanedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
+    // Factorization histograms
+    if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
+      hFactorizationPtBeforeTauIDUnweighted->Fill(myTauPt, fEventWeight.getWeight());
+      hFactorizationEtaBeforeTauIDUnweighted->Fill(myTauEta, fEventWeight.getWeight());
+      hFactorizationPtVsEtaBeforeTauIDUnweighted->Fill(myTauPt, myTauEta, fEventWeight.getWeight());
+      hFactorizationPtBeforeTauIDUnweighted->Fill(myTauPt);
+      hFactorizationEtaBeforeTauIDUnweighted->Fill(myTauEta);
+      hFactorizationPtVsEtaBeforeTauIDUnweighted->Fill(myTauPt, myTauEta);
+    }
+    // Purity
+    if (!iEvent.isRealData()) {
+      // FIXME: add check if the tau object matches with a MC tau 
+    }
+  }
+  
+  void TauSelection::fillHistogramsForSelectedTaus(pat::Tau& tau, const edm::Event& iEvent) {
+    double myTauPt = tau->pt();
+    double myTauEta = tau->eta();
+    hPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
+    hEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
+    // Factorization histograms
+    if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
+      hFactorizationPtAfterTauIDUnweighted->Fill(myTauPt, fEventWeight.getWeight());
+      hFactorizationEtaAfterTauIDUnweighted->Fill(myTauEta, fEventWeight.getWeight());
+      hFactorizationPtVsEtaAfterTauIDUnweighted->Fill(myTauPt, myTauEta, fEventWeight.getWeight());
+      hFactorizationPtAfterTauIDUnweighted->Fill(myTauPt);
+      hFactorizationEtaAfterTauIDUnweighted->Fill(myTauEta);
+      hFactorizationPtVsEtaAfterTauIDUnweighted->Fill(myTauPt, myTauEta);
+    }
+    // Purity
+    if (!iEvent.isRealData()) {
+      // FIXME: add check if the tau object matches with a MC tau 
+    }
+  
+  }
+
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
     fSelectedTaus.clear();
     fSelectedTaus.reserve(1);

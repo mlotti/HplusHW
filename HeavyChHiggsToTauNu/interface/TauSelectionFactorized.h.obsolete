@@ -78,23 +78,23 @@ namespace HPlus {
     FactorizationTable fFactorizationTable;
 
     // Histograms
-    TH1 *hPtSelectedTaus;
-    TH1 *hEtaSelectedTaus;
-    TH1 *hCategory;
+    TH1 *hFactorizationPtSelectedTaus;
+    TH1 *hFactorizationEtaSelectedTaus;
+    TH1 *hFactorizationCategory;
     // Weighted histograms
-    TH1 *hPtBeforeTauID;
-    TH1 *hPtAfterTauID;
-    TH1 *hEtaBeforeTauID;
-    TH1 *hEtaAfterTauID;
-    TH2 *hPtVsEtaBeforeTauID;
-    TH2 *hPtVsEtaAfterTauID;
+    TH1 *hFactorizationPtBeforeTauID;
+    TH1 *hFactorizationPtAfterTauID;
+    TH1 *hFactorizationEtaBeforeTauID;
+    TH1 *hFactorizationEtaAfterTauID;
+    TH2 *hFactorizationPtVsEtaBeforeTauID;
+    TH2 *hFactorizationPtVsEtaAfterTauID;
     // Unweighted histograms (needed to obtain the statistical error)
-    TH1 *hPtBeforeTauIDUnweighted;
-    TH1 *hPtAfterTauIDUnweighted;
-    TH1 *hEtaBeforeTauIDUnweighted;
-    TH1 *hEtaAfterTauIDUnweighted;
-    TH2 *hPtVsEtaBeforeTauIDUnweighted;
-    TH2 *hPtVsEtaAfterTauIDUnweighted;
+    TH1 *hFactorizationPtBeforeTauIDUnweighted;
+    TH1 *hFactorizationPtAfterTauIDUnweighted;
+    TH1 *hFactorizationEtaBeforeTauIDUnweighted;
+    TH1 *hFactorizationEtaAfterTauIDUnweighted;
+    TH2 *hFactorizationPtVsEtaBeforeTauIDUnweighted;
+    TH2 *hFactorizationPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
     double fFactorizationCoefficient;
