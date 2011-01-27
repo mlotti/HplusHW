@@ -26,12 +26,12 @@ namespace HPlus {
 
   TauIDTCTau::~TauIDTCTau() { }
 
-  bool TauIDTCTau::passLeadingTrackCuts(pat::Tau& tau) {
+  bool TauIDTCTau::passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) {
     // Check that leading track exists
-    if (tau.leadTrack().isNull()) return false;
+    if (tau->leadTrack().isNull()) return false;
     fCounterPackager.incrementSubCount(fIDLdgTrackExistsCut);
     // Leading track pt cut
-    double myLdgTrackPt = tau.leadTrack()->pt();
+    double myLdgTrackPt = tau->leadTrack()->pt();
     fCounterPackager.fill(fIDLdgTrackPtCut, myLdgTrackPt);
     if (!(myLdgTrackPt > fLeadTrkPtCut)) return false;
     fCounterPackager.incrementSubCount(fIDLdgTrackPtCut);
@@ -39,23 +39,23 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDTCTau::passIsolation(pat::Tau& tau) {
-    if (tau.tauID("byIsolation") < 0.5) return false;
+  bool TauIDTCTau::passIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDIsolation);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDTCTau::passAntiIsolation(pat::Tau& tau) {
-    if (tau.tauID("byIsolation") > 0.5) return false;
+  bool TauIDTCTau::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDIsolation);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDTCTau::passRTauCut(pat::Tau& tau) {
-    double myRtauValue = tau.leadTrack()->pt() / tau.pt();
-    hRtauVsEta->Fill(myRtauValue, tau.eta(), fEventWeight.getWeight());
+  bool TauIDTCTau::passRTauCut(const edm::Ptr<pat::Tau> tau) {
+    double myRtauValue = tau->leadTrack()->pt() / tau->pt();
+    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue < fRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);
@@ -63,9 +63,9 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDTCTau::passAntiRTauCut(pat::Tau& tau) {
-    double myRtauValue = tau.leadTrack()->pt() / tau.pt();
-    hRtauVsEta->Fill(myRtauValue, tau.eta(), fEventWeight.getWeight());
+  bool TauIDTCTau::passAntiRTauCut(const edm::Ptr<pat::Tau> tau) {
+    double myRtauValue = tau->leadTrack()->pt() / tau->pt();
+    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue > fAntiRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);

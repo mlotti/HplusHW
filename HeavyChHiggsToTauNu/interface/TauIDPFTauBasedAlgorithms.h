@@ -14,8 +14,8 @@ namespace HPlus {
     TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauIDPFShrinkingCone();
 
-    bool passIsolation(pat::Tau& tau);
-    bool passAntiIsolation(pat::Tau& tau);
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Tau ID selections related to isolation
@@ -31,8 +31,8 @@ namespace HPlus {
     TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauIDPFShrinkingConeHPS();
 
-    bool passIsolation(pat::Tau& tau);
-    bool passAntiIsolation(pat::Tau& tau);
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Tau ID selections related to isolation
@@ -48,8 +48,8 @@ namespace HPlus {
     TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauIDPFShrinkingConeTaNC();
 
-    bool passIsolation(pat::Tau& tau);
-    bool passAntiIsolation(pat::Tau& tau);
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Tau ID selections related to isolation
@@ -65,8 +65,8 @@ namespace HPlus {
     TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TauIDPFShrinkingConeCombinedHPSTaNC();
 
-    bool passIsolation(pat::Tau& tau);
-    bool passAntiIsolation(pat::Tau& tau);
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Tau ID selections related to isolation

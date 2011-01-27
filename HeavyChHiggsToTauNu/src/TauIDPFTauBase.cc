@@ -12,12 +12,12 @@ namespace HPlus {
 
   TauIDPFTauBase::~TauIDPFTauBase() { }
 
-  bool TauIDPFTauBase::passLeadingTrackCuts(pat::Tau& tau) {
+  bool TauIDPFTauBase::passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) {
     // Check that leading track exists
-    if (tau.leadPFChargedHadrCand().isNull()) return false;
+    if (tau->leadPFChargedHadrCand().isNull()) return false;
     fCounterPackager.incrementSubCount(fIDLdgTrackExistsCut);
     // Leading track pt cut
-    double myLdgTrackPt = tau.leadPFChargedHadrCand()->pt();
+    double myLdgTrackPt = tau->leadPFChargedHadrCand()->pt();
     fCounterPackager.fill(fIDLdgTrackPtCut, myLdgTrackPt);
     if (!(myLdgTrackPt > fLeadTrkPtCut)) return false;
     fCounterPackager.incrementSubCount(fIDLdgTrackPtCut);
@@ -25,9 +25,9 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDPFTauBase::passRTauCut(pat::Tau& tau) {
-    double myRtauValue = tau.leadPFChargedHadrCand()->pt() / tau.pt();
-    hRtauVsEta->Fill(myRtauValue, tau.eta(), fEventWeight.getWeight());
+  bool TauIDPFTauBase::passRTauCut(const edm::Ptr<pat::Tau> tau) {
+    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt();
+    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue < fRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);
@@ -35,9 +35,9 @@ namespace HPlus {
     return true;
   }
 
-  bool TauIDPFTauBase::passAntiRTauCut(pat::Tau& tau) {
-    double myRtauValue = tau.leadPFChargedHadrCand()->pt() / tau.pt();
-    hRtauVsEta->Fill(myRtauValue, tau.eta(), fEventWeight.getWeight());
+  bool TauIDPFTauBase::passAntiRTauCut(const edm::Ptr<pat::Tau> tau) {
+    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt();
+    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue > fAntiRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);

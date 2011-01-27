@@ -41,39 +41,39 @@ namespace HPlus {
     int myTauJetNumberBins = 20;
     float myTauJetNumberMin = 0.;
     float myTauJetNumberMax = 20.; 
-    TH1 *hPtTauCandidates = makeTH<TH1F>(*fs,
+    hPtTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    TH1 *hPtCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hPtCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    TH1 *hPtSelectedTaus = makeTH<TH1F>(*fs,
+    hPtSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    TH1 *hEtaTauCandidates = makeTH<TH1F>(*fs,
+    hEtaTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    TH1 *hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    TH1 *hEtaSelectedTaus = makeTH<TH1F>(*fs,
+    hEtaSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    TH1 *hNumberOfTauCandidates = makeTH<TH1F>(*fs,
+    hNumberOfTauCandidates = makeTH<TH1F>(*fs,
       "tauID_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    TH1 *hNumberOfCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hNumberOfCleanedTauCandidates = makeTH<TH1F>(*fs,
       "tauID_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    TH1 *hNumberOfSelectedTaus = makeTH<TH1F>(*fs,
+    hNumberOfSelectedTaus = makeTH<TH1F>(*fs,
       "tauID_selected_tau_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
@@ -208,7 +208,7 @@ namespace HPlus {
   TauSelection::Data TauSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus) {
     bool passEvent = false;
     // Do selection
-    passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector());
+    passEvent = doTauSelection(iEvent,iSetup,taus);
     return Data(this, passEvent);
   }
 
@@ -225,15 +225,15 @@ namespace HPlus {
 
     // Loop over the taus
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-      edm::Ptr<pat::Tau> iTau = *iter;
+      const edm::Ptr<pat::Tau> iTau = *iter;
 
-      fillHistogramsForAllTauCandidates(iTau);
+      fillHistogramsForTauCandidates(iTau, iEvent);
       
       // Tau candidate selections
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
-      fillHistogramsForCleanedTauCandidates(iTau);
+      fillHistogramsForCleanedTauCandidates(iTau, iEvent);
       fCleanedTauCandidates.push_back(iTau);
       
       // Tau ID selections
@@ -273,7 +273,7 @@ namespace HPlus {
         }
       }
       // All cuts have been passed, save tau
-      fillHistogramsForSelectedTaus(iTau);
+      fillHistogramsForSelectedTaus(iTau, iEvent);
       fSelectedTaus.push_back(iTau);
     }
     // Fill number of taus histograms
@@ -282,16 +282,16 @@ namespace HPlus {
     hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
 
     // Handle result of factorized tau ID
-    if (fOperationMode == fFactorizeTauID) {
+    if (fOperationMode == kFactorizedTauID) {
       if (!doFactorizationLookup())
         // No tau found
         return false;
       // Selected tau is the first entry in the fSelectedTaus vector
-      double myTauPt = fSelectedTaus.at(0)->pt();
-      double myTauEta = fSelectedTaus.at(0)->eta();
+      double myTauPt = fSelectedTaus[0]->pt();
+      double myTauEta = fSelectedTaus[0]->eta();
       hFactorizationPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
       hFactorizationEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
-      increment(fTauFoundCount);
+      increment(fTauFound);
       // Update event weight with the factorization coefficient
       fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(myTauPt, myTauEta));
     }
@@ -300,7 +300,7 @@ namespace HPlus {
     if (fSelectedTaus.size() == 0)
       return false;
     // Found at least 1 tau beyond this line
-    increment(fTauFoundCount);
+    increment(fTauFound);
     
     // Handle result of standard tau ID 
     if (fOperationMode == kNormalTauID)
@@ -318,30 +318,29 @@ namespace HPlus {
     // If the method returns true, the selected tau is the first entry of the fSelectedTaus vector
   
     // Check if there are entries in the tau collection
-    hCategory->Fill(0.0, fEventWeight.getWeight());
+    hFactorizationCategory->Fill(0.0, fEventWeight.getWeight());
     if (!fCleanedTauCandidates.size()) {
-      hCategory->Fill(1.0, fEventWeight.getWeight());
+      hFactorizationCategory->Fill(1.0, fEventWeight.getWeight());
       return false;
     }
     if (fCleanedTauCandidates.size() == 1) {
       // Only one tau in the cleaned tau candidate collection: take as tau the only tau object
       fSelectedTaus.clear();
       fSelectedTaus.push_back(fCleanedTauCandidates[0]);
-      hCategory->Fill(2.0, fEventWeight.getWeight());
+      hFactorizationCategory->Fill(2.0, fEventWeight.getWeight());
       return true;
     }
     // More than one tau exists in the cleaned tau candidate collection
     // Strategy: apply tauID and see if any of the candidates pass
     if (fSelectedTaus.size()) {
       // At least one tau object has passed tauID, take as tau the tau object with highest ET
-      hCategory->Fill(3.0, fEventWeight.getWeight());
+      hFactorizationCategory->Fill(3.0, fEventWeight.getWeight());
       return true;
     }
     // No tau objects have passed the tauID, take as tau the tau object with the highest ET
-    fSelectedTau = myFilteredTaus[0];
     fSelectedTaus.clear();
     fSelectedTaus.push_back(fCleanedTauCandidates[0]);
-    hCategory->Fill(4.0, fEventWeight.getWeight());
+    hFactorizationCategory->Fill(4.0, fEventWeight.getWeight());
     return true;
   }
 
@@ -357,14 +356,14 @@ namespace HPlus {
       hTauIdOperatingMode->Fill(5);
   }
 
-  void TauSelection::fillHistogramsForTauCandidates(pat::Tau& tau, const edm::Event& iEvent) {
+  void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     hPtTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
     hEtaTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
   }
   
-  void TauSelection::fillHistogramsForCleanedTauCandidates(pat::Tau& tau, const edm::Event& iEvent) {
+  void TauSelection::fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     hPtCleanedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
@@ -384,7 +383,7 @@ namespace HPlus {
     }
   }
   
-  void TauSelection::fillHistogramsForSelectedTaus(pat::Tau& tau, const edm::Event& iEvent) {
+  void TauSelection::fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
     double myTauPt = tau->pt();
     double myTauEta = tau->eta();
     hPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());

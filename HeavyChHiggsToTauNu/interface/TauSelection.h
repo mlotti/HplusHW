@@ -76,9 +76,9 @@ namespace HPlus {
     /// Fills the histogram that describes the mode in which the tau selection was run
     void fillOperationModeHistogram();
 
-    void fillHistogramsForTauCandidates(pat::Tau& tau, const edm::Event& iEvent);
-    void fillHistogramsForCleanedTauCandidates(pat::Tau& tau, const edm::Event& iEvent);
-    void fillHistogramsForSelectedTaus(pat::Tau& tau, const edm::Event& iEvent);
+    void fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    void fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
+    void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
 
 
   private:

@@ -21,15 +21,15 @@ namespace HPlus {
 
   TauIDPFShrinkingCone::~TauIDPFShrinkingCone() { }
   
-  bool TauIDPFShrinkingCone::passIsolation(pat::Tau& tau) {
-    if (tau.tauID("byIsolation05") < 0.5) return false; // 05 points to minimum track pt
+  bool TauIDPFShrinkingCone::passIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byIsolation05") < 0.5) return false; // 05 points to minimum track pt
     fCounterPackager.incrementSubCount(fIDIsolation);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDPFShrinkingCone::passAntiIsolation(pat::Tau& tau) {
-    if (tau.tauID("byIsolation") > 0.5) return false;
+  bool TauIDPFShrinkingCone::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDIsolation);
     // All cuts passed, return true
     return true;
@@ -50,15 +50,15 @@ namespace HPlus {
 
   TauIDPFShrinkingConeHPS::~TauIDPFShrinkingConeHPS() { }
   
-  bool TauIDPFShrinkingConeHPS::passIsolation(pat::Tau& tau) {
-    if (tau.tauID("byTightIsolation") < 0.5) return false;
+  bool TauIDPFShrinkingConeHPS::passIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byTightIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDPFShrinkingConeHPS::passAntiIsolation(pat::Tau& tau) {
-    if (tau.tauID("byLooseIsolation") > 0.5) return false;
+  bool TauIDPFShrinkingConeHPS::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
@@ -80,17 +80,17 @@ namespace HPlus {
 
   TauIDPFShrinkingConeTaNC::~TauIDPFShrinkingConeTaNC() { }
   
-  bool TauIDPFShrinkingConeTaNC::passIsolation(pat::Tau& tau) {
-    fCounterPackager.fill(fIDTaNC, tau.tauID("byTaNC"));
-    if (tau.tauID("byTaNCfrTenthPercent") < 0.5) return false;
+  bool TauIDPFShrinkingConeTaNC::passIsolation(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byTaNC"));
+    if (tau->tauID("byTaNCfrTenthPercent") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDPFShrinkingConeTaNC::passAntiIsolation(pat::Tau& tau) {
-    fCounterPackager.fill(fIDTaNC, tau.tauID("byTaNC"));
-    if (tau.tauID("byTaNCfrOnePercent") > 0.5) return false;
+  bool TauIDPFShrinkingConeTaNC::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byTaNC"));
+    if (tau->tauID("byTaNCfrOnePercent") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
     return true;
@@ -113,25 +113,25 @@ namespace HPlus {
 
   TauIDPFShrinkingConeCombinedHPSTaNC::~TauIDPFShrinkingConeCombinedHPSTaNC() { }
   
-  bool TauIDPFShrinkingConeCombinedHPSTaNC::passIsolation(pat::Tau& tau) {
+  bool TauIDPFShrinkingConeCombinedHPSTaNC::passIsolation(const edm::Ptr<pat::Tau> tau) {
     // Apply HPS
-    if (tau.tauID("byHPStight") < 0.5) return false;
+    if (tau->tauID("byHPStight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
-    fCounterPackager.fill(fIDTaNC, tau.tauID("byCombinedHPSTaNC"));
-    if (tau.tauID("byTaNCtight") < 0.5) return false;
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
+    if (tau->tauID("byTaNCtight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDPFShrinkingConeCombinedHPSTaNC::passAntiIsolation(pat::Tau& tau) {
+  bool TauIDPFShrinkingConeCombinedHPSTaNC::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
     // Apply HPS
-    if (tau.tauID("byHPSvloose") > 0.5) return false;
+    if (tau->tauID("byHPSvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
-    fCounterPackager.fill(fIDTaNC, tau.tauID("byCombinedHPSTaNC"));
-    if (tau.tauID("byTaNCvloose") > 0.5) return false;
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
+    if (tau->tauID("byTaNCvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
     return true;

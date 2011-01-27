@@ -78,15 +78,15 @@ namespace HPlus {
       makeTH<TH1F>(*fs, "TauFlightpathCut", "TauFlightpathCut;#tau flight path signif.;N_{jets} / 0.2", 75, -5., 10));
   }
 
-  bool TauIDBase::passTauCandidateSelection(pat::Tau& tau) {
+  bool TauIDBase::passTauCandidateSelection(const edm::Ptr<pat::Tau> tau) {
     fCounterPackager.incrementSubCount(fIDAllTauCandidates);
     // Jet pt cut
-    double myJetPt = tau.pt();
+    double myJetPt = tau->pt();
     fCounterPackager.fill(fIDJetPtCut, myJetPt);
     if(!(myJetPt > fPtCut)) return false;
     fCounterPackager.incrementSubCount(fIDJetPtCut);
     // Jet eta cut
-    double myJetEta = tau.eta();
+    double myJetEta = tau->eta();
     fCounterPackager.fill(fIDJetEtaCut, myJetEta);
     if(!(std::abs(myJetEta) < fEtaCut)) return false;
     fCounterPackager.incrementSubCount(fIDJetEtaCut);
@@ -94,60 +94,60 @@ namespace HPlus {
     return true;
   }
 
-  bool TauIDBase::passTauCandidateEAndMuVetoCuts(pat::Tau& tau) {
+  bool TauIDBase::passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau) {
     // Electron veto
-    if(tau.tauID("againstElectron") < 0.5 ) return false;
+    if(tau->tauID("againstElectron") < 0.5 ) return false;
     fCounterPackager.incrementSubCount(fIDAgainstElectronCut);
     // Muon veto
-    if(tau.tauID("againstMuon") < 0.5 ) return false;
+    if(tau->tauID("againstMuon") < 0.5 ) return false;
     fCounterPackager.incrementSubCount(fIDAgainstMuonCut);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDBase::passOneProngCut(pat::Tau& tau) {
-    fCounterPackager.fill(fIDOneProngNumberCut, tau.tauID("HChTauIDnProngsCont"));
-    if (tau.tauID("HChTauID1Prong") < 0.5) return false;
+  bool TauIDBase::passOneProngCut(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDOneProngNumberCut, tau->tauID("HChTauIDnProngsCont"));
+    if (tau->tauID("HChTauID1Prong") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDOneProngNumberCut);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDBase::passThreeProngCut(pat::Tau& tau) {
-    fCounterPackager.fill(fIDThreeProngNumberCut, tau.tauID("HChTauIDnProngsCont"));
-    if (tau.tauID("HChTauID3Prong") < 0.5) return false;
+  bool TauIDBase::passThreeProngCut(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDThreeProngNumberCut, tau->tauID("HChTauIDnProngsCont"));
+    if (tau->tauID("HChTauID3Prong") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDThreeProngNumberCut);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDBase::passChargeCut(pat::Tau& tau) {
+  bool TauIDBase::passChargeCut(const edm::Ptr<pat::Tau> tau) {
     // FIXME: add histogramming
-    if (tau.tauID("HChTauIDcharge") < 0.5) return false;
+    if (tau->tauID("HChTauIDcharge") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDChargeCut);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDBase::passInvMassCut(pat::Tau& tau) {
-    fCounterPackager.fill(fIDInvMassCut, tau.tauID("HChTauIDInvMassCont"));
-    if (tau.tauID("HChTauIDInvMass") < 0.5) return false;
+  bool TauIDBase::passInvMassCut(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDInvMassCut, tau->tauID("HChTauIDInvMassCont"));
+    if (tau->tauID("HChTauIDInvMass") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDInvMassCut);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDBase::passDeltaECut(pat::Tau& tau) {
-    fCounterPackager.fill(fIDDeltaECut, tau.tauID("HChTauIDDeltaECont"));
-    if (tau.tauID("HChTauIDDeltaE") < 0.5) return false;
+  bool TauIDBase::passDeltaECut(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDDeltaECut, tau->tauID("HChTauIDDeltaECont"));
+    if (tau->tauID("HChTauIDDeltaE") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDDeltaECut);
     // All cuts passed, return true
     return true;
   }
   
-  bool TauIDBase::passFlightpathCut(pat::Tau& tau) {
-    fCounterPackager.fill(fIDFlightpathCut, tau.tauID("HChTauIDFlightPathSignifCont"));
-    if (tau.tauID("HChTauIDFlightPathSignif") < 0.5) return false;
+  bool TauIDBase::passFlightpathCut(const edm::Ptr<pat::Tau> tau) {
+    fCounterPackager.fill(fIDFlightpathCut, tau->tauID("HChTauIDFlightPathSignifCont"));
+    if (tau->tauID("HChTauIDFlightPathSignif") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDFlightpathCut);
     // All cuts passed, return true
     return true;

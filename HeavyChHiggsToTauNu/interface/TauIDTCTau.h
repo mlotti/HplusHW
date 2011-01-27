@@ -14,11 +14,11 @@ namespace HPlus {
     ~TauIDTCTau();
 
 //    /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
-    bool passLeadingTrackCuts(pat::Tau& tau);
-    bool passIsolation(pat::Tau& tau);
-    bool passAntiIsolation(pat::Tau& tau);
-    bool passRTauCut(pat::Tau& tau);
-    bool passAntiRTauCut(pat::Tau& tau);
+    bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passRTauCut(const edm::Ptr<pat::Tau> tau);
+    bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
 
   private:
     // Tau ID selections related to isolation

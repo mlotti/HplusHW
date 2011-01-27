@@ -16,11 +16,11 @@ namespace HPlus {
     ~TauIDPFTauBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
-    bool passLeadingTrackCuts(pat::Tau& tau);
-    virtual bool passIsolation(pat::Tau& tau) = 0;
-    virtual bool passAntiIsolation(pat::Tau& tau) = 0;
-    bool passRTauCut(pat::Tau& tau);
-    bool passAntiRTauCut(pat::Tau& tau);
+    bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
+    virtual bool passIsolation(const edm::Ptr<pat::Tau> tau) = 0;
+    virtual bool passAntiIsolation(const edm::Ptr<pat::Tau> tau) = 0;
+    bool passRTauCut(const edm::Ptr<pat::Tau> tau);
+    bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
 
   protected:
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes

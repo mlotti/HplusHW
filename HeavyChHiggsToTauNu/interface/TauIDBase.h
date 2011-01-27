@@ -33,19 +33,19 @@ namespace HPlus {
     ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
-    bool passTauCandidateSelection(pat::Tau& tau);
-    virtual bool passLeadingTrackCuts(pat::Tau& tau) = 0;
-    bool passTauCandidateEAndMuVetoCuts(pat::Tau& tau);
-    virtual bool passIsolation(pat::Tau& tau) = 0;
-    virtual bool passAntiIsolation(pat::Tau& tau) = 0;
-    bool passOneProngCut(pat::Tau& tau);
-    bool passThreeProngCut(pat::Tau& tau);
-    bool passChargeCut(pat::Tau& tau);
-    virtual bool passRTauCut(pat::Tau& tau) = 0;
-    virtual bool passAntiRTauCut(pat::Tau& tau) = 0;
-    bool passInvMassCut(pat::Tau& tau);
-    bool passDeltaECut(pat::Tau& tau);
-    bool passFlightpathCut(pat::Tau& tau);
+    bool passTauCandidateSelection(const edm::Ptr<pat::Tau> tau);
+    virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
+    bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
+    virtual bool passIsolation(const edm::Ptr<pat::Tau> tau) = 0;
+    virtual bool passAntiIsolation(const edm::Ptr<pat::Tau> tau) = 0;
+    bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
+    bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
+    bool passChargeCut(const edm::Ptr<pat::Tau> tau);
+    virtual bool passRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
+    virtual bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
+    bool passInvMassCut(const edm::Ptr<pat::Tau> tau);
+    bool passDeltaECut(const edm::Ptr<pat::Tau> tau);
+    bool passFlightpathCut(const edm::Ptr<pat::Tau> tau);
 
     /// Call at the beginning of the event (before looping over all tau-jet candidates) 
     void reset();
