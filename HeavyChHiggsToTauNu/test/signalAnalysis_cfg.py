@@ -18,6 +18,7 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
+JESVariation = 0.05
 
 ################################################################################
 
@@ -125,7 +126,7 @@ process.signalAnalysisPath = cms.Path(
 # Run the analysis for the different tau ID algorithms at the same job
 # as the golden analysis. It is significantly more efficiency to run
 # many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragmen below creates the
+# some of the I/O and grid overhead). The fragment below creates the
 # following histogram directories
 # signalAnalysisTauSelectionShrinkingConeCutBased
 # signalAnalysisTauSelectionShrinkingConeTaNCBased
@@ -149,55 +150,16 @@ if doAllTauIds:
 # If the flag is true, create two paths for the variation in plus and
 # minus, and clone the signal analysis and counter modules to the
 # paths. The tau, jet and MET collections to adjust are taken from the
-# configuration of the golden analysis. 
-
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
-def addJESVariation(process, name, variation):
-    variationName = name
-    analysisName = "signalAnalysis"+name
-    countersName = analysisName+"Counters"
-    pathName = analysisName+"Path"
-
-    # Construct the JES variation module
-    variation = jesVariation.clone(
-        tauSrc = cms.InputTag(process.signalAnalysis.tauSelection.src.value()), # from untracked to tracked
-        jetSrc = cms.InputTag(process.signalAnalysis.jetSelection.src.value()),
-        metSrc = cms.InputTag(process.signalAnalysis.MET.src.value()),
-        JESVariation = cms.double(variation)
-    )
-    setattr(process, variationName, variation)
-
-    # Construct the signal analysis module for this variation
-    # Use variated taus, jets and MET
-    analysis = process.signalAnalysis.clone()
-    analysis.tauSelection.src = cms.untracked.InputTag(variationName)
-    analysis.jetSelection.src = cms.untracked.InputTag(variationName)
-    analysis.MET.src = cms.untracked.InputTag(variationName)
-    setattr(process, analysisName, analysis)
-    
-    # Construct the counters module
-    counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-        counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
-    )
-    if len(additionalCounters) > 0:
-        counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-    setattr(process, countersName, counters)
-
-    # Construct the path
-    path = cms.Path(
-        process.commonSequence *
-        variation *
-        analysis *
-        counters
-    )
-    setattr(process, pathName, path)
-#FIXME/Matti: hide
-
+# configuration of the golden analysis. The fragment below creates the
+# following histogram directories
+# signalAnalysisJESPlus05
+# signalAnalysisJESMinus05
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
-    addJESVariation(process, "JESPlus05", 0.05)
-    addJESVariation(process, "JESMinus05", -0.05)
+    s = "%02d" % int(JESVariation*100)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+s, process.signalAnalysis, additionalCounters, JESVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+s, process.signalAnalysis, additionalCounters, -JESVariation)
 
 
 # Print tau discriminators from one tau from one event. Note that if
