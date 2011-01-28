@@ -2,6 +2,10 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
+################################################################################
+# Configuration
+
+# Select the version of the data
 #dataVersion = "35X"
 #dataVersion = "35Xredigi"
 #dataVersion = "36X"
@@ -9,6 +13,21 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "37X"
 #dataVersion = "38X"
 dataVersion = "39Xredigi"
+
+##########
+# Flags for additional signal analysis modules
+
+# Perform the signal analysis with all tau ID algorithms in addition
+# to the "golden" analysis
+doAllTauIds = True
+
+# Perform the signal analysis with the JES variations in addition to
+# the "golden" analysis
+doJESVariation = False
+
+################################################################################
+# Common configuration, command line arguments, input file, number of
+# events, possible PAT-on-the-fly, configuration histograms
 
 options = getOptions()
 if options.dataVersion != "":
@@ -40,8 +59,6 @@ if options.doPat != 0:
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
-
-################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
@@ -95,6 +112,8 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
+################################################################################
+# The "golden" version of the signal analysis
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Prescale weight, do not uncomment unless you know what you're doing!
@@ -151,6 +170,9 @@ process.signalAnalysisPath = cms.Path(
     process.PickEvents
 )
 
+################################################################################
+# The signal analysis with different tau ID algorithms
+#
 # Run the analysis for the different tau ID algorithms at the same job
 # as the golden analysis. It is significantly more efficiency to run
 # many analyses in a single job compared to many jobs (this avoids
@@ -170,27 +192,26 @@ process.signalAnalysisPath = cms.Path(
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val
-addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-		 values = [param.tauSelectionShrinkingConeCutBased,
-		  param.tauSelectionShrinkingConeTaNCBased,
-		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
-		 names = ["TauSelectionShrinkingConeCutBased",
-		  "TauSelectionShrinkingConeTaNCBased",
-		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
-                 preSequence = process.patSequence,
-                 additionalCounters = additionalCounters)
-
-# Jet energy scale variation
+if doAllTauIds:
+    addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
+        values = [param.tauSelectionShrinkingConeCutBased,
+                  param.tauSelectionShrinkingConeTaNCBased,
+                  param.tauSelectionCaloTauCutBased,
+                  param.tauSelectionHPSTauBased],
+        names = ["TauSelectionShrinkingConeCutBased",
+                 "TauSelectionShrinkingConeTaNCBased",
+                 "TauSelectionCaloTauCutBased",
+                 "TauSelectionHPSTauBased"],
+        preSequence = process.patSequence,
+        additionalCounters = additionalCounters)
+    
+################################################################################
+# The signal analysis with jet energy scale variation
 #
 # If the flag is true, create two paths for the variation in plus and
 # minus, and clone the signal analysis and counter modules to the
 # paths. The tau, jet and MET collections to adjust are taken from the
 # configuration of the golden analysis. 
-
-doJESVariation = False
-#doJESVariation = True
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
 def addJESVariation(process, name, variation):
