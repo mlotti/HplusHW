@@ -10,7 +10,7 @@ from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 #
 # process   cms.Process object where to add the modules and cms.Path
 # prefix    Prefix string for the names of the modules and path
-# exemplar  Module object to clone
+# prototype Module object to clone
 # func      Function to be called for modifying one element of the job array
 # values    List of parameter values
 # names     If the str(x) for values produces an invalid python identifier
@@ -19,7 +19,7 @@ from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 #           str(value) is used. This name is appended to the prefix to obtain
 #           a name for the analysis module.
 
-def addAnalysisArray(process, prefix, exemplar, func, values, names=None, preSequence=None, additionalCounters=[]):
+def addAnalysisArray(process, prefix, prototype, func, values, names=None, preSequence=None, additionalCounters=[]):
     if names == None:
         names = [str(x) for x in values]
     
@@ -31,8 +31,8 @@ def addAnalysisArray(process, prefix, exemplar, func, values, names=None, preSeq
         counterName = analysisName+"Counters"
         pathName = analysisName+"Path"
 
-        # Clone the exemplar and call the modifier function
-        m = exemplar.clone()
+        # Clone the prototype and call the modifier function
+        m = prototype.clone()
         func(m, value)
 
         counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
