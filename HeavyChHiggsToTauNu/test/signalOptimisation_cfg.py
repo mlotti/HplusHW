@@ -7,7 +7,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38Xrelval"
+#dataVersion = "38Xrelval"
+dataVersion = "39X"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -93,13 +94,27 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
+# Import signal analysis parameters and tweak them here
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Set tau selection mode to standard
+param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string("standard")
+param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string("standard")
+param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string("standard")
+param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string("standard")
+param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string("standard")
+# Set other cuts
+param.MET.METCut = cms.untracked.double(-1.0)
+param.bTagging.minNumber = cms.untracked.uint32(0)
+param.transverseMassCut = cms.untracked.double(-1.0)
+param.alphaT = cms.untracked.double(-1.0)
+param.maxDeltaPhi = cms.untracked.double(999.)
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
+##############################################################################
 
 # Matching of pat::Taus to HLT taus
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
-process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
-process.patSequence *= process.triggerMatching
+#from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
+#process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
+#process.patSequence *= process.triggerMatching
 
 # Signal optimisation module
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
@@ -107,7 +122,8 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     TriggerMETEmulation = param.TriggerMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    tauSelection = param.tauSelection,
+    # Change default tau algorithm here as needed
+    tauSelection = param.tauSelectionHPSTauBased,
     useFactorizedTauID = param.useFactorizedTauID,
     jetSelection = param.jetSelection,
     MET = param.MET,
@@ -165,11 +181,13 @@ addAnalysisArray(process, "signalOptimisation", process.signalOptimisation, setT
 		 [param.tauSelectionShrinkingConeCutBased,
 		  param.tauSelectionShrinkingConeTaNCBased,
 		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
+		  param.tauSelectionHPSTauBased,
+                  param.tauSelectionCombinedHPSTaNCTauBased],
 		 names = ["TauSelectionShrinkingConeCutBased",
 		  "TauSelectionShrinkingConeTaNCBased",
 		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+		  "TauSelectionHPSTauBased",
+                  "TauSelectionCombinedHPSTaNCBased"],
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
 

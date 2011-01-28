@@ -7,7 +7,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38Xrelval"
+#dataVersion = "38Xrelval"
+dataVersion = "39X"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -99,10 +100,10 @@ process.infoPath = cms.Path(
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 
-# Matching of pat::Taus to HLT taus
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
-process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
-process.patSequence *= process.triggerMatching
+# Matching of pat::Taus to HLT taus - FIXME: done already in pattuples
+#from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
+#process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
+#process.patSequence *= process.triggerMatching
 
 
 # Prescale weight
@@ -179,11 +180,13 @@ addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelect
 		 [param.tauSelectionShrinkingConeCutBased,
 		  param.tauSelectionShrinkingConeTaNCBased,
 		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
+		  param.tauSelectionHPSTauBased,
+                  param.tauSelectionCombinedHPSTaNCTauBased],
 		 names = ["TauSelectionShrinkingConeCutBased",
 		  "TauSelectionShrinkingConeTaNCBased",
 		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+		  "TauSelectionHPSTauBased",
+                  "TauSelectionCombinedHPSTaNCBased"],
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
 

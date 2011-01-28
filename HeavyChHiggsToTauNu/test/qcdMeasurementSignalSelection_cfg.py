@@ -4,10 +4,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 
 #dataVersion = "35X"
 #dataVersion = "35Xredigi"
-dataVersion = "36X"
+#dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
 #dataVersion = "38Xrelval"
+dataVersion = "39X"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -97,27 +98,41 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
+# qcdMeasurementSignalSelection module
+##############################################################################
+# Import default parameter set and make necessary tweaks
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Set tau selection mode (options: 'standard', 'factorized')
+myTauOperationMode = "standard"
+param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+# The sources should use the same as in signal (i.e. tau trigger matched)
+# The cut values should be exactly the same as in signal analysis
+##############################################################################
+
+process.qcdMeasurement = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
+    # Apply trigger, tauSelection + jetSelection to get N_0
+    trigger = param.trigger,
+    TriggerMETEmulation = param.TriggerMETEmulation,
+    tauSelection = param.tauSelection,
+    jetSelection = param.jetSelection,
+    # Apply rest of event selection to get N_rest
+    GlobalElectronVeto = param.GlobalElectronVeto,
+    GlobalMuonVeto = param.GlobalMuonVeto,
+    MET = param.MET,
+    bTagging = param.bTagging,
+    fakeMETVeto = param.fakeMETVeto,
+    )
+
 # Prescale weight
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
 process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
 process.patSequence *= process.hplusPrescaleWeightProducer
 
-# qcdMeasurementSignalSelection module
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChQCDMeasurementSignalSelectionParameters_cff as param
-process.qcdMeasurement = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
-                                        # Apply trigger, tauSelection + jetSelection to get N_0
-                                        trigger = param.trigger,
-                                        TriggerMETEmulation = param.TriggerMETEmulation,
-                                        tauSelection = param.tauSelection,
-                                        jetSelection = param.jetSelection,
-                                        # Apply rest of event selection to get N_rest
-                                        GlobalElectronVeto = param.GlobalElectronVeto,
-                                        GlobalMuonVeto = param.GlobalMuonVeto,
-                                        MET = param.MET,
-                                        bTagging = param.bTagging,
-                                        fakeMETVeto = param.fakeMETVeto,
-                                        )
 print "Cut on HLT MET: ", process.qcdMeasurement.trigger.hltMetCut
 print "TauSelection algorithm:", process.qcdMeasurement.tauSelection.selection
 print "TauSelection src:", process.qcdMeasurement.tauSelection.src

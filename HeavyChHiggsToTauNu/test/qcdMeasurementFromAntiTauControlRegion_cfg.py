@@ -98,19 +98,40 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChQCDMeasurementFromAntiTauControlRegionParameters_cff as param
+##############################################################################
+# Import default parameter set and make necessary tweaks
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Set tau selection mode (options: 'antitautag', 'antiisolatedtau')
+myTauOperationMode = "antitautag"
+param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+# Set tau sources to non-trigger matched tau collections
+param.tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
+param.tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+param.tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+param.tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
+param.tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("_selectedPatTausHpsTancPFTau")
+# Set other cuts
+param.trigger.triggers = cms.untracked.vstring("HLT_Jet30U",
+                                               "HLT_Jet30UV3")
+
+##############################################################################
 process.qcdMeasurement = cms.EDProducer("HPlusQCDMeasurementByIsolationVetoProducer",
-                                        # Apply trigger, tauSelectionByIsolationVeto + jetSelection to get N_0
-                                        trigger = param.trigger,
-                                        TriggerMETEmulation = param.TriggerMETEmulation,
-                                        tauSelection = param.tauSelection,
-                                        jetSelection = param.jetSelection,
-                                        # Apply rest of event selection to get N_rest
-                                        GlobalElectronVeto = param.GlobalElectronVeto,
-                                        GlobalMuonVeto = param.GlobalMuonVeto,
-                                        MET = param.MET,
-                                        bTagging = param.bTagging,
-                                        fakeMETVeto = param.fakeMETVeto
+    # Apply trigger, tauSelectionByIsolationVeto + jetSelection to get N_0
+    trigger = param.trigger,
+    TriggerMETEmulation = param.TriggerMETEmulation,
+    # Set here the tau algorithm
+    tauSelection = param.tauSelectionHPSTauBased,
+    jetSelection = param.jetSelection,
+    # Apply rest of event selection to get N_rest
+    GlobalElectronVeto = param.GlobalElectronVeto,
+    GlobalMuonVeto = param.GlobalMuonVeto,
+    MET = param.MET,
+    bTagging = param.bTagging,
+    fakeMETVeto = param.fakeMETVeto
 #    trigger = param.trigger,
 #    tauSelection = param.tauSelection,
 #    jetSelection = param.jetSelection,
@@ -157,11 +178,13 @@ addAnalysisArray(process, "qcdMeasurement", process.qcdMeasurement, setTauSelect
 		 [param.tauSelectionShrinkingConeCutBased,
 		  param.tauSelectionShrinkingConeTaNCBased,
 		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
+		  param.tauSelectionHPSTauBased,
+                  param.tauSelectionCombinedHPSTaNCTauBased],
 		 names = ["TauSelectionShrinkingConeCutBased",
 		  "TauSelectionShrinkingConeTaNCBased",
 		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+		  "TauSelectionHPSTauBased",
+                  "TauSelectionCombinedHPSTaNCBased"],
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
 
