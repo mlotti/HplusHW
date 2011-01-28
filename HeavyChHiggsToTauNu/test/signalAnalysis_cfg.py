@@ -55,34 +55,8 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 
 # Fragment to run PAT on the fly if requested from command line
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.patSequence = cms.Sequence()
-if options.doPat != 0:
-    #FIXME/Matti: shorten to one line, no jet trigger matching
-    # process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
-    
-    print "Running PAT on the fly"
-
-    # Jet trigger (for cleaning of tau->HLT matching
-    jetTrigger = "HLT_Jet30U"
-    trigger = options.trigger
-
-    process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
-        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
-
-    print "Trigger used for tau matching: "+trigger
-    print "Trigger used for jet matching: "+jetTrigger
-
-    process.patSequence = cms.Sequence(
-        process.collisionDataSelection *
-        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
-    )
-additionalCounters = []
-if dataVersion.isData():
-    additionalCounters = dataSelectionCounters[:]
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
 # Add configuration information to histograms.root
 # FIXME/Matti: process.infoPath = addConfigInfo(process, options)
@@ -105,7 +79,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
 #process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.patSequence *= process.hplusPrescaleWeightProducer
+#process.commonSequence *= process.hplusPrescaleWeightProducer
 
 
 # Signal analysis module for the "golden analysis"
@@ -148,7 +122,7 @@ if len(additionalCounters) > 0:
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
-    process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
     process.signalAnalysisCounters *
     process.PickEvents
@@ -170,7 +144,7 @@ process.signalAnalysisPath = cms.Path(
 #
 # The corresponding Counter directories have "Counters" postfix, and
 # cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.patSequence for the
+# other. It is important to give the process.commonSequence for the
 # function, so that it will be run before the analysis module in the
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
@@ -189,7 +163,7 @@ if doAllTauIds:
                  "TauSelectionCaloTauCutBased",
                  "TauSelectionHPSTauBased",
                  "TauSelectionCombinedHPSTaNCBased"],
-        preSequence = process.patSequence,
+        preSequence = process.commonSequence,
         additionalCounters = additionalCounters)
 #FIXME/Matti: hide       
         
@@ -237,7 +211,7 @@ def addJESVariation(process, name, variation):
 
     # Construct the path
     path = cms.Path(
-        process.patSequence *
+        process.commonSequence *
         variation *
         analysis *
         counters
@@ -257,7 +231,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
     src = process.signalAnalysis.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
-#    process.patSequence *
+#    process.commonSequence *
 #    process.tauDiscriminatorPrint
 #)
 
