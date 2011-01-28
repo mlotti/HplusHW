@@ -59,17 +59,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
 # Add configuration information to histograms.root
-# FIXME/Matti: process.infoPath = addConfigInfo(process, options)
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
-if options.crossSection >= 0.:
-    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
-    print "Dataset cross section has been set to %g pb" % options.crossSection
-if options.luminosity >= 0:
-    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
-process.infoPath = cms.Path(
-    process.configInfo
-)
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
+process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
 # The "golden" version of the signal analysis

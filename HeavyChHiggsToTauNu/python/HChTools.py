@@ -1,6 +1,17 @@
 import FWCore.ParameterSet.Config as cms
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
+def addConfigInfo(process, options):
+    process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
+    if options.crossSection >= 0.:
+        process.configInfo.crossSection = cms.untracked.double(options.crossSection)
+        print "Dataset cross section has been set to %g pb" % options.crossSection
+    if options.luminosity >= 0:
+        process.configInfo.luminosity = cms.untracked.double(options.luminosity)
+        print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
+    return cms.Path(process.configInfo)
+
+
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by
 # cloning a given example module configuration and then calling a
