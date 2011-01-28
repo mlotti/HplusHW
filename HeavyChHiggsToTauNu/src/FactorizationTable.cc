@@ -5,7 +5,16 @@
 #include "FWCore/Utilities/interface/Exception.h"
 
 namespace HPlus {
-  FactorizationTable::FactorizationTable(const edm::ParameterSet& iConfig) {
+  FactorizationTable::FactorizationTable(const edm::ParameterSet& iConfig) :
+    fFactorizationEnabled(false) {
+    // Check if factorization was enabled
+    std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
+    if (myOperatingModeSelection == "factorized") {
+      fFactorizationEnabled = true;
+    } else {
+      return;
+    }
+    
     // Obtain correct parameterset
     const edm::ParameterSet myFactorizationConfig = iConfig.getUntrackedParameter<edm::ParameterSet>("factorization"); 
     const edm::ParameterSet myFactorizationTablesConfig =
@@ -23,7 +32,8 @@ namespace HPlus {
     else if(mySelection == "ShrinkingConePFTauCutBased")  tauAlgorithm = "signalAnalysisTauSelectionShrinkingConeCutBased";
     else if(mySelection == "ShrinkingConePFTauTaNCBased") tauAlgorithm = "signalAnalysisTauSelectionShrinkingConeTaNCBased";
     else if(mySelection == "HPSTauBased")                 tauAlgorithm = "signalAnalysisTauSelectionHPSTauBased";
-    else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
+    else if(mySelection == "CombinedHPSTaNCTauBased") tauAlgorithm = "signalAnalysisTauSelectionCombinedHPSTaNCBased";
+    else throw cms::Exception("Error") << "FactorizationTable: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCTauBased (you chose '" << mySelection << "')" << std::endl;
     fTauAlgorithm = tauAlgorithm; // FIXME: DEBUG
     // Obtain limits
     fPtLowEdges = myFactorizationConfig.getUntrackedParameter<std::vector<double> >("ptBinLowEdges");
@@ -46,6 +56,7 @@ namespace HPlus {
   FactorizationTable::~FactorizationTable() {}
 
   double FactorizationTable::getWeightByPtAndEta(double pt, double eta) const {
+    if (!fFactorizationEnabled) return 1.;
     // Just for debugging
     //std::cout << "debug: " << fTauAlgorithm << " pt=" << pt << " index=" << calculateTableIndex(pt, fPtLowEdges)
     //          << " eta=" << eta << " index=" << calculateTableIndex(eta, fEtaLowEdges) << std::endl;
