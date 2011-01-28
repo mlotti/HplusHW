@@ -8,7 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
 #dataVersion = "38Xrelval"
-dataVersion = "39X"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -94,7 +95,7 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
-<<<<<<< HEAD
+##############################################################################
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode to standard
@@ -116,8 +117,6 @@ param.maxDeltaPhi = cms.untracked.double(999.)
 #from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
 #process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
 #process.patSequence *= process.triggerMatching
-=======
->>>>>>> matti/cmssw397
 
 # Signal optimisation module
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
@@ -128,7 +127,6 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTauBased,
-    useFactorizedTauID = param.useFactorizedTauID,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -141,6 +139,7 @@ print "Cut on HLT MET: ", process.signalOptimisation.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
 print "TauSelection src:", process.signalOptimisation.tauSelection.src
 print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
+print "TauSelection operating mode:", process.signalOptimisation.tauSelection.operatingMode
 print "TauSelection factorization used:", process.signalOptimisation.useFactorizedTauID
 
 #if dataVersion.isMC() and dataVersion.is38X():

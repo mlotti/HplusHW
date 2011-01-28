@@ -8,7 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
 #dataVersion = "38Xrelval"
-dataVersion = "39X"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 #dataVersion = "data" # this is for collision data 
 
 options = getOptions()
@@ -113,7 +114,7 @@ param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(m
 # The cut values should be exactly the same as in signal analysis
 ##############################################################################
 
-process.qcdMeasurement = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
+process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
     # Apply trigger, tauSelection + jetSelection to get N_0
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,
@@ -133,26 +134,28 @@ process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(
 process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
 process.patSequence *= process.hplusPrescaleWeightProducer
 
-print "Cut on HLT MET: ", process.qcdMeasurement.trigger.hltMetCut
-print "TauSelection algorithm:", process.qcdMeasurement.tauSelection.selection
-print "TauSelection src:", process.qcdMeasurement.tauSelection.src
+print "Trigger:", process.qcdMeasurementMethod2Part2.trigger
+print "Cut on HLT MET: ", process.qcdMeasurementMethod2Part2.trigger.hltMetCut
+print "TauSelection algorithm:", process.qcdMeasurementMethod2Part2.tauSelection.selection
+print "TauSelection src:", process.qcdMeasurementMethod2Part2.tauSelection.src
+print "TauSelection operating mode:", process.qcdMeasurementMethod2Part2.tauSelection.operatingMode
 
 # Counter analyzer (in order to produce compatible root file with the python approach)
-process.qcdMeasurementCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counterNames = cms.untracked.InputTag("qcdMeasurement", "counterNames"),
-    counterInstances = cms.untracked.InputTag("qcdMeasurement", "counterInstances"),
+process.qcdMeasurementMethod2Part2Counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+    counterNames = cms.untracked.InputTag("qcdMeasurementMethod2Part2", "counterNames"),
+    counterInstances = cms.untracked.InputTag("qcdMeasurementMethod2Part2", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
     printSubCounters = cms.untracked.bool(False),
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
-    process.qcdMeasurementCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+    process.qcdMeasurementMethod2Part2Counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.qcdMeasurementPath = cms.Path(
+process.qcdMeasurementMethod2Part2Path = cms.Path(
     process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.qcdMeasurement *
-    process.qcdMeasurementCounters #*
+    process.qcdMeasurementMethod2Part2 *
+    process.qcdMeasurementMethod2Part2Counters #*
 #    process.PickEvents
 )
 
@@ -165,13 +168,13 @@ process.qcdMeasurementPath = cms.Path(
 # def setTauPt(m, val):
 #     m.tauSelection.ptCut = val
 # from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-# addAnalysisArray(process, "qcdMeasurementTauPt", process.qcdMeasurement, setTauPt,
+# addAnalysisArray(process, "qcdMeasurementMethod2Part2TauPt", process.qcdMeasurementMethod2Part2, setTauPt,
 #                  [10, 20, 30, 40, 50])
 
 def setTauSelection(m, val):
     m.tauSelection = val
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-addAnalysisArray(process, "qcdMeasurement", process.qcdMeasurement, setTauSelection,
+addAnalysisArray(process, "qcdMeasurementMethod2Part2", process.qcdMeasurementMethod2Part2, setTauSelection,
 		 [param.tauSelectionShrinkingConeCutBased,
 		  param.tauSelectionShrinkingConeTaNCBased,
 		  param.tauSelectionCaloTauCutBased,
@@ -186,7 +189,7 @@ addAnalysisArray(process, "qcdMeasurement", process.qcdMeasurement, setTauSelect
 
 # Print tau discriminators from one tau from one event
 process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyzer",
-    src = process.qcdMeasurement.tauSelection.src
+    src = process.qcdMeasurementMethod2Part2.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
 #    process.patSequence *
@@ -198,7 +201,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChQCDMeasurementSignalSelection",
+        "keep *_*_*_HChqcdMeasurementMethod2Part2SignalSelection",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
 #	"drop *",
