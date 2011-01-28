@@ -174,9 +174,9 @@ namespace HPlus {
       fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight);
     else if(fSelection == "HPSTauBased")
       fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight);
-    else if(fSelection == "CombinedHPSTaNCBased")
+    else if(fSelection == "CombinedHPSTaNCTauBased")
       fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used (was '" << fSelection << "')! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCBased" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
@@ -188,7 +188,7 @@ namespace HPlus {
       fOperationMode = kAntiTauTag;
     else if (myOperatingModeSelection == "antiisolatedtau")
       fOperationMode = kAntiTauTagIsolationOnly;
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode (was '" << myOperatingModeSelection << "')! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
   }
 
   TauSelection::~TauSelection() {

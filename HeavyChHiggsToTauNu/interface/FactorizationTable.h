@@ -26,6 +26,8 @@ namespace HPlus {
   private:
     int calculateTableIndex(const double value, const std::vector<double>& edges) const;
   
+    /// Protection for the case the factorization is not used
+    bool fFactorizationEnabled;
     /// Type of table
     FactorizationTableType fTableType;
     /// Low bin edges by pT
