@@ -28,7 +28,22 @@ class StyleFill:
     def __call__(self, h):
         self.apply(h)
 
+class StyleError:
+    def __init__(self, color):
+        self.color = color
+
+    def apply(self, h):
+        h.SetFillStyle(1001)
+        h.SetFillColor(self.color)
+        h.SetMarkerStyle(0)
+        h.SetLineWidth(0)
+        h.SetLineColor(self.color)
+
+    def __call__(self, h):
+        self.apply(h)
+
 dataStyle = Style(-2, ROOT.kBlack)
+errorStyle = StyleError(ROOT.kRed-10)
 
 styles = [
     Style(4, ROOT.kBlue),
@@ -54,6 +69,9 @@ def applyStyle(h, ind):
 
 def getDataStyle():
     return dataStyle
+
+def getErrorStyle():
+    return errorStyle
 
 def getStyles():
     return styles

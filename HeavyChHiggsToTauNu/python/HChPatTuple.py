@@ -16,6 +16,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 
 # Assumes that process.out is the output module
 #
@@ -23,7 +24,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTes
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True):
+           doPatCalo=True, doBTagging=True,
+           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -34,6 +36,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus:
+	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
@@ -41,6 +44,15 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+
+        # Reconfigure PFRecoTauDiscriminationByInvMass because there is no updated configuration in the CVS
+        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet(
+            min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
+            max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
+        )
+
+        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
+        process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
 
         # These are already in 36X AOD, se remove them from the tautagging
         # sequence
@@ -52,14 +64,23 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
             process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
         
-        process.load("RecoTauTag.Configuration.HPSPFTaus_cfi")
+
+        # Sequence to produce HPS and HPS+TaNC taus. Remove the
+        # shrinking cone PFTau and the TaNC classifier from the
+        # sequence as they are already produced as a part of standard
+        # RECO, and we don't want to reproduce them here (i.e. we
+        # prefer the objects in RECO/AOD over reproducing them on the
+        # fly).
+        process.PFTau.remove(process.ak5PFJetsLegacyTaNCPiZeros)
+        process.PFTau.remove(process.produceAndDiscriminateShrinkingConePFTaus)
+        process.PFTau.remove(process.produceShrinkingConeDiscriminationByTauNeuralClassifier)
 
         process.hplusPatTauSequence = cms.Sequence(
             process.tautagging *
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
-	    process.PFTauTestDiscriminationSequence *
-            process.produceAndDiscriminateHPSPFTaus *
+            process.PFTauTestDiscriminationSequence *
+            process.PFTau * # for HPS+TaNC
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
@@ -198,9 +219,28 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          algoLabel = "hps",
                          typeLabel = "PFTau")
         process.patTausHpsPFTau.isoDeposits = cms.PSet()
+
+        addTauCollection(process,cms.InputTag('hpsTancTaus'),
+                         algoLabel = "hpsTanc",
+                         typeLabel = "PFTau")
+        process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+        # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
+        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+
+        # Add visible taus    
+        if dataVersion.isMC():
+            process.VisibleTaus = cms.EDProducer("HLTTauMCProducer",
+                GenParticles  = cms.untracked.InputTag("genParticles"),
+                ptMinTau      = cms.untracked.double(3),
+                ptMinMuon     = cms.untracked.double(3),
+                ptMinElectron = cms.untracked.double(3),
+                BosonID       = cms.untracked.vint32(23),
+                EtaMax         = cms.untracked.double(2.5)
+            )
+            outputCommands.append("keep *_VisibleTaus_*_*")
+
     else:
         removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
-    
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
                            #"keep *_cleanPatTaus_*_*",
@@ -274,9 +314,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             outMod  = 'out'
         switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
 
-        # StandAlone trigger objects are needed for trigger matching
-        # at the analysis phase
+        # Keep StandAlone trigger objects for enabling trigger
+        # matching in the analysis phase with PAT tools
         outputCommands.extend(patTriggerStandAloneEventContent)
+
 
     # Remove cleaning step and set the event content
     if out == None:
@@ -301,8 +342,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     seq *= process.hplusPatSequence
 
+    # Tau+HLT matching
+    if doTauHLTMatching:
+        seq *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
+
     return seq
-    
-
-
-

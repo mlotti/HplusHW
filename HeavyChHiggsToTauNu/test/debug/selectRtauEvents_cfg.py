@@ -10,7 +10,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string("START38_V9::All")
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #    skipEvents = cms.untracked.uint32(500),
     fileNames = cms.untracked.vstring(
     "/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/FEFEE1D1-F17B-DF11-B911-00304867C16A.root"

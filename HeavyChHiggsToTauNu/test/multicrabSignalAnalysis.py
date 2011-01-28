@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v6"
-#pattupleVersion = "pattuple_v8"
+#pattupleVersion = "pattuple_v6"
+pattupleVersion = "pattuple_v9"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -15,10 +15,9 @@ pattupleVersion = "pattuple_v6"
 runPatOnTheFly = False
 #runPatOnTheFly = True
 if runPatOnTheFly:
-    # At the moment we need the RECO for running PAT due to the
-    # electron ID
-    #pattupleVersion = "AOD"
-    pattupleVersion = "RECO"
+    # RECO is needed for pre-39X data, for 39X and beyond, AOD is enough
+    pattupleVersion = "AOD"
+    #pattupleVersion = "RECO"
 
 
 # Uncomment below the datasets you want to process
@@ -33,12 +32,20 @@ multicrab.extendDatasets(pattupleVersion,
 #        "JetMETTau_136033-141887", # v6
 #        "JetMET_141950-144114",    # v6
 #        "Jet_146240-148058",       # v6
+        # MC Signal Winter 10
+#        "TTToHplusBWB_M90_Winter10", # v9
         # MC Signal Fall10
 #        "TTToHplusBWB_M90",  # v6
 #        "TTToHplusBWB_M100", # v6
 #        "TTToHplusBWB_M120", # v6
 #        "TTToHplusBWB_M140", # v6
 #        "TTToHplusBWB_M160", # v6
+        # MC Signal Fall10 PU
+#        "TTToHplusBWB_M90_PU",  # v6
+#        "TTToHplusBWB_M100_PU", # v6
+#        "TTToHplusBWB_M120_PU", # v6
+#        "TTToHplusBWB_M140_PU", # v6
+#        "TTToHplusBWB_M160_PU", # v6
         # MC Signal Spring10
 #        "TTToHpmToTauNu_M90",  # v6
 #        "TTToHpmToTauNu_M100", # v6
@@ -46,21 +53,31 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TTbar_Htaunu_M140",   # v6
 #        "TTbar_Htaunu_M160",   # v6
         # MC Background Winter10
-#        "QCD_Pt30to50_TuneZ2_Winter10",   # v8
-#        "QCD_Pt80to120_TuneZ2_Winter10",  # v8
-#        "QCD_Pt120to170_TuneZ2_Winter10", # v8
-#        "QCD_Pt170to300_TuneZ2_Winter10", # v8
-#        "QCD_Pt300to470_TuneZ2_Winter10", # v8
-#        "TTJets_TuneZ2_Winter10",         # v8
-#        "TTJets_TuneD6T_Winter10",        # v8 
-#        "WJets_TuneZ2_Winter10_noPU",     # v8
-#        "WJets_TuneD6T_Winter10",         # v8
+#        "QCD_Pt30to50_TuneZ2_Winter10",   # v9
+#        "QCD_Pt80to120_TuneZ2_Winter10",  # v9
+#        "QCD_Pt120to170_TuneZ2_Winter10", # v9
+#        "QCD_Pt170to300_TuneZ2_Winter10", # v9
+#        "QCD_Pt300to470_TuneZ2_Winter10", # v9
+#        "TTJets_TuneZ2_Winter10",         # v9
+#        "TTJets_TuneD6T_Winter10",        # v9 
+#        "WJets_TuneZ2_Winter10_noPU",     # v9
+#        "WJets_TuneD6T_Winter10",         # v9
         # MC Background Fall10
 #        "QCD_Pt30to50_Fall10",   # v6
 #        "QCD_Pt50to80_Fall10",   # v6
 #        "QCD_Pt80to120_Fall10",  # v6
 #        "QCD_Pt120to170_Fall10", # v6
 #        "QCD_Pt170to300_Fall10", # v6
+#        "TTJets",                # v6 
+#        "WJets_Fall10",          # v6
+        # MC Background Fall10 PU
+#        "QCD_Pt30to50_Fall10_PU",   # v6
+#        "QCD_Pt50to80_Fall10_PU",   # v6
+#        "QCD_Pt80to120_Fall10_PU",  # v6
+#        "QCD_Pt120to170_Fall10_PU", # v6
+#        "QCD_Pt170to300_Fall10_PU", # v6
+#        "TTJets_PU",                # v6 
+#        "WJets_Fall10_PU",          # v6
         # MC Background Summer10
 #        "QCD_Pt30to50",   # v6
 #        "QCD_Pt50to80",   # v6

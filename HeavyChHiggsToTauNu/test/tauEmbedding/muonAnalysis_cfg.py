@@ -33,7 +33,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
         #dataVersion.getAnalysisDefaultFileCastor()
@@ -125,7 +124,7 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
-    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False)
+    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
         process.patPlainSequence
@@ -432,6 +431,22 @@ class MuonAnalysis:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
             self.clonePileupAnalyzer()
+
+    def muonKinematicEtaSelection(self):
+        name = "MuonEta"
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, etaCut, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonKinematicPtCustomSelection(self, pt):
+        name = "MuonPt%d" % pt
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "pt() > %d" % pt, selector="PATMuonSelector")
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
         
     def muonCleaningFromJet(self):
         m = self.muonJetCleanerPrototype.clone(src=self.selectedMuons)
@@ -671,7 +686,16 @@ class MuonAnalysis:
         self.muonCleaningFromJet()
 
         self.tightMuonSelection()
-        self.muonKinematicSelection()
+        #self.muonKinematicSelection()
+        self.muonKinematicEtaSelection()
+        self.muonKinematicPtCustomSelection(5)
+        self.muonKinematicPtCustomSelection(10)
+        self.muonKinematicPtCustomSelection(15)
+        self.muonKinematicPtCustomSelection(20)
+        self.muonKinematicPtCustomSelection(25)
+        self.muonKinematicPtCustomSelection(30)
+        self.muonKinematicPtCustomSelection(35)
+        self.muonKinematicPtCustomSelection(40)
         self.muonQuality()
         self.muonImpactParameter()
         self.muonVertexDiff()
@@ -758,6 +782,75 @@ if options.WDecaySeparate > 0:
 
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
+
+process.muonJetMetAnalyzer = cms.EDAnalyzer(
+    "HPlusMuonJetMetAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    jetSrc = cms.untracked.InputTag(jetsPF.value()),
+    metSrc = cms.untracked.InputTag(pfMET),
+    njets = cms.untracked.uint32(1),
+    jetSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(jetSelection),
+            name = cms.untracked.string("JetKinematic")
+        ),
+    ),
+    muonSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(tightMuonCut),
+            name = cms.untracked.string("MuonTight")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("abs(eta()) < 1.4"),
+            name = cms.untracked.string("MuonEta")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 5"),
+            name = cms.untracked.string("MuonPt5")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 10"),
+            name = cms.untracked.string("MuonPt10")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 15"),
+            name = cms.untracked.string("MuonPt15")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 20"),
+            name = cms.untracked.string("MuonPt20")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 25"),
+            name = cms.untracked.string("MuonPt25")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 30"),
+            name = cms.untracked.string("MuonPt30")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 35"),
+            name = cms.untracked.string("MuonPt35")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 40"),
+            name = cms.untracked.string("MuonPt40")
+        ),
+    )
+)
+
+process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
+process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
+    cut = cms.untracked.string(jetIdPF),
+    name = cms.untracked.string("JetId")
+))
+
+process.muonJetMetPath = cms.Path(
+    process.commonSequence *
+    process.muonJetMetAnalyzer *
+    process.muonJetMetAnalyzerJetId
+)
+
 
 #print process.dumpPython()
 

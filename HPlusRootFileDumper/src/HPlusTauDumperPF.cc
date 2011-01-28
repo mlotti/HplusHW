@@ -153,9 +153,9 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   // Loop over the tau jets
   for (size_t i = 0; i < myTauJetCount; ++i) {
     reco::PFTauRef myTauJetRef(myTauJets, i);
-    const PFTauDecayMode& theDecayMode = (*theDMAssoc)[myTauJetRef]; //get PFTauDecayMode associated to this PFTau
+    const reco::PFTauDecayMode& theDecayMode = (*theDMAssoc)[myTauJetRef]; //get PFTauDecayMode associated to this PFTau
      
-    const PFCandidateRef& myLdgChargedHadronCandidateRef = myTauJetRef->leadPFChargedHadrCand();
+    const reco::PFCandidateRef& myLdgChargedHadronCandidateRef = myTauJetRef->leadPFChargedHadrCand();
     if (myLdgChargedHadronCandidateRef.isNull()) continue;
     // FIXME: add a counter here
     
@@ -195,10 +195,10 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     // Track quality cuts have already been applied to all the PF tracks
     
     // Charged track isolation
-    const PFCandidateRefVector& mySignalPFCandidates = myTauJetRef->signalPFCands(); // Leading track is included here 
-    const PFCandidateRefVector& myIsolationPFCandidates = myTauJetRef->isolationPFCands(); // Leading track is included here
-    const PFCandidateRefVector& mySignalPFGammaCandidates = myTauJetRef->signalPFGammaCands();
-    RefVector<PFCandidateCollection>::const_iterator iCand;
+    const reco::PFCandidateRefVector& mySignalPFCandidates = myTauJetRef->signalPFCands(); // Leading track is included here 
+    const reco::PFCandidateRefVector& myIsolationPFCandidates = myTauJetRef->isolationPFCands(); // Leading track is included here
+    const reco::PFCandidateRefVector& mySignalPFGammaCandidates = myTauJetRef->signalPFGammaCands();
+    edm::RefVector<reco::PFCandidateCollection>::const_iterator iCand;
     
     // Count the number of signal tracks in the signal cone above a certain pt threshold
     int mySignalTrackCount = 0;
@@ -342,7 +342,7 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
   
     // 3Prong and 5Prong related variables
     // ***********************************
-    Vertex SV;
+    reco::Vertex SV;
     bool withPVError = true;
     
     if(mySignalTrackCount==3){
@@ -465,13 +465,13 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     // Get hadrons reference vector
     reco::PFCandidateRefVector hadrons = myPFTau->signalPFChargedHadrCands();
      // Get individual hadrons
-     PFCandidateRef  h1  = hadrons.at(0);
-     PFCandidateRef  h2  = hadrons.at(1);
-     PFCandidateRef  h3  = hadrons.at(2);
+    reco::PFCandidateRef  h1  = hadrons.at(0);
+    reco::PFCandidateRef  h2  = hadrons.at(1);
+    reco::PFCandidateRef  h3  = hadrons.at(2);
   
      if(h1->trackRef().isNonnull() && h2->trackRef().isNonnull() && h3->trackRef().isNonnull() ) {
        // Make transient(extrapolated) tracks for each hadron
-       std::vector<TransientTrack> transientTracks;
+       std::vector<reco::TransientTrack> transientTracks;
 
        transientTracks.push_back(TransientTrackBuilder_->build(h1->trackRef()));
        transientTracks.push_back(TransientTrackBuilder_->build(h2->trackRef()));
@@ -538,14 +538,14 @@ bool HPlusTauDumperPF::setData(edm::Event& iEvent, const edm::EventSetup& iSetup
     // Get hadrons reference vector
     reco::PFCandidateRefVector hadrons = myPFTau->signalPFChargedHadrCands();
     // Get individual hadrons   
-    PFCandidateRef  h1  = hadrons.at(0);
-    PFCandidateRef  h2  = hadrons.at(1);
-    PFCandidateRef  h3  = hadrons.at(2);
-    PFCandidateRef  h4  = hadrons.at(3);
-    PFCandidateRef  h5  = hadrons.at(4);
+    reco::PFCandidateRef  h1  = hadrons.at(0);
+    reco::PFCandidateRef  h2  = hadrons.at(1);
+    reco::PFCandidateRef  h3  = hadrons.at(2);
+    reco::PFCandidateRef  h4  = hadrons.at(3);
+    reco::PFCandidateRef  h5  = hadrons.at(4);
     
     // Make transient(extrapolated) tracks for each hadron
-    std::vector<TransientTrack> transientTracks;
+    std::vector<reco::TransientTrack> transientTracks;
     transientTracks.push_back(TransientTrackBuilder_->build(h1->trackRef()));
     transientTracks.push_back(TransientTrackBuilder_->build(h2->trackRef()));
     transientTracks.push_back(TransientTrackBuilder_->build(h3->trackRef()));

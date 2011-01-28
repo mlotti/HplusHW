@@ -17,48 +17,37 @@ set -e
 # 12.11.2010/M.Kortelainen CMSSW_3_8_6 Removed the tau embedding tag (added workaround)
 # 9.12.2010/M.Kortelainen CMSSW_3_8_7 Updated PAT tags to latest recipe, updated lumi tag
 # 27.12.2010/M.Kortelainen CMSSW_3_9_7 Updated tags to latest recipes
+# 12.1.2011/M.Kortelainen CMSSW_3_9_7 Added HPS+TaNC tags
+# 18.1.2011/M.Kortelainen CMSSW_3_9_7 Update PFRecoTauDiscriminationByInvMass.cc
+# 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 
-#TARGET="analysis"
-#if [ "x$#" = "x1" ]; then
-#    TARGET=$1
-#fi
-#echo "Checking out tags for $TARGET"
+# addpkg requires cmsenv
+eval $(scram runtime -sh)
 
-# Common
+# HPS+TaNC
+cvs co -r1.28 RecoTauTag/tau_tags.txt
+# This checkouts
+# RecoTauTag/RecoTau
+# RecoTauTag/TauTagTools
+# RecoTauTag/Configuration
+# DataFormats/TauReco
+addpkg -f RecoTauTag/tau_tags.txt
 
+cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
+# This checkouts
+# DataFormats/PatCandidates 
+# JetMETCorrections/Type1MET 
+# PhysicsTools/IsolationAlgos 
+# PhysicsTools/PFCandProducer 
+# PhysicsTools/PatAlgos 
+# PhysicsTools/PatUtils
+addpkg -f RecoTauTag/tau_tags_dependencies.txt
+cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
-# PATTuple
-#if [ "x$TARGET" = "xpattuple" ]; then
+# Electron ID
 cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
 cvs co -r V00-03-00 ElectroWeakAnalysis/WENu
-addpkg RecoTauTag/RecoTau
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByCharge.cc
-cvs co -r 1.2 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByDeltaE.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByFlightPathSignificance.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByInvMass.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByNProngs.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByTauPolarization.cc
-cvs co -r 1.3 RecoTauTag/RecoTau/plugins/CaloRecoTauDiscriminationByIsolation.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByDeltaE.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByFlightPathSignificance.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByInvMass.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByNProngs.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByTauPolarization.cc
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByCharge_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByDeltaE_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByFlightPathSignificance_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByInvMass_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByNProngs_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationByTauPolarization_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByDeltaE_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByFlightPathSignificance_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByNProngs_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByTauPolarization_cfi.py
-cvs co -r 1.1 RecoTauTag/RecoTau/python/CaloRecoTauDiscriminationForChargedHiggs_cfi.py
-cvs co -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
-cvs co -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByIsolationChargedPtSum_cfi.py
-cvs up -r 1.2 RecoTauTag/RecoTau/plugins/BuildFile.xml
+
+# Higgs skimms
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-#fi

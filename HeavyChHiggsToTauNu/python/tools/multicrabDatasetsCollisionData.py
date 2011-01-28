@@ -5,8 +5,8 @@ datasets = {
     # Collision data
     #
     # BTau PD (for signal analysis)
-    "BTau_141950-144114": {
-        "dataVersion": "38XdataRun2010A",
+    "BTau_141950-144114_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
             "RECO": {
@@ -45,8 +45,8 @@ datasets = {
         }
 
     },
-    "BTau_146240-148107": {
-        "dataVersion": "38XdataRun2010B",
+    "BTau_146240-148107_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
         "runs": (146240, 148107),
         "data": {
@@ -85,8 +85,8 @@ datasets = {
             }
         },
     },
-    "BTau_148108-148864": {
-        "dataVersion": "38XdataRun2010B",
+    "BTau_148108-148864_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 148864),
         "data": {
@@ -101,8 +101,8 @@ datasets = {
             }
         },
     },
-    "BTau_148108-149182": {
-        "dataVersion": "38XdataRun2010B",
+    "BTau_148108-149182_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
         "runs": (148108, 149182),
         "data": {
@@ -135,8 +135,8 @@ datasets = {
             }
         },
     },
-    "BTau_149291-149442": {
-        "dataVersion": "38XdataRun2010B",
+    "BTau_149291-149442_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "runs": (149291, 149442),
         "data": {
@@ -171,8 +171,8 @@ datasets = {
     },
 
     # Jet PD (for QCD background analysis"
-    "JetMETTau_136033-141887": { # first run actually 135821, but lumi list starts from this one
-        "dataVersion": "38XdataRun2010A",
+    "JetMETTau_136033-141887_Nov4": { # first run actually 135821, but lumi list starts from this one
+        "dataVersion": "38Xdata",
         "trigger": "HLT_Jet30U",
         "data": {
             "RECO": {
@@ -192,8 +192,8 @@ datasets = {
             }
         }
     },
-    "JetMET_141950-144114": {
-        "dataVersion": "38XdataRun2010A",
+    "JetMET_141950-144114_Nov4": {
+        "dataVersion": "38Xdata",
         "trigger": "HLT_Jet30U",
         "data": {
             "RECO": {
@@ -213,8 +213,8 @@ datasets = {
             }
         }
     },
-    "Jet_146240-148058": { # last run really 149442, but last run with HLT_Jet30U is this one
-        "dataVersion": "38XdataRun2010B",
+    "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
+        "dataVersion": "38Xdata",
         "trigger": "HLT_Jet30U",
         "runs": (146240, 148058),
         "data": {
@@ -238,60 +238,47 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
-    "Mu_135821-144114": {
-        "dataVersion": "38XdataRun2010A",
+    "Mu_135821-144114_Nov4": {
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu9",
+        "data": {}
+    },
+    "Mu_135821-144114_Dec22": {
+        "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
         "data": {
-            "RECO": {
-                "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/RECO", # runs 135821-144114
+            "AOD": {
+                "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD", # runs 135821-144114
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMask": "Nov4ReReco"
+                "lumiMask": "DCSOnly"
             },
-            "AOD": {
-                "datasetpath": "/Mu/Run2010A-Nov4ReReco_v1/AOD", # runs 135821-144114
-                "luminosity": 0,
-                "lumis_per_job": 500,
-                "lumiMask": "Nov4ReReco"
-            }
         }
     },
-    "Mu_146240-147116": {
-        "dataVersion": "38XdataRun2010B",
+    "Mu_146240-147116_Dec22": {
+        "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
         "runs": (146240, 147116),
         "data": {
-            "RECO": {
-                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 600, # Adjusted for PAT on the fly
-                "lumiMask": "Nov4ReReco"
-            },
             "AOD": {
-                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 600, # Adjusted for PAT on the fly
-                "lumiMask": "Nov4ReReco"
-            }
+                "lumiMask": "DCSOnly"
+            },
         }
     },
-    "Mu_147196-149442": {
-        "dataVersion": "38XdataRun2010B",
+    "Mu_147196-149442_Dec22": {
+        "dataVersion": "39Xdata",
         "trigger": "HLT_Mu15_v1",
         "runs": (147196, 149442),
         "data": {
-            "RECO": {
-                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMask": "Nov4ReReco"
-            },
             "AOD": {
-                "datasetpath": "/Mu/Run2010B-Nov4ReReco_v1/AOD",
+                "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMask": "Nov4ReReco"
-            }
+                "lumiMask": "DCSOnly"
+            },
         }
     },
 }

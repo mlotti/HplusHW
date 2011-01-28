@@ -20,16 +20,15 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("HChSignalOptimisation")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
+	"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_2_1_GhW_TTToHpmToTauNu_M-100_7TeV-pythia6-tauola_Spring10_START3X_V26_v1_GEN-SIM-RECO-pattuple_v6.root"
 	#"rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root"
         # For testing in lxplus
-        dataVersion.getAnalysisDefaultFileCastor()
+        #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
@@ -51,7 +50,6 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 500
 process.TFileService.fileName = "histograms.root"
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalTrigger import getSignalTrigger
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
@@ -62,17 +60,19 @@ if options.doPat != 0:
     print "GlobalTag="+dataVersion.getGlobalTag()
 
     # Jet trigger (for cleaning of tau->HLT matching
+    jetTrigger = "HLT_Jet30U"
     trigger = options.trigger
-    if len(trigger) == 0:
-        trigger = getSignalTrigger(dataVersion)
 
     process.collisionDataSelection = cms.Sequence()
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
+    print "Trigger used for tau matching: "+trigger
+    print "Trigger used for jet matching: "+jetTrigger
+
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion)
+        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
     )
 additionalCounters = []
 if dataVersion.isData():
@@ -94,6 +94,7 @@ process.infoPath = cms.Path(
     process.configInfo
 )
 
+<<<<<<< HEAD
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode to standard
@@ -115,8 +116,11 @@ param.maxDeltaPhi = cms.untracked.double(999.)
 #from HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching import addTauTriggerMatching
 #process.triggerMatching = addTauTriggerMatching(process, param.trigger.triggers[:], "Tau")
 #process.patSequence *= process.triggerMatching
+=======
+>>>>>>> matti/cmssw397
 
 # Signal optimisation module
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalOptimisationParameters_cff as param
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
     TriggerMETEmulation = param.TriggerMETEmulation,

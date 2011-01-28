@@ -12,7 +12,6 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 process.source = cms.Source('PoolSource',
-  duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #  noEventSort = cms.untracked.bool(True),
   fileNames = cms.untracked.vstring(
     "/store/group/local/HiggsChToTauNuFullyHadronic/ntuples/CMSSW_3_6_X/QCD_Pt30_Summer10_START336_V9_S09_v1_AODSIM_v4/HPlusOut_100_1.root",

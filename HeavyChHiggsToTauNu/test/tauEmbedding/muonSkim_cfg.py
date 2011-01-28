@@ -25,7 +25,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    #duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
         dataVersion.getPatDefaultFileMadhatter()
@@ -62,7 +61,7 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
     
-    process.patSequence = addPat(process, dataVersion, doPatTrigger=False,
+    process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
                                  doPatTaus=False, doPatElectronID=False)
     removeSpecificPATObjects(process, ["Photons"], False)
     removeCleaning(process, False)    
