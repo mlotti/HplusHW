@@ -5,6 +5,32 @@ datasets = {
     # Collision data
     #
     # BTau PD (for signal analysis)
+    "JetMETTau_Tau_136035-139975_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleLooseIsoTau20",
+        "runs": (136035, 139975), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "JetMETTau_Tau_140058_141881_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleLooseIsoTau20_Trk5",
+        "runs": (140058, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
     "BTau_141956-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
@@ -212,7 +238,7 @@ datasets = {
     },
 
     # Jet PD (for QCD background analysis"
-    "JetMETTau_136035-141881_Dec22": {
+    "JetMETTau_Jet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
         "runs": (136035, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
@@ -247,6 +273,19 @@ datasets = {
                 "datasetpath": "/Jet/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "number_of_jobs": 40, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "Jet_148822-149294_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_Jet30U_v3",
+        "runs": (148822, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/Jet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
         }

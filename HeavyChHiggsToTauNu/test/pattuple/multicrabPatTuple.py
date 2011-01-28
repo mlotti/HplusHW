@@ -16,16 +16,19 @@ multicrab.extendDatasets(
 # 39X
 #
 ########
-        # Data (tau)
+        # Data (Tau)
+#        "JetMETTau_Tau_136035-139975_Dec22", # HLT_SingleLooseIsoTau20
+#        "JetMETTau_Tau_140058_141881_Dec22", # HLT_SingleLooseIsoTau20_Trk5
 #        "BTau_141956-144114_Dec22", # HLT_SingleIsoTau20_Trk5
 #        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20
 #        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4
 
         # Data (Jet)
-#        "JetMETTau_136035-141881_Dec22",
+#        "JetMETTau_Jet_136035-141881_Dec22",
 #        "JetMET_141956-144114_Dec22",
 #        "Jet_146428-148058_Dec22",
+#        "Jet_148822-149294_Dec22",
 
         # Signal MC
 #        "TTToHplusBWB_M90_Winter10",
