@@ -240,6 +240,9 @@ namespace HPlus {
       if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
         // Standard tau ID or factorized tau ID (necessary for the tau selection logic) 
         if (!fTauID->passIsolation(iTau)) continue;
+
+        // FIXME: the current implementation does NOT work for HPS taus (no HChTauIDnProngsCont discriminator)
+        /*
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
           if (!fTauID->passChargeCut(iTau)) continue;
@@ -252,6 +255,7 @@ namespace HPlus {
           //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
           if (!fTauID->passRTauCut(iTau)) continue;
         }
+        */
       } else if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly) {
         // Anti-tau tag
         if (fProngNumber == 1) {

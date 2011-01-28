@@ -118,7 +118,10 @@ namespace HPlus {
     if (tau->tauID("byHPStight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
+    // FIXME: doesn't work for HPS+TaNC
+    /*
     fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
+    */
     if (tau->tauID("byTaNCtight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
@@ -130,7 +133,10 @@ namespace HPlus {
     if (tau->tauID("byHPSvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
+    // FIXME: doesn't work for HPS+TaNC
+    /*
     fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
+    */
     if (tau->tauID("byTaNCvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
