@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 ################################################################################
 # Configuration
@@ -21,16 +20,9 @@ doAllTauIds = True
 doJESVariation = False
 
 ################################################################################
-# Common configuration, command line arguments, input file, number of
-# events, possible PAT-on-the-fly, configuration histograms
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
-# FIXME/Matti: target: options, dataVersion = getOptions(dataVersion)
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 ################################################################################
 # Define the process

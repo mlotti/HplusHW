@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.VarParsing as VarParsing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import sys
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideAboutPythonConfigFile#Passing_Command_Line_Arguments_T
@@ -42,3 +43,14 @@ def getOptions(options=None):
     options.parseArguments()
 
     return options
+
+
+def getOptionsDataVersion(dataVersion, options=None):
+    options = getOptions(options)
+
+    if options.dataVersion != "":
+        dataVersion = options.dataVersion
+    print "Data version is", dataVersion
+
+    dataVersion = DataVersion(dataVersion)
+    return (options, dataVersion)
