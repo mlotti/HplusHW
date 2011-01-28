@@ -139,24 +139,8 @@ process.signalAnalysisPath = cms.Path(
 # function, so that it will be run before the analysis module in the
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-def setTauSelection(module, val):
-    module.tauSelection = val
 if doAllTauIds:
-    addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-        values = [param.tauSelectionShrinkingConeCutBased,
-                  param.tauSelectionShrinkingConeTaNCBased,
-                  param.tauSelectionCaloTauCutBased,
-                  param.tauSelectionHPSTauBased,
-                  param.tauSelectionCombinedHPSTaNCTauBased],
-        names = ["TauSelectionShrinkingConeCutBased",
-                 "TauSelectionShrinkingConeTaNCBased",
-                 "TauSelectionCaloTauCutBased",
-                 "TauSelectionHPSTauBased",
-                 "TauSelectionCombinedHPSTaNCBased"],
-        preSequence = process.commonSequence,
-        additionalCounters = additionalCounters)
-#FIXME/Matti: hide       
+    param.addTauIdAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
         
     
 ################################################################################
