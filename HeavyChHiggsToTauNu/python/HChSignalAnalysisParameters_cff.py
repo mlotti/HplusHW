@@ -28,7 +28,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.8), # rtau > value
     antiRtauCut = cms.untracked.double(0.4), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
-    nprongs = cms.untracked.uint32(1), # not used at the moment FIXME: use it in TauSelection.cc
+    nprongs = cms.untracked.uint32(1), # not used at the moment FIXME: has no effect in TauSelection.cc
     factorization = factorizationParams.tauIDFactorizationParameters
 )
 

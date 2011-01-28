@@ -6,13 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 # Configuration
 
 # Select the version of the data
-#dataVersion = "35X"
-#dataVersion = "35Xredigi"
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-#dataVersion = "38X"
 dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -35,7 +30,10 @@ if options.dataVersion != "":
 
 print "Assuming data is ", dataVersion
 dataVersion = DataVersion(dataVersion) # convert string to object
+# FIXME/Matti: target: options, dataVersion = getOptions(dataVersion)
 
+################################################################################
+# Define the process
 process = cms.Process("HChSignalAnalysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -53,27 +51,26 @@ process.source = cms.Source('PoolSource',
 #        "file:pattuple.root"
     )
 )
-if options.doPat != 0:
-    process.source.fileNames = cms.untracked.vstring(dataVersion.getPatDefaultFileMadhatter())
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
-process.TFileService.fileName = "histograms.root"
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.patSequence = cms.Sequence()
 if options.doPat != 0:
+    #FIXME/Matti: shorten to one line, no jet trigger matching
+    # process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+    
     print "Running PAT on the fly"
 
     # Jet trigger (for cleaning of tau->HLT matching
@@ -96,10 +93,8 @@ if dataVersion.isData():
     additionalCounters = dataSelectionCounters[:]
 
 
-# Add generator and configuration information to histograms.root
-process.genRunInfo = cms.EDAnalyzer("HPlusGenRunInfoAnalyzer",
-    src = cms.untracked.InputTag("generator")
-)
+# Add configuration information to histograms.root
+# FIXME/Matti: process.infoPath = addConfigInfo(process, options)
 process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
 if options.crossSection >= 0.:
     process.configInfo.crossSection = cms.untracked.double(options.crossSection)
@@ -108,7 +103,6 @@ if options.luminosity >= 0:
     process.configInfo.luminosity = cms.untracked.double(options.luminosity)
     print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 process.infoPath = cms.Path(
-    process.genRunInfo +
     process.configInfo
 )
 
@@ -145,7 +139,7 @@ print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET: ", process.signalAnalysis.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
-print "TauSelection factorization used:", process.signalAnalysis.useFactorizedTauID
+print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
 print "TauSelection factorization source:", process.signalAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 # Counter analyzer (in order to produce compatible root file with the
@@ -182,6 +176,7 @@ process.signalAnalysisPath = cms.Path(
 # signalAnalysisTauSelectionShrinkingConeTaNCBased
 # signalAnalysisTauSelectionCaloTauCutBased
 # signalAnalysisTauSelectionHPSTauBased
+# signalAnalysisTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and
 # cms.Paths "Path" postfix. The paths are run independently of each
@@ -206,6 +201,8 @@ if doAllTauIds:
                  "TauSelectionCombinedHPSTaNCBased"],
         preSequence = process.patSequence,
         additionalCounters = additionalCounters)
+#FIXME/Matti: hide       
+        
     
 ################################################################################
 # The signal analysis with jet energy scale variation
@@ -256,6 +253,7 @@ def addJESVariation(process, name, variation):
         counters
     )
     setattr(process, pathName, path)
+#FIXME/Matti: hide
 
 if doJESVariation:
     # In principle here could be more than two JES variation analyses

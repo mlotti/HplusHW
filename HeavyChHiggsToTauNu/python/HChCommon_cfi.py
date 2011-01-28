@@ -7,7 +7,7 @@ MessageLogger.categories.append("hltPrescaleTable")
 MessageLogger.categories.append("EventCounts")  # HPlusEventCountAnalyzer
 MessageLogger.categories.append("HLTTableInfo") # HPlusHLTTableAnalyzer
 
-MessageLogger.cerr.FwkReport.reportEvery = 100
+MessageLogger.cerr.FwkReport.reportEvery = 500
 
 MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(reportEvery = MessageLogger.cerr.FwkReport.reportEvery)
 
@@ -44,5 +44,5 @@ from RecoTracker.TransientTrackingRecHit.TransientTrackingRecHitBuilderWithoutRe
 from TrackingTools.TransientTrack.TransientTrackBuilder_cfi import *
 
 TFileService = cms.Service("TFileService",
-  fileName = cms.string('HPlusOutInfo.root')
+  fileName = cms.string('histograms.root')
 )
