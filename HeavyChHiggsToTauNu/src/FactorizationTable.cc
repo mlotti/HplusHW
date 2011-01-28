@@ -15,7 +15,7 @@ namespace HPlus {
     if      (myTableType == "byPt")      fTableType = kByPt;
     else if (myTableType == "byEta")     fTableType = kByEta;
     else if (myTableType == "byPtVsEta") fTableType = kByPtVsEta;
-    else throw cms::Exception("Error") << "FactorizationTable: factorizationSourceName is unknown! Options: byPt, byEta, byPtVsEta";
+    else throw cms::Exception("Configuration") << "FactorizationTable: factorizationSourceName is unknown (was '" << myTableType << "')! Options: byPt, byEta, byPtVsEta";
     // Determine tauID algorithm
     std::string tauAlgorithm = "";
     std::string mySelection = iConfig.getUntrackedParameter<std::string>("selection");
@@ -23,7 +23,7 @@ namespace HPlus {
     else if(mySelection == "ShrinkingConePFTauCutBased")  tauAlgorithm = "signalAnalysisTauSelectionShrinkingConeCutBased";
     else if(mySelection == "ShrinkingConePFTauTaNCBased") tauAlgorithm = "signalAnalysisTauSelectionShrinkingConeTaNCBased";
     else if(mySelection == "HPSTauBased")                 tauAlgorithm = "signalAnalysisTauSelectionHPSTauBased";
-    else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
+    else throw cms::Exception("Configuration") << "FactorizationTable: no or unknown tau selection used (was '" << mySelection << "')! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased" << std::endl;
     fTauAlgorithm = tauAlgorithm; // FIXME: DEBUG
     // Obtain limits
     fPtLowEdges = myFactorizationConfig.getUntrackedParameter<std::vector<double> >("ptBinLowEdges");
