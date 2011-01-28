@@ -20,7 +20,7 @@ def main(opts, args):
         print
         print "================================================================================"
         print "Dataset %s:" % d
-        ret = subprocess.call(["lumiCalc.py", "-c", "frontier://LumiProd/CMS_LUMI_PROD", "-i", json, "--nowarning", "overview"])
+        ret = subprocess.call(["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-i", json, "--nowarning", "overview", "-b", "stable"])
         if ret != 0:
             print "Call to lumiCalc.py failed with return call %d" % ret
             return 1
