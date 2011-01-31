@@ -58,25 +58,28 @@ namespace HPlus {
           increment(fTriggerPathCount);
 
 	// Get HLT MET object
-	pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
-	if(hltMets.size() == 0) {
-	  fHltMet = pat::TriggerObjectRef();
-	  if(fMetCut >= 0)
-	    passEvent = false;
-	}
-	else if(hltMets.size() == 1) {
-	  increment(fTriggerHltMetExistsCount);
-	  fHltMet = hltMets[0];
-	  hHltMet->Fill(fHltMet->et(), fEventWeight.getWeight());
+        // but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
+        if(passEvent) {
+	  pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
+	  if(hltMets.size() == 0) {
+	    fHltMet = pat::TriggerObjectRef();
+	    if(fMetCut >= 0)
+	      passEvent = false;
+	  }
+	  else if(hltMets.size() == 1) {
+	    increment(fTriggerHltMetExistsCount);
+	    fHltMet = hltMets[0];
+	    hHltMet->Fill(fHltMet->et(), fEventWeight.getWeight());
+  
+	    // Cut on HLT MET
+	    if(fHltMet->et() <= fMetCut)
+	      passEvent = false;
+	  }
+	  else
+	    // precaution
+	    throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() << " instead of 1" << std::endl;
+        }
 
-	  // Cut on HLT MET
-	  if(fHltMet->et() <= fMetCut)
-	    passEvent = false;
-	}
-	else
-	  // precaution
-	  throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() << " instead of 1" << std::endl;
- 
         if(passEvent) increment(fTriggerCount);
 	return Data(this, returnPath, passEvent);
   }

@@ -21,12 +21,12 @@ namespace HPlus {
     // Initialize counter objects for tau candidate selection
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", 0);
     fIDJetPtCut = fCounterPackager.addSubCounter(baseLabel, "TauJetPt",
-      makeTH<TH1F>(*fs, "TauJetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 2 GeV/c", 100, 0., 200.));
+      makeTH<TH1F>(*fs, "TauCand_JetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 2 GeV/c", 100, 0., 200.));
     fIDJetEtaCut = fCounterPackager.addSubCounter(baseLabel, "TauJetEta",
-      makeTH<TH1F>(*fs, "TauJetEta", "TauJetEta;#tau jet #eta;N_{jets} / 0.1", 60, -3., 3.));
+      makeTH<TH1F>(*fs, "TauCand_JetEta", "TauJetEta;#tau jet #eta;N_{jets} / 0.1", 60, -3., 3.));
     fIDLdgTrackExistsCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackExists", 0);
     fIDLdgTrackPtCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackPtCut",
-      makeTH<TH1F>(*fs, "TauLdgTrackPtCut", "TauLdgTrackPtCut;#tau leading track, GeV/c; N_{jets} / 2 GeV/c", 100, 0., 200.));
+      makeTH<TH1F>(*fs, "TauCand_LdgTrackPtCut", "TauLdgTrackPtCut;#tau leading track, GeV/c; N_{jets} / 2 GeV/c", 100, 0., 200.));
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", 0);
     fIDAgainstMuonCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstMuonCut", 0);
     // Initialize counter objects for tau identification
@@ -38,7 +38,7 @@ namespace HPlus {
     fIDDeltaECut = -1; 
     fIDFlightpathCut = -1;
     // Histograms
-    hRtauVsEta = makeTH<TH2F>(*fs, "TauEtaVsRtau", "TauEtaVsRtau;R_{#tau};#tau eta", 60, -3., 3., 20, 0., 200.);
+    hRtauVsEta = makeTH<TH2F>(*fs, "TauID_RtauDetail_RtauVsEta", "RtauVsEta;R_{#tau};#tau eta", 60, 0.0, 1.2, 60, -3., 3.);
     /*
     hPtAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_pt_afterTauSelCuts", "tau_pt_afterTauSelCuts", 100, 0., 200.);
     hEtaAfterTauSelCuts = makeTH<TH1F>(*fs, "tau_eta_afterTauSelCuts", "tau_eta_afterTauSelCuts", 60, -3., 3.);
@@ -60,22 +60,26 @@ namespace HPlus {
 
   TauIDBase::~TauIDBase() { }
 
-  void TauIDBase::createSelectionCounterPackagesBeyondIsolation() {
+  void TauIDBase::createSelectionCounterPackagesBeyondIsolation(int prongCount) {
     edm::Service<TFileService> fs;
-    fIDOneProngNumberCut = fCounterPackager.addSubCounter(fBaseLabel, "TauOneProngCut",
-      makeTH<TH1F>(*fs, "TauOneProngNumberCut", "TauOneProngNumberCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
-    fIDThreeProngNumberCut = fCounterPackager.addSubCounter(fBaseLabel, "TauThreeProngCut",
-      makeTH<TH1F>(*fs, "TauThreeProngNumberCut", "TauThreeProngNumberCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
+    if (prongCount == 1)
+      fIDOneProngNumberCut = fCounterPackager.addSubCounter(fBaseLabel, "TauOneProngCut",
+        makeTH<TH1F>(*fs, "TauID_OneProngNumberCut", "TauOneProngNumberCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
+    else if (prongCount == 3)
+      fIDThreeProngNumberCut = fCounterPackager.addSubCounter(fBaseLabel, "TauThreeProngCut",
+        makeTH<TH1F>(*fs, "TauID_ThreeProngNumberCut", "TauThreeProngNumberCut;N_{#tau prong};N_{jets}", 10, 0., 10.));
     fIDChargeCut = fCounterPackager.addSubCounter(fBaseLabel, "TauChargeCut",
-      makeTH<TH1F>(*fs, "TauChargeCut", "TauChargeCut;#tau charge;N_{jets}", 7, -3., 4.));
+      makeTH<TH1F>(*fs, "TauID_ChargeCut", "TauChargeCut;#tau charge;N_{jets}", 7, -3., 4.));
     fIDRTauCut = fCounterPackager.addSubCounter(fBaseLabel, "TauRtauCut",
-      makeTH<TH1F>(*fs, "TauRtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
-    fIDInvMassCut = fCounterPackager.addSubCounter(fBaseLabel, "TauInvMassCut",
-      makeTH<TH1F>(*fs, "TauInvMassCut", "TauInvMassCut;m_{vis.#tau}, GeV/c^{2};N_{jets} / 0.1 GeV/c^{2}", 60, 0., 6.));
-    fIDDeltaECut = fCounterPackager.addSubCounter(fBaseLabel, "TauDeltaECut",
-      makeTH<TH1F>(*fs, "TauDeltaECut", "TauDeltaECut;#tau #DeltaE;N_{jets} / 0.02", 100, -1., 1.));
-    fIDFlightpathCut = fCounterPackager.addSubCounter(fBaseLabel, "TauFlightpathCut",
-      makeTH<TH1F>(*fs, "TauFlightpathCut", "TauFlightpathCut;#tau flight path signif.;N_{jets} / 0.2", 75, -5., 10));
+      makeTH<TH1F>(*fs, "TauID_RtauCut", "TauRtauCut;R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{jets} / 0.02", 60, 0., 1.2));
+    if (prongCount == 3) {
+      fIDInvMassCut = fCounterPackager.addSubCounter(fBaseLabel, "TauInvMassCut",
+        makeTH<TH1F>(*fs, "TauID_InvMassCut", "TauInvMassCut;m_{vis.#tau}, GeV/c^{2};N_{jets} / 0.1 GeV/c^{2}", 60, 0., 6.));
+      fIDDeltaECut = fCounterPackager.addSubCounter(fBaseLabel, "TauDeltaECut",
+        makeTH<TH1F>(*fs, "TauID_DeltaECut", "TauDeltaECut;#tau #DeltaE;N_{jets} / 0.02", 100, -1., 1.));
+      fIDFlightpathCut = fCounterPackager.addSubCounter(fBaseLabel, "TauFlightpathCut",
+        makeTH<TH1F>(*fs, "TauID_FlightpathCut", "TauFlightpathCut;#tau flight path signif.;N_{jets} / 0.2", 75, -5., 10));
+    }
   }
 
   bool TauIDBase::passTauCandidateSelection(const edm::Ptr<pat::Tau> tau) {
@@ -105,25 +109,10 @@ namespace HPlus {
     return true;
   }
   
-  bool TauIDBase::passOneProngCut(const edm::Ptr<pat::Tau> tau) {
-    fCounterPackager.fill(fIDOneProngNumberCut, tau->tauID("HChTauIDnProngsCont"));
-    if (tau->tauID("HChTauID1Prong") < 0.5) return false;
-    fCounterPackager.incrementSubCount(fIDOneProngNumberCut);
-    // All cuts passed, return true
-    return true;
-  }
-  
-  bool TauIDBase::passThreeProngCut(const edm::Ptr<pat::Tau> tau) {
-    fCounterPackager.fill(fIDThreeProngNumberCut, tau->tauID("HChTauIDnProngsCont"));
-    if (tau->tauID("HChTauID3Prong") < 0.5) return false;
-    fCounterPackager.incrementSubCount(fIDThreeProngNumberCut);
-    // All cuts passed, return true
-    return true;
-  }
-
   bool TauIDBase::passChargeCut(const edm::Ptr<pat::Tau> tau) {
-    // FIXME: add histogramming
-    if (tau->tauID("HChTauIDcharge") < 0.5) return false;
+    fCounterPackager.fill(fIDChargeCut, tau->charge());
+    if (std::abs(tau->charge()) != 1) return false;
+    //if (tau->tauID("HChTauIDcharge") < 0.5) return false; // the discriminator does not work for HPS
     fCounterPackager.incrementSubCount(fIDChargeCut);
     // All cuts passed, return true
     return true;

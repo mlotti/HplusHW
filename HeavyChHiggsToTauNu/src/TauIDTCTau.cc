@@ -11,7 +11,7 @@
 #include "TH1F.h"
 
 namespace HPlus {
-  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
     TauIDBase(iConfig, eventCounter, eventWeight, "TCTau")
   {
     edm::Service<TFileService> fs;
@@ -21,7 +21,7 @@ namespace HPlus {
     // Histograms
     
     // Initialize rest counter objects 
-    createSelectionCounterPackagesBeyondIsolation();
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
   TauIDTCTau::~TauIDTCTau() { }
@@ -53,21 +53,39 @@ namespace HPlus {
     return true;
   }
 
-  bool TauIDTCTau::passRTauCut(const edm::Ptr<pat::Tau> tau) {
-    double myRtauValue = tau->leadTrack()->pt() / tau->pt();
-    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
-    fCounterPackager.fill(fIDRTauCut, myRtauValue);
-    if (!(myRtauValue < fRtauCut)) return false;
-    fCounterPackager.incrementSubCount(fIDRTauCut);
+  bool TauIDTCTau::passOneProngCut(const edm::Ptr<pat::Tau> tau) {
+    size_t myTrackCount = tau->signalTracks().size();
+    fCounterPackager.fill(fIDOneProngNumberCut, myTrackCount);
+    if (!(myTrackCount == 1)) return false;
+    fCounterPackager.incrementSubCount(fIDOneProngNumberCut);
     // All cuts passed, return true
     return true;
   }
   
+  bool TauIDTCTau::passThreeProngCut(const edm::Ptr<pat::Tau> tau) {
+    size_t myTrackCount = tau->signalTracks().size();
+    fCounterPackager.fill(fIDThreeProngNumberCut, myTrackCount);
+    if (!(myTrackCount == 3)) return false;
+    fCounterPackager.incrementSubCount(fIDThreeProngNumberCut);
+    // All cuts passed, return true
+    return true;
+  }
+
+  bool TauIDTCTau::passRTauCut(const edm::Ptr<pat::Tau> tau) {
+    double myRtauValue = tau->leadTrack()->pt() / tau->pt();
+    hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
+    fCounterPackager.fill(fIDRTauCut, myRtauValue);
+    if (!(myRtauValue > fRtauCut)) return false;
+    fCounterPackager.incrementSubCount(fIDRTauCut);
+    // All cuts passed, return true
+    return true;
+  }
+
   bool TauIDTCTau::passAntiRTauCut(const edm::Ptr<pat::Tau> tau) {
     double myRtauValue = tau->leadTrack()->pt() / tau->pt();
     hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
-    if (!(myRtauValue > fAntiRtauCut)) return false;
+    if (!(myRtauValue < fAntiRtauCut)) return false;
     fCounterPackager.incrementSubCount(fIDRTauCut);
     // All cuts passed, return true
     return true;

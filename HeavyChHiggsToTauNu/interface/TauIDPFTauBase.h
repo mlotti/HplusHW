@@ -17,8 +17,8 @@ namespace HPlus {
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
     bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
-    virtual bool passIsolation(const edm::Ptr<pat::Tau> tau) = 0;
-    virtual bool passAntiIsolation(const edm::Ptr<pat::Tau> tau) = 0;
+    bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
+    bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
     bool passRTauCut(const edm::Ptr<pat::Tau> tau);
     bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
 

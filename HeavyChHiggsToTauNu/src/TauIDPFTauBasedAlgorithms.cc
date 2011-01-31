@@ -7,7 +7,7 @@
 namespace HPlus {
   // TauIDPFShrinkingCone ------------------------------------------------
   
-  TauIDPFShrinkingCone::TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauIDPFShrinkingCone::TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, "PFShrink")
   {
     edm::Service<TFileService> fs;
@@ -16,7 +16,7 @@ namespace HPlus {
     // Histograms
     
     // Initialize rest counter objects
-    createSelectionCounterPackagesBeyondIsolation();
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
   TauIDPFShrinkingCone::~TauIDPFShrinkingCone() { }
@@ -36,7 +36,7 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeHPS ---------------------------------------------
-  TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, "HPSTight")
   {
     edm::Service<TFileService> fs;
@@ -45,7 +45,7 @@ namespace HPlus {
     // Histograms
     
     // Initialize rest counter objects
-    createSelectionCounterPackagesBeyondIsolation();
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
   TauIDPFShrinkingConeHPS::~TauIDPFShrinkingConeHPS() { }
@@ -63,19 +63,19 @@ namespace HPlus {
     // All cuts passed, return true
     return true;
   }
-
+  
   // TauIDPFShrinkingConeTaNC --------------------------------------------
-  TauIDPFShrinkingConeTaNC::TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauIDPFShrinkingConeTaNC::TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, "TaNCTenth")
   {
     edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
     fIDTaNC = fCounterPackager.addSubCounter("TaNCTenth", "TaNCTenth",
-      makeTH<TH1F>(*fs, "TauTaNC", "TaNC;TaNC output;N_{jets}/0.02", 50, 0., 1.));
+      makeTH<TH1F>(*fs, "TauID_TaNC", "TaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
     // Histograms
     
     // Initialize rest counter objects
-    createSelectionCounterPackagesBeyondIsolation();
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
   TauIDPFShrinkingConeTaNC::~TauIDPFShrinkingConeTaNC() { }
@@ -97,18 +97,18 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeCombinedHPSTaNC --------------------------------------------
-  TauIDPFShrinkingConeCombinedHPSTaNC::TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  TauIDPFShrinkingConeCombinedHPSTaNC::TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, "HPSTaNC")
   {
     edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
     fIDHPS = fCounterPackager.addSubCounter("HPSTaNC", "HPSTight", 0);
     fIDTaNC = fCounterPackager.addSubCounter("HPSTaNC", "TaNCTenth",
-      makeTH<TH1F>(*fs, "TauCombinedHPSTaNC", "CombinedHPSTaNC;TaNC output;N_{jets}/0.02", 50, 0., 1.));
+      makeTH<TH1F>(*fs, "TauID_CombinedHPSTaNC", "CombinedHPSTaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
     // Histograms
     
     // Initialize rest counter objects
-    createSelectionCounterPackagesBeyondIsolation();
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
   TauIDPFShrinkingConeCombinedHPSTaNC::~TauIDPFShrinkingConeCombinedHPSTaNC() { }
@@ -118,10 +118,7 @@ namespace HPlus {
     if (tau->tauID("byHPStight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
-    // FIXME: doesn't work for HPS+TaNC
-    /*
-    fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
-    */
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byTaNCvloose"));
     if (tau->tauID("byTaNCtight") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
@@ -133,15 +130,11 @@ namespace HPlus {
     if (tau->tauID("byHPSvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // Apply TaNC
-    // FIXME: doesn't work for HPS+TaNC
-    /*
-    fCounterPackager.fill(fIDTaNC, tau->tauID("byCombinedHPSTaNC"));
-    */
+    fCounterPackager.fill(fIDTaNC, tau->tauID("byTaNCvloose"));
     if (tau->tauID("byTaNCvloose") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDTaNC);
     // All cuts passed, return true
     return true;
   }
-
   
 }

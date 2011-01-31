@@ -30,11 +30,12 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-	"rfio:/castor/cern.ch/user/w/wendland/pattuple_v9_39X_QCD120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
@@ -67,6 +68,14 @@ process.infoPath = addConfigInfo(process, options)
 # The "golden" version of the signal analysis
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Set tau selection mode to 'standard' or 'factorized'
+myTauSelectionOperatingMode = 'standard' 
+param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+
 # Prescale weight, do not uncomment unless you know what you're doing!
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
@@ -81,7 +90,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
 ####    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    tauSelection = param.tauSelection,
+    tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -104,7 +113,7 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False),
+    printSubCounters = cms.untracked.bool(True), #False
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
