@@ -45,7 +45,7 @@ ROOT.gROOT.SetBatch(True)
 style = TDRStyle()
 
 # Construct datasets as stated in the multicrab.cfg of the execution
-# directory. The returned object is of type DatasetSet.
+# directory. The returned object is of type DatasetManager.
 datasets = getDatasetsFromMulticrabCfg()
 
 # Construct datasets from the given list of CRAB task directories
@@ -55,7 +55,7 @@ datasets = getDatasetsFromMulticrabCfg()
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
 
-# Print the list of datasets in the given HistoSet
+# Print the list of datasets in the given HistoManager
 #print "\n".join([d.getName() for d in datasets.getAllDatasets()])
 
 # Example how to remove some datasets
@@ -82,10 +82,10 @@ datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
                        "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
 
 # Get set of histograms with the given path. The returned object is of
-# type HistoSet, which contains a histogram from each dataset in
-# DatasetSet. The histograms can be e.g. merged/stacked or normalized
+# type HistoManager, which contains a histogram from each dataset in
+# DatasetManager. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
+tauPts = HistoManager(datasets, "signalAnalysis/tau_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -95,7 +95,7 @@ tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
 #ylabel = "Cross section (pb)"
 
 # Normalize MC histograms to the luminosity of the collision data in
-# the HistoSet
+# the HistoManager
 #tauPts.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 

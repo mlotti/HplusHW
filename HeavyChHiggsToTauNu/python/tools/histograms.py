@@ -139,7 +139,7 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
-class HistoSetData:
+class HistoData:
     """Class to represent one (TH1/TH2) histogram."""
 
     def __init__(self, dataset, histo):
@@ -201,14 +201,14 @@ class HistoSetData:
     def getXmax(self):
         return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
 
-class HistoSetDataStacked:
+class HistoDataStacked:
     """Class to represent stacked TH1 histograms."""
 
     def __init__(self, data, name):
         """Constructor.
 
         Arguments:
-        data    List of HistoSetData objects to stack
+        data    List of HistoData objects to stack
         name    Name of the stacked histogram
 
         Stacking is done with the help of THStack object
@@ -282,11 +282,11 @@ class HistoStatError:
         histos = []
         for h in self.histos:
             try:
-                # If h is HistoSetDataStacked
+                # If h is HistoDataStacked
                 hl = h.getAllHistograms()
                 histos.extend(hl)
             except AttributeError:
-                # If h is HistoSetData
+                # If h is HistoData
                 histos.append(h.getHistogram())
 
         self.histo = histos[0].Clone()
@@ -327,23 +327,23 @@ class HistoStatError:
         return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
         
 
-class HistoSetImpl:
-    """Implementation of HistoSet.
+class HistoManagerImpl:
+    """Implementation of HistoManager.
 
-    Intended to be used only from HistoSet. This class contains all
-    the methods which require the HistoSetData objects (and only them).
+    Intended to be used only from HistoManager. This class contains all
+    the methods which require the HistoData objects (and only them).
     """
     def __init__(self, histos=[]):
         self.histos = histos
         self._populateMap()
 
     def append(self, histoWrapper):
-        """Append a HistoSetData object."""
+        """Append a HistoData object."""
         self.histos.append(histoWrapper)
         self._populateMap()
 
     def extend(self, histoWrappers):
-        """Extend with a list of HistoSetData objects."""
+        """Extend with a list of HistoData objects."""
         self.histos.extend(histoWrappers)
         self._populateMap()
 
@@ -390,7 +390,7 @@ class HistoSetImpl:
         func        Function taking one parameter (TH1), return value is used
                     as the new histogram
         predicate   Call func() only if predicate returns True. The
-                    HistoSetData object is given to the predicate
+                    HistoData object is given to the predicate
         """
         for d in self.histos:
             if predicate(d):
@@ -561,40 +561,40 @@ class HistoSetImpl:
         if len(selected) == 0:
             return
 
-        notSelected.insert(firstIndex, HistoSetDataStacked(selected, newName))
+        notSelected.insert(firstIndex, HistoDataStacked(selected, newName))
         self.histos = notSelected
         self._populateMap()
 
 
 
-class HistoSet:
+class HistoManager:
     """Collection of histograms which are managed together.
 
-    The histograms in a HistoSet are drawn to one plot.
+    The histograms in a HistoManager are drawn to one plot.
 
-    The implementation is divided to this and HistoSetImpl class. The
+    The implementation is divided to this and HistoManagerImpl class. The
     idea is that here are the methods, which don't require
-    HistoSetData objects (namely setting the normalization), and
-    HistoSetImpl has all the methods which require the HistoSetData
+    HistoData objects (namely setting the normalization), and
+    HistoSetImpl has all the methods which require the HistoData
     objects. User can set freely the normalization scheme as many
     times as (s)he wants, and at the first time some method not
-    implemented in HistoSet is called, the HistoSetData objects are
-    created and the calls are delegated to HistoSetImpl class.
+    implemented in HistoManager is called, the HistoData objects are
+    created and the calls are delegated to HistoManagerImpl class.
     """
-    def __init__(self, datasetSet, name):
+    def __init__(self, datasetMgr, name):
         """Constructor.
 
         Arguments:
-        datasetSet   DatasetSet object to take the histograms from
-        name         Path to the TH1 objects in the DatasetSet ROOT files
+        datasetMgr   DatasetManager object to take the histograms from
+        name         Path to the TH1 objects in the DatasetManager ROOT files
         """
-        self.datasets = datasetSet
-        self.histoWrappers = datasetSet.getHistoWrappers(name)
+        self.datasetMgr = datasetMgr
+        self.histoWrappers = datasetMgr.getHistoWrappers(name)
         self.data = None
         self.luminosity = None
 
     def __getattr__(self, name):
-        """Delegate the calls which require the HistoSetData objects to the implementation class."""
+        """Delegate the calls which require the HistoData objects to the implementation class."""
         if self.data == None:
             self._createHistogramObjects()
         return getattr(self.data, name)
@@ -673,16 +673,16 @@ class HistoSet:
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
     def getHistogramObjects(self):
-        """Get the HistoSetData objects."""
-        return [HistoSetData(h.getDataset(), h.getHistogram()) for h in self.histoWrappers]
+        """Get the HistoData objects."""
+        return [HistoData(h.getDataset(), h.getHistogram()) for h in self.histoWrappers]
 
     def _createHistogramObjects(self):
-        """Create the HistoSetImpl object.
+        """Create the HistoManagerImpl object.
 
         Intended only for internal use.
         """
-        self.data = HistoSetImpl(self.getHistogramObjects())
+        self.data = HistoManagerImpl(self.getHistogramObjects())
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'Stacked MC'."""
-        self.stackHistograms("Stacked MC", self.datasets.getMCDatasetNames())
+        self.stackHistograms("Stacked MC", self.datasetMgr.getMCDatasetNames())

@@ -46,7 +46,7 @@ style = TDRStyle()
 
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
-### directory. The returned object is of type DatasetSet.
+### directory. The returned object is of type DatasetManager.
 datasets = getDatasetsFromMulticrabCfg()
 
 ### Construct datasets from the given list of CRAB task directories
@@ -76,12 +76,12 @@ datasets.remove([",BTau_141950-144114", "BTau_146240-147116", "TTbar", "TTbar_Ht
 
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
-### type HistoSet, which contains a histogram from each dataset in
-### DatasetSet. The histograms can be e.g. merged/stacked or normalized
+### type HistoManager, which contains a histogram from each dataset in
+### DatasetManager. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-alphaT = HistoSet(datasets, "signalAnalysis/alphaT")
+alphaT = HistoManager(datasets, "signalAnalysis/alphaT")
 
-### Print the list of datasets in the given HistoSet
+### Print the list of datasets in the given HistoManager
 #print "\n".join(alphaT.getDatasetNames())
 
 ############################### DATA ###############################
@@ -101,7 +101,7 @@ alphaT = HistoSet(datasets, "signalAnalysis/alphaT")
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
-# the HistoSet
+# the HistoManager
 #alphaT.normalizeMCByLuminosity()
 #ylabel = "Events"
 

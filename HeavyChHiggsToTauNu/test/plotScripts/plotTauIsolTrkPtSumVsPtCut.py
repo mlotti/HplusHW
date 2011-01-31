@@ -46,7 +46,7 @@ style = TDRStyle()
 
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
-### directory. The returned object is of type DatasetSet.
+### directory. The returned object is of type DatasetManager.
 #datasets = getDatasetsFromMulticrabCfg() ## uncomment me
 
 ### Construct datasets from the given list of CRAB task directories
@@ -66,12 +66,12 @@ datasets = getDatasetsFromRootFiles([("TTToHpmToTauNu_M120", "TTToHpmToTauNu_M12
 
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
-### type HistoSet, which contains a histogram from each dataset in
-### DatasetSet. The histograms can be e.g. merged/stacked or normalized
+### type HistoManager, which contains a histogram from each dataset in
+### DatasetManager. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-TauIsoltrkPtsumVSPtcut = HistoSet(datasets, "signalAnalysis/tau_isoltrk_ptsum_vs_ptcut")
+TauIsoltrkPtsumVSPtcut = HistoManager(datasets, "signalAnalysis/tau_isoltrk_ptsum_vs_ptcut")
 
-### Print the list of datasets in the given HistoSet
+### Print the list of datasets in the given HistoManager
 #print "\n".join(TauIsoltrkPtsumVSPtcut.getDatasetNames())
 
 ### Example how to remove some datasets
@@ -96,7 +96,7 @@ TauIsoltrkPtsumVSPtcut = HistoSet(datasets, "signalAnalysis/tau_isoltrk_ptsum_vs
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
-# the HistoSet
+# the HistoManager
 #TauIsoltrkPtsumVSPtcut.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 

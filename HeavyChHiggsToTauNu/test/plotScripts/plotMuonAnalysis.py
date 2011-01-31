@@ -244,7 +244,7 @@ style = TDRStyle()
 
 class Histo:
     def __init__(self, datasets, name, lumi=None):
-        self.histos = HistoSet(datasets, name)
+        self.histos = HistoManager(datasets, name)
         #print "\n".join(histos.getDatasetNames())
 
         if lumi == None:

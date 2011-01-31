@@ -46,7 +46,7 @@ style = TDRStyle()
 
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
-### directory. The returned object is of type DatasetSet.
+### directory. The returned object is of type DatasetManager.
 #datasets = getDatasetsFromMulticrabCfg() ## uncomment me
 
 ### Construct datasets from the given list of CRAB task directories
@@ -67,12 +67,12 @@ datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120", "QCD_Pt1
 
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
-### type HistoSet, which contains a histogram from each dataset in
-### DatasetSet. The histograms can be e.g. merged/stacked or normalized
+### type HistoManager, which contains a histogram from each dataset in
+### DatasetManager. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-NBtagJets = HistoSet(datasets, "signalAnalysis/NumberOfBtaggedJets")
+NBtagJets = HistoManager(datasets, "signalAnalysis/NumberOfBtaggedJets")
 
-### Print the list of datasets in the given HistoSet
+### Print the list of datasets in the given HistoManager
 #print "\n".join(NBtagJets.getDatasetNames())
 
 ### Example how to remove some datasets
@@ -97,7 +97,7 @@ NBtagJets = HistoSet(datasets, "signalAnalysis/NumberOfBtaggedJets")
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
-# the HistoSet
+# the HistoManager
 #NBtagJets.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 
