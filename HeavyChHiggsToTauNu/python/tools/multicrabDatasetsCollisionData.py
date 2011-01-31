@@ -18,7 +18,7 @@ datasets = {
             },
         }
     },
-    "JetMETTau_Tau_140058_141881_Dec22": {
+    "JetMETTau_Tau_140058-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleLooseIsoTau20_Trk5",
         "runs": (140058, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)

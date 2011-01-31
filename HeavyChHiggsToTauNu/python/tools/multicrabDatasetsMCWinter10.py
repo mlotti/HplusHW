@@ -74,16 +74,16 @@ datasets = {
             },
         },
     },
-    "QCD_Pt50to80_TuneZ2_Winter10": {
-        "dataVersion":  "39Xredigi",
-        "crossSection": 6.359e+06,
-        "data": {
-            "AOD": {
-                "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 450,
-            },
-        },
-    },
+    # "QCD_Pt50to80_TuneZ2_Winter10": {
+    #     "dataVersion":  "39Xredigi",
+    #     "crossSection": 6.359e+06,
+    #     "data": {
+    #         "AOD": {
+    #             "datasetpath": "",
+    #             "number_of_jobs": 450,
+    #         },
+    #     },
+    # },
     "QCD_Pt80to120_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 7.843e+05,
