@@ -20,10 +20,12 @@ doAllTauIds = True
 doJESVariation = False
 JESVariation = 0.05
 
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
+
 
 ################################################################################
 # Define the process
@@ -64,6 +66,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options)
 
+
 ################################################################################
 # The "golden" version of the signal analysis
 
@@ -87,9 +90,10 @@ param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(m
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
 #    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
-####    TriggerTauMETEmulation = param.TriggerTauMETEmulation,
+####    TriggerTauMETEmulation = param.TriggerTauMETEmulation, OBSOLETE?
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+    # Change default tau algorithm here as needed         
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
@@ -113,7 +117,7 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(True), #False
+    printSubCounters = cms.untracked.bool(True), # Default False
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
@@ -128,6 +132,7 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
 
 ################################################################################
 # The signal analysis with different tau ID algorithms
