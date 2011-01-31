@@ -85,7 +85,7 @@ def addOptions(parser):
 
 
 def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
-    """Construct DatasetSet from a multicrab.cfg.
+    """Construct DatasetManager from a multicrab.cfg.
 
     Parameters:
     opts       Optional OptionParser object. Should have options added with
@@ -95,12 +95,12 @@ def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
 
 
     The section names in multicrab.cfg are taken as the dataset names
-    in the DatasetSet object.
+    in the DatasetManager object.
     """
     return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counters)
 
 def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounters"):   
-    """Construct DatasetSet from a list of CRAB task directory names.
+    """Construct DatasetManager from a list of CRAB task directory names.
 
     Parameters:
     taskdirs   List of strings for the CRAB task directories (relative
@@ -110,7 +110,7 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
     counters   String for a directory name inside the ROOT files for the
                event counter histograms
 
-    The task directories are taken as the dataset names in the DatasetSet object.
+    The task directories are taken as the dataset names in the DatasetManager object.
     """
     if opts == None:
         parser = OptionParser(usage="Usage: %prog [options]")
@@ -147,7 +147,7 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
     return getDatasetsFromRootFiles(dlist, counters)
 
 def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
-    """Construct DatasetSet from a list of CRAB task directory names.
+    """Construct DatasetManager from a list of CRAB task directory names.
 
     Parameters:
     dlist      List of (name, filename) pairs (both should be strings).
@@ -156,7 +156,7 @@ def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
     counters   String for a directory name inside the ROOT files for the
                event counter histograms
     """
-    datasets = DatasetSet()
+    datasets = DatasetManager()
     for name, f in dlist:
         datasets.append(Dataset(name, f, counters))
     return datasets
@@ -857,7 +857,7 @@ class DatasetMerged:
                 raise Exception("Error: merged datasets have different contents in directory '%s'" % directory)
         return content
 
-class DatasetSet:
+class DatasetManager:
     """Collection of Dataset objects which are managed together.
 
     Holds both an ordered list of Dataset objects, and a name->object
@@ -887,40 +887,40 @@ class DatasetSet:
         """
 
         if dataset.getName() in self.datasetMap:
-            raise Exception("Dataset '%s' already exists in this DatasetSet" % dataset.getName())
+            raise Exception("Dataset '%s' already exists in this DatasetManager" % dataset.getName())
 
         self.datasets.append(dataset)
         self.datasetMap[dataset.getName()] = dataset
 
-    def extend(self, datasetset):
-        """Extend the set of Datasets from another DatasetSet object.
+    def extend(self, datasetmgr):
+        """Extend the set of Datasets from another DatasetManager object.
 
         Parameters:
-        datasetset   DatasetSet object
+        datasetmgr   DatasetManager object
 
-        Note that the Dataset objects of datasetset are appended to
+        Note that the Dataset objects of datasetmgr are appended to
         self by reference, i.e. the Dataset objects will be shared
         between them.
         """
-        for d in datasetset.datasets:
+        for d in datasetmgr.datasets:
             self.append(d)
 
     def shallowCopy(self):
-        """Make a shallow copy of the DatasetSet object.
+        """Make a shallow copy of the DatasetManager object.
 
-        The Dataset objects are shared between the DatasetSets.
+        The Dataset objects are shared between the DatasetManagers.
         """
 
-        copy = DatasetSet()
+        copy = DatasetManager()
         copy.extend(self)
         return copy
 
     def deepCopy(self):
-        """Make a deep copy of the DatasetSet object.
+        """Make a deep copy of the DatasetManager object.
 
-        Nothing is shared between the DatasetSets.
+        Nothing is shared between the DatasetManagers.
         """
-        copy = DatasetSet()
+        copy = DatasetManager()
         for d in self.datasets:
             copy.append(d.deepCopy())
         return copy

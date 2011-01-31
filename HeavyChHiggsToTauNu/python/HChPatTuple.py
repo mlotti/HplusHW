@@ -17,6 +17,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 
 # Assumes that process.out is the output module
 #
@@ -347,3 +348,34 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         seq *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
 
     return seq
+
+
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
+    counters = []
+    if dataVersion.isData():
+        counters = HChDataSelection.dataSelectionCounters[:]
+
+    if options.doPat == 0:
+        return (cms.Sequence(), counters)
+
+    print "Running PAT on the fly"
+
+    process.collisionDataSelection = cms.Sequence()
+    if dataVersion.isData():
+        process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+
+    if options.trigger == "":
+        raise Exception("Command line argument 'trigger' is missing")
+
+    print "Trigger used for tau matching:", options.trigger
+    if jetTrigger != None:
+        print "Trigger used for jet matching:", jetTrigger
+
+    process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger)
+
+    dataPatSequence = cms.Sequence(
+        process.collisionDataSelection *
+        process.patSequence
+    )
+    
+    return (dataPatSequence, counters)

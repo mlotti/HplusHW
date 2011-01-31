@@ -112,3 +112,24 @@ fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
   maxDeltaPhi = cms.untracked.double(999.)
 )
+
+
+# Functions
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
+def setTauSelection(module, val):
+    module.tauSelection = val
+def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
+    addAnalysisArray(process, prefix, module, setTauSelection,
+    values = [tauSelectionShrinkingConeCutBased,
+              tauSelectionShrinkingConeTaNCBased,
+              tauSelectionCaloTauCutBased,
+              tauSelectionHPSTauBased,
+              tauSelectionCombinedHPSTaNCTauBased],
+    names = ["TauSelectionShrinkingConeCutBased",
+             "TauSelectionShrinkingConeTaNCBased",
+             "TauSelectionCaloTauCutBased",
+             "TauSelectionHPSTauBased",
+             "TauSelectionCombinedHPSTaNCBased"],
+    preSequence = commonSequence,
+    additionalCounters = additionalCounters)
+

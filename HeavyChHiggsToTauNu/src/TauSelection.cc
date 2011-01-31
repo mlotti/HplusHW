@@ -176,7 +176,7 @@ namespace HPlus {
       fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight);
     else if(fSelection == "CombinedHPSTaNCTauBased")
       fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight);
-    else throw cms::Exception("Error") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
@@ -188,7 +188,7 @@ namespace HPlus {
       fOperationMode = kAntiTauTag;
     else if (myOperatingModeSelection == "antiisolatedtau")
       fOperationMode = kAntiTauTagIsolationOnly;
-    else throw cms::Exception("Error") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
   }
 
   TauSelection::~TauSelection() {
@@ -240,6 +240,9 @@ namespace HPlus {
       if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
         // Standard tau ID or factorized tau ID (necessary for the tau selection logic) 
         if (!fTauID->passIsolation(iTau)) continue;
+
+        // FIXME: the current implementation does NOT work for HPS taus (no HChTauIDnProngsCont discriminator)
+        /*
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
           if (!fTauID->passChargeCut(iTau)) continue;
@@ -252,6 +255,7 @@ namespace HPlus {
           //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
           if (!fTauID->passRTauCut(iTau)) continue;
         }
+        */
       } else if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly) {
         // Anti-tau tag
         if (fProngNumber == 1) {

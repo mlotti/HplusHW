@@ -73,29 +73,28 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 def addTauHLTMatching(process, tauTrigger, jetTrigger):
     if tauTrigger == None:
         raise Exception("Tau trigger missing for matching")
-    if jetTrigger == None:
-        raise Exception("Jet trigger missing for matching")
 
     process.tauTriggerMatchingSequence = addTauTriggerMatching(process, tauTrigger, "Tau")
-    process.jetTriggerMatchingSequence = addTauTriggerMatching(process, jetTrigger, "Jet")
-
     process.triggerMatchingSequence = cms.Sequence(
-        process.tauTriggerMatchingSequence *
-        process.jetTriggerMatchingSequence
+        process.tauTriggerMatchingSequence
     )
 
-    ###########################################################################
-    # Remove first tau matching to the jet trigger from the list
-    # of tau -> HLT tau trigger matched patTaus
-    for collection in _patTauCollectionsDefault:
-        patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
-            tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
-            tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
-        )
-        patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"
-        setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
-        process.triggerMatchingSequence *= patJetTriggerCleanedTauTriggerMatchedTaus
+    if jetTrigger != None:
+        process.jetTriggerMatchingSequence = addTauTriggerMatching(process, jetTrigger, "Jet")
+        process.triggerMatchingSequence *= process.jetTriggerMatchingSequence
 
+        ###########################################################################
+        # Remove first tau matching to the jet trigger from the list
+        # of tau -> HLT tau trigger matched patTaus
+        for collection in _patTauCollectionsDefault:
+            patJetTriggerCleanedTauTriggerMatchedTaus = cms.EDProducer("TauHLTMatchJetTriggerRemover",
+                tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
+                tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
+            )
+            patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"
+            setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
+            process.triggerMatchingSequence *= patJetTriggerCleanedTauTriggerMatchedTaus
+    
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):

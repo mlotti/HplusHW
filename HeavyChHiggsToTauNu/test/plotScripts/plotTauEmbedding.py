@@ -18,7 +18,7 @@ textDefaults.setEnergyDefaults(x=0.17)
 textDefaults.setCmsPreliminaryDefaults(x=0.6)
 
 def getHisto(datasets, path, name, func=None):
-    h = HistoSet(datasets, path)
+    h = HistoManager(datasets, path)
     h = h.createHistogramObjects()[0]
     h.setName(name)
     h.setLegendLabel(name)
@@ -48,7 +48,7 @@ class HistoBase:
 
 class Histo(HistoBase):
     def __init__(self, datasets, directory, names):
-        self.histos = HistoSetImpl([])
+        self.histos = HistoManagerImpl([])
         self.prefix = directory.replace("/", "_")+"_"
 
         for name in names:
@@ -61,7 +61,7 @@ class Histo(HistoBase):
 
 class Histo2(HistoBase):
     def __init__(self, datasets, datasetsTau, directories, name):
-        self.histos = HistoSetImpl([])
+        self.histos = HistoManagerImpl([])
 
         self.histos.append(getHisto(datasets, directories[0]+"/"+name, name+"Embedded"))
         self.histos.append(getHisto(datasetsTau, directories[1]+"/"+name, name+"Tau"))

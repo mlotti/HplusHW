@@ -46,7 +46,7 @@ style = TDRStyle()
 
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
-### directory. The returned object is of type DatasetSet.
+### directory. The returned object is of type DatasetManager.
 datasets = getDatasetsFromMulticrabCfg()
 
 ### Construct datasets from the given list of CRAB task directories
@@ -71,12 +71,12 @@ datasets.remove(["TTbar", "TTbar_Htaunu_M80", "TTToHpmToTauNu_M90", "TTToHpmToTa
 #datasets = getDatasetsFromRootFiles([("BTau_141950-144114", "BTau_141950-144114/res/histograms_1_1_Dxo.root")])
 ############################### HISTOS ###############################
 ### Get set of histograms with the given path. The returned object is of
-### type HistoSet, which contains a histogram from each dataset in
-### DatasetSet. The histograms can be e.g. merged/stacked or normalized
+### type HistoManager, which contains a histogram from each dataset in
+### DatasetManager. The histograms can be e.g. merged/stacked or normalized
 ### in various ways before drawing.
-NSelJets = HistoSet(datasets, "signalAnalysis/NumberOfSelectedJets")
+NSelJets = HistoManager(datasets, "signalAnalysis/NumberOfSelectedJets")
 
-### Print the list of datasets in the given HistoSet
+### Print the list of datasets in the given HistoManager
 #print "\n".join(NSelJets.getDatasetNames())
 
 ############################### DATA ###############################
@@ -96,7 +96,7 @@ NSelJets = HistoSet(datasets, "signalAnalysis/NumberOfSelectedJets")
 #ylabel = "Cross section (pb)"
 
 ### Normalize MC histograms to the luminosity of the collision data in
-# the HistoSet
+# the HistoManager
 #NSelJets.normalizeMCByLuminosity()
 #ylabel = "Events"
 

@@ -1,6 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 ################################################################################
 # Configuration
@@ -19,18 +18,12 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
+JESVariation = 0.05
 
 ################################################################################
-# Common configuration, command line arguments, input file, number of
-# events, possible PAT-on-the-fly, configuration histograms
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
-# FIXME/Matti: target: options, dataVersion = getOptions(dataVersion)
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 ################################################################################
 # Define the process
@@ -63,47 +56,12 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
 
 # Fragment to run PAT on the fly if requested from command line
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.patSequence = cms.Sequence()
-if options.doPat != 0:
-    #FIXME/Matti: shorten to one line, no jet trigger matching
-    # process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
-    
-    print "Running PAT on the fly"
-
-    # Jet trigger (for cleaning of tau->HLT matching
-    jetTrigger = "HLT_Jet30U"
-    trigger = options.trigger
-
-    process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
-        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
-
-    print "Trigger used for tau matching: "+trigger
-    print "Trigger used for jet matching: "+jetTrigger
-
-    process.patSequence = cms.Sequence(
-        process.collisionDataSelection *
-        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
-    )
-additionalCounters = []
-if dataVersion.isData():
-    additionalCounters = dataSelectionCounters[:]
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
 # Add configuration information to histograms.root
-# FIXME/Matti: process.infoPath = addConfigInfo(process, options)
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
-if options.crossSection >= 0.:
-    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
-    print "Dataset cross section has been set to %g pb" % options.crossSection
-if options.luminosity >= 0:
-    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
-process.infoPath = cms.Path(
-    process.configInfo
-)
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
+process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
 # The "golden" version of the signal analysis
@@ -113,7 +71,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
 #process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.patSequence *= process.hplusPrescaleWeightProducer
+#process.commonSequence *= process.hplusPrescaleWeightProducer
 
 
 # Signal analysis module for the "golden analysis"
@@ -156,7 +114,7 @@ if len(additionalCounters) > 0:
 # ones selected by the golden analysis defined above.
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.signalAnalysisPath = cms.Path(
-    process.patSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.signalAnalysis *
     process.signalAnalysisCounters *
     process.PickEvents
@@ -168,7 +126,7 @@ process.signalAnalysisPath = cms.Path(
 # Run the analysis for the different tau ID algorithms at the same job
 # as the golden analysis. It is significantly more efficiency to run
 # many analyses in a single job compared to many jobs (this avoids
-# some of the I/O and grid overhead). The fragmen below creates the
+# some of the I/O and grid overhead). The fragment below creates the
 # following histogram directories
 # signalAnalysisTauSelectionShrinkingConeCutBased
 # signalAnalysisTauSelectionShrinkingConeTaNCBased
@@ -178,28 +136,12 @@ process.signalAnalysisPath = cms.Path(
 #
 # The corresponding Counter directories have "Counters" postfix, and
 # cms.Paths "Path" postfix. The paths are run independently of each
-# other. It is important to give the process.patSequence for the
+# other. It is important to give the process.commonSequence for the
 # function, so that it will be run before the analysis module in the
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-def setTauSelection(module, val):
-    module.tauSelection = val
 if doAllTauIds:
-    addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-        values = [param.tauSelectionShrinkingConeCutBased,
-                  param.tauSelectionShrinkingConeTaNCBased,
-                  param.tauSelectionCaloTauCutBased,
-                  param.tauSelectionHPSTauBased,
-                  param.tauSelectionCombinedHPSTaNCTauBased],
-        names = ["TauSelectionShrinkingConeCutBased",
-                 "TauSelectionShrinkingConeTaNCBased",
-                 "TauSelectionCaloTauCutBased",
-                 "TauSelectionHPSTauBased",
-                 "TauSelectionCombinedHPSTaNCBased"],
-        preSequence = process.patSequence,
-        additionalCounters = additionalCounters)
-#FIXME/Matti: hide       
+    param.addTauIdAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
         
     
 ################################################################################
@@ -208,55 +150,16 @@ if doAllTauIds:
 # If the flag is true, create two paths for the variation in plus and
 # minus, and clone the signal analysis and counter modules to the
 # paths. The tau, jet and MET collections to adjust are taken from the
-# configuration of the golden analysis. 
-
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
-def addJESVariation(process, name, variation):
-    variationName = name
-    analysisName = "signalAnalysis"+name
-    countersName = analysisName+"Counters"
-    pathName = analysisName+"Path"
-
-    # Construct the JES variation module
-    variation = jesVariation.clone(
-        tauSrc = cms.InputTag(process.signalAnalysis.tauSelection.src.value()), # from untracked to tracked
-        jetSrc = cms.InputTag(process.signalAnalysis.jetSelection.src.value()),
-        metSrc = cms.InputTag(process.signalAnalysis.MET.src.value()),
-        JESVariation = cms.double(variation)
-    )
-    setattr(process, variationName, variation)
-
-    # Construct the signal analysis module for this variation
-    # Use variated taus, jets and MET
-    analysis = process.signalAnalysis.clone()
-    analysis.tauSelection.src = cms.untracked.InputTag(variationName)
-    analysis.jetSelection.src = cms.untracked.InputTag(variationName)
-    analysis.MET.src = cms.untracked.InputTag(variationName)
-    setattr(process, analysisName, analysis)
-    
-    # Construct the counters module
-    counters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-        counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
-    )
-    if len(additionalCounters) > 0:
-        counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
-    setattr(process, countersName, counters)
-
-    # Construct the path
-    path = cms.Path(
-        process.patSequence *
-        variation *
-        analysis *
-        counters
-    )
-    setattr(process, pathName, path)
-#FIXME/Matti: hide
-
+# configuration of the golden analysis. The fragment below creates the
+# following histogram directories
+# signalAnalysisJESPlus05
+# signalAnalysisJESMinus05
+from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
-    addJESVariation(process, "JESPlus05", 0.05)
-    addJESVariation(process, "JESMinus05", -0.05)
+    s = "%02d" % int(JESVariation*100)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+s, process.signalAnalysis, additionalCounters, JESVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+s, process.signalAnalysis, additionalCounters, -JESVariation)
 
 
 # Print tau discriminators from one tau from one event. Note that if
@@ -265,7 +168,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
     src = process.signalAnalysis.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
-#    process.patSequence *
+#    process.commonSequence *
 #    process.tauDiscriminatorPrint
 #)
 
