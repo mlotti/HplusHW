@@ -154,7 +154,7 @@ if doAllTauIds:
 # following histogram directories
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addJESVariationAnalysis
+from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
     s = "%02d" % int(JESVariation*100)
