@@ -16,8 +16,8 @@ namespace HPlus {
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
-    fTriggerCounter(eventCounter.addCounter("trigger")),
-    fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
+    fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
+    //fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
@@ -66,12 +66,13 @@ namespace HPlus {
     
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
-    // Apply trigger 
+    // Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
 /*
     // Tau+MET trigger emulation
+    // HLT_MET cut is applied at trigger step
     TriggerTauMETEmulation::Data triggerTauMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup);
     if(!triggerTauMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);

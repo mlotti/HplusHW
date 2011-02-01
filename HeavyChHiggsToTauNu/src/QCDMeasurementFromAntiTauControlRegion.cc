@@ -13,7 +13,7 @@ namespace HPlus {
   QCDMeasurementFromAntiTauControlRegion::QCDMeasurementFromAntiTauControlRegion(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
-    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("trigger")),
+    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
@@ -65,12 +65,13 @@ namespace HPlus {
     
     increment(fAllCounter);
     
-    // Trigger
+    // Trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
 
-    // Trigger Emulation (for MC & Data) - Required in QCD estimation method because the signal trigger contains a MET cut. 
+    // Trigger Emulation (for MC & Data)
+    // Not needed: HLT_MET cut is applied already in trigger step 
     //TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
     //if(!triggerMETEmulationData.passedEvent()) return;
     //increment(fTriggerEmulationCounter);

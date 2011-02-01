@@ -33,7 +33,7 @@ namespace HPlus {
     	}
 
         edm::Service<TFileService> fs;
-        hHltMet = makeTH<TH1F>(*fs, "hlt_met", "hlt_met", 200, 0., 200.);
+        hHltMet = makeTH<TH1F>(*fs, "Trigger_HLT_MET", "HLT_MET;HLT_MET, GeV;N_{events} / 2 GeV", 100, 0., 200.);
 
   }
 

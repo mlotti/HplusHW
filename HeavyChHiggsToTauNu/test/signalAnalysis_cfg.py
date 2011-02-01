@@ -105,7 +105,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
 )
 
 print "Trigger:", process.signalAnalysis.trigger
-print "Cut on HLT MET: ", process.signalAnalysis.trigger.hltMetCut
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode

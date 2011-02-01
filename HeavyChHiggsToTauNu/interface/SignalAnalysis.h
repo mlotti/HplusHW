@@ -46,7 +46,7 @@ namespace HPlus {
 
     Count fAllCounter;
     Count fTriggerCounter;
-    Count fTriggerEmulationCounter;
+    //Count fTriggerEmulationCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fElectronVetoCounter;

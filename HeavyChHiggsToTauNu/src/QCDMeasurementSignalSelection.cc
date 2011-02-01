@@ -15,7 +15,7 @@ namespace HPlus {
     // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET cut")),
-    fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation cut")),
+    //fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation cut")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
     fJetSelectionCounter(eventCounter.addCounter("Jet selection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("Global electron veto")),
@@ -24,7 +24,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("B-tagging cut")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMET veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
+    fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
@@ -60,9 +60,10 @@ namespace HPlus {
     increment(fTriggerAndHLTMetCutCounter);
          
     // Trigger Emulation (for MC data)
-    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
+    // Not needed: HLT_MET cut is applied already in trigger step
+    /*TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
     if(!triggerMETEmulationData.passedEvent()) return;
-    increment(fTriggerEmulationCounter);
+    increment(fTriggerEmulationCounter);*/
 
     // Apply anti-tau tag taus (configure in cfg file)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);

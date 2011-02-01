@@ -105,7 +105,7 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
 )
 
 print "Trigger:", process.signalOptimisation.trigger
-print "Cut on HLT MET: ", process.signalOptimisation.trigger.hltMetCut
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalOptimisation.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
 print "TauSelection src:", process.signalOptimisation.tauSelection.src
 print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
