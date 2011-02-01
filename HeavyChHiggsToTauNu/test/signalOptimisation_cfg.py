@@ -67,7 +67,6 @@ process.infoPath = addConfigInfo(process, options)
 # The "golden" version of the signal optimisation
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
@@ -86,6 +85,7 @@ param.maxDeltaPhi = 999.
 
 # Signal optimisation module
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
+    #prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),   
     trigger = param.trigger,
     #TriggerMETEmulation = param.TriggerMETEmulation, OBSOLETE?
     GlobalElectronVeto = param.GlobalElectronVeto,

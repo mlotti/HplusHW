@@ -90,7 +90,7 @@ param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for whic
 ##############################################################################
 
 process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
-    # Apply trigger, tauSelection + jetSelection to get N_0
+    #prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
     #TriggerMETEmulation = param.TriggerMETEmulation, OBSOLETE?
     # Change default tau algorithm here as needed   
