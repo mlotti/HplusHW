@@ -109,21 +109,20 @@ namespace HPlus {
     // Fill additional counters before dropping events because of MET cut
     if (btagData.passedEvent() && fakeMETData.passedEvent()) {
       double myMETValue = metData.getSelectedMET()->et();
-      if (myMETValue > 0 && myMETValue < 30) {
+      if (myMETValue > 0)
         increment(fMETgt0AfterWholeSelectionCounter);
-      } else if (myMETValue < 40) {
+      if (myMETValue > 30)
         increment(fMETgt30AfterWholeSelectionCounter);
-      } else if (myMETValue < 50) {
+      if (myMETValue > 40)
         increment(fMETgt40AfterWholeSelectionCounter);
-      } else if (myMETValue < 60) {
+      if (myMETValue > 50)
         increment(fMETgt50AfterWholeSelectionCounter);
-      } else if (myMETValue < 70) {
+      if (myMETValue > 60)
         increment(fMETgt60AfterWholeSelectionCounter);
-      } else if (myMETValue < 80) {
+      if (myMETValue > 70)
         increment(fMETgt70AfterWholeSelectionCounter);
-      } else {
+      if (myMETValue > 80)
         increment(fMETgt80AfterWholeSelectionCounter);
-      }
       // Fill histogram of MET distribution of selected events (needed for MET extrapolation)
       hMETAfterWholeSelection->Fill(myMETValue, fEventWeight.getWeight());
     }
