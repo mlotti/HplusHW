@@ -73,15 +73,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode (options: 'standard', 'factorized')
 myTauOperationMode = "standard"
-param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
 # The sources should use the same as in signal (i.e. tau trigger matched, which is default)
 # Other parameters
 # HLT_MET cut has to be exactly the same as in the first part of the QCD measurement
-param.trigger.hltMetCut = cms.untracked.double(45.0) # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
 # Other cut values should be exactly the same as in signal analysis
 
 # Prescale weight, do not uncomment unless you know what you're doing!

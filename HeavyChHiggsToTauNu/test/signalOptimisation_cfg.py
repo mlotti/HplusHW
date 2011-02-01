@@ -69,18 +69,14 @@ process.infoPath = addConfigInfo(process, options)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
-myTauSelectionOperatingMode = 'standard' 
-param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
 # Set other cuts
-param.MET.METCut = cms.untracked.double(-1.0)
-param.bTagging.minNumber = cms.untracked.uint32(0)
-param.transverseMassCut = cms.untracked.double(-1.0)
-param.alphaT = cms.untracked.double(-1.0)
-param.maxDeltaPhi = cms.untracked.double(999.)
+param.MET.METCut = -1.0
+param.bTagging.minNumber = 0
+param.transverseMassCut = -1.0
+param.alphaT = -1.0
+param.maxDeltaPhi = 999.
 
 # Prescale weight, do not uncomment unless you know what you're doing!
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
