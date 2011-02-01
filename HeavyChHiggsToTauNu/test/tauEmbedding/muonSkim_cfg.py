@@ -3,11 +3,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-dataVersion = "36X"
+#dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
 #dataVersion = "38X"
-#dataVersion = "data" # this is for collision data 
+dataVersion = "39Xredigi"
 
 options = getOptions()
 if options.dataVersion != "":
