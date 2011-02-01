@@ -70,23 +70,16 @@ process.infoPath = addConfigInfo(process, options)
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau')
-myTauOperationMode = "antitautag"
-param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
-param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
+param.setAllTauSelectionOperatingMode('antitautag')
+#param.setAllTauSelectionOperatingMode('antiisolatedtau')
 # Set tau sources to non-trigger matched tau collections
-param.tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
-param.tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
-param.tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
-param.tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
-param.tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("selectedPatTausHpsTancPFTau")
+param.setAllTauSelectionSrcSelectedPatTaus()
 # Set other cuts
-param.trigger.triggers = cms.untracked.vstring(#"HLT_Jet30U",
-                                               "HLT_Jet30U_v3"
-                                            )
-param.trigger.hltMetCut = cms.untracked.double(45.0) # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.trigger.triggers = [
+    #"HLT_Jet30U",
+    "HLT_Jet30U_v3"
+]
+param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
 param.overrideTriggerFromOptions(options)
 
 # Prescale weight, do not uncomment unless you know what you're doing!

@@ -4,8 +4,8 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
-#step = "generation"
+#step = "skim"
+step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
@@ -13,7 +13,7 @@ step = "skim"
 config = {"skim":       {"input": "RECO",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation": {"input": "tauembedding_skim_v5",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
           "embedding":  {"input": "tauembedding_generation_v5",   "config": "embed_RECO.py", "output": "embedded_RECO.root"},
-          "analysis":   {"input": "tauembedding_embedding_v5",  "config": "embeddingAnalysis_cfg.py"},
+          "analysis":   {"input": "tauembedding_embedding_v5_1",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau": {"input": "pattuple_v6",               "config": "tauAnalysis_cfg.py"},
           }
 
@@ -26,18 +26,18 @@ multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
 datasets = [
     # Data
-    "Mu_135821-144114", # HLT_Mu9
+#    "Mu_135821-144114", # HLT_Mu9
     "Mu_146240-147116", # HLT_Mu9
     "Mu_147196-149442", # HLT_Mu15_v1
     # Signal MC
-    "TTJets_PU",
-    "WJets_Fall10_PU",
+#    "TTJets_PU",
+#    "WJets_Fall10_PU",
     # Background MC
-    "QCD_Pt20_MuEnriched_PU",
-    "DYJetsToLL_PU",
-    "TToBLNu_s-channel_PU",
-    "TToBLNu_t-channel_PU",
-    "TToBLNu_tW-channel_PU",
+#    "QCD_Pt20_MuEnriched_PU",
+#    "DYJetsToLL_PU",
+#    "TToBLNu_s-channel_PU",
+#    "TToBLNu_t-channel_PU",
+#    "TToBLNu_tW-channel_PU",
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -47,6 +47,7 @@ if step in ["generation", "embedding"]:
 
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v5" % step
+#tauname = "_tauembedding_%s_v5_1" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
@@ -56,7 +57,7 @@ skimNlumis = {
 
 skimNjobs = {
     "WJets_Fall10_PU": 50,
-    "TTJets_PY": 20,
+    "TTJets_PU": 400,
     "QCD_Pt20_MuEnriched_PU": 300,
     "DYJetsToLL_PU": 30,
     "TToBLNu_s-channel_PU": 100,
@@ -82,7 +83,7 @@ def modify(dataset):
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
-        dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
+#        dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
 
     if step == "skim":
         try:

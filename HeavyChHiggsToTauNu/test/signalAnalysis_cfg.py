@@ -73,12 +73,12 @@ process.infoPath = addConfigInfo(process, options)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
-myTauSelectionOperatingMode = 'standard' 
-param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionShrinkingConeTaNCBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
-param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+if options.tauEmbeddingInput != 0:
+    customiseParamForTauEmbedding(param)
 
 # Prescale weight, do not uncomment unless you know what you're doing!
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
@@ -118,7 +118,7 @@ process.signalAnalysisCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalAnalysis", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalAnalysis", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(True), # Default False
+    printSubCounters = cms.untracked.bool(False), # Default False
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
