@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+#dataVersion = "39Xredigi"
+dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -29,14 +29,15 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementFromAntiTauControlRegion")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_jetmetdata2010A.root"
         # For testing in lxplus
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
@@ -76,16 +77,17 @@ param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauOper
 param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
 param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauOperationMode)
 # Set tau sources to non-trigger matched tau collections
-param.tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
+param.tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausCaloRecoTau")
 param.tauSelectionShrinkingConeTaNCBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
-param.tauSelectionCaloTauCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
+param.tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau")
 param.tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
-param.tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("_selectedPatTausHpsTancPFTau")
+param.tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("selectedPatTausHpsTancPFTau")
 # Set other cuts
-param.trigger.triggers = cms.untracked.vstring(#"HLT_Jet30U",
+param.trigger.triggers = cms.untracked.vstring("HLT_Jet30U",
                                                #"HLT_Jet30U_V3",
-                                               "HLT_Jet30U_v3")
-
+                                               #"HLT_Jet30U_v3"
+                                            )
+param.trigger.hltMetCut = cms.untracked.double(-10.0)
 # Prescale weight, do not uncomment unless you know what you're doing!
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
@@ -143,11 +145,11 @@ process.qcdMeasurementMethod2Part1Path = cms.Path(
 # many analyses in a single job compared to many jobs (this avoids
 # some of the I/O and grid overhead). The fragment below creates the
 # following histogram directories
-# qcdMeasurementMethod2Part1CountersTauSelectionShrinkingConeCutBased
-# qcdMeasurementMethod2Part1CountersTauSelectionShrinkingConeTaNCBased
-# qcdMeasurementMethod2Part1CountersTauSelectionCaloTauCutBased
-# qcdMeasurementMethod2Part1CountersTauSelectionHPSTauBased
-# qcdMeasurementMethod2Part1CountersTauSelectionCombinedHPSTaNCBased
+# qcdMeasurementMethod2Part1TauSelectionShrinkingConeCutBased
+# qcdMeasurementMethod2Part1TauSelectionShrinkingConeTaNCBased
+# qcdMeasurementMethod2Part1TauSelectionCaloTauCutBased
+# qcdMeasurementMethod2Part1TauSelectionHPSTauBased
+# qcdMeasurementMethod2Part1TauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and
 # cms.Paths "Path" postfix. The paths are run independently of each
@@ -156,9 +158,9 @@ process.qcdMeasurementMethod2Part1Path = cms.Path(
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
-    param.addTauIdAnalyses(process, "qcdMeasurementMethod2Part1Counters", process.qcdMeasurementMethod2Part1Counters, process.commonSequence, additionalCounters)
-        
-    
+    param.addTauIdAnalyses(process, "qcdMeasurementMethod2Part1", process.qcdMeasurementMethod2Part1, process.commonSequence, additionalCounters)
+
+
 ################################################################################
 # The signal analysis with jet energy scale variation
 #
@@ -173,8 +175,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVari
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
     s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1Counters", "JESPlus"+s, process.qcdMeasurementMethod2Part1Counters, additionalCounters, JESVariation)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1Counters", "JESMinus"+s, process.qcdMeasurementMethod2Part1Counters, additionalCounters, -JESVariation)
+    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1", "JESPlus"+s, process.qcdMeasurementMethod2Part1, additionalCounters, JESVariation)
+    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1", "JESMinus"+s, process.qcdMeasurementMethod2Part1, additionalCounters, -JESVariation)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
