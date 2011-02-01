@@ -5,22 +5,116 @@ datasets = {
     # Collision data
     #
     # BTau PD (for signal analysis)
+    "JetMETTau_Tau_136035-139975_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleLooseIsoTau20",
+        "runs": (136035, 139975), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Tau_pattuple_v9_1-4e2fa0cbfe0cf1221a0673f448298393/USER",
+                "luminosity": 0.085524691,
+                "number_of_jobs": 4
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
+        }
+    },
+    "JetMETTau_Tau_140058-141881_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleLooseIsoTau20_Trk5",
+        "runs": (140058, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Tau_pattuple_v9_1-7b621476048eefc450e74b1a3fe9ad51/USER",
+                "luminosity": 0.198967175,
+                "number_of_jobs": 6
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
+        }
+    },
+    "BTau_141956-144114_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk5",
+        "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010A_Dec22ReReco_v1_AOD_141956_pattuple_v9_1-8fa92c7e2c071a3e7e6f47b50c02a015/USER",
+                "luminosity": 2.846183931,
+                "number_of_jobs": 30
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
+        }
+    },
+    "BTau_146428-148058_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
+        "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "BTau_148822-149182_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
+        "runs": (148822, 149182), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 15, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "BTau_149291-149294_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
+        "runs": (149291, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "lumis_per_job": 20, # Adjusted for PATtuple file size
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+
     "BTau_141950-144114_Nov4": {
         "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 50,
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010A-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
             "pattuple_v6_1": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
@@ -171,6 +265,86 @@ datasets = {
     },
 
     # Jet PD (for QCD background analysis"
+    "JetMETTau_Jet_136035-141881_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_Jet30U",
+        "runs": (136035, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 100, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Jet_pattuple_v9_1-7530ef6ad2e2f18191ca644614b1b027/USER",
+                "luminosity": .284491865,
+                "number_of_jobs": 10
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
+        }
+    },
+    "JetMET_141956-144114_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_Jet30U",
+        "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMET/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 300, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+            # "pattuple_v9_1": {
+            #     "dbs_url": common.pattuple_dbs,
+            #     "datasetpath": "",
+            #     "luminosity": 0,
+            #     "number_of_jobs": 20
+            # },
+            # "pattuple_v9": {
+            #     "fallback": "pattuple_v9_1"
+            # }
+        }
+    },
+    "Jet_146428-148058_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_Jet30U",
+        "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/Jet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 40, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "Jet_148822-149294_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_Jet30U_v3",
+        "runs": (148822, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/Jet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+            # "pattuple_v9_!": {
+            #     "dbs_url": common.pattuple_dbs,
+            #     "datasetpath": "",
+            #     "luminosity": 0,
+            #     "number_of_jobs": 1
+            # },
+            # "pattuple_v9": {
+            #     "fallback": "pattuple_v9_1"
+            # }
+        }
+    },
+
     "JetMETTau_136033-141887_Nov4": { # first run actually 135821, but lumi list starts from this one
         "dataVersion": "38Xdata",
         "trigger": "HLT_Jet30U",
@@ -238,46 +412,47 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
-    "Mu_135821-144114_Nov4": {
+    "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
         "dataVersion": "38Xdata",
         "trigger": "HLT_Mu9",
         "data": {}
     },
-    "Mu_135821-144114_Dec22": {
+    "Mu_136035-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
+        "runs": (136035, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
-                "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD", # runs 135821-144114
+                "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMask": "DCSOnly"
+                "lumiMask": "Dec22ReReco"
             },
         }
     },
-    "Mu_146240-147116_Dec22": {
+    "Mu_146428-147116_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
-        "runs": (146240, 147116),
+        "runs": (146428, 147116), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 600, # Adjusted for PAT on the fly
-                "lumiMask": "DCSOnly"
+                "lumiMask": "Dec22ReReco"
             },
         }
     },
-    "Mu_147196-149442_Dec22": {
+    "Mu_147196-149294_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu15_v1",
-        "runs": (147196, 149442),
+        "runs": (147196, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
                 "lumis_per_job": 500, # Adjusted for PAT on the fly
-                "lumiMask": "DCSOnly"
+                "lumiMask": "Dec22ReReco"
             },
         }
     },
