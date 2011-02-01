@@ -16,6 +16,15 @@ datasets = {
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Tau_pattuple_v9_1-4e2fa0cbfe0cf1221a0673f448298393/USER",
+                "luminosity": 0.085524691,
+                "number_of_jobs": 4
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "JetMETTau_Tau_140058-141881_Dec22": {
@@ -29,6 +38,15 @@ datasets = {
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Tau_pattuple_v9_1-7b621476048eefc450e74b1a3fe9ad51/USER",
+                "luminosity": 0.198967175,
+                "number_of_jobs": 6
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "BTau_141956-144114_Dec22": {
@@ -42,6 +60,15 @@ datasets = {
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
+            # "pattuple_v9_1": {
+            #     "dbs_url": common.pattuple_dbs,
+            #     "datasetpath": "",
+            #     "luminosity": 0.0,
+            #     "number_of_jobs": 30
+            # },
+            # "pattuple_v9": {
+            #     "fallback": "pattuple_v9_1"
+            # }
         }
     },
     "BTau_146428-148058_Dec22": {
@@ -249,6 +276,15 @@ datasets = {
                 "number_of_jobs": 100, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMETTau/local-Run2010A_Dec22ReReco_v1_AOD_Jet_pattuple_v9_1-7530ef6ad2e2f18191ca644614b1b027/USER",
+                "luminosity": .284491865,
+                "number_of_jobs": 10
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "JetMET_141956-144114_Dec22": {
@@ -262,6 +298,15 @@ datasets = {
                 "number_of_jobs": 300, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
+            # "pattuple_v9_1": {
+            #     "dbs_url": common.pattuple_dbs,
+            #     "datasetpath": "",
+            #     "luminosity": 0,
+            #     "number_of_jobs": 20
+            # },
+            # "pattuple_v9": {
+            #     "fallback": "pattuple_v9_1"
+            # }
         }
     },
     "Jet_146428-148058_Dec22": {
@@ -288,6 +333,15 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
+            # "pattuple_v9_!": {
+            #     "dbs_url": common.pattuple_dbs,
+            #     "datasetpath": "",
+            #     "luminosity": 0,
+            #     "number_of_jobs": 1
+            # },
+            # "pattuple_v9": {
+            #     "fallback": "pattuple_v9_1"
+            # }
         }
     },
 
