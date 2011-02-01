@@ -69,18 +69,47 @@ if options.doPat != 0:
         trigger = getSignalTrigger(dataVersion)
 
     process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
 
-    print "Trigger used for tau matching: "+trigger
-    print "Trigger used for jet matching: "+jetTrigger
+    if options.tauEmbeddingInput == 0:
+        print "Trigger used for tau matching: "+trigger
+        print "Trigger used for jet matching: "+jetTrigger
+
+    process.patPlainSequence = cms.Sequence()
+    if options.tauEmbeddingInput != 0:
+
+        process.out = cms.OutputModule("PoolOutputModule",
+            fileName = cms.untracked.string('dummy.root'),
+            outputCommands = cms.untracked.vstring()
+        )
+
+        process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
+                                          doPatCalo=False, doBTagging=False, doPatElectronID=False, doPatMET=False)
+
+        process.patMuons.muonSource.setProcessName("RECO")
+
+        from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning, removeMCMatching
+        removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        removeCleaning(process, False)
+
+        del process.out
+
+    else:
+        process.patPlainSequence = addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
 
     process.patSequence = cms.Sequence(
         process.collisionDataSelection *
-        addPat(process, dataVersion, matchingTauTrigger=trigger, matchingJetTrigger=jetTrigger)
+        process.patPlainSequence
     )
+
+    if options.tauEmbeddingInput != 0:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import addTauEmbeddingMuonTaus
+        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+        process.patSequence *= process.patMuonTauSequence
+
 additionalCounters = []
-if dataVersion.isData():
+if dataVersion.isData() and options.tauEmbeddingInput == 0:
     additionalCounters = dataSelectionCounters[:]
 
 
@@ -101,6 +130,10 @@ process.infoPath = cms.Path(
 
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+if options.tauEmbeddingInput != 0:
+    customiseParamForTauEmbedding(param)
+
 # Prescale weight
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
@@ -172,14 +205,7 @@ def setTauSelection(m, val):
     m.tauSelection = val
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 addAnalysisArray(process, "signalAnalysis", process.signalAnalysis, setTauSelection,
-		 [param.tauSelectionShrinkingConeCutBased,
-		  param.tauSelectionShrinkingConeTaNCBased,
-		  param.tauSelectionCaloTauCutBased,
-		  param.tauSelectionHPSTauBased],
-		 names = ["TauSelectionShrinkingConeCutBased",
-		  "TauSelectionShrinkingConeTaNCBased",
-		  "TauSelectionCaloTauCutBased",
-		  "TauSelectionHPSTauBased"],
+                 param.tauSelections, param.tauSelectionNames,
                  preSequence = process.patSequence,
                  additionalCounters = additionalCounters)
 

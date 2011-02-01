@@ -49,6 +49,15 @@ tauSelectionHPSTauBased = tauSelectionBase.clone()
 tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched")
 tauSelectionHPSTauBased.selection = cms.untracked.string("HPSTauBased")
 
+tauSelections = [tauSelectionCaloTauCutBased,
+                 tauSelectionShrinkingConeCutBased,
+                 tauSelectionShrinkingConeTaNCBased,
+                 tauSelectionHPSTauBased]
+tauSelectionNames = ["TauSelectionCaloTauCutBased",
+                     "TauSelectionShrinkingConeCutBased",
+                     "TauSelectionShrinkingConeTaNCBased",
+                     "TauSelectionHPSTauBased"]
+
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
