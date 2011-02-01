@@ -68,18 +68,23 @@ def customise(process):
     processName = process.name_()
 
     print "Adjusting event content to GEN-SIM-RECO+misc"
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
     outputModule.outputCommands = cms.untracked.vstring("drop *")
     outputModule.outputCommands.extend(process.RECOSIMEventContent.outputCommands)
+    outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
     outputModule.outputCommands.extend([
             "drop *_*_*_%s" % recoProcessName,
             "keep *_pfMet_*_%s" % recoProcessName,
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
+            "keep *_gsfElectrons_*_%s" % recoProcessName,
+            "keep *_gsfElectronCores_*_%s" % recoProcessName,
+            "keep *_electronGsfTracks_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
+            "keep *_gtDigis_*_%s" % recoProcessName,
 
             "drop *_*_*_%s" % hltProcessName,
-            "keep *_tauEmbeddingMuons_*_*",
             "keep *_dimuonsGlobal_*_%s" % hltProcessName,
             "keep *_generator_weight_%s" % hltProcessName,
             "keep *_genParticles_*_%s" % hltProcessName,
@@ -104,8 +109,8 @@ def customise(process):
         index += 1
 
     # Disable lumi producer
-    #process.localreco_HcalNZS.remove(process.lumiProducer)
-    #process.localreco.remove(process.lumiProducer)
+    process.localreco_HcalNZS.remove(process.lumiProducer)
+    process.localreco.remove(process.lumiProducer)
 
 
     if  hasattr(process,"iterativeTracking"):

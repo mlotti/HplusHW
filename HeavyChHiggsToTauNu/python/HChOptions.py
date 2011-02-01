@@ -30,6 +30,11 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton, options.varType.string,
                      "Trigger to use")
+    options.register("tauEmbeddingInput",
+                     0,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Input is from tau embedding (default: 0)")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):

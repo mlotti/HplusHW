@@ -53,6 +53,17 @@ tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("selectedPatTau
 tauSelectionCombinedHPSTaNCTauBased.selection = cms.untracked.string("CombinedHPSTaNCTauBased")
 
 
+tauSelections = [tauSelectionCaloTauCutBased,
+                 tauSelectionShrinkingConeCutBased,
+                 tauSelectionShrinkingConeTaNCBased,
+                 tauSelectionHPSTauBased,
+                 tauSelectionCombinedHPSTaNCTauBased]
+tauSelectionNames = ["TauSelectionCaloTauCutBased",
+                     "TauSelectionShrinkingConeCutBased",
+                     "TauSelectionShrinkingConeTaNCBased",
+                     "TauSelectionHPSTauBased",
+                     "TauSelectionCombinedHPSTaNCBased"]
+
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
@@ -124,16 +135,7 @@ def setTauSelection(module, val):
     module.tauSelection = val
 def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
     addAnalysisArray(process, prefix, module, setTauSelection,
-    values = [tauSelectionShrinkingConeCutBased,
-              tauSelectionShrinkingConeTaNCBased,
-              tauSelectionCaloTauCutBased,
-              tauSelectionHPSTauBased,
-              tauSelectionCombinedHPSTaNCTauBased],
-    names = ["TauSelectionShrinkingConeCutBased",
-             "TauSelectionShrinkingConeTaNCBased",
-             "TauSelectionCaloTauCutBased",
-             "TauSelectionHPSTauBased",
-             "TauSelectionCombinedHPSTaNCBased"],
+    values = tauSelections, names = tauSelectionNames,
     preSequence = commonSequence,
     additionalCounters = additionalCounters)
 
