@@ -62,9 +62,8 @@ if options.doPat != 0:
     if dataVersion.isData():
         process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
     
-    process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
-                                 doPatTaus=False, doPatElectronID=False)
-    removeSpecificPATObjects(process, ["Photons"], False)
+    process.patSequence = addPat(process, dataVersion, doTauHLTMatching=False,
+                                 doPatTaus=False)
     removeCleaning(process, False)    
     process.patMuons.embedTrack = False # In order to avoid transient references and generalTracks is available anyway
 
@@ -74,14 +73,24 @@ if options.doPat != 0:
     )
 
 # Override the outputCommands here, since PAT modifies it
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
 process.out.outputCommands = cms.untracked.vstring(
     "keep *",
     "drop *_MEtoEDMConverter_*_*", # drop DQM histos
     "drop *_*_*_MUONSKIM",
-    "keep *_selectedPatMuons_*_MUONSKIM",
-    "keep *_tauEmbeddingMuons_*_MUONSKIM",
-    "keep edmMergeableCounter_*_*_MUONSKIM", # in lumi block
 )
+
+import re
+name_re = re.compile("_\*$")
+process.out.outputCommands.extend([name_re.sub("_MUONSKIM", x) for x in process.HChEventContent.outputCommands])
+
+#     "keep edmMergeableCounter_*_*_MUONSKIM", # in lumi block
+#     "keep *_selectedPatMuons_*_MUONSKIM",
+#     "keep *_selectedPatElectrons_*_MUONSKIM",
+#     "keep *_selectedPatPhotons_*_MUONSKIM",
+#     "keep *_tauEmbeddingMuons_*_MUONSKIM",
+#     "keep *_patTriggerEvent_*_MUONSKIM",
+# )
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff")
