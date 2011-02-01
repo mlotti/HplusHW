@@ -67,6 +67,7 @@ process.infoPath = addConfigInfo(process, options)
 # The "golden" version of the signal optimisation
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 myTauSelectionOperatingMode = 'standard' 
 param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)

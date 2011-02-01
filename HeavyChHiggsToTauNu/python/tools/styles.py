@@ -17,13 +17,15 @@ class Style:
         self.apply(h)
 
 class StyleFill:
-    def __init__(self, style):
+    def __init__(self, style, fillStyle=1001):
         self.style = style
+        self.fillStyle = fillStyle
 
     def apply(self, h):
         self.style.apply(h)
         h.SetFillColor(self.style.color)
-        h.SetFillStyle(3002)
+        #h.SetFillStyle(3002)
+        h.SetFillStyle(self.fillStyle)
 
     def __call__(self, h):
         self.apply(h)
@@ -76,8 +78,8 @@ def getErrorStyle():
 def getStyles():
     return styles
 
-def getStylesFill():
-    return [StyleFill(s) for s in styles]
+def getStylesFill(**kwargs):
+    return [StyleFill(s, **kwargs) for s in styles]
 
 class Generator:
     def __init__(self, styles):
@@ -97,8 +99,8 @@ class Generator:
         self.styles[self.index](h)
         self.next()
 
-def generator(fill=False):
+def generator(fill=False, **kwargs):
     if fill:
-        return Generator(getStylesFill())
+        return Generator(getStylesFill(**kwargs))
     else:
-        return Generator(getStyles())
+        return Generator(getStyles(**kwargs))

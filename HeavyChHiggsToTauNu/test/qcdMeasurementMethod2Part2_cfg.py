@@ -70,6 +70,7 @@ process.infoPath = addConfigInfo(process, options)
 # qcdMeasurementSignalSelection module
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.overrideTriggerFromOptions(options)
 # Set tau selection mode (options: 'standard', 'factorized')
 myTauOperationMode = "standard"
 param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)

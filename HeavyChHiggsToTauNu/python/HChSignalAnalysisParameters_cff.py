@@ -115,6 +115,10 @@ fakeMETVeto = cms.untracked.PSet(
 
 
 # Functions
+def overrideTriggerFromOptions(options):
+    if options.trigger != "":
+        trigger.triggers = [options.trigger]
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val

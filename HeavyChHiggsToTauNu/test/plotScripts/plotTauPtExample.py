@@ -85,7 +85,7 @@ datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
 # type HistoManager, which contains a histogram from each dataset in
 # DatasetManager. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = HistoManager(datasets, "signalAnalysis/tau_pt")
+tauPts = HistoManager(datasets, "signalAnalysis/tauID_tau_candidates_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -117,6 +117,7 @@ tauPts.setHistoLegendStyle("Data", "p")
 
 # Apply the default styles (for all histograms, for MC histograms, for a single histogram)
 #tauPts.forEachHisto(styles.generator())
+#tauPts.forEachMCHisto(styles.generator(fill=True, fillStyle=3002)) # Example how to set non-default fill style
 tauPts.forEachMCHisto(styles.generator(fill=True)) # Apply SetFillColor too, needed for histogram stacking
 tauPts.forHisto("Data", styles.getDataStyle())
 tauPts.setHistoDrawStyle("Data", "EP")
