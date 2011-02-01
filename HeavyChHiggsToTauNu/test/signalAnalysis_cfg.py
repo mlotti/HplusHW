@@ -80,6 +80,10 @@ param.tauSelectionCaloTauCutBased.operatingMode = cms.untracked.string(myTauSele
 param.tauSelectionHPSTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
 param.tauSelectionCombinedHPSTaNCTauBased.operatingMode = cms.untracked.string(myTauSelectionOperatingMode)
 
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+if options.tauEmbeddingInput != 0:
+    customiseParamForTauEmbedding(param)
+
 # Prescale weight, do not uncomment unless you know what you're doing!
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
