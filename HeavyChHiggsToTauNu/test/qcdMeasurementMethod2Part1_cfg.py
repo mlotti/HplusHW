@@ -69,7 +69,6 @@ process.infoPath = addConfigInfo(process, options)
 # The core of the analysis
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-param.overrideTriggerFromOptions(options)
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau')
 myTauOperationMode = "antitautag"
 param.tauSelectionShrinkingConeCutBased.operatingMode = cms.untracked.string(myTauOperationMode)
@@ -84,10 +83,11 @@ param.tauSelectionShrinkingConeCutBased.src = cms.untracked.InputTag("selectedPa
 param.tauSelectionHPSTauBased.src = cms.untracked.InputTag("selectedPatTausHpsPFTau")
 param.tauSelectionCombinedHPSTaNCTauBased.src = cms.untracked.InputTag("selectedPatTausHpsTancPFTau")
 # Set other cuts
-param.trigger.triggers = cms.untracked.vstring("HLT_Jet30U",
-                                               #"HLT_Jet30U_v3"
+param.trigger.triggers = cms.untracked.vstring(#"HLT_Jet30U",
+                                               "HLT_Jet30U_v3"
                                             )
 param.trigger.hltMetCut = cms.untracked.double(45.0) # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.overrideTriggerFromOptions(options)
 
 # Prescale weight, do not uncomment unless you know what you're doing!
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
