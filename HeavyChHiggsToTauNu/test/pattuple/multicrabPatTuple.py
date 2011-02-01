@@ -101,6 +101,7 @@ multicrab.extendDatasets(
 #multicrab.addLineAll("USER.local_stage_out=1")
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
+run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
 
 def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
@@ -111,9 +112,14 @@ def addOutputName(dataset):
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
     if dataset.isData():
-        frun = dataset.getName().split("_")[1].split("-")[0]
+        m = run_re.search(dataset.getName())
+        frun = m.group("frun")
+        trig = ""
+        if m.group("trig"):
+            trig = m.group("trig")+"_"
+
         m = reco_re.search(name)
-        name = reco_re.sub(m.group("reco")+frun+"_", name)
+        name = reco_re.sub(m.group("reco")+trig+frun+"_", name)
 
     dataset.appendLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
