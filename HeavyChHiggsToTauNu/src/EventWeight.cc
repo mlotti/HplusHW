@@ -13,7 +13,6 @@ namespace HPlus {
   {
     if (iConfig.exists("prescaleSource")) {
       fPrescaleSrc = iConfig.getUntrackedParameter<edm::InputTag>("prescaleSource");
-      std::cout << "prescale src found" << std::endl;
       fPrescaleAvailableStatus = true;
     } else {
       fPrescaleAvailableStatus = false;
@@ -37,7 +36,6 @@ namespace HPlus {
     edm::Handle<double> myHandle;
     iEvent.getByLabel(fPrescaleSrc, myHandle);
     fWeight = *myHandle;
-    std::cout << "prescale=" << fWeight << std::endl;
     hPrescaleHisto->Fill(fWeight);
   }
 }
