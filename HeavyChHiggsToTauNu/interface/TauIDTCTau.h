@@ -10,11 +10,13 @@ namespace HPlus {
     /**
      * Implementation of the TCTau tau ID functionality
      */
-    TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
     ~TauIDTCTau();
 
 //    /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
     bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
+    bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
+    bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
     bool passRTauCut(const edm::Ptr<pat::Tau> tau);

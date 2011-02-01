@@ -14,7 +14,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("trigger")),
-    fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
+    //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
@@ -30,7 +30,7 @@ namespace HPlus {
     fMETgt70AfterWholeSelectionCounter(eventCounter.addCounter("METgt70AfterWholeSelection")),
     fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerMETEmulation"), eventCounter, eventWeight),
+    fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
@@ -69,11 +69,12 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
-         
+
     // Trigger Emulation (for MC & Data) - Required in QCD estimation method because the signal trigger contains a MET cut. 
-    TriggerMETEmulation::Data triggerMETEmulationData = fTriggerMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return;
-    increment(fTriggerEmulationCounter);
+    //TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
+    //if(!triggerMETEmulationData.passedEvent()) return;
+    //increment(fTriggerEmulationCounter);
+    //Trigger emulation done in trigger
 
     // Apply Isolation Veto to taus
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);

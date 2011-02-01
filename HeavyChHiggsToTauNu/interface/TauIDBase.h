@@ -38,8 +38,8 @@ namespace HPlus {
     bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
     virtual bool passIsolation(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiIsolation(const edm::Ptr<pat::Tau> tau) = 0;
-    bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
-    bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
+    virtual bool passOneProngCut(const edm::Ptr<pat::Tau> tau) = 0;
+    virtual bool passThreeProngCut(const edm::Ptr<pat::Tau> tau) = 0;
     bool passChargeCut(const edm::Ptr<pat::Tau> tau);
     virtual bool passRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
@@ -53,7 +53,7 @@ namespace HPlus {
     void updatePassedCounters(); 
     
   protected:
-    void createSelectionCounterPackagesBeyondIsolation(); // Guess what this is doing? :)
+    void createSelectionCounterPackagesBeyondIsolation(int prongCount); // Guess what this is doing? :)
     
   protected:
     // Input parameters
