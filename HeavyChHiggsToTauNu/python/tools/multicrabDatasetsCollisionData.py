@@ -60,15 +60,15 @@ datasets = {
                 "lumis_per_job": 50, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
-            # "pattuple_v9_1": {
-            #     "dbs_url": common.pattuple_dbs,
-            #     "datasetpath": "",
-            #     "luminosity": 0.0,
-            #     "number_of_jobs": 30
-            # },
-            # "pattuple_v9": {
-            #     "fallback": "pattuple_v9_1"
-            # }
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010A_Dec22ReReco_v1_AOD_141956_pattuple_v9_1-8fa92c7e2c071a3e7e6f47b50c02a015/USER",
+                "luminosity": 2.846183931,
+                "number_of_jobs": 30
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "BTau_146428-148058_Dec22": {
