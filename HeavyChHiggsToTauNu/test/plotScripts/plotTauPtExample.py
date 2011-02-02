@@ -127,6 +127,10 @@ tauPts.setHistoDrawStyle("Data", "EP")
 # Note: this MUST be done after all legend/style manipulation
 tauPts.stackMCHistograms()
 
+# Example how to add MC uncertainty
+tauPts.addMcUncertainty(styles.getErrorStyle())
+#tauPts.addMcUncertainty(styles.getErrorStyle(), "MC uncertainty")
+
 # Create TCanvas and TH1F such that they cover all histograms
 (canvas, frame) = tauPts.createCanvasFrame("taupt")
 #(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
