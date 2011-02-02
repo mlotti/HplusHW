@@ -63,7 +63,6 @@ if options.doPat != 0:
     
     process.patSequence = addPat(process, dataVersion, doTauHLTMatching=False,
                                  doPatTaus=False)
-    removeCleaning(process, False)    
     process.patMuons.embedTrack = False # In order to avoid transient references and generalTracks is available anyway
 
     process.selectionSequence = cms.Sequence(
@@ -82,14 +81,6 @@ process.out.outputCommands = cms.untracked.vstring(
 import re
 name_re = re.compile("_\*$")
 process.out.outputCommands.extend([name_re.sub("_MUONSKIM", x) for x in process.HChEventContent.outputCommands])
-
-#     "keep edmMergeableCounter_*_*_MUONSKIM", # in lumi block
-#     "keep *_selectedPatMuons_*_MUONSKIM",
-#     "keep *_selectedPatElectrons_*_MUONSKIM",
-#     "keep *_selectedPatPhotons_*_MUONSKIM",
-#     "keep *_tauEmbeddingMuons_*_MUONSKIM",
-#     "keep *_patTriggerEvent_*_MUONSKIM",
-# )
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff")
