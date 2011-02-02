@@ -4,8 +4,8 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
-step = "generation"
+step = "skim"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
@@ -26,18 +26,18 @@ multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
 datasets = [
     # Data
-#    "Mu_135821-144114", # HLT_Mu9
-    "Mu_146240-147116", # HLT_Mu9
-    "Mu_147196-149442", # HLT_Mu15_v1
+    "Mu_136035-144114_Dec22", # HLT_Mu9
+    "Mu_146428-147116_Dec22", # HLT_Mu9
+    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
-#    "TTJets_PU",
-#    "WJets_Fall10_PU",
+    "TTJets_TuneZ2_Winter10",
+    "WJets_TuneZ2_Winter10_noPU",
     # Background MC
-#    "QCD_Pt20_MuEnriched_PU",
-#    "DYJetsToLL_PU",
-#    "TToBLNu_s-channel_PU",
-#    "TToBLNu_t-channel_PU",
-#    "TToBLNu_tW-channel_PU",
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
+    "DYJetsToLL_TuneZ2_Winter10",
+    "TToBLNu_s-channel_Winter10",
+    "TToBLNu_t-channel_Winter10",
+    "TToBLNu_tW-channel_Winter10",
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -46,23 +46,22 @@ if step in ["generation", "embedding"]:
     multicrab.appendArgAll("overrideBeamSpot=1")
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v5" % step
-#tauname = "_tauembedding_%s_v5_1" % step
+tauname = "_tauembedding_%s_v6" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
 skimNlumis = {
-    "Mu_135821-144114": 1000
+    "Mu_136035-144114_Dec22": 1000
     }
 
 skimNjobs = {
-    "WJets_Fall10_PU": 50,
-    "TTJets_PU": 400,
-    "QCD_Pt20_MuEnriched_PU": 300,
-    "DYJetsToLL_PU": 30,
-    "TToBLNu_s-channel_PU": 100,
-    "TToBLNu_t-channel_PU": 100,
-    "TToBLNu_tW-channel_PU": 100,
+    "WJets_TuneZ2_Winter10_noPU": 100,
+    "TTJets_TuneZ2_Winter10": 400,
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 300,
+    "DYJetsToLL_TuneZ2_Winter10": 30,
+    "TToBLNu_s-channel_Winter10": 100,
+    "TToBLNu_t-channel_Winter10": 100,
+    "TToBLNu_tW-channel_Winter10": 100,
     }
     
 

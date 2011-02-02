@@ -417,6 +417,16 @@ datasets = {
         "trigger": "HLT_Mu9",
         "data": {}
     },
+    "Mu_146240-147116_Nov4": { # needed to keep tau embedding happy
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu9",
+        "data": {}
+    },
+    "Mu_147196-149442_Nov4": { # needed to keep tau embedding happy
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu15_v1",
+        "data": {}
+    },
     "Mu_136035-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
