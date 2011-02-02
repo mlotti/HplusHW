@@ -127,7 +127,7 @@ NBtagJets.forHisto("Data", styles.getDataStyle())
 #NBtagJets.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = NBtagJets.createCanvasFrame("NBtagJets", ymin=0.01, ymax=None, xmin=0.0, xmax=8.0)
+cf = CanvasFrame(NBtagJets, "NBtagJets", ymin=0.01, ymax=None, xmin=0.0, xmax=8.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Number of Btag Jets")

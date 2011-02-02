@@ -140,12 +140,61 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
 class CanvasFrame:
-    """Placeholder for the canvas and the frame histogram(s)."""
-    def __init__(self, canvas, frame, **kwargs):
-        self.canvas = canvas
-        self.frame = frame
-        for key, value in kwargs.iteritems():
-            setattr(self, key, value)
+    """Create TCanvas and frame for one TPad."""
+    def __init__(self, histoManager, name, **kwargs):
+        """Create TCanvas and TH1 for the frame.
+
+        Arguments:
+        histoManager  HistoManager object to take the histograms from for automatic axis ranges
+        name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
+        
+        Keyword arguments:
+        ymin     Minimum value of Y axis
+        ymax     Maximum value of Y axis
+        xmin     Minimum value of X axis
+        xmax     Maximum value of X axis
+        yfactor, ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
+        yminfactor           Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
+
+        By default ymin, ymax, xmin and xmax are taken as the
+        maximum/minimums of the histogram objects such that frame
+        contains all histograms. The ymax is then multiplied with
+        ymaxfactor
+
+        The yminfactor/ymaxfactor are used only if ymin/ymax is taken
+        from the histograms, i.e. ymax keyword argument is *not*
+        given.
+        """
+        self.canvas = ROOT.TCanvas(name)
+
+        histos = histoManager.getHistoDataList()
+        if len(histos) == 0:
+            raise Exception("Empty set of histograms!")
+
+        yfactor = 1.1
+        if "ymaxfactor" in kwargs:
+            yfactor = kwargs["ymaxfactor"]
+            if "yfactor" in kwargs:
+                raise Exception("Only one of ymaxfactor, yfactor can be given")
+        elif "yfactor" in kwargs:
+            yfactor = kwargs["yfactor"]
+
+        if not "ymax" in kwargs:
+            kwargs["ymax"] = yfactor * max([d.histo.GetMaximum() for d in histos])
+        if not "ymin" in kwargs:
+            kwargs["ymin"] = min([d.histo.GetMinimum() for d in histos])
+            if "yminfactor" in kwargs:
+                kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
+
+        if not "xmin" in kwargs:
+            kwargs["xmin"] = min([d.getXmin() for d in histos])
+        if not "xmax" in kwargs:
+            kwargs["xmax"] = min([d.getXmax() for d in histos])
+
+        self.frame = self.canvas.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
+        self.frame.GetXaxis().SetTitle(histos[0].histo.GetXaxis().GetTitle())
+        self.frame.GetYaxis().SetTitle(histos[0].histo.GetYaxis().GetTitle())
+        
 
 class HistoData:
     """Class to represent one (TH1/TH2) histogram."""

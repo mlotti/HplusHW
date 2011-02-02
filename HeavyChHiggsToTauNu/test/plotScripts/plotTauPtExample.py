@@ -132,8 +132,8 @@ tauPts.addMcUncertainty(styles.getErrorStyle())
 #tauPts.addMcUncertainty(styles.getErrorStyle(), "MC uncertainty")
 
 # Create TCanvas and TH1F such that they cover all histograms
-cf = tauPts.createCanvasFrame("taupt")
-#cf = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
+cf = CanvasFrame(tauPts, "taupt")
+#cf = CanvasFrame(tauPts, "taupt", ymin=10, ymax=1e9) # for logy
 
 # Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")

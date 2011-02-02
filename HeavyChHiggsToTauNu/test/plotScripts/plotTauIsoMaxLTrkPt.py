@@ -125,7 +125,7 @@ TauIsoMaxlTrkPt.forHisto("Data", styles.getDataStyle())
 #TauIsoMaxlTrkPt.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = TauIsoMaxlTrkPt.createCanvasFrame("TauIsoMaxlTrkPt", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
+cf = CanvasFrame(TauIsoMaxlTrkPt, "TauIsoMaxlTrkPt", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("#tau-jet, Max Ldg Trk in Isol Annulus, p_{T} (GeV/c)")

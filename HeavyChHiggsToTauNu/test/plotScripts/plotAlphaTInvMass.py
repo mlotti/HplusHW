@@ -125,7 +125,7 @@ alphaTInvMass.forHisto("Data", styles.getDataStyle())
 #alphaTInvMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = alphaTInvMass.createCanvasFrame("alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=1000.0)
+cf = CanvasFrame(alphaTInvMass, "alphaTInvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=1000.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Di-jet InvMass [GeV/c^{2}]")

@@ -139,7 +139,7 @@ alphaT.forHisto("Data", styles.getDataStyle())
 alphaT.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = alphaT.createCanvasFrame("alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=1.2)
+cf = CanvasFrame(alphaT, "alphaT", ymin=0.01, ymax=None, xmin=0.0, xmax=1.2)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("#alpha_{T}")

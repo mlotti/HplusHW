@@ -125,7 +125,7 @@ tauNProngs.forHisto("Data", styles.getDataStyle())
 #tauNProngs.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = tauNProngs.createCanvasFrame("tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
+cf = CanvasFrame(tauNProngs, "tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("#tau-jet nProngs")

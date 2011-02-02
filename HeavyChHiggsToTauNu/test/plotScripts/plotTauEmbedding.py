@@ -28,7 +28,7 @@ def getHisto(datasets, path, name, func=None):
 
 class HistoBase:
     def createFrame(self, plotname, **kwargs):
-        cf = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = self.histos, plotname, **kwargs)
         self.canvas = cf.canvas
         self.frame = cf.frame
 
@@ -59,7 +59,8 @@ class Histo(HistoBase):
         self.histos.forEachHisto(styles.generator())
 
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(self.prefix+plotname, **kwargs)
+        cf = self.histos, self.prefix+plotname, **kwargs)
+        (self.canvas, self.frame) = (cf.canvas, cf.frame)
 
 class Histo2(HistoBase):
     def __init__(self, datasets, datasetsTau, directories, name):

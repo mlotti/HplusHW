@@ -206,7 +206,7 @@ class Histo:
         self.histos.append(hse)
 
     def createFrame(self, plotname, **kwargs):
-        cf = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = CanvasFrame(self.histos, plotname, **kwargs)
         self.canvas = cf.canvas
         self.frame = cf.frame
 

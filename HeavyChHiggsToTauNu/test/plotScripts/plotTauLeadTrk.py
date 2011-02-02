@@ -126,7 +126,7 @@ TauLeadTrk.forHisto("Data", styles.getDataStyle())
 TauLeadTrk.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = TauLeadTrk.createCanvasFrame("TauLeadTrk", ymin=0.01, ymax=None, xmin=0.0, xmax=100.0)
+cf = CanvasFrame(TauLeadTrk, "TauLeadTrk", ymin=0.01, ymax=None, xmin=0.0, xmax=100.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("#tau-jet, Ldg Trk p_{T} (GeV/c)")

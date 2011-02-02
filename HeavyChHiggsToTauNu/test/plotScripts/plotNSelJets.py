@@ -128,7 +128,7 @@ NSelJets.setHistoDrawStyle("BTau_146240-147116", "EP")
 NSelJets.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = NSelJets.createCanvasFrame("NSelJets", ymin=0.01, ymax=None, xmin=0.0, xmax=10.0)
+cf = CanvasFrame(NSelJets, "NSelJets", ymin=0.01, ymax=None, xmin=0.0, xmax=10.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Number of Selected Jets")

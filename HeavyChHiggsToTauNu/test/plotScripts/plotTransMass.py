@@ -123,7 +123,7 @@ transverseMass.forHisto("Data", styles.getDataStyle())
 #transverseMass.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = transverseMass.createCanvasFrame("transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=300.0)
+cf = CanvasFrame(transverseMass, "transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=300.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("M_{T} GeV/c^{2}")

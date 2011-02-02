@@ -125,7 +125,7 @@ tauInvMass.forHisto("Data", styles.getDataStyle())
 #tauInvMass.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = tauInvMass.createCanvasFrame("tau_InvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
+cf = CanvasFrame(tauInvMass, "tau_InvMass", ymin=0.01, ymax=None, xmin=0.0, xmax=2.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Inv-Mass (GeV/c^{2})")

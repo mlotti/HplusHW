@@ -127,7 +127,7 @@ Rtau.forHisto("Data", styles.getDataStyle())
 #Rtau.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = Rtau.createCanvasFrame("Rtau", ymin=0.01, ymax=None, xmin=0.0, xmax=1.05)
+cf = CanvasFrame(Rtau, "Rtau", ymin=0.01, ymax=None, xmin=0.0, xmax=1.05)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("R_{#tau}")

@@ -129,7 +129,7 @@ TauNTrksVSPtcut.forHisto("Data", styles.getDataStyle())
 #TauNTrksVSPtcut.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = TauNTrksVSPtcut.createCanvasFrame("TauNTrksVSPtcut", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
+cf = CanvasFrame(TauNTrksVSPtcut, "TauNTrksVSPtcut", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("???")

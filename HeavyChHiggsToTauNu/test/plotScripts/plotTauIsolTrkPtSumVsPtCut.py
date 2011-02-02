@@ -125,7 +125,7 @@ TauIsoltrkPtsumVSPtcut.forHisto("Data", styles.getDataStyle())
 #TauIsoltrkPtsumVSPtcut.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-cf = TauIsoltrkPtsumVSPtcut.createCanvasFrame("TauIsoltrkPtsumVSPtcut", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
+cf = CanvasFrame(TauIsoltrkPtsumVSPtcut, "TauIsoltrkPtsumVSPtcut", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
 
 ### Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("???")
