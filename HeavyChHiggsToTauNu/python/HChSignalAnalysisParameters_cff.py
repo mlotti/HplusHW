@@ -128,7 +128,7 @@ GlobalMuonVeto = cms.untracked.PSet(
 
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
-  maxDeltaPhi = cms.untracked.double(999.)
+  minDeltaPhi = cms.untracked.double(10.) # in degrees
 )
 
 

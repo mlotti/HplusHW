@@ -56,7 +56,7 @@ namespace HPlus {
   private:
     // Input parameters
     edm::InputTag fSrc;
-    const double fMaxDeltaPhi;
+    const double fMinDeltaPhi;
 
     // Counters
     //Count f;
