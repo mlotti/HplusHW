@@ -246,15 +246,15 @@ datasets = {
                 "number_of_jobs": 300, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
-            # "pattuple_v9_1": {
-            #     "dbs_url": common.pattuple_dbs,
-            #     "datasetpath": "",
-            #     "luminosity": 0,
-            #     "number_of_jobs": 20
-            # },
-            # "pattuple_v9": {
-            #     "fallback": "pattuple_v9_1"
-            # }
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/JetMET/local-Run2010A_Dec22ReReco_v1_AOD_141956_pattuple_v9_1-7530ef6ad2e2f18191ca644614b1b027/USER",
+                "luminosity": 2.846183931,
+                "number_of_jobs": 20
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "Jet_146428-148058_Dec22": {
@@ -268,6 +268,15 @@ datasets = {
                 "number_of_jobs": 40, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Jet/local-Run2010B_Dec22ReReco_v1_AOD_146428_pattuple_v9_1-7530ef6ad2e2f18191ca644614b1b027/USER",
+                "luminosity": 14.517746074,
+                "number_of_jobs": 2
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
     "Jet_148822-149294_Dec22": {
