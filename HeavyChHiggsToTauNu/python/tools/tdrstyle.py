@@ -52,7 +52,8 @@ class TDRStyle:
 
         self.tdrStyle.SetEndErrorSize(2)
         # self.tdrStyle.SetErrorMarker(20)
-        self.tdrStyle.SetErrorX(0.)
+        #self.tdrStyle.SetErrorX(0.)
+        self.tdrStyle.SetErrorX(0.5) # needed for uncertainty histograms
 
         self.tdrStyle.SetMarkerStyle(20)
 

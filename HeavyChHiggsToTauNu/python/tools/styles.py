@@ -31,21 +31,28 @@ class StyleFill:
         self.apply(h)
 
 class StyleError:
-    def __init__(self, color):
+    def __init__(self, color, style=3004, linecolor=None):
         self.color = color
+        self.style = style
+        self.linecolor = linecolor
 
     def apply(self, h):
-        h.SetFillStyle(1001)
+        h.SetFillStyle(self.style)
         h.SetFillColor(self.color)
         h.SetMarkerStyle(0)
-        h.SetLineWidth(0)
-        h.SetLineColor(self.color)
+        if self.linecolor != None:
+            h.SetLineColor(self.color)
+        else:
+            h.SetLineStyle(0)
+            h.SetLineWidth(0)
+            h.SetLineColor(ROOT.kWhite)
 
     def __call__(self, h):
         self.apply(h)
 
 dataStyle = Style(-2, ROOT.kBlack)
-errorStyle = StyleError(ROOT.kRed-10)
+errorStyle = StyleError(ROOT.kGray+2, 3354)
+errorStyle2 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
 styles = [
     Style(4, ROOT.kBlue),
