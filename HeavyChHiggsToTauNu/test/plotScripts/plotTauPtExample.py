@@ -85,7 +85,7 @@ datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
 # type HistoManager, which contains a histogram from each dataset in
 # DatasetManager. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = HistoManager(datasets, "signalAnalysis/tauID_tau_candidates_pt")
+tauPts = HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -189,4 +189,4 @@ print eventCounter.getMainCounterTable().format(FloatDecimalFormat(1))
 for subCounterName in eventCounter.getSubCounterNames():
     print "============================================================"
     print "Subcounter %s (MC normalized by collision data luminosity)" % subCounterName
-    print eventCounter.getSubCounterTable().format() # Use the default format
+    print eventCounter.getSubCounterTable(subCounterName).format() # Use the default format
