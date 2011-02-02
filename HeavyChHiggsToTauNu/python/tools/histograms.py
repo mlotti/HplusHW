@@ -337,7 +337,6 @@ class HistoManagerImpl:
         # List for the Draw() order, keep it reversed in order to draw
         # the last histogram in the list first. i.e. to the bottom
         self.drawList = histos[:]
-        self.drawList.reverse()
 
         # List for the legend order, first histogram is also first in
         # the legend
@@ -346,24 +345,49 @@ class HistoManagerImpl:
         # Dictionary for accessing the histograms by name
         self._populateMap()
 
-    def append(self, histoWrapper):
-        """Append a HistoData object."""
-        self.drawList.insert(0, histoWrapper)
-        self.legendList.append(histoWrapper)
-        self._populateMap()
-
-    def extend(self, histoWrappers):
-        """Extend with a list of HistoData objects."""
-        self.drawList.reverse()
-        self.drawList.extend(histoWrappers)
-        self.drawList.reverse()
-        self.legendList.extend(histoWrappers)
-        self._populateMap()
+    def __len__(self):
+        return len(self.drawList)
 
     def _populateMap(self):
         self.nameHistoMap = {}
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
+
+    def append(self, histoWrapper):
+        """Append a HistoData object."""
+        self.drawList.append(histoWrapper)
+        self.legendList.append(histoWrapper)
+        self._populateMap()
+
+    def extend(self, histoWrappers):
+        """Extend with a list of HistoData objects."""
+        self.drawList.extend(histoWrappers)
+        self.legendList.extend(histoWrappers)
+        self._populateMap()
+
+    def insert(self, i, histoWrapper, **kwargs):
+        """Insert HistoData to position i.
+
+        Arguments:
+        i             Index of the position to insert the histogram
+        histoWrapper  HistoData object to insert
+
+        Keyword arguments:
+
+        legendIndex   Index of the position to insert the histogram in
+                      the legend list (default is the same as i). Can
+                      be useful for e.g. separate uncertainty
+                      histogram
+        """
+        drawIndex = i
+        legendIndex = i
+
+        if "legendIndex" in kwargs:
+            legendIndex = kwargs["legendIndex"]
+
+        self.drawList.insert(drawIndex, histoWrapper)
+        self.legendList.insert(legendIndex, histoWrapper)
+        self._populateMap()
 
     def forHisto(self, name, func):
         """Call a function for a histogram.
@@ -462,7 +486,7 @@ class HistoManagerImpl:
         Arguments:
         style  Style for the legend (given to TLegend as 3rd argument)
         """
-        for d in self.drawList:
+        for d in self.legendList:
             d.setLegendStyle(style)
 
     def setHistoDrawStyle(self, name, style):
@@ -534,11 +558,8 @@ class HistoManagerImpl:
             kwargs["xmax"] = min([d.getXmax() for d in self.drawList])
 
         frame = c.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-
-        # Take these from the first added histogram, which is the last
-        # item in the draw list
-        frame.GetXaxis().SetTitle(self.drawList[-1].histo.GetXaxis().GetTitle())
-        frame.GetYaxis().SetTitle(self.drawList[-1].histo.GetYaxis().GetTitle())
+        frame.GetXaxis().SetTitle(self.drawList[0].histo.GetXaxis().GetTitle())
+        frame.GetYaxis().SetTitle(self.drawList[0].histo.GetYaxis().GetTitle())
 
         return (c, frame)
 
@@ -549,7 +570,12 @@ class HistoManagerImpl:
 
     def draw(self):
         """Draw histograms."""
-        for h in self.drawList:
+        # Reverse the order of histograms so that the last histogram
+        # is drawn first, i.e. on the bottom
+        histos = self.drawList[:]
+        histos.reverse()
+
+        for h in histos:
             h.histo.Draw(h.drawStyle+" same")
 
     def stackHistograms(self, newName, nameList):
@@ -573,6 +599,22 @@ class HistoManagerImpl:
 
         self._populateMap()
 
+    def addMcUncertainty(self, style, name="MC stat. unc."):
+        mcHistos = filter(lambda x: x.isMC(), self.drawList)
+        if len(mcHistos) == 0:
+            print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
+            return
+
+        hse = HistoStatError(mcHistos, name)
+        hse.call(style)
+
+        firstMcIndex = len(self.drawList)
+        for i, h in enumerate(self.drawList):
+            if h.isMC():
+                firstMcIndex = i
+                break
+        self.insert(firstMcIndex, hse, legendIndex=len(self.drawList))
+        
 
 
 class HistoManager:

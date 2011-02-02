@@ -51,8 +51,9 @@ class StyleError:
         self.apply(h)
 
 dataStyle = Style(-2, ROOT.kBlack)
-errorStyle = StyleError(ROOT.kGray+2, 3354)
-errorStyle2 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
+errorStyle = StyleError(ROOT.kBlack, 3354)
+errorStyle2 = StyleError(ROOT.kGray+2, 3354)
+errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
 styles = [
     Style(4, ROOT.kBlue),
