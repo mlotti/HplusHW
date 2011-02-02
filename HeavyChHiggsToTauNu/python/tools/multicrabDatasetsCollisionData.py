@@ -115,18 +115,6 @@ datasets = {
         "dataVersion": "38Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
         "data": {
-            "pattuple_v6_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_1-b9b1bac3463fc5700035eeb83da514a6/USER",
-                "luminosity": 2.139732871,
-                "number_of_jobs": 10
-            },
-            "pattuple_v6_2": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010A_Sep17ReReco_v2_RECO_pattuple_v6_2-b9b1bac3463fc5700035eeb83da514a6/USER",
-                "luminosity": 2.027848248,
-                "number_of_jobs": 10
-            },
             "pattuple_v6_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_3-dfc6d27ce5aa60b808b4a2bcd34b7c86/USER",
@@ -156,18 +144,6 @@ datasets = {
                 "lumis_per_job": 50,
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_1-43c3132ebadd44967499e6cca288e3ab/USER",
-                "luminosity": 5.899172590,
-                "number_of_jobs": 10
-            },
-            "pattuple_v6_2": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-43c3132ebadd44967499e6cca288e3ab/USER",
-                "luminosity": 5.867011630,
-                "number_of_jobs": 10
-            },
             "pattuple_v6_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ba8b03606ed700d03389442a6378453f/USER",
@@ -176,22 +152,6 @@ datasets = {
             },
             "pattuple_v6": {
                 "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-    "BTau_148108-148864_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
-        "runs": (148108, 148864),
-        "data": {
-            "pattuple_v6_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_1-87e2c0e398f5cb72e5974e2df0c2a6a6/USER",
-                "luminosity": 4.600225784,
-                "number_of_jobs": 3
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_1"
             }
         },
     },
@@ -211,12 +171,6 @@ datasets = {
                 "luminosity": 0,
                 "lumis_per_job": 15,
                 "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_2": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-87e2c0e398f5cb72e5974e2df0c2a6a6/USER",
-                "luminosity": 13.821016530,
-                "number_of_jobs": 10
             },
             "pattuple_v6_3": {
                 "dbs_url": common.pattuple_dbs,
@@ -245,12 +199,6 @@ datasets = {
                 "luminosity": 0,
                 "lumis_per_job": 20,
                 "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_2": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_PromptReco_v2_RECO_pattuple_v6_2-377aee71049a82c7ea12a489f5d5e3ef/USER",
-                "luminosity": 2.131303202,
-                "number_of_jobs": 2
             },
             "pattuple_v6_3": {
                 "dbs_url": common.pattuple_dbs,
