@@ -334,22 +334,35 @@ class HistoManagerImpl:
     the methods which require the HistoData objects (and only them).
     """
     def __init__(self, histos=[]):
-        self.histos = histos
+        # List for the Draw() order, keep it reversed in order to draw
+        # the last histogram in the list first. i.e. to the bottom
+        self.drawList = histos[:]
+        self.drawList.reverse()
+
+        # List for the legend order, first histogram is also first in
+        # the legend
+        self.legendList = histos[:]
+
+        # Dictionary for accessing the histograms by name
         self._populateMap()
 
     def append(self, histoWrapper):
         """Append a HistoData object."""
-        self.histos.append(histoWrapper)
+        self.drawList.insert(0, histoWrapper)
+        self.legendList.append(histoWrapper)
         self._populateMap()
 
     def extend(self, histoWrappers):
         """Extend with a list of HistoData objects."""
-        self.histos.extend(histoWrappers)
+        self.drawList.reverse()
+        self.drawList.extend(histoWrappers)
+        self.drawList.reverse()
+        self.legendList.extend(histoWrappers)
         self._populateMap()
 
     def _populateMap(self):
         self.nameHistoMap = {}
-        for h in self.histos:
+        for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
     def forHisto(self, name, func):
@@ -392,7 +405,7 @@ class HistoManagerImpl:
         predicate   Call func() only if predicate returns True. The
                     HistoData object is given to the predicate
         """
-        for d in self.histos:
+        for d in self.drawList:
             if predicate(d):
                 d.call(func)
 
@@ -408,7 +421,7 @@ class HistoManagerImpl:
         return [d.getHistogram() for d in self.histos]
 
     def getHistoDataList(self):
-        return self.histos
+        return self.drawList[:]
 
     def setHistoLegendLabel(self, name, label):
         """Set legend name for a given histogram.
@@ -449,7 +462,7 @@ class HistoManagerImpl:
         Arguments:
         style  Style for the legend (given to TLegend as 3rd argument)
         """
-        for d in self.histos:
+        for d in self.drawList:
             d.setLegendStyle(style)
 
     def setHistoDrawStyle(self, name, style):
@@ -470,7 +483,7 @@ class HistoManagerImpl:
         Arguments:
         style  Style for obj.Draw() call
         """
-        for d in self.histos:
+        for d in self.drawList:
             d.drawStyle = style
 
     def createCanvasFrame(self, name, **kwargs):
@@ -496,7 +509,7 @@ class HistoManagerImpl:
         from the histograms, i.e. ymax keyword argument is *not*
         given.
         """
-        if len(self.histos) == 0:
+        if len(self.drawList) == 0:
             raise Exception("Empty set of histograms!")
 
         c = ROOT.TCanvas(name)
@@ -509,45 +522,35 @@ class HistoManagerImpl:
             yfactor = kwargs["yfactor"]
 
         if not "ymax" in kwargs:
-            kwargs["ymax"] = yfactor * max([d.histo.GetMaximum() for d in self.histos])
+            kwargs["ymax"] = yfactor * max([d.histo.GetMaximum() for d in self.drawList])
         if not "ymin" in kwargs:
-            kwargs["ymin"] = min([d.histo.GetMinimum() for d in self.histos])
+            kwargs["ymin"] = min([d.histo.GetMinimum() for d in self.drawList])
             if "yminfactor" in kwargs:
                 kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
 
         if not "xmin" in kwargs:
-            kwargs["xmin"] = min([d.getXmin() for d in self.histos])
+            kwargs["xmin"] = min([d.getXmin() for d in self.drawList])
         if not "xmax" in kwargs:
-            kwargs["xmax"] = min([d.getXmax() for d in self.histos])
+            kwargs["xmax"] = min([d.getXmax() for d in self.drawList])
 
         frame = c.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-        frame.GetXaxis().SetTitle(self.histos[0].histo.GetXaxis().GetTitle())
-        frame.GetYaxis().SetTitle(self.histos[0].histo.GetYaxis().GetTitle())
+
+        # Take these from the first added histogram, which is the last
+        # item in the draw list
+        frame.GetXaxis().SetTitle(self.drawList[-1].histo.GetXaxis().GetTitle())
+        frame.GetYaxis().SetTitle(self.drawList[-1].histo.GetYaxis().GetTitle())
 
         return (c, frame)
 
     def addToLegend(self, legend):
         """Add histograms to a given TLegend."""
-        for d in self.histos:
+        for d in self.legendList:
             d.addToLegend(legend)
 
-    def draw(self, inReverseOrder=True):
-        """Draw histograms.
-
-        Arguments:
-        inReverseOrder  If True (default), draw the histograms in reverse order.
-
-        By drawing in reverse order, the histogram which is last in
-        the TLegend is drawn first, i.e. to bottom, and the first one
-        in legend is drawn last, i.e. to top. I think this is the
-        logical order.
-        """
-        histos = [(d.histo, d.drawStyle, d.getName()) for d in self.histos]
-        if inReverseOrder:
-            histos.reverse()
-
-        for h, style, dname in histos:
-            h.Draw(style+" same")
+    def draw(self):
+        """Draw histograms."""
+        for h in self.drawList:
+            h.histo.Draw(h.drawStyle+" same")
 
     def stackHistograms(self, newName, nameList):
         """Stack histograms.
@@ -557,12 +560,17 @@ class HistoManagerImpl:
         nameList   List of histogram names to stack
         """
 
-        (selected, notSelected, firstIndex) = mergeStackHelper(self.histos, nameList, "stack")
+        (selected, notSelected, firstIndex) = mergeStackHelper(self.drawList, nameList, "stack")
         if len(selected) == 0:
             return
 
-        notSelected.insert(firstIndex, HistoDataStacked(selected, newName))
-        self.histos = notSelected
+        stacked = HistoDataStacked(selected, newName)
+        notSelected.insert(firstIndex, stacked)
+        self.drawList = notSelected
+
+        self.legendList = filter(lambda x: x in notSelected, self.legendList)
+        self.legendList.insert(firstIndex+1, stacked)
+
         self._populateMap()
 
 
