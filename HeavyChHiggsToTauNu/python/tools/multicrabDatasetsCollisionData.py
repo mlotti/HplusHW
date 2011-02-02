@@ -333,15 +333,15 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
-            # "pattuple_v9_!": {
-            #     "dbs_url": common.pattuple_dbs,
-            #     "datasetpath": "",
-            #     "luminosity": 0,
-            #     "number_of_jobs": 1
-            # },
-            # "pattuple_v9": {
-            #     "fallback": "pattuple_v9_1"
-            # }
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Jet/local-Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9_1-f27709779cfd23143641ea67ab8bfc68/USER",
+                "luminosity": 18.435676673,
+                "number_of_jobs": 1
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
 
