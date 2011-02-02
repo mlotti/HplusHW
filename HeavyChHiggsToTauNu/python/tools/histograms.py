@@ -139,6 +139,14 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
+class CanvasFrame:
+    """Placeholder for the canvas and the frame histogram(s)."""
+    def __init__(self, canvas, frame, **kwargs):
+        self.canvas = canvas
+        self.frame = frame
+        for key, value in kwargs.iteritems():
+            setattr(self, key, value)
+
 class HistoData:
     """Class to represent one (TH1/TH2) histogram."""
 
@@ -561,7 +569,7 @@ class HistoManagerImpl:
         frame.GetXaxis().SetTitle(self.drawList[0].histo.GetXaxis().GetTitle())
         frame.GetYaxis().SetTitle(self.drawList[0].histo.GetYaxis().GetTitle())
 
-        return (c, frame)
+        return CanvasFrame(c, frame)
 
     def addToLegend(self, legend):
         """Add histograms to a given TLegend."""

@@ -125,11 +125,11 @@ TauIsoMaxlTrkPt.forHisto("Data", styles.getDataStyle())
 #TauIsoMaxlTrkPt.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = TauIsoMaxlTrkPt.createCanvasFrame("TauIsoMaxlTrkPt", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
+cf = TauIsoMaxlTrkPt.createCanvasFrame("TauIsoMaxlTrkPt", ymin=0.01, ymax=None, xmin=0.0, xmax=20.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("#tau-jet, Max Ldg Trk in Isol Annulus, p_{T} (GeV/c)")
-frame.GetYaxis().SetTitle(ylabel)
+cf.frame.GetXaxis().SetTitle("#tau-jet, Max Ldg Trk in Isol Annulus, p_{T} (GeV/c)")
+cf.frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
@@ -154,6 +154,6 @@ raw_input("Hit enter to continue") ### keep canvas open until you hit enter
 
 ############################### SAVING ###############################
 ### Save TCanvas as png
-canvas.SaveAs(".png")
-#canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+cf.canvas.SaveAs(".png")
+#cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".C")

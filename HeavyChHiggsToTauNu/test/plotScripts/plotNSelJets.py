@@ -128,11 +128,11 @@ NSelJets.setHistoDrawStyle("BTau_146240-147116", "EP")
 NSelJets.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = NSelJets.createCanvasFrame("NSelJets", ymin=0.01, ymax=None, xmin=0.0, xmax=10.0)
+cf = NSelJets.createCanvasFrame("NSelJets", ymin=0.01, ymax=None, xmin=0.0, xmax=10.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Number of Selected Jets")
-frame.GetYaxis().SetTitle(ylabel)
+cf.frame.GetXaxis().SetTitle("Number of Selected Jets")
+cf.frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
@@ -157,6 +157,6 @@ raw_input("Hit enter to continue") ### keep canvas open until you hit enter
 
 ############################### SAVING ###############################
 ### Save TCanvas as png
-canvas.SaveAs(".png")
-#canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+cf.canvas.SaveAs(".png")
+#cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".C")

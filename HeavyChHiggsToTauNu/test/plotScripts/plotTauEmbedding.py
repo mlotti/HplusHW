@@ -28,7 +28,9 @@ def getHisto(datasets, path, name, func=None):
 
 class HistoBase:
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = self.histos.createCanvasFrame(plotname, **kwargs)
+        self.canvas = cf.canvas
+        self.frame = cf.frame
 
     def setLegend(self, legend):
         self.legend = legend

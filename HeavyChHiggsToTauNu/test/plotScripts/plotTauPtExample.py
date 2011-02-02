@@ -132,12 +132,12 @@ tauPts.addMcUncertainty(styles.getErrorStyle())
 #tauPts.addMcUncertainty(styles.getErrorStyle(), "MC uncertainty")
 
 # Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauPts.createCanvasFrame("taupt")
-#(canvas, frame) = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
+cf = tauPts.createCanvasFrame("taupt")
+#cf = tauPts.createCanvasFrame("taupt", ymin=10, ymax=1e9) # for logy
 
 # Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
-frame.GetYaxis().SetTitle(ylabel)
+cf.frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+cf.frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
@@ -162,9 +162,9 @@ tauPts.addLuminosityText()
 
 
 # Save TCanvas as png
-canvas.SaveAs(".png")
-#canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+cf.canvas.SaveAs(".png")
+cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".C")
 
 # Print various information from datasets
 print "============================================================"
