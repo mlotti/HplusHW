@@ -23,7 +23,7 @@ def customise(process):
 
     print "TAUOLA mdtau =", process.generator.ZTauTau.TauolaOptions.InputCards.mdtau
 
-    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+    #process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
     processName = process.name_()
     process.hltTrigReport.HLTriggerResults.setProcessName(processName)
@@ -56,7 +56,7 @@ def customise(process):
 
     # Do we have to override the beam spot for data?
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_v16_offline") # 38x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
         process.GlobalTag.toGet = cms.VPSet(
             cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
                      tag = bs,

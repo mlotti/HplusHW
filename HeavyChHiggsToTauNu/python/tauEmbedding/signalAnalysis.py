@@ -16,9 +16,8 @@ def customiseParamForTauEmbedding(param):
 
     # Use the taus matched to the original muon in tau selections
     postfix = "TauEmbeddingMuonMatched"
-    param.tauSelectionShrinkingConeCutBased.src.setModuleLabel("selectedPatTausShrinkingConePFTau"+postfix)
-    param.tauSelectionShrinkingConeTaNCBased.src.setModuleLabel("selectedPatTausShrinkingConePFTau"+postfix)
-    param.tauSelectionHPSTauBased.src.setModuleLabel("selectedPatTausHpsPFTau"+postfix)
+    param.setAllTauSelectionSrcSelectedPatTaus()
+    param.forEachTauSelection(lambda x: x.src.setModuleLabel(x.src.getModuleLabel()+postfix))
 
     # Remove TCTau
     i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)
@@ -55,7 +54,7 @@ def addTauEmbeddingMuonTaus(process):
         deltaR = cms.double(0.1),
     )
 
-    for tau in ["selectedPatTausShrinkingConePFTau", "selectedPatTausHpsPFTau"]:
+    for tau in ["selectedPatTausShrinkingConePFTau", "selectedPatTausHpsPFTau", "selectedPatTausHpsTancPFTau"]:
         m = prototype.clone(
             tauSrc = tau
         )

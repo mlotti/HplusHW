@@ -333,15 +333,15 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
-            # "pattuple_v9_!": {
-            #     "dbs_url": common.pattuple_dbs,
-            #     "datasetpath": "",
-            #     "luminosity": 0,
-            #     "number_of_jobs": 1
-            # },
-            # "pattuple_v9": {
-            #     "fallback": "pattuple_v9_1"
-            # }
+            "pattuple_v9_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Jet/local-Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9_1-f27709779cfd23143641ea67ab8bfc68/USER",
+                "luminosity": 18.435676673,
+                "number_of_jobs": 1
+            },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_1"
+            }
         }
     },
 
@@ -415,6 +415,16 @@ datasets = {
     "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
         "dataVersion": "38Xdata",
         "trigger": "HLT_Mu9",
+        "data": {}
+    },
+    "Mu_146240-147116_Nov4": { # needed to keep tau embedding happy
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu9",
+        "data": {}
+    },
+    "Mu_147196-149442_Nov4": { # needed to keep tau embedding happy
+        "dataVersion": "38Xdata",
+        "trigger": "HLT_Mu15_v1",
         "data": {}
     },
     "Mu_136035-144114_Dec22": {
