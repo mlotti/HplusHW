@@ -377,7 +377,7 @@ class HistoData:
         """Add the histogram to a TLegend."""
         legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
 
-    def call(self, func):
+    def callHisto(self, func):
         """Call a function with the TH1 as an argument.
 
         The return value of the function is used as the new histogram.
@@ -458,10 +458,10 @@ class HistoDataStacked:
         for d in self.data:
             d.addToLegend(legend)
 
-    def call(self, function):
+    def callHisto(self, function):
         """Call a function for each histogram in the stack."""
         for d in self.data:
-            d.call(function)
+            d.callHisto(function)
 
     def getXmin(self):
         return min([d.getXmin() for d in self.data])
@@ -512,7 +512,7 @@ class HistoStatError:
     def addToLegend(self, legend):
         legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
 
-    def call(self, function):
+    def callHisto(self, function):
         h = function(self.histo)
         if h != None:
             self.histo = h
@@ -595,7 +595,7 @@ class HistoManagerImpl:
                as the new histogram
         """
         try:
-            self.nameHistoMap[name].call(func)
+            self.nameHistoMap[name].callHisto(func)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
 
@@ -628,7 +628,7 @@ class HistoManagerImpl:
         """
         for d in self.drawList:
             if predicate(d):
-                d.call(func)
+                d.callHisto(func)
 
     def hasHisto(self, name):
         return name in self.nameHistoMap
@@ -794,7 +794,7 @@ class HistoManagerImpl:
             return
 
         hse = HistoStatError(mcHistos, name)
-        hse.call(style)
+        hse.callHisto(style)
 
         firstMcIndex = len(self.drawList)
         for i, h in enumerate(self.drawList):
