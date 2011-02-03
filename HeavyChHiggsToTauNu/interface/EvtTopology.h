@@ -80,6 +80,7 @@ namespace HPlus {
     ~EvtTopology();
 
     Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    Data InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets);
 
   private:
     // Input parameters
@@ -96,6 +97,11 @@ namespace HPlus {
 
     // Histograms
     TH1 *hAlphaT;
+    TH1 *hDiJetInvMass;
+    TH1 *hDiJetInvMassCutFail;
+    TH1 *hDiJetInvMassCutPass;
+    TH1 *hDiJetInvMassWCutFail;
+    TH1 *hDiJetInvMassTopCutFail;
 
     // Other variables
     AlphaStruc sAlpha;
