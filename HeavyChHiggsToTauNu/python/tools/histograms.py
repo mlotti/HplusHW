@@ -175,8 +175,8 @@ class CanvasFrame:
         ymax     Maximum value of Y axis
         xmin     Minimum value of X axis
         xmax     Maximum value of X axis
-        yfactor, ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
-        yminfactor           Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
+        ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
+        yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
 
         By default ymin, ymax, xmin and xmax are taken as the
         maximum/minimums of the histogram objects such that frame
@@ -187,36 +187,149 @@ class CanvasFrame:
         from the histograms, i.e. ymax keyword argument is *not*
         given.
         """
-        self.canvas = ROOT.TCanvas(name)
-
         histos = histoManager.getHistoDataList()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
-        yfactor = 1.1
-        if "ymaxfactor" in kwargs:
-            yfactor = kwargs["ymaxfactor"]
-            if "yfactor" in kwargs:
+        self.canvas = ROOT.TCanvas(name)
+
+        if "yfactor" in kwargs:
+            if "ymaxfactor" in kwargs:
                 raise Exception("Only one of ymaxfactor, yfactor can be given")
-        elif "yfactor" in kwargs:
-            yfactor = kwargs["yfactor"]
+            kwargs["ymaxfactor"] = kwargs["yfactor"]
 
-        if not "ymax" in kwargs:
-            kwargs["ymax"] = yfactor * max([d.histo.GetMaximum() for d in histos])
-        if not "ymin" in kwargs:
-            kwargs["ymin"] = min([d.histo.GetMinimum() for d in histos])
-            if "yminfactor" in kwargs:
-                kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
-
-        if not "xmin" in kwargs:
-            kwargs["xmin"] = min([d.getXmin() for d in histos])
-        if not "xmax" in kwargs:
-            kwargs["xmax"] = min([d.getXmax() for d in histos])
+        _boundsArgs(histos, kwargs)
 
         self.frame = self.canvas.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
         self.frame.GetXaxis().SetTitle(histos[0].histo.GetXaxis().GetTitle())
         self.frame.GetYaxis().SetTitle(histos[0].histo.GetYaxis().GetTitle())
+
+class CanvasFrameTwo:
+    """Create TCanvas and frames for to TPads."""
+    def __init__(self, histoManager1, histos2, name, **kwargs):
+        """Create TCanvas and TH1 for the frame.
+
+        Arguments:
+        histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
+        histos2       List of TH1s to take the histograms for automatic axis ranges for lower pad
+        name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
         
+        Keyword arguments:
+        opts1                   Dictionary for histoManager1 options
+        opts2                   Dictionary for histos2 options
+        canvasFactor            Multiply the canvas height by this factor (default 1.25)
+        canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
+
+        Options:
+        ymin     Minimum value of Y axis
+        ymax     Maximum value of Y axis
+        xmin     Minimum value of X axis (only for opts1)
+        xmax     Maximum value of X axis (only for opts1)
+        ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
+        yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
+
+        By default ymin, ymax, xmin and xmax are taken as the
+        maximum/minimums of the histogram objects such that frame
+        contains all histograms. The ymax is then multiplied with
+        ymaxfactor
+
+        The yminfactor/ymaxfactor are used only if ymin/ymax is taken
+        from the histograms, i.e. ymax keyword argument is *not*
+        given.
+        """
+        class FrameWrapper:
+            """Wrapper to provide the CanvasFrameTwo.frame member.
+
+            The GetXaxis() is forwarded to the frame of the lower pad,
+            and the GetYaxis() is forwared to the frame of the upper pad.
+            """
+            def __init__(self, frame1, frame2):
+                self.frame1 = frame1
+                self.frame2 = frame2
+
+            def GetXaxis(self):
+                return self.frame2.GetXaxis()
+
+            def GetYaxis(self):
+                return self.frame1.GetYaxis()
+
+        class HistoWrapper:
+            """Wrapper to provide the getXmin/getXmax functions for _boundsArgs function."""
+            def __init__(self, histo):
+                self.histo = histo
+
+            def getXmin(self):
+                return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+
+            def getXmax(self):
+                return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
+
+        histos1 = histoManager1.getHistoDataList()
+        if len(histos1) == 0:
+            raise Exception("Empty set of histograms for first pad!")
+        if len(histos2) == 0:
+            raise Exception("Empty set of histograms for second pad!")
+
+        canvasFactor = _kwargsDefault(kwargs, "canvasFactor", 1.25)
+        canvasHeightCorrection = _kwargsDefault(kwargs, "canvasHeightCorrection", 0.022)
+        divisionPoint = 1-1/canvasFactor
+
+        opts1 = _kwargsDefault(kwargs, "opts1", {})
+        opts2 = _kwargsDefault(kwargs, "opts2", {})
+
+        if "xmin" in opts2 or "xmax" in opts2:
+            raise Exception("No 'xmin' or 'xmax' allowed in opts2")
+        
+
+        _boundsArgs(histos1, opts1)
+        opts2["xmin"] = opts1["xmin"]
+        opts2["ymin"] = opts1["ymin"]
+        _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
+
+        # Create the canvas, divide it to two
+        self.canvas = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
+        self.canvas.Divide(1, 2)
+        
+        # Set the lower point of the upper pad to divisionPoint
+        self.pad1 = self.canvas.cd(1)
+        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
+        self.pad1.GetPadPar(xlow, ylow, xup, yup)
+        self.pad1.SetPad(xlow, divisionPoint, xup, yup)
+
+        # Set the upper point of the lower pad to divisionPoint
+        self.pad2 = self.canvas.cd(2)
+        self.pad2.GetPadPar(xlow, ylow, xup, yup)
+        self.pad2.SetPad(xlow, ylow, xup,
+                         divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+canvasHeightCorrection)
+        self.pad2.SetFillStyle(4000)
+        self.pad2.SetTopMargin(0.0)
+        #self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.06)
+        self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.16)
+
+        self.canvas.cd(1)
+
+        yoffsetFactor = canvasFactor*1.15
+        #xoffsetFactor = canvasFactor*1.6
+        #xoffsetFactor = canvasFactor*2
+        xoffsetFactor = 0.5*canvasFactor/(canvasFactor-1) * 1.3
+
+        self.frame1 = self.pad1.DrawFrame(opts1["xmin"], opts1["ymin"], opts1["xmax"], opts1["ymax"])
+        (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
+        self.frame1.GetXaxis().SetLabelSize(0)
+        self.frame1.GetXaxis().SetTitleSize(0)
+        self.frame1.GetYaxis().SetTitle(histos1[0].histo.GetYaxis().GetTitle())
+        self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
+
+        self.canvas.cd(2)
+        self.frame2 = self.pad2.DrawFrame(opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"])
+        self.frame2.GetXaxis().SetTitle(histos1[0].histo.GetXaxis().GetTitle())
+        self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
+        self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
+        self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
+
+        self.canvas.cd(1)
+        self.frame = FrameWrapper(self.frame1, self.frame2)
+
 
 class HistoData:
     """Class to represent one (TH1/TH2) histogram."""
@@ -310,6 +423,14 @@ class HistoDataStacked:
         """Get the original histograms."""
         return [x.getHistogram() for x in self.data]
 
+    def getSumHistogram(self):
+        """Get the sum of the original histograms."""
+        h = self.data[0].getHistogram().Clone()
+        h.SetName(h.GetName()+"_sum")
+        for d in self.data[1:]:
+            h.Add(d.getHistogram())
+        return h
+
     def isMC(self):
         return self.data[0].isMC()
 
@@ -351,8 +472,8 @@ class HistoDataStacked:
 class HistoStatError:
     """Class to represent combined statistical errors of many histograms."""
 
-    def __init__(self, histoData, name):
-        self.histos = histoData
+    def __init__(self, histoDatas, name):
+        self.histos = histoDatas
         self.name = name
         self.legendLabel = name
         self.legendStyle = "F"
@@ -360,12 +481,9 @@ class HistoStatError:
 
         histos = []
         for h in self.histos:
-            try:
-                # If h is HistoDataStacked
-                hl = h.getAllHistograms()
-                histos.extend(hl)
-            except AttributeError:
-                # If h is HistoData
+            if hasattr(h, "getSumHistogram"):
+                histos.append(h.getSumHistogram())
+            else:
                 histos.append(h.getHistogram())
 
         self.histo = histos[0].Clone()
@@ -517,7 +635,11 @@ class HistoManagerImpl:
 
     def getHisto(self, name):
         """Get TH1 of a given name."""
-        return self.nameHistoMap[name].getHistogram()
+        return self.getHistoData(name).getHistogram()
+
+    def getHistoData(self, name):
+        """Get HistoData of a given name."""
+        return self.nameHistoMap[name]
 
     def getHistoList(self):
         """Get list of TH1 histograms."""
@@ -589,58 +711,45 @@ class HistoManagerImpl:
         for d in self.drawList:
             d.drawStyle = style
 
-    def createCanvasFrame(self, name, **kwargs):
-        """Create TCanvas and TH1 for the frame.
-
-        Arguments:
-        name  Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-        
-        Keyword arguments:
-        ymin     Minimum value of Y axis
-        ymax     Maximum value of Y axis
-        xmin     Minimum value of X axis
-        xmax     Maximum value of X axis
-        yfactor, ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
-        yminfactor           Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
-
-        By default ymin, ymax, xmin and xmax are taken as the
-        maximum/minimums of the histogram objects such that frame
-        contains all histograms. The ymax is then multiplied with
-        ymaxfactor
-
-        The yminfactor/ymaxfactor are used only if ymin/ymax is taken
-        from the histograms, i.e. ymax keyword argument is *not*
-        given.
-        """
+    def createCanvasFrameTwo(self, name):
+        """Create TCanvas split in two and the TH1 frames on them."""
         if len(self.drawList) == 0:
             raise Exception("Empty set of histograms!")
 
-        c = ROOT.TCanvas(name)
-        yfactor = 1.1
-        if "ymaxfactor" in kwargs:
-            yfactor = kwargs["ymaxfactor"]
-            if "yfactor" in kwargs:
-                raise Exception("Only one of ymaxfactor, yfactor can be given")
-        elif "yfactor" in kwargs:
-            yfactor = kwargs["yfactor"]
+        canvasFactor = 1.5
+        divisionPoint = 1-1/canvasFactor
 
-        if not "ymax" in kwargs:
-            kwargs["ymax"] = yfactor * max([d.histo.GetMaximum() for d in self.drawList])
-        if not "ymin" in kwargs:
-            kwargs["ymin"] = min([d.histo.GetMinimum() for d in self.drawList])
-            if "yminfactor" in kwargs:
-                kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
+        # Create the canvas, divide it to two
+        c = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
+        c.Divide(1, 2)
+        
+        # Set the lower point of the upper pad to divisionPoint
+        pad1 = c.cd(1)
+        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
+        pad1.GetPadPar(xlow, ylow, xup, yup)
+        pad1.SetPad(xlow, divisionPoint, xup, yup)
 
-        if not "xmin" in kwargs:
-            kwargs["xmin"] = min([d.getXmin() for d in self.drawList])
-        if not "xmax" in kwargs:
-            kwargs["xmax"] = min([d.getXmax() for d in self.drawList])
+        # Set the upper point of the lower pad to divisionPoint
+        pad2 = c.cd(2)
+        pad2.GetPadPar(xlow, ylow, xup, yup)
+        pad2.SetPad(xlow, ylow, xup, divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+0.005)
 
-        frame = c.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-        frame.GetXaxis().SetTitle(self.drawList[0].histo.GetXaxis().GetTitle())
-        frame.GetYaxis().SetTitle(self.drawList[0].histo.GetYaxis().GetTitle())
+        c.cd(1)
 
-        return CanvasFrame(c, frame)
+        frame1 = pad1.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
+        (labelSize, titleSize) = (frame1.GetXaxis().GetLabelSize(), frame1.GetXaxis().GetTitleSize())
+        frame1.GetYaxis().SetTitle(self.drawList[0].histo.GetYaxis().GetTitle())
+
+        c.cd(2)
+        frame2 = pad2.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
+        frame2.GetXaxis().SetTitle(self.drawList[0].histo.GetXaxis().GetTitle())
+        frame2.GetYaxis().SetTitle("")
+        for axis in [frame2.GetXaxis(), frame2.GetYaxis()]:
+            axis.SetLabelSize(labelSize*canvasFactor)
+            axis.SetTitleSize(titleSize*canvasFactor)
+
+        return CanvasFrame(c, frame1, frame1=frame1, frame2=frame2, pad1=pad1, pad2=pad2)
+
 
     def addToLegend(self, legend):
         """Add histograms to a given TLegend."""
@@ -814,4 +923,4 @@ class HistoManager:
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'Stacked MC'."""
-        self.stackHistograms("Stacked MC", self.datasetMgr.getMCDatasetNames())
+        self.stackHistograms("StackedMC", self.datasetMgr.getMCDatasetNames())
