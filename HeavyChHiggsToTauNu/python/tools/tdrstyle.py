@@ -11,6 +11,22 @@ class TDRStyle:
         self.canvasH = 600
         self.canvasW = 600
 
+        #absoluteSize = False
+        absoluteSize = True
+
+        if absoluteSize:
+            # helvetica, size absolute
+            self.font = 43
+            self.titleSize = 33
+            self.labelSize = 27
+            self.statSize = 14
+        else:
+            # helvetica, size w.r.t. pad size
+            self.font = 42
+            self.titleSize = 0.06
+            self.labelSize = 0.05
+            self.statSize = 0.025
+
         # for the canvas
         self.tdrStyle.SetCanvasBorderMode(0)
         self.tdrStyle.SetCanvasColor(ROOT.kWhite)
@@ -74,8 +90,8 @@ class TDRStyle:
         self.tdrStyle.SetOptFile(0)
         self.tdrStyle.SetOptStat(0) # To display the mean and RMS:   SetOptStat("mr");
         self.tdrStyle.SetStatColor(ROOT.kWhite)
-        self.tdrStyle.SetStatFont(42)
-        self.tdrStyle.SetStatFontSize(0.025)
+        self.tdrStyle.SetStatFont(self.font)
+        self.tdrStyle.SetStatFontSize(self.statSize)
         self.tdrStyle.SetStatTextColor(1)
         self.tdrStyle.SetStatFormat("6.4g")
         self.tdrStyle.SetStatBorderSize(1)
@@ -98,11 +114,11 @@ class TDRStyle:
         # For the Global title:
 
         self.tdrStyle.SetOptTitle(0)
-        self.tdrStyle.SetTitleFont(42)
+        self.tdrStyle.SetTitleFont(self.font)
         self.tdrStyle.SetTitleColor(1)
         self.tdrStyle.SetTitleTextColor(1)
         self.tdrStyle.SetTitleFillColor(10)
-        self.tdrStyle.SetTitleFontSize(0.05)
+        self.tdrStyle.SetTitleFontSize(self.labelSize)
         # self.tdrStyle.SetTitleH(0); // Set the height of the title box
         # self.tdrStyle.SetTitleW(0); // Set the width of the title box
         # self.tdrStyle.SetTitleX(0); // Set the position of the title box
@@ -112,8 +128,8 @@ class TDRStyle:
 
         # For the axis titles:
         self.tdrStyle.SetTitleColor(1, "XYZ")
-        self.tdrStyle.SetTitleFont(42, "XYZ")
-        self.tdrStyle.SetTitleSize(0.06, "XYZ")
+        self.tdrStyle.SetTitleFont(self.font, "XYZ")
+        self.tdrStyle.SetTitleSize(self.titleSize, "XYZ")
         # self.tdrStyle.SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
         # self.tdrStyle.SetTitleYSize(Float_t size = 0.02);
         self.tdrStyle.SetTitleXOffset(0.9)
@@ -122,9 +138,9 @@ class TDRStyle:
 
         # For the axis labels:
         self.tdrStyle.SetLabelColor(1, "XYZ")
-        self.tdrStyle.SetLabelFont(42, "XYZ")
+        self.tdrStyle.SetLabelFont(self.font, "XYZ")
         self.tdrStyle.SetLabelOffset(0.007, "XYZ")
-        self.tdrStyle.SetLabelSize(0.05, "XYZ")
+        self.tdrStyle.SetLabelSize(self.labelSize, "XYZ")
 
         # For the axis:
         self.tdrStyle.SetAxisColor(1, "XYZ")
@@ -133,6 +149,10 @@ class TDRStyle:
         self.tdrStyle.SetNdivisions(510, "XYZ")
         self.tdrStyle.SetPadTickX(1)  # To get tick marks on the opposite side of the frame
         self.tdrStyle.SetPadTickY(1)
+
+        # For the text boxes
+        self.tdrStyle.SetTextFont(self.font+20) # Bold
+        self.tdrStyle.SetTextSize(self.labelSize)
 
         # Change for log plots:
         self.tdrStyle.SetOptLogx(0)

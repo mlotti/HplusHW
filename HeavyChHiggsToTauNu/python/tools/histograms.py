@@ -14,16 +14,13 @@ class TextDefaults:
     the text size.
     """
     def __init__(self):
-        self._setDefaults("cmsPreliminary", x=0.62, y=0.96, size=0.05)
-        self._setDefaults("energy", x=0.3, y=0.96, size=0.05)
-        self._setDefaults("lumi", x=0.65, y=0.85, size=0.05)
+        self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
+        self._setDefaults("energy", x=0.3, y=0.96)
+        self._setDefaults("lumi", x=0.65, y=0.85)
 
     def _setDefaults(self, name, **kwargs):
-        for i in ["x", "y", "size"]:
-            try:
-                setattr(self, name+"_"+i, kwargs[i])
-            except KeyError:
-                pass
+        for x, value in kwargs.iteritems():
+            setattr(self, name+"_"+x, value)
             
     def setCmsPreliminaryDefaults(self, **kwargs):
         self._setDefaults("cmsPreliminary", **kwargs)
@@ -42,7 +39,10 @@ class TextDefaults:
         return (x, y)
 
     def getSize(self, name):
-        return getattr(self, name+"_size")
+        try:
+            return getattr(self, name+"_size")
+        except AttributeError:
+            return ROOT.gStyle.GetTextSize()
 
 textDefaults = TextDefaults()
 
@@ -76,12 +76,13 @@ class LegendCreator:
     legend = createLegend()
     """
 
-    def __init__(self, x1, y1, x2, y2):
+    def __init__(self, x1, y1, x2, y2, textSize=0.025):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.keys = ["x1", "y1", "x2", "y2"]
+        self.textSize = textSize
+        self._keys = ["x1", "y1", "x2", "y2"]
 
     def copy(self):
         return LegendCreator(self.x1, self.y1, self.x2, self.y2)
@@ -89,13 +90,10 @@ class LegendCreator:
     def setDefaults(self, **kwargs):
         """Set new default positions.
 
-        Keyword arguments: x1, y1, x2, y2
+        Keyword arguments: x1, y1, x2, y2, textSize
         """
-        for k in self.keys:
-            try:
-                setattr(self, k, kwargs[k])
-            except KeyError:
-                pass
+        for x, value in kwargs.iteritems():
+            setattr(self, x, value)
 
     def __call__(self, *args, **kwargs):
         """Create a new TLegend based.
@@ -111,18 +109,20 @@ class LegendCreator:
         if len(args) == 4:
             if len(kwargs) != 0:
                 raise Exception("Got 4 positional arguments, no keyword arguments allowed")
-            for i, k in enumerate(self.keys):
+            for i, k in enumerate(self._keys):
                 kwargs[k] = args[i]
         elif len(args) != 0:
             raise Exception("If positional arguments given, must give 4")
         else:
-            for i in self.keys:
+            for i in self._keys:
                 if not i in kwargs:
                     kwargs[i] = getattr(self, i)
 
         legend = ROOT.TLegend(kwargs["x1"], kwargs["y1"], kwargs["x2"], kwargs["y2"])
         legend.SetFillColor(ROOT.kWhite)
         legend.SetBorderSize(1)
+        legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
+        legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
         return legend
 
@@ -139,13 +139,35 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
+def _kwargsDefault(kwargs, name, default):
+    if name in kwargs:
+        return kwargs[name]
+    return default
+
+def _boundsArgs(histos, kwargs):
+    ymaxfactor = _kwargsDefault(kwargs, "ymaxfactor", 1.1)
+
+    if not "ymax" in kwargs:
+        kwargs["ymax"] = ymaxfactor * max([d.histo.GetMaximum() for d in histos])
+    if not "ymin" in kwargs:
+        if "yminfactor" in kwargs:
+            kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
+        else:
+            kwargs["ymin"] = min([d.histo.GetMinimum() for d in histos])
+
+    if not "xmin" in kwargs:
+        kwargs["xmin"] = min([d.getXmin() for d in histos])
+    if not "xmax" in kwargs:
+        kwargs["xmax"] = min([d.getXmax() for d in histos])
+
+
 class CanvasFrame:
     """Create TCanvas and frame for one TPad."""
     def __init__(self, histoManager, name, **kwargs):
         """Create TCanvas and TH1 for the frame.
 
         Arguments:
-        histoManager  HistoManager object to take the histograms from for automatic axis ranges
+        histoManager  HistoManager object to take the histograms for automatic axis ranges
         name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
         
         Keyword arguments:
