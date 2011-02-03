@@ -17,7 +17,7 @@ namespace HPlus {
   
   FakeMETVeto::FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fMaxDeltaPhi(iConfig.getUntrackedParameter<double>("maxDeltaPhi")),
+    fMinDeltaPhi(iConfig.getUntrackedParameter<double>("minDeltaPhi")),
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
@@ -37,7 +37,7 @@ namespace HPlus {
     // Loop over selected taus
     fClosestDeltaPhiToTaus = 999.;
     for(edm::PtrVector<reco::Candidate>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-      double myDeltaPhi = reco::deltaPhi(*met, **iter);
+      double myDeltaPhi = reco::deltaPhi(*met, **iter) * 180./3.14159;
       if ( fabs(myDeltaPhi) < fClosestDeltaPhiToTaus)
         fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
     }
@@ -46,7 +46,7 @@ namespace HPlus {
     // Loop over selected jets
     fClosestDeltaPhiToJets = 999.;
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-      double myDeltaPhi = reco::deltaPhi(*met, **iter);
+      double myDeltaPhi = reco::deltaPhi(*met, **iter) * 180./3.14159;
       if ( fabs(myDeltaPhi) < fClosestDeltaPhiToJets)
         fClosestDeltaPhiToJets = fabs(myDeltaPhi);
     }
@@ -62,7 +62,7 @@ namespace HPlus {
 
     // Make cut
     passEvent = true; 
-    if (fClosestDeltaPhi > fMaxDeltaPhi)
+    if (fClosestDeltaPhi < fMinDeltaPhi)
       passEvent = false;
 
     return Data(this, passEvent);
