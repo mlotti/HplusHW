@@ -20,21 +20,19 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 legendLabels = {
     "Data":                "Data",
-    "TTbar_Htaunu_M80":    "H^{#pm} M=80",
-    "TTToHpmToTauNu_M90":  "H^{#pm} M=90",
-    "TTToHpmToTauNu_M100": "H^{#pm} M=100",
-    "TTToHpmToTauNu_M120": "H^{#pm} M=120",
-    "TTbar_Htaunu_M140":   "H^{#pm} M=140",
-    "TTbar_Htaunu_M160":   "H^{#pm} M=160",
-    "TTbar":               "t#bar{t}",
-    "TTbarJets":           "t#bar{t}+jets",
-    "WJets":               "W+jets",
-    "QCD_Pt30to50":        "QCD, 30 < #hat{p}_T < 50",
-    "QCD_Pt50to80":        "QCD, 50 < #hat{p}_T < 80",
-    "QCD_Pt80to120":       "QCD, 80 < #hat{p}_T < 120",
-    "QCD_Pt120to170":      "QCD, 120 < #hat{p}_T < 170",
-    "QCD_Pt170to230":      "QCD, 170 < #hat{p}_T < 230",
-    "QCD_Pt230to300":      "QCD, 230 < #hat{p}_T < 300"}
+    "TTToHplusBWB_M90_Winter10":  "H^{#pm} M=90",
+    "TTToHplusBWB_M100_Winter10": "H^{#pm} M=100",
+    "TTToHplusBWB_M120_Winter10": "H^{#pm} M=120",
+    "TTToHplusBWB_M140_Winter10": "H^{#pm} M=140",
+    "TTToHplusBWB_M160_Winter10": "H^{#pm} M=160",
+    "TTJets_TuneZ2_Winter10":           "t#bar{t}+jets",
+    "WJets_TuneZ2_Winter10":               "W+jets",
+    "QCD_Pt30to50_TuneZ2_Winter10":        "QCD, 30 < #hat{p}_T < 50",
+    "QCD_Pt50to80_TuneZ2_Winter10":        "QCD, 50 < #hat{p}_T < 80",
+    "QCD_Pt80to120_TuneZ2_Winter10":       "QCD, 80 < #hat{p}_T < 120",
+    "QCD_Pt120to170_TuneZ2_Winter10":      "QCD, 120 < #hat{p}_T < 170",
+    "QCD_Pt170to230_TuneZ2_Winter10":      "QCD, 170 < #hat{p}_T < 230",
+    "QCD_Pt230to300_TuneZ2_Winter10":      "QCD, 230 < #hat{p}_T < 300"}
 
 
 # Go to batch mode, comment if interactive mode is wanted (see on the
@@ -78,8 +76,12 @@ datasets.mergeData()
 # datasets.getDataset("WJets").setCrossSection(30000)
 
 # Example how to merge histograms of several datasets
-datasets.merge("QCD", ["QCD_Pt30to50", "QCD_Pt50to80", "QCD_Pt80to120",
-                       "QCD_Pt120to170", "QCD_Pt170to230", "QCD_Pt230to300"])
+datasets.merge("QCD", ["QCD_Pt30to50_TuneZ2_Winter10",
+                       "QCD_Pt50to80_TuneZ2_Winter10",
+                       "QCD_Pt80to120_TuneZ2_Winter10",
+                       "QCD_Pt120to170_TuneZ2_Winter10",
+                       "QCD_Pt170to300_TuneZ2_Winter10",
+                       "QCD_Pt300to470_TuneZ2_Winter10"])
 
 # Get set of histograms with the given path. The returned object is of
 # type HistoManager, which contains a histogram from each dataset in
@@ -128,8 +130,8 @@ tauPts.setHistoDrawStyle("Data", "EP")
 tauPts.stackMCHistograms()
 
 # Example how to add MC uncertainty
-tauPts.addMcUncertainty(styles.getErrorStyle())
-#tauPts.addMcUncertainty(styles.getErrorStyle(), "MC uncertainty")
+tauPts.addMCUncertainty(styles.getErrorStyle())
+#tauPts.addMCUncertainty(styles.getErrorStyle(), "MC uncertainty")
 
 # Create TCanvas and TH1F such that they cover all histograms
 cf = CanvasFrame(tauPts, "taupt")
