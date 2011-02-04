@@ -273,7 +273,7 @@ class Histo:
             return
 
         ROOT.gStyle.SetErrorX(0.5)
-        hse = HistoStatError(histoData, "MC Stat. Err.")
+        hse = HistoTotalUncertainty(histoData, "MC Stat. Err.")
         hse.call(styles.getErrorStyle())
         self.histos.append(hse)
 

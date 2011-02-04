@@ -490,8 +490,8 @@ class HistoDataStacked:
     def getXmax(self):
         return max([d.getXmax() for d in self.data])
 
-class HistoStatError:
-    """Class to represent combined statistical errors of many histograms."""
+class HistoTotalUncertainty:
+    """Class to represent combined (statistical) uncertainties of many histograms."""
 
     def __init__(self, histoDatas, name):
         self.histos = histoDatas
@@ -781,7 +781,7 @@ class HistoManagerImpl:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
             return
 
-        hse = HistoStatError(mcHistos, name)
+        hse = HistoTotalUncertainty(mcHistos, name)
         hse.callHisto(style)
 
         firstMcIndex = len(self.drawList)
