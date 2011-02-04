@@ -352,7 +352,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
     counters = []
-    if dataVersion.isData() and options.tauEmbedding == 0:
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
         counters = HChDataSelection.dataSelectionCounters[:]
 
     if options.doPat == 0:
