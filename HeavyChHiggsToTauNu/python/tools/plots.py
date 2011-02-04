@@ -251,9 +251,14 @@ class DataMCPlot:
     def addLuminosityText(self, x=None, y=None):
         self.histoMgr.addLuminosityText(x, y)
 
-    def save(self):
+    def save(self, formats=None):
+        if formats == None:
+            formats = self.saveFormats
+
         backup = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
-        for f in self.saveFormats:
+
+        for f in formats:
             self.cf.canvas.SaveAs(f)
+
         ROOT.gErrorIgnoreLevel = backup
