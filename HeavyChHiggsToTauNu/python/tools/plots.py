@@ -197,7 +197,7 @@ class DataMCPlot:
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
-    def addMCStatUncertainty(self):
+    def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
     def createFrame(self, filename, **kwargs):

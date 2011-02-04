@@ -55,6 +55,8 @@ h = DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 h.stackMCHistograms()
 #tauPt.stackMCHistograms(stackSignal=True) # Stack also the signal datasets?
 
+h.addMCUncertainty()
+
 # Create canvas and frame for only the distributions
 h.createFrame("taupt_new")
 h.frame.GetXaxis().SetTitle("#tau p_T (GeV/c)")
@@ -79,6 +81,7 @@ h.save()
 # the data/MC
 h = DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 h.stackMCHistograms()
+h.addMCUncertainty()
 h.createFrameFraction("taupt_new2",)
 h.frame.GetXaxis().SetTitle("#tau p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("#tau cands / 1 GeV/c")

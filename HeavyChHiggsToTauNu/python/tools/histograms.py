@@ -65,7 +65,7 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     l = ROOT.TLatex()
     l.SetNDC()
     l.SetTextSize(textDefaults.getSize("lumi"))
-    l.DrawLatex(x, y, "#intL=%.2f %s" % (lumi, unit))
+    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 
 class LegendCreator:
     """Class for generating legend creation functions with default positions.
@@ -420,7 +420,7 @@ class HistoTotalUncertainty(HistoBase):
         self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
         self.histos = histos
 
-        for h in histos[1:]:
+        for h in rootHistos[1:]:
             self.rootHisto.Add(h)
 
     def isMC(self):
@@ -715,7 +715,6 @@ class HistoManagerImpl:
             return
 
         hse = HistoTotalUncertainty(mcHistos, name)
-        #hse.call(lambda h: style(h.getRootHisto()))
         hse.call(style)
 
         firstMcIndex = len(self.drawList)
