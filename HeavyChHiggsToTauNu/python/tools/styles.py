@@ -14,7 +14,7 @@ class Style:
 	h.SetFillColor(0)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 class StyleFill:
     def __init__(self, style, fillStyle=1001):
@@ -28,7 +28,7 @@ class StyleFill:
         h.SetFillStyle(self.fillStyle)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 class StyleError:
     def __init__(self, color, style=3004, linecolor=None):
@@ -48,7 +48,7 @@ class StyleError:
             h.SetLineColor(ROOT.kWhite)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 dataStyle = Style(-2, ROOT.kBlack)
 errorStyle = StyleError(ROOT.kBlack, 3354)

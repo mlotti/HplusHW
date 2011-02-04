@@ -111,7 +111,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-TauIsolTrkPt.setHistoLegendLabels(legendLabels) # many datasets, with dict
+TauIsolTrkPt.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 TauIsolTrkPt.setHistoLegendStyleAll("F")

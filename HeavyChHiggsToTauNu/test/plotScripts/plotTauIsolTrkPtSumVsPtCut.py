@@ -110,7 +110,7 @@ ylabel = "??"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-TauIsoltrkPtsumVSPtcut.setHistoLegendLabels(legendLabels) # many datasets, with dict
+TauIsoltrkPtsumVSPtcut.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 TauIsoltrkPtsumVSPtcut.setHistoLegendStyleAll("F")

@@ -123,12 +123,12 @@ def SetLegendLabel(labels):
     return SetProperty(labels, lambda hd, label: hd.setLegendLabel(label))
 
 def SetPlotStyle(styleList):
-    return SetProperty(styleList, lambda hd, style: hd.callHisto(style))
+    return SetProperty(styleList, lambda hd, style: hd.call(style))
 
 def UpdatePlotStyleFill(styleList, namesToFilled):
     def update(hd, style):
         if hd.getName() in namesToFilled:
-            hd.callHisto(styles.StyleFill(style))
+            hd.call(styles.StyleFill(style))
 
     return SetProperty(styleList, update)
 
@@ -174,11 +174,11 @@ class DataMCPlot:
         self.histoMgr.setHistoLegendStyle("Data", "p")
 
         # Set legend labels
-        self.histoMgr.forEachHistoObject(SetLegendLabel(_legendLabels))
+        self.histoMgr.forEachHisto(SetLegendLabel(_legendLabels))
 
         # Set plot styles, by default they are non-filled, but they
         # are transformed to filled if they are stacked
-        self.histoMgr.forEachHistoObject(SetPlotStyle(_plotStyles))
+        self.histoMgr.forEachHisto(SetPlotStyle(_plotStyles))
         self.histoMgr.setHistoDrawStyle("Data", "EP")
 
     def appendSaveFormat(self, format):
@@ -194,7 +194,7 @@ class DataMCPlot:
             mcNames = mcNamesNoSignal
 
         # Leave the signal datasets unfilled
-        self.histoMgr.forEachHistoObject(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
     def addMCStatUncertainty(self):
@@ -205,9 +205,12 @@ class DataMCPlot:
         self.frame = self.cf.frame
 
     def createFrameFraction(self, filename, **kwargs):
-        self.mcSum = self.histoMgr.getHistoData("StackedMC").getSumHistogram()
-        self.mcSum.Divide(self.histoMgr.getHisto("Data"))
-        styles.getDataStyle()(self.mcSum)
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
+
+        self.mcSum = self.histoMgr.getHisto("StackedMC").getSumRootHisto()
+        self.mcSum.Divide(self.histoMgr.getHisto("Data").getRootHisto())
+        styles.getDataStyle().apply(self.mcSum)
         self.mcSum.GetYaxis().SetTitle("Data/MC")
 
         self.cf = CanvasFrameTwo(self.histoMgr, [self.mcSum], filename, **kwargs)

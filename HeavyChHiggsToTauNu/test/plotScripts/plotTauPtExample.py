@@ -111,7 +111,7 @@ ylabel = "#tau cands / 1 GeV/c"
 
 # Example how to set legend labels from defaults
 #tauPts.setHistoLegendLabel("TTbar_Htaunu_M80", "H^{#pm} M=80") # one dataset at a time
-tauPts.setHistoLegendLabels(legendLabels) # many datasets, with dict
+tauPts.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 # Example how to modify legend styles
 tauPts.setHistoLegendStyleAll("F")

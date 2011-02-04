@@ -252,7 +252,7 @@ class Histo:
         else:
             self.histos.normalizeMCToLuminosity(lumi)
 
-        self.histos.setHistoLegendLabels(legendLabels)
+        self.histos.setHistoLegendLabelMany(legendLabels)
 
         hasData = self.histos.hasHisto("Data")
 

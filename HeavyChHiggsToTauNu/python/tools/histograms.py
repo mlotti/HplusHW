@@ -148,17 +148,17 @@ def _boundsArgs(histos, kwargs):
     ymaxfactor = _kwargsDefault(kwargs, "ymaxfactor", 1.1)
 
     if not "ymax" in kwargs:
-        kwargs["ymax"] = ymaxfactor * max([d.histo.GetMaximum() for d in histos])
+        kwargs["ymax"] = ymaxfactor * max([h.getRootHisto().GetMaximum() for h in histos])
     if not "ymin" in kwargs:
         if "yminfactor" in kwargs:
             kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
         else:
-            kwargs["ymin"] = min([d.histo.GetMinimum() for d in histos])
+            kwargs["ymin"] = min([h.getRootHisto().GetMinimum() for h in histos])
 
     if not "xmin" in kwargs:
-        kwargs["xmin"] = min([d.getXmin() for d in histos])
+        kwargs["xmin"] = min([h.getXmin() for h in histos])
     if not "xmax" in kwargs:
-        kwargs["xmax"] = min([d.getXmax() for d in histos])
+        kwargs["xmax"] = min([h.getXmax() for h in histos])
 
 
 class CanvasFrame:
@@ -187,7 +187,7 @@ class CanvasFrame:
         from the histograms, i.e. ymax keyword argument is *not*
         given.
         """
-        histos = histoManager.getHistoDataList()
+        histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
@@ -201,8 +201,8 @@ class CanvasFrame:
         _boundsArgs(histos, kwargs)
 
         self.frame = self.canvas.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-        self.frame.GetXaxis().SetTitle(histos[0].histo.GetXaxis().GetTitle())
-        self.frame.GetYaxis().SetTitle(histos[0].histo.GetYaxis().GetTitle())
+        self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
+        self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
 
 class CanvasFrameTwo:
     """Create TCanvas and frames for to TPads."""
@@ -266,13 +266,16 @@ class CanvasFrameTwo:
             def __init__(self, histo):
                 self.histo = histo
 
+            def getRootHisto(self):
+                return self.histo
+
             def getXmin(self):
                 return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
 
             def getXmax(self):
                 return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
 
-        histos1 = histoManager1.getHistoDataList()
+        histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
         if len(histos2) == 0:
@@ -326,12 +329,12 @@ class CanvasFrameTwo:
         (labelSize, titleSize) = (self.frame1.GetXaxis().GetLabelSize(), self.frame1.GetXaxis().GetTitleSize())
         self.frame1.GetXaxis().SetLabelSize(0)
         self.frame1.GetXaxis().SetTitleSize(0)
-        self.frame1.GetYaxis().SetTitle(histos1[0].histo.GetYaxis().GetTitle())
+        self.frame1.GetYaxis().SetTitle(histos1[0].getRootHisto().GetYaxis().GetTitle())
         self.frame1.GetYaxis().SetTitleOffset(self.frame1.GetYaxis().GetTitleOffset()*yoffsetFactor)
 
         self.canvas.cd(2)
         self.frame2 = self.pad2.DrawFrame(opts2["xmin"], opts2["ymin"], opts2["xmax"], opts2["ymax"])
-        self.frame2.GetXaxis().SetTitle(histos1[0].histo.GetXaxis().GetTitle())
+        self.frame2.GetXaxis().SetTitle(histos1[0].getRootHisto().GetXaxis().GetTitle())
         self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
@@ -339,8 +342,49 @@ class CanvasFrameTwo:
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)
 
+class HistoBase:
+    """Base class for all Histo classes."""
 
-class HistoData:
+    def __init__(self, rootHisto, name, legendStyle, drawStyle):
+        self.rootHisto = rootHisto
+        self.name = name
+        self.legendLabel = name
+        self.legendStyle = legendStyle
+        self.drawStyle = drawStyle
+
+    def getRootHisto(self):
+        return self.rootHisto
+
+    def getName(self):
+        return self.name
+
+    def setName(self, name):
+        self.name = name
+
+    def setLegendLabel(self, label):
+        self.legendLabel = label
+
+    def setLegendStyle(self, style):
+        self.legendStyle = style
+
+    def addToLegend(self, legend):
+        """Add the histogram to a TLegend."""
+        legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
+
+    def call(self, func):
+        """Call a funcrtion with self as an argument."""
+        func(self)
+
+    def draw(self, opt):
+        self.rootHisto.Draw(self.drawStyle+" "+opt)
+
+    def getXmin(self):
+        return self.rootHisto.GetXaxis().GetBinLowEdge(self.rootHisto.GetXaxis().GetFirst())
+
+    def getXmax(self):
+        return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
+
+class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
     def __init__(self, dataset, histo):
@@ -352,16 +396,8 @@ class HistoData:
 
         The default legend label is the dataset name
         """
+        HistoBase.__init__(self, histo, dataset.getName(), "l", "HIST")
         self.dataset = dataset
-        self.name = dataset.getName()
-        self.histo = histo
-        self.legendLabel = dataset.getName()
-        self.legendStyle = "l"
-        self.drawStyle = "HIST"
-
-    def getHistogram(self):
-        """Get the TH1 object."""
-        return self.histo
 
     def isMC(self):
         return self.dataset.isMC()
@@ -369,148 +405,23 @@ class HistoData:
     def isData(self):
         return self.dataset.isData()
 
-    def getName(self):
-        return self.name
-
-    def setName(self, name):
-        self.name = name
-
-    def setLegendLabel(self, label):
-        self.legendLabel = label
-
-    def setLegendStyle(self, style):
-        """Legend style can be anything TLegend.AddEntry() takes as the 3rd argument."""
-        self.legendStyle = style
-
-    def addToLegend(self, legend):
-        """Add the histogram to a TLegend."""
-        legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
-
-    def callHisto(self, func):
-        """Call a function with the TH1 as an argument.
-
-        The return value of the function is used as the new histogram.
-
-        """
-        h = func(self.histo)
-        if h != None:
-            self.histo = h
-
-    def call(self, func):
-        """Call a function with self as an arugment.
-
-        The return value of the function is not used.
-        """
-        func(self)
- 
-    def getXmin(self):
-        return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
-
-    def getXmax(self):
-        return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
-
-class HistoDataStacked:
-    """Class to represent stacked TH1 histograms."""
-
-    def __init__(self, data, name):
-        """Constructor.
-
-        Arguments:
-        data    List of HistoData objects to stack
-        name    Name of the stacked histogram
-
-        Stacking is done with the help of THStack object
-        """
-        self.data = data
-        self.drawStyle = "HIST"
-        self.name = name
-        
-        self.histo = ROOT.THStack(name+"stackHist", name+"stackHist")
-        histos = [d.histo for d in self.data]
-        histos.reverse()
-        for h in histos:
-            self.histo.Add(h)
-
-    def getHistogram(self):
-        """Get the THStack histogram."""
-        return self.histo
-
-    def getAllHistograms(self):
-        """Get the original histograms."""
-        return [x.getHistogram() for x in self.data]
-
-    def getSumHistogram(self):
-        """Get the sum of the original histograms."""
-        h = self.data[0].getHistogram().Clone()
-        h.SetName(h.GetName()+"_sum")
-        for d in self.data[1:]:
-            h.Add(d.getHistogram())
-        return h
-
-    def isMC(self):
-        return self.data[0].isMC()
-
-    def isData(self):
-        return self.data[0].isData()
-
-    def getName(self):
-        return self.name
-
-    def setName(self, name):
-        self.name = name
-
-    def setLegendLabel(self, label):
-        """Set the legend labels of the stacked histograms."""
-        for d in self.data:
-            d.setLegendLabel(label)
-
-    def setLegendStyle(self, style):
-        """Set the legend style of the stacked histograms."""
-        for d in self.data:
-            d.setLegendStyle(style)
-
-    def addToLegend(self, legend):
-        """Add the stacked histograms to a TLegend."""
-        for d in self.data:
-            d.addToLegend(legend)
-
-    def callHisto(self, function):
-        """Call a function for each histogram in the stack."""
-        for d in self.data:
-            d.callHisto(function)
-
-    def call(self, function):
-        """Call a function for each HistoData in the scak."""
-        for d in self.data:
-            d.call(function)
-
-    def getXmin(self):
-        return min([d.getXmin() for d in self.data])
-
-    def getXmax(self):
-        return max([d.getXmax() for d in self.data])
-
-class HistoTotalUncertainty:
+class HistoTotalUncertainty(HistoBase):
     """Class to represent combined (statistical) uncertainties of many histograms."""
 
-    def __init__(self, histoDatas, name):
-        self.histos = histoDatas
-        self.name = name
-        self.legendLabel = name
-        self.legendStyle = "F"
-        self.drawStyle = "E2"
-
-        histos = []
-        for h in self.histos:
-            if hasattr(h, "getSumHistogram"):
-                histos.append(h.getSumHistogram())
+    def __init__(self, histos, name):
+        rootHistos = []
+        for h in histos:
+            if hasattr(h, "getSumRootHisto"):
+                rootHistos.append(h.getSumRootHisto())
             else:
-                histos.append(h.getHistogram())
+                rootHistos.append(h.getRootHisto())
 
-        self.histo = histos[0].Clone()
-        self.histo.SetName(self.histo.GetName()+"_errors")
+        HistoBase.__init__(self, rootHistos[0].Clone(), name, "F", "E2")
+        self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
+        self.histos = histos
+
         for h in histos[1:]:
-            self.histo.Add(h)
+            self.rootHisto.Add(h)
 
     def isMC(self):
         return self.histos[0].isMC()
@@ -518,43 +429,84 @@ class HistoTotalUncertainty:
     def isData(self):
         return self.histos[0].isData()
 
-    def getName(self):
-        return self.name
+class HistoStacked(HistoBase):
+    """Class to represent stacked TH1 histograms."""
 
-    def setName(self):
-        self.name = name
+    def __init__(self, histos, name):
+        """Constructor.
+
+        Arguments:
+        histos  List of Histo objects to stack
+        name    Name of the stacked histogram
+
+        Stacking is done with the help of THStack object
+        """
+        HistoBase.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
+        self.histos = histos
+
+        rootHistos = [d.getRootHisto() for d in self.histos]
+        rootHistos.reverse()
+        for h in rootHistos:
+            self.rootHisto.Add(h)
+
+    def getAllRootHistos(self):
+        """Get the original histograms."""
+        return [x.getRootHisto() for x in self.histos]
+
+    def getSumRootHisto(self):
+        """Get the sum of the original histograms."""
+        h = self.histos[0].getRootHisto().Clone()
+        h.SetName(h.GetName()+"_sum")
+        for d in self.histos[1:]:
+            h.Add(d.getRootHisto())
+        return h
+
+    def isMC(self):
+        return self.histos[0].isMC()
+
+    def isData(self):
+        return self.histos[0].isData()
 
     def setLegendLabel(self, label):
-        self.legendLabel = label
+        """Set the legend labels of the stacked histograms."""
+        for h in self.histos:
+            h.setLegendLabel(label)
 
     def setLegendStyle(self, style):
-        self.legendStyle = style
+        """Set the legend style of the stacked histograms."""
+        for h in self.histos:
+            h.setLegendStyle(style)
 
     def addToLegend(self, legend):
-        legend.AddEntry(self.histo, self.legendLabel, self.legendStyle)
-
-    def callHisto(self, function):
-        h = function(self.histo)
-        if h != None:
-            self.histo = h
+        """Add the stacked histograms to a TLegend."""
+        for h in self.histos:
+            h.addToLegend(legend)
 
     def call(self, function):
-        function(self)
+        """Call a function for each Histo in the scak."""
+        for h in self.histos:
+            h.call(function)
 
     def getXmin(self):
-        return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
+        return min([h.getXmin() for h in self.histos])
 
     def getXmax(self):
-        return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
-        
+        return max([h.getXmax() for h in self.histos])
+
 
 class HistoManagerImpl:
     """Implementation of HistoManager.
 
     Intended to be used only from HistoManager. This class contains all
-    the methods which require the HistoData objects (and only them).
+    the methods which require the Histo objects (and only them).
     """
     def __init__(self, histos=[]):
+        """Constructor.
+
+        Arguments
+        histos    List of Histo objects
+        """
+
         # List for the Draw() order, keep it reversed in order to draw
         # the last histogram in the list first. i.e. to the bottom
         self.drawList = histos[:]
@@ -574,24 +526,24 @@ class HistoManagerImpl:
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
-    def append(self, histoWrapper):
-        """Append a HistoData object."""
-        self.drawList.append(histoWrapper)
-        self.legendList.append(histoWrapper)
+    def append(self, histo):
+        """Append a Histo object."""
+        self.drawList.append(histo)
+        self.legendList.append(histo)
         self._populateMap()
 
-    def extend(self, histoWrappers):
-        """Extend with a list of HistoData objects."""
-        self.drawList.extend(histoWrappers)
-        self.legendList.extend(histoWrappers)
+    def extend(self, histos):
+        """Extend with a list of Histo objects."""
+        self.drawList.extend(histos)
+        self.legendList.extend(histos)
         self._populateMap()
 
-    def insert(self, i, histoWrapper, **kwargs):
-        """Insert HistoData to position i.
+    def insert(self, i, histo, **kwargs):
+        """Insert Histo to position i.
 
         Arguments:
         i             Index of the position to insert the histogram
-        histoWrapper  HistoData object to insert
+        histo         Histo object to insert
 
         Keyword arguments:
 
@@ -606,55 +558,52 @@ class HistoManagerImpl:
         if "legendIndex" in kwargs:
             legendIndex = kwargs["legendIndex"]
 
-        self.drawList.insert(drawIndex, histoWrapper)
-        self.legendList.insert(legendIndex, histoWrapper)
+        self.drawList.insert(drawIndex, histo)
+        self.legendList.insert(legendIndex, histo)
         self._populateMap()
 
     def forHisto(self, name, func):
-        """Call a function for a histogram.
+        """Call a function for a Histo object.
 
         Arguments:
         name   Name of histogram
-        func   Function taking one parameter (TH1), return value is used
-               as the new histogram
+        func   Function taking one parameter (Histo), return value is not used
         """
         try:
-            self.nameHistoMap[name].callHisto(func)
+            self.nameHistoMap[name].call(func)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
 
     def forEachMCHisto(self, func):
-        """Call each MC histogram with a function.
+        """Call each MC Histo with a function.
 
         Arguments:
-        func   Function taking one parameter (TH1), return value is used
-               as the new histogram
+        func   Function taking one parameter (Histo), return value is not used
         """
-        self.forEachHisto(func, lambda x: x.isMC())
+        def forMC(histo):
+            if histo.isMC():
+                func(histo)
+
+        self.forEachHisto(forMC)
 
     def forEachDataHisto(self, func):
-        """Call each data histogram with a function.
+        """Call each data Histo with a function.
 
         Arguments:
-        func   Function taking one parameter (TH1), return value is used
-               as the new histogram
+        func   Function taking one parameter (Histo, return value is not used
         """
-        self.forEachHisto(func, lambda x: x.isData())
+        def forData(histo):
+            if histo.isData():
+                func(histo)
+        self.forEachHisto(forData)
 
-    def forEachHisto(self, func, predicate=lambda x: True):
+    def forEachHisto(self, func):
         """Call each histogram with a function.
 
         Arguments:
-        func        Function taking one parameter (TH1), return value is used
+        func        Function taking one parameter (Histo), return value is used
                     as the new histogram
-        predicate   Call func() only if predicate returns True. The
-                    HistoData object is given to the predicate
         """
-        for d in self.drawList:
-            if predicate(d):
-                d.callHisto(func)
-
-    def forEachHistoObject(self, func):
         for d in self.drawList:
             d.call(func)
 
@@ -662,40 +611,24 @@ class HistoManagerImpl:
         return name in self.nameHistoMap
 
     def getHisto(self, name):
-        """Get TH1 of a given name."""
-        return self.getHistoData(name).getHistogram()
-
-    def getHistoData(self, name):
-        """Get HistoData of a given name."""
+        """Get Histo of a given name."""
         return self.nameHistoMap[name]
 
-    def getHistoList(self):
-        """Get list of TH1 histograms."""
-        return [d.getHistogram() for d in self.histos]
-
-    def getHistoDataList(self):
+    def getHistos(self):
+        """Get all Histos."""
         return self.drawList[:]
 
-    def setHistoLegendLabel(self, name, label):
-        """Set legend name for a given histogram.
-
-        Arguments:
-        name   Name of the histogram
-        label  Label for legend
-        """
-        try:
-            self.nameHistoMap[name].setLegendLabel(label)
-        except KeyError:
-            print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
-
-    def setHistoLegendLabels(self, nameMap):
+    def setHistoLegendLabelMany(self, nameMap):
         """Set legend names for given histograms.
 
         Arguments:
         nameMap   Dictionary with name->label mappings
         """
         for name, label in nameMap.iteritems():
-            self.setHistoLegendLabel(name, label)
+            try:
+                self.nameHistoMap[name].setLegendLabel(label)
+            except KeyError:
+                print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
 
     def setHistoLegendStyle(self, name, style):
         """Set the legend style for a given histogram.
@@ -752,7 +685,7 @@ class HistoManagerImpl:
         histos.reverse()
 
         for h in histos:
-            h.histo.Draw(h.drawStyle+" same")
+            h.draw("same")
 
     def stackHistograms(self, newName, nameList):
         """Stack histograms.
@@ -766,7 +699,7 @@ class HistoManagerImpl:
         if len(selected) == 0:
             return
 
-        stacked = HistoDataStacked(selected, newName)
+        stacked = HistoStacked(selected, newName)
         notSelected.insert(firstIndex, stacked)
         self.drawList = notSelected
 
@@ -782,7 +715,8 @@ class HistoManagerImpl:
             return
 
         hse = HistoTotalUncertainty(mcHistos, name)
-        hse.callHisto(style)
+        #hse.call(lambda h: style(h.getRootHisto()))
+        hse.call(style)
 
         firstMcIndex = len(self.drawList)
         for i, h in enumerate(self.drawList):
@@ -800,11 +734,11 @@ class HistoManager:
 
     The implementation is divided to this and HistoManagerImpl class. The
     idea is that here are the methods, which don't require
-    HistoData objects (namely setting the normalization), and
-    HistoSetImpl has all the methods which require the HistoData
+    Histo objects (namely setting the normalization), and
+    HistoSetImpl has all the methods which require the Histo
     objects. User can set freely the normalization scheme as many
     times as (s)he wants, and at the first time some method not
-    implemented in HistoManager is called, the HistoData objects are
+    implemented in HistoManager is called, the Histo objects are
     created and the calls are delegated to HistoManagerImpl class.
     """
     def __init__(self, datasetMgr, name):
@@ -816,21 +750,21 @@ class HistoManager:
         """
         self.datasetMgr = datasetMgr
         self.histoWrappers = datasetMgr.getHistoWrappers(name)
-        self.data = None
+        self.impl = None
         self.luminosity = None
 
     def __getattr__(self, name):
-        """Delegate the calls which require the HistoData objects to the implementation class."""
-        if self.data == None:
-            self._createHistogramObjects()
-        return getattr(self.data, name)
+        """Delegate the calls which require the Histo objects to the implementation class."""
+        if self.impl == None:
+            self._createImplementation()
+        return getattr(self.impl, name)
 
     def normalizeToOne(self):
         """Set the histogram normalization 'to one'.
 
         All histograms are normalized to unit area.
         """
-        if self.data != None:
+        if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.histoWrappers:
             h.normalizeToOne()
@@ -842,7 +776,7 @@ class HistoManager:
         All histograms from MC datasets are normalized by their cross
         section.
         """
-        if self.data != None:
+        if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.histoWrappers:
             if h.getDataset().isMC():
@@ -858,7 +792,7 @@ class HistoManager:
         are normalized to the integrated luminosity of the the data
         dataset.
         """
-        if self.data != None:
+        if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         lumi = None
         for h in self.histoWrappers:
@@ -881,7 +815,7 @@ class HistoManager:
         All histograms from MC datasets are normalized to the given
         integrated luminosity.
         """
-        if self.data != None:
+        if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.histoWrappers:
             if h.getDataset().isMC():
@@ -898,17 +832,13 @@ class HistoManager:
         """Draw the text for the integrated luminosity."""
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
-    def getHistogramObjects(self):
-        """Get the HistoData objects."""
-        return [HistoData(h.getDataset(), h.getHistogram()) for h in self.histoWrappers]
-
-    def _createHistogramObjects(self):
+    def _createImplementation(self):
         """Create the HistoManagerImpl object.
 
         Intended only for internal use.
         """
-        self.data = HistoManagerImpl(self.getHistogramObjects())
+        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.histoWrappers])
 
     def stackMCHistograms(self):
-        """Stack all MC histograms to one named 'Stacked MC'."""
+        """Stack all MC histograms to one named 'StackedMC'."""
         self.stackHistograms("StackedMC", self.datasetMgr.getMCDatasetNames())

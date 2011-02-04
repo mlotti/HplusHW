@@ -110,7 +110,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-tauNProngs.setHistoLegendLabels(legendLabels) # many datasets, with dict
+tauNProngs.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 tauNProngs.setHistoLegendStyleAll("F")

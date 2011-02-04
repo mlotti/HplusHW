@@ -114,7 +114,7 @@ ylabel = "???"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-TauNTrksVSPtcut.setHistoLegendLabels(legendLabels) # many datasets, with dict
+TauNTrksVSPtcut.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 TauNTrksVSPtcut.setHistoLegendStyleAll("F")

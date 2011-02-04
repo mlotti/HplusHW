@@ -120,7 +120,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-alphaT.setHistoLegendLabels(legendLabels) # many datasets, with dict
+alphaT.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 alphaT.setHistoLegendStyleAll("F")

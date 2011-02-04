@@ -112,7 +112,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-NBtagJets.setHistoLegendLabels(legendLabels) # many datasets, with dict
+NBtagJets.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 NBtagJets.setHistoLegendStyleAll("F")

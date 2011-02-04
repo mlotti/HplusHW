@@ -112,7 +112,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-Rtau.setHistoLegendLabels(legendLabels) # many datasets, with dict
+Rtau.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 Rtau.setHistoLegendStyleAll("F")
