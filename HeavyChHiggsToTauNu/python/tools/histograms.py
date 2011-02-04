@@ -387,6 +387,13 @@ class HistoData:
         if h != None:
             self.histo = h
 
+    def call(self, func):
+        """Call a function with self as an arugment.
+
+        The return value of the function is not used.
+        """
+        func(self)
+ 
     def getXmin(self):
         return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
 
@@ -463,6 +470,11 @@ class HistoDataStacked:
         for d in self.data:
             d.callHisto(function)
 
+    def call(self, function):
+        """Call a function for each HistoData in the scak."""
+        for d in self.data:
+            d.call(function)
+
     def getXmin(self):
         return min([d.getXmin() for d in self.data])
 
@@ -516,6 +528,9 @@ class HistoStatError:
         h = function(self.histo)
         if h != None:
             self.histo = h
+
+    def call(self, function):
+        function(self)
 
     def getXmin(self):
         return self.histo.GetXaxis().GetBinLowEdge(self.histo.GetXaxis().GetFirst())
@@ -629,6 +644,10 @@ class HistoManagerImpl:
         for d in self.drawList:
             if predicate(d):
                 d.callHisto(func)
+
+    def forEachHistoObject(self, func):
+        for d in self.drawList:
+            d.call(func)
 
     def hasHisto(self, name):
         return name in self.nameHistoMap
