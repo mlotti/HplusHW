@@ -26,7 +26,6 @@ def customise(process):
     #process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
     processName = process.name_()
-    process.hltTrigReport.HLTriggerResults.setProcessName(processName)
 
     print "Adjusting event content to RAWSIM+misc"
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
@@ -67,6 +66,11 @@ def customise(process):
         print "BeamSpot in globaltag set to ", bs
     else:
         print "BeamSpot in globaltag not changed"
+
+    if hasattr(process, "hltTrigReport"):
+        process.hltTrigReport.HLTriggerResults.setProcessName(processName)
+    if hasattr(process, "DQM_FEDIntegrity_v2"):
+        process.schedule.remove(process.DQM_FEDIntegrity_v2)
 
     #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     #process.generation_step *= process.printGenParticles
