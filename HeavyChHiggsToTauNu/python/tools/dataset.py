@@ -959,6 +959,10 @@ class DatasetManager:
                 ret.append(d)
         return ret
 
+    def getAllDatasetNames(self):
+        """Get a list of names of all Dataset objects."""
+        return [x.getName() for x in self.getAllDatasets()]
+
     def getMCDatasetNames(self):
         """Get a list of names of MC Dataset objects."""
         return [x.getName() for x in self.getMCDatasets()]
@@ -1014,7 +1018,7 @@ class DatasetManager:
         self.datasetMap[oldName].setName(newName)
         self._populateMap()
 
-    def renameMany(self, nameMap):
+    def renameMany(self, nameMap, silent=False):
         """Rename many Datasets.
 
         Parameters:
@@ -1024,14 +1028,33 @@ class DatasetManager:
             if oldName == newName:
                 continue
 
-            if newName in datasetMap:
+            if newName in self.datasetMap:
                 raise Exception("Trying to rename datasets '%s' to '%s', but a dataset with the new name already exists!" % (oldName, newName))
-            self.datasetMap[oldName].setName(newName)
+
+            try:
+                self.datasetMap[oldName].setName(newName)
+            except KeyError, e:
+                if not silent:
+                    raise Exception("Trying to rename dataset '%s' to '%s', but '%s' doesn't exist!" % (oldName, newName, oldName))
         self._populateMap()
 
     def mergeData(self):
         """Merge all data Datasets to one with a name 'Data'."""
         self.merge("Data", [x.getName() for x in self.getDataDatasets()])
+
+    def mergeMany(self, mapping):
+        """Merge datasets according to the mapping."""
+        toMerge = {}
+        for d in self.datasets:
+            if d.getName() in mapping:
+                newName = mapping[d.getName()]
+                if newName in toMerge:
+                    toMerge[newName].append(d.getName())
+                else:
+                    toMerge[newName] = [d.getName()]
+
+        for newName, nameList in toMerge.iteritems():
+            self.merge(newName, nameList)
 
     def merge(self, newName, nameList):
         """Merge Datasets.
@@ -1046,7 +1069,7 @@ class DatasetManager:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             return
         elif len(selected) == 1:
-            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+", renaming it to '%s'" % newName
+            print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
             return 
 
