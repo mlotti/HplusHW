@@ -126,7 +126,7 @@ class LegendCreator:
         #legend.SetMargin(0.1)
         return legend
 
-createLegend = LegendCreator(0.7, 0.6, 0.92, 0.92)
+createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
 
 def updatePaletteStyle(histo):
     """Update the style of palette Z axis according to ROOT.gStyle."""
@@ -253,6 +253,14 @@ class CanvasFrameTwo:
             def GetYaxis(self):
                 return self.frame1.GetYaxis()
 
+
+            def getXmin(self):
+                return self.frame2.GetXaxis().GetBinLowEdge(self.frame2.GetXaxis().GetFirst())
+
+            def getXmax(self):
+                return self.frame2.GetXaxis().GetBinUpEdge(self.frame2.GetXaxis().GetLast())
+
+
         class HistoWrapper:
             """Wrapper to provide the getXmin/getXmax functions for _boundsArgs function."""
             def __init__(self, histo):
@@ -283,7 +291,7 @@ class CanvasFrameTwo:
 
         _boundsArgs(histos1, opts1)
         opts2["xmin"] = opts1["xmin"]
-        opts2["ymin"] = opts1["ymin"]
+        opts2["xmax"] = opts1["xmax"]
         _boundsArgs([HistoWrapper(h) for h in histos2], opts2)
 
         # Create the canvas, divide it to two
@@ -295,13 +303,14 @@ class CanvasFrameTwo:
         (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
         self.pad1.GetPadPar(xlow, ylow, xup, yup)
         self.pad1.SetPad(xlow, divisionPoint, xup, yup)
+        self.pad1.SetFillStyle(4000) # transparent
 
         # Set the upper point of the lower pad to divisionPoint
         self.pad2 = self.canvas.cd(2)
         self.pad2.GetPadPar(xlow, ylow, xup, yup)
         self.pad2.SetPad(xlow, ylow, xup,
                          divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+canvasHeightCorrection)
-        self.pad2.SetFillStyle(4000)
+        self.pad2.SetFillStyle(4000) # transparent
         self.pad2.SetTopMargin(0.0)
         #self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.06)
         self.pad2.SetBottomMargin(self.pad2.GetBottomMargin()+0.16)
@@ -730,46 +739,6 @@ class HistoManagerImpl:
         for d in self.drawList:
             d.drawStyle = style
 
-    def createCanvasFrameTwo(self, name):
-        """Create TCanvas split in two and the TH1 frames on them."""
-        if len(self.drawList) == 0:
-            raise Exception("Empty set of histograms!")
-
-        canvasFactor = 1.5
-        divisionPoint = 1-1/canvasFactor
-
-        # Create the canvas, divide it to two
-        c = ROOT.TCanvas(name, name, ROOT.gStyle.GetCanvasDefW(), int(ROOT.gStyle.GetCanvasDefH()*canvasFactor))
-        c.Divide(1, 2)
-        
-        # Set the lower point of the upper pad to divisionPoint
-        pad1 = c.cd(1)
-        (xlow, ylow, xup, yup) = [ROOT.Double(x) for x in [0.0]*4]
-        pad1.GetPadPar(xlow, ylow, xup, yup)
-        pad1.SetPad(xlow, divisionPoint, xup, yup)
-
-        # Set the upper point of the lower pad to divisionPoint
-        pad2 = c.cd(2)
-        pad2.GetPadPar(xlow, ylow, xup, yup)
-        pad2.SetPad(xlow, ylow, xup, divisionPoint+ROOT.gStyle.GetPadBottomMargin()-ROOT.gStyle.GetPadTopMargin()+0.005)
-
-        c.cd(1)
-
-        frame1 = pad1.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-        (labelSize, titleSize) = (frame1.GetXaxis().GetLabelSize(), frame1.GetXaxis().GetTitleSize())
-        frame1.GetYaxis().SetTitle(self.drawList[0].histo.GetYaxis().GetTitle())
-
-        c.cd(2)
-        frame2 = pad2.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
-        frame2.GetXaxis().SetTitle(self.drawList[0].histo.GetXaxis().GetTitle())
-        frame2.GetYaxis().SetTitle("")
-        for axis in [frame2.GetXaxis(), frame2.GetYaxis()]:
-            axis.SetLabelSize(labelSize*canvasFactor)
-            axis.SetTitleSize(titleSize*canvasFactor)
-
-        return CanvasFrame(c, frame1, frame1=frame1, frame2=frame2, pad1=pad1, pad2=pad2)
-
-
     def addToLegend(self, legend):
         """Add histograms to a given TLegend."""
         for d in self.legendList:
@@ -806,7 +775,7 @@ class HistoManagerImpl:
 
         self._populateMap()
 
-    def addMcUncertainty(self, style, name="MC stat. unc."):
+    def addMCUncertainty(self, style, name="MC stat. unc."):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
