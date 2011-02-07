@@ -41,6 +41,9 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
   template <typename I>
   GenParticlePair findMuNuFromW(const reco::Candidate& recoMu, I begin, I end) const;
 
+  typedef std::pair<size_t, const reco::GenParticle *> SizeTGenParticlePair;
+  SizeTGenParticlePair genTauDaughters(const reco::GenParticle& tau) const;
+
   edm::InputTag muonSrc_;
   edm::InputTag tauSrc_;
   edm::InputTag genParticleOriginalSrc_;
@@ -90,6 +93,8 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hTauGen.init(dir, "GenTau", "Tau gen");
       hNuGen.init(dir, "GenTauNu", "Nu gen");
       hTauNuGen.init(dir, "GenTau_GenTauNu", "Gen tau vs. nu");
+      hTauGenNprongs = dir.make<TH1F>("GenTau_NProngs", "Number of charged pion daughters of generator tau", 10, 0, 10);
+      hTauGenLeadingPi.init(dir, "GenTauLeadingPi", "Gen tau leading pi");
 
       hTauGenMass = dir.make<TH1F>("GenTau_Mass", "Tau mass at generator level", 100, 1.7, 1.9);
       hTauGenDecayMass = dir.make<TH1F>("GenTauDecay_Mass", "Tau mass from decay products at generator level", 100, 1.7, 1.9);
@@ -165,6 +170,8 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     Histo hTauGen;
     Histo hNuGen;
     Histo2 hTauNuGen;
+    TH1 *hTauGenNprongs;
+    Histo hTauGenLeadingPi;
 
     TH1 *hTauGenMass;
     TH1 *hTauGenDecayMass;
@@ -226,6 +233,7 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   edm::Handle<edm::View<reco::GenParticle> > hgenEmbedded;
   iEvent.getByLabel(genParticleEmbeddedSrc_, hgenEmbedded);
   GenParticlePair nuTau = findTauNu(hgenEmbedded->begin(), hgenEmbedded->end());
+  SizeTGenParticlePair nProngsLeadingPion = genTauDaughters(*nuTau.second);
 
   reco::GenParticle::LorentzVector tauDecaySum;
   for(reco::GenParticle::const_iterator iDaughter = nuTau.second->begin(); iDaughter != nuTau.second->end(); ++iDaughter) {
@@ -257,6 +265,9 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
   histos.hTauGen.fill(*nuTau.second);
   histos.hNuGen.fill(*nuTau.first);
   histos.hTauNuGen.fill(*nuTau.second, *nuTau.first);
+  histos.hTauGenNprongs->Fill(nProngsLeadingPion.first);
+  if(nProngsLeadingPion.second)
+    histos.hTauGenLeadingPi.fill(*nProngsLeadingPion.second);
 
   histos.hTauGenMass->Fill(nuTau.second->p4().M());
   histos.hTauGenDecayMass->Fill(tauDecayMass);
@@ -281,6 +292,9 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     histosMatched.hTauGen.fill(*nuTau.second);
     histosMatched.hNuGen.fill(*nuTau.first);
     histosMatched.hTauNuGen.fill(*nuTau.second, *nuTau.first);
+    histosMatched.hTauGenNprongs->Fill(nProngsLeadingPion.first);
+    if(nProngsLeadingPion.second)
+      histosMatched.hTauGenLeadingPi.fill(*nProngsLeadingPion.second);
 
     histosMatched.hTauGenMass->Fill(nuTau.second->p4().M());
     histosMatched.hTauGenDecayMass->Fill(tauDecayMass);
@@ -339,6 +353,22 @@ HPlusTauEmbeddingAnalyzer::GenParticlePair HPlusTauEmbeddingAnalyzer::findMuNuFr
     }
   }
   return nearest;
+}
+
+HPlusTauEmbeddingAnalyzer::SizeTGenParticlePair HPlusTauEmbeddingAnalyzer::genTauDaughters(const reco::GenParticle& tau) const {
+  size_t nprongs = 0;
+  const reco::GenParticle *leadingPion = 0;
+  double maxPt = 0.0;
+  for(reco::GenParticle::const_iterator iDaughter = tau.begin(); iDaughter != tau.end(); ++iDaughter) {
+    if(std::abs(iDaughter->pdgId()) == 211) {
+      nprongs += 1;
+      if(maxPt < iDaughter->pt()) {
+        maxPt = iDaughter->pt();
+        leadingPion = dynamic_cast<const reco::GenParticle *>(&(*iDaughter));
+      }
+    }
+  }
+  return std::make_pair(nprongs, leadingPion);
 }
 
 //define this as a plug-in
