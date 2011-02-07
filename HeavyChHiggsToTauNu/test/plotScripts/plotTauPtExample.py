@@ -185,15 +185,31 @@ eventCounter.normalizeMCByLuminosity()
 # Normalize MC to specific luminosity
 # eventCounter.normalizeMCToLuminosity(5)
 
-# Example how to print the main counter (the parameter is
-# function/functor giving a format for the printing)
+# Example how to print the main counter with the default formatting
 print "============================================================"
 print "Main counter (MC normalized by collision data luminosity)"
-print eventCounter.getMainCounterTable().format(TableFormatText())
-#print eventCounter.getMainCounterTable().format(TableFormatLaTeX())
+print eventCounter.getMainCounterTable().format()
 
 # Example how to print all subcounter names
 for subCounterName in eventCounter.getSubCounterNames():
     print "============================================================"
     print "Subcounter %s (MC normalized by collision data luminosity)" % subCounterName
-    print eventCounter.getSubCounterTable(subCounterName).format() # Use the default format
+    print eventCounter.getSubCounterTable(subCounterName).format()
+
+
+print "============================================================"
+print "Main counter (examples of the same table)"
+
+# Change the value format (printf style)
+print eventCounter.getMainCounterTable().format(TableFormatText(CellFormatText(valueFormat="%.1f")))
+
+# No uncertainties
+print eventCounter.getMainCounterTable().format(TableFormatText(CellFormatText(valueFormat="%.0e", valueOnly=True)))
+
+# LaTeX table (tabular), default format
+print eventCounter.getMainCounterTable().format(TableFormatLaTeX())
+
+# LaTeX table, change value and uncertainty formats
+print eventCounter.getMainCounterTable().format(TableFormatLaTeX(CellFormatTeX(valueFormat="%.2e", uncertaintyFormat="%.1e")))
+
+
