@@ -1,5 +1,6 @@
 import math
 import copy
+import re
 import ROOT
 
 from dataset import *
@@ -44,21 +45,67 @@ class CellFormatText(CellFormatBase):
 class CellFormatTeX(CellFormatBase):
     def __init__(self, **kwargs):
         CellFormatBase.__init__(self, **kwargs)
+        self._texifyPower = tools.kwargsDefault(kwargs, "texifyPower", True)
+        self._texre = re.compile("(?P<sign>[+-])?(?P<mantissa>[^e]*)(e(?P<exponent>.*))?$")
 
     def _formatValue(self, value):
-        return self._texify(value)
+        return self._texify([value])[0]
 
     def _formatValuePlusMinus(self, value, uncertainty):
-        return self._texify(value) + " \\pm " + self._texify(uncertainty)
+        (v, u) = self._texify([value, uncertainty])
+        return v + " \\pm " + u
 
     def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
-        return "%s^{+ %s}_{- %s}" % (self._texify(value), self._texify(uncertaintyHigh), self._texify(uncertaintyLow))
+        (v, ul, uh) = self._texify([value, uncertaintyHigh, uncertaintyLow])
+        return "%s^{+ %s}_{- %s}" % (v, ul, uh)
 
-    def _texify(self, number):
+    def _texify(self, numbers):
+        if not self._texifyPower:
+            return numbers
+
+        # Check if none of the numbers have exponents
+        if reduce(lambda x,y: x+y, map(lambda n: "e" in n, numbers)) == 0:
+            return numbers
+
+        maxExp = max([self._getExponent(n) for n in numbers])
+        expStr = "\\times 10^{%d}" % maxExp
+
+        # Only one number
+        if len(numbers) == 1:
+            return [self._texifyOne(n, maxExp)+expStr]
+
+        # Many numbers, show the exponent only in the last one, use parenthesis
+        ret = [self._texifyOne(n, maxExp) for n in numbers]
+        ret[0] = "\\left("+ret[0]
+        ret[-1] = ret[-1]+"\\right)"+expStr
+        return ret
+
+    def _getExponent(self, number):
         if not "e" in number:
-            return number
+            return 0
+        m = self._texre.search(number)
+        return int(m.group("exponent"))
 
-        return number.replace("e", "\times 10^{")+"}"
+    def _texifyOne(self, number, targetExp):
+        m = self._texre.search(number)
+        exp = m.group("exponent")
+        if exp == None:
+            exp = 0
+        else:
+            exp = int(exp)
+
+        mantissa = m.group("mantissa")
+        sign = m.group("sign")
+        if sign == None:
+            sign = ""
+
+        if exp == targetExp:
+            return mantissa
+        elif exp < targetExp:
+            return sign + "0."+ ("0"*(targetExp-exp-1)) + mantissa.replace(".", "")
+        else:
+            # Sanity check
+            raise Exception("This condition should never happen")
 
 class TableFormatBase:
     def __init__(self, cellFormat, **kwargs):
