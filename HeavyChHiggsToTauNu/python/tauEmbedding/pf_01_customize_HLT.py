@@ -26,7 +26,6 @@ def customise(process):
     #process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
     processName = process.name_()
-    process.hltTrigReport.HLTriggerResults.setProcessName(processName)
 
     print "Adjusting event content to RAWSIM+misc"
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
@@ -56,7 +55,8 @@ def customise(process):
 
     # Do we have to override the beam spot for data?
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
+        #bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
         process.GlobalTag.toGet = cms.VPSet(
             cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
                      tag = bs,
@@ -66,6 +66,11 @@ def customise(process):
         print "BeamSpot in globaltag set to ", bs
     else:
         print "BeamSpot in globaltag not changed"
+
+    if hasattr(process, "hltTrigReport"):
+        process.hltTrigReport.HLTriggerResults.setProcessName(processName)
+    if hasattr(process, "DQM_FEDIntegrity_v2"):
+        process.schedule.remove(process.DQM_FEDIntegrity_v2)
 
     #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     #process.generation_step *= process.printGenParticles

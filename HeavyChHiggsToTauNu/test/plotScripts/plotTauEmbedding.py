@@ -28,7 +28,9 @@ def getHisto(datasets, path, name, func=None):
 
 class HistoBase:
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = self.histos, plotname, **kwargs)
+        self.canvas = cf.canvas
+        self.frame = cf.frame
 
     def setLegend(self, legend):
         self.legend = legend
@@ -57,7 +59,8 @@ class Histo(HistoBase):
         self.histos.forEachHisto(styles.generator())
 
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(self.prefix+plotname, **kwargs)
+        cf = self.histos, self.prefix+plotname, **kwargs)
+        (self.canvas, self.frame) = (cf.canvas, cf.frame)
 
 class Histo2(HistoBase):
     def __init__(self, datasets, datasetsTau, directories, name):
@@ -68,7 +71,7 @@ class Histo2(HistoBase):
 
         self.histos.forEachHisto(styles.generator())
 
-        self.histos.setHistoLegendLabels({name+"Embedded": "Embedded #tau",
+        self.histos.setHistoLegendLabelMany({name+"Embedded": "Embedded #tau",
                                           name+"Tau": "Real #tau"})
 
 class PlotMuonTau:
@@ -94,7 +97,7 @@ class PlotMuonTau:
         name = "Muon_Tau_"+q
         h = Histo(datasets, an, ["Tau_"+q, "Muon_"+q])
         h.histos.forEachHisto(lambda h: h.Rebin(2))
-        h.histos.setHistoLegendLabels({"Muon_"+q: "#mu", "Tau_"+q: "#tau"})
+        h.histos.setHistoLegendLabelMany({"Muon_"+q: "#mu", "Tau_"+q: "#tau"})
         h.createFrame(name, yfactor=1.2)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
@@ -171,7 +174,7 @@ class PlotGenTauNu:
     
         h = Histo(datasets, an, ["GenTau_"+q, "GenTauNu_"+q])
         h.histos.forEachHisto(lambda h: h.Rebin(rebin))
-        h.histos.setHistoLegendLabels({"GenTau_"+q: "Gen #tau", "GenTauNu_"+q: "Gen #nu_{#tau}"})
+        h.histos.setHistoLegendLabelMany({"GenTau_"+q: "Gen #tau", "GenTauNu_"+q: "Gen #nu_{#tau}"})
         h.createFrame("GenTau_GenTauNu_"+q, yfactor=1.2)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
@@ -237,7 +240,7 @@ class PlotGenTauNu:
 
 def tauGenMass(datasets, an):
     h = Histo(datasets, an, ["GenTau_Mass", "GenTauDecay_Mass"])
-    h.histos.setHistoLegendLabels({"GenTau_Mass": "#tau",
+    h.histos.setHistoLegendLabelMany({"GenTau_Mass": "#tau",
                                    "GenTauDecay_Mass": "#tau decays"})
     h.createFrame("GenTau_Mass")
     h.frame.GetXaxis().SetTitle("M (GeV/c^{2})")
@@ -341,7 +344,7 @@ class PlotMet:
     
         h = Histo(datasets, an, [t+"_"+q, t+"Original_"+q])
         h.histos.forEachHisto(lambda h: h.Rebin(rebin))
-        h.histos.setHistoLegendLabels({t+"_"+q: "Embedded", t+"Original_"+q: "Original"})
+        h.histos.setHistoLegendLabelMany({t+"_"+q: "Embedded", t+"Original_"+q: "Original"})
         h.createFrame(t+"_"+q)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
@@ -458,7 +461,7 @@ class PlotMuonTauMetDeltaPhi:
                 "Muon,"+t+"Original_DPhi",
                 #"Tau,"+t+"Original_DPhi"
                 ])
-        h.histos.setHistoLegendLabels({
+        h.histos.setHistoLegendLabelMany({
                 #"Muon,"+t+"_DPhi": "#Delta#phi(#mu, MET_{#tau})",
                 "Muon,"+t+"Original_DPhi": "#Delta#phi(#mu, MET_{#mu})",
                 "Tau,"+t+"_DPhi": "#Delta#phi(#tau, MET_{#tau})",
@@ -543,7 +546,7 @@ class PlotMuonTauMetDeltaPhi:
                 "GenWTauNu,"+t+"_DPhi",
                 "GenWNu,"+t+"Original_DPhi",
                 ])
-        h.histos.setHistoLegendLabels({
+        h.histos.setHistoLegendLabelMany({
                 "GenWTauNu,"+t+"_DPhi": "#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau})",
                 "GenWNu,"+t+"Original_DPhi": "#Delta#phi(#nu_{#mu}, MET_{#nu})"
                 })

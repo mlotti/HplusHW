@@ -230,6 +230,11 @@ datasets = {
                                         # needed to get enough jobs
                 "use_server": 1,
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2011Flat_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 60
+            },
         },
     },
     "WJets_TuneD6T_Winter10": {
@@ -281,7 +286,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_s-channel_Winter10": {
+    "TToBLNu_s-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 0.99,
         "data": {
@@ -291,7 +296,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_t-channel_Winter10": {
+    "TToBLNu_t-channel_Tune_Z2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 63./3.,
         "data": {
@@ -301,7 +306,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_tW-channel_Winter10": {
+    "TToBLNu_tW-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 10.56,
         "data": {

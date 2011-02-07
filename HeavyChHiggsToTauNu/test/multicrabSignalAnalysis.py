@@ -29,8 +29,14 @@ multicrab.extendDatasets(pattupleVersion,
 #        "JetMETTau_Tau_136035-139975_Dec22", # v9
 #        "JetMETTau_Tau_140058-141881_Dec22", # v9
 #        "BTau_141956-144114_Dec22",          # v9
+#        "BTau_146428-148058_Dec22",          # v9
+#        "BTau_148822-149182_Dec22",          # v9
+#        "BTau_148822-149182_Dec22",          # v9
         # Data for QCD
 #        "JetMETTau_Jet_136035-141881_Dec22", # v9
+#        "JetMET_141956-144114_Dec22",        # v9
+#        "Jet_146428-148058_Dec22",           # v9
+#        "Jet_148822-149294_Dec22",           # v9
         # MC Signal 10
 #        "TTToHplusBWB_M90_Winter10",  # v9
 #        "TTToHplusBWB_M100_Winter10", # v9
@@ -45,6 +51,7 @@ multicrab.extendDatasets(pattupleVersion,
 #        "QCD_Pt300to470_TuneZ2_Winter10", # v9
 #        "TTJets_TuneZ2_Winter10",         # v9
 #        "TTJets_TuneD6T_Winter10",        # v9 
+#        "WJets_TuneZ2_Winter10",          # v9
 #        "WJets_TuneZ2_Winter10_noPU",     # v9
 #        "WJets_TuneD6T_Winter10",         # v9
 
