@@ -13,7 +13,7 @@ namespace HPlus {
   QCDMeasurementFromAntiTauControlRegion::QCDMeasurementFromAntiTauControlRegion(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
-    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
+    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
