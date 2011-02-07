@@ -636,10 +636,10 @@ if QCDdetails:
     eventCounter.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    eventCounter.getMainCounter().printCounter()
+    print eventCounter.getMainCounterTable.printCounter()
 
 
     eventCounter = makeEventCounter(datasetsQCD)
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    eventCounter.getMainCounter().printCounter()
+    print eventCounter.getMainCounterTable.printCounter()
