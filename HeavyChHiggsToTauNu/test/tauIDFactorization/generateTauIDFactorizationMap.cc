@@ -439,6 +439,9 @@ void FactorizationMap::draw() const {
   myStream << fLabel << "_" << fName << "_weights_uncertainty.png";
   c->Print(myStream.str().c_str());
   myStream.str("");
+  myStream << fLabel << "_" << fName << "_weights_uncertainty.eps";
+  c->Print(myStream.str().c_str());
+  myStream.str("");
   myStream << fLabel << "_" << fName << "_weights_uncertainty.C";
   c->Print(myStream.str().c_str());
 }
