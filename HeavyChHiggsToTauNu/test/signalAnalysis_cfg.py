@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion, getTauIDFactorizationMap
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 ################################################################################
 # Configuration
@@ -73,10 +73,9 @@ process.infoPath = addConfigInfo(process, options)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
-myTauSelectionOperatingMode = 'standard'
-#myTauSelectionOperatingMode = 'factorized'
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
 
-param.setAllTauSelectionOperatingMode(myTauSelectionOperatingMode) # Set tau ID operating mode
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding

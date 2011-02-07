@@ -72,9 +72,13 @@ process.infoPath = addConfigInfo(process, options)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode (options: 'standard', 'factorized')
-myTauOperationMode = "standard"
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
+#param.setAllTauSelectionOperatingMode('antitautag')
+#param.setAllTauSelectionOperatingMode('antiisolatedtau')
+
+param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+
 # The sources should use the same as in signal (i.e. tau trigger matched, which is default)
 # Other parameters
 # HLT_MET cut has to be exactly the same as in the first part of the QCD measurement
