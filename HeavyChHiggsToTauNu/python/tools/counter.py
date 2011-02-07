@@ -159,6 +159,14 @@ class TableFormatLaTeX(TableFormatBase):
         else:
             return ""
 
+class TableFormatConTeXtTABLE(TableFormatBase):
+    """http://wiki.contextgarden.net/TABLE"""
+
+    def __init__(self, cellFormat=CellFormatTeX()):
+        TableFormatBase.__init__(self, cellFormat, beginTable="\\bTABLE", endTable="\\eTABLE",
+                                 beginRow="  \\bTR", endRow="\\eTR",
+                                 beginColumn="\\bTD ", endColumn=" \\eTD")
+
 
 # Create a new counter table with the counter efficiencies
 def counterEfficiency(counterTable):
