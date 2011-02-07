@@ -15,7 +15,10 @@ trigger = cms.untracked.PSet(
 )
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
+# Tau ID factorization map
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
+
+# Default tau selection
 tauSelectionBase = cms.untracked.PSet(
     # Operating mode options: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
@@ -158,6 +161,15 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
+def setTauIDFactorizationMap(options):
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getTauIDFactorizationMap
+    myFactorizationFilename = getTauIDFactorizationMap(options)
+    tauIDCoefficients = __import__(myFactorizationFilename, fromlist=['dummy'])
+    tauSelectionCaloTauCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
+    tauSelectionShrinkingConeTaNCBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
+    tauSelectionShrinkingConeCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
+    tauSelectionHPSTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
+    tauSelectionCombinedHPSTaNCTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):

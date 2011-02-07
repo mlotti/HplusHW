@@ -70,6 +70,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
+
+param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+
 # Set other cuts
 param.MET.METCut = -1.0
 param.bTagging.minNumber = 0
