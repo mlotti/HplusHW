@@ -296,7 +296,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_t-channel_Tune_Z2_Winter10": {
+    "TToBLNu_t-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 63./3.,
         "data": {
