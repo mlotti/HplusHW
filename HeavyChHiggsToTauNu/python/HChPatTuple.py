@@ -350,7 +350,15 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     return seq
 
 
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
+    def setPatArg(args, name, value):
+        if name in args:
+            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
+        args[name] = value
+    def setPatArgs(args, d):
+        for name, value in d.iteritems():
+            setPatArg(args, name, value)
+
     counters = []
     if dataVersion.isData() and options.tauEmbeddingInput == 0:
         counters = HChDataSelection.dataSelectionCounters[:]
@@ -368,9 +376,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
                 fileName = cms.untracked.string('dummy.root'),
                 outputCommands = cms.untracked.vstring()
             )
+        setPatArgs(patArgs, {"doPatTrigger": False,
+                             "doTauHLTMatching": False,
+                             "doPatCalo": False,
+                             "doBTagging": False,
+                             "doPatElectronID": False,
+                             "doPatMET": False})
 
-        process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
-                                     doPatCalo=False, doBTagging=False, doPatElectronID=False, doPatMET=False)
+        process.patSequence = addPat(process, dataVersion, **patArgs)
         removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
 
         if not hasOut:
@@ -386,7 +399,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
         if jetTrigger != None:
             print "Trigger used for jet matching:", jetTrigger
 
-        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger)
+        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger, **patArgs)
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *
