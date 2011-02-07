@@ -1,7 +1,7 @@
 import ROOT
 import array
 
-from histograms import *
+import histograms
 import styles
 
 # Map the physical dataset names (in multicrab.cfg) to logical names
@@ -163,7 +163,7 @@ class DataMCPlot:
         self.saveFormats = saveFormats
 
         # Create the histogram manager
-        self.histoMgr = HistoManager(datasetMgr, name)
+        self.histoMgr = histograms.HistoManager(datasetMgr, name)
         self.datasetMgr = datasetMgr
         
         # Normalize the MC histograms to the data luminosity
@@ -201,7 +201,7 @@ class DataMCPlot:
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
     def createFrame(self, filename, **kwargs):
-        self.cf = CanvasFrame(self.histoMgr, filename, **kwargs)
+        self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
     def createFrameFraction(self, filename, **kwargs):
@@ -213,7 +213,7 @@ class DataMCPlot:
         styles.getDataStyle().apply(self.mcSum)
         self.mcSum.GetYaxis().SetTitle("Data/MC")
 
-        self.cf = CanvasFrameTwo(self.histoMgr, [self.mcSum], filename, **kwargs)
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.mcSum], filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 

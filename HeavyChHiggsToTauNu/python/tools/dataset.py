@@ -21,7 +21,7 @@ class Count:
     def uncertaintyLow(self):
         return self.uncertainty()
 
-    def uncertaintyHigh(self):
+    def uncertaintyUp(self):
         return self.uncertainty()
 
     def __str__(self):

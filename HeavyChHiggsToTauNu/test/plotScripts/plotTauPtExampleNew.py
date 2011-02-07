@@ -10,12 +10,10 @@
 ###########################################################################
 
 import ROOT
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 # Go to batch mode, comment if interactive mode is wanted (see on the
@@ -23,19 +21,19 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 ROOT.gROOT.SetBatch(True)
 
 # Apply TDR style
-style = TDRStyle()
+style = tdrstyle.TDRStyle()
 
 
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetManager.
-datasets = getDatasetsFromMulticrabCfg()
+datasets = dataset.getDatasetsFromMulticrabCfg()
 
 # Construct datasets from the given list of CRAB task directories
-#datasets = getDatasetsFromCrabDirs(["QCD_Pt120to170"])
-#datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
+#datasets = dataset.getDatasetsFromCrabDirs(["QCD_Pt120to170"])
+#datasets = dataset.getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
 
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
-#datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
+#datasets = dataset.getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
 
 # Merge:
 #  - all data datasets to 'Data'
@@ -43,13 +41,13 @@ datasets = getDatasetsFromMulticrabCfg()
 #  - all single top datasets to 'SingleTop'
 # Rename the physical dataset names to logical (essentially drop the Tune and Winter10)
 # Reorder to the 'standard' order, all 'nonstandard' are left to the end
-mergeRenameReorderForDataMC(datasets)
+plots.mergeRenameReorderForDataMC(datasets)
 
 # Override the data luminosity (should not be used except for testing)
 datasets.getDataset("Data").setLuminosity(35)
 
 # Create the plot, latter argument is the path to the histogram in the ROOT files
-h = DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+h = plots.DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 
 # Stack MC histograms
 h.stackMCHistograms()
@@ -63,14 +61,14 @@ h.frame.GetXaxis().SetTitle("#tau p_T (GeV/c)")
 h.frame.GetYaxis().SetTitle("#tau cands / 1 GeV/c")
 
 # Create legend
-h.setLegend(createLegend())
+h.setLegend(histograms.createLegend())
 
 # Draw the histograms and the legend
 h.draw()
 
 # Add the necessary pieces of text
-addCmsPreliminaryText()
-addEnergyText()
+histograms.addCmsPreliminaryText()
+histograms.addEnergyText()
 h.addLuminosityText()
 
 # Save to .png, .eps and .C file
@@ -79,16 +77,16 @@ h.save()
 
 # Same, but create two pads, one for the distributions and another for
 # the data/MC
-h = DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+h = plots.DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 h.stackMCHistograms()
 h.addMCUncertainty()
 h.createFrameFraction("taupt_new2",)
 h.frame.GetXaxis().SetTitle("#tau p_{T} (GeV/c)")
 h.frame.GetYaxis().SetTitle("#tau cands / 1 GeV/c")
-h.setLegend(createLegend())
+h.setLegend(histograms.createLegend())
 h.draw()
-addCmsPreliminaryText()
-addEnergyText()
+histograms.addCmsPreliminaryText()
+histograms.addEnergyText()
 h.addLuminosityText()
 h.save()
 

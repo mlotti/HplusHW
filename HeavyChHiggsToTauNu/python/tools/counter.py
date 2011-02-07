@@ -3,11 +3,35 @@ import copy
 import re
 import ROOT
 
-from dataset import *
+import dataset
 import tools
 
 class CellFormatBase:
+    """Base class for cell formats.
+
+    The deriving classes must implement
+    _formatValue(value)
+    _formatValuePlusMinus(value, uncertainty)
+    _formatValuePlusUpMinusLow(value, uncertaintyUp, uncertaintyLow)
+
+    The value, uncertainty(Up|Low) are strings formatted with the
+    value/uncertaintyFormats. The deriving class may then apply
+    additional formatting for the value/uncertainties, and it must
+    construct the plusminus string for single uncertainty, and plus
+    upper minus lower string for unequal upper/lower uncertainties.
+    """
+
     def __init__(self, **kwargs):
+        """Constructor.
+
+        Keyword arguments:
+        valueFormat           Format string for float values (printf style; default: '%.4g')
+        uncertaintyFormat     Format string for uncertainties (default: same as valueFormat)
+        uncertaintyPrecision  Number of digits to use for comparing if
+                              the lower and upper uncertainties are
+                              equal (default: 4)
+        valueOnly             Boolean, format the value only? (default: False)
+        """
         self._valueFormat = tools.kwargsDefault(kwargs, "valueFormat", "%.4g")
         self._uncertaintyFormat = tools.kwargsDefault(kwargs, "uncertaintyFormat", self._valueFormat)
         self._valueOnly = tools.kwargsDefault(kwargs, "valueOnly", False)
@@ -16,21 +40,28 @@ class CellFormatBase:
         self._uncertaintyEpsilon = math.pow(10., -1.0*uncertaintyPrecision)
 
     def format(self, count):
+        """Format the Count object."""
         value = self._valueFormat % count.value()
-        uHigh = count.uncertaintyHigh()
+        uUp = count.uncertaintyUp()
         uLow = count.uncertaintyLow()
 
-        if self._valueOnly or (uLow == None and uHigh == None):
+        if self._valueOnly or (uLow == None and uUp == None):
             return self._formatValue(value)
 
-        if (uLow == 0.0 and uHigh == 0.0) or (abs(uHigh-uLow)/uHigh < self._uncertaintyEpsilon):
+        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
             return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
         else:
-            return self._formatValuePlusHighMinusLow(value, self._uncertaintyFormat % uHigh, self._uncertaintyFormat % uLow)
+            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
 
 
 class CellFormatText(CellFormatBase):
+    """Text cell format."""
     def __init__(self, **kwargs):
+        """Constructor.
+
+        Keyword arguments:
+        Same as CellFormatBase
+        """
         CellFormatBase.__init__(self, **kwargs)
 
     def _formatValue(self, value):
@@ -39,11 +70,18 @@ class CellFormatText(CellFormatBase):
     def _formatValuePlusMinus(self, value, uncertainty):
         return value + " +- " + uncertainty
 
-    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
-        return value + " +"+uncertaintyHigh + " -"+uncertaintyLow
+    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
+        return value + " +"+uncertaintyUp + " -"+uncertaintyLow
 
 class CellFormatTeX(CellFormatBase):
+    """TeX cell format."""
     def __init__(self, **kwargs):
+        """Constructor.
+
+        Keyword arguments
+        texifyPower   Boolean, should the 1e4 to be converted to 1\\times 10^{4}? (default: True)
+        Same as CellFormatBase
+        """
         CellFormatBase.__init__(self, **kwargs)
         self._texifyPower = tools.kwargsDefault(kwargs, "texifyPower", True)
         self._texre = re.compile("(?P<sign>[+-])?(?P<mantissa>[^e]*)(e(?P<exponent>.*))?$")
@@ -55,11 +93,18 @@ class CellFormatTeX(CellFormatBase):
         (v, u) = self._texify([value, uncertainty])
         return v + " \\pm " + u
 
-    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
-        (v, ul, uh) = self._texify([value, uncertaintyHigh, uncertaintyLow])
+    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
+        (v, ul, uh) = self._texify([value, uncertaintyUp, uncertaintyLow])
         return "%s^{+ %s}_{- %s}" % (v, ul, uh)
 
     def _texify(self, numbers):
+        """TeXify the list of numbers.
+
+        If the texifyPower is False, do nothing.
+
+        Convert the numbers such that their exponent is the maximum
+        one in the list.
+        """
         if not self._texifyPower:
             return numbers
 
@@ -108,7 +153,29 @@ class CellFormatTeX(CellFormatBase):
             raise Exception("This condition should never happen")
 
 class TableFormatBase:
+    """Base class for table formats.
+
+    The deriving classes must either give the
+    (begin|end)(Table|Row|Column) as arguments to the constructor, or
+    implement the corresponding method(s) themselvels.
+
+    The format method should not be overridden by a deriving class.
+    """
+
     def __init__(self, cellFormat, **kwargs):
+        """Constructor.
+
+        Arguments:
+        cellFormat   CellFormatBase (or anything deriving from it) for the default cell format
+
+        Keyword arguments:
+        beginTable    String for table beginning
+        endTable      String for table ending
+        beginRow      String for row beginning
+        endRow        String for for ending
+        beginColumn   String for column beginning
+        endColumn     String for column ending
+        """
         self.defaultCellFormat = cellFormat
 
         for x in ["beginTable", "endTable", "beginRow", "endRow", "beginColumn", "endColumn"]:
@@ -118,34 +185,87 @@ class TableFormatBase:
                 setattr(self, "_"+x, "")
 
     def beginTable(self, ncolumns):
+        """Format table beginning.
+
+        Arguments:
+        ncolumns   Number of columns in the table
+        """
         return self._beginTable
 
     def endTable(self):
+        """Format table ending."""
         return self._endTable
 
     def beginRow(self, firstRow):
+        """Format row beginning.
+
+        Arguments:
+        firstRow   Boolean, is this the first row?
+        """
         return self._beginRow
 
     def endRow(self, lastRow):
+        """Format row ending.
+
+        Arguments:
+        lastRow   Boolean, is this the last row?
+        """
         return self._endRow
 
     def beginColumn(self, firstColumn):
+        """Format column beginning.
+
+        Arguments:
+        firstColumn   Boolean, is this the first column?
+        """
         return self._beginColumn
 
     def endColumn(self, lastColumn):
+        """Format column beginning.
+
+        Arguments:
+        lastColumn   Boolean, is this the last column?
+        """
         return self._endColumn
 
-    def format(self, count):
+    def formatCell(self, count):
+        """Format a cell.
+
+        Arguments:
+        count   Count object to format
+        """
         return self.defaultCellFormat.format(count)
 
 
 class TableFormatText(TableFormatBase):
+    """Text table format."""
     def __init__(self, cellFormat=CellFormatText(), beginRow="", columnSeparator = "  ", endRow = ""):
+        """Constructor.
+
+        Arguments:
+        cellFormat        Cell formatting (default: CellFormatText())
+        beginRow          String for row beginning (default: '')
+        columnSeparator   String for column separation (default: '  ')
+        endRow            String for row ending (default: '')
+        """
         TableFormatBase.__init__(self, cellFormat, beginTable="", endTable="", beginRow=beginRow, endRow=endRow,
-                                 beginColumn="", endColumn=columnSeparator)
+                                 beginColumn="")
+        self._columnSeparator = columnSeparator
+
+    def endColumn(self, lastColumn):
+        if not lastColumn:
+            return self._columnSeparator
+        else:
+            return ""
 
 class TableFormatLaTeX(TableFormatBase):
+    """LaTeX table (tabular) format."""
     def __init__(self, cellFormat=CellFormatTeX()):
+        """Constructor.
+
+        Arguments:
+        cellFormat    Cell formatting (default: CellFromatTeX())
+        """
         TableFormatBase.__init__(self, cellFormat, endTable="\\end{tabular}",
                                  beginRow="  ", endRow = " \\\\",
                                  beginColumn="")
@@ -160,16 +280,24 @@ class TableFormatLaTeX(TableFormatBase):
             return ""
 
 class TableFormatConTeXtTABLE(TableFormatBase):
-    """http://wiki.contextgarden.net/TABLE"""
+    """ConTeXt TABLE format.
+
+    For more information see http://wiki.contextgarden.net/TABLE
+    """
 
     def __init__(self, cellFormat=CellFormatTeX()):
+        """Constructor.
+
+        Arguments:
+        cellFormat    Cell formatting (default: CellFromatTeX())
+        """
         TableFormatBase.__init__(self, cellFormat, beginTable="\\bTABLE", endTable="\\eTABLE",
                                  beginRow="  \\bTR", endRow="\\eTR",
                                  beginColumn="\\bTD ", endColumn=" \\eTD")
 
 
-# Create a new counter table with the counter efficiencies
 def counterEfficiency(counterTable):
+    """Create a new counter table with the counter efficiencies."""
     result = counterTable.deepCopy()
     for icol in xrange(0, counterTable.getNcolumns()):
         prev = None
@@ -178,15 +306,15 @@ def counterEfficiency(counterTable):
             value = None
             if count != None and prev != None:
                 try:
-                    value = Count(count.value() / prev.value(), None)
+                    value = dataset.Count(count.value() / prev.value(), None)
                 except ZeroDivisionError:
                     pass
             prev = count
             result.setValue(irow, icol, value)
     return result
 
-# Counter column
 class CounterColumn:
+    """Class represring a column in CounterTable."""
     def __init__(self, name, rowNames, values):
         self.name = name
         self.rowNames = rowNames
@@ -210,9 +338,13 @@ class CounterColumn:
     def getValue(self, irow):
         return self.values[irow]
 
-# Counter table, separated from Counter class in order to contain only
-# the table and to have the table operations separate
 class CounterTable:
+    """Class to represent a table of counts.
+
+    It is separated from Counter class in order to contain only the
+    table and to have certain table operations.
+    """
+    
     def __init__(self):
         self.rowNames = []
         self.columnNames = []
@@ -352,7 +484,7 @@ class CounterTable:
             for icol in xrange(0, self.getNcolumns()):
                 count = self.getValue(irow, icol)
                 if count != None:
-                    row.append(formatter.format(count))
+                    row.append(formatter.formatCell(count))
                 else:
                     row.append("")
             content.append(row)
@@ -386,8 +518,8 @@ class CounterTable:
         lines.append(formatter.endTable())
         return "\n".join(lines)
 
-# Counter for one dataset
 class SimpleCounter:
+    """Counter for one dataset."""
     def __init__(self, histoWrapper, countNameFunction):
         self.histoWrapper = histoWrapper
         self.counter = None
@@ -414,7 +546,7 @@ class SimpleCounter:
             self.histoWrapper.normalizeToLuminosity(lumi)
 
     def _createCounter(self):
-        self.counter = [x[1] for x in histoToCounter(self.histoWrapper.getHistogram())]
+        self.counter = [x[1] for x in dataset.histoToCounter(self.histoWrapper.getHistogram())]
 
     def getName(self):
         return self.histoWrapper.getDataset().getName()
@@ -438,8 +570,8 @@ class SimpleCounter:
                 return self.counter[i]
         raise Exception("No counter '%s'" % name)
 
-# Counter for many datasets
 class Counter:
+    """Counter for many datasets."""
     def __init__(self, histoWrappers, countNameFunction):
         self.counters = [SimpleCounter(h, countNameFunction) for h in histoWrappers]
 
@@ -474,8 +606,8 @@ class Counter:
             table.appendColumn(h)
         return table
 
-# Many counters
 class EventCounter:
+    """Many counters."""
     def __init__(self, datasets, countNameFunction=None):
         counterNames = {}
 

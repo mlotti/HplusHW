@@ -11,10 +11,10 @@
 
 
 import ROOT
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
@@ -40,18 +40,18 @@ legendLabels = {
 ROOT.gROOT.SetBatch(True)
 
 # Apply TDR style
-style = TDRStyle()
+style = tdrstyle.TDRStyle()
 
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetManager.
-datasets = getDatasetsFromMulticrabCfg()
+datasets = dataset.getDatasetsFromMulticrabCfg()
 
 # Construct datasets from the given list of CRAB task directories
-#datasets = getDatasetsFromCrabDirs(["QCD_Pt120to170"])
-#datasets = getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
+#datasets = dataset.getDatasetsFromCrabDirs(["QCD_Pt120to170"])
+#datasets = dataset.getDatasetsFromCrabDirs(["TTbar_Htaunu_M80"])
 
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
-#datasets = getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
+#datasets = dataset.getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
 
 # Print the list of datasets in the given HistoManager
 #print "\n".join([d.getName() for d in datasets.getAllDatasets()])
@@ -87,7 +87,7 @@ datasets.merge("QCD", ["QCD_Pt30to50_TuneZ2_Winter10",
 # type HistoManager, which contains a histogram from each dataset in
 # DatasetManager. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+tauPts = histograms.HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -134,15 +134,15 @@ tauPts.addMCUncertainty(styles.getErrorStyle())
 #tauPts.addMCUncertainty(styles.getErrorStyle(), "MC uncertainty")
 
 # Create TCanvas and TH1F such that they cover all histograms
-cf = CanvasFrame(tauPts, "taupt")
-#cf = CanvasFrame(tauPts, "taupt", ymin=10, ymax=1e9) # for logy
+cf = histograms.CanvasFrame(tauPts, "taupt")
+#cf = histograms.CanvasFrame(tauPts, "taupt", ymin=10, ymax=1e9) # for logy
 
 # Set the frame options, e.g. axis labels
 cf.frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
 cf.frame.GetYaxis().SetTitle(ylabel)
 
 # Legend
-legend = createLegend(0.7, 0.5, 0.9, 0.8)
+legend = histograms.createLegend(0.7, 0.5, 0.9, 0.8)
 tauPts.addToLegend(legend)
 
 # Draw the plots
@@ -153,8 +153,8 @@ legend.Draw()
 #ROOT.gPad.SetLogy(True)
 
 # The necessary texts, all take the position as arguments
-addCmsPreliminaryText()
-addEnergyText(x=0.3, y=0.85)
+histograms.addCmsPreliminaryText()
+histograms.addEnergyText(x=0.3, y=0.85)
 tauPts.addLuminosityText()
 
 
@@ -174,7 +174,7 @@ print "Dataset info: "
 datasets.printInfo()
 
 # Construct the event counter
-eventCounter = EventCounter(datasets)
+eventCounter = counter.EventCounter(datasets)
 
 # Normalize MC by the data luminosity
 eventCounter.normalizeMCByLuminosity()
@@ -201,15 +201,15 @@ print "============================================================"
 print "Main counter (examples of the same table)"
 
 # Change the value format (printf style)
-print eventCounter.getMainCounterTable().format(TableFormatText(CellFormatText(valueFormat="%.1f")))
+print eventCounter.getMainCounterTable().format(counter.TableFormatText(counter.CellFormatText(valueFormat="%.1f")))
 
 # No uncertainties
-print eventCounter.getMainCounterTable().format(TableFormatText(CellFormatText(valueFormat="%.0e", valueOnly=True)))
+print eventCounter.getMainCounterTable().format(counter.TableFormatText(counter.CellFormatText(valueFormat="%.0e", valueOnly=True)))
 
 # LaTeX table (tabular), default format
-print eventCounter.getMainCounterTable().format(TableFormatLaTeX())
+print eventCounter.getMainCounterTable().format(counter.TableFormatLaTeX())
 
 # LaTeX table, change value and uncertainty formats
-print eventCounter.getMainCounterTable().format(TableFormatLaTeX(CellFormatTeX(valueFormat="%.2e", uncertaintyFormat="%.1e")))
+print eventCounter.getMainCounterTable().format(counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.2e", uncertaintyFormat="%.1e", uncertaintyPrecision=1)))
 
 
