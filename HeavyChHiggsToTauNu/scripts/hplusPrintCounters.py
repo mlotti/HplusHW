@@ -35,9 +35,9 @@ def main(opts):
         print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect', 'eff'" % opts.mode
         return 1
 
-    formatFunc = lambda table: table.format(counter.FloatAutoFormat())
+    formatFunc = lambda table: table.format(counter.TableFormatText())
     if opts.mode == "eff":
-        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.FloatDecimalFormat(4))
+        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(counter.CellFormatText(valueFormat="%.4f")))
         quantity = "Cut efficiencies"
 
     print "============================================================"

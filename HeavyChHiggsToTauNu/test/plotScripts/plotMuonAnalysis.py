@@ -252,7 +252,7 @@ class Histo:
         else:
             self.histos.normalizeMCToLuminosity(lumi)
 
-        self.histos.setHistoLegendLabels(legendLabels)
+        self.histos.setHistoLegendLabelMany(legendLabels)
 
         hasData = self.histos.hasHisto("Data")
 
@@ -273,12 +273,14 @@ class Histo:
             return
 
         ROOT.gStyle.SetErrorX(0.5)
-        hse = HistoStatError(histoData, "MC Stat. Err.")
+        hse = HistoTotalUncertainty(histoData, "MC Stat. Err.")
         hse.call(styles.getErrorStyle())
         self.histos.append(hse)
 
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = CanvasFrame(self.histos, plotname, **kwargs)
+        self.canvas = cf.canvas
+        self.frame = cf.frame
 
     def setLegend(self, legend):
         self.legend = legend
@@ -604,7 +606,7 @@ eventCounter.normalizeMCByLuminosity()
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
 #eventCounter.getMainCounter().printCounter()
-print eventCounter.getMainCounterTable().format(FloatDecimalFormat(1))
+print eventCounter.getMainCounterTable().format()
 #print "------------------------------------------------------------"
 #print counterEfficiency(eventCounter.getMainCounterTable()).format(FloatDecimalFormat(4))
 
@@ -622,7 +624,7 @@ print eventCounter.getMainCounterTable().format(FloatDecimalFormat(1))
 eventCounter = makeEventCounter(datasetsMC)
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
-print eventCounter.getMainCounterTable().format(FloatDecimalFormat(0))
+print eventCounter.getMainCounterTable().format()
 
 if QCDdetails:
     print "============================================================"
@@ -634,10 +636,10 @@ if QCDdetails:
     eventCounter.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    eventCounter.getMainCounter().printCounter(FloatDecimalFormat(1))
+    print eventCounter.getMainCounterTable.printCounter()
 
 
     eventCounter = makeEventCounter(datasetsQCD)
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    eventCounter.getMainCounter().printCounter(FloatDecimalFormat(0))
+    print eventCounter.getMainCounterTable.printCounter()

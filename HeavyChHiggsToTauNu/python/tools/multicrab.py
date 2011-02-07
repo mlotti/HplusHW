@@ -400,7 +400,7 @@ class Multicrab:
                 raise Exception("Python configuration file '%s' doesn't exist!" % pyConfig)
 
             self.filesToCopy.append(pyConfig)
-            self.commonLines.append("CMSSW.pset = "+pyConfig)
+            self.commonLines.append("CMSSW.pset = "+os.path.basename(pyConfig))
 
     def extendDatasets(self, dataInput, datasetNames):
         """Extend the list of datasets for which the multicrab configuration is generated.

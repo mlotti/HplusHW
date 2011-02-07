@@ -14,7 +14,7 @@ class Style:
 	h.SetFillColor(0)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 class StyleFill:
     def __init__(self, style, fillStyle=1001):
@@ -28,30 +28,52 @@ class StyleFill:
         h.SetFillStyle(self.fillStyle)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 class StyleError:
-    def __init__(self, color):
+    def __init__(self, color, style=3004, linecolor=None):
         self.color = color
+        self.style = style
+        self.linecolor = linecolor
 
     def apply(self, h):
-        h.SetFillStyle(1001)
+        h.SetFillStyle(self.style)
         h.SetFillColor(self.color)
         h.SetMarkerStyle(0)
-        h.SetLineWidth(0)
-        h.SetLineColor(self.color)
+        if self.linecolor != None:
+            h.SetLineColor(self.color)
+        else:
+            h.SetLineStyle(0)
+            h.SetLineWidth(0)
+            h.SetLineColor(ROOT.kWhite)
 
     def __call__(self, h):
-        self.apply(h)
+        self.apply(h.getRootHisto())
 
 dataStyle = Style(-2, ROOT.kBlack)
-errorStyle = StyleError(ROOT.kRed-10)
+errorStyle = StyleError(ROOT.kBlack, 3354)
+errorStyle2 = StyleError(ROOT.kGray+2, 3354)
+errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
+
+#signal90Style =  Style(4, ROOT.kBlue)
+signal90Style =  Style(5, ROOT.kRed+1)
+signal100Style = Style(4, ROOT.kBlue)
+signal120Style = Style(4, ROOT.kBlue)
+signal140Style = Style(4, ROOT.kBlue)
+signal160Style = Style(4, ROOT.kBlue)
+
+qcdStyle = Style(7, ROOT.kYellow+1)
+wStyle = Style(1, ROOT.kGreen+2)
+#ttStyle = Style(5, ROOT.kRed+1)
+ttStyle = Style(4, ROOT.kBlue)
+dyStyle = Style(12, ROOT.kBlue-3)
+stStyle = Style(2, ROOT.kMagenta)
 
 styles = [
-    Style(4, ROOT.kBlue),
+    signal90Style,
     Style(5, ROOT.kRed),
-    Style(1, ROOT.kGreen+2),
-    Style(2, ROOT.kMagenta),
+    wStyle,
+    stStyle,
     Style(6, ROOT.kCyan),
     Style(7, ROOT.kYellow+2),
     Style(8, ROOT.kOrange+9),
