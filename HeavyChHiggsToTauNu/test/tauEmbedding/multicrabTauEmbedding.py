@@ -49,6 +49,9 @@ multicrab.extendDatasets(config[step]["input"], datasets)
 if step in ["generation", "embedding"]:
     multicrab.appendArgAll("overrideBeamSpot=1")
 multicrab.appendLineAll("GRID.maxtarballsize = 10")
+if step != "skim":
+    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+
 
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v6" % step
@@ -88,7 +91,6 @@ def modify(dataset):
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
-#        dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
 
     if step == "skim":
         try:
@@ -108,7 +110,6 @@ def modify(dataset):
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
 
 def modifyAnalysis(dataset):
-#    dataset.extendBlackWhiteList("ce_white_list", ["jade-cms.hip.fi"])
     if step == "signalAnalysis":
         dataset.appendArg("tauEmbeddingInput=1")
         dataset.appendArg("doPat=1")
