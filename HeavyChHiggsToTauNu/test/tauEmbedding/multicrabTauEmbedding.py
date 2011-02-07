@@ -10,7 +10,7 @@ step = "skim"
 #step = "analysis"
 #step = "analysisTau"
 
-config = {"skim":       {"input": "RECO",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
+config = {"skim":       {"input": "AOD",                         "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation": {"input": "tauembedding_skim_v5",         "config": "embed_HLT.py", "output": "embedded_HLT.root"},
           "embedding":  {"input": "tauembedding_generation_v5",   "config": "embed_RECO.py", "output": "embedded_RECO.root"},
           "analysis":   {"input": "tauembedding_embedding_v5_1",  "config": "embeddingAnalysis_cfg.py"},
@@ -31,13 +31,15 @@ datasets = [
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
     "TTJets_TuneZ2_Winter10",
-    "WJets_TuneZ2_Winter10_noPU",
+    "WJets_TuneZ2_Winter10",
+    #"WJets_TuneZ2_Winter10_noPU",
+    #"WJets_TuneD6T_Winter10",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
     "DYJetsToLL_TuneZ2_Winter10",
-    "TToBLNu_s-channel_Winter10",
-    "TToBLNu_t-channel_Winter10",
-    "TToBLNu_tW-channel_Winter10",
+    "TToBLNu_s-channel_TuneZ2_Winter10",
+    "TToBLNu_t-channel_TuneZ2_Winter10",
+    "TToBLNu_tW-channel_TuneZ2_Winter10",
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -55,13 +57,14 @@ skimNlumis = {
     }
 
 skimNjobs = {
+    "WJets_TuneZ2_Winter10": 400,
     "WJets_TuneZ2_Winter10_noPU": 100,
     "TTJets_TuneZ2_Winter10": 400,
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 300,
     "DYJetsToLL_TuneZ2_Winter10": 30,
-    "TToBLNu_s-channel_Winter10": 100,
-    "TToBLNu_t-channel_Winter10": 100,
-    "TToBLNu_tW-channel_Winter10": 100,
+    "TToBLNu_s-channel_TuneZ2_Winter10": 100,
+    "TToBLNu_t-channel_TuneZ2_Winter10": 100,
+    "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
     }
     
 
