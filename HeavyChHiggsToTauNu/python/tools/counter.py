@@ -295,6 +295,49 @@ class TableFormatConTeXtTABLE(TableFormatBase):
                                  beginRow="  \\bTR", endRow="\\eTR",
                                  beginColumn="\\bTD ", endColumn=" \\eTD")
 
+class TableSplitter:
+    def __init__(self, sep):
+        if isinstance(sep, str):
+            self.separators = [sep]
+        else:
+            self.separators = sep
+
+    def split(self, content):
+        nrows = len(content)
+        if nrows == 0:
+            return
+        ncols = len(content[0])
+        if ncols == 0:
+            return
+
+        ret = [[] for x in xrange(0, nrows)]
+
+        for icol in xrange(0, ncols):
+            # Do the splitting, and the maximum number of splits in the column
+            nsplits = 0
+            cells = []
+            for irow in xrange(0, nrows):
+                n = 0
+                cell = [content[irow][icol]]
+                tmp = []
+                for sep in self.separators:
+                    for c in cell:
+                        tmp.extend(c.split(sep))
+                    cell = tmp
+                    tmp = []
+                cells.append(cell)
+                nsplits = max(len(cell), nsplits)
+
+            # Then append empty cells for those rows which had less splits than the maximum
+            for irow, cell in enumerate(cells):
+                if len(cell) > nsplits:
+                    raise Exception("This should never happen!")
+                if len(cell) < nsplits:
+                    cell += ["" for x in xrange(0, nsplits-len(cell))]
+                ret[irow].extend(cell)
+   
+        return ret
+
 
 def counterEfficiency(counterTable):
     """Create a new counter table with the counter efficiencies."""
@@ -465,15 +508,6 @@ class CounterTable:
     def _getColumnWidth(self, icol):
         return self.columnWidths[icol]
 
-    def _updateRowColumnWidths(self):
-        rowNameWidth = 0
-        if len(self.rowNames) > 0:
-            rowNameWidth = max([len(x) for x in self.rowNames])
-        self.columnWidths = [max(15, len(x)+1) for x in self.columnNames]
-
-        self.rowNameFormat = "%%-%ds" % (rowNameWidth+2)
-        self.columnFormat = "%%%ds"
-
     def _header(self, formatter):
         return ["Counter"] + self.columnNames
 
@@ -491,21 +525,29 @@ class CounterTable:
         return content
 
     def _columnWidths(self, content):
-        widths = [0]*(self.getNcolumns()+1)
+        widths = [0]*(len(content[0]))
         for row in content:
             for icol, col in enumerate(row):
                 widths[icol] = max(widths[icol], len(col))
         return widths
 
-    def format(self, formatter=TableFormatText()):
+    def format(self, formatter=TableFormatText(), splitter=None):
+        if self.getNcolumns() == 0 or self.getNrows() == 0:
+            return ""
+
         content = [self._header(formatter)] + self._content(formatter)
+
+        if splitter != None:
+            content = splitter.split(content)
+
+        nrows = len(content)
+        ncols = len(content[0])
 
         columnWidths = self._columnWidths(content)
         columnFormat = "{value:<{width}}"
-
-        lines = [formatter.beginTable(self.getNcolumns()+1)]
-        lastRow = self.getNrows()-1
-        lastColumn = self.getNcolumns()
+        lines = [formatter.beginTable(ncols)]
+        lastRow = nrows-1
+        lastColumn = ncols-1
         for irow, row in enumerate(content):
             line = formatter.beginRow(irow==0)
             for icol, column in enumerate(row):
