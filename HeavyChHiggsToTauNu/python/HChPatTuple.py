@@ -352,7 +352,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
     counters = []
-    if dataVersion.isData() and options.tauEmbedding == 0:
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
         counters = HChDataSelection.dataSelectionCounters[:]
 
     if options.doPat == 0:
@@ -361,18 +361,27 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
     print "Running PAT on the fly"
 
     process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData() and options.tauEmbeddingInput() == 0:
-        process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
-
-    if options.trigger == "":
-        raise Exception("Command line argument 'trigger' is missing")
-
     if options.tauEmbeddingInput != 0:
-        process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doHLTTauMatching=False,
-                                     doPatCalo=False, doBTagging=False, doPatElectronID=False, doPatMET=False)
+        hasOut = hasattr(process, "out")
+        if not hasOut:
+            process.out = cms.OutputModule("PoolOutputModule",
+                fileName = cms.untracked.string('dummy.root'),
+                outputCommands = cms.untracked.vstring()
+            )
 
+        process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
+                                     doPatCalo=False, doBTagging=False, doPatElectronID=False, doPatMET=False)
         removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+
+        if not hasOut:
+            del process.out
     else:
+        if dataVersion.isData():
+            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+
+        if options.trigger == "":
+            raise Exception("Command line argument 'trigger' is missing")
+
         print "Trigger used for tau matching:", options.trigger
         if jetTrigger != None:
             print "Trigger used for jet matching:", jetTrigger
@@ -383,5 +392,10 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
         process.collisionDataSelection *
         process.patSequence
     )
+
+    if options.tauEmbeddingInput != 0:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import addTauEmbeddingMuonTaus
+        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+        process.patSequence *= process.patMuonTauSequence
     
     return (dataPatSequence, counters)

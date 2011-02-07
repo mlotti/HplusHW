@@ -69,10 +69,21 @@ process.infoPath = addConfigInfo(process, options)
 # The core of the analysis
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
 param.setAllTauSelectionOperatingMode('antitautag')
 #param.setAllTauSelectionOperatingMode('antiisolatedtau')
 #param.setAllTauSelectionOperatingMode('standard')
+=======
+# Set tau selection mode (options: 'antitautag', 'antiisolatedtau')
+#param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
+param.setAllTauSelectionOperatingMode('antitautag')
+#param.setAllTauSelectionOperatingMode('antiisolatedtau')
+
+param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+
+>>>>>>> sami/master:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
 # Set other cuts

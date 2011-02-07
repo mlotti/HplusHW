@@ -41,7 +41,11 @@ class SeqVisitor(object):
 def customise(process):
     processName = process.name_()
 
-    process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+    #process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+
+    recoProcessName = "RECO"
+    hltProcessName = "EMBEDDINGHLT"
+    processName = process.name_()
 
     process.tmfTracks = cms.EDProducer("RecoTracksMixer",
         trackCol1 = cms.InputTag("dimuonsGlobal"),
@@ -51,6 +55,10 @@ def customise(process):
     process.offlinePrimaryVerticesWithBS.TrackLabel = cms.InputTag("tmfTracks")
     process.offlinePrimaryVertices.TrackLabel = cms.InputTag("tmfTracks")
     process.muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("tmfTracks")
+    # it should be the best solution to take the original beam spot for the
+    # reconstruction of the new primary vertex
+    process.offlinePrimaryVertices.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
+    process.offlinePrimaryVerticesWithBS.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
     try:
         process.metreco.remove(process.BeamHaloId)
     except:
@@ -63,10 +71,6 @@ def customise(process):
     elif outdict.has_key("out"):
         outputModule = outdict["out"]
 
-    recoProcessName = "RECO"
-    hltProcessName = "EMBEDDINGHLT"
-    processName = process.name_()
-
     print "Adjusting event content to GEN-SIM-RECO+misc"
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
     outputModule.outputCommands = cms.untracked.vstring("drop *")
@@ -78,9 +82,6 @@ def customise(process):
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
-            "keep *_gsfElectrons_*_%s" % recoProcessName,
-            "keep *_gsfElectronCores_*_%s" % recoProcessName,
-            "keep *_electronGsfTracks_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
             "keep *_gtDigis_*_%s" % recoProcessName,
 
@@ -199,7 +200,8 @@ def customise(process):
 
 
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_v16_offline") # 38x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
+        #bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
         #bs = cms.string("BeamSpotObjects_2009_v14_offline") # 36x data gt
         #  tag = cms.string("Early10TeVCollision_3p8cm_31X_v1_mc_START"), # 35 default
         #  tag = cms.string("Realistic900GeVCollisions_10cm_STARTUP_v1_mc"), # 36 default

@@ -439,6 +439,9 @@ void FactorizationMap::draw() const {
   myStream << fLabel << "_" << fName << "_weights_uncertainty.png";
   c->Print(myStream.str().c_str());
   myStream.str("");
+  myStream << fLabel << "_" << fName << "_weights_uncertainty.eps";
+  c->Print(myStream.str().c_str());
+  myStream.str("");
   myStream << fLabel << "_" << fName << "_weights_uncertainty.C";
   c->Print(myStream.str().c_str());
 }
@@ -518,24 +521,25 @@ int main(int argc, char** argv) {
   // Set up string constants for config file location
   const std::string myConfigurationFilename = "../../python/HChTauIDFactorization_cfi.py";
   // Set up string constants for histograms
-  const std::string myPtBeforeName = "factorization_calculation_pt_before_tauID";
-  const std::string myPtAfterName = "factorization_calculation_pt_after_tauID";
-  const std::string myPtBeforeUnweightedName = "factorization_calculation_pt_before_tauID_unweighted";
-  const std::string myPtAfterUnweightedName = "factorization_calculation_pt_after_tauID_unweighted";
-  const std::string myEtaBeforeName = "factorization_calculation_eta_before_tauID";
-  const std::string myEtaAfterName = "factorization_calculation_eta_after_tauID";
-  const std::string myEtaBeforeUnweightedName = "factorization_calculation_eta_before_tauID_unweighted";
-  const std::string myEtaAfterUnweightedName = "factorization_calculation_eta_after_tauID_unweighted";
-  const std::string myPtVsEtaBeforeName = "factorization_calculation_pt_vs_eta_before_tauID";
-  const std::string myPtVsEtaAfterName = "factorization_calculation_pt_vs_eta_after_tauID";
-  const std::string myPtVsEtaBeforeUnweightedName = "factorization_calculation_pt_vs_eta_before_tauID_unweighted";
-  const std::string myPtVsEtaAfterUnweightedName = "factorization_calculation_pt_vs_eta_after_tauID_unweighted";
+  const std::string myPtBeforeName = "TauID_factorization_calculation_pt_before_tauID";
+  const std::string myPtAfterName = "TauID_factorization_calculation_pt_after_tauID";
+  const std::string myPtBeforeUnweightedName = "TauID_factorization_calculation_unweighted_pt_before_tauID";
+  const std::string myPtAfterUnweightedName = "TauID_factorization_calculation_unweighted_pt_after_tauID";
+  const std::string myEtaBeforeName = "TauID_factorization_calculation_eta_before_tauID";
+  const std::string myEtaAfterName = "TauID_factorization_calculation_eta_after_tauID";
+  const std::string myEtaBeforeUnweightedName = "TauID_factorization_calculation_unweighted_eta_before_tauID";
+  const std::string myEtaAfterUnweightedName = "TauID_factorization_calculation_unweighted_eta_after_tauID";
+  const std::string myPtVsEtaBeforeName = "TauID_factorization_calculation_pt_vs_eta_before_tauID";
+  const std::string myPtVsEtaAfterName = "TauID_factorization_calculation_pt_vs_eta_after_tauID";
+  const std::string myPtVsEtaBeforeUnweightedName = "TauID_factorization_calculation_unweighted_pt_vs_eta_before_tauID";
+  const std::string myPtVsEtaAfterUnweightedName = "TauID_factorization_calculation_unweighted_pt_vs_eta_after_tauID";
   // Set up string constants for tau algoritms
   std::vector<std::string> myTauAlgorithms;
   myTauAlgorithms.push_back("signalAnalysisTauSelectionShrinkingConeCutBased");
   myTauAlgorithms.push_back("signalAnalysisTauSelectionShrinkingConeTaNCBased");
   myTauAlgorithms.push_back("signalAnalysisTauSelectionHPSTauBased");
   myTauAlgorithms.push_back("signalAnalysisTauSelectionCaloTauCutBased");
+  myTauAlgorithms.push_back("signalAnalysisTauSelectionCombinedHPSTaNCBased");
 
   if (argc < 2) {
     std::cout << "Usage: generateTauIDFactorizationMap sample.root [sample2.root] [...]" << std::endl;
@@ -612,6 +616,7 @@ int main(int argc, char** argv) {
       return -1;
     }
     myConfigFile << "import FWCore.ParameterSet.Config as cms" << std::endl << std::endl;
+    myConfigFile << "# This file has been automatically generated with generateTauIDFactorizationMap" << std::endl << std::endl;
     myConfigFile << "tauIDFactorizationCoefficients = cms.untracked.PSet(" << std::endl;
     myConfigFile << "factorizationSourceName = cms.untracked.string('" << myFilename << "')," << std::endl << std::endl;
     for (std::vector<FactorizationMap*>::const_iterator it = myMaps.begin(); it != myMaps.end(); ++it) {

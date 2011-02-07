@@ -63,7 +63,12 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 
         for(edm::PtrVector<pat::Tau>::iterator iter = taus.begin(); iter != taus.end(); ++iter) {
                 edm::Ptr<pat::Tau> iTau = *iter;
-                const LorentzVector& p4 = iTau->p4() * (1 + JESVariation);
+                // Note: a tau can have mass, which must stay constant in the measurement
+                // Hence only the momentum and energy are scaled
+                double myM = iTau->p4().M();
+                double myP = iTau->p4().P();
+                double myFactor = (1 + JESVariation); 
+                const LorentzVector p4(iTau->p4().X()*myFactor, iTau->p4().Y()*myFactor, iTau->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
                 pat::Tau tau = *iTau;
                 tau.setP4(p4);
                 rescaledTaus->push_back(tau);
@@ -78,13 +83,18 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	       dpy = 0;
 	for(edm::PtrVector<pat::Jet>::iterator iter = jets.begin(); iter != jets.end(); ++iter) {
 		edm::Ptr<pat::Jet> iJet = *iter;
-		const LorentzVector& p4 = iJet->p4() * (1 + JESVariation);
+                // Note: a jet can have mass, which must stay constant in the measurement
+                // Hence only the momentum and energy are scaled
+                double myM = iJet->p4().M();
+                double myP = iJet->p4().P();
+                double myFactor = (1 + JESVariation); 
+                const LorentzVector p4(iJet->p4().X()*myFactor, iJet->p4().Y()*myFactor, iJet->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
 		pat::Jet jet = *iJet;
 		jet.setP4(p4);
 		rescaledJets->push_back(jet);
-
-		dpx = -iJet->px() * JESVariation; 
-		dpy = -iJet->py() * JESVariation;
+                // Negative sign for MET correction comes from MET definition
+		dpx += -iJet->px() * JESVariation; 
+		dpy += -iJet->py() * JESVariation;
 	}
 
 	// MET

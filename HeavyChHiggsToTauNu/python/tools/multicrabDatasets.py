@@ -13,7 +13,7 @@ datasets.update(mcFall10.datasets)
 datasets.update(mcWinter10.datasets)
 
 mcFall10PU.addTo(datasets)
-tauEmbedding.addTo(datasets)
+#tauEmbedding.addTo(datasets)
 
 def printAllDatasets(details=False):
     names = datasets.keys()

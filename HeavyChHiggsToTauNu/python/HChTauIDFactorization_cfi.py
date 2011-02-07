@@ -18,7 +18,7 @@ tauIDFactorizationParameters = cms.untracked.PSet(
   factorizationTableType = cms.untracked.string("byPt")
 )
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.FactorizationMapBTau_141950_148864_tctau_factorized_cfi as coefficientSource
+import HiggsAnalysis.HeavyChHiggsToTauNu.FactorizationMap_NoFactorization_cfi as coefficientSource
 tauIDFactorizationParameters.factorizationTables = coefficientSource.tauIDFactorizationCoefficients
 
 #print "TauID factorization source: ",factorizationSourceName
