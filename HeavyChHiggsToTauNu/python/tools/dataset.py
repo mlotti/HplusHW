@@ -7,16 +7,22 @@ import ROOT
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 class Count:
-    """Represents counter count value with error."""
-    def __init__(self, value, error):
+    """Represents counter count value with uncertainty."""
+    def __init__(self, value, uncertainty):
         self._value = value
-        self._error = error
+        self._uncertainty = uncertainty
 
     def value(self):
         return self._value
 
-    def error(self):
-        return self._error
+    def uncertainty(self):
+        return self._uncertainty
+
+    def uncertaintyLow(self):
+        return self.uncertainty()
+
+    def uncertaintyHigh(self):
+        return self.uncertainty()
 
     def __str__(self):
         return "%f"%self._value

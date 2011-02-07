@@ -3,75 +3,115 @@ import copy
 import ROOT
 
 from dataset import *
+import tools
 
-class FloatAutoFormat:
-    def __init__(self, decimals=4):
-        self.format = "%%%d."+str(decimals)+"g"
-    def __call__(self, width):
-        return self.format % width
+class CellFormatBase:
+    def __init__(self, **kwargs):
+        self._valueFormat = tools.kwargsDefault(kwargs, "valueFormat", "%.4g")
+        self._uncertaintyFormat = tools.kwargsDefault(kwargs, "uncertaintyFormat", self._valueFormat)
+        self._valueOnly = tools.kwargsDefault(kwargs, "valueOnly", False)
 
-class FloatDecimalFormat:
-    def __init__(self, decimals=4):
-        self.format = "%%%d."+str(decimals)+"f"
-    def __call__(self, width):
-        return self.format % width
+        uncertaintyPrecision = tools.kwargsDefault(kwargs, "uncertaintyPrecision", 4)
+        self._uncertaintyEpsilon = math.pow(10., -1.0*uncertaintyPrecision)
 
-class FloatExpFormat:
-    def __init__(self, decimals=4):
-        self.format = "%%%d."+str(decimals)+"e"
-    def __call__(self, width):
-        return self.format % width
+    def format(self, count):
+        value = self._valueFormat % count.value()
+        uHigh = count.uncertaintyHigh()
+        uLow = count.uncertaintyLow()
 
-class FormatText:
-    def __init__(self, valuePrecision=4, errorPrecision=4,
-                 begin="", separator = "  ", end = "",
-                 numberFormat="g"): # f, e, g as for printf
-        self.valuePrecision = valuePrecision
-        self.errorPrecision = errorPrecision
-        self.errorEpsilon = math.pow(10., -1.0*errorPrecision)
-        self.begin = begin
-        self.separator = separator
-        self.end = end
-        self.format = numberFormat
-                 
-    def beginTable(self):
-        return ""
+        if self._valueOnly or (uLow == None and uHigh == None):
+            return self._formatValue(value)
+
+        if (uLow == 0.0 and uHigh == 0.0) or (abs(uHigh-uLow)/uHigh < self._uncertaintyEpsilon):
+            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
+        else:
+            return self._formatValuePlusHighMinusLow(value, self._uncertaintyFormat % uHigh, self._uncertaintyFormat % uLow)
+
+
+class CellFormatText(CellFormatBase):
+    def __init__(self, **kwargs):
+        CellFormatBase.__init__(self, **kwargs)
+
+    def _formatValue(self, value):
+        return value
+
+    def _formatValuePlusMinus(self, value, uncertainty):
+        return value + " +- " + uncertainty
+
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        return value + " +"+uncertaintyHigh + " -"+uncertaintyLow
+
+class CellFormatTeX(CellFormatBase):
+    def __init__(self, **kwargs):
+        CellFormatBase.__init__(self, **kwargs)
+
+    def _formatValue(self, value):
+        return self._texify(value)
+
+    def _formatValuePlusMinus(self, value, uncertainty):
+        return self._texify(value) + " \\pm " + self._texify(uncertainty)
+
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        return "%s^{+ %s}_{- %s}" % (self._texify(value), self._texify(uncertaintyHigh), self._texify(uncertaintyLow))
+
+    def _texify(self, number):
+        if not "e" in number:
+            return number
+
+        return number.replace("e", "\times 10^{")+"}"
+
+class TableFormatBase:
+    def __init__(self, cellFormat, **kwargs):
+        self.defaultCellFormat = cellFormat
+
+        for x in ["beginTable", "endTable", "beginRow", "endRow", "beginColumn", "endColumn"]:
+            try:
+                setattr(self, "_"+x, kwargs[x])
+            except KeyError:
+                setattr(self, "_"+x, "")
+
+    def beginTable(self, ncolumns):
+        return self._beginTable
 
     def endTable(self):
-        return ""
+        return self._endTable
 
-    def beginLine(self):
-        return self.begin
+    def beginRow(self, firstRow):
+        return self._beginRow
 
-    def endLine(self):
-        return self.end
+    def endRow(self, lastRow):
+        return self._endRow
 
-    def beginColumn(self):
-        return ""
+    def beginColumn(self, firstColumn):
+        return self._beginColumn
 
-    def endColumn(self):
-        return self.separator
+    def endColumn(self, lastColumn):
+        return self._endColumn
 
-    def number(self, value, error=None, errorLow=None, errorHigh=None):
-        if error != None and (errorLow != None or errorHigh != None):
-            raise Exception("Only either error or errorLow and errorHigh can be set")
-        if errorLow != None and errorHigh == None or errorLow == None and errorHigh != None:
-            raise Exception("Both errorLow and errorHigh must be set")
+    def format(self, count):
+        return self.defaultCellFormat.format(count)
 
-        fmt = "%"+str(self.valuePrecision)+"."+self.format
-        ret = fmt % value
-        if error == None and errorLow == None:
-            return ret
 
-        fmt = "%"+str(self.errorPrecision)+"."+self.format
-        if error != None:
-            ret += " +- " + fmt%error
-            return ret
+class TableFormatText(TableFormatBase):
+    def __init__(self, cellFormat=CellFormatText(), beginRow="", columnSeparator = "  ", endRow = ""):
+        TableFormatBase.__init__(self, cellFormat, beginTable="", endTable="", beginRow=beginRow, endRow=endRow,
+                                 beginColumn="", endColumn=columnSeparator)
 
-        if abs(errorHigh-errorLow)/errorHigh < self.errorEpsilon:
-            ret += " +- " + fmt%errorLow
+class TableFormatLaTeX(TableFormatBase):
+    def __init__(self, cellFormat=CellFormatTeX()):
+        TableFormatBase.__init__(self, cellFormat, endTable="\\end{tabular}",
+                                 beginRow="  ", endRow = " \\\\",
+                                 beginColumn="")
+
+    def beginTable(self, ncolumns):
+        return "\\begin{tabular}{%s}" % ("l"*ncolumns)
+
+    def endColumn(self, lastColumn):
+        if not lastColumn:
+            return " && "
         else:
-            ret += " + "+fmt%errorHigh + " - "+fmt%errorLow
+            return ""
+
 
 # Create a new counter table with the counter efficiencies
 def counterEfficiency(counterTable):
@@ -123,17 +163,6 @@ class CounterTable:
         self.columnNames = []
         self.table = [] # table[row][column]
 
-        self._updateRowColumnWidths()
-
-    def _updateRowColumnWidths(self):
-        rowNameWidth = 0
-        if len(self.rowNames) > 0:
-            rowNameWidth = max([len(x) for x in self.rowNames])
-        self.columnWidths = [max(15, len(x)+1) for x in self.columnNames]
-
-        self.rowNameFormat = "%%-%ds" % (rowNameWidth+2)
-        self.columnFormat = "%%%ds"
-
     def deepCopy(self):
         return copy.deepcopy(self)
 
@@ -145,23 +174,11 @@ class CounterTable:
             return 0
         return len(self.table[0])
 
-    def getColumnWidth(self, icol):
-        return self.columnWidths[icol]
-
     def getValue(self, irow, icol):
         return self.table[irow][icol]
 
     def setValue(self, irow, icol, value):
         self.table[irow][icol] = value
-
-    def formatHeader(self):
-        header = self.rowNameFormat % "Counter"
-        for i, cname in enumerate(self.columnNames):
-            header += (self.columnFormat%self.columnWidths[i]) % cname
-        return header
-
-    def formatFirstColumn(self, irow):
-        return self.rowNameFormat % self.rowNames[irow]
 
     def indexColumn(self, name):
         return self.columnNames.index(name)
@@ -222,7 +239,6 @@ class CounterTable:
                 raise Exception("Internal error: len(row) = %d, beginColumns = %d" % (len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
-        self._updateRowColumnWidths()
 
     def getColumn(self, icol):
         # Extract the data for the column
@@ -259,22 +275,61 @@ class CounterTable:
 
             irow += 1
 
-    def format(self, formatFunction=FloatAutoFormat()):
-        content = [self.formatHeader()]
+    def _getColumnWidth(self, icol):
+        return self.columnWidths[icol]
 
+    def _updateRowColumnWidths(self):
+        rowNameWidth = 0
+        if len(self.rowNames) > 0:
+            rowNameWidth = max([len(x) for x in self.rowNames])
+        self.columnWidths = [max(15, len(x)+1) for x in self.columnNames]
+
+        self.rowNameFormat = "%%-%ds" % (rowNameWidth+2)
+        self.columnFormat = "%%%ds"
+
+    def _header(self, formatter):
+        return ["Counter"] + self.columnNames
+
+    def _content(self, formatter):
+        content = []
         for irow in xrange(0, self.getNrows()):
-            line = self.formatFirstColumn(irow)
-    
+            row = [self.rowNames[irow]]
             for icol in xrange(0, self.getNcolumns()):
                 count = self.getValue(irow, icol)
                 if count != None:
-                    line += formatFunction(self.getColumnWidth(icol)) % count.value()
+                    row.append(formatter.format(count))
                 else:
-                    line += " "*self.getColumnWidth(icol)
-    
-            content.append(line)
-        return "\n".join(content)
-            
+                    row.append("")
+            content.append(row)
+        return content
+
+    def _columnWidths(self, content):
+        widths = [0]*(self.getNcolumns()+1)
+        for row in content:
+            for icol, col in enumerate(row):
+                widths[icol] = max(widths[icol], len(col))
+        return widths
+
+    def format(self, formatter=TableFormatText()):
+        content = [self._header(formatter)] + self._content(formatter)
+
+        columnWidths = self._columnWidths(content)
+        columnFormat = "{value:<{width}}"
+
+        lines = [formatter.beginTable(self.getNcolumns()+1)]
+        lastRow = self.getNrows()-1
+        lastColumn = self.getNcolumns()
+        for irow, row in enumerate(content):
+            line = formatter.beginRow(irow==0)
+            for icol, column in enumerate(row):
+                line += formatter.beginColumn(icol==0)
+                line += columnFormat.format(width=columnWidths[icol], value=column)
+                line += formatter.endColumn(icol==lastColumn)
+            line += formatter.endRow(irow==lastRow)
+            lines.append(line)
+
+        lines.append(formatter.endTable())
+        return "\n".join(lines)
 
 # Counter for one dataset
 class SimpleCounter:
@@ -363,9 +418,6 @@ class Counter:
         for h in self.counters:
             table.appendColumn(h)
         return table
-
-    def printCounter(self, format=FloatAutoFormat()):
-        print self.getTable().format(format)
 
 # Many counters
 class EventCounter:
