@@ -36,9 +36,15 @@ def main(opts):
         return 1
 
     formatFunc = lambda table: table.format(counter.TableFormatText())
+    csvSplitter = counter.TableSplitter(["+-", "+", "-"])
+    if opts.csv:
+        formatFunc = lambda table: table.format(counter.TableFormatText(columnSeparator=","), csvSplitter)
     if opts.mode == "eff":
-        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(counter.CellFormatText(valueFormat="%.4f")))
+        cellFormat = counter.CellFormatText(valueFormat="%.4f")
+        formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(cellFormat))
         quantity = "Cut efficiencies"
+        if opts.csv:
+            formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(cellFormat, columnSeparator=","), csvSplitter)
 
     print "============================================================"
     print "Main counter %s: " % quantity
@@ -67,6 +73,8 @@ if __name__ == "__main__":
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
+    parser.add_option("--csv", dest="csv", action="store_true", default=False,
+                      help="Print in CSV format")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
 #                      help="Output format; available: 'text' (default: 'text')")
     parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
