@@ -36,7 +36,7 @@ def main(opts):
         return 1
 
     formatFunc = lambda table: table.format(counter.TableFormatText())
-    csvSplitter = counter.TableSplitter(["+-", "+", "-"])
+    csvSplitter = counter.TableSplitter([" +- ", " +", " -"])
     if opts.csv:
         formatFunc = lambda table: table.format(counter.TableFormatText(columnSeparator=","), csvSplitter)
     if opts.mode == "eff":

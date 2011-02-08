@@ -296,11 +296,12 @@ class TableFormatConTeXtTABLE(TableFormatBase):
                                  beginColumn="\\bTD ", endColumn=" \\eTD")
 
 class TableSplitter:
-    def __init__(self, sep):
-        if isinstance(sep, str):
-            self.separators = [sep]
+    def __init__(self, separators, removeSeparators=False):
+        if isinstance(separators, str):
+            self._separators = [separators]
         else:
-            self.separators = sep
+            self._separators = separators
+        self._removeSeparators = removeSeparators
 
     def split(self, content):
         nrows = len(content)
@@ -315,21 +316,35 @@ class TableSplitter:
         for icol in xrange(0, ncols):
             # Do the splitting, and the maximum number of splits in the column
             nsplits = 0
-            cells = []
+            rows = []
             for irow in xrange(0, nrows):
                 n = 0
-                cell = [content[irow][icol]]
-                tmp = []
-                for sep in self.separators:
-                    for c in cell:
-                        tmp.extend(c.split(sep))
-                    cell = tmp
-                    tmp = []
-                cells.append(cell)
-                nsplits = max(len(cell), nsplits)
+                row = []
+                cell = content[irow][icol]
+
+                start = 0
+                ind = 0
+                while ind < len(cell):
+                    foundSeparator = False
+                    for sep in self._separators:
+                        if cell[ind:ind+len(sep)] == sep:
+                            row.append(cell[start:ind])
+                            if not self._removeSeparators:
+                                row.append(sep)
+                            ind += len(sep)
+                            start = ind
+
+                            foundSeparator = True
+                            break
+                    if not foundSeparator:
+                        ind += 1
+                row.append(cell[start:len(cell)])
+                            
+                rows.append(row)
+                nsplits = max(len(row), nsplits)
 
             # Then append empty cells for those rows which had less splits than the maximum
-            for irow, cell in enumerate(cells):
+            for irow, cell in enumerate(rows):
                 if len(cell) > nsplits:
                     raise Exception("This should never happen!")
                 if len(cell) < nsplits:
