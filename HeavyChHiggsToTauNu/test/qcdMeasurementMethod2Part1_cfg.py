@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-#dataVersion = "39Xredigi"
-dataVersion = "39Xdata"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -29,15 +29,15 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
+        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
         # For testing in lxplus
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
@@ -69,6 +69,12 @@ process.infoPath = addConfigInfo(process, options)
 # The core of the analysis
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
+# Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
+param.setAllTauSelectionOperatingMode('antitautag')
+#param.setAllTauSelectionOperatingMode('antiisolatedtau')
+#param.setAllTauSelectionOperatingMode('standard')
+=======
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau')
 #param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
@@ -77,6 +83,7 @@ param.setAllTauSelectionOperatingMode('antitautag')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
+>>>>>>> sami/master:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
 # Set other cuts
@@ -101,6 +108,7 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
     # Set here the tau algorithm
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
+    EvtTopology = param.EvtTopology,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     MET = param.MET,
@@ -122,7 +130,7 @@ process.qcdMeasurementMethod2Part1Counters = cms.EDAnalyzer("HPlusEventCountAnal
     counterInstances = cms.untracked.InputTag("qcdMeasurementMethod2Part1", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
     printSubCounters = cms.untracked.bool(False),
-    printAvailableCounters = cms.untracked.bool(False),
+    printAvailableCounters = cms.untracked.bool(True),
 )
 if len(additionalCounters) > 0:
     process.qcdMeasurementMethod2Part1Counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
