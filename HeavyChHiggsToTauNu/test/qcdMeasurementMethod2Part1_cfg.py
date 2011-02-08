@@ -88,7 +88,7 @@ param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for whic
 param.overrideTriggerFromOptions(options)
 
 # Prescale weight, do not uncomment unless you know what you're doing!
-if dataVersion == 39Xdata:
+if dataVersion.isData():
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
