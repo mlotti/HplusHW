@@ -6,90 +6,6 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-class Count:
-    """Represents counter count value with uncertainty."""
-    def __init__(self, value, uncertainty):
-        self._value = value
-        self._uncertainty = uncertainty
-
-    def value(self):
-        return self._value
-
-    def uncertainty(self):
-        return self._uncertainty
-
-    def uncertaintyLow(self):
-        return self.uncertainty()
-
-    def uncertaintyUp(self):
-        return self.uncertainty()
-
-    def __str__(self):
-        return "%f"%self._value
-
-def histoToCounter(histo):
-    """Transform histogram (TH1) to a list of (name, Count) pairs.
-
-    The name is taken from the x axis label and the count is Count
-    object with value and (statistical) uncertainty.
-    """
-
-    ret = []
-
-    for bin in xrange(1, histo.GetNbinsX()+1):
-        ret.append( (histo.GetXaxis().GetBinLabel(bin),
-                     Count(float(histo.GetBinContent(bin)),
-                           float(histo.GetBinError(bin)))) )
-
-    return ret
-
-def histoToDict(histo):
-    """Transform histogram (TH1) to a dictionary.
-
-    The key is taken from the x axis label, and the value is the bin
-    content.
-    """
-
-    ret = {}
-
-    for bin in xrange(1, histo.GetNbinsX()+1):
-        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)
-
-    return ret
-
-def rescaleInfo(d):
-    """Rescales info dictionary.
-
-    Assumes that d has a 'control' key for a numeric value, and then
-    normalizes all items in the dictionary such that the 'control'
-    becomes one.
-
-    The use case is to have a dictionary from histoToDict() function,
-    where the original histogram is merged from multiple jobs. It is
-    assumed that each histogram as a one bin with 'control' label, and
-    the value of this bin is 1 for each job. Then the bin value for
-    the merged histogram tells the number of jobs. Naturally the
-    scheme works correctly only if the histograms from jobs are
-    identical, and hence is appropriate only for dataset-like
-    information.
-    """
-    factor = 1/d["control"]
-
-    ret = {}
-    for k, v in d.iteritems():
-        ret[k] = v*factor
-
-    return ret
-
-
-def addOptions(parser):
-    """Add common dataset options to OptionParser object."""
-    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    parser.add_option("-f", dest="files", type="string", action="append", default=[],
-                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-
-
 def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
     """Construct DatasetManager from a multicrab.cfg.
 
@@ -167,7 +83,92 @@ def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
         datasets.append(Dataset(name, f, counters))
     return datasets
 
-def normalizeToOne(h):
+def addOptions(parser):
+    """Add common dataset options to OptionParser object."""
+    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
+                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
+    parser.add_option("-f", dest="files", type="string", action="append", default=[],
+                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+
+
+
+class Count:
+    """Represents counter count value with uncertainty."""
+    def __init__(self, value, uncertainty):
+        self._value = value
+        self._uncertainty = uncertainty
+
+    def value(self):
+        return self._value
+
+    def uncertainty(self):
+        return self._uncertainty
+
+    def uncertaintyLow(self):
+        return self.uncertainty()
+
+    def uncertaintyUp(self):
+        return self.uncertainty()
+
+    def __str__(self):
+        return "%f"%self._value
+
+def _histoToCounter(histo):
+    """Transform histogram (TH1) to a list of (name, Count) pairs.
+
+    The name is taken from the x axis label and the count is Count
+    object with value and (statistical) uncertainty.
+    """
+
+    ret = []
+
+    for bin in xrange(1, histo.GetNbinsX()+1):
+        ret.append( (histo.GetXaxis().GetBinLabel(bin),
+                     Count(float(histo.GetBinContent(bin)),
+                           float(histo.GetBinError(bin)))) )
+
+    return ret
+
+def _histoToDict(histo):
+    """Transform histogram (TH1) to a dictionary.
+
+    The key is taken from the x axis label, and the value is the bin
+    content.
+    """
+
+    ret = {}
+
+    for bin in xrange(1, histo.GetNbinsX()+1):
+        ret[histo.GetXaxis().GetBinLabel(bin)] = histo.GetBinContent(bin)
+
+    return ret
+
+def _rescaleInfo(d):
+    """Rescales info dictionary.
+
+    Assumes that d has a 'control' key for a numeric value, and then
+    normalizes all items in the dictionary such that the 'control'
+    becomes one.
+
+    The use case is to have a dictionary from _histoToDict() function,
+    where the original histogram is merged from multiple jobs. It is
+    assumed that each histogram as a one bin with 'control' label, and
+    the value of this bin is 1 for each job. Then the bin value for
+    the merged histogram tells the number of jobs. Naturally the
+    scheme works correctly only if the histograms from jobs are
+    identical, and hence is appropriate only for dataset-like
+    information.
+    """
+    factor = 1/d["control"]
+
+    ret = {}
+    for k, v in d.iteritems():
+        ret[k] = v*factor
+
+    return ret
+
+
+def _normalizeToOne(h):
     """Normalize TH1 to unit area.
 
     Parameters:
@@ -179,7 +180,7 @@ def normalizeToOne(h):
     return normalizeToFactor(1.0/h.Integral())
     return h
 
-def normalizeToFactor(h, f):
+def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
 
     Parameters:
@@ -197,7 +198,7 @@ def normalizeToFactor(h, f):
     return h
 
 
-def mergeStackHelper(datasetList, nameList, task):
+def _mergeStackHelper(datasetList, nameList, task):
     """Helper function for merging/stacking a set of datasets.
 
     Parameters:
@@ -250,7 +251,7 @@ def mergeStackHelper(datasetList, nameList, task):
 
     return (selected, notSelected, firstIndex)
 
-class HistoWrapper:
+class DatasetRootHisto:
     """Wrapper for a single TH1 histogram and the corresponding Dataset.
 
     The wrapper holds the normalization of the histogram. User should
@@ -292,7 +293,7 @@ class HistoWrapper:
 
     def getBinLabels(self):
         """Get list of the bin labels of the histogram."""
-        return [x[0] for x in histoToCounter(self.histo)]
+        return [x[0] for x in _histoToCounter(self.histo)]
 
     def getHistogram(self):
         """Get a clone of the wrapped histogram normalized correctly."""
@@ -303,14 +304,14 @@ class HistoWrapper:
         if self.normalization == "none":
             return h
         elif self.normalization == "toOne":
-            return normalizeToOne(h)
+            return _normalizeToOne(h)
 
         # We have to normalize to cross section in any case
-        h = normalizeToFactor(h, self.dataset.getNormFactor())
+        h = _normalizeToFactor(h, self.dataset.getNormFactor())
         if self.normalization == "byCrossSection":
             return h
         elif self.normalization == "toLuminosity":
-            return normalizeToFactor(h, self.luminosity)
+            return _normalizeToFactor(h, self.luminosity)
         else:
             raise Exception("Internal error")
 
@@ -352,19 +353,19 @@ class HistoWrapper:
         self.luminosity = lumi
 
 
-class HistoWrapperMergedData:
+class DatasetRootHistoMergedData:
     """Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 
     The merged data histograms can only be normalized 'to one'.
 
-    See also the documentation of HistoWrapper class.
+    See also the documentation of DatasetRootHisto class.
     """
 
     def __init__(self, histoWrappers, mergedDataset):
         """Constructor.
 
         Parameters:
-        histoWrappers   List of HistoWrapper objects to merge
+        histoWrappers   List of DatasetRootHisto objects to merge
         mergedDataset   The corresponding DatasetMerged object
 
         The constructor checks that all histoWrappers are data, and
@@ -415,16 +416,16 @@ class HistoWrapperMergedData:
         else:
             return hsum
 
-class HistoWrapperMergedMC:
+class DatasetRootHistoMergedMC:
     """Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 
-    See also the documentation of HistoWrapper class.
+    See also the documentation of DatasetRootHisto class.
     """
     def __init__(self, histoWrappers, mergedDataset):
         """Constructor.
 
         Parameters:
-        histoWrappers   List of HistoWrapper objects to merge
+        histoWrappers   List of DatasetRootHisto objects to merge
         mergedDataset   The corresponding DatasetMerged object
 
         The constructor checks that all histoWrappers are MC, and are
@@ -554,7 +555,7 @@ class Dataset:
         self.info = {}
         configInfo = self.file.Get("configInfo")
         if configInfo != None:
-            self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
+            self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
         self.prefix = ""
         if counterDir != None:
@@ -575,7 +576,7 @@ class Dataset:
 
         if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
-        ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
+        ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
         self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
         self.counterDir = counterDir
 
@@ -671,8 +672,8 @@ class Dataset:
 
         return self.getCrossSection() / self.nAllEvents
 
-    def getHistoWrapper(self, name):
-        """Get the HistoWrapper object for a named histogram.
+    def getDatasetRootHisto(self, name):
+        """Get the DatasetRootHisto object for a named histogram.
 
         Parameters:
         name   Path of the histogram in the ROOT file
@@ -688,7 +689,7 @@ class Dataset:
 
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
-        return HistoWrapper(h, self)
+        return DatasetRootHisto(h, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
         """Get the directory content of a given directory in the ROOT file.
@@ -832,17 +833,17 @@ class DatasetMerged:
     def getNormFactor(self):
         return None
 
-    def getHistoWrapper(self, name):
-        """Get the HistoWrapperMergedMC/HistoWrapperMergedData object for a named histogram.
+    def getDatasetRootHisto(self, name):
+        """Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
 
         Parameters:
         name   Path of the histogram in the ROOT file
         """
-        wrappers = [d.getHistoWrapper(name) for d in self.datasets]
+        wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
         if self.isMC():
-            return HistoWrapperMergedMC(wrappers, self)
+            return DatasetRootHistoMergedMC(wrappers, self)
         else:
-            return HistoWrapperMergedData(wrappers, self)
+            return DatasetRootHistoMergedData(wrappers, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
         """Get the directory content of a given directory in the ROOT file.
@@ -937,13 +938,13 @@ class DatasetManager:
     def getDataset(self, name):
         return self.datasetMap[name]
 
-    def getHistoWrappers(self, histoName):
-        """Get a list of HistoWrapper objects for a given name.
+    def getDatasetRootHistos(self, histoName):
+        """Get a list of DatasetRootHisto objects for a given name.
 
         Parameters:
         histoName   Path to the histogram in each ROOT file.
         """
-        return [d.getHistoWrapper(histoName) for d in self.datasets]
+        return [d.getDatasetRootHisto(histoName) for d in self.datasets]
 
     def getAllDatasets(self):
         """Get a list of all Dataset objects."""
@@ -1070,7 +1071,7 @@ class DatasetManager:
         nameList   List of Dataset names to merge
         """
         
-        (selected, notSelected, firstIndex) = mergeStackHelper(self.datasets, nameList, "merge")
+        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
         if len(selected) == 0:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             return

@@ -4,8 +4,7 @@ from optparse import OptionParser
 
 import ROOT
 
-import multicrab
-from dataset import Dataset, mergeStackHelper
+import dataset
 import tools
 
 class TextDefaults:
@@ -691,7 +690,7 @@ class HistoManagerImpl:
         nameList   List of histogram names to stack
         """
 
-        (selected, notSelected, firstIndex) = mergeStackHelper(self.drawList, nameList, "stack")
+        (selected, notSelected, firstIndex) = dataset._mergeStackHelper(self.drawList, nameList, "stack")
         if len(selected) == 0:
             return
 
@@ -744,7 +743,7 @@ class HistoManager:
         name         Path to the TH1 objects in the DatasetManager ROOT files
         """
         self.datasetMgr = datasetMgr
-        self.histoWrappers = datasetMgr.getHistoWrappers(name)
+        self.datasetRootHistos = datasetMgr.getDatasetRootHistos(name)
         self.impl = None
         self.luminosity = None
 
@@ -761,7 +760,7 @@ class HistoManager:
         """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
-        for h in self.histoWrappers:
+        for h in self.datasetRootHistos:
             h.normalizeToOne()
         self.luminosity = None
 
@@ -773,7 +772,7 @@ class HistoManager:
         """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
-        for h in self.histoWrappers:
+        for h in self.datasetRootHistos:
             if h.getDataset().isMC():
                 h.normalizeByCrossSection()
         self.luminosity = None
@@ -790,7 +789,7 @@ class HistoManager:
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         lumi = None
-        for h in self.histoWrappers:
+        for h in self.datasetRootHistos:
             if h.getDataset().isData():
                 if lumi != None:
                     raise Exception("Unable to normalize by luminosity, more than one data datasets (you might want to merge data datasets)")
@@ -812,7 +811,7 @@ class HistoManager:
         """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
-        for h in self.histoWrappers:
+        for h in self.datasetRootHistos:
             if h.getDataset().isMC():
                 h.normalizeToLuminosity(lumi)
         self.luminosity = lumi
@@ -832,7 +831,7 @@ class HistoManager:
 
         Intended only for internal use.
         """
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.histoWrappers])
+        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'StackedMC'."""

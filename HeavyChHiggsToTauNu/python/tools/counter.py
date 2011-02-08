@@ -577,36 +577,36 @@ class CounterTable:
 
 class SimpleCounter:
     """Counter for one dataset."""
-    def __init__(self, histoWrapper, countNameFunction):
-        self.histoWrapper = histoWrapper
+    def __init__(self, datasetRootHisto, countNameFunction):
+        self.datasetRootHisto = datasetRootHisto
         self.counter = None
         if countNameFunction != None:
-            self.countNames = [countNameFunction(x) for x in histoWrapper.getBinLabels()]
+            self.countNames = [countNameFunction(x) for x in datasetRootHisto.getBinLabels()]
         else:
-            self.countNames = histoWrapper.getBinLabels()
+            self.countNames = datasetRootHisto.getBinLabels()
 
     def normalizeToOne(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        self.histoWrapper.normalizeToOne()
+        self.datasetRootHisto.normalizeToOne()
 
     def normalizeMCByCrossSection(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        if self.histoWrapper.getDataset().isMC():
-            self.histoWrapper.normalizeByCrossSection()
+        if self.datasetRootHisto.getDataset().isMC():
+            self.datasetRootHisto.normalizeByCrossSection()
 
     def normalizeMCToLuminosity(self, lumi):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        if self.histoWrapper.getDataset().isMC():
-            self.histoWrapper.normalizeToLuminosity(lumi)
+        if self.datasetRootHisto.getDataset().isMC():
+            self.datasetRootHisto.normalizeToLuminosity(lumi)
 
     def _createCounter(self):
-        self.counter = [x[1] for x in dataset.histoToCounter(self.histoWrapper.getHistogram())]
+        self.counter = [x[1] for x in dataset._histoToCounter(self.datasetRootHisto.getHistogram())]
 
     def getName(self):
-        return self.histoWrapper.getDataset().getName()
+        return self.datasetRootHisto.getDataset().getName()
 
     def getNrows(self):
         return len(self.countNames)
@@ -629,8 +629,8 @@ class SimpleCounter:
 
 class Counter:
     """Counter for many datasets."""
-    def __init__(self, histoWrappers, countNameFunction):
-        self.counters = [SimpleCounter(h, countNameFunction) for h in histoWrappers]
+    def __init__(self, datasetRootHistos, countNameFunction):
+        self.counters = [SimpleCounter(h, countNameFunction) for h in datasetRootHistos]
 
     def forEachDataset(self, func):
         for c in self.counters:
@@ -645,10 +645,10 @@ class Counter:
     def normalizeMCByLuminosity(self):
         lumi = None
         for c in self.counters:
-            if c.histoWrapper.getDataset().isData():
+            if c.datasetRootHisto.getDataset().isData():
                 if lumi != None:
                     raise Exception("Unable to normalize by luminosity, more than one data datasts (you might want to merge data datasets)")
-                lumi = c.histoWrapper.getDataset().getLuminosity()
+                lumi = c.datasetRootHisto.getDataset().getLuminosity()
         if lumi == None:
             raise Exception("Unable to normalize by luminosity. no data datasets")
 
@@ -688,10 +688,10 @@ class EventCounter:
         except KeyError:
             raise Exception("Error: no 'counter' histogram in the '%s' directories" % counterDir)
 
-        self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"), countNameFunction)
+        self.mainCounter = Counter(datasets.getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         for subname in counterNames.keys():
-            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname), countNameFunction)
+            self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
 
         self.normalization = "None"
 
