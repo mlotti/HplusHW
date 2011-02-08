@@ -1,27 +1,30 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
-import FWCore.ParameterSet.VarParsing as VarParsing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+
+################################################################################
+# Configuration
 
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38X"
-#dataVersion = "data" # this is for collision data 
+#dataVersion = "38X"
+dataVersion = "39Xredigi"
 
 debug = False
 #debug = True
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
+################################################################################
 
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
+options.doPat = 1
+options.tauEmbeddingInput = 1
 
 if debug:
     print "In debugging mode"
 
+################################################################################
+# Define the process
 process = cms.Process("TauEmbeddingAnalysis")
 
 if debug:
@@ -34,11 +37,11 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
         #"file:embedded_RECO.root"
   )
 )
-options.doPat = 1
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -47,51 +50,18 @@ if debug:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
-process.TFileService.fileName = "histograms.root"
+# Fragment to run PAT on the fly if requested from command line
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning, removeMCMatching
-process.patSequence = cms.Sequence()
-if options.doPat != 0:
-    print "Running PAT on the fly"
-
-    process.out = cms.OutputModule("PoolOutputModule",
-        fileName = cms.untracked.string('dummy.root'),
-        outputCommands = cms.untracked.vstring()
-    )
-
-
-    process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
-        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
-
-    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
-                                      doPatCalo=False, doBTagging=False, doPatMET=False, doPatElectronID=False)
-    process.patSequence = cms.Sequence(
-        process.collisionDataSelection *
-        process.patPlainSequence
-    )
-    removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
-    #removeSpecificPATObjects(process, ["Photons"], False)
-    removeCleaning(process, False)
-
-    del process.out
-
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
-if options.crossSection >= 0.:
-    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
-    print "Dataset cross section has been set to %g pb" % options.crossSection
-if options.luminosity >= 0:
-    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
-
-process.commonSequence = cms.Sequence(
-    process.patSequence +
-    process.configInfo
-)
+# Add configuration information to histograms.root
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
+process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
+
+#recoProcess = "REDIGI36X"
+recoProcess = "REDIGI39X"
 
 # Calculate PF MET for 
 from PhysicsTools.PFCandProducer.pfMET_cfi import pfMET
@@ -123,7 +93,7 @@ process.genMetTrueEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
 #from RecoMET.METProducers.genMetCalo_cfi import genMetCalo
 #process.genMetCaloOriginal = genMetCalo.clone(src=cms.InputTag("genCandidatesForMETOriginalSelected"))
 process.genMetCaloEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
-    src = cms.VInputTag(cms.InputTag("genMetCalo", "", "REDIGI36X"), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
+    src = cms.VInputTag(cms.InputTag("genMetCalo", "", recoProcess), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
 #    src = cms.VInputTag(cms.InputTag("genMetCaloOriginal"), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
 )                                            
 
@@ -136,7 +106,7 @@ process.genMetCaloEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
 #from RecoMET.METProducers.genMetCaloAndNonPrompt_cfi import genMetCaloAndNonPrompt
 #process.genMetCaloAndNonPromptOriginal = genMetCaloAndNonPrompt.clone(src=cms.InputTag("genParticlesForJetsNoMuNoNuOriginalSelected"))
 process.genMetCaloAndNonPromptEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
-    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X"), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
+    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPrompt", "", recoProcess), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
 #    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPromptOriginal"), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
 )
 
@@ -239,15 +209,15 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
         ),
         GenMetTrue = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetTrue", "", "REDIGI36X")
+            originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
         ),
         GenMetCalo = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCalo", "", "REDIGI36X")
+            originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
         ),
         GenMetCaloAndNonPrompt = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", "REDIGI36X")
+            originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
         ),
         GenMetNuSum = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),

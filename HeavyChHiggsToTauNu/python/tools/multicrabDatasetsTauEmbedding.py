@@ -255,7 +255,7 @@ def addTo(datasets):
                 "number_of_jobs": 60 # ~300 ev/job
             },
             })
-    datasets["TToBLNu_s-channel_TuneZ2_Winter10"]["data"].update({
+    datasets["TToBLNu_t-channel_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6-356976479e058d2236b19259096d6dbe/USER",

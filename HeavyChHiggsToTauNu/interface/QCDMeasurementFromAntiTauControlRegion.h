@@ -46,6 +46,7 @@ namespace HPlus {
     //Count fTriggerEmulationCounter;
     Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
+    Count fEvtTopologyCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
     Count fMETCounter;
@@ -69,7 +70,7 @@ namespace HPlus {
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
-    // EvtTopology fEvtTopology;
+    EvtTopology fEvtTopology;
 
     // Histograms
     TH1 *hMETAfterWholeSelection;
