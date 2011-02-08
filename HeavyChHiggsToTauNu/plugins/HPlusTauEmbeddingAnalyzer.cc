@@ -360,7 +360,15 @@ HPlusTauEmbeddingAnalyzer::SizeTGenParticlePair HPlusTauEmbeddingAnalyzer::genTa
   const reco::GenParticle *leadingPion = 0;
   double maxPt = 0.0;
   for(reco::GenParticle::const_iterator iDaughter = tau.begin(); iDaughter != tau.end(); ++iDaughter) {
-    if(std::abs(iDaughter->pdgId()) == 211) {
+    if(iDaughter->numberOfDaughters() > 0) {
+      SizeTGenParticlePair res = genTauDaughters(dynamic_cast<const reco::GenParticle&>(*iDaughter));
+      nprongs += res.first;
+      if(res.second && maxPt < res.second->pt()) {
+        maxPt = res.second->pt();
+        leadingPion = res.second;
+      }
+    }
+    else if(std::abs(iDaughter->pdgId()) == 211) {
       nprongs += 1;
       if(maxPt < iDaughter->pt()) {
         maxPt = iDaughter->pt();
