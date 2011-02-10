@@ -49,7 +49,13 @@ multicrab.extendDatasets(
 #        "WJets_TuneD6T_Winter10",
 #        "WJets_TuneZ2_Winter10",
 #        "WJets_TuneZ2_Winter10_noPU",
-
+#        "W2Jets_ptW0to100_TuneZ2_Winter10",
+#        "W2Jets_ptW100to300_TuneZ2_Winter10",
+#        "W3Jets_ptW0to100_TuneZ2_Winter10",
+#        "W3Jets_ptW100to300_TuneZ2_Winter10",
+#        "W4Jets_ptW0to100_TuneZ2_Winter10",
+#        "W4Jets_ptW100to300_TuneZ2_Winter10",
+          
 ########
 #
 # 38X
