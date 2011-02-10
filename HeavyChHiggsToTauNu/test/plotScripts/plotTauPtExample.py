@@ -98,12 +98,12 @@ tauPts = histograms.HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_
 
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoManager
-#tauPts.normalizeMCByLuminosity()
-#ylabel = "#tau cands / 1 GeV/c"
+tauPts.normalizeMCByLuminosity()
+ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
-tauPts.normalizeMCToLuminosity(4)
-ylabel = "#tau cands / 1 GeV/c"
+#tauPts.normalizeMCToLuminosity(4)
+#ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize the area of *all* histograms to 1
 #tauPts.normalizeToOne()
