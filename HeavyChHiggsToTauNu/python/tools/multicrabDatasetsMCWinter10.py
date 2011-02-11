@@ -282,6 +282,11 @@ datasets = {
                 "datasetpath": "/W3Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 130, # Adjusted for PATtuple file size
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 5
+            },
         },
     },
     "W3Jets_ptW100to300_TuneZ2_Winter10": {
