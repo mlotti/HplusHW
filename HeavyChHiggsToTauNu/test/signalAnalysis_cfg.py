@@ -36,9 +36,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+#       "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
+       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
@@ -72,11 +73,11 @@ process.infoPath = addConfigInfo(process, options)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # change to non-matched taus
-param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
-param.tauSelectionShrinkingConeCutBased.src = "selectedPatTausShrinkingConePFTauTau"
-param.tauSelectionShrinkingConeTaNCBased.src = "selectedPatTausShrinkingConePFTauTau"
-param.tauSelectionHPSTauBased.src = "selectedPatTausHpsPFTauTau"
-param.tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTau"
+#param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
+#param.tauSelectionShrinkingConeCutBased.src = "selectedPatTausShrinkingConePFTauTau"
+#param.tauSelectionShrinkingConeTaNCBased.src = "selectedPatTausShrinkingConePFTauTau"
+#param.tauSelectionHPSTauBased.src = "selectedPatTausHpsPFTauTau"
+#param.tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTau"
 
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
@@ -110,11 +111,19 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+#    forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
+
     #myFactorizationMapName = getTauIDFactorizationMap() 
+
+process.signalAnalysis.MET.METCut = 70.
+#process.signalAnalysis.fakeMETVeto.maxDeltaPhi = 5.
+process.signalAnalysis.bTagging.discriminatorCut = 2.0
+
+
 
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut

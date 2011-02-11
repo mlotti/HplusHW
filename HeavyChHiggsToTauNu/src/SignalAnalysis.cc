@@ -38,7 +38,9 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
-    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
+    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency")),
+    fGenparticleAnalysis(eventCounter, eventWeight)
+   
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -64,8 +66,13 @@ namespace HPlus {
   bool SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.updatePrescale(iEvent); // set prescale
     
+
+  // GenParticle analysis
+    fGenparticleAnalysis.analyze(iEvent, iSetup);
+
+
     increment(fAllCounter);
-    //   fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
+//fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
@@ -84,8 +91,6 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
 
-    
-
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
@@ -95,7 +100,6 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
-
 
     // MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
@@ -117,6 +121,15 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
+
+
+  /*
+    // Forward jet veto
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    if (!forwardJetData.passedEvent()) return false;
+    increment(fForwardJetVetoCounter);
+    */
+
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
