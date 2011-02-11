@@ -31,12 +31,12 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+#        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
 	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
 #        dataVersion.getAnalysisDefaultFileCastor()
@@ -71,6 +71,13 @@ process.infoPath = addConfigInfo(process, options)
 # The "golden" version of the signal analysis
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# change to non-matched taus
+param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
+param.tauSelectionShrinkingConeCutBased.src = "selectedPatTausShrinkingConePFTauTau"
+param.tauSelectionShrinkingConeTaNCBased.src = "selectedPatTausShrinkingConePFTauTau"
+param.tauSelectionHPSTauBased.src = "selectedPatTausHpsPFTauTau"
+param.tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTau"
+
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')

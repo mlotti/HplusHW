@@ -98,11 +98,11 @@ tauPts = histograms.HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_
 
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoManager
-#tauPts.normalizeMCByLuminosity()
+tauPts.normalizeMCByLuminosity()
 #ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
-tauPts.normalizeMCToLuminosity(4)
+#tauPts.normalizeMCToLuminosity(4)
 ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize the area of *all* histograms to 1
@@ -150,7 +150,7 @@ tauPts.draw()
 legend.Draw()
 
 # Set y-axis logarithmic (remember to give ymin for createCanvasFrame()
-#ROOT.gPad.SetLogy(True)
+ROOT.gPad.SetLogy(True)
 
 # The necessary texts, all take the position as arguments
 histograms.addCmsPreliminaryText()

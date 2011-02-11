@@ -65,7 +65,7 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent); // set prescale
     
     increment(fAllCounter);
-//fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
+    //   fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
     if(!triggerData.passedEvent()) return false;
@@ -84,6 +84,8 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
 
+    
+
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
@@ -93,6 +95,7 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
+
 
     // MET cut
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
