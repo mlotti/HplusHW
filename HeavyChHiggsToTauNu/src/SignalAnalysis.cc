@@ -68,7 +68,7 @@ namespace HPlus {
     
 
   // GenParticle analysis
-    fGenparticleAnalysis.analyze(iEvent, iSetup);
+    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
 
     increment(fAllCounter);
