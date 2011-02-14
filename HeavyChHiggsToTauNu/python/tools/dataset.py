@@ -68,18 +68,18 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
 
     return getDatasetsFromRootFiles(dlist, counters)
 
-def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
+def getDatasetsFromRootFiles(rootFileList, counters="signalAnalysisCounters"):
     """Construct DatasetManager from a list of CRAB task directory names.
 
     Parameters:
-    dlist      List of (name, filename) pairs (both should be strings).
-               'name' is taken as the dataset name, and 'filename' as
-               the path to the ROOT file.
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
+    rootFileList  List of (name, filename) pairs (both should be strings).
+                  'name' is taken as the dataset name, and 'filename' as
+                  the path to the ROOT file.
+    counters      String for a directory name inside the ROOT files for the
+                  event counter histograms
     """
     datasets = DatasetManager()
-    for name, f in dlist:
+    for name, f in rootFileList:
         datasets.append(Dataset(name, f, counters))
     return datasets
 
