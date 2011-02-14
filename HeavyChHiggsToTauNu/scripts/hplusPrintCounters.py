@@ -14,9 +14,9 @@ import ROOT
 def main(opts):
     datasets = None
     if len(opts.files) > 0:
-        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], opts.counterdir )
+        datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(opts, opts.counterdir)
+        datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir)
     eventCounter = counter.EventCounter(datasets)
     
 
@@ -67,18 +67,13 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
-    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    parser.add_option("-f", dest="files", type="string", action="append", default=[],
-                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+    dataset.addOptions(parser)
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
     parser.add_option("--csv", dest="csv", action="store_true", default=False,
                       help="Print in CSV format")
 #    parser.add_option("--format", "-f", dest="format", type="string", default="text",
 #                      help="Output format; available: 'text' (default: 'text')")
-    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
-                      help="TDirectory name containing the counters (default: signalAnalysisCounters")
     parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
                       help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
     (opts, args) = parser.parse_args()

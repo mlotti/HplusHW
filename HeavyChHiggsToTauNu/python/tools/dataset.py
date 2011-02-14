@@ -6,41 +6,58 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
+def getDatasetsFromMulticrabCfg(**kwargs):
     """Construct DatasetManager from a multicrab.cfg.
 
-    Parameters:
+    Keyword Arguments:
     opts       Optional OptionParser object. Should have options added with
                addOptions() and multicrab.addOptions().
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
+    cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+
+    See getDatasetsFromCrabDirs() for the rest of the keyword argumens.
 
 
     The section names in multicrab.cfg are taken as the dataset names
     in the DatasetManager object.
     """
-    return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counters)
+    opts = kwargs.get("opts", None)
+    taskDirs = []
+    if "cfgfile" in kwargs:
+        taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
+    else:
+        taskDirs = multicrab.getTaskDirectories(opts)
 
-def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounters"):   
+    return getDatasetsFromCrabDirs(taskDirs, **kwargs)
+
+def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     """Construct DatasetManager from a list of CRAB task directory names.
 
-    Parameters:
-    taskdirs   List of strings for the CRAB task directories (relative
-               to the working directory)
-    opts       Optional OptionParser object. Should have options added with
-               addOptions() and multicrab.addOptions().
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
+    Arguments:
+    taskdirs     List of strings for the CRAB task directories (relative
+                 to the working directory)
 
-    The task directories are taken as the dataset names in the DatasetManager object.
+    Keyword arguments:
+    opts         Optional OptionParser object. Should have options added with
+                 addOptions() and multicrab.addOptions().
+    namePostfix  Postfix for the dataset names (default: '')
+
+    See getDatasetsFromRootFiles() for rest of the keyword arguments.
+
+    The basename of the task directories are taken as the dataset
+    names in the DatasetManager object (e.g. for directory '../Foo',
+    'Foo' will be the dataset name)
     """
-    if opts == None:
+    opts = None
+    if "opts" in kwargs:
+        opts = kwargs["opts"]
+    else:
         parser = OptionParser(usage="Usage: %prog [options]")
         multicrab.addOptions(parser)
         addOptions(parser)
         (opts, args) = parser.parse_args()
-        if hasattr(opts, "counterdir"):
-            counters = opts.counterdir
+    if hasattr(opts, "counterDir"):
+        counters = opts.counterdir
+    postfix = kwargs.get("namePostfix", "")
 
     dlist = []
     noFiles = False
@@ -54,7 +71,7 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
             noFiles = True
             continue
 
-        dlist.append( (d, files[0]) )
+        dlist.append( (os.path.basename(d)+postfix, files[0]) )
 
     if noFiles:
         print >> sys.stderr, ""
@@ -66,18 +83,21 @@ def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounter
     if len(dlist) == 0:
         raise Exception("No datasets")
 
-    return getDatasetsFromRootFiles(dlist, counters)
+    return getDatasetsFromRootFiles(dlist, **kwargs)
 
-def getDatasetsFromRootFiles(rootFileList, counters="signalAnalysisCounters"):
+def getDatasetsFromRootFiles(rootFileList, **kwargs):
     """Construct DatasetManager from a list of CRAB task directory names.
 
-    Parameters:
+    Arguments:
     rootFileList  List of (name, filename) pairs (both should be strings).
                   'name' is taken as the dataset name, and 'filename' as
                   the path to the ROOT file.
+
+    Keyword arguments:
     counters      String for a directory name inside the ROOT files for the
-                  event counter histograms
+                  event counter histograms (default: 'signalAnalysisCounters').
     """
+    counters = kwargs.get("counters", "signalAnalysisCounters")
     datasets = DatasetManager()
     for name, f in rootFileList:
         datasets.append(Dataset(name, f, counters))
@@ -89,6 +109,8 @@ def addOptions(parser):
                       help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
     parser.add_option("-f", dest="files", type="string", action="append", default=[],
                       help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
+                      help="TDirectory name containing the counters (default: signalAnalysisCounters")
 
 
 
