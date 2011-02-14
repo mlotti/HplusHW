@@ -321,7 +321,7 @@ datasets = {
     },
     "W4Jets_ptW0to100_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 2.087e+02,
+        "crossSection": 4.446e+01,
         "data": {
             "AOD": {
                 "datasetpath": "/W4Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
