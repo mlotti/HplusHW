@@ -262,6 +262,11 @@ datasets = {
                 "datasetpath": "/W2Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 150, # Adjusted for PATtuple file size
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 10
+            },
         },
     },
     "W2Jets_ptW100to300_TuneZ2_Winter10": {
@@ -271,6 +276,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 150, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 8
             },
         },
     },
@@ -297,6 +307,11 @@ datasets = {
                 "datasetpath": "/W3Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 30, # Adjusted for PATtuple file size
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 2
+            },
         },
     },
     "W4Jets_ptW0to100_TuneZ2_Winter10": {
@@ -307,6 +322,11 @@ datasets = {
                 "datasetpath": "/W4Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
+            },
         },
     },
     "W4Jets_ptW100to300_TuneZ2_Winter10": {
@@ -316,6 +336,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/W4Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 15, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
             },
         },
     },
