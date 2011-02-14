@@ -102,6 +102,11 @@ datasets = {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 450,
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
+            },
         },
     },
     "QCD_Pt80to120_TuneZ2_Winter10": {

@@ -45,6 +45,7 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TTToHplusBWB_M160_Winter10", # v9
         # MC Background Winter10
 #        "QCD_Pt30to50_TuneZ2_Winter10",   # v9
+#        "QCD_Pt50to80_TuneZ2_Winter10",   # v9
 #        "QCD_Pt80to120_TuneZ2_Winter10",  # v9
 #        "QCD_Pt120to170_TuneZ2_Winter10", # v9
 #        "QCD_Pt170to300_TuneZ2_Winter10", # v9
