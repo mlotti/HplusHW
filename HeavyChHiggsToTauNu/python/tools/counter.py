@@ -4,7 +4,6 @@ import re
 import ROOT
 
 import dataset
-import tools
 
 class CellFormatBase:
     """Base class for cell formats.
@@ -32,11 +31,11 @@ class CellFormatBase:
                               equal (default: 4)
         valueOnly             Boolean, format the value only? (default: False)
         """
-        self._valueFormat = tools.kwargsDefault(kwargs, "valueFormat", "%.4g")
-        self._uncertaintyFormat = tools.kwargsDefault(kwargs, "uncertaintyFormat", self._valueFormat)
-        self._valueOnly = tools.kwargsDefault(kwargs, "valueOnly", False)
+        self._valueFormat = kwargs.get("valueFormat", "%.4g")
+        self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
+        self._valueOnly = kwargs.get("valueOnly", False)
 
-        uncertaintyPrecision = tools.kwargsDefault(kwargs, "uncertaintyPrecision", 4)
+        uncertaintyPrecision = kwargs.get("uncertaintyPrecision", 4)
         self._uncertaintyEpsilon = math.pow(10., -1.0*uncertaintyPrecision)
 
     def format(self, count):
@@ -83,7 +82,7 @@ class CellFormatTeX(CellFormatBase):
         Same as CellFormatBase
         """
         CellFormatBase.__init__(self, **kwargs)
-        self._texifyPower = tools.kwargsDefault(kwargs, "texifyPower", True)
+        self._texifyPower = kwargs.get("texifyPower", True)
         self._texre = re.compile("(?P<sign>[+-])?(?P<mantissa>[^e]*)(e(?P<exponent>.*))?$")
 
     def _formatValue(self, value):
