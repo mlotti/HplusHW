@@ -76,6 +76,8 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
+param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
 if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
@@ -85,6 +87,7 @@ if options.tauEmbeddingInput != 0:
 #process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
 #process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
 #process.commonSequence *= process.hplusPrescaleWeightProducer
+
 
 
 # Signal analysis module for the "golden analysis"
@@ -104,6 +107,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
+    #myFactorizationMapName = getTauIDFactorizationMap() 
 
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut

@@ -9,13 +9,13 @@ from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
-import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChCaloTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 
@@ -350,9 +350,17 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     return seq
 
 
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
+    def setPatArg(args, name, value):
+        if name in args:
+            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
+        args[name] = value
+    def setPatArgs(args, d):
+        for name, value in d.iteritems():
+            setPatArg(args, name, value)
+
     counters = []
-    if dataVersion.isData() and options.tauEmbedding == 0:
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
         counters = HChDataSelection.dataSelectionCounters[:]
 
     if options.doPat == 0:
@@ -368,9 +376,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
                 fileName = cms.untracked.string('dummy.root'),
                 outputCommands = cms.untracked.vstring()
             )
+        setPatArgs(patArgs, {"doPatTrigger": False,
+                             "doTauHLTMatching": False,
+                             "doPatCalo": False,
+                             "doBTagging": False,
+                             "doPatElectronID": False,
+                             "doPatMET": False})
 
-        process.patSequence = addPat(process, dataVersion, doPatTrigger=False, doTauHLTMatching=False,
-                                     doPatCalo=False, doBTagging=False, doPatElectronID=False, doPatMET=False)
+        process.patSequence = addPat(process, dataVersion, **patArgs)
         removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
 
         if not hasOut:
@@ -386,7 +399,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None):
         if jetTrigger != None:
             print "Trigger used for jet matching:", jetTrigger
 
-        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger)
+        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger, **patArgs)
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *

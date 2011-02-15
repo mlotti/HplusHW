@@ -30,7 +30,7 @@ def addTauEmbeddingMuonTaus(process):
 
     # Remove the embedding muon from the list of muons, use the rest
     # as an input for the global muon veto
-    from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import *
+    from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
     process.selectedPatMuonsEmbeddingMuonCleaned = cleanPatMuons.clone(
         src = cms.InputTag("selectedPatMuons"),
         checkOverlaps = cms.PSet(
@@ -49,14 +49,14 @@ def addTauEmbeddingMuonTaus(process):
 
     # Select the taus matching to the original muon
     prototype = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
-        tauSrc = cms.InputTag("dummy"),
-        candSrc = cms.InputTag("tauEmbeddingMuons"),
+        src = cms.InputTag("dummy"),
+        refSrc = cms.InputTag("tauEmbeddingMuons"),
         deltaR = cms.double(0.1),
     )
 
     for tau in ["selectedPatTausShrinkingConePFTau", "selectedPatTausHpsPFTau", "selectedPatTausHpsTancPFTau"]:
         m = prototype.clone(
-            tauSrc = tau
+            src = tau
         )
         setattr(process, tau+"TauEmbeddingMuonMatched", m)
         seq *= m

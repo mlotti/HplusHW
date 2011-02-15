@@ -9,9 +9,9 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
 
     # Construct the JES variation module
     variation = jesVariation.clone(
-        tauSrc = cms.InputTag(process.signalAnalysis.tauSelection.src.value()), # from untracked to tracked
-        jetSrc = cms.InputTag(process.signalAnalysis.jetSelection.src.value()),
-        metSrc = cms.InputTag(process.signalAnalysis.MET.src.value()),
+        tauSrc = cms.InputTag(prototype.tauSelection.src.value()), # from untracked to tracked
+        jetSrc = cms.InputTag(prototype.jetSelection.src.value()),
+        metSrc = cms.InputTag(prototype.MET.src.value()),
         JESVariation = cms.double(variation)
     )
     setattr(process, variationName, variation)

@@ -108,7 +108,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-transverseMass.setHistoLegendLabels(legendLabels) # many datasets, with dict
+transverseMass.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 transverseMass.setHistoLegendStyleAll("F")
@@ -123,11 +123,11 @@ transverseMass.forHisto("Data", styles.getDataStyle())
 #transverseMass.stackMCHistograms()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = transverseMass.createCanvasFrame("transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=300.0)
+cf = CanvasFrame(transverseMass, "transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=300.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("M_{T} GeV/c^{2}")
-frame.GetYaxis().SetTitle(ylabel)
+cf.frame.GetXaxis().SetTitle("M_{T} GeV/c^{2}")
+cf.frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
@@ -152,6 +152,6 @@ raw_input("Hit enter to continue") ### keep canvas open until you hit enter
 
 ############################### SAVING ###############################
 ### Save TCanvas as png
-canvas.SaveAs(".png")
-#canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+cf.canvas.SaveAs(".png")
+#cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".C")

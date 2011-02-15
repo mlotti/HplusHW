@@ -35,6 +35,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Input is from tau embedding (default: 0)")
+    options.register("tauIDFactorizationMap",
+                     "FactorizationMap_NoFactorization_cfi",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Factorization map config file")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):
@@ -59,3 +64,12 @@ def getOptionsDataVersion(dataVersion, options=None):
 
     dataVersion = DataVersion(dataVersion)
     return (options, dataVersion)
+
+
+def getTauIDFactorizationMap(options):
+    if options.tauIDFactorizationMap != "":
+        myFactorizationMapName = "HiggsAnalysis.HeavyChHiggsToTauNu."+options.tauIDFactorizationMap
+    else:
+        raise RuntimeError, "HChOptions::getTauIDFactorizationMap: Check default parameter value!"
+    print "tauID factorization map is:", myFactorizationMapName
+    return myFactorizationMapName

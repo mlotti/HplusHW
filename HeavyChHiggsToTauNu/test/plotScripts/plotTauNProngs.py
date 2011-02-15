@@ -110,7 +110,7 @@ ylabel = "Events"
 
 ############################### STYLES ###############################
 ### Example how to set legend labels from defaults
-tauNProngs.setHistoLegendLabels(legendLabels) # many datasets, with dict
+tauNProngs.setHistoLegendLabelMany(legendLabels) # many datasets, with dict
 
 ### Example how to modify legend styles
 tauNProngs.setHistoLegendStyleAll("F")
@@ -125,11 +125,11 @@ tauNProngs.forHisto("Data", styles.getDataStyle())
 #tauNProngs.stackMCDatasets()
 
 ### Create TCanvas and TH1F such that they cover all histograms
-(canvas, frame) = tauNProngs.createCanvasFrame("tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
+cf = CanvasFrame(tauNProngs, "tauNProngs", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
 
 ### Set the frame options, e.g. axis labels
-frame.GetXaxis().SetTitle("#tau-jet nProngs")
-frame.GetYaxis().SetTitle(ylabel)
+cf.frame.GetXaxis().SetTitle("#tau-jet nProngs")
+cf.frame.GetYaxis().SetTitle(ylabel)
 
 ### Legend
 legend = createLegend(0.7, 0.5, 0.9, 0.8)
@@ -154,6 +154,6 @@ raw_input("Hit enter to continue") ### keep canvas open until you hit enter
 
 ############################### SAVING ###############################
 ### Save TCanvas as png
-canvas.SaveAs(".png")
-#canvas.SaveAs(".eps")
-#canvas.SaveAs(".C")
+cf.canvas.SaveAs(".png")
+#cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".C")

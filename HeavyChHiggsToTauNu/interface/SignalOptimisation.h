@@ -48,9 +48,9 @@ namespace HPlus {
     Count fOneProngTauSelectionCounter;
     Count fMETCounter;
     Count fJetSelectionCounter;
+    Count fEvtTopologyCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
-    Count fEvtTopologyCounter;
     //
     EventWeight& fEventWeight;
 

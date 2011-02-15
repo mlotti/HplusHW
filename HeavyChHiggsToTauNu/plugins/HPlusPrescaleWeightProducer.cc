@@ -8,6 +8,8 @@
 
 #include<string>
 
+#include "TH1F.h"
+
 class HPlusPrescaleWeightProducer: public edm::EDProducer {
  public:
 

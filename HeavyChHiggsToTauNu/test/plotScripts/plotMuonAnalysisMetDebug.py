@@ -201,12 +201,14 @@ class Histo:
             return
 
         ROOT.gStyle.SetErrorX(0.5)
-        hse = HistoStatError(histoData, "MC Stat. Err.")
+        hse = HistoTotalUncertainty(histoData, "MC Stat. Err.")
         hse.call(styles.getErrorStyle())
         self.histos.append(hse)
 
     def createFrame(self, plotname, **kwargs):
-        (self.canvas, self.frame) = self.histos.createCanvasFrame(plotname, **kwargs)
+        cf = CanvasFrame(self.histos, plotname, **kwargs)
+        self.canvas = cf.canvas
+        self.frame = cf.frame
 
     def draw(self):
         self.histos.draw()

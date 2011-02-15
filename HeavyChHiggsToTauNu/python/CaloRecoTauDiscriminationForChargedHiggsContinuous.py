@@ -1,43 +1,44 @@
 import FWCore.ParameterSet.Config as cms
-#import copy
-
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTauPolarization_cfi import *
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByDeltaE_cfi import *
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByInvMass_cfi import *
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByFlightPathSignificance_cfi import *
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationByNProngs_cfi import *
-
-from RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi import addCaloDiscriminator
 
 def addCaloDiscriminatorSequenceCont(process, tau):
+    # Import the modules here in order to not to introduce compile
+    # time dependency (some of these are not in vanilla 3_9_7)
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationByTauPolarization_cfi as tauPolarization
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationByDeltaE_cfi as deltaE
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationByInvMass_cfi as invMass
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationByFlightPathSignificance_cfi as flightPath
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationByNProngs_cfi as nProngs
+
+    from RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi import addCaloDiscriminator
+
     lst = []
 
     lst.append(addCaloDiscriminator(process, tau, "DiscriminationByTauPolarizationCont",
-                                caloRecoTauDiscriminationByTauPolarization.clone(
+                                tauPolarization.caloRecoTauDiscriminationByTauPolarization.clone(
 					BooleanOutput = cms.bool(False)
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addCaloDiscriminator(process, tau, "DiscriminationByDeltaECont",
-                                caloRecoTauDiscriminationByDeltaE.clone(
+                                deltaE.caloRecoTauDiscriminationByDeltaE.clone(
 					BooleanOutput = cms.bool(False)
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addCaloDiscriminator(process, tau, "DiscriminationByInvMassCont",
-                                caloRecoTauDiscriminationByInvMass.clone(
+                                invMass.caloRecoTauDiscriminationByInvMass.clone(
 					BooleanOutput = cms.bool(False)
 				)))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addCaloDiscriminator(process, tau, "DiscriminationByFlightPathSignificanceCont",
-                                caloRecoTauDiscriminationByFlightPathSignificance.clone(
+                                flightPath.caloRecoTauDiscriminationByFlightPathSignificance.clone(
                                         BooleanOutput = cms.bool(False)
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
 
     lst.append(addCaloDiscriminator(process, tau, "DiscriminationByNProngsCont",
-                                caloRecoTauDiscriminationByNProngs.clone(
+                                nProngs.caloRecoTauDiscriminationByNProngs.clone(
 					BooleanOutput = cms.bool(False),
                                   	nProngs       = cms.uint32(0)
                                 )))

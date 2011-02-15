@@ -96,6 +96,7 @@ def customise(process):
             "keep *_particleFlow*_*_%s" % processName,
             "keep *_generalTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,
+            "keep *_offlinePrimaryVertices_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
     #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [
