@@ -49,8 +49,8 @@ namespace HPlus {
     Count fJetSelectionCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
-    Count fBTaggingCounter;
     Count fMETCounter;
+    Count fBTaggingCounter;
     Count fInvMassVetoOnJetsCounter;
     Count fFakeMETVetoCounter;
     Count fMETgt0AfterWholeSelectionCounter;
