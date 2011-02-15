@@ -1,0 +1,7 @@
+<use   name="FWCore/Framework"/>
+<use   name="DQMServices/Core"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="DataFormats/TauReco"/>
+<library   file="*.cc" name="TestAnalyzersValidationPlugins">
+  <flags   EDM_PLUGIN="1"/>
+</library>
