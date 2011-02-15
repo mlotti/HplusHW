@@ -50,8 +50,8 @@ namespace HPlus {
 
     // Book histograms 
     hMETAfterWholeSelection = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
-    //aa    hTriggerPrescales = fs->make<TH1F>("TriggerPrescales", "TriggerPrescales", 4000, -0.5, 3999.5);    
-    //aa    hTriggerPrescales_test = fs->make<TH1F>("TriggerPrescales", "TriggerPrescales", 4000, -0.5, 3999.5);    
+    hMETAfterWholeSelectionButInvMassVeto = fs->make<TH1F>("METAfterWholeSelectionButInvMassVeto", "MET after whole selection no InvMassVeto);MET, GeV;N/2 GeV", 250, 0, 500);
+
    }
 
   QCDMeasurementFromAntiTauControlRegion::~QCDMeasurementFromAntiTauControlRegion() {}
@@ -105,13 +105,14 @@ namespace HPlus {
     increment(fGlobalMuonVetoCounter);
     // fGlobalMuonVeto.debug();
 
-    // Obtain MET, btagging and fake MET veto data objects
+    // Obtain MET, btagging, "InvMass Veto On Jets" and "fake MET veto" data objects
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedAntiTau, jetData.getSelectedJets());
-    
+    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
+  
     // Fill additional counters before dropping events because of MET cut
-    if (btagData.passedEvent() && fakeMETData.passedEvent()) {
+    if ( btagData.passedEvent() && invMassVetoOnJetsData.passedEvent() && fakeMETData.passedEvent() ) {
       double myMETValue = metData.getSelectedMET()->et();
       if (myMETValue > 0)
         increment(fMETgt0AfterWholeSelectionCounter);
@@ -131,16 +132,21 @@ namespace HPlus {
       hMETAfterWholeSelection->Fill(myMETValue, fEventWeight.getWeight());
     }
 
+    // Fill additional counters before dropping events because of MET cut - No InvMassVeto
+    if ( btagData.passedEvent() && fakeMETData.passedEvent() ) {
+      double myMETValue = metData.getSelectedMET()->et();
+      hMETAfterWholeSelectionButInvMassVeto->Fill(myMETValue, fEventWeight.getWeight());
+    }
+    
+    // MET 
+    if(!metData.passedEvent()) return;
+    increment(fMETCounter);
+    
     // BTagging
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
 
-    // MET 
-    if(!metData.passedEvent()) return;
-    increment(fMETCounter);
-
     // InvMassVeto: Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
-    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
     if(!invMassVetoOnJetsData.passedEvent()) return; 
     increment(fInvMassVetoOnJetsCounter);
 

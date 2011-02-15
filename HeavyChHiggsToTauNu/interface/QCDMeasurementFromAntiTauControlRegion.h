@@ -76,8 +76,7 @@ namespace HPlus {
     
     // Histograms
     TH1 *hMETAfterWholeSelection;
-    //aa    TH1 *hTriggerPrescales;
-    //aa    TH1 *hTriggerPrescales_test;
+    TH1 *hMETAfterWholeSelectionButInvMassVeto;
 
   };
 }
