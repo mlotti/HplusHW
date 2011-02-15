@@ -97,12 +97,13 @@ namespace HPlus {
 
     // Histograms
     TH1 *hAlphaT;
-    TH1 *hDiJetInvMass;
-    TH1 *hDiJetInvMassCutFail;
-    TH1 *hDiJetInvMassCutPass;
-    TH1 *hDiJetInvMassWCutFail;
-    TH1 *hDiJetInvMassTopCutFail;
-
+    /*
+      TH1 *hDiJetInvMass;
+      TH1 *hDiJetInvMassCutFail;
+      TH1 *hDiJetInvMassCutPass;
+      TH1 *hDiJetInvMassWCutFail;
+    */
+    
     // Other variables
     AlphaStruc sAlpha;
     MathFunctions oMath;

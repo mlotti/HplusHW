@@ -181,11 +181,12 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.3, 1.0);
-    hDiJetInvMass      = makeTH<TH1F>(*fs, "DiJetInvMass", "DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "DiJetInvMassCutFail", "DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "DiJetInvMassCutPass", "DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hDiJetInvMassWCutFail   = makeTH<TH1F>(*fs, "DiJetInvMassWCutFail", "DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassTopCutFail = makeTH<TH1F>(*fs, "DiJetInvMassTopCutFail", "DiJetInvMassTopCutFail", 1000, 0.0, 1000.0);
+    /*
+    hDiJetInvMass      = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
+    hDiJetInvMassWCutFail   = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
+    */
   }
 
   EvtTopology::~EvtTopology() {}
