@@ -30,7 +30,7 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 
         mc_ignore = ["MULTICRAB", "COMMON"]
         mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read(os.path.basename(filename))
+        mc_parser.read(filename)
 
         sections = mc_parser.sections()
 

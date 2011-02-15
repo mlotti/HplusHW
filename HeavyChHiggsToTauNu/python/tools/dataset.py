@@ -6,6 +6,39 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
+    """Construct DatasetManager from a list of MultiCRAB directory names.
+
+    Arguments:
+    multiDirs   List of strings or pairs of strings of the MultiCRAB
+                directories (relative to the working directory). If
+                the item of the list is pair of strings, the first
+                element is the directory, and the second element is
+                the postfix for the dataset names from that directory.
+
+    Keyword arguments:
+
+    See getDatasetsFromMulticrabCfg() for the rest of the keyword arguments.
+    """
+
+    if "cfgfile" in kwargs:
+        raise Exception("'cfgfile' keyword argument not allowed")
+    if "namePostfix" in kwargs:
+        raise Exception("'namePostfix' keyword argument not allowed")
+
+    nameList = []
+    for d in multiDirs:
+        if isinstance(d, str):
+            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+        else:
+            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
+
+    datasets = DatasetManager()
+    for cfg, postfix in nameList:
+        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
+        datasets.extend(d)
+    return datasets
+
 def getDatasetsFromMulticrabCfg(**kwargs):
     """Construct DatasetManager from a multicrab.cfg.
 
