@@ -64,7 +64,7 @@ namespace HPlus {
     const float WMass   = 80.399;  // PDG value
     const float WMassWindow   = 0.1*WMass; 
     const float TopMass = 172.000;  // PDG value
-    const float TopMassWindow = 0.1*TopMass;
+    const float TopMassWindow = 0.2*TopMass;
 
     /// Return true if there are less than 2 jets since no calculation is possible (for safety)
     if(jets.size()<2) return Data(this, true);

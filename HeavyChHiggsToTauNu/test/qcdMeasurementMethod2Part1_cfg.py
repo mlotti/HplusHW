@@ -109,9 +109,9 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
     EvtTopology = param.EvtTopology,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    InvMassVetoOnJets = param.InvMassVetoOnJets,
     bTagging = param.bTagging,
     MET = param.MET,
+    InvMassVetoOnJets = param.InvMassVetoOnJets,
     fakeMETVeto = param.fakeMETVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )

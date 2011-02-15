@@ -19,9 +19,9 @@ namespace HPlus {
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
-    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fMETCounter(eventCounter.addCounter("MET")),
+    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMETVeto")),
     fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt0AfterWholeSelection")),
     fMETgt30AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
@@ -37,9 +37,9 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
-    fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
@@ -105,12 +105,6 @@ namespace HPlus {
     increment(fGlobalMuonVetoCounter);
     // fGlobalMuonVeto.debug();
 
-    // InvMassVeto 
-    // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
-    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
-    if(!invMassVetoOnJetsData.passedEvent()) return; 
-    increment(fInvMassVetoOnJetsCounter);
-    
     // Obtain MET, btagging and fake MET veto data objects
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
@@ -144,6 +138,11 @@ namespace HPlus {
     // MET 
     if(!metData.passedEvent()) return;
     increment(fMETCounter);
+
+    // InvMassVeto: Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
+    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
+    if(!invMassVetoOnJetsData.passedEvent()) return; 
+    increment(fInvMassVetoOnJetsCounter);
 
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;
