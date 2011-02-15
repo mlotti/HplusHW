@@ -94,16 +94,21 @@ datasets = {
             },
         },
     },
-    # "QCD_Pt50to80_TuneZ2_Winter10": {
-    #     "dataVersion":  "39Xredigi",
-    #     "crossSection": 6.359e+06,
-    #     "data": {
-    #         "AOD": {
-    #             "datasetpath": "",
-    #             "number_of_jobs": 450,
-    #         },
-    #     },
-    # },
+    "QCD_Pt50to80_TuneZ2_Winter10": {
+        "dataVersion":  "39Xredigi",
+        "crossSection": 6.359e+06,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 450,
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
+            },
+        },
+    },
     "QCD_Pt80to120_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 7.843e+05,
@@ -166,7 +171,7 @@ datasets = {
     },
 
 
-    # # Electroweak (Winter10)
+    # Electroweak MadGraph
     "TTJets_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 165,
@@ -253,9 +258,100 @@ datasets = {
             },
         },
     },
+    # Electroweak Alpgen
+    "W2Jets_ptW0to100_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 9.434e+02,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W2Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 10
+            },
+        },
+    },
+    "W2Jets_ptW100to300_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 6.718e+01,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W2Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 8
+            },
+        },
+    },
+    "W3Jets_ptW0to100_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 2.087e+02,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W3Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 130, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 5
+            },
+        },
+    },
+    "W3Jets_ptW100to300_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 3.243e+01,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W3Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W3Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 2
+            },
+        },
+    },
+    "W4Jets_ptW0to100_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 4.446e+01,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W4Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_ptW-0to100_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
+            },
+        },
+    },
+    "W4Jets_ptW100to300_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 1.138e+01,
+        "data": {
+            "AOD": {
+                "datasetpath": "/W4Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 15, # Adjusted for PATtuple file size
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/W4Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 1
+            },
+        },
+    },
 
 
-    # # Backgrounds for electroweak background measurement (Fall10)
+    # Backgrounds for electroweak background measurement (Fall10)
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 296600000.*0.0002855,
