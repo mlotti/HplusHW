@@ -9,7 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
@@ -46,7 +46,7 @@ namespace HPlus {
     //Count fTriggerEmulationCounter;
     Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
-    Count fEvtTopologyCounter;
+    Count fInvMassVetoOnJetsCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
     Count fMETCounter;
@@ -70,7 +70,7 @@ namespace HPlus {
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
-    EvtTopology fEvtTopology;
+    InvMassVetoOnJets fInvMassVetoOnJets;
 
     // Histograms
     TH1 *hMETAfterWholeSelection;

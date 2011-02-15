@@ -36,8 +36,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
         # For testing in lxplus
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
@@ -85,6 +85,7 @@ param.trigger.triggers = [
     "HLT_Jet30U_v3"
 ]
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.fakeMETVeto.minDeltaPhi = 5.0 # overwrite default value. Alsom note that I have changed the code to only consider deltaPhi(MET, jets)
 param.overrideTriggerFromOptions(options)
 
 # Prescale weight, do not uncomment unless you know what you're doing!
@@ -107,15 +108,17 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
     GlobalMuonVeto = param.GlobalMuonVeto,
     MET = param.MET,
     bTagging = param.bTagging,
+    InvMassVetoOnJets = param.InvMassVetoOnJets,
     fakeMETVeto = param.fakeMETVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
-
 print "Trigger:", process.qcdMeasurementMethod2Part1.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value):", process.qcdMeasurementMethod2Part1.trigger.hltMetCut
 print "TauSelection algorithm:", process.qcdMeasurementMethod2Part1.tauSelection.selection
 print "TauSelection src:", process.qcdMeasurementMethod2Part1.tauSelection.src
 print "TauSelection operating mode:", process.qcdMeasurementMethod2Part1.tauSelection.operatingMode
+print "InvMassVetoOnJets:", process.qcdMeasurementMethod2Part1.InvMassVetoOnJets
+print "fakeMETVeto:", process.qcdMeasurementMethod2Part1.fakeMETVeto
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -131,13 +134,13 @@ if len(additionalCounters) > 0:
 
 # PickEvent module and the main Path. The picked events are only the
 # ones selected by the golden analysis defined above.
-process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
-process.qcdMeasurementMethod2Part1Path = cms.Path(
-    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-    process.qcdMeasurementMethod2Part1 *
-    process.qcdMeasurementMethod2Part1Counters
+#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
+#process.qcdMeasurementMethod2Part1Path = cms.Path(
+#    process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
+#    process.qcdMeasurementMethod2Part1 *
+#    process.qcdMeasurementMethod2Part1Counters
     #* process.PickEvents
-)
+#)
 
 ################################################################################
 # The signal analysis with different tau ID algorithms

@@ -52,6 +52,7 @@ namespace HPlus {
     }
     hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
 
+    /* Note: deltaPhi(MET, tauJet) kills too much signal. Under investigation
     // Combine results
     if (fClosestDeltaPhiToJets < fClosestDeltaPhiToTaus) {
       fClosestDeltaPhi = fClosestDeltaPhiToJets;
@@ -59,6 +60,12 @@ namespace HPlus {
       fClosestDeltaPhi = fClosestDeltaPhiToTaus;
     }
     hClosestDeltaPhi->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
+    */
+
+
+    // New: Don't combine results. Take deltaPhi(MET, jets)
+      fClosestDeltaPhi = fClosestDeltaPhiToJets;
+      hClosestDeltaPhi->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
 
     // Make cut
     passEvent = true; 

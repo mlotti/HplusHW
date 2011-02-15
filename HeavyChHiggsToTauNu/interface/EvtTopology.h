@@ -80,7 +80,7 @@ namespace HPlus {
     ~EvtTopology();
 
     Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    Data InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets);
+    // Data InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets); obsolete
 
   private:
     // Input parameters

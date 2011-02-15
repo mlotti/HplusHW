@@ -129,6 +129,11 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonEtaCut = cms.untracked.double(2.5)
 )
 
+InvMassVetoOnJets = cms.untracked.PSet(
+    ptCut = cms.untracked.double(30),
+    etaCut = cms.untracked.double(2.4)
+)
+
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
   minDeltaPhi = cms.untracked.double(10.) # in degrees

@@ -1,7 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFromAntiTauControlRegion.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -14,14 +14,14 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
-    //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
+    // fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
-    fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
+    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMETVeto")),
     fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt0AfterWholeSelection")),
     fMETgt30AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
@@ -34,11 +34,11 @@ namespace HPlus {
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
+    fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)//,
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
@@ -90,13 +90,14 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedAntiTau);
     if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     increment(fJetSelectionCounter);
-    
+
     // InvMassVeto 
     // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
-    EvtTopology::Data evtTopologyData =  fEvtTopology.InvMassVetoOnJets(jetData.getSelectedJets() ); 
-    if(!evtTopologyData.passedEvent()) return; 
-    increment(fEvtTopologyCounter);
+    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
+    if(!invMassVetoOnJetsData.passedEvent()) return; 
+    increment(fInvMassVetoOnJetsCounter);
     
+
     // GlobalElectronVeto
     // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
