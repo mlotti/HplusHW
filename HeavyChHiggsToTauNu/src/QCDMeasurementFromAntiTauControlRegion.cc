@@ -19,9 +19,9 @@ namespace HPlus {
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
-    fMETCounter(eventCounter.addCounter("MET")),
-    fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),
+    fBTaggingCounter(eventCounter.addCounter("bTagging")),
+    fMETCounter(eventCounter.addCounter("MET")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMETVeto")),
     fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt0AfterWholeSelection")),
     fMETgt30AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
@@ -36,11 +36,11 @@ namespace HPlus {
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
-    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
-    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
+    fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
    {
@@ -136,13 +136,13 @@ namespace HPlus {
       hMETAfterWholeSelection->Fill(myMETValue, fEventWeight.getWeight());
     }
 
-    // MET 
-    if(!metData.passedEvent()) return;
-    increment(fMETCounter);
-    
     // BTagging
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
+
+    // MET 
+    if(!metData.passedEvent()) return;
+    increment(fMETCounter);
 
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;

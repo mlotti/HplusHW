@@ -49,10 +49,9 @@ namespace HPlus {
     Count fJetSelectionCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
-    Count fMETCounter;
-    Count fBTaggingCounter;
     Count fInvMassVetoOnJetsCounter;
-    Count fFakeMETVetoCounter;
+    Count fBTaggingCounter;
+    Count fMETCounter;
     Count fMETgt0AfterWholeSelectionCounter;
     Count fMETgt30AfterWholeSelectionCounter;
     Count fMETgt40AfterWholeSelectionCounter;
@@ -60,6 +59,7 @@ namespace HPlus {
     Count fMETgt60AfterWholeSelectionCounter;
     Count fMETgt70AfterWholeSelectionCounter;
     Count fMETgt80AfterWholeSelectionCounter;
+    Count fFakeMETVetoCounter;
 
     // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;

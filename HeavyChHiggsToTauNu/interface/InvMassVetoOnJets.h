@@ -81,7 +81,6 @@ namespace HPlus {
     const double fPtCut;
     const double fEtaCut;
     // Counters
-    Count fInvMassVetoOnJetsCount;
     Count fInvMassVetoOnJetsPtCutSubCount;
     Count fInvMassVetoOnJetsEtaCutSubCount;
     Count fInvMassVetoOnJetsDiJetsCutSubCount;

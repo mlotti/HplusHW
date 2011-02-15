@@ -26,11 +26,10 @@ namespace HPlus {
   InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
-    fInvMassVetoOnJetsCount(eventCounter.addCounter("InvMassVetoOnJets main")),
-    fInvMassVetoOnJetsPtCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets main", "PtCut")),
-    fInvMassVetoOnJetsEtaCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets main", "EtaCut")),
-    fInvMassVetoOnJetsDiJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets main", "InvMassVetoOnDiJets cut")),
-    fInvMassVetoOnJetsTriJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets main", "InvMassVetoOnTriJets cut")),
+    fInvMassVetoOnJetsPtCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "PtCut")),
+    fInvMassVetoOnJetsEtaCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "EtaCut")),
+    fInvMassVetoOnJetsDiJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVetoOnDiJets cut")),
+    fInvMassVetoOnJetsTriJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVetoOnTriJets cut")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
