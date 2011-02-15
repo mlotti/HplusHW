@@ -62,59 +62,12 @@ namespace HPlus {
 
     /// Declaration of variables    
     bool bPassedEvent = false;
-    bool bInvMassCutFail = false;
     bool bInvMassWithinWWindow = false;
     bool bInvMassWithinTopWindow = false;
     const float WMass   = 80.399;  // PDG value
     const float WMassWindow   = 0.1*WMass;  // PDG value
     const float TopMass = 172.000; 
     const float TopMassWindow = 0.1*TopMass;
-
-    /* DiJet code - works fine but obsolete -> Integrated with TriJet
-    /// Return true if there are less than two jets.
-    if(jets.size()<2) return Data(this, true);
-    else{
-      /// Loop over jet collection - mth Jet
-      for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-	edm::Ptr<pat::Jet> mJet = *iter;
-	
-	/// Loop over jet collection - nth Jet
-	for(edm::PtrVector<pat::Jet>::const_iterator iter2 = iter+1; iter2 != jets.end(); ++iter2) {
-	  edm::Ptr<pat::Jet> nJet = *iter2;
-	  
-	  /// Calculate the DiJet Mass
-	  float DiJetInvMass = sqrt( pow(nJet->energy()+mJet->energy(),2) - (nJet->p4().Vect() + mJet->p4().Vect()).Mag2() );
-
-	  /// Fill histograms
-	  hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
-
-	  /// Make decision on DiJet Mass
-	  if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
-	    bInvMassWithinWWindow = true;
-	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-	  else{
-	    bInvMassWithinWWindow   = false;
-	    bInvMassWithinTopWindow = false;
-	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-	  /// Make final boolean decision
-	  if( (bInvMassWithinWWindow) || (bInvMassWithinTopWindow) ){
-	    bPassedEvent = false;
-	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    break;
-	  }
-	  else{
-	    bPassedEvent = true;
-	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-
-	}//eof: second jet loop
-      }//eof: first jet loop
-    */
 
     /// Return true if there are less than 2 jets since no calculation is possible (for safety)
     if(jets.size()<2){
@@ -148,14 +101,14 @@ namespace HPlus {
       /// loop over jet collection - mth Jet
       for(edm::PtrVector<pat::Jet>::const_iterator jet = jets.begin(); jet != jets.end(); ++jet) {
 	edm::Ptr<pat::Jet> mJet = *jet;
-	
+
 	if(!(mJet->pt() > fPtCut)) continue;
 	if(!(std::abs(mJet->eta()) < fEtaCut)) continue;
 
 	/// Loop over jet collection - oth Jet, where: n = m+1
 	for(edm::PtrVector<pat::Jet>::const_iterator jet2 = jet+1; jet2 != jets.end(); ++jet2) {
 	  edm::Ptr<pat::Jet> nJet = *jet2;
-	  
+
 	  if(!(nJet->pt() > fPtCut)) continue;
 	  if(!(std::abs(nJet->eta()) < fEtaCut)) continue;
 
@@ -183,9 +136,9 @@ namespace HPlus {
 	    hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	  }
 	  /// Loop over jet collection - oth Jet, where: o = n+1 = m+2
-	  for(edm::PtrVector<pat::Jet>::const_iterator jet3 = jet+2; jet3 != jets.end(); ++jet2) {
+	  for(edm::PtrVector<pat::Jet>::const_iterator jet3 = jet+2; jet3 != jets.end(); ++jet3) {
 	    edm::Ptr<pat::Jet> oJet = *jet3;
-	    
+
 	    /// Increment counter if 3rd loop also survives jet Pt and Eta Cuts
 	    if(!(oJet->pt() > fPtCut)) continue;
 	    increment(fInvMassVetoOnJetsPtCutSubCount);

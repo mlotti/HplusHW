@@ -86,7 +86,7 @@ namespace HPlus {
     Count fInvMassVetoOnJetsEtaCutSubCount;
     Count fInvMassVetoOnJetsDiJetsCutSubCount;
     Count fInvMassVetoOnJetsTriJetsCutSubCount;
-
+    
     // EventWeight object
     EventWeight& fEventWeight;
 

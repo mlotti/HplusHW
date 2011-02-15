@@ -14,6 +14,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "TTree.h"
 
 namespace edm {
@@ -46,11 +47,11 @@ namespace HPlus {
     //Count fTriggerEmulationCounter;
     Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
-    Count fInvMassVetoOnJetsCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
+    Count fInvMassVetoOnJetsCounter;
     Count fFakeMETVetoCounter;
     Count fMETgt0AfterWholeSelectionCounter;
     Count fMETgt30AfterWholeSelectionCounter;
@@ -69,9 +70,10 @@ namespace HPlus {
     GlobalMuonVeto fGlobalMuonVeto;
     METSelection fMETSelection;
     BTagging fBTagging;
-    FakeMETVeto fFakeMETVeto;
     InvMassVetoOnJets fInvMassVetoOnJets;
-
+    FakeMETVeto fFakeMETVeto;
+    EvtTopology fEvtTopology;
+    
     // Histograms
     TH1 *hMETAfterWholeSelection;
     //aa    TH1 *hTriggerPrescales;

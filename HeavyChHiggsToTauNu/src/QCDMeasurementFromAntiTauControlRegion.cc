@@ -39,7 +39,8 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
-    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)//,
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
    {
@@ -62,10 +63,8 @@ namespace HPlus {
   void QCDMeasurementFromAntiTauControlRegion::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
-    //aa    double TriggerPrescale = fEventWeight.getWeight();
-    
+
     increment(fAllCounter);
-    
     // Trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
@@ -91,13 +90,9 @@ namespace HPlus {
     if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     increment(fJetSelectionCounter);
 
-    // InvMassVeto 
-    // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
-    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
-    if(!invMassVetoOnJetsData.passedEvent()) return; 
-    increment(fInvMassVetoOnJetsCounter);
+    // Run alphaT plots just for reference (will not affect the method in any way)
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());     
     
-
     // GlobalElectronVeto
     // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -108,6 +103,12 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
+
+    // InvMassVeto 
+    // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
+    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
+    if(!invMassVetoOnJetsData.passedEvent()) return; 
+    increment(fInvMassVetoOnJetsCounter);
     
     // Obtain MET, btagging and fake MET veto data objects
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
@@ -146,10 +147,6 @@ namespace HPlus {
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
-   
-    // Fill a histogram with the Trigger Prescales used
-    // aa   hTriggerPrescales->Fill(TriggerPrescale);
-    // aa   hTriggerPrescales_test->Fill(TriggerPrescale, TriggerPrescale);
-    // aa   std::cout << "TriggerPrescale = " << TriggerPrescale << std::endl;
+
   }
 }
