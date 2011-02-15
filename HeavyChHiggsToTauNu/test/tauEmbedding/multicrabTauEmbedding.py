@@ -42,6 +42,8 @@ datasets = [
     "TToBLNu_s-channel_TuneZ2_Winter10",
     "TToBLNu_t-channel_TuneZ2_Winter10",
     "TToBLNu_tW-channel_TuneZ2_Winter10",
+    # For testing
+    "TTToHplusBWB_M120_Winter10"
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
