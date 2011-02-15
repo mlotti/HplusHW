@@ -1,4 +1,4 @@
-//#######################################################################
+ //#######################################################################
 // -*- C++ -*-
 //       File Name:  InvMassVetoOnJets.cc
 // Original Author:  Alexandros Attikis
@@ -64,8 +64,8 @@ namespace HPlus {
     bool bInvMassWithinWWindow = false;
     bool bInvMassWithinTopWindow = false;
     const float WMass   = 80.399;  // PDG value
-    const float WMassWindow   = 0.1*WMass;  // PDG value
-    const float TopMass = 172.000; 
+    const float WMassWindow   = 0.1*WMass; 
+    const float TopMass = 172.000;  // PDG value
     const float TopMassWindow = 0.1*TopMass;
 
     /// Return true if there are less than 2 jets since no calculation is possible (for safety)
@@ -79,17 +79,17 @@ namespace HPlus {
       edm::PtrVector<pat::Jet>::const_iterator jet2 = jets.begin()+1;
       const LorentzVector myWCandidate ( (*jet1)->p4()+(*jet2)->p4() );
       double DiJetInvMass = myWCandidate.M();
+      hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+      hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
       /// Make decision on DiJet Mass
       if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
 	bInvMassWithinWWindow = true;
 	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	bPassedEvent = false;
 	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
       }
       else{
 	bInvMassWithinWWindow = false;
-	bPassedEvent = true;
 	hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
       }
@@ -123,14 +123,12 @@ namespace HPlus {
 	  /// Make decision on DiJet Mass
 	  if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
 	    bInvMassWithinWWindow = true;
-	    bPassedEvent = false;
 	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    break;
 	  }
 	  else{
 	    bInvMassWithinWWindow   = false;
-	    bPassedEvent = true;
 	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	  }
@@ -156,14 +154,12 @@ namespace HPlus {
 	    /// Make decision on TriJet Mass
 	    if( TriJetInvMass <= (TopMass+TopMassWindow) && DiJetInvMass >= (TopMass-TopMassWindow) ){
 	      bInvMassWithinTopWindow = true;
-	      bPassedEvent = false;
 	      hTriJetInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      hInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      break;
 	    }
 	    else{
 	      bInvMassWithinTopWindow = false;
-	      bPassedEvent = true;
 	      hTriJetInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      hInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    }
@@ -171,6 +167,11 @@ namespace HPlus {
 	}//eof: second jet loop
       }//eof: first jet loop
     }// njets >3 
+
+    /// Make decision on event. If Di/Tri-Jet combination within W OR Top mass are found return false. Else true
+    if(bInvMassWithinWWindow || bInvMassWithinTopWindow){
+      bPassedEvent = false;
+    }else bPassedEvent = true;
 
     if(!bPassedEvent && bInvMassWithinWWindow) increment(fInvMassVetoOnJetsDiJetsCutSubCount);
     if(!bPassedEvent && bInvMassWithinWWindow) increment(fInvMassVetoOnJetsTriJetsCutSubCount);

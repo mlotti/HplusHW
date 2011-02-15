@@ -50,6 +50,7 @@ namespace HPlus {
     ~GlobalMuonVeto();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    void debug(void);
 
   private:
     bool MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -118,6 +119,23 @@ namespace HPlus {
     // pt and eta of muon with highest pt passing the selections
     float fSelectedMuonPt;
     float fSelectedMuonEta;
+
+    // booleans
+    bool bMuonPresent;
+    bool bDecision;
+    bool bMuonHasGlobalOrInnerTrk;
+    bool bMuonPtCut;
+    bool bMuonEtaCut;
+    bool bMuonGlobalMuonOrTrkerMuon;
+    bool bMuonSelection;
+    bool bMuonNTrkerHitsCut;
+    bool bMuonNPixelHitsCut;
+    bool bMuonNMuonlHitsCut;
+    bool bMuonGlobalTrkChiSqCut;
+    bool bMuonImpactParCut;
+    bool bMuonRelIsolationR03Cut;
+    bool bMuonGoodPVCut;
+    
   };
 }
 

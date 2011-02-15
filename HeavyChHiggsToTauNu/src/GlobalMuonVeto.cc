@@ -151,34 +151,35 @@ namespace HPlus {
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
     
     // In the case where the handle is empty...
-    if ( !myMuonHandle->size() ){
-      // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
-    }
-
+    if (!myMuonHandle->size()){ bMuonPresent = false;}
+    else{bMuonPresent = true;}
+    
+    // If no muon is found return true - Event passes the muon Veto
+    if(!bMuonPresent) return true;
+    
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
-    // 
-    bool bMuonPresent = false;
-    bool bMuonHasGlobalOrInnerTrk = false;
-    bool bMuonPtCut = false;
-    bool bMuonEtaCut = false;
-    bool bMuonGlobalMuonOrTrkerMuon = false;
-    bool bMuonSelection = false;
-    bool bMuonNTrkerHitsCut = false;
-    bool bMuonNPixelHitsCut = false;
-    bool bMuonNMuonlHitsCut = false;
-    bool bMuonGlobalTrkChiSqCut = false;
-    bool bMuonImpactParCut = false;
-    bool bMuonRelIsolationR03Cut = false;
-    bool bMuonGoodPVCut = false;
     
     // Loop over all Muons
     for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
-
+      
       // Keep track of the muons analyzed
       bMuonPresent = true;
       increment(fMuonIDSubCountAllMuonCandidates);
+      bDecision = false;
+      bMuonHasGlobalOrInnerTrk = false;
+      bMuonPtCut = false;
+      bMuonEtaCut = false;
+      bMuonGlobalMuonOrTrkerMuon = false;
+      bMuonSelection = false;
+      bMuonNTrkerHitsCut = false;
+      bMuonNPixelHitsCut = false;
+      bMuonNMuonlHitsCut = false;
+      bMuonGlobalTrkChiSqCut = false;
+      bMuonImpactParCut = false;
+      bMuonRelIsolationR03Cut = false;
+      bMuonGoodPVCut = false;
       
       // Keep track of the MuonID's. Just for my information. 
       // 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
@@ -308,7 +309,7 @@ namespace HPlus {
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
-  
+
     if(bMuonPresent) {
       increment(fMuonSelectionSubCountMuonPresent);
       if(bMuonHasGlobalOrInnerTrk) {
@@ -350,7 +351,7 @@ namespace HPlus {
     }
 
     // Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
-    bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
+    bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
 
     // Now store the highest Muon Pt and Eta
     fSelectedMuonPt  = myHighestMuonPt;
@@ -359,10 +360,19 @@ namespace HPlus {
 
     // If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
-    // Otherwise increment counter and return true.
-    else increment(fGlobalMuonVetoCounter);
+    // Otherwise increment counter and return true - event has passed the Global Muon Veto cut.
+    else{
+      increment(fGlobalMuonVetoCounter);
     return true;
+    }
     
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   
+
+
+  void GlobalMuonVeto::debug(void){
+    
+    std::cout << "bDecision = " << bDecision << ", bMuonPresent = " << bMuonPresent << ", bMuonHasGlobalOrInnerTrk = " << bMuonHasGlobalOrInnerTrk << ", bMuonPtCut = " << bMuonPtCut << ", bMuonEtaCut = " << bMuonEtaCut << ", bMuonSelection = " << bMuonSelection << ", bMuonNTrkerHitsCut = " << bMuonNTrkerHitsCut << ", bMuonNPixelHitsCut = "  << bMuonNPixelHitsCut << ", bMuonNMuonlHitsCut = " << bMuonNMuonlHitsCut << ", bMuonGlobalTrkChiSqCut = " << bMuonGlobalTrkChiSqCut << ", bMuonImpactParCut = " << bMuonImpactParCut << ", bMuonRelIsolationR03Cut = " << bMuonRelIsolationR03Cut << ", bMuonGoodPVCut = " << bMuonGoodPVCut << "\n" << std::endl;
+  }
+
 }//eof: namespace HPlus {

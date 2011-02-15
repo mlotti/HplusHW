@@ -103,6 +103,7 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
+    // fGlobalMuonVeto.debug();
 
     // InvMassVeto 
     // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
