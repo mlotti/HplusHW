@@ -28,6 +28,14 @@ namespace HPlus {
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fDiJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVeto_DiJet")),
     fTriJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVeto_TriJet")),
+    fInvMassWWindow10SubCount(eventCounter.addSubCounter("InvMassWWindow", "InvMassWindow10")),
+    fInvMassWWindow15SubCount(eventCounter.addSubCounter("InvMassWWindow", "InvMassWindow15")),
+    fInvMassWWindow20SubCount(eventCounter.addSubCounter("InvMassWWindow", "InvMassWindow20")),
+    fInvMassWWindow25SubCount(eventCounter.addSubCounter("InvMassWWindow", "InvMassWindow25")),
+    fInvMassTopWindow10SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow10")),
+    fInvMassTopWindow15SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow15")),
+    fInvMassTopWindow20SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow20")),
+    fInvMassTopWindow25SubCount(eventCounter.addSubCounter("InvMassTopWindow", "InvMassWindow25")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -58,13 +66,25 @@ namespace HPlus {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// Declaration of variables    
+
     bool bPassedEvent = false;
     bool bInvMassWithinWWindow = false;
     bool bInvMassWithinTopWindow = false;
-    const float WMass   = 80.399;  // PDG value
+
+    const float WMass   = 80.399; // PDG value
+    const float WMassWindow10 = 0.1*WMass;
+    const float WMassWindow15 = 0.15*WMass;
+    const float WMassWindow20 = 0.20*WMass;
+    const float WMassWindow25 = 0.25*WMass;
     const float WMassWindow   = 0.1*WMass; 
-    const float TopMass = 172.000;  // PDG value
-    const float TopMassWindow = 0.1*TopMass;
+
+    const float TopMass = 175.000;
+    const float TopMassWindow   = 0.1*TopMass;
+    const float TopMassWindow10 = 0.1*TopMass;
+    const float TopMassWindow15 = 0.15*TopMass;
+    const float TopMassWindow20 = 0.20*TopMass;
+    const float TopMassWindow25 = 0.25*TopMass;
+    
 
     /// Return true if there are less than 2 jets since no calculation is possible (for safety)
     if(jets.size()<2) return Data(this, true);
@@ -83,9 +103,15 @@ namespace HPlus {
 
       hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
       hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+
+      /// Increment counters with variable mass window. Take no action
+      if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ) increment(fInvMassWWindow10SubCount);
+      if( DiJetInvMass <= (WMass+WMassWindow15) && DiJetInvMass >= (WMass-WMassWindow15) ) increment(fInvMassWWindow15SubCount);
+      if( DiJetInvMass <= (WMass+WMassWindow20) && DiJetInvMass >= (WMass-WMassWindow20) ) increment(fInvMassWWindow20SubCount);
+      if( DiJetInvMass <= (WMass+WMassWindow25) && DiJetInvMass >= (WMass-WMassWindow25) ) increment(fInvMassWWindow25SubCount);
       
-      /// Make decision on DiJet Mass
-      if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
+      /// Now, make decision on DiJet Mass
+      if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ){
 	bInvMassWithinWWindow = true;
 	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
@@ -97,6 +123,7 @@ namespace HPlus {
 	hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
       }
+
     }//eof: else if(jets.size()==2){
     else{
       /// If NJets>3, perform a triple loop within which to calculate di-jet and tri-jet invariant mass
@@ -124,6 +151,12 @@ namespace HPlus {
 	  hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	  hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	  
+	  /// Increment counters with variable mass window. Take no action
+	  if( DiJetInvMass <= (WMass+WMassWindow10) && DiJetInvMass >= (WMass-WMassWindow10) ) increment(fInvMassWWindow10SubCount);
+	  if( DiJetInvMass <= (WMass+WMassWindow15) && DiJetInvMass >= (WMass-WMassWindow15) ) increment(fInvMassWWindow15SubCount);
+	  if( DiJetInvMass <= (WMass+WMassWindow20) && DiJetInvMass >= (WMass-WMassWindow20) ) increment(fInvMassWWindow20SubCount);
+	  if( DiJetInvMass <= (WMass+WMassWindow25) && DiJetInvMass >= (WMass-WMassWindow25) ) increment(fInvMassWWindow25SubCount);
+      
 	  /// Make decision on DiJet Mass
 	  if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
 	    bInvMassWithinWWindow = true;
@@ -152,6 +185,12 @@ namespace HPlus {
 	    hTriJetInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    
+	    /// Increment counters with variable mass window. Take no action
+	    if( TriJetInvMass <= (TopMass+TopMassWindow10) && TriJetInvMass >= (TopMass-TopMassWindow10) ) increment(fInvMassTopWindow10SubCount);
+	    if( TriJetInvMass <= (TopMass+TopMassWindow15) && TriJetInvMass >= (TopMass-TopMassWindow15) ) increment(fInvMassTopWindow15SubCount);
+	    if( TriJetInvMass <= (TopMass+TopMassWindow20) && TriJetInvMass >= (TopMass-TopMassWindow20) ) increment(fInvMassTopWindow20SubCount);
+	    if( TriJetInvMass <= (TopMass+TopMassWindow25) && TriJetInvMass >= (TopMass-TopMassWindow25) ) increment(fInvMassTopWindow25SubCount);
+
 	    /// Make decision on TriJet Mass
 	    if( TriJetInvMass <= (TopMass+TopMassWindow) && DiJetInvMass >= (TopMass-TopMassWindow) ){
 	      bInvMassWithinTopWindow = true;
@@ -176,5 +215,6 @@ namespace HPlus {
     return Data(this, bPassedEvent);
 
   }//eof:  InvMassVetoOnJets::Data InvMassVetoOnJets::InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets ){
+
 
 }//eof: namespace HPlus {

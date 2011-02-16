@@ -104,14 +104,14 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
  #   prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),   
     trigger = param.trigger,
     #TriggerMETEmulation = param.TriggerMETEmulation, # OBSOLETE?
+    GlobalElectronVeto = param.GlobalElectronVeto,
+    GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     EvtTopology = param.EvtTopology,
-    GlobalElectronVeto = param.GlobalElectronVeto,
-    GlobalMuonVeto = param.GlobalMuonVeto,
+    InvMassVetoOnJets = param.InvMassVetoOnJets,
     MET = param.MET,
     bTagging = param.bTagging,                                                    
-    InvMassVetoOnJets = param.InvMassVetoOnJets,
     fakeMETVeto = param.fakeMETVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )

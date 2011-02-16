@@ -76,14 +76,24 @@ namespace HPlus {
 
     // Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
     Data analyze( const edm::PtrVector<pat::Jet>& jets );
-
+    
   private:
     const double fPtCut;
     const double fEtaCut;
     // Counters
     Count fDiJetsCutSubCount;
     Count fTriJetsCutSubCount;
-    
+
+    Count fInvMassWWindow10SubCount;
+    Count fInvMassWWindow15SubCount;
+    Count fInvMassWWindow20SubCount;
+    Count fInvMassWWindow25SubCount;
+
+    Count fInvMassTopWindow10SubCount;
+    Count fInvMassTopWindow15SubCount;
+    Count fInvMassTopWindow20SubCount;
+    Count fInvMassTopWindow25SubCount;
+
     // EventWeight object
     EventWeight& fEventWeight;
 

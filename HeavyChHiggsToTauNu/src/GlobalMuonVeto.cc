@@ -135,16 +135,6 @@ namespace HPlus {
     } 
     FIX ME */
 
-    /* FIX ME
-    // Get beam spot
-    edm::Handle<reco::BeamSpot> BeamSpotHandle;
-    iEvent.getByLabel(beamSpotCollection, BeamSpotHandle);
-    const reco::BeamSpot *myBeamSpot = BeamSpotHandle.product();
-    const math::XYZPoint myBeamSpotPosition = myBeamSpot->position();
-    impactParameter = fabs( (*iMuon)->innerTrack()->dxy(myBeamSpotPosition) );
-    impactParameter = fabs( (*iElectron)->gsfTrack()->dxy(myBeamSpotPosition) );
-    FIX ME */ 
-
 
     // Create and attach handle to Muon Collection
     edm::Handle<std::vector<pat::Muon> > myMuonHandle;
