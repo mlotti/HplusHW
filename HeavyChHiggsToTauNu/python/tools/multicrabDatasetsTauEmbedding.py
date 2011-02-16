@@ -106,7 +106,6 @@ def addTo(datasets):
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6-356976479e058d2236b19259096d6dbe/USER",
                 "number_of_jobs": 150 # ~500 ev/job
             },
-vvvvvvvvvvvvvvvvvvvv
             })
 
     datasets["TTToHplusBWB_M120_Winter10"]["data"].update({

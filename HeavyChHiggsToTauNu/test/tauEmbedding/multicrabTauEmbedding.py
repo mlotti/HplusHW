@@ -5,11 +5,11 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-#step = "generation"
+step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v6",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
@@ -49,8 +49,8 @@ datasets = [
 multicrab.extendDatasets(config[step]["input"], datasets)
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
-if step != "skim":
-    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+#if step != "skim":
+#    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
 path_re = re.compile("_tauembedding_.*")
@@ -93,7 +93,7 @@ def modify(dataset):
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
 
-    if dataset.isData() and step ini ["generation", "embedding"]:
+    if dataset.isData() and step in ["generation", "embedding"]:
         dataset.appendArg("overrideBeamSpot=1")
 
     if step == "skim":
