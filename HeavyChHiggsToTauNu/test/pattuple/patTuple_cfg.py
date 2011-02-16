@@ -118,15 +118,10 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 #process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
 # Create paths
-if not dataVersion.isData():
-    process.mcVisibleTauPath = cms.Path(
-        process.VisibleTaus
-    )
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
     process.s 
-    * process.triggerMatchingSequence
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
