@@ -80,6 +80,7 @@ namespace HPlus {
   private:
     const double fPtCut;
     const double fEtaCut;
+    const bool fSetTrueToUseModule;
     // Counters
     Count fDiJetsCutSubCount;
     Count fTriJetsCutSubCount;

@@ -26,7 +26,7 @@ style = tdrstyle.TDRStyle()
 
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetManager.
-datasets = dataset.getDatasetsFromMulticrabCfg()
+datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2Part1Counters/weighted")
 
 # Construct datasets from the given list of CRAB task directories
 #datasets = dataset.getDatasetsFromCrabDirs(["QCD_Pt120to170"])
@@ -47,7 +47,7 @@ plots.mergeRenameReorderForDataMC(datasets)
 datasets.getDataset("Data").setLuminosity(35)
 
 # Create the plot, latter argument is the path to the histogram in the ROOT files
-h = plots.DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+h = plots.DataMCPlot(datasets, "qcdMeasurementMethod2Part1Counters/TauSelection_all_tau_candidates_pt")
 
 # Stack MC histograms
 h.stackMCHistograms()
@@ -74,10 +74,10 @@ h.addLuminosityText()
 # Save to .png, .eps and .C file
 h.save()
 
-
+#  counters = "qcdMeasurementMethod2Part1Counters/weighted"
 # Same, but create two pads, one for the distributions and another for
 # the data/MC
-h = plots.DataMCPlot(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+h = plots.DataMCPlot(datasets, "qcdMeasurementMethod2Part1Counters/TauSelection_all_tau_candidates_pt")
 h.stackMCHistograms()
 h.addMCUncertainty()
 h.createFrameFraction("taupt_new2",)

@@ -26,6 +26,7 @@ namespace HPlus {
   InvMassVetoOnJets::InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fSetTrueToUseModule(iConfig.getUntrackedParameter<bool>("setTrueToUseModule")),
     fDiJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVeto_DiJet")),
     fTriJetsCutSubCount(eventCounter.addSubCounter("InvMassVetoOnJets", "InvMassVeto_TriJet")),
     fInvMassWWindow10SubCount(eventCounter.addSubCounter("InvMassWWindow", "InvMassWindow10")),
@@ -65,8 +66,10 @@ namespace HPlus {
     /// W->qq and t->bW decays.
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// Declaration of variables    
+    /// A direct and easy way to switch on/off the class from qcdMeasurementMethod2Part1_cfg.py file without the need to compile the code.
+    if(!fSetTrueToUseModule) return Data(this, true);
 
+    /// Declaration of variables    
     bool bPassedEvent = false;
     bool bInvMassWithinWWindow = false;
     bool bInvMassWithinTopWindow = false;

@@ -132,7 +132,9 @@ GlobalMuonVeto = cms.untracked.PSet(
 
 InvMassVetoOnJets = cms.untracked.PSet(
     ptCut = cms.untracked.double(30),
-    etaCut = cms.untracked.double(2.4)
+    etaCut = cms.untracked.double(2.4),
+    setTrueToUseModule = cms.untracked.bool(False)
+    #setTrueToUseModule = cms.untracked.bool(True)
 )
 
 fakeMETVeto = cms.untracked.PSet(

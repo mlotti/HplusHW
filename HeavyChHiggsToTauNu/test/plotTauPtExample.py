@@ -57,7 +57,7 @@ style = TDRStyle()
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetSet.
 datasets = getDatasetsFromMulticrabCfg(
-    #counters = "signalAnalysisCounters/weighted"
+    counters = "qcdMeasurementMethod2Part1Counters/weighted"
     )
 
 # Construct datasets from the given list of CRAB task directories
@@ -70,8 +70,8 @@ datasets = getDatasetsFromMulticrabCfg(
 # Print the list of datasets in the given HistoSet
 #print "\n".join([d.getName() for d in datasets.getAllDatasets()])
 datasets.remove([
-#    "BTau_146240-146729",
-#    "BTau_148108-148864",
+    "BTau_146240-146729",
+    "BTau_148108-148864",
     "TTbar_Htaunu_M80",
     "TTToHpmToTauNu_M90",
     "TTToHpmToTauNu_M100",
@@ -93,8 +93,8 @@ datasets.remove([
     ])
 selectedSignal = "TTToHplusBWB_M120"
 
-datasets.getDataset("BTau_146240-148107").setLuminosity(5.899172590)
-datasets.getDataset("BTau_148108-148864").setLuminosity(4.600225784)
+#datasets.getDataset("BTau_146240-148107").setLuminosity(5.899172590)
+#datasets.getDataset("BTau_148108-148864").setLuminosity(4.600225784)
 
 # Example how to remove some datasets
 #datasets.remove(["QCD_Pt15_pythia6", "QCD_Pt15_pythia8", "QCD_Pt30",
@@ -116,15 +116,15 @@ datasets.mergeData()
 # datasets.getDataset("WJets").setCrossSection(30000)
 
 # Example how to merge histograms of several datasets
-datasets.merge("QCD", ["QCD_Pt30to50_Fall10","QCD_Pt50to80_Fall10","QCD_Pt80to120_Fall10",
-                       "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
-#datasets.merge("QCD", ["QCD_Pt30to50_Fall10",
-#                       "QCD_Pt120to170_Fall10", "QCD_Pt170to300_Fall10"])
+datasets.merge("QCD", ["QCD_Pt30to50_Winter10","QCD_Pt50to80_Winter10","QCD_Pt80to120_Winter10",
+                       "QCD_Pt120to170_Winter10", "QCD_Pt170to300_Winter10"])
+#datasets.merge("QCD", ["QCD_Pt30to50_Winter10",
+#                       "QCD_Pt120to170_Winter10", "QCD_Pt170to300_Winter10"])
 # Get set of histograms with the given path. The returned object is of
 # type HistoSet, which contains a histogram from each dataset in
 # DatasetSet. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = HistoSet(datasets, "signalAnalysis/tau_pt")
+tauPts = HistoSet(datasets, "qcdMeasurementMethod1Part2/tau_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)

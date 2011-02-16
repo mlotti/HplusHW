@@ -76,6 +76,8 @@ namespace HPlus {
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
+
+    /// Get MET for histo-plotting purposes
     METSelection::Data tmpMetData = fMETSelection.analyze(iEvent, iSetup);
     hMETAfterTrigger->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
     
