@@ -75,15 +75,16 @@ def customise(process):
     #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     #process.generation_step *= process.printGenParticles
 
-    # process.VtxSmeared = cms.EDProducer("FlatEvtVtxGenerator", 
-    #     MaxZ = cms.double(0.0),
-    #     MaxX = cms.double(0.0),
-    #     MaxY = cms.double(0.0),
-    #     MinX = cms.double(0.0),
-    #     MinY = cms.double(0.0),
-    #     MinZ = cms.double(0.0),
-    #     TimeOffset = cms.double(0.0),
-    #     src = cms.InputTag("generator")
-    # )
+    # Disable gen vertex smearing
+    process.VtxSmeared = cms.EDProducer("FlatEvtVtxGenerator", 
+        MaxZ = cms.double(0.0),
+        MaxX = cms.double(0.0),
+        MaxY = cms.double(0.0),
+        MinX = cms.double(0.0),
+        MinY = cms.double(0.0),
+        MinZ = cms.double(0.0),
+        TimeOffset = cms.double(0.0),
+        src = cms.InputTag("generator")
+    )
     
     return process

@@ -38,6 +38,10 @@ class SeqVisitor(object):
 	    pass
 
 
+def replaceInputTag(tag, old, new):
+    tag.setModuleLabel(tag.getModuleLabel().replace(old, new))
+    return tag
+
 def customise(process):
     processName = process.name_()
 
@@ -47,14 +51,41 @@ def customise(process):
     hltProcessName = "EMBEDDINGHLT"
     processName = process.name_()
 
+    # Track embedding
+    # replaceGeneralTracks = False
+    # if replaceGeneralTracks:
+    #     process.generalTracksORG = process.generalTracks.clone()
+    #     process.trackCollectionMerging.remove(process.generalTracks)
+    #     process.generalTracks = cms.EDProducer("RecoTracksMixer",
+    #         trackCol1 = cms.InputTag("dimuonsGlobal"),
+    #         trackCol2 = cms.InputTag("generalTracksORG")
+    #     )
+    #     process.trackCollectionMerging *= process.generalTracksORG
+    #     process.trackCollectionMerging *= process.generalTracks
+    #     process.doAlldEdXEstimators = cms.Sequence() # disable these, require Trajectories
+        
+    #     replaceGeneralTracks = lambda x: replaceInputTag(x, "generalTracks", "generalTracksORG")
+    #     process.trackerDrivenElectronSeeds.TkColList = [replaceGeneralTracks(tag) for tag in process.trackerDrivenElectronSeeds.TkColList]
+    #     process.generalConversionTrackProducer.TrackProducer = "generalTracksORG"
+    #     process.muons.inputCollectionLabels = [replaceGeneralTracks(tag) for tag in process.muons.inputCollectionLabels]
+    #     for tag in [#process.muons.TrackExtractorPSet.inputTrackCollection,
+    #                 process.gsfElectronCores.ctfTracks,
+    #                 process.generalV0Candidates.trackRecoAlgorithm,
+    #                 process.particleFlowDisplacedVertexCandidate.trackCollection,
+    #                 process.pfDisplacedTrackerVertex.trackColl,
+    #                 ]:
+    #         replaceGeneralTracks(tag)
+    # else:
     process.tmfTracks = cms.EDProducer("RecoTracksMixer",
         trackCol1 = cms.InputTag("dimuonsGlobal"),
-        trackCol2 = cms.InputTag("generalTracks","",processName)
-    )  
+        trackCol2 = cms.InputTag("generalTracks")
+    )
+    process.trackCollectionMerging *= process.tmfTracks
 
     process.offlinePrimaryVerticesWithBS.TrackLabel = cms.InputTag("tmfTracks")
     process.offlinePrimaryVertices.TrackLabel = cms.InputTag("tmfTracks")
     process.muons.TrackExtractorPSet.inputTrackCollection = cms.InputTag("tmfTracks")
+
     # it should be the best solution to take the original beam spot for the
     # reconstruction of the new primary vertex
     process.offlinePrimaryVertices.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
@@ -95,7 +126,9 @@ def customise(process):
             "drop *_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
             "keep *_generalTracks_*_%s" % processName,
+            "keep *_tmfTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,
+            "keep *_offlinePrimaryVertices_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
     #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [
@@ -113,14 +146,7 @@ def customise(process):
     process.localreco_HcalNZS.remove(process.lumiProducer)
     process.localreco.remove(process.lumiProducer)
 
-
-    if  hasattr(process,"iterativeTracking"):
-        process.iterativeTracking.__iadd__(process.tmfTracks)
-    elif hasattr(process,"trackCollectionMerging"):
-        process.trackCollectionMerging.__iadd__(process.tmfTracks)
-    else:
-        raise "Cannot find tracking sequence"
-
+    # PFCandidate embedding
     process.particleFlowORG = process.particleFlow.clone()
     if hasattr(process,"famosParticleFlowSequence"):
         process.famosParticleFlowSequence.remove(process.pfElectronTranslatorSequence)
