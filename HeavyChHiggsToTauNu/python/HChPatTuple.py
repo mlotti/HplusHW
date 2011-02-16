@@ -238,6 +238,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                 BosonID       = cms.untracked.vint32(23),
                 EtaMax         = cms.untracked.double(2.5)
             )
+            process.hplusPatSequence *= process.VisibleTaus
             outputCommands.append("keep *_VisibleTaus_*_*")
 
     else:
