@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-#import copy
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolationChargedPtSum_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolation_cfi import *
@@ -20,9 +19,11 @@ PFTauQualityCuts08.isolationQualityCuts.minTrackPt = cms.double(0.8)
 PFTauQualityCuts09 = PFTauQualityCuts.clone()
 PFTauQualityCuts09.isolationQualityCuts.minTrackPt = cms.double(0.9)
 
-from RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi import addDiscriminator
-
 def addTestDiscriminatorSequence(process, tau):
+    # Import the modules here in order to not to introduce compile
+    # time dependency (some of these are not in vanilla 3_9_7)
+    from RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi import addDiscriminator
+
     lst = []
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolationChargedPtSum",

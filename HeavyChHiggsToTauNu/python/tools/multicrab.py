@@ -11,20 +11,26 @@ import certifiedLumi
 def getTaskDirectories(opts, filename="multicrab.cfg"):
     """Returns the list of CRAB task directories from a MultiCRAB configuration.
     
+    Arguments:
+    opts      If this object contains 'dirs' attribute, the content of it
+              is returned instead. The use case is that one can give
+              e.g. OptionParser object, whose 'dirs' option is
+              optional, to override the default behaviour of reading
+              the configuration file.
+
+    filename  Path to the multicrab.cfg file (default: 'multicrab.cfg')
+
     The order of the task names is the same as they are in the
     configuration file.
-
-    If opts object contains 'dirs' attribute, the content of it is
-    returned instead. The use case is that one can give e.g.
-    OptionParser object, whose 'dirs' option is optional, to override
-    the default behaviour of reading the configuration file.
     """
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
         return opts.dirs
     else:
+        directory = os.path.dirname(filename)
+
         mc_ignore = ["MULTICRAB", "COMMON"]
         mc_parser = ConfigParser.ConfigParser(dict_type=OrderedDict.OrderedDict)
-        mc_parser.read("multicrab.cfg")
+        mc_parser.read(filename)
 
         sections = mc_parser.sections()
 
@@ -36,7 +42,7 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 
 #        sections.sort()
 
-        return sections
+        return [os.path.join(directory, sec) for sec in sections]
 
 
 def addOptions(parser):
