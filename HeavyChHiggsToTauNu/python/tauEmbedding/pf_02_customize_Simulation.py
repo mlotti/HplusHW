@@ -113,6 +113,7 @@ def customise(process):
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
             "keep *_muons_*_%s" % recoProcessName,
+            "keep *_globalMuons_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
             "keep *_gtDigis_*_%s" % recoProcessName,
 
@@ -128,6 +129,7 @@ def customise(process):
             "keep *_generalTracks_*_%s" % processName,
             "keep *_tmfTracks_*_%s" % processName,
             "keep *_muons_*_%s" % processName,
+            "keep *_globalMuons_*_%s" % processName,
             "keep *_offlinePrimaryVertices_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
