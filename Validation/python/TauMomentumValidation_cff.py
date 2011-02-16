@@ -11,12 +11,17 @@ validatePatHPSTauTriggerMatch.src = cms.InputTag("selectedPatTausHpsPFTauTauTrig
 validatePatHPSTauTriggerMatchCleaned = MomentumValidation.clone()
 validatePatHPSTauTriggerMatchCleaned.src = cms.InputTag("selectedPatTausHpsPFTauTauTriggerMatchedAndJetTriggerCleaned")
 
+hltTauObjects = cms.EDFilter("PATTriggerObjectStandAloneSelector",
+    src = cms.InputTag("patTrigger"),
+    cut = cms.string("hasFilterId(84) && hasPathName('HLT_SingleIsoTau20_Trk15_MET25_v4')")
+)
 validateTriggerTaus = MomentumValidation.clone()
-validateTriggerTaus.src = cms.InputTag("patTrigger")
+validateTriggerTaus.src = cms.InputTag("hltTauObjects")
 
 TauMomentumValidation = cms.Sequence(
-    validatePatHPSTau*
-    validatePatHPSTauTriggerMatch*
-    validatePatHPSTauTriggerMatchCleaned*
+    validatePatHPSTau *
+    validatePatHPSTauTriggerMatch *
+    validatePatHPSTauTriggerMatchCleaned *
+    hltTauObjects *
     validateTriggerTaus
 )
