@@ -84,6 +84,13 @@ namespace HPlus {
     if(!triggerTauMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);
 */
+//    vector<int> recoVertexs::goodPrimaryVerices;
+//    if (goodPrimaryVerices.size() != 1) return false;
+//    std::vector<goodPrimaryVerices*> goodVerteces;
+
+//    const edm::PtrVector<recoVertexs::goodPrimaryVerices>& goodVerteces;
+
+
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau

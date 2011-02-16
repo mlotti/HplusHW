@@ -150,8 +150,7 @@ namespace HPlus {
 
     // Create and attach handle to Muon Collection
     edm::Handle<std::vector<pat::Muon> > myMuonHandle;
-    iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
-    
+    iEvent.getByLabel(fMuonCollectionName, myMuonHandle);    
     // In the case where the handle is empty...
     if ( !myMuonHandle->size() ){
       // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;

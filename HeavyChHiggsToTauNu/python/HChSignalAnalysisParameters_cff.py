@@ -11,7 +11,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4"
     ),
-    hltMetCut = cms.untracked.double(0.0),
+    hltMetCut = cms.untracked.double(30.0),
 )
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 

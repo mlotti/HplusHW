@@ -96,8 +96,8 @@ if options.tauEmbeddingInput != 0:
 #process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
 #process.commonSequence *= process.hplusPrescaleWeightProducer
 
-# change to non-matched taus
-#param.setAllTauSelectionSrcSelectedPatTaus()
+# change to non-matched taus !!!!!!!!!!!!!!!
+param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
