@@ -8,9 +8,7 @@ from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
-import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
-import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
@@ -39,6 +37,12 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     if doPatTaus:
 	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
+
+        # Do these imports here in order to be able to run PAT with
+        # doPatTaus=False with 3_9_7 without extra tags
+        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
 	PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
