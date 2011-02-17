@@ -1138,11 +1138,11 @@ class DatasetManager:
         self.datasets = notSelected
         self._populateMap()
 
-    def loadLuminosities(self, fname):
+    def loadLuminosities(self, fname="lumi.json"):
         """Load integrated luminosities from a JSON file.
 
-        Parameters:
-        fname  Path to the file
+        Arguments:
+        fname  Path to the file (default: 'lumi.json')
 
         The JSON file should be formatted like this:
 
@@ -1151,6 +1151,9 @@ class DatasetManager:
            "Mu_135821-144114": 2.863224758
          }'
         """
+        if not os.path.exists(fname):
+            print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % fname
+
         data = json.load(open(fname))
         for name, value in data.iteritems():
             self.getDataset(name).setLuminosity(value)

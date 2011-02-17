@@ -17,6 +17,10 @@ def main(opts):
         datasets = dataset.getDatasetsFromRootFiles( [(x,x) for x in opts.files], counters=opts.counterdir)
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(opts=opts, counters=opts.counterdir)
+
+    if os.path.exists(opts.lumifile):
+        datasets.loadLuminosities(opts.lumifile)
+
     eventCounter = counter.EventCounter(datasets)
     
 
@@ -76,6 +80,8 @@ if __name__ == "__main__":
 #                      help="Output format; available: 'text' (default: 'text')")
     parser.add_option("--mainCounterOnly", dest="mainCounterOnly", action="store_true", default=False,
                       help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
+    parser.add_option("--lumifile", dest="lumifile", type="string", default="lumi.json",
+                      help="The JSON file to contain the dataset integrated luminosities")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
