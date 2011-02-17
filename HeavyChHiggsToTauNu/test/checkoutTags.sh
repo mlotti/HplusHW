@@ -21,7 +21,7 @@ set -e
 # 18.1.2011/M.Kortelainen CMSSW_3_9_7 Update PFRecoTauDiscriminationByInvMass.cc
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 # 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
-# 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag and added a patch to support comments in site-local-config.xml
+# 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -55,8 +55,7 @@ if [ "x$HPSTANC" = "xtrue" ]; then
 fi
 
 # Luminosity
-cvs co -r V02-01-02 RecoLuminosity/LumiDB
-patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/cacheconfigParser.patch
+cvs co -r V02-01-03 RecoLuminosity/LumiDB
 
 # Electron ID
 cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
