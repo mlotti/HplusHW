@@ -27,6 +27,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "TLorentzVector.h"
@@ -82,7 +83,7 @@ class TauValidation : public edm::EDAnalyzer
 	TLorentzVector motherP4(const HepMC::GenParticle*);
 	void photons(const HepMC::GenParticle*);
 
-    	edm::InputTag hepmcCollection_;
+    	edm::InputTag src;
 
 	double tauEtCut;
 
@@ -109,7 +110,7 @@ class TauValidation : public edm::EDAnalyzer
 using namespace edm;
 
 TauValidation::TauValidation(const edm::ParameterSet& iPSet):  
-  hepmcCollection_(iPSet.getParameter<edm::InputTag>("hepmcCollection")),
+  src(iPSet.getParameter<edm::InputTag>("src")),
   tauEtCut(iPSet.getParameter<double>("tauEtCutForRtau"))
 {    
   dbe = 0;
@@ -122,7 +123,7 @@ void TauValidation::beginJob()
 {
   if(dbe){
     ///Setting the DQM top directories
-    dbe->setCurrentFolder("Generator/Tau");
+    dbe->setCurrentFolder("Validation/GeneratorTau");
     
     // Number of analyzed events
     nEvt = dbe->book1D("nEvt", "n analyzed Events", 1, 0., 1.);
@@ -131,6 +132,7 @@ void TauValidation::beginJob()
     TauPt            = dbe->book1D("TauPt","Tau pT", 100 ,0,100);
     TauEta           = dbe->book1D("TauEta","Tau eta", 100 ,-2.5,2.5);
     TauPhi           = dbe->book1D("TauPhi","Tau phi", 100 ,-3.14,3.14);
+/*
     TauProngs        = dbe->book1D("TauProngs","Tau n prongs", 7 ,0,7);
     TauDecayChannels = dbe->book1D("TauDecayChannels","Tau decay channels", 12 ,0,12);
 	TauDecayChannels->setBinLabel(1+undetermined,"?");
@@ -174,6 +176,7 @@ void TauValidation::beginJob()
     TauPhotonsPt       = dbe->book1D("TauPhotonsPt","Photon pt radiating from tau", 2 ,0,2);
 	TauPhotonsPt->setBinLabel(1,"Sum of tau pt");
 	TauPhotonsPt->setBinLabel(2,"Sum of tau pt radiated by photons");
+*/
   }
 
   return;
@@ -186,23 +189,34 @@ void TauValidation::endJob(){
 void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 {
   ///Get PDT Table
-  iSetup.getData( fPDGTable );
+//  iSetup.getData( fPDGTable );
   return;
 }
 void TauValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){return;}
 void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSetup)
 { 
-  
+/*  
   ///Gathering the HepMCProduct information
   edm::Handle<HepMCProduct> evt;
-  iEvent.getByLabel(hepmcCollection_, evt);
+  iEvent.getByLabel(src, evt);
 
   //Get EVENT
   HepMC::GenEvent *myGenEvent = new HepMC::GenEvent(*(evt->GetEvent()));
-
+*/
   nEvt->Fill(0.5);
 
   // find taus
+  Handle<reco::GenParticleCollection> genParticles;
+  iEvent.getByLabel(src, genParticles);
+  for(size_t i = 0; i < genParticles->size(); ++ i) {
+	const reco::GenParticle & p = (*genParticles)[i];
+	if(abs(p.pdgId())==15){
+	  TauPt->Fill(p.pt());
+	  TauEta->Fill(p.eta());
+	  TauPhi->Fill(p.phi());
+	}
+  }
+/*
   for(HepMC::GenEvent::particle_const_iterator iter = myGenEvent->particles_begin(); iter != myGenEvent->particles_end(); ++iter) {
       if(abs((*iter)->pdg_id())==15){
         TauPt->Fill((*iter)->momentum().perp());
@@ -219,8 +233,8 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
         spinEffectsZ(*iter);
       }
   }
-
   delete myGenEvent;
+*/
 }//analyze
 
 int TauValidation::findMother(const HepMC::GenParticle* tau){
