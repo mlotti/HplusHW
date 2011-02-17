@@ -52,7 +52,7 @@ void MomentumValidation::beginJob(){
     dbe->setCurrentFolder("Validation/Momentum");
 
     // Number of analyzed events
-    nEvt = dbe->book1D("nEvt", "n analyzed Events", 1, 0., 1.);
+    nEvt = dbe->book1D("nEvt "+src.label(), "n analyzed Events", 1, 0., 1.);
 
     //Kinematics
     Pt          = dbe->book1D("Pt "+src.label(),"pT", 100 ,0,100);
