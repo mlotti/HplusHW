@@ -173,7 +173,7 @@ def addTo(datasets):
             },
             "tauembedding_embedding_v6_1": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_generation_v6_1-e186a9fcb0f6b229006bacc604d044d9/USER",
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1-105b277d7ebabf8cba6c221de6c7ed8a/USER",
                 "number_of_jobs": 35 # ~2000 ev/job
             },
             })
