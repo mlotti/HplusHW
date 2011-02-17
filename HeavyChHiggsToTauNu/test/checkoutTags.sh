@@ -20,29 +20,38 @@ set -e
 # 12.1.2011/M.Kortelainen CMSSW_3_9_7 Added HPS+TaNC tags
 # 18.1.2011/M.Kortelainen CMSSW_3_9_7 Update PFRecoTauDiscriminationByInvMass.cc
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
+# 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
-# HPS+TaNC
-cvs co -r1.28 RecoTauTag/tau_tags.txt
-# This checkouts
-# RecoTauTag/RecoTau
-# RecoTauTag/TauTagTools
-# RecoTauTag/Configuration
-# DataFormats/TauReco
-addpkg -f RecoTauTag/tau_tags.txt
 
-cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
-# This checkouts
-# DataFormats/PatCandidates 
-# JetMETCorrections/Type1MET 
-# PhysicsTools/IsolationAlgos 
-# PhysicsTools/PFCandProducer 
-# PhysicsTools/PatAlgos 
-# PhysicsTools/PatUtils
-addpkg -f RecoTauTag/tau_tags_dependencies.txt
-cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+HPSTANC="true"
+if [ "x$#" = "x1" -a "x$1" = "xnoHpsTanc" ]; then
+    HPSTANC="false"
+fi
+
+# HPS+TaNC
+if [ "x$HPSTANC" = "xtrue" ]; then
+    cvs co -r1.28 RecoTauTag/tau_tags.txt
+    # This checkouts
+    # RecoTauTag/RecoTau
+    # RecoTauTag/TauTagTools
+    # RecoTauTag/Configuration
+    # DataFormats/TauReco
+    addpkg -f RecoTauTag/tau_tags.txt
+
+    cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
+    # This checkouts
+    # DataFormats/PatCandidates 
+    # JetMETCorrections/Type1MET 
+    # PhysicsTools/IsolationAlgos 
+    # PhysicsTools/PFCandProducer 
+    # PhysicsTools/PatAlgos 
+    # PhysicsTools/PatUtils
+    addpkg -f RecoTauTag/tau_tags_dependencies.txt
+    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+fi
 
 # Electron ID
 cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
