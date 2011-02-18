@@ -232,7 +232,7 @@ def _normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return normalizeToFactor(h, 1.0/h.Integral())
+    return _normalizeToFactor(h, 1.0/h.Integral())
 
 def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
@@ -466,7 +466,7 @@ class DatasetRootHistoMergedData:
         """
         hsum = self._getSumHistogram()
         if self.normalization == "toOne":
-            return normalizeToOne(hsum)
+            return _normalizeToOne(hsum)
         else:
             return hsum
 
@@ -568,7 +568,7 @@ class DatasetRootHistoMergedMC:
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
-            return normalizeToOne(hsum)
+            return _normalizeToOne(hsum)
         else:
             return hsum
 
