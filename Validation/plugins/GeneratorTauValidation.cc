@@ -208,13 +208,15 @@ void TauValidation::analyze(const edm::Event& iEvent,const edm::EventSetup& iSet
   // find taus
   Handle<reco::GenParticleCollection> genParticles;
   iEvent.getByLabel(src, genParticles);
-  for(size_t i = 0; i < genParticles->size(); ++ i) {
+  if(genParticles.isValid()){
+    for(size_t i = 0; i < genParticles->size(); ++ i) {
 	const reco::GenParticle & p = (*genParticles)[i];
 	if(abs(p.pdgId())==15){
 	  TauPt->Fill(p.pt());
 	  TauEta->Fill(p.eta());
 	  TauPhi->Fill(p.phi());
 	}
+    }
   }
 /*
   for(HepMC::GenEvent::particle_const_iterator iter = myGenEvent->particles_begin(); iter != myGenEvent->particles_end(); ++iter) {
