@@ -1057,6 +1057,9 @@ class DatasetManager:
         Parameters:
         nameList    List of Dataset names ro remove
         """
+        if isinstance(nameList, basestring):
+            nameList = [nameList]
+
         selected = []
         for d in self.datasets:
             if not d.getName() in nameList:
