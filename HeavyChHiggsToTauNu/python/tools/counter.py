@@ -601,6 +601,11 @@ class SimpleCounter:
         if self.datasetRootHisto.getDataset().isMC():
             self.datasetRootHisto.normalizeToLuminosity(lumi)
 
+    def scale(self, value):
+        if self.counter != None:
+            raise Exception("Can't scale after the counters have been created!")
+        self.datasetRootHisto.scale(value)
+
     def _createCounter(self):
         self.counter = [x[1] for x in dataset._histoToCounter(self.datasetRootHisto.getHistogram())]
 
@@ -655,6 +660,9 @@ class Counter:
 
     def normalizeMCToLuminosity(self, lumi):
         self.forEachDataset(lambda x: x.normalizeMCToLuminosity(lumi))
+
+    def scale(self, value):
+        self.forEachDataset(lambda x: x.scale(value))
 
     def getTable(self):
         table = CounterTable()
@@ -714,6 +722,10 @@ class EventCounter:
     def normalizeMCToLuminosity(self, lumi):
         self._forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
         self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
+
+    def scale(self, value):
+        self._forEachCounter(lambda x: x.scale(value))
+        self.normalization += " (scaled with %g)" % value
 
     def getMainCounter(self):
         return self.mainCounter
