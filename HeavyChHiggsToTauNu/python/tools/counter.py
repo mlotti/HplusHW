@@ -176,12 +176,22 @@ class TableFormatBase:
         endColumn     String for column ending
         """
         self.defaultCellFormat = cellFormat
+        self.columnCellFormat = {}
 
         for x in ["beginTable", "endTable", "beginRow", "endRow", "beginColumn", "endColumn"]:
             try:
                 setattr(self, "_"+x, kwargs[x])
             except KeyError:
                 setattr(self, "_"+x, "")
+
+    def setColumnFormat(self, columnIndex, cellFormat):
+        """Set column format.
+
+        Arguments:
+        columnIndex    index of column
+        cellFormat     CellFormatBase object to format the column
+        """
+        self.columnCellFormat[columnIndex] = cellFormat
 
     def beginTable(self, ncolumns):
         """Format table beginning.
@@ -227,13 +237,17 @@ class TableFormatBase:
         """
         return self._endColumn
 
-    def formatCell(self, count):
+    def formatCell(self, columnIndex, count):
         """Format a cell.
 
         Arguments:
         count   Count object to format
         """
-        return self.defaultCellFormat.format(count)
+        cf = self.defaultCellFormat
+        if columnIndex in self.columnCellFormat:
+            cf = self.columnCellFormat[columnIndex]
+
+        return cf.format(count)
 
 
 class TableFormatText(TableFormatBase):
@@ -429,6 +443,14 @@ class CounterTable:
             if row in mapping:
                 self.rowNames[irow] = mapping[row]
 
+    def getColumnNames(self):
+        return self.columnNames
+
+    def renameColumns(self, mapping):
+        for icol, col in enumerate(self.columnNames):
+            if col in mapping:
+                self.columnNames[icol] = mapping[col]
+
     def indexColumn(self, name):
         return self.columnNames.index(name)
 
@@ -481,11 +503,14 @@ class CounterTable:
             row[icol] = column.getCount(i)
             self.table.append(row)
 
-        # Sanity check
-        for row in self.table:
-            if len(row) < beginColumns+1:
-                print row
-                raise Exception("Internal error: len(row) = %d, beginColumns = %d" % (len(row), beginColumns))
+        for irow, row in enumerate(self.table):
+            # Append None to row if column didn't have 
+            if len(row) == beginColumns:
+                row.insert(icol, None)
+            # Sanity check
+            elif len(row) < beginColumns:
+                print [c.value() for c in row]
+                raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
 
@@ -537,7 +562,7 @@ class CounterTable:
             for icol in xrange(0, self.getNcolumns()):
                 count = self.getCount(irow, icol)
                 if count != None:
-                    row.append(formatter.formatCell(count))
+                    row.append(formatter.formatCell(icol, count))
                 else:
                     row.append("")
             content.append(row)
