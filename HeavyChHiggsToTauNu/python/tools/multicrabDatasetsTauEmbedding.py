@@ -37,6 +37,11 @@ def addTo(datasets):
                 "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_skim_v6-12ac7b1bb8dedc3750515b605b2bbaa4/USER",
                 "number_of_jobs": 30 # ~270 ev/job
             },
+            "tauembedding_skim_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_skim_v6_2-02482c90013e67a404a9ffaab5714305/USER",
+                "number_of_jobs": 30 # ~270 ev/job
+            },
             })
 
 
