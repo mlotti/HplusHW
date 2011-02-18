@@ -22,6 +22,7 @@ process.load('Configuration/StandardSequences/EndOfProcess_cff')
 process.load("HiggsAnalysis.Validation.TauMomentumValidation_cff")
 process.load("HiggsAnalysis.Validation.GeneratorValidation_cff")
 process.load("HiggsAnalysis.Validation.TriggerValidation_cff")
+process.TriggerTauValidation.triggerResults = cms.InputTag("TriggerResults","",dataVersion.getTriggerProcess())
 
 ANALYSISEventContent = cms.PSet(
     outputCommands = cms.untracked.vstring('keep *_*_*_Validation')

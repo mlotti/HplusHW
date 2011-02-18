@@ -10,6 +10,9 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DQMServices/Core/interface/MonitorElement.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerObject.h"
 
@@ -28,8 +31,10 @@ class TriggerObjectValidation : public edm::EDAnalyzer {
 	void endRun(const edm::Run&,const edm::EventSetup&);
 
     private:
-	edm::InputTag src;
-	int id;
+	edm::InputTag triggerResults;
+	std::string triggerBit;
+	edm::InputTag triggerObjects;
+	int triggerObjectId;
 
   	DQMStore *dbe;
 
@@ -39,8 +44,10 @@ class TriggerObjectValidation : public edm::EDAnalyzer {
 };
 
 TriggerObjectValidation::TriggerObjectValidation(const edm::ParameterSet& iConfig):
-  src(iConfig.getParameter<edm::InputTag>("src")),
-  id(iConfig.getParameter<int>("id"))
+    triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
+    triggerBit(iConfig.getParameter<std::string>("triggerBit")),
+    triggerObjects(iConfig.getParameter<edm::InputTag>("triggerObjects")),
+    triggerObjectId(iConfig.getParameter<int>("triggerObjectId"))
 {
   dbe = 0;
   dbe = edm::Service<DQMStore>().operator->();
@@ -54,7 +61,7 @@ void TriggerObjectValidation::beginJob(){
     dbe->setCurrentFolder("Validation/TriggerObjects");
 
     // Number of analyzed events
-    nEvt = dbe->book1D("nEvt", "n analyzed Events", 1, 0., 1.);
+    nEvt    = dbe->book1D("nEvt", "n analyzed Events", 2, 0., 2.);
 
     //Kinematics
     Pt          = dbe->book1D("Pt","pT", 100 ,0,100);
@@ -69,12 +76,32 @@ void TriggerObjectValidation::beginRun(const edm::Run& iRun,const edm::EventSetu
 void TriggerObjectValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
+
     nEvt->Fill(0.5);
+
+    edm::Handle<edm::TriggerResults> hltHandle;
+    iEvent.getByLabel(triggerResults,hltHandle);
+
+    bool passedTrigger = false;
+
+    const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltHandle);
+    for (unsigned int i=0; i<triggerNames.size(); i++) {
+	//std::cout << "trigger path= " << triggerNames.triggerName(i) << std::endl;
+	if(triggerBit == triggerNames.triggerName(i) && hltHandle->accept(i)){
+		passedTrigger = true;
+		i = triggerNames.size();
+	}
+    }
+
+    if(!passedTrigger) return;
+
+    nEvt->Fill(1.5);
+
     edm::Handle<trigger::TriggerEvent> triggerObjs;
-    if(iEvent.getByLabel(src,triggerObjs)){
+    if(iEvent.getByLabel(triggerObjects,triggerObjs)){
 	const trigger::TriggerObjectCollection objs = triggerObjs->getObjects();
 	for(unsigned i = 0; i < objs.size(); ++i){
-		if(objs[i].id() != id) continue;
+		if(objs[i].id() != triggerObjectId) continue;
 		Pt->Fill(objs[i].pt());
         	Eta->Fill(objs[i].eta());
         	Phi->Fill(objs[i].phi());
