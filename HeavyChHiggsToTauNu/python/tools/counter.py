@@ -359,7 +359,7 @@ def counterEfficiency(counterTable):
     for icol in xrange(0, counterTable.getNcolumns()):
         prev = None
         for irow in xrange(0, counterTable.getNrows()):
-            count = counterTable.getValue(irow, icol)
+            count = counterTable.getCount(irow, icol)
             value = None
             if count != None and prev != None:
                 try:
@@ -367,7 +367,7 @@ def counterEfficiency(counterTable):
                 except ZeroDivisionError:
                     pass
             prev = count
-            result.setValue(irow, icol, value)
+            result.setCount(irow, icol, value)
     return result
 
 class CounterColumn:
@@ -392,7 +392,7 @@ class CounterColumn:
     def getRowName(self, irow):
         return self.rowNames[irow]
 
-    def getValue(self, irow):
+    def getCount(self, irow):
         return self.values[irow]
 
 class CounterTable:
@@ -418,10 +418,10 @@ class CounterTable:
             return 0
         return len(self.table[0])
 
-    def getValue(self, irow, icol):
+    def getCount(self, irow, icol):
         return self.table[irow][icol]
 
-    def setValue(self, irow, icol, value):
+    def setCount(self, irow, icol, value):
         self.table[irow][icol] = value
 
     def renameRows(self, mapping):
@@ -446,7 +446,7 @@ class CounterTable:
         while iname < len(self.rowNames)  and icount < column.getNrows():
             # Check if the current indices give the same counter name for both
             if self.rowNames[iname] == column.getRowName(icount):
-                self.table[iname].insert(icol, column.getValue(icount))
+                self.table[iname].insert(icol, column.getCount(icount))
                 iname += 1
                 icount += 1
                 continue
@@ -455,7 +455,7 @@ class CounterTable:
             found = False
             for i in xrange(iname, len(self.rowNames)):
                 if self.rowNames[i] == column.getRowName(icount):
-                    self.table[i].insert(icol, column.getValue(icount))
+                    self.table[i].insert(icol, column.getCount(icount))
                     iname = i+1
                     icount += 1
                     found = True
@@ -469,7 +469,7 @@ class CounterTable:
             # found name
             self.rowNames.insert(iname, column.getRowName(icount))
             row = [None]*(beginColumns+1)
-            row[icol] = column.getValue(icount)
+            row[icol] = column.getCount(icount)
             self.table.insert(iname, row)
             iname += 1
             icount += 1
@@ -478,7 +478,7 @@ class CounterTable:
         for i in xrange(icount, column.getNrows()):
             self.rowNames.append(column.getRowName(i))
             row = [None]*(beginColumns+1)
-            row[icol] = column.getValue(i)
+            row[icol] = column.getCount(i)
             self.table.append(row)
 
         # Sanity check
@@ -535,7 +535,7 @@ class CounterTable:
         for irow in xrange(0, self.getNrows()):
             row = [self.rowNames[irow]]
             for icol in xrange(0, self.getNcolumns()):
-                count = self.getValue(irow, icol)
+                count = self.getCount(irow, icol)
                 if count != None:
                     row.append(formatter.formatCell(count))
                 else:
@@ -623,7 +623,7 @@ class SimpleCounter:
     def getRowName(self, icount):
         return self.countNames[icount]
 
-    def getValue(self, icount):
+    def getCount(self, icount):
         if self.counter == None:
             self._createCounter()
         return self.counter[icount]
