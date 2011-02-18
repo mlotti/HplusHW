@@ -424,6 +424,11 @@ class CounterTable:
     def setValue(self, irow, icol, value):
         self.table[irow][icol] = value
 
+    def renameRows(self, mapping):
+        for irow, row in enumerate(self.rowNames):
+            if row in mapping:
+                self.rowNames[irow] = mapping[row]
+
     def indexColumn(self, name):
         return self.columnNames.index(name)
 
