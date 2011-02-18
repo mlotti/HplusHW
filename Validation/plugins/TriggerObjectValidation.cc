@@ -74,7 +74,6 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
     if(iEvent.getByLabel(src,triggerObjs)){
 	const trigger::TriggerObjectCollection objs = triggerObjs->getObjects();
 	for(unsigned i = 0; i < objs.size(); ++i){
-		std::cout << "check trigger objects " << objs[i].pt() << " " << objs[i].id() << std::endl;
 		if(objs[i].id() != id) continue;
 		Pt->Fill(objs[i].pt());
         	Eta->Fill(objs[i].eta());
