@@ -17,7 +17,7 @@ doAllTauIds = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = False
+doJESVariation = True #False
 JESVariation = 0.03
 JESEtaVariation = 0.02
 
@@ -31,15 +31,14 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#       "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
-       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
@@ -72,13 +71,6 @@ process.infoPath = addConfigInfo(process, options)
 # The "golden" version of the signal analysis
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-# change to non-matched taus
-#param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
-#param.tauSelectionShrinkingConeCutBased.src = "selectedPatTausShrinkingConePFTauTau"
-#param.tauSelectionShrinkingConeTaNCBased.src = "selectedPatTausShrinkingConePFTauTau"
-#param.tauSelectionHPSTauBased.src = "selectedPatTausHpsPFTauTau"
-#param.tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTau"
-
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')
@@ -111,19 +103,11 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
-#    forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
-
     #myFactorizationMapName = getTauIDFactorizationMap() 
-
-process.signalAnalysis.MET.METCut = 70.
-#process.signalAnalysis.fakeMETVeto.maxDeltaPhi = 5.
-process.signalAnalysis.bTagging.discriminatorCut = 2.0
-
-
 
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut

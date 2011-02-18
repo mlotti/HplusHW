@@ -57,6 +57,11 @@ tauSelectionHPSTauBased = tauSelectionBase.clone(
     selection = "HPSTauBased"
 )
 
+tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    selection = "HPSMediumTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
     selection = "CombinedHPSTaNCTauBased"
@@ -67,17 +72,20 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
+                 tauSelectionHPSMediumTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
 tauSelectionNames = ["TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
-                     "TauSelectionHPSTauBased",
+                     "TauSelectionHPSTightTauBased",
+                     "TauSelectionHPSMediumTauBased",
                      "TauSelectionCombinedHPSTaNCBased"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
 tauSelection = tauSelectionHPSTauBased
+#tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
 
 jetSelection = cms.untracked.PSet(
@@ -152,6 +160,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
+    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
@@ -159,6 +168,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
 def setTauIDFactorizationMap(options):
