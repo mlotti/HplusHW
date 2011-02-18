@@ -13,11 +13,21 @@ def addTo(datasets):
                 "datasetpath": "/Mu/local-Run2010A_Dec22ReReco_v1_AOD_136035_tauembedding_skim_v6-e1e03911ddc3956a926ce92e843b1f3e/USER",
                 "number_of_jobs": 10 # ~70 ev/job
             },
+            "tauembedding_skim_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010A_Dec22ReReco_v1_AOD_136035_tauembedding_skim_v6_2-14362b39675aa2d1a1be898bd8d6ef08/USER",
+                "number_of_jobs": 10 # ~70 ev/job
+            },
             })
     datasets["Mu_146428-147116_Dec22"]["data"].update({
             "tauembedding_skim_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_146428_tauembedding_skim_v6-e1e03911ddc3956a926ce92e843b1f3e/USER",
+                "number_of_jobs": 8 # ~150 ev/job
+            },
+            "tauembedding_skim_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_146428_tauembedding_skim_v6_2-14362b39675aa2d1a1be898bd8d6ef08/USER",
                 "number_of_jobs": 8 # ~150 ev/job
             },
             })
