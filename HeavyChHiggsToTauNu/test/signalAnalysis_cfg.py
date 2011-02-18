@@ -17,7 +17,7 @@ doAllTauIds = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = True #False
+doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
 
