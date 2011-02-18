@@ -87,10 +87,11 @@ param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for whic
 # Other cut values should be exactly the same as in signal analysis
 
 # Prescale weight, do not uncomment unless you know what you're doing!
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.commonSequence *= process.hplusPrescaleWeightProducer
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
 
 ##############################################################################
 

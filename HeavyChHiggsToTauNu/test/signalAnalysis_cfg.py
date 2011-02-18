@@ -83,11 +83,11 @@ if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
 
 # Prescale weight, do not uncomment unless you know what you're doing!
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.commonSequence *= process.hplusPrescaleWeightProducer
-
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
 
 
 # Signal analysis module for the "golden analysis"

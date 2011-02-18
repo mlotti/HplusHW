@@ -82,10 +82,11 @@ param.alphaT = -1.0
 param.maxDeltaPhi = 999.
 
 # Prescale weight, do not uncomment unless you know what you're doing!
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.commonSequence *= process.hplusPrescaleWeightProducer
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
 
 # Signal optimisation module
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
