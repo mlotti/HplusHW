@@ -9,13 +9,13 @@ from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChPFTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
 import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
-import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous_cfi as HChCaloTauDiscriminatorsCont
+import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausCont_cfi as HChTausCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
-import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination_cfi as PFTauTestDiscrimination
+import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 
@@ -238,6 +238,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                 BosonID       = cms.untracked.vint32(23),
                 EtaMax         = cms.untracked.double(2.5)
             )
+            process.hplusPatSequence *= process.VisibleTaus
             outputCommands.append("keep *_VisibleTaus_*_*")
 
     else:
@@ -349,6 +350,23 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     return seq
 
+from FWCore.ParameterSet.Modules import _Module
+class RemoveSoftMuonVisitor:
+    def __init__(self):
+        self.found = []
+
+    def enter(self, visitee):
+        if isinstance(visitee, _Module) and "softMuon" in visitee.label():
+            self.found.append(visitee)
+
+    def leave(self, visitee):
+        pass
+
+    def removeFound(self, process, sequence):
+        for mod in self.found:
+            print "Removing '%s' from sequence '%s' and process" % (mod.label(), sequence.label())
+            sequence.remove(mod)
+            delattr(process, mod.label())
 
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     def setPatArg(args, name, value):
@@ -370,6 +388,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 
     process.collisionDataSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
+        # Hack to not to crash if something in PAT assumes process.out
         hasOut = hasattr(process, "out")
         if not hasOut:
             process.out = cms.OutputModule("PoolOutputModule",
@@ -379,13 +398,27 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         setPatArgs(patArgs, {"doPatTrigger": False,
                              "doTauHLTMatching": False,
                              "doPatCalo": False,
-                             "doBTagging": False,
+                             "doBTagging": True,
                              "doPatElectronID": False,
                              "doPatMET": False})
 
         process.patSequence = addPat(process, dataVersion, **patArgs)
         removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
 
+        # Remove soft muon b tagging discriminators as they are not
+        # well defined, cause technical problems and we don't use
+        # them.
+        process.patJets.discriminatorSources = filter(lambda tag: "softMuon" not in tag.getModuleLabel(), process.patJets.discriminatorSources)
+        for seq in [process.btagging, process.btaggingJetTagsAOD, process.btaggingTagInfosAOD]:
+            softMuonRemover = RemoveSoftMuonVisitor()
+            seq.visit(softMuonRemover)
+            softMuonRemover.removeFound(process, seq)
+
+        # Use the merged track collection
+        process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+        process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+
+        # Another part of the PAT process.out hack
         if not hasOut:
             del process.out
     else:

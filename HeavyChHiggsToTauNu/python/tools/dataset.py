@@ -6,6 +6,147 @@ import ROOT
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+def getDatasetsFromMulticrabDirs(multiDirs, **kwargs):
+    """Construct DatasetManager from a list of MultiCRAB directory names.
+
+    Arguments:
+    multiDirs   List of strings or pairs of strings of the MultiCRAB
+                directories (relative to the working directory). If
+                the item of the list is pair of strings, the first
+                element is the directory, and the second element is
+                the postfix for the dataset names from that directory.
+
+    Keyword arguments:
+
+    See getDatasetsFromMulticrabCfg() for the rest of the keyword arguments.
+    """
+
+    if "cfgfile" in kwargs:
+        raise Exception("'cfgfile' keyword argument not allowed")
+    if "namePostfix" in kwargs:
+        raise Exception("'namePostfix' keyword argument not allowed")
+
+    nameList = []
+    for d in multiDirs:
+        if isinstance(d, str):
+            nameList.append( (os.path.join(d, "multicrab.cfg"), "") )
+        else:
+            nameList.append( (os.path.join(d[0], "multicrab.cfg"), d[1]) )
+
+    datasets = DatasetManager()
+    for cfg, postfix in nameList:
+        d = getDatasetsFromMulticrabCfg(cfgfile=cfg, namePostfix=postfix, **kwargs)
+        datasets.extend(d)
+    return datasets
+
+def getDatasetsFromMulticrabCfg(**kwargs):
+    """Construct DatasetManager from a multicrab.cfg.
+
+    Keyword Arguments:
+    opts       Optional OptionParser object. Should have options added with
+               addOptions() and multicrab.addOptions().
+    cfgfile    Path to the multicrab.cfg file (for default, see multicrab.getTaskDirectories())
+
+    See getDatasetsFromCrabDirs() for the rest of the keyword argumens.
+
+
+    The section names in multicrab.cfg are taken as the dataset names
+    in the DatasetManager object.
+    """
+    opts = kwargs.get("opts", None)
+    taskDirs = []
+    if "cfgfile" in kwargs:
+        taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
+    else:
+        taskDirs = multicrab.getTaskDirectories(opts)
+
+    return getDatasetsFromCrabDirs(taskDirs, **kwargs)
+
+def getDatasetsFromCrabDirs(taskdirs, **kwargs):
+    """Construct DatasetManager from a list of CRAB task directory names.
+
+    Arguments:
+    taskdirs     List of strings for the CRAB task directories (relative
+                 to the working directory)
+
+    Keyword arguments:
+    opts         Optional OptionParser object. Should have options added with
+                 addOptions() and multicrab.addOptions().
+    namePostfix  Postfix for the dataset names (default: '')
+
+    See getDatasetsFromRootFiles() for rest of the keyword arguments.
+
+    The basename of the task directories are taken as the dataset
+    names in the DatasetManager object (e.g. for directory '../Foo',
+    'Foo' will be the dataset name)
+    """
+    opts = None
+    if "opts" in kwargs:
+        opts = kwargs["opts"]
+    else:
+        parser = OptionParser(usage="Usage: %prog [options]")
+        multicrab.addOptions(parser)
+        addOptions(parser)
+        (opts, args) = parser.parse_args()
+    if hasattr(opts, "counterDir"):
+        counters = opts.counterdir
+    postfix = kwargs.get("namePostfix", "")
+
+    dlist = []
+    noFiles = False
+    for d in taskdirs:
+        files = glob.glob(os.path.join(d, "res", opts.input))
+        if len(files) > 1:
+            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
+            return 1
+        elif len(files) == 0:
+            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, opts.input, os.path.join(d, "res"))
+            noFiles = True
+            continue
+
+        dlist.append( (os.path.basename(d)+postfix, files[0]) )
+
+    if noFiles:
+        print >> sys.stderr, ""
+        print >> sys.stderr, "  There were datasets without files. Have you merged the files with hplusMergeHistograms.py?"
+        print >> sys.stderr, ""
+        if len(dlist) == 0:
+            raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
+
+    if len(dlist) == 0:
+        raise Exception("No datasets")
+
+    return getDatasetsFromRootFiles(dlist, **kwargs)
+
+def getDatasetsFromRootFiles(rootFileList, **kwargs):
+    """Construct DatasetManager from a list of CRAB task directory names.
+
+    Arguments:
+    rootFileList  List of (name, filename) pairs (both should be strings).
+                  'name' is taken as the dataset name, and 'filename' as
+                  the path to the ROOT file.
+
+    Keyword arguments:
+    counters      String for a directory name inside the ROOT files for the
+                  event counter histograms (default: 'signalAnalysisCounters').
+    """
+    counters = kwargs.get("counters", "signalAnalysisCounters")
+    datasets = DatasetManager()
+    for name, f in rootFileList:
+        datasets.append(Dataset(name, f, counters))
+    return datasets
+
+def addOptions(parser):
+    """Add common dataset options to OptionParser object."""
+    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
+                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
+    parser.add_option("-f", dest="files", type="string", action="append", default=[],
+                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
+    parser.add_option("--counterDir", "-c", dest="counterdir", type="string", default="signalAnalysisCounters",
+                      help="TDirectory name containing the counters (default: signalAnalysisCounters")
+
+
+
 class Count:
     """Represents counter count value with uncertainty."""
     def __init__(self, value, uncertainty):
@@ -27,7 +168,7 @@ class Count:
     def __str__(self):
         return "%f"%self._value
 
-def histoToCounter(histo):
+def _histoToCounter(histo):
     """Transform histogram (TH1) to a list of (name, Count) pairs.
 
     The name is taken from the x axis label and the count is Count
@@ -43,7 +184,7 @@ def histoToCounter(histo):
 
     return ret
 
-def histoToDict(histo):
+def _histoToDict(histo):
     """Transform histogram (TH1) to a dictionary.
 
     The key is taken from the x axis label, and the value is the bin
@@ -57,14 +198,14 @@ def histoToDict(histo):
 
     return ret
 
-def rescaleInfo(d):
+def _rescaleInfo(d):
     """Rescales info dictionary.
 
     Assumes that d has a 'control' key for a numeric value, and then
     normalizes all items in the dictionary such that the 'control'
     becomes one.
 
-    The use case is to have a dictionary from histoToDict() function,
+    The use case is to have a dictionary from _histoToDict() function,
     where the original histogram is merged from multiple jobs. It is
     assumed that each histogram as a one bin with 'control' label, and
     the value of this bin is 1 for each job. Then the bin value for
@@ -82,92 +223,7 @@ def rescaleInfo(d):
     return ret
 
 
-def addOptions(parser):
-    """Add common dataset options to OptionParser object."""
-    parser.add_option("-i", dest="input", type="string", default="histograms-*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms-*.root')")
-    parser.add_option("-f", dest="files", type="string", action="append", default=[],
-                      help="Give input ROOT files explicitly, if these are given, multicrab.cfg is not read and -d/-i parameters are ignored")
-
-
-def getDatasetsFromMulticrabCfg(opts=None, counters="signalAnalysisCounters"):
-    """Construct DatasetManager from a multicrab.cfg.
-
-    Parameters:
-    opts       Optional OptionParser object. Should have options added with
-               addOptions() and multicrab.addOptions().
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
-
-
-    The section names in multicrab.cfg are taken as the dataset names
-    in the DatasetManager object.
-    """
-    return getDatasetsFromCrabDirs(multicrab.getTaskDirectories(opts), opts, counters)
-
-def getDatasetsFromCrabDirs(taskdirs, opts=None, counters="signalAnalysisCounters"):   
-    """Construct DatasetManager from a list of CRAB task directory names.
-
-    Parameters:
-    taskdirs   List of strings for the CRAB task directories (relative
-               to the working directory)
-    opts       Optional OptionParser object. Should have options added with
-               addOptions() and multicrab.addOptions().
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
-
-    The task directories are taken as the dataset names in the DatasetManager object.
-    """
-    if opts == None:
-        parser = OptionParser(usage="Usage: %prog [options]")
-        multicrab.addOptions(parser)
-        addOptions(parser)
-        (opts, args) = parser.parse_args()
-        if hasattr(opts, "counterdir"):
-            counters = opts.counterdir
-
-    dlist = []
-    noFiles = False
-    for d in taskdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
-        if len(files) > 1:
-            raise Exception("Only one file should match the input (%d matched) for task %s" % (len(files), d))
-            return 1
-        elif len(files) == 0:
-            print >> sys.stderr, "Ignoring dataset %s: no files matched to '%s' in task directory %s" % (d, opts.input, os.path.join(d, "res"))
-            noFiles = True
-            continue
-
-        dlist.append( (d, files[0]) )
-
-    if noFiles:
-        print >> sys.stderr, ""
-        print >> sys.stderr, "  There were datasets without files. Have you merged the files with hplusMergeHistograms.py?"
-        print >> sys.stderr, ""
-        if len(dlist) == 0:
-            raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
-
-    if len(dlist) == 0:
-        raise Exception("No datasets")
-
-    return getDatasetsFromRootFiles(dlist, counters)
-
-def getDatasetsFromRootFiles(dlist, counters="signalAnalysisCounters"):
-    """Construct DatasetManager from a list of CRAB task directory names.
-
-    Parameters:
-    dlist      List of (name, filename) pairs (both should be strings).
-               'name' is taken as the dataset name, and 'filename' as
-               the path to the ROOT file.
-    counters   String for a directory name inside the ROOT files for the
-               event counter histograms
-    """
-    datasets = DatasetManager()
-    for name, f in dlist:
-        datasets.append(Dataset(name, f, counters))
-    return datasets
-
-def normalizeToOne(h):
+def _normalizeToOne(h):
     """Normalize TH1 to unit area.
 
     Parameters:
@@ -176,10 +232,9 @@ def normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return normalizeToFactor(1.0/h.Integral())
-    return h
+    return normalizeToFactor(h, 1.0/h.Integral())
 
-def normalizeToFactor(h, f):
+def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
 
     Parameters:
@@ -197,7 +252,7 @@ def normalizeToFactor(h, f):
     return h
 
 
-def mergeStackHelper(datasetList, nameList, task):
+def _mergeStackHelper(datasetList, nameList, task):
     """Helper function for merging/stacking a set of datasets.
 
     Parameters:
@@ -250,7 +305,7 @@ def mergeStackHelper(datasetList, nameList, task):
 
     return (selected, notSelected, firstIndex)
 
-class HistoWrapper:
+class DatasetRootHisto:
     """Wrapper for a single TH1 histogram and the corresponding Dataset.
 
     The wrapper holds the normalization of the histogram. User should
@@ -292,7 +347,7 @@ class HistoWrapper:
 
     def getBinLabels(self):
         """Get list of the bin labels of the histogram."""
-        return [x[0] for x in histoToCounter(self.histo)]
+        return [x[0] for x in _histoToCounter(self.histo)]
 
     def getHistogram(self):
         """Get a clone of the wrapped histogram normalized correctly."""
@@ -303,14 +358,14 @@ class HistoWrapper:
         if self.normalization == "none":
             return h
         elif self.normalization == "toOne":
-            return normalizeToOne(h)
+            return _normalizeToOne(h)
 
         # We have to normalize to cross section in any case
-        h = normalizeToFactor(h, self.dataset.getNormFactor())
+        h = _normalizeToFactor(h, self.dataset.getNormFactor())
         if self.normalization == "byCrossSection":
             return h
         elif self.normalization == "toLuminosity":
-            return normalizeToFactor(h, self.luminosity)
+            return _normalizeToFactor(h, self.luminosity)
         else:
             raise Exception("Internal error")
 
@@ -352,19 +407,19 @@ class HistoWrapper:
         self.luminosity = lumi
 
 
-class HistoWrapperMergedData:
+class DatasetRootHistoMergedData:
     """Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 
     The merged data histograms can only be normalized 'to one'.
 
-    See also the documentation of HistoWrapper class.
+    See also the documentation of DatasetRootHisto class.
     """
 
     def __init__(self, histoWrappers, mergedDataset):
         """Constructor.
 
         Parameters:
-        histoWrappers   List of HistoWrapper objects to merge
+        histoWrappers   List of DatasetRootHisto objects to merge
         mergedDataset   The corresponding DatasetMerged object
 
         The constructor checks that all histoWrappers are data, and
@@ -415,16 +470,16 @@ class HistoWrapperMergedData:
         else:
             return hsum
 
-class HistoWrapperMergedMC:
+class DatasetRootHistoMergedMC:
     """Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 
-    See also the documentation of HistoWrapper class.
+    See also the documentation of DatasetRootHisto class.
     """
     def __init__(self, histoWrappers, mergedDataset):
         """Constructor.
 
         Parameters:
-        histoWrappers   List of HistoWrapper objects to merge
+        histoWrappers   List of DatasetRootHisto objects to merge
         mergedDataset   The corresponding DatasetMerged object
 
         The constructor checks that all histoWrappers are MC, and are
@@ -554,7 +609,7 @@ class Dataset:
         self.info = {}
         configInfo = self.file.Get("configInfo")
         if configInfo != None:
-            self.info = rescaleInfo(histoToDict(self.file.Get("configInfo").Get("configinfo")))
+            self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
         self.prefix = ""
         if counterDir != None:
@@ -575,7 +630,7 @@ class Dataset:
 
         if self.file.Get(counterDir) == None:
             raise Exception("Unable to find directory '%s' from ROOT file '%s'" % (counterDir, self.file.GetName()))
-        ctr = histoToCounter(self.file.Get(counterDir).Get("counter"))
+        ctr = _histoToCounter(self.file.Get(counterDir).Get("counter"))
         self.nAllEvents = ctr[0][1].value() # first counter, second element of the tuple
         self.counterDir = counterDir
 
@@ -671,8 +726,8 @@ class Dataset:
 
         return self.getCrossSection() / self.nAllEvents
 
-    def getHistoWrapper(self, name):
-        """Get the HistoWrapper object for a named histogram.
+    def getDatasetRootHisto(self, name):
+        """Get the DatasetRootHisto object for a named histogram.
 
         Parameters:
         name   Path of the histogram in the ROOT file
@@ -688,7 +743,7 @@ class Dataset:
 
         name = h.GetName()+"_"+self.name
         h.SetName(name.translate(None, "-+.:;"))
-        return HistoWrapper(h, self)
+        return DatasetRootHisto(h, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
         """Get the directory content of a given directory in the ROOT file.
@@ -832,17 +887,17 @@ class DatasetMerged:
     def getNormFactor(self):
         return None
 
-    def getHistoWrapper(self, name):
-        """Get the HistoWrapperMergedMC/HistoWrapperMergedData object for a named histogram.
+    def getDatasetRootHisto(self, name):
+        """Get the DatasetRootHistoMergedMC/DatasetRootHistoMergedData object for a named histogram.
 
         Parameters:
         name   Path of the histogram in the ROOT file
         """
-        wrappers = [d.getHistoWrapper(name) for d in self.datasets]
+        wrappers = [d.getDatasetRootHisto(name) for d in self.datasets]
         if self.isMC():
-            return HistoWrapperMergedMC(wrappers, self)
+            return DatasetRootHistoMergedMC(wrappers, self)
         else:
-            return HistoWrapperMergedData(wrappers, self)
+            return DatasetRootHistoMergedData(wrappers, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
         """Get the directory content of a given directory in the ROOT file.
@@ -937,13 +992,13 @@ class DatasetManager:
     def getDataset(self, name):
         return self.datasetMap[name]
 
-    def getHistoWrappers(self, histoName):
-        """Get a list of HistoWrapper objects for a given name.
+    def getDatasetRootHistos(self, histoName):
+        """Get a list of DatasetRootHisto objects for a given name.
 
         Parameters:
         histoName   Path to the histogram in each ROOT file.
         """
-        return [d.getHistoWrapper(histoName) for d in self.datasets]
+        return [d.getDatasetRootHisto(histoName) for d in self.datasets]
 
     def getAllDatasets(self):
         """Get a list of all Dataset objects."""
@@ -1070,7 +1125,7 @@ class DatasetManager:
         nameList   List of Dataset names to merge
         """
         
-        (selected, notSelected, firstIndex) = mergeStackHelper(self.datasets, nameList, "merge")
+        (selected, notSelected, firstIndex) = _mergeStackHelper(self.datasets, nameList, "merge")
         if len(selected) == 0:
             print >> sys.stderr, "Dataset merge: no datasets '" +", ".join(nameList) + "' found, not doing anything"
             return

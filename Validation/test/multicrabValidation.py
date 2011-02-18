@@ -2,7 +2,7 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
+multicrab = Multicrab("crab_analysis.cfg", "validation_cfg.py")
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v6"
@@ -52,8 +52,8 @@ multicrab.extendDatasets(pattupleVersion,
 #        "QCD_Pt300to470_TuneZ2_Winter10", # v9
 #        "TTJets_TuneZ2_Winter10",         # v9
 #        "TTJets_TuneD6T_Winter10",        # v9 
-#        "WJets_TuneZ2_Winter10",          # v9
-#        "WJets_TuneZ2_Winter10_noPU",     # v9
+        "WJets_TuneZ2_Winter10",          # v9
+        "WJets_TuneZ2_Winter10_noPU",     # v9
 #        "WJets_TuneD6T_Winter10",         # v9
 #        "W2Jets_ptW0to100_TuneZ2_Winter10",   # v9
 #        "W2Jets_ptW100to300_TuneZ2_Winter10", # v9
