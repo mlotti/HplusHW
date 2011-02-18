@@ -78,6 +78,9 @@ param.setAllTauSelectionOperatingMode('standard')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
+# Set tau sources to non-trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
 if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
