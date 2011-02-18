@@ -18,8 +18,8 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.05
-
+JESVariation = 0.03
+JESEtaVariation = 0.02
 
 ################################################################################
 
@@ -177,8 +177,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVari
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
     s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+s, process.signalAnalysis, additionalCounters, JESVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+s, process.signalAnalysis, additionalCounters, -JESVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+s, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+s, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation)
 
 
 # Print tau discriminators from one tau from one event. Note that if
