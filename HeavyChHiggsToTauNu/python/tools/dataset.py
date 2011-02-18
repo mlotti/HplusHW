@@ -763,7 +763,13 @@ class Dataset:
 
         d = self.file.Get(self.prefix+directory)
         dirlist = d.GetListOfKeys()
+
+        # Suppress the warning message of missing dictionary for some iterator
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kError
         diriter = dirlist.MakeIterator()
+        ROOT.gErrorIgnoreLevel = backup
+
         key = diriter.Next()
 
         ret = []
