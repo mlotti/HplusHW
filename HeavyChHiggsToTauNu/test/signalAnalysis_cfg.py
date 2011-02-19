@@ -32,12 +32,12 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 process = cms.Process("HChSignalAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	#"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade

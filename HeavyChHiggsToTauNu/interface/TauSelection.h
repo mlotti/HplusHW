@@ -79,7 +79,7 @@ namespace HPlus {
     void fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
-
+    void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
 
   private:
     // Input parameters
@@ -118,6 +118,9 @@ namespace HPlus {
     TH1 *hNumberOfTauCandidates;
     TH1 *hNumberOfCleanedTauCandidates;
     TH1 *hNumberOfSelectedTaus;
+    TH1 *hMCPurityOfTauCandidates;
+    TH1 *hMCPurityOfCleanedTauCandidates;
+    TH1 *hMCPurityOfSelectedTaus;
 
     // Factorization / selected taus
     TH1 *hFactorizationPtSelectedTaus;

@@ -11,6 +11,11 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
+#include "Math/GenVector/VectorUtil.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+
 #include "TH1F.h"
 
 namespace HPlus {
@@ -94,7 +99,7 @@ namespace HPlus {
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     hEtaSelectedTaus = makeTH<TH1F>(*fs,
-      "TauSelection_selected_taus_phi",
+      "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     // Eta vs. phi
@@ -139,6 +144,29 @@ namespace HPlus {
       "TauSelection_selected_taus_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
+    // MC purity
+    hMCPurityOfTauCandidates = makeTH<TH1F>(*fs,
+      "TauSelection_all_tau_candidates_MC_purity",
+      "tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
+    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
+    hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    hMCPurityOfCleanedTauCandidates = makeTH<TH1F>(*fs,
+      "TauSelection_cleaned_tau_candidates_MC_purity",
+      "cleaned_tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
+    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
+    hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+    hMCPurityOfSelectedTaus = makeTH<TH1F>(*fs,
+      "TauSelection_selected_taus_MC_purity",
+      "selected_tau_MC_purity;;N_{jets}", 4, 0., 4.);
+    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
+    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
+    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "Other #tau source");
+    hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
+
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
     hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 5, 0., 5.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
@@ -409,6 +437,10 @@ namespace HPlus {
     hEtaTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
     hPhiTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
     hEtaPhiTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    // Purity
+    if (!iEvent.isRealData()) {
+      ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates); 
+    }
   }
   
   void TauSelection::fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
@@ -417,8 +449,8 @@ namespace HPlus {
     double myTauPhi = tau->phi();
     hPtCleanedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
     hEtaCleanedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
-    hPhiTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPhiCleanedTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
+    hEtaPhiCleanedTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
     // Factorization histograms
     if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
       hFactorizationPtBeforeTauID->Fill(myTauPt, fEventWeight.getWeight());
@@ -430,7 +462,7 @@ namespace HPlus {
     }
     // Purity
     if (!iEvent.isRealData()) {
-      // FIXME: add check if the tau object matches with a MC tau 
+      ObtainMCPurity(tau, iEvent, hMCPurityOfCleanedTauCandidates); 
     }
   }
   
@@ -440,8 +472,8 @@ namespace HPlus {
     double myTauPhi = tau->phi();
     hPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
     hEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
-    hPhiTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
-    hEtaPhiTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
+    hPhiSelectedTaus->Fill(myTauPhi, fEventWeight.getWeight());
+    hEtaPhiSelectedTaus->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
     // Factorization histograms
     if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
       hFactorizationPtAfterTauID->Fill(myTauPt, fEventWeight.getWeight());
@@ -453,9 +485,8 @@ namespace HPlus {
     }
     // Purity
     if (!iEvent.isRealData()) {
-      // FIXME: add check if the tau object matches with a MC tau 
-    }
-  
+      ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTaus); 
+    }  
   }
 
   TauSelection::Data TauSelection::setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passEvent) {
@@ -465,4 +496,35 @@ namespace HPlus {
       fSelectedTaus.push_back(tau);
     return Data(this, passEvent);
   }
+
+  void TauSelection::ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram) {
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    for (size_t i=0; i < genParticles->size(); ++i) {  
+      const reco::Candidate & p = (*genParticles)[i];
+      if (std::abs(p.pdgId()) == 15) {
+        // Check match with tau
+        if (reco::deltaR(p, tau->p4()) < 0.1) {
+          // Check mother of tau
+          int numberOfTauMothers = p.numberOfMothers(); 
+          for (int im=0; im < numberOfTauMothers; ++im){  
+            const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+            if (!dparticle) continue;
+            int idmother = std::abs(dparticle->pdgId());
+            if (idmother == 37) { // H+
+              histogram->Fill(0., fEventWeight.getWeight());
+              return;
+            }
+            if (idmother == 24) { // W+
+              histogram->Fill(1., fEventWeight.getWeight());
+              return;
+            }
+          }
+          histogram->Fill(2., fEventWeight.getWeight()); // Other source of tau (B decays)
+        }
+      }
+    }
+    histogram->Fill(3., fEventWeight.getWeight()); // No MC match found
+  }
+
 }
