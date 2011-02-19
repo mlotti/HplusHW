@@ -82,14 +82,26 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
+   hPhiTauCandidates = makeTH<TH1F>(*fs,
+      "TauSelection_all_tau_candidates_phi",
+      "tau_candidates_phi;#phi #phi;N_{jets} / 0.1",
+      myTauJetEtaBins, -3.2, 3.2);
     hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
+    hPhiCleanedTauCandidates = makeTH<TH1F>(*fs,
+      "TauSelection_cleaned_tau_candidates_phi",
+      "cleaned_tau_candidates_phi;#phi #phi;N_{jets} / 0.1",
+      myTauJetEtaBins, -3.2, 3.2);
     hEtaSelectedTaus = makeTH<TH1F>(*fs,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
+   hPhiSelectedTaus = makeTH<TH1F>(*fs,
+      "TauSelection_selected_taus_phi",
+      "selected_tau_phi;#phi #phi;N_{jets} / 0.1",
+      myTauJetEtaBins, -3.2, 3.2);
     hNumberOfTauCandidates = makeTH<TH1F>(*fs,
       "TauSelection_all_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
@@ -369,6 +381,7 @@ namespace HPlus {
     double myTauEta = tau->eta();
     hPtTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
     hEtaTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
+    hPhiTauCandidates->Fill(tau->phi(), fEventWeight.getWeight());
   }
   
   void TauSelection::fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
@@ -376,6 +389,7 @@ namespace HPlus {
     double myTauEta = tau->eta();
     hPtCleanedTauCandidates->Fill(myTauPt, fEventWeight.getWeight());
     hEtaCleanedTauCandidates->Fill(myTauEta, fEventWeight.getWeight());
+    hPhiCleanedTauCandidates->Fill(tau->phi(), fEventWeight.getWeight());
     // Factorization histograms
     if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
       hFactorizationPtBeforeTauID->Fill(myTauPt, fEventWeight.getWeight());
@@ -396,6 +410,7 @@ namespace HPlus {
     double myTauEta = tau->eta();
     hPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
     hEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
+    hPhiSelectedTaus->Fill(tau->phi(), fEventWeight.getWeight());
     // Factorization histograms
     if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
       hFactorizationPtAfterTauID->Fill(myTauPt, fEventWeight.getWeight());

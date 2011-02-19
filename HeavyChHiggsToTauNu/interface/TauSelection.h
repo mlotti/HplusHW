@@ -109,6 +109,9 @@ namespace HPlus {
     TH1 *hEtaTauCandidates;
     TH1 *hEtaCleanedTauCandidates;
     TH1 *hEtaSelectedTaus;
+    TH1 *hPhiTauCandidates;
+    TH1 *hPhiCleanedTauCandidates;
+    TH1 *hPhiSelectedTaus;
     TH1 *hNumberOfTauCandidates;
     TH1 *hNumberOfCleanedTauCandidates;
     TH1 *hNumberOfSelectedTaus;
