@@ -34,6 +34,7 @@ class JetEnergyScaleVariation: public edm::EDProducer {
 	edm::InputTag metSrc;
 	double JESVariation;
         double JESEtaVariation;
+        double unclusteredMETVariation;
 };
 
 JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfig) :
@@ -41,11 +42,22 @@ JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfi
 	jetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
 	metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
 	JESVariation(iConfig.getParameter<double>("JESVariation")),
-        JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation"))
+        JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation")),
+        unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation"))
 {
 	produces<pat::TauCollection>();
 	produces<pat::JetCollection>();
 	produces<pat::METCollection>();
+        // Check validity of provided values
+        if (JESVariation < -1. || JESVariation > 1.) {
+          throw cms::Exception("Configuration") << "JetEnergyScaleVariation: Invalid value for JESVariation! Please provide a value between -1..1 (value=" << JESVariation << ").";  
+        }
+        if (JESEtaVariation < -1. || JESEtaVariation > 1.) {
+          throw cms::Exception("Configuration") << "JetEnergyScaleVariation: Invalid value for JESEtaVariation! Please provide a value between -1..1 (value=" << JESEtaVariation << ").";  
+        }
+        if (unclusteredMETVariation < -1. || unclusteredMETVariation > 1.) {
+          throw cms::Exception("Configuration") << "JetEnergyScaleVariation: Invalid value for unclusteredMETVariation! Please provide a value between -1..1 (value=" << unclusteredMETVariation << ").";  
+        }
 }
 
 JetEnergyScaleVariation::~JetEnergyScaleVariation() {}
@@ -85,8 +97,8 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
     	iEvent.getByLabel(jetSrc, hjets);
 	const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
 
-	double dpx = 0,
-	       dpy = 0;
+        LorentzVector myJetSum(0., 0., 0., 0.);
+        LorentzVector myVariatedJetSum(0., 0., 0., 0.);
 	for(edm::PtrVector<pat::Jet>::iterator iter = jets.begin(); iter != jets.end(); ++iter) {
 		edm::Ptr<pat::Jet> iJet = *iter;
                 // Note: a jet can have mass, which must stay constant in the measurement
@@ -103,8 +115,8 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 		jet.setP4(p4);
 		rescaledJets->push_back(jet);
                 // Negative sign for MET correction comes from MET definition
-		dpx += -iJet->px() * JESVariation; 
-		dpy += -iJet->py() * JESVariation;
+                myJetSum -= iJet->p4();
+                myVariatedJetSum -= p4;
 	}
 
 	// MET
@@ -120,14 +132,22 @@ loop over jets):
 3. Then: ME(X,Y) -= JetP(X,Y)
 */
 	reco::MET scaledMet = *met;
-	double newX = met->p4().Px() + dpx;
+/*	double newX = met->p4().Px() + dpx;
 	double newY = met->p4().Py() + dpy;
-//double newX = met->p4().Px()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation 
-//double newY = met->p4().Py()*(1-JESVariation/fabs(JESVariation)*0.1); // MET scale 10%, sign from JESVariation
-	double newZ = 0;//met->p4().Pz();
-	double newE = sqrt(newX*newX + newY*newY);//met->p4().E();
+*/
+       
+// Substract jet component from MET to obtain the unclustered MET
+        LorentzVector myVariatedMET = met->p4();
+        myVariatedMET -= myJetSum;
+// Variate the unclustered MET
+        myVariatedMET*= (1. + unclusteredMETVariation);
+// Then add the variated jet component
+        myVariatedMET += myVariatedJetSum;
+        myVariatedMET.SetPz(0.);
+        myVariatedMET.SetE(std::sqrt(myVariatedMET.Perp2()));
 
-	const LorentzVector& p4(LorentzVector(newX,newY,newZ,newE));
+// Set new MET value
+	const LorentzVector& p4(myVariatedMET);
 	scaledMet.setP4(p4);
 
 	rescaledMET->push_back(scaledMet);

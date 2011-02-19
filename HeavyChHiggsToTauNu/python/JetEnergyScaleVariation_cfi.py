@@ -5,5 +5,6 @@ jesVariation = cms.EDProducer("JetEnergyScaleVariation",
     jetSrc = cms.InputTag("selectedPatJets"),
     metSrc = cms.InputTag("patMETs"),
     JESVariation = cms.double(0.03), # use sign, +/-
-    JESEtaVariation = cms.double(0.02)
+    JESEtaVariation = cms.double(0.02), # takes the sign from JESVariation
+    unclusteredMETVariation = cms.double(0.10) # use sign, +/-
 )
