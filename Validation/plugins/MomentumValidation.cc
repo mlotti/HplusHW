@@ -35,6 +35,7 @@ class MomentumValidation : public edm::EDAnalyzer {
 
         MonitorElement *nEvt;
   	MonitorElement *Pt, *Eta, *Phi;
+	MonitorElement *EtaPhi;
 };
 
 MomentumValidation::MomentumValidation(const edm::ParameterSet& iConfig):
@@ -52,12 +53,14 @@ void MomentumValidation::beginJob(){
     dbe->setCurrentFolder("Validation/Momentum");
 
     // Number of analyzed events
-    nEvt = dbe->book1D("nEvt", "n analyzed Events", 1, 0., 1.);
+    nEvt = dbe->book1D("nEvt "+src.label(), "n analyzed Events", 1, 0., 1.);
 
     //Kinematics
     Pt          = dbe->book1D("Pt "+src.label(),"pT", 100 ,0,100);
     Eta         = dbe->book1D("Eta "+src.label(),"eta", 100 ,-2.5,2.5);
     Phi		= dbe->book1D("Phi "+src.label(),"phi", 100 ,-3.14,3.14);
+
+    EtaPhi	= dbe->book2D("Eta Phi "+src.label(),"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
   }
 }
 
@@ -82,6 +85,8 @@ void MomentumValidation::loop(const edm::Event& iEvent,const edm::EventSetup& iS
 	Pt->Fill(i->p4().Pt());
 	Eta->Fill(i->p4().Eta());
 	Phi->Fill(i->p4().Phi());
+
+	EtaPhi->Fill(i->p4().Eta(),i->p4().Phi());
     }
 }
 void MomentumValidation::endJob(){}
