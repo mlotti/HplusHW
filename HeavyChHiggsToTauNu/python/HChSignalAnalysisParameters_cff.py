@@ -131,7 +131,8 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(20.0),
-    MuonEtaCut = cms.untracked.double(2.5)
+    MuonEtaCut = cms.untracked.double(2.5),
+    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
 )
 
 fakeMETVeto = cms.untracked.PSet(

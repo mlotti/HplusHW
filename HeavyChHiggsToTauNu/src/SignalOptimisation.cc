@@ -114,7 +114,7 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     
     // 3) GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fClobalMuonVetoCounter);
     
