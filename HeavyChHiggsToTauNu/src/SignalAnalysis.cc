@@ -68,7 +68,9 @@ namespace HPlus {
     
 
   // GenParticle analysis
+
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
+
 
 
     increment(fAllCounter);
@@ -84,11 +86,7 @@ namespace HPlus {
     if(!triggerTauMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);
 */
-//    vector<int> recoVertexs::goodPrimaryVerices;
-//    if (goodPrimaryVerices.size() != 1) return false;
-//    std::vector<goodPrimaryVerices*> goodVerteces;
 
-//    const edm::PtrVector<recoVertexs::goodPrimaryVerices>& goodVerteces;
 
 
     // TauID (with optional factorization)

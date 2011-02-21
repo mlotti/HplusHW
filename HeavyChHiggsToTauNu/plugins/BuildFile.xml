@@ -12,6 +12,7 @@
   <use   name="DataFormats/PatCandidates"/>
   <use   name="DataFormats/WrappedStdDictionaries"/>
   <use   name="DataFormats/HepMCCandidate"/>
+  <use   name="DataFormats/ParticleFlowCandidate"/>
   <use   name="CommonTools/UtilAlgos"/>
   <use   name="CommonTools/TriggerUtils"/>
   <use   name="HLTrigger/HLTcore"/>

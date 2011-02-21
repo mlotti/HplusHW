@@ -18,7 +18,9 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.05
+JESVariation = 0.03
+JESEtaVariation = 0.02
+JESUnclusteredMETVariation = 0.10
 
 ################################################################################
 
@@ -176,9 +178,13 @@ if doAllTauIds:
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
-    s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1", "JESPlus"+s, process.qcdMeasurementMethod2Part1, additionalCounters, JESVariation)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part1", "JESMinus"+s, process.qcdMeasurementMethod2Part1, additionalCounters, -JESVariation)
+    JESs = "%02d" % int(JESVariation*100)
+    JESe = "%02d" % int(JESEtaVariation*100)
+    JESm = "%02d" % int(JESUnclusteredMETVariation*100)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

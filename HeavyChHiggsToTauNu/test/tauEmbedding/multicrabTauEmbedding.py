@@ -5,18 +5,18 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-#step = "generation"
+step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v6",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v6", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v6",  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v6",                "config": "tauAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v6",  "config": "../signalAnalysis_cfg.py"},
+          "embedding":      {"input": "tauembedding_generation_v6_1", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "analysis":       {"input": "tauembedding_embedding_v6_1",  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v9",                "config": "tauAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v6_1",  "config": "../signalAnalysis_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -28,33 +28,34 @@ multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
 datasets = [
     # Data
-#    "Mu_136035-144114_Dec22", # HLT_Mu9
-#    "Mu_146428-147116_Dec22", # HLT_Mu9
-#    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
+    "Mu_136035-144114_Dec22", # HLT_Mu9
+    "Mu_146428-147116_Dec22", # HLT_Mu9
+    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
-#    "TTJets_TuneZ2_Winter10",
-#    "WJets_TuneZ2_Winter10",
+    "TTJets_TuneZ2_Winter10",
+    "WJets_TuneZ2_Winter10",
     #"WJets_TuneZ2_Winter10_noPU",
     #"WJets_TuneD6T_Winter10",
     # Background MC
-#    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
     "DYJetsToLL_TuneZ2_Winter10",
-#    "TToBLNu_s-channel_TuneZ2_Winter10",
-#    "TToBLNu_t-channel_TuneZ2_Winter10",
-#    "TToBLNu_tW-channel_TuneZ2_Winter10",
+    "TToBLNu_s-channel_TuneZ2_Winter10",
+    "TToBLNu_t-channel_TuneZ2_Winter10",
+    "TToBLNu_tW-channel_TuneZ2_Winter10",
+    # For testing
+    "TTToHplusBWB_M120_Winter10"
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 
-if step in ["generation", "embedding"]:
-    multicrab.appendArgAll("overrideBeamSpot=1")
-multicrab.appendLineAll("GRID.maxtarballsize = 10")
-if step != "skim":
-    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+multicrab.appendLineAll("GRID.maxtarballsize = 15")
+#if step != "skim":
+#    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v6" % step
+#tauname = "_tauembedding_%s_v6" % step
+tauname = "_tauembedding_%s_v6_1" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
@@ -91,6 +92,9 @@ def modify(dataset):
     else:
         name = path_re.sub(tauname, path[2])
         name = name.replace("local-", "")
+
+    if dataset.isData() and step in ["generation", "embedding"]:
+        dataset.appendArg("overrideBeamSpot=1")
 
     if step == "skim":
         try:
