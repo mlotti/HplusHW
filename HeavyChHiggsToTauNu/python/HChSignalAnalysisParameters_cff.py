@@ -15,6 +15,11 @@ trigger = cms.untracked.PSet(
 )
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
+primaryVertexSelection = cms.untracked.PSet(
+    src = cms.untracked.InputTag("selectedPrimaryVertex"),
+    enabled = cms.untracked.bool(True)
+)
+
 # Tau ID factorization map
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
 

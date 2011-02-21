@@ -71,6 +71,10 @@ process.infoPath = addConfigInfo(process, options)
 ################################################################################
 # The "golden" version of the signal analysis
 
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # change to non-matched taus
 #param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
@@ -103,6 +107,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
 #    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
 ####    TriggerTauMETEmulation = param.TriggerTauMETEmulation, OBSOLETE?
+    primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed         
