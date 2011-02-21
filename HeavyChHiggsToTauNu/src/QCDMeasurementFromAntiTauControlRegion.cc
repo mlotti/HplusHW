@@ -15,6 +15,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
+    fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
@@ -32,6 +33,7 @@ namespace HPlus {
     fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
+    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
@@ -77,6 +79,11 @@ namespace HPlus {
     //if(!triggerMETEmulationData.passedEvent()) return;
     //increment(fTriggerEmulationCounter);
     //Trigger emulation done in trigger
+
+    // Primary vertex
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    if(!pvData.passedEvent()) return;
+    increment(fPrimaryVertexCounter);
 
     // Apply Isolation Veto to taus
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
