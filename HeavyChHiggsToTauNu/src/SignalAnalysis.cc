@@ -68,9 +68,7 @@ namespace HPlus {
     
 
   // GenParticle analysis
-
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
-
 
 
     increment(fAllCounter);
@@ -87,6 +85,12 @@ namespace HPlus {
     increment(fTriggerEmulationCounter);
 */
 
+  
+
+    edm::Handle <reco::VertexCollection> goodPrimaryVertices;
+    edm::InputTag myVertexInputTag("goodPrimaryVertices", "", "HChPatTuple");
+    iEvent.getByLabel(myVertexInputTag, goodPrimaryVertices);
+    //   if (goodPrimaryVertices->size() != 1) return false;
 
 
     // TauID (with optional factorization)

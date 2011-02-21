@@ -73,6 +73,12 @@ namespace HPlus {
     Count fCleanCutSubCount;
     Count fPtCutSubCount;
     Count fEtaCutSubCount;
+    Count fnumberOfDaughtersCutSubCount;
+    Count fchargedEmEnergyFractionCutSubCount;
+    Count fneutralHadronEnergyFractionCutSubCount;
+    Count fneutralEmEnergyFractionCutSubCount;
+    Count fchargedHadronEnergyFractionCutSubCount;
+    Count fchargedMultiplicityCutSubCount;
 
     // EventWeight object
     EventWeight& fEventWeight;

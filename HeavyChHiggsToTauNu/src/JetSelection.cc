@@ -32,6 +32,12 @@ namespace HPlus {
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
+    fnumberOfDaughtersCutSubCount(eventCounter.addSubCounter("Jet selection", "numberOfDaughtersCut")),
+    fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
+    fneutralHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralHadronEnergyFractionCut")),
+    fneutralEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralEmEnergyFractionCut")),
+    fchargedHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedHadronEnergyFractionCut")),
+    fchargedMultiplicityCutSubCount(eventCounter.addSubCounter("Jet selection", "fchargedMultiplicityCut")),  
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -90,6 +96,7 @@ namespace HPlus {
       increment(fPtCutSubCount);
       ++ptCutPassed;
 
+
       if(!(std::abs(iJet->eta()) < fEtaCut)){
 	fNotSelectedJets.push_back(iJet);
 	continue;
@@ -97,7 +104,27 @@ namespace HPlus {
       increment(fEtaCutSubCount);
       ++etaCutPassed;
 
+      
+    // jetID cuts 
+      if(!(iJet->numberOfDaughters() > 1)) continue;
+      increment(fnumberOfDaughtersCutSubCount);
 
+      if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
+      increment(fchargedEmEnergyFractionCutSubCount);
+
+      if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
+      increment(fneutralHadronEnergyFractionCutSubCount);
+
+      if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
+      increment(fneutralEmEnergyFractionCutSubCount);
+
+      if(fabs(iJet->eta()) < 2.4) {
+	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
+	  increment(fchargedHadronEnergyFractionCutSubCount);
+	  if(!(iJet->chargedMultiplicity() > 0)) continue;
+	  increment(fchargedMultiplicityCutSubCount);
+	}
+     
       // plot deltaPhi(jet,met)
       double deltaPhi = -999;
 

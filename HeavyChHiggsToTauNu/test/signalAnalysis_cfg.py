@@ -32,19 +32,19 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+       # "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
 	#"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#        "file:pattuple.root"
+        "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
 
@@ -93,7 +93,7 @@ if options.tauEmbeddingInput != 0:
 #process.commonSequence *= process.hplusPrescaleWeightProducer
 
 # change to non-matched taus !!!!!!!!!!!!!!!
-param.setAllTauSelectionSrcSelectedPatTaus()
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
 
 if dataVersion.isData():
