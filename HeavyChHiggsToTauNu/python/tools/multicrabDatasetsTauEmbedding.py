@@ -23,6 +23,11 @@ def addTo(datasets):
                 "datasetpath": "/Mu/local-Run2010A_Dec22ReReco_v1_AOD_136035_tauembedding_generation_v6_2-6aea81f6d245f91e632a791a3c2d020d/USER",
                 "number_of_jobs": 10 # ~70 ev/job
             },
+            "tauembedding_embedding_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010A_Dec22ReReco_v1_AOD_136035_tauembedding_embedding_v6_2-105b277d7ebabf8cba6c221de6c7ed8a/USER",
+                "number_of_jobs": 1 # ~700 ev/job
+            },
             })
     datasets["Mu_146428-147116_Dec22"]["data"].update({
             "tauembedding_skim_v6": {
@@ -40,6 +45,11 @@ def addTo(datasets):
                 "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_146428_tauembedding_generation_v6_2-6aea81f6d245f91e632a791a3c2d020d/USER",
                 "number_of_jobs": 8 # ~150 ev/job
             },
+            "tauembedding_embedding_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_146428_tauembedding_embedding_v6_2-105b277d7ebabf8cba6c221de6c7ed8a/USER",
+                "number_of_jobs": 1 # ~1200 ev/job
+            },
             })
     datasets["Mu_147196-149294_Dec22"]["data"].update({
             "tauembedding_skim_v6": {
@@ -51,6 +61,16 @@ def addTo(datasets):
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_skim_v6_2-02482c90013e67a404a9ffaab5714305/USER",
                 "number_of_jobs": 30 # ~270 ev/job
+            },
+            "tauembedding_generation_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_generation_v6_2-6aea81f6d245f91e632a791a3c2d020d/USER",
+                "number_of_jobs": 30 # ~270 ev/job
+            },
+            "tauembedding_embedding_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v6_2-105b277d7ebabf8cba6c221de6c7ed8a/USER",
+                "number_of_jobs": 4 # ~2000 ev/job
             },
             })
 
