@@ -232,7 +232,7 @@ def _normalizeToOne(h):
     Returns the normalized histogram (which is the same as the
     parameter, i.e. no copy is made).
     """
-    return normalizeToFactor(h, 1.0/h.Integral())
+    return _normalizeToFactor(h, 1.0/h.Integral())
 
 def _normalizeToFactor(h, f):
     """Scale TH1 with a given factor.
@@ -305,7 +305,44 @@ def _mergeStackHelper(datasetList, nameList, task):
 
     return (selected, notSelected, firstIndex)
 
-class DatasetRootHisto:
+class DatasetRootHistoBase:
+    """Base class for DatasetRootHisto classes.
+
+    The derived class must implement
+
+    _normalizedHistogram()
+
+    which should return the cloned and normalized TH1
+    """
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.multiplication = None
+
+    def getDataset(self,):
+        return self.dataset
+
+    def getHistogram(self):
+        """Get a clone of the wrapped histogram normalized correctly."""
+        h = self._normalizedHistogram()
+
+        if self.multiplication != None:
+            h = _normalizeToFactor(h, self.multiplication)
+        return h
+
+    def scale(self, value):
+        """Scale the histogram bin values with a value.
+
+        Arguments:
+        value    Value to multiply with
+
+        h = h*value
+        """
+        if self.multiplication == None:
+            self.multiplication = value
+        else:
+            self.multiplication *= value
+
+class DatasetRootHisto(DatasetRootHistoBase):
     """Wrapper for a single TH1 histogram and the corresponding Dataset.
 
     The wrapper holds the normalization of the histogram. User should
@@ -332,12 +369,9 @@ class DatasetRootHisto:
 
         Sets the initial normalization to 'none'
         """
+        DatasetRootHistoBase.__init__(self, dataset)
         self.histo = histo
-        self.dataset = dataset
         self.normalization = "none"
-
-    def getDataset(self):
-        return self.dataset
 
     def isData(self):
         return self.dataset.isData()
@@ -349,9 +383,7 @@ class DatasetRootHisto:
         """Get list of the bin labels of the histogram."""
         return [x[0] for x in _histoToCounter(self.histo)]
 
-    def getHistogram(self):
-        """Get a clone of the wrapped histogram normalized correctly."""
-
+    def _normalizedHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
         h.SetName(h.GetName()+"_cloned")
@@ -406,8 +438,7 @@ class DatasetRootHisto:
         self.normalization = "toLuminosity"
         self.luminosity = lumi
 
-
-class DatasetRootHistoMergedData:
+class DatasetRootHistoMergedData(DatasetRootHistoBase):
     """Wrapper for a merged TH1 histograms from data and the corresponding Datasets.
 
     The merged data histograms can only be normalized 'to one'.
@@ -425,17 +456,17 @@ class DatasetRootHistoMergedData:
         The constructor checks that all histoWrappers are data, and
         are not yet normalized.
         """
+        DatasetRootHistoBase.__init__(self, mergedDataset)
+
         self.histoWrappers = histoWrappers
-        self.dataset = mergedDataset
         self.normalization = "none"
         for h in self.histoWrappers:
             if not h.isData():
-                raise Exception("Internal error")
+                raise Exception("Histograms to be merged must come from data")
             if h.normalization != "none":
-                raise Exception("Internal error")
-
-    def getDataset(self):
-        return self.dataset
+                raise Exception("Histograms to be merged must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be merged must not be multiplied at this stage")
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
@@ -458,7 +489,7 @@ class DatasetRootHistoMergedData:
             hsum.Add(h.getHistogram())
         return hsum
 
-    def getHistogram(self):
+    def _normalizedHistogram(self):
         """Merge the histograms and apply the current normalization.
 
         The returned histogram is a clone, so client code can do
@@ -466,11 +497,11 @@ class DatasetRootHistoMergedData:
         """
         hsum = self._getSumHistogram()
         if self.normalization == "toOne":
-            return normalizeToOne(hsum)
+            return _normalizeToOne(hsum)
         else:
             return hsum
 
-class DatasetRootHistoMergedMC:
+class DatasetRootHistoMergedMC(DatasetRootHistoBase):
     """Wrapper for a merged TH1 histograms from MC and the corresponding Datasets.
 
     See also the documentation of DatasetRootHisto class.
@@ -485,17 +516,16 @@ class DatasetRootHistoMergedMC:
         The constructor checks that all histoWrappers are MC, and are
         not yet normalized.
         """
+        DatasetRootHistoBase.__init__(self, mergedDataset)
         self.histoWrappers = histoWrappers
-        self.dataset = mergedDataset
         self.normalization = "none"
         for h in self.histoWrappers:
-            if h.isData():
-                raise Exception("Internal error")
+            if not h.isMC():
+                raise Exception("Histograms to be merged must come from MC")
             if h.normalization != "none":
-                raise Exception("Internal error")
-
-    def getDataset(self):
-        return self.dataset
+                raise Exception("Histograms to be merged must not be normalized at this stage")
+            if h.multiplication != None:
+                raise Exception("Histograms to be merged must not be multiplied at this stage")
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
@@ -548,7 +578,7 @@ class DatasetRootHistoMergedMC:
         for h in self.histoWrappers:
             h.normalizeToLuminosity(lumi)
 
-    def getHistogram(self):
+    def _normalizedHistogram(self):
         """Merge the histograms and apply the current normalization.
 
         The returned histogram is a clone, so client code can do
@@ -568,7 +598,7 @@ class DatasetRootHistoMergedMC:
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
-            return normalizeToOne(hsum)
+            return _normalizeToOne(hsum)
         else:
             return hsum
 
@@ -763,7 +793,13 @@ class Dataset:
 
         d = self.file.Get(self.prefix+directory)
         dirlist = d.GetListOfKeys()
+
+        # Suppress the warning message of missing dictionary for some iterator
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kError
         diriter = dirlist.MakeIterator()
+        ROOT.gErrorIgnoreLevel = backup
+
         key = diriter.Next()
 
         ret = []
@@ -1057,6 +1093,9 @@ class DatasetManager:
         Parameters:
         nameList    List of Dataset names ro remove
         """
+        if isinstance(nameList, basestring):
+            nameList = [nameList]
+
         selected = []
         for d in self.datasets:
             if not d.getName() in nameList:
