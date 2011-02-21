@@ -20,6 +20,7 @@ doAllTauIds = True
 doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
+JESUnclusteredMETVariation = 0.10 
 
 ################################################################################
 
@@ -31,15 +32,14 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#       "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	#"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         # For testing in lxplus
-       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
@@ -76,19 +76,15 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexS
 addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-# change to non-matched taus
-#param.tauSelectionCaloTauCutBased.src = "selectedPatTausCaloRecoTauTau"
-#param.tauSelectionShrinkingConeCutBased.src = "selectedPatTausShrinkingConePFTauTau"
-#param.tauSelectionShrinkingConeTaNCBased.src = "selectedPatTausShrinkingConePFTauTau"
-#param.tauSelectionHPSTauBased.src = "selectedPatTausHpsPFTauTau"
-#param.tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTau"
-
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+
+# Set tau sources to non-trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
 if options.tauEmbeddingInput != 0:
@@ -116,19 +112,11 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
-#    forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
-
     #myFactorizationMapName = getTauIDFactorizationMap() 
-
-process.signalAnalysis.MET.METCut = 70.
-#process.signalAnalysis.fakeMETVeto.maxDeltaPhi = 5.
-process.signalAnalysis.bTagging.discriminatorCut = 2.0
-
-
 
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
@@ -197,9 +185,13 @@ if doAllTauIds:
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
-    s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+s, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+s, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation)
+    JESs = "%02d" % int(JESVariation*100)
+    JESe = "%02d" % int(JESEtaVariation*100)
+    JESm = "%02d" % int(JESUnclusteredMETVariation*100)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 
 # Print tau discriminators from one tau from one event. Note that if

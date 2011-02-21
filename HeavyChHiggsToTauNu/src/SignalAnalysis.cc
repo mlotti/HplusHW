@@ -70,9 +70,9 @@ namespace HPlus {
     
 
   // GenParticle analysis
-    if(!iEvent.isRealData())
+    if (!iEvent.isRealData()) {
       fGenparticleAnalysis.analyze(iEvent, iSetup);
-
+    }
 
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
