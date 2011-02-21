@@ -69,6 +69,11 @@ process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
 # The core of the analysis
+
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
@@ -102,6 +107,7 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
     trigger = param.trigger,
     #TriggerMETEmulation = param.TriggerMETEmulation, # OBSOLETE?
     # Set here the tau algorithm
+    primaryVertexSelection = param.primaryVertexSelection,
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     EvtTopology = param.EvtTopology,

@@ -66,6 +66,9 @@ datasets.remove(["BTau_141956-144114_Dec22", "BTau_146428-148058_Dec22", "BTau_1
 # Example how to set new signal cross sections for a given tan(beta)
 xsect.setHplusCrossSections(datasets, tanbeta=20)
 
+# Load dataset luminosities from a 'lumi.json' file
+datasets.loadLuminosities()
+
 # Merge all collision data datasets to one, it has name "Data"
 # Note: this must be done before normalizeMCByLuminosity()
 datasets.mergeData()

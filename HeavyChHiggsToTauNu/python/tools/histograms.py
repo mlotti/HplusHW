@@ -815,6 +815,13 @@ class HistoManager:
                 h.normalizeToLuminosity(lumi)
         self.luminosity = lumi
 
+    def scale(self, value):
+        """Scale the histograms with a value."""
+        if self.impl != None:
+            raise Exception("Can't scale after the histograms have been created!")
+        for h in self.datasetRootHistos:
+            h.scale(value)
+
     def getLuminosity(self):
         """Get the integrated luminosity to which the MC datasets have been normalized to."""
         if self.luminosity == None:

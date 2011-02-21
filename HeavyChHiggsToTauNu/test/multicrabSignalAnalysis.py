@@ -31,7 +31,7 @@ multicrab.extendDatasets(pattupleVersion,
 #        "BTau_141956-144114_Dec22",          # v9
 #        "BTau_146428-148058_Dec22",          # v9
 #        "BTau_148822-149182_Dec22",          # v9
-#        "BTau_148822-149182_Dec22",          # v9
+#        "BTau_149291-149294_Dec22",          # v9
         # Data for QCD
 #        "JetMETTau_Jet_136035-141881_Dec22", # v9
 #        "JetMET_141956-144114_Dec22",        # v9

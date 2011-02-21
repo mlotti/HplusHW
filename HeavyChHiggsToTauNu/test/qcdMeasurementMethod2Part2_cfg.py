@@ -69,6 +69,11 @@ process.infoPath = addConfigInfo(process, options)
 
 ##############################################################################
 # qcdMeasurementSignalSelection module
+
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
@@ -100,6 +105,7 @@ process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSe
     trigger = param.trigger,
     #TriggerMETEmulation = param.TriggerMETEmulation, OBSOLETE?
     # Change default tau algorithm here as needed   
+    primaryVertexSelection = param.primaryVertexSelection,
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     # Apply rest of event selection to get N_rest

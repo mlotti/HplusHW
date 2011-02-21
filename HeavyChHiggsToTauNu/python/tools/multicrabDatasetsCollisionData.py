@@ -8,6 +8,7 @@ datasets = {
     "JetMETTau_Tau_136035-139975_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleLooseIsoTau20",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (136035, 139975), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -30,6 +31,7 @@ datasets = {
     "JetMETTau_Tau_140058-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleLooseIsoTau20_Trk5",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (140058, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -52,6 +54,7 @@ datasets = {
     "BTau_141956-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -74,6 +77,7 @@ datasets = {
     "BTau_146428-148058_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -96,6 +100,7 @@ datasets = {
     "BTau_148822-149182_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (148822, 149182), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -118,6 +123,7 @@ datasets = {
     "BTau_149291-149294_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (149291, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -243,6 +249,7 @@ datasets = {
     "JetMETTau_Jet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (136035, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -265,6 +272,7 @@ datasets = {
     "JetMET_141956-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -287,6 +295,7 @@ datasets = {
     "Jet_146428-148058_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -309,6 +318,7 @@ datasets = {
     "Jet_148822-149294_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U_v3",
+        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (148822, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
