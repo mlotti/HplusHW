@@ -33,13 +33,15 @@ class JetEnergyScaleVariation: public edm::EDProducer {
 	edm::InputTag jetSrc;
 	edm::InputTag metSrc;
 	double JESVariation;
+        double JESEtaVariation;
 };
 
 JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfig) :
 	tauSrc(iConfig.getParameter<edm::InputTag>("tauSrc")),
 	jetSrc(iConfig.getParameter<edm::InputTag>("jetSrc")),
 	metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
-	JESVariation(iConfig.getParameter<double>("JESVariation"))
+	JESVariation(iConfig.getParameter<double>("JESVariation")),
+        JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation"))
 {
 	produces<pat::TauCollection>();
 	produces<pat::JetCollection>();
@@ -67,7 +69,11 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
                 // Hence only the momentum and energy are scaled
                 double myM = iTau->p4().M();
                 double myP = iTau->p4().P();
-                double myFactor = (1 + JESVariation); 
+                // JES +- JESeta /eta
+                double myChange = std::sqrt(JESVariation*JESVariation 
+                  + JESEtaVariation*JESEtaVariation / iTau->eta() / iTau->eta());
+                double myFactor = 1. + myChange;
+                if (JESVariation < 0) myFactor = 1. - myChange;
                 const LorentzVector p4(iTau->p4().X()*myFactor, iTau->p4().Y()*myFactor, iTau->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
                 pat::Tau tau = *iTau;
                 tau.setP4(p4);
@@ -87,7 +93,11 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
                 // Hence only the momentum and energy are scaled
                 double myM = iJet->p4().M();
                 double myP = iJet->p4().P();
-                double myFactor = (1 + JESVariation); 
+                // JES +- 2%/eta
+                double myChange = std::sqrt(JESVariation*JESVariation 
+                  + JESEtaVariation*JESEtaVariation / iJet->eta() / iJet->eta());
+                double myFactor = 1. + myChange;
+                if (JESVariation < 0) myFactor = 1. - myChange;
                 const LorentzVector p4(iJet->p4().X()*myFactor, iJet->p4().Y()*myFactor, iJet->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
 		pat::Jet jet = *iJet;
 		jet.setP4(p4);

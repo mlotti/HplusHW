@@ -18,7 +18,8 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.05
+JESVariation = 0.03
+JESEtaVariation = 0.02
 
 
 ################################################################################
@@ -86,10 +87,11 @@ param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for whic
 # Other cut values should be exactly the same as in signal analysis
 
 # Prescale weight, do not uncomment unless you know what you're doing!
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.commonSequence *= process.hplusPrescaleWeightProducer
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
 
 ##############################################################################
 
@@ -175,8 +177,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVari
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
     s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part2", "JESPlus"+s, process.qcdMeasurementMethod2Part2, additionalCounters, JESVariation)
-    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part2", "JESMinus"+s, process.qcdMeasurementMethod2Part2, additionalCounters, -JESVariation)
+    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part2", "JESPlus"+s, process.qcdMeasurementMethod2Part2, additionalCounters, JESVariation, JESEtaVariation)
+    addJESVariationAnalysis(process, "qcdMeasurementMethod2Part2", "JESMinus"+s, process.qcdMeasurementMethod2Part2, additionalCounters, -JESVariation, JESEtaVariation)
 
 
 # Print tau discriminators from one tau from one event. Note that if
