@@ -7,8 +7,9 @@ dataVersion = "39Xredigi"
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 options, dataVersion = getOptionsDataVersion(dataVersion)
+print dataVersion.getTriggerProcess()
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
@@ -22,7 +23,8 @@ process.load('Configuration/StandardSequences/EndOfProcess_cff')
 process.load("HiggsAnalysis.Validation.TauMomentumValidation_cff")
 process.load("HiggsAnalysis.Validation.GeneratorValidation_cff")
 process.load("HiggsAnalysis.Validation.TriggerValidation_cff")
-process.TriggerTauValidation.triggerResults = cms.InputTag("TriggerResults","",dataVersion.getTriggerProcess())
+#process.TriggerTauValidation.triggerResults = cms.InputTag("TriggerResults","",dataVersion.getTriggerProcess())
+#process.TriggerTauValidation.hltPathFilter  = cms.InputTag("hltFilterL3TrackIsolationSingleIsoTau35Trk15MET25","",dataVersion.getTriggerProcess())
 
 ANALYSISEventContent = cms.PSet(
     outputCommands = cms.untracked.vstring('keep *_*_*_Validation')
