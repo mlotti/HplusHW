@@ -29,7 +29,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
@@ -119,9 +119,9 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
 print "\nTrigger:", process.qcdMeasurementMethod2Part1.trigger
 print "\nHLT MET Cut (check histogram Trigger_HLT_MET for minimum value):", process.qcdMeasurementMethod2Part1.trigger.hltMetCut
 print "\nTauSelection src:", process.qcdMeasurementMethod2Part1.tauSelection.src
-print "\nTauSelection selection:", process.qcdMeasurementMethod2Part1.tauSelection.selection
-print "\nTauSelection invMassCut:", process.qcdMeasurementMethod2Part1.tauSelection.invMassCut
-print "\nTauSelection rtauCut:", process.qcdMeasurementMethod2Part1.tauSelection.rtauCut
+print "TauSelection selection:", process.qcdMeasurementMethod2Part1.tauSelection.selection
+print "TauSelection invMassCut:", process.qcdMeasurementMethod2Part1.tauSelection.invMassCut
+print "TauSelection rtauCut:", process.qcdMeasurementMethod2Part1.tauSelection.rtauCut
 print "\nGlobalElectronVeto: ", process.qcdMeasurementMethod2Part1.GlobalElectronVeto
 print "\nGlobalMuonVeto: ", process.qcdMeasurementMethod2Part1.GlobalMuonVeto
 print "\nMET: ", process.qcdMeasurementMethod2Part1.MET
