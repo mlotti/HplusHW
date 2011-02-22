@@ -37,10 +37,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-	#"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
         #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
         # For testing in lxplus
+#       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
