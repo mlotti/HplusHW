@@ -86,19 +86,10 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
 # Other cut values should be exactly the same as in signal analysis
 
-# Prescale weight, do not uncomment unless you know what you're doing!
-if dataVersion.isData():
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-    process.commonSequence *= process.hplusPrescaleWeightProducer
-
 ##############################################################################
 
 process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
-    #prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
-    #TriggerMETEmulation = param.TriggerMETEmulation, OBSOLETE?
     # Change default tau algorithm here as needed   
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
@@ -110,7 +101,15 @@ process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSe
     fakeMETVeto = param.fakeMETVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
+# Prescale fetching done automatically for data
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
+    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
+# Print output
 print "Trigger:", process.qcdMeasurementMethod2Part2.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value):", process.qcdMeasurementMethod2Part2.trigger.hltMetCut
 print "TauSelection algorithm:", process.qcdMeasurementMethod2Part2.tauSelection.selection
