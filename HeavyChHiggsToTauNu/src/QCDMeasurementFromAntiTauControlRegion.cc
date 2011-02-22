@@ -51,18 +51,29 @@ namespace HPlus {
 
     // Book histograms 
     hMETAfterTrigger           = fs->make<TH1F>("METAfterTrigger", "MET after Trigger;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterTrigger->Sumw2();
     hMETAfterElectronVeto      = fs->make<TH1F>("METAfterElectronVeto", "MET after Electron Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterElectronVeto->Sumw2();
     hMETAfterMuonVeto          = fs->make<TH1F>("METAfterMuonVeto", "MET after Muon Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterMuonVeto->Sumw2();
     hMETAfterTauSelection      = fs->make<TH1F>("METAfterTauSelection", "MET after Tau Selection;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterTauSelection->Sumw2();
     hMETAfterJetSelection      = fs->make<TH1F>("METAfterJetSelection", "MET after Jet Selection;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterJetSelection->Sumw2();
     hMETAfterInvMassVetoOnJets = fs->make<TH1F>("METAfterInvMassVetoOnJets", "MET after InvMass Veto On Jets;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterInvMassVetoOnJets->Sumw2();
     hMETAfterMET               = fs->make<TH1F>("METAfterMET", "MET after MET cut;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterMET->Sumw2();
     hMETAfterBTagging          = fs->make<TH1F>("METAfterBTagging", "MET after b-tagging;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterBTagging->Sumw2();
     hMETAfterFakeMetVeto       = fs->make<TH1F>("METAfterFakeMetVeto", "MET after fake MET Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterFakeMetVeto->Sumw2();
     hMETAfterWholeSelection    = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterWholeSelection->Sumw2();
     hRTauAfterAllSelectionsExceptMETandFakeMetVeto = fs->make<TH1F>("RTauAfterAllSelectionsExceptMETAndFakeMETVeto", "RTauAfterAllSelectionsExceptMETAndFakeMETVeto;Rtau;N_{events}/0.02", 60, 0., 1.2);
+    hRTauAfterAllSelectionsExceptMETandFakeMetVeto->Sumw2();
     hRTauAfterAllSelections = fs->make<TH1F>("RTauAfterAllSelections", "RTauAfterAllSelections;Rtau;N_{events}/0.02", 60, 0., 1.2);;
-
+    hRTauAfterAllSelections->Sumw2();
    }
 
   QCDMeasurementFromAntiTauControlRegion::~QCDMeasurementFromAntiTauControlRegion() {}
