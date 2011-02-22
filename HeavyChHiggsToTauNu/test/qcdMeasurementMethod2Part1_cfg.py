@@ -31,7 +31,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -98,7 +98,7 @@ param.trigger.triggers = [
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-param.fakeMETVeto.minDeltaPhi = 5.0 # overwrite default value. Alsom note that I have changed the code to only consider deltaPhi(MET, jets)
+param.InvMassVetoOnJets.setTrueToUseModule = False
 param.overrideTriggerFromOptions(options)
 
 ##############################################################################
