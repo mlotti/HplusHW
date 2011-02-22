@@ -342,7 +342,8 @@ class MuonAnalysis:
             self.clonePileupAnalyzer()
 
         # Select primary vertex
-        self.selectedPrimaryVertex = self.analysis.addAnalysisModule("PrimaryVertex",
+        self.selectedPrimaryVertex = self.analysis.addAnalysisModule(
+            "PrimaryVertex",
             selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
             filter = cms.EDFilter("VertexCountFilter",
                                   src = cms.InputTag("dummy"),
@@ -698,10 +699,10 @@ class MuonAnalysis:
 def createAnalysis(name, postfix="", **kwargs):
     a = MuonAnalysis(process, prefix=name+postfix, **kwargs)
     getattr(a, name)()
-    #a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
-    #getattr(a, name)()
-    a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
     getattr(a, name)()
+    #a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    #getattr(a, name)()
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", **kwargs)
@@ -710,6 +711,14 @@ def createAnalysis2(**kwargs):
     if "postfix" in kwargs:
         postfix = kwargs["postfix"]
         del kwargs["postfix"]
+
+    for nj in [1, 2, 3]:
+        kwargs["postfix"] = "NJets%d%s"%(nj, postfix)
+        kwargs["njets"] = nj
+        createAnalysis("noIsoNoVetoMet", **kwargs)
+        createAnalysis("noMuon", **kwargs)
+        createAnalysis("noMuonPF", jets=jetsPF, **kwargs)
+        createAnalysis("muonLast", **kwargs)
 
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
@@ -741,6 +750,74 @@ if options.WDecaySeparate > 0:
 
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
+
+process.muonJetMetAnalyzer = cms.EDAnalyzer(
+    "HPlusMuonJetMetAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    jetSrc = cms.untracked.InputTag(jetsPF.value()),
+    metSrc = cms.untracked.InputTag(pfMET),
+    njets = cms.untracked.uint32(1),
+    jetSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(jetSelection),
+            name = cms.untracked.string("JetKinematic")
+        ),
+    ),
+    muonSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(tightMuonCut),
+            name = cms.untracked.string("MuonTight")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("abs(eta()) < 1.4"),
+            name = cms.untracked.string("MuonEta")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 5"),
+            name = cms.untracked.string("MuonPt5")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 10"),
+            name = cms.untracked.string("MuonPt10")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 15"),
+            name = cms.untracked.string("MuonPt15")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 20"),
+            name = cms.untracked.string("MuonPt20")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 25"),
+            name = cms.untracked.string("MuonPt25")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 30"),
+            name = cms.untracked.string("MuonPt30")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 35"),
+            name = cms.untracked.string("MuonPt35")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 40"),
+            name = cms.untracked.string("MuonPt40")
+        ),
+    )
+)
+
+process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
+process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
+    cut = cms.untracked.string(jetIdPF),
+    name = cms.untracked.string("JetId")
+))
+
+process.muonJetMetPath = cms.Path(
+    process.commonSequence *
+    process.muonJetMetAnalyzer *
+    process.muonJetMetAnalyzerJetId
+)
 
 
 #print process.dumpPython()
