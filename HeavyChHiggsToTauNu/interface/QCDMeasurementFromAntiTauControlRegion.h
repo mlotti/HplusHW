@@ -88,6 +88,9 @@ namespace HPlus {
     TH1 *hMETAfterBTagging;
     TH1 *hMETAfterFakeMetVeto;
     TH1 *hMETAfterWholeSelection; // without MET Cut
+    
+    TH1 *hRTauAfterAllSelectionsExceptMETandFakeMetVeto;
+    TH1 *hRTauAfterAllSelections;
   };
 }
 

@@ -21,6 +21,7 @@ namespace HPlus {
     bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);
     bool passRTauCut(const edm::Ptr<pat::Tau> tau);
     bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
+    double getRtauValue(const edm::Ptr<pat::Tau> tau) const;
 
   protected:
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes
