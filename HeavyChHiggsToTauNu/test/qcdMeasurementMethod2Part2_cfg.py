@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+#dataVersion = "39Xredigi"
+dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -32,19 +32,24 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part2")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-        # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
-        # For testing in jade
-        #dataVersion.getAnalysisDefaultFileMadhatter()
-        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
+    # For testing in lxplus
+    #dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
 
@@ -89,31 +94,35 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Other parameters
 # HLT_MET cut has to be exactly the same as in the first part of the QCD measurement
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+#param.InvMassVetoOnJets.setTrueToUseModule = True
+param.InvMassVetoOnJets.setTrueToUseModule = False
 # Other cut values should be exactly the same as in signal analysis
 
 ##############################################################################
 
 process.qcdMeasurementMethod2Part2 = cms.EDProducer("HPlusQCDMeasurementSignalSelectionProducer",
     trigger = param.trigger,
-    # Change default tau algorithm here as needed   
     primaryVertexSelection = param.primaryVertexSelection,
-    tauSelection = param.tauSelectionHPSTauBased,
-    jetSelection = param.jetSelection,
-    # Apply rest of event selection to get N_rest
+    # Set here the tau algorithm
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+    tauSelection = param.tauSelectionHPSTauBased,
+    jetSelection = param.jetSelection,
+    EvtTopology = param.EvtTopology, ### only for histogramming reasons - does not affect analysis
+    InvMassVetoOnJets = param.InvMassVetoOnJets,
     MET = param.MET,
-    bTagging = param.bTagging,
+    bTagging = param.bTagging,                                                    
     fakeMETVeto = param.fakeMETVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
+
 # Prescale fetching done automatically for data
 if dataVersion.isData():
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    process.qcdMeasurementMethod2Part2.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
 print "Trigger:", process.qcdMeasurementMethod2Part2.trigger
@@ -121,6 +130,18 @@ print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value):", pro
 print "TauSelection algorithm:", process.qcdMeasurementMethod2Part2.tauSelection.selection
 print "TauSelection src:", process.qcdMeasurementMethod2Part2.tauSelection.src
 print "TauSelection operating mode:", process.qcdMeasurementMethod2Part2.tauSelection.operatingMode
+print "TauSelection selection:", process.qcdMeasurementMethod2Part2.tauSelection.selection
+print "TauSelection invMassCut:", process.qcdMeasurementMethod2Part2.tauSelection.invMassCut
+print "TauSelection rtauCut:", process.qcdMeasurementMethod2Part2.tauSelection.rtauCut
+print "TauSelection antiRtauCut:", process.qcdMeasurementMethod2Part2.tauSelection.antiRtauCut
+print "\nGlobalElectronVeto: ", process.qcdMeasurementMethod2Part2.GlobalElectronVeto
+print "\nGlobalMuonVeto: ", process.qcdMeasurementMethod2Part2.GlobalMuonVeto
+print "\nMET: ", process.qcdMeasurementMethod2Part2.MET
+print "\nbTagging: ", process.qcdMeasurementMethod2Part2.bTagging
+print "\nInvMassVetoOnJets:", process.qcdMeasurementMethod2Part2.InvMassVetoOnJets
+print "\nFakeMETVeto:", process.qcdMeasurementMethod2Part2.fakeMETVeto
+print "\nTriggerEmulationEfficiency:", process.qcdMeasurementMethod2Part2.TriggerEmulationEfficiency
+print "\nEvtTopology:", process.qcdMeasurementMethod2Part2.EvtTopology
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)

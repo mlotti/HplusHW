@@ -40,7 +40,7 @@ process.source = cms.Source('PoolSource',
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    "file:/afs/cern.ch/user/a/attikis/scratch0/pattuple_19_1_3id.root"
+    "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
@@ -98,7 +98,8 @@ param.trigger.triggers = [
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-param.InvMassVetoOnJets.setTrueToUseModule = False
+#param.InvMassVetoOnJets.setTrueToUseModule = False
+param.InvMassVetoOnJets.setTrueToUseModule = True
 param.overrideTriggerFromOptions(options)
 
 ##############################################################################
