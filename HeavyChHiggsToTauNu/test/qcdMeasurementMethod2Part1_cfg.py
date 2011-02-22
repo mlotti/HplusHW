@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+#dataVersion = "39Xredigi"
+dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -31,14 +31,17 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    "file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    "file:/afs/cern.ch/user/a/attikis/scratch0/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
@@ -108,8 +111,6 @@ process.qcdMeasurementMethod2Part1 = cms.EDProducer("HPlusQCDMeasurementFromAnti
     GlobalMuonVeto = param.GlobalMuonVeto,
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
-    tauSelection = param.tauSelectionHPSTauBased,
-    jetSelection = param.jetSelection,
     EvtTopology = param.EvtTopology, ### only for histogramming reasons - does not affect analysis
     InvMassVetoOnJets = param.InvMassVetoOnJets,
     MET = param.MET,
@@ -124,7 +125,8 @@ if dataVersion.isData():
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    #process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    process.qcdMeasurementMethod2Part1.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
 print "Trigger:", process.qcdMeasurementMethod2Part1.trigger
@@ -135,6 +137,7 @@ print "TauSelection operating mode:", process.qcdMeasurementMethod2Part1.tauSele
 print "TauSelection selection:", process.qcdMeasurementMethod2Part1.tauSelection.selection
 print "TauSelection invMassCut:", process.qcdMeasurementMethod2Part1.tauSelection.invMassCut
 print "TauSelection rtauCut:", process.qcdMeasurementMethod2Part1.tauSelection.rtauCut
+print "TauSelection antiRtauCut:", process.qcdMeasurementMethod2Part1.tauSelection.antiRtauCut
 print "\nGlobalElectronVeto: ", process.qcdMeasurementMethod2Part1.GlobalElectronVeto
 print "\nGlobalMuonVeto: ", process.qcdMeasurementMethod2Part1.GlobalMuonVeto
 print "\nMET: ", process.qcdMeasurementMethod2Part1.MET
