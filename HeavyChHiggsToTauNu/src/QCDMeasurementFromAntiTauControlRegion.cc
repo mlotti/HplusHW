@@ -15,6 +15,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
+    fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
     fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
@@ -32,14 +33,15 @@ namespace HPlus {
     fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
+    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
-    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)//,
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
    {
@@ -78,6 +80,11 @@ namespace HPlus {
     //increment(fTriggerEmulationCounter);
     //Trigger emulation done in trigger
 
+    // Primary vertex
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    if(!pvData.passedEvent()) return;
+    increment(fPrimaryVertexCounter);
+
     // Apply Isolation Veto to taus
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // At least one tau candidate was found which was isolated.
@@ -104,7 +111,7 @@ namespace HPlus {
     increment(fGlobalElectronVetoCounter);
 
     // GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     

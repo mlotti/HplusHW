@@ -16,6 +16,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation cut")),
+    fPrimaryVertexCounter(eventCounter.addCounter("Primary vertex")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
     fJetSelectionCounter(eventCounter.addCounter("Jet selection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("Global electron veto")),
@@ -25,6 +26,7 @@ namespace HPlus {
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMET veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
+    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
@@ -65,6 +67,11 @@ namespace HPlus {
     if(!triggerMETEmulationData.passedEvent()) return;
     increment(fTriggerEmulationCounter);*/
 
+    // Primary vertex
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    if(!pvData.passedEvent()) return;
+    increment(fPrimaryVertexCounter);
+
     // Apply anti-tau tag taus (configure in cfg file)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // No tau found!
@@ -82,7 +89,7 @@ namespace HPlus {
     increment(fGlobalElectronVetoCounter);
 
     // GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     

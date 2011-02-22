@@ -6,6 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h" 
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -49,16 +50,17 @@ namespace HPlus {
     GlobalMuonVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~GlobalMuonVeto();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
   private:
-    bool MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex);
 
     // Input parameters
     edm::InputTag fMuonCollectionName;
     const std::string fMuonSelection;
     const double fMuonPtCut;
     const double fMuonEtaCut;
+    const bool fMuonApplyIpz;
     
     /// Counter
     Count fGlobalMuonVetoCounter;

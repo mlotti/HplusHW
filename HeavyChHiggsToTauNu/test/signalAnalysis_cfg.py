@@ -72,6 +72,10 @@ process.infoPath = addConfigInfo(process, options)
 ################################################################################
 # The "golden" version of the signal analysis
 
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
@@ -90,6 +94,7 @@ if options.tauEmbeddingInput != 0:
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
+    primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed         

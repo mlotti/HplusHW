@@ -2,6 +2,7 @@
 <use   name="DQMServices/Core"/>
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="DataFormats/TauReco"/>
+<use   name="DataFormats/HLTReco"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="SimGeneral/HepPDTRecord"/>
 <library   file="*.cc" name="TestAnalyzersValidationPlugins">

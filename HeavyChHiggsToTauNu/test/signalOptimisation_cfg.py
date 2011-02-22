@@ -67,6 +67,11 @@ process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
 # The "golden" version of the signal optimisation
+
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode to 'standard' or 'factorized'
@@ -85,6 +90,7 @@ param.maxDeltaPhi = 999.
 # Signal optimisation module
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
+    primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
