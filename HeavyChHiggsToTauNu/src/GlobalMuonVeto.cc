@@ -22,6 +22,7 @@ namespace HPlus {
     fMuonSelection(iConfig.getUntrackedParameter<std::string>("MuonSelection")),
     fMuonPtCut(iConfig.getUntrackedParameter<double>("MuonPtCut")),
     fMuonEtaCut(iConfig.getUntrackedParameter<double>("MuonEtaCut")),
+    fMuonApplyIpz(iConfig.getUntrackedParameter<bool>("MuonApplyIpz")),
     fGlobalMuonVetoCounter(eventCounter.addSubCounter("GlobalMuon Selection","GlobalMuonVeto")),
     fMuonSelectionSubCountMuonPresent(eventCounter.addSubCounter("GlobalMuon Selection","Muon present")),
     fMuonSelectionSubCountMuonHasGlobalOrInnerTrk(eventCounter.addSubCounter("GlobalMuon Selection","Muon has Global OR Inner Trk")),
@@ -97,16 +98,16 @@ namespace HPlus {
 
   GlobalMuonVeto::~GlobalMuonVeto() {}
 
-  GlobalMuonVeto::Data GlobalMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  GlobalMuonVeto::Data GlobalMuonVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
     // Reset data variables
     fSelectedMuonPt = -1.0;
     fSelectedMuonEta = -999.99;
     // Get result
-    bool passEvent = MuonSelection(iEvent,iSetup);
+    bool passEvent = MuonSelection(iEvent,iSetup, primaryVertex);
     return Data(this, passEvent);
   }
 
-  bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
+  bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex){
 
     // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
@@ -135,41 +136,50 @@ namespace HPlus {
     } 
     FIX ME */
 
+    /* FIX ME
+    // Get beam spot
+    edm::Handle<reco::BeamSpot> BeamSpotHandle;
+    iEvent.getByLabel(beamSpotCollection, BeamSpotHandle);
+    const reco::BeamSpot *myBeamSpot = BeamSpotHandle.product();
+    const math::XYZPoint myBeamSpotPosition = myBeamSpot->position();
+    impactParameter = fabs( (*iMuon)->innerTrack()->dxy(myBeamSpotPosition) );
+    impactParameter = fabs( (*iElectron)->gsfTrack()->dxy(myBeamSpotPosition) );
+    FIX ME */ 
+
 
     // Create and attach handle to Muon Collection
     edm::Handle<std::vector<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
     
     // In the case where the handle is empty...
-    if (!myMuonHandle->size()){ bMuonPresent = false;}
-    else{bMuonPresent = true;}
-    
-    // If no muon is found return true - Event passes the muon Veto
-    if(!bMuonPresent) return true;
-    
+    if ( !myMuonHandle->size() ){
+      // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
+    }
+
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
+    // 
+    bool bMuonPresent = false;
+    bool bMuonHasGlobalOrInnerTrk = false;
+    bool bMuonPtCut = false;
+    bool bMuonEtaCut = false;
+    bool bMuonGlobalMuonOrTrkerMuon = false;
+    bool bMuonSelection = false;
+    bool bMuonNTrkerHitsCut = false;
+    bool bMuonNPixelHitsCut = false;
+    bool bMuonNMuonlHitsCut = false;
+    bool bMuonGlobalTrkChiSqCut = false;
+    bool bMuonImpactParCut = false;
+    bool bMuonRelIsolationR03Cut = false;
+    bool bMuonGoodPVCut = false;
     
     // Loop over all Muons
     for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
-      
+
       // Keep track of the muons analyzed
       bMuonPresent = true;
       increment(fMuonIDSubCountAllMuonCandidates);
-      bDecision = false;
-      bMuonHasGlobalOrInnerTrk = false;
-      bMuonPtCut = false;
-      bMuonEtaCut = false;
-      bMuonGlobalMuonOrTrkerMuon = false;
-      bMuonSelection = false;
-      bMuonNTrkerHitsCut = false;
-      bMuonNPixelHitsCut = false;
-      bMuonNMuonlHitsCut = false;
-      bMuonGlobalTrkChiSqCut = false;
-      bMuonImpactParCut = false;
-      bMuonRelIsolationR03Cut = false;
-      bMuonGoodPVCut = false;
       
       // Keep track of the MuonID's. Just for my information. 
       // 28/10/2010 - pat::Muon::muonID() used instead of pat::Muon::isGood(). The latter is there only for backward compatibility.
@@ -278,9 +288,12 @@ namespace HPlus {
       bMuonRelIsolationR03Cut = true;
 
       // 8) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
-      // FIX ME
-      if ( fabs(myInnerTrackRef->dz()) < 1.0) continue; // This is the z-impact parameter w.r.t to (0,0,0). Replace latter with BeamSpot
-      bMuonGoodPVCut = true;      
+      if(fMuonApplyIpz) {
+        if(primaryVertex.get() == 0)
+          throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
+        if(std::abs(myInnerTrackRef->dz(primaryVertex->position())) < 1.0) continue; // This is the z-impact parameter w.r.t to selected primary vertex
+        bMuonGoodPVCut = true;
+      }
 
       
       // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
@@ -299,7 +312,7 @@ namespace HPlus {
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
-
+  
     if(bMuonPresent) {
       increment(fMuonSelectionSubCountMuonPresent);
       if(bMuonHasGlobalOrInnerTrk) {
@@ -341,7 +354,9 @@ namespace HPlus {
     }
 
     // Make a boolean that describes whether a Global Muon (passing all selection criteria) is found.
-    bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut*bMuonGoodPVCut;
+    bool bDecision = bMuonPresent*bMuonHasGlobalOrInnerTrk*bMuonPtCut*bMuonEtaCut*bMuonGlobalMuonOrTrkerMuon*bMuonSelection*bMuonNTrkerHitsCut*bMuonNPixelHitsCut*bMuonNMuonlHitsCut*bMuonGlobalTrkChiSqCut*bMuonImpactParCut*bMuonRelIsolationR03Cut;
+    if(fMuonApplyIpz)
+      bDecision = bDecision && bMuonGoodPVCut;
 
     // Now store the highest Muon Pt and Eta
     fSelectedMuonPt  = myHighestMuonPt;
@@ -350,19 +365,10 @@ namespace HPlus {
 
     // If a Global Muon (passing all selection criteria) is found, do not increment counter. Return false.
     if(bDecision) return false;
-    // Otherwise increment counter and return true - event has passed the Global Muon Veto cut.
-    else{
-      increment(fGlobalMuonVetoCounter);
+    // Otherwise increment counter and return true.
+    else increment(fGlobalMuonVetoCounter);
     return true;
-    }
     
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
   
-
-
-  void GlobalMuonVeto::debug(void){
-    
-    std::cout << "bDecision = " << bDecision << ", bMuonPresent = " << bMuonPresent << ", bMuonHasGlobalOrInnerTrk = " << bMuonHasGlobalOrInnerTrk << ", bMuonPtCut = " << bMuonPtCut << ", bMuonEtaCut = " << bMuonEtaCut << ", bMuonSelection = " << bMuonSelection << ", bMuonNTrkerHitsCut = " << bMuonNTrkerHitsCut << ", bMuonNPixelHitsCut = "  << bMuonNPixelHitsCut << ", bMuonNMuonlHitsCut = " << bMuonNMuonlHitsCut << ", bMuonGlobalTrkChiSqCut = " << bMuonGlobalTrkChiSqCut << ", bMuonImpactParCut = " << bMuonImpactParCut << ", bMuonRelIsolationR03Cut = " << bMuonRelIsolationR03Cut << ", bMuonGoodPVCut = " << bMuonGoodPVCut << "\n" << std::endl;
-  }
-
 }//eof: namespace HPlus {
