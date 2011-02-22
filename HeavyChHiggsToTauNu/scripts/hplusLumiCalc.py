@@ -43,7 +43,10 @@ def main(opts, args):
             print "  Ignoring task directory '%s', it looks like MC" % d
             continue
 
-        p = subprocess.Popen(["crab", "-report", "-c", d], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        cmd = ["crab", "-report", "-c", d]
+        if opts.verbose:
+            print " ".join(cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
         ret = p.returncode
         if ret != 0:
@@ -60,6 +63,8 @@ def main(opts, args):
         cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
+        if opts.verbose:
+            print " ".join(cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
         ret = p.returncode
