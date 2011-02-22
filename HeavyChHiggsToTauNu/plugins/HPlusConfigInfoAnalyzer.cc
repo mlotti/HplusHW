@@ -6,9 +6,10 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TH1F.h"
+#include "TNamed.h"
 
-#include<iostream>
 #include<limits>
+#include<string>
 
 class HPlusConfigInfoAnalyzer: public edm::EDAnalyzer {
  public:
@@ -28,6 +29,7 @@ class HPlusConfigInfoAnalyzer: public edm::EDAnalyzer {
   virtual void endJob();
 
 private:
+  std::string dataVersion;
   double crossSection;
   double luminosity;
   bool hasCrossSection;
@@ -35,6 +37,7 @@ private:
 };
 
 HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset): 
+  dataVersion(""),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
   luminosity(std::numeric_limits<double>::quiet_NaN()),
   hasCrossSection(false), hasLuminosity(false)
@@ -46,6 +49,9 @@ HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset):
   if(pset.exists("luminosity")) {
     luminosity = pset.getUntrackedParameter<double>("luminosity");
     hasLuminosity = true;
+  }
+  if(pset.exists("dataVersion")) {
+    dataVersion = pset.getUntrackedParameter<std::string>("dataVersion");
   }
 
 }
@@ -79,6 +85,8 @@ void HPlusConfigInfoAnalyzer::endJob() {
     info->AddBinContent(bin, luminosity);
     ++bin;
   }
+
+  TNamed *dv = fs->make<TNamed>("dataVersion", dataVersion.c_str());
 
 }
 

@@ -142,7 +142,9 @@ if options.doPat != 0:
 ################################################################################
 
 # Generator and configuration info analyzers
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
+process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
+    dataVersion = cms.untracked.string(dataVersion.version)
+)
 if options.crossSection >= 0.:
     process.configInfo.crossSection = cms.untracked.double(options.crossSection)
     print "Dataset cross section has been set to %g pb" % options.crossSection
