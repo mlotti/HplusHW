@@ -49,7 +49,8 @@ if options.doPat != 0:
 # Configuration
 trigger = options.trigger
 if len(trigger) == 0:
-    trigger = "HLT_Mu9"
+#    trigger = "HLT_Mu9"
+    trigger = "HLT_Mu15_v1"
 
 print "Using trigger %s" % trigger
 
@@ -128,8 +129,9 @@ process.commonSequence *= process.firstPrimaryVertex
 
 # Define the histograms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="muon pt (GeV/c)")
-histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="muon eta")
+histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="pt (GeV/c)")
+histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="eta")
+histoPhi = Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, description="phi")
 histoIso = Histo("relIso", relIso, min=0, max=0.5, nbins=100, description="Relative isolation")
 histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
@@ -138,11 +140,13 @@ histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=
 histoMet = Histo("et", "et()", min=0., max=400., nbins=400, description="MET (GeV)")
 
 histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
-                            min=0, max=120, nbins=120, description="W transverse mass")
+                            min=0, max=200, nbins=200, description="W transverse mass")
 histoZMass = Histo("mass", "mass()", min=0, max=200, nbins=200, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoIso]
+histosBeginning = [histoPt, histoEta, histoPhi, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
+
+histosJet = [histoPt, histoEta, histoPhi]
 
 vertexCollections = ["offlinePrimaryVertices"]
 if dataVersion.isData():
@@ -182,6 +186,8 @@ class MuonAnalysis:
         if not self.afterOtherCuts:
             self.histoAnalyzer = self.analysis.addMultiHistoAnalyzer("AllMuons", [
                     ("muon_", muons, histosBeginning),
+                    ("calojet_", jets, histosJet),
+                    ("pfjet_", jetsPF, histosJet),
                     ("calomet_", cms.InputTag(caloMET), [histoMet]),
                     ("pfmet_", cms.InputTag(pfMET), [histoMet]),
                     ("tcmet_", cms.InputTag(tcMET), [histoMet])])
@@ -721,6 +727,7 @@ def createAnalysis2(**kwargs):
         kwargs["metCut"] = met
         kwargs["njets"] = njets
         kwargs["jets"] = jetsPF
+        kwargs["doJetId"] = True
         createAnalysis("noIsoNoVetoMetPF", **kwargs)
 
 createAnalysis2()
