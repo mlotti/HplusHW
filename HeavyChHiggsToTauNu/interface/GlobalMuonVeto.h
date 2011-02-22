@@ -123,7 +123,7 @@ namespace HPlus {
     float fSelectedMuonEta;
 
     // booleans
-    //bool bMuonPresent;
+    bool bMuonPresent;
     bool bDecision;
     bool bMuonHasGlobalOrInnerTrk;
     bool bMuonPtCut;

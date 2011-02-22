@@ -45,16 +45,13 @@ namespace HPlus {
     // Counters
     Count fAllCounter;
     Count fTriggerAndHLTMetCutCounter;
-    //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
-    Count fOneProngTauSelectionCounter;
-    Count fJetSelectionCounter;
-    Count fEvtTopologyCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
-    Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
     Count fInvMassVetoOnJetsCounter;
+    Count fEvtTopologyCounter;
+    Count fOneProngTauSelectionCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
@@ -68,19 +65,17 @@ namespace HPlus {
 
     // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
-    TriggerTauMETEmulation  fTriggerTauMETEmulation;
+    //TriggerTauMETEmulation  fTriggerTauMETEmulation;
     VertexSelection fPrimaryVertexSelection;
-    TauSelection fOneProngTauSelection;
-    JetSelection fJetSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
-    TauSelection fOneProngTauSelection;
     JetSelection fJetSelection;
     InvMassVetoOnJets fInvMassVetoOnJets;
+    EvtTopology fEvtTopology;
+    TauSelection fOneProngTauSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
-    EvtTopology fEvtTopology;
     
     // Histograms
     TH1 *hMETAfterTrigger;
