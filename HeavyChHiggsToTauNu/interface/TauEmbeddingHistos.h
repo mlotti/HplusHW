@@ -5,6 +5,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/Math/interface/Point3D.h"
 
 #include<string>
 
@@ -16,6 +17,7 @@ namespace reco {
   class Candidate;
   class BaseTau;
   class GenParticle;
+  class Track;
 }
 namespace pat {
   class Muon;
@@ -72,12 +74,33 @@ namespace hplus {
       ~Histo();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
-      void fill(const reco::Candidate& cand);
+      //void fill(const reco::Candidate& cand);
+      void fill(const math::XYZTLorentzVector& cand);
+
+      template <typename T>
+      void fill(const T& cand) {
+        fill(cand.p4());
+      }
 
     private:
       TH1 *hPt;
       TH1 *hEta;
       TH1 *hPhi;
+    };
+
+    class HistoTrack {
+    public:
+      HistoTrack();
+      ~HistoTrack();
+
+      void init(TFileDirectory& dir, const std::string& name, const std::string& title);
+      void fill(const reco::Track& track, const math::XYZPoint& vertex);
+
+    private:
+      TH1 *hNhits;
+      TH1 *hChi2Norm;
+      TH1 *hDxy;
+      TH1 *hDz;
     };
 
     class Histo2 {
@@ -86,7 +109,20 @@ namespace hplus {
       ~Histo2();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
-      void fill(const reco::Candidate& x, const reco::Candidate& y);
+      //void fill(const reco::Candidate& x, const reco::Candidate& y);
+      void fill(const math::XYZTLorentzVector& x, const math::XYZTLorentzVector& y);
+      template <typename T>
+      void fill(const math::XYZTLorentzVector& x, const T& y) {
+        fill(x, y.p4());
+      }
+      template <typename T>
+      void fill(const T& x, const math::XYZTLorentzVector& y) {
+        fill(x.p4(), y);
+      }
+      template <typename T1, typename T2>
+      void fill(const T1& x, const T2& y) {
+        fill(x.p4(), y.p4());
+      }
 
     private:
       TH2 *hPt;

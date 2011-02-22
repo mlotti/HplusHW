@@ -5,14 +5,13 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
 #include "DataFormats/Math/interface/deltaPhi.h"
-
 
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
@@ -29,11 +28,30 @@ namespace hplus {
       hPhi = dir.make<TH1F>((name+"_Phi").c_str(), (title+" phi").c_str(), 700, -3.5, 3.5);
     }
 
-    void Histo::fill(const reco::Candidate& cand) {
+    //void Histo::fill(const reco::Candidate& cand) {
+    void Histo::fill(const math::XYZTLorentzVector& cand) {
       hPt->Fill(cand.pt());
       hEta->Fill(cand.eta());
       hPhi->Fill(cand.phi());
     }
+
+    ////////////////////////////////////////
+    HistoTrack::HistoTrack(): hNhits(0), hChi2Norm(0), hDxy(0), hDz(0) {}
+    HistoTrack::~HistoTrack() {}
+    void HistoTrack::init(TFileDirectory& dir, const std::string& name, const std::string& title) {
+      hNhits = dir.make<TH1F>((name+"_TrackNhits").c_str(), (title+" track N hits").c_str(), 80, 0, 80);
+      hChi2Norm = dir.make<TH1F>((name+"_TrackChi2Norm").c_str(), (title+" track chi2/ndof").c_str(), 200, 0, 20);
+      hDxy = dir.make<TH1F>((name+"_TrackDxy").c_str(), (title+" track dxy").c_str(), 200, 0, 0.2);
+      hDz = dir.make<TH1F>((name+"_TrackDz").c_str(), (title+" track dz").c_str(), 100, 0, 1.0);
+    }
+
+    void HistoTrack::fill(const reco::Track& track, const math::XYZPoint& vertex) {
+      hNhits->Fill(track.numberOfValidHits());
+      hChi2Norm->Fill(track.normalizedChi2());
+      hDxy->Fill(std::abs(track.dxy(vertex)));
+      hDz->Fill(std::abs(track.dz(vertex)));
+    }
+
 
     ////////////////////////////////////////
 
@@ -55,7 +73,8 @@ namespace hplus {
       hDEta = dir.make<TH1F>((name2+"_DEta").c_str(), (title+" #Delta#eta").c_str(), 600,-3,3);
     }
 
-    void Histo2::fill(const reco::Candidate& x, const reco::Candidate& y) {
+    //void Histo2::fill(const reco::Candidate& x, const reco::Candidate& y) {
+    void Histo2::fill(const math::XYZTLorentzVector& x, const math::XYZTLorentzVector& y) {
       hPt->Fill(x.pt(), y.pt());
       hEta->Fill(x.eta(), y.eta());
       hPhi->Fill(x.phi(), y.phi());

@@ -9,12 +9,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "TTree.h"
 
 namespace edm {
@@ -45,11 +45,12 @@ namespace HPlus {
     Count fAllCounter;
     Count fTriggerAndHLTMetCutCounter;
     //Count fTriggerEmulationCounter;
-    Count fGlobalElectronVetoCounter;
-    Count fGlobalMuonVetoCounter;
+    Count fPrimaryVertexCounter;
     Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
-    Count fInvMassVetoOnJetsCounter;
+    Count fEvtTopologyCounter;
+    Count fGlobalElectronVetoCounter;
+    Count fGlobalMuonVetoCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
@@ -64,27 +65,21 @@ namespace HPlus {
     // The order here defines the order the counters are printed at the program termination
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
-    GlobalElectronVeto fGlobalElectronVeto;
-    GlobalMuonVeto fGlobalMuonVeto;
+    VertexSelection fPrimaryVertexSelection;
     TauSelection fOneProngTauSelection;
     JetSelection fJetSelection;
-    InvMassVetoOnJets fInvMassVetoOnJets;
+    GlobalElectronVeto fGlobalElectronVeto;
+    GlobalMuonVeto fGlobalMuonVeto;
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     EvtTopology fEvtTopology;
-    
+
     // Histograms
-    TH1 *hMETAfterTrigger;
-    TH1 *hMETAfterElectronVeto;
-    TH1 *hMETAfterMuonVeto;
-    TH1 *hMETAfterTauSelection;
-    TH1 *hMETAfterJetSelection;
-    TH1 *hMETAfterInvMassVetoOnJets;
-    TH1 *hMETAfterMET;
-    TH1 *hMETAfterBTagging;
-    TH1 *hMETAfterFakeMetVeto;
-    TH1 *hMETAfterWholeSelection; // without MET Cut
+    TH1 *hMETAfterWholeSelection;
+    //aa    TH1 *hTriggerPrescales;
+    //aa    TH1 *hTriggerPrescales_test;
+
   };
 }
 

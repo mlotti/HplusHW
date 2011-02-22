@@ -4,7 +4,6 @@ import re
 import ROOT
 
 import dataset
-import tools
 
 class CellFormatBase:
     """Base class for cell formats.
@@ -32,11 +31,11 @@ class CellFormatBase:
                               equal (default: 4)
         valueOnly             Boolean, format the value only? (default: False)
         """
-        self._valueFormat = tools.kwargsDefault(kwargs, "valueFormat", "%.4g")
-        self._uncertaintyFormat = tools.kwargsDefault(kwargs, "uncertaintyFormat", self._valueFormat)
-        self._valueOnly = tools.kwargsDefault(kwargs, "valueOnly", False)
+        self._valueFormat = kwargs.get("valueFormat", "%.4g")
+        self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
+        self._valueOnly = kwargs.get("valueOnly", False)
 
-        uncertaintyPrecision = tools.kwargsDefault(kwargs, "uncertaintyPrecision", 4)
+        uncertaintyPrecision = kwargs.get("uncertaintyPrecision", 4)
         self._uncertaintyEpsilon = math.pow(10., -1.0*uncertaintyPrecision)
 
     def format(self, count):
@@ -83,7 +82,7 @@ class CellFormatTeX(CellFormatBase):
         Same as CellFormatBase
         """
         CellFormatBase.__init__(self, **kwargs)
-        self._texifyPower = tools.kwargsDefault(kwargs, "texifyPower", True)
+        self._texifyPower = kwargs.get("texifyPower", True)
         self._texre = re.compile("(?P<sign>[+-])?(?P<mantissa>[^e]*)(e(?P<exponent>.*))?$")
 
     def _formatValue(self, value):
@@ -177,12 +176,22 @@ class TableFormatBase:
         endColumn     String for column ending
         """
         self.defaultCellFormat = cellFormat
+        self.columnCellFormat = {}
 
         for x in ["beginTable", "endTable", "beginRow", "endRow", "beginColumn", "endColumn"]:
             try:
                 setattr(self, "_"+x, kwargs[x])
             except KeyError:
                 setattr(self, "_"+x, "")
+
+    def setColumnFormat(self, columnIndex, cellFormat):
+        """Set column format.
+
+        Arguments:
+        columnIndex    index of column
+        cellFormat     CellFormatBase object to format the column
+        """
+        self.columnCellFormat[columnIndex] = cellFormat
 
     def beginTable(self, ncolumns):
         """Format table beginning.
@@ -228,13 +237,17 @@ class TableFormatBase:
         """
         return self._endColumn
 
-    def formatCell(self, count):
+    def formatCell(self, columnIndex, count):
         """Format a cell.
 
         Arguments:
         count   Count object to format
         """
-        return self.defaultCellFormat.format(count)
+        cf = self.defaultCellFormat
+        if columnIndex in self.columnCellFormat:
+            cf = self.columnCellFormat[columnIndex]
+
+        return cf.format(count)
 
 
 class TableFormatText(TableFormatBase):
@@ -360,7 +373,7 @@ def counterEfficiency(counterTable):
     for icol in xrange(0, counterTable.getNcolumns()):
         prev = None
         for irow in xrange(0, counterTable.getNrows()):
-            count = counterTable.getValue(irow, icol)
+            count = counterTable.getCount(irow, icol)
             value = None
             if count != None and prev != None:
                 try:
@@ -368,7 +381,7 @@ def counterEfficiency(counterTable):
                 except ZeroDivisionError:
                     pass
             prev = count
-            result.setValue(irow, icol, value)
+            result.setCount(irow, icol, value)
     return result
 
 class CounterColumn:
@@ -393,7 +406,7 @@ class CounterColumn:
     def getRowName(self, irow):
         return self.rowNames[irow]
 
-    def getValue(self, irow):
+    def getCount(self, irow):
         return self.values[irow]
 
 class CounterTable:
@@ -419,11 +432,24 @@ class CounterTable:
             return 0
         return len(self.table[0])
 
-    def getValue(self, irow, icol):
+    def getCount(self, irow, icol):
         return self.table[irow][icol]
 
-    def setValue(self, irow, icol, value):
+    def setCount(self, irow, icol, value):
         self.table[irow][icol] = value
+
+    def renameRows(self, mapping):
+        for irow, row in enumerate(self.rowNames):
+            if row in mapping:
+                self.rowNames[irow] = mapping[row]
+
+    def getColumnNames(self):
+        return self.columnNames
+
+    def renameColumns(self, mapping):
+        for icol, col in enumerate(self.columnNames):
+            if col in mapping:
+                self.columnNames[icol] = mapping[col]
 
     def indexColumn(self, name):
         return self.columnNames.index(name)
@@ -442,7 +468,7 @@ class CounterTable:
         while iname < len(self.rowNames)  and icount < column.getNrows():
             # Check if the current indices give the same counter name for both
             if self.rowNames[iname] == column.getRowName(icount):
-                self.table[iname].insert(icol, column.getValue(icount))
+                self.table[iname].insert(icol, column.getCount(icount))
                 iname += 1
                 icount += 1
                 continue
@@ -451,7 +477,7 @@ class CounterTable:
             found = False
             for i in xrange(iname, len(self.rowNames)):
                 if self.rowNames[i] == column.getRowName(icount):
-                    self.table[i].insert(icol, column.getValue(icount))
+                    self.table[i].insert(icol, column.getCount(icount))
                     iname = i+1
                     icount += 1
                     found = True
@@ -465,7 +491,7 @@ class CounterTable:
             # found name
             self.rowNames.insert(iname, column.getRowName(icount))
             row = [None]*(beginColumns+1)
-            row[icol] = column.getValue(icount)
+            row[icol] = column.getCount(icount)
             self.table.insert(iname, row)
             iname += 1
             icount += 1
@@ -474,14 +500,17 @@ class CounterTable:
         for i in xrange(icount, column.getNrows()):
             self.rowNames.append(column.getRowName(i))
             row = [None]*(beginColumns+1)
-            row[icol] = column.getValue(i)
+            row[icol] = column.getCount(i)
             self.table.append(row)
 
-        # Sanity check
-        for row in self.table:
-            if len(row) < beginColumns+1:
-                print row
-                raise Exception("Internal error: len(row) = %d, beginColumns = %d" % (len(row), beginColumns))
+        for irow, row in enumerate(self.table):
+            # Append None to row if column didn't have 
+            if len(row) == beginColumns:
+                row.insert(icol, None)
+            # Sanity check
+            elif len(row) < beginColumns:
+                print [c.value() for c in row]
+                raise Exception("Internal error at row %d: len(row) = %d, beginColumns = %d" % (irow, len(row), beginColumns))
 
         self.columnNames.insert(icol, column.getName())
 
@@ -531,9 +560,9 @@ class CounterTable:
         for irow in xrange(0, self.getNrows()):
             row = [self.rowNames[irow]]
             for icol in xrange(0, self.getNcolumns()):
-                count = self.getValue(irow, icol)
+                count = self.getCount(irow, icol)
                 if count != None:
-                    row.append(formatter.formatCell(count))
+                    row.append(formatter.formatCell(icol, count))
                 else:
                     row.append("")
             content.append(row)
@@ -577,36 +606,41 @@ class CounterTable:
 
 class SimpleCounter:
     """Counter for one dataset."""
-    def __init__(self, histoWrapper, countNameFunction):
-        self.histoWrapper = histoWrapper
+    def __init__(self, datasetRootHisto, countNameFunction):
+        self.datasetRootHisto = datasetRootHisto
         self.counter = None
         if countNameFunction != None:
-            self.countNames = [countNameFunction(x) for x in histoWrapper.getBinLabels()]
+            self.countNames = [countNameFunction(x) for x in datasetRootHisto.getBinLabels()]
         else:
-            self.countNames = histoWrapper.getBinLabels()
+            self.countNames = datasetRootHisto.getBinLabels()
 
     def normalizeToOne(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        self.histoWrapper.normalizeToOne()
+        self.datasetRootHisto.normalizeToOne()
 
     def normalizeMCByCrossSection(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        if self.histoWrapper.getDataset().isMC():
-            self.histoWrapper.normalizeByCrossSection()
+        if self.datasetRootHisto.getDataset().isMC():
+            self.datasetRootHisto.normalizeByCrossSection()
 
     def normalizeMCToLuminosity(self, lumi):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
-        if self.histoWrapper.getDataset().isMC():
-            self.histoWrapper.normalizeToLuminosity(lumi)
+        if self.datasetRootHisto.getDataset().isMC():
+            self.datasetRootHisto.normalizeToLuminosity(lumi)
+
+    def scale(self, value):
+        if self.counter != None:
+            raise Exception("Can't scale after the counters have been created!")
+        self.datasetRootHisto.scale(value)
 
     def _createCounter(self):
-        self.counter = [x[1] for x in dataset.histoToCounter(self.histoWrapper.getHistogram())]
+        self.counter = [x[1] for x in dataset._histoToCounter(self.datasetRootHisto.getHistogram())]
 
     def getName(self):
-        return self.histoWrapper.getDataset().getName()
+        return self.datasetRootHisto.getDataset().getName()
 
     def getNrows(self):
         return len(self.countNames)
@@ -614,7 +648,7 @@ class SimpleCounter:
     def getRowName(self, icount):
         return self.countNames[icount]
 
-    def getValue(self, icount):
+    def getCount(self, icount):
         if self.counter == None:
             self._createCounter()
         return self.counter[icount]
@@ -629,8 +663,8 @@ class SimpleCounter:
 
 class Counter:
     """Counter for many datasets."""
-    def __init__(self, histoWrappers, countNameFunction):
-        self.counters = [SimpleCounter(h, countNameFunction) for h in histoWrappers]
+    def __init__(self, datasetRootHistos, countNameFunction):
+        self.counters = [SimpleCounter(h, countNameFunction) for h in datasetRootHistos]
 
     def forEachDataset(self, func):
         for c in self.counters:
@@ -645,10 +679,10 @@ class Counter:
     def normalizeMCByLuminosity(self):
         lumi = None
         for c in self.counters:
-            if c.histoWrapper.getDataset().isData():
+            if c.datasetRootHisto.getDataset().isData():
                 if lumi != None:
                     raise Exception("Unable to normalize by luminosity, more than one data datasts (you might want to merge data datasets)")
-                lumi = c.histoWrapper.getDataset().getLuminosity()
+                lumi = c.datasetRootHisto.getDataset().getLuminosity()
         if lumi == None:
             raise Exception("Unable to normalize by luminosity. no data datasets")
 
@@ -656,6 +690,9 @@ class Counter:
 
     def normalizeMCToLuminosity(self, lumi):
         self.forEachDataset(lambda x: x.normalizeMCToLuminosity(lumi))
+
+    def scale(self, value):
+        self.forEachDataset(lambda x: x.scale(value))
 
     def getTable(self):
         table = CounterTable()
@@ -688,10 +725,10 @@ class EventCounter:
         except KeyError:
             raise Exception("Error: no 'counter' histogram in the '%s' directories" % counterDir)
 
-        self.mainCounter = Counter(datasets.getHistoWrappers(counterDir+"/counter"), countNameFunction)
+        self.mainCounter = Counter(datasets.getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         for subname in counterNames.keys():
-            self.subCounters[subname] = Counter(datasets.getHistoWrappers(counterDir+"/"+subname), countNameFunction)
+            self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
 
         self.normalization = "None"
 
@@ -715,6 +752,10 @@ class EventCounter:
     def normalizeMCToLuminosity(self, lumi):
         self._forEachCounter(lambda x: x.normalizeMCToLuminosity(lumi))
         self.normalization = "MC normalized to luminosity %f pb^-1" % lumi
+
+    def scale(self, value):
+        self._forEachCounter(lambda x: x.scale(value))
+        self.normalization += " (scaled with %g)" % value
 
     def getMainCounter(self):
         return self.mainCounter

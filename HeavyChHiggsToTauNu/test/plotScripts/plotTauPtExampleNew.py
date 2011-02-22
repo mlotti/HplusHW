@@ -35,6 +35,9 @@ datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2
 # Construct datasets from a given list of (name, pathToRooTFile) pairs
 #datasets = dataset.getDatasetsFromRootFiles([("QCD_Pt120to170", "QCD_Pt120to170/res/histograms-QCD_Pt120to170.root")])
 
+# Load dataset luminosities from a 'lumi.json' file
+datasets.loadLuminosities()
+
 # Merge:
 #  - all data datasets to 'Data'
 #  - all QCD datasets to 'QCD'
@@ -44,7 +47,7 @@ datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2
 plots.mergeRenameReorderForDataMC(datasets)
 
 # Override the data luminosity (should not be used except for testing)
-datasets.getDataset("Data").setLuminosity(35)
+#datasets.getDataset("Data").setLuminosity(35)
 
 # Create the plot, latter argument is the path to the histogram in the ROOT files
 h = plots.DataMCPlot(datasets, "qcdMeasurementMethod2Part1Counters/TauSelection_all_tau_candidates_pt")

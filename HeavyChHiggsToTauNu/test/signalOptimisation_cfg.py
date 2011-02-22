@@ -18,7 +18,9 @@ doAllTauIds = True
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
-JESVariation = 0.05
+JESVariation = 0.03
+JESEtaVariation = 0.02
+JESUnclusteredMETVariation = 0.10
 
 ################################################################################
 
@@ -65,6 +67,11 @@ process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
 # The "golden" version of the signal optimisation
+
+# Primary vertex selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
+addPrimaryVertexSelection(process, process.commonSequence)
+
 # Import signal analysis parameters and tweak them here
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode to 'standard' or 'factorized'
@@ -80,17 +87,10 @@ param.transverseMassCut = -1.0
 param.alphaT = -1.0
 param.maxDeltaPhi = 999.
 
-# Prescale weight, do not uncomment unless you know what you're doing!
-#process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-#process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-#process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-#process.commonSequence *= process.hplusPrescaleWeightProducer
-
 # Signal optimisation module
 process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
-    #prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),   
     trigger = param.trigger,
-    #TriggerMETEmulation = param.TriggerMETEmulation, OBSOLETE?
+    primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
@@ -104,6 +104,15 @@ process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
 
+# Prescale fetching done automatically for data
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
+    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+
+# Print output
 print "Trigger:", process.signalOptimisation.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalOptimisation.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
@@ -169,9 +178,13 @@ if doAllTauIds:
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
     # In principle here could be more than two JES variation analyses
-    s = "%02d" % int(JESVariation*100)
-    addJESVariationAnalysis(process, "signalOptimisation", "JESPlus"+s, process.signalOptimisation, additionalCounters, JESVariation)
-    addJESVariationAnalysis(process, "signalOptimisation", "JESMinus"+s, process.signalOptimisation, additionalCounters, -JESVariation)
+    JESs = "%02d" % int(JESVariation*100)
+    JESe = "%02d" % int(JESEtaVariation*100)
+    JESm = "%02d" % int(JESUnclusteredMETVariation*100)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

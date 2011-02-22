@@ -29,6 +29,9 @@ _physicalToLogical = {
 
     "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL",
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": "QCD_Pt20_MuEnriched",
+    "TToBLNu_s-channel_TuneZ2_Winter10": "TToBLNu_s-channel",
+    "TToBLNu_t-channel_TuneZ2_Winter10": "TToBLNu_t-channel",
+    "TToBLNu_tW-channel_TuneZ2_Winter10": "TToBLNu_tW-channel",
 }
 
 _datasetMerge = {

@@ -5,6 +5,7 @@ datasets = {
     "TTToHplusBWB_M90_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 16.442915,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M90_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -20,6 +21,7 @@ datasets = {
     "TTToHplusBWB_M100_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 14.057857,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M100_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -35,6 +37,7 @@ datasets = {
     "TTToHplusBWB_M120_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 8.984715,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M120_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -50,6 +53,7 @@ datasets = {
     "TTToHplusBWB_M140_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 4.223402,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M140_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -65,6 +69,7 @@ datasets = {
     "TTToHplusBWB_M160_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 0.811493,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M160_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -82,6 +87,7 @@ datasets = {
     "QCD_Pt30to50_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 5.312e+07,
+        "tauIDFactorizationMap": "FactorizationMapQCD_Pt30to50_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -112,6 +118,7 @@ datasets = {
     "QCD_Pt80to120_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 7.843e+05,
+        "tauIDFactorizationMap": "FactorizationMapQCD_Pt80to120_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -127,6 +134,7 @@ datasets = {
     "QCD_Pt120to170_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 1.151e+05,
+        "tauIDFactorizationMap": "FactorizationMapQCD_Pt120to170_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -142,6 +150,7 @@ datasets = {
     "QCD_Pt170to300_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 2.426e+04,
+        "tauIDFactorizationMap": "FactorizationMapQCD_Pt170to300_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -157,6 +166,7 @@ datasets = {
     "QCD_Pt300to470_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 1.168e+03,
+        "tauIDFactorizationMap": "FactorizationMapQCD_Pt300to470_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_300to470_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -175,6 +185,7 @@ datasets = {
     "TTJets_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 165,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_TTJets_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -225,6 +236,7 @@ datasets = {
     "WJets_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 24640,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_WJets_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2011Flat_BX156_START39_V8-v1/AODSIM",

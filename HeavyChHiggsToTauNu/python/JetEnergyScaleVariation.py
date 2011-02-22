@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
 
-def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters, variation):
+def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEneryVariationForMET):
     variationName = name
     analysisName = prefix+name
     countersName = analysisName+"Counters"
@@ -12,9 +12,12 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
         tauSrc = cms.InputTag(prototype.tauSelection.src.value()), # from untracked to tracked
         jetSrc = cms.InputTag(prototype.jetSelection.src.value()),
         metSrc = cms.InputTag(prototype.MET.src.value()),
-        JESVariation = cms.double(variation)
+        JESVariation = cms.double(variation),
+        JESEtaVariation = cms.double(etaVariation),
+        unclusteredMETVariation = cms.double(unclusteredEneryVariationForMET)
     )
     setattr(process, variationName, variation)
+    #"JES"+variation+"eta"+etaVariation+"unclusted"+unclusteredEneryVariationForMET)
 
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET

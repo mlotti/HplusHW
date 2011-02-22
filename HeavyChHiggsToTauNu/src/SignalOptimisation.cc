@@ -17,6 +17,7 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET Cut")),
     fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation")),
+    fPrimaryVertexCounter(eventCounter.addCounter("Primary vertex")),
     fClobalMuonVetoCounter(eventCounter.addCounter("Global Muon Veto")),
     fClobalElectronVetoCounter(eventCounter.addCounter("Global Electron Veto")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
@@ -28,6 +29,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
+    fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
@@ -105,9 +107,14 @@ namespace HPlus {
     TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
     if(!triggerMETEmulationData.passedEvent()) return;
     increment(fTriggerEmulationCounter);
+
+    // Primary vertex
+    VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
+    if(!pvData.passedEvent()) return;
+    increment(fPrimaryVertexCounter);
     
     // 3) GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup);
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fClobalMuonVetoCounter);
     

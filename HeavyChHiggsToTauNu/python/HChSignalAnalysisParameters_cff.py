@@ -11,9 +11,14 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4"
     ),
-    hltMetCut = cms.untracked.double(30.0),
+    hltMetCut = cms.untracked.double(45.0),
 )
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
+
+primaryVertexSelection = cms.untracked.PSet(
+    src = cms.untracked.InputTag("selectedPrimaryVertex"),
+    enabled = cms.untracked.bool(True)
+)
 
 # Tau ID factorization map
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
@@ -57,6 +62,11 @@ tauSelectionHPSTauBased = tauSelectionBase.clone(
     selection = "HPSTauBased"
 )
 
+tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    selection = "HPSMediumTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
     selection = "CombinedHPSTaNCTauBased"
@@ -67,17 +77,20 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
+                 tauSelectionHPSMediumTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
 tauSelectionNames = ["TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
-                     "TauSelectionHPSTauBased",
+                     "TauSelectionHPSTightTauBased",
+                     "TauSelectionHPSMediumTauBased",
                      "TauSelectionCombinedHPSTaNCBased"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
 tauSelection = tauSelectionHPSTauBased
+#tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
 
 jetSelection = cms.untracked.PSet(
@@ -127,7 +140,8 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(20.0),
-    MuonEtaCut = cms.untracked.double(2.5)
+    MuonEtaCut = cms.untracked.double(2.5),
+    MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
 )
 
 InvMassVetoOnJets = cms.untracked.PSet(
@@ -139,7 +153,7 @@ InvMassVetoOnJets = cms.untracked.PSet(
 
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
-  minDeltaPhi = cms.untracked.double(10.) # in degrees
+  minDeltaPhi = cms.untracked.double(5.) # in degrees
 )
 
 
@@ -160,6 +174,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
+    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
@@ -167,6 +182,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
 def setTauIDFactorizationMap(options):
