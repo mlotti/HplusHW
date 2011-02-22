@@ -37,7 +37,7 @@ private:
 };
 
 HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset): 
-  dataVersion(""),
+  dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
   luminosity(std::numeric_limits<double>::quiet_NaN()),
   hasCrossSection(false), hasLuminosity(false)
@@ -50,10 +50,6 @@ HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset):
     luminosity = pset.getUntrackedParameter<double>("luminosity");
     hasLuminosity = true;
   }
-  if(pset.exists("dataVersion")) {
-    dataVersion = pset.getUntrackedParameter<std::string>("dataVersion");
-  }
-
 }
 
 HPlusConfigInfoAnalyzer::~HPlusConfigInfoAnalyzer() {}
