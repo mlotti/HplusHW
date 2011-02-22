@@ -1,15 +1,16 @@
 //#######################################################################
 // -*- C++ -*-
-//       File Name:  EvtTopology.h
+//       File Name:  InvMassVetoOnJets.h
 // Original Author:  Alexandros Attikis
 //         Created:  Mon 4 Oct 2010
-//     Description:  Designed to calculate Evt Topology related variables                   
+//     Description:  Designed to calculate DiJet and TriJet invariant 
+//                   masses and veto if they match specific mothers.
 //       Institute:  UCY
 //         e-mail :  attikis@cern.ch
 //        Comments:  
 //#######################################################################
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_EvtTopology_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_EvtTopology_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_InvMassVetoOnJets_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_InvMassVetoOnJets_h
 // ROOT libraries
 #include <Math/Vector3D.h>
 #include <Math/Point3D.h>
@@ -31,6 +32,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MathFunctions.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+typedef math::XYZTLorentzVector LorentzVector;
 
 namespace reco {
   class Candidate;
@@ -43,17 +46,9 @@ namespace edm {
 class TH1;
 
 namespace HPlus {
-
-  class EvtTopology {
+  
+  class InvMassVetoOnJets {
   public:
-    typedef struct {
-      float fAlphaT;
-      float fJt; // Jt = Ht - TauJetEt - LdgJetEt
-      float fHt;
-      float fDeltaHt;
-      float fMHt;
-      vector<float> vDiJetMassesNoTau;
-    } AlphaStruc;
 
     /**
      * Class to encapsulate the access to the data members of
@@ -65,48 +60,59 @@ namespace HPlus {
       // The reason for pointer instead of reference is that const
       // reference allows temporaries, while const pointer does not.
       // Here the object pointed-to must live longer than this object.
-      Data(const EvtTopology *evtTopology, bool passedEvent);
+      Data(const InvMassVetoOnJets *invMassVetoOnJets, bool passedEvent);
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const EvtTopology::AlphaStruc alphaT() const { return fEvtTopology->sAlpha; }
+      // const InvMassVetoOnJets::AlphaStruc alphaT() const { return fInvMassVetoOnJets->sAlpha; }
     
     private:
-      const EvtTopology *fEvtTopology;
+      const InvMassVetoOnJets *fInvMassVetoOnJets;
       const bool fPassedEvent;
     };
 
-    EvtTopology(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~EvtTopology();
+    InvMassVetoOnJets(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~InvMassVetoOnJets();
 
-    Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
-    // Data InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets); obsolete
-
+    // Data analyze( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze( const edm::PtrVector<pat::Jet>& jets );
+    
   private:
-    // Input parameters
-    // std::string fDiscriminator;
-    // double fDiscrCut;
-    const double fAlphaTCut;
-
+    const double fPtCut;
+    const double fEtaCut;
+    const bool fSetTrueToUseModule;
     // Counters
-    Count fEvtTopologyCount;
-    Count fAlphaTCutCount;
+    Count fDiJetsCutSubCount;
+    Count fTriJetsCutSubCount;
+
+    Count fInvMassWWindow10SubCount;
+    Count fInvMassWWindow15SubCount;
+    Count fInvMassWWindow20SubCount;
+    Count fInvMassWWindow25SubCount;
+
+    Count fInvMassTopWindow10SubCount;
+    Count fInvMassTopWindow15SubCount;
+    Count fInvMassTopWindow20SubCount;
+    Count fInvMassTopWindow25SubCount;
 
     // EventWeight object
     EventWeight& fEventWeight;
 
     // Histograms
-    TH1 *hAlphaT;
-    /*
-      TH1 *hDiJetInvMass;
-      TH1 *hDiJetInvMassCutFail;
-      TH1 *hDiJetInvMassCutPass;
-      TH1 *hDiJetInvMassWCutFail;
-    */
-    
-    // Other variables
-    AlphaStruc sAlpha;
-    MathFunctions oMath;
+    TH1 *hDiJetInvMass;
+    TH1 *hDiJetInvMassCutFail;
+    TH1 *hDiJetInvMassCutPass;
+    TH1 *hDiJetInvMassWCutFail;
+
+    TH1 *hTriJetInvMass;
+    TH1 *hTriJetInvMassCutFail;
+    TH1 *hTriJetInvMassCutPass;
+    TH1 *hTriJetInvMassTopCutFail;
+
+    TH1 *hInvMass;
+    TH1 *hInvMassCutFail;
+    TH1 *hInvMassCutPass;
+
   };
 }
 
