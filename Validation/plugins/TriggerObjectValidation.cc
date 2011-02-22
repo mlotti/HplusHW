@@ -105,14 +105,7 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
         const trigger::TriggerObjectCollection objs(triggerObjs->getObjects());
 
 	size_t index = triggerObjs->filterIndex(hltPathFilter);
-//std::cout << "index " << index << " " << index - triggerObjs->sizeFilters() << std::endl;
-/*
-std::cout << "hltPathFilter " << hltPathFilter.encode() << std::endl;
-const std::vector< std::string > tags = triggerObjs->collectionTags();
-for(size_t i = 0;i<tags.size();++i){
-    std::cout << "    tag " << tags[i] << std::endl;
-}
-*/
+
 	if(index < triggerObjs->sizeFilters()){
 	  const trigger::Keys& KEYS(triggerObjs->filterKeys(index));
 
@@ -126,6 +119,11 @@ for(size_t i = 0;i<tags.size();++i){
                 Phi->Fill(objs[i].phi());
 
                 EtaPhi->Fill(objs[i].eta(),objs[i].phi());
+	  }
+	}else{
+	  std::cout << "hltPathFilter " << hltPathFilter.encode() << std::endl;
+	  for(size_t i = 0; i < triggerObjs->sizeFilters(); ++i){
+	    std::cout << "    tag " << triggerObjs->filterTag(i).encode() << std::endl;
 	  }
 	}
     }

@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 TriggerTauValidation = cms.EDAnalyzer('TriggerObjectValidation',
-#    triggerResults  = cms.InputTag("TriggerResults","HLT"),
-    triggerResults  = cms.InputTag("TriggerResults","","REDIGI39X"),
+    triggerResults  = cms.InputTag("TriggerResults","","HLT"),
+#    triggerResults  = cms.InputTag("TriggerResults","","REDIGI39X"),
     triggerBit      = cms.string("HLT_SingleIsoTau35_Trk15_MET25_v4"),
     triggerObjects  = cms.InputTag("hltTriggerSummaryAOD"),
     triggerObjectId = cms.int32(15),
