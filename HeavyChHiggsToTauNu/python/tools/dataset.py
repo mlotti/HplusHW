@@ -614,7 +614,9 @@ class Dataset:
     The default values for cross section/luminosity are read from
     'configInfo/configInfo' histogram (if it exists). The data/MC
     datasets are differentiated by the existence of 'crossSection'
-    (for MC) and 'luminosity' (for data) keys in the histogram.
+    (for MC) and 'luminosity' (for data) keys in the histogram. Reads
+    the dataVersion from 'configInfo/dataVersion' and deduces whether
+    the dataset is data/MC from it.
     """
 
     def __init__(self, name, fname, counterDir):
@@ -633,7 +635,8 @@ class Dataset:
 
         Opens the ROOT file, reads 'configInfo/configInfo' histogram
         (if it exists), and reads the main event counter
-        ('counterDir/counters') if counterDir is not None.
+        ('counterDir/counters') if counterDir is not None. Reads also
+        'configInfo/dataVersion' TNamed.
         """
 
         self.name = name
@@ -645,6 +648,14 @@ class Dataset:
         configInfo = self.file.Get("configInfo")
         if configInfo != None:
             self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
+
+        dataVersion = self.file.Get("dataVersion")
+        if dataVersion != None:
+            self.dataVersion = dataVersion.GetTitle()
+        else:
+            self.dataVersion = ""
+
+        self._isData = "data" in self.dataVersion
 
         self.prefix = ""
         if counterDir != None:
@@ -711,32 +722,38 @@ class Dataset:
     def setCrossSection(self, value):
         """Set cross section of MC dataset (in pb)."""
         if not self.isMC():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
+            raise Exception("Should not set cross section for data dataset %s" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
         """Get cross section of MC dataset (in pb)."""
         if not self.isMC():
             raise Exception("Dataset %s is data, no cross section available" % self.name)
-        return self.info["crossSection"]
+        try:
+            return self.info["crossSection"]
+        except AttributeError:
+            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method.")
 
     def setLuminosity(self, value):
         """Set the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
-            raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
+            raise Exception("Should not set luminosity for MC dataset %s" % self.name)
         self.info["luminosity"] = value
 
     def getLuminosity(self):
         """Get the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
-        return self.info["luminosity"]
+        try:
+            return self.info["luminosity"]
+        except AttributeError:
+            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method.")
 
     def isData(self):
-        return not self.isMC()
+        return self._isData
 
     def isMC(self):
-        return "crossSection" in self.info
+        return not self._isData
 
     def getCounterDirectory(self):
         return self.originalCounterDir
