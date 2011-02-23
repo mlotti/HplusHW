@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+#dataVersion = "39Xredigi"
+dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -37,9 +37,9 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-    "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
@@ -83,9 +83,9 @@ addPrimaryVertexSelection(process, process.commonSequence)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
-#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
-param.setAllTauSelectionOperatingMode('antitautag')
+#param.setAllTauSelectionOperatingMode('antitautag')
 #param.setAllTauSelectionOperatingMode('antiisolatedtau')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
@@ -94,8 +94,8 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Other parameters
 # HLT_MET cut has to be exactly the same as in the first part of the QCD measurement
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-#param.InvMassVetoOnJets.setTrueToUseModule = True
-param.InvMassVetoOnJets.setTrueToUseModule = False
+param.InvMassVetoOnJets.setTrueToUseModule = True
+#param.InvMassVetoOnJets.setTrueToUseModule = False
 # Other cut values should be exactly the same as in signal analysis
 
 ##############################################################################
