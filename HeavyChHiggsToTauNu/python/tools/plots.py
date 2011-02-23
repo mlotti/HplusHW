@@ -153,8 +153,8 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
-class DataMCPlot:
-    """Class to create data-MC comparison plot."""
+class PlotBase:
+    """Base class for plots."""
 
     def __init__(self, datasetMgr, name, saveFormats=[".png", ".eps", ".C"]):
         """Constructor.
@@ -162,30 +162,86 @@ class DataMCPlot:
         Arguments:
         datasetMgr   DatasetManager for datasets
         name         Name of the histogram in the ROOT files
+        saveFormats  List of the default formats to save (default: ['.png', '.eps', '.C'])
         """
-        self.saveFormats = saveFormats
-
         # Create the histogram manager
         self.histoMgr = histograms.HistoManager(datasetMgr, name)
         self.datasetMgr = datasetMgr
+
+        # Save the format
+        self.saveFormats = saveFormats
+
+    def _setLegendStyles(self):
+        self.histoMgr.setHistoLegendStyleAll("F")
+        if self.histoMgr.hasHisto("Data"):
+            self.histoMgr.setHistoLegendStyle("Data", "p")
+
+    def _setLegendLabels(self):
+        self.histoMgr.forEachHisto(SetLegendLabel(_legendLabels))
+
+    def _setPlotStyles(self):
+        self.histoMgr.forEachHisto(SetPlotStyle(_plotStyles))
+        if self.histoMgr.hasHisto("Data"):
+            self.histoMgr.setHistoDrawStyle("Data", "EP")
+
+    def appendSaveFormat(self, format):
+        self.saveFormats.append(format)
+
+    def setLegend(self, legend):
+        self.legend = legend
+        self.histoMgr.addToLegend(legend)
+
+    def removeLegend(self):
+        delattr(self, "legend")
+
+    def addMCUncertainty(self):
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle())
+
+    def createFrame(self, filename, **kwargs):
+        self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
+        self.frame = self.cf.frame
+
+    def draw(self):
+        self.histoMgr.draw()
+        if hasattr(self, "legend"):
+            self.legend.Draw()
+
+    def addLuminosityText(self, x=None, y=None):
+        self.histoMgr.addLuminosityText(x, y)
+
+    def save(self, formats=None):
+        if formats == None:
+            formats = self.saveFormats
+
+        backup = ROOT.gErrorIgnoreLevel
+        ROOT.gErrorIgnoreLevel = ROOT.kWarning
+
+        for f in formats:
+            self.cf.canvas.SaveAs(f)
+
+        ROOT.gErrorIgnoreLevel = backup
+
+class DataMCPlot(PlotBase):
+    """Class to create data-MC comparison plot."""
+
+    def __init__(self, datasetMgr, name, **kwargs):
+        """Constructor.
+
+        Arguments:
+        datasetMgr   DatasetManager for datasets
+        name         Name of the histogram in the ROOT files
+
+        Keyword arguments:
+        see PlotBase.__init__()
+        """
+        PlotBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
         self.histoMgr.normalizeMCByLuminosity()
 
-        # Set the legend styles
-        self.histoMgr.setHistoLegendStyleAll("F")
-        self.histoMgr.setHistoLegendStyle("Data", "p")
-
-        # Set legend labels
-        self.histoMgr.forEachHisto(SetLegendLabel(_legendLabels))
-
-        # Set plot styles, by default they are non-filled, but they
-        # are transformed to filled if they are stacked
-        self.histoMgr.forEachHisto(SetPlotStyle(_plotStyles))
-        self.histoMgr.setHistoDrawStyle("Data", "EP")
-
-    def appendSaveFormat(self, format):
-        self.saveFormats.append(format)
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
 
     def stackMCHistograms(self, stackSignal=False):
         def isNotSignal(name):
@@ -200,13 +256,6 @@ class DataMCPlot:
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
-    def addMCUncertainty(self):
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle())
-
-    def createFrame(self, filename, **kwargs):
-        self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
-        self.frame = self.cf.frame
-
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
@@ -220,14 +269,8 @@ class DataMCPlot:
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
-    def setLegend(self, legend):
-        self.legend = legend
-        self.histoMgr.addToLegend(legend)
-
     def draw(self):
-        self.histoMgr.draw()
-        if hasattr(self, "legend"):
-            self.legend.Draw()
+        PlotBase.draw(self)
         if hasattr(self, "mcSum"):
             self.cf.canvas.cd(2)
 
@@ -254,17 +297,3 @@ class DataMCPlot:
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
-    def addLuminosityText(self, x=None, y=None):
-        self.histoMgr.addLuminosityText(x, y)
-
-    def save(self, formats=None):
-        if formats == None:
-            formats = self.saveFormats
-
-        backup = ROOT.gErrorIgnoreLevel
-        ROOT.gErrorIgnoreLevel = ROOT.kWarning
-
-        for f in formats:
-            self.cf.canvas.SaveAs(f)
-
-        ROOT.gErrorIgnoreLevel = backup
