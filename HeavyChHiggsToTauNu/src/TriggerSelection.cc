@@ -33,7 +33,9 @@ namespace HPlus {
     	}
 
         edm::Service<TFileService> fs;
-        hHltMet = makeTH<TH1F>(*fs, "Trigger_HLT_MET", "HLT_MET;HLT_MET, GeV;N_{events} / 2 GeV", 100, 0., 200.);
+        hHltMetBeforeTrigger = makeTH<TH1F>(*fs, "Trigger_HLT_MET_Before_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
+        hHltMetAfterTrigger = makeTH<TH1F>(*fs, "Trigger_HLT_MET_After_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
+        hHltMetSelected = makeTH<TH1F>(*fs, "Trigger_HLT_MET_Selected", "HLT_MET_Selected;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
 
   }
 
@@ -69,11 +71,16 @@ namespace HPlus {
 	  else if(hltMets.size() == 1) {
 	    increment(fTriggerHltMetExistsCount);
 	    fHltMet = hltMets[0];
-	    hHltMet->Fill(fHltMet->et(), fEventWeight.getWeight());
-  
+            hHltMetBeforeTrigger->Fill(fHltMet->et(), fEventWeight.getWeight());
+	    if (passEvent)
+              hHltMetAfterTrigger->Fill(fHltMet->et(), fEventWeight.getWeight());
+
 	    // Cut on HLT MET
-	    if(fHltMet->et() <= fMetCut)
+	    if(fHltMet->et() <= fMetCut) {
 	      passEvent = false;
+            } else if (passEvent) {
+              hHltMetSelected->Fill(fHltMet->et(), fEventWeight.getWeight());
+            }
 	  }
 	  else
 	    // precaution

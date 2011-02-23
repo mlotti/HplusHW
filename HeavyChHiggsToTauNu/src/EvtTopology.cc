@@ -181,11 +181,12 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.3, 1.0);
-    hDiJetInvMass      = makeTH<TH1F>(*fs, "DiJetInvMass", "DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "DiJetInvMassCutFail", "DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "DiJetInvMassCutPass", "DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hDiJetInvMassWCutFail   = makeTH<TH1F>(*fs, "DiJetInvMassWCutFail", "DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassTopCutFail = makeTH<TH1F>(*fs, "DiJetInvMassTopCutFail", "DiJetInvMassTopCutFail", 1000, 0.0, 1000.0);
+    /*
+    hDiJetInvMass      = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutPass", "EvtTopology_DiJetInvMassCutPass", 1000, 0.0, 1000.0);
+    hDiJetInvMassWCutFail   = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassWCutFail", "EvtTopology_DiJetInvMassWCutFail", 1000, 0.0, 1000.0);
+    */
   }
 
   EvtTopology::~EvtTopology() {}
@@ -310,75 +311,5 @@ namespace HPlus {
     return Data(this, bPassedCut);
   } //eof: bool EvtTopology::alphaT( const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets ){
   
-  
-  
-  EvtTopology::Data EvtTopology::InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets ){
-    
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Description                                                                                                
-    /// Uses the jet-collection to reconstruct all the possible di-jet combinations.The motivation behind the creation
-    /// of this method is to be able to veto events with candidate di-jet combinations having an invariant mass close 
-    /// to the mass of the W boson or the top quark. In this way we can get rid of hadronic events that include
-    /// W->qq and t->bW decays.
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /// Declaration of variables    
-    bool bPassedEvent = false;
-    bool bInvMassCutFail = false;
-    bool bInvMassWithinWWindow = false;
-    bool bInvMassWithinTopWindow = false;
-    const float WMass   = 80.399;  // PDG value
-    const float WMassWindow   = 0.1*WMass;  // PDG value
-    const float TopMass = 172.000; 
-    const float TopMassWindow = 0.1*TopMass;
-
-    /// Return true if there are less than two jets.
-    if(jets.size()<2) return Data(this, true);
-    else{
-      /// Loop over jet collection - mth Jet
-      for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
-	edm::Ptr<pat::Jet> mJet = *iter;
-	
-	/// Loop over jet collection - nth Jet
-	for(edm::PtrVector<pat::Jet>::const_iterator iter2 = iter+1; iter2 != jets.end(); ++iter2) {
-	  edm::Ptr<pat::Jet> nJet = *iter2;
-	  
-	  /// Calculate the DiJet Mass
-	  float DiJetInvMass = sqrt( pow(nJet->energy()+mJet->energy(),2) - (nJet->p4().Vect() + mJet->p4().Vect()).Mag2() );
-
-	  /// Fill histograms
-	  hDiJetInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  
-	  /// Make decision on DiJet Mass
-	  if( DiJetInvMass <= (WMass+WMassWindow) && DiJetInvMass >= (WMass-WMassWindow) ){
-	    bInvMassWithinWWindow = true;
-	    hDiJetInvMassWCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-	  else if( DiJetInvMass <= (TopMass+TopMassWindow) && DiJetInvMass >= (TopMass-TopMassWindow) ){
-	    bInvMassWithinTopWindow = true;
-	    hDiJetInvMassTopCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-	  else{
-	    bInvMassWithinWWindow   = false;
-	    bInvMassWithinTopWindow = false;
-	  }
-	  /// Make final boolean decision
-	  if( (bInvMassWithinWWindow) || (bInvMassWithinTopWindow) ){
-	    bPassedEvent = false;
-	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
-	    break;
-	  }
-	  else{
-	    bPassedEvent = true;
-	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
-	  }
-
-	}//eof: second jet loop
-      }//eof: first jet loop
-
-      return Data(this, bPassedEvent);
-    }//eof: else{
-  }//eof:  EvtTopology::Data EvtTopology::InvMassVetoOnJets( const edm::PtrVector<pat::Jet>& jets ){
-  
-
+ 
 }//eof: namespace HPlus {

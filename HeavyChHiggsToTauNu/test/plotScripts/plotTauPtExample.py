@@ -19,7 +19,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 legendLabels = {
-    "Data":                "Data",
+#    "Data":                "Data",
     "TTToHplusBWB_M90_Winter10":  "H^{#pm} M=90",
     "TTToHplusBWB_M100_Winter10": "H^{#pm} M=100",
     "TTToHplusBWB_M120_Winter10": "H^{#pm} M=120",
@@ -37,14 +37,14 @@ legendLabels = {
 
 # Go to batch mode, comment if interactive mode is wanted (see on the
 # bottom of the script how to make it to wait input from user)
-ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(False)
 
 # Apply TDR style
 style = tdrstyle.TDRStyle()
 
 # Construct datasets as stated in the multicrab.cfg of the execution
 # directory. The returned object is of type DatasetManager.
-datasets = dataset.getDatasetsFromMulticrabCfg()
+datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2Part1Counters/weighted")
 
 # Construct datasets from the given list of CRAB task directories
 #datasets = dataset.getDatasetsFromCrabDirs(["QCD_Pt120to170"])
@@ -80,18 +80,20 @@ datasets.mergeData()
 # datasets.getDataset("WJets").setCrossSection(30000)
 
 # Example how to merge histograms of several datasets
-datasets.merge("QCD", ["QCD_Pt30to50_TuneZ2_Winter10",
-                       "QCD_Pt50to80_TuneZ2_Winter10",
-                       "QCD_Pt80to120_TuneZ2_Winter10",
-                       "QCD_Pt120to170_TuneZ2_Winter10",
-                       "QCD_Pt170to300_TuneZ2_Winter10",
-                       "QCD_Pt300to470_TuneZ2_Winter10"])
+#datasets.merge("QCD", ["QCD_Pt30to50_TuneZ2_Winter10",
+#                       "QCD_Pt50to80_TuneZ2_Winter10",
+#                       "QCD_Pt80to120_TuneZ2_Winter10",
+#                       "QCD_Pt120to170_TuneZ2_Winter10",
+#                       "QCD_Pt170to300_TuneZ2_Winter10",
+#                       "QCD_Pt300to470_TuneZ2_Winter10"])
+
+datasets.merge("QCD", ["QCD_Pt30to50_TuneZ2_Winter10", "QCD_Pt80to120_TuneZ2_Winter10", "QCD_Pt120to170_TuneZ2_Winter10", "QCD_Pt170to300_TuneZ2_Winter10", "QCD_Pt300to470_TuneZ2_Winter10"])
 
 # Get set of histograms with the given path. The returned object is of
 # type HistoManager, which contains a histogram from each dataset in
 # DatasetManager. The histograms can be e.g. merged/stacked or normalized
 # in various ways before drawing.
-tauPts = histograms.HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_candidates_pt")
+tauPts = histograms.HistoManager(datasets, "qcdMeasurementMethod2Part1/TauSelection_all_tau_candidates_pt")
 
 # The default normalization is no normalization (i.e. number of MC
 # events for MC, and number of events for data)
@@ -102,7 +104,10 @@ tauPts = histograms.HistoManager(datasets, "signalAnalysis/TauSelection_all_tau_
 
 # Normalize MC histograms to the luminosity of the collision data in
 # the HistoManager
-tauPts.normalizeMCByLuminosity()
+#tauPts.normalizeMCByLuminosity()
+#tauPts.normalizeMCByCrossSection()
+tauPts.normalizeToOne()
+#tauPts.normalizeMCToLuminosity(33.69)
 ylabel = "#tau cands / 1 GeV/c"
 
 # Normalize MC histograms to an explicit luminosity in pb
@@ -159,17 +164,17 @@ legend.Draw()
 # The necessary texts, all take the position as arguments
 histograms.addCmsPreliminaryText()
 histograms.addEnergyText(x=0.3, y=0.85)
-tauPts.addLuminosityText()
+#tauPts.addLuminosityText()
 
 
 # Script execution can be paused like this, it will continue after
 # user has given some input (which must include enter)
-#raw_input("Hit enter to continue")
+raw_input("Hit enter to continue")
 
 
 # Save TCanvas as png
-cf.canvas.SaveAs(".png")
-cf.canvas.SaveAs(".eps")
+#cf.canvas.SaveAs(".png")
+#cf.canvas.SaveAs(".eps")
 #cf.canvas.SaveAs(".C")
 
 # Print various information from datasets
@@ -184,13 +189,13 @@ sys.exit(0)
 eventCounter = counter.EventCounter(datasets)
 
 # Normalize MC by the data luminosity
-eventCounter.normalizeMCByLuminosity()
+#eventCounter.normalizeMCByLuminosity()
 
 # Normalize MC by cross section
 # eventCounter.normalizeMCByCrossSection
 
 # Normalize MC to specific luminosity
-# eventCounter.normalizeMCToLuminosity(5)
+eventCounter.normalizeMCToLuminosity(33.69)
 
 # Example how to print the main counter with the default formatting
 print "============================================================"

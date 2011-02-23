@@ -34,7 +34,9 @@ namespace HPlus {
     edm::InputTag fPrescaleSrc;
     bool fPrescaleAvailableStatus;
     double fWeight;
-    TH1F* hPrescaleHisto;
+    TH1F* hPrescaleHistoLowScale;
+    TH1F* hPrescaleHistoMediumScale;
+    TH1F* hPrescaleHistoHighScale;
   };
 }
 

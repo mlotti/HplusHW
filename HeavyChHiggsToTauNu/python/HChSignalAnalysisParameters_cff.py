@@ -128,6 +128,7 @@ EvtTopology = cms.untracked.PSet(
     #alphaT = cms.untracked.double(-5.00)
     alphaT = cms.untracked.double(-5.0)
 )
+
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
     ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
@@ -141,6 +142,13 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonPtCut = cms.untracked.double(20.0),
     MuonEtaCut = cms.untracked.double(2.5),
     MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
+)
+
+InvMassVetoOnJets = cms.untracked.PSet(
+    ptCut = cms.untracked.double(30),
+    etaCut = cms.untracked.double(2.4),
+    #setTrueToUseModule = cms.untracked.bool(False)
+    setTrueToUseModule = cms.untracked.bool(True)
 )
 
 fakeMETVeto = cms.untracked.PSet(
