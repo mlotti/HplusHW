@@ -20,7 +20,9 @@ namespace HPlus {
     // Histograms
     edm::Service<TFileService> fs;
 
-    hPrescaleHisto = makeTH<TH1F>(*fs, "Trigger_Prescale", "Trigger_Prescale;Trigger Prescale Factor;N_{events} / 50", 200, 0., 10000.);
+    hPrescaleHistoLowScale = makeTH<TH1F>(*fs, "Trigger_Prescale_Low_part", "Trigger_Prescale_Low_part;Trigger Prescale Factor;N_{events} / 1", 100, 0., 100.);
+    hPrescaleHistoMediumScale = makeTH<TH1F>(*fs, "Trigger_Prescale_Medium_part", "Trigger_Prescale_Medium_part;Trigger Prescale Factor;N_{events} / 50", 200, 0., 10000.);
+    hPrescaleHistoHighScale = makeTH<TH1F>(*fs, "Trigger_Prescale_High_part", "Trigger_Prescale_High_part;Trigger Prescale Factor;N_{events} / 5000", 200, 0., 1000000.);
   }
   
   EventWeight::~EventWeight() {
@@ -30,12 +32,13 @@ namespace HPlus {
   void EventWeight::updatePrescale(const edm::Event& iEvent) {
     if (!fPrescaleAvailableStatus) {
       fWeight = 1.0;
-      hPrescaleHisto->Fill(fWeight);
-      return;
+    } else {
+      edm::Handle<double> myHandle;
+      iEvent.getByLabel(fPrescaleSrc, myHandle);
+      fWeight = *myHandle;
     }
-    edm::Handle<double> myHandle;
-    iEvent.getByLabel(fPrescaleSrc, myHandle);
-    fWeight = *myHandle;
-    hPrescaleHisto->Fill(fWeight);
+    hPrescaleHistoLowScale->Fill(fWeight);
+    hPrescaleHistoMediumScale->Fill(fWeight);
+    hPrescaleHistoHighScale->Fill(fWeight);
   }
 }

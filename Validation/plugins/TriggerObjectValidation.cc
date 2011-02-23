@@ -36,6 +36,8 @@ class TriggerObjectValidation : public edm::EDAnalyzer {
 	edm::InputTag triggerObjects;
 	int triggerObjectId;
 
+	edm::InputTag hltPathFilter;
+
   	DQMStore *dbe;
 
         MonitorElement *nEvt;
@@ -47,7 +49,8 @@ TriggerObjectValidation::TriggerObjectValidation(const edm::ParameterSet& iConfi
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
     triggerBit(iConfig.getParameter<std::string>("triggerBit")),
     triggerObjects(iConfig.getParameter<edm::InputTag>("triggerObjects")),
-    triggerObjectId(iConfig.getParameter<int>("triggerObjectId"))
+    triggerObjectId(iConfig.getParameter<int>("triggerObjectId")),
+    hltPathFilter(iConfig.getParameter<edm::InputTag>("hltPathFilter"))
 {
   dbe = 0;
   dbe = edm::Service<DQMStore>().operator->();
@@ -61,14 +64,14 @@ void TriggerObjectValidation::beginJob(){
     dbe->setCurrentFolder("Validation/TriggerObjects");
 
     // Number of analyzed events
-    nEvt    = dbe->book1D("nEvt", "n analyzed Events", 2, 0., 2.);
+    nEvt    = dbe->book1D("nEvt "+hltPathFilter.label(), "n analyzed Events", 2, 0., 2.);
 
     //Kinematics
-    Pt          = dbe->book1D("Pt","pT", 100 ,0,100);
-    Eta         = dbe->book1D("Eta","eta", 100 ,-2.5,2.5);
-    Phi		= dbe->book1D("Phi","phi", 100 ,-3.14,3.14);
+    Pt          = dbe->book1D("Pt "+hltPathFilter.label(),"pT", 100 ,0,100);
+    Eta         = dbe->book1D("Eta "+hltPathFilter.label(),"eta", 100 ,-2.5,2.5);
+    Phi		= dbe->book1D("Phi "+hltPathFilter.label(),"phi", 100 ,-3.14,3.14);
 
-    EtaPhi	= dbe->book2D("Eta Phi","eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
+    EtaPhi	= dbe->book2D("Eta Phi "+hltPathFilter.label(),"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
   }
 }
 
@@ -99,14 +102,29 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
 
     edm::Handle<trigger::TriggerEvent> triggerObjs;
     if(iEvent.getByLabel(triggerObjects,triggerObjs)){
-	const trigger::TriggerObjectCollection objs = triggerObjs->getObjects();
-	for(unsigned i = 0; i < objs.size(); ++i){
-		if(objs[i].id() != triggerObjectId) continue;
-		Pt->Fill(objs[i].pt());
-        	Eta->Fill(objs[i].eta());
-        	Phi->Fill(objs[i].phi());
+        const trigger::TriggerObjectCollection objs(triggerObjs->getObjects());
 
-        	EtaPhi->Fill(objs[i].eta(),objs[i].phi());
+	size_t index = triggerObjs->filterIndex(hltPathFilter);
+
+	if(index < triggerObjs->sizeFilters()){
+	  const trigger::Keys& KEYS(triggerObjs->filterKeys(index));
+
+	  for(size_t i = 0;i<KEYS.size();++i){
+		const trigger::TriggerObject& TO(objs[KEYS[i]]);
+//std::cout << "id " << TO.id() << " " << triggerObjectId << std::endl;
+//                if(TO.id() != triggerObjectId) continue;
+
+                Pt->Fill(TO.pt());
+                Eta->Fill(objs[i].eta());
+                Phi->Fill(objs[i].phi());
+
+                EtaPhi->Fill(objs[i].eta(),objs[i].phi());
+	  }
+	}else{
+	  std::cout << "hltPathFilter " << hltPathFilter.encode() << std::endl;
+	  for(size_t i = 0; i < triggerObjs->sizeFilters(); ++i){
+	    std::cout << "    tag " << triggerObjs->filterTag(i).encode() << std::endl;
+	  }
 	}
     }
 }
