@@ -36,7 +36,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
@@ -62,7 +62,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
-process.MessageLogger.cerr.FwkReport.reportEvery = 5
+#process.MessageLogger.cerr.FwkReport.reportEvery = 5
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
@@ -73,7 +73,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options)
 
 ################################################################################
-# The core of the analysis
+# qcdMeasurementControlRegionSelection module
 
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
@@ -98,8 +98,8 @@ param.trigger.triggers = [
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-#param.InvMassVetoOnJets.setTrueToUseModule = False
-param.InvMassVetoOnJets.setTrueToUseModule = True
+#param.InvMassVetoOnJets.setTrueToUseModule = True
+param.InvMassVetoOnJets.setTrueToUseModule = False
 param.overrideTriggerFromOptions(options)
 
 ##############################################################################
@@ -125,7 +125,6 @@ if dataVersion.isData():
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    #process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
     process.qcdMeasurementMethod2Part1.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output

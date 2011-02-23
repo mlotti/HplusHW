@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-#dataVersion = "39Xredigi"
-dataVersion = "39Xdata"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -27,7 +27,6 @@ JESUnclusteredMETVariation = 0.10
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
-
 ################################################################################
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part2")
@@ -40,8 +39,8 @@ process.source = cms.Source('PoolSource',
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
+    "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
@@ -63,6 +62,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
+#process.MessageLogger.cerr.FwkReport.reportEvery = 5
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
@@ -82,10 +82,10 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
-# Set tau selection mode (options: 'standard', 'factorized')
-param.setAllTauSelectionOperatingMode('standard')
+# Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
+#param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
-#param.setAllTauSelectionOperatingMode('antitautag')
+param.setAllTauSelectionOperatingMode('antitautag')
 #param.setAllTauSelectionOperatingMode('antiisolatedtau')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
@@ -149,8 +149,8 @@ process.qcdMeasurementMethod2Part2Counters = cms.EDAnalyzer("HPlusEventCountAnal
     counterNames = cms.untracked.InputTag("qcdMeasurementMethod2Part2", "counterNames"),
     counterInstances = cms.untracked.InputTag("qcdMeasurementMethod2Part2", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(True), # Default: False
-    printAvailableCounters = cms.untracked.bool(False),
+    printSubCounters = cms.untracked.bool(False),
+    printAvailableCounters = cms.untracked.bool(True),
 )
 if len(additionalCounters) > 0:
     process.qcdMeasurementMethod2Part2Counters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])

@@ -14,7 +14,7 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
-    fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
+    fPrimaryVertexCounter(eventCounter.addCounter("Primary_Vertex")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
     fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
