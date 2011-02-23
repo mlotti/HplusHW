@@ -197,6 +197,11 @@ class PlotBase:
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
+    def stackMCHistograms(self):
+        mcNames = self.datasetMgr.getMCDatasetNames()
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
+        self.histoMgr.stackHistograms("StackedMC", mcNames)
+
     def createFrame(self, filename, **kwargs):
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
