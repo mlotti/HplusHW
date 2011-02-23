@@ -98,8 +98,8 @@ param.trigger.triggers = [
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-param.InvMassVetoOnJets.setTrueToUseModule = True
-#param.InvMassVetoOnJets.setTrueToUseModule = False
+#param.InvMassVetoOnJets.setTrueToUseModule = True
+param.InvMassVetoOnJets.setTrueToUseModule = False
 param.overrideTriggerFromOptions(options)
 
 ##############################################################################

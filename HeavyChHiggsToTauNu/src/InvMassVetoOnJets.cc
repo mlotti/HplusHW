@@ -190,7 +190,7 @@ namespace HPlus {
 	    
 	    /// Fill histograms
 	    hTriJetInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
-	    hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	    hInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    
 	    /// Increment counters with variable mass window. Take no action
 	    if( TriJetInvMass <= (TopMass+TopMassWindow10) && TriJetInvMass >= (TopMass-TopMassWindow10) ) increment(fInvMassTopWindow10SubCount);
@@ -367,7 +367,7 @@ namespace HPlus {
 	    
 	    /// Fill histograms
 	    hTriJetInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
-	    hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	    hInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    
 	    /// Increment counters with variable mass window. Take no action
 	    if( TriJetInvMass <= (TopMass+TopMassWindow10) && TriJetInvMass >= (TopMass-TopMassWindow10) ) increment(fInvMassTopWindow10SubCount);
