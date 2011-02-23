@@ -55,12 +55,17 @@ def getDatasetsFromMulticrabCfg(**kwargs):
     """
     opts = kwargs.get("opts", None)
     taskDirs = []
+    dirname = ""
     if "cfgfile" in kwargs:
         taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
+        dirname = os.path.dirname(kwargs["cfgfile"])
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
-    return getDatasetsFromCrabDirs(taskDirs, **kwargs)
+    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **kwargs)
+    if len(dirname) > 0:
+        datasetMgr._setBaseDirectory(dirname)
+    return datasetMgr
 
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     """Construct DatasetManager from a list of CRAB task directory names.
@@ -728,7 +733,7 @@ class Dataset:
         return self.info["luminosity"]
 
     def isData(self):
-        return "luminosity" in self.info
+        return not self.isMC()
 
     def isMC(self):
         return "crossSection" in self.info
@@ -961,9 +966,10 @@ class DatasetManager:
     map for convenient access by dataset name.
     """
 
-    def __init__(self):
+    def __init__(self, base=""):
         self.datasets = []
         self.datasetMap = {}
+        self.basedir = base
 
     def _populateMap(self):
         """Populate the datasetMap member from the datasets list.
@@ -973,6 +979,9 @@ class DatasetManager:
         self.datasetMap = {}
         for d in self.datasets:
             self.datasetMap[d.getName()] = d
+
+    def _setBaseDirectory(self, base):
+        self.basedir = base
 
     def append(self, dataset):
         """Append a Dataset object to the set.
@@ -1181,7 +1190,10 @@ class DatasetManager:
         """Load integrated luminosities from a JSON file.
 
         Arguments:
-        fname  Path to the file (default: 'lumi.json')
+        fname   Path to the file (default: 'lumi.json'). If the
+                directory part of the path is empty, the file is
+                looked from the base directory (which defaults to
+                current directory)
 
         The JSON file should be formatted like this:
 
@@ -1190,6 +1202,9 @@ class DatasetManager:
            "Mu_135821-144114": 2.863224758
          }'
         """
+        if len(os.path.dirname(fname)) == 0:
+            fname = os.path.join(self.basedir, fname)
+
         if not os.path.exists(fname):
             print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % fname
 
