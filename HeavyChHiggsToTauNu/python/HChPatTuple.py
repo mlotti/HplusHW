@@ -429,15 +429,19 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         if dataVersion.isData():
             process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
 
-        if options.trigger == "":
-            raise Exception("Command line argument 'trigger' is missing")
+        pargs = patArgs.copy()
 
         if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
+            if options.trigger == "":
+                raise Exception("Command line argument 'trigger' is missing")
+
             print "Trigger used for tau matching:", options.trigger
+            pargs["matchingTauTrigger"] = options.trigger
             if jetTrigger != None:
                 print "Trigger used for jet matching:", jetTrigger
+                pargs["matchingJetTrigger"] = jetTrigger            
 
-        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger, **patArgs)
+        process.patSequence = addPat(process, dataVersion, **pargs)
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *
