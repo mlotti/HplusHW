@@ -170,9 +170,6 @@ class Count:
     def uncertaintyUp(self):
         return self.uncertainty()
 
-    def __str__(self):
-        return "%f"%self._value
-
 def _histoToCounter(histo):
     """Transform histogram (TH1) to a list of (name, Count) pairs.
 
