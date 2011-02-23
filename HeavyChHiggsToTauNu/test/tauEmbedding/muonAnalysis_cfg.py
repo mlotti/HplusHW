@@ -178,10 +178,7 @@ class MuonAnalysis:
         self._jets = jets
         self._isolationCut = "%s < %f" % (sumIsoRel, muonIsolationCut)
 
-        counters = []
-        if dataVersion.isData():
-            counters = dataSelectionCounters
-        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=counters)
+        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=additionalCounters)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
