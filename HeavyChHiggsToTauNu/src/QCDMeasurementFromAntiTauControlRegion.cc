@@ -1,7 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFromAntiTauControlRegion.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -14,13 +14,12 @@ namespace HPlus {
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET_cut")),
-    //fTriggerEmulationCounter(eventCounter.addCounter("TriggerMETEmulation")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
-    fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
-    fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
-    fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
+    fJetSelectionCounter(eventCounter.addCounter("jetSelection")),
+    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),    fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("tauSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fakeMETVeto")),
@@ -32,16 +31,17 @@ namespace HPlus {
     fMETgt70AfterWholeSelectionCounter(eventCounter.addCounter("METgt70AfterWholeSelection")),
     fMETgt80AfterWholeSelectionCounter(eventCounter.addCounter("METgt80AfterWholeSelection")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
+    //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
-    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
+    fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
+    fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
-    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
 
    {
@@ -50,9 +50,16 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms 
-    hMETAfterWholeSelection = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
-    //aa    hTriggerPrescales = fs->make<TH1F>("TriggerPrescales", "TriggerPrescales", 4000, -0.5, 3999.5);    
-    //aa    hTriggerPrescales_test = fs->make<TH1F>("TriggerPrescales", "TriggerPrescales", 4000, -0.5, 3999.5);    
+    hMETAfterTrigger           = fs->make<TH1F>("METAfterTrigger", "MET after Trigger;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterElectronVeto      = fs->make<TH1F>("METAfterElectronVeto", "MET after Electron Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterMuonVeto          = fs->make<TH1F>("METAfterMuonVeto", "MET after Muon Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterTauSelection      = fs->make<TH1F>("METAfterTauSelection", "MET after Tau Selection;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterJetSelection      = fs->make<TH1F>("METAfterJetSelection", "MET after Jet Selection;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterInvMassVetoOnJets = fs->make<TH1F>("METAfterInvMassVetoOnJets", "MET after InvMass Veto On Jets;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterMET               = fs->make<TH1F>("METAfterMET", "MET after MET cut;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterBTagging          = fs->make<TH1F>("METAfterBTagging", "MET after b-tagging;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterFakeMetVeto       = fs->make<TH1F>("METAfterFakeMetVeto", "MET after fake MET Veto;MET, GeV;N/2 GeV", 250, 0, 500);
+    hMETAfterWholeSelection    = fs->make<TH1F>("METAfterWholeSelection", "MET after whole selection;MET, GeV;N/2 GeV", 250, 0, 500);
    }
 
   QCDMeasurementFromAntiTauControlRegion::~QCDMeasurementFromAntiTauControlRegion() {}
@@ -64,64 +71,66 @@ namespace HPlus {
   void QCDMeasurementFromAntiTauControlRegion::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
-    //aa    double TriggerPrescale = fEventWeight.getWeight();
-    
     increment(fAllCounter);
-    
+
     // Trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
-
-    // Trigger Emulation (for MC & Data)
-    // Not needed: HLT_MET cut is applied already in trigger step 
-    //TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
-    //if(!triggerMETEmulationData.passedEvent()) return;
-    //increment(fTriggerEmulationCounter);
-    //Trigger emulation done in trigger
 
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
     increment(fPrimaryVertexCounter);
 
-    // Apply Isolation Veto to taus
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return; // At least one tau candidate was found which was isolated.
-    increment(fOneProngTauSelectionCounter);
-    edm::PtrVector<pat::Tau> mySelectedAntiTau;
-    mySelectedAntiTau.push_back(tauData.getSelectedTaus()[0]);
-
-    // Clean jet collection from selected tau and apply NJets>=3 cut
-    // JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedAntiTau);
-    if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
-    increment(fJetSelectionCounter);
+    // Get MET for histo-plotting purposes
+    METSelection::Data tmpMetData = fMETSelection.analyze(iEvent, iSetup);
+    hMETAfterTrigger->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
     
-    // InvMassVeto 
-    // Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
-    EvtTopology::Data evtTopologyData =  fEvtTopology.InvMassVetoOnJets(jetData.getSelectedJets() ); 
-    if(!evtTopologyData.passedEvent()) return; 
-    increment(fEvtTopologyCounter);
-    
-    // GlobalElectronVeto
-    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
+    // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
-
+    hMETAfterElectronVeto->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
     // GlobalMuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
+    hMETAfterMuonVeto->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
     
-    // Obtain MET, btagging and fake MET veto data objects
+    // Apply tau-Selection (available: antitautag, antiisolation, standard)
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    if(!tauData.passedEvent()) return;
+    increment(fOneProngTauSelectionCounter);
+    edm::PtrVector<pat::Tau> mySelectedAntiTau;
+    mySelectedAntiTau.push_back(tauData.getSelectedTaus()[0]);
+    hMETAfterTauSelection->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
+    // Clean jet collection from selected tau and apply NJets>=3 cut
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedAntiTau);
+    if(!jetData.passedEvent()) return; // Note: jets close to tau-Jet in eta-phi space are removed from jet list.
+    increment(fJetSelectionCounter);
+    hMETAfterJetSelection->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+    // Run alphaT plots just for reference (will NOT affect the method in any way)
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());     
+
+    // InvMassVeto: Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
+    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
+    if(!invMassVetoOnJetsData.passedEvent()) return; 
+    increment(fInvMassVetoOnJetsCounter);
+    hMETAfterInvMassVetoOnJets->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
+    // Obtain MET, btagging, "InvMass Veto On Jets" and "fake MET veto" data objects
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedAntiTau, jetData.getSelectedJets());
+
     
     // Fill additional counters before dropping events because of MET cut
-    if (btagData.passedEvent() && fakeMETData.passedEvent()) {
+    if ( btagData.passedEvent() && fakeMETData.passedEvent() ) {
       double myMETValue = metData.getSelectedMET()->et();
       if (myMETValue > 0)
         increment(fMETgt0AfterWholeSelectionCounter);
@@ -144,18 +153,17 @@ namespace HPlus {
     // MET 
     if(!metData.passedEvent()) return;
     increment(fMETCounter);
-    
+    hMETAfterMET->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+
     // BTagging
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
-
+    hMETAfterBTagging->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
-   
-    // Fill a histogram with the Trigger Prescales used
-    // aa   hTriggerPrescales->Fill(TriggerPrescale);
-    // aa   hTriggerPrescales_test->Fill(TriggerPrescale, TriggerPrescale);
-    // aa   std::cout << "TriggerPrescale = " << TriggerPrescale << std::endl;
+    hMETAfterFakeMetVeto->Fill(tmpMetData.getSelectedMET()->et(), fEventWeight.getWeight());
+
   }
 }

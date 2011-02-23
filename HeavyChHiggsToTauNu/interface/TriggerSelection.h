@@ -90,7 +90,9 @@ namespace HPlus {
     Count fTriggerHltMetExistsCount;
 
     // Histograms
-    TH1 *hHltMet;
+    TH1 *hHltMetBeforeTrigger;
+    TH1 *hHltMetAfterTrigger;
+    TH1 *hHltMetSelected;
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;

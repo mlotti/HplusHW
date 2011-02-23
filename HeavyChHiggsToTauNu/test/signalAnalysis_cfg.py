@@ -37,9 +37,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-	#"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+        #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
         # For testing in lxplus
+#       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
@@ -90,19 +92,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import custom
 if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
 
-# Prescale weight, do not uncomment unless you know what you're doing!
-if dataVersion.isData():
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
-    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
-    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
-    process.commonSequence *= process.hplusPrescaleWeightProducer
-
-
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
-#    prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer"),
     trigger = param.trigger,
-####    TriggerTauMETEmulation = param.TriggerTauMETEmulation, OBSOLETE?
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
@@ -116,8 +108,16 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
-    #myFactorizationMapName = getTauIDFactorizationMap() 
 
+# Prescale fetching done automatically for data
+if dataVersion.isData():
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
+    process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
+    process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
+    process.commonSequence *= process.hplusPrescaleWeightProducer
+    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+
+# Print output
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection

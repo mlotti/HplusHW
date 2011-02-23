@@ -58,6 +58,9 @@ namespace HPlus {
     //} else {
     //  fClosestDeltaPhi = fClosestDeltaPhiToTaus;
     //}
+
+    // New: Don't combine results. Take deltaPhi(MET, jets)
+    fClosestDeltaPhi = fClosestDeltaPhiToJets;
     hClosestDeltaPhi->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
 
     // Make cut
