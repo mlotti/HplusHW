@@ -378,6 +378,9 @@ class HistoBase:
     def getXmax(self):
         return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
 
+    def getBinWidth(self, bin):
+        return self.rootHisto.GetBinWidth(bin)
+
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
@@ -486,6 +489,9 @@ class HistoStacked(HistoBase):
 
     def getXmax(self):
         return max([h.getXmax() for h in self.histos])
+
+    def getBinWidth(self, bin):
+        return self.histos[0].getBinWidth(bin)
 
 
 class HistoManagerImpl:
