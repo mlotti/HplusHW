@@ -41,15 +41,15 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     // Histograms
-    hDiJetInvMass           = makeTH<TH1F>(*fs, "DiJetInvMass", "DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "DiJetInvMassCutFail", "DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "DiJetInvMassCutPass", "DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hTriJetInvMass          = makeTH<TH1F>(*fs, "TriJetInvMass", "TriJetInvMass", 1000, 0.0, 1000.0);
-    hTriJetInvMassCutFail   = makeTH<TH1F>(*fs, "TriJetInvMassCutFail", "TriJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hTriJetInvMassCutPass   = makeTH<TH1F>(*fs, "TriJetInvMassCutPass", "TriJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hInvMass                = makeTH<TH1F>(*fs, "InvMass", "InvMass", 1000, 0.0, 1000.0);
-    hInvMassCutFail         = makeTH<TH1F>(*fs, "InvMassCutFail", "InvMassCutFail", 1000, 0.0, 1000.0);
-    hInvMassCutPass         = makeTH<TH1F>(*fs, "InvMassCutPass", "InvMassCutPass", 1000, 0.0, 1000.0);
+    hDiJetInvMass           = makeTH<TH1F>(*fs, "DiJetInvMass", "DiJetInvMass", 250, 0.0, 1000.0);
+    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "DiJetInvMassCutFail", "DiJetInvMassCutFail", 250, 0.0, 1000.0);
+    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "DiJetInvMassCutPass", "DiJetInvMassCutPass", 250, 0.0, 1000.0);
+    hTriJetInvMass          = makeTH<TH1F>(*fs, "TriJetInvMass", "TriJetInvMass", 250, 0.0, 1000.0);
+    hTriJetInvMassCutFail   = makeTH<TH1F>(*fs, "TriJetInvMassCutFail", "TriJetInvMassCutFail", 250, 0.0, 1000.0);
+    hTriJetInvMassCutPass   = makeTH<TH1F>(*fs, "TriJetInvMassCutPass", "TriJetInvMassCutPass", 250, 0.0, 1000.0);
+    hInvMass                = makeTH<TH1F>(*fs, "InvMass", "InvMass", 250, 0.0, 1000.0);
+    hInvMassCutFail         = makeTH<TH1F>(*fs, "InvMassCutFail", "InvMassCutFail", 250, 0.0, 1000.0);
+    hInvMassCutPass         = makeTH<TH1F>(*fs, "InvMassCutPass", "InvMassCutPass", 250, 0.0, 1000.0);
 
   }
 

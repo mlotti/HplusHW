@@ -31,17 +31,28 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+=======
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+>>>>>>> wendland/master:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+=======
+    #"file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+>>>>>>> wendland/master:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
     # For testing in lxplus
@@ -62,7 +73,11 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 #process.MessageLogger.cerr.FwkReport.reportEvery = 5
+=======
+process.MessageLogger.cerr.FwkReport.reportEvery = 500
+>>>>>>> wendland/master:HeavyChHiggsToTauNu/test/qcdMeasurementMethod2Part1_cfg.py
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly

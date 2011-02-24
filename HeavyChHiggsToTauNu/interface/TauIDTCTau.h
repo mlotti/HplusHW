@@ -21,6 +21,7 @@ namespace HPlus {
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
     bool passRTauCut(const edm::Ptr<pat::Tau> tau);
     bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau);
+    double getRtauValue(const edm::Ptr<pat::Tau> tau) const;
 
   private:
     // Tau ID selections related to isolation

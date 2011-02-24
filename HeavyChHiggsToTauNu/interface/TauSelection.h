@@ -44,6 +44,9 @@ namespace HPlus {
       const edm::PtrVector<pat::Tau>& getCleanedTauCandidates() const {
         return fTauSelection->fCleanedTauCandidates;
       }
+      double getRtauOfSelectedTau() const {
+        return fTauSelection->getSelectedRtauValue();
+      }
 
     private:
       const TauSelection *fTauSelection;
@@ -80,6 +83,13 @@ namespace HPlus {
     void fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
+
+    double getSelectedRtauValue() const {
+      if (fSelectedTaus.size())
+        return fTauID->getRtauValue(fSelectedTaus[0]);
+      else
+        return -1.0; // safety
+    }
 
   private:
     // Input parameters

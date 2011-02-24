@@ -47,10 +47,12 @@ class CellFormatBase:
         if self._valueOnly or (uLow == None and uUp == None):
             return self._formatValue(value)
 
-        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
-            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
+#        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
+#            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
+#        else:
+#            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
         else:
-            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
+            return self._formatValue(value)
 
 
 class CellFormatText(CellFormatBase):
