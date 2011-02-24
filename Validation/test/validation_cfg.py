@@ -4,6 +4,7 @@ process = cms.Process("Validation")
 
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "311Xredigi"
 
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -20,6 +21,9 @@ process.source = cms.Source("PoolSource",
 #	"file:/tmp/slehti/test.root"
     )
 )
+
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.load('Configuration/StandardSequences/EndOfProcess_cff')
 process.load("HiggsAnalysis.Validation.TauMomentumValidation_cff")
@@ -45,6 +49,9 @@ process.p = cms.Path(
     process.TauMomentumValidation+
     process.GeneratorValidation+
     process.TriggerValidation+
-    process.endOfProcess+
+    process.endOfProcess
+)
+
+process.endPath = cms.EndPath(
     process.out
 )
