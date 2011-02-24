@@ -1,6 +1,3 @@
-#ifndef TauValidation_H
-#define TauValidation_H
-
 /*class TauValidation
  *  
  *  Class to fill Event Generator dqm monitor elements; works on HepMCProduct
@@ -12,6 +9,7 @@
 
 // framework & common header files
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Run.h"
@@ -529,4 +527,5 @@ void TauValidation::photons(const HepMC::GenParticle* tau){
         }
 }
 
-#endif
+//define this as a plug-in
+DEFINE_FWK_MODULE(TauValidation);
