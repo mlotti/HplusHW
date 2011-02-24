@@ -374,6 +374,26 @@ datasets = {
             }
         },
     },
+    "DYJetsToLL_M10to50_TuneD6T_Winter10": { # Z+jets
+        "dataVersion": "39Xredigi",
+        "crossSection": 310,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneD6T_M-10To50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 15,
+            }
+        },
+    },
+    "DYJetsToLL_M50_TuneD6T_Winter10": { # Z+jets
+        "dataVersion": "39Xredigi",
+        "crossSection": 2289,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneD6T_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 15,
+            }
+        },
+    },
     "DYJetsToLL_TuneZ2_Winter10": { # Z+jets
         "dataVersion": "39Xredigi",
         "crossSection": 2321,
