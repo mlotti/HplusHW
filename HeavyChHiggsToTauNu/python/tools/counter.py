@@ -288,7 +288,7 @@ class TableFormatLaTeX(TableFormatBase):
 
     def endColumn(self, lastColumn):
         if not lastColumn:
-            return " && "
+            return " & "
         else:
             return ""
 
@@ -681,7 +681,7 @@ class Counter:
         for c in self.counters:
             if c.datasetRootHisto.getDataset().isData():
                 if lumi != None:
-                    raise Exception("Unable to normalize by luminosity, more than one data datasts (you might want to merge data datasets)")
+                    raise Exception("Unable to normalize by luminosity, more than one data datasets (you might want to merge data datasets)")
                 lumi = c.datasetRootHisto.getDataset().getLuminosity()
         if lumi == None:
             raise Exception("Unable to normalize by luminosity. no data datasets")
