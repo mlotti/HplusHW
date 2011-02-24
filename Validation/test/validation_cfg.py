@@ -29,6 +29,8 @@ process.L2TauMET.triggerResults.setProcessName(dataVersion.getTriggerProcess())
 process.L2TauMET.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
 process.L3TauMET.triggerResults.setProcessName(dataVersion.getTriggerProcess())
 process.L3TauMET.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
+process.L3TauMETnoHLTFilter.triggerResults.setProcessName(dataVersion.getTriggerProcess())
+process.L3TauMETnoHLTFilter.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
 #process.TriggerTauValidation.triggerResults = cms.InputTag("TriggerResults","",dataVersion.getTriggerProcess())
 #process.TriggerTauValidation.hltPathFilter  = cms.InputTag("hltFilterL3TrackIsolationSingleIsoTau35Trk15MET25","",dataVersion.getTriggerProcess())
 
