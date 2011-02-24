@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Validation")
 
-#dataVersion = "39Xredigi"
-dataVersion = "39Xdata"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
