@@ -156,6 +156,16 @@ fakeMETVeto = cms.untracked.PSet(
   minDeltaPhi = cms.untracked.double(5.) # in degrees
 )
 
+forwardJetVeto = cms.untracked.PSet(
+  src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
+  src_met = MET.src,
+  ptCut = cms.untracked.double(30),
+  etaCut = cms.untracked.double(2.4),
+  ForwJetEtCut = cms.untracked.double(20),
+  ForwJetEtaCut = cms.untracked.double(3.0),
+  METCut = cms.untracked.double(70.0)
+ )
+
 
 # Functions
 def overrideTriggerFromOptions(options):

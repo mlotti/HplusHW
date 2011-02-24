@@ -18,7 +18,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
-//#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 
 namespace edm {
   class ParameterSet;
@@ -59,6 +59,7 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
+    Count fForwardJetVetoCounter;
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -71,7 +72,7 @@ namespace HPlus {
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     GenParticleAnalysis fGenparticleAnalysis;
-    //    ForwardJetVeto fForwardJetVeto;
+    ForwardJetVeto fForwardJetVeto;
  
     // Count ftransverseMassCutCount;
     CorrelationAnalysis fCorrelationAnalysis;

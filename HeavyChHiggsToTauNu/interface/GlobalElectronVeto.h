@@ -77,6 +77,7 @@ namespace HPlus {
     Count fElecSelectionSubCountElectronHasGsfTrkOrTrk;
     Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountEtaCut;
+    Count fElecSelectionSubCountFiducialVolumeCut;
     Count fElecSelectionSubCountElectronSelection;
     Count fElecSelectionSubCountNLostHitsInTrkerCut;
     Count fElecSelectionSubCountmyElectronDeltaCotThetaCut;
@@ -111,6 +112,7 @@ namespace HPlus {
     TH1 *hElectronPt_gsfTrack_AfterSelection;
     TH1 *hElectronEta_gsfTrack_AfterSelection;
     TH1 *hElectronImpactParameter;
+    TH1 *hElectronEta_superCluster;
 
     // pt and eta of highest pt electron passing the selection
     float fSelectedElectronPt;
