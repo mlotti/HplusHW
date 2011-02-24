@@ -25,7 +25,8 @@ def isMCTask(taskdir):
     return mc
 
 def main(opts, args):
-    multicrab.checkCrabInPath()
+    if opts.report:
+        multicrab.checkCrabInPath()
 
     crabdirs = multicrab.getTaskDirectories(opts)
 
@@ -43,19 +44,20 @@ def main(opts, args):
             print "  Ignoring task directory '%s', it looks like MC" % d
             continue
 
-        cmd = ["crab", "-report", "-c", d]
-        if opts.verbose:
-            print " ".join(cmd)
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        ret = p.returncode
-        if ret != 0:
-            print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
-            print output
-            return 1
-        if opts.verbose:
-            print output
-
+        if opts.report:
+            cmd = ["crab", "-report", "-c", d]
+            if opts.verbose:
+                print " ".join(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = p.communicate()[0]
+            ret = p.returncode
+            if ret != 0:
+                print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
+                print output
+                return 1
+            if opts.verbose:
+                print output
+    
         jsonfile = os.path.join(d, "res", "lumiSummary.json")
         #print
         #print "================================================================================"
@@ -97,6 +99,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("--output", "-o", dest="output", type="string", default="lumi.json",
                       help="Output file to write the dataset integrated luminosities")
+    parser.add_option("--noreport", dest="report", action="store_false", default=True,
+                      help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     
