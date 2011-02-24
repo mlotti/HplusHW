@@ -92,12 +92,12 @@ class DataVersion:
         # Collision data
         if dataVersion in ["36Xdata", "38Xdata", "39Xdata"]:
             self.is_data = True
-            self.globalTag = "GR_R_39X_V5::All"
+            self.globalTag = "GR_R_311_V1::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START39_V8::All"
+            self.globalTag = "START311_V1::All"
 
             try:
                 self.signalTrigger = conf["signalTrigger"]
