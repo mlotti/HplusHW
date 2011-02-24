@@ -58,7 +58,7 @@ void PrimaryVertexValidation::beginJob(){
     // Number of analyzed events
     nEvt    = dbe->book1D("nEvt ", "n analyzed Events", 1, 0., 1.);
 
-    double range = 100;
+    double range = 0.5;
     //Position
     PV_X	= dbe->book1D("PrimaryVertex X "+primaryVertexSrc.label(),"PrimaryVertex X", 100 ,-range,range);
     PV_Y        = dbe->book1D("PrimaryVertex Y "+primaryVertexSrc.label(),"PrimaryVertex Y", 100 ,-range,range);
@@ -68,8 +68,8 @@ void PrimaryVertexValidation::beginJob(){
     BS_Y        = dbe->book1D("BeamSpot Y "+beamSpotSrc.label(),"BeamSpot Y", 100 ,-range,range);
     BS_XY       = dbe->book2D("BeamSpot X Y "+beamSpotSrc.label(),"BeamSpot X Y", 100 ,-range,range, 100 ,-range,range);
 
-    BS_WidthX   = dbe->book1D("BeamSpot X width "+beamSpotSrc.label(),"BeamSpot X Width", 100 ,-range,range);
-    BS_WidthY   = dbe->book1D("BeamSpot Y width "+beamSpotSrc.label(),"BeamSpot Y Width", 100 ,-range,range);
+    BS_WidthX   = dbe->book1D("BeamSpot X width "+beamSpotSrc.label(),"BeamSpot X Width", 100 ,0,0.01);
+    BS_WidthY   = dbe->book1D("BeamSpot Y width "+beamSpotSrc.label(),"BeamSpot Y Width", 100 ,0,0.01);
   }
 }
 

@@ -2,8 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Validation")
 
+dataTier = "PATTuple"
+#dataTier = "AOD"
+
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "38XredigiPU"
 
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -43,10 +47,24 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = ANALYSISEventContent.outputCommands
 )
 
-process.p = cms.Path(
-    process.TauMomentumValidation+
-    process.GeneratorValidation+
-    process.TriggerValidation+
-    process.endOfProcess+
-    process.out
-)
+if dataTier == "PATTuple":
+    process.p = cms.Path(
+        process.TauMomentumValidation+
+        process.GeneratorValidation+
+        process.TriggerValidation+
+        process.endOfProcess+
+        process.out
+    )
+
+process.load("HiggsAnalysis.Validation.PFTauChHadronCandidateValidation_cfi")
+process.load("HiggsAnalysis.Validation.PrimaryVertexValidation_cfi")
+
+if dataTier == "AOD":
+    process.p = cms.Path(
+	process.PFTauValidation+
+        process.PrimaryVertexValidation+
+        process.GeneratorValidation+
+        process.TriggerValidation+
+        process.endOfProcess+
+        process.out
+    )
