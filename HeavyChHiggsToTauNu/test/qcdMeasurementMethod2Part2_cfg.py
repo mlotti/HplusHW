@@ -113,7 +113,7 @@ if dataVersion.isData():
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
-    process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+    process.qcdMeasurementMethod2Part2.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
 print "Trigger:", process.qcdMeasurementMethod2Part2.trigger
