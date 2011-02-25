@@ -64,14 +64,17 @@ void TriggerObjectValidation::beginJob(){
     dbe->setCurrentFolder("Validation/TriggerObjects");
 
     // Number of analyzed events
-    nEvt    = dbe->book1D("nEvt "+hltPathFilter.label(), "n analyzed Events", 2, 0., 2.);
+    nEvt    = dbe->book1D("nEvt "+hltPathFilter.label()+" "+triggerBit, "n analyzed Events", 2, 0., 2.);
 
     //Kinematics
-    Pt          = dbe->book1D("Pt "+hltPathFilter.label(),"pT", 100 ,0,100);
-    Eta         = dbe->book1D("Eta "+hltPathFilter.label(),"eta", 100 ,-2.5,2.5);
-    Phi		= dbe->book1D("Phi "+hltPathFilter.label(),"phi", 100 ,-3.14,3.14);
+    Pt          = dbe->book1D("Pt "+hltPathFilter.label()+" "+triggerBit,"pT", 100 ,0,100);
+    Eta         = dbe->book1D("Eta "+hltPathFilter.label()+" "+triggerBit,"eta", 100 ,-2.5,2.5);
+    Phi		= dbe->book1D("Phi "+hltPathFilter.label()+" "+triggerBit,"phi", 100 ,-3.14,3.14);
 
-    EtaPhi	= dbe->book2D("Eta Phi "+hltPathFilter.label(),"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
+    EtaPhi	= dbe->book2D("Eta Phi "+hltPathFilter.label()+" "+triggerBit,"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
+
+    std::cout << "Trigger bit: " << triggerBit << std::endl;
+    std::cout << "Trigger path: " << hltPathFilter.label() << std::endl;
   }
 }
 
@@ -83,20 +86,22 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
     nEvt->Fill(0.5);
 
     edm::Handle<edm::TriggerResults> hltHandle;
-    iEvent.getByLabel(triggerResults,hltHandle);
+    if(triggerBit != ""){
+      iEvent.getByLabel(triggerResults,hltHandle);
 
-    bool passedTrigger = false;
+      bool passedTrigger = false;
 
-    const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltHandle);
-    for (unsigned int i=0; i<triggerNames.size(); i++) {
+      const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltHandle);
+      for (unsigned int i=0; i<triggerNames.size(); i++) {
 	//std::cout << "trigger path= " << triggerNames.triggerName(i) << std::endl;
 	if(triggerBit == triggerNames.triggerName(i) && hltHandle->accept(i)){
 		passedTrigger = true;
 		i = triggerNames.size();
 	}
-    }
+      }
 
-    if(!passedTrigger) return;
+      if(!passedTrigger) return;
+    }
 
     nEvt->Fill(1.5);
 
@@ -121,9 +126,11 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
                 EtaPhi->Fill(objs[i].eta(),objs[i].phi());
 	  }
 	}else{
-	  std::cout << "hltPathFilter " << hltPathFilter.encode() << std::endl;
-	  for(size_t i = 0; i < triggerObjs->sizeFilters(); ++i){
-	    std::cout << "    tag " << triggerObjs->filterTag(i).encode() << std::endl;
+	  if(triggerBit != ""){
+	    std::cout << "hltPathFilter " << hltPathFilter.encode() << std::endl;
+	    for(size_t i = 0; i < triggerObjs->sizeFilters(); ++i){
+	    	std::cout << "    tag " << triggerObjs->filterTag(i).encode() << std::endl;
+	    }
 	  }
 	}
     }

@@ -63,4 +63,8 @@ namespace HPlus {
     // All cuts passed, return true
     return true;
   }
+  
+  double TauIDPFTauBase::getRtauValue(const edm::Ptr<pat::Tau> tau) const {
+    return tau->leadPFChargedHadrCand()->pt() / tau->pt();
+  }
 }

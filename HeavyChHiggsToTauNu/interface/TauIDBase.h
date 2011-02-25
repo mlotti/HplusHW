@@ -43,9 +43,11 @@ namespace HPlus {
     bool passChargeCut(const edm::Ptr<pat::Tau> tau);
     virtual bool passRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
+    virtual double getRtauValue(const edm::Ptr<pat::Tau> tau) const = 0;
     bool passInvMassCut(const edm::Ptr<pat::Tau> tau);
     bool passDeltaECut(const edm::Ptr<pat::Tau> tau);
     bool passFlightpathCut(const edm::Ptr<pat::Tau> tau);
+    bool passECALFiducialCuts(const edm::Ptr<pat::Tau> tau);
 
     /// Call at the beginning of the event (before looping over all tau-jet candidates) 
     void reset();
@@ -72,6 +74,8 @@ namespace HPlus {
     size_t fIDJetEtaCut;
     size_t fIDLdgTrackExistsCut;
     size_t fIDLdgTrackPtCut;
+    size_t fIDECALFiducialCutCracksOnly;
+    size_t fIDECALFiducialCut;
     size_t fIDAgainstElectronCut;
     size_t fIDAgainstMuonCut;
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes

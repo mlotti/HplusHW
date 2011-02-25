@@ -316,6 +316,7 @@ namespace HPlus {
       // Tau candidate selections
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
+      if (!fTauID->passECALFiducialCuts(iTau)) continue;
       if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
       fillHistogramsForCleanedTauCandidates(iTau, iEvent);
       fCleanedTauCandidates.push_back(iTau);
