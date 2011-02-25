@@ -89,9 +89,15 @@ def main(opts, args):
         print "Task %s recorded luminosity %f pb^-1" % (d, lumi)
         data[d] = lumi
 
+        # Save the json file after each data task in case of future errors
+        f = open(opts.output, "wb")
+        json.dump(data, f, sort_keys=True, indent=2)
+        f.close()
+
     f = open(opts.output, "wb")
     json.dump(data, f, sort_keys=True, indent=2)
     f.close()
+
     return 0
 
 if __name__ == "__main__":
