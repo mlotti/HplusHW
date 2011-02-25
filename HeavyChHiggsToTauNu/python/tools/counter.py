@@ -384,6 +384,36 @@ def counterEfficiency(counterTable):
             result.setCount(irow, icol, value)
     return result
 
+def sumColumn(name, columns):
+    """Create a new CounterColumn as the sum of the columns."""
+    nrows = columns[0].getNrows()
+    for i, c in enumerate(columns[1:]):
+        if nrows != c.getNrows():
+            raise Exception("Unable to sum the columns, column 0 has '%d' rows, column %d has '%d'." % (nrows, i, c.getNrows()))
+    rows = []
+    for irow in xrange(nrows):
+        count = dataset.Count(0,0)
+        for c in columns:
+            count.add(c.getCount(irow))
+        rows.append(count)
+
+    return CounterColumn(name, columns[0].getRowNames(), rows)
+
+def divideColumn(name, column1, column2):
+    """Create a CounterColumn as column1/column2."""
+    nrows = column1.getNrows()
+    if nrows != column2.getNrows():
+        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+
+    rows = []
+    for irow in xrange(nrows):
+        count = column1.getCount(irow).copy()
+        count.divide(column2.getCount(irow))
+        rows.append(count)
+
+    return CounterColumn(name, column1.getRowNames(), rows)
+
+
 class CounterColumn:
     """Class represring a column in CounterTable."""
     def __init__(self, name, rowNames, values):
@@ -406,8 +436,16 @@ class CounterColumn:
     def getRowName(self, irow):
         return self.rowNames[irow]
 
+    def getRowNames(self):
+        return self.rowNames
+
     def getCount(self, irow):
         return self.values[irow]
+
+    def multiply(self, value):
+        count = dataset.Count(value, 0)
+        for v in self.values:
+            v.multiply(count)
 
 class CounterTable:
     """Class to represent a table of counts.
@@ -452,7 +490,10 @@ class CounterTable:
                 self.columnNames[icol] = mapping[col]
 
     def indexColumn(self, name):
-        return self.columnNames.index(name)
+        try:
+            return self.columnNames.index(name)
+        except ValueError:
+            raise Exception("Column '%s' not found" % name)
 
     def appendColumn(self, column):
         self.insertColumn(self.getNcolumns(), column)

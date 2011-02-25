@@ -1,6 +1,7 @@
 import glob, os, sys
 import json
 from optparse import OptionParser
+import math
 
 import ROOT
 
@@ -158,6 +159,9 @@ class Count:
         self._value = value
         self._uncertainty = uncertainty
 
+    def copy(self):
+        return Count(self._value, self._uncertainty)
+
     def value(self):
         return self._value
 
@@ -169,6 +173,27 @@ class Count:
 
     def uncertaintyUp(self):
         return self.uncertainty()
+
+    def add(self, count):
+        """self = self + count"""
+        self._value += count._value
+        self._uncertainty = math.sqrt(self._uncertainty**2 + count._uncertainty**2)
+
+    def subtract(self, count):
+        """self = self - count"""
+        self.add(Count(-count._value, count._uncertainty))
+
+    def multiply(self, count):
+        """self = self * count"""
+        self._uncertainty = math.sqrt( (count._value * self._uncertainty)**2 +
+                                       (self._value  * count._uncertainty)**2 )
+        self._value = self._value * count._value
+
+    def divide(self, count):
+        """self = self / count"""
+        self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
+                                       (self._value*count._uncertainty / (count._value**2) )**2 )
+        self._value = self._value / count._value
 
 def _histoToCounter(histo):
     """Transform histogram (TH1) to a list of (name, Count) pairs.
