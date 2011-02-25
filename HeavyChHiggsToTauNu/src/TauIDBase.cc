@@ -27,6 +27,8 @@ namespace HPlus {
     fIDLdgTrackExistsCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackExists", 0);
     fIDLdgTrackPtCut = fCounterPackager.addSubCounter(baseLabel, "TauLdgTrackPtCut",
       makeTH<TH1F>(*fs, "TauCand_LdgTrackPtCut", "TauLdgTrackPtCut;#tau leading track, GeV/c; N_{jets} / 2 GeV/c", 100, 0., 200.));
+    fIDECALFiducialCutCracksOnly = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracks", 0);
+    fIDECALFiducialCut = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracksAndGap", 0);
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", 0);
     fIDAgainstMuonCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstMuonCut", 0);
     // Initialize counter objects for tau identification
@@ -138,6 +140,23 @@ namespace HPlus {
     fCounterPackager.fill(fIDFlightpathCut, tau->tauID("HChTauIDFlightPathSignifCont"));
     if (tau->tauID("HChTauIDFlightPathSignif") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDFlightpathCut);
+    // All cuts passed, return true
+    return true;
+  }
+  
+  bool TauIDBase::passECALFiducialCuts(const edm::Ptr<pat::Tau> tau) {
+    double myEta = std::abs(tau->eta());
+    // true, if eta is in ECAL crack
+    bool myECALCrackStatus = (myEta < 0.018 ||
+                              (myEta>0.423 && myEta<0.461) ||
+                              (myEta>0.770 && myEta<0.806) ||
+                              (myEta>1.127 && myEta<1.163));
+    if (myECALCrackStatus) return false;
+    fCounterPackager.incrementSubCount(fIDECALFiducialCutCracksOnly);
+    // true, if eta is in ECAL gap
+    bool myECALGapStatus = (myEta>1.460 && myEta<1.558);
+    if (myECALGapStatus) return false;
+    fCounterPackager.incrementSubCount(fIDECALFiducialCut);
     // All cuts passed, return true
     return true;
   }
