@@ -5,6 +5,6 @@
 <use   name="DataFormats/HLTReco"/>
 <use   name="SimDataFormats/GeneratorProducts"/>
 <use   name="SimGeneral/HepPDTRecord"/>
-<library   file="*.cc" name="TestAnalyzersValidationPlugins">
+<library   file="*.cc" name="HiggsAnalysisValidationPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
