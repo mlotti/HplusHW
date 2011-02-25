@@ -110,6 +110,7 @@ namespace HPlus {
     TH1 *hElectronEta_AfterSelection;
     TH1 *hElectronPt_gsfTrack_AfterSelection;
     TH1 *hElectronEta_gsfTrack_AfterSelection;
+    TH1 *hElectronImpactParameter;
 
     // pt and eta of highest pt electron passing the selection
     float fSelectedElectronPt;

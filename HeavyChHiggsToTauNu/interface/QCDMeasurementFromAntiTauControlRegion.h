@@ -48,10 +48,10 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fGlobalElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
+    Count fOneProngTauSelectionCounter;
     Count fJetSelectionCounter;
     Count fInvMassVetoOnJetsCounter;
     Count fEvtTopologyCounter;
-    Count fOneProngTauSelectionCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
@@ -69,10 +69,10 @@ namespace HPlus {
     VertexSelection fPrimaryVertexSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
+    TauSelection fOneProngTauSelection;
     JetSelection fJetSelection;
     InvMassVetoOnJets fInvMassVetoOnJets;
     EvtTopology fEvtTopology;
-    TauSelection fOneProngTauSelection;
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;

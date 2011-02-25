@@ -17,6 +17,12 @@ namespace HPlus {
     fBaseLabel(baseLabel)
   {
     edm::Service<TFileService> fs;
+    hEtaTauCands_nocut = makeTH<TH1F>(*fs,
+      "hEtaTauCands_nocuts",
+      "hEtaTauCands_nocuts;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
+    hEtaTauCands_ptcut = makeTH<TH1F>(*fs,
+      "hEtaTauCands_ptcut",
+      "hEtaTauCands_ptcut;#tau #eta;N_{jets} / 0.1",60, -3., 3.);
     
     // Initialize counter objects for tau candidate selection
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", 0);
@@ -88,11 +94,14 @@ namespace HPlus {
     fCounterPackager.incrementSubCount(fIDAllTauCandidates);
     // Jet pt cut
     double myJetPt = tau->pt();
+    double myJetEta = tau->eta();
     fCounterPackager.fill(fIDJetPtCut, myJetPt);
+    hEtaTauCands_nocut->Fill(myJetEta, fEventWeight.getWeight());
     if(!(myJetPt > fPtCut)) return false;
     fCounterPackager.incrementSubCount(fIDJetPtCut);
+    hEtaTauCands_ptcut->Fill(myJetEta, fEventWeight.getWeight());
     // Jet eta cut
-    double myJetEta = tau->eta();
+    //   double myJetEta = tau->eta();
     fCounterPackager.fill(fIDJetEtaCut, myJetEta);
     if(!(std::abs(myJetEta) < fEtaCut)) return false;
     fCounterPackager.incrementSubCount(fIDJetEtaCut);

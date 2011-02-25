@@ -95,7 +95,8 @@ namespace HPlus {
 
     // Histograms
     TH2* hRtauVsEta;
-
+    TH1F* hEtaTauCands_nocut;
+    TH1F* hEtaTauCands_ptcut;
   };
 }
 

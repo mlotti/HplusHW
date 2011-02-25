@@ -79,10 +79,12 @@ namespace HPlus {
     const float WMassWindow15 = 0.15*WMass;
     const float WMassWindow20 = 0.20*WMass;
     const float WMassWindow25 = 0.25*WMass;
-    const float WMassWindow   = 0.1*WMass; 
+    // const float WMassWindow   = 0.1*WMass; 
+    const float WMassWindow   = 0.2*WMass; 
 
     const float TopMass = 175.000;
-    const float TopMassWindow   = 0.1*TopMass;
+    const float TopMassWindow   = 0.20*TopMass;
+    // const float TopMassWindow   = 0.1*TopMass;
     const float TopMassWindow10 = 0.1*TopMass;
     const float TopMassWindow15 = 0.15*TopMass;
     const float TopMassWindow20 = 0.20*TopMass;
