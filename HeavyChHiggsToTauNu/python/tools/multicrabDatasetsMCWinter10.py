@@ -79,6 +79,36 @@ datasets = {
     },
 
     # QCD Winter10
+    "QCD_Pt0to5_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 4.844e+10*0.983,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_0to5_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt5to15_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 3.675e+10,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_5to15_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt15to30_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 8.159e+08,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_15to30_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 480, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "QCD_Pt30to50_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 5.312e+07,
@@ -98,15 +128,23 @@ datasets = {
         "dataVersion":  "39Xredigi",
         "crossSection": 6.359e+06,
         "data": {
+            "RECO": {
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/GEN-SIM-RECODEBUG",
+                "number_of_jobs": 300, # Adjuested for PATtuple file size
+            }
             "AOD": {
-                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 450,
+                "fallback": "RECO"
+                #"datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/AODSIM",
+                #"number_of_jobs": 200,
             },
-            "pattuple_v9": {
+            "pattuple_v9_old": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
                 "number_of_jobs": 1
             },
+            "pattuple_v9": {
+                "fallback": "pattuple_v9_old"
+            }
         },
     },
     "QCD_Pt80to120_TuneZ2_Winter10": {
@@ -346,6 +384,38 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/W4Jets_ptW-100to300_TuneZ2_7TeV-alpgen-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
                 "number_of_jobs": 1
+            },
+        },
+    },
+
+    # Diboson
+    "WW_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 27.79,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "WZ_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 10.4,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "ZZ_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 4.297,
+        "data": {
+            "AOD": {
+                "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
             },
         },
     },
