@@ -74,6 +74,8 @@ muonSelectionPF = [analysisPrefix+x for x in [
         "h06_MuonIP",
         "h07_MuonVertexDiff",
         "h07_MuonLargestPt",
+        "h07_JetSelection",
+        "h07_JetId",
         "h08_JetMultiplicityCut",
         "h09_METCut"]]
 muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
@@ -83,23 +85,24 @@ muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
 
 selections = noIsoNoVetoMet
 selectionsAoc = noIsoNoVetoMetAoc
-index = 8
+#index = 8
 if "muonSelectionPF" in analysisPrefix:
     selections = muonSelectionPF
     selectionsAoc = muonSelectionPFAoc
 elif "topMuJetRefMet" in analysisPrefix:
     selections = topMuJetRefMet
     selectionsAoc = topMuJetRefMetAoc
-    index = 11
+#    index = 11
 
-multip_beforeJet = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
-multip_afterJet = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
-lastMultip = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
+#multip_beforeJet = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
+#multip_afterJet = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
+#lastMultip = analysisPrefix+"h%02d_Multiplicity" % index; index += 1
 
 selectionAll = selections[0]
 selectionTrigger = selections[1]
 selectionPrimaryVertex = selections[2]
 selectionMuon = findSelection(selections, "MuonLargestPt")
+selectionJetId = findSelection(selections, "JetId")
 selectionJet = findSelection(selections, "JetMultiplicityCut")
 selectionMet = findSelection(selections, "METCut")
 
@@ -169,7 +172,7 @@ style = tdrstyle.TDRStyle()
 class Plot(plots.PlotBase):
     def __init__(self, datasets, name):
         plots.PlotBase.__init__(self, datasets, name,
-                                [".png"]
+#                                [".png"]
                                 )
 
         if normalizeToLumi == None:
@@ -204,10 +207,13 @@ def jetPt(h, prefix=""):
     xlabel = "Jet p_{T} (GeV/c)"
     ylabel = "Number of jets / %.1f GeV/c" % binWidth(h)
 
+    ptcut = 30
+    ymin = 4
+
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    h.createFrame(prefix+"jet_pt_log", ymin=0.1, yfactor=2)
+    h.createFrame(prefix+"jet_pt_log", ymin=ymin, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -217,6 +223,18 @@ def jetPt(h, prefix=""):
     histograms.addEnergyText()
     h.histoMgr.addLuminosityText()
     h.save()
+
+    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, ymin=ymin, yfactor=2)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    ROOT.gPad.SetLogy(True)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.histoMgr.addLuminosityText()
+    h.save()
+    
 
 
 def muonPt(h, prefix="", plotAll=False):
@@ -471,7 +489,7 @@ class PlotMet:
         h.draw()
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
-        #h.histoMgr.addLuminosityText()
+        h.histoMgr.addLuminosityText()
         h.save()
 
     def _createPlot(self, met, selection, calcNumEvents=False):
@@ -492,11 +510,11 @@ class PlotMet:
         h = self._createPlot(met, selection)
         self._plotLog(h, selection, met)
 
-plotMet = PlotMet()
+plotMet = PlotMet(rebin=5)
 
 #for sel in selections:
 #for sel in [selectionMuon, selectionJet, selectionMet]:
-for sel in [selectionJet, selectionMet]:
+for isel, sel in enumerate([selectionMuon, selectionJetId, selectionJet, selectionMet]):
     prefix = sel+"_"
 
     muonPt(Plot(datasets, sel+"/muon_pt"), prefix)
@@ -507,7 +525,8 @@ for sel in [selectionJet, selectionMet]:
 
     plotMet.plotLog("pfmet", selection=sel)
 
-    wTransMass(Plot(datasets, sel+"/wmumetPF_tmass"), prefix)
+    if isel > 0:
+        wTransMass(Plot(datasets, sel+"/wmumetPF_tmass"), prefix)
 
 for sel in [multipMuon, multipMuonJetSelection]:
     prefix = sel+"_"
@@ -594,6 +613,12 @@ def addPurityColumn(table):
     purity.multiply(100) # -> %
     table.appendColumn(purity)
 
+def addDataMcRatioColumn(table):
+    dataColumn = table.indexColumn("Data")
+    mcSumColumn = table.indexColumn("MCsum")
+    ratio = counter.divideColumn("Data/MCsum", table.getColumn(dataColumn), table.getColumn(mcSumColumn))
+    table.appendColumn(ratio)
+
 
 print "============================================================"
 print "Dataset info: "
@@ -615,7 +640,7 @@ mainCounterMap = {
     analysisPrefix+"countTrigger": "Triggered",
     analysisPrefix+"countPrimaryVertex": "Good primary vertex",
     analysisPrefix+"countGlobalTrackerMuon": "Global \& tracker muon",
-    analysisPrefix+"countMuonKin": "Muon \pT\, $\eta$ cuts",
+    analysisPrefix+"countMuonKin": "Muon \pT, $\eta$ cuts",
     analysisPrefix+"countMuonQuality": "Muon quality cuts",
     analysisPrefix+"countMuonIP": "Muon transverse IP",
     analysisPrefix+"countMuonVertexDiff": "Muon dz",
@@ -633,13 +658,8 @@ addSumColumn(table)
 addTtwFractionColumn(table)
 addPurityColumn(table)
 addQcdFractionColumn(table)
+print table.format()
 
-latexFormat.setColumnFormat(table.indexColumn("SingleTop"), counter.CellFormatTeX(valueFormat="%.1f"))
-for cname in ["TTJets/(TTJets+WJets)", "TT+W purity", "QCD/MCsum"]:
-    latexFormat.setColumnFormat(table.indexColumn(cname), counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True))
-
-table.renameRows(mainCounterMap)
-print table.format(latexFormat)
 #print "------------------------------------------------------------"
 #print counterEfficiency(eventCounter.getMainCounterTable()).format(FloatDecimalFormat(4))
 
@@ -658,4 +678,39 @@ eventCounter = makeEventCounter(datasetsMC)
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
 print eventCounter.getMainCounterTable().format(counter.TableFormatText(counter.CellFormatText(valueOnly=True, valueFormat="%.0f")))
+
+
+# Make the Data column entries comparable to the MC
+table.renameRows(mainCounterMap)
+dataCol = table.getColumn(0)
+table.removeColumn(0)
+dataCol.removeRow(2) # scraping
+dataCol.removeRow(2) # HBHE
+dataCol.removeRow(2) # pv filter
+dataCol.removeRow(2) # all events
+dataCol.removeRow(2) # triggered
+table.insertColumn(0, dataCol)
+addDataMcRatioColumn(table)
+
+# LaTeX tables for note
+latexFormat.setColumnFormat(counter.CellFormatTeX(valueFormat="%.3f"), name="Data/MCsum")
+latexFormat.setColumnFormat(counter.CellFormatTeX(valueFormat="%.1f"), name="SingleTop")
+
+tableDataMc = counter.CounterTable()
+tableDataMc.appendColumn(table.getColumn(name="Data"))
+tableDataMc.appendColumn(table.getColumn(name="MCsum"))
+tableDataMc.appendColumn(table.getColumn(name="Data/MCsum"))
+print tableDataMc.format(latexFormat)
+
+tableMc = counter.CounterTable()
+#tableMc.appendColumn(table.getColumn(name="MCsum"))
+for mcName in datasets.getMCDatasetNames():
+    tableMc.appendColumn(table.getColumn(name=mcName))
+print tableMc.format(latexFormat)
+
+tableRatio = counter.CounterTable()
+for cname in ["TTJets/(TTJets+WJets)", "TT+W purity", "QCD/MCsum"]:
+    tableRatio.appendColumn(table.getColumn(name=cname))
+    latexFormat.setColumnFormat(counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True), name=cname)
+print tableRatio.format(latexFormat)
 
