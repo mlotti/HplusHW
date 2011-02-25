@@ -404,7 +404,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 50, # Adjusted for PATtuple
+                "number_of_jobs": 20, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -417,7 +417,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/JetMET/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 50, # Adjusted for PATtuple
+                "number_of_jobs": 200, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -443,7 +443,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/MultiJet/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple
+                "number_of_jobs": 80, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -456,7 +456,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/MultiJet/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple
+                "number_of_jobs": 100, # Adjusted for PATtuple
                 "lumiMask": "Dec22ReReco"
             },
         }
