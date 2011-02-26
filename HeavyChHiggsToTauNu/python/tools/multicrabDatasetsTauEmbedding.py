@@ -96,6 +96,13 @@ def addTo(datasets):
                 "fallback": "tauembedding_embedding_v6_1"
             }
             })
+    datasets["TTJets_TuneD6T_Winter10"]["data"].update({
+            "tauembedding_skim_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneD6T_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6_2-fcfdd342282f14f16d1961a4572a9199/USER",
+                "number_of_jobs": 105 # ~1300 ev/job
+            },
+            })
     datasets["WJets_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v6": {
                 "dbs_url": common.pattuple_dbs,
@@ -117,7 +124,13 @@ def addTo(datasets):
                 "fallback": "tauembedding_embedding_v6_1"
             }
             })
-
+    datasets["WJets_TuneD6T_Winter10"]["data"].update({
+            "tauembedding_skim_v6_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6_2-fcfdd342282f14f16d1961a4572a9199/USER",
+                "number_of_jobs": 15 # ~1000 ev/job
+            },
+            })
     datasets["TToBLNu_s-channel_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v6": {
                 "dbs_url": common.pattuple_dbs,
