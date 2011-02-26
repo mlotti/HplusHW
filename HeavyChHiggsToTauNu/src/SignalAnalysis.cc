@@ -102,10 +102,7 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
  
-    // Forward jet veto                                                                                                                                            
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);                
-    if (!forwardJetData.passedEvent()) return false;                                  
-    increment(fForwardJetVetoCounter);      
+  
 
                                                                                                                                             
     // TauID (with optional factorization)
@@ -146,14 +143,11 @@ namespace HPlus {
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
 
-
-  /*
-    // Forward jet veto
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    if (!forwardJetData.passedEvent()) return false;
-    increment(fForwardJetVetoCounter);
-    */
-
+    // Forward jet veto                                                                                                                                            
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);                
+    if (!forwardJetData.passedEvent()) return false;                                  
+    increment(fForwardJetVetoCounter);      
+ 
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());

@@ -59,13 +59,14 @@ namespace HPlus {
     edm::InputTag fSrc_met;
     const double  fForwJetEtaCut;
     const double  fForwJetEtCut;
+    const double  fEtSumRatioCut;
     const double  fEtaCut;
     const double  fPtCut;
-    const double  fMetCut;
+   
    // Counters
     Count fForwardJetSubCount;
     Count fEtSumRatioSubCount;
-
+    Count fEtMetSumRatioSubCount;
  
   
 
@@ -82,6 +83,7 @@ namespace HPlus {
     TH1 *hEtSumCentral;
     TH1 *hEtSumForward;
     TH1 *hEtSumRatio;
+    TH1 *hEtMetSumRatio;
   };
 }
 

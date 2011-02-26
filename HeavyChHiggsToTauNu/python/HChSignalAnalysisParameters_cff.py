@@ -161,9 +161,9 @@ forwardJetVeto = cms.untracked.PSet(
   src_met = MET.src,
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
-  ForwJetEtCut = cms.untracked.double(20),
-  ForwJetEtaCut = cms.untracked.double(3.0),
-  METCut = cms.untracked.double(70.0)
+  ForwJetEtCut = cms.untracked.double(10.0),
+  ForwJetEtaCut = cms.untracked.double(2.5),
+  EtSumRatioCut = cms.untracked.double(0.2)
  )
 
 
