@@ -70,7 +70,7 @@ dyStyle = Style(12, ROOT.kBlue-3)
 stStyle = Style(2, ROOT.kMagenta)
 
 styles = [
-    signal90Style,
+    Style(4, ROOT.kBlue),
     Style(5, ROOT.kRed),
     wStyle,
     stStyle,
