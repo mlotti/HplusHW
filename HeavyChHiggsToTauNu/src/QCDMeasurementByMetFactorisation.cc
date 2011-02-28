@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementFromAntiTauControlRegion.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementByMetFactorisation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
@@ -10,19 +10,19 @@
 #include "TNamed.h"
 
 namespace HPlus {
-  QCDMeasurementFromAntiTauControlRegion::QCDMeasurementFromAntiTauControlRegion(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  QCDMeasurementByMetFactorisation::QCDMeasurementByMetFactorisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("TauSelection")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
-    fOneProngTauSelectionCounter(eventCounter.addCounter("TauSelection")),
     fJetSelectionCounter(eventCounter.addCounter("JetSelection")),
-    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")),    
-    fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),
-    fMETCounter(eventCounter.addCounter("MET")),
+    fInvMassVetoOnJetsCounter(eventCounter.addCounter("InvMassVetoOnJets")), // dumbie
+    fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),             // dumbie
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
+    fMETCounter(eventCounter.addCounter("MET")),
     fFakeMETVetoCounter(eventCounter.addCounter("FakeMETVeto")),
     fMETgt0AfterWholeSelectionCounter(eventCounter.addCounter("METgt0AfterWholeSelection")),
     fMETgt30AfterWholeSelectionCounter(eventCounter.addCounter("METgt30AfterWholeSelection")),
@@ -75,73 +75,99 @@ namespace HPlus {
     hRTauAfterAllSelectionsExceptMETandFakeMetVeto->Sumw2();
     hRTauAfterAllSelections = fs->make<TH1F>("RTauAfterAllSelections", "RTauAfterAllSelections;Rtau;N_{events}/0.02", 60, 0., 1.2);;
     hRTauAfterAllSelections->Sumw2();
+
+    hTauPtVsMET_AfterTauSelection = fs->make<TH2F>("TauPtVsMET_AfterTauSelection", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterTauSelection->Sumw2();
+    hTauPtVsMET_AfterElectronVeto = fs->make<TH2F>("TauPtVsMET_ElectronVeto", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterElectronVeto->Sumw2();
+    hTauPtVsMET_AfterMuonVeto = fs->make<TH2F>("TauPtVsMET_AfterMuonVeto", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterMuonVeto->Sumw2();
+    hTauPtVsMET_AfterJetSelection = fs->make<TH2F>("TauPtVsMET_AfterJetSelection", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterJetSelection->Sumw2();
+    hTauPtVsMET_AfterBTagging = fs->make<TH2F>("TauPtVsMET_AfterBTagging", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterBTagging->Sumw2();
+
    }
 
-  QCDMeasurementFromAntiTauControlRegion::~QCDMeasurementFromAntiTauControlRegion() {}
+  QCDMeasurementByMetFactorisation::~QCDMeasurementByMetFactorisation() {}
 
-  void QCDMeasurementFromAntiTauControlRegion::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurementByMetFactorisation::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     analyze(iEvent, iSetup);
   }
 
-  void QCDMeasurementFromAntiTauControlRegion::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurementByMetFactorisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
     increment(fAllCounter);
+
 
     // Trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
 
+
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
     increment(fPrimaryVertexCounter);
 
-    // Get MET for histo-plotting purposes
+
+    // Get MET early on for histo-plotting purposes. No cut is applied yet
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     hMETAfterTrigger->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
+
+    // Apply tau-ID - waiting for Lauri's contribution
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    if(!tauData.passedEvent()) return;
+    increment(fOneProngTauSelectionCounter);
+    edm::PtrVector<pat::Tau> mySelectedTau;
+    mySelectedTau.push_back(tauData.getSelectedTaus()[0]);
+    hMETAfterTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hTauPtVsMET_AfterTauSelection->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+
     // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
     hMETAfterElectronVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hTauPtVsMET_AfterElectronVeto->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
+
     // GlobalMuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     hMETAfterMuonVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    
-    // Apply tau-Selection (available: antitautag, antiisolation, standard)
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return;
-    increment(fOneProngTauSelectionCounter);
-    edm::PtrVector<pat::Tau> mySelectedAntiTau;
-    mySelectedAntiTau.push_back(tauData.getSelectedTaus()[0]);
-    hMETAfterTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    
+    hTauPtVsMET_AfterMuonVeto->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedAntiTau);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
     if(!jetData.passedEvent()) return; // Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     increment(fJetSelectionCounter);
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hTauPtVsMET_AfterJetSelection->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    // Run alphaT plots just for reference (will NOT affect the method in any way)
+
+    // alphaT - No cuts applied! Only produces plots
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());     
+    // increment(fEvtTopologyCounter);
+    
 
-    // InvMassVeto: Apply InvMassVeto to reject events with W->qq and t->bW. Anticipated to increase QCD Purity
+    // InvMassVeto - No cuts applied! Only produces plots 
     InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
-    if(!invMassVetoOnJetsData.passedEvent()) return; 
-    increment(fInvMassVetoOnJetsCounter);
+    // if(!invMassVetoOnJetsData.passedEvent()) return; 
+    // increment(fInvMassVetoOnJetsCounter);
     hMETAfterInvMassVetoOnJets->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
-    // Obtain MET, btagging, "InvMass Veto On Jets" and "fake MET veto" data objects
+    
+    // Obtain btagging and "fake MET veto" data objects
     //METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedAntiTau, jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
 
     
     // Fill additional counters before dropping events because of MET cut
@@ -165,24 +191,28 @@ namespace HPlus {
       hMETAfterWholeSelection->Fill(myMETValue, fEventWeight.getWeight());
     }
 
-    if(btagData.passedEvent())
+    if(btagData.passedEvent()){ 
       hRTauAfterAllSelectionsExceptMETandFakeMetVeto->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    }
+
+    
+    // BTagging
+    if(!btagData.passedEvent()) return;
+    increment(fBTaggingCounter);
+    hMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hTauPtVsMET_AfterBTagging->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());    
 
     // MET 
     if(!metData.passedEvent()) return;
     increment(fMETCounter);
     hMETAfterMET->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
-    // BTagging
-    if(!btagData.passedEvent()) return;
-    increment(fBTaggingCounter);
-    hMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    
     
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
     hMETAfterFakeMetVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
     hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    
   }
 }

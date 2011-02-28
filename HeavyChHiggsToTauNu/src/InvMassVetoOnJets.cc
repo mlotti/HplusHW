@@ -41,16 +41,24 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     // Histograms
-    hDiJetInvMass           = makeTH<TH1F>(*fs, "DiJetInvMass", "DiJetInvMass", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "DiJetInvMassCutFail", "DiJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hDiJetInvMassCutPass    = makeTH<TH1F>(*fs, "DiJetInvMassCutPass", "DiJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hTriJetInvMass          = makeTH<TH1F>(*fs, "TriJetInvMass", "TriJetInvMass", 1000, 0.0, 1000.0);
-    hTriJetInvMassCutFail   = makeTH<TH1F>(*fs, "TriJetInvMassCutFail", "TriJetInvMassCutFail", 1000, 0.0, 1000.0);
-    hTriJetInvMassCutPass   = makeTH<TH1F>(*fs, "TriJetInvMassCutPass", "TriJetInvMassCutPass", 1000, 0.0, 1000.0);
-    hInvMass                = makeTH<TH1F>(*fs, "InvMass", "InvMass", 1000, 0.0, 1000.0);
-    hInvMassCutFail         = makeTH<TH1F>(*fs, "InvMassCutFail", "InvMassCutFail", 1000, 0.0, 1000.0);
-    hInvMassCutPass         = makeTH<TH1F>(*fs, "InvMassCutPass", "InvMassCutPass", 1000, 0.0, 1000.0);
-
+    hDiJetInvMass           = fs->make<TH1F>("DiJetInvMass", "DiJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMass->Sumw2();
+    hDiJetInvMassCutFail    = fs->make<TH1F>("DiJetInvMassCutFail", "DiJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutFail->Sumw2();
+    hDiJetInvMassCutPass    = fs->make<TH1F>("DiJetInvMassCutPass", "DiJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hDiJetInvMassCutPass->Sumw2();
+    hTriJetInvMass          = fs->make<TH1F>("TriJetInvMass", "TriJetInvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMass->Sumw2();
+    hTriJetInvMassCutFail   = fs->make<TH1F>("TriJetInvMassCutFail", "TriJetInvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutFail->Sumw2();
+    hTriJetInvMassCutPass   = fs->make<TH1F>("TriJetInvMassCutPass", "TriJetInvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hTriJetInvMassCutPass->Sumw2();
+    hInvMass                = fs->make<TH1F>("InvMass", "InvMass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMass->Sumw2();
+    hInvMassCutFail         = fs->make<TH1F>("InvMassCutFail", "InvMassCutFail;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutFail->Sumw2();
+    hInvMassCutPass         = fs->make<TH1F>("InvMassCutPass", "InvMassCutPass;InvMass, GeV/c^{2};N/2 GeV/c^{2}", 250, 0.0, 1000.0);
+    hInvMassCutPass->Sumw2();
   }
 
   InvMassVetoOnJets::~InvMassVetoOnJets() {}
@@ -64,10 +72,16 @@ namespace HPlus {
     /// of this method is to be able to veto events with candidate di-jet combinations having an invariant mass close 
     /// to the mass of the W boson or the top quark. In this way we can get rid of hadronic events that include
     /// W->qq and t->bW decays.
+    /// 
+    /// This slightly varied version instead of exiting the function as soon as a dijet (trijet) candidate is found
+    /// within the w-mass (top-mass) window it only sets a boolean to true but continues looking into the rest of 
+    /// the dijet and trijet combinations. In this way the full InvariantMass Distributions can be obtained, with 
+    /// no missing entries around the window values that we veto. As a disadvantage, the computing time is expected 
+    /// to be slightly increaser wrt the "immediate veto" version.
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// A direct and easy way to switch on/off the class from qcdMeasurementMethod2Part1_cfg.py file without the need to compile the code.
-    if(!fSetTrueToUseModule) return Data(this, true);
+    // if(!fSetTrueToUseModule) return Data(this, true);
 
     /// Declaration of variables    
     bool bPassedEvent = false;
@@ -122,9 +136,9 @@ namespace HPlus {
 	hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	increment(fDiJetsCutSubCount);
-	return Data(this, false);
+	// return Data(this, false);
       } else{
-	bInvMassWithinWWindow = false;
+	// bInvMassWithinWWindow = false;
 	hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
       }
@@ -168,9 +182,9 @@ namespace HPlus {
 	    hDiJetInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    hInvMassCutFail->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    increment(fDiJetsCutSubCount);
-	    return Data(this, false);
+	    // return Data(this, false);
 	  } else{
-	    bInvMassWithinWWindow   = false;
+	    // bInvMassWithinWWindow = false; // don't want to do this as if a combination within the window was found before I lose the info
 	    hDiJetInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	    hInvMassCutPass->Fill(DiJetInvMass, fEventWeight.getWeight());
 	  }
@@ -188,7 +202,7 @@ namespace HPlus {
 	    
 	    /// Fill histograms
 	    hTriJetInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
-	    hInvMass->Fill(DiJetInvMass, fEventWeight.getWeight());
+	    hInvMass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    
 	    /// Increment counters with variable mass window. Take no action
 	    if( TriJetInvMass <= (TopMass+TopMassWindow10) && TriJetInvMass >= (TopMass-TopMassWindow10) ) increment(fInvMassTopWindow10SubCount);
@@ -202,9 +216,9 @@ namespace HPlus {
 	      hTriJetInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      hInvMassCutFail->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      increment(fTriJetsCutSubCount);
-	      return Data(this, false);
+	      // return Data(this, false);
 	    } else{
-	      bInvMassWithinTopWindow = false;
+	      // bInvMassWithinTopWindow = false;
 	      hTriJetInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	      hInvMassCutPass->Fill(TriJetInvMass, fEventWeight.getWeight());
 	    }
@@ -216,6 +230,11 @@ namespace HPlus {
     /// Make decision on event. If Di/Tri-Jet combination within W OR Top mass are found return false. Else true
     if( (bInvMassWithinWWindow) || (bInvMassWithinTopWindow) ) bPassedEvent = false;
     else bPassedEvent = true;
+
+    // std::cout << "*** bPassedEvent = " << bPassedEvent << ", bInvMassWithinWWindow = " << bInvMassWithinWWindow << ", bInvMassWithinTopWindow = " << bInvMassWithinTopWindow << std::endl;
+
+    /// Run module but always return true (i.e. passed requirement no matter what)
+    if(!fSetTrueToUseModule) bPassedEvent = true;
     
     return Data(this, bPassedEvent);
 
