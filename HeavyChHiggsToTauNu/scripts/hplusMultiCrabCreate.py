@@ -55,7 +55,7 @@ def main(opts):
 
     # Check crab environment
     multicrab.checkCrabInPath()
-    dirname = multicrab.createTaskDir()
+    dirname = multicrab.createTaskDir(prefix=opts.prefix)
 
     shutil.copy(mc_conf_file, os.path.join(dirname, "multicrab.cfg"))
     flist = [crab_conf_file, py_conf_file]
@@ -87,6 +87,9 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("--cfg", dest="cfgfile", type="string", default="multicrab.cfg",
                       help="Multicrab configuration file (default: 'multicrab.cfg')")
+    parser.add_option("--prefix", "-p", dest="prefix", type="string", default="multicrab",
+                      help="Prefix for the multicrab task directory (default: 'multicrab')")
+
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))

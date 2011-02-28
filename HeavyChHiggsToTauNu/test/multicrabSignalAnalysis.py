@@ -147,3 +147,6 @@ if runPatOnTheFly:
 
 # Genenerate configuration and create the crab tasks
 multicrab.createTasks()
+
+# Create a custom multicrab task directory (SignalAnalysis_xxxxxx_yyyyyy)
+#multicrab.createTasks(prefix="SignalAnalysis")
