@@ -7,6 +7,7 @@ dataTier = "PATTuple"
 
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "311Xredigi"
 #dataVersion = "38XredigiPU"
 
 # Command line arguments (options) and DataVersion object
@@ -24,6 +25,9 @@ process.source = cms.Source("PoolSource",
 #	"file:/tmp/slehti/test.root"
     )
 )
+
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.load('Configuration/StandardSequences/EndOfProcess_cff')
 process.load("HiggsAnalysis.Validation.TauMomentumValidation_cff")
@@ -52,7 +56,10 @@ if dataTier == "PATTuple":
         process.TauMomentumValidation+
         process.GeneratorValidation+
         process.TriggerValidation+
-        process.endOfProcess+
+        process.endOfProcess
+)
+
+process.endPath = cms.EndPath(
         process.out
     )
 
@@ -65,6 +72,5 @@ if dataTier == "AOD":
         process.PrimaryVertexValidation+
         process.GeneratorValidation+
         process.TriggerValidation+
-        process.endOfProcess+
-        process.out
+        process.endOfProcess
     )

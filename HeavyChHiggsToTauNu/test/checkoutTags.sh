@@ -22,6 +22,7 @@ set -e
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 # 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
+# 24.2.2011/M.Kortelainen CMSSW_3_11_1_patch2 Taking into account what is included in the release
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -58,8 +59,7 @@ fi
 cvs co -r V02-01-03 RecoLuminosity/LumiDB
 
 # Electron ID
-cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
-cvs co -r V00-03-00 ElectroWeakAnalysis/WENu
+cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
