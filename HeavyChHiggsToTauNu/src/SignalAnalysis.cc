@@ -27,6 +27,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
+    fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
@@ -37,6 +38,7 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -99,8 +101,10 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
+ 
+  
 
-
+                                                                                                                                            
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
@@ -108,7 +112,7 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
 
-    // Global electron veto
+    //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
@@ -138,16 +142,10 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-
-
-  /*
-    // Forward jet veto
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    if (!forwardJetData.passedEvent()) return false;
-    increment(fForwardJetVetoCounter);
-    */
-
-
+                                                                                                         
+            
+                              
+  
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
@@ -166,6 +164,14 @@ namespace HPlus {
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
+
+
+    // Forward jet veto                                                                                                                                                                                                                
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    if (!forwardJetData.passedEvent()) return false;
+    increment(fForwardJetVetoCounter);
+
+
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau

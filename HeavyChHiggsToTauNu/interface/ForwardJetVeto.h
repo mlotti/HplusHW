@@ -51,7 +51,7 @@ namespace HPlus {
     ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~ForwardJetVeto();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
     // Input parameters
@@ -59,11 +59,16 @@ namespace HPlus {
     edm::InputTag fSrc_met;
     const double  fForwJetEtaCut;
     const double  fForwJetEtCut;
+    const double  fEtSumRatioCut;
     const double  fEtaCut;
     const double  fPtCut;
-    const double  fMetCut;
-    // Counters
-    //Count f;
+   
+   // Counters
+    Count fForwardJetSubCount;
+    Count fEtSumRatioSubCount;
+    Count fEtMetSumRatioSubCount;
+ 
+  
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -78,6 +83,7 @@ namespace HPlus {
     TH1 *hEtSumCentral;
     TH1 *hEtSumForward;
     TH1 *hEtSumRatio;
+    TH1 *hEtMetSumRatio;
   };
 }
 
