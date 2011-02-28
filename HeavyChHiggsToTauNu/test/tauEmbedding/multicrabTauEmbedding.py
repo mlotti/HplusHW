@@ -123,6 +123,7 @@ def modifyAnalysis(dataset):
 
 
 if step in ["analysis", "analysisTau","signalAnalysis"]:
+    multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyAnalysis)
 else:
     multicrab.forEachDataset(modify)
