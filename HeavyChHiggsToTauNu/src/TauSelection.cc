@@ -96,28 +96,14 @@ namespace HPlus {
       "TauSelection_all_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-   hPhiTauCandidates = makeTH<TH1F>(*fs,
-      "TauSelection_all_tau_candidates_phi",
-      "tau_candidates_phi;#phi #phi;N_{jets} / 0.1",
-      myTauJetEtaBins, -3.2, 3.2);
     hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hPhiCleanedTauCandidates = makeTH<TH1F>(*fs,
-      "TauSelection_cleaned_tau_candidates_phi",
-      "cleaned_tau_candidates_phi;#phi #phi;N_{jets} / 0.1",
-      myTauJetEtaBins, -3.2, 3.2);
     hEtaSelectedTaus = makeTH<TH1F>(*fs,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-
-   hPhiSelectedTaus = makeTH<TH1F>(*fs,
-      "TauSelection_selected_taus_phi",
-      "selected_tau_phi;#phi #phi;N_{jets} / 0.1",
-      myTauJetEtaBins, -3.2, 3.2);
-
     // Eta vs. phi
     hEtaPhiTauCandidates = makeTH<TH2F>(*fs,
       "TauSelection_all_tau_candidates_eta_vs_phi",
@@ -148,7 +134,6 @@ namespace HPlus {
       "selected_tau_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
     // N
-
     hNumberOfTauCandidates = makeTH<TH1F>(*fs,
       "TauSelection_all_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
