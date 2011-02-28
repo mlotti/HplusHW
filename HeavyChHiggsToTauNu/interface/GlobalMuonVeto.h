@@ -117,7 +117,8 @@ namespace HPlus {
     TH1 *hMuonEta_InnerTrack_AfterSelection;
     TH1 *hMuonPt_GlobalTrack_AfterSelection;
     TH1 *hMuonEta_GlobalTrack_AfterSelection;
-
+    TH1 *hMuonImpactParameter;
+    TH1 *hMuonZdiff;
     // pt and eta of muon with highest pt passing the selections
     float fSelectedMuonPt;
     float fSelectedMuonEta;
