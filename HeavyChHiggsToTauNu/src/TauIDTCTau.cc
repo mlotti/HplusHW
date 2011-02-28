@@ -91,4 +91,7 @@ namespace HPlus {
     return true;
   }
 
+  double TauIDTCTau::getRtauValue(const edm::Ptr<pat::Tau> tau) const {
+    return tau->leadTrack()->pt() / tau->pt();
+  }
 }

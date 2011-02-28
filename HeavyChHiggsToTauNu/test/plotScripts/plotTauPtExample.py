@@ -61,6 +61,7 @@ datasets = dataset.getDatasetsFromMulticrabCfg(counters = "qcdMeasurementMethod2
 #                 "QCD_Pt80", "QCD_Pt170", "QCD_Pt80to120_Fall10",
 #                 "QCD_Pt120to170_Fall10", "QCD_Pt127to300_Fall10"])
 
+datasets.remove(["BTau_141956-144114_Dec22", "BTau_146428-148058_Dec22", "BTau_148822-149182_Dec22"])
 
 # Example how to set new signal cross sections for a given tan(beta)
 xsect.setHplusCrossSections(datasets, tanbeta=20)
@@ -180,6 +181,9 @@ raw_input("Hit enter to continue")
 print "============================================================"
 print "Dataset info: "
 datasets.printInfo()
+
+import sys
+sys.exit(0)
 
 # Construct the event counter
 eventCounter = counter.EventCounter(datasets)
