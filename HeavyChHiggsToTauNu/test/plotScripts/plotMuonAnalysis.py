@@ -180,8 +180,8 @@ class Plot(plots.PlotBase):
         self._setLegendStyles()
         self._setPlotStyles()
 
-def binWidth(plot):
-    return plot.histoMgr.getHistos()[0].getBinWidth(1)
+    def binWidth(self):
+        return self.histoMgr.getHistos()[0].getBinWidth(1)
 
 def jetMultiplicity(h, prefix=""):
     h.stackMCHistograms()
@@ -201,7 +201,7 @@ def jetMultiplicity(h, prefix=""):
 def jetPt(h, prefix=""):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     xlabel = "Jet p_{T} (GeV/c)"
-    ylabel = "Number of jets / %.1f GeV/c" % binWidth(h)
+    ylabel = "Number of jets / %.1f GeV/c" % h.binWidth()
 
     h.stackMCHistograms()
     h.addMCUncertainty()
@@ -226,7 +226,7 @@ def muonPt(h, prefix="", plotAll=False):
     xmax = 350
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
-    ylabel = ylabel % binWidth(h)
+    ylabel = ylabel % h.binWidth()
 
     h.stackMCHistograms()
     h.addMCUncertainty()
@@ -275,7 +275,7 @@ def muonPt(h, prefix="", plotAll=False):
 def muonEta(h, prefix="", plotAll=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     xlabel = "Muon  #eta"
-    ylabel = "Number of muons / %.1f" % binWidth(h)
+    ylabel = "Number of muons / %.1f" % h.binWidth()
 
     h.stackMCHistograms()
     
@@ -304,7 +304,7 @@ def muonPhi(h, prefix="", plotAll=False):
 #    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
 
     xlabel = "Muon  #phi"
-    ylabel = "Number of muons / %.1f" % binWidth(h)
+    ylabel = "Number of muons / %.1f" % h.binWidth()
     h.stackMCHistograms()
 
     if plotAll:
@@ -376,7 +376,7 @@ def muonD0():
 def wTransMass(h, prefix=""):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     xlabel = "m_{T}(#mu, MET) (GeV/c)"
-    ylabel = "Number of events / %.1f GeV/c" % binWidth(h)
+    ylabel = "Number of events / %.1f GeV/c" % h.binWidth()
 
     h.stackMCHistograms()
     h.addMCUncertainty()
