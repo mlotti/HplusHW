@@ -2,8 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Validation")
 
+dataTier = "PATTuple"
+#dataTier = "AOD"
+
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "38XredigiPU"
 
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
@@ -29,6 +33,8 @@ process.L2TauMET.triggerResults.setProcessName(dataVersion.getTriggerProcess())
 process.L2TauMET.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
 process.L3TauMET.triggerResults.setProcessName(dataVersion.getTriggerProcess())
 process.L3TauMET.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
+process.L3TauMETnoHLTFilter.triggerResults.setProcessName(dataVersion.getTriggerProcess())
+process.L3TauMETnoHLTFilter.hltPathFilter.setProcessName(dataVersion.getTriggerProcess())
 #process.TriggerTauValidation.triggerResults = cms.InputTag("TriggerResults","",dataVersion.getTriggerProcess())
 #process.TriggerTauValidation.hltPathFilter  = cms.InputTag("hltFilterL3TrackIsolationSingleIsoTau35Trk15MET25","",dataVersion.getTriggerProcess())
 
@@ -41,10 +47,24 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = ANALYSISEventContent.outputCommands
 )
 
-process.p = cms.Path(
-    process.TauMomentumValidation+
-    process.GeneratorValidation+
-    process.TriggerValidation+
-    process.endOfProcess+
-    process.out
-)
+if dataTier == "PATTuple":
+    process.p = cms.Path(
+        process.TauMomentumValidation+
+        process.GeneratorValidation+
+        process.TriggerValidation+
+        process.endOfProcess+
+        process.out
+    )
+
+process.load("HiggsAnalysis.Validation.PFTauChHadronCandidateValidation_cfi")
+process.load("HiggsAnalysis.Validation.PrimaryVertexValidation_cfi")
+
+if dataTier == "AOD":
+    process.p = cms.Path(
+	process.PFTauValidation+
+        process.PrimaryVertexValidation+
+        process.GeneratorValidation+
+        process.TriggerValidation+
+        process.endOfProcess+
+        process.out
+    )

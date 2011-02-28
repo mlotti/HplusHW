@@ -56,6 +56,7 @@ namespace HPlus {
     hElectronEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
     hElectronPt_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
     hElectronEta_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
+     hElectronImpactParameter = makeTH<TH1F>(*fs, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
     bDecision = false;
     bPassedElecID = false;
@@ -449,6 +450,7 @@ namespace HPlus {
       bElecElectronDistanceCut = true;
 
       // 4) Transverse Impact Parameter wrt BeamSpot, applied on the gsfTrack of the Electron candidate
+      hElectronImpactParameter->Fill(myTransverseImpactPar,fEventWeight.getWeight()); 
       if(myTransverseImpactPar > 0.04) continue;
       bElecTransvImpactParCut = true;
       

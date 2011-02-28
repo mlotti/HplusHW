@@ -135,7 +135,7 @@ process.commonSequence *= process.firstPrimaryVertex
 
 # Define the histograms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="pt (GeV/c)")
+histoPt = Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
 histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="eta")
 histoPhi = Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, description="phi")
 histoTrackIso = Histo("trackIso", trackIso, min=0, max=100.0, nbins=100, description="TrackIso")

@@ -72,7 +72,9 @@ namespace HPlus {
     hMuonEta_InnerTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
     hMuonPt_GlobalTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
     hMuonEta_GlobalTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
-  
+     hMuonImpactParameter = makeTH<TH1F>(*fs, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
+     hMuonZdiff = makeTH<TH1F>(*fs, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
+ 
     // Check here that the muon selection is reasonable
     if(fMuonSelection != "All" &&
        fMuonSelection != "AllGlobalMuons" &&
@@ -149,8 +151,7 @@ namespace HPlus {
 
     // Create and attach handle to Muon Collection
     edm::Handle<std::vector<pat::Muon> > myMuonHandle;
-    iEvent.getByLabel(fMuonCollectionName, myMuonHandle);
-    
+    iEvent.getByLabel(fMuonCollectionName, myMuonHandle);    
     // In the case where the handle is empty...
     if ( !myMuonHandle->size() ){
       // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
@@ -275,6 +276,7 @@ namespace HPlus {
       // 6) Impact Paremeter (d0) wrt beam spot < 0.02cm (applied to track from the inner tracker)
       // FIX ME
       // if ( myInnerTrackRef->dxy() < 0.02) continue; // This is the transverse IP w.r.t to (0,0,0). Replace latter with BeamSpot
+      hMuonImpactParameter->Fill((*iMuon).dB(),fEventWeight.getWeight()); 
       if ((*iMuon).dB() > 0.02) continue; // This is the transverse IP w.r.t to beamline.
       bMuonImpactParCut = true;
       
@@ -288,12 +290,14 @@ namespace HPlus {
       bMuonRelIsolationR03Cut = true;
 
       // 8) Check that muon has good PV (i.e diff between muon track at its vertex and the PV along the Z position < 1cm)
+
       if(fMuonApplyIpz) {
         if(primaryVertex.get() == 0)
           throw cms::Exception("LogicError") << "MuonApplyIpz is true, but got null primary vertex" << std::endl;
         if(std::abs(myInnerTrackRef->dz(primaryVertex->position())) < 1.0) continue; // This is the z-impact parameter w.r.t to selected primary vertex
         bMuonGoodPVCut = true;
       }
+
 
       
       // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.

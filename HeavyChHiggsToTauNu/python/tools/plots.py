@@ -103,6 +103,7 @@ _plotStyles = {
 
     "DYJetsToLL":            styles.dyStyle,
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
+    "SingleTop":             styles.stStyle
 }
 
 

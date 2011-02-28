@@ -1,6 +1,7 @@
 import glob, os, sys
 import json
 from optparse import OptionParser
+import math
 
 import ROOT
 
@@ -158,6 +159,9 @@ class Count:
         self._value = value
         self._uncertainty = uncertainty
 
+    def copy(self):
+        return Count(self._value, self._uncertainty)
+
     def value(self):
         return self._value
 
@@ -169,6 +173,27 @@ class Count:
 
     def uncertaintyUp(self):
         return self.uncertainty()
+
+    def add(self, count):
+        """self = self + count"""
+        self._value += count._value
+        self._uncertainty = math.sqrt(self._uncertainty**2 + count._uncertainty**2)
+
+    def subtract(self, count):
+        """self = self - count"""
+        self.add(Count(-count._value, count._uncertainty))
+
+    def multiply(self, count):
+        """self = self * count"""
+        self._uncertainty = math.sqrt( (count._value * self._uncertainty)**2 +
+                                       (self._value  * count._uncertainty)**2 )
+        self._value = self._value * count._value
+
+    def divide(self, count):
+        """self = self / count"""
+        self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
+                                       (self._value*count._uncertainty / (count._value**2) )**2 )
+        self._value = self._value / count._value
 
 def _histoToCounter(histo):
     """Transform histogram (TH1) to a list of (name, Count) pairs.
@@ -323,6 +348,12 @@ class DatasetRootHistoBase:
     def getDataset(self,):
         return self.dataset
 
+    def isData(self):
+        return self.dataset.isData()
+
+    def isMC(self):
+        return self.dataset.isMC()
+
     def getHistogram(self):
         """Get a clone of the wrapped histogram normalized correctly."""
         h = self._normalizedHistogram()
@@ -374,12 +405,6 @@ class DatasetRootHisto(DatasetRootHistoBase):
         DatasetRootHistoBase.__init__(self, dataset)
         self.histo = histo
         self.normalization = "none"
-
-    def isData(self):
-        return self.dataset.isData()
-
-    def isMC(self):
-        return self.dataset.isMC()
 
     def getBinLabels(self):
         """Get list of the bin labels of the histogram."""
@@ -470,6 +495,12 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
 
+    def isData(self):
+        return True
+
+    def isMC(self):
+        return False
+
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
         return self.histoWrappers[0].getBinLabels()
@@ -528,6 +559,12 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
+
+    def isData(self):
+        return False
+
+    def isMC(self):
+        return True
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
@@ -642,15 +679,15 @@ class Dataset:
             raise Exception("Unable to open ROOT file '%s'"%fname)
 
         self.info = {}
+        self.dataVersion = ""
         configInfo = self.file.Get("configInfo")
         if configInfo != None:
             self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
-        dataVersion = self.file.Get("dataVersion")
-        if dataVersion != None:
-            self.dataVersion = dataVersion.GetTitle()
-        else:
-            self.dataVersion = ""
+            dataVersion = configInfo.Get("dataVersion")
+
+            if dataVersion != None:
+                self.dataVersion = dataVersion.GetTitle()
 
         self._isData = "data" in self.dataVersion
 
@@ -1163,7 +1200,11 @@ class DatasetManager:
 
     def mergeData(self):
         """Merge all data Datasets to one with a name 'Data'."""
-        self.merge("Data", [x.getName() for x in self.getDataDatasets()])
+        self.merge("Data", self.getDataDatasetNames())
+
+    def mergeMC(self):
+        """Merge all MC Datasets to one with a name 'MC'."""
+        self.merge("MC", self.getMCDatasetNames())
 
     def mergeMany(self, mapping):
         """Merge datasets according to the mapping."""
