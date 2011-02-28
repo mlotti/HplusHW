@@ -5,26 +5,14 @@ import shutil
 import os
 import sys
 import ConfigParser
+from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def print_usage(prog):
-    print "Usage: %s [-cfg multicrab_cfg_file.cfg]" % prog
-
-def main(argv):
-    mc_conf_file = "multicrab.cfg"
+def main(opts):
+    mc_conf_file = opts.cfgfile
     crab_conf_file = None
     py_conf_file = None
     json_files = []
-
-    if len(argv) == 3:
-        if argv[1] == '-cfg':
-            mc_conf_file = argv[2]
-        else:
-            print_usage(argv[0])
-            return 1
-    elif len(argv) != 1:
-        print_usage(argv[0])
-        return 1
 
     if not os.path.exists(mc_conf_file):
         print "Multicrab configuration file %s doesn't exist!" % mc_conf_file
@@ -96,4 +84,9 @@ def main(argv):
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("--cfg", dest="cfgfile", type="string", default="multicrab.cfg",
+                      help="Multicrab configuration file (default: 'multicrab.cfg')")
+    (opts, args) = parser.parse_args()
+
+    sys.exit(main(opts))
