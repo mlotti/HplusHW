@@ -142,13 +142,10 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-
-    // Forward jet veto                                                                                                                                            
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);                
-    if (!forwardJetData.passedEvent()) return false;                                  
-    increment(fForwardJetVetoCounter);      
- 
-
+                                                                                                         
+            
+                              
+  
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
@@ -167,6 +164,14 @@ namespace HPlus {
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
+
+
+    // Forward jet veto                                                                                                                                                                                                                
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    if (!forwardJetData.passedEvent()) return false;
+    increment(fForwardJetVetoCounter);
+
+
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau
