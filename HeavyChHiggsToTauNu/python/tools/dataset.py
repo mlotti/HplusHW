@@ -1224,7 +1224,8 @@ class DatasetManager:
 
         data = json.load(open(fname))
         for name, value in data.iteritems():
-            self.getDataset(name).setLuminosity(value)
+            if self.hasDataset(name):
+                self.getDataset(name).setLuminosity(value)
 
     def printInfo(self):
         """Print dataset information."""
