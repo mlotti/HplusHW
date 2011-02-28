@@ -54,11 +54,13 @@ namespace HPlus {
       fOperationMode = kNormalTauID;
     else if (myOperatingModeSelection == "factorized")
       fOperationMode = kFactorizedTauID;
+    else if (myOperatingModeSelection == "tauCandidateSelectionOnly")
+      fOperationMode = kTauCandidateSelectionOnly;
     else if (myOperatingModeSelection == "antitautag")
       fOperationMode = kAntiTauTag;
     else if (myOperatingModeSelection == "antiisolatedtau")
       fOperationMode = kAntiTauTagIsolationOnly;
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'tauCandidateSelectionOnly', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
 
     // Histograms
     edm::Service<TFileService> fs;
@@ -383,6 +385,10 @@ namespace HPlus {
       increment(fTauFound);
       // Update event weight with the factorization coefficient
       fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(myTauPt, myTauEta));
+    }
+    // Handle result of tau candidate selection only
+    if (fOperationMode == kTauCandidateSelectionOnly) {
+      return (fCleanedTauCandidates.size() == 1);
     }
 
     // Check if taus have been found
