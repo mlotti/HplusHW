@@ -366,7 +366,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_s-channel_Winter10": {
+    "TToBLNu_s-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 0.99,
         "data": {
@@ -376,7 +376,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_t-channel_Winter10": {
+    "TToBLNu_t-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 63./3.,
         "data": {
@@ -386,7 +386,7 @@ datasets = {
             }
         },
     },
-    "TToBLNu_tW-channel_Winter10": {
+    "TToBLNu_tW-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 10.56,
         "data": {

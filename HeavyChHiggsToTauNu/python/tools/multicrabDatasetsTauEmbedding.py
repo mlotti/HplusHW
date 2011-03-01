@@ -215,7 +215,7 @@ def addTo(datasets):
             }
             })
 
-    datasets["DYJetsToLL_TuneZ2_Winter10"]["data"].update({
+    datasets["DYJetsToLL_M50_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v6": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6-356976479e058d2236b19259096d6dbe/USER",
