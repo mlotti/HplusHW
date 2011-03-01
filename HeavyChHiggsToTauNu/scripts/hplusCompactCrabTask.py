@@ -29,6 +29,12 @@ def main(opts, args):
             tar.add(f)
         tar.close()
 
+        # Keep share/crab.cfg
+        files.remove("share")
+        sharefiles = glob.glob(os.path.join("share", "*"))
+        sharefiles = filter(lambda x: not "crab.cfg" in x, sharefiles)
+        files.extend(sharefiles)
+
         # Delete the files just added to the archive
         for f in files:
             if os.path.isfile(f):

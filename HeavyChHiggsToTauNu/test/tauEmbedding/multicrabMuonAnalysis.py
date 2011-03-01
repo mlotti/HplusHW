@@ -6,74 +6,54 @@ multicrab = Multicrab("../crab_analysis.cfg", "muonAnalysis_cfg.py", lumiMaskDir
 
 aodDatasets = [
     # Data
-    "Mu_135821-144114",
-    "Mu_146240-147116",
-    "Mu_147196-149442",
-    # Signal MC (Fall10)
-##    "TT",
-    # Background MC (Fall10)
-    "QCD_Pt20_MuEnriched",
-    "QCD_Pt20to30_MuEnriched",
-    "QCD_Pt30to50_MuEnriched",
-    "QCD_Pt50to80_MuEnriched",
-    "QCD_Pt80to120_MuEnriched",
-    "QCD_Pt120to150_MuEnriched",
-    "QCD_Pt150_MuEnriched",
-    "DYJetsToLL", # Z+jets
-    "TToBLNu_s-channel",
-    "TToBLNu_t-channel",
-    "TToBLNu_tW-channel",
-    # Background MC (Summer10)
-##    "ZJets",
-##    "SingleTop_sChannel",
-##    "SingleTop_tChannel",
-##    "SingleTop_tWChannel",
+    "Mu_136035-144114_Dec22",
+    "Mu_146428-147116_Dec22",
+    "Mu_147196-149294_Dec22"
+    # Signal MC
+    # Background MC
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
+    "DYJetsToLL_TuneZ2_Winter10",
+    "TToBLNu_s-channel_TuneZ2_Winter10",
+    "TToBLNu_t-channel_TuneZ2_Winter10",
+    "TToBLNu_tW-channel_TuneZ2_Winter10",
     ]
 patDatasets = [
     # Signal MC
-##    "TT",
-    "TTJets", # Fall10
-    "WJets", # Summer10
-    # Background MC
-    "QCD_Pt30to50_Fall10",
-    "QCD_Pt50to80_Fall10",
-    "QCD_Pt80to120_Fall10",
-    "QCD_Pt120to170_Fall10",
-    "QCD_Pt170to300_Fall10",
+    "WJets_TuneZ2_Winter10",
+    "WJets_TuneD6T_Winter10",
+    "TTJets_TuneZ2_Winter10",
+    "TTJets_TuneD6T_Winter10",
 ]
 
 usePatTuples = True
 #usePatTuples = False
 
-aodDatasets = [
-    "Mu_146240-147116",
-    "Mu_147196-149442",
-    ]
-
-patDatasets = []
+#aodDatasets = []
+#patDatasets = []
 
 if not usePatTuples:
     aodDatasets.extend(patDatasets)
 if len(aodDatasets) > 0:
     multicrab.extendDatasets("AOD", aodDatasets)
 if usePatTuples and len(patDatasets) > 0:
-    multicrab.addDatasets("pattuple_v6", patDatasets)
+    multicrab.extendDatasets("pattuple_v9", patDatasets)
+multicrab.appendLineAll("GRID.maxtarballsize = 15")
+multicrab.appendLineAll("CMSSW.output_file = histograms.root")
 
-decaySeparate = ["TTJets",
-                 "WJets",
-                 "TToBLNu_s-channel",
-                 "TToBLNu_t-channel",
-                 "TToBLNu_tW-channel"]
+decaySeparate = [
+#    "WJets_TuneZ2_Winter10",
+#    "WJets_TuneD6T_Winter10",
+#    "TTJets_TuneZ2_Winter10",
+#    "TTJets_TuneD6T_Winter10",
+#    "TToBLNu_s-channel_TuneZ2_Winter10",
+#    "TToBLNu_t-channel_TuneZ2_Winter10",
+#    "TToBLNu_tW-channel_TuneZ2_Winter10",
+]
 numberOfJobs = {}
-if usePatTuples:
-    numberOfJobs.update({
-            "QCD_Pt30to50_Fall10": 5,
-            "QCD_Pt50to80_Fall10": 5,
-            "QCD_Pt80to120_Fall10": 5,
-            "QCD_Pt120to170_Fall10": 5,
-            "QCD_Pt170to300_Fall10": 5,
-            "WJets": 30
-    })
+#if usePatTuples:
+#    numberOfJobs.update({
+#            "WJets": 30
+#    })
 #else:
 #    numberOfJobs.update({
 #            "TTJets": 40
