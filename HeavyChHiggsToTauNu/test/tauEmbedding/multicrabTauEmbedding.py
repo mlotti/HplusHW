@@ -71,12 +71,12 @@ skimNjobs = {
     "TTJets_TuneZ2_Winter10": 400,
     "TTJets_TunedD6TWinter10": 400,
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 300,
-    "DYJetsToLL_TuneZ2_Winter10": 30,
+    "DYJetsToLL_M50_TuneZ2_Winter10": 30,
     "TToBLNu_s-channel_TuneZ2_Winter10": 100,
     "TToBLNu_t-channel_TuneZ2_Winter10": 100,
     "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
     }
-    
+   
 
 def modify(dataset):
     name = ""
@@ -131,5 +131,7 @@ if step in ["analysis", "analysisTau","signalAnalysis"]:
 else:
     multicrab.forEachDataset(modify)
 
-multicrab.createTasks()
-#multicrab.createTasks(configOnly=True)
+prefix = "multicrab_"+step
+
+multicrab.createTasks(prefix=prefix)
+#multicrab.createTasks(configOnly=True,prefix=prefix)
