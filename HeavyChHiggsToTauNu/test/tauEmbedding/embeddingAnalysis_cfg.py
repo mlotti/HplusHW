@@ -38,8 +38,10 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1_test1/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_8Ag.root"
         #"file:embedded_RECO.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"
   )
 )
 ################################################################################
@@ -141,6 +143,21 @@ process.genMetSequence = cms.Sequence(
 
 process.commonSequence *= process.genMetSequence
 
+
+# Select PFCands in 0.1 cone
+process.selectedPFCands = cms.EDProducer("HPlusPFCandCandViewDeltaRSelector",
+    src = cms.InputTag("particleFlow"),
+    refSrc = cms.InputTag("tauEmbeddingMuons"),
+    deltaR = cms.double(0.1)
+)
+process.selectedPFCandsORG = process.selectedPFCands.clone(
+    src = cms.InputTag("particleFlowORG")
+)
+
+process.commonSequence *= process.selectedPFCands
+process.commonSequence *= process.selectedPFCandsORG
+
+
 if debug:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     process.commonSequence *= process.printGenParticles
@@ -196,8 +213,13 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
+    pfCandSrc = cms.untracked.InputTag("particleFlowORG"),
+#    pfCandSrc = cms.untracked.InputTag("selectedPFCands"),
+    vertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
     genParticleOriginalSrc = cms.untracked.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.untracked.InputTag("genParticles"),
+    visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+#    visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
     mets = cms.untracked.PSet(
         Met = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
@@ -239,7 +261,7 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 process.analysisPath = cms.Path(
     process.commonSequence *
     analysis.getSequence() *
-    process.EmbeddingAnalyzer *
-    process.tauIdEmbeddingAnalyzer *
-    process.tauPtIdEmbeddingAnalyzer
+    process.EmbeddingAnalyzer# *
+#    process.tauIdEmbeddingAnalyzer *
+#    process.tauPtIdEmbeddingAnalyzer
 )
