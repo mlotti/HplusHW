@@ -39,6 +39,7 @@ namespace HPlus {
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fTauEmbeddingAnalysis(eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -46,6 +47,11 @@ namespace HPlus {
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
    
   {
+
+    if(iConfig.exists("tauEmbedding")) {
+      fTauEmbeddingAnalysis.init(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"));
+    }
+
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
@@ -74,6 +80,7 @@ namespace HPlus {
   // GenParticle analysis
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
+    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
 
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
@@ -111,6 +118,7 @@ namespace HPlus {
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
+    fTauEmbeddingAnalysis.fillAfterTauId();
 
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -126,6 +134,7 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
+    fTauEmbeddingAnalysis.fillAfterMetCut();
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
@@ -170,7 +179,7 @@ namespace HPlus {
     ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     if (!forwardJetData.passedEvent()) return false;
     increment(fForwardJetVetoCounter);
-
+    fTauEmbeddingAnalysis.fillEnd();
 
 
     // The following code is not correct, because there could be more than one tau jet

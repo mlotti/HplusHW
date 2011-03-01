@@ -118,6 +118,12 @@ if dataVersion.isData():
     process.commonSequence *= process.hplusPrescaleWeightProducer
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
+# Enable the tau embedding specific histograms
+if options.tauEmbeddingInput:
+    process.signalAnalysis.tauEmbedding = cms.untracked.PSet(
+        originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO")
+    )
+
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
