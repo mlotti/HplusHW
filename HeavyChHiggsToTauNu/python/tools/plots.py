@@ -20,6 +20,15 @@ _physicalToLogical = {
     "WJets_TuneZ2_Winter10": "WJets",
     "WJets_TuneZ2_Winter10_noPU": "WJets",
 
+    "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL_M50",
+    "DYJetsToLL_M50_TuneZ2_Winter10":          "DYJetsToLL_M50",
+    "DYJetsToLL_M10to50_TuneD6T_Winter10":          "DYJetsToLL_M10to50",
+    "DYJetsToLL_M50_TuneD6T_Winter10":          "DYJetsToLL_M50",
+
+    "TToBLNu_s-channel_TuneZ2_Winter10": "TToBLNu_s-channel",
+    "TToBLNu_t-channel_TuneZ2_Winter10": "TToBLNu_t-channel",
+    "TToBLNu_tW-channel_TuneZ2_Winter10": "TToBLNu_tW-channel",
+
     "QCD_Pt30to50_TuneZ2_Winter10":   "QCD_Pt30to50",
     "QCD_Pt50to80_TuneZ2_Winter10":   "QCD_Pt50to80",
     "QCD_Pt80to120_TuneZ2_Winter10":  "QCD_Pt80to120",
@@ -27,11 +36,11 @@ _physicalToLogical = {
     "QCD_Pt170to300_TuneZ2_Winter10": "QCD_Pt170to300",
     "QCD_Pt300to470_TuneZ2_Winter10": "QCD_Pt300to470",
 
-    "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL",
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": "QCD_Pt20_MuEnriched",
-    "TToBLNu_s-channel_TuneZ2_Winter10": "TToBLNu_s-channel",
-    "TToBLNu_t-channel_TuneZ2_Winter10": "TToBLNu_t-channel",
-    "TToBLNu_tW-channel_TuneZ2_Winter10": "TToBLNu_tW-channel",
+
+    "WW_TuneZ2_Winter10": "WW",
+    "WZ_TuneZ2_Winter10": "WZ",
+    "ZZ_TuneZ2_Winter10": "ZZ",
 }
 
 _datasetMerge = {
@@ -45,6 +54,13 @@ _datasetMerge = {
     "TToBLNu_s-channel": "SingleTop",
     "TToBLNu_t-channel": "SingleTop",
     "TToBLNu_tW-channel": "SingleTop",
+
+    "DYJetsToLL_M10to50": "DYJetsToLL",
+    "DYJetsToLL_M50": "DYJetsToLL",
+
+    "WW": "Diboson",
+    "WZ": "Diboson",
+    "ZZ": "Diboson",
 }
 
 _datasetOrder = [
@@ -59,6 +75,7 @@ _datasetOrder = [
     "WJets",
     "SingleTop",
     "TTJets",
+    "Diboson",
 ]
 
 # Map the logical dataset names to legend labels
@@ -103,7 +120,8 @@ _plotStyles = {
 
     "DYJetsToLL":            styles.dyStyle,
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
-    "SingleTop":             styles.stStyle
+    "SingleTop":             styles.stStyle,
+    "Diboson":               styles.dibStyle,
 }
 
 

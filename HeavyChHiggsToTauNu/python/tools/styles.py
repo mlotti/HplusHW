@@ -69,13 +69,14 @@ ttStyle = Style(4, ROOT.kBlue)
 dyStyle = Style(5, ROOT.kRed+1)
 #dyStyle = Style(12, ROOT.kBlue-3)
 stStyle = Style(2, ROOT.kMagenta)
+dibStyle = Style(6, ROOT.kCyan)
 
 styles = [
     Style(4, ROOT.kBlue),
     Style(5, ROOT.kRed),
     wStyle,
     stStyle,
-    Style(6, ROOT.kCyan),
+    dibStyle,
     Style(7, ROOT.kYellow+2),
     Style(8, ROOT.kOrange+9),
     Style(9, ROOT.kOrange+3),
