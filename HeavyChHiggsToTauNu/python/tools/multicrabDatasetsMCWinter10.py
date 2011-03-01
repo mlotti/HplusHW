@@ -267,6 +267,21 @@ datasets = {
         "crossSection": 24640,
         "data": {
             "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/AODSIM",
+                "number_of_jobs": 1500, # Adjusted for PATtuple file
+                                        # size. CRAB doesn't really
+                                        # create this many jobs, but
+                                        # the large number seems to be
+                                        # needed to get enough jobs
+                "use_server": 1,
+            },
+        },
+    },
+    "WJets_TuneZ2_Winter10_PU2011": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 24640,
+        "data": {
+            "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2011Flat_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 1500, # Adjusted for PATtuple file
                                         # size. CRAB doesn't really
