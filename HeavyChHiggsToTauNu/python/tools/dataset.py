@@ -688,6 +688,8 @@ class Dataset:
 
             if dataVersion != None:
                 self.dataVersion = dataVersion.GetTitle()
+            elif "luminosity" in self.info:
+                self.dataVersion = "data"
 
         self._isData = "data" in self.dataVersion
 
