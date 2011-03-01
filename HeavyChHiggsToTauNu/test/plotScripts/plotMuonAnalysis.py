@@ -129,9 +129,6 @@ else:
 
 plots.mergeRenameReorderForDataMC(datasets)
 
-datasetsQCD = datasets.shallowCopy()
-datasetsQCD.selectAndReorder(["QCD_Pt20_MuEnriched"])
-
 styleGenerator = styles.generator(fill=True)
 wmunu = ["WJets", "TTJets", "SingleTop"]
 if WdecaySeparate:
@@ -158,10 +155,13 @@ datasets.selectAndReorder(
         "DYJetsToLL",
         "QCD_Pt20_MuEnriched"
 ])
+datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
+
 
 normalizeToLumi = None
 if not datasets.hasDataset("Data"):
     normalizeToLumi = 36
+normalizeToLumi = 36
 
 #textDefaults.setCmsPreliminaryDefaults()
 #histograms.textDefaults.setEnergyDefaults(x=0.17)
@@ -649,6 +649,7 @@ mainCounterMap = {
     }
 
 latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.0f"))
+#latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.0f", valueOnly=True))
 
 print "============================================================"
 print "Main counter (%s)" % eventCounter.getNormalizationString()
@@ -714,3 +715,6 @@ for cname in ["TTJets/(TTJets+WJets)", "TT+W purity", "QCD/MCsum"]:
     latexFormat.setColumnFormat(counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True), name=cname)
 print tableRatio.format(latexFormat)
 
+#tablettw = counter.CounterTable()
+#tablettw.appendColumn(ttwSum(table))
+#print tablettw.format(latexFormat)
