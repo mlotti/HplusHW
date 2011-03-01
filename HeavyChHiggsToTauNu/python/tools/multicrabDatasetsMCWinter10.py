@@ -143,8 +143,10 @@ datasets = {
                 "number_of_jobs": 1
             },
             "pattuple_v9": {
-                "fallback": "pattuple_v9_old"
-            }
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_GEN-SIM-RECODEBUG_pattuple_v9b-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 15
+            },
         },
     },
     "QCD_Pt80to120_TuneZ2_Winter10": {
