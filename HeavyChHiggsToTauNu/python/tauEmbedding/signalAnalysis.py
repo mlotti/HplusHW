@@ -7,9 +7,8 @@ def customiseParamForTauEmbedding(param):
     param.trigger.hltMetCut = -1 # disable
 
     # Use PatJets and PFMet directly
-    param.jetSelection.src.setModuleLabel("selectedPatJets") # these are really AK5PF
-    param.jetSelection.src_met.setModuleLabel("pfMet") # no PAT object at the moment
-    param.MET.src.setModuleLabel("pfMet")
+    param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
+    param.changeMetCollection(moduleLabel="pfMet") # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
