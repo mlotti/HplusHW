@@ -21,6 +21,10 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
+# Temporary switch for disabling prescales (produces tons of unnecessary output
+# with Btau data where no prescale is needed at the moment) 
+disablePrescales = True
+
 ################################################################################
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -61,7 +65,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 # qcdMeasurementMethod3 module
@@ -72,12 +76,13 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-# Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
-#param.setAllTauSelectionOperatingMode('standard')
+# Set tau selection mode (options: 'standard', tauCandidateSelectionOnly)
+# other options (use not recommended here): 'factorized', 'antitautag', 'antiisolatedtau'
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 #param.setAllTauSelectionOperatingMode('factorized')
 #param.setAllTauSelectionOperatingMode('antitautag')
-param.setAllTauSelectionOperatingMode('antiisolatedtau')
-### Lauri -> input here new method tag
+#param.setAllTauSelectionOperatingMode('antiisolatedtau')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
@@ -112,7 +117,7 @@ process.qcdMeasurementMethod3 = cms.EDProducer("HPlusQCDMeasurementByMetFactoris
 )
 
 # Prescale fetching done automatically for data
-if dataVersion.isData():
+if dataVersion.isData() and not disablePrescales:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
