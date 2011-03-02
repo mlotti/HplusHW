@@ -67,7 +67,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 
 ################################################################################
@@ -117,6 +117,12 @@ if dataVersion.isData():
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
+
+# Enable the tau embedding specific histograms
+if options.tauEmbeddingInput:
+    process.signalAnalysis.tauEmbedding = cms.untracked.PSet(
+        originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO")
+    )
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger

@@ -24,6 +24,13 @@ multicrab.extendDatasets(
 #        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4
 
+        # Data (QuadJet)
+#        "JetMETTau_QuadJet_136035-141881_Dec22", # HLT_QuadJet15U
+#        "JetMET_QuadJet_141956-144114_Dec22",    # HLT_QuadJet15U
+#        "Jet_QuadJet_146428-147116_Dec22",       # HLT_QuadJet25U
+#        "MultiJet_QuadJet_147196-148058_Dec22",  # HLT_QuadJet25U_v2
+#        "MultiJet_QuadJet_148819-149442_Dec22",  # HLT_QuadJet25U_v3
+
         # Data (Jet)
 #        "JetMETTau_Jet_136035-141881_Dec22", # HLT_Jet30U
 #        "JetMET_141956-144114_Dec22",        # HLT_Jet30U
@@ -49,12 +56,21 @@ multicrab.extendDatasets(
 #        "WJets_TuneD6T_Winter10",
 #        "WJets_TuneZ2_Winter10",
 #        "WJets_TuneZ2_Winter10_noPU",
+#        "DYJetsToLL_M10to50_TuneD6T_Winter10",
+#        "DYJetsToLL_M50_TuneD6T_Winter10",
+#        "DYJetsToLL_M50_TuneZ2_Winter10",
+#        "TToBLNu_s-channel_Winter10",
+#        "TToBLNu_t-channel_Winter10",
+#        "TToBLNu_tW-channel_Winter10"
 #        "W2Jets_ptW0to100_TuneZ2_Winter10",
 #        "W2Jets_ptW100to300_TuneZ2_Winter10",
 #        "W3Jets_ptW0to100_TuneZ2_Winter10",
 #        "W3Jets_ptW100to300_TuneZ2_Winter10",
 #        "W4Jets_ptW0to100_TuneZ2_Winter10",
 #        "W4Jets_ptW100to300_TuneZ2_Winter10",
+#        "WW_TuneZ2_Winter10",
+#        "WZ_TuneZ2_Winter10",
+#        "ZZ_TuneZ2_Winter10",
           
 ########
 #
@@ -114,7 +130,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v9_1"
+    name += "_pattuple_v9"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD

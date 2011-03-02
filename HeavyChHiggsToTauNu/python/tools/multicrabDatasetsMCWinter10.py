@@ -84,6 +84,36 @@ datasets = {
     },
 
     # QCD Winter10
+    "QCD_Pt0to5_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 4.844e+10*0.983,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_0to5_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt5to15_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 3.675e+10,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_5to15_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt15to30_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 8.159e+08,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_15to30_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 480, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "QCD_Pt30to50_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 5.312e+07,
@@ -104,14 +134,24 @@ datasets = {
         "dataVersion":  "39Xredigi",
         "crossSection": 6.359e+06,
         "data": {
-            "AOD": {
-                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 450,
+            "RECO": {
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/GEN-SIM-RECODEBUG",
+                "number_of_jobs": 300, # Adjuested for PATtuple file size
             },
-            "pattuple_v9": {
+            "AOD": {
+                "fallback": "RECO"
+                #"datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/AODSIM",
+                #"number_of_jobs": 200,
+            },
+            "pattuple_v9_old": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
                 "number_of_jobs": 1
+            },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_GEN-SIM-RECODEBUG_pattuple_v9b-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 15
             },
         },
     },
@@ -239,6 +279,22 @@ datasets = {
         "tauIDFactorizationMap": "FactorizationMaphistograms_WJets_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v2/AODSIM",
+                "number_of_jobs": 1500, # Adjusted for PATtuple file
+                                        # size. CRAB doesn't really
+                                        # create this many jobs, but
+                                        # the large number seems to be
+                                        # needed to get enough jobs
+                "use_server": 1,
+            },
+        },
+    },
+    "WJets_TuneZ2_Winter10_PU2011": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 24640,
+        "tauIDFactorizationMap": "FactorizationMaphistograms_WJets_TuneZ2_Winter10_cfi",
+        "data": {
+            "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2011Flat_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 1500, # Adjusted for PATtuple file
                                         # size. CRAB doesn't really
@@ -267,6 +323,76 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9-c2f22ab9ac43296d989acccdef834e2a/USER",
                 "number_of_jobs": 60
+            },
+        },
+    },
+    "DYJetsToLL_M10to50_TuneD6T_Winter10": { # Z+jets
+        "dataVersion": "39Xredigi",
+        "crossSection": 310,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneD6T_M-10To50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 15, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "DYJetsToLL_M50_TuneD6T_Winter10": { # Z+jets
+        "dataVersion": "39Xredigi",
+        "crossSection": 2289,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneD6T_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "DYJetsToLL_M50_TuneZ2_Winter10": { # Z+jets
+        "dataVersion": "39Xredigi",
+        "crossSection": 2321,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "DYJetsToLL_M50_TuneZ2_Winter10_noPU": { # Z+jets
+        "dataVersion":" 39Xredigi",
+        "crossSection": 2321,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-START39_V8-v2/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "TToBLNu_s-channel_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 0.99,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 60, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "TToBLNu_t-channel_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 63./3.,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 60, # Adjusted for PATtuple file size
+            }
+        },
+    },
+    "TToBLNu_tW-channel_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 10.56,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 70, # Adjusted for PATtuple file size
             },
         },
     },
@@ -362,6 +488,37 @@ datasets = {
         },
     },
 
+    # Diboson
+    "WW_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 27.79,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "WZ_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 10.4,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "ZZ_TuneZ2_Winter10": {
+        "dataVersion": "39Xredigi",
+        "crossSection": 4.297,
+        "data": {
+            "AOD": {
+                "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
+            },
+        },
+    },
 
     # Backgrounds for electroweak background measurement (Fall10)
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": {
@@ -372,56 +529,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
                 "number_of_jobs": 200,  # Adjusted for PAT on the fly
             }
-        },
-    },
-    "DYJetsToLL_TuneZ2_Winter10": { # Z+jets
-        "dataVersion": "39Xredigi",
-        "crossSection": 2321,
-        "data": {
-            "AOD": {
-                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 15,
-            }
-        },
-    },
-    "DYJetsToLL_TuneZ2_Winter10_noPU": { # Z+jets
-        "dataVersion":" 39Xredigi",
-        "crossSection": 2321,
-        "data": {
-            "AOD": {
-                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-START39_V8-v2/AODSIM",
-                "number_of_jobs": 15,
-            }
-        },
-    },
-    "TToBLNu_s-channel_TuneZ2_Winter10": {
-        "dataVersion": "39Xredigi",
-        "crossSection": 0.99,
-        "data": {
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            }
-        },
-    },
-    "TToBLNu_t-channel_TuneZ2_Winter10": {
-        "dataVersion": "39Xredigi",
-        "crossSection": 63./3.,
-        "data": {
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            }
-        },
-    },
-    "TToBLNu_tW-channel_TuneZ2_Winter10": {
-        "dataVersion": "39Xredigi",
-        "crossSection": 10.56,
-        "data": {
-            "AOD": {
-                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
-                "number_of_jobs": 10, # Adjusted for PAT on the fly
-            },
         },
     },
 }

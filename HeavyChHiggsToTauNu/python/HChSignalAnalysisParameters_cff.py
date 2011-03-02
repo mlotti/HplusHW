@@ -214,3 +214,18 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
                      preSequence = commonSequence,
                      additionalCounters = additionalCounters)
 
+
+def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):
+    for tag in inputTags:
+        if moduleLabel != None:
+            tag.setModuleLabel(moduleLabel)
+        if instanceLabel != None:
+            tag.setProductInstanceLabel(instanceLabel)
+        if processName != None:
+            tag.setProcessName(processName)
+
+def changeJetCollection(**kwargs):
+    _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
+
+def changeMetCollection(**kwargs):
+    _changeCollection([jetSelection.src_met, MET.src, fakeMETVeto.src, forwardJetVeto.src_met], **kwargs)

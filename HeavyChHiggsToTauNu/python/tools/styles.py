@@ -66,15 +66,17 @@ qcdStyle = Style(7, ROOT.kYellow+1)
 wStyle = Style(1, ROOT.kGreen+2)
 #ttStyle = Style(5, ROOT.kRed+1)
 ttStyle = Style(4, ROOT.kBlue)
-dyStyle = Style(12, ROOT.kBlue-3)
+dyStyle = Style(5, ROOT.kRed+1)
+#dyStyle = Style(12, ROOT.kBlue-3)
 stStyle = Style(2, ROOT.kMagenta)
+dibStyle = Style(6, ROOT.kCyan)
 
 styles = [
-    signal90Style,
+    Style(4, ROOT.kBlue),
     Style(5, ROOT.kRed),
     wStyle,
     stStyle,
-    Style(6, ROOT.kCyan),
+    dibStyle,
     Style(7, ROOT.kYellow+2),
     Style(8, ROOT.kOrange+9),
     Style(9, ROOT.kOrange+3),
