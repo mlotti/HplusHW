@@ -14,7 +14,11 @@ namespace edm {
   class EventSetup;
 }
 namespace reco {
-  class Candidate;
+  class MET;
+  class Muon;
+}
+namespace pat {
+  class Tau;
 }
 
 class TFileDirectory;
@@ -34,7 +38,7 @@ namespace HPlus {
       void book(TFileDirectory& fd, const std::string& prefix);
 
       // Fill the histograms (add more objects to arguments if necessary)
-      void fill(double weight, const reco::Candidate& originalMet);
+      void fill(double weight, const reco::MET& originalMet);
 
     private:
       // Histograms
@@ -51,6 +55,8 @@ namespace HPlus {
 
     // Read the objects from the event and fill the fBegin
     void beginEvent(const edm::Event&, const edm::EventSetup&);
+
+    void setSelectedTau(const edm::Ptr<pat::Tau>& tau);
 
     // Fill the rest of the histogram sets
     void fillAfterTauId();
@@ -70,7 +76,8 @@ namespace HPlus {
     Histograms fEnd;
 
     // Holders of the objects
-    edm::Ptr<reco::Candidate> fOriginalMet;
+    edm::Ptr<reco::MET> fOriginalMet;
+    edm::Ptr<pat::Tau> fSelectedTau;
 
     bool fEnabled;
   };

@@ -9,7 +9,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/METReco/interface/MET.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 namespace HPlus {
   TauEmbeddingAnalysis::Histograms::Histograms():
@@ -21,7 +21,7 @@ namespace HPlus {
     hOriginalMet = makeTH<TH1F>(fd, (prefix+"_originalMet").c_str(), "Original MET", 400, 0, 400);
   }
 
-  void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::Candidate& originalMet) {
+  void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet) {
     hOriginalMet->Fill(originalMet.et(), weight);
   }
 
@@ -53,7 +53,13 @@ namespace HPlus {
     iEvent.getByLabel(fOriginalMetSrc, hOriginalMet);
     fOriginalMet = hOriginalMet->ptrAt(0);
 
+    fSelectedTau = edm::Ptr<pat::Tau>();
+
     fBegin.fill(fEventWeight.getWeight(), *fOriginalMet);    
+  }
+
+  void TauEmbeddingAnalysis::setSelectedTau(const edm::Ptr<pat::Tau>& tau) {
+    fSelectedTau = tau;
   }
 
   void TauEmbeddingAnalysis::fillAfterTauId() {
