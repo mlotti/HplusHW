@@ -24,7 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True,
+           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
@@ -275,6 +275,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     process.patMuons.usePV = False
     process.patMuons.embedTrack = True
 
+    if doPatMuonPFIsolation:
+        addPFMuonIsolation(process, process.patMuons, verbose=True)
+
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
@@ -458,3 +461,110 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         process.patSequence *= process.patMuonTauSequence
     
     return (dataPatSequence, counters)
+
+
+### The functions below are taken from
+### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
+### revision 1.7
+
+###################a#################################################
+from PhysicsTools.PFCandProducer.Isolation.tools_cfi import isoDepositReplace
+
+def addSelectedPFlowParticle(process,verbose=False):
+    if verbose:
+        print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
+    process.load("PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff")
+    process.load("PhysicsTools.PFCandProducer.pfNoPileUp_cff")
+    process.pfCandidateSelectionByType = cms.Sequence(
+        process.pfNoPileUpSequence *
+        ( process.pfAllNeutralHadrons +
+          process.pfAllChargedHadrons +
+          process.pfAllPhotons
+          )  +
+        process.pfAllMuons +
+        process.pfAllElectrons
+        )
+    process.pfPileUp.Enable = True # enable pile-up filtering
+    process.pfPileUp.Vertices = "offlinePrimaryVertices" # use vertices w/o BS
+    process.pfAllMuons.src = "particleFlow"
+    process.pfAllElectrons.src = "particleFlow"
+    
+    process.patDefaultSequence.replace(process.patCandidates,
+                                       process.pfCandidateSelectionByType+
+                                       process.patCandidates)
+
+def addPFMuonIsolation(process,module,postfix="",verbose=False):
+    if verbose:
+        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
+
+    if not hasattr(process, "pfCandidateSelectionByType"):
+        addSelectedPFlowParticle(process,verbose=verbose)
+        
+    #setup correct src of isolated object
+    setattr(process,"isoDepMuonWithCharged"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllChargedHadrons'))
+    setattr(process,"isoDepMuonWithNeutral"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllNeutralHadrons'))
+    setattr(process,"isoDepMuonWithPhotons"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllPhotons'))
+
+    #compute isolation values form deposits
+    process.load("PhysicsTools.PFCandProducer.Isolation.pfMuonIsolationFromDeposits_cff")
+    if postfix!="":
+        setattr(process,"isoValMuonWithCharged"+postfix,
+                process.isoValMuonWithCharged.clone())
+        getattr(process,"isoValMuonWithCharged"+postfix).deposits.src="isoDepMuonWithCharged"+postfix
+        setattr(process,"isoValMuonWithNeutral"+postfix,
+                process.isoValMuonWithNeutral.clone())
+        getattr(process,"isoValMuonWithNeutral"+postfix).deposits.src="isoDepMuonWithNeutral"+postfix
+        setattr(process,"isoValMuonWithPhotons"+postfix,
+                process.isoValMuonWithPhotons.clone())
+        getattr(process,"isoValMuonWithPhotons"+postfix).deposits.src="isoDepMuonWithPhotons"+postfix
+
+    for name in ["Charged", "Neutral", "Photons"]:
+        m = getattr(process, "isoValMuonWith"+name+postfix).clone()
+        m.deposits.mode = "count"
+        setattr(process, "isoValCountMuonWith"+name+postfix, m)
+        
+    setattr(process,"patMuonIsolationFromDepositsSequence"+postfix,
+            cms.Sequence(getattr(process,"isoValMuonWithCharged"+postfix) +
+                         getattr(process,"isoValMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValMuonWithPhotons"+postfix) +
+                         getattr(process,"isoValCountMuonWithCharged"+postfix) +
+                         getattr(process,"isoValCountMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValCountMuonWithPhotons"+postfix)                         )
+            )
+
+    setattr(process,"patMuonIsoDepositsSequence"+postfix,
+            cms.Sequence(getattr(process,"isoDepMuonWithCharged"+postfix) +
+                         getattr(process,"isoDepMuonWithNeutral"+postfix) +
+                         getattr(process,"isoDepMuonWithPhotons"+postfix)
+                         )
+            )
+    setattr(process,"patMuonIsolationSequence"+postfix,
+            cms.Sequence(getattr(process,"patMuonIsoDepositsSequence"+postfix) +
+                         getattr(process,"patMuonIsolationFromDepositsSequence"+postfix)
+                         )
+            )
+
+    module.isoDeposits = cms.PSet(
+        pfChargedHadrons = cms.InputTag("isoDepMuonWithCharged"+postfix),
+        pfNeutralHadrons = cms.InputTag("isoDepMuonWithNeutral"+postfix),
+        pfPhotons = cms.InputTag("isoDepMuonWithPhotons"+postfix)
+        )
+    module.isolationValues = cms.PSet(
+        pfChargedHadrons = cms.InputTag("isoValMuonWithCharged"+postfix),
+        pfNeutralHadrons = cms.InputTag("isoValMuonWithNeutral"+postfix),
+        pfPhotons = cms.InputTag("isoValMuonWithPhotons"+postfix),
+        pfChargedHadronsCount = cms.InputTag("isoValCountMuontWithCharged"+postfix),
+        pfNeutralHadronsCount = cms.InputTag("isoValCountMuonWithNeutral"+postfix),
+        pfPhotonsCount = cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+        )
+    
+    process.patDefaultSequence.replace(module,
+                                       getattr(process,"patMuonIsolationSequence"+postfix)+
+                                       module
+                                       )

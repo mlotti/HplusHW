@@ -71,19 +71,26 @@ dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = Fals
 
 maxVertexZ = 1.0
 
-trackIso = "isolationR03().sumPt"
-caloIso = "isolationR03().emEt+isolationR03().hadEt"
-sumIso = "%s+%s" % (trackIso, caloIso)
-
-trackIsoRel = "(%s)/pt" % trackIso
-caloIsoRel = "(%s)/pt" % caloIso
-sumIsoRel = "(%s)/pt" % sumIso
+# PfAllParticleIso=3,PfChargedHadronIso=4, PfNeutralHadronIso=5, PfGammaIso=6, 
+isolations = {
+    # Detector iso
+    "trackIso": "isolationR03().sumPt",
+    "caloIso": "isolationR03().emEt+isolationR03().hadEt",
+    # 'standard' PF isolation
+    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
+    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
+    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+}
+isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
+isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
+for key, value in isolations.items():
+    isolations[key+"Rel"] = "(%s)/pt" % value
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetId = "emEnergyFraction() > 0.01 && jetID().n90Hits > 1 && jetID().fHPD < 0.98"
 jetIdPF = "numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 
-muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+sumIsoRel+" < 0.2"
+muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+isolations["sumIsoRel"]+" < 0.2"
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
 zMassVetoMuons ="isGlobalMuon && pt > 20. && abs(eta) < 2.5"
 zMassVeto = "76 < mass() && mass < 106"
@@ -106,6 +113,7 @@ met = cms.InputTag(pfMET)
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.options.wantSummary = cms.untracked.bool(True)
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.categories.append("TauIsolationSelector")
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
@@ -116,14 +124,15 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
 patArgs = {"doPatTrigger": False,
-           "doPatTaus": False,
+#           "doPatTaus": False,
            "doPatElectronID": False,
            "doTauHLTMatching": False,
+           "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 
 # Add configuration information to histograms.root
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
@@ -134,16 +143,18 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
 process.commonSequence *= process.firstPrimaryVertex
 
 # Define the histograms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 histoPt = Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
 histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="eta")
 histoPhi = Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, description="phi")
-histoTrackIso = Histo("trackIso", trackIso, min=0, max=100.0, nbins=100, description="TrackIso")
-histoCaloIso = Histo("caloIso", caloIso, min=0, max=100.0, nbins=100, description="CaloIso")
-histoSumIso = Histo("sumIso", sumIso, min=0, max=100.0, nbins=100, description="SumIso")
-histoTrackIsoRel = Histo("trackIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="TrackIsoRel")
-histoCaloIsoRel = Histo("caloIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="CaloIsoRel")
-histoSumIsoRel = Histo("sumIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="SumIsoRel")
+
+histoIsos = {}
+for name, value in isolations.iteritems():
+    h = None
+    if "IsoRel" in name:
+        h = Histo(name, value, min=0, max=0.5, nbins=100, description=name)
+    else:
+        h = Histo(name, value, min=0, max=100.0, nbins=100, description=name)
+    histoIsos[name] = h
 
 histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
@@ -155,7 +166,7 @@ histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daug
                             min=0, max=400, nbins=400, description="W transverse mass")
 histoZMass = Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoPhi, histoTrackIso, histoCaloIso, histoSumIso, histoTrackIsoRel, histoCaloIsoRel, histoSumIsoRel]
+histosBeginning = [histoPt, histoEta, histoPhi] + histoIsos.values()
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
 
 histosJet = [histoPt, histoEta, histoPhi]
@@ -167,16 +178,17 @@ if dataVersion.isData():
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
     def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False,
-                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False):
+                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False, doIsolationWithTau=False):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
         self.doJetId = doJetId
+        self.doIsolationWithTau = doIsolationWithTau
         self._ptCut = ptCutString % muonPtCut
         self._metCut = metCutString % metCut
         self._njets = njets
         self._jets = jets
-        self._isolationCut = "%s < %f" % (sumIsoRel, muonIsolationCut)
+        self._isolationCut = "%s < %f" % (isolations["sumIsoRel"], muonIsolationCut)
 
         self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=additionalCounters)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
@@ -280,7 +292,7 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoSumIsoRel.pset().clone(cut=cms.untracked.string(self._isolationCut)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIsos["sumIsoRel"].pset().clone(cut=cms.untracked.string(self._isolationCut)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
@@ -484,7 +496,24 @@ class MuonAnalysis:
 
     def muonIsolationCustom(self, postfix, cut):
         name = "MuonIsolation"+postfix
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (sumIsoRel, cut))
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (isolations["sumIsoRel"], cut))
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonIsolationWithTau(self):
+        name = "MuonIsolationWithTau"
+        self.selectedMuons = self.analysis.addAnalysisModule(
+            name,
+            selector = cms.EDProducer("HPlusCandViewPtrTauIsolationSelector",
+                                      candSrc = self.selectedMuons,
+                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
+                                      isolationDiscriminator = cms.string("byIsolation"),
+                                      deltaR = cms.double(0.15),
+                                      minCands = cms.uint32(1)),
+            filter = makeCountFilter(cms.InputTag("dummy"), 1),
+            counter=True).getSelectorInputTag()
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -640,6 +669,8 @@ class MuonAnalysis:
         self.muonQuality()
         self.muonImpactParameter()
         self.muonVertexDiff()
+        if self.doIsolationWithTau:
+            self.muonIsolationWithTau()
         name = self.muonLargestPt()
 
         if not self.afterOtherCuts:
@@ -719,11 +750,14 @@ def createAnalysis(name, postfix="", **kwargs):
     getattr(a, name)()
     #a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
     #getattr(a, name)()
+    if not "doIsolationWithTau" in kwargs:
+        a = MuonAnalysis(process, prefix=name+postfix+"IsoTau", doIsolationWithTau=True, **kwargs)
+        getattr(a, name)()
     a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
     getattr(a, name)()
 
 def createAnalysis2(**kwargs):
-    createAnalysis("topMuJetRefMet", **kwargs)
+    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
     postfix = ""
     if "postfix" in kwargs:
