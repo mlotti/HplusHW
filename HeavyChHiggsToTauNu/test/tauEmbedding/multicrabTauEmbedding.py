@@ -5,11 +5,11 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-step = "generation"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v6_2",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
