@@ -157,7 +157,7 @@ for name, value in isolations.iteritems():
         h = Histo(name, value, min=0, max=100.0, nbins=100, description=name)
     histoIsos[name] = h
 
-histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
+histoDB = Histo("trackDB", "dB()", min=-0.1, max=0.1, nbins=50, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
 histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=100, description="Track norm chi2")
 
