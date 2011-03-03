@@ -71,8 +71,11 @@ void HPlusCandViewPtrTauIsolationSelector::produce(edm::Event& iEvent, const edm
         found = htau->ptrAt(iTau);
       }
     }
-    if(found.get() == 0 || maxDr > this->maxDR)
-      throw cms::Exception("LogicError") << "The assumption that there is a PFTau object for each muon too, failed with DR " << maxDr << std::endl;
+    if(found.get() == 0 || maxDr > this->maxDR) {
+      edm::LogWarning("TauIsolationSelector") << "The assumption that there is a PFTau object for each muon too, failed with DR " << maxDr << std::endl;
+      //throw cms::Exception("LogicError") << "The assumption that there is a PFTau object for each muon too, failed with DR " << maxDr << std::endl;
+      continue;
+    }
     if(found->tauID(tauDiscriminator) < 0.5)
       continue;
 
