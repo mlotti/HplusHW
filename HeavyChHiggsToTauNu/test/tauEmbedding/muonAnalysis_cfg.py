@@ -125,6 +125,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
 patArgs = {"doPatTrigger": False,
 #           "doPatTaus": False,
+           "doHChTauDiscriminators": False,
            "doPatElectronID": False,
            "doTauHLTMatching": False,
            "doPatMuonPFIsolation": True,

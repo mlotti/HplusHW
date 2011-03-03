@@ -23,7 +23,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
+def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
            doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
@@ -35,7 +35,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
-    if doPatTaus:
+    if doPatTaus and doHChTauDiscriminators:
 	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
 
@@ -46,7 +46,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
-	PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
@@ -56,7 +56,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
             max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
         )
-
+        
         # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
 
@@ -203,9 +203,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # process.patTaus.embedIsolationPFGammaCands = True
 
     if doPatTaus:
-        classicTauIDSources.extend( HChTaus.HChTauIDSources )
-        classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
-	classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
+        if doHChTauDiscriminators:
+            classicTauIDSources.extend( HChTaus.HChTauIDSources )
+            classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
+            classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
 
         if doPatCalo:
             addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
@@ -226,12 +227,17 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          typeLabel = "PFTau")
         process.patTausHpsPFTau.isoDeposits = cms.PSet()
 
-        addTauCollection(process,cms.InputTag('hpsTancTaus'),
-                         algoLabel = "hpsTanc",
-                         typeLabel = "PFTau")
-        process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
-        # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
-        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+        # Side effect because HPS is not needed for muon analysis,
+        # which is the use case for doHchTauDiscriminators. To do it
+        # correctly one shouhd disentangle the hpsTanc imports above
+        # from the discriminators.
+        if doHChTauDiscriminators:
+            addTauCollection(process,cms.InputTag('hpsTancTaus'),
+                             algoLabel = "hpsTanc",
+                             typeLabel = "PFTau")
+            process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+            # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
+            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
 
         # Add visible taus    
         if dataVersion.isMC():
