@@ -172,6 +172,26 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+def _createRatio(rootHisto1, rootHisto2, ytitle):
+    ratio = rootHisto1.Clone()
+    ratio.Divide(rootHisto2)
+    styles.getDataStyle().apply(ratio)
+    ratio.GetYaxis().SetTitle(ytitle)
+    return ratio
+
+def _createRatioLine(xmin, xmax):
+    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
+    line.SetLineColor(ROOT.kBlack)
+    line.SetLineWidth(2)
+    line.SetLineStyle(3)
+    return line
+
+def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
+    coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
+    coverPad.SetBorderMode(0)
+    return coverPad
+ 
+
 class PlotBase:
     """Base class for plots."""
 
@@ -259,7 +279,6 @@ class PlotSameBase(PlotBase):
         self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
-
 class DataMCPlot(PlotSameBase):
     """Class to create data-MC comparison plot."""
 
@@ -299,11 +318,9 @@ class DataMCPlot(PlotSameBase):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
 
-        self.ratio = self.histoMgr.getHisto("Data").getRootHisto().Clone()
-        self.ratio.Divide(self.histoMgr.getHisto("StackedMC").getSumRootHisto())
-        styles.getDataStyle().apply(self.ratio)
-        self.ratio.GetYaxis().SetTitle("Data/MC")
-        
+        self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
+                                  self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                  "Data/MC")
 
         self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
         self.frame = self.cf.frame
@@ -314,12 +331,7 @@ class DataMCPlot(PlotSameBase):
         if hasattr(self, "ratio"):
             self.cf.canvas.cd(2)
 
-            self.line = ROOT.TGraph(2, 
-                                    array.array("d", [self.cf.frame.getXmin(), self.cf.frame.getXmax()]),
-                                    array.array("d", [1.0, 1.0]))
-            self.line.SetLineColor(ROOT.kBlack)
-            self.line.SetLineWidth(2)
-            self.line.SetLineStyle(3)
+            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
             self.line.Draw("L")
 
             self.ratio.Draw("EP same")
@@ -329,11 +341,58 @@ class DataMCPlot(PlotSameBase):
             # label of the y-axis of the lower pad. Then move the
             # upper pad on top, so that the lowest label of the y-axis
             # of it is shown
-            self.stupidPad = ROOT.TPad("stupidpad", "stupidpad", 0.065, 0.285, 0.165, 0.33)
-            #self.stupidPad.SetFillColor(ROOT.kRed)
-            self.stupidPad.SetBorderMode(0)
-            self.stupidPad.Draw()
+            self.coverPad = _createCoverPad()
+            self.coverPad.Draw()
 
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+class ComparisonPlot(PlotBase):
+    """Class to create comparison plots of two quantities."""
+
+    def __init__(self, datasetRootHisto1, datasetRootHisto2):
+        """Constructor.
+
+        Arguments:
+        datasetRootHisto1
+        datasetRootHisto2
+
+        ratio is datasetRootHisto1/datasetRootHisto2
+        """
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
+
+    def createFrame(self, filename, doRatio=True, **kwargs):
+        if not doRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            histos = self.histoMgr.getHistos()
+            self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
+                                      "%s/%s" % (histos[0].getName(), histos[1].getName()))
+
+            self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
+            self.frame = self.cf.frame
+            self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+    def draw(self):
+        PlotBase.draw(self)
+        if hasattr(self, "ratio"):
+            self.cf.canvas.cd(2)
+
+            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
+            self.line.Draw("L")
+
+            self.ratio.Draw("EP same")
+            self.cf.canvas.cd()
+
+            # Create an empty, white-colored pad to hide the topmost
+            # label of the y-axis of the lower pad. Then move the
+            # upper pad on top, so that the lowest label of the y-axis
+            # of it is shown
+            self.coverPad = _createCoverPad()
+            self.coverPad.Draw()
+
+            self.cf.canvas.cd(1)
+            self.cf.pad1.Pop() # Move the first pad on top
+
+
+        
