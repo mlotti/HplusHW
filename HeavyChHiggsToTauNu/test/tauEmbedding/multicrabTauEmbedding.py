@@ -5,11 +5,11 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-step = "generation"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v6_2",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
@@ -39,7 +39,7 @@ datasets = [
     "WJets_TuneD6T_Winter10",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
-    "DYJetsToLL_TuneZ2_Winter10",
+    "DYJetsToLL_M50_TuneZ2_Winter10",
     "TToBLNu_s-channel_TuneZ2_Winter10",
     "TToBLNu_t-channel_TuneZ2_Winter10",
     "TToBLNu_tW-channel_TuneZ2_Winter10",
