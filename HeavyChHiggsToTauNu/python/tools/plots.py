@@ -175,17 +175,15 @@ def mergeRenameReorderForDataMC(datasetMgr):
 class PlotBase:
     """Base class for plots."""
 
-    def __init__(self, datasetMgr, name, saveFormats=[".png", ".eps", ".C"]):
+    def __init__(self, datasetRootHistos, saveFormats=[".png", ".eps", ".C"]):
         """Constructor.
 
         Arguments:
-        datasetMgr   DatasetManager for datasets
-        name         Name of the histogram in the ROOT files
-        saveFormats  List of the default formats to save (default: ['.png', '.eps', '.C'])
+        datasetRootHistos  List of DatasetRootHisto objects to plot
+        saveFormats        List of the default formats to save (default: ['.png', '.eps', '.C'])
         """
         # Create the histogram manager
-        self.histoMgr = histograms.HistoManager(datasetMgr, name)
-        self.datasetMgr = datasetMgr
+        self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
 
         # Save the format
         self.saveFormats = saveFormats
@@ -216,11 +214,6 @@ class PlotBase:
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
-    def stackMCHistograms(self):
-        mcNames = self.datasetMgr.getMCDatasetNames()
-        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
-        self.histoMgr.stackHistograms("StackedMC", mcNames)
-
     def createFrame(self, filename, **kwargs):
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
@@ -245,8 +238,8 @@ class PlotBase:
 
         ROOT.gErrorIgnoreLevel = backup
 
-class DataMCPlot(PlotBase):
-    """Class to create data-MC comparison plot."""
+class PlotSameBase(PlotBase):
+    """Base class for plots with same histogram from many datasets."""
 
     def __init__(self, datasetMgr, name, **kwargs):
         """Constructor.
@@ -258,7 +251,29 @@ class DataMCPlot(PlotBase):
         Keyword arguments:
         see PlotBase.__init__()
         """
-        PlotBase.__init__(self, datasetMgr, name, **kwargs)
+        PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
+        self.datasetMgr = datasetMgr
+
+    def stackMCHistograms(self):
+        mcNames = self.datasetMgr.getMCDatasetNames()
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
+        self.histoMgr.stackHistograms("StackedMC", mcNames)
+
+
+class DataMCPlot(PlotSameBase):
+    """Class to create data-MC comparison plot."""
+
+    def __init__(self, datasetMgr, name, **kwargs):
+        """Constructor.
+
+        Arguments:
+        datasetMgr   DatasetManager for datasets
+        name         Name of the histogram in the ROOT files
+
+        Keyword arguments:
+        see PlotSameBase.__init__()
+        """
+        PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
         self.histoMgr.normalizeMCByLuminosity()
@@ -294,7 +309,7 @@ class DataMCPlot(PlotBase):
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
     def draw(self):
-        PlotBase.draw(self)
+        PlotSameBase.draw(self)
         if hasattr(self, "mcSum"):
             self.cf.canvas.cd(2)
 

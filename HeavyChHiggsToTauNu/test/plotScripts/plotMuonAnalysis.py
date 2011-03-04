@@ -169,9 +169,9 @@ normalizeToLumi = 36
 #histograms.createLegend.setDefaults(x1=0.65,y1=0.7)
 style = tdrstyle.TDRStyle()
 
-class Plot(plots.PlotBase):
+class Plot(plots.PlotSameBase):
     def __init__(self, datasets, name):
-        plots.PlotBase.__init__(self, datasets, name,
+        plots.PlotSameBase.__init__(self, datasets, name,
 #                                [".png"]
                                 )
 

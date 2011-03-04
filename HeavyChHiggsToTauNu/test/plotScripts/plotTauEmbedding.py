@@ -31,7 +31,7 @@ def getHisto(datasets, path, name, func=None):
         func(h)
     return h
 
-class PlotBase(plots.PlotBase):
+class PlotBase(plots.PlotSameBase):
     def __init__(self):
         self.histoMgr = histograms.HistoManagerImpl([])
         self.saveFormats = [".png",
@@ -53,7 +53,7 @@ class Plot(PlotBase):
         self.histoMgr.forEachHisto(styles.generator())
 
     def createFrame(self, plotname, **kwargs):
-        plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
+        plots.PlotSameBase.createFrame(self, self.prefix+plotname, **kwargs)
 
 class Plot2(PlotBase):
     def __init__(self, datasets, datasetsTau, directories, name):
