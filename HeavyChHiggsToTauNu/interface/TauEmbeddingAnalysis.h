@@ -38,8 +38,7 @@ namespace HPlus {
       void book(TFileDirectory& fd, const std::string& prefix);
 
       // Fill the histograms (add more objects to arguments if necessary)
-      void fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon, const pat::Tau& selectedTau);
-      void fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon);
+      void fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon* originalMuon, const pat::Tau* selectedTau);
 
     private:
       // Histograms
@@ -60,11 +59,8 @@ namespace HPlus {
     };
 
   public:
-    TauEmbeddingAnalysis(EventWeight& eventWeight);
+    TauEmbeddingAnalysis(const edm::ParameterSet& iConfig, EventWeight& eventWeight);
     ~TauEmbeddingAnalysis();
-
-    // Initialize, only if the parameter set is available
-    void init(const edm::ParameterSet& iConfig);
 
     // Read the objects from the event and fill the fBegin
     void beginEvent(const edm::Event&, const edm::EventSetup&);
@@ -80,7 +76,8 @@ namespace HPlus {
     edm::InputTag fOriginalMetSrc;
     edm::InputTag fEmbeddingMetSrc;
     edm::InputTag fOriginalMuonSrc;
-    edm::InputTag fSelectedTauSrc;
+
+    bool fEmbeddingMode;
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -97,9 +94,7 @@ namespace HPlus {
     edm::Ptr<pat::Tau> fSelectedTau;
     edm::Ptr<reco::Muon> fOriginalMuon;
 
-    bool fEnabled;
   };
-
 }
 
 

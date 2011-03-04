@@ -113,7 +113,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    tauEmbedding = param.TauEmbeddingAnalysis
 )
 
 # Prescale fetching done automatically for data
@@ -123,15 +124,6 @@ if dataVersion.isData():
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
     process.commonSequence *= process.hplusPrescaleWeightProducer
     process.signalAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
-
-# Enable the tau embedding specific histograms
-if options.tauEmbeddingInput:
-    process.signalAnalysis.tauEmbedding = cms.untracked.PSet(
-        originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO"),
-        originalMuon = cms.untracked.InputTag("tauEmbeddingMuons"),
-        embeddingMetSrc = process.signalAnalysis.MET.src,
-        selectedTauSrc = process.signalAnalysis.tauSelection.src,
-    )
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger

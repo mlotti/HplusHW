@@ -38,55 +38,64 @@ namespace HPlus {
     hTransverseMassOriginal = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
   }
 
-  void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon) {
-    hOriginalMet->Fill(originalMet.et(), weight);
-    hEmbeddingMet->Fill(embeddingMet.et(), weight);
-    hOriginalMuonPt->Fill(originalMuon.pt(), weight);
-    hOriginalMuonPt->Fill(originalMuon.pt(), weight);
-    hOriginalMuonEta->Fill(originalMuon.eta(), weight);
-    hOriginalMuonPhi->Fill(originalMuon.phi(), weight);
-  }
-  void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon, const pat::Tau& selectedTau) {
-    fill(weight, originalMet, embeddingMet, originalMuon);
-    hSelectedTauPt->Fill(selectedTau.pt(), weight);
-    hSelectedTauEta->Fill(selectedTau.eta(), weight);
-    hSelectedTauPhi->Fill(selectedTau.phi(), weight);
-    // Leading track and Rtau 
-    if (!selectedTau.leadPFChargedHadrCand().isNull()) {
-      double LdgTrackPt = selectedTau.leadPFChargedHadrCand()->p();
-      hleadPFChargedHadrPt->Fill(LdgTrackPt, weight);
-      if (selectedTau.energy() > 0) {
-	double Rtau = selectedTau.leadPFChargedHadrCand()->p()/selectedTau.energy();
-        hRtau->Fill(Rtau, weight);
+  void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon *originalMuon, const pat::Tau *selectedTau) {
+
+    if(originalMet) {
+      hOriginalMet->Fill(originalMet->et(), weight);
+    }
+
+    if(embeddingMet) {
+      hEmbeddingMet->Fill(embeddingMet->et(), weight);
+    }
+
+    if(originalMuon) {
+      hOriginalMuonPt->Fill(originalMuon->pt(), weight);
+      hOriginalMuonPt->Fill(originalMuon->pt(), weight);
+      hOriginalMuonEta->Fill(originalMuon->eta(), weight);
+      hOriginalMuonPhi->Fill(originalMuon->phi(), weight);
+    }
+
+    if(selectedTau) {
+      hSelectedTauPt->Fill(selectedTau->pt(), weight);
+      hSelectedTauEta->Fill(selectedTau->eta(), weight);
+      hSelectedTauPhi->Fill(selectedTau->phi(), weight);
+      // Leading track and Rtau 
+      if (!selectedTau->leadPFChargedHadrCand().isNull()) {
+        double LdgTrackPt = selectedTau->leadPFChargedHadrCand()->p();
+        hleadPFChargedHadrPt->Fill(LdgTrackPt, weight);
+        if (selectedTau->energy() > 0) {
+          double Rtau = selectedTau->leadPFChargedHadrCand()->p()/selectedTau->energy();
+          hRtau->Fill(Rtau, weight);
+        }
       }
     }
- 
-    double deltaPhi = DeltaPhi::reconstruct(selectedTau, embeddingMet);
-    hDeltaPhi->Fill(deltaPhi);
-    double transverseMass = TransverseMass::reconstruct(selectedTau, embeddingMet );
-    hTransverseMass->Fill(transverseMass);
 
-    double deltaPhiOriginal = DeltaPhi::reconstruct(originalMuon, originalMet);
-    hDeltaPhiOriginal->Fill(deltaPhiOriginal);
-    double transverseMassOriginal = TransverseMass::reconstruct(originalMuon, originalMet );
-    hTransverseMassOriginal->Fill(transverseMassOriginal);
-   
+    if(selectedTau && embeddingMet) {
+      double deltaPhi = DeltaPhi::reconstruct(*selectedTau, *embeddingMet);
+      hDeltaPhi->Fill(deltaPhi);
+      double transverseMass = TransverseMass::reconstruct(*selectedTau, *embeddingMet );
+      hTransverseMass->Fill(transverseMass);
+    }
+
+    if(originalMuon && originalMet) {
+      double deltaPhiOriginal = DeltaPhi::reconstruct(*originalMuon, *originalMet);
+      hDeltaPhiOriginal->Fill(deltaPhiOriginal);
+      double transverseMassOriginal = TransverseMass::reconstruct(*originalMuon, *originalMet);
+      hTransverseMassOriginal->Fill(transverseMassOriginal);
+    }
   }
 
   //////////
 
-  TauEmbeddingAnalysis::TauEmbeddingAnalysis(EventWeight& eventWeight):
-    fEventWeight(eventWeight),
-    fEnabled(false)
-  {}
-  TauEmbeddingAnalysis::~TauEmbeddingAnalysis() {}
-
-  void TauEmbeddingAnalysis::init(const edm::ParameterSet& iConfig) {
-    fEnabled = true;
-    fOriginalMetSrc = iConfig.getUntrackedParameter<edm::InputTag>("originalMetSrc");
-    fEmbeddingMetSrc = iConfig.getUntrackedParameter<edm::InputTag>("embeddingMetSrc");
-    fOriginalMuonSrc = iConfig.getUntrackedParameter<edm::InputTag>("originalMuon");
-    fSelectedTauSrc = iConfig.getUntrackedParameter<edm::InputTag>("selectedTauSrc");
+  TauEmbeddingAnalysis::TauEmbeddingAnalysis(const edm::ParameterSet& iConfig, EventWeight& eventWeight):
+    fEmbeddingMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("embeddingMetSrc")),
+    fEmbeddingMode(iConfig.getUntrackedParameter<bool>("embeddingMode")),
+    fEventWeight(eventWeight)
+  {
+    if(fEmbeddingMode) {
+      fOriginalMuonSrc = iConfig.getUntrackedParameter<edm::InputTag>("originalMuon");
+      fOriginalMetSrc = iConfig.getUntrackedParameter<edm::InputTag>("originalMetSrc");
+    }
 
     edm::Service<TFileService> fs;
     std::string prefix("TauEmbeddingAnalysis_");
@@ -95,26 +104,32 @@ namespace HPlus {
     fAfterTauId.book(*fs, prefix+"afterTauId");
     fAfterMetCut.book(*fs, prefix+"afterMetCut");
     fEnd.book(*fs, prefix+"end");
+
   }
+  TauEmbeddingAnalysis::~TauEmbeddingAnalysis() {}
 
   void TauEmbeddingAnalysis::beginEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    if(!fEnabled) return;
+    if(fEmbeddingMode) {
+      edm::Handle<edm::View<reco::MET> > hOriginalMet;
+      iEvent.getByLabel(fOriginalMetSrc, hOriginalMet);
+      fOriginalMet = hOriginalMet->ptrAt(0);
 
-    edm::Handle<edm::View<reco::MET> > hOriginalMet;
-    iEvent.getByLabel(fOriginalMetSrc, hOriginalMet);
-    fOriginalMet = hOriginalMet->ptrAt(0);
+      edm::Handle<edm::View<pat::Muon> > hOriginalMuon;
+      iEvent.getByLabel(fOriginalMuonSrc, hOriginalMuon);
+      fOriginalMuon = hOriginalMuon->ptrAt(0);
+    }
+    else {
+      fOriginalMet = edm::Ptr<reco::MET>();
+      fOriginalMuon = edm::Ptr<reco::Muon>();
+    }
 
     edm::Handle<edm::View<reco::MET> > hEmbeddingMet;
     iEvent.getByLabel(fEmbeddingMetSrc, hEmbeddingMet);
     fEmbeddingMet = hEmbeddingMet->ptrAt(0);
 
-    edm::Handle<edm::View<pat::Muon> > hOriginalMuon;
-    iEvent.getByLabel(fOriginalMuonSrc, hOriginalMuon);
-    fOriginalMuon = hOriginalMuon->ptrAt(0);
-
     fSelectedTau = edm::Ptr<pat::Tau>();
 
-    fBegin.fill(fEventWeight.getWeight(), *fOriginalMet, *fEmbeddingMet, *fOriginalMuon);    
+    fBegin.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
 
   void TauEmbeddingAnalysis::setSelectedTau(const edm::Ptr<pat::Tau>& tau) {
@@ -122,15 +137,12 @@ namespace HPlus {
   }
 
   void TauEmbeddingAnalysis::fillAfterTauId() {
-    if(!fEnabled) return;
-    fAfterTauId.fill(fEventWeight.getWeight(), *fOriginalMet, *fEmbeddingMet, *fOriginalMuon, *fSelectedTau);
+    fAfterTauId.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
   void TauEmbeddingAnalysis::fillAfterMetCut() {
-    if(!fEnabled) return;
-    fAfterMetCut.fill(fEventWeight.getWeight(), *fOriginalMet, *fEmbeddingMet, *fOriginalMuon, *fSelectedTau);
+    fAfterMetCut.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
   void TauEmbeddingAnalysis::fillEnd() {
-    if(!fEnabled) return;
-    fEnd.fill(fEventWeight.getWeight(), *fOriginalMet, *fEmbeddingMet, *fOriginalMuon, *fSelectedTau);
+    fEnd.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
 }

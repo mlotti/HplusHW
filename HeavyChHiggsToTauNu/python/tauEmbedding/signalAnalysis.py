@@ -24,6 +24,14 @@ def customiseParamForTauEmbedding(param):
     del param.tauSelections[i]
     del param.tauSelectionNames[i]
 
+    # Set the analyzer
+    param.TauEmbeddingAnalysis.embeddingMode = True
+    param.TauEmbeddingAnalysis.originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO")
+    param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag("tauEmbeddingMuons")
+    param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
+    
+
+
 def addTauEmbeddingMuonTaus(process):
     seq = cms.Sequence()
 
