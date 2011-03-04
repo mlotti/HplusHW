@@ -384,16 +384,17 @@ class HistoBase:
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
-    def __init__(self, dataset, histo):
+    def __init__(self, dataset, histo, name):
         """Constructor
 
         Arguments:
         dataset   Dataset object
         histo     TH1 object
+        name      Name of the Histo
 
         The default legend label is the dataset name
         """
-        HistoBase.__init__(self, histo, dataset.getName(), "l", "HIST")
+        HistoBase.__init__(self, histo, name, "l", "HIST")
         self.dataset = dataset
 
     def isMC(self):
@@ -526,19 +527,19 @@ class HistoManagerImpl:
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
-    def append(self, histo):
+    def appendHisto(self, histo):
         """Append a Histo object."""
         self.drawList.append(histo)
         self.legendList.append(histo)
         self._populateMap()
 
-    def extend(self, histos):
+    def extendHistos(self, histos):
         """Extend with a list of Histo objects."""
         self.drawList.extend(histos)
         self.legendList.extend(histos)
         self._populateMap()
 
-    def insert(self, i, histo, **kwargs):
+    def insertHisto(self, i, histo, **kwargs):
         """Insert Histo to position i.
 
         Arguments:
@@ -722,7 +723,7 @@ class HistoManagerImpl:
             if h.isMC():
                 firstMcIndex = i
                 break
-        self.insert(firstMcIndex, hse, legendIndex=len(self.drawList))
+        self.insertHisto(firstMcIndex, hse, legendIndex=len(self.drawList))
         
 
 
@@ -783,6 +784,8 @@ class HistoManager:
     def append(self, datasetRootHisto):
         if self.impl != None:
             raise Exception("Can't append after the histograms have been created!")
+        if not isinstance(datasetRootHisto, dataset.DatasetRootHistoBase):
+            raise Exception("Can append only DatasetRootHistoBase derived objects, got %s" % str(datasetRootHisto))
         self.datasetRootHistos.append(datasetRootHisto)
 
     def extend(self, datasetRootHistos):
@@ -792,6 +795,9 @@ class HistoManager:
             if datasetRootHistos.impl != None:
                 raise Exception("Can't extend from HistoManagerBase whose histograms have been created!")
             datasetRootHistos = HistoManagerBase.datasetRootHistos
+        for d in datasetRootHistos:
+            if not isinstance(datasetRootHisto, dataset.DatasetRootHistoBase):
+                raise Exception("Can extend only DatasetRootHistoBase derived objects, got %s" % str(d))
         self.datasetRootHistos.extend(datasetRootHistos)
 
     def normalizeToOne(self):
@@ -882,7 +888,7 @@ class HistoManager:
         if len(self.datasetRootHistos) == 0:
             raise Exception("No histograms to use!")
 
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'StackedMC'."""
