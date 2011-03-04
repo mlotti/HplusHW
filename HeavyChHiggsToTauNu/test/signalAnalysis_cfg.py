@@ -27,13 +27,17 @@ JESUnclusteredMETVariation = 0.10
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
+# These are needed for running against tau embedding samples, can be
+# given also from command line
+#options.doPat=1
+#options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
 process = cms.Process("HChSignalAnalysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
@@ -44,11 +48,13 @@ process.source = cms.Source('PoolSource',
 #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        #dataVersion.getAnalysisDefaultFileMadhatter()
+        dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+#      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
+if options.tauEmbeddingInput != 0:
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -121,7 +127,10 @@ if dataVersion.isData():
 # Enable the tau embedding specific histograms
 if options.tauEmbeddingInput:
     process.signalAnalysis.tauEmbedding = cms.untracked.PSet(
-        originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO")
+        originalMetSrc = cms.untracked.InputTag("pfMet", "", "RECO"),
+        originalMuon = cms.untracked.InputTag("tauEmbeddingMuons"),
+        embeddingMetSrc = process.signalAnalysis.MET.src,
+        selectedTauSrc = process.signalAnalysis.tauSelection.src,
     )
 
 # Print output
