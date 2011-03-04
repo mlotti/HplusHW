@@ -299,18 +299,19 @@ class DataMCPlot(PlotSameBase):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
 
-        self.mcSum = self.histoMgr.getHisto("StackedMC").getSumRootHisto()
-        self.mcSum.Divide(self.histoMgr.getHisto("Data").getRootHisto())
-        styles.getDataStyle().apply(self.mcSum)
-        self.mcSum.GetYaxis().SetTitle("Data/MC")
+        self.ratio = self.histoMgr.getHisto("Data").getRootHisto().Clone()
+        self.ratio.Divide(self.histoMgr.getHisto("StackedMC").getSumRootHisto())
+        styles.getDataStyle().apply(self.ratio)
+        self.ratio.GetYaxis().SetTitle("Data/MC")
+        
 
-        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.mcSum], filename, **kwargs)
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
     def draw(self):
         PlotSameBase.draw(self)
-        if hasattr(self, "mcSum"):
+        if hasattr(self, "ratio"):
             self.cf.canvas.cd(2)
 
             self.line = ROOT.TGraph(2, 
@@ -321,7 +322,7 @@ class DataMCPlot(PlotSameBase):
             self.line.SetLineStyle(3)
             self.line.Draw("L")
 
-            self.mcSum.Draw("EP same")
+            self.ratio.Draw("EP same")
             self.cf.canvas.cd()
 
             # Create an empty, white-colored pad to hide the topmost
