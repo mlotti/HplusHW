@@ -734,21 +734,43 @@ class HistoManager:
     The implementation is divided to this and HistoManagerImpl class. The
     idea is that here are the methods, which don't require
     Histo objects (namely setting the normalization), and
-    HistoSetImpl has all the methods which require the Histo
+    HistoManagerImpl has all the methods which require the Histo
     objects. User can set freely the normalization scheme as many
     times as (s)he wants, and at the first time some method not
-    implemented in HistoManager is called, the Histo objects are
+    implemented in HistoManagerBase is called, the Histo objects are
     created and the calls are delegated to HistoManagerImpl class.
     """
-    def __init__(self, datasetMgr, name):
+    def __init__(self, *args, **kwargs):
         """Constructor.
 
-        Arguments:
+        Positional arguments:
         datasetMgr   DatasetManager object to take the histograms from
         name         Path to the TH1 objects in the DatasetManager ROOT files
+
+        Keyword arguments:
+        datasetRootHistos   Initial list of DatasetRootHisto objects
+
+        Only either both positional arguments or the keyword argument
+        can be given.
+
+        FIXME: the interface should be fixed to have only the keyword
+        argument (also as the only positional argument). This is not
+        done yet for backward compatibility.
         """
-        self.datasetMgr = datasetMgr
-        self.datasetRootHistos = datasetMgr.getDatasetRootHistos(name)
+        if len(args) == 0:
+            if len(kwargs) != 1:
+                raise Exception("If positional arguments are not given, there must be exactly 1 keyword argument")
+            self.datasetRootHistos = kwargs["datasetRootHistos"]
+        else:
+            if len(args) != 2:
+                raise Exception("Must give exactly 2 positional arguments (got %d)" % len(args))
+            if len(kwargs) != 0:
+                raise Exception("If positional arguments are given, there must not be any keyword arguments")
+            datasetMgr = args[0]
+            name = args[1]
+
+            self.datasetRootHistos = datasetMgr.getDatasetRootHistos(name)
+
         self.impl = None
         self.luminosity = None
 
@@ -757,6 +779,20 @@ class HistoManager:
         if self.impl == None:
             self._createImplementation()
         return getattr(self.impl, name)
+
+    def append(self, datasetRootHisto):
+        if self.impl != None:
+            raise Exception("Can't append after the histograms have been created!")
+        self.datasetRootHistos.append(datasetRootHisto)
+
+    def extend(self, datasetRootHistos):
+        if self.impl != None:
+            raise Exception("Can't extend after the histograms have been created!")
+        if isinstance(datasetRootHistos, HistoManager):
+            if datasetRootHistos.impl != None:
+                raise Exception("Can't extend from HistoManagerBase whose histograms have been created!")
+            datasetRootHistos = HistoManagerBase.datasetRootHistos
+        self.datasetRootHistos.extend(datasetRootHistos)
 
     def normalizeToOne(self):
         """Set the histogram normalization 'to one'.
@@ -843,8 +879,13 @@ class HistoManager:
 
         Intended only for internal use.
         """
+        if len(self.datasetRootHistos) == 0:
+            raise Exception("No histograms to use!")
+
         self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'StackedMC'."""
-        self.stackHistograms("StackedMC", self.datasetMgr.getMCDatasetNames())
+        histos = self.getHistos()
+        
+        self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])
