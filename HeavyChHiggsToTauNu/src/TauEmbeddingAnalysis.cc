@@ -12,6 +12,9 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+
 namespace HPlus {
   TauEmbeddingAnalysis::Histograms::Histograms():
     hOriginalMet(0)
@@ -29,6 +32,10 @@ namespace HPlus {
     hSelectedTauPhi = makeTH<TH1F>(fd, (prefix+"_selectedTauPhi").c_str(), "SelectedTau Phi", 300, 0, 3.2);
     hleadPFChargedHadrPt = makeTH<TH1F>(fd, (prefix+"_leadPFChargedHadrPt").c_str(), "LeadPFChargedHadr Pt", 400, 0, 200);
     hRtau = makeTH<TH1F>(fd, (prefix+"_Rtau").c_str(), "Rtau", 400, 0, 1.2);
+    hDeltaPhi = makeTH<TH1F>(fd, (prefix+"_DeltaPhi").c_str(), "DeltaPhi", 400, 0, 3.2);
+    hTransverseMass = makeTH<TH1F>(fd, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
+    hDeltaPhiOriginal = makeTH<TH1F>(fd, (prefix+"_DeltaPhiOriginal").c_str(), "DeltaPhiOriginal", 400, 0, 3.2);
+    hTransverseMassOriginal = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
   }
 
   void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon) {
@@ -46,13 +53,24 @@ namespace HPlus {
     hSelectedTauPhi->Fill(selectedTau.phi(), weight);
     // Leading track and Rtau 
     if (!selectedTau.leadPFChargedHadrCand().isNull()) {
-      double LdgTrackPt = selectedTau.leadPFChargedHadrCand()->pt();
+      double LdgTrackPt = selectedTau.leadPFChargedHadrCand()->p();
       hleadPFChargedHadrPt->Fill(LdgTrackPt, weight);
-      if (selectedTau.E() > 0) {
-	double Rtau = selectedTau.leadPFChargedHadrCand()->P()/selectedTau.E();
+      if (selectedTau.energy() > 0) {
+	double Rtau = selectedTau.leadPFChargedHadrCand()->p()/selectedTau.energy();
         hRtau->Fill(Rtau, weight);
       }
     }
+ 
+    double deltaPhi = DeltaPhi::reconstruct(selectedTau, embeddingMet);
+    hDeltaPhi->Fill(deltaPhi);
+    double transverseMass = TransverseMass::reconstruct(selectedTau, embeddingMet );
+    hTransverseMass->Fill(transverseMass);
+
+    double deltaPhiOriginal = DeltaPhi::reconstruct(originalMuon, originalMet);
+    hDeltaPhiOriginal->Fill(deltaPhiOriginal);
+    double transverseMassOriginal = TransverseMass::reconstruct(originalMuon, originalMet );
+    hTransverseMassOriginal->Fill(transverseMassOriginal);
+   
   }
 
   //////////

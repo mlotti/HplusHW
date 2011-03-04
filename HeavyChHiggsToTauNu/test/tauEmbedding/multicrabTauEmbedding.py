@@ -39,7 +39,7 @@ datasets = [
     "WJets_TuneD6T_Winter10",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
-    "DYJetsToLL_TuneZ2_Winter10",
+    "DYJetsToLL_M50_TuneZ2_Winter10",
     "TToBLNu_s-channel_TuneZ2_Winter10",
     "TToBLNu_t-channel_TuneZ2_Winter10",
     "TToBLNu_tW-channel_TuneZ2_Winter10",
