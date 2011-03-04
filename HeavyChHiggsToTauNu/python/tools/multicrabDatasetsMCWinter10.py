@@ -275,6 +275,11 @@ datasets = {
                                         # needed to get enough jobs
                 "use_server": 1,
             },
+            "pattuple_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_AODSIM_pattuple_v9b-c2f22ab9ac43296d989acccdef834e2a/USER",
+                "number_of_jobs": 60
+            },
         },
     },
     "WJets_TuneZ2_Winter10_PU2011": {
