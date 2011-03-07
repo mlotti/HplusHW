@@ -25,6 +25,8 @@ class TFileDirectory;
 
 class TH1;
 
+#include "TH2.h"
+
 namespace HPlus {
   class EventWeight;
 
@@ -56,6 +58,9 @@ namespace HPlus {
       TH1 *hTransverseMassOriginal;
       TH1 *hDeltaPhi;
       TH1 *hTransverseMass;
+      TH2 *hEmbVSOrigMet;
+      TH2 *hDeltaPhiEmbVSOrig;
+      TH2 *hMTEmbVSOrig; 
     };
 
   public:
