@@ -39,6 +39,9 @@ namespace HPlus {
   }
 
   void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon *originalMuon, const pat::Tau *selectedTau) {
+    // Fill only PFTaus
+    if(selectedTau && !selectedTau->isPFTau())
+      return;
 
     if(originalMet) {
       hOriginalMet->Fill(originalMet->et(), weight);
