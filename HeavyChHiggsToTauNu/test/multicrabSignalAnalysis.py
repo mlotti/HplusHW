@@ -66,6 +66,13 @@ multicrab.extendDatasets(pattupleVersion,
 #        "W3Jets_ptW100to300_TuneZ2_Winter10", # v9
 #        "W4Jets_ptW0to100_TuneZ2_Winter10",   # v9
 #        "W4Jets_ptW100to300_TuneZ2_Winter10", # v9
+#        "WW_TuneZ2_Winter10", # v9
+#        "WZ_TuneZ2_Winter10", # v9
+#        "ZZ_TuneZ2_Winter10", # v9
+#        "TToBLNu_s-channel_Winter10", # v9
+#        "TToBLNu_t-channel_Winter10", # v9
+#        "TToBLNu_tW-channel_Winter10", # v9
+#        "DYJetsToLL_M50_TuneZ2_Winter10", # v9
 
         #### 38X data and MC
         # Data
