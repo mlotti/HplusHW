@@ -24,6 +24,7 @@ namespace HPlus {
   void TauEmbeddingAnalysis::Histograms::book(TFileDirectory& fd, const std::string& prefix) {
     hOriginalMet = makeTH<TH1F>(fd, (prefix+"_originalMet").c_str(), "Original MET", 400, 0, 400);
     hEmbeddingMet = makeTH<TH1F>(fd, (prefix+"_embeddingMet").c_str(), "Embedding MET", 400, 0, 400);
+    hEmbVSOrigMet = makeTH<TH2F>(fd, (prefix+"_embVSOrigMet").c_str(), "EmbeddingVSoriginal MET", 100, 0, 400, 100, 0, 400);
     hOriginalMuonPt = makeTH<TH1F>(fd, (prefix+"_originalMuonPt").c_str(), "OriginalMuon Pt", 400, 0, 400);
     hOriginalMuonEta = makeTH<TH1F>(fd, (prefix+"_originalMuonEta").c_str(), "OriginalMuon Eta", 300, -3,3);
     hOriginalMuonPhi = makeTH<TH1F>(fd, (prefix+"_originalMuonPhi").c_str(), "OriginalMuon Phi", 300, 0, 3.2);
@@ -33,9 +34,11 @@ namespace HPlus {
     hleadPFChargedHadrPt = makeTH<TH1F>(fd, (prefix+"_leadPFChargedHadrPt").c_str(), "LeadPFChargedHadr Pt", 400, 0, 200);
     hRtau = makeTH<TH1F>(fd, (prefix+"_Rtau").c_str(), "Rtau", 400, 0, 1.2);
     hDeltaPhi = makeTH<TH1F>(fd, (prefix+"_DeltaPhi").c_str(), "DeltaPhi", 400, 0, 3.2);
+    hDeltaPhiEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_DeltaPhiEmbVSOrig").c_str(), "DeltaPhiEmbVSOrig", 100, 0, 3.2, 100, 0, 3.2);
     hTransverseMass = makeTH<TH1F>(fd, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
     hDeltaPhiOriginal = makeTH<TH1F>(fd, (prefix+"_DeltaPhiOriginal").c_str(), "DeltaPhiOriginal", 400, 0, 3.2);
     hTransverseMassOriginal = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
+    hMTEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_MTEmbVSOrig").c_str(), "MTEmbVSOrig", 100, 0, 400, 100, 0, 400);
   }
 
   void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon) {
@@ -45,6 +48,7 @@ namespace HPlus {
     hOriginalMuonPt->Fill(originalMuon.pt(), weight);
     hOriginalMuonEta->Fill(originalMuon.eta(), weight);
     hOriginalMuonPhi->Fill(originalMuon.phi(), weight);
+    hEmbVSOrigMet->Fill(embeddingMet.et(),originalMet.et(), weight);
   }
   void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET& originalMet, const reco::MET& embeddingMet, const reco::Muon& originalMuon, const pat::Tau& selectedTau) {
     fill(weight, originalMet, embeddingMet, originalMuon);
@@ -53,7 +57,7 @@ namespace HPlus {
     hSelectedTauPhi->Fill(selectedTau.phi(), weight);
     // Leading track and Rtau 
     if (!selectedTau.leadPFChargedHadrCand().isNull()) {
-      double LdgTrackPt = selectedTau.leadPFChargedHadrCand()->p();
+      double LdgTrackPt = selectedTau.leadPFChargedHadrCand()->pt();
       hleadPFChargedHadrPt->Fill(LdgTrackPt, weight);
       if (selectedTau.energy() > 0) {
 	double Rtau = selectedTau.leadPFChargedHadrCand()->p()/selectedTau.energy();
@@ -62,15 +66,16 @@ namespace HPlus {
     }
  
     double deltaPhi = DeltaPhi::reconstruct(selectedTau, embeddingMet);
-    hDeltaPhi->Fill(deltaPhi);
+    hDeltaPhi->Fill(deltaPhi, weight);
     double transverseMass = TransverseMass::reconstruct(selectedTau, embeddingMet );
-    hTransverseMass->Fill(transverseMass);
+    hTransverseMass->Fill(transverseMass, weight);
 
     double deltaPhiOriginal = DeltaPhi::reconstruct(originalMuon, originalMet);
-    hDeltaPhiOriginal->Fill(deltaPhiOriginal);
+    hDeltaPhiOriginal->Fill(deltaPhiOriginal, weight);
     double transverseMassOriginal = TransverseMass::reconstruct(originalMuon, originalMet );
-    hTransverseMassOriginal->Fill(transverseMassOriginal);
-   
+    hTransverseMassOriginal->Fill(transverseMassOriginal, weight);
+    hDeltaPhiEmbVSOrig->Fill(deltaPhi,deltaPhiOriginal, weight);
+    hMTEmbVSOrig->Fill(transverseMass, transverseMassOriginal, weight);    
   }
 
   //////////
