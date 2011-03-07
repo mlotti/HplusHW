@@ -22,21 +22,17 @@ createLegend = histograms.createLegend
 createLegend2 = createLegend.copy()
 createLegend2.setDefaults(x1=0.6, y1=0.8, y2=0.94)
 
-def getHisto(datasets, path, name, func=None):
-    h = histograms.HistoManager(datasets, path)
-    h = h.getHistos()[0]
+def getHisto(datasets, path, name):
+    h = datasets.getDatasetRootHistos(path)[0]
     h.setName(name)
-    h.setLegendLabel(name)
-    if func != None:
-        func(h)
     return h
 
-class PlotBase(plots.PlotSameBase):
+class PlotBase(plots.PlotBase):
     def __init__(self):
-        self.histoMgr = histograms.HistoManagerImpl([])
-        self.saveFormats = [".png",
-#                            ".eps", ".C"
-                            ]
+        plots.PlotBase.__init__(self, [],
+                                [".png",
+#                                 ".eps", ".C"
+                                 ])
 
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
@@ -53,7 +49,7 @@ class Plot(PlotBase):
         self.histoMgr.forEachHisto(styles.generator())
 
     def createFrame(self, plotname, **kwargs):
-        plots.PlotSameBase.createFrame(self, self.prefix+plotname, **kwargs)
+        plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
 
 class Plot2(PlotBase):
     def __init__(self, datasets, datasetsTau, directories, name):
