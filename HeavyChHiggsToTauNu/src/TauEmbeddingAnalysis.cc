@@ -15,6 +15,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 
+#include<limits>
+
 namespace HPlus {
   TauEmbeddingAnalysis::Histograms::Histograms():
     hOriginalMet(0)
@@ -48,7 +50,7 @@ namespace HPlus {
 
     if(originalMet) {
       hOriginalMet->Fill(originalMet->et(), weight);
-    hEmbVSOrigMet->Fill(embeddingMet.et(),originalMet.et(), weight);
+      hEmbVSOrigMet->Fill(embeddingMet->et(),originalMet->et(), weight);
     }
 
     if(embeddingMet) {
@@ -77,10 +79,12 @@ namespace HPlus {
       }
     }
 
+    double deltaPhi = std::numeric_limits<double>::quiet_NaN();
+    double transverseMass = std::numeric_limits<double>::quiet_NaN();
     if(selectedTau && embeddingMet) {
-      double deltaPhi = DeltaPhi::reconstruct(*selectedTau, *embeddingMet);
+      deltaPhi = DeltaPhi::reconstruct(*selectedTau, *embeddingMet);
       hDeltaPhi->Fill(deltaPhi, weight);
-      double transverseMass = TransverseMass::reconstruct(*selectedTau, *embeddingMet );
+      transverseMass = TransverseMass::reconstruct(*selectedTau, *embeddingMet );
       hTransverseMass->Fill(transverseMass, weight);
     }
 
@@ -91,6 +95,7 @@ namespace HPlus {
       hTransverseMassOriginal->Fill(transverseMassOriginal, weight);
       hDeltaPhiEmbVSOrig->Fill(deltaPhi,deltaPhiOriginal, weight);
       hMTEmbVSOrig->Fill(transverseMass, transverseMassOriginal, weight);    
+    }
   }
 
   //////////

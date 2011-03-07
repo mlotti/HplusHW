@@ -38,9 +38,9 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
-    fGenparticleAnalysis(eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
@@ -116,9 +116,9 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterTauId();
 
     // for testing RTau distribution in embedding
-    if (!tauData.getSelectedTaus()[0].leadPFChargedHadrCand().isNull()) {
-      if (tauData.getSelectedTaus()[0].energy() > 0) {
-	double Rtau = tauData.getSelectedTaus()[0].leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0].energy();
+    if (!tauData.getSelectedTaus()[0]->leadPFChargedHadrCand().isNull()) {
+      if (tauData.getSelectedTaus()[0]->energy() > 0) {
+	double Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
         if (Rtau < 0.8) return false;
       }  
     }
