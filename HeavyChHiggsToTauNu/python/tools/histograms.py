@@ -165,6 +165,12 @@ class CanvasFrame:
         name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
         
         Keyword arguments:
+        opts   Dictionary for options
+        
+        For backward compatibility the options can also be given
+        directly as keyword arguments.
+
+        Options:
         ymin     Minimum value of Y axis
         ymax     Maximum value of Y axis
         xmin     Minimum value of X axis
@@ -187,14 +193,20 @@ class CanvasFrame:
 
         self.canvas = ROOT.TCanvas(name)
 
-        if "yfactor" in kwargs:
-            if "ymaxfactor" in kwargs:
+        opts = kwargs
+        if "opts" in kwargs:
+            if len(kwargs) != 1:
+                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given")
+            opts = kwargs["opts"]
+
+        if "yfactor" in opts:
+            if "ymaxfactor" in opts:
                 raise Exception("Only one of ymaxfactor, yfactor can be given")
-            kwargs["ymaxfactor"] = kwargs["yfactor"]
+            opts["ymaxfactor"] = opts["yfactor"]
 
-        _boundsArgs(histos, kwargs)
+        _boundsArgs(histos, opts)
 
-        self.frame = self.canvas.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
+        self.frame = self.canvas.DrawFrame(opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"])
         self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
         self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
 
@@ -209,7 +221,7 @@ class CanvasFrameTwo:
         name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
         
         Keyword arguments:
-        opts1                   Dictionary for histoManager1 options
+        opts/opts1              Dictionary for histoManager1 options
         opts2                   Dictionary for histos2 options
         canvasFactor            Multiply the canvas height by this factor (default 1.25)
         canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
@@ -279,7 +291,11 @@ class CanvasFrameTwo:
         canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
-        opts1 = kwargs.get("opts1", {})
+        opts1 = kwargs.get("opts", {})
+        if "opts1" in kwargs:
+            if "opts" in kwargs:
+                raise Exception("Can not give both 'opts' and 'opts1' as keyword arguments")
+            opts1 = kwargs["opts1"]
         opts2 = kwargs.get("opts2", {})
 
         if "xmin" in opts2 or "xmax" in opts2:
