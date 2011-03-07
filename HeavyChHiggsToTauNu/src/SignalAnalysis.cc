@@ -116,12 +116,12 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterTauId();
 
     // for testing RTau distribution in embedding
-    if (tauData.getSelectedTaus()[0]->isPFTau() && !tauData.getSelectedTaus()[0]->leadPFChargedHadrCand().isNull()) {
-      if (tauData.getSelectedTaus()[0]->energy() > 0) {
-	double Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
-        if (Rtau < 0.8) return false;
-      }
-    }
+    //    if (tauData.getSelectedTaus()[0]->isPFTau() && !tauData.getSelectedTaus()[0]->leadPFChargedHadrCand().isNull()) {
+    //     if (tauData.getSelectedTaus()[0]->energy() > 0) {
+    //	double Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
+    //     if (Rtau < 0.8) return false;
+    //  }
+    // }
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
