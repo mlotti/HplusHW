@@ -6,11 +6,12 @@ fi
 if [ "x$DOXYGEN" = "x" ]; then
     DOXYGEN=doxygen
 fi
-DATE=$(date "+/%d.%b.%Y/%T")
+COMMIT=$(git show | head -n 1 | cut -d ' ' -f 2)
+DATE=$(date "+%d.%b.%Y/%T")
 
 echo "Creating doxygen config file"
-sed "s?REPLACEME?$VERSION$DATE?g" doxygen_py.config > doxyconfig_py.active
-sed "s?REPLACEME?$VERSION$DATE?g" doxygen_cpp.config > doxyconfig_cpp.active
+sed "s?REPLACEME?$VERSION/$COMMIT/$DATE?g" doxygen_py.config > doxyconfig_py.active
+sed "s?REPLACEME?$VERSION/$COMMIT/$DATE?g" doxygen_cpp.config > doxyconfig_cpp.active
 
 echo "Generating reference manual"
 cd ..
