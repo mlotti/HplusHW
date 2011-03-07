@@ -14,9 +14,9 @@ sed "s?REPLACEME?$VERSION/$COMMIT?g" doxygen_cpp.config > doxyconfig_cpp.active
 
 cd ..
 echo "Generating reference manual for C++"
-$DOXYGEN doc/doxyconfig_py.active
-echo "Generating reference manual for Python"
 $DOXYGEN doc/doxyconfig_cpp.active
+echo "Generating reference manual for Python"
+$DOXYGEN doc/doxyconfig_py.active
 
 cd doc
 rm doxyconfig_py.active
