@@ -71,6 +71,7 @@ _datasetOrder = [
     "TTToHplusBWB_M140",
     "TTToHplusBWB_M160",
     "QCD",
+    "QCD_Pt20_MuEnriched",
     "DYJetsToLL",
     "WJets",
     "SingleTop",

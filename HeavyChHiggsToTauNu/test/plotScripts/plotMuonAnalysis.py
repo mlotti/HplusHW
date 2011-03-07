@@ -13,9 +13,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 WdecaySeparate = False
 #WdecaySeparate = True
 
-tuneD6T = False
-tuneD6T = True
-
 def findSelection(lst, name):
     for n in lst:
         if name in n:
@@ -118,14 +115,25 @@ lastSelectionBeforeMetOtherIso = selectionsAoc[-2]+"Iso"
 
 datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysisPrefix+"countAnalyzer")
 datasets.loadLuminosities()
+foo = {
+        "WJets_TuneZ2_Winter10": 28000,
+        "TToBLNu_s-channel_TuneZ2_Winter10": 4.6*0.32442,
+        "TToBLNu_t-channel_TuneZ2_Winter10": 63*0.32442,
+        "TToBLNu_tW-channel_TuneZ2_Winter10": 10.6,
+        "WW_TuneZ2_Winter10": 43,
+        "WZ_TuneZ2_Winter10": 18,
+        "ZZ_TuneZ2_Winter10": 5.9,
+}
+for name, xsect in foo.iteritems():
+    datasets.getDataset(name).setCrossSection(xsect)
 
 datasetsMC = datasets.deepCopy()
 datasetsMC.remove(datasets.getDataDatasetNames())
 
-if tuneD6T:
-    datasets.remove(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
-else:
-    datasets.remove(["TTJets_TuneD6T_Winter10", "WJets_TuneD6T_Winter10"])
+#if tuneD6T:
+#    datasets.remove(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
+#else:
+#    datasets.remove(["TTJets_TuneD6T_Winter10", "WJets_TuneD6T_Winter10"])
 
 plots.mergeRenameReorderForDataMC(datasets)
 
@@ -150,18 +158,18 @@ if WdecaySeparate:
 
     wmunu = [x+"WMuNu" for x in wmunu] + [x+"WOther" for x in wmunu]
 
-datasets.selectAndReorder(
-    ["Data"] + wmunu + [
-        "DYJetsToLL",
-        "QCD_Pt20_MuEnriched"
-])
-datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
+#datasets.selectAndReorder(
+#    ["Data"] + wmunu + [
+#        "DYJetsToLL",
+#        "QCD_Pt20_MuEnriched"
+#])
+#datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
 
 
 normalizeToLumi = None
 if not datasets.hasDataset("Data"):
     normalizeToLumi = 36
-normalizeToLumi = 36
+#normalizeToLumi = 36
 
 #textDefaults.setCmsPreliminaryDefaults()
 #histograms.textDefaults.setEnergyDefaults(x=0.17)
@@ -209,11 +217,12 @@ def jetPt(h, prefix=""):
 
     ptcut = 30
     ymin = 4
+    xmax = 400
 
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    h.createFrame(prefix+"jet_pt_log", ymin=ymin, yfactor=2)
+    h.createFrame(prefix+"jet_pt_log", xmax=xmax, ymin=ymin, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -224,7 +233,7 @@ def jetPt(h, prefix=""):
     h.histoMgr.addLuminosityText()
     h.save()
 
-    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, ymin=ymin, yfactor=2)
+    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, xmax=xmax, ymin=ymin, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -242,7 +251,7 @@ def muonPt(h, prefix="", plotAll=False):
     ylabel = "Number of muons / %.1f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
     ptcut = 30
-    xmax = 350
+    xmax = 400
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     ylabel = ylabel % h.binWidth()
@@ -347,29 +356,30 @@ def muonPhi(h, prefix="", plotAll=False):
     h.histoMgr.addLuminosityText(x=0.2)
     h.save()
 
-def muonIso(h, prefix=""):
-    xlabel = "Muon rel. isol. (GeV/c)"
-    #ylabel = "Number of muons / 0.01"
+def muonIso(h, prefix="", plotAll=False):
     #rebin = 2
-    ylabel = "Number of muons / 0.025"
     rebin = 5
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "Muon rel. isol. (GeV/c)"
+    ylabel = "Number of muons / %.3f" % h.binWidth()
     h.stackMCHistograms()
-    h.createFrame(prefix+"muon_reliso")
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
 
-    h.createFrame(prefix+"muon_reliso_log", ymin=1e-2, ymax=4000)
+    if plotAll:
+        h.createFrame(prefix+"muon_reliso")
+        h.frame.GetXaxis().SetTitle(xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(histograms.createLegend())
+        h.draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        h.histoMgr.addLuminosityText()
+        h.save()
+
+    h.createFrame(prefix+"muon_reliso_log", ymin=1e-2, ymaxfactor=10)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend(0.72, 0.7, 0.92, 0.92))
+    #h.setLegend(histograms.createLegend(0.72, 0.7, 0.92, 0.92))
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
