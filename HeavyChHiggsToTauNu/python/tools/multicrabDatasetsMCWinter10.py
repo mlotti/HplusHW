@@ -84,6 +84,7 @@ datasets = {
     },
 
     # QCD Winter10
+    # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingWinter2010
     "QCD_Pt0to5_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 4.844e+10*0.983,
@@ -222,6 +223,7 @@ datasets = {
 
 
     # Electroweak MadGraph
+    # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "TTJets_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 165,
@@ -255,7 +257,7 @@ datasets = {
     },
     "WJets_TuneZ2_Winter10_noPU": {
         "dataVersion": "39Xredigi",
-        "crossSection": 24640,
+        "crossSection": 28000,
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-START39_V8-v1/AODSIM",
@@ -275,7 +277,7 @@ datasets = {
     },
     "WJets_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 24640,
+        "crossSection": 28000,
         "tauIDFactorizationMap": "FactorizationMaphistograms_WJets_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
@@ -296,7 +298,7 @@ datasets = {
     },
     "WJets_TuneZ2_Winter10_PU2011": {
         "dataVersion": "39Xredigi",
-        "crossSection": 24640,
+        "crossSection": 28000,
         "tauIDFactorizationMap": "FactorizationMaphistograms_WJets_TuneZ2_Winter10_cfi",
         "data": {
             "AOD": {
@@ -317,7 +319,7 @@ datasets = {
     },
     "WJets_TuneD6T_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 24380,
+        "crossSection": 28000,
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -380,7 +382,7 @@ datasets = {
     # Single top
     "TToBLNu_s-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 1.49,
+        "crossSection": 4.6*0.32442,
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -395,7 +397,7 @@ datasets = {
     },
     "TToBLNu_t-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 20.44,
+        "crossSection": 63*0.32442,
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -410,7 +412,7 @@ datasets = {
     },
     "TToBLNu_tW-channel_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 10.56,
+        "crossSection": 10.6,
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -424,6 +426,7 @@ datasets = {
         },
     },
     # Electroweak Alpgen
+    # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingWinter2010
     "W2Jets_ptW0to100_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 9.434e+02,
@@ -515,7 +518,8 @@ datasets = {
         },
     },
 
-    # Diboson
+    # Diboson pythia
+    # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "WW_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 43,
@@ -533,7 +537,7 @@ datasets = {
     },
     "WZ_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 18.2,
+        "crossSection": 18,
         "data": {
             "AOD": {
                 "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
@@ -562,7 +566,8 @@ datasets = {
         },
     },
 
-    # Backgrounds for electroweak background measurement (Fall10)
+    # Backgrounds for electroweak background measurement
+    # Cross section is from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingWinter2010
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": {
         "dataVersion": "39Xredigi",
         "crossSection": 296600000.*0.0002855,
