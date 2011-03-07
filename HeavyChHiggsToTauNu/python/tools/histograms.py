@@ -192,6 +192,7 @@ class CanvasFrame:
             raise Exception("Empty set of histograms!")
 
         self.canvas = ROOT.TCanvas(name)
+        self.pad = self.canvas.GetPad(0)
 
         opts = kwargs
         if "opts" in kwargs:
@@ -351,6 +352,7 @@ class CanvasFrameTwo:
 
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)
+        self.pad = self.pad1
 
 class HistoBase:
     """Base class for all Histo classes."""
@@ -725,10 +727,16 @@ class HistoManagerImpl:
 
         self._populateMap()
 
-    def addMCUncertainty(self, style, name="MC stat. unc."):
+    def addMCUncertainty(self, style, name="MC stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
+            return
+
+        if nameList != None:
+            mcHistos = filter(lambda x: x.getName() in nameList, mcHistos)
+        if len(mcHistos) == 0:
+            print >>sys.stderr, "WARNING: No MC histograms to use for uncertainty band"
             return
 
         hse = HistoTotalUncertainty(mcHistos, name)

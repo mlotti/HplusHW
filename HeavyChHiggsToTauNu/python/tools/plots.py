@@ -238,6 +238,11 @@ class PlotBase:
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
+    def getFrame(self):
+        return frame
+    def getPad(self):
+        return self.cf.pad
+
     def draw(self):
         self.histoMgr.draw()
         if hasattr(self, "legend"):
@@ -314,9 +319,14 @@ class DataMCPlot(PlotSameBase):
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    def addMCUncertainty(self):
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
+            raise Exception("Must call stackMCHostograms() before createFrameFraction()")
 
         self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
@@ -325,6 +335,15 @@ class DataMCPlot(PlotSameBase):
         self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+    def getFrame1(self):
+        return self.cf.frame1
+    def getFrame2(self):
+        return self.cf.frame2
+    def getPad1(self):
+        return self.cf.pad1
+    def getPad2(self):
+        return self.cf.pad2
 
     def draw(self):
         PlotSameBase.draw(self)
@@ -372,6 +391,15 @@ class ComparisonPlot(PlotBase):
             self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
             self.frame = self.cf.frame
             self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+    def getFrame1(self):
+        return self.cf.frame1
+    def getFrame2(self):
+        return self.cf.frame2
+    def getPad1(self):
+        return self.cf.pad1
+    def getPad2(self):
+        return self.cf.pad2
 
     def draw(self):
         PlotBase.draw(self)
