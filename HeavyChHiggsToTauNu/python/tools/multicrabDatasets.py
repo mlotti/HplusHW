@@ -23,6 +23,9 @@ def printAllDatasets(details=False):
         line = name
         if details:
             content = datasets[name]
+            if "crossSection" in content:
+                line += " (%g pb)" % content["crossSection"]
+
             inputs = content["data"].keys()
             inputs.sort()
             line += " : " + ", ".join(inputs)
