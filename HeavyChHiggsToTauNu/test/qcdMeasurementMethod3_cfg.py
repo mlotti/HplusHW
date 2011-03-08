@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+#dataVersion = "39Xredigi"
+dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -35,8 +35,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
@@ -62,7 +62,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 #process.infoPath = addConfigInfo(process, options)
-process.infoPath = addConfigInfo(process, options, dataVersion)
+process.infoPath = addConfigInfo ( process, options, dataVersion )
 
 ################################################################################
 # qcdMeasurementMethod3 module
@@ -74,12 +74,7 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
-#param.setAllTauSelectionOperatingMode('standard')
-#param.setAllTauSelectionOperatingMode('factorized')
-#param.setAllTauSelectionOperatingMode('antitautag')
-param.setAllTauSelectionOperatingMode('antiisolatedtau')
-### Lauri -> input here new method tag
-
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 ### Use trigger matched taus and standard signal trigger => Disable below
