@@ -104,6 +104,20 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
 
+    /*
+    // TauID (with optional factorization) 
+                                                                             
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+
+    // Hadronic jet selection                                                                                                                                                                                                      
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+    if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
+    */
+
+
+
+    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
@@ -115,13 +129,7 @@ namespace HPlus {
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
 
-    // for testing RTau distribution in embedding
-    //    if (tauData.getSelectedTaus()[0]->isPFTau() && !tauData.getSelectedTaus()[0]->leadPFChargedHadrCand().isNull()) {
-    //     if (tauData.getSelectedTaus()[0]->energy() > 0) {
-    //	double Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
-    //     if (Rtau < 0.8) return false;
-    //  }
-    // }
+ 
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;

@@ -29,8 +29,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # These are needed for running against tau embedding samples, can be
 # given also from command line
-##options.doPat=1
-##options.tauEmbeddingInput=1
+options.doPat=1
+options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
