@@ -12,8 +12,8 @@ pattupleVersion = "pattuple_v9"
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
 # where information not stored in pattuples is needed). 
-#runPatOnTheFly = False
-runPatOnTheFly = True
+runPatOnTheFly = False
+#runPatOnTheFly = True
 if runPatOnTheFly:
     # RECO is needed for pre-39X data, for 39X and beyond, AOD is enough
     pattupleVersion = "AOD"
@@ -37,11 +37,12 @@ multicrab.extendDatasets(pattupleVersion,
 #        "JetMET_141956-144114_Dec22",        # v9
 #        "Jet_146428-148058_Dec22",           # v9
 #        "Jet_148822-149294_Dec22",           # v9
-    "JetMETTau_QuadJet_136035-141881_Dec22",
-    "JetMET_QuadJet_141956-144114_Dec22",
-    "Jet_QuadJet_146428-147116_Dec22",
-    "MultiJet_QuadJet_147196-148058_Dec22",
-    "MultiJet_QuadJet_148819-149442_Dec22",
+        # Data for signal QuadJet (no pattuples, needs runPatOnTheFly=True
+#        "JetMETTau_QuadJet_136035-141881_Dec22",
+#        "JetMET_QuadJet_141956-144114_Dec22",
+#        "Jet_QuadJet_146428-147116_Dec22",
+#        "MultiJet_QuadJet_147196-148058_Dec22",
+#        "MultiJet_QuadJet_148819-149442_Dec22",
         # MC Signal 10
 #        "TTToHplusBWB_M90_Winter10",  # v9
 #        "TTToHplusBWB_M100_Winter10", # v9
@@ -69,9 +70,9 @@ multicrab.extendDatasets(pattupleVersion,
 #        "WW_TuneZ2_Winter10", # v9
 #        "WZ_TuneZ2_Winter10", # v9
 #        "ZZ_TuneZ2_Winter10", # v9
-#        "TToBLNu_s-channel_Winter10", # v9
-#        "TToBLNu_t-channel_Winter10", # v9
-#        "TToBLNu_tW-channel_Winter10", # v9
+#        "TToBLNu_s-channel_TuneZ2_Winter10", # v9
+#        "TToBLNu_t-channel_TuneZ2_Winter10", # v9
+#        "TToBLNu_tW-channel_TuneZ2_Winter10", # v9
 #        "DYJetsToLL_M50_TuneZ2_Winter10", # v9
 
         #### 38X data and MC
