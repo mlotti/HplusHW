@@ -75,17 +75,23 @@ namespace HPlus {
     hRTauAfterAllSelectionsExceptMETandFakeMetVeto->Sumw2();
     hRTauAfterAllSelections = fs->make<TH1F>("RTauAfterAllSelections", "RTauAfterAllSelections;Rtau;N_{events}/0.02", 60, 0., 1.2);;
     hRTauAfterAllSelections->Sumw2();
-
+    /// tau pT Vs MET
     hTauPtVsMET_AfterTauSelection = fs->make<TH2F>("TauPtVsMET_AfterTauSelection", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
     hTauPtVsMET_AfterTauSelection->Sumw2();
-    hTauPtVsMET_AfterElectronVeto = fs->make<TH2F>("TauPtVsMET_ElectronVeto", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterElectronVeto = fs->make<TH2F>("TauPtVsMET_AfterElectronVeto", "Tau Pt Vs MET After Electron Veto; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
     hTauPtVsMET_AfterElectronVeto->Sumw2();
-    hTauPtVsMET_AfterMuonVeto = fs->make<TH2F>("TauPtVsMET_AfterMuonVeto", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterMuonVeto = fs->make<TH2F>("TauPtVsMET_AfterMuonVeto", "Tau Pt Vs MET After Muon Veto; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
     hTauPtVsMET_AfterMuonVeto->Sumw2();
-    hTauPtVsMET_AfterJetSelection = fs->make<TH2F>("TauPtVsMET_AfterJetSelection", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterJetSelection = fs->make<TH2F>("TauPtVsMET_AfterJetSelection", "Tau Pt Vs MET After Jet Selection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
     hTauPtVsMET_AfterJetSelection->Sumw2();
-    hTauPtVsMET_AfterBTagging = fs->make<TH2F>("TauPtVsMET_AfterBTagging", "Tau Pt Vs MET AfterTauSelection; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterBTagging = fs->make<TH2F>("TauPtVsMET_AfterBTagging", "Tau Pt Vs MET After BTagging; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
     hTauPtVsMET_AfterBTagging->Sumw2();
+
+    hTauPtVsMET_AfterMET = fs->make<TH2F>("TauPtVsMET_AfterMET", "Tau Pt Vs MET After MET; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterMET->Sumw2();
+
+    hTauPtVsMET_AfterFakeMETVeto = fs->make<TH2F>("TauPtVsMET_AfterFakeMETVeto", "Tau Pt Vs MET After FakeMETVeto; #tau p_{T} GeV/c; E_{T}^{miss} GeV", 60, 0.0, 300.0, 40, 0.0, 200);
+    hTauPtVsMET_AfterFakeMETVeto->Sumw2();
 
    }
 
@@ -202,17 +208,19 @@ namespace HPlus {
     hMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hTauPtVsMET_AfterBTagging->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());    
 
+    
     // MET 
     if(!metData.passedEvent()) return;
     increment(fMETCounter);
     hMETAfterMET->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    
+    hTauPtVsMET_AfterMET->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
     // FakeMETVeto
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
     hMETAfterFakeMetVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hRTauAfterAllSelections->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    hTauPtVsMET_AfterFakeMETVeto->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
   }
 }
