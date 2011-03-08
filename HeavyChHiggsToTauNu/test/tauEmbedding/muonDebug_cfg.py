@@ -49,8 +49,7 @@ if options.doPat != 0:
 # Configuration
 trigger = options.trigger
 if len(trigger) == 0:
-#    trigger = "HLT_Mu9"
-    trigger = "HLT_Mu15_v1"
+    trigger = "HLT_Mu9"
 
 print "Using trigger %s" % trigger
 
@@ -71,19 +70,13 @@ dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = Fals
 
 maxVertexZ = 1.0
 
-trackIso = "isolationR03().sumPt"
-caloIso = "isolationR03().emEt+isolationR03().hadEt"
-sumIso = "%s+%s" % (trackIso, caloIso)
-
-trackIsoRel = "(%s)/pt" % trackIso
-caloIsoRel = "(%s)/pt" % caloIso
-sumIsoRel = "(%s)/pt" % sumIso
+relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetId = "emEnergyFraction() > 0.01 && jetID().n90Hits > 1 && jetID().fHPD < 0.98"
 jetIdPF = "numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 
-muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+sumIsoRel+" < 0.2"
+muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
 zMassVetoMuons ="isGlobalMuon && pt > 20. && abs(eta) < 2.5"
 zMassVeto = "76 < mass() && mass < 106"
@@ -120,7 +113,7 @@ patArgs = {"doPatTrigger": False,
            "doPatElectronID": False,
            "doTauHLTMatching": False,
            }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -135,16 +128,9 @@ process.commonSequence *= process.firstPrimaryVertex
 
 # Define the histograms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
-histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="eta")
-histoPhi = Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, description="phi")
-histoTrackIso = Histo("trackIso", trackIso, min=0, max=100.0, nbins=100, description="TrackIso")
-histoCaloIso = Histo("caloIso", caloIso, min=0, max=100.0, nbins=100, description="CaloIso")
-histoSumIso = Histo("sumIso", sumIso, min=0, max=100.0, nbins=100, description="SumIso")
-histoTrackIsoRel = Histo("trackIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="TrackIsoRel")
-histoCaloIsoRel = Histo("caloIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="CaloIsoRel")
-histoSumIsoRel = Histo("sumIsoRel", trackIsoRel, min=0, max=0.5, nbins=100, description="SumIsoRel")
-
+histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="muon pt (GeV/c)")
+histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="muon eta")
+histoIso = Histo("relIso", relIso, min=0, max=0.5, nbins=100, description="Relative isolation")
 histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
 histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=100, description="Track norm chi2")
@@ -152,13 +138,11 @@ histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=
 histoMet = Histo("et", "et()", min=0., max=400., nbins=400, description="MET (GeV)")
 
 histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
-                            min=0, max=400, nbins=400, description="W transverse mass")
-histoZMass = Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
+                            min=0, max=120, nbins=120, description="W transverse mass")
+histoZMass = Histo("mass", "mass()", min=0, max=200, nbins=200, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoPhi, histoTrackIso, histoCaloIso, histoSumIso, histoTrackIsoRel, histoCaloIsoRel, histoSumIsoRel]
+histosBeginning = [histoPt, histoEta, histoIso]
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
-
-histosJet = [histoPt, histoEta, histoPhi]
 
 vertexCollections = ["offlinePrimaryVertices"]
 if dataVersion.isData():
@@ -176,9 +160,12 @@ class MuonAnalysis:
         self._metCut = metCutString % metCut
         self._njets = njets
         self._jets = jets
-        self._isolationCut = "%s < %f" % (sumIsoRel, muonIsolationCut)
+        self._isolationCut = "%s < %f" % (relIso, muonIsolationCut)
 
-        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=additionalCounters)
+        counters = []
+        if dataVersion.isData():
+            counters = dataSelectionCounters
+        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=counters)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
@@ -195,8 +182,6 @@ class MuonAnalysis:
         if not self.afterOtherCuts:
             self.histoAnalyzer = self.analysis.addMultiHistoAnalyzer("AllMuons", [
                     ("muon_", muons, histosBeginning),
-                    ("calojet_", jets, histosJet),
-                    ("pfjet_", jetsPF, histosJet),
                     ("calomet_", cms.InputTag(caloMET), [histoMet]),
                     ("pfmet_", cms.InputTag(pfMET), [histoMet]),
                     ("tcmet_", cms.InputTag(tcMET), [histoMet])])
@@ -280,15 +265,13 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoSumIsoRel.pset().clone(cut=cms.untracked.string(self._isolationCut)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCut)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
         self.histoAnalyzer = self.analysis.addCloneAnalyzer(name, self.histoAnalyzer)
         if "muonSrc" in kwargs:
             self.histoAnalyzer.muon_.src = kwargs["muonSrc"]
-        if "pfJetSrc" in kwargs:
-            self.histoAnalyzer.pfjet_.src = kwargs["pfJetSrc"]
 
     def cloneMultipAnalyzer(self, **kwargs):
         name = self.multipName
@@ -317,9 +300,9 @@ class MuonAnalysis:
         wmunuPF   = self.analysis.addProducer("WMuNuPF",   self.candCombinerPrototype.clone(decay = cms.string(self.selectedMuons.getModuleLabel()+" "+pfMET)))
         wmunuTC   = self.analysis.addProducer("WMuNuTC",   self.candCombinerPrototype.clone(decay = cms.string(self.selectedMuons.getModuleLabel()+" "+tcMET)))
         self.cloneHistoAnalyzer("WMuNuCands")
-        self.histoAnalyzer.wmumetCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
-        self.histoAnalyzer.wmumetPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
-        self.histoAnalyzer.wmumetTC_   = cms.untracked.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmunuCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmunuPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmunuTC_   = cms.untracked.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
 
     def addZMassHistos(self):
         from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
@@ -359,7 +342,8 @@ class MuonAnalysis:
             self.clonePileupAnalyzer()
 
         # Select primary vertex
-        self.selectedPrimaryVertex = self.analysis.addAnalysisModule("PrimaryVertex",
+        self.selectedPrimaryVertex = self.analysis.addAnalysisModule(
+            "PrimaryVertex",
             selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
             filter = cms.EDFilter("VertexCountFilter",
                                   src = cms.InputTag("dummy"),
@@ -376,7 +360,6 @@ class MuonAnalysis:
         # track the multiplicity through the selections
         self.selectedJets = self.analysis.addSelection("JetSelection", self.selectedJets, jetSelection)
         if not self.afterOtherCuts:
-            self.cloneHistoAnalyzer("JetSelection", pfJetSrc=self.selectedJets)
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetSelection")
             self.multipAnalyzer.jets.src = self.selectedJets
 
@@ -387,7 +370,6 @@ class MuonAnalysis:
 
         self.selectedJets = self.analysis.addSelection("JetId", self.selectedJets, idstr)
         if not self.afterOtherCuts:
-            self.cloneHistoAnalyzer("JetId", pfJetSrc=self.selectedJets)
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetId")
             self.multipAnalyzer.jets.src = self.selectedJets
 
@@ -484,7 +466,7 @@ class MuonAnalysis:
 
     def muonIsolationCustom(self, postfix, cut):
         name = "MuonIsolation"+postfix
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (sumIsoRel, cut))
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (relIso, cut))
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -597,7 +579,7 @@ class MuonAnalysis:
             self.addAfterOtherCutsAnalyzer(name)
         self.createAnalysisPath()
 
-    def muonSelection(self):
+    def noIsoNoVetoMet(self):
         self.triggerPrimaryVertex()
         self.jetSelection()
         if self.doJetId:
@@ -630,7 +612,7 @@ class MuonAnalysis:
 
         self.createAnalysisPath()
 
-    def muonSelectionPF(self):
+    def noIsoNoVetoMetPF(self):
         self.triggerPrimaryVertex()
         self.tightMuonSelection()
 
@@ -717,10 +699,10 @@ class MuonAnalysis:
 def createAnalysis(name, postfix="", **kwargs):
     a = MuonAnalysis(process, prefix=name+postfix, **kwargs)
     getattr(a, name)()
-    #a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
-    #getattr(a, name)()
-    a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
     getattr(a, name)()
+    #a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    #getattr(a, name)()
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", **kwargs)
@@ -729,6 +711,14 @@ def createAnalysis2(**kwargs):
     if "postfix" in kwargs:
         postfix = kwargs["postfix"]
         del kwargs["postfix"]
+
+    for nj in [1, 2, 3]:
+        kwargs["postfix"] = "NJets%d%s"%(nj, postfix)
+        kwargs["njets"] = nj
+        createAnalysis("noIsoNoVetoMet", **kwargs)
+        createAnalysis("noMuon", **kwargs)
+        createAnalysis("noMuonPF", jets=jetsPF, **kwargs)
+        createAnalysis("muonLast", **kwargs)
 
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
@@ -740,8 +730,7 @@ def createAnalysis2(**kwargs):
         kwargs["metCut"] = met
         kwargs["njets"] = njets
         kwargs["jets"] = jetsPF
-        kwargs["doJetId"] = True
-        createAnalysis("muonSelectionPF", **kwargs)
+        createAnalysis("noIsoNoVetoMetPF", **kwargs)
 
 createAnalysis2()
 if options.WDecaySeparate > 0:
@@ -761,6 +750,74 @@ if options.WDecaySeparate > 0:
 
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
+
+process.muonJetMetAnalyzer = cms.EDAnalyzer(
+    "HPlusMuonJetMetAnalyzer",
+    muonSrc = cms.untracked.InputTag(muons.value()),
+    jetSrc = cms.untracked.InputTag(jetsPF.value()),
+    metSrc = cms.untracked.InputTag(pfMET),
+    njets = cms.untracked.uint32(1),
+    jetSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(jetSelection),
+            name = cms.untracked.string("JetKinematic")
+        ),
+    ),
+    muonSelections = cms.untracked.VPSet(
+        cms.PSet(
+            cut = cms.untracked.string(tightMuonCut),
+            name = cms.untracked.string("MuonTight")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("abs(eta()) < 1.4"),
+            name = cms.untracked.string("MuonEta")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 5"),
+            name = cms.untracked.string("MuonPt5")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 10"),
+            name = cms.untracked.string("MuonPt10")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 15"),
+            name = cms.untracked.string("MuonPt15")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 20"),
+            name = cms.untracked.string("MuonPt20")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 25"),
+            name = cms.untracked.string("MuonPt25")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 30"),
+            name = cms.untracked.string("MuonPt30")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 35"),
+            name = cms.untracked.string("MuonPt35")
+        ),
+        cms.PSet(
+            cut = cms.untracked.string("pt() > 40"),
+            name = cms.untracked.string("MuonPt40")
+        ),
+    )
+)
+
+process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
+process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
+    cut = cms.untracked.string(jetIdPF),
+    name = cms.untracked.string("JetId")
+))
+
+process.muonJetMetPath = cms.Path(
+    process.commonSequence *
+    process.muonJetMetAnalyzer *
+    process.muonJetMetAnalyzerJetId
+)
 
 
 #print process.dumpPython()

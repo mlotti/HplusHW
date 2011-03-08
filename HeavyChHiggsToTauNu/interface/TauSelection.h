@@ -54,8 +54,9 @@ namespace HPlus {
     };
 
     enum TauSelectionOperationMode {
-      kNormalTauID,
+      kNormalTauID, // Tau candidate selection + tau ID selections
       kFactorizedTauID,
+      kTauCandidateSelectionOnly, // Only tau candidate selection is applied
       kAntiTauTag, // Selects anti-tagged taus
       kAntiTauTagIsolationOnly // Selects anti-isolated tau jets
     };

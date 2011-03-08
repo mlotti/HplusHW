@@ -47,12 +47,10 @@ class CellFormatBase:
         if self._valueOnly or (uLow == None and uUp == None):
             return self._formatValue(value)
 
-#        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
-#            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
-#        else:
-#            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
+        if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
+            return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
         else:
-            return self._formatValue(value)
+            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
 
 
 class CellFormatText(CellFormatBase):
@@ -186,14 +184,29 @@ class TableFormatBase:
             except KeyError:
                 setattr(self, "_"+x, "")
 
-    def setColumnFormat(self, columnIndex, cellFormat):
+    def setColumnFormat(self, cellFormat, **kwargs):
         """Set column format.
 
         Arguments:
-        columnIndex    index of column
         cellFormat     CellFormatBase object to format the column
+
+        Keyword arguments:
+        index     Column index
+        name      Column name
+
+        The column can be referred by index or by name. Only one of
+        them can be given. In case of clash, the preference is on the
+        column name.
         """
-        self.columnCellFormat[columnIndex] = cellFormat
+        ind = kwargs.get("index", None)
+        if ind == None:
+            ind = kwargs.get("name", None)
+            if ind == None:
+                raise Exception("Either 'index' or 'name' keyword argument is required")
+        elif "name" in kwargs:
+            raise Exception("Only one of keyword arguments 'index', 'name' can be given")
+
+        self.columnCellFormat[ind] = cellFormat
 
     def beginTable(self, ncolumns):
         """Format table beginning.
@@ -239,17 +252,22 @@ class TableFormatBase:
         """
         return self._endColumn
 
-    def formatCell(self, columnIndex, count):
+    def setCurrentColumn(self, name, index):
+        self.currentCellFormat = self.defaultCellFormat
+        for ind in [index, name]:
+            if ind in self.columnCellFormat:
+                self.currentCellFormat = self.columnCellFormat[ind]
+
+    def formatCell(self, count):
         """Format a cell.
 
         Arguments:
         count   Count object to format
         """
-        cf = self.defaultCellFormat
-        if columnIndex in self.columnCellFormat:
-            cf = self.columnCellFormat[columnIndex]
+        if not hasattr(self, "currentCellFormat"):
+            raise Exception("setCurrentColumn() must be called first")
 
-        return cf.format(count)
+        return self.currentCellFormat.format(count)
 
 
 class TableFormatText(TableFormatBase):
@@ -290,7 +308,7 @@ class TableFormatLaTeX(TableFormatBase):
 
     def endColumn(self, lastColumn):
         if not lastColumn:
-            return " && "
+            return " & "
         else:
             return ""
 
@@ -386,6 +404,36 @@ def counterEfficiency(counterTable):
             result.setCount(irow, icol, value)
     return result
 
+def sumColumn(name, columns):
+    """Create a new CounterColumn as the sum of the columns."""
+    nrows = columns[0].getNrows()
+    for i, c in enumerate(columns[1:]):
+        if nrows != c.getNrows():
+            raise Exception("Unable to sum the columns, column 0 has '%d' rows, column %d has '%d'." % (nrows, i, c.getNrows()))
+    rows = []
+    for irow in xrange(nrows):
+        count = dataset.Count(0,0)
+        for c in columns:
+            count.add(c.getCount(irow))
+        rows.append(count)
+
+    return CounterColumn(name, columns[0].getRowNames(), rows)
+
+def divideColumn(name, column1, column2):
+    """Create a CounterColumn as column1/column2."""
+    nrows = column1.getNrows()
+    if nrows != column2.getNrows():
+        raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
+
+    rows = []
+    for irow in xrange(nrows):
+        count = column1.getCount(irow).copy()
+        count.divide(column2.getCount(irow))
+        rows.append(count)
+
+    return CounterColumn(name, column1.getRowNames(), rows)
+
+
 class CounterColumn:
     """Class represring a column in CounterTable."""
     def __init__(self, name, rowNames, values):
@@ -408,8 +456,20 @@ class CounterColumn:
     def getRowName(self, irow):
         return self.rowNames[irow]
 
+    def getRowNames(self):
+        return self.rowNames
+
     def getCount(self, irow):
         return self.values[irow]
+
+    def removeRow(self, irow):
+        del self.values[irow]
+        del self.rowNames[irow]
+
+    def multiply(self, value):
+        count = dataset.Count(value, 0)
+        for v in self.values:
+            v.multiply(count)
 
 class CounterTable:
     """Class to represent a table of counts.
@@ -454,7 +514,10 @@ class CounterTable:
                 self.columnNames[icol] = mapping[col]
 
     def indexColumn(self, name):
-        return self.columnNames.index(name)
+        try:
+            return self.columnNames.index(name)
+        except ValueError:
+            raise Exception("Column '%s' not found" % name)
 
     def appendColumn(self, column):
         self.insertColumn(self.getNcolumns(), column)
@@ -516,7 +579,37 @@ class CounterTable:
 
         self.columnNames.insert(icol, column.getName())
 
-    def getColumn(self, icol):
+    def getColumn(self, *args, **kwargs):
+        """Get column by index or by name.
+
+        Positional arguments:
+        icol   Column index
+
+        Keyword arguments:
+        index   Column index
+        name    Column name
+
+        The column is identified either by index or name. If
+        positional argument is given, it is used as an index (for
+        backward compatibility)
+        """
+
+        if len(args) > 1:
+            raise Exception("Only one positional argument may be given")
+        elif len(args) == 1 and len(kwargs) > 0:
+            raise Exception("No positional arguments may be given if any keyword argument is given")
+
+        icol = None
+        if len(args) == 1:
+            icol = args[0]
+        elif "index" in kwargs:
+            icol = kwargs["index"]
+        elif "name" in kwargs:
+            icol = self.indexColumn(kwargs["name"])
+        else:
+            raise Exception("Keyword argument must be either 'index' or 'name'")
+
+
         # Extract the data for the column
         rowNames = self.rowNames[:]
         colValues = [self.table[irow][icol] for irow in xrange(0, self.getNrows())]
@@ -559,15 +652,18 @@ class CounterTable:
 
     def _content(self, formatter):
         content = []
-        for irow in xrange(0, self.getNrows()):
-            row = [self.rowNames[irow]]
-            for icol in xrange(0, self.getNcolumns()):
+        for irow in xrange(self.getNrows()):
+            content.append([self.rowNames[irow]])
+
+        for icol in xrange(self.getNcolumns()):
+            formatter.setCurrentColumn(self.columnNames[icol], icol)
+
+            for irow in xrange(self.getNrows()):
                 count = self.getCount(irow, icol)
                 if count != None:
-                    row.append(formatter.formatCell(icol, count))
+                    content[irow].append(formatter.formatCell(count))
                 else:
-                    row.append("")
-            content.append(row)
+                    content[irow].append("")
         return content
 
     def _columnWidths(self, content):
@@ -683,7 +779,7 @@ class Counter:
         for c in self.counters:
             if c.datasetRootHisto.getDataset().isData():
                 if lumi != None:
-                    raise Exception("Unable to normalize by luminosity, more than one data datasts (you might want to merge data datasets)")
+                    raise Exception("Unable to normalize by luminosity, more than one data datasets (you might want to merge data datasets)")
                 lumi = c.datasetRootHisto.getDataset().getLuminosity()
         if lumi == None:
             raise Exception("Unable to normalize by luminosity. no data datasets")

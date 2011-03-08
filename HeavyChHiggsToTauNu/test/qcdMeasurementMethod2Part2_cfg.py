@@ -70,7 +70,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ##############################################################################
 # qcdMeasurementSignalSelection module

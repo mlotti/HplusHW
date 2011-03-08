@@ -61,9 +61,9 @@ def checkCrabInPath():
         else:
             raise e
 
-def createTaskDir():
+def createTaskDir(prefix="multicrab"):
     """Create 'standard' multicrab task directory and return the name of it."""
-    dirname = "multicrab_" + time.strftime("%y%m%d_%H%M%S")
+    dirname = prefix+"_" + time.strftime("%y%m%d_%H%M%S")
     os.mkdir(dirname)
     return dirname
 
@@ -573,11 +573,12 @@ class Multicrab:
         print "Wrote multicrab configuration to %s" % filename
         
 
-    def createTasks(self, configOnly=False):
+    def createTasks(self, configOnly=False, **kwargs):
         """Create the multicrab task.
 
-        Parameters:
-        configOnly   If true, generate the configuration only.
+        Keyword arguments:
+        configOnly   If true, generate the configuration only (default: False).
+        prefix       Prefix of the multicrab task directory (default: 'multicrab')
 
         Creates a new directory for the CRAB tasks, generates the
         multicrab.cfg in there, copies and generates the necessary
@@ -586,7 +587,7 @@ class Multicrab:
         """
 
         checkCrabInPath()
-        dirname = createTaskDir()
+        dirname = createTaskDir(**kwargs)
 
         self._writeConfig(os.path.join(dirname, "multicrab.cfg"))
 

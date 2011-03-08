@@ -103,3 +103,11 @@ muonSelectionSequence = cms.Sequence(
     * goodJets      * goodJetFilter * muonSelectionJets
 #    * goodMet       * goodMetFilter * muonSelectionMet
 )
+
+muonSelectionCounters = [
+    "muonSelectionAllEvents",
+    "muonSelectionTriggered",
+    "muonSelectionPrimaryVertex",
+    "muonSelectionMuons",
+    "muonSelectionJets"
+]
