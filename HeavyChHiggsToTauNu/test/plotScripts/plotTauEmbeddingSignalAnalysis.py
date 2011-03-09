@@ -85,7 +85,7 @@ def leadingTrack(h, rebin=5):
     h.getPad().SetLogy(True)
     common(h, xlabel, ylabel)
 
-def met(h, rebin=5):
+def met(h, rebin=5, fraction=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -102,8 +102,10 @@ def met(h, rebin=5):
     opts = {"ymin": 0.001, "ymaxfactor": 2}
 
     name = name+"_log"
-    #h.createFrameFraction(name, opts=opts)
-    h.createFrame(name, opts=opts)
+    if fraction:
+        h.createFrameFraction(name, opts=opts)
+    else:
+        h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
     common(h, xlabel, ylabel)
 
@@ -113,4 +115,6 @@ deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_D
 
 leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
 
+met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), fraction=True)
+met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMet"))
 met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"))
