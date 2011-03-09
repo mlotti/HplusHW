@@ -24,42 +24,46 @@ def addTestDiscriminatorSequence(process, tau):
     # time dependency (some of these are not in vanilla 3_9_7)
     from RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi import addDiscriminator
 
+    leadingTrackFinding = tau+"DiscriminationByLeadingTrackFinding"
+    if tau == "hpsPFTau":
+        leadingTrackFinding = tau+"DiscriminationByDecayModeFinding"
+
     lst = []
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolationChargedPtSum",
                                 pfRecoTauDiscriminationByIsolationChargedSumPt.clone(
 				)))
-    lst[-1].Prediscriminants.leadPion.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadPion.Producer = cms.InputTag(leadingTrackFinding)
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation05",
                                 pfRecoTauDiscriminationByIsolation.clone(
 					qualityCuts = PFTauQualityCuts05
                                 )))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation06",
                                 pfRecoTauDiscriminationByIsolation.clone(
                                         qualityCuts = PFTauQualityCuts06
                                 )))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation07",
                                 pfRecoTauDiscriminationByIsolation.clone(
                                         qualityCuts = PFTauQualityCuts07
                                 )))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation08",
                                 pfRecoTauDiscriminationByIsolation.clone(
                                         qualityCuts = PFTauQualityCuts08
                                 )))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation09",
                                 pfRecoTauDiscriminationByIsolation.clone(
                                         qualityCuts = PFTauQualityCuts09
                                 )))
-    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(tau+'DiscriminationByLeadingTrackFinding')
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
     sequence = cms.Sequence()
     for m in lst:
@@ -70,10 +74,9 @@ def addTestDiscriminatorSequence(process, tau):
     return sequence
 
 
-def addPFTauTestDiscriminationSequence(process):
-    process.PFTauTestDiscriminationSequence = cms.Sequence(
-#        addTestDiscriminatorSequence(process, "fixedConePFTau") *
-        addTestDiscriminatorSequence(process, "shrinkingConePFTau")
-    )
+def addPFTauTestDiscriminationSequence(process, tauAlgos=["shrinkingConePFTau"]):
+    process.PFTauTestDiscriminationSequence = cms.Sequence()
+    for algo in tauAlgos:
+        process.PFTauTestDiscriminationSequence *= addTestDiscriminatorSequence(process, algo)
 
     return process.PFTauTestDiscriminationSequence

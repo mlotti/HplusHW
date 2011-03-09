@@ -44,18 +44,13 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
         import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
         import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
-        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
-        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
-	PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
+        tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
-
-        # Reconfigure PFRecoTauDiscriminationByInvMass because there is no updated configuration in the CVS
-        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet(
-            min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
-            max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
-        )
 
         # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
@@ -83,10 +78,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
         process.hplusPatTauSequence = cms.Sequence(
             process.tautagging *
+            process.PFTau * # for HPS+TaNC
             process.PFTauDiscriminationSequenceForChargedHiggs *
             process.PFTauDiscriminationSequenceForChargedHiggsCont *
             process.PFTauTestDiscriminationSequence *
-            process.PFTau * # for HPS+TaNC
             process.CaloTauDiscriminationSequenceForChargedHiggs *
             process.CaloTauDiscriminationSequenceForChargedHiggsCont
         )
@@ -203,9 +198,11 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # process.patTaus.embedIsolationPFGammaCands = True
 
     if doPatTaus:
-        tauTools.classicTauIDSources.extend( HChTaus.HChTauIDSources )
-        tauTools.classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
-        tauTools.classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
+        for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+            idSources.extend(HChTaus.HChTauIDSources)
+            idSources.extend(HChTausCont.HChTauIDSourcesCont)
+        for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+            idSources.extend(HChTausTest.TestTauIDSources)
 
         if doPatCalo:
             tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
