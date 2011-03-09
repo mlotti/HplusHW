@@ -222,6 +222,9 @@ class PlotBase:
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
 
+    def binWidth(self):
+        return self.histoMgr.getHistos()[0].getBinWidth(1)
+
     def appendSaveFormat(self, format):
         self.saveFormats.append(format)
 

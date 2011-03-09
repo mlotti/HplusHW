@@ -1,5 +1,19 @@
 #!/usr/bin/env python
 
+######################################################################
+#
+# This plot script is for analysing how various quantities change in
+# the embedding process. The corresponding python job configuration is
+# tauEmbedding/embeddingAnalysis_cfg.py
+#
+# Examples of quantities which are compared within a single sample:
+# - original vs. embedded MET
+# - kinematics of original muon vs. embedded tau
+#
+# Author: Matti Kortelainen
+#
+######################################################################
+
 import os
 from array import array
 
@@ -33,9 +47,6 @@ class PlotBase(plots.PlotBase):
                                 [".png",
 #                                 ".eps", ".C"
                                  ])
-
-    def binWidth(self):
-        return self.histoMgr.getHistos()[0].getBinWidth(1)
 
 class Plot(PlotBase):
     def __init__(self, datasets, directory, names):
