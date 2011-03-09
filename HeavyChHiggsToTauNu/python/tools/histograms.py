@@ -402,17 +402,17 @@ class HistoBase:
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
-    def __init__(self, dataset, histo, name):
+    def __init__(self, dataset, rootHisto, name):
         """Constructor
 
         Arguments:
-        dataset   Dataset object
-        histo     TH1 object
-        name      Name of the Histo
+        dataset    Dataset object
+        rootHisto  TH1 object
+        name       Name of the Histo
 
         The default legend label is the dataset name
         """
-        HistoBase.__init__(self, histo, name, "l", "HIST")
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
         self.dataset = dataset
 
     def isMC(self):
@@ -420,6 +420,9 @@ class Histo(HistoBase):
 
     def isData(self):
         return self.dataset.isData()
+
+    def getDataset(self):
+        return self.dataset
 
 class HistoTotalUncertainty(HistoBase):
     """Class to represent combined (statistical) uncertainties of many histograms."""
@@ -909,9 +912,6 @@ class HistoManager:
 
         Intended only for internal use.
         """
-        if len(self.datasetRootHistos) == 0:
-            raise Exception("No histograms to use!")
-
         self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):
