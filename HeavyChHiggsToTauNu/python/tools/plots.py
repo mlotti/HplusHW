@@ -334,7 +334,7 @@ class DataMCPlot(PlotSameBase):
 
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("Must call stackMCHostograms() before createFrameFraction()")
+            raise Exception("Must call stackMCHistograms() before createFrameFraction()")
 
         self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
