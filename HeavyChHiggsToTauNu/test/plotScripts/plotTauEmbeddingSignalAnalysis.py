@@ -35,15 +35,23 @@ plots.mergeRenameReorderForDataMC(datasets)
 # Apply TDR style
 style = tdrstyle.TDRStyle()
 
-def deltaPhi(h, step="", rebin=5):
+def deltaPhi(h, name="DeltaPhi", rebin=5):
+    name = h.getRootHistoPath()
+    tmp = name.split("_")
+    name = tmp[-1] + "_" + tmp[-2] # ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
+
+    particle = "#tau jet"
+    if "Original" in name:
+        particle = "#mu"
+
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#Delta#phi(#tau jet, MET) (rad)"
+    xlabel = "#Delta#phi(%s, MET) (rad)" % particle
     ylabel = "Events / %.2f rad" % h.binWidth()
     
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    name = "DeltaPhi_%s_log" % step
+    name = name+"_log"
     h.createFrameFraction(name)
     #h.createFrame(name)
     h.frame.GetXaxis().SetTitle(xlabel)
@@ -55,5 +63,6 @@ def deltaPhi(h, step="", rebin=5):
     h.addLuminosityText()
     h.save()
 
-deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"), step="afterTauId")
+deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
