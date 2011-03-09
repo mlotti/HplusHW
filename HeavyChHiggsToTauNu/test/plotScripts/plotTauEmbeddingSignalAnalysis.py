@@ -85,7 +85,7 @@ def leadingTrack(h, rebin=5):
     h.getPad().SetLogy(True)
     common(h, xlabel, ylabel)
 
-def met(h, rebin=5, fraction=False):
+def met(h, rebin=5, ratio=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -100,10 +100,32 @@ def met(h, rebin=5, fraction=False):
     h.addMCUncertainty()
 
     opts = {"ymin": 0.001, "ymaxfactor": 2}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
 
     name = name+"_log"
-    if fraction:
-        h.createFrameFraction(name, opts=opts)
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    common(h, xlabel, ylabel)
+
+def muonPt(h, rebin=5, ratio=False):
+    name = flipName(h.getRootHistoPath())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "p_{T}^{#mu} (GeV/c)"
+    ylabel = "Events / %.0f GeV" % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+
+    name = name+"_log"
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
@@ -115,6 +137,10 @@ deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_D
 
 leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
 
-met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), fraction=True)
+met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
 met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMet"))
 met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"))
+
+muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
+muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMuonPt"))
+muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMuonPt"))
