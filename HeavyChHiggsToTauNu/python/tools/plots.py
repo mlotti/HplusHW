@@ -282,6 +282,10 @@ class PlotSameBase(PlotBase):
         """
         PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
         self.datasetMgr = datasetMgr
+        self.rootHistoPath = name
+
+    def getRootHistoPath(self):
+        return self.rootHistoPath
 
     def stackMCHistograms(self):
         mcNames = self.datasetMgr.getMCDatasetNames()
