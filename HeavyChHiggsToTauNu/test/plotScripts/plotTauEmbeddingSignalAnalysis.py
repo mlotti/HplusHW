@@ -35,10 +35,22 @@ plots.mergeRenameReorderForDataMC(datasets)
 # Apply TDR style
 style = tdrstyle.TDRStyle()
 
-def deltaPhi(h, name="DeltaPhi", rebin=5):
-    name = h.getRootHistoPath()
+def flipName(name):
     tmp = name.split("_")
-    name = tmp[-1] + "_" + tmp[-2] # ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
+    return tmp[-1] + "_" + tmp[-2] # ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
+
+def common(h, xlabel, ylabel):
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.addLuminosityText()
+    h.save()
+
+def deltaPhi(h, rebin=5):
+    name = flipName(h.getRootHistoPath())
 
     particle = "#tau jet"
     if "Original" in name:
@@ -51,18 +63,29 @@ def deltaPhi(h, name="DeltaPhi", rebin=5):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
+    #h.createFrameFraction(name)
+    h.createFrame(name)
+    common(h, xlabel, ylabel)
+
+def leadingTrack(h, rebin=5):
+    name = flipName(h.getRootHistoPath())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "p_{T}^{leading track} (GeV/c)"
+    ylabel = "Events / %.0f GeV/c" % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+
     name = name+"_log"
-    h.createFrameFraction(name)
-    #h.createFrame(name)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.addLuminosityText()
-    h.save()
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    ROOT.gPad.SetLogy(True)
+    common(h, xlabel, ylabel)
+
 
 deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
 deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
-
+leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
