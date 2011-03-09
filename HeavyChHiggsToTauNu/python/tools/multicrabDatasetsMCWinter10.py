@@ -371,7 +371,7 @@ datasets = {
     },
     "DYJetsToLL_M50_TuneZ2_Winter10_noPU": { # Z+jets
         "dataVersion":" 39Xredigi",
-        "crossSection": 2321,
+        "crossSection": 2800,
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-START39_V8-v2/AODSIM",
