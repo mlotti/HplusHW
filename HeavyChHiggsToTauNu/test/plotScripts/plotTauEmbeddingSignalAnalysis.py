@@ -82,10 +82,35 @@ def leadingTrack(h, rebin=5):
     name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
-    ROOT.gPad.SetLogy(True)
+    h.getPad().SetLogy(True)
+    common(h, xlabel, ylabel)
+
+def met(h, rebin=5):
+    name = flipName(h.getRootHistoPath())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "MET (GeV)"
+    if "embedding" in name:
+        xlabel = "Embedded "+xlabel
+    elif "original" in name:
+        xlabel = "Original "+xlabel
+    ylabel = "Events / %.0f GeV" % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.001, "ymaxfactor": 2}
+
+    name = name+"_log"
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
     common(h, xlabel, ylabel)
 
 
 deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
 deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
+
 leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
+
+met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"))
