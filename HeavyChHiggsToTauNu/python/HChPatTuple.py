@@ -25,13 +25,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
            doPatCalo=True, doBTagging=True,
-           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
+           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
+           includeTracksPFCands=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
         out = outdict["out"]
 
     outputCommands = []
+
+    if includeTracksPFCands:
+        outputCommands.extend([
+                "keep *_generalTracks_*_*",
+                "keep *_globalMuons_*_*",
+                "keep *_particleFlow_*_*"
+                ])
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
@@ -176,10 +184,16 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    process.patTaus.embedLeadTrack = True
-    process.patTaus.embedLeadPFCand = True
-    process.patTaus.embedLeadPFChargedHadrCand = True
-    process.patTaus.embedLeadPFNeutralCand = True
+    if includeTracksPFCands:
+        process.patTaus.embedLeadTrack = False
+        process.patTaus.embedLeadPFCand = False
+        process.patTaus.embedLeadPFChargedHadrCand = False
+        process.patTaus.embedLeadPFNeutralCand = False
+    else:
+        process.patTaus.embedLeadTrack = True
+        process.patTaus.embedLeadPFCand = True
+        process.patTaus.embedLeadPFChargedHadrCand = True
+        process.patTaus.embedLeadPFNeutralCand = True
 
     # There's probably a bug in pat::Tau which in practice prevents
     # the emedding of PFCands. Therefore we keep the PFCandidates
@@ -270,13 +284,19 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     process.patMuons.usePV = False
-    process.patMuons.embedTrack = True
+    if includeTracksPFCands:
+        process.patMuons.embedTrack = False
+    else:
+        process.patMuons.embedTrack = True
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     process.patElectrons.usePV = False
-    process.patElectrons.embedTrack = True
+    if includeTracksPFCands:
+        process.patElectrons.embedTrack = False
+    else:
+        process.patElectrons.embedTrack = True
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
