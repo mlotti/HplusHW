@@ -41,6 +41,8 @@ if [ "x$HPSTANC" = "xtrue" ]; then
     # RecoTauTag/Configuration
     # DataFormats/TauReco
     addpkg -f RecoTauTag/tau_tags.txt
+    cvs up -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
+    cvs up -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 
     cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
     # This checkouts
