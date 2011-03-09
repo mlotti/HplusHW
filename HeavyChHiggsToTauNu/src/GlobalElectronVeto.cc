@@ -272,7 +272,7 @@ namespace HPlus {
     }
 
     // Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
-    bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID;
+    bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID*bElecFiducialVolumeCut;
 
     // Now store the highest Electron Pt and Eta
     fSelectedElectronPt = myHighestElecPt;

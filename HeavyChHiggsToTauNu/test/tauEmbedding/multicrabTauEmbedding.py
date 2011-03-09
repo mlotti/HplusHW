@@ -33,10 +33,10 @@ datasets = [
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
     "TTJets_TuneZ2_Winter10",
-    "TTJets_TuneD6T_Winter10",
+#    "TTJets_TuneD6T_Winter10",
     "WJets_TuneZ2_Winter10",
     #"WJets_TuneZ2_Winter10_noPU",
-    "WJets_TuneD6T_Winter10",
+#    "WJets_TuneD6T_Winter10",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
     "DYJetsToLL_M50_TuneZ2_Winter10",
