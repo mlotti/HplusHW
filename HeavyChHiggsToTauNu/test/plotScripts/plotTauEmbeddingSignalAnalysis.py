@@ -39,20 +39,20 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
-    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
-
+    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"))
     leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
-
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMet"))
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"))
+    rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
 
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMuonPt"))
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMuonPt"))
 
-    rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
+    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
+    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMet"))
+    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"))
+
+    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
 
 # Helper function to flip the last two parts of the histogram name
@@ -74,23 +74,23 @@ def common(h, xlabel, ylabel):
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
-def deltaPhi(h, rebin=5):
+def tauEta(h, rebin=5):
     name = flipName(h.getRootHistoPath())
 
-    particle = "#tau jet"
-    if "Original" in name:
-        particle = "#mu"
-
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "#Delta#phi(%s, MET) (rad)" % particle
-    ylabel = "Events / %.2f rad" % h.binWidth()
-    
+    xlabel = "#eta^{#tau jet}"
+    ylabel = "Events / %.1f" % h.binWidth()
+
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    #h.createFrameFraction(name)
-    h.createFrame(name)
-    h.setLegend(histograms.createLegend())
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+
+    name = name+"_log"
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    #h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
 def leadingTrack(h, rebin=5):
@@ -121,11 +121,34 @@ def rtau(h, name, rebin=5):
     h.addMCUncertainty()
 
     opts = {"ymin": 0.01, "ymaxfactor": 10}
+    name = name+"_log"
     h.createFrame(name, opts=opts)
     #h.createFrameFraction(name, opts=opts)
     h.getPad().SetLogy(True)
     #h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)    
+    common(h, xlabel, ylabel)
+
+def muonPt(h, rebin=5, ratio=False):
+    name = flipName(h.getRootHistoPath())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "p_{T}^{#mu} (GeV/c)"
+    ylabel = "Events / %.0f GeV" % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+
+    name = name+"_log"
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
 
 def met(h, rebin=5, ratio=False):
     name = flipName(h.getRootHistoPath())
@@ -153,25 +176,22 @@ def met(h, rebin=5, ratio=False):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def muonPt(h, rebin=5, ratio=False):
+def deltaPhi(h, rebin=5):
     name = flipName(h.getRootHistoPath())
 
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "p_{T}^{#mu} (GeV/c)"
-    ylabel = "Events / %.0f GeV" % h.binWidth()
+    particle = "#tau jet"
+    if "Original" in name:
+        particle = "#mu"
 
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "#Delta#phi(%s, MET) (rad)" % particle
+    ylabel = "Events / %.2f rad" % h.binWidth()
+    
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
-
-    name = name+"_log"
-    if ratio:
-        h.createFrameFraction(name, opts=opts, opts2=opts2)
-    else:
-        h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
+    #h.createFrameFraction(name)
+    h.createFrame(name)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
