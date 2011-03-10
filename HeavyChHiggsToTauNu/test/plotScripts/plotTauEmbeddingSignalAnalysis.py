@@ -39,6 +39,7 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
+    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"))
     tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"))
     leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"))
     rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
@@ -74,6 +75,25 @@ def common(h, xlabel, ylabel):
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
+def tauPt(h, rebin=5):
+    name = flipName(h.getRootHistoPath())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "#p_{T}^{#tau jet} (GeV/c)"
+    ylabel = "Events / %.0f GeV/c" % h.binWidth()
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+
+    name = name+"_log"
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
 def tauEta(h, rebin=5):
     name = flipName(h.getRootHistoPath())
 
