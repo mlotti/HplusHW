@@ -55,6 +55,7 @@ def main():
     deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
+    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
 
 # Helper function to flip the last two parts of the histogram name
 # e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
@@ -214,6 +215,29 @@ def deltaPhi(h, rebin=5):
     h.createFrame(name)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
+
+def transverseMass(h, rebin=5):
+    name = flipName(h.getRootHistoPath())
+    name = name.replace("TransverseMass", "MtEmbedding")
+
+    particle = "#tau jet"
+    if "Original" in name:
+        particle = "#mu"
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "m_{T}(%s, MET) (GeV/c^{2})" % particle
+    ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
+    
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"xmax": 150}
+
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
 
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
