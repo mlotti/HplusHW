@@ -56,6 +56,7 @@ def main():
     deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
+    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
 
 # Helper function to flip the last two parts of the histogram name
 # e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
@@ -218,11 +219,14 @@ def deltaPhi(h, rebin=5):
 
 def transverseMass(h, rebin=5):
     name = flipName(h.getRootHistoPath())
-    name = name.replace("TransverseMass", "MtEmbedding")
 
-    particle = "#tau jet"
+    particle = ""
     if "Original" in name:
         particle = "#mu"
+        name = name.replace("TransverseMass", "Mt")
+    else:
+        particle = "#tau jet"
+        name = name.replace("TransverseMass", "MtEmbedding")
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "m_{T}(%s, MET) (GeV/c^{2})" % particle
@@ -231,7 +235,7 @@ def transverseMass(h, rebin=5):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"xmax": 150}
+    opts = {"xmax": 200}
 
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
