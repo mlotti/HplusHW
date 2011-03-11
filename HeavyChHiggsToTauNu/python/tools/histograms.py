@@ -1,3 +1,8 @@
+## \package tools.histograms
+# Histogram utilities and classes
+#
+# The package contains classes and utilities for histogram management.
+
 import os, sys
 import glob
 from optparse import OptionParser
@@ -6,30 +11,52 @@ import ROOT
 
 import dataset
 
+## Class to provide default positions of the various texts.
+#
+# The attributes which can be set are the x and y coordinates and the
+# text size.
 class TextDefaults:
-    """Class to provide default positions of the various texts.
-
-    The attributes which can be set are the x and y coordinates and
-    the text size.
-    """
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
         self._setDefaults("energy", x=0.3, y=0.96)
         self._setDefaults("lumi", x=0.65, y=0.85)
 
+    ## Modify the default values
+    # 
+    # \param name   Name of the property ('cmsPreliminary', 'energy', 'lumi')
+    # \param kwargs Keyword arguments
+    #
+    # <b>Keyword arguments</b>
+    # \li \a x     X coordinate
+    # \li \a y     Y coordinate
+    # \li \a size  Font size
     def _setDefaults(self, name, **kwargs):
         for x, value in kwargs.iteritems():
             setattr(self, name+"_"+x, value)
             
+    ## Modify the default position of "CMS Preliminary" text
+    #
+    # \param kwargs  Keyword arguments (forwarded to _setDefaults())
     def setCmsPreliminaryDefaults(self, **kwargs):
         self._setDefaults("cmsPreliminary", **kwargs)
 
+    ## Modify the default position of center-of-mass energy text
+    #
+    # \param kwargs  Keyword arguments (forwarded to _setDefaults())
     def setEnergyDefaults(self, **kwargs):
         self._setDefaults("energy", **kwargs)
         
+    ## Modify the default position of integrated luminosity text
+    #
+    # \param kwargs  Keyword arguments (forwarded to _setDefaults())
     def setLuminosityDefaults(self, **kwargs):
         self._setDefaults("lumi", **kwargs)
 
+    ## Get the (x, y) values for property
+    #
+    # \param name  Name of property
+    # \param x     X coordinate, if None, use the default
+    # \param y     Y coordinate, if None, use the default
     def getValues(self, name, x, y):
         if x == None:
             x = getattr(self, name+"_x")
@@ -37,14 +64,29 @@ class TextDefaults:
             y = getattr(self, name+"_y")
         return (x, y)
 
+    ## Get the size for property
+    #
+    # \param name  Name of property
+    #
+    # \return The text size, taken from ROOT.gStyle if no value has been set
     def getSize(self, name):
         try:
             return getattr(self, name+"_size")
         except AttributeError:
             return ROOT.gStyle.GetTextSize()
 
+## Provides default text positions and sizes
+#
+# In order to modify the global defaults, modify this object.
+#
+# Used by histograms.addCmsPreliminaryText(),
+# histograms.addEnergyText(), histograms.addLuminosityText().
 textDefaults = TextDefaults()
 
+## Add the "CMS Preliminary" text to the pad
+#
+# \param x   X coordinate of the text (None for default value)
+# \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     l = ROOT.TLatex()
@@ -52,6 +94,11 @@ def addCmsPreliminaryText(x=None, y=None):
     l.SetTextSize(textDefaults.getSize("cmsPreliminary"))
     l.DrawLatex(x, y, "CMS Preliminary")
 
+## Add the center-of-mass energy text to the pad
+#
+# \param x   X coordinate of the text (None for default value)
+# \param y   Y coordinate of the text (None for default value)
+# \param s   Center-of-mass energy text with the unit
 def addEnergyText(x=None, y=None, s="7 TeV"):
     (x, y) = textDefaults.getValues("energy", x, y)
     l = ROOT.TLatex()
@@ -59,6 +106,12 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
     l.SetTextSize(textDefaults.getSize("energy"))
     l.DrawLatex(x, y, "#sqrt{s} = "+s)
 
+## Add the integrated luminosity text to the pad
+#
+# \param x     X coordinate of the text (None for default value)
+# \param y     Y coordinate of the text (None for default value)
+# \param lumi  Value of the integrated luminosity
+# \param unit  Unit of the integrated luminosity value
 def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
