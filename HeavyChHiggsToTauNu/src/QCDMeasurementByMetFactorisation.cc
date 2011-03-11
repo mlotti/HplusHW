@@ -10,6 +10,57 @@
 #include "TNamed.h"
 
 namespace HPlus {
+  QCDMeasurementByMetFactorisation::HistogramGroupByTauPt::HistogramGroupByTauPt(const edm::ParameterSet& iConfig, std::string name) {
+    // Get tau pt edge table
+    edm::ParameterSet myTauConfig = iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection");
+    edm::ParameterSet myTauFactorizationConfig = myTauConfig.getUntrackedParameter<edm::ParameterSet>("factorization");
+    fPtBinEdges = myTauFactorizationConfig.getUntrackedParameter<std::vector<double> >("ptBinLowEdges");
+    // Make histograms
+    edm::Service<TFileService> fs;
+    size_t myTableSize = fPtBinEdges.size(); 
+    int myMETBins = 20; // number of bins for the histograms
+    double myMETMin = 0.; // MET range minimum
+    double myMETMax = 100.; // MET range maximum
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+        // Treat first bin
+        myHistoName << name << "TauPtRangeBelow" << fPtBinEdges[0];
+        myHistoLabel << name << "TauPtRangeBelow" << fPtBinEdges[0] <<";MET, GeV;N/" 
+                     << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
+        fHistograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+          myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+      } else {
+        myHistoName << name << "TauPtRange" << fPtBinEdges[i-1] << "to" << fPtBinEdges[i];
+        myHistoLabel << name << "TauPtRange" << fPtBinEdges[i-1] << "to" << fPtBinEdges[i] <<";MET, GeV;N/" 
+                     << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
+        fHistograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+          myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << "TauPtRangeAbove" << fPtBinEdges[myTableSize-1];
+    myHistoLabel << name << "TauPtRangeAbove" << fPtBinEdges[myTableSize-1] <<";MET, GeV;N/" 
+                 << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
+    fHistograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+      myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+  }
+
+  QCDMeasurementByMetFactorisation::HistogramGroupByTauPt::~HistogramGroupByTauPt() { }
+  
+  void QCDMeasurementByMetFactorisation::HistogramGroupByTauPt::fill(double tauPt, double MET, double weight) {
+    size_t myTableSize = fPtBinEdges.size();
+    size_t myIndex = 0;
+    while (tauPt > fPtBinEdges[myIndex] && myIndex < myTableSize)
+      ++myIndex;
+    fHistograms[myIndex]->Fill(MET, weight);
+  }
+
   QCDMeasurementByMetFactorisation::QCDMeasurementByMetFactorisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
@@ -42,9 +93,13 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
-    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight)
+    fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-
+    hMETPlotsAfterTauSelection(iConfig, "METPlotsAfterTauSelection"),
+    hMETPlotsAfterMuonVeto(iConfig, "METPlotsAfterMuonVeto"),
+    hMETPlotsAfterHadronicJetSelection2(iConfig, "METPlotsAfterJetSelection2"),
+    hMETPlotsAfterHadronicJetSelection3(iConfig, "METPlotsAfterJetSelection3"),
+    hMETPlotsAfterBTagging(iConfig, "METPlotsAfterBTagging")
    {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -132,7 +187,7 @@ namespace HPlus {
     mySelectedTau.push_back(tauData.getSelectedTaus()[0]);
     hMETAfterTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hTauPtVsMET_AfterTauSelection->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
+    hMETPlotsAfterTauSelection.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -148,10 +203,14 @@ namespace HPlus {
     increment(fGlobalMuonVetoCounter);
     hMETAfterMuonVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hTauPtVsMET_AfterMuonVeto->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
+    hMETPlotsAfterMuonVeto.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);    
+    if (jetData.getHadronicJetCount() >= 2)
+    hMETPlotsAfterHadronicJetSelection2.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if (jetData.getHadronicJetCount() >= 3)
+    hMETPlotsAfterHadronicJetSelection3.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if(!jetData.passedEvent()) return; // Note: jets close to tau-Jet in eta-phi space are removed from jet list.
     increment(fJetSelectionCounter);
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -174,7 +233,9 @@ namespace HPlus {
     //METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
-
+    if (btagData.passedEvent() {
+      hMETPlotsAfterBTagging.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    }
     
     // Fill additional counters before dropping events because of MET cut
     if ( btagData.passedEvent() && fakeMETData.passedEvent() ) {

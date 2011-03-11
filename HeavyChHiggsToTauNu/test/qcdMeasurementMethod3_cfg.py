@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-#dataVersion = "39Xredigi"
-dataVersion = "39Xdata"
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
 ##########
 # Flags for additional signal analysis modules
@@ -39,8 +39,8 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"

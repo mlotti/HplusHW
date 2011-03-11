@@ -29,6 +29,20 @@ class TH2;
 
 namespace HPlus {
   class QCDMeasurementByMetFactorisation {
+    /** Helper class for producing data/MC histograms
+    **/
+    class HistogramGroupByTauPt {
+    public:
+      HistogramGroupByTauPt(const edm::ParameterSet& iConfig, std::string name);
+      ~HistogramGroupByTauPt();
+      /// Fill MET to histogram corresponding to correct tau pT bin 
+      void fill(double tauPt, double MET, double weight);
+      
+    private:
+      std::vector<double> fPtBinEdges; 
+      std::vector<TH1*> fHistograms;
+    };
+  
   public:
     explicit QCDMeasurementByMetFactorisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~QCDMeasurementByMetFactorisation();
@@ -100,6 +114,11 @@ namespace HPlus {
     TH2 *hTauPtVsMET_AfterMET;
     TH2 *hTauPtVsMET_AfterFakeMETVeto;
 
+    HistogramGroupByTauPt hMETPlotsAfterTauSelection;
+    HistogramGroupByTauPt hMETPlotsAfterMuonVeto;
+    HistogramGroupByTauPt hMETPlotsAfterHadronicJetSelection2;
+    HistogramGroupByTauPt hMETPlotsAfterHadronicJetSelection3;
+    HistogramGroupByTauPt hMETPlotsAfterBTagging;
   };
 }
 
