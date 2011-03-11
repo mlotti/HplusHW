@@ -311,7 +311,7 @@ class PlotBase:
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
-    ## Stack all MC histograms to one
+    ## Stack all MC histograms 
     #
     # Internally, THStack is used
     def stackMCHistograms(self):
@@ -358,6 +358,20 @@ class PlotBase:
             self.cf.canvas.SaveAs(f)
 
         ROOT.gErrorIgnoreLevel = backup
+
+    ## \var histoMgr
+    # histograms.HistoManager object for histogram management
+    ## \var datasetMgr
+    # datasets.DatasetManager object to have the datasets at hand
+    ## \var saveFormats
+    # List of formats to which to save the plot
+    ## \var legend
+    # TLegend object if legend has been added to the plot
+    ## \var cf
+    # histograms.CanvasFrame object to hold the TCanvas and TH1 for frame
+    ## \var frame
+    # TH1 object for the frame (from the cf object)
+
 
 ## Class for data-MC comparison plot.
 # 
@@ -412,7 +426,6 @@ class DataMCPlot(PlotBase):
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
-    ## Draw the plot
     def draw(self):
         PlotBase.draw(self)
         if hasattr(self, "mcSum"):
