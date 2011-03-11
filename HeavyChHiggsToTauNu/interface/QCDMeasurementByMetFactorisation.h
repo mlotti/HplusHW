@@ -97,6 +97,8 @@ namespace HPlus {
     TH2 *hTauPtVsMET_AfterMuonVeto;
     TH2 *hTauPtVsMET_AfterJetSelection;
     TH2 *hTauPtVsMET_AfterBTagging;
+    TH2 *hTauPtVsMET_AfterMET;
+    TH2 *hTauPtVsMET_AfterFakeMETVeto;
 
   };
 }
