@@ -19,7 +19,7 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("MUONSKIM")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -52,23 +52,14 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 process.selectionSequence = cms.Sequence()
 
-from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPat
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
-
-if options.doPat != 0:
-    process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
-        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
-    
-    process.patSequence = addPat(process, dataVersion, doTauHLTMatching=False,
-                                 doPatTaus=False)
-    process.patMuons.embedTrack = False # In order to avoid transient references and generalTracks is available anyway
-
-    process.selectionSequence = cms.Sequence(
-        process.collisionDataSelection * 
-        process.patSequence
-    )
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+patArgs = {"doTauHLTMatching": False,
+           "doPatTaus": False
+           }
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+# In order to avoid transient references and generalTracks is available anyway
+if hasattr(process, "patMuons"):
+    process.patMuons.embedTrack = False
 
 # Override the outputCommands here, since PAT modifies it
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
@@ -84,12 +75,12 @@ process.out.outputCommands.extend([name_re.sub("_MUONSKIM", x) for x in process.
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelection_cff")
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff")
-process.selectionSequence *= process.muonSelectionSequence
 process.muonTrigger.hltResults.setProcessName(dataVersion.getTriggerProcess())
 process.muonTrigger.triggerConditions = cms.vstring(trigger)
 
 process.path = cms.Path(
-    process.selectionSequence
+    process.commonSequence *
+    process.muonSelectionSequence
 )
 process.endPath = cms.EndPath(
     process.out
