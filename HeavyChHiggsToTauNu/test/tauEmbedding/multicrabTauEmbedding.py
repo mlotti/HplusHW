@@ -43,6 +43,9 @@ datasets = [
     "TToBLNu_s-channel_TuneZ2_Winter10",
     "TToBLNu_t-channel_TuneZ2_Winter10",
     "TToBLNu_tW-channel_TuneZ2_Winter10",
+    "WW_TuneZ2_Winter10",
+    "WZ_TuneZ2_Winter10",
+    "ZZ_TuneZ2_Winter10",
     # For testing
     "TTToHplusBWB_M120_Winter10"
     ]
@@ -55,14 +58,9 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-#tauname = "_tauembedding_%s_v6" % step
-tauname = "_tauembedding_%s_v6_2" % step
+tauname = "_tauembedding_%s_v7" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
-
-skimNlumis = {
-    "Mu_136035-144114_Dec22": 1000
-    }
 
 skimNjobs = {
     "WJets_TuneZ2_Winter10": 400,
@@ -70,11 +68,14 @@ skimNjobs = {
     "WJets_TuneD6T_Winter10": 400,
     "TTJets_TuneZ2_Winter10": 400,
     "TTJets_TunedD6TWinter10": 400,
-    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 300,
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 400,
     "DYJetsToLL_M50_TuneZ2_Winter10": 30,
     "TToBLNu_s-channel_TuneZ2_Winter10": 100,
     "TToBLNu_t-channel_TuneZ2_Winter10": 100,
     "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
+    "WW_TuneZ2_Winter10": 100,
+    "WZ_TuneZ2_Winter10": 100,
+    "ZZ_TuneZ2_Winter10": 100,
     }
    
 
@@ -102,10 +103,6 @@ def modify(dataset):
     if step == "skim":
         try:
             dataset.setNumberOfJobs(skimNjobs[dataset.getName()])
-        except KeyError:
-            pass
-        try:
-            dataset.setLumisPerJob(skimNlumis[dataset.getName()])
         except KeyError:
             pass
 
