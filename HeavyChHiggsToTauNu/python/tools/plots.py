@@ -1,11 +1,35 @@
+## \package tools.plots
+# Plot utilities and classes
+#
+# The package is intended to gather the following commonalities in the
+# plots of H+ analysis (signal analysis, QCD and EWK background
+# analyses)
+# - Dataset merging (see plots._datasetMerge)
+# - Dataset order (see plots._datasetOrder)
+# - Dataset legend labels (see plots._legendLabels)
+# - Dataset plot styles (see plots._plotStyles)
+# - Various datasets.DatasetManager operations (see plots.mergeRenameReorderForDataMC())
+# - Various histograms.HistoManager operations (see plots.PlotBase and the derived classes)
+#
+# The intended usage is to first construct datasets.DatasetManager as
+# usual, then call plots.mergeRenameReorderForDataMC() and then
+# construct an object of the appropriate plots.PlotBase derived class.
+# Further customisations and operations should be done via the
+# interface of the plots.PlotBase derived class, or directly with the
+# histograms.HistoManager object contained by the plot object (via
+# histoMgr member).
+
 import ROOT
 import array
 
 import histograms
 import styles
 
+## Map the physical dataset names to logical names
+#
 # Map the physical dataset names (in multicrab.cfg) to logical names
-# used in _legendLabels and _plotStyles
+# used in plots._legendLabels and plots._plotStyles. The mapping is
+# used in the mergeRenameReorderForDataMC() function.
 _physicalToLogical = {
     "TTToHplusBWB_M90_Winter10":  "TTToHplusBWB_M90", 
     "TTToHplusBWB_M100_Winter10": "TTToHplusBWB_M100",
@@ -43,6 +67,7 @@ _physicalToLogical = {
     "ZZ_TuneZ2_Winter10": "ZZ",
 }
 
+## Map the datasets to be merged to the name of the merged dataset.
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -63,6 +88,7 @@ _datasetMerge = {
     "ZZ": "Diboson",
 }
 
+## Default ordering of datasets
 _datasetOrder = [
     "Data",
     "TTToHplusBWB_M90", 
@@ -78,7 +104,7 @@ _datasetOrder = [
     "Diboson",
 ]
 
-# Map the logical dataset names to legend labels
+## Map the logical dataset names to legend labels
 _legendLabels = {
     "Data":                  "Data",
 
@@ -103,7 +129,7 @@ _legendLabels = {
     "SingleTop":             "Single t",
 }
 
-# Map the logical dataset names to plot styles
+## Map the logical dataset names to plot styles
 _plotStyles = {
     "Data":                  styles.dataStyle,
 
@@ -124,36 +150,98 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 }
 
-
+## Helper class for setting properties
+#
+# Helper class for setting properties of histograms.Histo objects (legend label, plot style)
 class SetProperty:
+    ## Constructor
+    #
+    # \param properties  Dictionary of properties (from name of
+    #                    histograms.Histo to the property understood
+    #                    by the setter)
+    # \param setter      Function for setting the property. It should take
+    #                    two parameters, first one is the
+    #                    histograms.Histo object, second one is the
+    #                    property to be set
     def __init__(self, properties, setter):
         self.properties = properties
         self.setter = setter
 
+    ## Set the property of a given object
+    #
+    # \param histoData   histograms.Histo object for which to set the property
+    #
+    # If there is no property to be set for a given histo, nothing is done to it
     def __call__(self, histoData):
         prop = self._getProperty(histoData.getName())
         if prop != None:
             self.setter(histoData, prop)
 
+    ##
+    # \todo Replace this with self.properties.get(name, None)...
     def _getProperty(self, name):
         if name in self.properties:
             return self.properties[name]
         else:
             return None
 
+## Construct a "function" to set legend labels
+#
+# \param labels   Dictionary of labels (from the histo name to the legend label)
+#
+# \return   Object with implemented function call operator " to be used
+#           with histograms.HistoManagerImpl.forEachHisto().
 def SetLegendLabel(labels):
     return SetProperty(labels, lambda hd, label: hd.setLegendLabel(label))
 
-def SetPlotStyle(styleList):
-    return SetProperty(styleList, lambda hd, style: hd.call(style))
+## Construct a "function" to set plot styles
+#
+# \param styleMap   Dictionary of styles (from the histo name to the style)
+#
+# \return   Object with implemented function call operator " to be used
+#           with histograms.HistoManagerImpl.forEachHisto().
+def SetPlotStyle(styleMap):
+    return SetProperty(styleMap, lambda hd, style: hd.call(style))
 
-def UpdatePlotStyleFill(styleList, namesToFilled):
+## Construct a "function" to update some styles to filled
+#
+# \param styleMap       Dictionary of styles (from the histo name to the style)
+# \param namesToFilled  List of histogram names for which to apply the filled style
+#
+# \return   Object with implemented function call operator " to be used
+#           with histograms.HistoManagerImpl.forEachHisto().
+#
+# The filled style is implemented via style.StyleFill
+def UpdatePlotStyleFill(styleMap, namesToFilled):
     def update(hd, style):
         if hd.getName() in namesToFilled:
             hd.call(styles.StyleFill(style))
 
-    return SetProperty(styleList, update)
+    return SetProperty(styleMap, update)
 
+## Default dataset merging, naming and reordering for data/MC comparison
+#
+# \param datasetMgr  dataset.DatasetManager object
+#
+# Merges data datasets and the MC datasets as specified in
+# plots._datasetMerge. The intention is that the datasets to be merged
+# as one are kind of binned ones, and the final merged dataset forms a
+# logical entity. For example, data in multiple run periods, QCD in
+# pthat bins, single top in the separate channels, WW, WZ and ZZ for
+# diboson.
+#
+# Renames the datasets as specified in plots._physicalToLogical. The
+# intention is that the physical dataset names (i.e. the crab task
+# names in multicrab.cfg) can contain some rather specific information
+# (e.g. the pythia tune, MC production era) which is not that relevant
+# in actual plotting (i.e. TTJets in TuneZ2 and TuneD6T, and from
+# Fall10 and Winter10, all are logically TTJets sample). This choice
+# makes e.g. the plots._datasetMerge, plots._datasetOrder,
+# plots._legendLabels and plots._plotStyles shorter and more generic.
+#
+# Finally orders the datasets as specified in plots._datasetOrder. The
+# datasets not in the plots._datasetOrder list are left at the end in
+# the same order they were originally.
 def mergeRenameReorderForDataMC(datasetMgr):
     datasetMgr.mergeData()
     datasetMgr.renameMany(_physicalToLogical, silent=True)
@@ -172,17 +260,14 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+## Base class for plots
 class PlotBase:
-    """Base class for plots."""
-
+    ## Construct plot from DatasetManager and histogram name
+    #
+    # \param datasetMgr   dataset.DatasetManager for datasets
+    # \param name         Path of the histogram in the ROOT files
+    # \param saveFormats  List of suffixes for formats for which to save the plot
     def __init__(self, datasetMgr, name, saveFormats=[".png", ".eps", ".C"]):
-        """Constructor.
-
-        Arguments:
-        datasetMgr   DatasetManager for datasets
-        name         Name of the histogram in the ROOT files
-        saveFormats  List of the default formats to save (default: ['.png', '.eps', '.C'])
-        """
         # Create the histogram manager
         self.histoMgr = histograms.HistoManager(datasetMgr, name)
         self.datasetMgr = datasetMgr
@@ -203,36 +288,65 @@ class PlotBase:
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
 
+    ## Add a format for which to save the plot
+    #
+    # \param format  Suffix recognised by ROOT
     def appendSaveFormat(self, format):
         self.saveFormats.append(format)
 
+    ## Set the legend object
+    # 
+    # \param legend   TLegend object
+    #
+    # All histograms in the plot are added to the legend object
     def setLegend(self, legend):
         self.legend = legend
         self.histoMgr.addToLegend(legend)
 
+    ## Remove the legend object
     def removeLegend(self):
         delattr(self, "legend")
 
+    ## Add MC uncertainty histogram
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
+    ## Stack all MC histograms to one
+    #
+    # Internally, THStack is used
     def stackMCHistograms(self):
         mcNames = self.datasetMgr.getMCDatasetNames()
         self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    ## Create TCanvas and frames for the histogram and a data/MC ratio
+    #
+    # \param filename   Name for TCanvas (becomes the file name)
+    # \param kwargs     Keyword arguments, forwarded to histograms.CanvasFrame.__init__()
     def createFrame(self, filename, **kwargs):
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
+    ## Draw the plot
+    #
+    # Draw also the legend if one has been associated
     def draw(self):
         self.histoMgr.draw()
         if hasattr(self, "legend"):
             self.legend.Draw()
 
+    ## Add text for integrated luminosity
+    #
+    # \param x   X coordinate (in NDC, None for the default value)
+    # \param y   Y coordinate (in NDC, None for the default value)
     def addLuminosityText(self, x=None, y=None):
         self.histoMgr.addLuminosityText(x, y)
 
+    ## Save the plot to file(s)
+    #
+    # \param formats   Save to these formats (if not given, the values
+    #                  given in the constructor and in
+    #                  appendSaveFormat() are used
     def save(self, formats=None):
         if formats == None:
             formats = self.saveFormats
@@ -245,19 +359,15 @@ class PlotBase:
 
         ROOT.gErrorIgnoreLevel = backup
 
+## Class for data-MC comparison plot.
+# 
 class DataMCPlot(PlotBase):
-    """Class to create data-MC comparison plot."""
-
+    ## Construct from DatasetManager and a histogram path
+    #
+    # \param datasetMgr  DatasetManager for datasets
+    # \param name        Path of the histogram in the ROOT files
+    # \param kwargs      Keyword arguments, forwarded to PlotBase.__init__()
     def __init__(self, datasetMgr, name, **kwargs):
-        """Constructor.
-
-        Arguments:
-        datasetMgr   DatasetManager for datasets
-        name         Name of the histogram in the ROOT files
-
-        Keyword arguments:
-        see PlotBase.__init__()
-        """
         PlotBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
@@ -267,6 +377,11 @@ class DataMCPlot(PlotBase):
         self._setLegendLabels()
         self._setPlotStyles()
 
+    ## Stack MC histograms
+    #
+    # \param stackSignal  Should the signal histograms be stacked too?
+    #
+    # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
         def isNotSignal(name):
             return not "TTToHplus" in name
@@ -280,6 +395,10 @@ class DataMCPlot(PlotBase):
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    ## Create TCanvas and frames for the histogram and a data/MC ratio
+    #
+    # \param filename   Name for TCanvas (becomes the file name)
+    # \param kwargs     Keyword arguments, forwarded to histograms.CanvasFrameTwo.__init__()
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
@@ -293,6 +412,7 @@ class DataMCPlot(PlotBase):
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
+    ## Draw the plot
     def draw(self):
         PlotBase.draw(self)
         if hasattr(self, "mcSum"):
