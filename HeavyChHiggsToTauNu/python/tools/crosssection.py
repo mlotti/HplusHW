@@ -94,7 +94,9 @@ def setHplusCrossSections(datasets, tanbeta):
         if not datasets.hasDataset(name):
             continue
 
-        datasets.getDataset(name).setCrossSection(hplusTauNuCrossSection(mass, tanbeta))
+        crossSection = hplusTauNuCrossSection(mass, tanbeta)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
 
 def printHplusCrossSections():
     print "ttbar cross section %f pb" % ttCrossSection
