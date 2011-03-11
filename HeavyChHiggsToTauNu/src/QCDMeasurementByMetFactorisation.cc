@@ -233,7 +233,7 @@ namespace HPlus {
     //METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
-    if (btagData.passedEvent() {
+    if (btagData.passedEvent()) {
       hMETPlotsAfterBTagging.fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     }
     
