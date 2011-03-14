@@ -462,7 +462,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     )
 
     if options.tauEmbeddingInput != 0:
-        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import addTauEmbeddingMuonTaus
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
         process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
         process.patSequence *= process.patMuonTauSequence
     

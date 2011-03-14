@@ -97,7 +97,7 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Set tau sources to non-trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import customiseParamForTauEmbedding
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionInAnalysis as muonSelection
 if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
