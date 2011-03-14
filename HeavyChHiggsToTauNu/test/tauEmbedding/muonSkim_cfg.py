@@ -54,7 +54,8 @@ process.selectionSequence = cms.Sequence()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {"doTauHLTMatching": False,
-           "doPatTaus": False
+           "doPatTaus": False,
+           "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 # In order to avoid transient references and generalTracks is available anyway
