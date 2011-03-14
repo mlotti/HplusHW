@@ -1,6 +1,7 @@
 import ROOT
 import array
 
+import dataset
 import histograms
 import styles
 
@@ -295,7 +296,7 @@ class PlotSameBase(PlotBase):
 class DataMCPlot(PlotSameBase):
     """Class to create data-MC comparison plot."""
 
-    def __init__(self, datasetMgr, name, **kwargs):
+    def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
         """Constructor.
 
         Arguments:
@@ -309,10 +310,37 @@ class DataMCPlot(PlotSameBase):
         
         # Normalize the MC histograms to the data luminosity
         self.histoMgr.normalizeMCByLuminosity()
+        self.normalizeToOne = normalizeToOne
 
         self._setLegendStyles()
         self._setLegendLabels()
         self._setPlotStyles()
+
+    def _normalizeToOne(self):
+        if not self.normalizeToOne:
+            return
+
+        if not self.histoMgr.hasHisto("StackedMC"):
+            self.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            return
+
+        # Normalize the stacked histograms
+        handled = []
+        h = self.histoMgr.getHisto("StackedMC")
+        sumInt = h.getSumRootHisto().Integral()
+        for th1 in h.getAllRootHistos():
+            dataset._normalizeToFactor(th1, 1.0/sumInt)
+        handled.append("StackedMC")
+
+        # Normalize the the uncertainty histogram if it exists
+        if self.histoMgr.hasHisto("MCuncertainty"):
+            dataset._normalizeToFactor(self.histoMgr.getHisto("MCuncertainty").getRootHisto(), 1.0/sumInt)
+            handled.append("MCuncertainty")
+        
+        # Normalize the rest
+        for h in self.histoMgr.getHistos():
+            if not h.getName() in handled:
+                dataset._normalizeToOne(h.getRootHisto())
 
     def stackMCHistograms(self, stackSignal=False):
         def isNotSignal(name):
@@ -332,9 +360,15 @@ class DataMCPlot(PlotSameBase):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
         self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
 
+    def createFrame(self, filename, **kwargs):
+        self._normalizeToOne()
+        PlotSameBase.createFrame(self, filename, **kwargs)
+
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before createFrameFraction()")
+
+        self._normalizeToOne()
 
         self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
