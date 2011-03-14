@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+######################################################################
+#
+# This plot script is for analysing the muon selection part of the EWK
+# background measurement. The corresponding python job configuration
+# is tauEmbedding/muonAnalysis_cfg.py.
+#
+# Author: Matti Kortelainen
+#
+######################################################################
+
 import sys
 import array
 
@@ -222,9 +232,6 @@ class Plot(plots.PlotSameBase):
         self._setLegendLabels()
         self._setLegendStyles()
         self._setPlotStyles()
-
-    def binWidth(self):
-        return self.histoMgr.getHistos()[0].getBinWidth(1)
 
 class PlotPassed(plots.PlotBase):
     def __init__(self, plot):

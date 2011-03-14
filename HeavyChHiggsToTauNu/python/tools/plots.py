@@ -222,6 +222,9 @@ class PlotBase:
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
 
+    def binWidth(self):
+        return self.histoMgr.getHistos()[0].getBinWidth(1)
+
     def appendSaveFormat(self, format):
         self.saveFormats.append(format)
 
@@ -279,6 +282,10 @@ class PlotSameBase(PlotBase):
         """
         PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
         self.datasetMgr = datasetMgr
+        self.rootHistoPath = name
+
+    def getRootHistoPath(self):
+        return self.rootHistoPath
 
     def stackMCHistograms(self):
         mcNames = self.datasetMgr.getMCDatasetNames()
@@ -327,7 +334,7 @@ class DataMCPlot(PlotSameBase):
 
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("Must call stackMCHostograms() before createFrameFraction()")
+            raise Exception("Must call stackMCHistograms() before createFrameFraction()")
 
         self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
                                   self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
