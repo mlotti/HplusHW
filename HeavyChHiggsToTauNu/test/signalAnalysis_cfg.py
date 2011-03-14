@@ -20,7 +20,10 @@ doAllTauIds = True
 doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10 
+JESUnclusteredMETVariation = 0.10
+
+# With tau embedding input, tighten the muon selection
+tauEmbeddingTightenMuonSelection = False
 
 ################################################################################
 
@@ -95,8 +98,14 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionInAnalysis as muonSelection
 if options.tauEmbeddingInput != 0:
     customiseParamForTauEmbedding(param)
+    if tauEmbeddingTightenMuonSelection:
+        (sequence, counters, muonSrc) = muonSelection.addMuonSelection(process)
+        additionalCounters.extend(counters)
+        process.commonSequence *= sequence
+        param.TauEmbeddingAnalysis.originalMuon = cms.InputTag(muonSrc)
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
