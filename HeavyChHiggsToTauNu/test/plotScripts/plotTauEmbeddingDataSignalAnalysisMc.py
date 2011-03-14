@@ -33,34 +33,50 @@ counters = analysis+"Counters"
 embeddingSignalAnalysis = "multicrab_signalAnalysis_110303_154128"
 signalAnalysis = "multicrab_110307_141642"
 
-# Read the datasets
-# Take only TT+W from signal analysis, and data from embedding+signal analysis
-datasetsEmbSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=embeddingSignalAnalysis+"/multicrab.cfg", counters=counters)
-datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=signalAnalysis+"/multicrab.cfg", counters=counters)
+# main function
+def main():
+    # Read the datasets
+    # Take only TT+W from signal analysis, and data from embedding+signal analysis
+    datasetsEmbSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=embeddingSignalAnalysis+"/multicrab.cfg", counters=counters)
+    datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=signalAnalysis+"/multicrab.cfg", counters=counters)
 
-datasetsEmbSig.loadLuminosities()
-datasetsEmbSig.selectAndReorder(datasetsEmbSig.getDataDatasetNames())
-datasetsSig.selectAndReorder(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
-datasets = datasetsEmbSig
-datasets.extend(datasetsSig)
+    datasetsEmbSig.loadLuminosities()
+    datasetsEmbSig.selectAndReorder(datasetsEmbSig.getDataDatasetNames())
+    datasetsSig.selectAndReorder(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
+    datasets = datasetsEmbSig
+    datasets.extend(datasetsSig)
 
-plots.mergeRenameReorderForDataMC(datasets)
+    plots.mergeRenameReorderForDataMC(datasets)
 
-# Apply TDR style
-style = tdrstyle.TDRStyle()
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
 
 
+    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), step="begin")
+    #met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet", normalizeToOne=True), step="begin2")
+
+# Functions below are for plot-specific formattings. They all take the
+# plot object as an argument, then apply some formatting to it, draw
+# it and finally save it to files.
 def met(h, step="", rebin=5):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "Met (GeV)"
     ylabel = "Events / %.0f GeV" % h.binWidth()
-    opts = {"ymin": 0.001, "ymaxfactor": 2}
+    opts = {"ymaxfactor": 2}
     
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    h.createFrameFraction("MetSimulateEmbedded_log", opts=opts)
-    #h.createFrame("MetSimulateEmbedded_log", opts=opts)
+    if h.normalizeToOne:
+        ylabel = "A.u."
+        opts["yminfactor"] = 1e-5
+    else:
+        opts["ymin"] = 0.001
+           
+
+    name = "MetSimulateEmbedded_%s_log" % step
+    h.createFrameFraction(name, opts=opts)
+    #h.createFrame(name, opts=opts)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -68,9 +84,10 @@ def met(h, step="", rebin=5):
     h.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
-    h.addLuminosityText()
+    #h.addLuminosityText()
     h.save()
 
-
-met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"))
+# Call the main function if the script is executed (i.e. not imported)
+if __name__ == "__main__":
+    main()
 
