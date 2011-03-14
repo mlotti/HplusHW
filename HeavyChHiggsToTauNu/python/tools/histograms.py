@@ -730,7 +730,7 @@ class HistoManagerImpl:
 
         self._populateMap()
 
-    def addMCUncertainty(self, style, name="MC stat. unc.", nameList=None):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
@@ -743,6 +743,7 @@ class HistoManagerImpl:
             return
 
         hse = HistoTotalUncertainty(mcHistos, name)
+        hse.setLegendLabel(legendLabel)
         hse.call(style)
 
         firstMcIndex = len(self.drawList)
