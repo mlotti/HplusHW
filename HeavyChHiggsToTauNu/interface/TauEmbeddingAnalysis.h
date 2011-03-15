@@ -52,6 +52,8 @@ namespace HPlus {
       TH1 *hSelectedTauPt;
       TH1 *hSelectedTauEta;
       TH1 *hSelectedTauPhi;
+      TH1 *hSelectedTauIsolation05;
+      TH1 *hSelectedTauIsolation10;
       TH1 *hleadPFChargedHadrPt;
       TH1 *hRtau;
       TH1 *hDeltaPhiOriginal;

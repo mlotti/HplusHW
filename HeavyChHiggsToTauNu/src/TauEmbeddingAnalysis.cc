@@ -27,14 +27,19 @@ namespace HPlus {
     hOriginalMet = makeTH<TH1F>(fd, (prefix+"_originalMet").c_str(), "Original MET", 400, 0, 400);
     hEmbeddingMet = makeTH<TH1F>(fd, (prefix+"_embeddingMet").c_str(), "Embedding MET", 400, 0, 400);
     hEmbVSOrigMet = makeTH<TH2F>(fd, (prefix+"_embVSOrigMet").c_str(), "EmbeddingVSoriginal MET", 100, 0, 400, 100, 0, 400);
+
     hOriginalMuonPt = makeTH<TH1F>(fd, (prefix+"_originalMuonPt").c_str(), "OriginalMuon Pt", 400, 0, 400);
     hOriginalMuonEta = makeTH<TH1F>(fd, (prefix+"_originalMuonEta").c_str(), "OriginalMuon Eta", 300, -3,3);
     hOriginalMuonPhi = makeTH<TH1F>(fd, (prefix+"_originalMuonPhi").c_str(), "OriginalMuon Phi", 300, 0, 3.2);
+
     hSelectedTauPt = makeTH<TH1F>(fd, (prefix+"_selectedTauPt").c_str(), "SelectedTau Pt", 400, 0, 400);
     hSelectedTauEta = makeTH<TH1F>(fd, (prefix+"_selectedTauEta").c_str(), "SelectedTau Eta", 300, -3, 3);
     hSelectedTauPhi = makeTH<TH1F>(fd, (prefix+"_selectedTauPhi").c_str(), "SelectedTau Phi", 300, 0, 3.2);
+    hSelectedTauIsolation05 = makeTH<TH1F>(fd, (prefix+"_selectedTauIsolation05").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 0.5", 100, 0, 100);
+    hSelectedTauIsolation10 = makeTH<TH1F>(fd, (prefix+"_selectedTauIsolation10").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 1.0", 100, 0, 100);
     hleadPFChargedHadrPt = makeTH<TH1F>(fd, (prefix+"_leadPFChargedHadrPt").c_str(), "LeadPFChargedHadr Pt", 400, 0, 200);
     hRtau = makeTH<TH1F>(fd, (prefix+"_Rtau").c_str(), "Rtau", 400, 0, 1.2);
+
     hDeltaPhi = makeTH<TH1F>(fd, (prefix+"_DeltaPhi").c_str(), "DeltaPhi", 400, 0, 3.2);
     hDeltaPhiEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_DeltaPhiEmbVSOrig").c_str(), "DeltaPhiEmbVSOrig", 100, 0, 3.2, 100, 0, 3.2);
     hTransverseMass = makeTH<TH1F>(fd, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
@@ -68,6 +73,7 @@ namespace HPlus {
       hSelectedTauPt->Fill(selectedTau->pt(), weight);
       hSelectedTauEta->Fill(selectedTau->eta(), weight);
       hSelectedTauPhi->Fill(selectedTau->phi(), weight);
+
       // Leading track and Rtau 
       if (!selectedTau->leadPFChargedHadrCand().isNull()) {
         double LdgTrackPt = selectedTau->leadPFChargedHadrCand()->pt();
@@ -76,6 +82,25 @@ namespace HPlus {
           double Rtau = selectedTau->leadPFChargedHadrCand()->p()/selectedTau->energy();
           hRtau->Fill(Rtau, weight);
         }
+      }
+
+      // Isolation
+      reco::PFCandidateRefVector isoCands = selectedTau->isolationPFChargedHadrCands();
+      if(isoCands.isNonnull()) {
+        double pt05 = 0;
+        double pt10 = 0;
+        for(reco::PFCandidateRefVector::const_iterator isoCand = isoCands.begin(); isoCand != isoCands.end(); ++isoCand) {
+          double pt = (*isoCand)->pt();
+          if(pt > 0.5) {
+            pt05 += pt;
+            if(pt > 1.0) {
+              pt10 += pt;
+            }
+          }
+        }
+
+        hSelectedTauIsolation05->Fill(pt05, weight);
+        hSelectedTauIsolation10->Fill(pt10, weight);
       }
     }
 
