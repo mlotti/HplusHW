@@ -96,6 +96,7 @@ namespace HPlus {
     TH1 *hMETAfterElectronVeto;
     TH1 *hMETAfterMuonVeto;
     TH1 *hMETAfterTauSelection;
+    TH1 *hMETAfterJetSelection2;
     TH1 *hMETAfterJetSelection;
     TH1 *hMETAfterInvMassVetoOnJets;
     TH1 *hMETAfterMET;
@@ -109,6 +110,7 @@ namespace HPlus {
     TH2 *hTauPtVsMET_AfterTauSelection;
     TH2 *hTauPtVsMET_AfterElectronVeto;
     TH2 *hTauPtVsMET_AfterMuonVeto;
+    TH2 *hTauPtVsMET_AfterJetSelection2;
     TH2 *hTauPtVsMET_AfterJetSelection;
     TH2 *hTauPtVsMET_AfterBTagging;
     TH2 *hTauPtVsMET_AfterMET;
