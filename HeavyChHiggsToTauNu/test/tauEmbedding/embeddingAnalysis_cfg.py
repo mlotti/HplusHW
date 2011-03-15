@@ -207,6 +207,9 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("pfmet_", pfMET, [histoMet]),
         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
 
+process.tauSelectionSequence = analysis.getSequence()
+process.commonSequence *= process.tauSelectionSequence
+
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
@@ -257,8 +260,15 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    analysis.getSequence() *
     process.EmbeddingAnalyzer# *
 #    process.tauIdEmbeddingAnalyzer *
 #    process.tauPtIdEmbeddingAnalyzer
 )
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+def _setMuon(module, muonSrc):
+    module.muonSrc = cms.untracked.InputTag(muonSrc)
+
+tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
+                                                    process.commonSequence, [],
+                                                    modify=_setMuon, signalAnalysisCounters=False)

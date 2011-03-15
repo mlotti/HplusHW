@@ -100,11 +100,11 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
-    if tauEmbeddingTightenMuonSelection:
-        (sequence, counters, muonSrc) = tauEmbeddingCustomisations.addMuonSelection(process)
-        additionalCounters.extend(counters)
-        process.commonSequence *= sequence
-        param.TauEmbeddingAnalysis.originalMuon = cms.InputTag(muonSrc)
+#    if tauEmbeddingTightenMuonSelection:
+#        (sequence, counters, muonSrc) = tauEmbeddingCustomisations.addMuonSelection(process)
+#        additionalCounters.extend(counters)
+#        process.commonSequence *= sequence
+#        param.TauEmbeddingAnalysis.originalMuon = cms.InputTag(muonSrc)
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -186,8 +186,10 @@ process.signalAnalysisPath = cms.Path(
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
     param.addTauIdAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
-        
-    
+
+if tauEmbeddingTightenMuonSelection:
+    tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
+
 ################################################################################
 # The signal analysis with jet energy scale variation
 #

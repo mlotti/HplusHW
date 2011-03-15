@@ -46,19 +46,20 @@ def addAnalysisArray(process, prefix, prototype, func, values, names=None, preSe
         # Add the analysis modules and path
         addAnalysis(process, prefix+name, module, preSequence, additionalCounters)
         
-def addAnalysis(process, analysisName, analysisModule, preSequence=None, additionalCounters=[]):
+def addAnalysis(process, analysisName, analysisModule, preSequence=None, additionalCounters=[], signalAnalysisCounters=True):
     # Counter and path names
     counterName = analysisName+"Counters"
     pathName = analysisName+"Path"
 
     # Counter module
     counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-        counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-        counterInstances = cms.untracked.InputTag(analysisName, "counterInstances"),
         printMainCounter = cms.untracked.bool(False),
         printSubCounters = cms.untracked.bool(False),
         printAvailableCounters = cms.untracked.bool(False),
     )
+    if signalAnalysisCounters:
+        counter.counterNames = cms.untracked.InputTag(analysisName, "counterNames")
+        counter.counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
     if len(additionalCounters) > 0:
         counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
