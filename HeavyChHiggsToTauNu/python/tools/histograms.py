@@ -402,17 +402,17 @@ class HistoBase:
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
-    def __init__(self, dataset, histo, name):
+    def __init__(self, dataset, rootHisto, name):
         """Constructor
 
         Arguments:
-        dataset   Dataset object
-        histo     TH1 object
-        name      Name of the Histo
+        dataset    Dataset object
+        rootHisto  TH1 object
+        name       Name of the Histo
 
         The default legend label is the dataset name
         """
-        HistoBase.__init__(self, histo, name, "l", "HIST")
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
         self.dataset = dataset
 
     def isMC(self):
@@ -420,6 +420,9 @@ class Histo(HistoBase):
 
     def isData(self):
         return self.dataset.isData()
+
+    def getDataset(self):
+        return self.dataset
 
 class HistoTotalUncertainty(HistoBase):
     """Class to represent combined (statistical) uncertainties of many histograms."""
@@ -727,7 +730,7 @@ class HistoManagerImpl:
 
         self._populateMap()
 
-    def addMCUncertainty(self, style, name="MC stat. unc.", nameList=None):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
@@ -740,6 +743,7 @@ class HistoManagerImpl:
             return
 
         hse = HistoTotalUncertainty(mcHistos, name)
+        hse.setLegendLabel(legendLabel)
         hse.call(style)
 
         firstMcIndex = len(self.drawList)
@@ -909,9 +913,6 @@ class HistoManager:
 
         Intended only for internal use.
         """
-        if len(self.datasetRootHistos) == 0:
-            raise Exception("No histograms to use!")
-
         self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):

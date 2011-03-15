@@ -564,7 +564,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 500, # Adjusted for PAT on the fly
+                "number_of_job": 100, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -577,7 +577,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 600, # Adjusted for PAT on the fly
+                "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -590,7 +590,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 500, # Adjusted for PAT on the fly
+                "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }
