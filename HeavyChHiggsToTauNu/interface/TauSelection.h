@@ -57,6 +57,7 @@ namespace HPlus {
       kNormalTauID, // Tau candidate selection + tau ID selections
       kFactorizedTauID,
       kTauCandidateSelectionOnly, // Only tau candidate selection is applied
+      kTauCandidateSelectionOnlyReversedRtau, // Only tau candidate selection is applied with reversed Rtau cut
       kAntiTauTag, // Selects anti-tagged taus
       kAntiTauTagIsolationOnly // Selects anti-isolated tau jets
     };
@@ -68,6 +69,8 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on a given sample of taus 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// tau ID on cleaned tau candidates
+    Data analyzeTauIDOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
 
