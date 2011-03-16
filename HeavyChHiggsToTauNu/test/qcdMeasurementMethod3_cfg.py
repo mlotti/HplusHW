@@ -76,13 +76,10 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-# Set tau selection mode (options: 'standard', tauCandidateSelectionOnly)
-# other options (use not recommended here): 'factorized', 'antitautag', 'antiisolatedtau'
-#param.setAllTauSelectionOperatingMode('standard')
+# Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
+# other options (use not recommended here): 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
-#param.setAllTauSelectionOperatingMode('factorized')
-#param.setAllTauSelectionOperatingMode('antitautag')
-#param.setAllTauSelectionOperatingMode('antiisolatedtau')
+#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnlyReversedRtau')
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 ### Use trigger matched taus and standard signal trigger => Disable below
