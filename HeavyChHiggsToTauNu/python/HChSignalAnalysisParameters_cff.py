@@ -156,6 +156,11 @@ fakeMETVeto = cms.untracked.PSet(
   minDeltaPhi = cms.untracked.double(5.) # in degrees
 )
 
+TauEmbeddingAnalysis = cms.untracked.PSet(
+  embeddingMetSrc = MET.src,
+  embeddingMode = cms.untracked.bool(False)
+)
+
 forwardJetVeto = cms.untracked.PSet(
   src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
   src_met = MET.src,

@@ -45,7 +45,7 @@ namespace HPlus {
   }
     
   bool TauIDPFTauBase::passRTauCut(const edm::Ptr<pat::Tau> tau) {
-    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt();
+    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt() - 1.0e-30; // value 1 goes in the bin below 1 in the histogram
     hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue > fRtauCut)) return false;
@@ -55,7 +55,7 @@ namespace HPlus {
   }
 
   bool TauIDPFTauBase::passAntiRTauCut(const edm::Ptr<pat::Tau> tau) {
-    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt();
+    double myRtauValue = tau->leadPFChargedHadrCand()->pt() / tau->pt() - 1.0e-30; // value 1 goes in the bin below 1 in the histogram
     hRtauVsEta->Fill(myRtauValue, tau->eta(), fEventWeight.getWeight());
     fCounterPackager.fill(fIDRTauCut, myRtauValue);
     if (!(myRtauValue < fAntiRtauCut)) return false;
@@ -65,6 +65,6 @@ namespace HPlus {
   }
   
   double TauIDPFTauBase::getRtauValue(const edm::Ptr<pat::Tau> tau) const {
-    return tau->leadPFChargedHadrCand()->pt() / tau->pt();
+    return tau->leadPFChargedHadrCand()->pt() / tau->pt() - 1.0e-30; // value 1 goes in the bin below 1 in the histogram
   }
 }

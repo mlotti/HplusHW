@@ -7,7 +7,7 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
-import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter_alt as counter
 
 import ROOT
 
@@ -25,10 +25,9 @@ def main(opts):
     
 
     print "============================================================"
-    if opts.printInfo:
-        print "Dataset info: "
-        datasets.printInfo()
-        print
+    print "Dataset info: "
+    datasets.printInfo()
+    print
 
     quantity = "events"
     if opts.mode == "events":
@@ -40,13 +39,12 @@ def main(opts):
         print "Printing mode '%s' doesn't exist! The following ones are available 'events', 'xsect', 'eff'" % opts.mode
         return 1
 
-    cellFormat = counter.CellFormatText(valueOnly=opts.valueOnly)
-    formatFunc = lambda table: table.format(counter.TableFormatText(cellFormat))
+    formatFunc = lambda table: table.format(counter.TableFormatText())
     csvSplitter = counter.TableSplitter([" +- ", " +", " -"])
     if opts.csv:
-        formatFunc = lambda table: table.format(counter.TableFormatText(cellFormat, columnSeparator=","), csvSplitter)
+        formatFunc = lambda table: table.format(counter.TableFormatText(columnSeparator=","), csvSplitter)
     if opts.mode == "eff":
-        cellFormat = counter.CellFormatText(valueFormat="%.4f", valueOnly=opts.valueOnly)
+        cellFormat = counter.CellFormatText(valueFormat="%.4f")
         formatFunc = lambda table: counter.counterEfficiency(table).format(counter.TableFormatText(cellFormat))
         quantity = "Cut efficiencies"
         if opts.csv:
@@ -84,10 +82,6 @@ if __name__ == "__main__":
                       help="By default the main counter and the subcounters are all printed. With this option only the main counter is printed")
     parser.add_option("--lumifile", dest="lumifile", type="string", default="lumi.json",
                       help="The JSON file to contain the dataset integrated luminosities")
-    parser.add_option("--noinfo", dest="printInfo", action="store_false", default=True,
-                      help="Don't print the dataset info")
-    parser.add_option("--noerror", dest="valueOnly", action="store_true", default=False,
-                      help="Don't print statistical errors")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
