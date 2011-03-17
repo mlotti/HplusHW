@@ -30,7 +30,7 @@ process = cms.Process("TauEmbeddingAnalysis")
 if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -44,6 +44,9 @@ process.source = cms.Source('PoolSource',
         "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"
   )
 )
+if dataVersion.isData():
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/Mu_147196-149294_Dec22/Mu/Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v6_2/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_1_1_92A.root"]
+
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -54,7 +57,10 @@ if debug:
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+patArgs = {
+    "doPatTauIsoDeposits": True
+}
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -141,7 +147,8 @@ process.genMetSequence = cms.Sequence(
     process.genMetNuEmbedded
 )
 
-process.commonSequence *= process.genMetSequence
+if dataVersion.isMC():
+    process.commonSequence *= process.genMetSequence
 
 
 # Select PFCands in 0.1 cone
@@ -229,27 +236,32 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
             originalSrc = cms.untracked.InputTag("pfMETOriginalNoMuon")
         ),
-        GenMetTrue = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
-        ),
-        GenMetCalo = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
-        ),
-        GenMetCaloAndNonPrompt = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
-        ),
-        GenMetNuSum = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetNuOriginal")
-        ),
     ),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
-    metCut = cms.untracked.double(60)
+    metCut = cms.untracked.double(60),
+    tauIsolationCalculator = cms.untracked.PSet(
+        pvSrc = cms.InputTag("offlinePrimaryVertices")
+    )
 )
+# if dataVersion.isMC():
+#     process.EmbeddingAnalyzer.GenMetTrue = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetCalo = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetCaloAndNonPrompt = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetNuSum = cms.untracked.PSet(
+#          embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
+#          originalSrc = cms.untracked.InputTag("genMetNuOriginal")
+#     )
+
 process.tauIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
     tauSrc = cms.untracked.InputTag(selectedTaus.value())
 )
