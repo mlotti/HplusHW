@@ -24,7 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False,
+           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
@@ -220,12 +220,14 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
-        process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
+        if not doPatTauIsoDeposits:
+            process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
                          typeLabel = "PFTau")
-        process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        if not doPatTauIsoDeposits:
+            process.patTausHpsPFTau.isoDeposits = cms.PSet()
 
         # Side effect because HPS is not needed for muon analysis,
         # which is the use case for doHchTauDiscriminators. To do it
@@ -235,7 +237,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
             addTauCollection(process,cms.InputTag('hpsTancTaus'),
                              algoLabel = "hpsTanc",
                              typeLabel = "PFTau")
-            process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+            if not doPatTauIsoDeposits:
+                process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
             # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
             del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
 
