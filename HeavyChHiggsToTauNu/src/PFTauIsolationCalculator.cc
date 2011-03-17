@@ -26,7 +26,7 @@ namespace HPlus {
     thePV_ = hvertex->ptrAt(0);
   }
 
-  void PFTauIsolationCalculator::calculateHpsLoose(const pat::Tau& tau, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculateHpsLoose(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const {
     double minTrackPt = 1.0;
     int minPixelHits = 0;
     int minTrackHits = 8;
@@ -36,10 +36,10 @@ namespace HPlus {
 
     double minGammaEt = 1.5;
 
-    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, occupancy);
+    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, maxPt, occupancy);
   }
 
-  void PFTauIsolationCalculator::calculateHpsMedium(const pat::Tau& tau, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculateHpsMedium(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const {
     double minTrackPt = 0.8;
     int minPixelHits = 0;
     int minTrackHits = 3;
@@ -49,10 +49,10 @@ namespace HPlus {
 
     double minGammaEt = 0.8;
 
-    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, occupancy);
+    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, maxPt, occupancy);
   }
 
-  void PFTauIsolationCalculator::calculateHpsTight(const pat::Tau& tau, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculateHpsTight(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const {
     double minTrackPt = 0.5;
     int minPixelHits = 0;
     int minTrackHits = 3;
@@ -62,16 +62,16 @@ namespace HPlus {
 
     double minGammaEt = 0.5;
 
-    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, occupancy);
+    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, maxPt, occupancy);
   }
 
-  void PFTauIsolationCalculator::calculateShrinkingConeByIsolation(const pat::Tau& tau, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculateShrinkingConeByIsolation(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const {
     double minTrackPt = 1.0;
 
-    calculateShrinkingConeByIsolation(tau, minTrackPt, sumPt, occupancy);
+    calculateShrinkingConeByIsolation(tau, minTrackPt, sumPt, maxPt, occupancy);
   }
 
-  void PFTauIsolationCalculator::calculateShrinkingConeByIsolation(const pat::Tau& tau, double minTrackPt, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculateShrinkingConeByIsolation(const pat::Tau& tau, double minTrackPt, double *sumPt, double *maxPt, size_t *occupancy) const {
     int minPixelHits = 0;
     int minTrackHits = 8;
     double maxIP = 0.03;
@@ -80,11 +80,12 @@ namespace HPlus {
 
     double minGammaEt = 1.5;
 
-    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, occupancy);
+    calculate(tau, true, true, minTrackPt, minPixelHits, minTrackHits, maxIP, maxChi2, maxDeltaZ, minGammaEt, sumPt, maxPt, occupancy);
   }
 
-  void PFTauIsolationCalculator::calculate(const pat::Tau& tau, bool includeTracks, bool includeGammas, double minTrackPt, int minPixelHits, int minTrackHits, double maxIP, double maxChi2, double maxDeltaZ, double minGammaEt, double *sumPt, size_t *occupancy) const {
+  void PFTauIsolationCalculator::calculate(const pat::Tau& tau, bool includeTracks, bool includeGammas, double minTrackPt, int minPixelHits, int minTrackHits, double maxIP, double maxChi2, double maxDeltaZ, double minGammaEt, double *sumPt, double *maxPt, size_t *occupancy) const {
     *sumPt = 0;
+    *maxPt = 0;
     *occupancy = 0;
 
     //includeTracks = false;
@@ -104,7 +105,9 @@ namespace HPlus {
                                                                                           thePV_->position().z());
         *occupancy = *occupancy + chargedCands.size();
         for(size_t i=0; i<chargedCands.size(); ++i) {
-          *sumPt = *sumPt + chargedCands[i]->pt();
+          double pt = chargedCands[i]->pt();
+          *sumPt = *sumPt + pt;
+          *maxPt = std::max(*maxPt, pt);
         }
       }
     }
@@ -116,7 +119,9 @@ namespace HPlus {
 
         *occupancy = *occupancy + gammaCands.size();
         for(size_t i=0; i<gammaCands.size(); ++i) {
-          *sumPt = *sumPt + gammaCands[i]->pt();
+          double pt = gammaCands[i]->pt();
+          *sumPt = *sumPt + pt;
+          *maxPt = std::max(*maxPt, pt);
         }
       }
     }

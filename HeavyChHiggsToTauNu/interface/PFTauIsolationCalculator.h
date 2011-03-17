@@ -28,14 +28,14 @@ namespace HPlus {
 
     void beginEvent(const edm::Event& iEvent);
 
-    void calculateHpsLoose(const pat::Tau& tau, double *sumPt, size_t *occupancy) const;
-    void calculateHpsMedium(const pat::Tau& tau, double *sumPt, size_t *occupancy) const;
-    void calculateHpsTight(const pat::Tau& tau, double *sumPt, size_t *occupancy) const;
+    void calculateHpsLoose(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const;
+    void calculateHpsMedium(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const;
+    void calculateHpsTight(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const;
 
-    void calculateShrinkingConeByIsolation(const pat::Tau& tau, double *sumPt, size_t *occupancy) const;
-    void calculateShrinkingConeByIsolation(const pat::Tau& tau, double minTrackPt, double *sumPt, size_t *occupancy) const;
+    void calculateShrinkingConeByIsolation(const pat::Tau& tau, double *sumPt, double *maxPt, size_t *occupancy) const;
+    void calculateShrinkingConeByIsolation(const pat::Tau& tau, double minTrackPt, double *sumPt, double *maxPt, size_t *occupancy) const;
 
-    void calculate(const pat::Tau& tau, bool includeTracks, bool includeGammas, double minTrackPt, int minPixelHits, int minTrackHits, double maxIP, double maxChi2, double maxDeltaZ, double minGammaEt, double *sumPt, size_t *occupancy) const;
+    void calculate(const pat::Tau& tau, bool includeTracks, bool includeGammas, double minTrackPt, int minPixelHits, int minTrackHits, double maxIP, double maxChi2, double maxDeltaZ, double minGammaEt, double *sumPt, double *maxPt, size_t *occupancy) const;
 
   private:
     edm::InputTag pvSrc_;
