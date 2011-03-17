@@ -119,15 +119,22 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     l.SetTextSize(textDefaults.getSize("lumi"))
     l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 
+## Class for generating legend creation functions with default positions.
+#
+# The intended usage is demonstrated in histograms.py below, i.e.
+# \code
+# createLegend = LegendCreator(x1, y1, x2, y2)
+# createLegend.setDefaults(x1=0.4, y2=0.5)
+# legend = createLegend()
+# \endcode
 class LegendCreator:
-    """Class for generating legend creation functions with default positions.
-
-    The intended usage is demonstrated in histograms.py below, i.e.
-    createLegend = LegendCreator(x1, y1, x2, y2)
-    createLegend.setDefaults(x1=0.4, y2=0.5)
-    legend = createLegend()
-    """
-
+    ## Constructor
+    #
+    # \param x1        Default x1 (left x)
+    # \param y1        Default y1 (lower y)
+    # \param x2        Default x2 (right x)
+    # \param y2        Default y2 (upper y)
+    # \param textSize  Default text size
     def __init__(self, x1, y1, x2, y2, textSize=0.025):
         self.x1 = x1
         self.y1 = y1
@@ -136,28 +143,32 @@ class LegendCreator:
         self.textSize = textSize
         self._keys = ["x1", "y1", "x2", "y2"]
 
+    ## Create a copy of the object
     def copy(self):
         return LegendCreator(self.x1, self.y1, self.x2, self.y2)
 
+    ## Set new default positions
+    #
+    # <b>Keyword arguments</b>
+    # \li \a x1       X1 coordinate
+    # \li \a y1       Y1 coordinate
+    # \li \a x2       X2 coordinate
+    # \li \a y2       Y2 coordinate
+    # \li \a textSize Text size
     def setDefaults(self, **kwargs):
-        """Set new default positions.
-
-        Keyword arguments: x1, y1, x2, y2, textSize
-        """
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
 
+    ## Create a new TLegend object (function call syntax)
+    #
+    # Arguments can be either
+    # - Four numbers for the coordinates (x1, y1, x2, y2) as positional arguments
+    # - Keyword arguments (x1, y1, x2, y2)
+    #
+    # If all 4 coordinates are specified, they are used. In the
+    # keyword argument case, the coordinates which are not given are
+    # taken from the default values.
     def __call__(self, *args, **kwargs):
-        """Create a new TLegend based.
-
-        Arguments can be either
-        - Four numbers for the coordinates (x1, y1, x2, y2), or
-        - Keyword arguments: x1, y1, x2, y2
-
-        If all 4 coordinates are specified, they are used. In the
-        keyword argument case, the coordinates which are not given are
-        taken from the default values.
-        """
         if len(args) == 4:
             if len(kwargs) != 0:
                 raise Exception("Got 4 positional arguments, no keyword arguments allowed")
@@ -178,10 +189,28 @@ class LegendCreator:
         #legend.SetMargin(0.1)
         return legend
 
+    ## \var x1
+    # X1 coordinate
+    ## \var y1
+    # Y1 coordinate
+    ## \var x2
+    # X2 coordinate
+    ## \var y2
+    # Y2 coordinate
+    ## \var textSize
+    # Text size
+    ## \var _keys
+    # List of valid coordinate names for __call__() function
+
+
+## Default legend creator object
 createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
 
+## Update the style of palette Z axis according to ROOT.gStyle.
+#
+# This function is needed because the style is not propageted to the Z
+# axis automatically.
 def updatePaletteStyle(histo):
-    """Update the style of palette Z axis according to ROOT.gStyle."""
     ROOT.gPad.Update()
     paletteAxis = histo.GetListOfFunctions().FindObject("palette")
     if paletteAxis == None:
@@ -191,6 +220,12 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
+## Infer the frame bounds from the histograms and keyword arguments
+#
+# \param histos  List of histograms.HistoBase objects
+# \param kwargs  Dictionary of keyword arguments to parse
+#
+# Used e.g. in histograms.CanvasFrame and histograms.CanvasFrameTwo
 def _boundsArgs(histos, kwargs):
     ymaxfactor = kwargs.get("ymaxfactor", 1.1)
 
@@ -207,33 +242,31 @@ def _boundsArgs(histos, kwargs):
     if not "xmax" in kwargs:
         kwargs["xmax"] = min([h.getXmax() for h in histos])
 
-
+## Create TCanvas and frame for one TPad.
 class CanvasFrame:
-    """Create TCanvas and frame for one TPad."""
+    ## Create TCanvas and TH1 for the frame.
+    #
+    # \param histoManager  histograms.HistoManager object to take the histograms for automatic axis ranges
+    # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a ymin     Minimum value of Y axis
+    # \li\a ymax     Maximum value of Y axis
+    # \li\a xmin     Minimum value of X axis
+    # \li\a xmax     Maximum value of X axis
+    # \li\a ymaxfactor  Maximum value of Y is \a ymax*\a ymaxfactor (default 1.1)
+    # \li\a yminfactor  Minimum value of Y is \a ymax*\a yminfactor (yes, calculated from \a ymax )
+    #
+    # By default \a ymin, \a ymax, \a xmin and \a xmax are taken as
+    # the maximum/minimums of the histogram objects such that frame
+    # contains all histograms. The \a ymax is then multiplied with \a
+    # ymaxfactor
+    #
+    # The \a yminfactor/\a ymaxfactor are used only if \a ymin/\a ymax
+    # is taken from the histograms, i.e. \a ymax keyword argument is
+    # \b not given.
     def __init__(self, histoManager, name, **kwargs):
-        """Create TCanvas and TH1 for the frame.
-
-        Arguments:
-        histoManager  HistoManager object to take the histograms for automatic axis ranges
-        name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-        
-        Keyword arguments:
-        ymin     Minimum value of Y axis
-        ymax     Maximum value of Y axis
-        xmin     Minimum value of X axis
-        xmax     Maximum value of X axis
-        ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
-        yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
-
-        By default ymin, ymax, xmin and xmax are taken as the
-        maximum/minimums of the histogram objects such that frame
-        contains all histograms. The ymax is then multiplied with
-        ymaxfactor
-
-        The yminfactor/ymaxfactor are used only if ymin/ymax is taken
-        from the histograms, i.e. ymax keyword argument is *not*
-        given.
-        """
         histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
@@ -251,39 +284,43 @@ class CanvasFrame:
         self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
         self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
 
+    ## \var canvas
+    # TCanvas for the canvas
+    ## \var frame
+    # TH1 for the frame
+
+## Create TCanvas and frames for two TPads.
 class CanvasFrameTwo:
-    """Create TCanvas and frames for to TPads."""
+    ## Create TCanvas and TH1 for the frame.
+    #
+    # \param histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
+    # \param histos2       List of TH1s to take the histograms for automatic axis ranges for lower pad
+    # \param name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
+    # \param kwargs        Keyword arguments (see below)
+    #
+    # <b>Keyword arguments</b>
+    # \li\a opts1                   Dictionary for histoManager1 options
+    # \li\a opts2                   Dictionary for histos2 options
+    # \li\a canvasFactor            Multiply the canvas height by this factor (default 1.25)
+    # \li\a canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
+    #
+    # <b>Options</b>
+    # \li\a ymin     Minimum value of Y axis
+    # \li\a ymax     Maximum value of Y axis
+    # \li\a xmin     Minimum value of X axis (only for opts1)
+    # \li\a xmax     Maximum value of X axis (only for opts1)
+    # \li\a ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
+    # \li\a yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
+    #
+    # By default \a ymin, \a ymax, \a xmin and \a xmax are taken as
+    # the maximum/minimums of the histogram objects such that frame
+    # contains all histograms. The \a ymax is then multiplied with \a
+    # ymaxfactor
+    #
+    # The \a yminfactor/\a ymaxfactor are used only if \a ymin/\a ymax
+    # is taken from the histograms, i.e. \a ymax keyword argument is \b
+    # not given.
     def __init__(self, histoManager1, histos2, name, **kwargs):
-        """Create TCanvas and TH1 for the frame.
-
-        Arguments:
-        histoManager1 HistoManager object to take the histograms for automatic axis ranges for upper pad
-        histos2       List of TH1s to take the histograms for automatic axis ranges for lower pad
-        name          Name for TCanvas (will be the file name, if TCanvas.SaveAs(".png") is used)
-        
-        Keyword arguments:
-        opts1                   Dictionary for histoManager1 options
-        opts2                   Dictionary for histos2 options
-        canvasFactor            Multiply the canvas height by this factor (default 1.25)
-        canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
-
-        Options:
-        ymin     Minimum value of Y axis
-        ymax     Maximum value of Y axis
-        xmin     Minimum value of X axis (only for opts1)
-        xmax     Maximum value of X axis (only for opts1)
-        ymaxfactor  Maximum value of Y is ymax*ymaxfactor (default 1.1)
-        yminfactor  Minimum value of Y is ymax*yminfactor (yes, calculated from ymax
-
-        By default ymin, ymax, xmin and xmax are taken as the
-        maximum/minimums of the histogram objects such that frame
-        contains all histograms. The ymax is then multiplied with
-        ymaxfactor
-
-        The yminfactor/ymaxfactor are used only if ymin/ymax is taken
-        from the histograms, i.e. ymax keyword argument is *not*
-        given.
-        """
         class FrameWrapper:
             """Wrapper to provide the CanvasFrameTwo.frame member.
 
@@ -389,9 +426,30 @@ class CanvasFrameTwo:
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)
 
-class HistoBase:
-    """Base class for all Histo classes."""
+    ## \var frame1
+    # TH1 for the upper frame
+    ## \var frame2
+    # TH2 for the lower frame
+    ## \var canvas
+    # TCanvas for the canvas
+    ## \var pad1
+    # TPad for the upper pad
+    ## \var pad2
+    # TPad for the lower pad
+    ## \var frame
+    # Wrapper for the two frames
+    #
+    # The y axis of the wrapper is taken from the upper frame, and the
+    # xa xis from the lower frame.
 
+## Base class for all Histo classes.
+class HistoBase:
+    ## Constructor
+    #
+    # \param rootHisto    ROOT histogram object (TH1)
+    # \param name         Name of the histogram
+    # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
+    # \param drawStyle    Style string for Draw (string parameter for TH1.Draw())
     def __init__(self, rootHisto, name, legendStyle, drawStyle):
         self.rootHisto = rootHisto
         self.name = name
@@ -399,40 +457,77 @@ class HistoBase:
         self.legendStyle = legendStyle
         self.drawStyle = drawStyle
 
+    ## Get the ROOT histogram object (TH1)
     def getRootHisto(self):
         return self.rootHisto
 
+    ## Get the histogram name
     def getName(self):
         return self.name
 
+    ## Set the histogram name
+    #
+    # \param name  New histogram name
     def setName(self, name):
         self.name = name
 
+    ## Set the legend label
+    #
+    # \param label  New histogram label for TLegend
     def setLegendLabel(self, label):
         self.legendLabel = label
 
+    ## Set the legend style
+    #
+    # \param style  New histogram style for TLegend
     def setLegendStyle(self, style):
         self.legendStyle = style
 
+    ## Add the histogram to a TLegend
+    #
+    # \param legend   TLegend object
     def addToLegend(self, legend):
-        """Add the histogram to a TLegend."""
         legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
 
+    ## Call a function with self as an argument.
+    #
+    # \param func  Function with one parameter
+    #
+    # \todo This resembles the Visitor pattern, perhaps this should be
+    # renamed to visit()?
     def call(self, func):
-        """Call a funcrtion with self as an argument."""
         func(self)
 
+    ## Draw the histogram
+    #
+    # \param opt  Drawing options (in addition to the draw style)
     def draw(self, opt):
         self.rootHisto.Draw(self.drawStyle+" "+opt)
 
+    ## Get the minimum value of the X axis
     def getXmin(self):
         return self.rootHisto.GetXaxis().GetBinLowEdge(self.rootHisto.GetXaxis().GetFirst())
 
+    ## Get the maximum value of the X axis
     def getXmax(self):
         return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
 
+    ## Get the width of a bin
+    #
+    # \param bin  Bin number
     def getBinWidth(self, bin):
         return self.rootHisto.GetBinWidth(bin)
+
+    ## \var rootHisto
+    # ROOT histogram object (TH1)
+    ## \var name
+    # Histogram name
+    ## \var legendLabel
+    # Label for TLegend
+    ## \var legendStyle
+    # Style string for TLegend
+    ## \var drawStyle
+    # Style string for Draw()
 
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
