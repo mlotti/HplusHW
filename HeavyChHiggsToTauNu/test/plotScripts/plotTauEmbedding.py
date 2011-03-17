@@ -68,13 +68,20 @@ class PlotMany(PlotBase):
         PlotBase.__init__(self)
 
         self.prefix = prefix+"_"
+        self.plotname = name
 
         for d in directories:
             self.histoMgr.append(getHisto(datasets, d+"/"+name, d))
 
         self.histoMgr.forEachHisto(styles.generator())
 
-    def createFrame(self, plotname, **kwargs):
+    def createFrame(self, **kwargs):
+        plotname = kwargs.get("plotname", self.plotname)
+        try:
+            del kwargs["plotname"]
+        except KeyError:
+            pass
+
         plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
 
 class Plot2(PlotBase):
@@ -269,6 +276,34 @@ def tauGenMass(datasets, an):
     histograms.addEnergyText()
     h.save()
 
+def tauIsoSumMaxPt(h, legendLabels, xlabel, rebin=4):
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    h.histoMgr.setHistoLegendLabelMany(legendLabels)
+
+    h.createFrame(ymin=0.1, ymaxfactor=2, xmax=50)
+    h.frame.GetXaxis().SetTitle("#tau isol. cand %s (GeV/c)" % xlabel)
+    h.frame.GetYaxis().SetTitle("Taus / %.1f GeV/c" % h.binWidth())
+    h.setLegend(histograms.createLegend())
+    h.getPad().SetLogy(True)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.save()
+
+def tauIsoOccupancy(h, legendLabels):
+    h.histoMgr.setHistoLegendLabelMany(legendLabels)
+
+    h.createFrame(ymin=0.1, ymaxfactor=2)
+    h.frame.GetXaxis().SetTitle("#tau isolation cand #")
+    h.frame.GetYaxis().SetTitle("Taus / %.0f" % h.binWidth())
+    h.setLegend(histograms.createLegend())
+    h.getPad().SetLogy(True)
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.save()
+
+
 def muonTauIso(datasets, analyses):
     relIso_re = re.compile("RelIso(?P<iso>\d+)")
     legendLabels = {}
@@ -279,20 +314,20 @@ def muonTauIso(datasets, analyses):
         else:
             legendLabels[an] = "No iso"
 
-    for name in ["Tau_IsoChargedHadrPt05Sum", "Tau_IsoChargedHadrPt10Sum"]:
-        h = PlotMany(datasets, "combined", analyses, name)
-        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
-        h.histoMgr.setHistoLegendLabelMany(legendLabels)
+    histos = [
+#        "Tau_IsoChargedHadrPt05Sum",
+#        "Tau_IsoChargedHadrPt10Sum",
+        "Tau_IsoShrinkingCone",
+        "Tau_IsoShrinkingCone05",
+        "Tau_IsoHpsLoose",
+        "Tau_IsoHpsMedium",
+        "Tau_IsoHpsTight"
+        ]
 
-        h.createFrame(name, ymin=0.1, ymaxfactor=2, xmax=50)
-        h.frame.GetXaxis().SetTitle("#tau isol. charged cand (p_{T} > 0.5 GeV/c) #Sigma p_{T} (GeV/c)")
-        h.frame.GetYaxis().SetTitle("Taus / %.1f GeV/c" % h.binWidth())
-        h.setLegend(histograms.createLegend())
-        h.getPad().SetLogy(True)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+    for name in histos:
+        tauIsoSumMaxPt(PlotMany(datasets, "combined", analyses, name+"SumPt"), legendLabels, " #Sigma p_{T}")
+        tauIsoSumMaxPt(PlotMany(datasets, "combined", analyses, name+"MaxPt"), legendLabels, "max p_{T}")
+        tauIsoOccupancy(PlotMany(datasets, "combined", analyses, name+"Occupancy"), legendLabels)
 
 def muonTauIso2(datasets, an):
     style.setWide(True)
