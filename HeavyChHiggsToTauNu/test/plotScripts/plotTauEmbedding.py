@@ -15,6 +15,7 @@
 ######################################################################
 
 import os
+import re
 from array import array
 
 import ROOT
@@ -56,6 +57,20 @@ class Plot(PlotBase):
 
         for name in names:
             self.histoMgr.append(getHisto(datasets, directory+"/"+name, name))
+
+        self.histoMgr.forEachHisto(styles.generator())
+
+    def createFrame(self, plotname, **kwargs):
+        plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
+
+class PlotMany(PlotBase):
+    def __init__(self, datasets, prefix, directories, name):
+        PlotBase.__init__(self)
+
+        self.prefix = prefix+"_"
+
+        for d in directories:
+            self.histoMgr.append(getHisto(datasets, d+"/"+name, d))
 
         self.histoMgr.forEachHisto(styles.generator())
 
@@ -254,7 +269,32 @@ def tauGenMass(datasets, an):
     histograms.addEnergyText()
     h.save()
 
-def muonTauIso(datasets, an):
+def muonTauIso(datasets, analyses):
+    relIso_re = re.compile("RelIso(?P<iso>\d+)")
+    legendLabels = {}
+    for an in analyses:
+        m = relIso_re.search(an)
+        if m:
+            legendLabels[an] = "Iso < %.2f" % (float(m.group("iso"))/100.0)
+        else:
+            legendLabels[an] = "No iso"
+
+    for name in ["Tau_IsoChargedHadrPt05Sum", "Tau_IsoChargedHadrPt10Sum"]:
+        h = PlotMany(datasets, "combined", analyses, name)
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(4))
+        h.histoMgr.setHistoLegendLabelMany(legendLabels)
+
+        h.createFrame(name, ymin=0.1, ymaxfactor=2, xmax=50)
+        h.frame.GetXaxis().SetTitle("#tau isol. charged cand (p_{T} > 0.5 GeV/c) #Sigma p_{T} (GeV/c)")
+        h.frame.GetYaxis().SetTitle("Taus / %.1f GeV/c" % h.binWidth())
+        h.setLegend(histograms.createLegend())
+        h.getPad().SetLogy(True)
+        h.draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        h.save()
+
+def muonTauIso2(datasets, an):
     style.setWide(True)
     name = "Muon_IsoTrk_Tau_IsoChargedHadrPtSum"
     h = Plot(datasets, an, [name])
@@ -290,7 +330,6 @@ def muonTauIso(datasets, an):
     histograms.addEnergyText()
     h.save()
     style.setWide(False)
-
 
 def muonTauDR(datasets, an):
     rebin = 1
@@ -581,11 +620,17 @@ def embeddingPlots():
         datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+#        datasets.selectAndReorder(["TTJets_TuneZ2_Winter10"])
+        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
 
     muonTau = PlotMuonTau()
     genTauNu = PlotGenTauNu()
     met = PlotMet()
     muonTauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
+
+    muonTauIso(datasets, ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]])
+
+    return
 
     for analysis in [
         "EmbeddingAnalyzer",
@@ -599,7 +644,7 @@ def embeddingPlots():
             muonTau.plot(datasets, analysis, q)
 #            genTauNu.plot(datasets, analysis, q)
 #        muonTauDR(datasets, analysis)
-#        muonTauIso(datasets, analysis)
+#        muonTauIso2(datasets, analysis)
 #        tauGenMass(datasets, analysis)
     
 #        muonTauMetDeltaPhi.plot(datasets, analysis, "Met")
@@ -627,6 +672,7 @@ def tauPlots():
         datasets = getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
         datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+        datasets.selectAndReorder("TTJets_TuneZ2_Winter10")
     
     genTauNu = PlotGenTauNu()
     tauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
