@@ -334,9 +334,6 @@ class PlotBase:
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
-    ## Stack all MC histograms 
-    #
-    # Internally, THStack is used
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename   Name for TCanvas (becomes the file name)
@@ -396,25 +393,25 @@ class PlotBase:
     # TH1 object for the frame (from the cf object)
 
 
+## Base class for plots with same histogram from many datasets.
 class PlotSameBase(PlotBase):
-    """Base class for plots with same histogram from many datasets."""
-
+    ## Construct from DatasetManager and a histogram path
+    #
+    # \param datasetMgr  DatasetManager for datasets
+    # \param name        Path of the histogram in the ROOT files
+    # \param kwargs      Keyword arguments, forwarded to PlotBase.__init__()
     def __init__(self, datasetMgr, name, **kwargs):
-        """Constructor.
-        Arguments:
-        datasetMgr   DatasetManager for datasets
-        name         Name of the histogram in the ROOT files
-
-        Keyword arguments:
-        see PlotBase.__init__()
-        """
         PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
         self.datasetMgr = datasetMgr
         self.rootHistoPath = name
 
+    ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
 
+    ## Stack all MC histograms 
+    #
+    # Internally, THStack is used
     def stackMCHistograms(self):
         mcNames = self.datasetMgr.getMCDatasetNames()
         self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
