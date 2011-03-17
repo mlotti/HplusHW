@@ -184,7 +184,7 @@ namespace HPlus {
 
     // Apply rest of tauID
     TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDOnCleanedTauCandidates(iEvent, iSetup);
-    if(!tauData.passedEvent()) return;
+    if(!tauDataForTauID.passedEvent()) return;
     increment(fOneProngTauIDCounter);
     hWeightedMETAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hNonWeightedTauPtAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
@@ -194,6 +194,7 @@ namespace HPlus {
 
     // BTagging
     if(!btagData.passedEvent()) return;
+    increment(fBTaggingCounter);
     hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hNonWeightedTauPtAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())

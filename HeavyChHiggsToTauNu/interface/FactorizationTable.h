@@ -46,12 +46,8 @@ namespace HPlus {
     std::vector<double> fPtLowEdges;
     /// Low bin edges by eta
     std::vector<double> fEtaLowEdges;
-    /// Weights by pT
-    std::vector<double> fPtTable;
-    /// Weights by eta
-    std::vector<double> fEtaTable;
-    /// Weights by pT vs eta
-    std::vector<double> fPtVsEtaTable;
+    /// Weights table
+    std::vector<double> fWeightTable;
     
     std::string fTauAlgorithm;
     

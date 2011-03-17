@@ -7,7 +7,7 @@ ptDummy = cms.untracked.vdouble( *(
   1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.
 ) )
 
-METTableFacctorizationCoefficients = cms.untracked.PSet(
+METTableFactorizationCoefficients = cms.untracked.PSet(
 factorizationSourceName = cms.untracked.string('NoFactorization'),
 
 METTables_Coefficients = ptDummy,

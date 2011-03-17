@@ -67,18 +67,18 @@ namespace HPlus {
     // Obtain coefficient tables and check that their size is correct
     bool myDimensionStatus = true;
     if (fTableType == kByPt) {
-      fPtTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
-      if (fPtLowEdges.size()+1 != fPtTable.size())
+      fWeightTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if (fPtLowEdges.size()+1 != fWeightTable.size())
         myDimensionStatus = false;
     }
     if (fTableType == kByEta) {
-      fEtaTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
-      if (fEtaLowEdges.size()+1 != fEtaTable.size())
+      fWeightTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if (fEtaLowEdges.size()+1 != fWeightTable.size())
         myDimensionStatus = false;
     }
     if (fTableType == kByPtVsEta) {
-      fPtVsEtaTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
-      if ((fPtLowEdges.size()+1)*(fEtaLowEdges.size()+1) != fPtVsEtaTable.size())
+      fWeightTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if ((fPtLowEdges.size()+1)*(fEtaLowEdges.size()+1) != fWeightTable.size())
         myDimensionStatus = false;
     }
     // Throw exception if coefficient table dimension is incorrect
@@ -94,6 +94,9 @@ namespace HPlus {
     std::string myName = "FactorizationTableCoefficients_"+tableNamePrefix;
     std::string myLabel = myName+";bin;weight coefficient";
     hUsedCoefficients = fs->make<TH1F>(myName.c_str(), myLabel.c_str(), myCoefficientBinCount, 0., myCoefficientBinCount);
+    for (size_t i = 0; i < fWeightTable.size(); ++i) {
+      hUsedCoefficients->Fill(i, fWeightTable[i]);
+    }
   }
 
   double FactorizationTable::getWeightByPtAndEta(double pt, double eta) const {
@@ -104,26 +107,19 @@ namespace HPlus {
 
     // Return output of correct index of correct table
     if (fTableType == kByPt)
-      return fPtTable[calculateTableIndex(pt, fPtLowEdges)];
+      return fWeightTable[calculateTableIndex(pt, fPtLowEdges)];
     else if (fTableType == kByEta)
-      return fEtaTable[calculateTableIndex(eta, fEtaLowEdges)];
+      return fWeightTable[calculateTableIndex(eta, fEtaLowEdges)];
     else if (fTableType == kByPtVsEta) {
       int myEtaIndex = calculateTableIndex(eta, fEtaLowEdges);
       int myPtIndex = calculateTableIndex(pt, fPtLowEdges);
-      return fPtVsEtaTable[myEtaIndex*(fPtLowEdges.size()+1) + myPtIndex];
+      return fWeightTable[myEtaIndex*(fPtLowEdges.size()+1) + myPtIndex];
     }
     return 0.;
   }
 
   int FactorizationTable::getCoefficientTableSize() const {
-    if (fTableType == kByPt)
-      return fPtTable.size()+1;
-    else if (fTableType == kByEta)
-      return fEtaTable.size()+1;
-    else if (fTableType == kByPtVsEta) {
-      return (fPtTable.size()+1) * (fEtaTable.size()+1); 
-    }
-    return 0;  
+    return fWeightTable.size();
   }
 
   int FactorizationTable::getCoefficientTableIndexByPtAndEta(double pt, double eta) const {
@@ -134,7 +130,7 @@ namespace HPlus {
     else if (fTableType == kByPtVsEta) {
       int myEtaIndex = calculateTableIndex(eta, fEtaLowEdges);
       int myPtIndex = calculateTableIndex(pt, fPtLowEdges);
-      return myEtaIndex*(fPtLowEdges.size()+1) + myPtIndex;
+      return myEtaIndex*fPtLowEdges.size() + myPtIndex;
     }
     return 0;
   }

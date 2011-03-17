@@ -33,7 +33,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod3Part2")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -97,10 +97,6 @@ param.InvMassVetoOnJets.setTrueToUseModule = False
 # param.overrideTriggerFromOptions(options) => obsolete
 
 ##############################################################################
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables
-import HiggsAnalysis.HeavyChHiggsToTauNu.METTableFactorization_NoFactorization_cfi as mettables_coefficients
-mettables.factorizationTables = mettables_coefficients
-
 process.qcdMeasurementMethod3Part2 = cms.EDProducer("HPlusQCDMeasurementByMetFactorisationPart2Producer",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
@@ -113,10 +109,15 @@ process.qcdMeasurementMethod3Part2 = cms.EDProducer("HPlusQCDMeasurementByMetFac
     bTagging = param.bTagging,
     MET = param.MET,
     fakeMETVeto = param.fakeMETVeto,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    factorization = mettables
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
-
+# Factorization (quick and dirty version)
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables
+import HiggsAnalysis.HeavyChHiggsToTauNu.METTableFactorization_NoFactorization_cfi as mettableCoeff
+#process.qcdMeasurementMethod3Part2.factorization = cms.untracked.PSet()
+process.qcdMeasurementMethod3Part2.factorization = mettables.METTableParameters
+process.qcdMeasurementMethod3Part2.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
+        
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
@@ -143,6 +144,7 @@ print "\nInvMassVetoOnJets:", process.qcdMeasurementMethod3Part2.InvMassVetoOnJe
 print "\nFakeMETVeto:", process.qcdMeasurementMethod3Part2.fakeMETVeto
 print "\nTriggerEmulationEfficiency:", process.qcdMeasurementMethod3Part2.TriggerEmulationEfficiency
 print "\nEvtTopology:", process.qcdMeasurementMethod3Part2.EvtTopology
+print "\nMetTables:", process.qcdMeasurementMethod3Part2.factorization
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
