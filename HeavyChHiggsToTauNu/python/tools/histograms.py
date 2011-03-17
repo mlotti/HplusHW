@@ -267,12 +267,6 @@ class CanvasFrame:
     # is taken from the histograms, i.e. \a ymax keyword argument is
     # \b not given.
     def __init__(self, histoManager, name, **kwargs):
-        opts   Dictionary for options
-        
-        For backward compatibility the options can also be given
-        directly as keyword arguments.
-
-        Options:
         histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
