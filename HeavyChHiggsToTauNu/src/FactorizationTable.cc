@@ -4,6 +4,9 @@
 
 #include "FWCore/Utilities/interface/Exception.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 namespace HPlus {
   FactorizationTable::FactorizationTable(const edm::ParameterSet& iConfig) :
     fFactorizationEnabled(false) {
@@ -84,6 +87,13 @@ namespace HPlus {
         << "FactorizationTable: dimensions of the bins and coefficient tables do not match!" << std::endl
         << "Regenerate the coefficient tables to get correct dimensions!" << std::endl;
     }
+    
+    // Fill control histogram with coefficients
+    edm::Service<TFileService> fs;
+    int myCoefficientBinCount = getCoefficientTableSize();
+    std::string myName = "FactorizationTableCoefficients_"+tableNamePrefix;
+    std::string myLabel = myName+";bin;weight coefficient";
+    hUsedCoefficients = fs->make<TH1F>(myName.c_str(), myLabel.c_str(), myCoefficientBinCount, 0., myCoefficientBinCount);
   }
 
   double FactorizationTable::getWeightByPtAndEta(double pt, double eta) const {
@@ -103,6 +113,30 @@ namespace HPlus {
       return fPtVsEtaTable[myEtaIndex*(fPtLowEdges.size()+1) + myPtIndex];
     }
     return 0.;
+  }
+
+  int FactorizationTable::getCoefficientTableSize() const {
+    if (fTableType == kByPt)
+      return fPtTable.size()+1;
+    else if (fTableType == kByEta)
+      return fEtaTable.size()+1;
+    else if (fTableType == kByPtVsEta) {
+      return (fPtTable.size()+1) * (fEtaTable.size()+1); 
+    }
+    return 0;  
+  }
+
+  int FactorizationTable::getCoefficientTableIndexByPtAndEta(double pt, double eta) const {
+    if (fTableType == kByPt)
+      return calculateTableIndex(pt, fPtLowEdges);
+    else if (fTableType == kByEta)
+      return calculateTableIndex(eta, fEtaLowEdges);
+    else if (fTableType == kByPtVsEta) {
+      int myEtaIndex = calculateTableIndex(eta, fEtaLowEdges);
+      int myPtIndex = calculateTableIndex(pt, fPtLowEdges);
+      return myEtaIndex*(fPtLowEdges.size()+1) + myPtIndex;
+    }
+    return 0;
   }
 
   int FactorizationTable::calculateTableIndex(const double value, const std::vector<double>& edges) const {

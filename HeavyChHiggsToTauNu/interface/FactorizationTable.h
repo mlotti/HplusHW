@@ -6,6 +6,7 @@
 #include <string>
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "TH1F.h"
 
 namespace HPlus {
   /**
@@ -24,7 +25,12 @@ namespace HPlus {
     FactorizationTable(const edm::ParameterSet& iConfig, std::string tableNamePrefix);
     ~FactorizationTable();
 
+    /// Getter for weight (depends on table type selected)
     double getWeightByPtAndEta(double pt, double eta) const;
+    /// Getter for table dimension (returns number of bins, i.e. table size + 1)
+    int getCoefficientTableSize() const;
+    /// Getter for bin index (for histogramming)
+    int getCoefficientTableIndexByPtAndEta(double pt, double eta) const;
 
   private:
     /// Initialization called from the constructor
@@ -48,6 +54,8 @@ namespace HPlus {
     std::vector<double> fPtVsEtaTable;
     
     std::string fTauAlgorithm;
+    
+    TH1* hUsedCoefficients;
   };
 }
 
