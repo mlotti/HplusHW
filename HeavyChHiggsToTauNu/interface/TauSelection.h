@@ -73,6 +73,8 @@ namespace HPlus {
     Data analyzeTauIDOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
+    /// Method for getting operating mode (needed for tau specific weight maps)
+    TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
 
   private:
     /// Method for doing tau selection
