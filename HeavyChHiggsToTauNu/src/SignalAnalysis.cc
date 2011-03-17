@@ -38,19 +38,15 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTauEmbeddingAnalysis(eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
+    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
    
   {
-
-    if(iConfig.exists("tauEmbedding")) {
-      fTauEmbeddingAnalysis.init(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"));
-    }
 
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -81,6 +77,7 @@ namespace HPlus {
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
+   
 
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
@@ -94,9 +91,7 @@ namespace HPlus {
     TriggerTauMETEmulation::Data triggerTauMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup);
     if(!triggerTauMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);
-*/
-
- 
+*/ 
 /*
     edm::Handle <reco::VertexCollection> goodPrimaryVertices;
     edm::InputTag myVertexInputTag("goodPrimaryVertices", "", "HChPatTuple");
@@ -108,9 +103,21 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
- 
-  
 
+    /*
+    // TauID (with optional factorization) 
+                                                                             
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+
+    // Hadronic jet selection                                                                                                                                                                                                      
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+    if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
+    */
+
+
+
+    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
@@ -118,9 +125,11 @@ namespace HPlus {
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
+
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
 
+ 
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
@@ -136,6 +145,7 @@ namespace HPlus {
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
+   
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
@@ -152,7 +162,7 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-                                                                                                         
+                                                                                                     
             
                               
   

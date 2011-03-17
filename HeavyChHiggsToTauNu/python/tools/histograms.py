@@ -267,20 +267,33 @@ class CanvasFrame:
     # is taken from the histograms, i.e. \a ymax keyword argument is
     # \b not given.
     def __init__(self, histoManager, name, **kwargs):
+        opts   Dictionary for options
+        
+        For backward compatibility the options can also be given
+        directly as keyword arguments.
+
+        Options:
         histos = histoManager.getHistos()
         if len(histos) == 0:
             raise Exception("Empty set of histograms!")
 
         self.canvas = ROOT.TCanvas(name)
+        self.pad = self.canvas.GetPad(0)
 
-        if "yfactor" in kwargs:
-            if "ymaxfactor" in kwargs:
+        opts = kwargs
+        if "opts" in kwargs:
+            if len(kwargs) != 1:
+                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given")
+            opts = kwargs["opts"]
+
+        if "yfactor" in opts:
+            if "ymaxfactor" in opts:
                 raise Exception("Only one of ymaxfactor, yfactor can be given")
-            kwargs["ymaxfactor"] = kwargs["yfactor"]
+            opts["ymaxfactor"] = opts["yfactor"]
 
-        _boundsArgs(histos, kwargs)
+        _boundsArgs(histos, opts)
 
-        self.frame = self.canvas.DrawFrame(kwargs["xmin"], kwargs["ymin"], kwargs["xmax"], kwargs["ymax"])
+        self.frame = self.canvas.DrawFrame(opts["xmin"], opts["ymin"], opts["xmax"], opts["ymax"])
         self.frame.GetXaxis().SetTitle(histos[0].getRootHisto().GetXaxis().GetTitle())
         self.frame.GetYaxis().SetTitle(histos[0].getRootHisto().GetYaxis().GetTitle())
 
@@ -299,7 +312,7 @@ class CanvasFrameTwo:
     # \param kwargs        Keyword arguments (see below)
     #
     # <b>Keyword arguments</b>
-    # \li\a opts1                   Dictionary for histoManager1 options
+    # \li\a opts1/\a opts           Dictionary for histoManager1 options
     # \li\a opts2                   Dictionary for histos2 options
     # \li\a canvasFactor            Multiply the canvas height by this factor (default 1.25)
     # \li\a canvasHeightCorrection  Add this to the height of the lower pad (default 0.022)
@@ -369,7 +382,11 @@ class CanvasFrameTwo:
         canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
-        opts1 = kwargs.get("opts1", {})
+        opts1 = kwargs.get("opts", {})
+        if "opts1" in kwargs:
+            if "opts" in kwargs:
+                raise Exception("Can not give both 'opts' and 'opts1' as keyword arguments")
+            opts1 = kwargs["opts1"]
         opts2 = kwargs.get("opts2", {})
 
         if "xmin" in opts2 or "xmax" in opts2:
@@ -425,6 +442,7 @@ class CanvasFrameTwo:
 
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)
+        self.pad = self.pad1
 
     ## \var frame1
     # TH1 for the upper frame
@@ -532,16 +550,17 @@ class HistoBase:
 class Histo(HistoBase):
     """Class to represent one (TH1/TH2) histogram."""
 
-    def __init__(self, dataset, histo):
+    def __init__(self, dataset, rootHisto, name):
         """Constructor
 
         Arguments:
-        dataset   Dataset object
-        histo     TH1 object
+        dataset    Dataset object
+        rootHisto  TH1 object
+        name       Name of the Histo
 
         The default legend label is the dataset name
         """
-        HistoBase.__init__(self, histo, dataset.getName(), "l", "HIST")
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
         self.dataset = dataset
 
     def isMC(self):
@@ -549,6 +568,9 @@ class Histo(HistoBase):
 
     def isData(self):
         return self.dataset.isData()
+
+    def getDataset(self):
+        return self.dataset
 
 class HistoTotalUncertainty(HistoBase):
     """Class to represent combined (statistical) uncertainties of many histograms."""
@@ -674,19 +696,19 @@ class HistoManagerImpl:
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
-    def append(self, histo):
+    def appendHisto(self, histo):
         """Append a Histo object."""
         self.drawList.append(histo)
         self.legendList.append(histo)
         self._populateMap()
 
-    def extend(self, histos):
+    def extendHistos(self, histos):
         """Extend with a list of Histo objects."""
         self.drawList.extend(histos)
         self.legendList.extend(histos)
         self._populateMap()
 
-    def insert(self, i, histo, **kwargs):
+    def insertHisto(self, i, histo, **kwargs):
         """Insert Histo to position i.
 
         Arguments:
@@ -856,13 +878,20 @@ class HistoManagerImpl:
 
         self._populateMap()
 
-    def addMCUncertainty(self, style, name="MC stat. unc."):
+    def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
             print >> sys.stderr, "WARNING: Tried to create MC uncertainty histogram, but there are not MC histograms!"
             return
 
+        if nameList != None:
+            mcHistos = filter(lambda x: x.getName() in nameList, mcHistos)
+        if len(mcHistos) == 0:
+            print >>sys.stderr, "WARNING: No MC histograms to use for uncertainty band"
+            return
+
         hse = HistoTotalUncertainty(mcHistos, name)
+        hse.setLegendLabel(legendLabel)
         hse.call(style)
 
         firstMcIndex = len(self.drawList)
@@ -870,7 +899,7 @@ class HistoManagerImpl:
             if h.isMC():
                 firstMcIndex = i
                 break
-        self.insert(firstMcIndex, hse, legendIndex=len(self.drawList))
+        self.insertHisto(firstMcIndex, hse, legendIndex=len(self.drawList))
         
 
 
@@ -882,21 +911,43 @@ class HistoManager:
     The implementation is divided to this and HistoManagerImpl class. The
     idea is that here are the methods, which don't require
     Histo objects (namely setting the normalization), and
-    HistoSetImpl has all the methods which require the Histo
+    HistoManagerImpl has all the methods which require the Histo
     objects. User can set freely the normalization scheme as many
     times as (s)he wants, and at the first time some method not
-    implemented in HistoManager is called, the Histo objects are
+    implemented in HistoManagerBase is called, the Histo objects are
     created and the calls are delegated to HistoManagerImpl class.
     """
-    def __init__(self, datasetMgr, name):
+    def __init__(self, *args, **kwargs):
         """Constructor.
 
-        Arguments:
+        Positional arguments:
         datasetMgr   DatasetManager object to take the histograms from
         name         Path to the TH1 objects in the DatasetManager ROOT files
+
+        Keyword arguments:
+        datasetRootHistos   Initial list of DatasetRootHisto objects
+
+        Only either both positional arguments or the keyword argument
+        can be given.
+
+        FIXME: the interface should be fixed to have only the keyword
+        argument (also as the only positional argument). This is not
+        done yet for backward compatibility.
         """
-        self.datasetMgr = datasetMgr
-        self.datasetRootHistos = datasetMgr.getDatasetRootHistos(name)
+        if len(args) == 0:
+            if len(kwargs) != 1:
+                raise Exception("If positional arguments are not given, there must be exactly 1 keyword argument")
+            self.datasetRootHistos = kwargs["datasetRootHistos"]
+        else:
+            if len(args) != 2:
+                raise Exception("Must give exactly 2 positional arguments (got %d)" % len(args))
+            if len(kwargs) != 0:
+                raise Exception("If positional arguments are given, there must not be any keyword arguments")
+            datasetMgr = args[0]
+            name = args[1]
+
+            self.datasetRootHistos = datasetMgr.getDatasetRootHistos(name)
+
         self.impl = None
         self.luminosity = None
 
@@ -905,6 +956,25 @@ class HistoManager:
         if self.impl == None:
             self._createImplementation()
         return getattr(self.impl, name)
+
+    def append(self, datasetRootHisto):
+        if self.impl != None:
+            raise Exception("Can't append after the histograms have been created!")
+        if not isinstance(datasetRootHisto, dataset.DatasetRootHistoBase):
+            raise Exception("Can append only DatasetRootHistoBase derived objects, got %s" % str(datasetRootHisto))
+        self.datasetRootHistos.append(datasetRootHisto)
+
+    def extend(self, datasetRootHistos):
+        if self.impl != None:
+            raise Exception("Can't extend after the histograms have been created!")
+        if isinstance(datasetRootHistos, HistoManager):
+            if datasetRootHistos.impl != None:
+                raise Exception("Can't extend from HistoManagerBase whose histograms have been created!")
+            datasetRootHistos = HistoManagerBase.datasetRootHistos
+        for d in datasetRootHistos:
+            if not isinstance(datasetRootHisto, dataset.DatasetRootHistoBase):
+                raise Exception("Can extend only DatasetRootHistoBase derived objects, got %s" % str(d))
+        self.datasetRootHistos.extend(datasetRootHistos)
 
     def normalizeToOne(self):
         """Set the histogram normalization 'to one'.
@@ -991,8 +1061,10 @@ class HistoManager:
 
         Intended only for internal use.
         """
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     def stackMCHistograms(self):
         """Stack all MC histograms to one named 'StackedMC'."""
-        self.stackHistograms("StackedMC", self.datasetMgr.getMCDatasetNames())
+        histos = self.getHistos()
+        
+        self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])

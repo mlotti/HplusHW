@@ -22,6 +22,7 @@
 import ROOT
 import array
 
+import dataset
 import histograms
 import styles
 
@@ -97,6 +98,7 @@ _datasetOrder = [
     "TTToHplusBWB_M140",
     "TTToHplusBWB_M160",
     "QCD",
+    "QCD_Pt20_MuEnriched",
     "DYJetsToLL",
     "WJets",
     "SingleTop",
@@ -260,17 +262,35 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+def _createRatio(rootHisto1, rootHisto2, ytitle):
+    ratio = rootHisto1.Clone()
+    ratio.Divide(rootHisto2)
+    styles.getDataStyle().apply(ratio)
+    ratio.GetYaxis().SetTitle(ytitle)
+    return ratio
+
+def _createRatioLine(xmin, xmax):
+    line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
+    line.SetLineColor(ROOT.kBlack)
+    line.SetLineWidth(2)
+    line.SetLineStyle(3)
+    return line
+
+def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
+    coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
+    coverPad.SetBorderMode(0)
+    return coverPad
+ 
+
 ## Base class for plots
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name
     #
-    # \param datasetMgr   dataset.DatasetManager for datasets
-    # \param name         Path of the histogram in the ROOT files
-    # \param saveFormats  List of suffixes for formats for which to save the plot
-    def __init__(self, datasetMgr, name, saveFormats=[".png", ".eps", ".C"]):
+    # \param datasetRootHistos  dataset.DatasetRootHistoBase objects to plot
+    # \param saveFormats        List of suffixes for formats for which to save the plot
+    def __init__(self, datasetRootHistos, saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
-        self.histoMgr = histograms.HistoManager(datasetMgr, name)
-        self.datasetMgr = datasetMgr
+        self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
 
         # Save the format
         self.saveFormats = saveFormats
@@ -287,6 +307,9 @@ class PlotBase:
         self.histoMgr.forEachHisto(SetPlotStyle(_plotStyles))
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
+
+    def binWidth(self):
+        return self.histoMgr.getHistos()[0].getBinWidth(1)
 
     ## Add a format for which to save the plot
     #
@@ -314,11 +337,6 @@ class PlotBase:
     ## Stack all MC histograms 
     #
     # Internally, THStack is used
-    def stackMCHistograms(self):
-        mcNames = self.datasetMgr.getMCDatasetNames()
-        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
-        self.histoMgr.stackHistograms("StackedMC", mcNames)
-
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename   Name for TCanvas (becomes the file name)
@@ -326,6 +344,11 @@ class PlotBase:
     def createFrame(self, filename, **kwargs):
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
+
+    def getFrame(self):
+        return frame
+    def getPad(self):
+        return self.cf.pad
 
     ## Draw the plot
     #
@@ -373,23 +396,74 @@ class PlotBase:
     # TH1 object for the frame (from the cf object)
 
 
+class PlotSameBase(PlotBase):
+    """Base class for plots with same histogram from many datasets."""
+
+    def __init__(self, datasetMgr, name, **kwargs):
+        """Constructor.
+        Arguments:
+        datasetMgr   DatasetManager for datasets
+        name         Name of the histogram in the ROOT files
+
+        Keyword arguments:
+        see PlotBase.__init__()
+        """
+        PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
+        self.datasetMgr = datasetMgr
+        self.rootHistoPath = name
+
+    def getRootHistoPath(self):
+        return self.rootHistoPath
+
+    def stackMCHistograms(self):
+        mcNames = self.datasetMgr.getMCDatasetNames()
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
+        self.histoMgr.stackHistograms("StackedMC", mcNames)
+
 ## Class for data-MC comparison plot.
 # 
-class DataMCPlot(PlotBase):
+class DataMCPlot(PlotSameBase):
     ## Construct from DatasetManager and a histogram path
     #
     # \param datasetMgr  DatasetManager for datasets
     # \param name        Path of the histogram in the ROOT files
-    # \param kwargs      Keyword arguments, forwarded to PlotBase.__init__()
-    def __init__(self, datasetMgr, name, **kwargs):
-        PlotBase.__init__(self, datasetMgr, name, **kwargs)
+    # \param kwargs      Keyword arguments, forwarded to PlotSameBase.__init__()
+    def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
+        PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
         self.histoMgr.normalizeMCByLuminosity()
+        self.normalizeToOne = normalizeToOne
 
         self._setLegendStyles()
         self._setLegendLabels()
         self._setPlotStyles()
+
+    def _normalizeToOne(self):
+        if not self.normalizeToOne:
+            return
+
+        if not self.histoMgr.hasHisto("StackedMC"):
+            self.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
+            return
+
+        # Normalize the stacked histograms
+        handled = []
+        h = self.histoMgr.getHisto("StackedMC")
+        sumInt = h.getSumRootHisto().Integral()
+        for th1 in h.getAllRootHistos():
+            dataset._normalizeToFactor(th1, 1.0/sumInt)
+        handled.append("StackedMC")
+
+        # Normalize the the uncertainty histogram if it exists
+        if self.histoMgr.hasHisto("MCuncertainty"):
+            dataset._normalizeToFactor(self.histoMgr.getHisto("MCuncertainty").getRootHisto(), 1.0/sumInt)
+            handled.append("MCuncertainty")
+        
+        # Normalize the rest
+        for h in self.histoMgr.getHistos():
+            if not h.getName() in handled:
+                dataset._normalizeToOne(h.getRootHisto())
 
     ## Stack MC histograms
     #
@@ -409,48 +483,118 @@ class DataMCPlot(PlotBase):
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    def addMCUncertainty(self):
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+
+    def createFrame(self, filename, **kwargs):
+        self._normalizeToOne()
+        PlotSameBase.createFrame(self, filename, **kwargs)
+
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename   Name for TCanvas (becomes the file name)
     # \param kwargs     Keyword arguments, forwarded to histograms.CanvasFrameTwo.__init__()
     def createFrameFraction(self, filename, **kwargs):
         if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("MC histograms must be stacked in order to create Data/MC fraction")
+            raise Exception("Must call stackMCHistograms() before createFrameFraction()")
 
-        self.mcSum = self.histoMgr.getHisto("StackedMC").getSumRootHisto()
-        self.mcSum.Divide(self.histoMgr.getHisto("Data").getRootHisto())
-        styles.getDataStyle().apply(self.mcSum)
-        self.mcSum.GetYaxis().SetTitle("Data/MC")
+        self._normalizeToOne()
 
-        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.mcSum], filename, **kwargs)
+        self.ratio = _createRatio(self.histoMgr.getHisto("Data").getRootHisto(),
+                                  self.histoMgr.getHisto("StackedMC").getSumRootHisto(),
+                                  "Data/MC")
+
+        self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
+    def getFrame1(self):
+        return self.cf.frame1
+    def getFrame2(self):
+        return self.cf.frame2
+    def getPad1(self):
+        return self.cf.pad1
+    def getPad2(self):
+        return self.cf.pad2
+
     def draw(self):
-        PlotBase.draw(self)
-        if hasattr(self, "mcSum"):
+        PlotSameBase.draw(self)
+        if hasattr(self, "ratio"):
             self.cf.canvas.cd(2)
 
-            self.line = ROOT.TGraph(2, 
-                                    array.array("d", [self.cf.frame.getXmin(), self.cf.frame.getXmax()]),
-                                    array.array("d", [1.0, 1.0]))
-            self.line.SetLineColor(ROOT.kBlack)
-            self.line.SetLineWidth(2)
-            self.line.SetLineStyle(3)
+            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
             self.line.Draw("L")
 
-            self.mcSum.Draw("EP same")
+            self.ratio.Draw("EP same")
             self.cf.canvas.cd()
 
             # Create an empty, white-colored pad to hide the topmost
             # label of the y-axis of the lower pad. Then move the
             # upper pad on top, so that the lowest label of the y-axis
             # of it is shown
-            self.stupidPad = ROOT.TPad("stupidpad", "stupidpad", 0.065, 0.285, 0.165, 0.33)
-            #self.stupidPad.SetFillColor(ROOT.kRed)
-            self.stupidPad.SetBorderMode(0)
-            self.stupidPad.Draw()
+            self.coverPad = _createCoverPad()
+            self.coverPad.Draw()
 
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+class ComparisonPlot(PlotBase):
+    """Class to create comparison plots of two quantities."""
+
+    def __init__(self, datasetRootHisto1, datasetRootHisto2):
+        """Constructor.
+
+        Arguments:
+        datasetRootHisto1
+        datasetRootHisto2
+
+        ratio is datasetRootHisto1/datasetRootHisto2
+        """
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
+
+    def createFrame(self, filename, doRatio=True, **kwargs):
+        if not doRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            histos = self.histoMgr.getHistos()
+            self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
+                                      "%s/%s" % (histos[0].getName(), histos[1].getName()))
+
+            self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
+            self.frame = self.cf.frame
+            self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+    def getFrame1(self):
+        return self.cf.frame1
+    def getFrame2(self):
+        return self.cf.frame2
+    def getPad1(self):
+        return self.cf.pad1
+    def getPad2(self):
+        return self.cf.pad2
+
+    def draw(self):
+        PlotBase.draw(self)
+        if hasattr(self, "ratio"):
+            self.cf.canvas.cd(2)
+
+            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
+            self.line.Draw("L")
+
+            self.ratio.Draw("EP same")
+            self.cf.canvas.cd()
+
+            # Create an empty, white-colored pad to hide the topmost
+            # label of the y-axis of the lower pad. Then move the
+            # upper pad on top, so that the lowest label of the y-axis
+            # of it is shown
+            self.coverPad = _createCoverPad()
+            self.coverPad.Draw()
+
+            self.cf.canvas.cd(1)
+            self.cf.pad1.Pop() # Move the first pad on top
+
+
+        

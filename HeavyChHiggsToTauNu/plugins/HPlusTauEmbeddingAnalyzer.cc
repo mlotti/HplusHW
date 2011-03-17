@@ -100,7 +100,9 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hTauLeadChargedHadrExists = dir.make<TH1F>("Tau_LeadPFChargedHadrCand_Exists", "Tau leading charged hadr cand exists", 2, 0, 2);
       hTauLeadTrackExists = dir.make<TH1F>("Tau_LeadTrack_Exists", "Tau leading track exists", 2, 0, 2);
       hTauR = dir.make<TH1F>("Tau_Rtau", "Rtau", 120, 0., 1.2);
-      hTauIsoChargedHadrPtSum = dir.make<TH1F>("Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 100, 0, 100);
+      hTauIsoChargedHadrPtSum = dir.make<TH1F>("Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 200, 0, 100);
+      hTauIsoChargedHadrPt05Sum = dir.make<TH1F>("Tau_IsoChargedHadrPt05Sum", "Tau isolation charged hadr cand pt sum, pt > 0.5", 200, 0, 100);
+      hTauIsoChargedHadrPt10Sum = dir.make<TH1F>("Tau_IsoChargedHadrPt10Sum", "Tau isolation charged hadr cand pt sum, pt > 1.0", 200, 0, 100);
       hTauIsoChargedHadrPtSumRel = dir.make<TH1F>("Tau_IsoChargedHadrPtSumRel", "Tau isolation charged hadr cand relative pt sum", 200, 0, 20);
       hTauIsoChargedHadrPtMax = dir.make<TH1F>("Tau_IsoChargedHadrPtMax", "Tau isolation charged hadr cand pt max", 100, 0, 100);
       hTauIsoChargedHadrPtMaxRel = dir.make<TH1F>("Tau_IsoChargedHadrPtMaxRel", "Tau isolation charged hadr cand relative pt max", 200, 0, 20);
@@ -159,13 +161,24 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
       double ptSum = tau.isolationPFChargedHadrCandsPtSum();
       double ptMax = 0;
+      double pt05Sum = 0.0;
+      double pt10Sum = 0.0;
       const reco::PFCandidateRefVector& isoCands = tau.isolationPFChargedHadrCands();
       if(isoCands.isNonnull()) {
         for(reco::PFCandidateRefVector::const_iterator iCand = isoCands.begin(); iCand != isoCands.end(); ++iCand) {
-          ptMax = std::max(ptMax, (*iCand)->pt());
+          double pt = (*iCand)->pt();
+          ptMax = std::max(ptMax, pt);
+          if(pt > 0.5) {
+            pt05Sum += pt;
+            if(pt > 1.0) {
+              pt10Sum += pt;
+            }
+          }
         }
       }
       hTauIsoChargedHadrPtSum->Fill(ptSum);
+      hTauIsoChargedHadrPt05Sum->Fill(pt05Sum);
+      hTauIsoChargedHadrPt10Sum->Fill(pt10Sum);
       hTauIsoChargedHadrPtSumRel->Fill(ptSum/tau.pt());
       hTauIsoChargedHadrPtMax->Fill(ptMax);
       hTauIsoChargedHadrPtMaxRel->Fill(ptMax/tau.pt());
@@ -288,6 +301,8 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     TH1 *hTauLeadTrackExists;
     TH1 *hTauLeadChargedHadrExists;
     TH1 *hTauIsoChargedHadrPtSum;
+    TH1 *hTauIsoChargedHadrPt05Sum;
+    TH1 *hTauIsoChargedHadrPt10Sum;
     TH1 *hTauIsoChargedHadrPtSumRel;
     TH1 *hTauIsoChargedHadrPtMax;
     TH1 *hTauIsoChargedHadrPtMaxRel;

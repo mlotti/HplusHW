@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+######################################################################
+#
+# This plot script is for analysing the muon selection part of the EWK
+# background measurement. The corresponding python job configuration
+# is tauEmbedding/muonAnalysis_cfg.py.
+#
+# Author: Matti Kortelainen
+#
+######################################################################
+
+import sys
+import array
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -13,14 +26,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 WdecaySeparate = False
 #WdecaySeparate = True
 
-tuneD6T = False
-tuneD6T = True
-
 def findSelection(lst, name):
     for n in lst:
         if name in n:
             return n
-    raise Exception("Did not find '%s' from the following list\n%s" % (name, "\n".join(lst)))
+#    raise Exception("Did not find '%s' from the following list\n%s" % (name, "\n".join(lst)))
+    return None
 
 def replaceSelection(name, new):
     return name.split("_")[0]+"_"+new
@@ -28,7 +39,8 @@ def replaceSelection(name, new):
 #analysisPrefix = "noIsoNoVetoMetNJets3"
 #analysisPrefix = "noIsoNoVetoMetPFPt30Met20NJets3"
 #analysisPrefix = "topMuJetRefMet"
-analysisPrefix = "muonSelectionPFPt30Met20NJets3"
+#analysisPrefix = "muonSelectionPFPt30Met20NJets3"
+analysisPrefix = "muonSelectionPFPt30Met20NJets3IsoTau"
 
 topMuJetRefMet = [analysisPrefix+x for x in [
         "h00_AllMuons",
@@ -79,16 +91,41 @@ muonSelectionPF = [analysisPrefix+x for x in [
         "h08_JetMultiplicityCut",
         "h09_METCut"]]
 muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
-        "h06_MuonLargestPt",
-        "h07_JetMultiplicityCut",
-        "h08_METCut"]]
+        "h07_MuonLargestPt",
+        "h08_JetMultiplicityCut",
+        "h09_METCut"]]
+
+muonSelectionPFIsoTau = [analysisPrefix+x for x in [
+        "h00_AllMuons",
+        "h01_Triggered",
+        "h02_PrimaryVertex",
+        "h03_GlobalTrackerMuon",
+        "h04_MuonKin",
+        "h05_MuonQuality",
+        "h06_MuonIP",
+        "h07_MuonVertexDiff",
+        "h08_MuonIsolation",
+        "h08_MuonLargestPt",
+        "h08_JetSelection",
+        "h08_JetId",
+        "h09_JetMultiplicityCut",
+        "h10_METCut"
+        ]]
+muonSelectionPFIsoTauAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
+        "h08_MuonLargestPt",
+        "h09_JetMultiplicityCut",
+        "h10_METCut"]]
 
 selections = noIsoNoVetoMet
 selectionsAoc = noIsoNoVetoMetAoc
 #index = 8
 if "muonSelectionPF" in analysisPrefix:
-    selections = muonSelectionPF
-    selectionsAoc = muonSelectionPFAoc
+    if "IsoTau" in analysisPrefix:
+        selections = muonSelectionPFIsoTau
+        selectionsAoc = muonSelectionPFIsoTauAoc
+    else:
+        selections = muonSelectionPF
+        selectionsAoc = muonSelectionPFAoc
 elif "topMuJetRefMet" in analysisPrefix:
     selections = topMuJetRefMet
     selectionsAoc = topMuJetRefMetAoc
@@ -102,6 +139,7 @@ selectionAll = selections[0]
 selectionTrigger = selections[1]
 selectionPrimaryVertex = selections[2]
 selectionMuon = findSelection(selections, "MuonLargestPt")
+selectionMuonIso = findSelection(selections, "MuonIsolation")
 selectionJetId = findSelection(selections, "JetId")
 selectionJet = findSelection(selections, "JetMultiplicityCut")
 selectionMet = findSelection(selections, "METCut")
@@ -118,14 +156,25 @@ lastSelectionBeforeMetOtherIso = selectionsAoc[-2]+"Iso"
 
 datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysisPrefix+"countAnalyzer")
 datasets.loadLuminosities()
+foo = {
+        "WJets_TuneZ2_Winter10": 28000,
+        "TToBLNu_s-channel_TuneZ2_Winter10": 4.6*0.32442,
+        "TToBLNu_t-channel_TuneZ2_Winter10": 63*0.32442,
+        "TToBLNu_tW-channel_TuneZ2_Winter10": 10.6,
+        "WW_TuneZ2_Winter10": 43,
+        "WZ_TuneZ2_Winter10": 18,
+        "ZZ_TuneZ2_Winter10": 5.9,
+}
+for name, xsect in foo.iteritems():
+    datasets.getDataset(name).setCrossSection(xsect)
 
 datasetsMC = datasets.deepCopy()
 datasetsMC.remove(datasets.getDataDatasetNames())
 
-if tuneD6T:
-    datasets.remove(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
-else:
-    datasets.remove(["TTJets_TuneD6T_Winter10", "WJets_TuneD6T_Winter10"])
+#if tuneD6T:
+#    datasets.remove(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
+#else:
+#    datasets.remove(["TTJets_TuneD6T_Winter10", "WJets_TuneD6T_Winter10"])
 
 plots.mergeRenameReorderForDataMC(datasets)
 
@@ -150,18 +199,18 @@ if WdecaySeparate:
 
     wmunu = [x+"WMuNu" for x in wmunu] + [x+"WOther" for x in wmunu]
 
-datasets.selectAndReorder(
-    ["Data"] + wmunu + [
-        "DYJetsToLL",
-        "QCD_Pt20_MuEnriched"
-])
-datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
+#datasets.selectAndReorder(
+#    ["Data"] + wmunu + [
+#        "DYJetsToLL",
+#        "QCD_Pt20_MuEnriched"
+#])
+#datasets.selectAndReorder(["Data", "TTJets", "WJets", "QCD_Pt20_MuEnriched"])
 
 
 normalizeToLumi = None
 if not datasets.hasDataset("Data"):
     normalizeToLumi = 36
-normalizeToLumi = 36
+#normalizeToLumi = 36
 
 #textDefaults.setCmsPreliminaryDefaults()
 #histograms.textDefaults.setEnergyDefaults(x=0.17)
@@ -169,9 +218,9 @@ normalizeToLumi = 36
 #histograms.createLegend.setDefaults(x1=0.65,y1=0.7)
 style = tdrstyle.TDRStyle()
 
-class Plot(plots.PlotBase):
+class Plot(plots.PlotSameBase):
     def __init__(self, datasets, name):
-        plots.PlotBase.__init__(self, datasets, name,
+        plots.PlotSameBase.__init__(self, datasets, name,
 #                                [".png"]
                                 )
 
@@ -184,8 +233,95 @@ class Plot(plots.PlotBase):
         self._setLegendStyles()
         self._setPlotStyles()
 
+class PlotPassed(plots.PlotBase):
+    def __init__(self, plot):
+        plots.PlotBase.__init__(self, [], plot.saveFormats)
+
+        backup = ROOT.TH1.AddDirectoryStatus()
+        ROOT.TH1.AddDirectory(False)
+
+        for histo in plot.histoMgr.getHistos():
+            hpass = dist2pass(histo.getRootHisto())
+            h = histograms.Histo(histo.getDataset(), hpass, histo.getName())
+            self.histoMgr.appendHisto(h)
+        self.histoMgr.setHistoDrawStyleAll("P")
+        self.histoMgr.setHistoLegendStyleAll("P")
+        self._setLegendLabels()
+        self._setPlotStyles()
+
+        ROOT.TH1.AddDirectory(backup)
+
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
+
+    def printFractions(self, bin):
+        qcd = 0.0
+        wjets = 0.0
+        wjets_all = 0.0
+        ttjets = 0.0
+        ttjets_all = 0.0
+        other = 0.0
+        for histo in self.histoMgr.getHistos():
+            if not histo.isMC():
+                continue
+            th1 = histo.getRootHisto()
+            content = th1.GetBinContent(bin)
+            nall = th1.GetBinContent(th1.GetNbinsX()+1) # number of all events is in the overflow bin
+            if "QCD" in histo.getName():
+                qcd += content
+            elif "TTJets" in histo.getName():
+                ttjets += content
+                ttjets_all += nall
+            elif "WJets" in histo.getName():
+                wjets += content
+                wjets_all += nall
+            else:
+                other += content
+
+        cut = self.histoMgr.getHistos()[0].getRootHisto().GetBinCenter(bin)
+        #print "Bin cut  TTJets WJets TT+W QCD Other TT+W/all QCD/all QCD/QCD/tt+w"
+        #print "%d %f  %f %f %f %f %f %f %f %f" % (bin, cut, ttjets, wjets, (ttjets+wjets), qcd, other, ((ttjets+wjets)/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd)))
+        nall = ttjets+wjets+qcd+other
+#        print "Bin cut   TT_eff W_eff  TT+W/all  QCD/all"
+#        print "%d %f   %f %f  %f %f" % (bin, cut, ttjets/ttjets_all, wjets/wjets_all, (ttjets+wjets)/nall, qcd/nall)
+        
+        print "Bin cut   TT W QCD  TT+W/all  QCD/all"
+        print "%d %f   %f %f %f  %f %f" % (bin, cut, ttjets, wjets, qcd, (ttjets+wjets)/nall, qcd/nall)
+
+
+# dist = TH1
+def dist2pass(hdist):
+    # bin 0             underflow bin
+    # bin 1             first bin
+    # bin GetNbinsX()   last bin
+    # bin GetNbinsX()+1 overflow bin
+
+    # Construct the passed histogram such that the bin low edges in
+    # the distribution histogram become the bin centers
+    binLowEdges = []
+    for bin in xrange(1, hdist.GetNbinsX()+3):
+        prevBin = bin-1
+        prevLowEdge = hdist.GetBinLowEdge(prevBin)
+        thisLowEdge = hdist.GetBinLowEdge(bin)
+        binLowEdges.append( (prevLowEdge+thisLowEdge)/2 )
+
+    #name = "passed_"+hdist.GetName()
+    hpass = ROOT.TH1F(name, name, len(binLowEdges)-1, array.array("d", binLowEdges))
+
+    #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
+
+    #print ["%.4f" % i for i in binLowEdges]
+    #print ["%.3f" % hdist.GetBinLowEdge(bin) for bin in xrange(1, hdist.GetNbinsX()+2)]
+    #print ["%.3f" % hpass.GetBinCenter(bin) for bin in xrange(1, hpass.GetNbinsX()+1)]
+    #for bin in xrange(1, hpass.GetNbinsX()):
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    #print "total %f" % total
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        passed = hdist.Integral(0, bin)
+        #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
+        hpass.SetBinContent(bin+1, passed)
+    #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
+    return hpass
 
 def jetMultiplicity(h, prefix=""):
     h.stackMCHistograms()
@@ -209,11 +345,12 @@ def jetPt(h, prefix=""):
 
     ptcut = 30
     ymin = 4
+    xmax = 400
 
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    h.createFrame(prefix+"jet_pt_log", ymin=ymin, yfactor=2)
+    h.createFrame(prefix+"jet_pt_log", xmax=xmax, ymin=ymin, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -224,7 +361,7 @@ def jetPt(h, prefix=""):
     h.histoMgr.addLuminosityText()
     h.save()
 
-    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, ymin=ymin, yfactor=2)
+    h.createFrame(prefix+"jet_pt_log_cut%d"%ptcut, xmin=ptcut, xmax=xmax, ymin=ymin, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -242,7 +379,7 @@ def muonPt(h, prefix="", plotAll=False):
     ylabel = "Number of muons / %.1f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
     ptcut = 30
-    xmax = 350
+    xmax = 400
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     ylabel = ylabel % h.binWidth()
@@ -347,35 +484,53 @@ def muonPhi(h, prefix="", plotAll=False):
     h.histoMgr.addLuminosityText(x=0.2)
     h.save()
 
-def muonIso(h, prefix=""):
-    xlabel = "Muon rel. isol. (GeV/c)"
-    #ylabel = "Number of muons / 0.01"
+def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False):
     #rebin = 2
-    ylabel = "Number of muons / 0.025"
     rebin = 5
 
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    h.stackMCHistograms()
-    h.createFrame(prefix+"muon_reliso")
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.histoMgr.addLuminosityText()
-    h.save()
+    #dist2pass(h.histoMgr.getHisto("QCD_Pt20_MuEnriched").getRootHisto())
 
-    h.createFrame(prefix+"muon_reliso_log", ymin=1e-2, ymax=4000)
+    passed = PlotPassed(h)
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "Muon rel. isol. (GeV/c)"
+    ylabel = "Number of muons / %.3f" % h.binWidth()
+    h.stackMCHistograms()
+
+    if plotAll:
+        h.createFrame(prefix+"muon_"+q)
+        h.frame.GetXaxis().SetTitle(xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(histograms.createLegend())
+        h.draw()
+        histograms.addCmsPreliminaryText()
+        histograms.addEnergyText()
+        h.histoMgr.addLuminosityText()
+        h.save()
+
+    h.createFrame(prefix+"muon_%s_log" % q, ymin=1e-2, ymaxfactor=10)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend(0.72, 0.7, 0.92, 0.92))
+    #h.setLegend(histograms.createLegend(0.72, 0.7, 0.92, 0.92))
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     h.histoMgr.addLuminosityText(x=0.45, y=0.85)
     h.save()
+
+    passed.createFrame(prefix+"muon_%s_log_passed" % q, ymin=10, ymaxfactor=10)
+    passed.frame.GetXaxis().SetTitle("Cut on "+xlabel)
+    passed.frame.GetYaxis().SetTitle("Passed events")
+    ROOT.gPad.SetLogy(True)
+    passed.draw()
+    passed.save()
+
+    if printFraction:
+        print "----------------------------------------"
+        print "quantity %s" % q
+        passed.printFractions(21)
+        passed.printFractions(31)
+        print "----------------------------------------"
 
 def muonD0():
     # Muon track ip w.r.t. beam spot
@@ -512,14 +667,25 @@ class PlotMet:
 
 plotMet = PlotMet(rebin=5)
 
+#muonIso(Plot(datasets, selectionMuon+"/muon_sumIsoRel"), "test_", "sumIsoRel")
+#sys.exit(0)
+
+
 #for sel in selections:
 #for sel in [selectionMuon, selectionJet, selectionMet]:
 for isel, sel in enumerate([selectionMuon, selectionJetId, selectionJet, selectionMet]):
+    if sel == None:
+        continue
+
     prefix = sel+"_"
+
+    printFraction = isel in [0, 2, 3]
 
     muonPt(Plot(datasets, sel+"/muon_pt"), prefix)
     muonEta(Plot(datasets, sel+"/muon_eta"), prefix)
     muonPhi(Plot(datasets, sel+"/muon_phi"), prefix)
+    muonIso(Plot(datasets, sel+"/muon_sumIsoRel"), prefix, "sumIsoRel", printFraction=printFraction)
+    muonIso(Plot(datasets, sel+"/muon_pfSumIsoRel"), prefix, "pfSumIsoRel", printFraction=printFraction)
 
     jetPt(Plot(datasets, sel+"/pfjet_pt"), prefix)
 

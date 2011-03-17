@@ -343,10 +343,17 @@ class DatasetRootHistoBase:
     """
     def __init__(self, dataset):
         self.dataset = dataset
+        self.name = dataset.getName()
         self.multiplication = None
 
-    def getDataset(self,):
+    def getDataset(self):
         return self.dataset
+
+    def setName(self, name):
+        self.name = name
+
+    def getName(self):
+        return self.name
 
     def isData(self):
         return self.dataset.isData()
