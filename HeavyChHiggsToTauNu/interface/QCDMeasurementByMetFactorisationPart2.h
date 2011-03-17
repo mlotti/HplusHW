@@ -53,17 +53,18 @@ namespace HPlus {
     Count fJetSelectionCounter2;
     Count fJetSelectionCounter;
     Count fMETCounter;
-    Count fOneProngTauIDCounter;
+    Count fOneProngTauIDWithoutRtauCounter;
+    Count fOneProngTauIDWithRtauCounter;
     Count fInvMassVetoOnJetsCounter;
     Count fEvtTopologyCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
     
     // Counters for propagating result into signal region from reversed rtau control region
-    /*Count fABCDNegativeRtauNegativeBTagCounter;
+    Count fABCDNegativeRtauNegativeBTagCounter;
     Count fABCDNegativeRtauPositiveBTagCounter;
     Count fABCDPositiveRtauNegativeBTagCounter;
-    Count fABCDPositiveRtauPositiveBTagCounter;*/
+    Count fABCDPositiveRtauPositiveBTagCounter;
 
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
@@ -85,6 +86,7 @@ namespace HPlus {
     // Histograms
     TH1 *hMETAfterJetSelection;
     TH1 *hWeightedMETAfterJetSelection;
+    TH1 *hWeightedMETAfterTauIDNoRtau;
     TH1 *hWeightedMETAfterTauID;
     TH1 *hWeightedMETAfterBTagging;
     TH1 *hWeightedMETAfterFakeMETVeto;
@@ -92,25 +94,21 @@ namespace HPlus {
 
     // Histograms for later change of factorization map
     TH1 *hNonWeightedTauPtAfterJetSelection;
+    TH1 *hNonWeightedTauPtAfterTauIDNoRtau;
     TH1 *hNonWeightedTauPtAfterTauID;
     TH1 *hNonWeightedTauPtAfterBTagging;
     TH1 *hNonWeightedTauPtAfterFakeMETVeto;
-    /*TH1 *fNonWeightedABCDNegativeRtauNegativeBTag;
+    TH1 *fNonWeightedABCDNegativeRtauNegativeBTag;
     TH1 *fNonWeightedABCDNegativeRtauPositiveBTag;
     TH1 *fNonWeightedABCDPositiveRtauNegativeBTag;
-    TH1 *fNonWeightedABCDPositiveRtauPositiveBTag;*/
+    TH1 *fNonWeightedABCDPositiveRtauPositiveBTag;
     
     // Control histograms for P(MET>70)
     TH1 *hMETPassProbabilityAfterJetSelection;
+    TH1 *hMETPassProbabilityAfterTauIDNoRtau;
     TH1 *hMETPassProbabilityAfterTauID;
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
-/*
-    HistogramGroupByTauPt hMETPlotsAfterTauSelection;
-    HistogramGroupByTauPt hMETPlotsAfterMuonVeto;
-    HistogramGroupByTauPt hMETPlotsAfterHadronicJetSelection2;
-    HistogramGroupByTauPt hMETPlotsAfterHadronicJetSelection3;
-    HistogramGroupByTauPt hMETPlotsAfterBTagging;*/
   };
 }
 
