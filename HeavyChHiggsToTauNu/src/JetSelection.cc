@@ -42,6 +42,7 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hPt = makeTH<TH1F>(*fs, "jet_pt", "het_pt", 100, 0., 200.);
+    hPtCentral = makeTH<TH1F>(*fs, "jet_pt_central", "het_pt_central", 100, 0., 200.);
     hEta = makeTH<TH1F>(*fs, "jet_eta", "jet_eta", 100, -5., 5.);
     hPhi = makeTH<TH1F>(*fs, "jet_phi", "jet_phi", 100, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(*fs, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
@@ -89,6 +90,7 @@ namespace HPlus {
       ++cleanPassed;
 
       hPt->Fill(iJet->pt(), fEventWeight.getWeight());
+      if (fabs(iJet->eta()) < 2.4) hPtCentral->Fill(iJet->pt(), fEventWeight.getWeight());
       hEta->Fill(iJet->eta(), fEventWeight.getWeight());
       hPhi->Fill(iJet->phi(), fEventWeight.getWeight());
 

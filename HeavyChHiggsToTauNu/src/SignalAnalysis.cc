@@ -76,7 +76,7 @@ namespace HPlus {
   // GenParticle analysis
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
-    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
+    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
    
 
     increment(fAllCounter);
@@ -104,7 +104,7 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
 
-    /*
+    
     // TauID (with optional factorization) 
                                                                              
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
@@ -113,14 +113,14 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
-    */
+    
 
 
 
-    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
+     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
     // TauID (with optional factorization)
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
@@ -146,11 +146,12 @@ namespace HPlus {
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
    
-
+    
     // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    if(!jetData.passedEvent()) return false;
-    increment(fNJetsCounter);
+    //    JetSelection::Data jetData2 = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    //    if(!jetData2.passedEvent()) return false;
+    //    increment(fNJetsCounter);
+   
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
