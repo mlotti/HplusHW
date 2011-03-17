@@ -172,7 +172,7 @@ namespace HPlus {
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 7, 0., 7.);
+    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 9, 0., 9.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Factorized tau ID");
@@ -180,6 +180,8 @@ namespace HPlus {
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "Anti-isolated tau");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauCandidateSelectionOnly");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(7, "tauCandidateSelectionOnlyReversedRtau");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(8, "tauIDWithoutRtauOnly");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(9, "tauIDWithRtauOnly");
 
     // Factorization / general histograms
     // NB! change binning and range only if you ARE sure what you are doing ...
@@ -286,12 +288,17 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  TauSelection::Data TauSelection::analyzeTauIDOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TauSelection::Data TauSelection::analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Initialize
     bool passEvent = false;
     fSelectedTaus.clear();
     fSelectedTaus.reserve(fCleanedTauCandidates.size());
     fTauID->reset();
+    // Document operation mode
+    TauSelectionOperationMode fOriginalOperationMode = fOperationMode;
+    fOperationMode = kTauIDWithoutRtauOnly;
+    fillOperationModeHistogram();
+    fOperationMode = fOriginalOperationMode;
     // Do selection
     for(edm::PtrVector<pat::Tau>::const_iterator iter = fCleanedTauCandidates.begin();
         iter != fCleanedTauCandidates.end(); ++iter) {
@@ -300,10 +307,8 @@ namespace HPlus {
       if (fProngNumber == 1) {
         if (!fTauID->passOneProngCut(iTau)) continue;
         if (!fTauID->passChargeCut(iTau)) continue;
-        // Apply Rtau only, if no reversed Rtau control region is used
-        if (fOperationMode != kTauCandidateSelectionOnlyReversedRtau) {
-          if (!fTauID->passRTauCut(iTau)) continue;
-        }
+        // Apply Rtau through
+        // pass = data::selectedTauPassedRtau() || !data::shouldRtauBeAppliedOnSelectedTau()
       }
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
@@ -319,6 +324,37 @@ namespace HPlus {
     // Return data object
     return Data(this, passEvent);
   }
+
+  /*TauSelection::Data TauSelection::analyzeTauIDWithRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    // Initialize
+    fOperationMode = kTauIDWithRtauOnly;
+    bool passEvent = false;
+    edm::PtrVector<pat::Tau> myTaus = fSelectedTaus;
+    fSelectedTaus.clear();
+    fSelectedTaus.reserve(fCleanedTauCandidates.size());
+    fTauID->reset();
+    // Document operation mode
+    fillOperationModeHistogram();
+    // Do selection
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = myTaus.begin();
+        iter != myTaus.end(); ++iter) {
+      const edm::Ptr<pat::Tau> iTau = *iter;
+      if (!fTauID->passRTauCut(iTau)) continue;
+      }
+      // All cuts have been passed, save tau
+      fillHistogramsForSelectedTaus(iTau, iEvent);
+      fSelectedTaus.push_back(iTau);
+    }
+    // Handle counters
+    fTauID->updatePassedCounters();
+    // Fill number of taus histograms
+    hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
+    // Make decision
+    if (fSelectedTaus.size() == 1)
+      passEvent = true;
+    // Return data object
+    return Data(this, passEvent);
+  }*/
 
   bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     // Document operation mode
@@ -483,6 +519,10 @@ namespace HPlus {
       hTauIdOperatingMode->Fill(5);
     else if (fOperationMode == kTauCandidateSelectionOnlyReversedRtau)
       hTauIdOperatingMode->Fill(6);
+    else if (fOperationMode == kTauIDWithoutRtauOnly)
+      hTauIdOperatingMode->Fill(7);
+    else if (fOperationMode == kTauIDWithRtauOnly)
+      hTauIdOperatingMode->Fill(8);
   }
 
   void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
