@@ -96,6 +96,15 @@ class Plot2(PlotBase):
         self.histoMgr.setHistoLegendLabelMany({name+"Embedded": "Embedded #tau",
                                                name+"Tau": "Real #tau"})
 
+def drawSave(h, updatePaletteStyle=False):
+    h.draw()
+    if updatePaletteStyle:
+        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    h.save()
+
+
 class PlotMuonTau:
     def __init__(self, rebin={}):
         self.rebin = {"Pt": 2,
@@ -128,10 +137,7 @@ class PlotMuonTau:
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(createLegend2())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
     
         if q == "Pt":
             h.createFrame(name+"_log", ymin=0.1, yfactor=2)
@@ -139,10 +145,7 @@ class PlotMuonTau:
             h.frame.GetYaxis().SetTitle(ylabel)
             h.setLegend(createLegend2())
             ROOT.gPad.SetLogy(True)
-            h.draw()
-            histograms.addCmsPreliminaryText()
-            histograms.addEnergyText()
-            h.save()
+            drawSave(h)
     
         xmin, ymin = 0, 0
         xmax, ymax = 200, 200
@@ -163,11 +166,7 @@ class PlotMuonTau:
         h.frame.GetXaxis().SetTitle(label%"#mu")
         h.frame.GetYaxis().SetTitle(label%"#tau")
         h.histoMgr.setHistoDrawStyleAll("COLZ")
-        h.draw()
-        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
 
 class PlotGenTauNu:
@@ -205,10 +204,7 @@ class PlotGenTauNu:
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(createLegend2())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
 
         name = "GenTau,GenTauNu_D"+q
         h = Plot(datasets, an, [name])
@@ -216,10 +212,7 @@ class PlotGenTauNu:
         h.createFrame(name)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
     
         xmin, ymin = 0, 0
         xmax, ymax = 200, 200
@@ -240,11 +233,7 @@ class PlotGenTauNu:
         h.frame.GetXaxis().SetTitle(label%"#tau")
         h.frame.GetYaxis().SetTitle(label%"#nu")
         h.histoMgr.setHistoDrawStyleAll("COLZ")
-        h.draw()
-        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h, updatePaletteStyle(h))
         style.setWide(False)
 
     def plotDR(self, datasets, an):
@@ -258,10 +247,7 @@ class PlotGenTauNu:
         h.createFrame(name)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
-        h.draw()
-        addCmsPreliminaryText()
-        addEnergyText()
-        h.save()
+        drawSave(h)
         
 
 def tauGenMass(datasets, an):
@@ -271,10 +257,7 @@ def tauGenMass(datasets, an):
     h.createFrame("GenTau_Mass")
     h.frame.GetXaxis().SetTitle("M (GeV/c^{2})")
     h.frame.GetYaxis().SetTitle("Number of MC events / 0.02")
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
 
 def tauIsoSumMaxPt(h, legendLabels, xlabel, rebin=4):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -285,10 +268,7 @@ def tauIsoSumMaxPt(h, legendLabels, xlabel, rebin=4):
     h.frame.GetYaxis().SetTitle("Taus / %.1f GeV/c" % h.binWidth())
     h.setLegend(histograms.createLegend())
     h.getPad().SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
 
 def tauIsoOccupancy(h, legendLabels):
     h.histoMgr.setHistoLegendLabelMany(legendLabels)
@@ -298,11 +278,7 @@ def tauIsoOccupancy(h, legendLabels):
     h.frame.GetYaxis().SetTitle("Taus / %.0f" % h.binWidth())
     h.setLegend(histograms.createLegend())
     h.getPad().SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
-
+    drawSave(h)
 
 def muonTauIso(datasets, analyses):
     relIso_re = re.compile("RelIso(?P<iso>\d+)")
@@ -337,10 +313,7 @@ def muonTauIso2(datasets, an):
     h.frame.GetXaxis().SetTitle("#mu tracker isolation #Sigma p_{T} (GeV/c)")
     h.frame.GetYaxis().SetTitle("#tau isolation charged cand #Sigma p_{T} (GeV/c)")
     h.histoMgr.setHistoDrawStyleAll("COLZ")
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
     style.setWide(False)
 
     #style.setWide(True)
@@ -360,10 +333,7 @@ def muonTauIso2(datasets, an):
     h.frame.GetXaxis().SetTitle("#mu rel. iso")
     h.frame.GetYaxis().SetTitle("#tau isol. chrg cand #Sigma p_{T}/p^{#tau}_{T}")
     h.histoMgr.setHistoDrawStyleAll("COLZ")
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
     style.setWide(False)
 
 def muonTauDR(datasets, an):
@@ -379,10 +349,7 @@ def muonTauDR(datasets, an):
     h.frame.GetXaxis().SetTitle("#DeltaR(#mu, #tau)")
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
 
     name = "Muon,TauLdg_DR"
     h = Plot(datasets, an, [name])
@@ -391,10 +358,7 @@ def muonTauDR(datasets, an):
     h.frame.GetXaxis().SetTitle("#DeltaR(#mu, #tau ldg cand)")
     h.frame.GetYaxis().SetTitle(ylabel)
     ROOT.gPad.SetLogy(True)
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    h.save()
+    drawSave(h)
 
 class PlotMet:
     def __init__(self, rebin={}):
@@ -428,10 +392,7 @@ class PlotMet:
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(createLegend2())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
     
         if t == "Met" and q == "Et":
             name = t+"Original_"+q+"_AfterCut"
@@ -440,10 +401,7 @@ class PlotMet:
             h.createFrame(name)
             h.frame.GetXaxis().SetTitle("Original "+xlabel)
             h.frame.GetYaxis().SetTitle(ylabel)
-            h.draw()
-            histograms.addCmsPreliminaryText()
-            histograms.addEnergyText()
-            h.save()
+            drawSave(h)
         
         xmin, ymin = [0]*2
         xmax, ymax = [200]*2
@@ -508,10 +466,7 @@ class PlotMet:
         h.createFrame(name)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
-        h.draw()
-        addCmsPreliminaryText()
-        addEnergyText()
-        h.save()
+        drawSave(h)
 
 
 class PlotMuonTauMetDeltaPhi:
@@ -543,10 +498,7 @@ class PlotMuonTauMetDeltaPhi:
         h.frame.GetXaxis().SetTitle("#Delta#phi")
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(createLegend2(y1=0.75))
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
     
         style.setWide(True)
         h = Plot(datasets, an, ["Muon,"+t+"Original_Tau,"+t+"_DPhi"])
@@ -555,11 +507,7 @@ class PlotMuonTauMetDeltaPhi:
         h.frame.GetXaxis().SetTitle("#Delta#phi(#mu, MET_{#mu})")
         h.frame.GetYaxis().SetTitle("#Delta#phi(#tau, MET_{#tau})")
         h.histoMgr.setHistoDrawStyleAll("COLZ")
-        h.draw()
-        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
 
         name = t+","+t+"Original_DPhi"
@@ -569,10 +517,7 @@ class PlotMuonTauMetDeltaPhi:
         h.createFrame(name)
         h.frame.GetXaxis().SetTitle("#Delta#phi(MET_{#tau},MET_{#mu}) (rad)")
         h.frame.GetYaxis().SetTitle(self.ylabel)
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        h.drawSave(h)
     
         #style.setOptStat(1)
         name = t+","+t+"Original_DEt"
@@ -604,11 +549,7 @@ class PlotMuonTauMetDeltaPhi:
         h.frame.GetXaxis().SetTitle("#Delta#phi(#mu, MET_{#mu})")
         h.frame.GetYaxis().SetTitle("MET_{#tau}-MET_{#mu}")
         h.histoMgr.setHistoDrawStyleAll("COLZ")
-        h.draw()
-        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
     
         numEventsAll = h.histoMgr.getHistos()[0].getRootHisto().GetEntries()
@@ -626,10 +567,7 @@ class PlotMuonTauMetDeltaPhi:
         h.frame.GetXaxis().SetTitle("#Delta#phi")
         h.frame.GetYaxis().SetTitle(self.ylabel)
         h.setLegend(createLegend2())
-        h.draw()
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h)
     
         numEventsGenMu = h.histoMgr.getHistos()[0].getRootHisto().GetEntries()
         print "%s: N(W->munu) / N(all) = %d/%d = %.1f %%" % (an, numEventsGenMu, numEventsAll, numEventsGenMu/numEventsAll*100)
@@ -641,11 +579,7 @@ class PlotMuonTauMetDeltaPhi:
         h.frame.GetXaxis().SetTitle("#Delta#phi(#nu_{#mu}, MET_{#mu})")
         h.frame.GetYaxis().SetTitle("#Delta#phi(#nu_{#mu}+#nu_{#tau}, MET_{#tau})")
         h.histoMgr.setHistoDrawStyleAll("COLZ")
-        h.draw()
-        histograms.updatePaletteStyle(h.histoMgr.getHistos()[0].getRootHisto())
-        histograms.addCmsPreliminaryText()
-        histograms.addEnergyText()
-        h.save()
+        drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
     
 
