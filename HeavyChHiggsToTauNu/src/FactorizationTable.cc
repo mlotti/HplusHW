@@ -14,17 +14,12 @@ namespace HPlus {
     } else {
       return;
     }
-    
     // Obtain correct parameterset
     const edm::ParameterSet myFactorizationConfig = iConfig.getUntrackedParameter<edm::ParameterSet>("factorization"); 
     const edm::ParameterSet myFactorizationTablesConfig =
       myFactorizationConfig.getUntrackedParameter<edm::ParameterSet>("factorizationTables");
     // Determine type of table
     std::string myTableType = myFactorizationConfig.getUntrackedParameter<std::string>("factorizationTableType");
-    if      (myTableType == "byPt")      fTableType = kByPt;
-    else if (myTableType == "byEta")     fTableType = kByEta;
-    else if (myTableType == "byPtVsEta") fTableType = kByPtVsEta;
-    else throw cms::Exception("Configuration") << "FactorizationTable: factorizationSourceName is unknown (was '" << myTableType << "')! Options: byPt, byEta, byPtVsEta";
     // Determine tauID algorithm
     std::string tauAlgorithm = "";
     std::string mySelection = iConfig.getUntrackedParameter<std::string>("selection");
@@ -34,26 +29,62 @@ namespace HPlus {
     else if(mySelection == "HPSTauBased")                 tauAlgorithm = "signalAnalysisTauSelectionHPSTauBased";
     else if(mySelection == "CombinedHPSTaNCTauBased") tauAlgorithm = "signalAnalysisTauSelectionCombinedHPSTaNCBased";
     else throw cms::Exception("Configuration") << "FactorizationTable: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, CombinedHPSTaNCTauBased (you chose '" << mySelection << "')" << std::endl;
-    fTauAlgorithm = tauAlgorithm; // FIXME: DEBUG
+    fTauAlgorithm = tauAlgorithm;
+    std::string myPrefix = "tauIDFactorizationByPt_"+tauAlgorithm;
+    // Initialize
+    initialize(myFactorizationConfig, myFactorizationTablesConfig, myPrefix, myTableType);
+  }
+
+  FactorizationTable::FactorizationTable(const edm::ParameterSet& iConfig, std::string tableNamePrefix)
+  : fFactorizationEnabled(true),
+  fTauAlgorithm("NA") {
+    // Obtain correct parameterset
+    const edm::ParameterSet myFactorizationConfig = iConfig.getUntrackedParameter<edm::ParameterSet>("factorization"); 
+    const edm::ParameterSet myFactorizationTablesConfig =
+      myFactorizationConfig.getUntrackedParameter<edm::ParameterSet>("factorizationTables");
+    // Determine type of table
+    std::string myTableType = myFactorizationConfig.getUntrackedParameter<std::string>("factorizationTableType");
+    // Initialize
+    initialize(myFactorizationConfig, myFactorizationTablesConfig, tableNamePrefix, myTableType);
+  }
+
+  FactorizationTable::~FactorizationTable() {}
+
+  void FactorizationTable::initialize(const edm::ParameterSet& factorizationConfig, const edm::ParameterSet& factorizationTableConfig, std::string tableNamePrefix, std::string tableTypeName) {
+    // Check table type
+    if      (tableTypeName == "byPt")      fTableType = kByPt;
+    else if (tableTypeName == "byEta")     fTableType = kByEta;
+    else if (tableTypeName == "byPtVsEta") fTableType = kByPtVsEta;
+    else throw cms::Exception("Configuration") << "FactorizationTable: factorizationSourceName is unknown (was '" << tableTypeName << "')! Options: byPt, byEta, byPtVsEta";
     // Obtain limits
-    fPtLowEdges = myFactorizationConfig.getUntrackedParameter<std::vector<double> >("ptBinLowEdges");
-    fEtaLowEdges = myFactorizationConfig.getUntrackedParameter<std::vector<double> >("etaBinLowEdges");
-    // Obtain coefficient tables
-    fPtTable = myFactorizationTablesConfig.getUntrackedParameter<std::vector<double> >("tauIDFactorizationByPt_"+tauAlgorithm+"_Coefficients");
-    fEtaTable = myFactorizationTablesConfig.getUntrackedParameter<std::vector<double> >("tauIDFactorizationByEta_"+tauAlgorithm+"_Coefficients");
-    fPtVsEtaTable = myFactorizationTablesConfig.getUntrackedParameter<std::vector<double> >("tauIDFactorizationByPtVsEta_"+tauAlgorithm+"_Coefficients");
-    
-    // Check dimensions
-    if (fPtLowEdges.size()+1 != fPtTable.size() ||
-        fEtaLowEdges.size()+1 != fEtaTable.size() ||
-        (fPtLowEdges.size()+1)*(fEtaLowEdges.size()+1) != fPtVsEtaTable.size()) {
+    if (fTableType == kByPt || fTableType == kByPtVsEta)
+      fPtLowEdges = factorizationConfig.getUntrackedParameter<std::vector<double> >("ptBinLowEdges");
+    if (fTableType == kByEta || fTableType == kByPtVsEta)
+      fEtaLowEdges = factorizationConfig.getUntrackedParameter<std::vector<double> >("etaBinLowEdges");
+    // Obtain coefficient tables and check that their size is correct
+    bool myDimensionStatus = true;
+    if (fTableType == kByPt) {
+      fPtTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if (fPtLowEdges.size()+1 != fPtTable.size())
+        myDimensionStatus = false;
+    }
+    if (fTableType == kByEta) {
+      fEtaTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if (fEtaLowEdges.size()+1 != fEtaTable.size())
+        myDimensionStatus = false;
+    }
+    if (fTableType == kByPtVsEta) {
+      fPtVsEtaTable = factorizationTableConfig.getUntrackedParameter<std::vector<double> >(tableNamePrefix+"_Coefficients");
+      if ((fPtLowEdges.size()+1)*(fEtaLowEdges.size()+1) != fPtVsEtaTable.size())
+        myDimensionStatus = false;
+    }
+    // Throw exception if coefficient table dimension is incorrect
+    if (!myDimensionStatus) {
       throw cms::Exception("Error") 
         << "FactorizationTable: dimensions of the bins and coefficient tables do not match!" << std::endl
         << "Regenerate the coefficient tables to get correct dimensions!" << std::endl;
     }
   }
-
-  FactorizationTable::~FactorizationTable() {}
 
   double FactorizationTable::getWeightByPtAndEta(double pt, double eta) const {
     if (!fFactorizationEnabled) return 1.;
