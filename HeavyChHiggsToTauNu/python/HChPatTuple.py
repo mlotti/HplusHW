@@ -245,7 +245,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         # correctly one shouhd disentangle the hpsTanc imports above
         # from the discriminators.
         if doHChTauDiscriminators:
-            tautools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
+            tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
                              algoLabel = "hpsTanc",
                              typeLabel = "PFTau")
             if not doPatTauIsoDeposits:
