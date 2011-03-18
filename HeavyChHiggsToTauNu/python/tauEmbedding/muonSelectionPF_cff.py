@@ -39,30 +39,31 @@ tightMuons = cms.EDFilter("PATMuonSelector",
 #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
     )
 )
-#tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
-#    src = cms.InputTag("tightMuons"),
-#    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
-#    maxZ = cms.double(1.0)
-#)
-#tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
-#    src = cms.InputTag("tightMuonsZ"),
-#    minNumber = cms.uint32(1)
-#)
-# tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
-#     src = cms.InputTag("tightMuonsZ"),
-#     filter = cms.bool(False),
-#     maxNumber = cms.uint32(1)
-# )
-tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
     src = cms.InputTag("tightMuons"),
     vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
     maxZ = cms.double(1.0)
 )
-tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
-    src = cms.InputTag("tauEmbeddingMuons"),
-    minNumber = cms.uint32(1),
+tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("tightMuonsZ"),
+    minNumber = cms.uint32(1)
+)
+#tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
+tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
+    src = cms.InputTag("tightMuonsZ"),
+    filter = cms.bool(False),
     maxNumber = cms.uint32(1)
 )
+# tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#     src = cms.InputTag("tightMuons"),
+#     vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
+#     maxZ = cms.double(1.0)
+# )
+# tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
+#     src = cms.InputTag("tauEmbeddingMuons"),
+#     minNumber = cms.uint32(1),
+#     maxNumber = cms.uint32(1)
+# )
 muonSelectionMuons = cms.EDProducer("EventCountProducer")
 
 
@@ -110,10 +111,10 @@ muonSelectionSequence = cms.Sequence(
     * muonTrigger * muonSelectionTriggered
     * muonFirstPrimaryVertex * muonGoodPrimaryVertex * muonPrimaryVertexFilter * muonSelectionPrimaryVertex
     * tightMuons 
-#    * tightMuonsZ 
-#    * tightMuonsFilter
+    * tightMuonsZ 
+    * tightMuonsFilter
     * tauEmbeddingMuons 
-    * tauEmbeddingMuonsFilter
+#    * tauEmbeddingMuonsFilter
     * muonSelectionMuons
     * goodJets      * goodJetFilter * muonSelectionJets
 #    * goodMet       * goodMetFilter * muonSelectionMet
