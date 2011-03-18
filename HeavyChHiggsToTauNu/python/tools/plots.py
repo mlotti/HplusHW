@@ -1,4 +1,4 @@
-## \package tools.plots
+## \package plots
 # Plot utilities and classes
 #
 # The package is intended to gather the following commonalities in the
