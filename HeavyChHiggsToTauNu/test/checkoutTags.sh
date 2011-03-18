@@ -22,6 +22,7 @@ set -e
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 # 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
+# 18.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated PAT tags for trigger
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -53,6 +54,16 @@ if [ "x$HPSTANC" = "xtrue" ]; then
     # PhysicsTools/PatAlgos 
     # PhysicsTools/PatUtils
     addpkg -f RecoTauTag/tau_tags_dependencies.txt
+    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+fi
+
+# PAT
+addpkg CommonTools/CandUtils     V00-00-05
+addpkg DataFormats/CaloTowers    V02-05-11
+addpkg DataFormats/PatCandidates V06-02-21
+addpkg PhysicsTools/PatAlgos     V08-03-11
+
+if [ "x$HPSTANC" = "xtrue" ]; then
     cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
 fi
 
