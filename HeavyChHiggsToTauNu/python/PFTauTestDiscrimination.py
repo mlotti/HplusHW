@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolationChargedPtSum_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauDiscriminationByIsolation_cfi import *
+from RecoTauTag.RecoTau.PFRecoTauDiscriminationAgainstElectron_cfi import *
 from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import *
 
 PFTauQualityCuts05 = PFTauQualityCuts.clone()
@@ -62,6 +63,13 @@ def addTestDiscriminatorSequence(process, tau):
     lst.append(addDiscriminator(process, tau, "DiscriminationByIsolation09",
                                 pfRecoTauDiscriminationByIsolation.clone(
                                         qualityCuts = PFTauQualityCuts09
+                                )))
+    lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
+
+
+    lst.append(addDiscriminator(process, tau, "DiscriminationAgainstElectronWithCrack",
+                                pfRecoTauDiscriminationAgainstElectron.clone(
+                                    ApplyCut_EcalCrackCut = True,
                                 )))
     lst[-1].Prediscriminants.leadTrack.Producer = cms.InputTag(leadingTrackFinding)
 
