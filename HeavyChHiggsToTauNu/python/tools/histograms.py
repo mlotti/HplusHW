@@ -1,4 +1,4 @@
-## \package tools.histograms
+## \package histograms
 # Histogram utilities and classes
 #
 # The package contains classes and utilities for histogram management.
