@@ -30,7 +30,7 @@ counters = analysis+"Counters"
 
 embeddingSignalAnalysis = "."
 #signalAnalysis = "../../multicrab_110307_141642"
-signalAnalysis = "../../multicrab_110308_184514"
+signalAnalysis = "../../multicrab_110316_182853"
 #embeddingSignalAnalysis = "multicrab_signalAnalysis_110303_154128"
 #signalAnalysis = "multicrab_110307_141642"
 
@@ -72,10 +72,18 @@ def main():
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"), step="afterTauId")
 
     jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt_central"), "jetPtCentral")
     jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
     jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "numberOfjets")
 
+
+
+    eventCounter = counter.EventCounter(datasets)
+    eventCounter.normalizeMCByLuminosity()
+    print "============================================================"
+    print "Main counter (MC normalized by collision data luminosity)"
+    print eventCounter.getMainCounterTable().format()
 
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw

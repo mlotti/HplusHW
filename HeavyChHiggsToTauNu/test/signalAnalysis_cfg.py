@@ -29,8 +29,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # These are needed for running against tau embedding samples, can be
 # given also from command line
-options.doPat=1
-options.tauEmbeddingInput=1
+#options.doPat=1
+#options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
@@ -114,7 +114,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    tauEmbedding = param.TauEmbeddingAnalysis
+    tauEmbedding = param.TauEmbeddingAnalysis,
+    GenParticleAnalysis = param.GenParticleAnalysis                                     
 )
 
 # Prescale fetching done automatically for data

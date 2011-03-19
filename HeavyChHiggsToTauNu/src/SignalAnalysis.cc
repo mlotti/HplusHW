@@ -107,12 +107,12 @@ namespace HPlus {
     
     // TauID (with optional factorization) 
                                                                              
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
 
     // Hadronic jet selection                                                                                                                                                                                                      
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
-    if(!jetData.passedEvent()) return false;
-    increment(fNJetsCounter);
+    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+    //    if(!jetData.passedEvent()) return false;
+    //    increment(fNJetsCounter);
     
 
 
@@ -120,7 +120,7 @@ namespace HPlus {
      fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
     // TauID (with optional factorization)
-     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
@@ -148,9 +148,9 @@ namespace HPlus {
    
     
     // Hadronic jet selection
-    //    JetSelection::Data jetData2 = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    //    if(!jetData2.passedEvent()) return false;
-    //    increment(fNJetsCounter);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
    
 
     // b tagging
