@@ -665,15 +665,20 @@ class ComparisonPlot(PlotBase):
     def __init__(self, datasetRootHisto1, datasetRootHisto2):
         PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
 
+    ## Set default legend labels and styles, and plot styles
+    def setDefaultStyles(self):
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
     
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename     Name for TCanvas (becomes the file name)
     # \param createRatio  Create also the ratio pad?
-    # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or histograms.CanvasFrameTwo.__init__()
+    # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
     def createFrame(self, filename, createRatio=False, **kwargs):
         if not createRatio:
-            PlotSameBase.createFrame(self, filename, **kwargs)
+            PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
             self.ratio = _createRatio(histos[0].getRootHisto(), histos[1].getRootHisto(),
@@ -720,6 +725,9 @@ class ComparisonPlot(PlotBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+    def addLuminosityText(self, *args, **kwargs):
+        pass
+
     ## \var ratio
     # Holds the TH1 for data/MC ratio, if exists
     ## \var line
@@ -727,4 +735,3 @@ class ComparisonPlot(PlotBase):
     ## \var coverPad
     # Holds TPad to cover the larget Y axis value of the ratio TPad,
     # if ratio exists
-        

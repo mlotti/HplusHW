@@ -81,11 +81,21 @@ def main():
 
     etSumRatio(plots.DataMCPlot(datasets, analysis+"/EtSumRatio"), "etSumRatio")
     
+    genComparison(datasets)
+
     eventCounter = counter.EventCounter(datasets)
     eventCounter.normalizeMCByLuminosity()
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     print eventCounter.getMainCounterTable().format()
+
+def genComparison(datasets):
+    signal = "TTToHplusBWB_M120"
+    background = "TTJets"
+
+    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/genRtau1ProngHp"),
+                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/genRtau1ProngW")),
+            "genRtau1Prong_Hp_vs_TT")
 
 def scaleMC(histo, scale):
     if histo.isMC():
@@ -322,8 +332,22 @@ def rtau(h, name, rebin=2, ratio=True):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
 
+def rtauGen(h, name, rebin=2, ratio=False):
+    h.setDefaultStyles()
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "R_{#tau}"
+    ylabel = "Events / %.2f" % h.binWidth()
 
- 
+    kwargs = {"opts": {"ymin": 1, "ymaxfactor": 10}}
+    if ratio:
+        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
+    name = name+"_log"
+
+    h.createFrame(name, createRatio=ratio, **kwargs)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
+    common(h, xlabel, ylabel)
+
 def met(h, rebin=20, ratio=True):
     name = flipName(h.getRootHistoPath())
 
@@ -571,7 +595,6 @@ def etSumRatio(h, name, rebin=1, ratio=False):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-    
 
     
 # Call the main function if the script is executed (i.e. not imported)
