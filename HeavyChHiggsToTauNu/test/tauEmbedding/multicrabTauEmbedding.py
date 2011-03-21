@@ -12,7 +12,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v6_2",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+          "generation":     {"input": "tauembedding_skim_v8",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
           "embedding":      {"input": "tauembedding_generation_v6_2", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
           "analysis":       {"input": "tauembedding_embedding_v6_2",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v9",                "config": "tauAnalysis_cfg.py"},
