@@ -44,59 +44,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus and doHChTauDiscriminators:
-	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
-        process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
-
-        # Do these imports here in order to be able to run PAT with
-        # doPatTaus=False with 3_9_7 without extra tags
-        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
-        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
-
-        tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
-        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
-        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
-        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
-
-        HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
-        HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
-
-        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
-        process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
-
-        # These are already in 36X AOD, se remove them from the tautagging
-        # sequence
-        if not dataVersion.is35X():
-            process.tautagging.remove(process.jptRecoTauProducer)
-            process.tautagging.remove(process.caloRecoTauProducer)
-            process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
-        
-
-        # Sequence to produce HPS and HPS+TaNC taus. Remove the
-        # shrinking cone PFTau and the TaNC classifier from the
-        # sequence as they are already produced as a part of standard
-        # RECO, and we don't want to reproduce them here (i.e. we
-        # prefer the objects in RECO/AOD over reproducing them on the
-        # fly).
-        process.PFTau.remove(process.ak5PFJetsLegacyTaNCPiZeros)
-        process.PFTau.remove(process.produceAndDiscriminateShrinkingConePFTaus)
-        process.PFTau.remove(process.produceShrinkingConeDiscriminationByTauNeuralClassifier)
-
-        process.hplusPatTauSequence = cms.Sequence(
-            process.tautagging *
-            process.PFTau * # for HPS+TaNC
-            process.PFTauDiscriminationSequenceForChargedHiggs *
-            process.PFTauDiscriminationSequenceForChargedHiggsCont *
-            process.PFTauTestDiscriminationSequence *
-            process.CaloTauDiscriminationSequenceForChargedHiggs *
-            process.CaloTauDiscriminationSequenceForChargedHiggsCont
-        )
-        if not doPatCalo:
-            process.hplusPatTauSequence.remove(process.tautagging)
-            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
-            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+        process.hplusPatTauSequence = addPFTausAndDiscriminators(process, dataVersion, doPatCalo)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -384,6 +332,71 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     return seq
 
+
+def addPFTausAndDiscriminators(process, dataVersion, doCalo):
+    process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+    process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
+
+    # Do these imports here in order to be able to run PAT with
+    # doPatTaus=False with 3_9_7 without extra tags
+    import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+
+    tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+    HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+    HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+    PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+
+    HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
+    HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+
+    # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
+    process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
+
+    # These are already in 36X AOD, se remove them from the tautagging
+    # sequence
+    if not dataVersion.is35X():
+        process.tautagging.remove(process.jptRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
+        
+
+    # Sequence to produce HPS and HPS+TaNC taus. Remove the
+    # shrinking cone PFTau and the TaNC classifier from the
+    # sequence as they are already produced as a part of standard
+    # RECO, and we don't want to reproduce them here (i.e. we
+    # prefer the objects in RECO/AOD over reproducing them on the
+    # fly).
+    process.PFTau.remove(process.ak5PFJetsLegacyTaNCPiZeros)
+    process.PFTau.remove(process.produceAndDiscriminateShrinkingConePFTaus)
+    process.PFTau.remove(process.produceShrinkingConeDiscriminationByTauNeuralClassifier)
+
+    sequence = cms.Sequence(
+        process.tautagging *
+        process.PFTau * # for HPS+TaNC
+        process.PFTauDiscriminationSequenceForChargedHiggs *
+        process.PFTauDiscriminationSequenceForChargedHiggsCont *
+        process.PFTauTestDiscriminationSequence *
+        process.CaloTauDiscriminationSequenceForChargedHiggs *
+        process.CaloTauDiscriminationSequenceForChargedHiggsCont
+    )
+    if not doCalo:
+        sequence.remove(process.tautagging)
+        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
+        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+
+    return sequence
+
+
+
+
+##################################################
+#
+# PAT on the fly
+#
 from FWCore.ParameterSet.Modules import _Module
 class RemoveSoftMuonVisitor:
     def __init__(self):
