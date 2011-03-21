@@ -179,13 +179,21 @@ class SetProperty:
         if prop != None:
             self.setter(histoData, prop)
 
-    ##
+    ## Get the property
+    #
+    # \param name  Name of the property
+    #
     # \todo Replace this with self.properties.get(name, None)...
     def _getProperty(self, name):
         if name in self.properties:
             return self.properties[name]
         else:
             return None
+
+    ## \var properties
+    # Dictionary of properties (see __init__())
+    ## \var setter
+    # Function setting the property (see __init__())
 
 ## Construct a "function" to set legend labels
 #
@@ -433,8 +441,6 @@ class PlotBase:
 
     ## \var histoMgr
     # histograms.HistoManager object for histogram management
-    ## \var datasetMgr
-    # datasets.DatasetManager object to have the datasets at hand
     ## \var saveFormats
     # List of formats to which to save the plot
     ## \var legend
@@ -468,6 +474,11 @@ class PlotSameBase(PlotBase):
         mcNames = self.datasetMgr.getMCDatasetNames()
         self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
+
+    ## \var datasetMgr
+    # datasets.DatasetManager object to have the datasets at hand
+    ## \var rootHistoPath
+    # Path to the histogram in the ROOT files
 
 ## Class for data-MC comparison plot.
 # 
@@ -629,6 +640,19 @@ class DataMCPlot(PlotSameBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+
+    ## \var normalizeToOne
+    # Flag to indicate if histograms should be normalized to unit area
+    ## \var ratio
+    # Holds the TH1 for data/MC ratio, if exists
+    ## \var line
+    # Holds the TGraph for ratio line, if ratio exists
+    ## \var coverPad
+    # Holds TPad to cover the larget Y axis value of the ratio TPad,
+    # if ratio exists
+
+
+
 ## Class to create comparison plots of two quantities.
 class ComparisonPlot(PlotBase):
 
@@ -696,5 +720,11 @@ class ComparisonPlot(PlotBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
-
+    ## \var ratio
+    # Holds the TH1 for data/MC ratio, if exists
+    ## \var line
+    # Holds the TGraph for ratio line, if ratio exists
+    ## \var coverPad
+    # Holds TPad to cover the larget Y axis value of the ratio TPad,
+    # if ratio exists
         

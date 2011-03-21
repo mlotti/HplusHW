@@ -295,6 +295,8 @@ class CanvasFrame:
     # TCanvas for the canvas
     ## \var frame
     # TH1 for the frame
+    ## \var pad
+    # TPad of the plot
 
 ## Create TCanvas and frames for two TPads.
 class CanvasFrameTwo:
@@ -444,6 +446,8 @@ class CanvasFrameTwo:
     # TH2 for the lower frame
     ## \var canvas
     # TCanvas for the canvas
+    ## \var pad
+    # TPad for the upper pad
     ## \var pad1
     # TPad for the upper pad
     ## \var pad2
@@ -566,6 +570,9 @@ class Histo(HistoBase):
     def getDataset(self):
         return self.dataset
 
+    ## \var dataset
+    # The histogram is from this dataset.Dataset object
+
 ## Represents combined (statistical) uncertainties of multiple histograms.
 class HistoTotalUncertainty(HistoBase):
     ## Constructor
@@ -594,6 +601,9 @@ class HistoTotalUncertainty(HistoBase):
     ## Is the histogram from collision data?
     def isData(self):
         return self.histos[0].isData()
+
+    ## \var histos
+    # List of histograms.HistoBase objects from which the total uncertaincy is calculated
 
 ## Represents stacked TH1 histograms
 #
@@ -632,25 +642,21 @@ class HistoStacked(HistoBase):
     def isData(self):
         return self.histos[0].isData()
 
-    ## Set the legend label of the stacked histograms.
     def setLegendLabel(self, label):
         for h in self.histos:
             h.setLegendLabel(label)
 
-    ## Set the legend style of the stacked histograms.
     def setLegendStyle(self, style):
         for h in self.histos:
             h.setLegendStyle(style)
 
-    ## Add the stacked histograms to a TLegend.
     def addToLegend(self, legend):
         for h in self.histos:
             h.addToLegend(legend)
 
-    
     ## Call a function for each Histo in the stack.
     #
-    # \param func  Function with one parameter
+    # \param function  Function with one parameter
     #
     # \todo This resembles the Visitor pattern, perhaps this should be
     # renamed to visit()?
@@ -666,6 +672,9 @@ class HistoStacked(HistoBase):
 
     def getBinWidth(self, bin):
         return self.histos[0].getBinWidth(bin)
+
+    ## \var histos
+    # List of histograms.Histo objects which are stacked
 
 ## Implementation of HistoManager.
 #
@@ -719,8 +728,7 @@ class HistoManagerImpl:
     # <b>Keyword arguments</b>
     # \li \a legendIndex  Index of the position to insert the histogram in
     #                     the legend list (default is the same as i). Can
-    #                     be useful for e.g. separate uncertainty
-    #                     histogram
+    #                     be useful for e.g. separate uncertainty histogram.
     def insertHisto(self, i, histo, **kwargs):
         drawIndex = i
         legendIndex = i
@@ -806,7 +814,7 @@ class HistoManagerImpl:
 
     ## Set the legend style for all histograms.
     #
-    # \param Style for the legend (given to TLegend as 3rd argument)
+    # \param style  Style for the legend (given to TLegend as 3rd argument)
     def setHistoLegendStyleAll(self, style):
         for d in self.legendList:
             d.setLegendStyle(style)
@@ -847,8 +855,8 @@ class HistoManagerImpl:
 
     ## Stack histograms.
     #
-    # \param Name of the histogram stack
-    # \param List of histogram names to stack
+    # \param newName   Name of the histogram stack
+    # \param nameList  List of histogram names to stack
     def stackHistograms(self, newName, nameList):
         (selected, notSelected, firstIndex) = dataset._mergeStackHelper(self.drawList, nameList, "stack")
         if len(selected) == 0:
@@ -892,6 +900,22 @@ class HistoManagerImpl:
                 break
         self.insertHisto(firstMcIndex, hse, legendIndex=len(self.drawList))
         
+    ## \var drawList
+    # List of histograms.HistoBase objects for drawing
+    #
+    # The histograms are drawn in the <i>reverse</i> order, i.e. the
+    # first histogram is on the top, anbd the last histogram is on the
+    # bottom.
+    #
+    ## \var legendList
+    # List of histograms.HistoBase objects for TLegend
+    #
+    # The histograms are added to the TLegend in the order they are in
+    # the list.
+    #
+    ## \var nameHistoMap
+    # Dictionary from histograms.HistoBase names to the objects
+
 
 ## Collection of histograms which are managed together.
 #
@@ -909,7 +933,7 @@ class HistoManager:
     ## Constructor.
     #
     # \param args   Positional arguments
-    # \param kwargs Kwyword arguments
+    # \param kwargs Keyword arguments
     #
     # <b>Positional arguments</b>
     # \li \a datasetMgr   DatasetManager object to take the histograms from
@@ -1062,3 +1086,10 @@ class HistoManager:
         histos = self.getHistos()
         
         self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])
+
+    ## \var datasetRootHistos
+    # List of dataset.DatasetRootHisto objects to manage
+    ## \var impl
+    # histograms.HistoManagerImpl object for the implementation
+    ## \var luminosity
+    # Total integrated luminosity ofthe managed collision data (None if not set)
