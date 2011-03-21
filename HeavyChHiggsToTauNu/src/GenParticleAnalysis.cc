@@ -17,13 +17,16 @@
 namespace HPlus {
 
   GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight)
-    : fEventWeight(eventWeight) {
+    : fEventWeight(eventWeight)
+      //    fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
+      //    fEtaCut(iConfig.getUntrackedParameter<double>("etaCut"))
+  {
     init();
   }
   GenParticleAnalysis::GenParticleAnalysis(EventCounter& eventCounter, EventWeight& eventWeight)
-  : fEventWeight(eventWeight) {
-    init();
-  }
+    : fEventWeight(eventWeight) {
+      init();
+    }
 /*  GenParticleAnalysis::GenParticleAnalysis(){
     init();
   }*/
@@ -86,6 +89,8 @@ namespace HPlus {
 
       for (size_t i=0; i < genParticles->size(); ++i){  
 	const reco::Candidate & p = (*genParticles)[i];
+	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
+	if ( deltaR > 0.2) continue;
 	int id = p.pdgId();
 	if ( abs(id) == 15 ) {
 	  int numberOfTauMothers = p.numberOfMothers(); 
@@ -125,23 +130,26 @@ namespace HPlus {
       double magCM = tau->BoostToCM().mag2();
       
       if (tauFromHiggs ) {
-	hRtau1pHp->Fill(Rtau);
 	hptVisibleTau1pHp->Fill(tau->pt());
 	hEtaVisibleTau1pHp->Fill(tau->eta());
-	hLeadingTrack1pHp->Fill(ptmax);
-	hThetaCM1pHp->Fill(thetaCM); 
-	hTauMass1pHp->Fill(tau->mass());
-	hMagCM1pHp->Fill(magCM);
-	
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau1pHp->Fill(Rtau);
+	  hLeadingTrack1pHp->Fill(ptmax);
+	  hThetaCM1pHp->Fill(thetaCM); 
+	  hTauMass1pHp->Fill(tau->mass());
+	  hMagCM1pHp->Fill(magCM);
+	}
       }
       if (tauFromW) {
-	hRtau1pW->Fill(Rtau);
 	hptVisibleTau1pW->Fill(tau->pt());
 	hEtaVisibleTau1pW->Fill(tau->eta());
-	hLeadingTrack1pW->Fill(ptmax);
-	hThetaCM1pW->Fill(thetaCM); 
-	hTauMass1pW->Fill(tau->mass());
-	hMagCM1pW->Fill(magCM);
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau1pW->Fill(Rtau);
+	  hLeadingTrack1pW->Fill(ptmax);
+	  hThetaCM1pW->Fill(thetaCM); 
+	  hTauMass1pW->Fill(tau->mass());
+	  hMagCM1pW->Fill(magCM);
+	}
       }
     }
     
@@ -194,12 +202,16 @@ namespace HPlus {
       }
 
       if (tauFromHiggs ) {
-	hRtau13pHp->Fill(Rtau);
-	hptVisibleTau13pHp->Fill(tau->pt());
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau13pHp->Fill(Rtau);
+	  hptVisibleTau13pHp->Fill(tau->pt());
+	}
       }
       if (tauFromW) {
-	hRtau13pW->Fill(Rtau);
-	hptVisibleTau13pW->Fill(tau->pt());
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau13pW->Fill(Rtau);
+	  hptVisibleTau13pW->Fill(tau->pt());
+	}
       }
     }
     
@@ -250,12 +262,16 @@ namespace HPlus {
       //     std::cout << " pion 1/3 prong " <<  ptmax << " Rtau  " <<  Rtau << std::endl;
       
       if (tauFromHiggs ) {
-	hRtau3pHp->Fill(Rtau);
-	hptVisibleTau3pHp->Fill(tau->pt());
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau3pHp->Fill(Rtau);
+	  hptVisibleTau3pHp->Fill(tau->pt());
+	}
       }
       if (tauFromW) {
-	hRtau3pW->Fill(Rtau);
-	hptVisibleTau3pW->Fill(tau->pt());
+	if ( tau->pt() > 30 && fabs(tau->eta()) < 2.3 ) {
+	  hRtau3pW->Fill(Rtau);
+	  hptVisibleTau3pW->Fill(tau->pt());
+	}
       }
     }
   }

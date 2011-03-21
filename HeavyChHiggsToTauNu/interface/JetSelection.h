@@ -85,6 +85,7 @@ namespace HPlus {
     
     // Histograms
     TH1 *hPt;
+    TH1 *hPtCentral;
     TH1 *hEta;
     TH1 *hPhi;
     TH1 *hNumberOfSelectedJets;
