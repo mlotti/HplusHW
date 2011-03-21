@@ -16,14 +16,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 
 # Assumes that process.out is the output module
 #
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True,
+def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
+           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
            doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
     out = None
     outdict = process.outputModules_()
@@ -34,7 +35,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
-    if doPatTaus:
+    if doPatTaus and doHChTauDiscriminators:
 	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
         process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
 
@@ -45,7 +46,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
 
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
-	PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
@@ -55,7 +56,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
             min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
             max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
         )
-
+        
         # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
         process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
 
@@ -202,9 +203,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # process.patTaus.embedIsolationPFGammaCands = True
 
     if doPatTaus:
-        classicTauIDSources.extend( HChTaus.HChTauIDSources )
-        classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
-	classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
+        if doHChTauDiscriminators:
+            classicTauIDSources.extend( HChTaus.HChTauIDSources )
+            classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
+            classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
 
         if doPatCalo:
             addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
@@ -218,19 +220,27 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
-        process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
+        if not doPatTauIsoDeposits:
+            process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
         addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
                          typeLabel = "PFTau")
-        process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        if not doPatTauIsoDeposits:
+            process.patTausHpsPFTau.isoDeposits = cms.PSet()
 
-        addTauCollection(process,cms.InputTag('hpsTancTaus'),
-                         algoLabel = "hpsTanc",
-                         typeLabel = "PFTau")
-        process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
-        # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
-        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+        # Side effect because HPS is not needed for muon analysis,
+        # which is the use case for doHchTauDiscriminators. To do it
+        # correctly one shouhd disentangle the hpsTanc imports above
+        # from the discriminators.
+        if doHChTauDiscriminators:
+            addTauCollection(process,cms.InputTag('hpsTancTaus'),
+                             algoLabel = "hpsTanc",
+                             typeLabel = "PFTau")
+            if not doPatTauIsoDeposits:
+                process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+            # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
+            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
 
         # Add visible taus    
         if dataVersion.isMC():
@@ -273,6 +283,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doPatMET=Tru
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     process.patMuons.usePV = False
     process.patMuons.embedTrack = True
+
+    if doPatMuonPFIsolation:
+        addPFMuonIsolation(process, process.patMuons, verbose=True)
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
@@ -384,6 +397,8 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     counters = []
     if dataVersion.isData() and options.tauEmbeddingInput == 0:
         counters = HChDataSelection.dataSelectionCounters[:]
+    if options.tauEmbeddingInput != 0:
+        counters = MuonSelection.muonSelectionCounters[:]
 
     if options.doPat == 0:
         return (cms.Sequence(), counters)
@@ -392,6 +407,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 
     process.collisionDataSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
+
         # Hack to not to crash if something in PAT assumes process.out
         hasOut = hasattr(process, "out")
         if not hasOut:
@@ -429,14 +445,19 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         if dataVersion.isData():
             process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
 
-        if options.trigger == "":
-            raise Exception("Command line argument 'trigger' is missing")
+        pargs = patArgs.copy()
 
-        print "Trigger used for tau matching:", options.trigger
-        if jetTrigger != None:
-            print "Trigger used for jet matching:", jetTrigger
+        if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
+            if options.trigger == "":
+                raise Exception("Command line argument 'trigger' is missing")
 
-        process.patSequence = addPat(process, dataVersion, matchingTauTrigger=options.trigger, matchingJetTrigger=jetTrigger, **patArgs)
+            print "Trigger used for tau matching:", options.trigger
+            pargs["matchingTauTrigger"] = options.trigger
+            if jetTrigger != None:
+                print "Trigger used for jet matching:", jetTrigger
+                pargs["matchingJetTrigger"] = jetTrigger            
+
+        process.patSequence = addPat(process, dataVersion, **pargs)
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *
@@ -444,8 +465,150 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     )
 
     if options.tauEmbeddingInput != 0:
-        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import addTauEmbeddingMuonTaus
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
         process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
         process.patSequence *= process.patMuonTauSequence
     
     return (dataPatSequence, counters)
+
+
+### The functions below are taken from
+### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
+### revision 1.7
+
+###################a#################################################
+from PhysicsTools.PFCandProducer.Isolation.tools_cfi import isoDepositReplace
+
+def addSelectedPFlowParticle(process,verbose=False):
+    if verbose:
+        print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
+    process.load("PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff")
+    process.load("PhysicsTools.PFCandProducer.pfNoPileUp_cff")
+    process.pfCandidateSelectionByType = cms.Sequence(
+        process.pfNoPileUpSequence *
+        ( process.pfAllNeutralHadrons +
+          process.pfAllChargedHadrons +
+          process.pfAllPhotons
+          )  +
+        process.pfAllMuons +
+        process.pfAllElectrons
+        )
+    process.pfPileUp.Enable = True # enable pile-up filtering
+    process.pfPileUp.Vertices = "offlinePrimaryVertices" # use vertices w/o BS
+    process.pfAllMuons.src = "particleFlow"
+    process.pfAllElectrons.src = "particleFlow"
+    
+    process.patDefaultSequence.replace(process.patCandidates,
+                                       process.pfCandidateSelectionByType+
+                                       process.patCandidates)
+
+def addPFMuonIsolation(process,module,postfix="",verbose=False):
+    if verbose:
+        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
+
+    if not hasattr(process, "pfCandidateSelectionByType"):
+        addSelectedPFlowParticle(process,verbose=verbose)
+        
+    #setup correct src of isolated object
+    setattr(process,"isoDepMuonWithCharged"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllChargedHadrons'))
+    setattr(process,"isoDepMuonWithNeutral"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllNeutralHadrons'))
+    setattr(process,"isoDepMuonWithPhotons"+postfix,
+            isoDepositReplace(module.muonSource,
+                              'pfAllPhotons'))
+
+    #compute isolation values form deposits
+    process.load("PhysicsTools.PFCandProducer.Isolation.pfMuonIsolationFromDeposits_cff")
+    if postfix!="":
+        setattr(process,"isoValMuonWithCharged"+postfix,
+                process.isoValMuonWithCharged.clone())
+        getattr(process,"isoValMuonWithCharged"+postfix).deposits.src="isoDepMuonWithCharged"+postfix
+        setattr(process,"isoValMuonWithNeutral"+postfix,
+                process.isoValMuonWithNeutral.clone())
+        getattr(process,"isoValMuonWithNeutral"+postfix).deposits.src="isoDepMuonWithNeutral"+postfix
+        setattr(process,"isoValMuonWithPhotons"+postfix,
+                process.isoValMuonWithPhotons.clone())
+        getattr(process,"isoValMuonWithPhotons"+postfix).deposits.src="isoDepMuonWithPhotons"+postfix
+
+    # Count and max pts
+    for name in ["Charged", "Neutral", "Photons"]:
+        prototype = getattr(process, "isoValMuonWith"+name+postfix)
+
+        m = prototype.clone()
+        m.deposits[0].mode = "count"
+        setattr(process, "isoValCountMuonWith"+name+postfix, m)
+
+        m = prototype.clone()
+        m.deposits[0].mode = "max"
+        m.deposits[0].vetos = []
+        setattr(process, "isoValMaxMuonWith"+name+postfix, m)
+
+    # Use the 0.5 min value for pt with charged cands in order to be similar with HpsTight
+    for name in ["isoValCountMuonWithCharged", "isoValMaxMuonWithCharged"]:
+        m = getattr(process, name+postfix).clone()
+        m.deposits[0].vetos = ["Threshold(0.5)"]
+        setattr(process, name+"Tight"+postfix, m)
+    
+
+    setattr(process,"patMuonIsolationFromDepositsSequence"+postfix,
+            cms.Sequence(getattr(process,"isoValMuonWithCharged"+postfix) +
+                         getattr(process,"isoValMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValMuonWithPhotons"+postfix) +
+                         getattr(process,"isoValCountMuonWithCharged"+postfix) +
+                         getattr(process,"isoValCountMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValCountMuonWithPhotons"+postfix) +                         
+                         getattr(process,"isoValMaxMuonWithCharged"+postfix) +
+                         getattr(process,"isoValMaxMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValMaxMuonWithPhotons"+postfix) +                  
+                         getattr(process,"isoValCountMuonWithChargedTight"+postfix) +
+                         getattr(process,"isoValMaxMuonWithChargedTight"+postfix) 
+            )
+    )
+
+    setattr(process,"patMuonIsoDepositsSequence"+postfix,
+            cms.Sequence(getattr(process,"isoDepMuonWithCharged"+postfix) +
+                         getattr(process,"isoDepMuonWithNeutral"+postfix) +
+                         getattr(process,"isoDepMuonWithPhotons"+postfix)
+            )
+    )
+    setattr(process,"patMuonIsolationSequence"+postfix,
+            cms.Sequence(getattr(process,"patMuonIsoDepositsSequence"+postfix) +
+                         getattr(process,"patMuonIsolationFromDepositsSequence"+postfix)
+            )
+    )
+
+    # The possible values for the keys are predefined...
+    module.isoDeposits = cms.PSet(
+        pfChargedHadrons = cms.InputTag("isoDepMuonWithCharged"+postfix),
+        pfNeutralHadrons = cms.InputTag("isoDepMuonWithNeutral"+postfix),
+        pfPhotons = cms.InputTag("isoDepMuonWithPhotons"+postfix)
+    )
+    module.isolationValues = cms.PSet(
+        pfChargedHadrons = cms.InputTag("isoValMuonWithCharged"+postfix),
+        pfNeutralHadrons = cms.InputTag("isoValMuonWithNeutral"+postfix),
+        pfPhotons = cms.InputTag("isoValMuonWithPhotons"+postfix),
+        # Only 5 slots available *sigh*
+        user = cms.VInputTag(
+                cms.InputTag("isoValCountMuonWithChargedTight"+postfix),
+                cms.InputTag("isoValMaxMuonWithChargedTight"+postfix),
+                cms.InputTag("isoValMaxMuonWithNeutral"+postfix),
+                cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+                cms.InputTag("isoValMaxMuonWithPhotons"+postfix),
+        )
+#        pfChargedHadronsCount = cms.InputTag("isoValCountMuonWithCharged"+postfix),
+#        pfNeutralHadronsCount = cms.InputTag("isoValCountMuonWithNeutral"+postfix),
+#        pfPhotonsCount = cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+#        pfChargedHadronsMax = cms.InputTag("isoValMaxMuonWithCharged"+postfix),
+#        pfNeutralHadronsMax = cms.InputTag("isoValMaxMuonWithNeutral"+postfix),
+#        pfPhotonsMax = cms.InputTag("isoValMaxMuonWithPhotons"+postfix),
+#        pfChargedHadronsTightCount = cms.InputTag("isoValCountMuonWithChargedTight"+postfix),
+#        pfChargedHadronsTightMax = cms.InputTag("isoValMaxMuonWithChargedTight"+postfix),
+    )
+
+    process.patDefaultSequence.replace(module,
+                                       getattr(process,"patMuonIsolationSequence"+postfix)+
+                                       module
+                                       )

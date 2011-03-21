@@ -52,12 +52,28 @@ hplusTanBetaIndex = {10: 0,
                      40: 3}
 
 hplusDatasetMass = {
+    # Spring10
     "TTbar_Htaunu_M80":    80,
     "TTToHpmToTauNu_M90":  90,
     "TTToHpmToTauNu_M100": 100,
     "TTToHpmToTauNu_M120": 120,
     "TTbar_Htaunu_M140":   140,
-    "TTbar_Htaunu_M160":   160}
+    "TTbar_Htaunu_M160":   160,
+
+    # Winter10
+    "TTToHplusBWB_M90_Winter10": 90,
+    "TTToHplusBWB_M100_Winter10": 100,
+    "TTToHplusBWB_M120_Winter10": 120,
+    "TTToHplusBWB_M140_Winter10": 140,
+    "TTToHplusBWB_M160_Winter10": 160,
+
+    # Logical names (see plots.py)
+    "TTToHplusBWB_M90": 90,
+    "TTToHplusBWB_M100": 100,
+    "TTToHplusBWB_M120": 120,
+    "TTToHplusBWB_M140": 140,
+    "TTToHplusBWB_M160": 160,
+}
 
 def hplusTauNuBRs(mass, tanbeta):
     if not mass in hplusMassIndex:
@@ -78,7 +94,9 @@ def setHplusCrossSections(datasets, tanbeta):
         if not datasets.hasDataset(name):
             continue
 
-        datasets.getDataset(name).setCrossSection(hplusTauNuCrossSection(mass, tanbeta))
+        crossSection = hplusTauNuCrossSection(mass, tanbeta)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
 
 def printHplusCrossSections():
     print "ttbar cross section %f pb" % ttCrossSection

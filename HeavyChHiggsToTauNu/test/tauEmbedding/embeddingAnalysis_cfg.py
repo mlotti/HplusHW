@@ -30,7 +30,7 @@ process = cms.Process("TauEmbeddingAnalysis")
 if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
-    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+    process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -38,10 +38,15 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1_test1/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_8Ag.root"
         #"file:embedded_RECO.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"
   )
 )
+if dataVersion.isData():
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/Mu_147196-149294_Dec22/Mu/Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v6_2/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_1_1_92A.root"]
+
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -52,11 +57,14 @@ if debug:
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+patArgs = {
+    "doPatTauIsoDeposits": True
+}
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 
@@ -139,7 +147,23 @@ process.genMetSequence = cms.Sequence(
     process.genMetNuEmbedded
 )
 
-process.commonSequence *= process.genMetSequence
+if dataVersion.isMC():
+    process.commonSequence *= process.genMetSequence
+
+
+# Select PFCands in 0.1 cone
+process.selectedPFCands = cms.EDProducer("HPlusPFCandCandViewDeltaRSelector",
+    src = cms.InputTag("particleFlow"),
+    refSrc = cms.InputTag("tauEmbeddingMuons"),
+    deltaR = cms.double(0.1)
+)
+process.selectedPFCandsORG = process.selectedPFCands.clone(
+    src = cms.InputTag("particleFlowORG")
+)
+
+process.commonSequence *= process.selectedPFCands
+process.commonSequence *= process.selectedPFCandsORG
+
 
 if debug:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
@@ -165,10 +189,7 @@ pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", "RECO")
 
 
-counters = []
-if dataVersion.isData():
-    counters = dataSelectionCounters
-analysis = Analysis(process, "analysis", options, additionalCounters=counters)
+analysis = Analysis(process, "analysis", options, additionalCounters=additionalCounters)
 analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 
 selectedTaus = analysis.addSelection("LooseTauId", taus,
@@ -193,11 +214,19 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
         ("pfmet_", pfMET, [histoMet]),
         ("pfmetOriginal_", pfMETOriginal, [histoMet])])
 
+process.tauSelectionSequence = analysis.getSequence()
+process.commonSequence *= process.tauSelectionSequence
+
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
+    pfCandSrc = cms.untracked.InputTag("particleFlowORG"),
+#    pfCandSrc = cms.untracked.InputTag("selectedPFCands"),
+    vertexSrc = cms.untracked.InputTag("offlinePrimaryVertices"),
     genParticleOriginalSrc = cms.untracked.InputTag("genParticles", "", "HLT"),
     genParticleEmbeddedSrc = cms.untracked.InputTag("genParticles"),
+    visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+#    visibleTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
     mets = cms.untracked.PSet(
         Met = cms.untracked.PSet(
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
@@ -207,27 +236,32 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
             embeddedSrc = cms.untracked.InputTag(pfMET.value()),
             originalSrc = cms.untracked.InputTag("pfMETOriginalNoMuon")
         ),
-        GenMetTrue = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
-        ),
-        GenMetCalo = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
-        ),
-        GenMetCaloAndNonPrompt = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
-        ),
-        GenMetNuSum = cms.untracked.PSet(
-            embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
-            originalSrc = cms.untracked.InputTag("genMetNuOriginal")
-        ),
     ),
 
     muonTauMatchingCone = cms.untracked.double(0.5),
-    metCut = cms.untracked.double(60)
+    metCut = cms.untracked.double(60),
+    tauIsolationCalculator = cms.untracked.PSet(
+        pvSrc = cms.InputTag("offlinePrimaryVertices")
+    )
 )
+# if dataVersion.isMC():
+#     process.EmbeddingAnalyzer.GenMetTrue = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetTrue", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetCalo = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetCaloEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetCalo", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetCaloAndNonPrompt = cms.untracked.PSet(
+#         embeddedSrc = cms.untracked.InputTag("genMetCaloAndNonPromptEmbedded"),
+#         originalSrc = cms.untracked.InputTag("genMetCaloAndNonPrompt", "", recoProcess)
+#     )
+#     process.EmbeddingAnalyzer.GenMetNuSum = cms.untracked.PSet(
+#          embeddedSrc = cms.untracked.InputTag("genMetNuEmbedded"),
+#          originalSrc = cms.untracked.InputTag("genMetNuOriginal")
+#     )
+
 process.tauIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
     tauSrc = cms.untracked.InputTag(selectedTaus.value())
 )
@@ -238,8 +272,15 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    analysis.getSequence() *
-    process.EmbeddingAnalyzer *
-    process.tauIdEmbeddingAnalyzer *
-    process.tauPtIdEmbeddingAnalyzer
+    process.EmbeddingAnalyzer# *
+#    process.tauIdEmbeddingAnalyzer *
+#    process.tauPtIdEmbeddingAnalyzer
 )
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+def _setMuon(module, muonSrc):
+    module.muonSrc = cms.untracked.InputTag(muonSrc)
+
+tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
+                                                    process.commonSequence, [],
+                                                    modify=_setMuon, signalAnalysisCounters=False)

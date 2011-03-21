@@ -25,7 +25,8 @@ def isMCTask(taskdir):
     return mc
 
 def main(opts, args):
-    multicrab.checkCrabInPath()
+    if opts.report:
+        multicrab.checkCrabInPath()
 
     crabdirs = multicrab.getTaskDirectories(opts)
 
@@ -43,16 +44,20 @@ def main(opts, args):
             print "  Ignoring task directory '%s', it looks like MC" % d
             continue
 
-        p = subprocess.Popen(["crab", "-report", "-c", d], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        output = p.communicate()[0]
-        ret = p.returncode
-        if ret != 0:
-            print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
-            print output
-            return 1
-        if opts.verbose:
-            print output
-
+        if opts.report:
+            cmd = ["crab", "-report", "-c", d]
+            if opts.verbose:
+                print " ".join(cmd)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output = p.communicate()[0]
+            ret = p.returncode
+            if ret != 0:
+                print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
+                print output
+                return 1
+            if opts.verbose:
+                print output
+    
         jsonfile = os.path.join(d, "res", "lumiSummary.json")
         #print
         #print "================================================================================"
@@ -60,6 +65,8 @@ def main(opts, args):
         cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
+        if opts.verbose:
+            print " ".join(cmd)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = p.communicate()[0]
         ret = p.returncode
@@ -82,9 +89,15 @@ def main(opts, args):
         print "Task %s recorded luminosity %f pb^-1" % (d, lumi)
         data[d] = lumi
 
+        # Save the json file after each data task in case of future errors
+        f = open(opts.output, "wb")
+        json.dump(data, f, sort_keys=True, indent=2)
+        f.close()
+
     f = open(opts.output, "wb")
     json.dump(data, f, sort_keys=True, indent=2)
     f.close()
+
     return 0
 
 if __name__ == "__main__":
@@ -92,6 +105,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("--output", "-o", dest="output", type="string", default="lumi.json",
                       help="Output file to write the dataset integrated luminosities")
+    parser.add_option("--noreport", dest="report", action="store_false", default=True,
+                      help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
     

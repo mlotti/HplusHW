@@ -26,6 +26,7 @@ namespace HPlus {
     fElecSelectionSubCountElectronHasGsfTrkOrTrk(eventCounter.addSubCounter("GlobalElectron Selection", "Electron has gsfTrack or track")),
     fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
     fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Eta")),
+    fElecSelectionSubCountFiducialVolumeCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron fiducial volume")),
     fElecSelectionSubCountElectronSelection(eventCounter.addSubCounter("GlobalElectron Selection", fElecSelection)),
     fElecSelectionSubCountNLostHitsInTrkerCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Num of Lost Hits In Trker")),
     fElecSelectionSubCountmyElectronDeltaCotThetaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Delta Cot(Theta)")),
@@ -48,13 +49,14 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hElectronPt  = makeTH<TH1F>(*fs, "GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
+    hElectronPt  = makeTH<TH1F>(*fs, "GlobalElectronPt", "GlobalElectronPt", 100, 0.0, 200.0);
     hElectronEta = makeTH<TH1F>(*fs, "GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack  = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 400, 0.0, 400.0);
+    hElectronPt_gsfTrack  = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 100, 0.0, 200.0);
     hElectronEta_gsfTrack = makeTH<TH1F>(*fs, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
-    hElectronPt_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 400, 0.0, 400.0);
-    hElectronEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 60, -3.0, 3.0);
-    hElectronPt_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 400, 0.0, 400.0);
+    hElectronEta_superCluster = makeTH<TH1F>(*fs, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
+    hElectronPt_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronPt_AfterSelection", 100, 0.0, 200.0);
+    hElectronEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
+    hElectronPt_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 100, 0.0, 200.0);
     hElectronEta_gsfTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
      hElectronImpactParameter = makeTH<TH1F>(*fs, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
@@ -131,7 +133,9 @@ namespace HPlus {
     bool bElecHasGsfTrkOrTrk = false;
     bool bElecPtCut = false;
     bool bElecEtaCut = false;
-    
+    bool bElecFiducialVolumeCut  = false;
+
+   
     // Loop over all Electrons
     for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
 
@@ -202,7 +206,21 @@ namespace HPlus {
       // 2) Apply Eta cut requirement      
       if (std::fabs(myElectronEta) > fElecEtaCut) continue;
       bElecEtaCut = true;
+
+      // Apply electron fiducial volume cut
+      // Obtain reference to the superCluster
+      reco::SuperClusterRef mySuperClusterRef = (*iElectron).superCluster(); 
       
+      // Check that superCluster was found
+      if ( mySuperClusterRef.isNull()) continue;
+
+      hElectronEta_superCluster->Fill(mySuperClusterRef->eta(), fEventWeight.getWeight());
+     
+      if ( fabs(mySuperClusterRef->eta()) > 1.4442 && fabs(mySuperClusterRef->eta()) < 1.566) continue;
+      bElecFiducialVolumeCut = true;
+
+
+      bElecHasGsfTrkOrTrk = true;   
       // 3) Apply Electron ID (choose low efficiency => High Purity)
       if( (bUseLooseID) && (bElecIDIsLoose) ) bPassedElecID = true;
       else if( (bUseRobustLooseID ) && (bElecIDIsRobustLoose) ) bPassedElecID = true;
@@ -242,8 +260,11 @@ namespace HPlus {
           increment(fElecSelectionSubCountPtCut);
           if(bElecEtaCut) {
             increment(fElecSelectionSubCountEtaCut);
-            if(bPassedElecID) {
-              increment(fElecSelectionSubCountElectronSelection);
+	    if(bElecFiducialVolumeCut) {
+	      increment(fElecSelectionSubCountFiducialVolumeCut);
+	      if(bPassedElecID) {
+		increment(fElecSelectionSubCountElectronSelection);
+	      }
             }
           }
         }
@@ -251,7 +272,7 @@ namespace HPlus {
     }
 
     // Make a boolean that describes whether a Global Electron (passing all selection criteria) is found.
-    bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID;
+    bool bDecision = bElecPresent*bElecHasGsfTrkOrTrk*bElecPtCut*bElecEtaCut*bPassedElecID*bElecFiducialVolumeCut;
 
     // Now store the highest Electron Pt and Eta
     fSelectedElectronPt = myHighestElecPt;

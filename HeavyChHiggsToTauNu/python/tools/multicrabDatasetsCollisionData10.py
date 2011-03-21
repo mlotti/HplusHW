@@ -472,6 +472,74 @@ datasets = {
     },
 
 
+    # For QuadJet trigger
+    "JetMETTau_QuadJet_136035-141881_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_QuadJet15U",
+        "runs": (136035, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "JetMET_QuadJet_141956-144114_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_QuadJet15U",
+        "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/JetMET/Run2010A-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 200, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "Jet_QuadJet_146428-147116_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_QuadJet25U",
+        "runs": (146428, 147116), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/Jet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 40, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "MultiJet_QuadJet_147196-148058_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_QuadJet25U_v2",
+        "runs": (147196, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/MultiJet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 80, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+    "MultiJet_QuadJet_148819-149442_Dec22": {
+        "dataVersion": "39Xdata",
+        "trigger": "HLT_QuadJet25U_v3",
+        "runs": (148819, 149442), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
+        "data": {
+            "AOD": {
+                "datasetpath": "/MultiJet/Run2010B-Dec22ReReco_v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 100, # Adjusted for PATtuple
+                "lumiMask": "Dec22ReReco"
+            },
+        }
+    },
+
+
     # Mu PD (for electroweak background analysis)
     "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
         "dataVersion": "38Xdata",
@@ -496,7 +564,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 500, # Adjusted for PAT on the fly
+                "number_of_jobs": 80, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -509,7 +577,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 600, # Adjusted for PAT on the fly
+                "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }
@@ -522,7 +590,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 500, # Adjusted for PAT on the fly
+                "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }

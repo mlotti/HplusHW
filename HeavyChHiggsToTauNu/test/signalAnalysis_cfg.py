@@ -20,13 +20,20 @@ doAllTauIds = True
 doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10 
+JESUnclusteredMETVariation = 0.10
+
+# With tau embedding input, tighten the muon selection
+tauEmbeddingTightenMuonSelection = False
 
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
+# These are needed for running against tau embedding samples, can be
+# given also from command line
+#options.doPat=1
+#options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
@@ -38,17 +45,19 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-        #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+#       "rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
         # For testing in lxplus
 #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        #dataVersion.getAnalysisDefaultFileMadhatter()
+#        dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#        "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
+if options.tauEmbeddingInput != 0:
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -67,7 +76,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 
 ################################################################################
@@ -88,9 +97,9 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Set tau sources to non-trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.signalAnalysis import customiseParamForTauEmbedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
-    customiseParamForTauEmbedding(param)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -104,9 +113,11 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    tauEmbedding = param.TauEmbeddingAnalysis
 )
 
 # Prescale fetching done automatically for data
@@ -170,8 +181,7 @@ process.signalAnalysisPath = cms.Path(
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
     param.addTauIdAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
-        
-    
+
 ################################################################################
 # The signal analysis with jet energy scale variation
 #
@@ -193,6 +203,9 @@ if doJESVariation:
     addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
+# Signal analysis with various tightened muon selections for tau embedding
+if tauEmbeddingTightenMuonSelection:
+    tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

@@ -5,11 +5,11 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-step = "generation"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v6_2",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
@@ -33,15 +33,19 @@ datasets = [
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
     "TTJets_TuneZ2_Winter10",
+#    "TTJets_TuneD6T_Winter10",
     "WJets_TuneZ2_Winter10",
     #"WJets_TuneZ2_Winter10_noPU",
-    #"WJets_TuneD6T_Winter10",
+#    "WJets_TuneD6T_Winter10",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
-    "DYJetsToLL_TuneZ2_Winter10",
+    "DYJetsToLL_M50_TuneZ2_Winter10",
     "TToBLNu_s-channel_TuneZ2_Winter10",
     "TToBLNu_t-channel_TuneZ2_Winter10",
     "TToBLNu_tW-channel_TuneZ2_Winter10",
+    "WW_TuneZ2_Winter10",
+    "WZ_TuneZ2_Winter10",
+    "ZZ_TuneZ2_Winter10",
     # For testing
     "TTToHplusBWB_M120_Winter10"
     ]
@@ -54,26 +58,26 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-#tauname = "_tauembedding_%s_v6" % step
-tauname = "_tauembedding_%s_v6_2" % step
+tauname = "_tauembedding_%s_v8" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
-
-skimNlumis = {
-    "Mu_136035-144114_Dec22": 1000
-    }
 
 skimNjobs = {
     "WJets_TuneZ2_Winter10": 400,
     "WJets_TuneZ2_Winter10_noPU": 100,
+    "WJets_TuneD6T_Winter10": 400,
     "TTJets_TuneZ2_Winter10": 400,
-    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 300,
-    "DYJetsToLL_TuneZ2_Winter10": 30,
+    "TTJets_TunedD6TWinter10": 400,
+    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 400,
+    "DYJetsToLL_M50_TuneZ2_Winter10": 30,
     "TToBLNu_s-channel_TuneZ2_Winter10": 100,
     "TToBLNu_t-channel_TuneZ2_Winter10": 100,
     "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
+    "WW_TuneZ2_Winter10": 100,
+    "WZ_TuneZ2_Winter10": 100,
+    "ZZ_TuneZ2_Winter10": 100,
     }
-    
+   
 
 def modify(dataset):
     name = ""
@@ -101,10 +105,6 @@ def modify(dataset):
             dataset.setNumberOfJobs(skimNjobs[dataset.getName()])
         except KeyError:
             pass
-        try:
-            dataset.setLumisPerJob(skimNlumis[dataset.getName()])
-        except KeyError:
-            pass
 
         #if config[step]["input"] == "AOD":
         #    dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
@@ -123,9 +123,12 @@ def modifyAnalysis(dataset):
 
 
 if step in ["analysis", "analysisTau","signalAnalysis"]:
+    multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyAnalysis)
 else:
     multicrab.forEachDataset(modify)
 
-multicrab.createTasks()
-#multicrab.createTasks(configOnly=True)
+prefix = "multicrab_"+step
+
+multicrab.createTasks(prefix=prefix)
+#multicrab.createTasks(configOnly=True,prefix=prefix)

@@ -1,6 +1,7 @@
 import glob, os, sys
 import json
 from optparse import OptionParser
+import math
 
 import ROOT
 
@@ -55,12 +56,17 @@ def getDatasetsFromMulticrabCfg(**kwargs):
     """
     opts = kwargs.get("opts", None)
     taskDirs = []
+    dirname = ""
     if "cfgfile" in kwargs:
         taskDirs = multicrab.getTaskDirectories(opts, kwargs["cfgfile"])
+        dirname = os.path.dirname(kwargs["cfgfile"])
     else:
         taskDirs = multicrab.getTaskDirectories(opts)
 
-    return getDatasetsFromCrabDirs(taskDirs, **kwargs)
+    datasetMgr = getDatasetsFromCrabDirs(taskDirs, **kwargs)
+    if len(dirname) > 0:
+        datasetMgr._setBaseDirectory(dirname)
+    return datasetMgr
 
 def getDatasetsFromCrabDirs(taskdirs, **kwargs):
     """Construct DatasetManager from a list of CRAB task directory names.
@@ -153,6 +159,9 @@ class Count:
         self._value = value
         self._uncertainty = uncertainty
 
+    def copy(self):
+        return Count(self._value, self._uncertainty)
+
     def value(self):
         return self._value
 
@@ -165,8 +174,26 @@ class Count:
     def uncertaintyUp(self):
         return self.uncertainty()
 
-    def __str__(self):
-        return "%f"%self._value
+    def add(self, count):
+        """self = self + count"""
+        self._value += count._value
+        self._uncertainty = math.sqrt(self._uncertainty**2 + count._uncertainty**2)
+
+    def subtract(self, count):
+        """self = self - count"""
+        self.add(Count(-count._value, count._uncertainty))
+
+    def multiply(self, count):
+        """self = self * count"""
+        self._uncertainty = math.sqrt( (count._value * self._uncertainty)**2 +
+                                       (self._value  * count._uncertainty)**2 )
+        self._value = self._value * count._value
+
+    def divide(self, count):
+        """self = self / count"""
+        self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
+                                       (self._value*count._uncertainty / (count._value**2) )**2 )
+        self._value = self._value / count._value
 
 def _histoToCounter(histo):
     """Transform histogram (TH1) to a list of (name, Count) pairs.
@@ -316,10 +343,23 @@ class DatasetRootHistoBase:
     """
     def __init__(self, dataset):
         self.dataset = dataset
+        self.name = dataset.getName()
         self.multiplication = None
 
-    def getDataset(self,):
+    def getDataset(self):
         return self.dataset
+
+    def setName(self, name):
+        self.name = name
+
+    def getName(self):
+        return self.name
+
+    def isData(self):
+        return self.dataset.isData()
+
+    def isMC(self):
+        return self.dataset.isMC()
 
     def getHistogram(self):
         """Get a clone of the wrapped histogram normalized correctly."""
@@ -372,12 +412,6 @@ class DatasetRootHisto(DatasetRootHistoBase):
         DatasetRootHistoBase.__init__(self, dataset)
         self.histo = histo
         self.normalization = "none"
-
-    def isData(self):
-        return self.dataset.isData()
-
-    def isMC(self):
-        return self.dataset.isMC()
 
     def getBinLabels(self):
         """Get list of the bin labels of the histogram."""
@@ -468,6 +502,12 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
 
+    def isData(self):
+        return True
+
+    def isMC(self):
+        return False
+
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
         return self.histoWrappers[0].getBinLabels()
@@ -526,6 +566,12 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
                 raise Exception("Histograms to be merged must not be multiplied at this stage")
+
+    def isData(self):
+        return False
+
+    def isMC(self):
+        return True
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
@@ -609,7 +655,9 @@ class Dataset:
     The default values for cross section/luminosity are read from
     'configInfo/configInfo' histogram (if it exists). The data/MC
     datasets are differentiated by the existence of 'crossSection'
-    (for MC) and 'luminosity' (for data) keys in the histogram.
+    (for MC) and 'luminosity' (for data) keys in the histogram. Reads
+    the dataVersion from 'configInfo/dataVersion' and deduces whether
+    the dataset is data/MC from it.
     """
 
     def __init__(self, name, fname, counterDir):
@@ -628,7 +676,8 @@ class Dataset:
 
         Opens the ROOT file, reads 'configInfo/configInfo' histogram
         (if it exists), and reads the main event counter
-        ('counterDir/counters') if counterDir is not None.
+        ('counterDir/counters') if counterDir is not None. Reads also
+        'configInfo/dataVersion' TNamed.
         """
 
         self.name = name
@@ -637,9 +686,19 @@ class Dataset:
             raise Exception("Unable to open ROOT file '%s'"%fname)
 
         self.info = {}
+        self.dataVersion = ""
         configInfo = self.file.Get("configInfo")
         if configInfo != None:
             self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
+
+            dataVersion = configInfo.Get("dataVersion")
+
+            if dataVersion != None:
+                self.dataVersion = dataVersion.GetTitle()
+            elif "luminosity" in self.info:
+                self.dataVersion = "data"
+
+        self._isData = "data" in self.dataVersion
 
         self.prefix = ""
         if counterDir != None:
@@ -706,32 +765,38 @@ class Dataset:
     def setCrossSection(self, value):
         """Set cross section of MC dataset (in pb)."""
         if not self.isMC():
-            raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
+            raise Exception("Should not set cross section for data dataset %s" % self.name)
         self.info["crossSection"] = value
 
     def getCrossSection(self):
         """Get cross section of MC dataset (in pb)."""
         if not self.isMC():
             raise Exception("Dataset %s is data, no cross section available" % self.name)
-        return self.info["crossSection"]
+        try:
+            return self.info["crossSection"]
+        except AttributeError:
+            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method.")
 
     def setLuminosity(self, value):
         """Set the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
-            raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
+            raise Exception("Should not set luminosity for MC dataset %s" % self.name)
         self.info["luminosity"] = value
 
     def getLuminosity(self):
         """Get the integrated luminosity of data dataset (in pb^-1)."""
         if not self.isData():
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
-        return self.info["luminosity"]
+        try:
+            return self.info["luminosity"]
+        except AttributeError:
+            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method.")
 
     def isData(self):
-        return "luminosity" in self.info
+        return self._isData
 
     def isMC(self):
-        return "crossSection" in self.info
+        return not self._isData
 
     def getCounterDirectory(self):
         return self.originalCounterDir
@@ -961,9 +1026,10 @@ class DatasetManager:
     map for convenient access by dataset name.
     """
 
-    def __init__(self):
+    def __init__(self, base=""):
         self.datasets = []
         self.datasetMap = {}
+        self.basedir = base
 
     def _populateMap(self):
         """Populate the datasetMap member from the datasets list.
@@ -973,6 +1039,9 @@ class DatasetManager:
         self.datasetMap = {}
         for d in self.datasets:
             self.datasetMap[d.getName()] = d
+
+    def _setBaseDirectory(self, base):
+        self.basedir = base
 
     def append(self, dataset):
         """Append a Dataset object to the set.
@@ -1140,7 +1209,11 @@ class DatasetManager:
 
     def mergeData(self):
         """Merge all data Datasets to one with a name 'Data'."""
-        self.merge("Data", [x.getName() for x in self.getDataDatasets()])
+        self.merge("Data", self.getDataDatasetNames())
+
+    def mergeMC(self):
+        """Merge all MC Datasets to one with a name 'MC'."""
+        self.merge("MC", self.getMCDatasetNames())
 
     def mergeMany(self, mapping):
         """Merge datasets according to the mapping."""
@@ -1181,7 +1254,10 @@ class DatasetManager:
         """Load integrated luminosities from a JSON file.
 
         Arguments:
-        fname  Path to the file (default: 'lumi.json')
+        fname   Path to the file (default: 'lumi.json'). If the
+                directory part of the path is empty, the file is
+                looked from the base directory (which defaults to
+                current directory)
 
         The JSON file should be formatted like this:
 
@@ -1190,12 +1266,16 @@ class DatasetManager:
            "Mu_135821-144114": 2.863224758
          }'
         """
+        if len(os.path.dirname(fname)) == 0:
+            fname = os.path.join(self.basedir, fname)
+
         if not os.path.exists(fname):
             print >> sys.stderr, "WARNING: luminosity json file '%s' doesn't exist!" % fname
 
         data = json.load(open(fname))
         for name, value in data.iteritems():
-            self.getDataset(name).setLuminosity(value)
+            if self.hasDataset(name):
+                self.getDataset(name).setLuminosity(value)
 
     def printInfo(self):
         """Print dataset information."""

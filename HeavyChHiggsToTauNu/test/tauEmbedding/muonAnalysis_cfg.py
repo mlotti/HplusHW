@@ -1,26 +1,20 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-dataVersion = "38X"
-#dataVersion = "data" # this is for collision data 
+dataVersion = "39Xredigi"
+#dataVersion = "39Xdata"
 
+################################################################################
+
+# Command line arguments (options) and DataVersion object
 options = VarParsing.VarParsing()
 options.register("WDecaySeparate",
                  0,
                  options.multiplicity.singleton,
                  options.varType.int,
                  "Separate W decays from MC information")
-options = getOptions(options)
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
+options, dataVersion = getOptionsDataVersion(dataVersion, options)
 
 process = cms.Process("HChMuonAnalysis")
 
@@ -55,7 +49,8 @@ if options.doPat != 0:
 # Configuration
 trigger = options.trigger
 if len(trigger) == 0:
-    trigger = "HLT_Mu9"
+#    trigger = "HLT_Mu9"
+    trigger = "HLT_Mu15_v1"
 
 print "Using trigger %s" % trigger
 
@@ -76,13 +71,26 @@ dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = Fals
 
 maxVertexZ = 1.0
 
-relIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
+# PfAllParticleIso=3,PfChargedHadronIso=4, PfNeutralHadronIso=5, PfGammaIso=6, 
+isolations = {
+    # Detector iso
+    "trackIso": "isolationR03().sumPt",
+    "caloIso": "isolationR03().emEt+isolationR03().hadEt",
+    # 'standard' PF isolation
+    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
+    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
+    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+}
+isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
+isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
+for key, value in isolations.items():
+    isolations[key+"Rel"] = "(%s)/pt" % value
 
 jetSelection = "pt() > 30 && abs(eta()) < 2.4"
 jetId = "emEnergyFraction() > 0.01 && jetID().n90Hits > 1 && jetID().fHPD < 0.98"
 jetIdPF = "numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 
-muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+relIso+" < 0.2"
+muonVeto = "isGlobalMuon && pt > 10. && abs(eta) < 2.5 && "+isolations["sumIsoRel"]+" < 0.2"
 electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
 zMassVetoMuons ="isGlobalMuon && pt > 20. && abs(eta) < 2.5"
 zMassVeto = "76 < mass() && mass < 106"
@@ -105,78 +113,64 @@ met = cms.InputTag(pfMET)
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 #process.options.wantSummary = cms.untracked.bool(True)
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.categories.append("TauIsolationSelector")
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
-process.TFileService.fileName = "histograms.root"
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection, dataSelectionCounters
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi import *
-from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects, removeCleaning
-process.patSequence = cms.Sequence()
-if options.doPat != 0:
-    print "Running PAT on the fly"
+# Fragment to run PAT on the fly if requested from command line
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
+patArgs = {"doPatTrigger": False,
+#           "doPatTaus": False,
+           "doHChTauDiscriminators": False,
+           "doPatElectronID": False,
+           "doTauHLTMatching": False,
+           "doPatMuonPFIsolation": True,
+           }
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 
-    process.collisionDataSelection = cms.Sequence()
-    if dataVersion.isData():
-        process.collisionDataSelection = addDataSelection(process, dataVersion, trigger)
-
-    process.patPlainSequence = addPat(process, dataVersion, doPatTrigger=False, doPatTaus=False, doPatElectronID=False, doTauHLTMatching=False)
-    process.patSequence = cms.Sequence(
-        process.collisionDataSelection *
-        process.patPlainSequence
-    )
-    #removeSpecificPATObjects(process, ["Electrons", "Photons"], False)
-    removeSpecificPATObjects(process, ["Photons"], False)
-    removeCleaning(process, False)    
-
-    # In order to calculate the transverse impact parameter w.r.t.
-    # beam spot instead of primary vertex, see
-    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
-    process.patMuons.usePV = False
-
+# Add configuration information to histograms.root
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
-
-# Generator and configuration info analyzers
-process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer")
-if options.crossSection >= 0.:
-    process.configInfo.crossSection = cms.untracked.double(options.crossSection)
-    print "Dataset cross section has been set to %g pb" % options.crossSection
-if options.luminosity >= 0:
-    process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-    print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
 
 process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
     src = cms.InputTag("offlinePrimaryVertices")
 )
-process.patSequence *= process.firstPrimaryVertex
-
-process.commonSequence = cms.Sequence(
-    process.patSequence +
-    process.configInfo
-)
+process.commonSequence *= process.firstPrimaryVertex
 
 # Define the histograms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-histoPt = Histo("pt", "pt()", min=0., max=400., nbins=400, description="muon pt (GeV/c)")
-histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="muon eta")
-histoIso = Histo("relIso", relIso, min=0, max=0.5, nbins=100, description="Relative isolation")
-histoDB = Histo("trackDB", "dB()", min=-0.2, max=0.2, nbins=400, description="Track ip @ PV (cm)")
+histoPt = Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
+histoEta = Histo("eta", "eta()", min=-3, max=3, nbins=120, description="eta")
+histoPhi = Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, description="phi")
+
+histoIsos = {}
+for name, value in isolations.iteritems():
+    h = None
+    if "IsoRel" in name:
+        h = Histo(name, value, min=0, max=0.5, nbins=100, description=name)
+    else:
+        h = Histo(name, value, min=0, max=100.0, nbins=100, description=name)
+    histoIsos[name] = h
+
+histoDB = Histo("trackDB", "dB()", min=-0.1, max=0.1, nbins=50, description="Track ip @ PV (cm)")
 histoNhits = Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
 histoChi2 = Histo("trackNormChi2", "globalTrack().normalizedChi2()", min=0, max=20, nbins=100, description="Track norm chi2")
 
 histoMet = Histo("et", "et()", min=0., max=400., nbins=400, description="MET (GeV)")
 
 histoTransverseMass = Histo("tmass", "sqrt((daughter(0).pt+daughter(1).pt)*(daughter(0).pt+daughter(1).pt)-pt*pt)",
-                            min=0, max=120, nbins=120, description="W transverse mass")
-histoZMass = Histo("mass", "mass()", min=0, max=200, nbins=200, description="Z mass")
+                            min=0, max=400, nbins=400, description="W transverse mass")
+histoZMass = Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoIso]
+histosBeginning = [histoPt, histoEta, histoPhi] + histoIsos.values()
 histosGlobal = histosBeginning+[histoDB, histoNhits, histoChi2]
+
+histosJet = [histoPt, histoEta, histoPhi]
 
 vertexCollections = ["offlinePrimaryVertices"]
 if dataVersion.isData():
@@ -185,21 +179,19 @@ if dataVersion.isData():
 # Class to wrap the analysis steps, and to have methods for the defined analyses
 class MuonAnalysis:
     def __init__(self, process, prefix="", beginSequence=None, afterOtherCuts=False,
-                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False):
+                 muonPtCut=30, muonIsolationCut=0.05, metCut=20, njets=3, jets=jets, doJetId=False, doIsolationWithTau=False):
         self.process = process
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
         self.doJetId = doJetId
+        self.doIsolationWithTau = doIsolationWithTau
         self._ptCut = ptCutString % muonPtCut
         self._metCut = metCutString % metCut
         self._njets = njets
         self._jets = jets
-        self._isolationCut = "%s < %f" % (relIso, muonIsolationCut)
+        self._isolationCut = "%s < %f" % (isolations["sumIsoRel"], muonIsolationCut)
 
-        counters = []
-        if dataVersion.isData():
-            counters = dataSelectionCounters
-        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=counters)
+        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=additionalCounters)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
@@ -216,6 +208,8 @@ class MuonAnalysis:
         if not self.afterOtherCuts:
             self.histoAnalyzer = self.analysis.addMultiHistoAnalyzer("AllMuons", [
                     ("muon_", muons, histosBeginning),
+                    ("calojet_", jets, histosJet),
+                    ("pfjet_", jetsPF, histosJet),
                     ("calomet_", cms.InputTag(caloMET), [histoMet]),
                     ("pfmet_", cms.InputTag(pfMET), [histoMet]),
                     ("tcmet_", cms.InputTag(tcMET), [histoMet])])
@@ -299,13 +293,15 @@ class MuonAnalysis:
                 )
             )
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
-            self.afterOtherCutsModuleIso.histograms.append(histoIso.pset().clone(cut=cms.untracked.string(self._isolationCut)))
+            self.afterOtherCutsModuleIso.histograms.append(histoIsos["sumIsoRel"].pset().clone(cut=cms.untracked.string(self._isolationCut)))
         
 
     def cloneHistoAnalyzer(self, name, **kwargs):
         self.histoAnalyzer = self.analysis.addCloneAnalyzer(name, self.histoAnalyzer)
         if "muonSrc" in kwargs:
             self.histoAnalyzer.muon_.src = kwargs["muonSrc"]
+        if "pfJetSrc" in kwargs:
+            self.histoAnalyzer.pfjet_.src = kwargs["pfJetSrc"]
 
     def cloneMultipAnalyzer(self, **kwargs):
         name = self.multipName
@@ -334,9 +330,9 @@ class MuonAnalysis:
         wmunuPF   = self.analysis.addProducer("WMuNuPF",   self.candCombinerPrototype.clone(decay = cms.string(self.selectedMuons.getModuleLabel()+" "+pfMET)))
         wmunuTC   = self.analysis.addProducer("WMuNuTC",   self.candCombinerPrototype.clone(decay = cms.string(self.selectedMuons.getModuleLabel()+" "+tcMET)))
         self.cloneHistoAnalyzer("WMuNuCands")
-        self.histoAnalyzer.wmunuCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
-        self.histoAnalyzer.wmunuPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
-        self.histoAnalyzer.wmunuTC_   = cms.untracked.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmumetCalo_ = cms.untracked.PSet(src = wmunuCalo, histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmumetPF_   = cms.untracked.PSet(src = wmunuPF,   histograms = cms.VPSet(histoTransverseMass.pset()))
+        self.histoAnalyzer.wmumetTC_   = cms.untracked.PSet(src = wmunuTC,   histograms = cms.VPSet(histoTransverseMass.pset()))
 
     def addZMassHistos(self):
         from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
@@ -366,6 +362,8 @@ class MuonAnalysis:
         self.multipAnalyzer.zMassMuons = self.multipAnalyzer.selMuons.clone(src = zMassMuons)
 
     def triggerPrimaryVertex(self):
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi import goodPrimaryVertices
+
         # Trigger
         self.analysis.addTriggerCut(dataVersion, trigger)
         if not self.afterOtherCuts:
@@ -374,8 +372,7 @@ class MuonAnalysis:
             self.clonePileupAnalyzer()
 
         # Select primary vertex
-        self.selectedPrimaryVertex = self.analysis.addAnalysisModule(
-            "PrimaryVertex",
+        self.selectedPrimaryVertex = self.analysis.addAnalysisModule("PrimaryVertex",
             selector = goodPrimaryVertices.clone(src = cms.InputTag("firstPrimaryVertex")),
             filter = cms.EDFilter("VertexCountFilter",
                                   src = cms.InputTag("dummy"),
@@ -392,6 +389,7 @@ class MuonAnalysis:
         # track the multiplicity through the selections
         self.selectedJets = self.analysis.addSelection("JetSelection", self.selectedJets, jetSelection)
         if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer("JetSelection", pfJetSrc=self.selectedJets)
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetSelection")
             self.multipAnalyzer.jets.src = self.selectedJets
 
@@ -402,6 +400,7 @@ class MuonAnalysis:
 
         self.selectedJets = self.analysis.addSelection("JetId", self.selectedJets, idstr)
         if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer("JetId", pfJetSrc=self.selectedJets)
             self.cloneMultipAnalyzer(name="MultiplicityAfterJetId")
             self.multipAnalyzer.jets.src = self.selectedJets
 
@@ -498,7 +497,24 @@ class MuonAnalysis:
 
     def muonIsolationCustom(self, postfix, cut):
         name = "MuonIsolation"+postfix
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (relIso, cut))
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (isolations["sumIsoRel"], cut))
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+            self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
+            self.clonePileupAnalyzer()
+
+    def muonIsolationWithTau(self):
+        name = "MuonIsolationWithTau"
+        self.selectedMuons = self.analysis.addAnalysisModule(
+            name,
+            selector = cms.EDProducer("HPlusCandViewPtrTauIsolationSelector",
+                                      candSrc = self.selectedMuons,
+                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
+                                      isolationDiscriminator = cms.string("byIsolation"),
+                                      deltaR = cms.double(0.15),
+                                      minCands = cms.uint32(1)),
+            filter = makeCountFilter(cms.InputTag("dummy"), 1),
+            counter=True).getSelectorInputTag()
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
             self.cloneMultipAnalyzer(selMuonSrc=self.selectedMuons)
@@ -611,7 +627,7 @@ class MuonAnalysis:
             self.addAfterOtherCutsAnalyzer(name)
         self.createAnalysisPath()
 
-    def noIsoNoVetoMet(self):
+    def muonSelection(self):
         self.triggerPrimaryVertex()
         self.jetSelection()
         if self.doJetId:
@@ -644,7 +660,7 @@ class MuonAnalysis:
 
         self.createAnalysisPath()
 
-    def noIsoNoVetoMetPF(self):
+    def muonSelectionPF(self):
         self.triggerPrimaryVertex()
         self.tightMuonSelection()
 
@@ -654,6 +670,8 @@ class MuonAnalysis:
         self.muonQuality()
         self.muonImpactParameter()
         self.muonVertexDiff()
+        if self.doIsolationWithTau:
+            self.muonIsolationWithTau()
         name = self.muonLargestPt()
 
         if not self.afterOtherCuts:
@@ -731,26 +749,21 @@ class MuonAnalysis:
 def createAnalysis(name, postfix="", **kwargs):
     a = MuonAnalysis(process, prefix=name+postfix, **kwargs)
     getattr(a, name)()
-    a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
-    getattr(a, name)()
-    #a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    #a = MuonAnalysis(process, prefix=name+postfix+"JetId", doJetId=True, **kwargs)
     #getattr(a, name)()
+    if not "doIsolationWithTau" in kwargs:
+        a = MuonAnalysis(process, prefix=name+postfix+"IsoTau", doIsolationWithTau=True, **kwargs)
+        getattr(a, name)()
+    a = MuonAnalysis(process, prefix=name+postfix+"Aoc", afterOtherCuts=True, **kwargs)
+    getattr(a, name)()
 
 def createAnalysis2(**kwargs):
-    createAnalysis("topMuJetRefMet", **kwargs)
+    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
     postfix = ""
     if "postfix" in kwargs:
         postfix = kwargs["postfix"]
         del kwargs["postfix"]
-
-    for nj in [1, 2, 3]:
-        kwargs["postfix"] = "NJets%d%s"%(nj, postfix)
-        kwargs["njets"] = nj
-        createAnalysis("noIsoNoVetoMet", **kwargs)
-        createAnalysis("noMuon", **kwargs)
-        createAnalysis("noMuonPF", jets=jetsPF, **kwargs)
-        createAnalysis("muonLast", **kwargs)
 
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
@@ -762,7 +775,8 @@ def createAnalysis2(**kwargs):
         kwargs["metCut"] = met
         kwargs["njets"] = njets
         kwargs["jets"] = jetsPF
-        createAnalysis("noIsoNoVetoMetPF", **kwargs)
+        kwargs["doJetId"] = True
+        createAnalysis("muonSelectionPF", **kwargs)
 
 createAnalysis2()
 if options.WDecaySeparate > 0:
@@ -782,74 +796,6 @@ if options.WDecaySeparate > 0:
 
     createAnalysis2(postfix="Wmunu", beginSequence=process.wMuNuSequence)
     createAnalysis2(postfix="WOther", beginSequence=process.wOtherSequence)
-
-process.muonJetMetAnalyzer = cms.EDAnalyzer(
-    "HPlusMuonJetMetAnalyzer",
-    muonSrc = cms.untracked.InputTag(muons.value()),
-    jetSrc = cms.untracked.InputTag(jetsPF.value()),
-    metSrc = cms.untracked.InputTag(pfMET),
-    njets = cms.untracked.uint32(1),
-    jetSelections = cms.untracked.VPSet(
-        cms.PSet(
-            cut = cms.untracked.string(jetSelection),
-            name = cms.untracked.string("JetKinematic")
-        ),
-    ),
-    muonSelections = cms.untracked.VPSet(
-        cms.PSet(
-            cut = cms.untracked.string(tightMuonCut),
-            name = cms.untracked.string("MuonTight")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("abs(eta()) < 1.4"),
-            name = cms.untracked.string("MuonEta")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 5"),
-            name = cms.untracked.string("MuonPt5")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 10"),
-            name = cms.untracked.string("MuonPt10")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 15"),
-            name = cms.untracked.string("MuonPt15")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 20"),
-            name = cms.untracked.string("MuonPt20")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 25"),
-            name = cms.untracked.string("MuonPt25")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 30"),
-            name = cms.untracked.string("MuonPt30")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 35"),
-            name = cms.untracked.string("MuonPt35")
-        ),
-        cms.PSet(
-            cut = cms.untracked.string("pt() > 40"),
-            name = cms.untracked.string("MuonPt40")
-        ),
-    )
-)
-
-process.muonJetMetAnalyzerJetId = process.muonJetMetAnalyzer.clone()
-process.muonJetMetAnalyzerJetId.jetSelections.append(cms.PSet(
-    cut = cms.untracked.string(jetIdPF),
-    name = cms.untracked.string("JetId")
-))
-
-process.muonJetMetPath = cms.Path(
-    process.commonSequence *
-    process.muonJetMetAnalyzer *
-    process.muonJetMetAnalyzerJetId
-)
 
 
 #print process.dumpPython()

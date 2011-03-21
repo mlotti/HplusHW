@@ -31,24 +31,17 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChQCDMeasurementMethod2Part1")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    #"file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk-1/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
-    # For testing in lxplus
-    #dataVersion.getAnalysisDefaultFileCastor()
-    # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
-    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    "file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     )
 )
 
@@ -62,7 +55,6 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
-
 process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Fragment to run PAT on the fly if requested from command line
@@ -71,7 +63,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options)
+process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 # qcdMeasurementControlRegionSelection module
@@ -85,8 +77,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 # Set tau selection mode (options: 'antitautag', 'antiisolatedtau', 'standard')
 #param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
-param.setAllTauSelectionOperatingMode('antitautag')
-#param.setAllTauSelectionOperatingMode('antiisolatedtau')
+#param.setAllTauSelectionOperatingMode('antitautag')
+param.setAllTauSelectionOperatingMode('antiisolatedtau')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
