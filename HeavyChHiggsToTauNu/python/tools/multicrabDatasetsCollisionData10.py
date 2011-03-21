@@ -564,7 +564,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Mu/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PAT on the fly
+                "number_of_jobs": 80, # Adjusted for PAT on the fly
                 "lumiMask": "Dec22ReReco"
             },
         }

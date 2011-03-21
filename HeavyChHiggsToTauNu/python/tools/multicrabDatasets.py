@@ -1,18 +1,25 @@
-import multicrabDatasetsCollisionData as collisionData
+import multicrabDatasetsCollisionData10 as collisionData10
+import multicrabDatasetsCollisionData11 as collisionData11
+
 import multicrabDatasetsMCSummer10 as mcSummer10
 import multicrabDatasetsMCFall10 as mcFall10
 import multicrabDatasetsMCFall10PU as mcFall10PU
 import multicrabDatasetsMCWinter10 as mcWinter10
+import multicrabDatasetsMCSpring11 as mcSpring11
+
 import multicrabDatasetsTauEmbedding as tauEmbedding
 
 datasets = {}
 
-datasets.update(collisionData.datasets)
+datasets.update(collisionData10.datasets)
+datasets.update(collisionData11.datasets)
+
 datasets.update(mcSummer10.datasets)
 datasets.update(mcFall10.datasets)
-datasets.update(mcWinter10.datasets)
-
 mcFall10PU.addTo(datasets)
+datasets.update(mcWinter10.datasets)
+datasets.update(mcSpring11.datasets)
+
 tauEmbedding.addTo(datasets)
 
 def printAllDatasets(details=False):

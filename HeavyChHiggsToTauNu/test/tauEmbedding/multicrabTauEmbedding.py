@@ -58,7 +58,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v7" % step
+tauname = "_tauembedding_%s_v8" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 

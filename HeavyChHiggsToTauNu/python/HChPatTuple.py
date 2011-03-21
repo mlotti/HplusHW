@@ -550,46 +550,81 @@ def addPFMuonIsolation(process,module,postfix="",verbose=False):
                 process.isoValMuonWithPhotons.clone())
         getattr(process,"isoValMuonWithPhotons"+postfix).deposits.src="isoDepMuonWithPhotons"+postfix
 
+    # Count and max pts
     for name in ["Charged", "Neutral", "Photons"]:
-        m = getattr(process, "isoValMuonWith"+name+postfix).clone()
-        m.deposits.mode = "count"
+        prototype = getattr(process, "isoValMuonWith"+name+postfix)
+
+        m = prototype.clone()
+        m.deposits[0].mode = "count"
         setattr(process, "isoValCountMuonWith"+name+postfix, m)
-        
+
+        m = prototype.clone()
+        m.deposits[0].mode = "max"
+        m.deposits[0].vetos = []
+        setattr(process, "isoValMaxMuonWith"+name+postfix, m)
+
+    # Use the 0.5 min value for pt with charged cands in order to be similar with HpsTight
+    for name in ["isoValCountMuonWithCharged", "isoValMaxMuonWithCharged"]:
+        m = getattr(process, name+postfix).clone()
+        m.deposits[0].vetos = ["Threshold(0.5)"]
+        setattr(process, name+"Tight"+postfix, m)
+    
+
     setattr(process,"patMuonIsolationFromDepositsSequence"+postfix,
             cms.Sequence(getattr(process,"isoValMuonWithCharged"+postfix) +
                          getattr(process,"isoValMuonWithNeutral"+postfix) +
                          getattr(process,"isoValMuonWithPhotons"+postfix) +
                          getattr(process,"isoValCountMuonWithCharged"+postfix) +
                          getattr(process,"isoValCountMuonWithNeutral"+postfix) +
-                         getattr(process,"isoValCountMuonWithPhotons"+postfix)                         )
+                         getattr(process,"isoValCountMuonWithPhotons"+postfix) +                         
+                         getattr(process,"isoValMaxMuonWithCharged"+postfix) +
+                         getattr(process,"isoValMaxMuonWithNeutral"+postfix) +
+                         getattr(process,"isoValMaxMuonWithPhotons"+postfix) +                  
+                         getattr(process,"isoValCountMuonWithChargedTight"+postfix) +
+                         getattr(process,"isoValMaxMuonWithChargedTight"+postfix) 
             )
+    )
 
     setattr(process,"patMuonIsoDepositsSequence"+postfix,
             cms.Sequence(getattr(process,"isoDepMuonWithCharged"+postfix) +
                          getattr(process,"isoDepMuonWithNeutral"+postfix) +
                          getattr(process,"isoDepMuonWithPhotons"+postfix)
-                         )
             )
+    )
     setattr(process,"patMuonIsolationSequence"+postfix,
             cms.Sequence(getattr(process,"patMuonIsoDepositsSequence"+postfix) +
                          getattr(process,"patMuonIsolationFromDepositsSequence"+postfix)
-                         )
             )
+    )
 
+    # The possible values for the keys are predefined...
     module.isoDeposits = cms.PSet(
         pfChargedHadrons = cms.InputTag("isoDepMuonWithCharged"+postfix),
         pfNeutralHadrons = cms.InputTag("isoDepMuonWithNeutral"+postfix),
         pfPhotons = cms.InputTag("isoDepMuonWithPhotons"+postfix)
-        )
+    )
     module.isolationValues = cms.PSet(
         pfChargedHadrons = cms.InputTag("isoValMuonWithCharged"+postfix),
         pfNeutralHadrons = cms.InputTag("isoValMuonWithNeutral"+postfix),
         pfPhotons = cms.InputTag("isoValMuonWithPhotons"+postfix),
-        pfChargedHadronsCount = cms.InputTag("isoValCountMuontWithCharged"+postfix),
-        pfNeutralHadronsCount = cms.InputTag("isoValCountMuonWithNeutral"+postfix),
-        pfPhotonsCount = cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+        # Only 5 slots available *sigh*
+        user = cms.VInputTag(
+                cms.InputTag("isoValCountMuonWithChargedTight"+postfix),
+                cms.InputTag("isoValMaxMuonWithChargedTight"+postfix),
+                cms.InputTag("isoValMaxMuonWithNeutral"+postfix),
+                cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+                cms.InputTag("isoValMaxMuonWithPhotons"+postfix),
         )
-    
+#        pfChargedHadronsCount = cms.InputTag("isoValCountMuonWithCharged"+postfix),
+#        pfNeutralHadronsCount = cms.InputTag("isoValCountMuonWithNeutral"+postfix),
+#        pfPhotonsCount = cms.InputTag("isoValCountMuonWithPhotons"+postfix),
+#        pfChargedHadronsMax = cms.InputTag("isoValMaxMuonWithCharged"+postfix),
+#        pfNeutralHadronsMax = cms.InputTag("isoValMaxMuonWithNeutral"+postfix),
+#        pfPhotonsMax = cms.InputTag("isoValMaxMuonWithPhotons"+postfix),
+#        pfChargedHadronsTightCount = cms.InputTag("isoValCountMuonWithChargedTight"+postfix),
+#        pfChargedHadronsTightMax = cms.InputTag("isoValMaxMuonWithChargedTight"+postfix),
+    )
+
     process.patDefaultSequence.replace(module,
                                        getattr(process,"patMuonIsolationSequence"+postfix)+
                                        module

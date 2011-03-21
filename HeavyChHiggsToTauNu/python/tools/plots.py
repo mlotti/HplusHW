@@ -1,4 +1,4 @@
-## \package tools.plots
+## \package plots
 # Plot utilities and classes
 #
 # The package is intended to gather the following commonalities in the
@@ -179,13 +179,21 @@ class SetProperty:
         if prop != None:
             self.setter(histoData, prop)
 
-    ##
+    ## Get the property
+    #
+    # \param name  Name of the property
+    #
     # \todo Replace this with self.properties.get(name, None)...
     def _getProperty(self, name):
         if name in self.properties:
             return self.properties[name]
         else:
             return None
+
+    ## \var properties
+    # Dictionary of properties (see __init__())
+    ## \var setter
+    # Function setting the property (see __init__())
 
 ## Construct a "function" to set legend labels
 #
@@ -262,6 +270,13 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+## Creates a ratio histogram
+#
+# \param rootHisto1  TH1 dividend
+# \param rootHisto2  TH1 divisor
+# \param ytitle      Y axis title of the final ratio histogram
+#
+# \return TH1 of rootHisto1/rootHisto2
 def _createRatio(rootHisto1, rootHisto2, ytitle):
     ratio = rootHisto1.Clone()
     ratio.Divide(rootHisto2)
@@ -269,6 +284,12 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
     ratio.GetYaxis().SetTitle(ytitle)
     return ratio
 
+## Creates a 1-line for ratio plots
+#
+# \param xmin  Minimum x value
+# \param xmax  Maximum x value
+#
+# \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
 def _createRatioLine(xmin, xmax):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
     line.SetLineColor(ROOT.kBlack)
@@ -276,6 +297,28 @@ def _createRatioLine(xmin, xmax):
     line.SetLineStyle(3)
     return line
 
+## Creates a cover pad
+#
+# \param xmin  X left coordinate
+# \param ymin  Y lower coordinate
+# \param xmax  X right coordinate
+# \param ymax  Y upper coordinate
+#
+# If distributions and data/MC ratios are plotted on the same TCanvas
+# such that the lower X axis of distributions TPad and the upper X
+# axis of the ratio TPad coincide, the Y axis labels of the two TPads
+# go on top of each others and it may happen that the greatest Y axis
+# value of the lower TPad is directly on top of the smallest Y axis
+# value of the upper TPad.
+#
+# This function can be used to create a blank TPad which is drawn
+# after the lower TPad Y axis and before the upper TPad Y axis. Then
+# only the smallest Y axis value of the upper TPad is drawn.
+#
+# See plots.DataMCPlot.draw() and plots.ComparisonPlot.draw() for
+# examples.
+#
+# \return TPad 
 def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
     coverPad = ROOT.TPad("coverpad", "coverpad", xmin, ymin, xmax, ymax)
     coverPad.SetBorderMode(0)
@@ -295,19 +338,33 @@ class PlotBase:
         # Save the format
         self.saveFormats = saveFormats
 
+    ## Set the default legend styles
+    #
+    # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoLegendStyle("Data", "p")
 
+    ## Set the default legend labels
+    #
+    # Labels are taken from the plots._legendLabels dictionary
+    #
+    # Intended to be called from the deriving classes
     def _setLegendLabels(self):
         self.histoMgr.forEachHisto(SetLegendLabel(_legendLabels))
 
+    ## Set the default plot styles
+    #
+    # Styles are taken from the plots._plotStyles dictionary
+    #
+    # Intended to be called from the deriving classes
     def _setPlotStyles(self):
         self.histoMgr.forEachHisto(SetPlotStyle(_plotStyles))
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
 
+    ## Get the bin width (assuming it is constant)
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
 
@@ -334,9 +391,6 @@ class PlotBase:
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
 
-    ## Stack all MC histograms 
-    #
-    # Internally, THStack is used
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename   Name for TCanvas (becomes the file name)
@@ -345,8 +399,11 @@ class PlotBase:
         self.cf = histograms.CanvasFrame(self.histoMgr, filename, **kwargs)
         self.frame = self.cf.frame
 
+    ## Get the frame TH1
     def getFrame(self):
         return frame
+
+    ## Get the TPad
     def getPad(self):
         return self.cf.pad
 
@@ -384,8 +441,6 @@ class PlotBase:
 
     ## \var histoMgr
     # histograms.HistoManager object for histogram management
-    ## \var datasetMgr
-    # datasets.DatasetManager object to have the datasets at hand
     ## \var saveFormats
     # List of formats to which to save the plot
     ## \var legend
@@ -396,38 +451,62 @@ class PlotBase:
     # TH1 object for the frame (from the cf object)
 
 
+## Base class for plots with same histogram from many datasets.
 class PlotSameBase(PlotBase):
-    """Base class for plots with same histogram from many datasets."""
-
+    ## Construct from DatasetManager and a histogram path
+    #
+    # \param datasetMgr  DatasetManager for datasets
+    # \param name        Path of the histogram in the ROOT files
+    # \param kwargs      Keyword arguments, forwarded to PlotBase.__init__()
     def __init__(self, datasetMgr, name, **kwargs):
-        """Constructor.
-        Arguments:
-        datasetMgr   DatasetManager for datasets
-        name         Name of the histogram in the ROOT files
-
-        Keyword arguments:
-        see PlotBase.__init__()
-        """
         PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
         self.datasetMgr = datasetMgr
         self.rootHistoPath = name
 
+    ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
 
+    ## Stack all MC histograms 
+    #
+    # Internally, THStack is used
     def stackMCHistograms(self):
         mcNames = self.datasetMgr.getMCDatasetNames()
         self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    ## \var datasetMgr
+    # datasets.DatasetManager object to have the datasets at hand
+    ## \var rootHistoPath
+    # Path to the histogram in the ROOT files
+
 ## Class for data-MC comparison plot.
 # 
+# Several assumptions have been made for this plotting class. If these
+# are not met, one should consider either adding the feature to this
+# class (if the required change is relatively small), or creating
+# another class (if the change is large).
+# - There is always one histogram with the name "Data" for collision data
+# - There is always at least one MC histogram
+# - Only the MC histograms are stacked, and it should be done with the
+#   stackMCHistograms() method
+# - Data/MC ratio pad can be added to the same TCanvas, the MC
+#   considered in the ratio are the stacked ones
+# - The MC is normalized by the integrated luminosity of the collision
+#   data by default
+#   - Normalization to unit area (normalizeToOne) is also supported
+#     such that all non-stacked histograms are normalized to unit
+#     area, and the total area of stacked histograms is normalized to
+#     unit area while the ratios of the individual datasets is
+#     determined from the cross sections
+#
 class DataMCPlot(PlotSameBase):
     ## Construct from DatasetManager and a histogram path
     #
-    # \param datasetMgr  DatasetManager for datasets
-    # \param name        Path of the histogram in the ROOT files
-    # \param kwargs      Keyword arguments, forwarded to PlotSameBase.__init__()
+    # \param datasetMgr      DatasetManager for datasets
+    # \param name            Path of the histogram in the ROOT files
+    # \param normalizeToOne  Should the histograms be normalized to one?
+    # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
     def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         
@@ -439,10 +518,15 @@ class DataMCPlot(PlotSameBase):
         self._setLegendLabels()
         self._setPlotStyles()
 
+    ## Helper function to do the work for "normalization to one"
     def _normalizeToOne(self):
+        # First check that the normalizeToOne is enabled
         if not self.normalizeToOne:
             return
 
+        # If the MC histograms have not been stacked, the
+        # normalization is straighforward (normalize all histograms to
+        # one)
         if not self.histoMgr.hasHisto("StackedMC"):
             self.histoMgr.forEachHisto(lambda h: dataset._normalizeToOne(h.getRootHisto()))
             return
@@ -483,14 +567,23 @@ class DataMCPlot(PlotSameBase):
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
+    ## Add MC uncertainty band
     def addMCUncertainty(self):
         if not self.histoMgr.hasHisto("StackedMC"):
             raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
         self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
 
-    def createFrame(self, filename, **kwargs):
+    ## Create TCanvas and frames for the histogram and a data/MC ratio
+    #
+    # \param filename     Name for TCanvas (becomes the file name)
+    # \param createRatio  Create also the ratio pad?
+    # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or histograms.CanvasFrameTwo.__init__()
+    def createFrame(self, filename, createRatio=False, **kwargs):
         self._normalizeToOne()
-        PlotSameBase.createFrame(self, filename, **kwargs)
+        if not createRatio:
+            PlotSameBase.createFrame(self, filename, **kwargs)
+        else:
+            self.createFrameFraction(filename, **kwargs)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
@@ -510,12 +603,19 @@ class DataMCPlot(PlotSameBase):
         self.frame = self.cf.frame
         self.cf.frame2.GetYaxis().SetNdivisions(505)
 
+    ## Get the upper frame TH1
     def getFrame1(self):
         return self.cf.frame1
+
+    ## Get the lower frame TH1
     def getFrame2(self):
         return self.cf.frame2
+
+    ## Get the upper TPad
     def getPad1(self):
         return self.cf.pad1
+
+    ## Get the lower TPad
     def getPad2(self):
         return self.cf.pad2
 
@@ -540,22 +640,44 @@ class DataMCPlot(PlotSameBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+
+    ## \var normalizeToOne
+    # Flag to indicate if histograms should be normalized to unit area
+    ## \var ratio
+    # Holds the TH1 for data/MC ratio, if exists
+    ## \var line
+    # Holds the TGraph for ratio line, if ratio exists
+    ## \var coverPad
+    # Holds TPad to cover the larget Y axis value of the ratio TPad,
+    # if ratio exists
+
+
+
+## Class to create comparison plots of two quantities.
 class ComparisonPlot(PlotBase):
-    """Class to create comparison plots of two quantities."""
 
+    ## Constructor.
+    #
+    # \param datasetRootHisto1
+    # \param datasetRootHisto2
+    #
+    # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2):
-        """Constructor.
-
-        Arguments:
-        datasetRootHisto1
-        datasetRootHisto2
-
-        ratio is datasetRootHisto1/datasetRootHisto2
-        """
         PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
 
-    def createFrame(self, filename, doRatio=True, **kwargs):
-        if not doRatio:
+    ## Set default legend labels and styles, and plot styles
+    def setDefaultStyles(self):
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
+    
+    ## Create TCanvas and frames for the histogram and a data/MC ratio
+    #
+    # \param filename     Name for TCanvas (becomes the file name)
+    # \param createRatio  Create also the ratio pad?
+    # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
+    def createFrame(self, filename, createRatio=False, **kwargs):
+        if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
             histos = self.histoMgr.getHistos()
@@ -566,12 +688,19 @@ class ComparisonPlot(PlotBase):
             self.frame = self.cf.frame
             self.cf.frame2.GetYaxis().SetNdivisions(505)
 
+    ## Get the upper frame TH1
     def getFrame1(self):
         return self.cf.frame1
+
+    ## Get the lower frame TH1
     def getFrame2(self):
         return self.cf.frame2
+
+    ## Get the upper TPad
     def getPad1(self):
         return self.cf.pad1
+
+    ## Get the lower TPad
     def getPad2(self):
         return self.cf.pad2
 
@@ -596,5 +725,13 @@ class ComparisonPlot(PlotBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
+    def addLuminosityText(self, *args, **kwargs):
+        pass
 
-        
+    ## \var ratio
+    # Holds the TH1 for data/MC ratio, if exists
+    ## \var line
+    # Holds the TGraph for ratio line, if ratio exists
+    ## \var coverPad
+    # Holds TPad to cover the larget Y axis value of the ratio TPad,
+    # if ratio exists
