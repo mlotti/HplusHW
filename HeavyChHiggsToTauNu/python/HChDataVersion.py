@@ -66,6 +66,12 @@ config = {
     "39Xdata": {
         "triggerProcess": "HLT",
     },
+    "311Xredigi": {
+        "triggerProcess": "REDIGI311X",
+    },
+    "41Xdata": {
+        "triggerProcess": "HLT"
+    },
 }
 
 
@@ -86,7 +92,7 @@ class DataVersion:
                 setattr(self, f, conf[f])
 
         # Collision data
-        if dataVersion in ["36Xdata", "38Xdata", "39Xdata"]:
+        if "data" in dataVersion:
             self.is_data = True
             self.globalTag = "GR_R_39X_V5::All"
 
@@ -100,20 +106,6 @@ class DataVersion:
             except KeyError:
                 pass
                 
-
-        self.is_35X = False
-        self.is_36X = False
-        self.is_38X = False
-        self.is_39X = False
-        if dataVersion in ["35X", "35Xredigi"]:
-            self.is_35X = True
-        elif dataVersion in ["36X", "36Xdata", "36Xspring10"]:
-            self.is_36X = True
-        elif dataVersion in ["38X", "38Xrelval", "38XredigiPU", "38Xdata"]:
-            self.is_38X = True
-        elif dataVersion in ["39Xredigi"]:
-            self.is_39X = True
-
     def isData(self):
         return self.is_data
 
@@ -121,16 +113,22 @@ class DataVersion:
         return not self.is_data
 
     def is35X(self):
-        return self.is_35X
+        return "35X" in dataVersion
 
     def is36X(self):
-        return self.is_36X
+        return "36X" in dataVersion
 
     def is38X(self):
-        return self.is_38X
+        return "38X" in dataVersion
 
     def is39X(self):
-        return self.is_39X
+        return "39X" in dataVersion
+
+    def is311X(self):
+        return "311X" in dataVersion
+
+    def is41X(self):
+        return "41X" in dataVersion
 
     def getTriggerProcess(self):
         return self.trigger
