@@ -24,6 +24,7 @@ set -e
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
 # 24.2.2011/M.Kortelainen CMSSW_3_11_1_patch2 Taking into account what is included in the release
 # 17.3.2011/M.Kortelainen CMSSW_3_9_7 Suffering from HiggsAnalysis/Skimming being checked out without a tag...
+# 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -65,7 +66,3 @@ cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-rm HiggsAnalysis/Skimming/src/HiggsToZZ4LeptonsSkimDiLeptonProducer.cc
-rm HiggsAnalysis/Skimming/src/HiggsToZZ4LeptonsSkimTriLeptonProducer.cc
-cvs up -r 1.2 HiggsAnalysis/Skimming/src/HiggsToZZ4LeptonsSkimFilter.cc
-cvs up -r 1.17 HiggsAnalysis/Skimming/src/SealModule.cc
