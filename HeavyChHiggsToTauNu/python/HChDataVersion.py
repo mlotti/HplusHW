@@ -113,22 +113,22 @@ class DataVersion:
         return not self.is_data
 
     def is35X(self):
-        return "35X" in dataVersion
+        return "35X" in self.version
 
     def is36X(self):
-        return "36X" in dataVersion
+        return "36X" in self.version
 
     def is38X(self):
-        return "38X" in dataVersion
+        return "38X" in self.version
 
     def is39X(self):
-        return "39X" in dataVersion
+        return "39X" in self.version
 
     def is311X(self):
-        return "311X" in dataVersion
+        return "311X" in self.version
 
     def is41X(self):
-        return "41X" in dataVersion
+        return "41X" in self.version
 
     def getTriggerProcess(self):
         return self.trigger
