@@ -280,3 +280,102 @@ def addTo(datasets):
 
 ################################################################################
 
+    datasets["Mu_136035-144114_Dec22"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010A_Dec22ReReco_v1_AOD_136035_tauembedding_skim_v8-76bb5cce7c3f1bc52c0b1a053fb5cd75/USER",
+                "number_of_jobs": 5 # ~600 ev/job
+            },
+            })
+ 
+    datasets["Mu_146428-147116_Dec22"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_146428_tauembedding_skim_v8-76bb5cce7c3f1bc52c0b1a053fb5cd75/USER",
+                "number_of_jobs": 10 # ~500 ev/job
+            },
+            })
+
+    datasets["Mu_147196-149294_Dec22"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_skim_v8-72b9135e07048785afc689c030a45e57/USER",
+                "number_of_jobs": 25 # ~1100 ev/job
+            },
+            })
+
+    datasets["TTJets_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 130 # ~1200 ev/job
+            },
+            })
+    datasets["WJets_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 50 # ~1100 ev/job
+            },
+            })
+
+    datasets["TToBLNu_s-channel_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 30 # ~1800 ev/job
+            },
+            })
+    datasets["TToBLNu_t-channel_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 30 # ~1600 ev/job
+            },
+            })
+    datasets["TToBLNu_tW-channel_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 35 # ~1600 ev/job
+            },
+            })
+
+    datasets["WW_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 45 # ~1600 ev/job
+            },
+            })
+
+    datasets["WZ_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 45 # ~1800 ev/job
+            },
+            })
+    datasets["ZZ_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 40 # ~1700 ev/job
+            },
+            })
+
+    datasets["QCD_Pt20_MuEnriched_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 180 # ~1600 ev/job
+            },
+            })
+
+    datasets["TTToHplusBWB_M120_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 6 # ~1800 ev/job
+            },
+            })
