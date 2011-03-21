@@ -25,6 +25,7 @@ set -e
 # 17.3.2011/M.Kortelainen CMSSW_3_9_7 Suffering from HiggsAnalysis/Skimming being checked out without a tag...
 # 18.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated PAT tags for trigger
 # 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
+# 21.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated pfTools.py
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -67,6 +68,7 @@ addpkg PhysicsTools/PatAlgos     V08-03-11
 
 if [ "x$HPSTANC" = "xtrue" ]; then
     cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+    cvs up -r1.53 PhysicsTools/PatAlgos/python/tools/pfTools.py
 fi
 
 # Luminosity
