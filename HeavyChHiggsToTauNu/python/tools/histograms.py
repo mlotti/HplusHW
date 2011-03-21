@@ -541,34 +541,37 @@ class HistoBase:
     ## \var drawStyle
     # Style string for Draw()
 
+## Represents one (TH1/TH2) histogram
 class Histo(HistoBase):
-    """Class to represent one (TH1/TH2) histogram."""
-
+    ## Constructor
+    #
+    # \param dataset    dataset.Dataset object
+    # \param rootHisto  TH1 object
+    # \param name       Name of the Histo
+    #
+    #    The default legend label is the dataset name
     def __init__(self, dataset, rootHisto, name):
-        """Constructor
-
-        Arguments:
-        dataset    Dataset object
-        rootHisto  TH1 object
-        name       Name of the Histo
-
-        The default legend label is the dataset name
-        """
         HistoBase.__init__(self, rootHisto, name, "l", "HIST")
         self.dataset = dataset
 
+    ## Is the histogram from MC?
     def isMC(self):
         return self.dataset.isMC()
 
+    ## Is the histogram from collision data?
     def isData(self):
         return self.dataset.isData()
 
+    ## Get the dataset.Dataset object
     def getDataset(self):
         return self.dataset
 
+## Represents combined (statistical) uncertainties of multiple histograms.
 class HistoTotalUncertainty(HistoBase):
-    """Class to represent combined (statistical) uncertainties of many histograms."""
-
+    ## Constructor
+    #
+    # \param histos  List of histograms.HistoBase objects
+    # \param name    Name of the uncertainty histogram
     def __init__(self, histos, name):
         rootHistos = []
         for h in histos:
@@ -584,24 +587,23 @@ class HistoTotalUncertainty(HistoBase):
         for h in rootHistos[1:]:
             self.rootHisto.Add(h)
 
+    ## Is the histogram from MC?
     def isMC(self):
         return self.histos[0].isMC()
 
+    ## Is the histogram from collision data?
     def isData(self):
         return self.histos[0].isData()
 
+## Represents stacked TH1 histograms
+#
+# Stacking is done with the help of THStack object
 class HistoStacked(HistoBase):
-    """Class to represent stacked TH1 histograms."""
-
+    ## Constructor.
+    #
+    # \param histos  List of Histo objects to stack
+    # \param name    Name of the stacked histogram
     def __init__(self, histos, name):
-        """Constructor.
-
-        Arguments:
-        histos  List of Histo objects to stack
-        name    Name of the stacked histogram
-
-        Stacking is done with the help of THStack object
-        """
         HistoBase.__init__(self, ROOT.THStack(name+"stackHist", name+"stackHist"), name, None, "HIST")
         self.histos = histos
 
@@ -610,41 +612,49 @@ class HistoStacked(HistoBase):
         for h in rootHistos:
             self.rootHisto.Add(h)
 
+    ## Get the list of original TH1 histograms.
     def getAllRootHistos(self):
-        """Get the original histograms."""
         return [x.getRootHisto() for x in self.histos]
 
+    ## Get the sum of the original histograms.
     def getSumRootHisto(self):
-        """Get the sum of the original histograms."""
         h = self.histos[0].getRootHisto().Clone()
         h.SetName(h.GetName()+"_sum")
         for d in self.histos[1:]:
             h.Add(d.getRootHisto())
         return h
 
+    ## Is the histogram from MC?
     def isMC(self):
         return self.histos[0].isMC()
 
+    ## Is the histogram from collision data?
     def isData(self):
         return self.histos[0].isData()
 
+    ## Set the legend label of the stacked histograms.
     def setLegendLabel(self, label):
-        """Set the legend labels of the stacked histograms."""
         for h in self.histos:
             h.setLegendLabel(label)
 
+    ## Set the legend style of the stacked histograms.
     def setLegendStyle(self, style):
-        """Set the legend style of the stacked histograms."""
         for h in self.histos:
             h.setLegendStyle(style)
 
+    ## Add the stacked histograms to a TLegend.
     def addToLegend(self, legend):
-        """Add the stacked histograms to a TLegend."""
         for h in self.histos:
             h.addToLegend(legend)
 
+    
+    ## Call a function for each Histo in the stack.
+    #
+    # \param func  Function with one parameter
+    #
+    # \todo This resembles the Visitor pattern, perhaps this should be
+    # renamed to visit()?
     def call(self, function):
-        """Call a function for each Histo in the scak."""
         for h in self.histos:
             h.call(function)
 
@@ -657,19 +667,15 @@ class HistoStacked(HistoBase):
     def getBinWidth(self, bin):
         return self.histos[0].getBinWidth(bin)
 
-
+## Implementation of HistoManager.
+#
+# Intended to be used only from HistoManager. This class contains all
+#  the methods which require the Histo objects (and only them).
 class HistoManagerImpl:
-    """Implementation of HistoManager.
-
-    Intended to be used only from HistoManager. This class contains all
-    the methods which require the Histo objects (and only them).
-    """
+    ## Constructor.
+    #
+    # \param histos    List of histograms.HistoBase objects
     def __init__(self, histos=[]):
-        """Constructor.
-
-        Arguments
-        histos    List of Histo objects
-        """
 
         # List for the Draw() order, keep it reversed in order to draw
         # the last histogram in the list first. i.e. to the bottom
@@ -682,40 +688,40 @@ class HistoManagerImpl:
         # Dictionary for accessing the histograms by name
         self._populateMap()
 
+    ## Get the number of managed histograms.HistoBase objects
     def __len__(self):
         return len(self.drawList)
 
+    ## Populate the name -> histograms.HistoBase map
     def _populateMap(self):
         self.nameHistoMap = {}
         for h in self.drawList:
             self.nameHistoMap[h.getName()] = h
 
+    ## Append a histograms.HistoBase object.
     def appendHisto(self, histo):
-        """Append a Histo object."""
         self.drawList.append(histo)
         self.legendList.append(histo)
         self._populateMap()
 
+    ## Extend with a list of histograms.HistoBase objects.
     def extendHistos(self, histos):
-        """Extend with a list of Histo objects."""
         self.drawList.extend(histos)
         self.legendList.extend(histos)
         self._populateMap()
 
+    ## Insert histograms.HistoBase to position i.
+    #
+    # \param i      Index of the position to insert the histogram
+    # \param histo  histograms.HistoBase object to insert
+    # \param kwargs Keyword arguments
+    # 
+    # <b>Keyword arguments</b>
+    # \li \a legendIndex  Index of the position to insert the histogram in
+    #                     the legend list (default is the same as i). Can
+    #                     be useful for e.g. separate uncertainty
+    #                     histogram
     def insertHisto(self, i, histo, **kwargs):
-        """Insert Histo to position i.
-
-        Arguments:
-        i             Index of the position to insert the histogram
-        histo         Histo object to insert
-
-        Keyword arguments:
-
-        legendIndex   Index of the position to insert the histogram in
-                      the legend list (default is the same as i). Can
-                      be useful for e.g. separate uncertainty
-                      histogram
-        """
         drawIndex = i
         legendIndex = i
 
@@ -726,123 +732,111 @@ class HistoManagerImpl:
         self.legendList.insert(legendIndex, histo)
         self._populateMap()
 
+    ## Call a function for a named histograms.HistoBase object.
+    #
+    # \param name   Name of histogram
+    # \param func   Function taking one parameter (histograms.HistoBase), return value is not used
     def forHisto(self, name, func):
-        """Call a function for a Histo object.
-
-        Arguments:
-        name   Name of histogram
-        func   Function taking one parameter (Histo), return value is not used
-        """
         try:
             self.nameHistoMap[name].call(func)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to call a function for histogram '%s', which doesn't exist." % name
 
+    ## Call each MC histograms.HistoBase with a function.
+    #
+    # \param func   Function taking one parameter (histograms.HistoBase), return value is not used
     def forEachMCHisto(self, func):
-        """Call each MC Histo with a function.
-
-        Arguments:
-        func   Function taking one parameter (Histo), return value is not used
-        """
         def forMC(histo):
             if histo.isMC():
                 func(histo)
 
         self.forEachHisto(forMC)
 
+    ## Call each collision data histograms.HistoBase with a function.
+    #
+    # \param func  Function taking one parameter (Histo, return value is not used
     def forEachDataHisto(self, func):
-        """Call each data Histo with a function.
-
-        Arguments:
-        func   Function taking one parameter (Histo, return value is not used
-        """
         def forData(histo):
             if histo.isData():
                 func(histo)
         self.forEachHisto(forData)
 
+    ## Call each histograms.HistoBase with a function.
+    #
+    # \param func  Function taking one parameter (Histo), return value is not used
     def forEachHisto(self, func):
-        """Call each histogram with a function.
-
-        Arguments:
-        func        Function taking one parameter (Histo), return value is used
-                    as the new histogram
-        """
         for d in self.drawList:
             d.call(func)
 
+    ## Check if a histograms.HistoBase with a given name exists
+    #
+    # \param name   Name of histograms.HistoBase to check
     def hasHisto(self, name):
         return name in self.nameHistoMap
 
+    ## Get histograms.HistoBase of a given name
+    #
+    # \param name  Name of histograms.HistoBase to get
     def getHisto(self, name):
-        """Get Histo of a given name."""
         return self.nameHistoMap[name]
 
+    ## Get all histogram.HistoBase objects
     def getHistos(self):
-        """Get all Histos."""
         return self.drawList[:]
 
+    ## Set legend names for given histograms.
+    #
+    # \param nameMap   Dictionary with name->label mappings
     def setHistoLegendLabelMany(self, nameMap):
-        """Set legend names for given histograms.
-
-        Arguments:
-        nameMap   Dictionary with name->label mappings
-        """
         for name, label in nameMap.iteritems():
             try:
                 self.nameHistoMap[name].setLegendLabel(label)
             except KeyError:
                 print >> sys.stderr, "WARNING: Tried to set legend label for histogram '%s', which doesn't exist." % name
 
+    ## Set the legend style for a given histogram.
+    #
+    # \param name   Name of the histogram
+    # \param style  Style for the legend (given to TLegend as 3rd argument)
     def setHistoLegendStyle(self, name, style):
-        """Set the legend style for a given histogram.
-
-        Arguments:
-        name   Name of the histogram
-        style  Style for the legend (given to TLegend as 3rd argument)
-        """
         try:
             self.nameHistoMap[name].setLegendStyle(style)
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to set legend style for histogram '%s', which doesn't exist." % name
 
+    ## Set the legend style for all histograms.
+    #
+    # \param Style for the legend (given to TLegend as 3rd argument)
     def setHistoLegendStyleAll(self, style):
-        """Set the legend style for all histograms.
-
-        Arguments:
-        style  Style for the legend (given to TLegend as 3rd argument)
-        """
         for d in self.legendList:
             d.setLegendStyle(style)
 
+    ## Set histogram drawing style for a given histogram.
+    #
+    # \param name   Name of the histogram
+    # \param style  Style for obj.Draw() call
     def setHistoDrawStyle(self, name, style):
-        """Set histogram drawing style for a given histogram.
-
-        Arguments:
-        name   Name of the histogram
-        style  Style for obj.Draw() call
-        """
         try:
             self.nameHistoMap[name].drawStyle = style
         except KeyError:
             print >> sys.stderr, "WARNING: Tried to set draw style for histogram '%s', which doesn't exist." % name
 
+    ## Set the histogram drawing style for all histograms.
+    #
+    # \param style  Style for obj.Draw() call
     def setHistoDrawStyleAll(self, style):
-        """Set the histogram drawing style for all histograms.
-
-        Arguments:
-        style  Style for obj.Draw() call
-        """
         for d in self.drawList:
             d.drawStyle = style
 
+    ## Add histograms to a given TLegend.
+    #
+    # \param legend  TLegend object
     def addToLegend(self, legend):
-        """Add histograms to a given TLegend."""
         for d in self.legendList:
             d.addToLegend(legend)
 
+    ## Draw histograms.
     def draw(self):
-        """Draw histograms."""
         # Reverse the order of histograms so that the last histogram
         # is drawn first, i.e. on the bottom
         histos = self.drawList[:]
@@ -851,14 +845,11 @@ class HistoManagerImpl:
         for h in histos:
             h.draw("same")
 
+    ## Stack histograms.
+    #
+    # \param Name of the histogram stack
+    # \param List of histogram names to stack
     def stackHistograms(self, newName, nameList):
-        """Stack histograms.
-
-        Arguments:
-        newName    Name of the histogram stack
-        nameList   List of histogram names to stack
-        """
-
         (selected, notSelected, firstIndex) = dataset._mergeStackHelper(self.drawList, nameList, "stack")
         if len(selected) == 0:
             return
@@ -872,6 +863,12 @@ class HistoManagerImpl:
 
         self._populateMap()
 
+    ## Add MC uncertainty band histogram
+    #
+    # \param style        Style function for the uncertainty histogram
+    # \param name         Name of the unceratinty histogram
+    # \param legendLabel  Legend label for the uncertainty histogram
+    # \param nameList     List of histogram names to include to the uncertainty band (\a None corresponds all MC)
     def addMCUncertainty(self, style, name="MCuncertainty", legendLabel="MC stat. unc.", nameList=None):
         mcHistos = filter(lambda x: x.isMC(), self.drawList)
         if len(mcHistos) == 0:
@@ -896,38 +893,38 @@ class HistoManagerImpl:
         self.insertHisto(firstMcIndex, hse, legendIndex=len(self.drawList))
         
 
+## Collection of histograms which are managed together.
+#
+# The histograms in a HistoManager are drawn to one plot.
 
+# The implementation is divided to this and HistoManagerImpl class.
+# The idea is that here are the methods, which don't require Histo
+# objects (namely setting the normalization), and HistoManagerImpl has
+# all the methods which require the histograms.HistoBase objects. User
+# can set freely the normalization scheme as many times as (s)he
+# wants, and at the first time some method not implemented in
+# HistoManagerBase is called, the Histo objects are created and the
+# calls are delegated to HistoManagerImpl class.
 class HistoManager:
-    """Collection of histograms which are managed together.
-
-    The histograms in a HistoManager are drawn to one plot.
-
-    The implementation is divided to this and HistoManagerImpl class. The
-    idea is that here are the methods, which don't require
-    Histo objects (namely setting the normalization), and
-    HistoManagerImpl has all the methods which require the Histo
-    objects. User can set freely the normalization scheme as many
-    times as (s)he wants, and at the first time some method not
-    implemented in HistoManagerBase is called, the Histo objects are
-    created and the calls are delegated to HistoManagerImpl class.
-    """
+    ## Constructor.
+    #
+    # \param args   Positional arguments
+    # \param kwargs Kwyword arguments
+    #
+    # <b>Positional arguments</b>
+    # \li \a datasetMgr   DatasetManager object to take the histograms from
+    # \li \a name         Path to the TH1 objects in the DatasetManager ROOT files
+    #
+    # <b>Keyword arguments</b>
+    # \li \a datasetRootHistos   Initial list of DatasetRootHisto objects
+    #
+    # Only either both positional arguments or the keyword argument
+    # can be given.
+    #
+    # \todo The interface should be fixed to have only the keyword
+    #       argument (also as the only positional argument). This is
+    #       not done yet for backward compatibility.
     def __init__(self, *args, **kwargs):
-        """Constructor.
-
-        Positional arguments:
-        datasetMgr   DatasetManager object to take the histograms from
-        name         Path to the TH1 objects in the DatasetManager ROOT files
-
-        Keyword arguments:
-        datasetRootHistos   Initial list of DatasetRootHisto objects
-
-        Only either both positional arguments or the keyword argument
-        can be given.
-
-        FIXME: the interface should be fixed to have only the keyword
-        argument (also as the only positional argument). This is not
-        done yet for backward compatibility.
-        """
         if len(args) == 0:
             if len(kwargs) != 1:
                 raise Exception("If positional arguments are not given, there must be exactly 1 keyword argument")
@@ -945,12 +942,17 @@ class HistoManager:
         self.impl = None
         self.luminosity = None
 
+    ## Delegate the calls which require the histograms.HistoBase objects to the implementation class.
+    #
+    # \param name  Name of the attribute to get
     def __getattr__(self, name):
-        """Delegate the calls which require the Histo objects to the implementation class."""
         if self.impl == None:
             self._createImplementation()
         return getattr(self.impl, name)
 
+    ## Append dataset.DatasetRootHistoBase object
+    #
+    # \param datasetRootHisto  dataset.DatasetRootHistoBase object
     def append(self, datasetRootHisto):
         if self.impl != None:
             raise Exception("Can't append after the histograms have been created!")
@@ -958,6 +960,9 @@ class HistoManager:
             raise Exception("Can append only DatasetRootHistoBase derived objects, got %s" % str(datasetRootHisto))
         self.datasetRootHistos.append(datasetRootHisto)
 
+    ## Extend with another HistoManager or a list of dataset.DatasetRootHistoBase objects
+    #
+    # \param datasetRootHistos  HistoManager object, or a list of dataset.DatasetRootHistoBase objects
     def extend(self, datasetRootHistos):
         if self.impl != None:
             raise Exception("Can't extend after the histograms have been created!")
@@ -970,23 +975,21 @@ class HistoManager:
                 raise Exception("Can extend only DatasetRootHistoBase derived objects, got %s" % str(d))
         self.datasetRootHistos.extend(datasetRootHistos)
 
+    ## Set the histogram normalization scheme to <i>to one</i>.
+    #
+    # All histograms are normalized to unit area.
     def normalizeToOne(self):
-        """Set the histogram normalization 'to one'.
-
-        All histograms are normalized to unit area.
-        """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.datasetRootHistos:
             h.normalizeToOne()
         self.luminosity = None
 
+    ## Set the MC histogram normalization scheme to <i>by cross section</i>.
+    #
+    # All histograms from MC datasets are normalized by their cross
+    # section.
     def normalizeMCByCrossSection(self):
-        """Set the MC histogram normalization 'by cross section'.
-
-        All histograms from MC datasets are normalized by their cross
-        section.
-        """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.datasetRootHistos:
@@ -994,15 +997,14 @@ class HistoManager:
                 h.normalizeByCrossSection()
         self.luminosity = None
 
+    ## Set the MC histogram normalization <i>by luminosity</i>.
+    #
+    # The set of histograms is required to contain one, and only one
+    # histogram from data dataset (if there are many data datasets,
+    # they should be merged first). All histograms from MC datasets
+    # are normalized to the integrated luminosity of the the data
+    # dataset.
     def normalizeMCByLuminosity(self):
-        """Set the MC histogram normalization 'by luminosity'.
-
-        The set of histograms is required to contain one, and only one
-        histogram from data dataset (if there are many data datasets,
-        they should be merged first). All histograms from MC datasets
-        are normalized to the integrated luminosity of the the data
-        dataset.
-        """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         lumi = None
@@ -1017,15 +1019,13 @@ class HistoManager:
 
         self.normalizeMCToLuminosity(lumi)
 
+    ## Set the MC histogram normalization <i>to luminosity</i>.
+    #
+    # \param lumi   Integrated luminosity (pb^-1)
+    #
+    # All histograms from MC datasets are normalized to the given
+    # integrated luminosity.
     def normalizeMCToLuminosity(self, lumi):
-        """Set the MC histogram normalization 'to luminosity'.
-
-        Arguments:
-        lumi   Integrated luminosity (pb^-1)
-
-        All histograms from MC datasets are normalized to the given
-        integrated luminosity.
-        """
         if self.impl != None:
             raise Exception("Can't normalize after the histograms have been created!")
         for h in self.datasetRootHistos:
@@ -1033,32 +1033,32 @@ class HistoManager:
                 h.normalizeToLuminosity(lumi)
         self.luminosity = lumi
 
-    def scale(self, value):
-        """Scale the histograms with a value."""
-        if self.impl != None:
-            raise Exception("Can't scale after the histograms have been created!")
-        for h in self.datasetRootHistos:
-            h.scale(value)
+#    def scale(self, value):
+#        """Scale the histograms with a value."""
+#        if self.impl != None:
+#            raise Exception("Can't scale after the histograms have been created!")
+#        for h in self.datasetRootHistos:
+#            h.scale(value)
 
+    ## Get the integrated luminosity to which the MC datasets have been normalized to.
     def getLuminosity(self):
-        """Get the integrated luminosity to which the MC datasets have been normalized to."""
         if self.luminosity == None:
             raise Exception("No normalization by or to luminosity!")
         return self.luminosity
 
-    def addLuminosityText(self, x=None, y=None): # Nones for the default values
-        """Draw the text for the integrated luminosity."""
+    ## Draw the text for the integrated luminosity.
+    #
+    # \param x   X coordinate of the text (\a None for default)
+    # \param y   Y coordinate of the text (\a None for default)
+    def addLuminosityText(self, x=None, y=None):
         addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
 
+    ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        """Create the HistoManagerImpl object.
-
-        Intended only for internal use.
-        """
         self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
+    ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
-        """Stack all MC histograms to one named 'StackedMC'."""
         histos = self.getHistos()
         
         self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])
