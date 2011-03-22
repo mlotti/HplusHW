@@ -24,7 +24,9 @@ set -e
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
 # 24.2.2011/M.Kortelainen CMSSW_3_11_1_patch2 Taking into account what is included in the release
 # 17.3.2011/M.Kortelainen CMSSW_3_9_7 Suffering from HiggsAnalysis/Skimming being checked out without a tag...
+# 18.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated PAT tags for trigger
 # 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
+# 21.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated pfTools.py
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -44,6 +46,8 @@ if [ "x$HPSTANC" = "xtrue" ]; then
     # RecoTauTag/Configuration
     # DataFormats/TauReco
     addpkg -f RecoTauTag/tau_tags.txt
+    cvs up -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
+    cvs up -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 
     cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
     # This checkouts
@@ -55,6 +59,17 @@ if [ "x$HPSTANC" = "xtrue" ]; then
     # PhysicsTools/PatUtils
     addpkg -f RecoTauTag/tau_tags_dependencies.txt
     cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+fi
+
+# PAT
+addpkg CommonTools/CandUtils     V00-00-05
+addpkg DataFormats/CaloTowers    V02-05-11
+addpkg DataFormats/PatCandidates V06-02-21
+addpkg PhysicsTools/PatAlgos     V08-03-11
+
+if [ "x$HPSTANC" = "xtrue" ]; then
+    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
+    cvs up -r1.53 PhysicsTools/PatAlgos/python/tools/pfTools.py
 fi
 
 # Luminosity
