@@ -32,6 +32,9 @@ namespace HPlus {
     
     // EventWeight object
     EventWeight& fEventWeight;
+    //    edm::InputTag fSrc;
+    //   const double fPtCut;
+    //   const double fEtaCut;
     
     // Histograms
     TH1 *hTauStatus;

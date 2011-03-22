@@ -86,7 +86,7 @@ namespace HPlus {
 
       // Isolation
       reco::PFCandidateRefVector isoCands = selectedTau->isolationPFChargedHadrCands();
-      if(isoCands.isNonnull()) {
+      if(isoCands.isNonnull() && isoCands.begin()->isNonnull() && isoCands.begin()->isAvailable()) {
         double pt05 = 0;
         double pt10 = 0;
         for(reco::PFCandidateRefVector::const_iterator isoCand = isoCands.begin(); isoCand != isoCands.end(); ++isoCand) {

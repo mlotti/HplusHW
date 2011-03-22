@@ -171,6 +171,10 @@ forwardJetVeto = cms.untracked.PSet(
   EtSumRatioCut = cms.untracked.double(0.2)
  )
 
+GenParticleAnalysis = cms.untracked.PSet(
+  ptCut = cms.untracked.double(30),
+  etaCut = cms.untracked.double(2.3)
+)
 
 # Functions
 def overrideTriggerFromOptions(options):
