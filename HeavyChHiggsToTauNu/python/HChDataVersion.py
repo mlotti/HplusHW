@@ -68,6 +68,7 @@ config = {
     },
     "311Xredigi": {
         "triggerProcess": "REDIGI311X",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data//TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
     },
     "41Xdata": {
         "triggerProcess": "HLT"
