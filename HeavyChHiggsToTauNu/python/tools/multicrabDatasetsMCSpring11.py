@@ -97,6 +97,46 @@ datasets = {
 
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingWinter2010
+    "QCD_Pt0to5_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 4.844e+10*0.983,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_0to5_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt5to15_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 3.675e+10,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_5to15_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt80to120_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 7.843e+05,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt120to170_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 1.151e+05,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "QCD_Pt170to300_TuneZ2_Winter10": {
         "dataVersion": "311Xredigi",
         "crossSection": 2.426e+04,
