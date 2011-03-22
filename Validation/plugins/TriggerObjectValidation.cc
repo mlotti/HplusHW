@@ -43,6 +43,8 @@ class TriggerObjectValidation : public edm::EDAnalyzer {
         MonitorElement *nEvt;
   	MonitorElement *Pt, *Eta, *Phi;
 	MonitorElement *EtaPhi;
+	MonitorElement *Z;
+	MonitorElement *EtaZ;
 };
 
 TriggerObjectValidation::TriggerObjectValidation(const edm::ParameterSet& iConfig):
@@ -72,6 +74,9 @@ void TriggerObjectValidation::beginJob(){
     Phi		= dbe->book1D("Phi "+hltPathFilter.label()+" "+triggerBit,"phi", 100 ,-3.14,3.14);
 
     EtaPhi	= dbe->book2D("Eta Phi "+hltPathFilter.label()+" "+triggerBit,"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
+
+    Z		= dbe->book1D("Vertex Z "+hltPathFilter.label()+" "+triggerBit,"vertex Z", 100 ,-25.,25.);
+    EtaZ	= dbe->book2D("Eta Z "+hltPathFilter.label()+" "+triggerBit,"eta Z", 100 ,-2.5,2.5, 100 ,-25.,25.);
 
     std::cout << "Trigger bit: " << triggerBit << std::endl;
     std::cout << "Trigger path: " << hltPathFilter.label() << std::endl;
@@ -124,6 +129,10 @@ void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::Even
                 Phi->Fill(objs[i].phi());
 
                 EtaPhi->Fill(objs[i].eta(),objs[i].phi());
+
+		Z->Fill(TO.particle().vz());
+		EtaZ->Fill(TO.eta(),TO.particle().vz());
+//std::cout << " z " << objs[i].particle().vz() << std::endl;
 	  }
 	}else{
 	  if(triggerBit != ""){
