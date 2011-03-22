@@ -7,6 +7,7 @@ import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
+import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
@@ -37,8 +38,21 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     if includeTracksPFCands:
         outputCommands.extend([
                 "keep *_generalTracks_*_*",
+                "keep *_particleFlow_*_*",
+
+                # required for PF2PAT
+                "keep *_electronGsfTracks_*_*",
+                "keep *_gsfElectrons_*_*",
+                "keep *_gsfElectronCores_*_*",
+                "keep *_eid*_*_*",
+                "keep recoSuperClusters_*_*_*", # I don't know which one is required
+                "keep *_hfEMClusters_*_*",
+#                "keep *_photons_*_*",
                 "keep *_globalMuons_*_*",
-                "keep *_particleFlow_*_*"
+                "keep *_standAloneMuons_*_*",
+                "keep *_muons_*_*",
+                "keep *_offlineBeamSpot_*_*",
+                "keep *_genMetTrue_*_*",
                 ])
 
     # Tau Discriminators
@@ -501,6 +515,51 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     
     return (dataPatSequence, counters)
 
+
+##################################################
+#
+# PF2PAT
+#
+def addPF2PAT(process, dataVersion):
+    if hasattr(process, "patDefaultSequence"):
+        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
+
+    # Hack to not to crash if something in PAT assumes process.out
+    hasOut = hasattr(process, "out")
+    if not hasOut:
+        process.out = cms.OutputModule("PoolOutputModule",
+            fileName = cms.untracked.string('dummy.root'),
+            outputCommands = cms.untracked.vstring()
+        )
+
+    process.load("PhysicsTools.PatAlgos.patSequences_cff")
+    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix="PFlow")
+
+    # Bugfixes
+    # Add PiZero producer
+    process.ak5PFJetsLegacyTaNCPiZerosPFlow = process.ak5PFJetsLegacyTaNCPiZeros.clone()
+    process.ak5PFJetsLegacyTaNCPiZerosPFlow.src = "pfJetsPFlow"
+    process.pfTauSequencePFlow.replace(process.pfRecoTauTagInfoProducerPFlow,
+                                       process.pfRecoTauTagInfoProducerPFlow+process.ak5PFJetsLegacyTaNCPiZerosPFlow)
+
+    pfTau = process.shrinkingConePFTauProducerPFlow
+    pfTau.builders[0].pfCandSrc = process.pfJetsPFlow.src # According to the exception pfCandSrc should be like this
+    pfTau.jetSrc = "pfJetsPFlow"
+    pfTau.piZeroSrc = "ak5PFJetsLegacyTaNCPiZerosPFlow"
+
+    # MC matchers
+    #process.electronMatchPFlow.src = "pfIsolatedElectronsPFlow"
+    process.makePatPhotonsPFlow.remove(process.photonMatchPFlow)
+
+    # Disable electron ID...
+    #process.patElectronsPFlow.addElectronID = False
+    #process.patElectronsPFlow.electronIDSources = cms.PSet()
+    #process.patElectronsPFlow.isolationValues = cms.PSet()
+
+    if not hasOut:
+        del process.out
+
+    return process.patPF2PATSequencePFlow
 
 ### The functions below are taken from
 ### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
