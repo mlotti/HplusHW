@@ -69,7 +69,7 @@ skimNjobs = {
     "TTJets_TuneZ2_Winter10": 400,
     "TTJets_TunedD6TWinter10": 400,
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 400,
-    "DYJetsToLL_M50_TuneZ2_Winter10": 30,
+    "DYJetsToLL_M50_TuneZ2_Winter10": 130,
     "TToBLNu_s-channel_TuneZ2_Winter10": 100,
     "TToBLNu_t-channel_TuneZ2_Winter10": 100,
     "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
