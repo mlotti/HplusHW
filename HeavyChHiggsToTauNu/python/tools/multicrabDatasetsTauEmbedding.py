@@ -319,6 +319,14 @@ def addTo(datasets):
             },
             })
 
+    datasets["DYJetsToLL_M50_TuneZ2_Winter10"]["data"].update({
+            "tauembedding_skim_v8": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v8-125b9de96a4e966128d3c40d84533e48/USER",
+                "number_of_jobs": 30 # ~3500 ev/job
+            },
+            })
+
     datasets["TToBLNu_s-channel_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v8": {
                 "dbs_url": common.pattuple_dbs,
