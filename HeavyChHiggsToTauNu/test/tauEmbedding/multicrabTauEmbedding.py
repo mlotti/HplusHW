@@ -12,8 +12,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 step = "signalAnalysis"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v6_2",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v6_2", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "generation":     {"input": "tauembedding_skim_v8",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+          "embedding":      {"input": "tauembedding_generation_v8", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
           "analysis":       {"input": "tauembedding_embedding_v6_2",  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v9",                "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_v6_2",  "config": "../signalAnalysis_cfg.py"},
@@ -58,7 +58,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v8" % step
+tauname = "_tauembedding_%s_v8_1" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
@@ -69,7 +69,7 @@ skimNjobs = {
     "TTJets_TuneZ2_Winter10": 400,
     "TTJets_TunedD6TWinter10": 400,
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 400,
-    "DYJetsToLL_M50_TuneZ2_Winter10": 30,
+    "DYJetsToLL_M50_TuneZ2_Winter10": 130,
     "TToBLNu_s-channel_TuneZ2_Winter10": 100,
     "TToBLNu_t-channel_TuneZ2_Winter10": 100,
     "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
