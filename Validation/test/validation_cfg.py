@@ -2,12 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Validation")
 
-dataTier = "PATTuple"
-#dataTier = "AOD"
+#dataTier = "PATTuple"
+dataTier = "AOD"
 
-dataVersion = "39Xredigi"
+#dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
-#dataVersion = "311Xredigi"
+dataVersion = "311Xredigi"
 #dataVersion = "38XredigiPU"
 
 # Command line arguments (options) and DataVersion object
@@ -21,7 +21,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #        'rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/test_H120_100_1_08t_RAW_RECO.root'
 #	'file:/tmp/slehti/test_H120_100_1_08t_RAW_RECO.root'
-	dataVersion.getAnalysisDefaultFileCastor()
+#	dataVersion.getAnalysisDefaultFileCastor()
+	dataVersion.getPatDefaultFileCastor()
 #	"file:/tmp/slehti/test.root"
     )
 )
