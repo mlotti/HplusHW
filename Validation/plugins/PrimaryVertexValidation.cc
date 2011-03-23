@@ -122,10 +122,10 @@ void PrimaryVertexValidation::analyze( const edm::Event& iEvent, const edm::Even
     }
 
     edm::Handle<reco::VertexCollection> pixelVertices;
-    iEvent.getByLabel(pixelVertexSrc,pixelVertices);
+    if(iEvent.getByLabel(pixelVertexSrc,pixelVertices)){
 
-    const reco::VertexCollection pixelvertexCollection = *(pixelVertices.product());
-    if(pixelvertexCollection.size() > 0){
+      const reco::VertexCollection pixelvertexCollection = *(pixelVertices.product());
+      if(pixelvertexCollection.size() > 0){
         double pv_x = pixelvertexCollection.begin()->x();
         double pv_y = pixelvertexCollection.begin()->y();
         double pv_z = pixelvertexCollection.begin()->z();
@@ -133,6 +133,7 @@ void PrimaryVertexValidation::analyze( const edm::Event& iEvent, const edm::Even
         PixelV_Y->Fill(pv_y);
         PixelV_Z->Fill(pv_z);
         PixelV_XY->Fill(pv_x,pv_y);
+      }
     }
 }
 
