@@ -27,50 +27,23 @@ set -e
 # 18.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated PAT tags for trigger
 # 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
 # 21.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated pfTools.py
+# 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags for the latest recipe for 41X, removed HPS+TaNC tags as it is in AOD
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 
-HPSTANC="true"
-if [ "x$#" = "x1" -a "x$1" = "xnoHpsTanc" ]; then
-    HPSTANC="false"
-fi
-
-# HPS+TaNC
-if [ "x$HPSTANC" = "xtrue" ]; then
-    cvs co -r1.28 RecoTauTag/tau_tags.txt
-    # This checkouts
-    # RecoTauTag/RecoTau
-    # RecoTauTag/TauTagTools
-    # RecoTauTag/Configuration
-    # DataFormats/TauReco
-    addpkg -f RecoTauTag/tau_tags.txt
-    cvs up -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
-    cvs up -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
-
-    cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
-    # This checkouts
-    # DataFormats/PatCandidates 
-    # JetMETCorrections/Type1MET 
-    # PhysicsTools/IsolationAlgos 
-    # PhysicsTools/PFCandProducer 
-    # PhysicsTools/PatAlgos 
-    # PhysicsTools/PatUtils
-    addpkg -f RecoTauTag/tau_tags_dependencies.txt
-    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
-fi
-
 # PAT
-addpkg CommonTools/CandUtils     V00-00-05
-addpkg DataFormats/CaloTowers    V02-05-11
-addpkg DataFormats/PatCandidates V06-02-21
-addpkg PhysicsTools/PatAlgos     V08-03-11
+addpkg CommonTools/CandAlgos       V00-01-01
+addpkg PhysicsTools/PFCandProducer V04-07-01-00
+addpkg PhysicsTools/PatAlgos       V08-06-01-09
+addpkg PhysicsTools/PatExamples    V00-05-06
 
-if [ "x$HPSTANC" = "xtrue" ]; then
-    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
-    cvs up -r1.53 PhysicsTools/PatAlgos/python/tools/pfTools.py
-fi
+# Tau bugfixes which are not yet in the release
+addpkg RecoTauTag/RecoTau
+cvs up -r 1.3 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByInvMass.cc
+cvs up -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
+cvs up -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
 
 # Luminosity
 cvs co -r V02-01-03 RecoLuminosity/LumiDB
