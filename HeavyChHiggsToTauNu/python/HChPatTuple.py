@@ -522,26 +522,8 @@ def addPF2PAT(process, dataVersion):
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
     pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix="PFlow")
 
-    # Bugfixes
-    # Add PiZero producer
-    process.ak5PFJetsLegacyTaNCPiZerosPFlow = process.ak5PFJetsLegacyTaNCPiZeros.clone()
-    process.ak5PFJetsLegacyTaNCPiZerosPFlow.src = "pfJetsPFlow"
-    process.pfTauSequencePFlow.replace(process.pfRecoTauTagInfoProducerPFlow,
-                                       process.pfRecoTauTagInfoProducerPFlow+process.ak5PFJetsLegacyTaNCPiZerosPFlow)
-
-    pfTau = process.shrinkingConePFTauProducerPFlow
-    pfTau.builders[0].pfCandSrc = process.pfJetsPFlow.src # According to the exception pfCandSrc should be like this
-    pfTau.jetSrc = "pfJetsPFlow"
-    pfTau.piZeroSrc = "ak5PFJetsLegacyTaNCPiZerosPFlow"
-
-    # MC matchers
-    #process.electronMatchPFlow.src = "pfIsolatedElectronsPFlow"
-    process.makePatPhotonsPFlow.remove(process.photonMatchPFlow)
-
-    # Disable electron ID...
-    #process.patElectronsPFlow.addElectronID = False
-    #process.patElectronsPFlow.electronIDSources = cms.PSet()
-    #process.patElectronsPFlow.isolationValues = cms.PSet()
+    # Remove photon MC matcher in order to avoid keeping photons in the event content
+    process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
 
     if not hasOut:
         del process.out
