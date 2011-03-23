@@ -28,15 +28,17 @@ set -e
 # 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
 # 21.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated pfTools.py
 # 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags for the latest recipe for 41X, removed HPS+TaNC tags as it is in AOD
+# 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 
 # PAT
+addpkg FWCore/Skeletons            V01-01-01
 addpkg CommonTools/CandAlgos       V00-01-01
 addpkg PhysicsTools/PFCandProducer V04-07-01-00
-addpkg PhysicsTools/PatAlgos       V08-06-01-09
+addpkg PhysicsTools/PatAlgos       V08-06-01-11
 addpkg PhysicsTools/PatExamples    V00-05-06
 
 # Tau bugfixes which are not yet in the release
