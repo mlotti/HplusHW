@@ -68,6 +68,7 @@ config = {
     },
     "311Xredigi": {
         "triggerProcess": "REDIGI311X",
+        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patMadhatter": "file:/mnt/flustre/mkortela/data//TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
     },
     "41Xdata": {
@@ -95,12 +96,12 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_311_V1::All"
+            self.globalTag = "GR_R_311_V2::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START311_V1::All"
+            self.globalTag = "START311_V2::All"
 
             try:
                 self.signalTrigger = conf["signalTrigger"]
