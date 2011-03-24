@@ -157,7 +157,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
         },
     }, 
@@ -232,6 +232,19 @@ datasets = {
                 "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 250, # Adjusted for PATtuple file size
             },
+        },
+    },
+
+    # Backgrounds for electroweak background measurement
+    # Cross section is from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingWinter2010
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 296600000.*0.0002855,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 200,  # Adjusted for PAT on the fly
+            }
         },
     },
 }
