@@ -58,6 +58,8 @@ class TauTriggerEfficiencyValidation : public edm::EDAnalyzer {
   	MonitorElement *PtOfflineTau, *EtaOfflineTau, *PhiOfflineTau;
 	MonitorElement *PtOfflineTauTriggerMatched, *EtaOfflineTauTriggerMatched, *PhiOfflineTauTriggerMatched;
 	MonitorElement *EtaOfflineTauZ,*EtaOfflineTauZTriggerMatched;
+	MonitorElement *EtaOfflineTauSmallZ,*EtaOfflineTauSmallZTriggerMatched;
+	MonitorElement *EtaOfflineTauLargeZ,*EtaOfflineTauLargeZTriggerMatched;
 };
 
 TauTriggerEfficiencyValidation::TauTriggerEfficiencyValidation(const edm::ParameterSet& iConfig):
@@ -99,6 +101,12 @@ void TauTriggerEfficiencyValidation::beginJob(){
 
     EtaOfflineTauZ               = dbe->book2D("Eta Z ","eta Z", 100 ,-2.5,2.5, 50 ,-25.,25.);
     EtaOfflineTauZTriggerMatched = dbe->book2D("Eta Z "+hltPathFilter.label()+" matched","eta Z", 100 ,-2.5,2.5, 50 ,-25.,25.);
+
+    EtaOfflineTauLargeZ = dbe->book1D("Eta largeZ","eta", 100 ,-2.5,2.5);
+    EtaOfflineTauLargeZTriggerMatched = dbe->book1D("Eta largeZ "+hltPathFilter.label()+" matched","eta", 100 ,-2.5,2.5);
+
+    EtaOfflineTauSmallZ = dbe->book1D("Eta smallZ","eta", 100 ,-2.5,2.5);
+    EtaOfflineTauSmallZTriggerMatched = dbe->book1D("Eta smallZ "+hltPathFilter.label()+" matched","eta", 100 ,-2.5,2.5);
 
     std::cout << "Trigger bit: " << triggerBit << std::endl;
     std::cout << "Trigger path: " << hltPathFilter.label() << std::endl;
@@ -146,6 +154,12 @@ void TauTriggerEfficiencyValidation::analyze( const edm::Event& iEvent, const ed
 		PhiOfflineTau->Fill(thePFTau->phi());
 		EtaOfflineTauZ->Fill(thePFTau->eta(),pv_z);
 
+		if(abs(pv_z) > 16){
+		  EtaOfflineTauLargeZ->Fill(thePFTau->eta());
+		}else{
+		  EtaOfflineTauSmallZ->Fill(thePFTau->eta());
+		}
+
 		if(triggerObjs.isValid()){
 			const trigger::TriggerObjectCollection objs(triggerObjs->getObjects());
 
@@ -170,6 +184,11 @@ void TauTriggerEfficiencyValidation::analyze( const edm::Event& iEvent, const ed
                 		PhiOfflineTauTriggerMatched->Fill(thePFTau->phi());
 				EtaOfflineTauZTriggerMatched->Fill(thePFTau->eta(),pv_z);
 				triggered = true;
+                		if(abs(pv_z) > 16){
+                		  EtaOfflineTauLargeZTriggerMatched->Fill(thePFTau->eta());
+                		}else{
+                		  EtaOfflineTauSmallZTriggerMatched->Fill(thePFTau->eta());
+                		}
 			}
 		}
 	}
