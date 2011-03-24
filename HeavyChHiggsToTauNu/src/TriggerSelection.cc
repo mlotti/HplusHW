@@ -62,6 +62,22 @@ namespace HPlus {
 	// Get HLT MET object
         // but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
         if(passEvent) {
+          // Print all trigger object types of all triggers
+          /*
+          const pat::TriggerObjectCollection *objs = trigger->objects();
+          for(pat::TriggerObjectCollection::const_iterator iObj = objs->begin(); iObj != objs->end(); ++iObj) {
+            std::vector<int> types = iObj->triggerObjectTypes();
+            if(types.empty())
+              continue;
+            std::cout << "Object , object types ";
+            for(std::vector<int>::const_iterator iType = types.begin(); iType != types.end(); ++iType) {
+              std::cout << *iType << " ";
+            }
+            std::cout << std::endl;
+          }
+          */
+
+
 	  pat::TriggerObjectRefVector hltMets = trigger->objects(trigger::TriggerMET);
 	  if(hltMets.size() == 0) {
 	    fHltMet = pat::TriggerObjectRef();
