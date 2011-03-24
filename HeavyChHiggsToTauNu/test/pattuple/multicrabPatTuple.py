@@ -13,6 +13,16 @@ multicrab.extendDatasets(
     [
 ########
 #
+# 311X
+#
+########
+        # Signal MC
+        "TTToHplusBWB_M150_Spring11",
+        "TTToHplusBWB_M155_Spring11",
+
+
+########
+#
 # 39X
 #
 ########
@@ -130,7 +140,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v9"
+    name += "_pattuple_v10_test1"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
@@ -147,6 +157,13 @@ def addOutputName(dataset):
     dataset.appendLine("USER.publish_data_name = "+name)
 multicrab.forEachDataset(addOutputName)
 
+def addSplitMode(dataset):
+    if dataset.isMC():
+        dataset.appendLine("CMSSW.total_number_of_events = -1")
+    else:
+        dataset.appendLine("CMSSW.total_number_of_lumis = -1")
+multicrab.forEachDataset(addSplitMode)
+
 # For collision data stageout from US doesn't seem to be a problem
 #allowUS = ["TT", "TTJets", "TTToHplusBWB_M90", "TTToHplusBWB_M100", "TTToHplusBWB_M120", "TTToHplusBWB_M140", "TTToHplusBWB_M160"]
 #def blacklistUS(dataset):
@@ -159,7 +176,7 @@ multicrab.forEachDataset(addOutputName)
 multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
 
 # Create multicrab task configuration and run 'multicrab -create'
-multicrab.createTasks()
+#multicrab.createTasks()
 
 # Create task configuration only
-#multicrab.createTasks(configOnly=True)
+multicrab.createTasks(configOnly=True)
