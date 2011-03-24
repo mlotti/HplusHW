@@ -376,14 +376,23 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo):
         process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
         
 
+    process.hplusHpsTancTauSequence = cms.Sequence()
     sequence = cms.Sequence(
         process.tautagging *
+        process.hplusHpsTancTauSequence *
         process.PFTauDiscriminationSequenceForChargedHiggs *
         process.PFTauDiscriminationSequenceForChargedHiggsCont *
         process.PFTauTestDiscriminationSequence *
         process.CaloTauDiscriminationSequenceForChargedHiggs *
         process.CaloTauDiscriminationSequenceForChargedHiggsCont
     )
+    if dataVersion.is39X() or dataVersion.is38X() or dataVersion.is36X() or dataVersion.is35X():
+        process.hplusHpsTancTauSequence *= (
+            process.ak5PFJetsRecoTauPiZeros *
+            process.combinatoricRecoTaus *
+            process.hpsTancTauSequence
+         )
+
     if not doCalo:
         sequence.remove(process.tautagging)
         sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
