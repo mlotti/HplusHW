@@ -6,8 +6,8 @@ process = cms.Process("Validation")
 dataTier = "AOD"
 
 #dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
 dataVersion = "311Xredigi"
+#dataVersion = "39Xdata"
 #dataVersion = "38XredigiPU"
 
 # Command line arguments (options) and DataVersion object
@@ -23,7 +23,6 @@ process.source = cms.Source("PoolSource",
 #	'file:/tmp/slehti/test_H120_100_1_08t_RAW_RECO.root'
 #	dataVersion.getAnalysisDefaultFileCastor()
 	dataVersion.getPatDefaultFileCastor()
-#	"file:/tmp/slehti/test.root"
     )
 )
 
@@ -52,20 +51,21 @@ process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = ANALYSISEventContent.outputCommands
 )
 
+process.endPath = cms.EndPath(
+    process.out
+)
+
 if dataTier == "PATTuple":
     process.p = cms.Path(
         process.TauMomentumValidation+
         process.GeneratorValidation+
         process.TriggerValidation+
         process.endOfProcess
-)
-
-process.endPath = cms.EndPath(
-        process.out
     )
 
 process.load("HiggsAnalysis.Validation.PFTauChHadronCandidateValidation_cfi")
 process.load("HiggsAnalysis.Validation.PrimaryVertexValidation_cfi")
+process.load("HiggsAnalysis.Validation.TauTriggerEfficiencyValidation_cfi")
 
 if dataTier == "AOD":
     process.p = cms.Path(
@@ -73,5 +73,6 @@ if dataTier == "AOD":
         process.PrimaryVertexValidation+
         process.GeneratorValidation+
         process.TriggerValidation+
+	process.TauTriggerEfficiencyValidation+
         process.endOfProcess
     )
