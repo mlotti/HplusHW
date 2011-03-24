@@ -44,6 +44,7 @@ namespace HPlus {
     hDeltaPhiEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_DeltaPhiEmbVSOrig").c_str(), "DeltaPhiEmbVSOrig", 100, 0, 3.2, 100, 0, 3.2);
     hTransverseMass = makeTH<TH1F>(fd, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
     hDeltaPhiOriginal = makeTH<TH1F>(fd, (prefix+"_DeltaPhiOriginal").c_str(), "DeltaPhiOriginal", 400, 0, 3.2);
+    hTransverseMassOriginalTauID = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
     hTransverseMassOriginal = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
     hMTEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_MTEmbVSOrig").c_str(), "MTEmbVSOrig", 100, 0, 400, 100, 0, 400);
   }
@@ -67,6 +68,12 @@ namespace HPlus {
       hOriginalMuonPt->Fill(originalMuon->pt(), weight);
       hOriginalMuonEta->Fill(originalMuon->eta(), weight);
       hOriginalMuonPhi->Fill(originalMuon->phi(), weight);
+      if(originalMet) {
+	double transverseMassOriginal = TransverseMass::reconstruct(*originalMuon, *originalMet);
+	hTransverseMassOriginal->Fill(transverseMassOriginal, weight);
+	double deltaPhiOriginal = DeltaPhi::reconstruct(*originalMuon, *originalMet);
+	hDeltaPhiOriginal->Fill(deltaPhiOriginal, weight);
+      }
     }
 
     if(selectedTau) {
@@ -115,9 +122,9 @@ namespace HPlus {
 
     if(originalMuon && originalMet) {
       double deltaPhiOriginal = DeltaPhi::reconstruct(*originalMuon, *originalMet);
-      hDeltaPhiOriginal->Fill(deltaPhiOriginal, weight);
+      hDeltaPhiOriginalTauID->Fill(deltaPhiOriginal, weight);
       double transverseMassOriginal = TransverseMass::reconstruct(*originalMuon, *originalMet);
-      hTransverseMassOriginal->Fill(transverseMassOriginal, weight);
+      hTransverseMassOriginalTauID->Fill(transverseMassOriginal, weight);
       hDeltaPhiEmbVSOrig->Fill(deltaPhi,deltaPhiOriginal, weight);
       hMTEmbVSOrig->Fill(transverseMass, transverseMassOriginal, weight);    
     }

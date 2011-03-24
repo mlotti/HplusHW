@@ -29,9 +29,9 @@ namespace HPlus {
     hPt = makeTH<TH1F>(*fs, "bjet_pt", "bjet_pt", 100, 0., 200.);
     hPt1 = makeTH<TH1F>(*fs, "bjet1_pt", "bjet1_pt", 100, 0., 200.);
     hPt2 = makeTH<TH1F>(*fs, "bjet2_pt", "bjet2_pt", 100, 0., 200.);
-    hEta = makeTH<TH1F>(*fs, "bjet_eta", "bjet_pt", 60, -3., 3.);
-    hEta1 = makeTH<TH1F>(*fs, "bjet1_eta", "bjet1_pt", 60, -3., 3.);
-    hEta2 = makeTH<TH1F>(*fs, "bjet2_eta", "bjet2_pt", 60, -3., 3.);
+    hEta = makeTH<TH1F>(*fs, "bjet_eta", "bjet_pt", 100, -5., 5.);
+    hEta1 = makeTH<TH1F>(*fs, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
+    hEta2 = makeTH<TH1F>(*fs, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
     hNumberOfBtaggedJets = makeTH<TH1F>(*fs, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
   }
 

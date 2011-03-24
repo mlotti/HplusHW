@@ -51,9 +51,9 @@ process.source = cms.Source('PoolSource',
 #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-#        dataVersion.getAnalysisDefaultFileMadhatter()
+        dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+#      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
 if options.tauEmbeddingInput != 0:
@@ -89,8 +89,8 @@ addPrimaryVertexSelection(process, process.commonSequence)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
-param.setAllTauSelectionOperatingMode('standard')
-#param.setAllTauSelectionOperatingMode('factorized')
+#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('factorized')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 

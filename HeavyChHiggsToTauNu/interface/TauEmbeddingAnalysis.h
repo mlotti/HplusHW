@@ -58,6 +58,8 @@ namespace HPlus {
       TH1 *hRtau;
       TH1 *hDeltaPhiOriginal;
       TH1 *hTransverseMassOriginal;
+      TH1 *hDeltaPhiOriginalTauID;
+      TH1 *hTransverseMassOriginalTauID;
       TH1 *hDeltaPhi;
       TH1 *hTransverseMass;
       TH2 *hEmbVSOrigMet;
