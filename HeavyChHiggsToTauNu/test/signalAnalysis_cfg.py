@@ -7,6 +7,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Select the version of the data
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "311Xredigi"
+#dataVersion = "41Xdata"
+
 
 ##########
 # Flags for additional signal analysis modules
