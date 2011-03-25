@@ -161,6 +161,21 @@ datasets = {
             },
         },
     }, 
+    "WJets_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 28000,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 1500, # Adjusted for PATtuple file
+                                        # size. CRAB doesn't really
+                                        # create this many jobs, but
+                                        # the large number seems to be
+                                        # needed to get enough jobs
+                "use_server": 1,
+            },
+        },
+    },
     "TToBLNu_s-channel_TuneZ2_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 4.6*0.32442,
