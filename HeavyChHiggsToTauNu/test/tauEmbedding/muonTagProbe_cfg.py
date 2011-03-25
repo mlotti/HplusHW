@@ -41,8 +41,8 @@ print "Trigger %s, filter %s" % (trigger, triggerFilter)
 # Define the process
 process = cms.Process("TagProbe")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -157,6 +157,27 @@ process.probeMuons = cms.EDFilter("PATMuonRefSelector",
     )
 )
 
+process.muonMultiplicity = cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
+    allMuons = cms.untracked.PSet(
+        src = cms.InputTag("patMuonsWithTrigger"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+    tagMuons = cms.untracked.PSet(
+        src = cms.InputTag("tagMuons"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+    probeMuons = cms.untracked.PSet(
+        src = cms.InputTag("probeMuons"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+)
+
 process.tagProbes = cms.EDProducer("CandViewShallowCloneCombiner",
 #    decay = cms.string("tagMuons@+ trkProbes@-"),
     decay = cms.string("tagMuons@+ probeMuons@-"),
@@ -168,6 +189,7 @@ process.tagAndProbeSequence = cms.Sequence(
     process.tagMuons *
 #    process.trkProbes *
     process.probeMuons *
+    process.muonMultiplicity *
     process.tagProbes
 )
 
