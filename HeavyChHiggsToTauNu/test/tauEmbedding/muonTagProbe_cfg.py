@@ -24,7 +24,7 @@ if len(trigger) == 0:
 #mu9filter = "hltSingleL3MuonPre9"
 #mu15filter = "hltSingleL3MuonPre15"
 mu9filter = "hltSingleMu9L3Filtered9"
-mu15filter = "hltSingleM159L3Filtered15"
+mu15filter = "hltSingleM15L3Filtered15"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -33,6 +33,8 @@ elif "HLT_Mu15" in trigger:
     triggerFilter = mu15filter
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
+
+print "Trigger %s, filter %s" % (trigger, triggerFilter)
 
 
 ################################################################################
