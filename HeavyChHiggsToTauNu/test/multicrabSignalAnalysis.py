@@ -6,7 +6,8 @@ multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v6"
-pattupleVersion = "pattuple_v9"
+#pattupleVersion = "pattuple_v9"
+pattupleVersion = "pattuple_v10_test1"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -24,6 +25,10 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 multicrab.extendDatasets(pattupleVersion,
     [
+        #### 41X data and 311X MC
+        # MC Bakcground Spring11
+        "TTJets_TuneZ2_Spring11",
+
         #### 39X data and MC
         # Data
 #        "JetMETTau_Tau_136035-139975_Dec22", # v9
