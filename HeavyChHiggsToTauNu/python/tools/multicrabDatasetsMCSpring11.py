@@ -117,6 +117,36 @@ datasets = {
             },
         },
     },
+    "QCD_Pt15to30_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 8.159e+08,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_15to30_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 480, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt30to50_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 5.312e+07,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "QCD_Pt50to80_TuneZ2_Spring11": {
+        "dataVersion":  "311Xredigi",
+        "crossSection": 6.359e+06,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "QCD_Pt80to120_TuneZ2_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 7.843e+05,
