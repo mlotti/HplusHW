@@ -189,6 +189,11 @@ datasets = {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
+            "pattuple_v10_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10_test1-fc6810ccf564527d387a28a4affcd399/USER",
+                "number_of_jobs": 12 # for 100 kev/job, ~30 min job
+            },
         },
     }, 
     "WJets_TuneZ2_Spring11": {
