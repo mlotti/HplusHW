@@ -1,4 +1,4 @@
-# Generated on Fri Nov 26 14:14:33 2010
+# Generated on Tue Mar 29 14:03:21 2011
 # by Top2HPlus using FeynHiggs 2.7.3 input
 # http://cmsdoc.cern.ch/~slehti/Top2HPlus.git
 
@@ -5049,6 +5049,2590 @@ hplusBranchingRatio = {
             -1000:  BranchingRatio(-1, -1, -1),
             -200:  BranchingRatio(-1, -1, -1),
             200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        199: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        200: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        201: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        202: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        203: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        204: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        205: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        206: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        207: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        208: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        209: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        210: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        211: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        212: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        213: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        214: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        215: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        216: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        217: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        218: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        219: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        }
+    },
+    150: {
+        5: {
+            -1000:  BranchingRatio(0.00372599, 0.948477, 128.001),
+            -200:  BranchingRatio(0.00365076, 0.949924, 127.719),
+            200:  BranchingRatio(0.0036058, 0.948748, 127.778),
+            1000:  BranchingRatio(0.00354522, 0.946281, 128.521)
+        },
+        6: {
+            -1000:  BranchingRatio(0.00313398, 0.97548, 127.886),
+            -200:  BranchingRatio(0.00301408, 0.976467, 127.599),
+            200:  BranchingRatio(0.00294468, 0.975868, 127.657),
+            1000:  BranchingRatio(0.00285326, 0.974474, 128.354)
+        },
+        7: {
+            -1000:  BranchingRatio(0.00293248, 0.984373, 127.763),
+            -200:  BranchingRatio(0.00275015, 0.985433, 127.481),
+            200:  BranchingRatio(0.00264781, 0.985286, 127.544),
+            1000:  BranchingRatio(0.00251615, 0.984648, 128.217)
+        },
+        8: {
+            -1000:  BranchingRatio(0.00297093, 0.986831, 127.621),
+            -200:  BranchingRatio(0.00270435, 0.98819, 127.358),
+            200:  BranchingRatio(0.00255918, 0.988415, 127.432),
+            1000:  BranchingRatio(0.00237679, 0.988342, 128.094)
+        },
+        9: {
+            -1000:  BranchingRatio(0.00318015, 0.986878, 127.456),
+            -200:  BranchingRatio(0.00280305, 0.98864, 127.224),
+            200:  BranchingRatio(0.00260373, 0.989186, 127.314),
+            1000:  BranchingRatio(0.00235918, 0.989559, 127.978)
+        },
+        10: {
+            -1000:  BranchingRatio(0.00352659, 0.986007, 127.263),
+            -200:  BranchingRatio(0.00300774, 0.988227, 127.078),
+            200:  BranchingRatio(0.0027416, 0.98906, 127.19),
+            1000:  BranchingRatio(0.00242261, 0.989801, 127.863)
+        },
+        11: {
+            -1000:  BranchingRatio(0.00399412, 0.9848, 127.041),
+            -200:  BranchingRatio(0.00329692, 0.987515, 126.917),
+            200:  BranchingRatio(0.00294984, 0.988611, 127.058),
+            1000:  BranchingRatio(0.00254341, 0.989667, 127.749)
+        },
+        12: {
+            -1000:  BranchingRatio(0.00457605, 0.983496, 126.785),
+            -200:  BranchingRatio(0.00365794, 0.986733, 126.741),
+            200:  BranchingRatio(0.00321443, 0.988077, 126.917),
+            1000:  BranchingRatio(0.00270689, 0.989408, 127.633)
+        },
+        13: {
+            -1000:  BranchingRatio(0.00527122, 0.982186, 126.492),
+            -200:  BranchingRatio(0.0040831, 0.985972, 126.55),
+            200:  BranchingRatio(0.00352627, 0.987551, 126.766),
+            1000:  BranchingRatio(0.00290339, 0.989128, 127.516)
+        },
+        14: {
+            -1000:  BranchingRatio(0.00608202, 0.980905, 126.158),
+            -200:  BranchingRatio(0.00456762, 0.985266, 126.341),
+            200:  BranchingRatio(0.0038792, 0.987071, 126.607),
+            1000:  BranchingRatio(0.00312624, 0.98887, 127.396)
+        },
+        15: {
+            -1000:  BranchingRatio(0.00701337, 0.97966, 125.781),
+            -200:  BranchingRatio(0.00510852, 0.984625, 126.115),
+            200:  BranchingRatio(0.00426883, 0.986649, 126.438),
+            1000:  BranchingRatio(0.00337067, 0.988649, 127.274)
+        },
+        16: {
+            -1000:  BranchingRatio(0.00807209, 0.978447, 125.355),
+            -200:  BranchingRatio(0.00570394, 0.984046, 125.871),
+            200:  BranchingRatio(0.00469196, 0.986283, 126.26),
+            1000:  BranchingRatio(0.00363308, 0.988469, 127.15)
+        },
+        17: {
+            -1000:  BranchingRatio(0.00926662, 0.977258, 124.876),
+            -200:  BranchingRatio(0.00635281, 0.983523, 125.609),
+            200:  BranchingRatio(0.0051461, 0.98597, 126.073),
+            1000:  BranchingRatio(0.00391071, 0.988327, 127.023)
+        },
+        18: {
+            -1000:  BranchingRatio(0.0106069, 0.976083, 124.339),
+            -200:  BranchingRatio(0.00705453, 0.983051, 125.328),
+            200:  BranchingRatio(0.00562932, 0.985703, 125.876),
+            1000:  BranchingRatio(0.00420137, 0.98822, 126.895)
+        },
+        19: {
+            -1000:  BranchingRatio(0.0121041, 0.974911, 123.738),
+            -200:  BranchingRatio(0.00780889, 0.982622, 125.027),
+            200:  BranchingRatio(0.00614001, 0.985477, 125.671),
+            1000:  BranchingRatio(0.00450327, 0.988143, 126.764)
+        },
+        20: {
+            -1000:  BranchingRatio(0.0137711, 0.973734, 123.066),
+            -200:  BranchingRatio(0.00861591, 0.98223, 124.706),
+            200:  BranchingRatio(0.00667686, 0.985286, 125.456),
+            1000:  BranchingRatio(0.00481493, 0.988091, 126.632)
+        },
+        21: {
+            -1000:  BranchingRatio(0.0156218, 0.972541, 122.318),
+            -200:  BranchingRatio(0.00947578, 0.98187, 124.364),
+            200:  BranchingRatio(0.00723871, 0.985126, 125.233),
+            1000:  BranchingRatio(0.0051351, 0.988061, 126.498)
+        },
+        22: {
+            -1000:  BranchingRatio(0.0176721, 0.971323, 121.484),
+            -200:  BranchingRatio(0.0103889, 0.981538, 124.002),
+            200:  BranchingRatio(0.00782456, 0.984991, 125.001),
+            1000:  BranchingRatio(0.00546271, 0.988049, 126.362)
+        },
+        23: {
+            -1000:  BranchingRatio(0.0199391, 0.97007, 120.556),
+            -200:  BranchingRatio(0.0113556, 0.981229, 123.617),
+            200:  BranchingRatio(0.00843351, 0.984878, 124.76),
+            1000:  BranchingRatio(0.00579682, 0.988052, 126.225)
+        },
+        24: {
+            -1000:  BranchingRatio(0.022442, 0.968774, 119.524),
+            -200:  BranchingRatio(0.0123764, 0.980939, 123.21),
+            200:  BranchingRatio(0.00906475, 0.984785, 124.511),
+            1000:  BranchingRatio(0.00613661, 0.988067, 126.087)
+        },
+        25: {
+            -1000:  BranchingRatio(0.0252017, 0.967424, 118.376),
+            -200:  BranchingRatio(0.013452, 0.980667, 122.781),
+            200:  BranchingRatio(0.00971753, 0.984708, 124.254),
+            1000:  BranchingRatio(0.00648135, 0.988094, 125.948)
+        },
+        26: {
+            -1000:  BranchingRatio(0.0282413, 0.966008, 117.1),
+            -200:  BranchingRatio(0.0145829, 0.98041, 122.327),
+            200:  BranchingRatio(0.0103912, 0.984646, 123.988),
+            1000:  BranchingRatio(0.00683041, 0.988128, 125.808)
+        },
+        27: {
+            -1000:  BranchingRatio(0.0315863, 0.964515, 115.68),
+            -200:  BranchingRatio(0.0157698, 0.980164, 121.85),
+            200:  BranchingRatio(0.011085, 0.984596, 123.714),
+            1000:  BranchingRatio(0.0071832, 0.98817, 125.668)
+        },
+        28: {
+            -1000:  BranchingRatio(0.0352646, 0.962928, 114.1),
+            -200:  BranchingRatio(0.0170133, 0.97993, 121.348),
+            200:  BranchingRatio(0.0117983, 0.984557, 123.433),
+            1000:  BranchingRatio(0.00753919, 0.988218, 125.526)
+        },
+        29: {
+            -1000:  BranchingRatio(0.0393069, 0.961228, 112.341),
+            -200:  BranchingRatio(0.0183142, 0.979705, 120.82),
+            200:  BranchingRatio(0.0125307, 0.984527, 123.143),
+            1000:  BranchingRatio(0.00789791, 0.988271, 125.385)
+        },
+        30: {
+            -1000:  BranchingRatio(0.0437471, 0.959389, 110.38),
+            -200:  BranchingRatio(0.019673, 0.979487, 120.265),
+            200:  BranchingRatio(0.0132814, 0.984505, 122.846),
+            1000:  BranchingRatio(0.00825893, 0.988328, 125.243)
+        },
+        31: {
+            -1000:  BranchingRatio(0.0486226, 0.957373, 108.19),
+            -200:  BranchingRatio(0.0210906, 0.979277, 119.684),
+            200:  BranchingRatio(0.0140501, 0.98449, 122.541),
+            1000:  BranchingRatio(0.00862186, 0.988387, 125.1)
+        },
+        32: {
+            -1000:  BranchingRatio(0.0539744, 0.955118, 105.743),
+            -200:  BranchingRatio(0.0225677, 0.979072, 119.075),
+            200:  BranchingRatio(0.014836, 0.984482, 122.229),
+            1000:  BranchingRatio(0.00898634, 0.988449, 124.958)
+        },
+        33: {
+            -1000:  BranchingRatio(0.0598478, 0.952515, 103),
+            -200:  BranchingRatio(0.0241049, 0.978872, 118.437),
+            200:  BranchingRatio(0.0156388, 0.984479, 121.91),
+            1000:  BranchingRatio(0.00935204, 0.988513, 124.815)
+        },
+        34: {
+            -1000:  BranchingRatio(0.0662927, 0.949337, 99.9194),
+            -200:  BranchingRatio(0.0257031, 0.978675, 117.769),
+            200:  BranchingRatio(0.016458, 0.984481, 121.583),
+            1000:  BranchingRatio(0.00971865, 0.988579, 124.673)
+        },
+        35: {
+            -1000:  BranchingRatio(0.0733642, 0.944949, 96.4485),
+            -200:  BranchingRatio(0.0273628, 0.978482, 117.072),
+            200:  BranchingRatio(0.017293, 0.984488, 121.249),
+            1000:  BranchingRatio(0.0100859, 0.988646, 124.531)
+        },
+        36: {
+            -1000:  BranchingRatio(0.081123, 0.936427, 92.5226),
+            -200:  BranchingRatio(0.0290849, 0.978292, 116.342),
+            200:  BranchingRatio(0.0181435, 0.984498, 120.908),
+            1000:  BranchingRatio(0.0104535, 0.988713, 124.389)
+        },
+        37: {
+            -1000:  BranchingRatio(0.0896365, 0.82844, 88.0604),
+            -200:  BranchingRatio(0.03087, 0.978103, 115.58),
+            200:  BranchingRatio(0.0190089, 0.984511, 120.56),
+            1000:  BranchingRatio(0.0108213, 0.988781, 124.247)
+        },
+        38: {
+            -1000:  BranchingRatio(0.0989787, 0.655085, 82.9564),
+            -200:  BranchingRatio(0.0327189, 0.977916, 114.785),
+            200:  BranchingRatio(0.0198888, 0.984527, 120.205),
+            1000:  BranchingRatio(0.0111891, 0.988849, 124.106)
+        },
+        39: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0346322, 0.977731, 113.955),
+            200:  BranchingRatio(0.0207828, 0.984546, 119.843),
+            1000:  BranchingRatio(0.0115565, 0.988917, 123.965)
+        },
+        40: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0366107, 0.977545, 113.09),
+            200:  BranchingRatio(0.0216905, 0.984568, 119.475),
+            1000:  BranchingRatio(0.0119235, 0.988985, 123.825)
+        },
+        41: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0386551, 0.97736, 112.188),
+            200:  BranchingRatio(0.0226115, 0.984591, 119.1),
+            1000:  BranchingRatio(0.0122899, 0.989052, 123.685)
+        },
+        42: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0407659, 0.977174, 111.247),
+            200:  BranchingRatio(0.0235453, 0.984616, 118.719),
+            1000:  BranchingRatio(0.0126556, 0.989119, 123.546)
+        },
+        43: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0429439, 0.976988, 110.267),
+            200:  BranchingRatio(0.0244916, 0.984643, 118.332),
+            1000:  BranchingRatio(0.0130203, 0.989186, 123.408)
+        },
+        44: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0451898, 0.9768, 109.246),
+            200:  BranchingRatio(0.0254499, 0.984671, 117.938),
+            1000:  BranchingRatio(0.013384, 0.989252, 123.27)
+        },
+        45: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0475041, 0.976611, 108.183),
+            200:  BranchingRatio(0.02642, 0.984701, 117.538),
+            1000:  BranchingRatio(0.0137465, 0.989318, 123.134)
+        },
+        46: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0498875, 0.976419, 107.075),
+            200:  BranchingRatio(0.0274015, 0.984731, 117.132),
+            1000:  BranchingRatio(0.0141077, 0.989382, 122.998)
+        },
+        47: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0523406, 0.976225, 105.922),
+            200:  BranchingRatio(0.0283939, 0.984763, 116.72),
+            1000:  BranchingRatio(0.0144675, 0.989446, 122.863)
+        },
+        48: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0548639, 0.976027, 104.721),
+            200:  BranchingRatio(0.029397, 0.984795, 116.302),
+            1000:  BranchingRatio(0.0148259, 0.989509, 122.729)
+        },
+        49: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0574581, 0.975826, 103.471),
+            200:  BranchingRatio(0.0304104, 0.984829, 115.878),
+            1000:  BranchingRatio(0.0151827, 0.989571, 122.596)
+        },
+        50: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0601236, 0.97562, 102.17),
+            200:  BranchingRatio(0.0314338, 0.984862, 115.448),
+            1000:  BranchingRatio(0.0155378, 0.989632, 122.463)
+        },
+        51: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0628611, 0.975409, 100.814),
+            200:  BranchingRatio(0.0324668, 0.984897, 115.013),
+            1000:  BranchingRatio(0.0158913, 0.989693, 122.332)
+        },
+        52: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.065671, 0.975192, 99.4025),
+            200:  BranchingRatio(0.0335091, 0.984932, 114.572),
+            1000:  BranchingRatio(0.0162429, 0.989752, 122.203)
+        },
+        53: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0685537, 0.974968, 97.9322),
+            200:  BranchingRatio(0.0345604, 0.984967, 114.125),
+            1000:  BranchingRatio(0.0165928, 0.98981, 122.074)
+        },
+        54: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0715099, 0.974736, 96.4003),
+            200:  BranchingRatio(0.0356204, 0.985003, 113.673),
+            1000:  BranchingRatio(0.0169407, 0.989868, 121.946)
+        },
+        55: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0745398, 0.974494, 94.8037),
+            200:  BranchingRatio(0.0366888, 0.985039, 113.216),
+            1000:  BranchingRatio(0.0172867, 0.989924, 121.82)
+        },
+        56: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0776439, 0.974241, 93.1393),
+            200:  BranchingRatio(0.0377653, 0.985075, 112.753),
+            1000:  BranchingRatio(0.0176307, 0.98998, 121.694)
+        },
+        57: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0808226, 0.973975, 91.4031),
+            200:  BranchingRatio(0.0388496, 0.985111, 112.285),
+            1000:  BranchingRatio(0.0179726, 0.990035, 121.57)
+        },
+        58: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0840762, 0.973693, 89.5914),
+            200:  BranchingRatio(0.0399414, 0.985148, 111.811),
+            1000:  BranchingRatio(0.0183125, 0.990088, 121.447)
+        },
+        59: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0874051, 0.973391, 87.6994),
+            200:  BranchingRatio(0.0410405, 0.985185, 111.333),
+            1000:  BranchingRatio(0.0186503, 0.990141, 121.326)
+        },
+        60: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0908095, 0.973066, 85.7222),
+            200:  BranchingRatio(0.0421466, 0.985221, 110.849),
+            1000:  BranchingRatio(0.0189859, 0.990193, 121.205)
+        },
+        61: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0942897, 0.972709, 83.6542),
+            200:  BranchingRatio(0.0432594, 0.985258, 110.361),
+            1000:  BranchingRatio(0.0193194, 0.990244, 121.086)
+        },
+        62: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.097846, 0.972313, 81.489),
+            200:  BranchingRatio(0.0443786, 0.985295, 109.867),
+            1000:  BranchingRatio(0.0196507, 0.990294, 120.968)
+        },
+        63: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.101478, 0.971862, 79.2192),
+            200:  BranchingRatio(0.045504, 0.985331, 109.369),
+            1000:  BranchingRatio(0.0199798, 0.990344, 120.852)
+        },
+        64: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.105187, 0.97133, 76.8364),
+            200:  BranchingRatio(0.0466354, 0.985368, 108.865),
+            1000:  BranchingRatio(0.0203067, 0.990392, 120.737)
+        },
+        65: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.108973, 0.970662, 74.3308),
+            200:  BranchingRatio(0.0477724, 0.985405, 108.357),
+            1000:  BranchingRatio(0.0206313, 0.99044, 120.623)
+        },
+        66: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.112835, 0.969703, 71.6908),
+            200:  BranchingRatio(0.048915, 0.985441, 107.844),
+            1000:  BranchingRatio(0.0209537, 0.990486, 120.511)
+        },
+        67: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.116774, 0.969109, 68.9025),
+            200:  BranchingRatio(0.0500628, 0.985477, 107.327),
+            1000:  BranchingRatio(0.0212738, 0.990532, 120.4)
+        },
+        68: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.120789, 0.965169, 65.9493),
+            200:  BranchingRatio(0.0512156, 0.985513, 106.804),
+            1000:  BranchingRatio(0.0215917, 0.990577, 120.29)
+        },
+        69: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.124881, 0.955497, 62.8102),
+            200:  BranchingRatio(0.0523732, 0.985549, 106.277),
+            1000:  BranchingRatio(0.0219073, 0.990622, 120.182)
+        },
+        70: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.12905, 0.94394, 59.4589),
+            200:  BranchingRatio(0.0535353, 0.985585, 105.746),
+            1000:  BranchingRatio(0.0222206, 0.990665, 120.075)
+        },
+        71: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.133295, 0.931142, 55.8613),
+            200:  BranchingRatio(0.0547018, 0.985621, 105.21),
+            1000:  BranchingRatio(0.0225317, 0.990708, 119.97)
+        },
+        72: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.137616, 0.917546, 51.9715),
+            200:  BranchingRatio(0.0558725, 0.985656, 104.669),
+            1000:  BranchingRatio(0.0228404, 0.99075, 119.866)
+        },
+        73: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.142014, 0.903479, 47.7251),
+            200:  BranchingRatio(0.0570471, 0.985691, 104.124),
+            1000:  BranchingRatio(0.0231469, 0.990791, 119.764)
+        },
+        74: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.146488, 0.889256, 43.0268),
+            200:  BranchingRatio(0.0582254, 0.985726, 103.575),
+            1000:  BranchingRatio(0.0234511, 0.990831, 119.663)
+        },
+        75: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.151037, 0.875656, 37.7237),
+            200:  BranchingRatio(0.0594073, 0.985761, 103.021),
+            1000:  BranchingRatio(0.023753, 0.990871, 119.563)
+        },
+        76: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.155662, 0.85952, 31.5397),
+            200:  BranchingRatio(0.0605926, 0.985795, 102.463),
+            1000:  BranchingRatio(0.0240526, 0.99091, 119.465)
+        },
+        77: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.160362, 0.842791, 23.8595),
+            200:  BranchingRatio(0.061781, 0.985829, 101.901),
+            1000:  BranchingRatio(0.02435, 0.990949, 119.369)
+        },
+        78: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.165136, 0.829983, 12.4091),
+            200:  BranchingRatio(0.0629724, 0.985863, 101.334),
+            1000:  BranchingRatio(0.0246451, 0.990986, 119.273)
+        },
+        79: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0641667, 0.985897, 100.763),
+            1000:  BranchingRatio(0.024938, 0.991023, 119.18)
+        },
+        80: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0653636, 0.98593, 100.188),
+            1000:  BranchingRatio(0.0252285, 0.99106, 119.088)
+        },
+        81: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.066563, 0.985962, 99.6093),
+            1000:  BranchingRatio(0.0255169, 0.991095, 118.997)
+        },
+        82: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0677646, 0.985995, 99.0261),
+            1000:  BranchingRatio(0.025803, 0.991131, 118.908)
+        },
+        83: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0689685, 0.986027, 98.4388),
+            1000:  BranchingRatio(0.0260869, 0.991165, 118.821)
+        },
+        84: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0701743, 0.986059, 97.8474),
+            1000:  BranchingRatio(0.0263686, 0.991199, 118.735)
+        },
+        85: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0713819, 0.98609, 97.2519),
+            1000:  BranchingRatio(0.0266481, 0.991232, 118.65)
+        },
+        86: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0725912, 0.986121, 96.6525),
+            1000:  BranchingRatio(0.0269254, 0.991265, 118.567)
+        },
+        87: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0738021, 0.986151, 96.049),
+            1000:  BranchingRatio(0.0272005, 0.991297, 118.486)
+        },
+        88: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0750144, 0.986181, 95.4416),
+            1000:  BranchingRatio(0.0274735, 0.991329, 118.406)
+        },
+        89: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0762279, 0.986211, 94.8302),
+            1000:  BranchingRatio(0.0277443, 0.99136, 118.328)
+        },
+        90: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0774425, 0.98624, 94.2149),
+            1000:  BranchingRatio(0.028013, 0.991391, 118.251)
+        },
+        91: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0786582, 0.986269, 93.5957),
+            1000:  BranchingRatio(0.0282795, 0.991421, 118.176)
+        },
+        92: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0798746, 0.986297, 92.9725),
+            1000:  BranchingRatio(0.0285439, 0.99145, 118.102)
+        },
+        93: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0810918, 0.986325, 92.3455),
+            1000:  BranchingRatio(0.0288063, 0.991479, 118.03)
+        },
+        94: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0823096, 0.986352, 91.7146),
+            1000:  BranchingRatio(0.0290665, 0.991508, 117.96)
+        },
+        95: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.083528, 0.986379, 91.0798),
+            1000:  BranchingRatio(0.0293247, 0.991536, 117.891)
+        },
+        96: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0847466, 0.986405, 90.4412),
+            1000:  BranchingRatio(0.0295808, 0.991564, 117.824)
+        },
+        97: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0859655, 0.986431, 89.7987),
+            1000:  BranchingRatio(0.0298349, 0.991591, 117.758)
+        },
+        98: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0871846, 0.986456, 89.1524),
+            1000:  BranchingRatio(0.030087, 0.991617, 117.694)
+        },
+        99: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0884036, 0.98648, 88.5022),
+            1000:  BranchingRatio(0.030337, 0.991644, 117.631)
+        },
+        100: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0896226, 0.986504, 87.8482),
+            1000:  BranchingRatio(0.0305851, 0.99167, 117.571)
+        },
+        101: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0908415, 0.986527, 87.1904),
+            1000:  BranchingRatio(0.0308311, 0.991695, 117.511)
+        },
+        102: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.09206, 0.98655, 86.5286),
+            1000:  BranchingRatio(0.0310753, 0.99172, 117.454)
+        },
+        103: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0932781, 0.986572, 85.8631),
+            1000:  BranchingRatio(0.0313174, 0.991745, 117.398)
+        },
+        104: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0944958, 0.986593, 85.1937),
+            1000:  BranchingRatio(0.0315577, 0.991769, 117.343)
+        },
+        105: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0957129, 0.986613, 84.5204),
+            1000:  BranchingRatio(0.031796, 0.991793, 117.291)
+        },
+        106: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0969294, 0.986632, 83.8432),
+            1000:  BranchingRatio(0.0320324, 0.991816, 117.239)
+        },
+        107: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.098145, 0.98665, 83.1622),
+            1000:  BranchingRatio(0.032267, 0.991839, 117.19)
+        },
+        108: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0993599, 0.986668, 82.4772),
+            1000:  BranchingRatio(0.0324997, 0.991862, 117.142)
+        },
+        109: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.100574, 0.986684, 81.7883),
+            1000:  BranchingRatio(0.0327305, 0.991884, 117.096)
+        },
+        110: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.101787, 0.986699, 81.0955),
+            1000:  BranchingRatio(0.0329595, 0.991906, 117.051)
+        },
+        111: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.102999, 0.986713, 80.3987),
+            1000:  BranchingRatio(0.0331866, 0.991927, 117.008)
+        },
+        112: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.104209, 0.986725, 79.6979),
+            1000:  BranchingRatio(0.033412, 0.991949, 116.967)
+        },
+        113: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.105419, 0.986736, 78.993),
+            1000:  BranchingRatio(0.0336356, 0.99197, 116.928)
+        },
+        114: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.106627, 0.986745, 78.2841),
+            1000:  BranchingRatio(0.0338574, 0.99199, 116.89)
+        },
+        115: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.107834, 0.986753, 77.5711),
+            1000:  BranchingRatio(0.0340774, 0.99201, 116.853)
+        },
+        116: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.109039, 0.986757, 76.854),
+            1000:  BranchingRatio(0.0342957, 0.99203, 116.819)
+        },
+        117: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.110243, 0.98676, 76.1327),
+            1000:  BranchingRatio(0.0345123, 0.99205, 116.786)
+        },
+        118: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.111445, 0.986759, 75.4072),
+            1000:  BranchingRatio(0.0347271, 0.992069, 116.755)
+        },
+        119: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.112645, 0.986754, 74.6774),
+            1000:  BranchingRatio(0.0349403, 0.992088, 116.725)
+        },
+        120: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.113844, 0.986745, 73.9432),
+            1000:  BranchingRatio(0.0351518, 0.992107, 116.698)
+        },
+        121: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.115041, 0.98673, 73.2047),
+            1000:  BranchingRatio(0.0353616, 0.992125, 116.671)
+        },
+        122: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.116237, 0.986707, 72.4618),
+            1000:  BranchingRatio(0.0355698, 0.992143, 116.647)
+        },
+        123: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.11743, 0.986673, 71.7143),
+            1000:  BranchingRatio(0.0357763, 0.992161, 116.624)
+        },
+        124: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.118621, 0.986656, 70.9622),
+            1000:  BranchingRatio(0.0359812, 0.992178, 116.603)
+        },
+        125: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.119811, 0.986676, 70.2055),
+            1000:  BranchingRatio(0.0361845, 0.992196, 116.584)
+        },
+        126: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.120998, 0.986697, 69.444),
+            1000:  BranchingRatio(0.0363862, 0.992212, 116.567)
+        },
+        127: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.122184, 0.986718, 68.6777),
+            1000:  BranchingRatio(0.0365863, 0.992229, 116.551)
+        },
+        128: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.123367, 0.98674, 67.9064),
+            1000:  BranchingRatio(0.0367849, 0.992245, 116.537)
+        },
+        129: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.124548, 0.986598, 67.1301),
+            1000:  BranchingRatio(0.0369819, 0.992261, 116.525)
+        },
+        130: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.125726, 0.986115, 66.3487),
+            1000:  BranchingRatio(0.0371773, 0.992277, 116.514)
+        },
+        131: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.126903, 0.985584, 65.562),
+            1000:  BranchingRatio(0.0373713, 0.992293, 116.505)
+        },
+        132: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.128077, 0.985017, 64.7699),
+            1000:  BranchingRatio(0.0375637, 0.992308, 116.498)
+        },
+        133: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.129248, 0.984421, 63.9723),
+            1000:  BranchingRatio(0.0377547, 0.992323, 116.493)
+        },
+        134: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.130418, 0.983802, 63.1691),
+            1000:  BranchingRatio(0.0379442, 0.992337, 116.489)
+        },
+        135: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.131585, 0.983165, 62.36),
+            1000:  BranchingRatio(0.0381321, 0.992352, 116.488)
+        },
+        136: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.132749, 0.982514, 61.545),
+            1000:  BranchingRatio(0.0383187, 0.992365, 116.488)
+        },
+        137: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.133911, 0.981853, 60.7238),
+            1000:  BranchingRatio(0.0385038, 0.992379, 116.49)
+        },
+        138: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.13507, 0.981185, 59.8963),
+            1000:  BranchingRatio(0.0386875, 0.992392, 116.493)
+        },
+        139: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.136227, 0.980513, 59.0622),
+            1000:  BranchingRatio(0.0388697, 0.992405, 116.499)
+        },
+        140: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.137381, 0.979839, 58.2214),
+            1000:  BranchingRatio(0.0390506, 0.992418, 116.506)
+        },
+        141: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.138532, 0.979165, 57.3737),
+            1000:  BranchingRatio(0.03923, 0.992431, 116.515)
+        },
+        142: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.139681, 0.978493, 56.5187),
+            1000:  BranchingRatio(0.0394081, 0.992442, 116.526)
+        },
+        143: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.140827, 0.977822, 55.6562),
+            1000:  BranchingRatio(0.0395848, 0.992454, 116.538)
+        },
+        144: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.14197, 0.977154, 54.7859),
+            1000:  BranchingRatio(0.0397602, 0.992465, 116.553)
+        },
+        145: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.143111, 0.976494, 53.9076),
+            1000:  BranchingRatio(0.0399342, 0.992476, 116.569)
+        },
+        146: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.144248, 0.975842, 53.0209),
+            1000:  BranchingRatio(0.040107, 0.992486, 116.587)
+        },
+        147: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.145383, 0.975199, 52.1254),
+            1000:  BranchingRatio(0.0402783, 0.992496, 116.607)
+        },
+        148: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.146515, 0.974565, 51.2207),
+            1000:  BranchingRatio(0.0404484, 0.992506, 116.629)
+        },
+        149: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.147644, 0.973943, 50.3065),
+            1000:  BranchingRatio(0.0406172, 0.992515, 116.653)
+        },
+        150: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.14877, 0.973332, 49.3822),
+            1000:  BranchingRatio(0.0407847, 0.992523, 116.679)
+        },
+        151: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.149893, 0.972733, 48.4474),
+            1000:  BranchingRatio(0.0409509, 0.99253, 116.706)
+        },
+        152: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.151014, 0.972148, 47.5016),
+            1000:  BranchingRatio(0.0411159, 0.992537, 116.735)
+        },
+        153: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.152131, 0.971582, 46.5441),
+            1000:  BranchingRatio(0.0412797, 0.992543, 116.766)
+        },
+        154: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.153245, 0.971029, 45.5743),
+            1000:  BranchingRatio(0.0414422, 0.992548, 116.8)
+        },
+        155: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.154357, 0.97049, 44.5915),
+            1000:  BranchingRatio(0.0416034, 0.992552, 116.834)
+        },
+        156: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.155465, 0.969965, 43.5948),
+            1000:  BranchingRatio(0.0417635, 0.992555, 116.871)
+        },
+        157: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.15657, 0.969456, 42.5836),
+            1000:  BranchingRatio(0.0419223, 0.992557, 116.91)
+        },
+        158: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.157672, 0.968964, 41.5566),
+            1000:  BranchingRatio(0.04208, 0.992557, 116.951)
+        },
+        159: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.158772, 0.968488, 40.513),
+            1000:  BranchingRatio(0.0422365, 0.992555, 116.993)
+        },
+        160: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.159868, 0.968029, 39.4515),
+            1000:  BranchingRatio(0.0423918, 0.99255, 117.038)
+        },
+        161: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.160961, 0.967589, 38.3707),
+            1000:  BranchingRatio(0.0425459, 0.992543, 117.084)
+        },
+        162: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.16205, 0.967166, 37.2691),
+            1000:  BranchingRatio(0.0426989, 0.992532, 117.132)
+        },
+        163: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.163137, 0.966386, 35.5488),
+            1000:  BranchingRatio(0.0428508, 0.992517, 117.183)
+        },
+        164: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.164221, 0.966379, 34.9963),
+            1000:  BranchingRatio(0.0430015, 0.992494, 117.235)
+        },
+        165: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.165301, 0.966016, 33.8208),
+            1000:  BranchingRatio(0.0431511, 0.992463, 117.289)
+        },
+        166: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.166378, 0.965673, 32.6159),
+            1000:  BranchingRatio(0.0432996, 0.992415, 117.345)
+        },
+        167: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.167452, 0.965353, 31.3783),
+            1000:  BranchingRatio(0.0434469, 0.992338, 117.403)
+        },
+        168: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.168523, 0.965055, 30.1043),
+            1000:  BranchingRatio(0.0435932, 0.992297, 117.463)
+        },
+        169: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.169591, 0.964782, 28.7895),
+            1000:  BranchingRatio(0.0437384, 0.99228, 117.525)
+        },
+        170: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.170655, 0.964535, 27.4284),
+            1000:  BranchingRatio(0.0438825, 0.991343, 117.589)
+        },
+        171: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.171717, 0.964315, 26.0144),
+            1000:  BranchingRatio(0.0440256, 0.990125, 117.655)
+        },
+        172: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.172775, 0.964126, 24.5389),
+            1000:  BranchingRatio(0.0441676, 0.988695, 117.723)
+        },
+        173: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.17383, 0.963971, 22.9909),
+            1000:  BranchingRatio(0.0443086, 0.987229, 117.793)
+        },
+        174: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.174881, 0.963855, 21.3558),
+            1000:  BranchingRatio(0.0444485, 0.985367, 117.865)
+        },
+        175: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.17593, 0.963785, 19.6136),
+            1000:  BranchingRatio(0.0445873, 0.983543, 117.939)
+        },
+        176: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.176975, 0.963771, 17.7348),
+            1000:  BranchingRatio(0.0447252, 0.981664, 118.015)
+        },
+        177: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.178017, 0.963831, 15.6743),
+            1000:  BranchingRatio(0.044862, 0.979771, 118.093)
+        },
+        178: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.179055, 0.964, 13.3547),
+            1000:  BranchingRatio(0.0449979, 0.977915, 118.173)
+        },
+        179: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.180091, 0.964354, 10.6215),
+            1000:  BranchingRatio(0.0451327, 0.976158, 118.255)
+        },
+        180: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.181123, 0.965156, 7.05295),
+            1000:  BranchingRatio(0.0452666, 0.974576, 118.339)
+        },
+        181: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0453994, 0.973269, 118.426)
+        },
+        182: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.812775, 0.912001, 30.2842),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0455313, 0.972373, 118.514)
+        },
+        183: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.817553, 0.913662, 64.7039),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0456622, 0.972079, 118.604)
+        },
+        184: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0457922, 0.972901, 118.696)
+        },
+        185: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0459212, 0.974805, 118.791)
+        },
+        186: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(0.0460493, 0.972805, 118.887)
+        },
+        187: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        188: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        189: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        190: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        191: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        192: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        193: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        194: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        195: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        196: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        197: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        198: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        199: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        200: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        201: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        202: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        203: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        204: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        205: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        206: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        207: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        208: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        209: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        210: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        211: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        212: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        213: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        214: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        215: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        216: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        217: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        218: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        219: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(-1, -1, -1),
+            1000:  BranchingRatio(-1, -1, -1)
+        }
+    },
+    155: {
+        5: {
+            -1000:  BranchingRatio(0.00240701, 0.949256, 133.818),
+            -200:  BranchingRatio(0.00235588, 0.950747, 133.547),
+            200:  BranchingRatio(0.00232525, 0.94959, 133.599),
+            1000:  BranchingRatio(0.00228389, 0.947305, 134.316)
+        },
+        6: {
+            -1000:  BranchingRatio(0.00203753, 0.975848, 133.707),
+            -200:  BranchingRatio(0.00195759, 0.976825, 133.43),
+            200:  BranchingRatio(0.0019112, 0.976235, 133.482),
+            1000:  BranchingRatio(0.00184996, 0.974967, 134.154)
+        },
+        7: {
+            -1000:  BranchingRatio(0.00191258, 0.984636, 133.588),
+            -200:  BranchingRatio(0.00179268, 0.985657, 133.316),
+            200:  BranchingRatio(0.00172522, 0.985507, 133.374),
+            1000:  BranchingRatio(0.00163823, 0.984951, 134.023)
+        },
+        8: {
+            -1000:  BranchingRatio(0.00193784, 0.987098, 133.451),
+            -200:  BranchingRatio(0.00176428, 0.988395, 133.197),
+            200:  BranchingRatio(0.00166954, 0.988606, 133.266),
+            1000:  BranchingRatio(0.00155025, 0.98858, 133.905)
+        },
+        9: {
+            -1000:  BranchingRatio(0.00207002, 0.987185, 133.293),
+            -200:  BranchingRatio(0.00182628, 0.988866, 133.069),
+            200:  BranchingRatio(0.00169719, 0.989387, 133.153),
+            1000:  BranchingRatio(0.00153846, 0.989781, 133.793)
+        },
+        10: {
+            -1000:  BranchingRatio(0.00228815, 0.986363, 133.109),
+            -200:  BranchingRatio(0.00195463, 0.988484, 132.928),
+            200:  BranchingRatio(0.00178322, 0.989282, 133.034),
+            1000:  BranchingRatio(0.00157738, 0.990024, 133.683)
+        },
+        11: {
+            -1000:  BranchingRatio(0.00258222, 0.985208, 132.895),
+            -200:  BranchingRatio(0.00213588, 0.987805, 132.775),
+            200:  BranchingRatio(0.0019133, 0.988857, 132.908),
+            1000:  BranchingRatio(0.00165221, 0.989897, 133.573)
+        },
+        12: {
+            -1000:  BranchingRatio(0.0029481, 0.983954, 132.65),
+            -200:  BranchingRatio(0.00236215, 0.987053, 132.606),
+            200:  BranchingRatio(0.00207867, 0.988345, 132.772),
+            1000:  BranchingRatio(0.00175376, 0.989646, 133.462)
+        },
+        13: {
+            -1000:  BranchingRatio(0.00338517, 0.982692, 132.37),
+            -200:  BranchingRatio(0.00262865, 0.986321, 132.423),
+            200:  BranchingRatio(0.00227366, 0.987838, 132.629),
+            1000:  BranchingRatio(0.00187601, 0.989373, 133.35)
+        },
+        14: {
+            -1000:  BranchingRatio(0.00389503, 0.981456, 132.051),
+            -200:  BranchingRatio(0.00293244, 0.98564, 132.223),
+            200:  BranchingRatio(0.00249442, 0.987375, 132.476),
+            1000:  BranchingRatio(0.00201479, 0.98912, 133.235)
+        },
+        15: {
+            -1000:  BranchingRatio(0.00448092, 0.980255, 131.69),
+            -200:  BranchingRatio(0.00327167, 0.98502, 132.007),
+            200:  BranchingRatio(0.00273824, 0.986967, 132.315),
+            1000:  BranchingRatio(0.0021671, 0.988904, 133.118)
+        },
+        16: {
+            -1000:  BranchingRatio(0.00514727, 0.979085, 131.283),
+            -200:  BranchingRatio(0.00364524, 0.98446, 131.774),
+            200:  BranchingRatio(0.00300312, 0.986612, 132.144),
+            1000:  BranchingRatio(0.00233073, 0.988727, 132.999)
+        },
+        17: {
+            -1000:  BranchingRatio(0.00589959, 0.977938, 130.825),
+            -200:  BranchingRatio(0.0040525, 0.983955, 131.523),
+            200:  BranchingRatio(0.00328752, 0.986309, 131.965),
+            1000:  BranchingRatio(0.00250393, 0.988587, 132.878)
+        },
+        18: {
+            -1000:  BranchingRatio(0.00674435, 0.976804, 130.312),
+            -200:  BranchingRatio(0.00449314, 0.983499, 131.254),
+            200:  BranchingRatio(0.00359025, 0.98605, 131.777),
+            1000:  BranchingRatio(0.00268534, 0.988481, 132.755)
+        },
+        19: {
+            -1000:  BranchingRatio(0.00768893, 0.975675, 129.738),
+            -200:  BranchingRatio(0.00496707, 0.983084, 130.967),
+            200:  BranchingRatio(0.00391034, 0.985831, 131.581),
+            1000:  BranchingRatio(0.00287385, 0.988404, 132.63)
+        },
+        20: {
+            -1000:  BranchingRatio(0.00874169, 0.97454, 129.097),
+            -200:  BranchingRatio(0.00547436, 0.982705, 130.66),
+            200:  BranchingRatio(0.00424696, 0.985646, 131.376),
+            1000:  BranchingRatio(0.00306854, 0.988352, 132.503)
+        },
+        21: {
+            -1000:  BranchingRatio(0.00991196, 0.973391, 128.383),
+            -200:  BranchingRatio(0.00601521, 0.982358, 130.334),
+            200:  BranchingRatio(0.00459941, 0.98549, 131.162),
+            1000:  BranchingRatio(0.00326862, 0.988321, 132.375)
+        },
+        22: {
+            -1000:  BranchingRatio(0.0112101, 0.972219, 127.587),
+            -200:  BranchingRatio(0.00658988, 0.982036, 129.987),
+            200:  BranchingRatio(0.00496709, 0.985359, 130.941),
+            1000:  BranchingRatio(0.00347342, 0.988307, 132.245)
+        },
+        23: {
+            -1000:  BranchingRatio(0.0126478, 0.971015, 126.702),
+            -200:  BranchingRatio(0.00719873, 0.981738, 129.62),
+            200:  BranchingRatio(0.00534945, 0.985249, 130.711),
+            1000:  BranchingRatio(0.00368236, 0.988308, 132.115)
+        },
+        24: {
+            -1000:  BranchingRatio(0.0142377, 0.969769, 125.719),
+            -200:  BranchingRatio(0.00784216, 0.981458, 129.232),
+            200:  BranchingRatio(0.005746, 0.985158, 130.473),
+            1000:  BranchingRatio(0.00389493, 0.988322, 131.982)
+        },
+        25: {
+            -1000:  BranchingRatio(0.0159941, 0.968473, 124.626),
+            -200:  BranchingRatio(0.00852059, 0.981195, 128.821),
+            200:  BranchingRatio(0.00615629, 0.985084, 130.227),
+            1000:  BranchingRatio(0.00411067, 0.988346, 131.849)
+        },
+        26: {
+            -1000:  BranchingRatio(0.0179328, 0.967116, 123.411),
+            -200:  BranchingRatio(0.0092345, 0.980947, 128.389),
+            200:  BranchingRatio(0.00657989, 0.985023, 129.973),
+            1000:  BranchingRatio(0.00432919, 0.988378, 131.716)
+        },
+        27: {
+            -1000:  BranchingRatio(0.0200713, 0.965687, 122.061),
+            -200:  BranchingRatio(0.00998438, 0.98071, 127.933),
+            200:  BranchingRatio(0.00701643, 0.984974, 129.712),
+            1000:  BranchingRatio(0.00455012, 0.988417, 131.581)
+        },
+        28: {
+            -1000:  BranchingRatio(0.022429, 0.964172, 120.56),
+            -200:  BranchingRatio(0.0107708, 0.980484, 127.454),
+            200:  BranchingRatio(0.00746551, 0.984935, 129.443),
+            1000:  BranchingRatio(0.00477313, 0.988462, 131.446)
+        },
+        29: {
+            -1000:  BranchingRatio(0.0250275, 0.962554, 118.891),
+            -200:  BranchingRatio(0.0115942, 0.980267, 126.951),
+            200:  BranchingRatio(0.00792681, 0.984906, 129.167),
+            1000:  BranchingRatio(0.00499793, 0.988512, 131.311)
+        },
+        30: {
+            -1000:  BranchingRatio(0.0278909, 0.960811, 117.033),
+            -200:  BranchingRatio(0.0124552, 0.980058, 126.422),
+            200:  BranchingRatio(0.00839997, 0.984884, 128.883),
+            1000:  BranchingRatio(0.00522424, 0.988566, 131.175)
+        },
+        31: {
+            -1000:  BranchingRatio(0.0310459, 0.958912, 114.962),
+            -200:  BranchingRatio(0.0133543, 0.979855, 125.868),
+            200:  BranchingRatio(0.00888467, 0.98487, 128.592),
+            1000:  BranchingRatio(0.00545183, 0.988622, 131.039)
+        },
+        32: {
+            -1000:  BranchingRatio(0.0345226, 0.956808, 112.65),
+            -200:  BranchingRatio(0.0142922, 0.979658, 125.288),
+            200:  BranchingRatio(0.00938061, 0.984862, 128.294),
+            1000:  BranchingRatio(0.00568046, 0.988681, 130.902)
+        },
+        33: {
+            -1000:  BranchingRatio(0.0383545, 0.954419, 110.066),
+            -200:  BranchingRatio(0.0152693, 0.979466, 124.681),
+            200:  BranchingRatio(0.00988749, 0.984858, 127.989),
+            1000:  BranchingRatio(0.00590992, 0.988743, 130.766)
+        },
+        34: {
+            -1000:  BranchingRatio(0.0425789, 0.951586, 107.171),
+            -200:  BranchingRatio(0.0162865, 0.979277, 124.045),
+            200:  BranchingRatio(0.010405, 0.98486, 127.677),
+            1000:  BranchingRatio(0.00614004, 0.988805, 130.63)
+        },
+        35: {
+            -1000:  BranchingRatio(0.047238, 0.947923, 103.92),
+            -200:  BranchingRatio(0.017344, 0.979092, 123.381),
+            200:  BranchingRatio(0.0109329, 0.984866, 127.358),
+            1000:  BranchingRatio(0.00637063, 0.988869, 130.494)
+        },
+        36: {
+            -1000:  BranchingRatio(0.0523792, 0.941925, 100.258),
+            -200:  BranchingRatio(0.0184428, 0.978909, 122.687),
+            200:  BranchingRatio(0.0114709, 0.984875, 127.033),
+            1000:  BranchingRatio(0.00660154, 0.988933, 130.358)
+        },
+        37: {
+            -1000:  BranchingRatio(0.0580558, 0.895568, 96.117),
+            -200:  BranchingRatio(0.0195832, 0.978729, 121.963),
+            200:  BranchingRatio(0.0120187, 0.984888, 126.701),
+            1000:  BranchingRatio(0.00683261, 0.988998, 130.223)
+        },
+        38: {
+            -1000:  BranchingRatio(0.0643281, 0.724675, 91.413),
+            -200:  BranchingRatio(0.020766, 0.97855, 121.208),
+            200:  BranchingRatio(0.012576, 0.984904, 126.363),
+            1000:  BranchingRatio(0.00706372, 0.989063, 130.088)
+        },
+        39: {
+            -1000:  BranchingRatio(0.0712647, 0.573958, 86.0366),
+            -200:  BranchingRatio(0.0219918, 0.978373, 120.42),
+            200:  BranchingRatio(0.0131427, 0.984922, 126.018),
+            1000:  BranchingRatio(0.00729473, 0.989128, 129.953)
+        },
+        40: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0232612, 0.978196, 119.598),
+            200:  BranchingRatio(0.0137185, 0.984942, 125.668),
+            1000:  BranchingRatio(0.00752553, 0.989193, 129.819)
+        },
+        41: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0245748, 0.97802, 118.743),
+            200:  BranchingRatio(0.014303, 0.984965, 125.31),
+            1000:  BranchingRatio(0.00775602, 0.989257, 129.686)
+        },
+        42: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0259333, 0.977843, 117.851),
+            200:  BranchingRatio(0.0148962, 0.984989, 124.947),
+            1000:  BranchingRatio(0.00798609, 0.989322, 129.553)
+        },
+        43: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0273373, 0.977666, 116.923),
+            200:  BranchingRatio(0.0154976, 0.985015, 124.578),
+            1000:  BranchingRatio(0.00821566, 0.989385, 129.42)
+        },
+        44: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0287875, 0.977488, 115.956),
+            200:  BranchingRatio(0.0161073, 0.985042, 124.203),
+            1000:  BranchingRatio(0.00844463, 0.989449, 129.289)
+        },
+        45: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0302845, 0.977309, 114.951),
+            200:  BranchingRatio(0.0167248, 0.985071, 123.822),
+            1000:  BranchingRatio(0.00867294, 0.989511, 129.158)
+        },
+        46: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.031829, 0.977129, 113.904),
+            200:  BranchingRatio(0.01735, 0.9851, 123.436),
+            1000:  BranchingRatio(0.00890051, 0.989573, 129.028)
+        },
+        47: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0334215, 0.976946, 112.816),
+            200:  BranchingRatio(0.0179828, 0.985131, 123.044),
+            1000:  BranchingRatio(0.00912728, 0.989635, 128.899)
+        },
+        48: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0350627, 0.976761, 111.683),
+            200:  BranchingRatio(0.0186228, 0.985162, 122.646),
+            1000:  BranchingRatio(0.00935318, 0.989695, 128.771)
+        },
+        49: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0367534, 0.976573, 110.506),
+            200:  BranchingRatio(0.0192698, 0.985194, 122.243),
+            1000:  BranchingRatio(0.00957817, 0.989755, 128.644)
+        },
+        50: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.038494, 0.976381, 109.281),
+            200:  BranchingRatio(0.0199237, 0.985227, 121.834),
+            1000:  BranchingRatio(0.00980218, 0.989813, 128.518)
+        },
+        51: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0402854, 0.976185, 108.007),
+            200:  BranchingRatio(0.0205844, 0.98526, 121.42),
+            1000:  BranchingRatio(0.0100252, 0.989871, 128.392)
+        },
+        52: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.042128, 0.975985, 106.682),
+            200:  BranchingRatio(0.0212515, 0.985294, 121.001),
+            1000:  BranchingRatio(0.0102471, 0.989928, 128.268)
+        },
+        53: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0440226, 0.97578, 105.304),
+            200:  BranchingRatio(0.0219248, 0.985328, 120.577),
+            1000:  BranchingRatio(0.0104679, 0.989984, 128.145)
+        },
+        54: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0459697, 0.975568, 103.871),
+            200:  BranchingRatio(0.0226044, 0.985363, 120.147),
+            1000:  BranchingRatio(0.0106876, 0.990039, 128.023)
+        },
+        55: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0479701, 0.975349, 102.38),
+            200:  BranchingRatio(0.0232898, 0.985398, 119.713),
+            1000:  BranchingRatio(0.0109062, 0.990094, 127.902)
+        },
+        56: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0500242, 0.975122, 100.828),
+            200:  BranchingRatio(0.023981, 0.985433, 119.273),
+            1000:  BranchingRatio(0.0111235, 0.990147, 127.782)
+        },
+        57: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0521329, 0.974886, 99.2128),
+            200:  BranchingRatio(0.0246778, 0.985468, 118.829),
+            1000:  BranchingRatio(0.0113396, 0.9902, 127.664)
+        },
+        58: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0542966, 0.974638, 97.5312),
+            200:  BranchingRatio(0.0253801, 0.985504, 118.38),
+            1000:  BranchingRatio(0.0115545, 0.990251, 127.546)
+        },
+        59: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0565161, 0.974376, 95.7797),
+            200:  BranchingRatio(0.0260875, 0.98554, 117.926),
+            1000:  BranchingRatio(0.011768, 0.990302, 127.43)
+        },
+        60: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0587918, 0.974099, 93.9544),
+            200:  BranchingRatio(0.0268001, 0.985575, 117.468),
+            1000:  BranchingRatio(0.0119803, 0.990352, 127.315)
+        },
+        61: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0611244, 0.973802, 92.0514),
+            200:  BranchingRatio(0.0275176, 0.985611, 117.004),
+            1000:  BranchingRatio(0.0121913, 0.990401, 127.201)
+        },
+        62: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0635146, 0.973481, 90.0658),
+            200:  BranchingRatio(0.0282399, 0.985647, 116.537),
+            1000:  BranchingRatio(0.012401, 0.990449, 127.088)
+        },
+        63: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0659628, 0.973129, 87.9926),
+            200:  BranchingRatio(0.0289668, 0.985683, 116.064),
+            1000:  BranchingRatio(0.0126093, 0.990497, 126.977)
+        },
+        64: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0684696, 0.972735, 85.8259),
+            200:  BranchingRatio(0.0296982, 0.985718, 115.588),
+            1000:  BranchingRatio(0.0128162, 0.990543, 126.867)
+        },
+        65: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0710357, 0.972285, 83.5593),
+            200:  BranchingRatio(0.0304339, 0.985754, 115.107),
+            1000:  BranchingRatio(0.0130218, 0.990589, 126.758)
+        },
+        66: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0736616, 0.97175, 81.1851),
+            200:  BranchingRatio(0.0311738, 0.98579, 114.621),
+            1000:  BranchingRatio(0.0132261, 0.990634, 126.651)
+        },
+        67: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0763478, 0.971066, 78.6947),
+            200:  BranchingRatio(0.0319178, 0.985825, 114.132),
+            1000:  BranchingRatio(0.0134289, 0.990678, 126.544)
+        },
+        68: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0790948, 0.970108, 76.078),
+            200:  BranchingRatio(0.0326656, 0.985861, 113.638),
+            1000:  BranchingRatio(0.0136304, 0.990721, 126.44)
+        },
+        69: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0819033, 0.969628, 73.323),
+            200:  BranchingRatio(0.0334173, 0.985896, 113.14),
+            1000:  BranchingRatio(0.0138305, 0.990764, 126.336)
+        },
+        70: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0847737, 0.964408, 70.4155),
+            200:  BranchingRatio(0.0341725, 0.985931, 112.637),
+            1000:  BranchingRatio(0.0140292, 0.990806, 126.234)
+        },
+        71: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0877064, 0.954902, 67.3378),
+            200:  BranchingRatio(0.0349313, 0.985966, 112.131),
+            1000:  BranchingRatio(0.0142264, 0.990847, 126.133)
+        },
+        72: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.090702, 0.943753, 64.0686),
+            200:  BranchingRatio(0.0356935, 0.986001, 111.621),
+            1000:  BranchingRatio(0.0144223, 0.990887, 126.034)
+        },
+        73: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0937609, 0.931498, 60.5804),
+            200:  BranchingRatio(0.0364589, 0.986035, 111.106),
+            1000:  BranchingRatio(0.0146168, 0.990927, 125.936)
+        },
+        74: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.0968837, 0.918518, 56.8374),
+            200:  BranchingRatio(0.0372275, 0.98607, 110.588),
+            1000:  BranchingRatio(0.0148099, 0.990966, 125.839)
+        },
+        75: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.100071, 0.905098, 52.7917),
+            200:  BranchingRatio(0.037999, 0.986104, 110.066),
+            1000:  BranchingRatio(0.0150016, 0.991004, 125.744)
+        },
+        76: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.103322, 0.891441, 48.3749),
+            200:  BranchingRatio(0.0387735, 0.986138, 109.54),
+            1000:  BranchingRatio(0.0151918, 0.991041, 125.65)
+        },
+        77: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.106639, 0.878304, 43.4864),
+            200:  BranchingRatio(0.0395508, 0.986171, 109.01),
+            1000:  BranchingRatio(0.0153807, 0.991078, 125.557)
+        },
+        78: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.110021, 0.86357, 37.962),
+            200:  BranchingRatio(0.0403307, 0.986205, 108.477),
+            1000:  BranchingRatio(0.0155682, 0.991114, 125.466)
+        },
+        79: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.113469, 0.847174, 31.5006),
+            200:  BranchingRatio(0.0411132, 0.986238, 107.94),
+            1000:  BranchingRatio(0.0157543, 0.99115, 125.377)
+        },
+        80: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.116983, 0.831934, 23.4119),
+            200:  BranchingRatio(0.0418981, 0.986271, 107.399),
+            1000:  BranchingRatio(0.015939, 0.991185, 125.289)
+        },
+        81: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.120563, 0.822404, 10.8607),
+            200:  BranchingRatio(0.0426854, 0.986303, 106.854),
+            1000:  BranchingRatio(0.0161224, 0.991219, 125.202)
+        },
+        82: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.043475, 0.986335, 106.306),
+            1000:  BranchingRatio(0.0163043, 0.991253, 125.116)
+        },
+        83: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0442667, 0.986367, 105.755),
+            1000:  BranchingRatio(0.0164849, 0.991286, 125.033)
+        },
+        84: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0450604, 0.986399, 105.2),
+            1000:  BranchingRatio(0.0166641, 0.991319, 124.95)
+        },
+        85: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0458561, 0.986429, 104.53),
+            1000:  BranchingRatio(0.016842, 0.991351, 124.869)
+        },
+        86: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0466536, 0.986461, 104.079),
+            1000:  BranchingRatio(0.0170185, 0.991382, 124.79)
+        },
+        87: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.047453, 0.986492, 103.513),
+            1000:  BranchingRatio(0.0171936, 0.991413, 124.712)
+        },
+        88: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0482539, 0.986522, 102.945),
+            1000:  BranchingRatio(0.0173674, 0.991444, 124.635)
+        },
+        89: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0490565, 0.986552, 102.372),
+            1000:  BranchingRatio(0.0175399, 0.991474, 124.56)
+        },
+        90: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0498606, 0.986582, 101.797),
+            1000:  BranchingRatio(0.017711, 0.991503, 124.486)
+        },
+        91: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.050666, 0.986611, 101.218),
+            1000:  BranchingRatio(0.0178808, 0.991532, 124.414)
+        },
+        92: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0514728, 0.98664, 100.636),
+            1000:  BranchingRatio(0.0180493, 0.99156, 124.343)
+        },
+        93: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0522809, 0.986669, 100.051),
+            1000:  BranchingRatio(0.0182166, 0.991588, 124.274)
+        },
+        94: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0530901, 0.986697, 99.4624),
+            1000:  BranchingRatio(0.0183825, 0.991616, 124.206)
+        },
+        95: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0539004, 0.986724, 98.8707),
+            1000:  BranchingRatio(0.0185471, 0.991643, 124.14)
+        },
+        96: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0547117, 0.986752, 98.2759),
+            1000:  BranchingRatio(0.0187105, 0.991669, 124.076)
+        },
+        97: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0555239, 0.986779, 97.6779),
+            1000:  BranchingRatio(0.0188726, 0.991696, 124.012)
+        },
+        98: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.056337, 0.986805, 97.0769),
+            1000:  BranchingRatio(0.0190334, 0.991721, 123.951)
+        },
+        99: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0571509, 0.986831, 96.4727),
+            1000:  BranchingRatio(0.019193, 0.991747, 123.89)
+        },
+        100: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0579655, 0.986857, 95.8655),
+            1000:  BranchingRatio(0.0193513, 0.991771, 123.832)
+        },
+        101: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0587808, 0.986882, 95.2552),
+            1000:  BranchingRatio(0.0195084, 0.991796, 123.775)
+        },
+        102: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0595966, 0.986906, 94.6419),
+            1000:  BranchingRatio(0.0196643, 0.99182, 123.719)
+        },
+        103: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.060413, 0.98693, 94.0255),
+            1000:  BranchingRatio(0.0198189, 0.991844, 123.665)
+        },
+        104: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0612298, 0.986954, 93.4062),
+            1000:  BranchingRatio(0.0199724, 0.991867, 123.613)
+        },
+        105: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.062047, 0.986977, 92.7838),
+            1000:  BranchingRatio(0.0201247, 0.99189, 123.562)
+        },
+        106: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0628646, 0.986999, 92.1585),
+            1000:  BranchingRatio(0.0202758, 0.991912, 123.512)
+        },
+        107: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0636824, 0.987021, 91.5302),
+            1000:  BranchingRatio(0.0204257, 0.991934, 123.464)
+        },
+        108: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0645004, 0.987042, 90.899),
+            1000:  BranchingRatio(0.0205744, 0.991956, 123.418)
+        },
+        109: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0653186, 0.987063, 90.2648),
+            1000:  BranchingRatio(0.020722, 0.991978, 123.373)
+        },
+        110: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0661369, 0.987083, 89.6277),
+            1000:  BranchingRatio(0.0208684, 0.991999, 123.33)
+        },
+        111: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0669552, 0.987102, 88.9876),
+            1000:  BranchingRatio(0.0210137, 0.99202, 123.288)
+        },
+        112: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0677735, 0.98712, 88.3446),
+            1000:  BranchingRatio(0.0211579, 0.99204, 123.248)
+        },
+        113: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0685918, 0.987138, 87.6987),
+            1000:  BranchingRatio(0.0213009, 0.99206, 123.21)
+        },
+        114: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0694099, 0.987155, 87.0498),
+            1000:  BranchingRatio(0.0214429, 0.99208, 123.173)
+        },
+        115: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0702279, 0.987171, 86.398),
+            1000:  BranchingRatio(0.0215837, 0.9921, 123.137)
+        },
+        116: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0710457, 0.987185, 85.7433),
+            1000:  BranchingRatio(0.0217235, 0.992119, 123.104)
+        },
+        117: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0718632, 0.987199, 85.0857),
+            1000:  BranchingRatio(0.0218621, 0.992138, 123.071)
+        },
+        118: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0726804, 0.987212, 84.4251),
+            1000:  BranchingRatio(0.0219997, 0.992156, 123.041)
+        },
+        119: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0734973, 0.987223, 83.7615),
+            1000:  BranchingRatio(0.0221362, 0.992175, 123.012)
+        },
+        120: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0743137, 0.987233, 83.0951),
+            1000:  BranchingRatio(0.0222717, 0.992193, 122.984)
+        },
+        121: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0751297, 0.98724, 82.4256),
+            1000:  BranchingRatio(0.0224061, 0.99221, 122.959)
+        },
+        122: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0759453, 0.987245, 81.7532),
+            1000:  BranchingRatio(0.0225395, 0.992228, 122.935)
+        },
+        123: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0767603, 0.987248, 81.0778),
+            1000:  BranchingRatio(0.0226719, 0.992245, 122.912)
+        },
+        124: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0775748, 0.987248, 80.3994),
+            1000:  BranchingRatio(0.0228032, 0.992262, 122.891)
+        },
+        125: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0783886, 0.987246, 79.718),
+            1000:  BranchingRatio(0.0229336, 0.992278, 122.872)
+        },
+        126: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0792019, 0.98724, 79.0335),
+            1000:  BranchingRatio(0.0230629, 0.992295, 122.854)
+        },
+        127: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0800144, 0.98723, 78.346),
+            1000:  BranchingRatio(0.0231912, 0.992311, 122.838)
+        },
+        128: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0808262, 0.987213, 77.6554),
+            1000:  BranchingRatio(0.0233186, 0.992326, 122.824)
+        },
+        129: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0816373, 0.987189, 76.9616),
+            1000:  BranchingRatio(0.0234449, 0.992342, 122.811)
+        },
+        130: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0824476, 0.987156, 76.2648),
+            1000:  BranchingRatio(0.0235704, 0.992357, 122.8)
+        },
+        131: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.083257, 0.987163, 75.2559),
+            1000:  BranchingRatio(0.0236948, 0.992372, 122.79)
+        },
+        132: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0840657, 0.987191, 74.8614),
+            1000:  BranchingRatio(0.0238183, 0.992387, 122.783)
+        },
+        133: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0848734, 0.987211, 74.1549),
+            1000:  BranchingRatio(0.0239409, 0.992402, 122.777)
+        },
+        134: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0856802, 0.98723, 73.4451),
+            1000:  BranchingRatio(0.0240625, 0.992416, 122.772)
+        },
+        135: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0864861, 0.987249, 72.7319),
+            1000:  BranchingRatio(0.0241832, 0.99243, 122.769)
+        },
+        136: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.087291, 0.987054, 72.0154),
+            1000:  BranchingRatio(0.024303, 0.992443, 122.768)
+        },
+        137: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0880949, 0.986642, 71.2954),
+            1000:  BranchingRatio(0.0244219, 0.992457, 122.769)
+        },
+        138: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0888977, 0.986195, 70.572),
+            1000:  BranchingRatio(0.0245399, 0.99247, 122.771)
+        },
+        139: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0896995, 0.985719, 69.845),
+            1000:  BranchingRatio(0.024657, 0.992482, 122.775)
+        },
+        140: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0905002, 0.985222, 69.1144),
+            1000:  BranchingRatio(0.0247732, 0.992495, 122.781)
+        },
+        141: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0912998, 0.984706, 68.3801),
+            1000:  BranchingRatio(0.0248885, 0.992507, 122.789)
+        },
+        142: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0920982, 0.984176, 67.642),
+            1000:  BranchingRatio(0.0250029, 0.992519, 122.798)
+        },
+        143: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0928955, 0.983635, 66.9002),
+            1000:  BranchingRatio(0.0251165, 0.992531, 122.809)
+        },
+        144: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0936916, 0.983086, 66.1544),
+            1000:  BranchingRatio(0.0252293, 0.992542, 122.821)
+        },
+        145: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0944864, 0.982532, 65.4046),
+            1000:  BranchingRatio(0.0253412, 0.992553, 122.835)
+        },
+        146: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0952801, 0.981973, 64.6508),
+            1000:  BranchingRatio(0.0254522, 0.992563, 122.852)
+        },
+        147: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0960724, 0.981413, 63.8927),
+            1000:  BranchingRatio(0.0255625, 0.992573, 122.869)
+        },
+        148: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0968635, 0.980852, 63.1304),
+            1000:  BranchingRatio(0.0256719, 0.992583, 122.889)
+        },
+        149: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0976533, 0.980292, 62.3637),
+            1000:  BranchingRatio(0.0257804, 0.992592, 122.91)
+        },
+        150: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0984418, 0.979735, 61.5924),
+            1000:  BranchingRatio(0.0258882, 0.992601, 122.933)
+        },
+        151: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.0992289, 0.979181, 60.8165),
+            1000:  BranchingRatio(0.0259952, 0.99261, 122.958)
+        },
+        152: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.100015, 0.978632, 60.0358),
+            1000:  BranchingRatio(0.0261014, 0.992617, 122.985)
+        },
+        153: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.100799, 0.978089, 59.2502),
+            1000:  BranchingRatio(0.0262067, 0.992624, 123.013)
+        },
+        154: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.101582, 0.977552, 58.4595),
+            1000:  BranchingRatio(0.0263114, 0.992631, 123.043)
+        },
+        155: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.102364, 0.977022, 57.6636),
+            1000:  BranchingRatio(0.0264152, 0.992637, 123.075)
+        },
+        156: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.103144, 0.9765, 56.8622),
+            1000:  BranchingRatio(0.0265182, 0.992641, 123.109)
+        },
+        157: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.103922, 0.975986, 56.0552),
+            1000:  BranchingRatio(0.0266205, 0.992645, 123.145)
+        },
+        158: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.104699, 0.975482, 55.2424),
+            1000:  BranchingRatio(0.0267221, 0.992648, 123.182)
+        },
+        159: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.105475, 0.974986, 54.4236),
+            1000:  BranchingRatio(0.0268228, 0.992649, 123.221)
+        },
+        160: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.106249, 0.974501, 53.5985),
+            1000:  BranchingRatio(0.0269229, 0.992649, 123.262)
+        },
+        161: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.107022, 0.974026, 52.7669),
+            1000:  BranchingRatio(0.0270222, 0.992647, 123.305)
+        },
+        162: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.107793, 0.973562, 51.9285),
+            1000:  BranchingRatio(0.0271208, 0.992643, 123.35)
+        },
+        163: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.108563, 0.973109, 51.083),
+            1000:  BranchingRatio(0.0272186, 0.992636, 123.396)
+        },
+        164: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.109331, 0.972668, 50.2302),
+            1000:  BranchingRatio(0.0273158, 0.992625, 123.445)
+        },
+        165: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.110097, 0.972238, 49.3697),
+            1000:  BranchingRatio(0.0274122, 0.99261, 123.495)
+        },
+        166: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.110862, 0.97182, 48.5011),
+            1000:  BranchingRatio(0.0275079, 0.992589, 123.547)
+        },
+        167: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.111626, 0.971415, 47.624),
+            1000:  BranchingRatio(0.0276029, 0.992559, 123.601)
+        },
+        168: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.112387, 0.971022, 46.7381),
+            1000:  BranchingRatio(0.0276973, 0.992514, 123.657)
+        },
+        169: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.113147, 0.970641, 45.8428),
+            1000:  BranchingRatio(0.0277909, 0.992442, 123.714)
+        },
+        170: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.113906, 0.970274, 44.9376),
+            1000:  BranchingRatio(0.0278838, 0.992389, 123.774)
+        },
+        171: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.114663, 0.969271, 43.059),
+            1000:  BranchingRatio(0.0279761, 0.992368, 123.835)
+        },
+        172: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.115418, 0.9695, 42.9773),
+            1000:  BranchingRatio(0.0280677, 0.991521, 123.899)
+        },
+        173: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.116171, 0.96925, 42.1573),
+            1000:  BranchingRatio(0.0281587, 0.990312, 123.964)
+        },
+        174: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.116923, 0.968936, 41.2067),
+            1000:  BranchingRatio(0.0282489, 0.988876, 124.031)
+        },
+        175: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.117673, 0.968636, 40.2429),
+            1000:  BranchingRatio(0.0283385, 0.987256, 124.1)
+        },
+        176: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.118422, 0.968349, 39.2651),
+            1000:  BranchingRatio(0.0284275, 0.985489, 124.171)
+        },
+        177: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.119168, 0.968077, 38.2721),
+            1000:  BranchingRatio(0.0285158, 0.983608, 124.244)
+        },
+        178: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.119913, 0.967819, 37.263),
+            1000:  BranchingRatio(0.0286035, 0.981648, 124.319)
+        },
+        179: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.120657, 0.967576, 36.2364),
+            1000:  BranchingRatio(0.0286906, 0.979647, 124.395)
+        },
+        180: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.121398, 0.967348, 35.191),
+            1000:  BranchingRatio(0.028777, 0.977651, 124.474)
+        },
+        181: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.122138, 0.967134, 34.1251),
+            1000:  BranchingRatio(0.0288628, 0.975711, 124.555)
+        },
+        182: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.122876, 0.966937, 33.037),
+            1000:  BranchingRatio(0.0289479, 0.973896, 124.637)
+        },
+        183: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.736743, 0.913882, 43.127),
+            200:  BranchingRatio(0.123613, 0.966755, 31.9245),
+            1000:  BranchingRatio(0.0290325, 0.972289, 124.722)
+        },
+        184: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.742886, 0.912221, 34.8028),
+            200:  BranchingRatio(0.124347, 0.96659, 30.7851),
+            1000:  BranchingRatio(0.0291164, 0.971005, 124.808)
+        },
+        185: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(0.748975, 0.910766, 23.1585),
+            200:  BranchingRatio(0.12508, 0.966442, 29.616),
+            1000:  BranchingRatio(0.0291998, 0.9702, 124.897)
+        },
+        186: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.125811, 0.966311, 28.4138),
+            1000:  BranchingRatio(0.0292825, 0.970063, 124.987)
+        },
+        187: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.126541, 0.966198, 27.1744),
+            1000:  BranchingRatio(0.0293646, 0.97091, 125.08)
+        },
+        188: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.127268, 0.966105, 25.8929),
+            1000:  BranchingRatio(0.0294462, 0.972793, 125.174)
+        },
+        189: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.127994, 0.966031, 24.5631),
+            1000:  BranchingRatio(0.0295272, 0.972746, 125.27)
+        },
+        190: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.128718, 0.965978, 23.1773),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        191: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.12944, 0.965953, 21.7257),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        192: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.130161, 0.96598, 20.195),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        193: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.130879, 0.966048, 18.5673),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        194: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.131596, 0.966163, 16.8165),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        195: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.132311, 0.966322, 14.9027),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        196: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.133024, 0.966354, 13.3447),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        197: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.133736, 0.966517, 10.254),
+            1000:  BranchingRatio(-1, -1, -1)
+        },
+        198: {
+            -1000:  BranchingRatio(-1, -1, -1),
+            -200:  BranchingRatio(-1, -1, -1),
+            200:  BranchingRatio(0.134445, 0.967009, 7.05019),
             1000:  BranchingRatio(-1, -1, -1)
         },
         199: {
