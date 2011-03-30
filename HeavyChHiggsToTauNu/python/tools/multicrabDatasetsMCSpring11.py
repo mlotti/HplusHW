@@ -177,6 +177,16 @@ datasets = {
             },
         },
     },
+    "QCD_Pt300to470_TuneZ2_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 1.168e+03,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt_300to470_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 450 # Adjusted for PATtuple file size
+            },
+        },
+    },
     
 
     # EWK MadGraph
