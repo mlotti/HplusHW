@@ -92,6 +92,11 @@ namespace HPlus {
     TH1 *hWeightedMETAfterFakeMETVeto;
     TH1 *hRTauAfterAllSelections;
 
+    // TauID-MET Corralation plots
+    TH1 *hMETRightBeforeTauID;
+    TH1 *hMETRightAfterTauID;
+    TH2 *hTauIDVsMETRightBeforeTauID;
+
     // Histograms for later change of factorization map
     TH1 *hNonWeightedTauPtAfterJetSelection;
     TH1 *hNonWeightedTauPtAfterTauIDNoRtau;
@@ -109,6 +114,7 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterTauID;
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
+
   };
 }
 

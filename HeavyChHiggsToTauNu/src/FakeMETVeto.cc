@@ -21,9 +21,14 @@ namespace HPlus {
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
-    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets;#Delta#phi;N / 0.01", 50, 0., 0.5);
-    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected taus;#Delta#phi;N / 0.01", 50, 0., 0.5);
+    
+    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 1", 180, 0., 180.0);
+    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 1", 180, 0., 180.0);
+    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 1", 180, 0., 180.0);
+    
+    hClosestDeltaPhiZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 1", 50, 0., 50.0);
+    hClosestDeltaPhiToJetsZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 1", 50, 0., 50.0);
+    hClosestDeltaPhiToTausZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus_Zoom", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 1", 50, 0., 50.0);
   }
 
   FakeMETVeto::~FakeMETVeto() {}
@@ -42,6 +47,7 @@ namespace HPlus {
         fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
     }
     hClosestDeltaPhiToTaus->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
+    hClosestDeltaPhiToTausZoom->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
     
     // Loop over selected jets
     fClosestDeltaPhiToJets = 999.;
@@ -51,6 +57,7 @@ namespace HPlus {
         fClosestDeltaPhiToJets = fabs(myDeltaPhi);
     }
     hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
+    hClosestDeltaPhiToJetsZoom->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
 
     // Combine results - for now take just DeltaPhi(MET,jet) into account 
     //if (fClosestDeltaPhiToJets < fClosestDeltaPhiToTaus) {
@@ -62,6 +69,7 @@ namespace HPlus {
     // New: Don't combine results. Take deltaPhi(MET, jets)
     fClosestDeltaPhi = fClosestDeltaPhiToJets;
     hClosestDeltaPhi->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
+    hClosestDeltaPhiZoom->Fill(fClosestDeltaPhi, fEventWeight.getWeight());
 
     // Make cut
     passEvent = true; 

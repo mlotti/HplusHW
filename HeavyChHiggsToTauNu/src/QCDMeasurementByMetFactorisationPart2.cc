@@ -51,6 +51,10 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms 
+    hMETRightBeforeTauID = fs->make<TH1F>("METRightBeforeTauID", "METRightBeforeTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hMETRightAfterTauID = fs->make<TH1F>("METRightAfterTauID", "METRightAfterTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hTauIDVsMETRightBeforeTauID= fs->make<TH2F>("TauIDVsMETRightBeforeTauID", "TauID_Vs_MET;#tau-ID; MET, GeV ; N_{events} / 5 GeV", 3, -0.5, 1.5, 60, 0., 300. );
+    
     hMETAfterJetSelection = fs->make<TH1F>("METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterJetSelection->Sumw2();
     hWeightedMETAfterJetSelection = fs->make<TH1F>("METAfterJetSelectionWeighted", "METAfterJetSelectionWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
@@ -183,10 +187,15 @@ namespace HPlus {
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
 
-
     // Apply rest of tauID without Rtau
     TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup);
+
+    hTauIDVsMETRightBeforeTauID->Fill(tauDataForTauID.passedEvent(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hMETRightBeforeTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
     if(!tauDataForTauID.passedEvent()) return;
+    hMETRightAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
     increment(fOneProngTauIDWithoutRtauCounter);
     hWeightedMETAfterTauIDNoRtau->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hNonWeightedTauPtAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
