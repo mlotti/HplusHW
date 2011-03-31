@@ -73,7 +73,8 @@ config = {
         "patMadhatter": "file:/mnt/flustre/mkortela/data//TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
     },
     "41Xdata": {
-        "triggerProcess": "HLT"
+        "triggerProcess": "HLT",
+        "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/405/780C336D-D64F-E011-984D-003048F01E88.root",
     },
 }
 
