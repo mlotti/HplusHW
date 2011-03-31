@@ -119,6 +119,18 @@ TauValidation::~TauValidation() {}
 
 void TauValidation::beginJob()
 {
+  return;
+}
+
+void TauValidation::endJob(){
+  return;
+}
+
+void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
+{
+  ///Get PDT Table
+//  iSetup.getData( fPDGTable );
+
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/GeneratorTau");
@@ -177,17 +189,6 @@ void TauValidation::beginJob()
 */
   }
 
-  return;
-}
-
-void TauValidation::endJob(){
-  return;
-}
-
-void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
-{
-  ///Get PDT Table
-//  iSetup.getData( fPDGTable );
   return;
 }
 void TauValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){return;}

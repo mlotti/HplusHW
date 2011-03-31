@@ -60,7 +60,9 @@ TriggerObjectValidation::TriggerObjectValidation(const edm::ParameterSet& iConfi
 
 TriggerObjectValidation::~TriggerObjectValidation() {}
 
-void TriggerObjectValidation::beginJob(){
+void TriggerObjectValidation::beginJob(){}
+
+void TriggerObjectValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/TriggerObjects");
@@ -82,8 +84,6 @@ void TriggerObjectValidation::beginJob(){
     std::cout << "Trigger path: " << hltPathFilter.label() << std::endl;
   }
 }
-
-void TriggerObjectValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 void TriggerObjectValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void TriggerObjectValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
