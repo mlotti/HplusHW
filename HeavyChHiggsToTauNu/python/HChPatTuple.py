@@ -386,7 +386,19 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo):
         process.CaloTauDiscriminationSequenceForChargedHiggs *
         process.CaloTauDiscriminationSequenceForChargedHiggsCont
     )
-    if dataVersion.is39X() or dataVersion.is38X() or dataVersion.is36X() or dataVersion.is35X():
+    # hpsTancTaus are only in 311X MC (41X is data)
+    if dataVersion.is41X() or dataVersion.is39X() or dataVersion.is38X() or dataVersion.is36X() or dataVersion.is35X():
+        if dataVersion.is41X():
+            process.hplusHpsTancTauSequence *= (
+                process.ak5PFJetTracksAssociatorAtVertex *
+                process.pfRecoTauTagInfoProducer *
+                process.shrinkingConePFTauDiscriminationByTaNC *
+                process.shrinkingConePFTauDiscriminationByTaNCfrHalfPercent *
+                process.shrinkingConePFTauDiscriminationByTaNCfrOnePercent *
+                process.shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent *
+                process.shrinkingConePFTauDiscriminationByTaNCfrTenthPercent
+            )
+
         process.hplusHpsTancTauSequence *= (
             process.ak5PFJetsRecoTauPiZeros *
             process.combinatoricRecoTaus *
