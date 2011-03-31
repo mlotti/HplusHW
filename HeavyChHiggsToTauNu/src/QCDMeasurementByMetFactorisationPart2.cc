@@ -52,21 +52,32 @@ namespace HPlus {
 
     // Book histograms 
     hMETRightBeforeTauID = fs->make<TH1F>("METRightBeforeTauID", "METRightBeforeTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hMETRightBeforeTauID->Sumw2();
+
     hMETRightAfterTauID = fs->make<TH1F>("METRightAfterTauID", "METRightAfterTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
-    hTauIDVsMETRightBeforeTauID= fs->make<TH2F>("TauIDVsMETRightBeforeTauID", "TauID_Vs_MET;#tau-ID; MET, GeV ; N_{events} / 5 GeV", 3, -0.5, 1.5, 60, 0., 300. );
-    
+    hMETRightAfterTauID->Sumw2();
+
+    hTauIDVsMETRightBeforeTauID = fs->make<TH2F>("TauIDVsMETRightBeforeTauID", "TauID_Vs_MET;#tau-ID; MET, GeV ; N_{events} / 5 GeV", 3, -0.5, 1.5, 60, 0., 300. );
+    hTauIDVsMETRightBeforeTauID->Sumw2();
+	
     hMETAfterJetSelection = fs->make<TH1F>("METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterJetSelection->Sumw2();
+
     hWeightedMETAfterJetSelection = fs->make<TH1F>("METAfterJetSelectionWeighted", "METAfterJetSelectionWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterJetSelection->Sumw2();
+
     hWeightedMETAfterTauIDNoRtau = fs->make<TH1F>("METAfterTauIDNoRtauWeighted", "METAfterTauIDNoRtauWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterTauIDNoRtau->Sumw2();
+
     hWeightedMETAfterTauID = fs->make<TH1F>("METAfterTauIDWeighted", "METAfterTauIDWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterTauID->Sumw2();
+
     hWeightedMETAfterBTagging = fs->make<TH1F>("METAfterBTaggingWeighted", "METAfterBTaggingWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterBTagging->Sumw2();
+
     hWeightedMETAfterFakeMETVeto = fs->make<TH1F>("METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterFakeMETVeto->Sumw2();    
+
     hRTauAfterAllSelections = fs->make<TH1F>("RTauAfterAllSelections", "RTauAfterAllSelections;Rtau;N_{events}/0.02", 60, 0., 1.2);
     hRTauAfterAllSelections->Sumw2();
 
