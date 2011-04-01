@@ -1,17 +1,12 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 #dataVersion="39Xredigi"
-dataVersion="311Xredigi"
-#dataVersion="41Xdata"
+#dataVersion="311Xredigi"
+dataVersion="41Xdata"
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # Create Process
 process = cms.Process("HChPatTuple")
