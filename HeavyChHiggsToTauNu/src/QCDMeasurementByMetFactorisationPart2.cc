@@ -51,10 +51,10 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms 
-    hMETRightBeforeTauID = fs->make<TH1F>("METRightBeforeTauID", "METRightBeforeTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hMETRightBeforeTauID = fs->make<TH1F>("METRightBeforeTauID", "METRightBeforeTauID;MET, GeV;N / 5 GeV", 60, 0., 300.);
     hMETRightBeforeTauID->Sumw2();
 
-    hMETRightAfterTauID = fs->make<TH1F>("METRightAfterTauID", "METRightAfterTauID;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hMETRightAfterTauID = fs->make<TH1F>("METRightAfterTauID", "METRightAfterTauID;MET, GeV;N / 5 GeV", 60, 0., 300.);
     hMETRightAfterTauID->Sumw2();
 
     hTauIDVsMETRightBeforeTauID = fs->make<TH2F>("TauIDVsMETRightBeforeTauID", "TauID_Vs_MET;#tau-ID; MET, GeV ; N_{events} / 5 GeV", 3, -0.5, 1.5, 60, 0., 300. );
