@@ -17,6 +17,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "TTree.h"
 #include "TH2F.h"
 
@@ -79,6 +81,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
+    DeltaPhi fDeltaPhi;
+    TransverseMass fTransverseMass;
     
     // Factorization table
     FactorizationTable fFactorizationTable;
@@ -145,7 +149,6 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterTauID;
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
-
   };
 }
 

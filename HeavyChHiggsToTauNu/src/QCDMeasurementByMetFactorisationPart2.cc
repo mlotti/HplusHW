@@ -329,8 +329,8 @@ namespace HPlus {
     hWeightedBJetsAfterAllSelections->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     hWeightedMETAfterAllSelections->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hWeightedFakeMETVetoAfterAllSelections->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
-    //hWeightedDeltaPhiAllSelections->Fill(, fEventWeight.getWeight()); // FIXME
-    //hWeightedTransverseMass->Fill(, fEventWeight.getWeight()); // FIXME
+    hWeightedDeltaPhiAfterAllSelections->Fill(fDeltaPhi.reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()))*180.0/3.14159, fEventWeight.getWeight());
+    hWeightedTransverseMassAfterAllSelections->Fill(fTransverseMass.reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
   }
 
   void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, int tauPtBin, double weightWithoutMET) {
