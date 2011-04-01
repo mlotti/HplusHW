@@ -22,13 +22,14 @@ namespace HPlus {
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
     
-    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 1", 180, 0., 180.0);
-    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 1", 180, 0., 180.0);
-    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 1", 180, 0., 180.0);
+    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 5", 36, -2.5, 177.5);
+    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 5", 36, -2.5, 177.5);
+    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 5", 36, -2.5, 177.5);
     
-    hClosestDeltaPhiZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 1", 50, 0., 50.0);
-    hClosestDeltaPhiToJetsZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 1", 50, 0., 50.0);
-    hClosestDeltaPhiToTausZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus_Zoom", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 1", 50, 0., 50.0);
+    hClosestDeltaPhiZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);#Delta#phi;N / 2", 25, 0., 50.0);
+    hClosestDeltaPhiToJetsZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);#Delta#phi;N / 2", 25, 0., 50.0);
+    hClosestDeltaPhiToTausZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus_Zoom", "min DeltaPhi(MET,selected taus);#Delta#phi;N / 2", 25, 0., 50.0);
+
   }
 
   FakeMETVeto::~FakeMETVeto() {}
