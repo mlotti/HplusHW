@@ -19,6 +19,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "TTree.h"
 #include "TH2F.h"
 
@@ -43,8 +44,8 @@ namespace HPlus {
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     // Different forks of analysis
-    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, int tauPtBin, double weightWithoutMET);
-    void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, int tauPtBin, double weightWithoutMET);
+    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
+    void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -65,6 +66,7 @@ namespace HPlus {
     Count fEvtTopologyCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
+    Count fForwardJetVetoCounter;
     
     // Counters for propagating result into signal region from reversed rtau control region
 
@@ -81,6 +83,7 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
+    ForwardJetVeto fForwardJetVeto;
     DeltaPhi fDeltaPhi;
     TransverseMass fTransverseMass;
     
@@ -94,6 +97,7 @@ namespace HPlus {
     TH1 *hWeightedMETAfterTauID;
     TH1 *hWeightedMETAfterBTagging;
     TH1 *hWeightedMETAfterFakeMETVeto;
+    TH1 *hWeightedMETAfterForwardJetVeto;
     // After all selections -- FIXME move to separate class
     TH1 *hWeightedTauPtAfterAllSelections;
     TH1 *hWeightedTauEtaAfterAllSelections;
@@ -124,6 +128,7 @@ namespace HPlus {
     TH1 *hStdNonWeightedTauPtAfterTauID;
     TH1 *hStdNonWeightedTauPtAfterBTagging;
     TH1 *hStdNonWeightedTauPtAfterFakeMETVeto;
+    TH1 *hStdNonWeightedTauPtAfterForwardJetVeto;
     TH1 *hStdWeightedRtau;
     TH1 *hStdWeightedBjets;
     TH1 *hStdWeightedFakeMETVeto;
@@ -134,6 +139,7 @@ namespace HPlus {
     TH1 *hFactRtauBNonWeightedTauPtAfterTauID;
     TH1 *hFactRtauBNonWeightedTauPtAfterBTagging;
     TH1 *hFactRtauBNonWeightedTauPtAfterFakeMETVeto;
+    TH1 *hFactRtauBNonWeightedTauPtAfterForwardJetVeto;
 
     // ABCD(tau isol. vs. b-tag) cut path - ugly duplication, but fast code
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterJetSelection[4];
@@ -141,7 +147,9 @@ namespace HPlus {
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterMET[4];
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterRtau[4];
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterFakeMETVeto[4];
+    TH1 *hABCDTauIsolBNonWeightedTauPtAfterForwardJetVeto[4];
     TH1 *hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterFakeMETVeto[4];
+    TH1 *hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[4];
 
     // Control histograms for P(MET>70)
     TH1 *hMETPassProbabilityAfterJetSelection;
@@ -149,6 +157,7 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterTauID;
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
+    TH1 *hMETPassProbabilityAfterForwardJetVeto;
   };
 }
 
