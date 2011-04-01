@@ -1,7 +1,7 @@
 import multicrabDatasetsCommon as common
 
 datasets = {
-    # Single tau
+    # Single tau + MET
     "Tau_160404-161176_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
@@ -10,8 +10,14 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 60, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
                 "lumiMask": "DCSOnly"
+            },
+            "pattuple_v10_test3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_160404_pattuple_v10_test3-0afb79e1b4a9efb21952e294fbf97113/USER",
+                "luminosity": 10.589643,
+                "number_of_jobs": 2
             },
         }
     },
@@ -26,6 +32,12 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "DCSOnly"
             },
+            "pattuple_v10_test3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_161216_pattuple_v10_test3-85ec5544f54122dfd23b7a7442771d8e/USER",
+                "luminosity": 12.291216,
+                "number_of_jobs": 2
+            },
         }
     },
 
@@ -38,8 +50,14 @@ datasets = {
             "AOD": {
                 "datasetpath": "/TauPlusX/Run2011A-PromptReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PATtuple file size
+                "number_of_jobs": 5, # Adjusted for PATtuple file size
                 "lumiMask": "DCSOnly"
+            },
+            "pattuple_v10_test3": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v1_AOD_160404_pattuple_v10_test3-7ca7b85da23747106d19bca56315fb4a/USER",
+                "luminosity": 22.880859,
+                "number_of_jobs": 1
             },
         }
     },
