@@ -18,6 +18,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "TTree.h"
+#include "TH2F.h"
 
 namespace edm {
   class ParameterSet;
@@ -39,7 +40,10 @@ namespace HPlus {
 
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    
+    // Different forks of analysis
+    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, int tauPtBin, double weightWithoutMET);
+    void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, int tauPtBin, double weightWithoutMET);
+
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
 
@@ -61,10 +65,6 @@ namespace HPlus {
     Count fFakeMETVetoCounter;
     
     // Counters for propagating result into signal region from reversed rtau control region
-    Count fABCDNegativeRtauNegativeBTagCounter;
-    Count fABCDNegativeRtauPositiveBTagCounter;
-    Count fABCDPositiveRtauNegativeBTagCounter;
-    Count fABCDPositiveRtauPositiveBTagCounter;
 
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
@@ -83,32 +83,69 @@ namespace HPlus {
     // Factorization table
     FactorizationTable fFactorizationTable;
     
-    // Histograms
+    // MET Histograms
     TH1 *hMETAfterJetSelection;
     TH1 *hWeightedMETAfterJetSelection;
     TH1 *hWeightedMETAfterTauIDNoRtau;
     TH1 *hWeightedMETAfterTauID;
     TH1 *hWeightedMETAfterBTagging;
     TH1 *hWeightedMETAfterFakeMETVeto;
-    TH1 *hRTauAfterAllSelections;
+    // After all selections -- FIXME move to separate class
+    TH1 *hWeightedTauPtAfterAllSelections;
+    TH1 *hWeightedTauEtaAfterAllSelections;
+    TH1 *hWeightedRTauAfterAllSelections;
+    TH1 *hWeightedNJetsAfterAllSelections;
+    TH1 *hWeightedBJetsAfterAllSelections;
+    TH1 *hWeightedMETAfterAllSelections;
+    TH1 *hWeightedFakeMETVetoAfterAllSelections;
+    TH1 *hWeightedDeltaPhiAfterAllSelections;
+    TH1 *hWeightedTransverseMassAfterAllSelections;
 
-    // Histograms for later change of factorization map
-    TH1 *hNonWeightedTauPtAfterJetSelection;
-    TH1 *hNonWeightedTauPtAfterTauIDNoRtau;
-    TH1 *hNonWeightedTauPtAfterTauID;
-    TH1 *hNonWeightedTauPtAfterBTagging;
-    TH1 *hNonWeightedTauPtAfterFakeMETVeto;
-    TH1 *fNonWeightedABCDNegativeRtauNegativeBTag;
-    TH1 *fNonWeightedABCDNegativeRtauPositiveBTag;
-    TH1 *fNonWeightedABCDPositiveRtauNegativeBTag;
-    TH1 *fNonWeightedABCDPositiveRtauPositiveBTag;
-    
+    // TauID-MET Correlation plots -- will not work like this, need to do in separate class (does not measure full tauID or if changed, the tau sub counters will be messed up)
+    TH1 *hTauIDMETCorrelationMETRightBeforeTauID; // FIXME
+    TH1 *hTauIDMETCorrelationMETRightAfterTauID; // FIXME
+    TH2 *hTauIDMETCorrelationTauIDVsMETRightBeforeTauID; // FIXME
+
+    // METFactorization details
+    TH1 *hMETFactorizationNJetsBefore;
+    TH1 *hMETFactorizationNJetsAfter;
+    TH2 *hMETFactorizationNJets;
+    TH1 *hMETFactorizationBJetsBefore;
+    TH1 *hMETFactorizationBJetsAfter;
+    TH2 *hMETFactorizationBJets;
+
+    // Standard cut path
+    TH1 *hStdNonWeightedTauPtAfterJetSelection;
+    TH1 *hStdNonWeightedTauPtAfterTauIDNoRtau;
+    TH1 *hStdNonWeightedTauPtAfterTauID;
+    TH1 *hStdNonWeightedTauPtAfterBTagging;
+    TH1 *hStdNonWeightedTauPtAfterFakeMETVeto;
+    TH1 *hStdWeightedRtau;
+    TH1 *hStdWeightedBjets;
+    TH1 *hStdWeightedFakeMETVeto;
+
+    // Standard cuts with factorized rtau and b-tagging
+    TH1 *hFactRtauBNonWeightedTauPtAfterJetSelection;
+    TH1 *hFactRtauBNonWeightedTauPtAfterTauIDNoRtau;
+    TH1 *hFactRtauBNonWeightedTauPtAfterTauID;
+    TH1 *hFactRtauBNonWeightedTauPtAfterBTagging;
+    TH1 *hFactRtauBNonWeightedTauPtAfterFakeMETVeto;
+
+    // ABCD(tau isol. vs. b-tag) cut path - ugly duplication, but fast code
+    TH1 *hABCDTauIsolBNonWeightedTauPtAfterJetSelection[4];
+    TH2 *hABCDTauIsolBNonWeightedTauPtVsMET[4];
+    TH1 *hABCDTauIsolBNonWeightedTauPtAfterMET[4];
+    TH1 *hABCDTauIsolBNonWeightedTauPtAfterRtau[4];
+    TH1 *hABCDTauIsolBNonWeightedTauPtAfterFakeMETVeto[4];
+    TH1 *hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterFakeMETVeto[4];
+
     // Control histograms for P(MET>70)
     TH1 *hMETPassProbabilityAfterJetSelection;
     TH1 *hMETPassProbabilityAfterTauIDNoRtau;
     TH1 *hMETPassProbabilityAfterTauID;
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
+
   };
 }
 
