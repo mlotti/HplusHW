@@ -74,7 +74,7 @@ config = {
     },
     "41Xdata": {
         "triggerProcess": "HLT",
-        "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/405/780C336D-D64F-E011-984D-003048F01E88.root",
+        "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
     },
 }
 
