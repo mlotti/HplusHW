@@ -13,12 +13,24 @@ multicrab.extendDatasets(
     [
 ########
 #
+# 41X
+#
+########
+    # Data
+    "Tau_160404-161176_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
+    "Tau_161216-161312_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
+    "TauPlusX_160404-161312_Prompt" # HLT_QuadJet40_IsoPFTau40_v1
+    
+########
+#
 # 311X
 #
 ########
         # Signal MC
-        "TTToHplusBWB_M150_Spring11",
-        "TTToHplusBWB_M155_Spring11",
+#        "TTToHplusBWB_M150_Spring11",
+#        "TTToHplusBWB_M155_Spring11",
+        # Background MC
+#        "TTJets_TuneZ2_Spring11",
 
 
 ########
@@ -140,7 +152,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v10_test1"
+    name += "_pattuple_v10_test3"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
@@ -176,7 +188,7 @@ multicrab.forEachDataset(addSplitMode)
 multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
 
 # Create multicrab task configuration and run 'multicrab -create'
-#multicrab.createTasks()
+multicrab.createTasks()
 
 # Create task configuration only
-multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(configOnly=True)
