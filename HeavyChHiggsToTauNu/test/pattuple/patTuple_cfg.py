@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 #dataVersion="39Xredigi"
-#dataVersion="311Xredigi"
-dataVersion="41Xdata"
+dataVersion="311Xredigi"
+#dataVersion="41Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
