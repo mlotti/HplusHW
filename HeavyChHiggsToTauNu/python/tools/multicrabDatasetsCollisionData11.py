@@ -15,10 +15,10 @@ datasets = {
             },
         }
     },
-    "Tau_161176-161312_Prompt": {
+    "Tau_161216-161312_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
-        "runs": (161176, 161312), # This is prompt RECO, so check the run range again when running!
+        "runs": (161216, 161312), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v1/AOD",
