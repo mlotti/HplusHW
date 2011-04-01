@@ -282,7 +282,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
             process.patElectronIsolation *
             process.patElectrons
         )
-        process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
+        if dataVersion.is41X():
+            process.patDefaultSequence.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
+        else:
+            process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
 
         process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
         process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
