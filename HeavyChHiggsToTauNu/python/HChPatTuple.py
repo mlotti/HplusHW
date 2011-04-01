@@ -277,16 +277,12 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
         process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        process.makePatElectronsIdAndElectrons = cms.Sequence(
+        process.patDefaultSequence.replace(process.patElectrons, (
             process.simpleEleIdSequence *
             process.patElectronIsolation *
             process.patElectrons
-        )
-        if dataVersion.is41X():
-            process.patDefaultSequence.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
-        else:
-            process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
-
+        ))
+                                           
         process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
         process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
         process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
