@@ -300,6 +300,7 @@ namespace HPlus {
     hTauIDMETCorrelationTauIDVsMETRightBeforeTauID->Fill(tauDataForTauID.passedEvent(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hTauIDMETCorrelationMETRightBeforeTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
     if(!tauDataForTauID.passedEvent()) return;
+
     increment(fOneProngTauIDWithoutRtauCounter);
     hWeightedMETAfterTauIDNoRtau->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);

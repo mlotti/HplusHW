@@ -74,6 +74,9 @@ namespace HPlus {
     TH1 *hClosestDeltaPhi;
     TH1 *hClosestDeltaPhiToJets;
     TH1 *hClosestDeltaPhiToTaus;
+    TH1 *hClosestDeltaPhiZoom;
+    TH1 *hClosestDeltaPhiToJetsZoom;
+    TH1 *hClosestDeltaPhiToTausZoom;
   };
 }
 
