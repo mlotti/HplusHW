@@ -44,7 +44,7 @@ namespace HPlus {
   private:
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     // Different forks of analysis
-    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
+    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
     void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer

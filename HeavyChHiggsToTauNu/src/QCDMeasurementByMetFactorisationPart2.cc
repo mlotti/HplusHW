@@ -291,7 +291,7 @@ namespace HPlus {
     }
 
     // Apply non-standard cut paths
-    analyzeABCDByTauIsolationAndBTagging(metData, tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+    analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     analyzeFactorizedBTaggingAndRtau(tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
     // Continue standard cut path
@@ -300,7 +300,6 @@ namespace HPlus {
     hTauIDMETCorrelationTauIDVsMETRightBeforeTauID->Fill(tauDataForTauID.passedEvent(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hTauIDMETCorrelationMETRightBeforeTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
     if(!tauDataForTauID.passedEvent()) return;
-
     increment(fOneProngTauIDWithoutRtauCounter);
     hWeightedMETAfterTauIDNoRtau->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
@@ -359,7 +358,7 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
   }
 
-  void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
+  void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;
     if (!tauData.passedEvent()) {
@@ -377,7 +376,7 @@ namespace HPlus {
     }
     // Do cut flow in proper phase space
     hABCDTauIsolBNonWeightedTauPtAfterJetSelection[myIndex]->Fill(tauPtBin, weightWithoutMET);
-    hABCDTauIsolBNonWeightedTauPtVsMET[myIndex]->Fill(tauData.getSelectedTaus()[0]->pt(), METData.getSelectedMET()->et());
+    hABCDTauIsolBNonWeightedTauPtVsMET[myIndex]->Fill(selectedTau[0]->pt(), METData.getSelectedMET()->et());
     // ... obtain P(MET)
     if (METData.passedEvent()) hABCDTauIsolBNonWeightedTauPtAfterMET[myIndex]->Fill(tauPtBin, weightWithoutMET);
     // ... apply Rtau
