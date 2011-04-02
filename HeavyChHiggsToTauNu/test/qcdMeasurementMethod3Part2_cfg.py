@@ -111,6 +111,7 @@ process.qcdMeasurementMethod3Part2 = cms.EDProducer("HPlusQCDMeasurementByMetFac
     bTagging = param.bTagging,
     MET = param.MET,
     fakeMETVeto = param.fakeMETVeto,
+    forwardJetVeto = param.forwardJetVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
 )
 # Factorization (quick and dirty version)
