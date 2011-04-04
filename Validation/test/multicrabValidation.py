@@ -6,7 +6,7 @@ multicrab = Multicrab("crab_analysis.cfg", "validation_cfg.py", lumiMaskDir="../
 
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v6"
-pattupleVersion = "pattuple_v9"
+#pattupleVersion = "pattuple_v9"
 
 
 # Change this to true if you want to run the PAT on the fly (for
