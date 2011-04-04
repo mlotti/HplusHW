@@ -70,6 +70,36 @@ def addMuonSelection(process, postfix="", cut="(isolationR03().emEt+isolationR03
 def _signalAnalysisSetMuon(module, muons):
     module.tauEmbedding.originalMuon = cms.untracked.InputTag(muons)
 
+def addMuonRelativeIsolation(process, sequence, cut=0.1, prefix="muonSelectionIsolation"):
+    return addMuonIsolation(process, sequence, prefix, "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < %f" % cut)
+
+def addMuonIsolation(process, sequence, prefix, isolation):
+    selector = prefix+"Selected"
+    filter = prefix+"Filter"
+    counter = prefix
+
+    # Create modules
+    m1 = cms.EDFilter("HPlusCandViewLazyPtrSelector",
+        src = cms.InputTag("tauEmbeddingMuons"),
+        cut = cms.string(isolation)
+    )
+    m2 = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(selector),
+        minNumber = cms.uint32(1)
+    )
+    m3 = cms.EDProducer("EventCountProducer")
+
+    # Add modules to process
+    setattr(process, selector, m1)
+    setattr(process, filter, m2)
+    setattr(process, counter, m3)
+
+    # Add modules to sequence
+    sequence *= (m1 * m2 * m3)
+
+    # Return list of counter names
+    return [counter]
+
 def addMuonIsolationAnalyses(process, prefix, prototype, commonSequence, additionalCounters, modify=_signalAnalysisSetMuon, signalAnalysisCounters=True):
     detRelIso = "(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt()"
     #pfRelIso = 
