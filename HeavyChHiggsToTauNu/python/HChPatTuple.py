@@ -213,8 +213,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
             if not doPatTauIsoDeposits:
                 process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
             # Disable discriminators which are not in AOD
-            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
-            del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
+#            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+#            del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
 
         # Add visible taus    
         if dataVersion.isMC():
@@ -378,31 +378,13 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo):
     process.hplusHpsTancTauSequence = cms.Sequence()
     sequence = cms.Sequence(
         process.tautagging *
-        process.hplusHpsTancTauSequence *
+        process.PFTau *
         process.PFTauDiscriminationSequenceForChargedHiggs *
         process.PFTauDiscriminationSequenceForChargedHiggsCont *
         process.PFTauTestDiscriminationSequence *
         process.CaloTauDiscriminationSequenceForChargedHiggs *
         process.CaloTauDiscriminationSequenceForChargedHiggsCont
     )
-    # hpsTancTaus are only in 311X MC (41X is data)
-    if dataVersion.is41X() or dataVersion.is39X() or dataVersion.is38X() or dataVersion.is36X() or dataVersion.is35X():
-        if dataVersion.is41X():
-            process.hplusHpsTancTauSequence *= (
-                process.ak5PFJetTracksAssociatorAtVertex *
-                process.pfRecoTauTagInfoProducer *
-                process.shrinkingConePFTauDiscriminationByTaNC *
-                process.shrinkingConePFTauDiscriminationByTaNCfrHalfPercent *
-                process.shrinkingConePFTauDiscriminationByTaNCfrOnePercent *
-                process.shrinkingConePFTauDiscriminationByTaNCfrQuarterPercent *
-                process.shrinkingConePFTauDiscriminationByTaNCfrTenthPercent
-            )
-
-        process.hplusHpsTancTauSequence *= (
-            process.ak5PFJetsRecoTauPiZeros *
-            process.combinatoricRecoTaus *
-            process.hpsTancTauSequence
-         )
 
     if not doCalo:
         sequence.remove(process.tautagging)
