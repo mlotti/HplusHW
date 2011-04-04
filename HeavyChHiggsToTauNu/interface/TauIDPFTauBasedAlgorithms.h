@@ -22,8 +22,19 @@ namespace HPlus {
     size_t fIDIsolation;
   };
 
-  // TauIDPFShrinkingConeHPS ---------------------------------------------
-  class TauIDPFShrinkingConeHPS : public TauIDPFTauBase {
+  // TauIDPFHPSBase ---------------------------------------------
+  class TauIDPFHPSBase: public TauIDPFTauBase {
+  public:
+    TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel);
+    virtual ~TauIDPFHPSBase();
+
+    bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
+  };
+
+  /**
+   * \todo The class should be renamed to e.g. TauIDPFHPS (there's no shrinking cone here)
+   */
+  class TauIDPFShrinkingConeHPS : public TauIDPFHPSBase {
    public:
     /**
      * Implementation of the TauIDPFShrinkingConeHPS tau ID functionality
@@ -39,8 +50,10 @@ namespace HPlus {
     size_t fIDHPS;
   };
 
-  // TauIDPFShrinkingConeHPSMedium ---------------------------------------
-  class TauIDPFShrinkingConeHPSMedium : public TauIDPFTauBase {
+  /**
+   * \todo The class should be renamed to e.g. TauIDPFHPSMedium (there's no shrinking cone here)
+   */
+  class TauIDPFShrinkingConeHPSMedium : public TauIDPFHPSBase {
    public:
     /**
      * Implementation of the TauIDPFShrinkingConeHPSMedium tau ID functionality
@@ -73,8 +86,10 @@ namespace HPlus {
     size_t fIDTaNC;
   };
 
-  // TauIDPFShrinkingConeCombinedHPSTaNC -------------------------------------------
-  class TauIDPFShrinkingConeCombinedHPSTaNC : public TauIDPFTauBase {
+  /**
+   * \todo The class should be renamed to e.g. TauIDPFCombinedHPSTaNC (there's no shrinking cone here)
+   */
+  class TauIDPFShrinkingConeCombinedHPSTaNC : public TauIDPFHPSBase {
    public:
     /**
      * Implementation of the TauIDPFShrinkingConeCombinedHPSTaNC tau ID functionality
