@@ -21,6 +21,19 @@ datasets = {
             },
         }
     },
+    "Tau_160431-161016_Prompt": {
+        "dataVersion": "41Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
+        "runs": (160431, 1611016), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
     "Tau_161216-161312_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",

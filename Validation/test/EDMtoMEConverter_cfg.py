@@ -15,6 +15,7 @@ process.source = cms.Source("PoolSource",
 )
 
 #import os, glob
+#directory = "TTJets_TuneZ2_Spring11/res"
 #directory = "QCD_Pt80to120_TuneZ2_Spring11/res"
 #directory = "TauPlusX_160404-161312_Prompt/res"
 #directory = "Tau_160404-161176_Prompt/res"
