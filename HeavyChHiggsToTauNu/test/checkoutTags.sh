@@ -30,27 +30,37 @@ set -e
 # 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags for the latest recipe for 41X, removed HPS+TaNC tags as it is in AOD
 # 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags
 # 24.3.2011/M.Kortelainen CMSSW_4_1_3_patch2 Updated PAT tags
+# 1.4.2011/M.Kortelainen CMSSW_4_1_3_patch3 Updated tau and PAT tags to the latest recipe for 41X
+# 4.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tags for the new release, 
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
-
 # PAT
-addpkg PhysicsTools/FWLite      V02-03-13      
-addpkg PhysicsTools/PatAlgos    V08-06-01-12   
-addpkg PhysicsTools/PatExamples V00-05-10      
-addpkg PhysicsTools/UtilAlgos   V08-02-09-01   
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes41X
 
-# Tau bugfixes which are not yet in the release
-addpkg RecoTauTag/RecoTau
-cvs up -r 1.3 RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationByInvMass.cc
-cvs up -r 1.2 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationByInvMass_cfi.py
-cvs up -r 1.3 RecoTauTag/RecoTau/python/PFRecoTauDiscriminationForChargedHiggs_cfi.py
+# Tau+PAT
+# https://hypernews.cern.ch/HyperNews/CMS/get/physTools/2286/1/1/1/1/1/1/2/2/2/1.html
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Recommended_tags_for_2011_data_t
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
+# Tau
+cvs co -r V01-00-07-01   DataFormats/TauReco
+cvs co -r V01-00-27      RecoTauTag/Configuration
+cvs co -r V01-00-33      RecoTauTag/RecoTau
+cvs co -r V01-00-12      RecoTauTag/TauTagTools
+# PAT
+cvs co -r V06-04-02      DataFormats/PatCandidates
+cvs co -r V04-07-02      PhysicsTools/PFCandProducer
+cvs co -r V08-06-18      PhysicsTools/PatAlgos
+# patches
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatAlgos_V08-06-18.patch
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PFCandProducer_V04-07-02.patch
 
 # Luminosity
 cvs co -r V02-01-03 RecoLuminosity/LumiDB
 
 # Electron ID
+# https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
 cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 
 # Higgs skimms
