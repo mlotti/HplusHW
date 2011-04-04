@@ -1,24 +1,26 @@
 import multicrabDatasetsCommon as common
 
+# Goal: ~3kev/job
+
 datasets = {
     # Signal WH
     "TTToHplusBWB_M150_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 2.156448,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TTToHplusBWB_M155_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 1.375513,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
@@ -26,71 +28,71 @@ datasets = {
     # Signal HH
     "TToHplusBHminusB_M80_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": -1,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M100_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.316988,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M120_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.123367,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M140_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.025729,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M150_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.007141,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M155_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.002891,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
     "TToHplusBHminusB_M160_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1, # not calculated yet!
+        "crossSection": 0.000831,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 35, # Adjusted for PATtuple file size
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
@@ -133,7 +135,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -143,7 +145,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -153,7 +155,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -163,7 +165,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -173,7 +175,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -183,7 +185,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt_300to470_TuneZ2_7TeV_pythia6/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450 # Adjusted for PATtuple file size
+                "number_of_jobs": 490 # Adjusted for PATtuple file size
             },
         },
     },
@@ -215,7 +217,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 1500, # Adjusted for PATtuple file
+                "number_of_jobs": 2000, # Adjusted for PATtuple file
                                         # size. CRAB doesn't really
                                         # create this many jobs, but
                                         # the large number seems to be
@@ -230,7 +232,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 110, # Adjusted for PATtuple file size
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
             },
         },
     },
@@ -240,7 +242,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 110, # Adjusted for PATtuple file size
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
             },
         },
     },
@@ -250,7 +252,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 100, # Adjusted for PATtuple file size
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
             },
         },
     },
@@ -260,7 +262,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         }
     },
@@ -273,7 +275,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 200, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -283,7 +285,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 250, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
@@ -293,7 +295,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
-                "number_of_jobs": 250, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
             },
         },
     },
