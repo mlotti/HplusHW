@@ -24,7 +24,7 @@ if len(trigger) == 0:
 #mu9filter = "hltSingleL3MuonPre9"
 #mu15filter = "hltSingleL3MuonPre15"
 mu9filter = "hltSingleMu9L3Filtered9"
-mu15filter = "hltSingleM159L3Filtered15"
+mu15filter = "hltSingleMu15L3Filtered15"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -34,13 +34,15 @@ elif "HLT_Mu15" in trigger:
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
+print "Trigger %s, filter %s" % (trigger, triggerFilter)
+
 
 ################################################################################
 # Define the process
 process = cms.Process("TagProbe")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -155,6 +157,27 @@ process.probeMuons = cms.EDFilter("PATMuonRefSelector",
     )
 )
 
+process.muonMultiplicity = cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
+    allMuons = cms.untracked.PSet(
+        src = cms.InputTag("patMuonsWithTrigger"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+    tagMuons = cms.untracked.PSet(
+        src = cms.InputTag("tagMuons"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+    probeMuons = cms.untracked.PSet(
+        src = cms.InputTag("probeMuons"),
+        min = cms.untracked.int32(0),
+        max = cms.untracked.int32(20),
+        nbins = cms.untracked.int32(20)
+    ),
+)
+
 process.tagProbes = cms.EDProducer("CandViewShallowCloneCombiner",
 #    decay = cms.string("tagMuons@+ trkProbes@-"),
     decay = cms.string("tagMuons@+ probeMuons@-"),
@@ -166,6 +189,7 @@ process.tagAndProbeSequence = cms.Sequence(
     process.tagMuons *
 #    process.trkProbes *
     process.probeMuons *
+    process.muonMultiplicity *
     process.tagProbes
 )
 

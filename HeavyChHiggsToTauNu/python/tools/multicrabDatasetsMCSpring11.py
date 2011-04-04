@@ -167,7 +167,7 @@ datasets = {
             },
         },
     },
-    "QCD_Pt170to300_TuneZ2_Winter10": {
+    "QCD_Pt170to300_TuneZ2_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 2.426e+04,
         "data": {
@@ -259,7 +259,7 @@ datasets = {
         "crossSection": 2800,
         "data": {
             "AOD": {
-                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM",
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 450, # Adjusted for PATtuple file size
             },
         }
