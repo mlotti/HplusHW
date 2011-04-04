@@ -204,6 +204,9 @@ datasets = {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10_test1-fc6810ccf564527d387a28a4affcd399/USER",
                 "number_of_jobs": 12 # for 100 kev/job, ~30 min job
             },
+            "pattuple_v10_test3": {
+                "fallback": "pattuple_v10_test1"
+            },
         },
     }, 
     "WJets_TuneZ2_Spring11": {
