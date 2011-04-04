@@ -70,11 +70,12 @@ config = {
         "triggerProcess": "REDIGI311X",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data//TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
     },
     "41Xdata": {
         "triggerProcess": "HLT",
         "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v1/AOD/84CA2525-5750-E011-AEC1-003048D375AA.root",
     },
 }
 
