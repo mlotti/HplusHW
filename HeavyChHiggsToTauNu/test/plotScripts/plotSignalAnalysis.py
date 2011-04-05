@@ -30,61 +30,78 @@ counters = analysis+"Counters"
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Winter10","TTToHplusBWB_M100_Winter10","TTToHplusBWB_M140_Winter10","TTToHplusBWB_M160_Winter10"])
+    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10",
+                     "TTToHplusBWB_M90_Winter10",
+                     "TTToHplusBWB_M100_Winter10",
+#                     "TTToHplusBWB_M120_Winter10",
+                     "TTToHplusBWB_M140_Winter10",
+                     "TTToHplusBWB_M160_Winter10",
+                     ])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
+
+    #datasets.remove(["Data"])
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
+
+    # Wrapper to decrease typing and have the common options
+    def createPlot(*args):
+        kwargs = {}
+        kwargs["saveFormats"] = [".png"]
+        return plots.DataMCPlot(datasets, *args, **kwargs)
+        #return plots.MCPlot(datasets, *args, normalizeToLumi=36, **kwargs)
+
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=True)
-    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
-    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
-    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-    rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
+    tauPt(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=True)
+    tauEta(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
+    tauPhi(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
+    leadingTrack(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
+    rtau(createPlot(analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
 
-    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
-    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
+    rtau(createPlot(analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
+    rtau(createPlot(analysis+"/genRtau1ProngW"), "genRtau1ProngW")
    
-    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
-    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
-    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
+    tauCandPt(createPlot(analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
+    tauCandEta(createPlot(analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
+    tauCandPhi(createPlot(analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
     
    
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
+    met(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
+    met(createPlot(analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 
-    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
-    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhiJetMet"), "DeltaPhiJetMet")
+    deltaPhi(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+    deltaPhi2(createPlot(analysis+"/deltaPhiJetMet"), "DeltaPhiJetMet")
 
-    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass")
+    transverseMass(createPlot(analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
+    transverseMass2(createPlot(analysis+"/transverseMass"), "transverseMass")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "NumberOfJets")
+    jetPt(createPlot(analysis+"/jet_pt"), "jetPt")
+    jetEta(createPlot(analysis+"/jet_eta"), "jetEta")
+    jetPhi(createPlot(analysis+"/jet_phi"), "jetPhi")
+    numberOfJets(createPlot(analysis+"/NumberOfSelectedJets"), "NumberOfJets")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPt", rebin=10)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/bjet_eta"), "bjetEta", rebin=10)
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfBtaggedJets"), "NumberOfBJets")
+    jetPt(createPlot(analysis+"/bjet_pt"), "bjetPt", rebin=10)
+    jetEta(createPlot(analysis+"/bjet_eta"), "bjetEta", rebin=10)
+    numberOfJets(createPlot(analysis+"/NumberOfBtaggedJets"), "NumberOfBJets")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronPt"), "electronPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronEta"), "electronEta")
+    jetPt(createPlot(analysis+"/GlobalElectronPt"), "electronPt")
+    jetEta(createPlot(analysis+"/GlobalElectronEta"), "electronEta")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonPt"), "muonPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonEta"), "muonEta")
+    jetPt(createPlot(analysis+"/GlobalMuonPt"), "muonPt")
+    jetEta(createPlot(analysis+"/GlobalMuonEta"), "muonEta")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/MaxForwJetEt"), "maxForwJetPt")
+    jetPt(createPlot(analysis+"/MaxForwJetEt"), "maxForwJetPt")
 
-    etSumRatio(plots.DataMCPlot(datasets, analysis+"/EtSumRatio"), "etSumRatio")
+    etSumRatio(createPlot(analysis+"/EtSumRatio"), "etSumRatio")
     
     genComparison(datasets)
 
     eventCounter = counter.EventCounter(datasets)
-    eventCounter.normalizeMCByLuminosity()
+    #eventCounter.normalizeMCByLuminosity()
+    eventCounter.normalizeMCToLuminosity(36)
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     print eventCounter.getMainCounterTable().format()
@@ -447,9 +464,9 @@ def transverseMass(h, rebin=10):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
-def transverseMass2(h, rebin=1):
+def transverseMass2(h, name="transverseMass", rebin=1):
 #    name = flipName(h.getRootHistoPath())
-#    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "m_{T}(#tau jet, MET) (GeV/c^{2})" 
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
@@ -458,7 +475,6 @@ def transverseMass2(h, rebin=1):
     h.addMCUncertainty()
 
     opts = {"xmax": 200}
-    name = "transverseMass"
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
     h.setLegend(histograms.createLegend())
