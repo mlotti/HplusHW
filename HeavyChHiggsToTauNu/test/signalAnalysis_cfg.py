@@ -89,8 +89,8 @@ addPrimaryVertexSelection(process, process.commonSequence)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
-#param.setAllTauSelectionOperatingMode('standard')
-param.setAllTauSelectionOperatingMode('factorized')
+param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('factorized')
 
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
@@ -113,6 +113,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    topSelection = param.topSelection,                                      
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,

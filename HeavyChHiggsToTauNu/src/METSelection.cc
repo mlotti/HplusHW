@@ -22,7 +22,7 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hMet = makeTH<TH1F>(*fs, "met", "met", 50, 0., 200.);
+    hMet = makeTH<TH1F>(*fs, "met", "met", 400, 0., 400.);
     hMetSignif = makeTH<TH1F>(*fs, "metSignif", "metSignif", 50, 0., 500.);
     hMetSumEt  = makeTH<TH1F>(*fs, "metSumEt", "metSumEt", 50, 0., 1500.);
     hMetDivSumEt = makeTH<TH1F>(*fs, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);

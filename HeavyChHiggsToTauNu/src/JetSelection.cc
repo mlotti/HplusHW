@@ -41,12 +41,12 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPt = makeTH<TH1F>(*fs, "jet_pt", "het_pt", 100, 0., 200.);
+    hPt = makeTH<TH1F>(*fs, "jet_pt", "het_pt", 400, 0., 400.);
     hPtCentral = makeTH<TH1F>(*fs, "jet_pt_central", "het_pt_central", 100, 0., 200.);
-    hEta = makeTH<TH1F>(*fs, "jet_eta", "jet_eta", 100, -5., 5.);
-    hPhi = makeTH<TH1F>(*fs, "jet_phi", "jet_phi", 100, -3.2, 3.2);
+    hEta = makeTH<TH1F>(*fs, "jet_eta", "jet_eta", 400, -5., 5.);
+    hPhi = makeTH<TH1F>(*fs, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(*fs, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 60, 0., 180.); 
+    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2); 
  }
 
   JetSelection::~JetSelection() {}
@@ -138,6 +138,7 @@ namespace HPlus {
 	//	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(fMETSelection.getSelectedMET()));
 	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
 	  hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
+	  //	  hDeltaPhiJetMet->Fill(deltaPhi, fEventWeight.getWeight());
       }
 
 

@@ -79,6 +79,8 @@ namespace HPlus {
     Count fMuonSelectionSubCountImpactParCut;
     Count fMuonSelectionSubCountRelIsolationR03Cut;
     Count fMuonSelectionSubCountGoodPVCut;
+    Count fMuonSelectionSubCountMatchingMCmuon;
+    Count fMuonSelectionSubCountMatchingMCmuonFromW;
     /// Sub-Counter (MuonID) - just for my information
     Count fMuonIDSubCountAllMuonCandidates;
     Count fMuonIDSubCountAll;
@@ -107,6 +109,10 @@ namespace HPlus {
     // Histograms
     TH1 *hMuonPt;
     TH1 *hMuonEta;
+    TH1 *hMuonPt_matchingMCmuon;
+    TH1 *hMuonEta_matchingMCmuon;
+    TH1 *hMuonPt_matchingMCmuonFromW;
+    TH1 *hMuonEta_matchingMCmuonFromW;
     TH1 *hMuonPt_InnerTrack;
     TH1 *hMuonEta_InnerTrack;
     TH1 *hMuonPt_GlobalTrack;
@@ -138,6 +144,8 @@ namespace HPlus {
     bool bMuonImpactParCut;
     bool bMuonRelIsolationR03Cut;
     bool bMuonGoodPVCut;
+    bool bMuonMatchingMCmuon;
+    bool bMuonMatchingMCmuonFromW;
     
   };
 }
