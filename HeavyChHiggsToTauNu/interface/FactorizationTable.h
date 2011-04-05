@@ -31,6 +31,8 @@ namespace HPlus {
     int getCoefficientTableSize() const;
     /// Getter for bin index (for histogramming)
     int getCoefficientTableIndexByPtAndEta(double pt, double eta) const;
+    /// Getter for bin low edges
+    std::vector<double> getBinLowEdges() const;
 
   private:
     /// Initialization called from the constructor

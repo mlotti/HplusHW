@@ -42,10 +42,13 @@ namespace HPlus {
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    void createHistogramGroupByTauPt(std::string name);
+
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     // Different forks of analysis
     void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
     void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
+    void analyzeFactorizedBTaggingBeforeTauIDAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -89,6 +92,7 @@ namespace HPlus {
     
     // Factorization table
     FactorizationTable fFactorizationTable;
+    std::vector<double> fFactorizationBinLowEdges;
     
     // MET Histograms
     TH1 *hMETAfterJetSelection;
@@ -141,6 +145,14 @@ namespace HPlus {
     TH1 *hFactRtauBNonWeightedTauPtAfterFakeMETVeto;
     TH1 *hFactRtauBNonWeightedTauPtAfterForwardJetVeto;
 
+    // Standard cuts with factorized rtau and b-tagging
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterJetSelection;
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauIDNoRtau;
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID;
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterBTagging;
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto;
+    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto;
+
     // ABCD(tau isol. vs. b-tag) cut path - ugly duplication, but fast code
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterJetSelection[4];
     TH2 *hABCDTauIsolBNonWeightedTauPtVsMET[4];
@@ -158,6 +170,9 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
     TH1 *hMETPassProbabilityAfterForwardJetVeto;
+
+
+    std::vector<TH1*> fMETHistogramsByTauPt;
   };
 }
 

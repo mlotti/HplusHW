@@ -143,4 +143,12 @@ namespace HPlus {
     }
     return myIndex;
   }
+
+  std::vector<double> FactorizationTable::getBinLowEdges() const {
+    if (fTableType == kByPt)
+      return fPtLowEdges;
+    else if (fTableType == kByEta)
+      return fEtaLowEdges;
+    return fPtLowEdges;
+  }
 }
