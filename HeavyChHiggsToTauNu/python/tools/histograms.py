@@ -130,17 +130,19 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
 class LegendCreator:
     ## Constructor
     #
-    # \param x1        Default x1 (left x)
-    # \param y1        Default y1 (lower y)
-    # \param x2        Default x2 (right x)
-    # \param y2        Default y2 (upper y)
-    # \param textSize  Default text size
-    def __init__(self, x1, y1, x2, y2, textSize=0.025):
+    # \param x1          Default x1 (left x)
+    # \param y1          Default y1 (lower y)
+    # \param x2          Default x2 (right x)
+    # \param y2          Default y2 (upper y)
+    # \param textSize    Default text size
+    # \param borderSize  Default border size
+    def __init__(self, x1, y1, x2, y2, textSize=0.025, borderSize=1):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
         self.textSize = textSize
+        self.borderSize = borderSize
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -150,11 +152,12 @@ class LegendCreator:
     ## Set new default positions
     #
     # <b>Keyword arguments</b>
-    # \li \a x1       X1 coordinate
-    # \li \a y1       Y1 coordinate
-    # \li \a x2       X2 coordinate
-    # \li \a y2       Y2 coordinate
-    # \li \a textSize Text size
+    # \li \a x1          X1 coordinate
+    # \li \a y1          Y1 coordinate
+    # \li \a x2          X2 coordinate
+    # \li \a y2          Y2 coordinate
+    # \li \a textSize    Text size
+    # \li \a borderSize  Border size
     def setDefaults(self, **kwargs):
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
@@ -183,7 +186,7 @@ class LegendCreator:
 
         legend = ROOT.TLegend(kwargs["x1"], kwargs["y1"], kwargs["x2"], kwargs["y2"])
         legend.SetFillColor(ROOT.kWhite)
-        legend.SetBorderSize(1)
+        legend.SetBorderSize(self.borderSize)
         legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
@@ -199,6 +202,8 @@ class LegendCreator:
     # Y2 coordinate
     ## \var textSize
     # Text size
+    ## \var boderSize
+    # Border size
     ## \var _keys
     # List of valid coordinate names for __call__() function
 
