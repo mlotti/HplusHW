@@ -378,6 +378,7 @@ namespace HPlus {
       hMETPassProbabilityAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
     // Apply Rtau cut (but only if tau selection is not done in reversed Rtau control region)
+    hStdWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), fEventWeight.getWeight());
     if(!tauDataForTauID.selectedTauPassedRtau()) return;
     increment(fOneProngTauIDWithRtauCounter);
     hWeightedMETAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -385,27 +386,26 @@ namespace HPlus {
     if (metData.passedEvent())
       hMETPassProbabilityAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     hTauIDMETCorrelationMETRightAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
-    hStdWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), fEventWeight.getWeight());
 
 
     // BTagging
+    hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
     hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())
       hMETPassProbabilityAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
 
 
     // FakeMETVeto
+    hStdWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
     hWeightedMETAfterFakeMETVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())
       hMETPassProbabilityAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    hStdWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
 
 
     // Do final histogramming
