@@ -285,15 +285,14 @@ namespace HPlus {
 
     // Get MET just for reference; do not apply a MET cut but instead use P(MET>70 GeV) as weight
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
 
     // Apply tau candidate selection (with or without Rtau control region)
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return;
+    TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
+    if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
     edm::PtrVector<pat::Tau> mySelectedTau;
-    mySelectedTau.push_back(tauData.getSelectedTaus()[0]);
+    mySelectedTau.push_back(tauCandidateData.getSelectedTaus()[0]);
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
 
@@ -317,6 +316,7 @@ namespace HPlus {
     }
     if(!jetData.passedEvent()) return;
     increment(fJetSelectionCounter);
+    hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     // Fill factorization info into histogram
     fMETHistogramsByTauPt[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -361,7 +361,7 @@ namespace HPlus {
     }
 
     // Apply non-standard cut paths
-    analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+    analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     analyzeFactorizedBTaggingAndRtau(tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     analyzeFactorizedBTaggingBeforeTauIDAndRtau(tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
@@ -429,10 +429,10 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
   }
 
-  void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
+  void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;
-    if (!tauData.passedEvent()) {
+    if (!tauData.passedEvent()) { // this is just isolation and nprongs == 1
       if (!btagData.passedEvent()) {
 	myIndex = 0; // NegNeg
       } else {
@@ -451,7 +451,7 @@ namespace HPlus {
     // ... obtain P(MET)
     if (METData.passedEvent()) hABCDTauIsolBNonWeightedTauPtAfterMET[myIndex]->Fill(tauPtBin, weightWithoutMET);
     // ... apply Rtau
-    if (tauData.selectedTauPassedRtau()) {
+    if (tauCandidateData.selectedTauCandidatePassedRtau()) {
       hABCDTauIsolBNonWeightedTauPtAfterRtau[myIndex]->Fill(tauPtBin, weightWithoutMET);
       if (fakeMETData.passedEvent()) {
         hABCDTauIsolBNonWeightedTauPtAfterFakeMETVeto[myIndex]->Fill(tauPtBin, weightWithoutMET);

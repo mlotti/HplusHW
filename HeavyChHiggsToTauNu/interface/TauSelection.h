@@ -54,6 +54,10 @@ namespace HPlus {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
       }
+      bool selectedTauCandidatePassedRtau() const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return false;
+        return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
+      }
 
     private:
       const TauSelection *fTauSelection;
