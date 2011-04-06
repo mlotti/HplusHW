@@ -124,12 +124,22 @@ namespace HPlus {
     hStdNonWeightedTauPtAfterFakeMETVeto->Sumw2();
     hStdNonWeightedTauPtAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterForwardJetVeto", "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterForwardJetVeto->Sumw2();
-    hStdWeightedRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_Rtau", "Rtau;Rtau;N_{events}/0.02", 60, 0., 1.2);
+    hStdWeightedRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
     hStdWeightedRtau->Sumw2();
     hStdWeightedBjets = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
     hStdWeightedBjets->Sumw2();
     hStdWeightedFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
     hStdWeightedFakeMETVeto->Sumw2();
+    hStdNonWeightedRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
+    hStdNonWeightedRtau->Sumw2();
+    hStdNonWeightedSelectedTauPt = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_TauPtAfterTauID", "tau pT after tauID;#tau p_{T} after tauID;N_{events}/10 GeV/c", 30, 0., 300.);
+    hStdNonWeightedSelectedTauPt->Sumw2();
+    hStdNonWeightedSelectedTauEta = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_TauEtaAfterTauID", "tau eta after tauID;#tau #eta after tauID;N_{events}/0.2", 30, -3., 3.);
+    hStdNonWeightedSelectedTauEta->Sumw2();
+    hStdNonWeightedBjets = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
+    hStdNonWeightedBjets->Sumw2();
+    hStdNonWeightedFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
+    hStdNonWeightedFakeMETVeto->Sumw2();
 
     // Standard cuts with factorized rtau and b-tagging
     hFactRtauBNonWeightedTauPtAfterJetSelection = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterJetSelection", "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
@@ -379,6 +389,7 @@ namespace HPlus {
 
     // Apply Rtau cut (but only if tau selection is not done in reversed Rtau control region)
     hStdWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    hStdNonWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), myEventWeightBeforeMetFactorization);
     if(!tauDataForTauID.selectedTauPassedRtau()) return;
     increment(fOneProngTauIDWithRtauCounter);
     hWeightedMETAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -386,10 +397,12 @@ namespace HPlus {
     if (metData.passedEvent())
       hMETPassProbabilityAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     hTauIDMETCorrelationMETRightAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
-
+    hStdNonWeightedSelectedTauPt->Fill(mySelectedTau[0]->pt(), myEventWeightBeforeMetFactorization);
+    hStdNonWeightedSelectedTauEta->Fill(mySelectedTau[0]->eta(), myEventWeightBeforeMetFactorization);
 
     // BTagging
     hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
+    hStdNonWeightedBjets->Fill(btagData.getBJetCount(), myEventWeightBeforeMetFactorization);
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
     hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -400,6 +413,7 @@ namespace HPlus {
 
     // FakeMETVeto
     hStdWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
+    hStdNonWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), myEventWeightBeforeMetFactorization);
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
     hWeightedMETAfterFakeMETVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());

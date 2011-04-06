@@ -136,6 +136,11 @@ namespace HPlus {
     TH1 *hStdWeightedRtau;
     TH1 *hStdWeightedBjets;
     TH1 *hStdWeightedFakeMETVeto;
+    TH1 *hStdNonWeightedRtau;
+    TH1 *hStdNonWeightedSelectedTauPt;
+    TH1 *hStdNonWeightedSelectedTauEta;
+    TH1 *hStdNonWeightedBjets;
+    TH1 *hStdNonWeightedFakeMETVeto;
 
     // Standard cuts with factorized rtau and b-tagging
     TH1 *hFactRtauBNonWeightedTauPtAfterJetSelection;
