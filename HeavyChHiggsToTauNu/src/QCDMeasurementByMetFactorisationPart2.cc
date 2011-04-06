@@ -484,11 +484,11 @@ namespace HPlus {
       hFactRtauBNonWeightedTauPtAfterBTagging->Fill(tauPtBin, weightWithoutMET);
     
     // Apply Fake MET veto
-    if (fakeMETData.passedEvent()) return;
+    if (!fakeMETData.passedEvent()) return;
     hFactRtauBNonWeightedTauPtAfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
 
     // Apply Forward jet veto
-    if (forwardData.passedEvent()) return;
+    if (!forwardData.passedEvent()) return;
     hFactRtauBNonWeightedTauPtAfterForwardJetVeto->Fill(tauPtBin, weightWithoutMET);
   }
 
@@ -508,11 +508,11 @@ namespace HPlus {
       hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID->Fill(tauPtBin, weightWithoutMET);
     
     // Apply Fake MET veto
-    if (fakeMETData.passedEvent()) return;
+    if (!fakeMETData.passedEvent()) return;
     hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
 
     // Apply Forward jet veto
-    if (forwardData.passedEvent()) return;
+    if (!forwardData.passedEvent()) return;
     hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto->Fill(tauPtBin, weightWithoutMET);
   }
 
