@@ -22,7 +22,8 @@ embeddingData = embedding
 #signalAnalysis = "../multicrab_110228_085943"
 signalAnalysis = "../multicrab_110404_134156"
 
-lumi = 36
+#analysis = "signalAnalysis"
+analysis = "signalAnalysisTauSelectionHPSTightTauBased"
 
 # Datasets from embedding
 datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embedding, "multicrab.cfg"))
@@ -39,6 +40,8 @@ datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(sign
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)
+
+lumi = datasetsExpected.getDataset("Data").getLuminosity()
 
 datasets.remove("TToHplusBWB_M120")
 
@@ -62,6 +65,88 @@ mainCounterMap.update({ # for ConTeXt
         "MET": r"$\text{MET} > 70\Giga\EVolt$",
         "fake MET veto": r"$\min(\Delta\phi(\text{MET},\text{jets})) < 10^\circ$"
 })
+
+def floatEqualAssert(a, b):
+    c = 0
+    if b != 0:
+        c = abs(a-b)/b
+    elif a != 0:
+        c = abs(a-b)/a
+    else:
+        c = abs(a-b)
+
+    if c >= 0.01:
+        raise Exception("a %f and b %f differ" % (a, b))
+    
+
+def normalizationFactor(embedded, expected):
+    mtRange = (0, 40)
+
+    lowBin = embedded.FindBin(mtRange[0])
+    upBin = embedded.FindBin(mtRange[1])-1
+    #print lowBin, embedded.GetBinLowEdge(lowBin)
+    #print upBin, embedded.GetXaxis().GetBinUpEdge(upBin)
+
+    floatEqualAssert(mtRange[0], embedded.GetBinLowEdge(lowBin))
+    floatEqualAssert(mtRange[1], embedded.GetXaxis().GetBinUpEdge(upBin))
+
+    embeddedCount = embedded.Integral(lowBin, upBin)
+    expectedCount = expected.Integral(lowBin, upBin)
+    normfactor = expectedCount/embeddedCount
+
+    print "mT normalization range %.1f - %.1f GeV/c^2 (bins %d - %d)" % (mtRange[0], mtRange[1], lowBin, upBin)
+    print "Embedded events %.1f" % embeddedCount
+    print "Expected events %.1f" % expectedCount
+    print "Normalization factor %f" % normfactor
+
+    return normfactor
+
+def signalAreaEvents(embedded, expected):
+    mtMin = 40
+
+    lowBin = embedded.FindBin(mtMin)
+    upBin = embedded.GetNbinsX()+1 # include the overflow bin
+
+    embeddedCount = embedded.Integral(lowBin, upBin)
+    expectedCount = expected.Integral(lowBin, upBin)
+
+    print "Embedded events %.2f" % embeddedCount
+    print "Expected events %.2f" % expectedCount
+
+mtEmbedded = plots.DataMCPlot(datasets, analysis+"/transverseMass")
+mtExpected = plots.DataMCPlot(datasetsExpected, analysis+"/transverseMass")
+
+def run(func, getter):
+    func(getter(mtEmbedded.histoMgr), getter(mtExpected.histoMgr))
+
+for d in ["Data", "TTJets", "WJets"]:
+    print
+    print "From %s" % d
+    run(normalizationFactor, lambda h: h.getHisto(d).getRootHisto())
+
+mtEmbedded.stackMCHistograms()
+mtExpected.stackMCHistograms()
+
+print
+print "From all MC"
+run(normalizationFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+
+# Scale
+mtEmbedded.histoMgr.forEachHisto(lambda histo: histo.getRootHisto().Scale(0.406020))
+
+print
+print
+print "From Data"
+run(signalAreaEvents, lambda h: h.getHisto("Data").getRootHisto())
+
+print
+print "From all MC"
+run(signalAreaEvents, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+
+
+
+import sys
+sys.exit(0)
 
 # Table formatting
 tableFormat = counter.TableFormatText()
