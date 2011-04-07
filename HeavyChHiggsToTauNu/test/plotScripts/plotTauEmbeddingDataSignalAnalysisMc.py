@@ -30,7 +30,8 @@ counters = analysis+"Counters"
 
 embeddingSignalAnalysis = "."
 #signalAnalysis = "../../multicrab_110307_141642"
-signalAnalysis = "../../multicrab_110316_182853"
+#signalAnalysis = "../../multicrab_110316_182853"
+signalAnalysis = "../../multicrab_110404_134156"
 #embeddingSignalAnalysis = "multicrab_signalAnalysis_110303_154128"
 #signalAnalysis = "multicrab_110307_141642"
 
@@ -41,41 +42,64 @@ def main():
     datasetsEmbSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=embeddingSignalAnalysis+"/multicrab.cfg", counters=counters)
     datasetsSig = dataset.getDatasetsFromMulticrabCfg(cfgfile=signalAnalysis+"/multicrab.cfg", counters=counters)
 
+    # Select only data from embedded
     datasetsEmbSig.loadLuminosities()
     datasetsEmbSig.selectAndReorder(datasetsEmbSig.getDataDatasetNames())
-    datasetsSig.selectAndReorder(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
+    plots.mergeRenameReorderForDataMC(datasetsEmbSig)
+
+    # Select MC from original
+    plots.mergeRenameReorderForDataMC(datasetsSig)
+    datasetsSig.selectAndReorder([
+            "QCD",
+            "DYJetsToLL",
+            "WJets",
+            "SingleTop",
+            "TTJets",
+            "Diboson",
+            ])
+
     datasets = datasetsEmbSig
     datasets.extend(datasetsSig)
 
-    plots.mergeRenameReorderForDataMC(datasets)
+
+    # Update legend labels
+    plots.updateLegendLabel("Data", "Data (emb)")
+    #plots.updateLegendLabel("WJets", "WJets (orig)")
+    #plots.updateLegendLabel("TTJets", "TTJets (orig)")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
+    # Wrapper to decrease typing and have the common options
+    def createPlot(plot, *args):
+        kwargs = {}
+        kwargs["saveFormats"] = [".png"]
+        return plots.DataMCPlot(datasets, analysis+"/"+plot, *args, **kwargs)
 
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), step="begin")
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), step="afterTauId")
-    #met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet", normalizeToOne=True), step="begin2")
+    met(createPlot("TauEmbeddingAnalysis_begin_embeddingMet"), step="begin")
+    met(createPlot("TauEmbeddingAnalysis_afterTauId_embeddingMet"), step="afterTauId")
+#    met(createPlot("TauEmbeddingAnalysis_begin_embeddingMet", normalizeToOne=True), step="begin2")
 
-    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
-    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
-    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
+    tauCandPt(createPlot("TauSelection_all_tau_candidates_pt"), step="begin")
+    tauCandEta(createPlot("TauSelection_all_tau_candidates_eta"), step="begin" )
+    tauCandPhi(createPlot("TauSelection_all_tau_candidates_phi"), step="begin" )
 
-    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), step="afterTauId")
-    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"),step="afterTauId" )
-    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"),step="afterTauId" )
-    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"),step="afterTauId")
-    rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
+    tauPt(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPt"), step="afterTauId")
+    tauEta(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauEta"),step="afterTauId" )
+    tauPhi(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPhi"),step="afterTauId" )
+    leadingTrack(createPlot("TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"),step="afterTauId")
+    rtau(createPlot("TauID_RtauCut"), "TauIdRtau_afterTauId")
 
-    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"), step="afterTauId")
+    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"), step="afterTauId")
 
-    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"), step="afterTauId")
+    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"), step="afterTauId", rebin=20)
+    transverseMass(createPlot("transverseMass"), step="end", rebin=5)
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
-    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt_central"), "jetPtCentral")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "numberOfjets")
+    jetPt(createPlot("jet_pt"), "jetPt")
+    jetPt(createPlot("jet_pt_central"), "jetPtCentral")
+    jetEta(createPlot("jet_eta"), "jetEta")
+    jetPhi(createPlot("jet_phi"), "jetPhi")
+    numberOfJets(createPlot("NumberOfSelectedJets"), "numberOfjets")
 
 
 
@@ -490,9 +514,10 @@ def deltaPhi(h, step="", rebin=5):
     histograms.addEnergyText()
     #h.addLuminosityText()
     h.save()
-def transverseMass(h, step="", rebin=5):
+
+def transverseMass(h, step="", rebin=5, particle="#tau"):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "m_{T}(%s, MET) (GeV/c^{2})" 
+    xlabel = "m_{T}(%s, MET) (GeV/c^{2})" % particle
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     opts = {"ymaxfactor": 2}
     
@@ -504,20 +529,34 @@ def transverseMass(h, step="", rebin=5):
         opts["yminfactor"] = 1e-5
     else:
         opts["ymin"] = 0.001
-           
+    opts["xmax"] = 200
 
     name = "transverseMassSimulateEmbedded_%s_log" % step
     h.createFrameFraction(name, opts=opts)
     #h.createFrame(name, opts=opts)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend(0.5, 0.3, 0.7, 0.6))
+    h.setLegend(histograms.createLegend())
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     #h.addLuminosityText()
     h.save()
+
+    name = "transverseMassSimulateEmbedded_%s" % step
+    h.createFrameFraction(name, opts=opts)
+    #h.createFrame(name, opts=opts)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    #h.addLuminosityText()
+    h.save()
+
+
 # Call the main function if the script is executed (i.e. not imported)
 if __name__ == "__main__":
     main()
