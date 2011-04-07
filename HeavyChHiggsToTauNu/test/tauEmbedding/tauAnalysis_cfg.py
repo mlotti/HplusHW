@@ -6,8 +6,9 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 #dataVersion = "36X"
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
-dataVersion = "38X"
+#dataVersion = "38X"
 #dataVersion = "data" # this is for collision data 
+dataVersion = "39Xredigi"
 
 options = getOptions()
 if options.dataVersion != "":
@@ -25,9 +26,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
-    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
+#    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1/2366fe480375ff6f751e0b7e8ec70b52/pattuple_158_1_ThM.root"
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1/2366fe480375ff6f751e0b7e8ec70b52/pattuple_158_1_ThM.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/WJets_TuneZ2_Winter10/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_AODSIM_pattuple_v9b/c2f22ab9ac43296d989acccdef834e2a/pattuple_127_1_B5I.root"
   )
 )
 ################################################################################
@@ -80,13 +82,15 @@ process.commonSequence *= process.genMetNu
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 
-taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
-#pfMET = cms.InputTag("pfMet")
-pfMET = cms.InputTag("patMETsPF")
+#taus = "selectedPatTausShrinkingConePFTau"
+taus = "selectedPatTausHpsPFTau"
+#pfMET = "pfMet"
+pfMET = "patMETsPF"
+jets = "selectedPatJetsAK5PF"
 
 process.LooseTauId = cms.EDFilter("PATTauSelector",
-    src = taus,
-    cut = cms.string("abs(eta) < 2.5 "
+    src = cms.InputTag(taus),
+    cut = cms.string("abs(eta) < 2.4 "
                      "&& leadPFChargedHadrCand().isNonnull() "
                      "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
 #                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
@@ -95,9 +99,9 @@ process.LooseTauId = cms.EDFilter("PATTauSelector",
 process.commonSequence *= process.LooseTauId
 
 process.LooseTauPtId = cms.EDFilter("PATTauSelector",
-    src = taus,
-    cut = cms.string("pt > 40 "
-                     "&& abs(eta) < 2.5 "
+    src = cms.InputTag(taus),
+    cut = cms.string("pt > 30 "
+                     "&& abs(eta) < 2.4 "
                      "&& leadPFChargedHadrCand().isNonnull() "
                      "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
 #                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
@@ -107,10 +111,10 @@ process.commonSequence *= process.LooseTauPtId
                      
 
 EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingTauAnalyzer",
-    tauSrc = cms.untracked.InputTag(taus.value()),
+    tauSrc = cms.untracked.InputTag(taus),
     genParticleSrc = cms.untracked.InputTag("genParticles"),
     mets = cms.untracked.PSet(
-        Met = cms.untracked.InputTag(pfMET.value()),
+        Met = cms.untracked.InputTag(pfMET),
 #        GenMetTrue = cms.untracked.InputTag("genMetTrue"),
 #        GenMetCalo = cms.untracked.InputTag("genMetCalo"),
 #        GenMetCaloAndNonPrompt = cms.untracked.InputTag("genMetCaloAndNonPrompt"),
@@ -128,10 +132,10 @@ def addPath(prefix, **kwargs):
     if "preSequence" in kwargs:
         path *= kwargs["preSequence"]
 
-    for name, tag in [("", taus.value()),
+    for name, tag in [("", taus),
                       ("tauId", "LooseTauId"),
                       ("tauPtId", "LooseTauPtId")]:
-        for ptcut, etacut in [(-1, -1), (40, -1), (40, 2.1)]:
+        for ptcut, etacut in [(-1, -1), (30, -1), (30, 2.1)]:
             pteta = ""
             if ptcut > 0 or etacut > 0:
                 pteta += "Gen"
@@ -151,8 +155,11 @@ def addPath(prefix, **kwargs):
 addPath("")
 
 process.goodJets = cms.EDFilter("PATJetSelector",
-    src = cms.InputTag("selectedPatJets"),
-    cut = cms.string("pt() > 30 && abs(eta()) < 2.4")
+    src = cms.InputTag(jets),
+    cut = cms.string(
+        "pt() > 30 && abs(eta()) < 2.4"
+        "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
+   )
 )
 process.goodJetFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("goodJets"),
