@@ -152,6 +152,10 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 }
 
+## Update the default legend labels
+def updateLegendLabel(datasetName, legendLabel):
+    _legendLabels[datasetName] = legendLabel
+
 ## Helper class for setting properties
 #
 # Helper class for setting properties of histograms.Histo objects (legend label, plot style)
