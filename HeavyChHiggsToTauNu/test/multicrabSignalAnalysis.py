@@ -7,7 +7,7 @@ multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 # Select the pattuple version to use as an input
 #pattupleVersion = "pattuple_v6"
 #pattupleVersion = "pattuple_v9"
-pattupleVersion = "pattuple_v10_test3"
+pattupleVersion = "pattuple_v10"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -27,14 +27,31 @@ multicrab.extendDatasets(pattupleVersion,
     [
         #### 41X data and 311X MC
         # Data: single tau + MET
-        "Tau_160404-161176_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
-        "Tau_161216-161312_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
+        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
 
         # Data: quadjet
-        "TauPlusX_160404-161312_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+
+        # MC Signal WH Spring11
+        "TTToHplusBWB_M150_Spring11",
+        "TTToHplusBWB_M155_Spring11",
+
+        # MC Signal HH Spring11
+        "TTToHplusBHminusB_M80_Spring11",
+        "TTToHplusBHminusB_M100_Spring11",
+        "TTToHplusBHminusB_M120_Spring11",
+        "TTToHplusBHminusB_M140_Spring11",
+        "TTToHplusBHminusB_M150_Spring11",
+        "TTToHplusBHminusB_M155_Spring11",
+        "TTToHplusBHminusB_M160_Spring11",
 
         # MC Background Spring11
+        "WJets_TuneZ2_Spring11",
         "TTJets_TuneZ2_Spring11",
+        "TToBLNu_s-channel_TuneZ2_Spring11",
+        "TToBLNu_t-channel_TuneZ2_Spring11",
+        "TToBLNu_tW-channel_TuneZ2_Spring11",
+        "DYJetsToLL_M50_TuneZ2_Spring11",
 
         #### 39X data and MC
         # Data
