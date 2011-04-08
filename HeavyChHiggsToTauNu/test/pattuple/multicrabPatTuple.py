@@ -22,8 +22,8 @@ multicrab.extendDatasets(
 #    "Tau_161216-161312_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
 #    "TauPlusX_160404-161312_Prompt" # HLT_QuadJet40_IsoPFTau40_v1
 # With certified json
-        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
-        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+#        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
+#        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
 
 ########
 #
@@ -31,16 +31,16 @@ multicrab.extendDatasets(
 #
 ########
         # Signal MC (WH)
-        "TTToHplusBWB_M150_Spring11",
-        "TTToHplusBWB_M155_Spring11",
+#        "TTToHplusBWB_M150_Spring11",
+#        "TTToHplusBWB_M155_Spring11",
         # (HH)
-        "TToHplusBHminusB_M80_Spring11",
-        "TToHplusBHminusB_M100_Spring11",
-        "TToHplusBHminusB_M120_Spring11",
-        "TToHplusBHminusB_M140_Spring11",
-        "TToHplusBHminusB_M150_Spring11",
-        "TToHplusBHminusB_M155_Spring11",
-        "TToHplusBHminusB_M160_Spring11",
+#        "TTToHplusBHminusB_M80_Spring11",
+#        "TTToHplusBHminusB_M100_Spring11",
+#        "TTToHplusBHminusB_M120_Spring11",
+#        "TTToHplusBHminusB_M140_Spring11",
+#        "TTToHplusBHminusB_M150_Spring11",
+#        "TTToHplusBHminusB_M155_Spring11",
+#        "TTToHplusBHminusB_M160_Spring11",
 
         # Background MC
 #        "QCD_Pt30to50_TuneZ2_Spring11",
@@ -50,7 +50,7 @@ multicrab.extendDatasets(
 #        "QCD_Pt170to300_TuneZ2_Spring11",
 #        "QCD_Pt300to470_TuneZ2_Spring11",
 #        "TTJets_TuneZ2_Spring11",
-        "WJets_TuneZ2_Spring11"
+#        "WJets_TuneZ2_Spring11"
 #        "TToBLNu_s-channel_TuneZ2_Spring11",
 #        "TToBLNu_t-channel_TuneZ2_Spring11",
 #        "TToBLNu_tW-channel_TuneZ2_Spring11",

@@ -36,7 +36,7 @@ datasets = {
     },
 
     # Signal HH
-    "TToHplusBHminusB_M80_Spring11": {
+    "TTToHplusBHminusB_M80_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": -1,
         "data": {
@@ -51,7 +51,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M100_Spring11": {
+    "TTToHplusBHminusB_M100_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.316988,
         "data": {
@@ -66,7 +66,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M120_Spring11": {
+    "TTToHplusBHminusB_M120_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.123367,
         "data": {
@@ -81,7 +81,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M140_Spring11": {
+    "TTToHplusBHminusB_M140_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.025729,
         "data": {
@@ -96,7 +96,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M150_Spring11": {
+    "TTToHplusBHminusB_M150_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.007141,
         "data": {
@@ -111,7 +111,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M155_Spring11": {
+    "TTToHplusBHminusB_M155_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.002891,
         "data": {
@@ -126,7 +126,7 @@ datasets = {
             },
         }
     },
-    "TToHplusBHminusB_M160_Spring11": {
+    "TTToHplusBHminusB_M160_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 0.000831,
         "data": {

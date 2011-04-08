@@ -32,7 +32,7 @@ datasets = {
                 "number_of_jobs": 30, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v10_test3": {
+            "pattuple_v10": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10-ecb64a326bff780f833933d40177edb0/USER",
                 "luminosity": 4.984615,
