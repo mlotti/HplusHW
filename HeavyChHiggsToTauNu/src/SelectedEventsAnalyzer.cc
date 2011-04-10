@@ -34,8 +34,8 @@ namespace HPlus {
     hMETAfterAllSelections = fs->make<TH1F>(myName.c_str(), "METAfterAllSelections;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterAllSelections->Sumw2();
     myName = prefix + "_METPhiAfterAllSelections";
-    hMETAfterAllSelections = fs->make<TH1F>(myName.c_str(), "METAfterAllSelections;MET, GeV;N_{events} / 5^{o}", 72, -180., 180.);
-    hMETAfterAllSelections->Sumw2();
+    hMETPhiAfterAllSelections = fs->make<TH1F>(myName.c_str(), "METPhiAfterAllSelections;MET #phi;N_{events} / 5^{o}", 72, -180., 180.);
+    hMETPhiAfterAllSelections->Sumw2();
     myName = prefix + "_FakeMETVetoAfterAllSelections";
     hFakeMETVetoAfterAllSelections = fs->make<TH1F>(myName.c_str(), "FakeMETVetoAfterAllSelections;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5^{o}", 36, 0., 180.);
     hFakeMETVetoAfterAllSelections->Sumw2();
@@ -49,7 +49,7 @@ namespace HPlus {
 
   SelectedEventsAnalyzer::~SelectedEventsAnalyzer() { }
 
-  void SelectedEventsAnalyzer::fill(const edm::PtrVector<pat::Tau>& selectedTau,
+  void SelectedEventsAnalyzer::fill(edm::PtrVector<pat::Tau>& selectedTau,
 				    const TauSelection::Data& tauData,
 				    const GlobalElectronVeto::Data& eVetoData,
 				    const GlobalMuonVeto::Data& muVetoData,

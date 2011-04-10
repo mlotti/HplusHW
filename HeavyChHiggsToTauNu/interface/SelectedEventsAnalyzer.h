@@ -25,7 +25,7 @@ namespace HPlus {
     SelectedEventsAnalyzer(std::string prefix);
     ~SelectedEventsAnalyzer();
 
-    void fill(const edm::PtrVector<pat::Tau>& selectedTau,
+    void fill(edm::PtrVector<pat::Tau>& selectedTau,
 	      const TauSelection::Data& tauData,
 	      const GlobalElectronVeto::Data& eVetoData,
 	      const GlobalMuonVeto::Data& muVetoData,
