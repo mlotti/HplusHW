@@ -20,6 +20,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
+
 #include "TTree.h"
 #include "TH2F.h"
 
@@ -42,13 +44,11 @@ namespace HPlus {
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    void createHistogramGroupByTauPt(std::string name);
+    void createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
 
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     // Different forks of analysis
     void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
-    void analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
-    void analyzeFactorizedBTaggingBeforeTauIDAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -89,6 +89,8 @@ namespace HPlus {
     ForwardJetVeto fForwardJetVeto;
     DeltaPhi fDeltaPhi;
     TransverseMass fTransverseMass;
+    SelectedEventsAnalyzer fWeightedSelectedEventsAnalyzer;
+    SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
     
     // Factorization table
     FactorizationTable fFactorizationTable;
@@ -112,11 +114,6 @@ namespace HPlus {
     TH1 *hWeightedFakeMETVetoAfterAllSelections;
     TH1 *hWeightedDeltaPhiAfterAllSelections;
     TH1 *hWeightedTransverseMassAfterAllSelections;
-
-    // TauID-MET Correlation plots -- will not work like this, need to do in separate class (does not measure full tauID or if changed, the tau sub counters will be messed up)
-    TH1 *hTauIDMETCorrelationMETRightBeforeTauID; // FIXME
-    TH1 *hTauIDMETCorrelationMETRightAfterTauID; // FIXME
-    TH2 *hTauIDMETCorrelationTauIDVsMETRightBeforeTauID; // FIXME
 
     // METFactorization details
     TH1 *hMETFactorizationNJetsBefore;
@@ -142,22 +139,6 @@ namespace HPlus {
     TH1 *hStdNonWeightedBjets;
     TH1 *hStdNonWeightedFakeMETVeto;
 
-    // Standard cuts with factorized rtau and b-tagging
-    TH1 *hFactRtauBNonWeightedTauPtAfterJetSelection;
-    TH1 *hFactRtauBNonWeightedTauPtAfterTauIDNoRtau;
-    TH1 *hFactRtauBNonWeightedTauPtAfterTauID;
-    TH1 *hFactRtauBNonWeightedTauPtAfterBTagging;
-    TH1 *hFactRtauBNonWeightedTauPtAfterFakeMETVeto;
-    TH1 *hFactRtauBNonWeightedTauPtAfterForwardJetVeto;
-
-    // Standard cuts with factorized rtau and b-tagging
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterJetSelection;
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauIDNoRtau;
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID;
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterBTagging;
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto;
-    TH1 *hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto;
-
     // ABCD(tau isol. vs. b-tag) cut path - ugly duplication, but fast code
     TH1 *hABCDTauIsolBNonWeightedTauPtAfterJetSelection[4];
     TH2 *hABCDTauIsolBNonWeightedTauPtVsMET[4];
@@ -176,8 +157,9 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
     TH1 *hMETPassProbabilityAfterForwardJetVeto;
 
-
-    std::vector<TH1*> fMETHistogramsByTauPt;
+    std::vector<TH1*> fMETHistogramsByTauPtAfterTauCandidateSelection;
+    std::vector<TH1*> fMETHistogramsByTauPtAfterJetSelection;
+    std::vector<TH1*> fMETHistogramsByTauPtAfterTauIsolation;
   };
 }
 

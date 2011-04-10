@@ -41,6 +41,8 @@ namespace HPlus {
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
+    fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fFactorizationTable(iConfig, "METTables")
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
    {
@@ -50,13 +52,6 @@ namespace HPlus {
 
     // Book histograms
 
-    // Correlation histograms FIXME: move to separate class
-    hTauIDMETCorrelationMETRightBeforeTauID = fs->make<TH1F>("QCDm3p2_METCorr_METRightBeforeTauID", "METRightBeforeTauID;MET, GeV;N / 5 GeV", 60, 0., 300.);
-    hTauIDMETCorrelationMETRightBeforeTauID->Sumw2();
-    hTauIDMETCorrelationMETRightAfterTauID = fs->make<TH1F>("QCDm3p2_METCorr_METRightAfterTauID", "METRightAfterTauID;MET, GeV;N / 5 GeV", 60, 0., 300.);
-    hTauIDMETCorrelationMETRightAfterTauID->Sumw2();
-    hTauIDMETCorrelationTauIDVsMETRightBeforeTauID = fs->make<TH2F>("QCDm3p2_METCorr_TauIDVsMETRightBeforeTauID", "TauID_Vs_MET;#tau-ID; MET, GeV ; N_{events} / 5 GeV", 3, -0.5, 1.5, 60, 0., 300. );
-    hTauIDMETCorrelationTauIDVsMETRightBeforeTauID->Sumw2();
     // Histograms with weights
     hMETAfterJetSelection = fs->make<TH1F>("QCDm3p2_METctrl_METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterJetSelection->Sumw2();
@@ -72,31 +67,14 @@ namespace HPlus {
     hWeightedMETAfterFakeMETVeto->Sumw2();
     hWeightedMETAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_METctrl_METAfterForwardJetVetoWeighted", "METAfterForwardJetVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterForwardJetVeto->Sumw2();
-    // After all selections
-    hWeightedTauPtAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_TauPtAfterAllSelections", "TauPtAfterAllSelections;tau p_{T}, GeV/c;N_{events}/5", 60, 0., 300.);
-    hWeightedTauPtAfterAllSelections->Sumw2();
-    hWeightedTauEtaAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_TauEtaAfterAllSelections", "TauEtaAfterAllSelections;tau #eta;N_{events}/0.1", 60, -3.0, 3.0);
-    hWeightedTauEtaAfterAllSelections->Sumw2();
-    hWeightedRTauAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_RtauAfterAllSelections", "RTauAfterAllSelections;Rtau;N_{events}/0.02", 60, 0., 1.2);
-    hWeightedRTauAfterAllSelections->Sumw2();
-    hWeightedNJetsAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_NJetsAfterAllSelections", "NJetsAfterAllSelections;N_{hadronic jets};N_{events}", 10, 0., 10.);
-    hWeightedNJetsAfterAllSelections->Sumw2();
-    hWeightedBJetsAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_BJetsAfterAllSelections", "BJetsAfterAllSelections;N_{b-tagged jets};N_{events}", 10, 0., 10.);
-    hWeightedBJetsAfterAllSelections->Sumw2();
-    hWeightedMETAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_METAfterAllSelections", "METAfterAllSelections;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
-    hWeightedMETAfterAllSelections->Sumw2();
-    hWeightedFakeMETVetoAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_FakeMETVetoAfterAllSelections", "FakeMETVetoAfterAllSelections;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
-    hWeightedFakeMETVetoAfterAllSelections->Sumw2();
-    hWeightedDeltaPhiAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_DeltaPhiAfterAllSelections", "DeltaPhiAfterAllSelections;#Delta#phi(MET, #tau), degrees;N_{events} / 5 degrees", 36, 0., 180.);
-    hWeightedDeltaPhiAfterAllSelections->Sumw2();
-    hWeightedTransverseMassAfterAllSelections = fs->make<TH1F>("QCDm3p2_weighted_TransverseMassAfterAllSelections", "TransverseMassAfterAllSelections;m_{T}(MET, #tau), GeV/c^{2};N_{events} / 5 GeV/c^{2}", 60, 0., 300.);
-    hWeightedTransverseMassAfterAllSelections->Sumw2();
+
+    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterTauCandidateSelection", fMETHistogramsByTauPtAfterTauCandidateSelection);
+    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterJetSelection", fMETHistogramsByTauPtAfterJetSelection);
+    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterTauIsolation", fMETHistogramsByTauPtAfterTauIsolation);
 
     // Histograms for later change of factorization map
 
     // MET factorization details
-    createHistogramGroupByTauPt("QCDm3p2_METafterJetSelection");
-
     int myCoefficientBinCount = fFactorizationTable.getCoefficientTableSize();
     hMETFactorizationNJetsBefore = fs->make<TH1F>("QCDm3p2_METFactorization_NJetsBefore", "METFactorizationNJetsBefore;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETFactorizationNJetsBefore->Sumw2();
@@ -141,33 +119,6 @@ namespace HPlus {
     hStdNonWeightedFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
     hStdNonWeightedFakeMETVeto->Sumw2();
 
-    // Standard cuts with factorized rtau and b-tagging
-    hFactRtauBNonWeightedTauPtAfterJetSelection = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterJetSelection", "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterJetSelection->Sumw2();
-    hFactRtauBNonWeightedTauPtAfterTauIDNoRtau = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterTauIDNoRtau", "NonWeightedTauPtAfterTauIDNoRtau;tau p_{T} bin;N_{events} after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterTauIDNoRtau->Sumw2();
-    hFactRtauBNonWeightedTauPtAfterTauID = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterTauID", "NonWeightedTauPtAfterTauID;tau p_{T} bin;N_{events} after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterTauID->Sumw2();
-    hFactRtauBNonWeightedTauPtAfterBTagging = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterBTagging", "NonWeightedTauPtAfterBTagging;tau p_{T} bin;N_{events} after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterBTagging->Sumw2();
-    hFactRtauBNonWeightedTauPtAfterFakeMETVeto = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterFakeMETVeto", "NonWeightedTauPtAfterFakeMETVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterFakeMETVeto->Sumw2();
-    hFactRtauBNonWeightedTauPtAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_FactRtauBCutPath_TauPtAfterForwardJetVeto", "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events} after forward jet veto", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBNonWeightedTauPtAfterForwardJetVeto->Sumw2();
-
-    // Standard cuts with factorized rtau and b-tagging
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterJetSelection = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterJetSelection", "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterJetSelection->Sumw2();
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauIDNoRtau = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterTauIDNoRtau", "NonWeightedTauPtAfterTauIDNoRtau;tau p_{T} bin;N_{events} after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauIDNoRtau->Sumw2();
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterTauID", "NonWeightedTauPtAfterTauID;tau p_{T} bin;N_{events} after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID->Sumw2();
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterBTagging = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterBTagging", "NonWeightedTauPtAfterBTagging;tau p_{T} bin;N_{events} after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterBTagging->Sumw2();
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterFakeMETVeto", "NonWeightedTauPtAfterFakeMETVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto->Sumw2();
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_FactRtauBBeforeTauIDCutPath_TauPtAfterForwardJetVeto", "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events} after forward jet veto", myCoefficientBinCount, 0., myCoefficientBinCount);
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto->Sumw2();
 
     // ABCD(tau isol. vs. b-tag) cut path
     for (int i = 0; i < 4; i++) {
@@ -232,7 +183,7 @@ namespace HPlus {
     analyze(iEvent, iSetup);
   }
 
-  void QCDMeasurementByMetFactorisationPart2::createHistogramGroupByTauPt(std::string name) {
+  void QCDMeasurementByMetFactorisationPart2::createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
     // Get tau pt edge table
     fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
     // Make histograms
@@ -251,14 +202,15 @@ namespace HPlus {
 	myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
 	myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";MET, GeV;N/" 
 		     << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
-	fMETHistogramsByTauPt.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
-						       myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+					    myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
       } else {
+	// Treat other bins
 	myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
 	myHistoLabel << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i] << ";MET, GeV;N/" 
 		     << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
-	fMETHistogramsByTauPt.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
-						       myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+					    myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
       }
     }
     // Treat last bin
@@ -267,10 +219,10 @@ namespace HPlus {
     myHistoName << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1];
     myHistoLabel << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1] <<";MET, GeV;N/" 
 		 << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
-    fMETHistogramsByTauPt.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
 						   myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
     // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = fMETHistogramsByTauPt.begin(); it != fMETHistogramsByTauPt.end(); ++it) {
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
       (*it)->Sumw2();
     }
   }
@@ -305,7 +257,7 @@ namespace HPlus {
     mySelectedTau.push_back(tauCandidateData.getSelectedTaus()[0]);
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
-
+    fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -329,7 +281,7 @@ namespace HPlus {
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     // Fill factorization info into histogram
-    fMETHistogramsByTauPt[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    fMETHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hMETFactorizationNJetsBefore->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     if (metData.passedEvent())
       hMETFactorizationNJetsAfter->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
@@ -372,46 +324,45 @@ namespace HPlus {
 
     // Apply non-standard cut paths
     analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    analyzeFactorizedBTaggingAndRtau(tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    analyzeFactorizedBTaggingBeforeTauIDAndRtau(tauDataForTauID, btagData, fakeMETData, forwardJetData, myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
-    // Continue standard cut path
+    // Continue best cut path
+
+    // Factorize out b-tagging
+    hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
+    hStdNonWeightedBjets->Fill(btagData.getBJetCount(), myEventWeightBeforeMetFactorization);
+    if (btagData.passedEvent()) {
+      increment(fBTaggingCounter);
+      hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      hStdNonWeightedTauPtAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+      if (metData.passedEvent())
+	hMETPassProbabilityAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+    }
+
 
     // Apply rest of tauID without Rtau
-    hTauIDMETCorrelationTauIDVsMETRightBeforeTauID->Fill(tauDataForTauID.passedEvent(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    hTauIDMETCorrelationMETRightBeforeTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
     if(!tauDataForTauID.passedEvent()) return;
     increment(fOneProngTauIDWithoutRtauCounter);
     hWeightedMETAfterTauIDNoRtau->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())
       hMETPassProbabilityAfterTauIDNoRtau->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+    fMETHistogramsByTauPtAfterTauIsolation[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    // Apply Rtau cut (but only if tau selection is not done in reversed Rtau control region)
+
+    // Factorize out Rtau cut
     hStdWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), fEventWeight.getWeight());
     hStdNonWeightedRtau->Fill(tauDataForTauID.getRtauOfSelectedTau(), myEventWeightBeforeMetFactorization);
-    if(!tauDataForTauID.selectedTauPassedRtau()) return;
-    increment(fOneProngTauIDWithRtauCounter);
-    hWeightedMETAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    hStdNonWeightedTauPtAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    if (metData.passedEvent())
-      hMETPassProbabilityAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    hTauIDMETCorrelationMETRightAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); // FIXME
-    hStdNonWeightedSelectedTauPt->Fill(mySelectedTau[0]->pt(), myEventWeightBeforeMetFactorization);
-    hStdNonWeightedSelectedTauEta->Fill(mySelectedTau[0]->eta(), myEventWeightBeforeMetFactorization);
+    if (tauDataForTauID.selectedTauPassedRtau()) {
+      increment(fOneProngTauIDWithRtauCounter);
+      hWeightedMETAfterTauID->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      hStdNonWeightedTauPtAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+      if (metData.passedEvent())
+	hMETPassProbabilityAfterTauID->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
+      hStdNonWeightedSelectedTauPt->Fill(mySelectedTau[0]->pt(), myEventWeightBeforeMetFactorization);
+      hStdNonWeightedSelectedTauEta->Fill(mySelectedTau[0]->eta(), myEventWeightBeforeMetFactorization);
+    }
 
-    // BTagging
-    hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
-    hStdNonWeightedBjets->Fill(btagData.getBJetCount(), myEventWeightBeforeMetFactorization);
-    if(!btagData.passedEvent()) return;
-    increment(fBTaggingCounter);
-    hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    hStdNonWeightedTauPtAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    if (metData.passedEvent())
-      hMETPassProbabilityAfterBTagging->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-
-
-    // FakeMETVeto
+    // Apply FakeMETVeto
     hStdWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
     hStdNonWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), myEventWeightBeforeMetFactorization);
     if (!fakeMETData.passedEvent()) return;
@@ -423,16 +374,26 @@ namespace HPlus {
 
 
     // Do final histogramming
-    hWeightedTauPtAfterAllSelections->Fill(mySelectedTau[0]->pt(), fEventWeight.getWeight());
-    hWeightedTauEtaAfterAllSelections->Fill(mySelectedTau[0]->eta(), fEventWeight.getWeight());
-    hWeightedRTauAfterAllSelections->Fill(tauDataForTauID.getRtauOfSelectedTau(), fEventWeight.getWeight());
-    hWeightedNJetsAfterAllSelections->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
-    hWeightedBJetsAfterAllSelections->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
-    hWeightedMETAfterAllSelections->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    hWeightedFakeMETVetoAfterAllSelections->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());
-    hWeightedDeltaPhiAfterAllSelections->Fill(fDeltaPhi.reconstruct(*(mySelectedTau[0]), *(metData.getSelectedMET()))*180.0/3.14159, fEventWeight.getWeight());
-    hWeightedTransverseMassAfterAllSelections->Fill(fTransverseMass.reconstruct(*(mySelectedTau[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
-
+    fWeightedSelectedEventsAnalyzer.fill(mySelectedTau,
+					 tauCandidateData,
+					 electronVetoData,
+					 muonVetoData,
+					 jetData,
+					 btagData,
+					 metData,
+					 fakeMETData,
+					 forwardJetData,
+					 fEventWeight.getWeight());
+    fNonWeightedSelectedEventsAnalyzer.fill(mySelectedTau,
+					    tauCandidateData,
+					    electronVetoData,
+					    muonVetoData,
+					    jetData,
+					    btagData,
+					    metData,
+					    fakeMETData,
+					    forwardJetData,
+					    myEventWeightBeforeMetFactorization);
 
     // Forward jet veto -- experimental
     if (!forwardJetData.passedEvent()) return;
@@ -481,53 +442,6 @@ namespace HPlus {
 	hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[myIndex]->Fill(tauPtBin, weightWithoutMET);
       }
     }
-  }
-
-  void QCDMeasurementByMetFactorisationPart2::analyzeFactorizedBTaggingAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
-    hFactRtauBNonWeightedTauPtAfterJetSelection->Fill(tauPtBin, weightWithoutMET);
-    // Apply TauID isolation and N prongs
-    if (!tauData.passedEvent()) return;
-    hFactRtauBNonWeightedTauPtAfterTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
-
-    // Handle Rtau
-    if (tauData.selectedTauPassedRtau())
-      hFactRtauBNonWeightedTauPtAfterTauID->Fill(tauPtBin, weightWithoutMET);
-
-    // Handle btagging
-    if (btagData.passedEvent())
-      hFactRtauBNonWeightedTauPtAfterBTagging->Fill(tauPtBin, weightWithoutMET);
-    
-    // Apply Fake MET veto
-    if (!fakeMETData.passedEvent()) return;
-    hFactRtauBNonWeightedTauPtAfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
-
-    // Apply Forward jet veto
-    if (!forwardData.passedEvent()) return;
-    hFactRtauBNonWeightedTauPtAfterForwardJetVeto->Fill(tauPtBin, weightWithoutMET);
-  }
-
-  void QCDMeasurementByMetFactorisationPart2::analyzeFactorizedBTaggingBeforeTauIDAndRtau(const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterJetSelection->Fill(tauPtBin, weightWithoutMET);
-
-    // Handle btagging
-    if (btagData.passedEvent())
-      hFactRtauBBeforeTauIDNonWeightedTauPtAfterBTagging->Fill(tauPtBin, weightWithoutMET);
-
-    // Apply TauID isolation and N prongs
-    if (!tauData.passedEvent()) return;
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
-
-    // Handle Rtau
-    if (tauData.selectedTauPassedRtau())
-      hFactRtauBBeforeTauIDNonWeightedTauPtAfterTauID->Fill(tauPtBin, weightWithoutMET);
-    
-    // Apply Fake MET veto
-    if (!fakeMETData.passedEvent()) return;
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
-
-    // Apply Forward jet veto
-    if (!forwardData.passedEvent()) return;
-    hFactRtauBBeforeTauIDNonWeightedTauPtAfterForwardJetVeto->Fill(tauPtBin, weightWithoutMET);
   }
 
 }
