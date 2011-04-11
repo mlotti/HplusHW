@@ -44,7 +44,11 @@ def main():
     tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
     leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
     rtau(plots.DataMCPlot(datasets, analysis+"/TauID_RtauCut"), "TauIdRtau_afterTauId")
-
+    
+    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), "tauCandidatePt")
+    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), "tauCandidateEta" )
+    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), "tauCandidatePhi" )
+    
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMuonPt"), ratio=True)
     muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMuonPt"), ratio=True)
@@ -64,15 +68,15 @@ def main():
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "NumberOfJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPtEmb")
+    jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEtaEmb")
+    jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhiEmb")
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "NumberOfJetsEmb")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPt", rebin=10)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/bjet_eta"), "bjetEta", rebin=10)
-#    jetPhi(plots.DataMCPlot(datasets, analysis+"/bjet_phi"), "bjetPhi", rebin=10)
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfBtaggedJets"), "NumberOfBJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPtEmb")
+    jetEta(plots.DataMCPlot(datasets, analysis+"/bjet_eta"), "bjetEtaEmb")
+#    jetPhi(plots.DataMCPlot(datasets, analysis+"/bjet_phi"), "bjetPhiEmb")
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfBtaggedJets"), "NumberOfBJetsEmb")
 
     eventCounter = counter.EventCounter(datasets)
     eventCounter.normalizeMCByLuminosity()
@@ -89,8 +93,8 @@ def scaleMCHistos(h, scale):
     h.histoMgr.forEachHisto(lambda histo: scaleMC(histo, scale))
 
 def scaleMCfromWmunu(h):
-    # Data/MC scale factor from AN 2011/053
-    scaleMCHistos(h, 0.9509)
+    # Data/MC scale factor from AN 2011/053, BR correction factor= 1/0.6479
+    scaleMCHistos(h, 0.9509/0.6479)
 
 
 # Helper function to flip the last two parts of the histogram name
@@ -118,7 +122,8 @@ def tauPt(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "#p_{T}^{#tau jet} (GeV/c)"
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
-
+    
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -141,12 +146,12 @@ def tauEta(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "#eta^{#tau jet}"
     ylabel = "Events"
-
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
     opts = {"ymin": 0.01, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    opts2 = {"ymin": 0.05, "ymax": 2.5}
 
     name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
@@ -165,7 +170,7 @@ def tauPhi(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "#phi^{#tau jet}"
     ylabel = "Events"
-
+    scaleMCfromWmunu(h)   
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -189,7 +194,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "p_{T}^{leading track} (GeV/c)"
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
-
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -206,7 +211,7 @@ def rtau(h, name, rebin=2, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "R_{#tau}"
     ylabel = "Events / %.2f" % h.binWidth()
-
+    scaleMCfromWmunu(h)    
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -269,7 +274,7 @@ def muonEta(h, rebin=5, ratio=False):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def met(h, rebin=20, ratio=True):
+def met(h, rebin=5, ratio=True):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -307,6 +312,7 @@ def deltaPhi(h, rebin=40):
     xlabel = "#Delta#phi(%s, MET) (rad)" % particle
     ylabel = "Events / %.2f rad" % h.binWidth()
     
+    scaleMCfromWmunu(h)    
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -321,7 +327,7 @@ def transverseMass(h, rebin=10):
     particle = ""
     if "Original" in name:
         particle = "#mu"
-        name = name.replace("TransverseMass", "Mt")
+        name = name.replace("TransverseMass", "MtOriginal")
     else:
         particle = "#tau jet"
         name = name.replace("TransverseMass", "MtEmbedding")
@@ -330,6 +336,7 @@ def transverseMass(h, rebin=10):
     xlabel = "m_{T}(%s, MET) (GeV/c^{2})" % particle
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
+    scaleMCfromWmunu(h)   
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -337,6 +344,72 @@ def transverseMass(h, rebin=10):
 
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+    
+def tauCandPt(h, name, rebin=1, ratio=True):
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+
+    xlabel = "p_{T}^{#tau-jet candidate} (GeV/c)"
+    ylabel = "Events /%.0f GeV/c" % h.binWidth()
+    
+    scaleMCfromWmunu(h)
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.01, "ymaxfactor": 5}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    name = name+"_log"
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+#    h.createFrame(name, opts=opts)
+    #h.createFrameFraction(name, opts=opts)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
+    
+def tauCandEta(h, name, rebin=1, ratio=True):
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+
+    xlabel = "#eta^{#tau-jet candidate}" 
+    ylabel = "Events / %.2f" % h.binWidth()
+    
+    scaleMCfromWmunu(h)
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 0.1, "ymaxfactor": 5}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    name = name+"_log"
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
+def tauCandPhi(h, name, rebin=1, ratio=True):
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+
+    xlabel = "#phi^{#tau-jet candidate}"
+    ylabel = "Events / %.2f" % h.binWidth()
+    
+    scaleMCfromWmunu(h)
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+
+    opts = {"ymin": 1.0, "ymaxfactor": 5}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    name = name+"_log"
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
@@ -349,7 +422,8 @@ def jetPt(h, name, rebin=2, ratio=True):
 
     xlabel = "p_{T}^{%s} (GeV/c)" % particle
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
-
+    
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -374,7 +448,7 @@ def jetEta(h, name, rebin=2, ratio=True):
         particle = "bjet"
     xlabel = "#eta^{%s}" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-
+    scaleMCfromWmunu(h)  
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -396,7 +470,7 @@ def jetPhi(h, name, rebin=2, ratio=True):
         particle = "bjet"
     xlabel = "#phi^{%s}" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
@@ -418,7 +492,7 @@ def numberOfJets(h, name, rebin=1, ratio=True):
         particle = "bjet"
     xlabel = "Number of %ss" % particle
     ylabel = "Events / %.2f" % h.binWidth()
-
+    scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 

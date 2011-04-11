@@ -1,12 +1,13 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
-
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "Math/GenVector/VectorUtil.h"
 #include <string>
 #include "TH1F.h"
 #include "TH2F.h"
@@ -27,6 +28,8 @@ namespace HPlus {
     fElecSelectionSubCountPtCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Pt " )),
     fElecSelectionSubCountEtaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Eta")),
     fElecSelectionSubCountFiducialVolumeCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron fiducial volume")),
+    fElecSelectionSubCountMatchingMCelectron(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron")),
+    fElecSelectionSubCountMatchingMCelectronFromW(eventCounter.addSubCounter("GlobalElectron Selection","Electron matching MC electron From W")),
     fElecSelectionSubCountElectronSelection(eventCounter.addSubCounter("GlobalElectron Selection", fElecSelection)),
     fElecSelectionSubCountNLostHitsInTrkerCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Num of Lost Hits In Trker")),
     fElecSelectionSubCountmyElectronDeltaCotThetaCut(eventCounter.addSubCounter("GlobalElectron Selection", "Electron Delta Cot(Theta)")),
@@ -49,8 +52,12 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hElectronPt  = makeTH<TH1F>(*fs, "GlobalElectronPt", "GlobalElectronPt", 100, 0.0, 200.0);
-    hElectronEta = makeTH<TH1F>(*fs, "GlobalElectronEta", "GlobalElectronEta", 60, -3.0, 3.0);
+    hElectronPt  = makeTH<TH1F>(*fs, "GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
+    hElectronEta = makeTH<TH1F>(*fs, "GlobalElectronEta", "GlobalElectronEta", 400, -3.0, 3.0);
+    hElectronPt_matchingMCelectron  = makeTH<TH1F>(*fs, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
+    hElectronEta_matchingMCelectron = makeTH<TH1F>(*fs, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
+    hElectronPt_matchingMCelectronFromW  = makeTH<TH1F>(*fs, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
+    hElectronEta_matchingMCelectronFromW = makeTH<TH1F>(*fs, "GlobalElectronEta_matchingMCelectronFromW", "GlobalElectronEta_matchingMCelectronFromW", 400, -3.0, 3.0);
     hElectronPt_gsfTrack  = makeTH<TH1F>(*fs, "GlobalElectronPt_gsfTrack", "GlobalElectronPt_gsfTrack", 100, 0.0, 200.0);
     hElectronEta_gsfTrack = makeTH<TH1F>(*fs, "GlobalElectronEta_gsfTrack", "GlobalElectronEta_gsfTrack", 60, -3.0, 3.0);
     hElectronEta_superCluster = makeTH<TH1F>(*fs, "GlobalElectronEta_superCluster", "GlobalElectronEta_superCluster", 60, -3.0, 3.0);
@@ -74,6 +81,7 @@ namespace HPlus {
     bUseSimpleEleId70relIsoID = false;
     bUseSimpleEleId60relIsoID = false;
     bUseCustomElectronID = false;
+
     // Check Whether official eID will be applied
     if( fElecSelection == "eidLoose") bUseLooseID = true;
     else if( fElecSelection == "eidRobustLoose") bUseRobustLooseID = true;
@@ -124,6 +132,9 @@ namespace HPlus {
 
     // In the case where the Electron Collection handle is empty...
     if ( !myElectronHandle->size() ) return true;
+
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
     
     // Reset/initialise variables
     float myHighestElecPt = -1.0;
@@ -134,6 +145,8 @@ namespace HPlus {
     bool bElecPtCut = false;
     bool bElecEtaCut = false;
     bool bElecFiducialVolumeCut  = false;
+    bool bElecMatchingMCelectron = false;
+    bool bElecMatchingMCelectronFromW = false;
 
    
     // Loop over all Electrons
@@ -250,6 +263,35 @@ namespace HPlus {
       hElectronPt_gsfTrack_AfterSelection->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
       
+      // Selection purity from MC
+      for (size_t i=0; i < genParticles->size(); ++i){  
+	const reco::Candidate & p = (*genParticles)[i];
+	const reco::Candidate & electron = (*iElectron);
+	int status = p.status();
+	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , electron.p4() );
+	if ( deltaR > 0.05 || status != 1) continue;
+	bElecMatchingMCelectron = true;
+	hElectronPt_matchingMCelectron->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+	hElectronEta_matchingMCelectron->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
+	int id = p.pdgId();
+	if ( abs(id) == 11 ) {
+	  int numberOfTauMothers = p.numberOfMothers(); 
+	  for (int im=0; im < numberOfTauMothers; ++im){  
+	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+	    if ( !dparticle) continue;
+	    int idmother = dparticle->pdgId();
+	    if ( abs(idmother) == 24 ) {
+	      bElecMatchingMCelectronFromW = true;
+	      hElectronPt_matchingMCelectronFromW->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+	      hElectronEta_matchingMCelectronFromW->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
+	    }
+	  }
+	}
+      }
+     
+
+
+      
     }//eof: for(pat::ElectronCollection::const_iterator iElectron = myElectronHandle->begin(); iElectron != myElectronHandle->end(); ++iElectron) {
     
     if(bElecPresent) {
@@ -264,6 +306,12 @@ namespace HPlus {
 	      increment(fElecSelectionSubCountFiducialVolumeCut);
 	      if(bPassedElecID) {
 		increment(fElecSelectionSubCountElectronSelection);
+		if(bElecMatchingMCelectron) {
+		  increment(fElecSelectionSubCountMatchingMCelectron);
+		  if(bElecMatchingMCelectronFromW) {
+		    increment(fElecSelectionSubCountMatchingMCelectronFromW);
+		  }
+		}
 	      }
             }
           }

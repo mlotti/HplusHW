@@ -1,4 +1,4 @@
-import FWCore.ParameterSet.Config as cms
+HChSignalAnalysisParameters_cff.pyimport FWCore.ParameterSet.Config as cms
 
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
@@ -139,7 +139,7 @@ GlobalElectronVeto = cms.untracked.PSet(
 GlobalMuonVeto = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
-    MuonPtCut = cms.untracked.double(20.0),
+    MuonPtCut = cms.untracked.double(15.0),
     MuonEtaCut = cms.untracked.double(2.5),
     MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
 )
@@ -174,6 +174,10 @@ forwardJetVeto = cms.untracked.PSet(
 GenParticleAnalysis = cms.untracked.PSet(
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.3)
+)
+topSelection = cms.untracked.PSet(
+  TopMassLow = cms.untracked.double(100.0),
+  TopMassHigh = cms.untracked.double(300.0)
 )
 
 # Functions

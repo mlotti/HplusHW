@@ -30,8 +30,8 @@ counters = analysis+"Counters"
 
 embeddingSignalAnalysis = "."
 #signalAnalysis = "../../multicrab_110307_141642"
-#signalAnalysis = "../../multicrab_110316_182853"
-signalAnalysis = "../../multicrab_110404_134156"
+signalAnalysis = "../../multicrab_110319_140504"
+#signalAnalysis = "../../multicrab_110404_134156"
 #embeddingSignalAnalysis = "multicrab_signalAnalysis_110303_154128"
 #signalAnalysis = "multicrab_110307_141642"
 
@@ -244,7 +244,7 @@ def tauCandPt(h, step="", rebin=1):
         opts["ymin"] = 0.001
            
 
-    name = "tauCandidatePtSimulateEmbedded_%s_log" % step
+    name = "tauCandidatePtSimulatedEmbedded_%s_log" % step
     h.createFrameFraction(name, opts=opts)
     #h.createFrame(name, opts=opts)
     h.frame.GetXaxis().SetTitle(xlabel)
@@ -272,7 +272,7 @@ def tauCandEta(h, step="", rebin=1):
         opts["ymin"] = 0.001
            
 
-    name = "tauCandidateEtaSimulateEmbedded_%s_log" % step
+    name = "tauCandidateEtaSimulatedEmbedded_%s_log" % step
     h.createFrameFraction(name, opts=opts)
     #h.createFrame(name, opts=opts)
     h.frame.GetXaxis().SetTitle(xlabel)
@@ -301,7 +301,7 @@ def tauCandPhi(h, step="", rebin=1):
         opts["ymin"] = 0.001
            
 
-    name = "tauCandidatePhiSimulateEmbedded_%s_log" % step
+    name = "tauCandidatePhiSimulatedEmbedded_%s_log" % step
     h.createFrameFraction(name, opts=opts)
     #h.createFrame(name, opts=opts)
     h.frame.GetXaxis().SetTitle(xlabel)
