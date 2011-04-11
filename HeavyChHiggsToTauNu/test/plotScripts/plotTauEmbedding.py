@@ -46,7 +46,7 @@ class PlotBase(plots.PlotBase):
     def __init__(self):
         plots.PlotBase.__init__(self, [],
                                 [".png",
-#                                 ".eps", ".C"
+                                 ".eps", ".C"
                                  ])
 
 class Plot(PlotBase):
@@ -64,25 +64,24 @@ class Plot(PlotBase):
         plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
 
 class PlotMany(PlotBase):
-    def __init__(self, datasets, prefix, directories, name):
+    def __init__(self, datasets, prefix, directories, name, normalizeToOne):
         PlotBase.__init__(self)
 
         self.prefix = prefix+"_"
-        self.plotname = name
+        self.name = name
+        self.postfix = ""
 
         for d in directories:
             self.histoMgr.append(getHisto(datasets, d+"/"+name, d))
 
+        if normalizeToOne:
+            self.histoMgr.normalizeToOne()
+            self.postfix += "_one"
+
         self.histoMgr.forEachHisto(styles.generator())
 
-    def createFrame(self, **kwargs):
-        plotname = kwargs.get("plotname", self.plotname)
-        try:
-            del kwargs["plotname"]
-        except KeyError:
-            pass
-
-        plots.PlotBase.createFrame(self, self.prefix+plotname, **kwargs)
+    def createFrame(self, plotname, **kwargs):
+        plots.PlotBase.createFrame(self, self.prefix+plotname+self.postfix, **kwargs)
 
 class Plot2(PlotBase):
     def __init__(self, datasets, datasetsTau, directories, name):
@@ -259,51 +258,73 @@ def tauGenMass(datasets, an):
     h.frame.GetYaxis().SetTitle("Number of MC events / 0.02")
     drawSave(h)
 
-def tauIsoSumMaxPt(h, legendLabels, xlabel, rebin=4):
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    h.histoMgr.setHistoLegendLabelMany(legendLabels)
+class PlotMuonTauIso:
+    def __init__(self, ptRebin=4):
+        self.relIso_re = re.compile("RelIso(?P<iso>\d+)")
 
-    h.createFrame(ymin=0.1, ymaxfactor=2, xmax=50)
-    h.frame.GetXaxis().SetTitle("#tau isol. cand %s (GeV/c)" % xlabel)
-    h.frame.GetYaxis().SetTitle("Taus / %.1f GeV/c" % h.binWidth())
-    h.setLegend(histograms.createLegend())
-    h.getPad().SetLogy(True)
-    drawSave(h)
+        self.ptRebin = 4
 
-def tauIsoOccupancy(h, legendLabels):
-    h.histoMgr.setHistoLegendLabelMany(legendLabels)
+        self.histos = [
+#            "Tau_IsoChargedHadrPt05Sum",
+#            "Tau_IsoChargedHadrPt10Sum",
+            "Tau_IsoShrinkingCone",
+            "Tau_IsoShrinkingCone05",
+            "Tau_IsoHpsLoose",
+            "Tau_IsoHpsMedium",
+            "Tau_IsoHpsTight"
+            ]
 
-    h.createFrame(ymin=0.1, ymaxfactor=2)
-    h.frame.GetXaxis().SetTitle("#tau isolation cand #")
-    h.frame.GetYaxis().SetTitle("Taus / %.0f" % h.binWidth())
-    h.setLegend(histograms.createLegend())
-    h.getPad().SetLogy(True)
-    drawSave(h)
+    def _setLegendLabels(self, analyses):
+        self.legendLabels = {}
+        for an in analyses:
+            m = self.relIso_re.search(an)
+            if m:
+                self.legendLabels[an] = "Iso < %.2f" % (float(m.group("iso"))/100.0)
+            else:
+                self.legendLabels[an] = "No iso"
 
-def muonTauIso(datasets, analyses):
-    relIso_re = re.compile("RelIso(?P<iso>\d+)")
-    legendLabels = {}
-    for an in analyses:
-        m = relIso_re.search(an)
-        if m:
-            legendLabels[an] = "Iso < %.2f" % (float(m.group("iso"))/100.0)
-        else:
-            legendLabels[an] = "No iso"
+    def _plotSumMax(self, h, xlabel):
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(self.ptRebin))
+        h.histoMgr.setHistoLegendLabelMany(self.legendLabels)
 
-    histos = [
-#        "Tau_IsoChargedHadrPt05Sum",
-#        "Tau_IsoChargedHadrPt10Sum",
-        "Tau_IsoShrinkingCone",
-        "Tau_IsoShrinkingCone05",
-        "Tau_IsoHpsLoose",
-        "Tau_IsoHpsMedium",
-        "Tau_IsoHpsTight"
-        ]
+        ylabel = "Taus / %.1f GeV/c" % h.binWidth()
+        ymin = 0.1
+        if self.normalizeToOne:
+            ylabel = "A.u."
+            ymin = 0.001
 
-    for name in histos:
-        tauIsoSumMaxPt(PlotMany(datasets, "combined", analyses, name+"SumPt"), legendLabels, " #Sigma p_{T}")
-        tauIsoSumMaxPt(PlotMany(datasets, "combined", analyses, name+"MaxPt"), legendLabels, "max p_{T}")
-        tauIsoOccupancy(PlotMany(datasets, "combined", analyses, name+"Occupancy"), legendLabels)
+        h.createFrame(h.name, ymin=ymin, ymaxfactor=2, xmax=50)
+        h.frame.GetXaxis().SetTitle("#tau isol. cand %s (GeV/c)" % xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(histograms.createLegend())
+        h.getPad().SetLogy(True)
+        drawSave(h)
+
+    def _plotOccupancy(self, h):
+        h.histoMgr.setHistoLegendLabelMany(self.legendLabels)
+
+        ylabel = "Taus / %.0f" % h.binWidth()
+        ymin = 0.1
+        if self.normalizeToOne:
+            ylabel = "A.u."
+            ymin = 0.001
+
+        h.createFrame(h.name, ymin=ymin, ymaxfactor=2)
+        h.frame.GetXaxis().SetTitle("#tau isolation cand #")
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(histograms.createLegend())
+        h.getPad().SetLogy(True)
+        drawSave(h)
+
+    def plot(self, datasets, analyses, normalizeToOne=False):
+        self._setLegendLabels(analyses)
+
+        self.normalizeToOne = normalizeToOne
+        for name in self.histos:
+            self._plotSumMax(PlotMany(datasets, "combined", analyses, name+"SumPt", normalizeToOne), " #Sigma p_{T}")
+            self._plotSumMax(PlotMany(datasets, "combined", analyses, name+"MaxPt", normalizeToOne), "max p_{T}")
+            self._plotOccupancy(PlotMany(datasets, "combined", analyses, name+"Occupancy", normalizeToOne))
+
 
 def muonTauIso2(datasets, an):
     style.setWide(True)
@@ -517,7 +538,7 @@ class PlotMuonTauMetDeltaPhi:
         h.createFrame(name)
         h.frame.GetXaxis().SetTitle("#Delta#phi(MET_{#tau},MET_{#mu}) (rad)")
         h.frame.GetYaxis().SetTitle(self.ylabel)
-        h.drawSave(h)
+        drawSave(h)
     
         #style.setOptStat(1)
         name = t+","+t+"Original_DEt"
@@ -589,17 +610,20 @@ def embeddingPlots():
         datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-#        datasets.selectAndReorder(["TTJets_TuneZ2_Winter10"])
-        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
+        datasets.selectAndReorder(["TTJets_TuneZ2_Winter10"])
+#        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
+
+    #isoAnalyses = ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]]
+    isoAnalyses = ["EmbeddingAnalyzer"]
 
     muonTau = PlotMuonTau()
     genTauNu = PlotGenTauNu()
     met = PlotMet()
     muonTauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
 
-    muonTauIso(datasets, ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]])
-
-    return
+    muonTauIso = PlotMuonTauIso()
+    #muonTauIso.plot(datasets, isoAnalyses)
+    #muonTauIso.plot(datasets, isoAnalyses, normalizeToOne=True)
 
     for analysis in [
         "EmbeddingAnalyzer",
