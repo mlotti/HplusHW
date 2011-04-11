@@ -3,10 +3,11 @@ import copy
 
 from PhysicsTools.PatAlgos.tools.jetTools import addJetCollection, switchJetCollection
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import run36xOn35xInput
-from PhysicsTools.PatAlgos.tools.tauTools import addTauCollection, classicTauIDSources, classicPFTauIDSources, tancTauIDSources
+import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
+import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
@@ -25,7 +26,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
            doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
-           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None):
+           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
+           includeTracksPFCands=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -33,67 +35,30 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     outputCommands = []
 
+    if includeTracksPFCands:
+        outputCommands.extend([
+                "keep *_generalTracks_*_*",
+                "keep *_particleFlow_*_*",
+
+                # required for PF2PAT
+                "keep *_electronGsfTracks_*_*",
+                "keep *_gsfElectrons_*_*",
+                "keep *_gsfElectronCores_*_*",
+                "keep *_eid*_*_*",
+                "keep recoSuperClusters_*_*_*", # I don't know which one is required
+                "keep *_hfEMClusters_*_*",
+#                "keep *_photons_*_*",
+                "keep *_globalMuons_*_*",
+                "keep *_standAloneMuons_*_*",
+                "keep *_muons_*_*",
+                "keep *_offlineBeamSpot_*_*",
+                "keep *_genMetTrue_*_*",
+                ])
+
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
     if doPatTaus and doHChTauDiscriminators:
-	process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
-        process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
-
-        # Do these imports here in order to be able to run PAT with
-        # doPatTaus=False with 3_9_7 without extra tags
-        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
-        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
-
-        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process)
-        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process)
-        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process)
-
-        HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
-        HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
-
-        # Reconfigure PFRecoTauDiscriminationByInvMass because there is no updated configuration in the CVS
-        process.shrinkingConePFTauDiscriminationByInvMass.select = cms.PSet(
-            min = process.shrinkingConePFTauDiscriminationByInvMass.invMassMin,
-            max = process.shrinkingConePFTauDiscriminationByInvMass.invMassMax
-        )
-        
-        # Disable PFRecoTauDiscriminationAgainstCaloMuon, requires RECO (there is one removal below related to this)
-        process.hpsTancTauSequence.remove(process.hpsTancTausDiscriminationAgainstCaloMuon)
-
-        # These are already in 36X AOD, se remove them from the tautagging
-        # sequence
-        if not dataVersion.is35X():
-            process.tautagging.remove(process.jptRecoTauProducer)
-            process.tautagging.remove(process.caloRecoTauProducer)
-            process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
-            process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
-        
-
-        # Sequence to produce HPS and HPS+TaNC taus. Remove the
-        # shrinking cone PFTau and the TaNC classifier from the
-        # sequence as they are already produced as a part of standard
-        # RECO, and we don't want to reproduce them here (i.e. we
-        # prefer the objects in RECO/AOD over reproducing them on the
-        # fly).
-        process.PFTau.remove(process.ak5PFJetsLegacyTaNCPiZeros)
-        process.PFTau.remove(process.produceAndDiscriminateShrinkingConePFTaus)
-        process.PFTau.remove(process.produceShrinkingConeDiscriminationByTauNeuralClassifier)
-
-        process.hplusPatTauSequence = cms.Sequence(
-            process.tautagging *
-            process.PFTauDiscriminationSequenceForChargedHiggs *
-            process.PFTauDiscriminationSequenceForChargedHiggsCont *
-            process.PFTauTestDiscriminationSequence *
-            process.PFTau * # for HPS+TaNC
-            process.CaloTauDiscriminationSequenceForChargedHiggs *
-            process.CaloTauDiscriminationSequenceForChargedHiggsCont
-        )
-        if not doPatCalo:
-            process.hplusPatTauSequence.remove(process.tautagging)
-            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
-            process.hplusPatTauSequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+        process.hplusPatTauSequence = addPFTausAndDiscriminators(process, dataVersion, doPatCalo)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -181,10 +146,16 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    process.patTaus.embedLeadTrack = True
-    process.patTaus.embedLeadPFCand = True
-    process.patTaus.embedLeadPFChargedHadrCand = True
-    process.patTaus.embedLeadPFNeutralCand = True
+    if includeTracksPFCands:
+        process.patTaus.embedLeadTrack = False
+        process.patTaus.embedLeadPFCand = False
+        process.patTaus.embedLeadPFChargedHadrCand = False
+        process.patTaus.embedLeadPFNeutralCand = False
+    else:
+        process.patTaus.embedLeadTrack = True
+        process.patTaus.embedLeadPFCand = True
+        process.patTaus.embedLeadPFChargedHadrCand = True
+        process.patTaus.embedLeadPFNeutralCand = True
 
     # There's probably a bug in pat::Tau which in practice prevents
     # the emedding of PFCands. Therefore we keep the PFCandidates
@@ -204,26 +175,28 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     if doPatTaus:
         if doHChTauDiscriminators:
-            classicTauIDSources.extend( HChTaus.HChTauIDSources )
-            classicTauIDSources.extend( HChTausCont.HChTauIDSourcesCont )
-            classicPFTauIDSources.extend( HChTausTest.TestTauIDSources )
+            for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+                idSources.extend(HChTaus.HChTauIDSources)
+                idSources.extend(HChTausCont.HChTauIDSourcesCont)
+            for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+                idSources.extend(HChTausTest.TestTauIDSources)
 
         if doPatCalo:
-            addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
+            tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                              algoLabel = "caloReco",
                              typeLabel = "Tau")
             process.patTausCaloRecoTau.embedLeadPFCand = False
             process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
             process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
     
-        addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
+        tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
                          typeLabel = "PFTau")
         # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
         if not doPatTauIsoDeposits:
             process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
-        addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
+        tauTools.addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
                          typeLabel = "PFTau")
         if not doPatTauIsoDeposits:
@@ -234,13 +207,14 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         # correctly one shouhd disentangle the hpsTanc imports above
         # from the discriminators.
         if doHChTauDiscriminators:
-            addTauCollection(process,cms.InputTag('hpsTancTaus'),
+            tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
                              algoLabel = "hpsTanc",
                              typeLabel = "PFTau")
             if not doPatTauIsoDeposits:
                 process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
-            # Disable againstCaloMuon, requires RECO (there is one removal above related to this) 
-            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+            # Disable discriminators which are not in AOD
+#            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+#            del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
 
         # Add visible taus    
         if dataVersion.isMC():
@@ -282,7 +256,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     process.patMuons.usePV = False
-    process.patMuons.embedTrack = True
+    if includeTracksPFCands:
+        process.patMuons.embedTrack = False
+    else:
+        process.patMuons.embedTrack = True
 
     if doPatMuonPFIsolation:
         addPFMuonIsolation(process, process.patMuons, verbose=True)
@@ -291,19 +268,21 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     process.patElectrons.usePV = False
-    process.patElectrons.embedTrack = True
+    if includeTracksPFCands:
+        process.patElectrons.embedTrack = False
+    else:
+        process.patElectrons.embedTrack = True
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
         process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        process.makePatElectronsIdAndElectrons = cms.Sequence(
+        process.patDefaultSequence.replace(process.patElectrons, (
             process.simpleEleIdSequence *
             process.patElectronIsolation *
             process.patElectrons
-        )
-        process.makePatElectrons.replace(process.patElectrons, process.makePatElectronsIdAndElectrons)
-
+        ))
+                                           
         process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
         process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
         process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
@@ -367,6 +346,60 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     return seq
 
+
+def addPFTausAndDiscriminators(process, dataVersion, doCalo):
+    process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+    process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
+
+    # Do these imports here in order to be able to run PAT with
+    # doPatTaus=False with 3_9_7 without extra tags
+    import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+
+    tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+    HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+    HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+    PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+
+    HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
+    HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+
+    # These are already in 36X AOD, se remove them from the tautagging
+    # sequence
+    if not dataVersion.is35X():
+        process.tautagging.remove(process.jptRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauProducer)
+        process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
+        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
+        
+
+    process.hplusHpsTancTauSequence = cms.Sequence()
+    sequence = cms.Sequence(
+        process.tautagging *
+        process.PFTau *
+        process.PFTauDiscriminationSequenceForChargedHiggs *
+        process.PFTauDiscriminationSequenceForChargedHiggsCont *
+        process.PFTauTestDiscriminationSequence *
+        process.CaloTauDiscriminationSequenceForChargedHiggs *
+        process.CaloTauDiscriminationSequenceForChargedHiggsCont
+    )
+
+    if not doCalo:
+        sequence.remove(process.tautagging)
+        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
+        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+
+    return sequence
+
+
+
+
+##################################################
+#
+# PAT on the fly
+#
 from FWCore.ParameterSet.Modules import _Module
 class RemoveSoftMuonVisitor:
     def __init__(self):
@@ -471,6 +504,33 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     
     return (dataPatSequence, counters)
 
+
+##################################################
+#
+# PF2PAT
+#
+def addPF2PAT(process, dataVersion):
+    if hasattr(process, "patDefaultSequence"):
+        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
+
+    # Hack to not to crash if something in PAT assumes process.out
+    hasOut = hasattr(process, "out")
+    if not hasOut:
+        process.out = cms.OutputModule("PoolOutputModule",
+            fileName = cms.untracked.string('dummy.root'),
+            outputCommands = cms.untracked.vstring()
+        )
+
+    process.load("PhysicsTools.PatAlgos.patSequences_cff")
+    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix="PFlow")
+
+    # Remove photon MC matcher in order to avoid keeping photons in the event content
+    process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
+
+    if not hasOut:
+        del process.out
+
+    return process.patPF2PATSequencePFlow
 
 ### The functions below are taken from
 ### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py

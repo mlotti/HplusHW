@@ -79,7 +79,9 @@ TauTriggerEfficiencyValidation::TauTriggerEfficiencyValidation(const edm::Parame
 
 TauTriggerEfficiencyValidation::~TauTriggerEfficiencyValidation() {}
 
-void TauTriggerEfficiencyValidation::beginJob(){
+void TauTriggerEfficiencyValidation::beginJob(){}
+
+void TauTriggerEfficiencyValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/TriggerEfficiency");
@@ -112,8 +114,6 @@ void TauTriggerEfficiencyValidation::beginJob(){
     std::cout << "Trigger path: " << hltPathFilter.label() << std::endl;
   }
 }
-
-void TauTriggerEfficiencyValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 void TauTriggerEfficiencyValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void TauTriggerEfficiencyValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){

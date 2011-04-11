@@ -35,9 +35,26 @@ namespace HPlus {
     return true;
   }
 
+  // TauIDPFHPSBase ---------------------------------------------
+  TauIDPFHPSBase::TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel):
+    TauIDPFTauBase(iConfig, eventCounter, eventWeight, baseLabel)
+  {}
+  TauIDPFHPSBase::~TauIDPFHPSBase() {}
+
+  bool TauIDPFHPSBase::passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau) {
+    // Electron veto
+    if(tau->tauID("againstElectronLoose") < 0.5 ) return false;
+    fCounterPackager.incrementSubCount(fIDAgainstElectronCut);
+    // Muon veto
+    if(tau->tauID("againstMuonLoose") < 0.5 ) return false;
+    fCounterPackager.incrementSubCount(fIDAgainstMuonCut);
+    // All cuts passed, return true
+    return true;
+  }
+
   // TauIDPFShrinkingConeHPS ---------------------------------------------
   TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, "HPSTight")
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSTight")
   {
     edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
@@ -66,7 +83,7 @@ namespace HPlus {
   
   // TauIDPFShrinkingConeHPSMedium ---------------------------------------
   TauIDPFShrinkingConeHPSMedium::TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, "HPSMedium")
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSMedium")
   {
     edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
@@ -127,7 +144,7 @@ namespace HPlus {
 
   // TauIDPFShrinkingConeCombinedHPSTaNC --------------------------------------------
   TauIDPFShrinkingConeCombinedHPSTaNC::TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, "HPSTaNC")
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSTaNC")
   {
     edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation

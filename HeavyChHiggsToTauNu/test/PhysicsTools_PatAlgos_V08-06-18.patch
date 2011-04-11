@@ -1,0 +1,181 @@
+Index: PhysicsTools/PatAlgos/python/patTemplate_cfg.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/python/patTemplate_cfg.py,v
+retrieving revision 1.42
+diff -u -r1.42 patTemplate_cfg.py
+--- PhysicsTools/PatAlgos/python/patTemplate_cfg.py	28 Mar 2011 11:49:11 -0000	1.42
++++ PhysicsTools/PatAlgos/python/patTemplate_cfg.py	1 Apr 2011 11:26:18 -0000
+@@ -12,9 +12,9 @@
+ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import pickRelValInputFiles
+ process.source = cms.Source("PoolSource",
+     fileNames = cms.untracked.vstring(
+-    pickRelValInputFiles( cmsswVersion  = 'CMSSW_4_2_0_pre8'
++    pickRelValInputFiles( cmsswVersion  = 'CMSSW_4_1_3'
+                         , relVal        = 'RelValTTbar'
+-                        , globalTag     = 'START42_V7'
++                        , globalTag     = 'START311_V2'
+                         , numberOfFiles = 1
+                         )
+     )
+@@ -32,6 +32,10 @@
+ ## Standard PAT Configuration File
+ process.load("PhysicsTools.PatAlgos.patSequences_cff")
+ 
++## internediate step to re-reco Taus
++process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
++process.p0 = cms.Path(process.PFTau)
++ 
+ ## Output Module Configuration (expects a path 'p')
+ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+ process.out = cms.OutputModule("PoolOutputModule",
+Index: PhysicsTools/PatAlgos/python/recoLayer0/pfCandidateIsoDepositSelection_cff.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/python/recoLayer0/pfCandidateIsoDepositSelection_cff.py,v
+retrieving revision 1.7
+diff -u -r1.7 pfCandidateIsoDepositSelection_cff.py
+--- PhysicsTools/PatAlgos/python/recoLayer0/pfCandidateIsoDepositSelection_cff.py	2 Feb 2011 19:57:36 -0000	1.7
++++ PhysicsTools/PatAlgos/python/recoLayer0/pfCandidateIsoDepositSelection_cff.py	1 Apr 2011 11:26:18 -0000
+@@ -1,7 +1,7 @@
+ import FWCore.ParameterSet.Config as cms
+ 
+-from CommonTools.ParticleFlow.ParticleSelectors.pfSortByType_cff import *
+-from CommonTools.ParticleFlow.pfNoPileUp_cff import *
++from PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff import *
++from PhysicsTools.PFCandProducer.pfNoPileUp_cff import *
+ 
+ 
+ patPFCandidateIsoDepositSelection = cms.Sequence(
+Index: PhysicsTools/PatAlgos/python/tools/pfTools.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/python/tools/pfTools.py,v
+retrieving revision 1.56
+diff -u -r1.56 pfTools.py
+--- PhysicsTools/PatAlgos/python/tools/pfTools.py	21 Mar 2011 15:35:29 -0000	1.56
++++ PhysicsTools/PatAlgos/python/tools/pfTools.py	1 Apr 2011 11:26:18 -0000
+@@ -236,7 +236,7 @@
+ 
+ #helper function for PAT on PF2PAT sample
+ def tauTypeInPF2PAT(process,tauType='shrinkingConePFTau', postfix = ""): 
+-    process.load("CommonTools.ParticleFlow.pfTaus_cff")
++    process.load("PhysicsTools.PFCandProducer.pfTaus_cff")
+     applyPostfix(process, "pfTaus",postfix).src = cms.InputTag(tauType+'Producer'+postfix)
+             
+ 
+@@ -311,7 +311,7 @@
+         sys.exit(1)
+ 
+     # changing the jet collection in PF2PAT:
+-    from CommonTools.ParticleFlow.Tools.jetTools import jetAlgo
++    from PhysicsTools.PFCandProducer.Tools.jetTools import jetAlgo
+     inputCollection = getattr(process,"pfJets"+postfix).src
+     setattr(process, "pfJets"+postfix, jetAlgo( algo ) ) # problem for cfgBrowser
+     getattr(process,"pfJets"+postfix).src = inputCollection
+@@ -347,7 +347,7 @@
+ 
+     # -------- CORE ---------------
+     if runPF2PAT:
+-        process.load("CommonTools.ParticleFlow.PF2PAT_cff")
++        process.load("PhysicsTools.PFCandProducer.PF2PAT_cff")
+         #add Pf2PAT *before* cloning so that overlapping modules are cloned too
+         #process.patDefaultSequence.replace( process.patCandidates, process.PF2PAT+process.patCandidates)
+         process.patPF2PATSequence = cms.Sequence( process.PF2PAT + process.patDefaultSequence)
+@@ -409,7 +409,7 @@
+     addPFCandidates(process,cms.InputTag('pfNoJet'+postfix),patLabel='PFParticles'+postfix,cut="",postfix=postfix)
+ 
+     if runOnMC:
+-        process.load("CommonTools.ParticleFlow.genForPF2PAT_cff")
++        process.load("PhysicsTools.PFCandProducer.genForPF2PAT_cff")
+         getattr(process, "patDefaultSequence"+postfix).replace(
+             applyPostfix(process,"patCandidates",postfix),
+             process.genForPF2PATSequence+applyPostfix(process,"patCandidates",postfix)
+Index: PhysicsTools/PatAlgos/test/patTuple_PATandPF2PAT_cfg.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/test/patTuple_PATandPF2PAT_cfg.py,v
+retrieving revision 1.12
+diff -u -r1.12 patTuple_PATandPF2PAT_cfg.py
+--- PhysicsTools/PatAlgos/test/patTuple_PATandPF2PAT_cfg.py	17 Mar 2011 21:15:55 -0000	1.12
++++ PhysicsTools/PatAlgos/test/patTuple_PATandPF2PAT_cfg.py	1 Apr 2011 11:26:18 -0000
+@@ -3,16 +3,16 @@
+ 
+ # the source is already defined in patTemplate_cfg.
+ # overriding source and various other things
+-#process.load("CommonTools.ParticleFlow.Sources.source_ZtoEles_DBS_312_cfi")
++#process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoEles_DBS_312_cfi")
+ #process.source = cms.Source("PoolSource", 
+ #     fileNames = cms.untracked.vstring('file:myAOD.root')
+ #)
+ 
+ 
+-# process.load("CommonTools.ParticleFlow.Sources.source_ZtoMus_DBS_cfi")
++# process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoMus_DBS_cfi")
+ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False))
+ 
+-# process.load("CommonTools.ParticleFlow.Sources.source_ZtoMus_DBS_cfi")
++# process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoMus_DBS_cfi")
+ runOnMC = True
+ 
+ if runOnMC == False:
+Index: PhysicsTools/PatAlgos/test/patTuple_PF2PAT_cfg.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/test/patTuple_PF2PAT_cfg.py,v
+retrieving revision 1.14
+diff -u -r1.14 patTuple_PF2PAT_cfg.py
+--- PhysicsTools/PatAlgos/test/patTuple_PF2PAT_cfg.py	17 Mar 2011 16:23:21 -0000	1.14
++++ PhysicsTools/PatAlgos/test/patTuple_PF2PAT_cfg.py	1 Apr 2011 11:26:18 -0000
+@@ -3,13 +3,13 @@
+ 
+ # the source is already defined in patTemplate_cfg.
+ # overriding source and various other things
+-#process.load("CommonTools.ParticleFlow.Sources.source_ZtoEles_DBS_312_cfi")
++#process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoEles_DBS_312_cfi")
+ #process.source = cms.Source("PoolSource", 
+ #     fileNames = cms.untracked.vstring('file:myAOD.root')
+ #)
+ 
+ 
+-# process.load("CommonTools.ParticleFlow.Sources.source_ZtoMus_DBS_cfi")
++# process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoMus_DBS_cfi")
+ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False))
+ 
+ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+@@ -50,7 +50,7 @@
+ 
+ # Add PF2PAT output to the created file
+ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
+-#process.load("CommonTools.ParticleFlow.PF2PAT_EventContent_cff")
++#process.load("PhysicsTools.PFCandProducer.PF2PAT_EventContent_cff")
+ #process.out.outputCommands =  cms.untracked.vstring('drop *')
+ process.out.outputCommands = cms.untracked.vstring('drop *',
+                                                    'keep recoPFCandidates_particleFlow_*_*',
+Index: PhysicsTools/PatAlgos/test/patTuple_userData_cfg.py
+===================================================================
+RCS file: /cvs/CMSSW/CMSSW/PhysicsTools/PatAlgos/test/patTuple_userData_cfg.py,v
+retrieving revision 1.2
+diff -u -r1.2 patTuple_userData_cfg.py
+--- PhysicsTools/PatAlgos/test/patTuple_userData_cfg.py	28 Jan 2011 21:08:21 -0000	1.2
++++ PhysicsTools/PatAlgos/test/patTuple_userData_cfg.py	1 Apr 2011 11:26:18 -0000
+@@ -3,13 +3,13 @@
+ 
+ # the source is already defined in patTemplate_cfg.
+ # overriding source and various other things
+-#process.load("CommonTools.ParticleFlow.Sources.source_ZtoEles_DBS_312_cfi")
++#process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoEles_DBS_312_cfi")
+ #process.source = cms.Source("PoolSource", 
+ #     fileNames = cms.untracked.vstring('file:myAOD.root')
+ #)
+ 
+ 
+-# process.load("CommonTools.ParticleFlow.Sources.source_ZtoMus_DBS_cfi")
++# process.load("PhysicsTools.PFCandProducer.Sources.source_ZtoMus_DBS_cfi")
+ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(False))
+ 
+ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+@@ -56,7 +56,7 @@
+ 
+ # Add PF2PAT output to the created file
+ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
+-#process.load("CommonTools.ParticleFlow.PF2PAT_EventContent_cff")
++#process.load("PhysicsTools.PFCandProducer.PF2PAT_EventContent_cff")
+ #process.out.outputCommands =  cms.untracked.vstring('drop *')
+ process.out.outputCommands = cms.untracked.vstring('drop *',
+                                                    *patEventContentNoCleaning ) 

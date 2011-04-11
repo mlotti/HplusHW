@@ -47,7 +47,9 @@ MomentumValidation::MomentumValidation(const edm::ParameterSet& iConfig):
 
 MomentumValidation::~MomentumValidation() {}
 
-void MomentumValidation::beginJob(){
+void MomentumValidation::beginJob(){}
+
+void MomentumValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/Momentum");
@@ -63,8 +65,6 @@ void MomentumValidation::beginJob(){
     EtaPhi	= dbe->book2D("Eta Phi "+src.label(),"eta phi", 100 ,-2.5,2.5, 100 ,-3.14,3.14);
   }
 }
-
-void MomentumValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 void MomentumValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void MomentumValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){

@@ -30,12 +30,12 @@ namespace HPlus {
      * Actual tau ID specific classes are inherited from this class.
      */
     TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel);
-    ~TauIDBase();
+    virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
     bool passTauCandidateSelection(const edm::Ptr<pat::Tau> tau);
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
-    bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
+    virtual bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
     virtual bool passIsolation(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiIsolation(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passOneProngCut(const edm::Ptr<pat::Tau> tau) = 0;

@@ -53,7 +53,9 @@ PrimaryVertexValidation::PrimaryVertexValidation(const edm::ParameterSet& iConfi
 
 PrimaryVertexValidation::~PrimaryVertexValidation() {}
 
-void PrimaryVertexValidation::beginJob(){
+void PrimaryVertexValidation::beginJob(){}
+
+void PrimaryVertexValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/PrimaryVertex");
@@ -83,8 +85,6 @@ void PrimaryVertexValidation::beginJob(){
     BS_WidthY   = dbe->book1D("BeamSpot Y width "+beamSpotSrc.label(),"BeamSpot Y Width", 100 ,0,0.01);
   }
 }
-
-void PrimaryVertexValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 void PrimaryVertexValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void PrimaryVertexValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){

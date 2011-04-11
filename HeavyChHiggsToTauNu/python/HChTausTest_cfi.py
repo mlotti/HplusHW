@@ -5,7 +5,8 @@ TestTauIDSources = [("byIsolationChargedPtSum", "DiscriminationByIsolationCharge
                     ("byIsolation06", "DiscriminationByIsolation06"),
                     ("byIsolation07", "DiscriminationByIsolation07"),
                     ("byIsolation08", "DiscriminationByIsolation08"),
-                    ("byIsolation09", "DiscriminationByIsolation09")
+                    ("byIsolation09", "DiscriminationByIsolation09"),
+                    ("againstElectronWithCrack", "DiscriminationAgainstElectronWithCrack")
 ]
 
 def extendEventContent(content, process):
