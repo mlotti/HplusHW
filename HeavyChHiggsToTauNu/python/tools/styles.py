@@ -50,8 +50,8 @@ class StyleError:
     def __call__(self, h):
         self.apply(h.getRootHisto())
 
-#dataStyle = Style(-2, ROOT.kBlack)
-dataStyle = Style(-22+6, ROOT.kBlack)
+dataStyle = Style(-2, ROOT.kBlack)
+#dataStyle = Style(-22+6, ROOT.kBlack)
 errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
