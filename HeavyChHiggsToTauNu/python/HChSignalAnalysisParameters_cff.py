@@ -1,4 +1,4 @@
-HChSignalAnalysisParameters_cff.pyimport FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
 
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
