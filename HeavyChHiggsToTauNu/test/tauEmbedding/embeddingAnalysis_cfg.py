@@ -184,7 +184,8 @@ histoMet = Histo("et", "et()", min=0., max=300., nbins=300, description="MET (Ge
 
 
 muons = cms.InputTag("tauEmbeddingMuons")
-taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
+#taus = cms.InputTag("selectedPatTausShrinkingConePFTau")
+taus = cms.InputTag("selectedPatTausHpsPFTau")
 pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", "RECO")
 
