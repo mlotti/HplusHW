@@ -47,6 +47,17 @@ namespace HPlus {
       double getRtauOfSelectedTau() const {
         return fTauSelection->getSelectedRtauValue();
       }
+      bool shouldRtauBeAppliedOnSelectedTau() const {
+        return fTauSelection->fOperationMode != kTauCandidateSelectionOnlyReversedRtau;
+      }
+      bool selectedTauPassedRtau() const {
+        if (!fTauSelection->fSelectedTaus.size()) return false;
+        return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
+      }
+      bool selectedTauCandidatePassedRtau() const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return false;
+        return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
+      }
 
     private:
       const TauSelection *fTauSelection;
@@ -57,6 +68,9 @@ namespace HPlus {
       kNormalTauID, // Tau candidate selection + tau ID selections
       kFactorizedTauID,
       kTauCandidateSelectionOnly, // Only tau candidate selection is applied
+      kTauCandidateSelectionOnlyReversedRtau, // Only tau candidate selection is applied with reversed Rtau cut
+      kTauIDWithoutRtauOnly, // For QCD bkg measurement - set internally
+      kTauIDWithRtauOnly, // For QCD bkg measurement - set internally
       kAntiTauTag, // Selects anti-tagged taus
       kAntiTauTagIsolationOnly // Selects anti-isolated tau jets
     };
@@ -68,8 +82,14 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on a given sample of taus 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// tau ID on cleaned tau candidates
+    Data analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    /// tau ID on selected tau candidates - to be applied after analyzeTauIDWithoutRtauOnCleanedTauCandidates
+    //Data analyzeTauIDWithRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Method for setting selected tau (from factorization)
     Data setSelectedTau(edm::Ptr<pat::Tau>& tau, bool passedEvent);
+    /// Method for getting operating mode (needed for tau specific weight maps)
+    TauSelectionOperationMode getOperationMode() const { return fOperationMode; }
 
   private:
     /// Method for doing tau selection

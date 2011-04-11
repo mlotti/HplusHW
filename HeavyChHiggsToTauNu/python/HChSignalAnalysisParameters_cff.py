@@ -132,7 +132,7 @@ EvtTopology = cms.untracked.PSet(
 GlobalElectronVeto = cms.untracked.PSet(
     ElectronCollectionName = cms.untracked.InputTag("selectedPatElectrons"),
     ElectronSelection = cms.untracked.string("simpleEleId95relIso"),
-    ElectronPtCut = cms.untracked.double(20.0),
+    ElectronPtCut = cms.untracked.double(15.0),
     ElectronEtaCut = cms.untracked.double(2.5)
 )
 
