@@ -53,6 +53,10 @@ void HPlusGenMETSumProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
   specific.ChargedHadEtFraction = 0.0;
   specific.MuonEtFraction = 0.0;
   specific.InvisibleEtFraction = 0.0;
+  specific.m_AuxiliaryEnergy = 0.0;
+  specific.m_InvisibleEnergy = 0.0;
+  specific.m_HadEnergy = 0.0;
+  specific.m_EmEnergy = 0.0;
 
   std::auto_ptr<std::vector<reco::GenMET> > ret(new std::vector<reco::GenMET>());
   ret->push_back(reco::GenMET(specific, sumet, metP4, vertex));
