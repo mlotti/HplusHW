@@ -774,8 +774,8 @@ class Dataset:
             raise Exception("Dataset %s is data, no cross section available" % self.name)
         try:
             return self.info["crossSection"]
-        except AttributeError:
-            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method.")
+        except KeyError:
+            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method." % self.name)
 
     def setLuminosity(self, value):
         """Set the integrated luminosity of data dataset (in pb^-1)."""
@@ -789,8 +789,8 @@ class Dataset:
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         try:
             return self.info["luminosity"]
-        except AttributeError:
-            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method.")
+        except KeyError:
+            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
 
     def isData(self):
         return self._isData
