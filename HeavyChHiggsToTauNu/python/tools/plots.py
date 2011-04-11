@@ -714,8 +714,8 @@ class ComparisonPlot(PlotBase):
     # \param datasetRootHisto2
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
-    def __init__(self, datasetRootHisto1, datasetRootHisto2):
-        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
+    def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
 
     ## Set default legend labels and styles, and plot styles
     def setDefaultStyles(self):
@@ -727,8 +727,9 @@ class ComparisonPlot(PlotBase):
     #
     # \param filename     Name for TCanvas (becomes the file name)
     # \param createRatio  Create also the ratio pad?
+    # \param coverPadOpts Options for cover TPad, forwarded to _createCoverPad()
     # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
-    def createFrame(self, filename, createRatio=False, **kwargs):
+    def createFrame(self, filename, createRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
@@ -739,6 +740,8 @@ class ComparisonPlot(PlotBase):
             self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
             self.frame = self.cf.frame
             self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+            self.coverPadOpts = coverPadOpts
 
     ## Get the upper frame TH1
     def getFrame1(self):
@@ -771,7 +774,7 @@ class ComparisonPlot(PlotBase):
             # label of the y-axis of the lower pad. Then move the
             # upper pad on top, so that the lowest label of the y-axis
             # of it is shown
-            self.coverPad = _createCoverPad()
+            self.coverPad = _createCoverPad(**self.coverPadOpts)
             self.coverPad.Draw()
 
             self.cf.canvas.cd(1)

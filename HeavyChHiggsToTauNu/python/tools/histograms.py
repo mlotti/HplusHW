@@ -383,12 +383,16 @@ class CanvasFrameTwo:
         canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
-        opts1 = kwargs.get("opts", {})
+        # Do it like this (create empty, update from kwargs) in order
+        # to make a copy and NOT modify the dictionary in the caller
+        opts1 = {}
+        opts1.update(kwargs.get("opts", {}))
         if "opts1" in kwargs:
             if "opts" in kwargs:
                 raise Exception("Can not give both 'opts' and 'opts1' as keyword arguments")
             opts1 = kwargs["opts1"]
-        opts2 = kwargs.get("opts2", {})
+        opts2 = {}
+        opts2.update(kwargs.get("opts2", {}))
 
         if "xmin" in opts2 or "xmax" in opts2:
             raise Exception("No 'xmin' or 'xmax' allowed in opts2")
@@ -440,6 +444,7 @@ class CanvasFrameTwo:
         self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
+        self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
 
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)
