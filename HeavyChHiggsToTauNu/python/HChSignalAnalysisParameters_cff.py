@@ -67,6 +67,11 @@ tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
     selection = "HPSMediumTauBased"
 )
 
+tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    selection = "HPSLooseTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
     selection = "CombinedHPSTaNCTauBased"
