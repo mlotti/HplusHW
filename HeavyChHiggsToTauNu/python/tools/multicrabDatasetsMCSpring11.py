@@ -4,6 +4,56 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Signal WH
+    "TTToHplusBWB_M80_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": -1,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M90_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 16.188976,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M100_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 13.815713,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M120_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 8.772209,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M140_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 4.068511,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+        }
+    },
     "TTToHplusBWB_M150_Spring11": {
         "dataVersion": "311Xredigi",
         "crossSection": 2.156448,
@@ -31,6 +81,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
                 "number_of_jobs": 1
+            },
+        }
+    },
+    "TTToHplusBWB_M160_Spring11": {
+        "dataVersion": "311Xredigi",
+        "crossSection": 0.738874,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
+                "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
         }
     },
