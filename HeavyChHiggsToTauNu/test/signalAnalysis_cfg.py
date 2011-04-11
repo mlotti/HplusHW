@@ -7,6 +7,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Select the version of the data
 dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+#dataVersion = "311Xredigi"
+#dataVersion = "41Xdata"
+
 
 ##########
 # Flags for additional signal analysis modules
@@ -23,7 +26,9 @@ JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
 # With tau embedding input, tighten the muon selection
-tauEmbeddingTightenMuonSelection = False
+tauEmbeddingTightenMuonSelection = True
+# With tau embedding input, do the muon selection scan
+doTauEmbeddingMuonSelectionScan = False
 
 ################################################################################
 
@@ -100,6 +105,9 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
+    if tauEmbeddingTightenMuonSelection:
+        counters = tauEmbeddingCustomisations.addMuonRelativeIsolation(process, process.commonSequence, cut=0.1)
+        additionalCounters.extend(counters)
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -206,7 +214,7 @@ if doJESVariation:
     addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 # Signal analysis with various tightened muon selections for tau embedding
-if tauEmbeddingTightenMuonSelection:
+if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
     tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if

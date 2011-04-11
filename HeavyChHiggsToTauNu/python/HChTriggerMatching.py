@@ -23,12 +23,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
-        andOr                 = cms.bool(False),
-        filterIdsEnum         = cms.vstring('*'),
-        filterIds             = cms.vint32(0),
-        filterLabels          = cms.vstring('*'),
-        pathNames             = cms.vstring(trigger),
-        collectionTags        = cms.vstring('*'),
+        matchedCuts           = cms.string(" || ".join([ "path('%s')"%path for path in trigger ]) ),
         maxDeltaR             = cms.double(0.4), # start with 0.4; patTrigger pages propose 0.1 or 0.2
         resolveAmbiguities    = cms.bool(True),
         resolveByMatchQuality = cms.bool(False)

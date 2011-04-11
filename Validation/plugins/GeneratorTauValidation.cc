@@ -1,6 +1,3 @@
-#ifndef TauValidation_H
-#define TauValidation_H
-
 /*class TauValidation
  *  
  *  Class to fill Event Generator dqm monitor elements; works on HepMCProduct
@@ -12,6 +9,7 @@
 
 // framework & common header files
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Run.h"
@@ -121,6 +119,18 @@ TauValidation::~TauValidation() {}
 
 void TauValidation::beginJob()
 {
+  return;
+}
+
+void TauValidation::endJob(){
+  return;
+}
+
+void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
+{
+  ///Get PDT Table
+//  iSetup.getData( fPDGTable );
+
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/GeneratorTau");
@@ -179,17 +189,6 @@ void TauValidation::beginJob()
 */
   }
 
-  return;
-}
-
-void TauValidation::endJob(){
-  return;
-}
-
-void TauValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
-{
-  ///Get PDT Table
-//  iSetup.getData( fPDGTable );
   return;
 }
 void TauValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){return;}
@@ -529,4 +528,5 @@ void TauValidation::photons(const HepMC::GenParticle* tau){
         }
 }
 
-#endif
+//define this as a plug-in
+DEFINE_FWK_MODULE(TauValidation);

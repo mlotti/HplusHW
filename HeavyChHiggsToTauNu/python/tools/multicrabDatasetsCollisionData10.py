@@ -8,13 +8,12 @@ datasets = {
     "JetMETTau_Tau_136035-139975_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleLooseIsoTau20",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (136035, 139975), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -31,13 +30,12 @@ datasets = {
     "JetMETTau_Tau_140058-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleLooseIsoTau20_Trk5",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (140058, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -54,13 +52,13 @@ datasets = {
     "BTau_141956-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk5",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
+                "use_server": 1,
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -77,13 +75,12 @@ datasets = {
     "BTau_146428-148058_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -100,13 +97,12 @@ datasets = {
     "BTau_148822-149182_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (148822, 149182), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 15, # Adjusted for PATtuple file size
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -123,13 +119,12 @@ datasets = {
     "BTau_149291-149294_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_BTau_Combined_Dec22_cfi",
         "runs": (149291, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 20, # Adjusted for PATtuple file size
+                "number_of_jobs": 60, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -249,7 +244,6 @@ datasets = {
     "JetMETTau_Jet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (136035, 141881), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -272,7 +266,6 @@ datasets = {
     "JetMET_141956-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (141956, 144114), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -295,7 +288,6 @@ datasets = {
     "Jet_146428-148058_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (146428, 148058), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {
@@ -318,7 +310,6 @@ datasets = {
     "Jet_148822-149294_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Jet30U_v3",
-        "tauIDFactorizationMap": "FactorizationMaphistograms_Jet_Combined_Dec22_cfi",
         "runs": (148822, 149294), # The real range for this trigger (from Run Registry and the Dec22 JSON file)
         "data": {
             "AOD": {

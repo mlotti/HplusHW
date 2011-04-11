@@ -14,5 +14,13 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+#import os, glob
+#directory = "TTJets_TuneZ2_Spring11/res"
+#directory = "QCD_Pt80to120_TuneZ2_Spring11/res"
+#directory = "TauPlusX_160404-161312_Prompt/res"
+#directory = "Tau_160404-161176_Prompt/res"
+#directory = "Tau_161216-161312_Prompt/res"
+#process.source.fileNames = ["file:%s"%x for x in glob.glob(os.path.join(directory, "*.root"))]
+
 process.p1 = cms.Path(process.EDMtoMEConverter*process.dqmSaver)
 

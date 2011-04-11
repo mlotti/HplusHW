@@ -51,7 +51,9 @@ PFTauChHadronCandidateValidation::PFTauChHadronCandidateValidation(const edm::Pa
 
 PFTauChHadronCandidateValidation::~PFTauChHadronCandidateValidation() {}
 
-void PFTauChHadronCandidateValidation::beginJob(){
+void PFTauChHadronCandidateValidation::beginJob(){}
+
+void PFTauChHadronCandidateValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
   if(dbe){
     ///Setting the DQM top directories
     dbe->setCurrentFolder("Validation/PFTauChHadronCandidate");
@@ -77,7 +79,6 @@ void PFTauChHadronCandidateValidation::beginJob(){
   }
 }
 
-void PFTauChHadronCandidateValidation::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 void PFTauChHadronCandidateValidation::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 void PFTauChHadronCandidateValidation::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){

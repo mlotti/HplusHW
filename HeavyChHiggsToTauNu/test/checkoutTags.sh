@@ -22,46 +22,46 @@ set -e
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 # 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
+# 24.2.2011/M.Kortelainen CMSSW_3_11_1_patch2 Taking into account what is included in the release
 # 17.3.2011/M.Kortelainen CMSSW_3_9_7 Suffering from HiggsAnalysis/Skimming being checked out without a tag...
+# 18.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated PAT tags for trigger
 # 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
+# 21.3.2011/M.Kortelainen CMSSW_3_9_9_patch1 Updated pfTools.py
+# 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags for the latest recipe for 41X, removed HPS+TaNC tags as it is in AOD
+# 23.3.2011/M.Kortelainen CMSSW_4_1_3 Updated PAT tags
+# 24.3.2011/M.Kortelainen CMSSW_4_1_3_patch2 Updated PAT tags
+# 1.4.2011/M.Kortelainen CMSSW_4_1_3_patch3 Updated tau and PAT tags to the latest recipe for 41X
+# 4.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tags for the new release, 
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
+# PAT
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes41X
 
-HPSTANC="true"
-if [ "x$#" = "x1" -a "x$1" = "xnoHpsTanc" ]; then
-    HPSTANC="false"
-fi
-
-# HPS+TaNC
-if [ "x$HPSTANC" = "xtrue" ]; then
-    cvs co -r1.28 RecoTauTag/tau_tags.txt
-    # This checkouts
-    # RecoTauTag/RecoTau
-    # RecoTauTag/TauTagTools
-    # RecoTauTag/Configuration
-    # DataFormats/TauReco
-    addpkg -f RecoTauTag/tau_tags.txt
-
-    cvs co -r 1.2 RecoTauTag/tau_tags_dependencies.txt
-    # This checkouts
-    # DataFormats/PatCandidates 
-    # JetMETCorrections/Type1MET 
-    # PhysicsTools/IsolationAlgos 
-    # PhysicsTools/PFCandProducer 
-    # PhysicsTools/PatAlgos 
-    # PhysicsTools/PatUtils
-    addpkg -f RecoTauTag/tau_tags_dependencies.txt
-    cvs up -r1.36 PhysicsTools/PatAlgos/python/tools/tauTools.py
-fi
+# Tau+PAT
+# https://hypernews.cern.ch/HyperNews/CMS/get/physTools/2286/1/1/1/1/1/1/2/2/2/1.html
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Recommended_tags_for_2011_data_t
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
+# Tau
+cvs co -r V01-00-07-01   DataFormats/TauReco
+cvs co -r V01-00-27      RecoTauTag/Configuration
+cvs co -r V01-00-33      RecoTauTag/RecoTau
+cvs co -r V01-00-12      RecoTauTag/TauTagTools
+# PAT
+cvs co -r V06-04-02      DataFormats/PatCandidates
+cvs co -r V04-07-02      PhysicsTools/PFCandProducer
+cvs co -r V08-06-18      PhysicsTools/PatAlgos
+# patches
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatAlgos_V08-06-18.patch
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PFCandProducer_V04-07-02.patch
 
 # Luminosity
 cvs co -r V02-01-03 RecoLuminosity/LumiDB
 
 # Electron ID
-cvs co -r V00-03-19 RecoEgamma/ElectronIdentification
-cvs co -r V00-03-00 ElectroWeakAnalysis/WENu
+# https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
+cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming

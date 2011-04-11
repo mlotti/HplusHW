@@ -1,27 +1,16 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-#dataVersion = "35X"
-#dataVersion = "35Xredigi"
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-#dataVersion = "38Xredigi"
-dataVersion = "38X"
-#dataVersion = "36Xdata" # this is for collision data 
-#dataVersion = "38Xdata" # this is for collision data 
+#dataVersion="39Xredigi"
+dataVersion="311Xredigi"
+#dataVersion="41Xdata"
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # Create Process
 process = cms.Process("HChPatTuple")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -38,9 +27,9 @@ process.source = cms.Source('PoolSource',
   fileNames = cms.untracked.vstring(
 #    "rfio:/castor/cern.ch/user/w/wendland/FE2DEA23-15CA-DF11-B86C-0026189438BF.root" #AOD
 #	"rfio:/castor/cern.ch/user/s/slehti/testData/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Fall10-START38_V12-v1_RAW_RECO.root"
-	"rfio:/castor/cern.ch/user/s/slehti/testData/test_H120_100_1_08t_RAW_RECO.root"
+#	"rfio:/castor/cern.ch/user/s/slehti/testData/test_H120_100_1_08t_RAW_RECO.root"
 #        dataVersion.getPatDefaultFileCastor()
-#        dataVersion.getPatDefaultFileMadhatter()
+        dataVersion.getPatDefaultFileMadhatter()
   )
 )
 
