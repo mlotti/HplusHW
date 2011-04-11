@@ -14,7 +14,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -37,7 +37,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -60,7 +60,8 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010A-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
+                "use_server": 1,
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -83,7 +84,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -106,7 +107,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 15, # Adjusted for PATtuple file size
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
@@ -129,7 +130,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Dec22ReReco_v1/AOD",
                 "luminosity": 0,
-                "lumis_per_job": 20, # Adjusted for PATtuple file size
+                "number_of_jobs": 60, # Adjusted for PATtuple file size
                 "lumiMask": "Dec22ReReco"
             },
             "pattuple_v9_1": {
