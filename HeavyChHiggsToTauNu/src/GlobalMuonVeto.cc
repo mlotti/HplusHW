@@ -332,29 +332,31 @@ namespace HPlus {
      
 
       // Selection purity from MC
-      for (size_t i=0; i < genParticles->size(); ++i){  
-	const reco::Candidate & p = (*genParticles)[i];
-	const reco::Candidate & muon = (*iMuon);
-	int status = p.status();
-	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , muon.p4() );
-	if ( deltaR > 0.05 || status != 1) continue;
-	bMuonMatchingMCmuon = true;
-	hMuonPt_matchingMCmuon->Fill(myMuonPt, fEventWeight.getWeight());
-	hMuonEta_matchingMCmuon->Fill(myMuonEta, fEventWeight.getWeight());
-	int id = p.pdgId();
-	if ( abs(id) == 13 ) {
-	  int numberOfTauMothers = p.numberOfMothers(); 
-	  for (int im=0; im < numberOfTauMothers; ++im){  
-	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-	    if ( !dparticle) continue;
-	    int idmother = dparticle->pdgId();
-	    if ( abs(idmother) == 24 ) {
-	      bMuonMatchingMCmuonFromW = true;
-	      hMuonPt_matchingMCmuonFromW->Fill(myMuonPt, fEventWeight.getWeight());
-	      hMuonEta_matchingMCmuonFromW->Fill(myMuonEta, fEventWeight.getWeight());
-	    }
-	  }
-	}
+      if(!iEvent.isRealData()) {
+        for (size_t i=0; i < genParticles->size(); ++i){  
+          const reco::Candidate & p = (*genParticles)[i];
+          const reco::Candidate & muon = (*iMuon);
+          int status = p.status();
+          double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , muon.p4() );
+          if ( deltaR > 0.05 || status != 1) continue;
+          bMuonMatchingMCmuon = true;
+          hMuonPt_matchingMCmuon->Fill(myMuonPt, fEventWeight.getWeight());
+          hMuonEta_matchingMCmuon->Fill(myMuonEta, fEventWeight.getWeight());
+          int id = p.pdgId();
+          if ( abs(id) == 13 ) {
+            int numberOfTauMothers = p.numberOfMothers(); 
+            for (int im=0; im < numberOfTauMothers; ++im){  
+              const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+              if ( !dparticle) continue;
+              int idmother = dparticle->pdgId();
+              if ( abs(idmother) == 24 ) {
+                bMuonMatchingMCmuonFromW = true;
+                hMuonPt_matchingMCmuonFromW->Fill(myMuonPt, fEventWeight.getWeight());
+                hMuonEta_matchingMCmuonFromW->Fill(myMuonEta, fEventWeight.getWeight());
+              }
+            }
+          }
+        }
       }
 
 
