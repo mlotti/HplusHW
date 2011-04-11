@@ -14,7 +14,6 @@ namespace HPlus {
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
-    ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
     //fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
@@ -27,7 +26,9 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
+    //    ftransverseMassCutCounter(eventCounter.addCounter("transverseMass cut")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
@@ -38,19 +39,16 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTauEmbeddingAnalysis(eventWeight),
+    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
+    //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("ftransverseMassCut"), eventCounter, eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
+    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
-    // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
    
   {
-
-    if(iConfig.exists("tauEmbedding")) {
-      fTauEmbeddingAnalysis.init(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"));
-    }
 
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -58,12 +56,16 @@ namespace HPlus {
 
     // Book histograms filled in the analysis body
     //    hmetAfterTrigger = makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
-    hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass", 50, 0., 200.);
-    hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi", 60, 0., 180.);
+    hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass", 400, 0., 400.);
+    hTransverseMassWithTopCut = makeTH<TH1F>(*fs, "transverseMassWithTopCut", "transverseMassWithTopCut", 400, 0., 400.);
+    hTransverseMassAfterVeto = makeTH<TH1F>(*fs, "transverseMassAfterVeto", "transverseMassAfterVeto", 400, 0., 400.);
+    hTransverseMassBeforeVeto = makeTH<TH1F>(*fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto", 400, 0., 400.);
+    hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi", 400, 0., 3.2);
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
     hAlphaTVsRtau = makeTH<TH2F>(*fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
-    hMet_AfterTauSelection = makeTH<TH1F>(*fs, "met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 300.0);
+    //    hMet_AfterTauSelection = makeTH<TH1F>(*fs, "met_AfterTauSelection", "met_AfterTauSelection", 100, 0.0, 400.0);
+    //    hMet_BeforeTauSelection = makeTH<TH1F>(*fs, "met_BeforeTauSelection", "met_BeforeTauSelection", 100, 0.0, 400.0);
     hMet_AfterBTagging = makeTH<TH1F>(*fs, "met_AfterBTagging", "met_AfterBTagging", 100, 0.0, 300.0);
   }
 
@@ -80,7 +82,8 @@ namespace HPlus {
   // GenParticle analysis
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
-    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
+    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
+   
 
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
@@ -94,9 +97,7 @@ namespace HPlus {
     TriggerTauMETEmulation::Data triggerTauMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup);
     if(!triggerTauMETEmulationData.passedEvent()) return false;
     increment(fTriggerEmulationCounter);
-*/
-
- 
+*/ 
 /*
     edm::Handle <reco::VertexCollection> goodPrimaryVertices;
     edm::InputTag myVertexInputTag("goodPrimaryVertices", "", "HChPatTuple");
@@ -108,9 +109,19 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
- 
-  
 
+    
+    // TauID (with optional factorization) 
+                                                                             
+    //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+
+    // Hadronic jet selection                                                                                                                                                                                                      
+    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+    //    if(!jetData.passedEvent()) return false;
+    //    increment(fNJetsCounter);
+    
+
+     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
@@ -118,9 +129,16 @@ namespace HPlus {
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
+
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
 
+    // MET 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
+    hTransverseMassBeforeVeto->Fill(transverseMass);
+ 
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
@@ -131,16 +149,19 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
 
+    hTransverseMassAfterVeto->Fill(transverseMass);
+
     // MET cut
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
-
+   
+    
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
+   
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
@@ -152,10 +173,8 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-                                                                                                         
-            
-                              
-  
+                                                                                                                  
+                               
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
@@ -165,22 +184,30 @@ namespace HPlus {
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3);
+    //    hDeltaPhi->Fill(deltaPhi);
 
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
+    //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass);
 
-    //  if(transverseMass < ftransverseMassCut ) return false;
-    //  increment(ftransverseMassCutCount);
+    //    if(transverseMass < 100 ) return false;
+    //   increment(ftransverseMassCutCounter);
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
 
+    // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (!TopSelectionData.passedEvent()) return false;
+    increment(fTopSelectionCounter);
 
+    hTransverseMassWithTopCut->Fill(transverseMass);
+
+                                           
     // Forward jet veto                                                                                                                                                                                                                
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
-    if (!forwardJetData.passedEvent()) return false;
-    increment(fForwardJetVetoCounter);
-    fTauEmbeddingAnalysis.fillEnd();
+    //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    //    if (!forwardJetData.passedEvent()) return false;
+    //    increment(fForwardJetVetoCounter);
+    //    fTauEmbeddingAnalysis.fillEnd();
 
 
     // The following code is not correct, because there could be more than one tau jet

@@ -208,6 +208,36 @@ namespace hplus {
       TH1 *hMetOrigDPhi;
       TH2 *hMuonOrigMetDPhiMetOrigDiff;
     };
+
+    class HistoIso {
+    public:
+      HistoIso();
+      ~HistoIso();
+
+      void init(TFileDirectory& dir, const std::string& name);
+
+      void fill(double sumPt, double maxPt, size_t occupancy);
+
+    private:
+      TH1 *hSumPt;
+      TH1 *hMaxPt;
+      TH1 *hOccupancy;
+    };
+
+    class HistoIso2 {
+    public:
+      HistoIso2();
+      ~HistoIso2();
+
+      void init(TFileDirectory& dir, const std::string& muonName, const std::string& tauName);
+
+      void fill(double muonIso, double tauSumPt, double tauMaxPt, size_t tauOccupancy);
+
+    private:
+      TH2 *hSumPt;
+      TH2 *hMaxPt;
+      TH2 *hOccupancy;
+    };
   }
 }
 

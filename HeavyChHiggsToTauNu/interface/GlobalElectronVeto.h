@@ -78,6 +78,8 @@ namespace HPlus {
     Count fElecSelectionSubCountPtCut;
     Count fElecSelectionSubCountEtaCut;
     Count fElecSelectionSubCountFiducialVolumeCut;
+    Count fElecSelectionSubCountMatchingMCelectron;
+    Count fElecSelectionSubCountMatchingMCelectronFromW;
     Count fElecSelectionSubCountElectronSelection;
     Count fElecSelectionSubCountNLostHitsInTrkerCut;
     Count fElecSelectionSubCountmyElectronDeltaCotThetaCut;
@@ -105,6 +107,10 @@ namespace HPlus {
     // Histograms
     TH1 *hElectronPt;
     TH1 *hElectronEta;
+    TH1 *hElectronPt_matchingMCelectron;
+    TH1 *hElectronEta_matchingMCelectron;
+    TH1 *hElectronPt_matchingMCelectronFromW;
+    TH1 *hElectronEta_matchingMCelectronFromW;
     TH1 *hElectronPt_gsfTrack;
     TH1 *hElectronEta_gsfTrack;
     TH1 *hElectronPt_AfterSelection;
@@ -133,6 +139,7 @@ namespace HPlus {
     bool bUseSimpleEleId70relIsoID;
     bool bUseSimpleEleId60relIsoID;
     bool bUseCustomElectronID;
+ 
   };
 }
 

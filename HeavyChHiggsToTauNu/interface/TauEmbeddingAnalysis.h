@@ -25,6 +25,8 @@ class TFileDirectory;
 
 class TH1;
 
+#include "TH2.h"
+
 namespace HPlus {
   class EventWeight;
 
@@ -38,20 +40,36 @@ namespace HPlus {
       void book(TFileDirectory& fd, const std::string& prefix);
 
       // Fill the histograms (add more objects to arguments if necessary)
-      void fill(double weight, const reco::MET& originalMet);
+      void fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon* originalMuon, const pat::Tau* selectedTau);
 
     private:
       // Histograms
       TH1 *hOriginalMet;
-
+      TH1 *hEmbeddingMet;
+      TH1 *hOriginalMuonPt;
+      TH1 *hOriginalMuonEta;
+      TH1 *hOriginalMuonPhi;
+      TH1 *hSelectedTauPt;
+      TH1 *hSelectedTauEta;
+      TH1 *hSelectedTauPhi;
+      TH1 *hSelectedTauIsolation05;
+      TH1 *hSelectedTauIsolation10;
+      TH1 *hleadPFChargedHadrPt;
+      TH1 *hRtau;
+      TH1 *hDeltaPhiOriginal;
+      TH1 *hTransverseMassOriginal;
+      TH1 *hDeltaPhiOriginalTauID;
+      TH1 *hTransverseMassOriginalTauID;
+      TH1 *hDeltaPhi;
+      TH1 *hTransverseMass;
+      TH2 *hEmbVSOrigMet;
+      TH2 *hDeltaPhiEmbVSOrig;
+      TH2 *hMTEmbVSOrig; 
     };
 
   public:
-    TauEmbeddingAnalysis(EventWeight& eventWeight);
+    TauEmbeddingAnalysis(const edm::ParameterSet& iConfig, EventWeight& eventWeight);
     ~TauEmbeddingAnalysis();
-
-    // Initialize, only if the parameter set is available
-    void init(const edm::ParameterSet& iConfig);
 
     // Read the objects from the event and fill the fBegin
     void beginEvent(const edm::Event&, const edm::EventSetup&);
@@ -65,6 +83,10 @@ namespace HPlus {
 
   private:
     edm::InputTag fOriginalMetSrc;
+    edm::InputTag fEmbeddingMetSrc;
+    edm::InputTag fOriginalMuonSrc;
+
+    bool fEmbeddingMode;
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -77,11 +99,11 @@ namespace HPlus {
 
     // Holders of the objects
     edm::Ptr<reco::MET> fOriginalMet;
+    edm::Ptr<reco::MET> fEmbeddingMet;
     edm::Ptr<pat::Tau> fSelectedTau;
+    edm::Ptr<reco::Muon> fOriginalMuon;
 
-    bool fEnabled;
   };
-
 }
 
 

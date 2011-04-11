@@ -1,5 +1,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -9,8 +10,11 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TLorentzVector.h"
+#include "TVector3.h"
 
 namespace HPlus {
   GlobalMuonVeto::Data::Data(const GlobalMuonVeto *globalMuonVeto, bool passedEvent):
@@ -37,6 +41,8 @@ namespace HPlus {
     fMuonSelectionSubCountImpactParCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon ImpactPar")),
     fMuonSelectionSubCountRelIsolationR03Cut(eventCounter.addSubCounter("GlobalMuon Selection","Muon RelIsolationR03")),
     fMuonSelectionSubCountGoodPVCut(eventCounter.addSubCounter("GlobalMuon Selection","Muon GoodPV")),
+    fMuonSelectionSubCountMatchingMCmuon(eventCounter.addSubCounter("GlobalMuon Selection","Muon matching MC Muon")),
+    fMuonSelectionSubCountMatchingMCmuonFromW(eventCounter.addSubCounter("GlobalMuon Selection","Muon matching MC Muon From W")),
     fMuonIDSubCountAllMuonCandidates(eventCounter.addSubCounter("GlobalMuon ID","All Muon Candidates")),
     fMuonIDSubCountAll(eventCounter.addSubCounter("GlobalMuon ID","All")),
     fMuonIDSubCountAllGlobalMuons(eventCounter.addSubCounter("GlobalMuon ID","AllGlobalMuons")),
@@ -61,16 +67,20 @@ namespace HPlus {
   {
     edm::Service<TFileService> fs;
     hMuonPt = makeTH<TH1F>(*fs, "GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
-    hMuonEta = makeTH<TH1F>(*fs, "GlobalMuonEta", "GlobalMuonEta", 60, -3., 3.);
-    hMuonPt_InnerTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 400, 0., 400.);
+    hMuonEta = makeTH<TH1F>(*fs, "GlobalMuonEta", "GlobalMuonEta", 400, -3., 3.);
+    hMuonPt_matchingMCmuon = makeTH<TH1F>(*fs, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
+    hMuonEta_matchingMCmuon = makeTH<TH1F>(*fs, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
+    hMuonPt_matchingMCmuonFromW = makeTH<TH1F>(*fs, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
+    hMuonEta_matchingMCmuonFromW = makeTH<TH1F>(*fs, "GlobalMuonEtamatchingMCmuonFromW", "GlobalMuonEtamatchingMCmuonFromW", 400, -3., 3.);
+    hMuonPt_InnerTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack", "GlobalMuonPt_InnerTrack", 100, 0., 400.);
     hMuonEta_InnerTrack = makeTH<TH1F>(*fs, "GlobalMuonEta_InnerTrack", "GlobalMuonEta_InnerTrack", 60, -3., 3.);
-    hMuonPt_GlobalTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 400, 0., 400.);
+    hMuonPt_GlobalTrack = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack", "GlobalMuonPt_GlobalTrack", 100, 0., 400.);
     hMuonEta_GlobalTrack = makeTH<TH1F>(*fs, "GlobalMuonEta_GlobalTrack", "GlobalMuonEta_GlobalTrack", 60, -3., 3.);
-    hMuonPt_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 400, 0., 400.);
+    hMuonPt_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_AfterSelection", "GlobalMuonPt_AfterSelection", 100, 0., 400.);
     hMuonEta_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_AfterSelection", "GlobalMuonEta_AfterSelection", 60, -3., 3.);
-    hMuonPt_InnerTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 400, 0., 400.);
+    hMuonPt_InnerTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_InnerTrack_AfterSelection", "GlobalMuonPt_InnerTrack_AfterSelection", 100, 0., 400.);
     hMuonEta_InnerTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
-    hMuonPt_GlobalTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 400, 0., 400.);
+    hMuonPt_GlobalTrack_AfterSelection  = makeTH<TH1F>(*fs, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
     hMuonEta_GlobalTrack_AfterSelection = makeTH<TH1F>(*fs, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
      hMuonImpactParameter = makeTH<TH1F>(*fs, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
      hMuonZdiff = makeTH<TH1F>(*fs, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
@@ -157,6 +167,9 @@ namespace HPlus {
       // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
     }
 
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;
     float myHighestMuonEta = -999.99;
@@ -174,6 +187,8 @@ namespace HPlus {
     bool bMuonImpactParCut = false;
     bool bMuonRelIsolationR03Cut = false;
     bool bMuonGoodPVCut = false;
+    bool bMuonMatchingMCmuon = false;
+    bool bMuonMatchingMCmuonFromW = false;
     
     // Loop over all Muons
     for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
@@ -314,6 +329,35 @@ namespace HPlus {
       hMuonEta_InnerTrack_AfterSelection->Fill(myMuonEta, fEventWeight.getWeight());
       hMuonPt_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->pt(), fEventWeight.getWeight());
       hMuonEta_GlobalTrack_AfterSelection->Fill(myGlobalTrackRef->eta(), fEventWeight.getWeight());
+     
+
+      // Selection purity from MC
+      for (size_t i=0; i < genParticles->size(); ++i){  
+	const reco::Candidate & p = (*genParticles)[i];
+	const reco::Candidate & muon = (*iMuon);
+	int status = p.status();
+	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , muon.p4() );
+	if ( deltaR > 0.05 || status != 1) continue;
+	bMuonMatchingMCmuon = true;
+	hMuonPt_matchingMCmuon->Fill(myMuonPt, fEventWeight.getWeight());
+	hMuonEta_matchingMCmuon->Fill(myMuonEta, fEventWeight.getWeight());
+	int id = p.pdgId();
+	if ( abs(id) == 13 ) {
+	  int numberOfTauMothers = p.numberOfMothers(); 
+	  for (int im=0; im < numberOfTauMothers; ++im){  
+	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+	    if ( !dparticle) continue;
+	    int idmother = dparticle->pdgId();
+	    if ( abs(idmother) == 24 ) {
+	      bMuonMatchingMCmuonFromW = true;
+	      hMuonPt_matchingMCmuonFromW->Fill(myMuonPt, fEventWeight.getWeight());
+	      hMuonEta_matchingMCmuonFromW->Fill(myMuonEta, fEventWeight.getWeight());
+	    }
+	  }
+	}
+      }
+
+
 
     }//eof: for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
   
@@ -343,6 +387,12 @@ namespace HPlus {
                             increment(fMuonSelectionSubCountRelIsolationR03Cut);
                             if(bMuonGoodPVCut) {
                               increment(fMuonSelectionSubCountGoodPVCut);
+			      if(bMuonMatchingMCmuon) {
+				increment(fMuonSelectionSubCountMatchingMCmuon);
+				if(bMuonMatchingMCmuonFromW) {
+				  increment(fMuonSelectionSubCountMatchingMCmuonFromW);
+				}
+			      }
                             }
                           }
                         }

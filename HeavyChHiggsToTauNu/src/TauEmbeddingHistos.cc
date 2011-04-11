@@ -222,5 +222,39 @@ namespace hplus {
       hMetOrigDPhi->Fill(reco::deltaPhi(met.phi(), metOrig.phi()));
       hMuonOrigMetDPhiMetOrigDiff->Fill(muonOrigMetDphi, diff);
     }
+
+    ////////////////////////////////////////
+
+    HistoIso::HistoIso(): hSumPt(0), hOccupancy(0) {}
+    HistoIso::~HistoIso() {}
+    void HistoIso::init(TFileDirectory& dir, const std::string& name) {
+      hSumPt = dir.make<TH1F>((name+"SumPt").c_str(), (name+" sum pt").c_str(), 200, 0, 100);
+      hMaxPt = dir.make<TH1F>((name+"MaxPt").c_str(), (name+" max pt").c_str(), 200, 0, 100);
+      hOccupancy = dir.make<TH1F>((name+"Occupancy").c_str(), (name+" occupancy").c_str(), 20, 0, 20);
+    }
+    void HistoIso::fill(double sumPt, double maxPt, size_t occupancy) {
+      hSumPt->Fill(sumPt);
+      hMaxPt->Fill(maxPt);
+      hOccupancy->Fill(occupancy);
+    }
+
+    HistoIso2::HistoIso2(): hSumPt(0), hOccupancy(0) {}
+    HistoIso2::~HistoIso2() {}
+    void HistoIso2::init(TFileDirectory& dir, const std::string& muonName, const std::string& tauName) {
+      hSumPt = dir.make<TH2F>(("Muon_"+muonName+"_Tau_"+tauName+"SumPt").c_str(),
+                              ("Muon "+muonName+" vs. tau "+tauName+ " sum pt").c_str(),
+                              100,0,0.5, 100,0,100);
+      hMaxPt = dir.make<TH2F>(("Muon_"+muonName+"_Tau_"+tauName+"MaxPt").c_str(),
+                              ("Muon "+muonName+" vs. tau "+tauName+ " max pt").c_str(),
+                              100,0,0.5, 100,0,100);
+      hOccupancy = dir.make<TH2F>(("Muon_"+muonName+"_Tau_"+tauName+"Occupancy").c_str(),
+                                  ("Muon "+muonName+" vs. tau "+tauName+ " occupancy").c_str(),
+                                  100,0,0.5, 100,0,100);
+    }
+    void HistoIso2::fill(double muonIso, double tauSumPt, double tauMaxPt, size_t tauOccupancy) {
+      hSumPt->Fill(muonIso, tauSumPt);
+      hMaxPt->Fill(muonIso, tauMaxPt);
+      hOccupancy->Fill(muonIso, tauOccupancy);
+    }
   }
 }

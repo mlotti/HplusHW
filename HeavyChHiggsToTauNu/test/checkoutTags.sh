@@ -22,6 +22,8 @@ set -e
 # 19.1.2011/M.Kortelainen CMSSW_3_9_7 Updated the tau tags
 # 16.2.2011/M.Kortelainen CMSSW_3_9_7 Mechanism to not to take HPS+TaNC tags
 # 17.2.2011/M.Kortelainen CMSSW_3_9_7 Updated lumi tag 
+# 17.3.2011/M.Kortelainen CMSSW_3_9_7 Suffering from HiggsAnalysis/Skimming being checked out without a tag...
+# 21.3.2011/M.Kortelainen CMSSW_4_1_3 Still suffering from HiggsAnalysis/Skimming...
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)

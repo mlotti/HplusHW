@@ -12,6 +12,7 @@
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/WrappedStdDictionaries"/>
 <use name="CommonTools/UtilAlgos"/>
+<use name="RecoTauTag/TauTagTools"/>
 <export>
   <lib name="HiggsAnalysisHeavyChHiggsToTauNu"/>
 </export>

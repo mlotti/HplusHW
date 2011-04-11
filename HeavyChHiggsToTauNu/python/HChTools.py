@@ -38,37 +38,42 @@ def addAnalysisArray(process, prefix, prototype, func, values, names=None, preSe
     
     for index, value in enumerate(values):
         name = names[index]
-        
-        # Module and path names
-        analysisName = prefix+name
-        counterName = analysisName+"Counters"
-        pathName = analysisName+"Path"
 
         # Clone the prototype and call the modifier function
-        m = prototype.clone()
-        func(m, value)
+        module = prototype.clone()
+        func(module, value)
 
-        counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-            counterNames = cms.untracked.InputTag(analysisName, "counterNames"),
-            counterInstances = cms.untracked.InputTag(analysisName, "counterInstances"),
-            printMainCounter = cms.untracked.bool(False),
-            printSubCounters = cms.untracked.bool(False),
-            printAvailableCounters = cms.untracked.bool(False),
-        )
-        if len(additionalCounters) > 0:
-            counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
+        # Add the analysis modules and path
+        addAnalysis(process, prefix+name, module, preSequence, additionalCounters)
+        
+def addAnalysis(process, analysisName, analysisModule, preSequence=None, additionalCounters=[], signalAnalysisCounters=True):
+    # Counter and path names
+    counterName = analysisName+"Counters"
+    pathName = analysisName+"Path"
 
-        path = cms.Path()
-        if preSequence != None:
-            path *= preSequence
-        path *= m
-        path *= counter
+    # Counter module
+    counter = cms.EDAnalyzer("HPlusEventCountAnalyzer",
+        printMainCounter = cms.untracked.bool(False),
+        printSubCounters = cms.untracked.bool(False),
+        printAvailableCounters = cms.untracked.bool(False),
+    )
+    if signalAnalysisCounters:
+        counter.counterNames = cms.untracked.InputTag(analysisName, "counterNames")
+        counter.counterInstances = cms.untracked.InputTag(analysisName, "counterInstances")
+    if len(additionalCounters) > 0:
+        counter.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])
 
-        # Add modules and path to process
-        setattr(process, analysisName, m)
-        setattr(process, counterName, counter)
-        setattr(process, pathName, path)
+    # Path
+    path = cms.Path()
+    if preSequence != None:
+        path *= preSequence
+    path *= analysisModule
+    path *= counter
 
+    # Add modules and path to process
+    setattr(process, analysisName, analysisModule)
+    setattr(process, counterName, counter)
+    setattr(process, pathName, path)
 
 # Add an object selector, count filter and event counter for one cut
 #

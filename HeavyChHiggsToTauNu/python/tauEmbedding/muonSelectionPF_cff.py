@@ -11,8 +11,7 @@ muonTrigger.triggerConditions = cms.vstring("HLT_Mu9")
 muonSelectionTriggered = cms.EDProducer("EventCountProducer")
 
 
-muonFirstPrimaryVertex = cms.EDProducer(
-    "HPlusSelectFirstVertex",
+muonFirstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 muonGoodPrimaryVertex = cms.EDFilter("VertexSelector",
@@ -49,21 +48,37 @@ tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightMuonsZ"),
     minNumber = cms.uint32(1)
 )
-tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
+#tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
+tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
     src = cms.InputTag("tightMuonsZ"),
     filter = cms.bool(False),
     maxNumber = cms.uint32(1)
 )
+# tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#     src = cms.InputTag("tightMuons"),
+#     vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
+#     maxZ = cms.double(1.0)
+# )
+# tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
+#     src = cms.InputTag("tauEmbeddingMuons"),
+#     minNumber = cms.uint32(1),
+#     maxNumber = cms.uint32(1)
+# )
 muonSelectionMuons = cms.EDProducer("EventCountProducer")
 
 
 from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
 goodJets = cleanPatJets.clone(
     src = cms.InputTag("selectedPatJetsAK5PF"),
-    preselection = "pt() > 30 && abs(eta()) < 2.4",
+    preselection =
+    "pt() > 30 && abs(eta()) < 2.4"
+    "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
+    "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
+    "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0" # eta < 2.4, so don't need the requirement here
+    ,
     checkOverlaps = cms.PSet(
         muons = cms.PSet(
-            src                 = cms.InputTag("tightMuonsZ"),
+            src                 = cms.InputTag("tauEmbeddingMuons"),
             algorithm           = cms.string("byDeltaR"),
             preselection        = cms.string(""),
             deltaR              = cms.double(0.1),
@@ -75,7 +90,7 @@ goodJets = cleanPatJets.clone(
 )
 goodJetFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("goodJets"),
-    minNumber = cms.uint32(3)
+    minNumber = cms.uint32(2)
 )
 muonSelectionJets = cms.EDProducer("EventCountProducer")
 
@@ -99,6 +114,7 @@ muonSelectionSequence = cms.Sequence(
     * tightMuonsZ 
     * tightMuonsFilter
     * tauEmbeddingMuons 
+#    * tauEmbeddingMuonsFilter
     * muonSelectionMuons
     * goodJets      * goodJetFilter * muonSelectionJets
 #    * goodMet       * goodMetFilter * muonSelectionMet
