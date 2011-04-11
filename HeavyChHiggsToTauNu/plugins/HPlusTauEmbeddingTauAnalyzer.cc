@@ -245,32 +245,6 @@ void HPlusTauEmbeddingTauAnalyzer::findTauNuFromW(I begin, I end, std::vector<Ge
       }
     }
   }
-
-
-    /*
-    int pdgId = std::abs(iGen->pdgId());
-    if(pdgId == 12 || pdgId == 14 || pdgId == 16) {
-      const reco::GenParticle *particle = &(*(iGen));
-      const reco::GenParticle *tau = 0;
-      while(const reco::GenParticle *mother = dynamic_cast<const reco::GenParticle *>(particle->mother())) {
-        particle = mother;
-        if(tau == 0 && std::abs(particle->pdgId()) == 15)
-          tau = particle;
-        else if(tau != 0 && std::abs(particle->pdgId()) == 24) {
-          bool found = false;
-          for(reco::GenParticle::const_iterator iDaughter = particle->begin(); iDaughter != particle->end(); ++iDaughter) {
-            if(std::abs(iDaughter->pdgId()) == 16) {
-              result.push_back(GenParticleTriple(tau, &(*iGen), dynamic_cast<const reco::GenParticle *>(&(*iDaughter))));
-              found = true;
-              break; // for loop
-            }
-          }
-          if(found)
-            break; // while loop
-        }
-      }
-    }
-    */
 }
 
 
