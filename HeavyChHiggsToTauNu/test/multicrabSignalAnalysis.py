@@ -27,31 +27,40 @@ multicrab.extendDatasets(pattupleVersion,
     [
         #### 41X data and 311X MC
         # Data: single tau + MET
-        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
+        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
 
         # Data: quadjet
-        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
 
         # MC Signal WH Spring11
-        "TTToHplusBWB_M150_Spring11",
-        "TTToHplusBWB_M155_Spring11",
+        "TTToHplusBWB_M150_Spring11", # v10
+        "TTToHplusBWB_M155_Spring11", # v10
 
         # MC Signal HH Spring11
-        "TTToHplusBHminusB_M80_Spring11",
-        "TTToHplusBHminusB_M100_Spring11",
-        "TTToHplusBHminusB_M120_Spring11",
-        "TTToHplusBHminusB_M140_Spring11",
-        "TTToHplusBHminusB_M150_Spring11",
-        "TTToHplusBHminusB_M155_Spring11",
-        "TTToHplusBHminusB_M160_Spring11",
+        "TTToHplusBHminusB_M80_Spring11",  # v10
+        "TTToHplusBHminusB_M100_Spring11", # v10
+        "TTToHplusBHminusB_M120_Spring11", # v10
+        "TTToHplusBHminusB_M140_Spring11", # v10
+        "TTToHplusBHminusB_M150_Spring11", # v10
+        "TTToHplusBHminusB_M155_Spring11", # v10
+        "TTToHplusBHminusB_M160_Spring11", # v10
 
         # MC Background Spring11
-        "WJets_TuneZ2_Spring11",
-        "TTJets_TuneZ2_Spring11",
-        "TToBLNu_s-channel_TuneZ2_Spring11",
-        "TToBLNu_t-channel_TuneZ2_Spring11",
-        "TToBLNu_tW-channel_TuneZ2_Spring11",
-        "DYJetsToLL_M50_TuneZ2_Spring11",
+        "QCD_Pt30to50_TuneZ2_Spring11",       # v10
+        "QCD_Pt50to80_TuneZ2_Spring11",       # v10
+        "QCD_Pt80to120_TuneZ2_Spring11",      # v10
+        "QCD_Pt120to170_TuneZ2_Spring11",     # v10
+        "QCD_Pt170to300_TuneZ2_Spring11",     # v10
+        "QCD_Pt300to470_TuneZ2_Spring11",     # v10
+        "WJets_TuneZ2_Spring11",              # v10
+        "TTJets_TuneZ2_Spring11",             # v10
+        "TToBLNu_s-channel_TuneZ2_Spring11",  # v10
+        "TToBLNu_t-channel_TuneZ2_Spring11",  # v10
+        "TToBLNu_tW-channel_TuneZ2_Spring11", # v10
+        "DYJetsToLL_M50_TuneZ2_Spring11",     # v10
+        "WW_TuneZ2_Spring11",                 # v10
+        "WZ_TuneZ2_Spring11",                 # v10
+        "ZZ_TuneZ2_Spring11",                 # v10
 
         #### 39X data and MC
         # Data
