@@ -42,6 +42,8 @@ _physicalToLogical = {
     "TTToHplusBWB_M100_Spring11": "TTToHplusBWB_M100",
     "TTToHplusBWB_M120_Spring11": "TTToHplusBWB_M120",
     "TTToHplusBWB_M140_Spring11": "TTToHplusBWB_M140",
+    "TTToHplusBWB_M150_Spring11": "TTToHplusBWB_M150",
+    "TTToHplusBWB_M155_Spring11": "TTToHplusBWB_M155",
     "TTToHplusBWB_M160_Spring11": "TTToHplusBWB_M160",
 
     "TToHplusBHminusB_M80_Spring11": "TToHplusBHminusB_M80",
@@ -189,7 +191,9 @@ _plotStyles = {
     "TTToHplusBWB_M100":          styles.signal100Style,
     "TTToHplusBWB_M120":          styles.signal120Style,
     "TTToHplusBWB_M140":          styles.signal140Style,
-    "TTToHplusBWB_M150":          styles.signal160Style,
+    "TTToHplusBWB_M150":          styles.signal150Style,
+    "TTToHplusBWB_M155":          styles.signal155Style,
+    "TTToHplusBWB_M160":          styles.signal160Style,
 
     "TToHplusBHminusB_M80":       styles.signalHH80Style,
     "TToHplusBHminusB_M100":      styles.signalHH100Style,
