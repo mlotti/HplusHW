@@ -26,6 +26,8 @@ JESUnclusteredMETVariation = 0.10
 tauEmbeddingTightenMuonSelection = True
 # With tau embedding input, do the muon selection scan
 doTauEmbeddingMuonSelectionScan = False
+# Do tau id scan for tau embedding normalisation (no tau embedding input required)
+doTauEmbeddingTauSelectionScan = False
 
 ################################################################################
 
@@ -213,6 +215,9 @@ if doJESVariation:
 # Signal analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
     tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
+
+if doTauEmbeddingTauSelectionScan:
+    tauEmbeddingCustomisations.addTauAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
