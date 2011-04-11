@@ -32,10 +32,16 @@ datasets = {
                 "number_of_jobs": 30, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v10": {
+            "pattuple_v10_old": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10-ecb64a326bff780f833933d40177edb0/USER",
                 "luminosity": 4.984615,
+                "number_of_jobs": 1
+            },
+            "pattuple_v10": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1-ecb64a326bff780f833933d40177edb0/USER",
+                "luminosity": 5.066715,
                 "number_of_jobs": 1
             },
         }
@@ -91,10 +97,16 @@ datasets = {
                 "number_of_jobs": 5, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v10": {
+            "pattuple_v10_old": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10-7c7e43599bead125d0cad4b457dd8f70/USER",
                 "luminosity": 4.984615,
+                "number_of_jobs": 1
+            },
+            "pattuple_v10_old": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1-7c7e43599bead125d0cad4b457dd8f70/USER",
+                "luminosity": 5.066715,
                 "number_of_jobs": 1
             },
         }
