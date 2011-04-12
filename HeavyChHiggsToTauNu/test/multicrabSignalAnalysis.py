@@ -33,8 +33,12 @@ multicrab.extendDatasets(pattupleVersion,
         "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
 
         # MC Signal WH Spring11
+        "TTToHplusBWB_M100_Spring11", # v10
+        "TTToHplusBWB_M120_Spring11", # v10
+        "TTToHplusBWB_M140_Spring11", # v10
         "TTToHplusBWB_M150_Spring11", # v10
         "TTToHplusBWB_M155_Spring11", # v10
+        "TTToHplusBWB_M160_Spring11", # v10
 
         # MC Signal HH Spring11
         "TTToHplusBHminusB_M80_Spring11",  # v10
