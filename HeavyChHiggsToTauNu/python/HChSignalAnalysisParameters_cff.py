@@ -83,12 +83,14 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
                  tauSelectionHPSMediumTauBased,
+                 tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
 tauSelectionNames = ["TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
                      "TauSelectionHPSTightTauBased",
                      "TauSelectionHPSMediumTauBased",
+                     "TauSelectionHPSLooseTauBased",
                      "TauSelectionCombinedHPSTaNCBased"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
@@ -203,6 +205,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
+    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
@@ -211,6 +214,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
 def setTauIDFactorizationMap(options):
@@ -227,8 +231,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val
 def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
+    selections = tauSelections[:]
+    names = tauSelectionNames[:]
+    hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
+    del selections[hpsLoose]
+    del names[hpsLoose]
+
     addAnalysisArray(process, prefix, module, setTauSelection,
-                     values = tauSelections, names = tauSelectionNames,
+                     values = selections, names = names,
                      preSequence = commonSequence,
                      additionalCounters = additionalCounters)
 
