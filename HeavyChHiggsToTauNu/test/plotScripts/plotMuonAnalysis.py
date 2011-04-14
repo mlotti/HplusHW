@@ -260,6 +260,10 @@ class PlotPassed(plots.PlotBase):
         wjets_all = 0.0
         ttjets = 0.0
         ttjets_all = 0.0
+        st = 0.0
+        st_all = 0.0
+        dyjets = 0.0
+        dyjets_all = 0.0
         other = 0.0
         for histo in self.histoMgr.getHistos():
             if not histo.isMC():
@@ -275,18 +279,24 @@ class PlotPassed(plots.PlotBase):
             elif "WJets" in histo.getName():
                 wjets += content
                 wjets_all += nall
+            elif "SingleTop" in histo.getName():
+                st += content
+                st_all += nall
+            elif "DYJets" in histo.getName():
+                dyjets += content
+                dyjets_all += content
             else:
                 other += content
 
         cut = self.histoMgr.getHistos()[0].getRootHisto().GetBinCenter(bin)
         #print "Bin cut  TTJets WJets TT+W QCD Other TT+W/all QCD/all QCD/QCD/tt+w"
         #print "%d %f  %f %f %f %f %f %f %f %f" % (bin, cut, ttjets, wjets, (ttjets+wjets), qcd, other, ((ttjets+wjets)/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd)))
-        nall = ttjets+wjets+qcd+other
+        nall = ttjets+wjets+st+dyjets+qcd+other
 #        print "Bin cut   TT_eff W_eff  TT+W/all  QCD/all"
 #        print "%d %f   %f %f  %f %f" % (bin, cut, ttjets/ttjets_all, wjets/wjets_all, (ttjets+wjets)/nall, qcd/nall)
         
-        print "Bin cut   TT W QCD  TT+W/all  QCD/all"
-        print "%d %f   %f %f %f  %f %f" % (bin, cut, ttjets, wjets, qcd, (ttjets+wjets)/nall, qcd/nall)
+        print "Bin cut   TT W QCD  TT+W+ST/all  QCD/all  DY/all"
+        print "%d %f   %f %f %f  %f %f %f" % (bin, cut, ttjets, wjets, qcd, (ttjets+wjets+st)/nall, qcd/nall, dyjets/nall)
 
 
 # dist = TH1
@@ -673,7 +683,8 @@ plotMet = PlotMet(rebin=5)
 
 #for sel in selections:
 #for sel in [selectionMuon, selectionJet, selectionMet]:
-for isel, sel in enumerate([selectionMuon, selectionJetId, selectionJet, selectionMet]):
+#for isel, sel in enumerate([selectionMuon, selectionJetId, selectionJet, selectionMet]):
+for isel, sel in enumerate([selectionJet]):
     if sel == None:
         continue
 
@@ -760,6 +771,12 @@ def ttwSum(table):
     wColumn = table.indexColumn("WJets")
     return counter.sumColumn("TTJets+WJets", [table.getColumn(i) for i in [ttColumn, wColumn]])
 
+def signalSum(table):
+    ttColumn = table.indexColumn("TTJets")
+    wColumn = table.indexColumn("WJets")
+    stColumn = table.indexColumn("SingleTop")
+    return counter.sumColumn("TTJets+WJets+SingleTop", [table.getColumn(i) for i in [ttColumn, wColumn]])
+
 def addTtwFractionColumn(table):
     ttColumn = table.indexColumn("TTJets")
     fraction = counter.divideColumn("TTJets/(TTJets+WJets)", table.getColumn(ttColumn), ttwSum(table))
@@ -773,9 +790,17 @@ def addQcdFractionColumn(table):
     fraction.multiply(100) # -> %
     table.appendColumn(fraction)
 
+def addDyFractionColumn(table):
+    dyColumn = table.indexColumn("DYJetsToLL")
+    mcSumColumn = table.indexColumn("MCsum")
+    fraction = counter.divideColumn("DY/MCsum", table.getColumn(dyColumn), table.getColumn(mcSumColumn))
+    fraction.multiply(100) # -> %
+    table.appendColumn(fraction)
+
 def addPurityColumn(table):
     mcSumColumn = table.indexColumn("MCsum")
-    purity = counter.divideColumn("TT+W purity", ttwSum(table), table.getColumn(mcSumColumn))
+    #purity = counter.divideColumn("TT+W purity", ttwSum(table), table.getColumn(mcSumColumn))
+    purity = counter.divideColumn("Purity", signalSum(table), table.getColumn(mcSumColumn))
     purity.multiply(100) # -> %
     table.appendColumn(purity)
 
@@ -824,6 +849,7 @@ table = eventCounter.getMainCounterTable()
 addSumColumn(table)
 addTtwFractionColumn(table)
 addPurityColumn(table)
+addDyFractionColumn(table)
 addQcdFractionColumn(table)
 print table.format()
 
@@ -876,7 +902,7 @@ for mcName in datasets.getMCDatasetNames():
 print tableMc.format(latexFormat)
 
 tableRatio = counter.CounterTable()
-for cname in ["TTJets/(TTJets+WJets)", "TT+W purity", "QCD/MCsum"]:
+for cname in ["TTJets/(TTJets+WJets)", "Purity", "QCD/MCsum", "DY/MCsum"]:
     tableRatio.appendColumn(table.getColumn(name=cname))
     latexFormat.setColumnFormat(counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True), name=cname)
 print tableRatio.format(latexFormat)
