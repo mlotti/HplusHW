@@ -211,6 +211,15 @@ class LegendCreator:
 ## Default legend creator object
 createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
 
+## Move TLegend
+def moveLegend(legend, dx=0, dy=0):
+    legend.SetX1(legend.GetX1() + dx)
+    legend.SetX2(legend.GetX2() + dx)
+    legend.SetY1(legend.GetY1() + dy)
+    legend.SetY2(legend.GetY2() + dy)
+    return legend
+    
+
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
 # This function is needed because the style is not propageted to the Z
