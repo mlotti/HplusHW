@@ -505,7 +505,7 @@ def transverseMass(h, rebin=1):
     h.getPad().SetLogy(True)
     common(h, xlabel, ylabel)
     
-def transverseMass2(h, name="transverseMass", rebin=2):
+def transverseMass2(h, name="transverseMass", rebin=2, log=True):
 #    name = h.getRootHistoPath()
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "allCuts"
@@ -516,18 +516,27 @@ def transverseMass2(h, name="transverseMass", rebin=2):
         particle = "afterVeto"
         name = name.replace("TransverseMass", "TransverseMassAfterVeto")
 
+    if log:
+        name += "_log"
+
     xlabel = "m_{T}(#tau jet, MET) (GeV/c^{2})" 
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
+
     scaleMCfromWmunu(h)    
     h.stackMCHistograms()
     h.addMCUncertainty()
-    opts = {"ymin": 0.0001,"xmax": 200, "ymaxfactor": 1.3}
+    opts = {"xmax": 200}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
+    if log:
+        opts["ymin"] = 0.0001
+        opts["ymaxfacror"] = 1.3
+
 #    opts = {"xmax": 200}
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
+    if log:
+        h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 

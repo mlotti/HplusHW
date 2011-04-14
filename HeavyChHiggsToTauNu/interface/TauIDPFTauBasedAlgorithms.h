@@ -50,6 +50,23 @@ namespace HPlus {
     size_t fIDHPS;
   };
 
+  // TauIDPFShrinkingConeHPSLoose ---------------------------------------
+  class TauIDPFShrinkingConeHPSLoose : public TauIDPFHPSBase {
+   public:
+    /**
+     * Implementation of the TauIDPFShrinkingConeHPSMedium tau ID functionality
+     */
+    TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    ~TauIDPFShrinkingConeHPSLoose();
+
+    bool passIsolation(const edm::Ptr<pat::Tau> tau);
+    bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
+
+  private:
+    // Tau ID selections related to isolation
+    size_t fIDHPS;
+  };
+
   /**
    * \todo The class should be renamed to e.g. TauIDPFHPSMedium (there's no shrinking cone here)
    */

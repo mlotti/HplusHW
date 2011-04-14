@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 
 def customiseParamForTauEmbedding(param):
     # Change the triggers to muon
@@ -121,7 +122,31 @@ def addMuonIsolationAnalyses(process, prefix, prototype, commonSequence, additio
         modify(module, muons)
 
         HChTools.addAnalysis(process, prefix+name, module, cseq, additionalCounters+counters, signalAnalysisCounters)
-        
+
+def addTauAnalyses(process, prefix, prototype, commonSequence, additionalCounters):
+    def disableRtau(module):
+        return module.clone(rtauCut = -1)
+
+    values = [
+        HChSignalAnalysisParameters.tauSelectionHPSLooseTauBased,
+        disableRtau(HChSignalAnalysisParameters.tauSelectionHPSLooseTauBased),
+        disableRtau(HChSignalAnalysisParameters.tauSelectionHPSMediumTauBased),
+        disableRtau(HChSignalAnalysisParameters.tauSelectionHPSTauBased),
+        disableRtau(HChSignalAnalysisParameters.tauSelectionShrinkingConeCutBased),
+        ]
+    names = [
+        "TauSelectionHPSLooseTauBased",
+        "TauSelectionHPSLooseTauNoRtauBased",
+        "TauSelectionHPSMediumTauNoRtauBased",
+        "TauSelectionHPSTightTauNoRtauBased",
+        "TauSelectionShrinkingConeCutNoRtauBased",
+        ]
+
+    HChTools.addAnalysisArray(process, prefix, prototype, HChSignalAnalysisParameters.setTauSelection,
+                              values=values, names=names,
+                              preSequence=commonSequence, additionalCounters=additionalCounters)
+    
+
 
 def addTauEmbeddingMuonTaus(process):
     seq = cms.Sequence()
