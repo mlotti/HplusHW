@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# set up ROOT enviroment
+# assuming you are using sh
+export ROOTSYS=/afs/cern.ch/sw/lcg/app/releases/ROOT/5.26.00/slc4_amd64_gcc34/root 
+export PATH=${ROOTSYS}/bin:${PATH}
+export LD_LIBRARY_PATH=${ROOTSYS}/lib
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_temp
+#./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic.txt | awk '{print $12}' >
+head -1 output_LandS_temp | awk '{print $12}' >& output_LandS
+tail -1 output_LandS_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS
