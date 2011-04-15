@@ -12,7 +12,7 @@ set -e
 # 22.3.2011/M.Kortelainen CMSSW_3_9_7 Added MuonAnalysis tag
 # 14.4.2011/M.Kortelainen CMSSW_4_1_4 Updated MCEmbeddingTools tag
 
-cvs co -r V00-00-11 TauAnalysis/MCEmbeddingTools
+cvs co -r V00-00-12 TauAnalysis/MCEmbeddingTools
 cvs co -r V01-13-00 MuonAnalysis/MuonAssociators
 
 # We have to add protection for multiple runs in OscarProducer
