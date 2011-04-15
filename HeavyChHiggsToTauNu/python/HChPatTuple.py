@@ -225,7 +225,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
             outputCommands.append("keep *_VisibleTaus_*_*")
 
     else:
-        removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
+        process.patDefaultSequence.remove(process.patTaus)
+        process.patDefaultSequence.remove(process.selectedPatTaus)
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
                            #"keep *_cleanPatTaus_*_*",
@@ -241,9 +244,13 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     if doPatMET:
         addTcMET(process, 'TC')
         addPfMET(process, 'PF')
-        outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
+        outputCommands.extend(["keep *_patMETsTC_*_*", "keep *_patMETsPF_*_*"])
     else:
-        removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
+        # FIXME: This is broken at the moment...
+        #removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
+        #process.patDefaultSequen
+        process.patDefaultSequence.remove(process.patMETs)
+        del process.patMETs
 
 
     # Muons
@@ -456,7 +463,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
                              "doPatMET": False})
 
         process.patSequence = addPat(process, dataVersion, **patArgs)
-        removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        process.patDefaultSequence.remove(process.patMuons)
+        process.patDefaultSequence.remove(process.selectedPatMuons)
+        process.patDefaultSequence.remove(process.patElectrons)
+        process.patDefaultSequence.remove(process.selectedPatElectrons)
+        process.patDefaultSequence.remove(process.patPhotons)
+        process.patDefaultSequence.remove(process.selectedPatPhotons)
 
         # Remove soft muon b tagging discriminators as they are not
         # well defined, cause technical problems and we don't use
