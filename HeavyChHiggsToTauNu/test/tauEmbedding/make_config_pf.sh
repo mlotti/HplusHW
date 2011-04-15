@@ -1,8 +1,7 @@
 #!/bin/sh
 
 CONDITIONS=auto:startup
-SEQUENCE=GEN:ProductionFilterSequence,SIM,DIGI,L1,DIGI2RAW,HLT:GRun
-#SEQUENCE=GEN:ProductionFilterSequence
+SEQUENCE=GEN,SIM,DIGI,L1,DIGI2RAW,HLT:GRun
 #NEVENTS=-1
 NEVENTS=2
 SKIMFILE=file:skim.root
