@@ -18,12 +18,13 @@ namespace HPlus {
   class TriggerEfficiency {
     class EfficiencyCalculator {
     public:
-      EfficiencyCalculator(const std::vector<double>& params);
+      EfficiencyCalculator(const std::vector<double>& tauParams, const std::vector<double>& metParams);
       ~EfficiencyCalculator();
 
       double efficiency(const pat::Tau& tau, const reco::MET& met) const;
     private:
-      std::vector<double> fParams;
+      std::vector<double> fTauParams;
+      std::vector<double> fMetParams;
     };
 
     class WeightedEfficiencyCalculator {
@@ -45,7 +46,6 @@ namespace HPlus {
     ~TriggerEfficiency();
 
     double efficiency(const pat::Tau& tau, const reco::MET& met) const;
-
   private:
     WeightedEfficiencyCalculator fTrueTaus;
     WeightedEfficiencyCalculator fFakeTaus;

@@ -189,10 +189,10 @@ topSelection = cms.untracked.PSet(
 
 triggerEfficiency = cms.untracked.PSet(
     selectTriggers = cms.VPSet(
-        cms.PSet(
-            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v3"),
-            luminosity = cms.double(16.084022481)
-        ),
+#        cms.PSet(
+#            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v3"),
+#            luminosity = cms.double(16.084022481)
+#        ),
         cms.PSet(
             trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
             luminosity = cms.double(2.270373344)
@@ -202,8 +202,15 @@ triggerEfficiency = cms.untracked.PSet(
         # These are just FAKE numbers for now
         cms.PSet(
             trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
-            trueTauParameters = cms.vdouble([0.98,5.0,0.3, 0.78,30.,0.5]),
-            fakeTauParameters = cms.vdouble([0.9,5.0,0.3, 0.78,30.,0.5]),
+            fakeTauParameters = cms.vdouble([0.9,5.0,0.3]),
+            trueTauParameters = cms.vdouble([0.98,5.0,0.3]),
+            metParameters = cms.vdouble([0.78,30.,0.5]),
+        ),
+        cms.PSet(
+            trigger = cms.string("HLT_SingleIsoPFTau35_Trk20_MET45"),
+            fakeTauParameters = cms.vdouble([0.54638, 41.6775, 0.399794]),
+            trueTauParameters = cms.vdouble([1, 47.1341, 0.700911]),
+            metParameters = cms.vdouble([1, 75.0429, 1.03602]),
         ),
     )
 )
@@ -220,13 +227,28 @@ def setEfficiencyTrigger(trigger):
 def setEfficiencyTriggers(triggers):
     triggerEfficiency.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
 
-def setEfficiencyTriggersFromTasks(tasknames, datasetType="pattuplev10"):
+def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10"):
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
     triggers = []
     for name in tasknames:
+        if not name in datasets:
+            raise Exception("No configuration fragment for datasets '%s' in multicrabDatasets.py" % name)
+        conf = datasets[name]
+        if not "trigger" in conf:
+            raise Exception("No trigger field in configuration fragment of dataset '%s'" % name)
+
+        if not datasetType in conf["data"]:
+            raise Exception("No definition for datasetType '%s' for dataset '%s', required to deduce the integrated luminosity" % (datasetType, name))
+        data = conf["data"][datasetType]
+        while "fallback" in data:
+            data = conf["data"][ data["fallback"] ]
+
+        if not "luminosity" in data:
+            raise Exception("No luminosity for dataset '%s' with datasetType '%s'" % (name, datasetType))
+
         triggers.append( (
-                datasets[name]["trigger"],
-                datasets[name]["data"][datasetType]["luminosity"]
+                conf["trigger"],
+                data["luminosity"]
             ) )
     setEfficiencyTriggers(triggers)
 

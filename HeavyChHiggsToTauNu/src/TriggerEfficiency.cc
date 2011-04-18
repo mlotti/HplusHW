@@ -20,14 +20,20 @@ namespace {
 }
 
 namespace HPlus {
-  TriggerEfficiency::EfficiencyCalculator::EfficiencyCalculator(const std::vector<double>& params): fParams(params) {
-    if(fParams.size() != 6)
-      throw cms::Exception("Configuration") << "EfficiencyCalculator needs exactly 6 parameters, got " << fParams.size() << std::endl;
+  TriggerEfficiency::EfficiencyCalculator::EfficiencyCalculator(const std::vector<double>& tauParams, const std::vector<double>& metParams):
+    fTauParams(tauParams),
+    fMetParams(metParams)
+  {
+    if(fTauParams.size() != 3)
+      throw cms::Exception("Configuration") << "EfficiencyCalculator needs exactly 3 tau parameters, got " << fTauParams.size() << std::endl;
+    if(fMetParams.size() != 3)
+      throw cms::Exception("Configuration") << "EfficiencyCalculator needs exactly 3 met parameters, got " << fMetParams.size() << std::endl;
+
   }
   TriggerEfficiency::EfficiencyCalculator::~EfficiencyCalculator() {}
   double TriggerEfficiency::EfficiencyCalculator::efficiency(const pat::Tau& tau, const reco::MET& met) const {
-    double tauEff = fParams[0]*(TMath::Freq((std::sqrt(tau.pt())-sqrt(fParams[1]))/(2*fParams[2])));
-    double metEff = fParams[3]*(TMath::Freq((std::sqrt(met.et())-sqrt(fParams[4]))/(2*fParams[5])));
+    double tauEff = fTauParams[0]*(TMath::Freq((std::sqrt(tau.pt())-sqrt(fTauParams[1]))/(2*fTauParams[2])));
+    double metEff = fMetParams[0]*(TMath::Freq((std::sqrt(met.et())-sqrt(fMetParams[1]))/(2*fMetParams[2])));
 
     return tauEff*metEff;
   }
@@ -66,8 +72,12 @@ namespace HPlus {
         throw cms::Exception("Configuration") << "No efficiency parameters for trigger " << triggerName << std::endl;
       }
 
-      fTrueTaus.addCalculator(luminosity, EfficiencyCalculator(iParam->getParameter<std::vector<double> >("trueTauParameters")));
-      fFakeTaus.addCalculator(luminosity, EfficiencyCalculator(iParam->getParameter<std::vector<double> >("fakeTauParameters")));
+      std::vector<double> trueTauParameters = iParam->getParameter<std::vector<double> >("trueTauParameters");
+      std::vector<double> fakeTauParameters = iParam->getParameter<std::vector<double> >("fakeTauParameters");
+      std::vector<double> metParameters = iParam->getParameter<std::vector<double> >("metParameters");
+
+      fTrueTaus.addCalculator(luminosity, EfficiencyCalculator(trueTauParameters, metParameters));
+      fFakeTaus.addCalculator(luminosity, EfficiencyCalculator(fakeTauParameters, metParameters));
     }
   }
   TriggerEfficiency::~TriggerEfficiency() {}
