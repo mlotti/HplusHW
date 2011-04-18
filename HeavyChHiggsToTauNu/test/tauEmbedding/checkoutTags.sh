@@ -11,9 +11,11 @@ set -e
 # 1.2.2011/M.Kortelainen CMSSW_3_9_7 Updated MCEmbeddingTools tag
 # 22.3.2011/M.Kortelainen CMSSW_3_9_7 Added MuonAnalysis tag
 # 14.4.2011/M.Kortelainen CMSSW_4_1_4 Updated MCEmbeddingTools tag
+# 18.4.2011/M.Kortelainen CMSSW_4_1_4 Updated patMuonsWithTrigger_cff.py revision
 
 cvs co -r V00-00-12 TauAnalysis/MCEmbeddingTools
 cvs co -r V01-13-00 MuonAnalysis/MuonAssociators
+cvs up -r 1.4 MuonAnalysis/MuonAssociators/python/patMuonsWithTrigger_cff.py
 
 # We have to add protection for multiple runs in OscarProducer
 addpkg SimG4Core/Application
