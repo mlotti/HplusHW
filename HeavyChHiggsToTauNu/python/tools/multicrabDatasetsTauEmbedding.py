@@ -476,7 +476,7 @@ def addTo(datasets):
                 "number_of_jobs": 25#5 # ~5500 ev/job #25 # ~1100 ev/job
             },
             })
-    datasets["WJets_TuneZ2_Winter10"]["data"].update({
+    datasets["WJets_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
@@ -492,7 +492,7 @@ def addTo(datasets):
             })
 
 
-    datasets["DYJetsToLL_M50_TuneZ2_Winter10"]["data"].update({
+    datasets["DYJetsToLL_M50_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
@@ -501,7 +501,7 @@ def addTo(datasets):
             })
 
 
-    datasets["TTToHplusBWB_M120_Winter10"]["data"].update({
+    datasets["TTToHplusBWB_M120_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
