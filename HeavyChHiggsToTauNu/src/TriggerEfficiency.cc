@@ -62,19 +62,15 @@ namespace HPlus {
 
   TriggerEfficiency::TriggerEfficiency(const edm::ParameterSet& iConfig) {
     std::vector<edm::ParameterSet> selectTriggers = iConfig.getParameter<std::vector<edm::ParameterSet> >("selectTriggers");
-    std::vector<edm::ParameterSet> parameters = iConfig.getParameter<std::vector<edm::ParameterSet> >("parameters");
+    edm::ParameterSet parameters = iConfig.getParameter<edm::ParameterSet>("parameters");
 
     for(std::vector<edm::ParameterSet>::const_iterator iTrigger = selectTriggers.begin(); iTrigger != selectTriggers.end(); ++iTrigger) {
-      std::string triggerName = iTrigger->getParameter<std::string>("trigger");
+      edm::ParameterSet param = parameters.getParameter<edm::ParameterSet>(iTrigger->getParameter<std::string>("trigger"));
       double luminosity = iTrigger->getParameter<double>("luminosity");
-      std::vector<edm::ParameterSet>::const_iterator iParam = std::find_if(parameters.begin(), parameters.end(), std::bind2nd(TriggerEq(), triggerName));
-      if(iParam == parameters.end()) {
-        throw cms::Exception("Configuration") << "No efficiency parameters for trigger " << triggerName << std::endl;
-      }
 
-      std::vector<double> trueTauParameters = iParam->getParameter<std::vector<double> >("trueTauParameters");
-      std::vector<double> fakeTauParameters = iParam->getParameter<std::vector<double> >("fakeTauParameters");
-      std::vector<double> metParameters = iParam->getParameter<std::vector<double> >("metParameters");
+      std::vector<double> trueTauParameters = param.getParameter<std::vector<double> >("trueTauParameters");
+      std::vector<double> fakeTauParameters = param.getParameter<std::vector<double> >("fakeTauParameters");
+      std::vector<double> metParameters = param.getParameter<std::vector<double> >("metParameters");
 
       fTrueTaus.addCalculator(luminosity, EfficiencyCalculator(trueTauParameters, metParameters));
       fFakeTaus.addCalculator(luminosity, EfficiencyCalculator(fakeTauParameters, metParameters));
@@ -90,7 +86,7 @@ namespace HPlus {
     else
       eff = fFakeTaus.efficiency(tau, met);
 
-    std::cout << "Is true tau? " << (tau.genJet() != 0) << " tau pt " << tau.pt() << " met " << met.et() << " efficiency " << eff << std::endl;
+    //std::cout << "Is true tau? " << (tau.genJet() != 0) << " tau pt " << tau.pt() << " met " << met.et() << " efficiency " << eff << std::endl;
 
     return eff;
   }
