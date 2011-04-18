@@ -188,16 +188,18 @@ topSelection = cms.untracked.PSet(
 )
 
 triggerEfficiency = cms.untracked.PSet(
+    # The selected triggers for the efficiency. If one trigger is
+    # given, the parametrization of it is used as it is (i.e.
+    # luminosity below is ignored). If multiple triggers are given,
+    # their parametrizations are used weighted by the luminosities
+    # given below.
     selectTriggers = cms.VPSet(
-#        cms.PSet(
-#            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v3"),
-#            luminosity = cms.double(16.084022481)
-#        ),
         cms.PSet(
             trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
             luminosity = cms.double(2.270373344)
         ),
     ),
+    # The parameters of the trigger efficiency parametrizations.
     parameters = cms.PSet(
         HLT_SingleIsoTau20_Trk15_MET25_v4 = cms.PSet(
             # These are just FAKE numbers for now
