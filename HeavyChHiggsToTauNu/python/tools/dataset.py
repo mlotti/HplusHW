@@ -120,7 +120,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
-        raise Exception("No datasets")
+        raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return getDatasetsFromRootFiles(dlist, **kwargs)
 
@@ -817,7 +817,9 @@ class Dataset:
         factor one gets the corresponding cross section.
         """
         if not hasattr(self, "nAllEvents"):
-            raise Exception("Number of all events is not set! The counter directory was not given, and setNallEvents() was not called.")
+            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
+        if self.nAllEvents == 0:
+            raise Exception("Number of all events is 0 for dataset %s" % self.name)
 
         return self.getCrossSection() / self.nAllEvents
 

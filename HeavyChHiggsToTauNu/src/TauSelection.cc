@@ -44,9 +44,11 @@ namespace HPlus {
       fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight, prongNumber);
     else if(fSelection == "HPSMediumTauBased")
       fTauID = new TauIDPFShrinkingConeHPSMedium(iConfig, eventCounter, eventWeight, prongNumber);
+    else if(fSelection == "HPSLooseTauBased")
+      fTauID = new TauIDPFShrinkingConeHPSLoose(iConfig, eventCounter, eventWeight, prongNumber);
     else if(fSelection == "CombinedHPSTaNCTauBased")
       fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, HPSLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
