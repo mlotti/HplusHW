@@ -199,21 +199,15 @@ triggerEfficiency = cms.untracked.PSet(
             luminosity = cms.double(2.270373344)
         ),
     ),
-    # The parameters of the trigger efficiency parametrizations.
-    parameters = cms.PSet(
-        HLT_SingleIsoTau20_Trk15_MET25_v4 = cms.PSet(
-            # These are just FAKE numbers for now
-            fakeTauParameters = cms.vdouble([0.9,5.0,0.3]),
-            trueTauParameters = cms.vdouble([0.98,5.0,0.3]),
-            metParameters = cms.vdouble([0.78,30.,0.5]),
-        ),
-        HLT_SingleIsoPFTau35_Trk20_MET45 = cms.PSet(
-            fakeTauParameters = cms.vdouble([0.54638, 41.6775, 0.399794]),
-            trueTauParameters = cms.vdouble([1, 47.1341, 0.700911]),
-            metParameters = cms.vdouble([1, 75.0429, 1.03602]),
-        ),
-    )
+    # The parameters of the trigger efficiency parametrizations,
+    # looked dynamically from TriggerEfficiency_cff.py
+    parameters = cms.PSet()
 )
+# Look up dynamically the triggers for which the parameters exist
+import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
+for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
+    print triggerName
+    setattr(triggerEfficiency.parameters, triggerName, getattr(trigEff, triggerName))
 
 # Functions
 def overrideTriggerFromOptions(options):
