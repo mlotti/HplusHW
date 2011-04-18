@@ -104,6 +104,14 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Set tau sources to non-trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
+# Set the triggers for trigger efficiencies
+#param.setEfficiencyTrigger("HLT_SingleIsoTau20_Trk15_MET25_v4") # one trigger
+#param.setEfficiencyTriggers([ # many triggers, efficiencies weighted by their luminosities
+#        ("HLT_SingleIsoTau20_Trk15_MET25_v3", 16.084022481),
+#        ("HLT_SingleIsoTau20_Trk15_MET25_v4", 2.270373344),
+#        ])
+
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
@@ -128,6 +136,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    triggerEfficiency = param.triggerEfficiency,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis                                     
 )
@@ -143,6 +152,7 @@ if dataVersion.isData():
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode

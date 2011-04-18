@@ -187,10 +187,55 @@ topSelection = cms.untracked.PSet(
   TopMassHigh = cms.untracked.double(300.0)
 )
 
+triggerEfficiency = cms.untracked.PSet(
+    selectTriggers = cms.VPSet(
+        cms.PSet(
+            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v3"),
+            luminosity = cms.double(16.084022481)
+        ),
+        cms.PSet(
+            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
+            luminosity = cms.double(2.270373344)
+        ),
+    ),
+    parameters = cms.VPSet(
+        # These are just FAKE numbers for now
+        cms.PSet(
+            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
+            trueTauParameters = cms.vdouble([0.98,5.0,0.3, 0.78,30.,0.5]),
+            fakeTauParameters = cms.vdouble([0.9,5.0,0.3, 0.78,30.,0.5]),
+        ),
+    )
+)
+
 # Functions
 def overrideTriggerFromOptions(options):
     if options.trigger != "":
         trigger.triggers = [options.trigger]
+
+
+def setEfficiencyTrigger(trigger):
+    triggerEfficiency.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
+
+def setEfficiencyTriggers(triggers):
+    triggerEfficiency.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
+
+def setEfficiencyTriggersFromTasks(tasknames, datasetType="pattuplev10"):
+    from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
+    triggers = []
+    for name in tasknames:
+        triggers.append( (
+                datasets[name]["trigger"],
+                datasets[name]["data"][datasetType]["luminosity"]
+            ) )
+    setEfficiencyTriggers(triggers)
+
+def formatEfficiencyTrigger(pset):
+    if pset.luminosity.value() < 0:
+        return pset.trigger.value()
+    else:
+        return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
+    
 
 def forEachTauSelection(function):
     for selection in tauSelections:
