@@ -78,20 +78,22 @@ tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
 )
 
 
-tauSelections = [tauSelectionCaloTauCutBased,
+tauSelections = [#tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
                  tauSelectionHPSMediumTauBased,
-                 tauSelectionHPSLooseTauBased,
-                 tauSelectionCombinedHPSTaNCTauBased]
-tauSelectionNames = ["TauSelectionCaloTauCutBased",
+                 tauSelectionHPSLooseTauBased
+                 #tauSelectionCombinedHPSTaNCTauBased
+                 ]
+tauSelectionNames = [#"TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
                      "TauSelectionHPSTightTauBased",
                      "TauSelectionHPSMediumTauBased",
-                     "TauSelectionHPSLooseTauBased",
-                     "TauSelectionCombinedHPSTaNCBased"]
+                     "TauSelectionHPSLooseTauBased"
+                     #"TauSelectionCombinedHPSTaNCBased"
+                     ]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
