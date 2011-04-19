@@ -112,7 +112,10 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     MET = param.MET,
     fakeMETVeto = param.fakeMETVeto,
     forwardJetVeto = param.forwardJetVeto,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    tauIsolationCalculator = cms.untracked.PSet(
+        pvSrc = cms.InputTag("offlinePrimaryVertices")
+    ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
 )
 # Factorization (quick and dirty version)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables

@@ -15,10 +15,11 @@ namespace HPlus {
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
     fPrimaryVertexCounter(eventCounter.addCounter("PrimaryVertex")),
-    fOneProngTauSelectionCounter(eventCounter.addCounter("TauSelection")),
+    fOneProngTauSelectionCounter(eventCounter.addCounter("TauCandSelection")),
+    fOneSelectedTauCounter(eventCounter.addCounter("TauCands==1")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
-    fJetSelectionCounter2(eventCounter.addCounter("JetSelection2")),
+    fJetSelectionCounter2(eventCounter.addCounter("Njets==2")),
     fJetSelectionCounter(eventCounter.addCounter("JetSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
@@ -43,6 +44,7 @@ namespace HPlus {
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
+    fPFTauIsolationCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("tauIsolationCalculator")),
     fFactorizationTable(iConfig, "METTables")
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
    {
@@ -53,70 +55,70 @@ namespace HPlus {
     // Book histograms
 
     // Histograms with weights
-    hMETAfterJetSelection = fs->make<TH1F>("QCDm3p2_METctrl_METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hMETAfterJetSelection = fs->make<TH1F>("QCD_METctrl_METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterJetSelection->Sumw2();
-    hWeightedMETAfterJetSelection = fs->make<TH1F>("QCDm3p2_METctrl_METAfterJetSelectionWeighted", "METAfterJetSelectionWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterJetSelection = fs->make<TH1F>("QCD_METctrl_METAfterJetSelectionWeighted", "METAfterJetSelectionWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterJetSelection->Sumw2();
-    hWeightedMETAfterTauIDNoRtau = fs->make<TH1F>("QCDm3p2_METctrl_METAfterTauIDNoRtauWeighted", "METAfterTauIDNoRtauWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterTauIDNoRtau = fs->make<TH1F>("QCD_METctrl_METAfterTauIDNoRtauWeighted", "METAfterTauIDNoRtauWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterTauIDNoRtau->Sumw2();
-    hWeightedMETAfterTauID = fs->make<TH1F>("QCDm3p2_METctrl_METAfterTauIDWeighted", "METAfterTauIDWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterTauID = fs->make<TH1F>("QCD_METctrl_METAfterTauIDWeighted", "METAfterTauIDWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterTauID->Sumw2();
-    hWeightedMETAfterBTagging = fs->make<TH1F>("QCDm3p2_METctrl_METAfterBTaggingWeighted", "METAfterBTaggingWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterBTagging = fs->make<TH1F>("QCD_METctrl_METAfterBTaggingWeighted", "METAfterBTaggingWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterBTagging->Sumw2();
-    hWeightedMETAfterFakeMETVeto = fs->make<TH1F>("QCDm3p2_METctrl_METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterFakeMETVeto = fs->make<TH1F>("QCD_METctrl_METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterFakeMETVeto->Sumw2();
-    hWeightedMETAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_METctrl_METAfterForwardJetVetoWeighted", "METAfterForwardJetVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterForwardJetVeto = fs->make<TH1F>("QCD_METctrl_METAfterForwardJetVetoWeighted", "METAfterForwardJetVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterForwardJetVeto->Sumw2();
 
-    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterTauCandidateSelection", fMETHistogramsByTauPtAfterTauCandidateSelection);
-    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterJetSelection", fMETHistogramsByTauPtAfterJetSelection);
-    createMETHistogramGroupByTauPt("QCDm3p2_MET_afterTauIsolation", fMETHistogramsByTauPtAfterTauIsolation);
+    createMETHistogramGroupByTauPt("QCD_MET_afterTauCandidateSelection", fMETHistogramsByTauPtAfterTauCandidateSelection);
+    createMETHistogramGroupByTauPt("QCD_MET_afterJetSelection", fMETHistogramsByTauPtAfterJetSelection);
+    createMETHistogramGroupByTauPt("QCD_MET_afterTauIsolation", fMETHistogramsByTauPtAfterTauIsolation);
 
     // Histograms for later change of factorization map
 
     // MET factorization details
     int myCoefficientBinCount = fFactorizationTable.getCoefficientTableSize();
-    hMETFactorizationNJetsBefore = fs->make<TH1F>("QCDm3p2_METFactorization_NJetsBefore", "METFactorizationNJetsBefore;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETFactorizationNJetsBefore = fs->make<TH1F>("QCD_METFactorization_NJetsBefore", "METFactorizationNJetsBefore;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETFactorizationNJetsBefore->Sumw2();
-    hMETFactorizationNJetsAfter = fs->make<TH1F>("QCDm3p2_METFactorization_NJetsAfter", "METFactorizationNJetsAfter;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETFactorizationNJetsAfter = fs->make<TH1F>("QCD_METFactorization_NJetsAfter", "METFactorizationNJetsAfter;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETFactorizationNJetsAfter->Sumw2();
-    hMETFactorizationNJets = fs->make<TH2F>("QCDm3p2_METFactorization_NJets", "METFactorizationNJets;tau p_{T}, GeV/c;MET, GeV", 60, 0, 300., 60, 0., 300.);
+    hMETFactorizationNJets = fs->make<TH2F>("QCD_METFactorization_NJets", "METFactorizationNJets;tau p_{T}, GeV/c;MET, GeV", 60, 0, 300., 60, 0., 300.);
     hMETFactorizationNJets->Sumw2();
-    hMETFactorizationBJetsBefore = fs->make<TH1F>("QCDm3p2_METFactorization_BJetsBefore", "METFactorizationBJetsBefore;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETFactorizationBJetsBefore = fs->make<TH1F>("QCD_METFactorization_BJetsBefore", "METFactorizationBJetsBefore;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETFactorizationBJetsBefore->Sumw2();
-    hMETFactorizationBJetsAfter = fs->make<TH1F>("QCDm3p2_METFactorization_BJetsAfter", "METFactorizationBJetsAfter;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETFactorizationBJetsAfter = fs->make<TH1F>("QCD_METFactorization_BJetsAfter", "METFactorizationBJetsAfter;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETFactorizationBJetsAfter->Sumw2();
-    hMETFactorizationBJets = fs->make<TH2F>("QCDm3p2_METFactorization_BJets", "METFactorizationBJets;tau p_{T}, GeV/c;MET, GeV", 60, 0, 300., 60, 0., 300.);
+    hMETFactorizationBJets = fs->make<TH2F>("QCD_METFactorization_BJets", "METFactorizationBJets;tau p_{T}, GeV/c;MET, GeV", 60, 0, 300., 60, 0., 300.);
     hMETFactorizationBJets->Sumw2();
 
     // Standard cut path
-    hStdNonWeightedTauPtAfterJetSelection = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterJetSelection", "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterJetSelection = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterJetSelection", "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterJetSelection->Sumw2();
-    hStdNonWeightedTauPtAfterTauIDNoRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterTauIDNoRtau", "NonWeightedTauPtAfterTauIDNoRtau;tau p_{T} bin;N_{events} after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterTauIDNoRtau = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterTauIDNoRtau", "NonWeightedTauPtAfterTauIDNoRtau;tau p_{T} bin;N_{events} after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterTauIDNoRtau->Sumw2();
-    hStdNonWeightedTauPtAfterTauID = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterTauID", "NonWeightedTauPtAfterTauID;tau p_{T} bin;N_{events} after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterTauID = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterTauID", "NonWeightedTauPtAfterTauID;tau p_{T} bin;N_{events} after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterTauID->Sumw2();
-    hStdNonWeightedTauPtAfterBTagging = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterBTagging", "NonWeightedTauPtAfterBTagging;tau p_{T} bin;N_{events} after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterBTagging = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterBTagging", "NonWeightedTauPtAfterBTagging;tau p_{T} bin;N_{events} after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterBTagging->Sumw2();
-    hStdNonWeightedTauPtAfterFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterFakeMETVeto", "NonWeightedTauPtAfterFakeMETVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterFakeMETVeto = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterFakeMETVeto", "NonWeightedTauPtAfterFakeMETVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterFakeMETVeto->Sumw2();
-    hStdNonWeightedTauPtAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_TauPtAfterForwardJetVeto", "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hStdNonWeightedTauPtAfterForwardJetVeto = fs->make<TH1F>("QCD_StdCutPath_TauPtAfterForwardJetVeto", "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events} after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
     hStdNonWeightedTauPtAfterForwardJetVeto->Sumw2();
-    hStdWeightedRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
+    hStdWeightedRtau = fs->make<TH1F>("QCD_StdCutPath_weighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
     hStdWeightedRtau->Sumw2();
-    hStdWeightedBjets = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
+    hStdWeightedBjets = fs->make<TH1F>("QCD_StdCutPath_weighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
     hStdWeightedBjets->Sumw2();
-    hStdWeightedFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_weighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
+    hStdWeightedFakeMETVeto = fs->make<TH1F>("QCD_StdCutPath_weighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
     hStdWeightedFakeMETVeto->Sumw2();
-    hStdNonWeightedRtau = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
+    hStdNonWeightedRtau = fs->make<TH1F>("QCD_StdCutPath_nonWeighted_Rtau", "Rtau;Rtau;N_{events}/0.05", 24, 0., 1.2);
     hStdNonWeightedRtau->Sumw2();
-    hStdNonWeightedSelectedTauPt = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_TauPtAfterTauID", "tau pT after tauID;#tau p_{T} after tauID;N_{events}/10 GeV/c", 30, 0., 300.);
+    hStdNonWeightedSelectedTauPt = fs->make<TH1F>("QCD_StdCutPath_nonWeighted_TauPtAfterTauID", "tau pT after tauID;#tau p_{T} after tauID;N_{events}/10 GeV/c", 30, 0., 300.);
     hStdNonWeightedSelectedTauPt->Sumw2();
-    hStdNonWeightedSelectedTauEta = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_TauEtaAfterTauID", "tau eta after tauID;#tau #eta after tauID;N_{events}/0.2", 30, -3., 3.);
+    hStdNonWeightedSelectedTauEta = fs->make<TH1F>("QCD_StdCutPath_nonWeighted_TauEtaAfterTauID", "tau eta after tauID;#tau #eta after tauID;N_{events}/0.2", 30, -3., 3.);
     hStdNonWeightedSelectedTauEta->Sumw2();
-    hStdNonWeightedBjets = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
+    hStdNonWeightedBjets = fs->make<TH1F>("QCD_StdCutPath_nonWeighted_Bjets", "Bjets;N_{b-tagged jets};N_{events}", 10, 0., 10.);
     hStdNonWeightedBjets->Sumw2();
-    hStdNonWeightedFakeMETVeto = fs->make<TH1F>("QCDm3p2_StdCutPath_nonWeighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
+    hStdNonWeightedFakeMETVeto = fs->make<TH1F>("QCD_StdCutPath_nonWeighted_FakeMETVeto", "FakeMETVeto;min(#Delta#phi(MET, jets)), degrees;N_{events} / 5 degrees", 36, 0., 180.);
     hStdNonWeightedFakeMETVeto->Sumw2();
 
 
@@ -129,52 +131,56 @@ namespace HPlus {
       else if (i == 3) myRegion = "PosPos";
 
       std::stringstream myLabel;
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterJetSelection_" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterJetSelection_" << myRegion;
       hABCDTauIsolBNonWeightedTauPtAfterJetSelection[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterJetSelection;tau p_{T} bin;N_{events} after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBNonWeightedTauPtAfterJetSelection[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtvsMET" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtvsMET" << myRegion;
       hABCDTauIsolBNonWeightedTauPtVsMET[i] = fs->make<TH2F>(myLabel.str().c_str(), "NonWeightedTauPtvsMET;tau p_{T}, GeV/c;MET, GeV", 60, 0, 300., 60, 0., 300.);
       hABCDTauIsolBNonWeightedTauPtVsMET[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterMET" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterMET" << myRegion;
       hABCDTauIsolBNonWeightedTauPtAfterMET[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterMET;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBNonWeightedTauPtAfterMET[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterRtau" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterRtau" << myRegion;
       hABCDTauIsolBNonWeightedTauPtAfterRtau[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterRtau;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBNonWeightedTauPtAfterRtau[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterFakeMETVeto" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterFakeMETVeto" << myRegion;
       hABCDTauIsolBNonWeightedTauPtAfterFakeMETVeto[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterFakeMETVeto;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBNonWeightedTauPtAfterFakeMETVeto[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterForwardJetVeto" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterForwardJetVeto" << myRegion;
       hABCDTauIsolBNonWeightedTauPtAfterForwardJetVeto[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterForwardJetVeto;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBNonWeightedTauPtAfterForwardJetVeto[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterFakeMETVetoWithFactorizedRtau" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterFakeMETVetoWithFactorizedRtau" << myRegion;
       hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterFakeMETVeto[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterFakeMETVetoWithFactorizedRtau;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterFakeMETVeto[i]->Sumw2();
       myLabel.str("");
-      myLabel << "QCDm3p2_ABCDTauIsolB_TauPtAfterForwardJetVetoWithFactorizedRtau" << myRegion;
+      myLabel << "QCD_ABCDTauIsolB_TauPtAfterForwardJetVetoWithFactorizedRtau" << myRegion;
       hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[i] = fs->make<TH1F>(myLabel.str().c_str(), "NonWeightedTauPtAfterForwardJetVetoWithFactorizedRtau;tau p_{T} bin;N_{events}", myCoefficientBinCount, 0., myCoefficientBinCount);
       hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[i]->Sumw2();
     }
 
     // Control histograms for P(MET>70)
-    hMETPassProbabilityAfterJetSelection = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterJetSelection", "NonWeightedMETPassProbAfterJetSelection;tau p_{T} bin;N_{events} for MET after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterJetSelection = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterJetSelection", "NonWeightedMETPassProbAfterJetSelection;tau p_{T} bin;N_{events} for MET after jet selection", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterJetSelection->Sumw2();
-    hMETPassProbabilityAfterTauIDNoRtau = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterTauIDNoRtau", "NonWeightedMETPassProbAfterTauIDNoRtau;tau p_{T} bin;N_{events} for MET after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterTauIDNoRtau = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterTauIDNoRtau", "NonWeightedMETPassProbAfterTauIDNoRtau;tau p_{T} bin;N_{events} for MET after TauIDNoRtau", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterTauIDNoRtau->Sumw2();
-    hMETPassProbabilityAfterTauID = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterTauID", "NonWeightedMETPassProbAfterTauID;tau p_{T} bin;N_{events} for MET after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterTauID = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterTauID", "NonWeightedMETPassProbAfterTauID;tau p_{T} bin;N_{events} for MET after TauID", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterTauID->Sumw2();
-    hMETPassProbabilityAfterBTagging = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterBTagging", "NonWeightedMETPassProbAfterBTagging;tau p_{T} bin;N_{events} for MET after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterBTagging = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterBTagging", "NonWeightedMETPassProbAfterBTagging;tau p_{T} bin;N_{events} for MET after b tagging", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterBTagging->Sumw2();
-    hMETPassProbabilityAfterFakeMETVeto = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterFakeMETVeto", "NonWeightedMETPassProbAfterFakeMETVeto;tau p_{T} bin;N_{events} for MET after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterFakeMETVeto = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterFakeMETVeto", "NonWeightedMETPassProbAfterFakeMETVeto;tau p_{T} bin;N_{events} for MET after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterFakeMETVeto->Sumw2();
-    hMETPassProbabilityAfterForwardJetVeto = fs->make<TH1F>("QCDm3p2_NoWeight_METPassProbAfterForwardJetVeto", "NonWeightedMETPassProbAfterForwardJetVeto;tau p_{T} bin;N_{events} for MET after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
+    hMETPassProbabilityAfterForwardJetVeto = fs->make<TH1F>("QCD_NoWeight_METPassProbAfterForwardJetVeto", "NonWeightedMETPassProbAfterForwardJetVeto;tau p_{T} bin;N_{events} for MET after fake MET veto", myCoefficientBinCount, 0., myCoefficientBinCount);
     hMETPassProbabilityAfterForwardJetVeto->Sumw2();
+    
+    // Other control histograms
+    hTauCandidateSelectionIsolatedPtMax = fs->make<TH1F>("QCD_SelectedTauCandidateMaxIsolatedPt", "QCD_SelectedTauCandidateMaxIsolatedPt;Isol. track p_{T}, GeV/c; N_{jets} / 1 GeV/c", 100, 0., 100.);
+    hTauCandidateSelectionIsolatedPtMax->Sumw2();
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -253,8 +259,12 @@ namespace HPlus {
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
-    edm::PtrVector<pat::Tau> mySelectedTau;
-    mySelectedTau.push_back(tauCandidateData.getSelectedTaus()[0]);
+    fPFTauIsolationCalculator.beginEvent(iEvent); // Set primary vertex to PF tau isolation calculation
+    edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
+    // Require that just one tau has been found
+    if (mySelectedTau.size() != 1) return;
+    increment(fOneSelectedTauCounter);
+    
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
     fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -292,9 +302,10 @@ namespace HPlus {
     fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(mySelectedTauPt, 0.));
     hWeightedMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterJetSelection->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-    if (metData.passedEvent())
+    if (metData.passedEvent()) {
       hMETPassProbabilityAfterJetSelection->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
-
+      increment(fMETCounter);
+    }
     // alphaT - No cuts applied! Only produces plots
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
     // increment(fEvtTopologyCounter);
@@ -404,6 +415,39 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
   }
 
+  edm::PtrVector<pat::Tau> QCDMeasurement::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
+    edm::PtrVector<pat::Tau> mySelectedTauCandidate;
+    edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
+    double myBestPtMax = 9999.;
+    std::cout << "taus:" << tauCandidates.size() << std::endl;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = tauCandidates.begin(); iter != tauCandidates.end(); ++iter) {
+      if (!(*iter)->isPFTau()) continue;
+      //const edm::Ptr<pat::Tau> iTau = *iter;
+      double mySumPt = 999.;
+      double myMaxPt = 999.;
+      size_t myOccupancy = 999.;
+      std::cout << "taus:" << std::endl;
+      fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
+      if (myMaxPt < myBestPtMax) {
+        if (myMaxPt < 0.5) {
+          mySelectedTauCandidate.push_back(*iter);
+          hTauCandidateSelectionIsolatedPtMax->Fill(myMaxPt, fEventWeight.getWeight());
+        } else {
+          myBestPtMax = myMaxPt;
+          myBestCandidate = iter;
+        }
+      }
+    }
+    // Save best candidate if list is empty 
+    if (!mySelectedTauCandidate.size() && tauCandidates.size()) {
+      mySelectedTauCandidate.push_back(*myBestCandidate);
+      hTauCandidateSelectionIsolatedPtMax->Fill(myBestPtMax, fEventWeight.getWeight());
+    }
+    // If more than 1 jets are chosen, then take the one with higher ET
+    // FIXME: add code
+    return mySelectedTauCandidate;
+  }
+  
   void QCDMeasurement::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;

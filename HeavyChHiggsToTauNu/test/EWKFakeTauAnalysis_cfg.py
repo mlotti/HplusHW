@@ -54,7 +54,7 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
 #	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-       "rfio:/castor/cern.ch/user/w/wendland/TTToHplusBWB_M-120_7TeV-pythia6-tauola_Winte10_39X_testsample.root"
+        "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
         # For testing in lxplus
 #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
