@@ -206,7 +206,6 @@ triggerEfficiency = cms.untracked.PSet(
 # Look up dynamically the triggers for which the parameters exist
 import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
-    print triggerName
     setattr(triggerEfficiency.parameters, triggerName, getattr(trigEff, triggerName))
 
 # Functions
