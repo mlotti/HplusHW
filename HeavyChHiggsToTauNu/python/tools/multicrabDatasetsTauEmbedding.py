@@ -421,7 +421,7 @@ def addTo(datasets):
             },
             "tauembedding_embedding_v9_test1": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_generation_v9_test1-2e9cb71fb80968b0b2f448053f8ffb15/USER",
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v9_test1-9fa4df4950a5013c36bb04ce6d0a226a/USER",
                 "number_of_jobs": 5 # ~5500 ev/job
             },
             })
