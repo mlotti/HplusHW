@@ -46,13 +46,13 @@ _physicalToLogical = {
     "TTToHplusBWB_M155_Spring11": "TTToHplusBWB_M155",
     "TTToHplusBWB_M160_Spring11": "TTToHplusBWB_M160",
 
-    "TToHplusBHminusB_M80_Spring11": "TToHplusBHminusB_M80",
-    "TToHplusBHminusB_M100_Spring11": "TToHplusBHminusB_M100",
-    "TToHplusBHminusB_M120_Spring11": "TToHplusBHminusB_M120",
-    "TToHplusBHminusB_M140_Spring11": "TToHplusBHminusB_M140",
-    "TToHplusBHminusB_M150_Spring11": "TToHplusBHminusB_M150",
-    "TToHplusBHminusB_M155_Spring11": "TToHplusBHminusB_M155",
-    "TToHplusBHminusB_M160_Spring11": "TToHplusBHminusB_M160",
+    "TTToHplusBHminusB_M80_Spring11": "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M100_Spring11": "TTToHplusBHminusB_M100",
+    "TTToHplusBHminusB_M120_Spring11": "TTToHplusBHminusB_M120",
+    "TTToHplusBHminusB_M140_Spring11": "TTToHplusBHminusB_M140",
+    "TTToHplusBHminusB_M150_Spring11": "TTToHplusBHminusB_M150",
+    "TTToHplusBHminusB_M155_Spring11": "TTToHplusBHminusB_M155",
+    "TTToHplusBHminusB_M160_Spring11": "TTToHplusBHminusB_M160",
 
     "TTJets_TuneD6T_Winter10": "TTJets",
     "TTJets_TuneZ2_Winter10": "TTJets",
@@ -130,19 +130,19 @@ _datasetOrder = [
     "TTToHplusBWB_M120",
     "TTToHplusBWB_M140",
     "TTToHplusBWB_M160",
-    "TToHplusBHminusB_M80",
-    "TToHplusBHminusB_M100",
-    "TToHplusBHminusB_M120",
-    "TToHplusBHminusB_M140",
-    "TToHplusBHminusB_M150",
-    "TToHplusBHminusB_M155",
-    "TToHplusBHminusB_M160",
+    "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M100",
+    "TTToHplusBHminusB_M120",
+    "TTToHplusBHminusB_M140",
+    "TTToHplusBHminusB_M150",
+    "TTToHplusBHminusB_M155",
+    "TTToHplusBHminusB_M160",
     "QCD",
     "QCD_Pt20_MuEnriched",
-    "DYJetsToLL",
     "WJets",
-    "SingleTop",
     "TTJets",
+    "DYJetsToLL",
+    "SingleTop",
     "Diboson",
 ]
 
@@ -159,13 +159,13 @@ _legendLabels = {
     "TTToHplusBWB_M155": "W+H^{#pm} m=155",
     "TTToHplusBWB_M160": "W+H^{#pm} m=160",
 
-    "TToHplusBHminusB_M80": "H^{+}H^{-} m=80",
-    "TToHplusBHminusB_M100": "H^{+}H^{-} m=100",
-    "TToHplusBHminusB_M120": "H^{+}H^{-} m=120",
-    "TToHplusBHminusB_M140": "H^{+}H^{-} m=140",
-    "TToHplusBHminusB_M150": "H^{+}H^{-} m=150",
-    "TToHplusBHminusB_M155": "H^{+}H^{-} m=155",
-    "TToHplusBHminusB_M160": "H^{+}H^{-} m=160",
+    "TTToHplusBHminusB_M80": "H^{+}H^{-} m=80",
+    "TTToHplusBHminusB_M100": "H^{+}H^{-} m=100",
+    "TTToHplusBHminusB_M120": "H^{+}H^{-} m=120",
+    "TTToHplusBHminusB_M140": "H^{+}H^{-} m=140",
+    "TTToHplusBHminusB_M150": "H^{+}H^{-} m=150",
+    "TTToHplusBHminusB_M155": "H^{+}H^{-} m=155",
+    "TTToHplusBHminusB_M160": "H^{+}H^{-} m=160",
 
     "TTJets":                "t#bar{t}+jets",
     "WJets":                 "W+jets",
@@ -179,7 +179,11 @@ _legendLabels = {
 
     "DYJetsToLL":            "DY+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
+
     "SingleTop":             "Single t",
+    "TToBLNu_s-channel":     "Single t (s channel)",
+    "TToBLNu_t-channel":     "Single t (t channel)",
+    "TToBLNu_tW-channel":    "Single t (tW channel)",
 }
 
 ## Map the logical dataset names to plot styles
@@ -358,7 +362,8 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
 # \return TGraph of line from (xmin, 1.0) to (xmax, 1.0)
 def _createRatioLine(xmin, xmax):
     line = ROOT.TGraph(2, array.array("d", [xmin, xmax]), array.array("d", [1.0, 1.0]))
-    line.SetLineColor(ROOT.kBlack)
+#    line.SetLineColor(ROOT.kBlack)
+    line.SetLineColor(ROOT.kRed)
     line.SetLineWidth(2)
     line.SetLineStyle(3)
     return line

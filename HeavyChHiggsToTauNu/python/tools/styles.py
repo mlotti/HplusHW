@@ -5,15 +5,15 @@ class StyleBase:
         self.apply(h.getRootHisto())
 
 class Style(StyleBase):
-    def __init__(self, style, color):
-        self.style = style
+    def __init__(self, marker, color):
+        self.marker = marker
         self.color = color
 
     def apply(self, h):
         h.SetLineWidth(2)
         h.SetLineColor(self.color)
         h.SetMarkerColor(self.color)
-        h.SetMarkerStyle(self.style)
+        h.SetMarkerStyle(self.marker)
         h.SetMarkerSize(1)
 	h.SetFillColor(0)
 
@@ -63,46 +63,55 @@ class StyleError(StyleBase):
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
-dataStyle = Style(20, ROOT.kBlack)
-#dataStyle = Style(6, ROOT.kBlack)
+dataStyle = Style(ROOT.kFullCircle, ROOT.kBlack)
+dataMcStyle = dataStyle
 errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
-#signal90Style =  Style(26, ROOT.kBlue)
-signal80Style =  Style(27, ROOT.kRed+1)
-signal90Style =  Style(27, ROOT.kRed+1)
-signal100Style = Style(27, ROOT.kRed+1)
-signal120Style = Style(27, ROOT.kRed+1)
-signal140Style = Style(27, ROOT.kRed+1)
-signal150Style = Style(27, ROOT.kRed+1)
-signal155Style = Style(27, ROOT.kRed+1)
-signal160Style = Style(27, ROOT.kRed+1)
+mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
+signalStyle = Style(34, ROOT.kPink-9)
+signal80Style =  signalStyle
+signal90Style =  signalStyle
+signal100Style = signalStyle
+signal120Style = signalStyle
+signal140Style = signalStyle
+signal150Style = signalStyle
+signal155Style = signalStyle
+signal160Style = signalStyle
 
-signalHH80Style =  Style(27, ROOT.kRed+1)
-signalHH90Style =  Style(27, ROOT.kRed+1)
-signalHH100Style = Style(27, ROOT.kRed+1)
-signalHH120Style = Style(27, ROOT.kRed+1)
-signalHH140Style = Style(27, ROOT.kRed+1)
-signalHH150Style = Style(27, ROOT.kRed+1)
-signalHH155Style = Style(27, ROOT.kRed+1)
-signalHH160Style = Style(27, ROOT.kRed+1)
+signalHH80Style =  signalStyle
+signalHH90Style =  signalStyle
+signalHH100Style = signalStyle
+signalHH120Style = signalStyle
+signalHH140Style = signalStyle
+signalHH150Style = signalStyle
+signalHH155Style = signalStyle
+signalHH160Style = signalStyle
 
-qcdStyle = Style(29, ROOT.kYellow+1)
-wStyle = Style(23, ROOT.kGreen+2)
-#ttStyle = Style(27, ROOT.kRed+1)
-ttStyle = Style(26, ROOT.kBlue)
-dyStyle = Style(27, ROOT.kRed+1)
-#dyStyle = Style(34, ROOT.kBlue-3)
-stStyle = Style(24, ROOT.kMagenta)
-dibStyle = Style(28, ROOT.kCyan)
+qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
+ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
+ttStyle = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
+wStyle = Style(ROOT.kFullTriangleDown, ROOT.kOrange+9)
+
+wwStyle = Style(ROOT.kMultiply, ROOT.kPink-9)
+wzStyle = Style(ROOT.kMultiply, ROOT.kPink-7)
+zzStyle = Style(ROOT.kMultiply, ROOT.kPink-5)
+dibStyle = Style(ROOT.kMultiply, ROOT.kBlue+1)
+
+stsStyle = Style(ROOT.kPlus, ROOT.kSpring-9)
+sttStyle = Style(ROOT.kPlus, ROOT.kSpring-7)
+sttwStyle = Style(ROOT.kPlus, ROOT.kSpring+4)
+stStyle = sttwStyle
+
+dyStyle = Style(ROOT.kStar, ROOT.kTeal-9)
 
 styles = [
     Style(26, ROOT.kBlue),
     Style(27, ROOT.kRed),
-    wStyle,
-    stStyle,
-    dibStyle,
+    Style(23, ROOT.kGreen+2),
+    Style(24, ROOT.kMagenta),
+    Style(28, ROOT.kCyan),
     Style(29, ROOT.kYellow+2),
     Style(30, ROOT.kOrange+9),
     Style(31, ROOT.kOrange+3),
