@@ -6,7 +6,7 @@ class StyleBase:
 
 class Style(StyleBase):
     def __init__(self, style, color):
-        self.style = 22 + style
+        self.style = style
         self.color = color
 
     def apply(self, h):
@@ -63,56 +63,56 @@ class StyleError(StyleBase):
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
-dataStyle = Style(-2, ROOT.kBlack)
-#dataStyle = Style(-22+6, ROOT.kBlack)
+dataStyle = Style(20, ROOT.kBlack)
+#dataStyle = Style(6, ROOT.kBlack)
 errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
-#signal90Style =  Style(4, ROOT.kBlue)
-signal80Style =  Style(5, ROOT.kRed+1)
-signal90Style =  Style(5, ROOT.kRed+1)
-signal100Style = Style(5, ROOT.kRed+1)
-signal120Style = Style(5, ROOT.kRed+1)
-signal140Style = Style(5, ROOT.kRed+1)
-signal150Style = Style(5, ROOT.kRed+1)
-signal155Style = Style(5, ROOT.kRed+1)
-signal160Style = Style(5, ROOT.kRed+1)
+#signal90Style =  Style(26, ROOT.kBlue)
+signal80Style =  Style(27, ROOT.kRed+1)
+signal90Style =  Style(27, ROOT.kRed+1)
+signal100Style = Style(27, ROOT.kRed+1)
+signal120Style = Style(27, ROOT.kRed+1)
+signal140Style = Style(27, ROOT.kRed+1)
+signal150Style = Style(27, ROOT.kRed+1)
+signal155Style = Style(27, ROOT.kRed+1)
+signal160Style = Style(27, ROOT.kRed+1)
 
-signalHH80Style =  Style(5, ROOT.kRed+1)
-signalHH90Style =  Style(5, ROOT.kRed+1)
-signalHH100Style = Style(5, ROOT.kRed+1)
-signalHH120Style = Style(5, ROOT.kRed+1)
-signalHH140Style = Style(5, ROOT.kRed+1)
-signalHH150Style = Style(5, ROOT.kRed+1)
-signalHH155Style = Style(5, ROOT.kRed+1)
-signalHH160Style = Style(5, ROOT.kRed+1)
+signalHH80Style =  Style(27, ROOT.kRed+1)
+signalHH90Style =  Style(27, ROOT.kRed+1)
+signalHH100Style = Style(27, ROOT.kRed+1)
+signalHH120Style = Style(27, ROOT.kRed+1)
+signalHH140Style = Style(27, ROOT.kRed+1)
+signalHH150Style = Style(27, ROOT.kRed+1)
+signalHH155Style = Style(27, ROOT.kRed+1)
+signalHH160Style = Style(27, ROOT.kRed+1)
 
-qcdStyle = Style(7, ROOT.kYellow+1)
-wStyle = Style(1, ROOT.kGreen+2)
-#ttStyle = Style(5, ROOT.kRed+1)
-ttStyle = Style(4, ROOT.kBlue)
-dyStyle = Style(5, ROOT.kRed+1)
-#dyStyle = Style(12, ROOT.kBlue-3)
-stStyle = Style(2, ROOT.kMagenta)
-dibStyle = Style(6, ROOT.kCyan)
+qcdStyle = Style(29, ROOT.kYellow+1)
+wStyle = Style(23, ROOT.kGreen+2)
+#ttStyle = Style(27, ROOT.kRed+1)
+ttStyle = Style(26, ROOT.kBlue)
+dyStyle = Style(27, ROOT.kRed+1)
+#dyStyle = Style(34, ROOT.kBlue-3)
+stStyle = Style(24, ROOT.kMagenta)
+dibStyle = Style(28, ROOT.kCyan)
 
 styles = [
-    Style(4, ROOT.kBlue),
-    Style(5, ROOT.kRed),
+    Style(26, ROOT.kBlue),
+    Style(27, ROOT.kRed),
     wStyle,
     stStyle,
     dibStyle,
-    Style(7, ROOT.kYellow+2),
-    Style(8, ROOT.kOrange+9),
-    Style(9, ROOT.kOrange+3),
-    Style(10, ROOT.kMagenta+3),
-    Style(11, ROOT.kGray+2),
-    Style(12, ROOT.kBlue+3),
-    Style(13, ROOT.kOrange+1),
-    Style(14, ROOT.kCyan-5),
-    Style(0, ROOT.kBlue),
-    Style(3, ROOT.kBlack)
+    Style(29, ROOT.kYellow+2),
+    Style(30, ROOT.kOrange+9),
+    Style(31, ROOT.kOrange+3),
+    Style(32, ROOT.kMagenta+3),
+    Style(33, ROOT.kGray+2),
+    Style(34, ROOT.kBlue+3),
+    Style(35, ROOT.kOrange+1),
+    Style(36, ROOT.kCyan-5),
+    Style(22, ROOT.kBlue),
+    Style(25, ROOT.kBlack)
     ]
 
 
