@@ -249,9 +249,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         # FIXME: This is broken at the moment...
         #removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
         #process.patDefaultSequen
+        process.patDefaultSequence.remove(process.patMETCorrections)
         process.patDefaultSequence.remove(process.patMETs)
+        del process.patMETCorrections
         del process.patMETs
-
 
     # Muons
     # In order to calculate the transverse impact parameter w.r.t.
