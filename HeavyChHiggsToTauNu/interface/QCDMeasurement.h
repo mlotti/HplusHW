@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementByMetFactorisationPart2_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementByMetFactorisationPart2_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -35,10 +35,10 @@ class TH1;
 class TH2;
 
 namespace HPlus {
-  class QCDMeasurementByMetFactorisationPart2 {  
+  class QCDMeasurement {  
   public:
-    explicit QCDMeasurementByMetFactorisationPart2(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~QCDMeasurementByMetFactorisationPart2();
+    explicit QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~QCDMeasurement();
 
     // Interface towards the EDProducer
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);

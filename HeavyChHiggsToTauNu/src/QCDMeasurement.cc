@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurementByMetFactorisationPart2.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurement.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
@@ -10,7 +10,7 @@
 #include "TNamed.h"
 
 namespace HPlus { 
-  QCDMeasurementByMetFactorisationPart2::QCDMeasurementByMetFactorisationPart2(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  QCDMeasurement::QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
@@ -177,13 +177,13 @@ namespace HPlus {
     hMETPassProbabilityAfterForwardJetVeto->Sumw2();
    }
 
-  QCDMeasurementByMetFactorisationPart2::~QCDMeasurementByMetFactorisationPart2() {}
+  QCDMeasurement::~QCDMeasurement() {}
 
-  void QCDMeasurementByMetFactorisationPart2::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurement::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     analyze(iEvent, iSetup);
   }
 
-  void QCDMeasurementByMetFactorisationPart2::createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
+  void QCDMeasurement::createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
     // Get tau pt edge table
     fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
     // Make histograms
@@ -227,7 +227,7 @@ namespace HPlus {
     }
   }
 
-  void QCDMeasurementByMetFactorisationPart2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
     increment(fAllCounter);
@@ -404,7 +404,7 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
   }
 
-  void QCDMeasurementByMetFactorisationPart2::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
+  void QCDMeasurement::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;
     if (!tauData.passedEvent()) { // this is just isolation and nprongs == 1
