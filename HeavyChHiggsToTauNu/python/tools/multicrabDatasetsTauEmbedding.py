@@ -1,5 +1,9 @@
 import multicrabDatasetsCommon as common
 
+# for generation (skim): ~1000 ev/job
+# for embedding (generation): ~5000 ev/job
+# for analysis (embedding): ~5000 ev/job
+
 def addTo(datasets):
 #    datasets[""]["data"]["tauembedding_skim_v5"] = {
 #        "dbs_url": common.pattuple_dbs,
@@ -410,12 +414,32 @@ def addTo(datasets):
                 "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_skim_v9-6c79cc5a252f5183f923b05982b89b14/USER",
                 "number_of_jobs": 25#5 # ~5500 ev/job #25 # ~1100 ev/job
             },
+            "tauembedding_generation_v9_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_generation_v9_test1-2e9cb71fb80968b0b2f448053f8ffb15/USER",
+                "number_of_jobs": 5 # ~5500 ev/job
+            },
+            "tauembedding_embedding_v9_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Mu/local-Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_generation_v9_test1-2e9cb71fb80968b0b2f448053f8ffb15/USER",
+                "number_of_jobs": 5 # ~5500 ev/job
+            },
             })
     datasets["WJets_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
                 "number_of_jobs": 50#10 # ~5500 ev/job #50 # ~1100 ev/job
+            },
+            "tauembedding_generation_v9_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_generation_v9_test1-0cf9957f1395328bfdb5327ead98570c/USER",
+                "number_of_jobs": 10 # ~5500 ev/job
+            },
+            "tauembedding_embedding_v9_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_test1-9fa4df4950a5013c36bb04ce6d0a226a/USER",
+                "number_of_jobs": 10 # ~5500 ev/job
             },
             })
     datasets["TToBLNu_t-channel_TuneZ2_Spring11"]["data"].update({

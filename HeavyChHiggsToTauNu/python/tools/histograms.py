@@ -15,11 +15,13 @@ import dataset
 #
 # The attributes which can be set are the x and y coordinates and the
 # text size.
+#
+# \todo Set the text fonts to non-bold
 class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
-        self._setDefaults("energy", x=0.3, y=0.96)
-        self._setDefaults("lumi", x=0.65, y=0.85)
+        self._setDefaults("energy", x=0.2, y=0.96)
+        self._setDefaults("lumi", x=0.45, y=0.96)
 
     ## Modify the default values
     # 
@@ -91,6 +93,7 @@ def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("cmsPreliminary"))
     l.DrawLatex(x, y, "CMS Preliminary")
 
@@ -103,6 +106,7 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
     (x, y) = textDefaults.getValues("energy", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("energy"))
     l.DrawLatex(x, y, "#sqrt{s} = "+s)
 
@@ -116,8 +120,11 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("lumi"))
-    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
+#    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
+#    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+    l.DrawLatex(x, y, "%.0f %s" % (lumi, unit))
 
 ## Class for generating legend creation functions with default positions.
 #
@@ -480,6 +487,8 @@ class CanvasFrameTwo:
 ## Base class for all Histo classes.
 class HistoBase:
     ## Constructor
+    #
+    # \todo test draw style "9"
     #
     # \param rootHisto    ROOT histogram object (TH1)
     # \param name         Name of the histogram
