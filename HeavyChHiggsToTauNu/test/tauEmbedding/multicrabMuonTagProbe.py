@@ -6,9 +6,9 @@ multicrab = Multicrab("../crab_analysis.cfg", "muonTagProbe_cfg.py", lumiMaskDir
 
 aodDatasets = [
     # Data
-#    "Mu_136035-144114_Dec22",
-#    "Mu_146428-147116_Dec22",
-    "Mu_147196-149294_Dec22"
+    "Mu_136035-144114_Dec22",
+    "Mu_146428-147116_Dec22",
+#    "Mu_147196-149294_Dec22"
     # Signal MC
     # Background MC
 #    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
@@ -41,5 +41,5 @@ multicrab.forEachDataset(modify)
 
 prefix="multicrab_tagprobe"
 
-#multicrab.createTasks(prefix=prefix)
-multicrab.createTasks(configOnly=True, prefix=prefix)
+multicrab.createTasks(prefix=prefix)
+#multicrab.createTasks(configOnly=True, prefix=prefix)

@@ -7,7 +7,8 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 #dataVersion = "36Xspring10"
 #dataVersion = "37X"
 #dataVersion = "38X"
-dataVersion = "39Xredigi"
+#dataVersion = "39Xredigi"
+dataVersion = "311Xredigi"
 
 options = getOptions()
 if options.dataVersion != "":
@@ -54,7 +55,7 @@ process.selectionSequence = cms.Sequence()
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {"doTauHLTMatching": False,
-           "doPatTaus": False,
+           "doPatTaus": True,
            "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)

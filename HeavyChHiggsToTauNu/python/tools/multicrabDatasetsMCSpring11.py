@@ -32,6 +32,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
+            "pattuple_v10": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M120_Spring11": {
@@ -42,6 +47,11 @@ datasets = {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 45, # Adjusted for PATtuple file size
             },
+            "pattuple_v10": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "TTToHplusBWB_M140_Spring11": {
@@ -51,6 +61,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+            "pattuple_v10": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
+                "number_of_jobs": 1
             },
         }
     },
@@ -91,6 +106,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
                 "number_of_jobs": 45, # Adjusted for PATtuple file size
+            },
+            "pattuple_v10": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
+                "number_of_jobs": 1
             },
         }
     },

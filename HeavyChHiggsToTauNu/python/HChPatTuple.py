@@ -57,8 +57,8 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
-    if doPatTaus and doHChTauDiscriminators:
-        process.hplusPatTauSequence = addPFTausAndDiscriminators(process, dataVersion, doPatCalo)
+    if doPatTaus:
+        process.hplusPatTauSequence = addPFTausAndDiscriminators(process, dataVersion, doPatCalo, doHChTauDiscriminators)
 
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -202,19 +202,14 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         if not doPatTauIsoDeposits:
             process.patTausHpsPFTau.isoDeposits = cms.PSet()
 
-        # Side effect because HPS is not needed for muon analysis,
-        # which is the use case for doHchTauDiscriminators. To do it
-        # correctly one shouhd disentangle the hpsTanc imports above
-        # from the discriminators.
-        if doHChTauDiscriminators:
-            tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
-                             algoLabel = "hpsTanc",
-                             typeLabel = "PFTau")
-            if not doPatTauIsoDeposits:
-                process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
-            # Disable discriminators which are not in AOD
-#            del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
-#            del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
+        tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
+                                  algoLabel = "hpsTanc",
+                                  typeLabel = "PFTau")
+        if not doPatTauIsoDeposits:
+            process.patTausHpsTancPFTau.isoDeposits = cms.PSet()
+        # Disable discriminators which are not in AOD
+#        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
+#        del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
 
         # Add visible taus    
         if dataVersion.isMC():
@@ -230,7 +225,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
             outputCommands.append("keep *_VisibleTaus_*_*")
 
     else:
-        removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Taus"], outputInProcess= out != None)
+        process.patDefaultSequence.remove(process.patTaus)
+        process.patDefaultSequence.remove(process.selectedPatTaus)
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
                            #"keep *_cleanPatTaus_*_*",
@@ -246,9 +244,13 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     if doPatMET:
         addTcMET(process, 'TC')
         addPfMET(process, 'PF')
-        outputCommands.extend(["keep *_patMETsPF_*_*", "keep *_patMETsTC_*_*"])
+        outputCommands.extend(["keep *_patMETsTC_*_*", "keep *_patMETsPF_*_*"])
     else:
-        removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
+        # FIXME: This is broken at the moment...
+        #removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
+        #process.patDefaultSequen
+        process.patDefaultSequence.remove(process.patMETs)
+        del process.patMETs
 
 
     # Muons
@@ -347,22 +349,23 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     return seq
 
 
-def addPFTausAndDiscriminators(process, dataVersion, doCalo):
+def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
 
-    # Do these imports here in order to be able to run PAT with
-    # doPatTaus=False with 3_9_7 without extra tags
-    import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
-    import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+    if doDiscriminators:
+        # Do these imports here in order to be able to run PAT with
+        # doPatTaus=False with 3_9_7 without extra tags
+        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
-    tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
-    HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
-    HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
-    PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+        tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
 
-    HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
-    HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+        HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
+        HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
     # These are already in 36X AOD, se remove them from the tautagging
     # sequence
@@ -376,20 +379,24 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo):
         
 
     process.hplusHpsTancTauSequence = cms.Sequence()
-    sequence = cms.Sequence(
-        process.tautagging *
-        process.PFTau *
-        process.PFTauDiscriminationSequenceForChargedHiggs *
-        process.PFTauDiscriminationSequenceForChargedHiggsCont *
-        process.PFTauTestDiscriminationSequence *
-        process.CaloTauDiscriminationSequenceForChargedHiggs *
-        process.CaloTauDiscriminationSequenceForChargedHiggsCont
-    )
+    sequence = cms.Sequence()
 
-    if not doCalo:
-        sequence.remove(process.tautagging)
-        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggs)
-        sequence.remove(process.CaloTauDiscriminationSequenceForChargedHiggsCont)
+    if doCalo:
+        sequence *= process.tautagging
+
+    sequence *= process.PFTau
+
+    if doDiscriminators:
+        if doCalo:
+            sequence *= (
+                process.CaloTauDiscriminationSequenceForChargedHiggs *
+                process.CaloTauDiscriminationSequenceForChargedHiggsCont
+            )
+        sequence *= (
+            process.PFTauDiscriminationSequenceForChargedHiggs *
+            process.PFTauDiscriminationSequenceForChargedHiggsCont *
+            process.PFTauTestDiscriminationSequence
+        )
 
     return sequence
 
@@ -456,7 +463,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
                              "doPatMET": False})
 
         process.patSequence = addPat(process, dataVersion, **patArgs)
-        removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        process.patDefaultSequence.remove(process.patMuons)
+        process.patDefaultSequence.remove(process.selectedPatMuons)
+        process.patDefaultSequence.remove(process.patElectrons)
+        process.patDefaultSequence.remove(process.selectedPatElectrons)
+        process.patDefaultSequence.remove(process.patPhotons)
+        process.patDefaultSequence.remove(process.selectedPatPhotons)
 
         # Remove soft muon b tagging discriminators as they are not
         # well defined, cause technical problems and we don't use
@@ -558,9 +572,9 @@ def addSelectedPFlowParticle(process,verbose=False):
     process.pfAllMuons.src = "particleFlow"
     process.pfAllElectrons.src = "particleFlow"
     
-    process.patDefaultSequence.replace(process.patCandidates,
-                                       process.pfCandidateSelectionByType+
-                                       process.patCandidates)
+    process.hplusPatSequence.replace(process.hplusPatTauSequence,
+                                     process.pfCandidateSelectionByType+
+                                     process.hplusPatTauSequence)
 
 def addPFMuonIsolation(process,module,postfix="",verbose=False):
     if verbose:

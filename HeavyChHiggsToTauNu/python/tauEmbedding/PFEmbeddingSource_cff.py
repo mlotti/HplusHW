@@ -28,8 +28,8 @@ dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
 )
 
 filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
-    minEvents = cms.untracked.int32(1),
-    target =  cms.untracked.int32(1) 
+    target =  cms.untracked.int32(1),
+    src = cms.untracked.InputTag("generator")
 )
 
 # Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing

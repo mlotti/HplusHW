@@ -21,6 +21,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 
 namespace edm {
   class ParameterSet;
@@ -83,6 +84,7 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     //
+    TriggerEfficiency fTriggerEfficiency;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     // Histograms
