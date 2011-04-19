@@ -120,7 +120,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
-        raise Exception("No datasets")
+        raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return getDatasetsFromRootFiles(dlist, **kwargs)
 
@@ -774,8 +774,8 @@ class Dataset:
             raise Exception("Dataset %s is data, no cross section available" % self.name)
         try:
             return self.info["crossSection"]
-        except AttributeError:
-            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method.")
+        except KeyError:
+            raise Exception("Dataset %s is MC, but 'crossSection' is missing from configInfo/configInfo histogram. You have to explicitly set the cross section with setCrossSection() method." % self.name)
 
     def setLuminosity(self, value):
         """Set the integrated luminosity of data dataset (in pb^-1)."""
@@ -789,8 +789,8 @@ class Dataset:
             raise Exception("Dataset %s is MC, no luminosity available" % self.name)
         try:
             return self.info["luminosity"]
-        except AttributeError:
-            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method.")
+        except KeyError:
+            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
 
     def isData(self):
         return self._isData
@@ -817,7 +817,9 @@ class Dataset:
         factor one gets the corresponding cross section.
         """
         if not hasattr(self, "nAllEvents"):
-            raise Exception("Number of all events is not set! The counter directory was not given, and setNallEvents() was not called.")
+            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
+        if self.nAllEvents == 0:
+            raise Exception("Number of all events is 0 for dataset %s" % self.name)
 
         return self.getCrossSection() / self.nAllEvents
 

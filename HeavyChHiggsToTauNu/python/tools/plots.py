@@ -42,6 +42,8 @@ _physicalToLogical = {
     "TTToHplusBWB_M100_Spring11": "TTToHplusBWB_M100",
     "TTToHplusBWB_M120_Spring11": "TTToHplusBWB_M120",
     "TTToHplusBWB_M140_Spring11": "TTToHplusBWB_M140",
+    "TTToHplusBWB_M150_Spring11": "TTToHplusBWB_M150",
+    "TTToHplusBWB_M155_Spring11": "TTToHplusBWB_M155",
     "TTToHplusBWB_M160_Spring11": "TTToHplusBWB_M160",
 
     "TToHplusBHminusB_M80_Spring11": "TToHplusBHminusB_M80",
@@ -189,7 +191,9 @@ _plotStyles = {
     "TTToHplusBWB_M100":          styles.signal100Style,
     "TTToHplusBWB_M120":          styles.signal120Style,
     "TTToHplusBWB_M140":          styles.signal140Style,
-    "TTToHplusBWB_M150":          styles.signal160Style,
+    "TTToHplusBWB_M150":          styles.signal150Style,
+    "TTToHplusBWB_M155":          styles.signal155Style,
+    "TTToHplusBWB_M160":          styles.signal160Style,
 
     "TToHplusBHminusB_M80":       styles.signalHH80Style,
     "TToHplusBHminusB_M100":      styles.signalHH100Style,
@@ -209,6 +213,10 @@ _plotStyles = {
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
 }
+
+## Update the default legend labels
+def updateLegendLabel(datasetName, legendLabel):
+    _legendLabels[datasetName] = legendLabel
 
 ## Helper class for setting properties
 #
@@ -513,68 +521,47 @@ class PlotBase:
 class PlotSameBase(PlotBase):
     ## Construct from DatasetManager and a histogram path
     #
-    # \param datasetMgr  DatasetManager for datasets
-    # \param name        Path of the histogram in the ROOT files
-    # \param kwargs      Keyword arguments, forwarded to PlotBase.__init__()
-    def __init__(self, datasetMgr, name, **kwargs):
+    # \param datasetMgr      DatasetManager for datasets
+    # \param name            Path of the histogram in the ROOT files
+    # \param normalizeToOne  Should the histograms be normalized to one?
+    # \param kwargs          Keyword arguments, forwarded to PlotBase.__init__()
+    def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
         PlotBase.__init__(self, datasetMgr.getDatasetRootHistos(name), **kwargs)
         self.datasetMgr = datasetMgr
         self.rootHistoPath = name
+        self.normalizeToOne = normalizeToOne
 
     ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
 
-    ## Stack all MC histograms 
+    ## Stack MC histograms
     #
-    # Internally, THStack is used
-    def stackMCHistograms(self):
+    # \param stackSignal  Should the signal histograms be stacked too?
+    #
+    # Signal histograms are identified by checking if the name contains "TTToHplus"
+    def stackMCHistograms(self, stackSignal=False):
+        def isNotSignal(name):
+            return not "TTToHplus" in name
+
         mcNames = self.datasetMgr.getMCDatasetNames()
-        self.histoMgr.forEachHisto(UpdatePlotStyleFill(_plotStyles, mcNames))
+        mcNamesNoSignal = filter(isNotSignal, mcNames)
+        if not stackSignal:
+            mcNames = mcNamesNoSignal
+
+        # Leave the signal datasets unfilled
+        self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
-    ## \var datasetMgr
-    # datasets.DatasetManager object to have the datasets at hand
-    ## \var rootHistoPath
-    # Path to the histogram in the ROOT files
+    ## Add MC uncertainty band
+    def addMCUncertainty(self):
+        if not self.histoMgr.hasHisto("StackedMC"):
+            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
+        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
 
-## Class for data-MC comparison plot.
-# 
-# Several assumptions have been made for this plotting class. If these
-# are not met, one should consider either adding the feature to this
-# class (if the required change is relatively small), or creating
-# another class (if the change is large).
-# - There is always one histogram with the name "Data" for collision data
-# - There is always at least one MC histogram
-# - Only the MC histograms are stacked, and it should be done with the
-#   stackMCHistograms() method
-# - Data/MC ratio pad can be added to the same TCanvas, the MC
-#   considered in the ratio are the stacked ones
-# - The MC is normalized by the integrated luminosity of the collision
-#   data by default
-#   - Normalization to unit area (normalizeToOne) is also supported
-#     such that all non-stacked histograms are normalized to unit
-#     area, and the total area of stacked histograms is normalized to
-#     unit area while the ratios of the individual datasets is
-#     determined from the cross sections
-#
-class DataMCPlot(PlotSameBase):
-    ## Construct from DatasetManager and a histogram path
-    #
-    # \param datasetMgr      DatasetManager for datasets
-    # \param name            Path of the histogram in the ROOT files
-    # \param normalizeToOne  Should the histograms be normalized to one?
-    # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
-    def __init__(self, datasetMgr, name, normalizeToOne=False, **kwargs):
-        PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
-        
-        # Normalize the MC histograms to the data luminosity
-        self.histoMgr.normalizeMCByLuminosity()
-        self.normalizeToOne = normalizeToOne
-
-        self._setLegendStyles()
-        self._setLegendLabels()
-        self._setPlotStyles()
+    def createFrame(self, filename, **kwargs):
+        self._normalizeToOne()
+        PlotBase.createFrame(self, filename, **kwargs)
 
     ## Helper function to do the work for "normalization to one"
     def _normalizeToOne(self):
@@ -607,37 +594,108 @@ class DataMCPlot(PlotSameBase):
             if not h.getName() in handled:
                 dataset._normalizeToOne(h.getRootHisto())
 
-    ## Stack MC histograms
+    ## \var datasetMgr
+    # datasets.DatasetManager object to have the datasets at hand
+    ## \var rootHistoPath
+    # Path to the histogram in the ROOT files
+    ## \var normalizeToOne
+    # Flag to indicate if histograms should be normalized to unit area
+
+## Class for MC plots.
+#
+#
+#
+class MCPlot(PlotSameBase):
+    ## Construct from DatasetManager and a histogram path
     #
-    # \param stackSignal  Should the signal histograms be stacked too?
+    # \param datasetMgr      DatasetManager for datasets
+    # \param name            Path of the histogram in the ROOT files
+    # \param kwargs          Keyword arguments, forwarded to 
     #
-    # Signal histograms are identified by checking if the name contains "TTToHplus"
-    def stackMCHistograms(self, stackSignal=False):
-        def isNotSignal(name):
-            return not "TTToHplus" in name
+    # <b>Keyword arguments</b>
+    # \li \a normalizeToOne           Normalize the histograms to one (True/False)
+    # \li \a normalizeByCrossSection  Normalize the histograms by the dataset cross sections (True/False)
+    # \li \a normalizeToLumi          Normalize the histograms to a given luminosity (number)
+    # \li Rest are forwarded to PlotSameBase.__init__()
+    #
+    # One of the normalization keyword arguments must be given, only
+    # one can be True or have a number.
+    def __init__(self, datasetMgr, name, **kwargs):
+        arg = {}
+        normalizationModes = ["normalizeToOne", "normalizeByCrossSection", "normalizeToLumi"]
+        for a in normalizationModes:
+            if a in kwargs and kwargs[a]:
+                if len(arg) != 0:
+                    raise Exception("Only one of %s can be given, got %s and %s" % (",".join(normalizationModes), arg.items()[0], a))
+                arg[a] = kwargs[a]
+                # This one we have to keep
+                if a != "normalizeToOne":
+                    del kwargs[a]
 
-        mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(isNotSignal, mcNames)
-        if not stackSignal:
-            mcNames = mcNamesNoSignal
+        if len(arg) == 0:
+            raise Exception("One of the %s must be given" % ",".join(normalizationModes))
 
-        # Leave the signal datasets unfilled
-        self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
-        self.histoMgr.stackHistograms("StackedMC", mcNames)
+        # Base class constructor
+        PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
+        
+        # Normalize the histograms
+        if self.normalizeToOne or arg.get("normalizeByCrossSection", False):
+            self.histoMgr.normalizeMCByCrossSection()
+        else:
+            self.histoMgr.normalizeMCToLuminosity(arg["normalizeToLumi"])
+        
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
 
-    ## Add MC uncertainty band
-    def addMCUncertainty(self):
-        if not self.histoMgr.hasHisto("StackedMC"):
-            raise Exception("Must call stackMCHistograms() before addMCUncertainty()")
-        self.histoMgr.addMCUncertainty(styles.getErrorStyle(), nameList=["StackedMC"])
+    ## This is provided to have similar interface with DataMCPlot
+    def createFrameFraction(self, filename, **kwargs):
+        if "opts2" in kwargs:
+            del kwargs["opts2"]
+        self.createFrame(filename, **kwargs)
 
-    ## Create TCanvas and frames for the histogram and a data/MC ratio
+## Class for data-MC comparison plot.
+# 
+# Several assumptions have been made for this plotting class. If these
+# are not met, one should consider either adding the feature to this
+# class (if the required change is relatively small), or creating
+# another class (if the change is large).
+# - There is always one histogram with the name "Data" for collision data
+# - There is always at least one MC histogram
+# - Only the MC histograms are stacked, and it should be done with the
+#   stackMCHistograms() method
+# - Data/MC ratio pad can be added to the same TCanvas, the MC
+#   considered in the ratio are the stacked ones
+# - The MC is normalized by the integrated luminosity of the collision
+#   data by default
+#   - Normalization to unit area (normalizeToOne) is also supported
+#     such that all non-stacked histograms are normalized to unit
+#     area, and the total area of stacked histograms is normalized to
+#     unit area while the ratios of the individual datasets is
+#     determined from the cross sections. The support is in the base class.
+#
+class DataMCPlot(PlotSameBase):
+    ## Construct from DatasetManager and a histogram path
+    #
+    # \param datasetMgr      DatasetManager for datasets
+    # \param name            Path of the histogram in the ROOT files
+    # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
+    def __init__(self, datasetMgr, name, **kwargs):
+        PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
+        
+        # Normalize the MC histograms to the data luminosity
+        self.histoMgr.normalizeMCByLuminosity()
+
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
+
+   ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename     Name for TCanvas (becomes the file name)
     # \param createRatio  Create also the ratio pad?
     # \param kwargs       Keyword arguments, forwarded to PlotSameBase.createFrame() or histograms.CanvasFrameTwo.__init__()
     def createFrame(self, filename, createRatio=False, **kwargs):
-        self._normalizeToOne()
         if not createRatio:
             PlotSameBase.createFrame(self, filename, **kwargs)
         else:
@@ -699,8 +757,6 @@ class DataMCPlot(PlotSameBase):
             self.cf.pad1.Pop() # Move the first pad on top
 
 
-    ## \var normalizeToOne
-    # Flag to indicate if histograms should be normalized to unit area
     ## \var ratio
     # Holds the TH1 for data/MC ratio, if exists
     ## \var line
@@ -720,8 +776,8 @@ class ComparisonPlot(PlotBase):
     # \param datasetRootHisto2
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
-    def __init__(self, datasetRootHisto1, datasetRootHisto2):
-        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2])
+    def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
+        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
 
     ## Set default legend labels and styles, and plot styles
     def setDefaultStyles(self):
@@ -733,8 +789,9 @@ class ComparisonPlot(PlotBase):
     #
     # \param filename     Name for TCanvas (becomes the file name)
     # \param createRatio  Create also the ratio pad?
+    # \param coverPadOpts Options for cover TPad, forwarded to _createCoverPad()
     # \param kwargs       Keyword arguments, forwarded to PlotBase.createFrame() or histograms.CanvasFrameTwo.__init__()
-    def createFrame(self, filename, createRatio=False, **kwargs):
+    def createFrame(self, filename, createRatio=False, coverPadOpts={}, **kwargs):
         if not createRatio:
             PlotBase.createFrame(self, filename, **kwargs)
         else:
@@ -745,6 +802,8 @@ class ComparisonPlot(PlotBase):
             self.cf = histograms.CanvasFrameTwo(self.histoMgr, [self.ratio], filename, **kwargs)
             self.frame = self.cf.frame
             self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+            self.coverPadOpts = coverPadOpts
 
     ## Get the upper frame TH1
     def getFrame1(self):
@@ -777,7 +836,7 @@ class ComparisonPlot(PlotBase):
             # label of the y-axis of the lower pad. Then move the
             # upper pad on top, so that the lowest label of the y-axis
             # of it is shown
-            self.coverPad = _createCoverPad()
+            self.coverPad = _createCoverPad(**self.coverPadOpts)
             self.coverPad.Draw()
 
             self.cf.canvas.cd(1)

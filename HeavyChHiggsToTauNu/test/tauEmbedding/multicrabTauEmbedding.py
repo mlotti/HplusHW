@@ -4,19 +4,22 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
+step = "skim"
 #step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
+
+dirPrefix = ""
+#dirPrefix = "_TauIdScan"
 
 config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v8",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v8", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v6_2",  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v9",                "config": "tauAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v6_2",  "config": "../signalAnalysis_cfg.py"},
+#          "generation":     {"input": "tauembedding_skim_v8",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+#          "embedding":      {"input": "tauembedding_generation_v8", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+#          "analysis":       {"input": "tauembedding_embedding_v6_2",  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v10",                "config": "tauAnalysis_cfg.py"},
+#          "signalAnalysis": {"input": "tauembedding_embedding_v6_2",  "config": "../signalAnalysis_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -32,22 +35,19 @@ datasets = [
     "Mu_146428-147116_Dec22", # HLT_Mu9
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     # Signal MC
-    "TTJets_TuneZ2_Winter10",
-#    "TTJets_TuneD6T_Winter10",
-    "WJets_TuneZ2_Winter10",
-    #"WJets_TuneZ2_Winter10_noPU",
-#    "WJets_TuneD6T_Winter10",
+    "TTJets_TuneZ2_Spring11",
+    "WJets_TuneZ2_Spring11",
     # Background MC
-    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
-    "DYJetsToLL_M50_TuneZ2_Winter10",
-    "TToBLNu_s-channel_TuneZ2_Winter10",
-    "TToBLNu_t-channel_TuneZ2_Winter10",
-    "TToBLNu_tW-channel_TuneZ2_Winter10",
-    "WW_TuneZ2_Winter10",
-    "WZ_TuneZ2_Winter10",
-    "ZZ_TuneZ2_Winter10",
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
+    "DYJetsToLL_M50_TuneZ2_Spring11",
+    "TToBLNu_s-channel_TuneZ2_Spring11",
+    "TToBLNu_t-channel_TuneZ2_Spring11",
+    "TToBLNu_tW-channel_TuneZ2_Spring11",
+    "WW_TuneZ2_Spring11",
+    "WZ_TuneZ2_Spring11",
+    "ZZ_TuneZ2_Spring11",
     # For testing
-    "TTToHplusBWB_M120_Winter10"
+    "TTToHplusBWB_M120_Spring11"
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -58,24 +58,21 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v8_1" % step
+tauname = "_tauembedding_%s_v9" % step
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
 skimNjobs = {
-    "WJets_TuneZ2_Winter10": 400,
-    "WJets_TuneZ2_Winter10_noPU": 100,
-    "WJets_TuneD6T_Winter10": 400,
-    "TTJets_TuneZ2_Winter10": 400,
-    "TTJets_TunedD6TWinter10": 400,
-    "QCD_Pt20_MuEnriched_TuneZ2_Winter10": 400,
-    "DYJetsToLL_M50_TuneZ2_Winter10": 130,
-    "TToBLNu_s-channel_TuneZ2_Winter10": 100,
-    "TToBLNu_t-channel_TuneZ2_Winter10": 100,
-    "TToBLNu_tW-channel_TuneZ2_Winter10": 100,
-    "WW_TuneZ2_Winter10": 100,
-    "WZ_TuneZ2_Winter10": 100,
-    "ZZ_TuneZ2_Winter10": 100,
+    "WJets_TuneZ2_Spring11": 400,
+    "TTJets_TuneZ2_Spring11": 400,
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 400,
+    "DYJetsToLL_M50_TuneZ2_Spring11": 150,
+    "TToBLNu_s-channel_TuneZ2_Spring11": 100,
+    "TToBLNu_t-channel_TuneZ2_Spring11": 100,
+    "TToBLNu_tW-channel_TuneZ2_Spring11": 100,
+    "WW_TuneZ2_Spring11": 100,
+    "WZ_TuneZ2_Spring11": 100,
+    "ZZ_TuneZ2_Spring11": 100,
     }
    
 
@@ -128,7 +125,9 @@ if step in ["analysis", "analysisTau","signalAnalysis"]:
 else:
     multicrab.forEachDataset(modify)
 
-prefix = "multicrab_"+step
+multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel", "T2_BE"])
+
+prefix = "multicrab_"+step+dirPrefix
 
 multicrab.createTasks(prefix=prefix)
 #multicrab.createTasks(configOnly=True,prefix=prefix)

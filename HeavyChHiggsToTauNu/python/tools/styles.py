@@ -1,6 +1,10 @@
 import ROOT
 
-class Style:
+class StyleBase:
+    def __call__(self, h):
+        self.apply(h.getRootHisto())
+
+class Style(StyleBase):
     def __init__(self, style, color):
         self.style = 22 + style
         self.color = color
@@ -13,10 +17,18 @@ class Style:
         h.SetMarkerSize(1)
 	h.SetFillColor(0)
 
-    def __call__(self, h):
-        self.apply(h.getRootHisto())
+class StyleCompound(StyleBase):
+    def __init__(self, styles=[]):
+        self.styles = styles
 
-class StyleFill:
+    def append(self, style):
+        self.styles = style
+
+    def apply(self, h):
+        for s in self.styles:
+            s.apply(h)
+
+class StyleFill(StyleBase):
     def __init__(self, style, fillStyle=1001):
         self.style = style
         self.fillStyle = fillStyle
@@ -27,10 +39,14 @@ class StyleFill:
         #h.SetFillStyle(3002)
         h.SetFillStyle(self.fillStyle)
 
-    def __call__(self, h):
-        self.apply(h.getRootHisto())
+class StyleLine(StyleBase):
+    def __init__(self, lineStyle=1):
+        self.lineStyle = lineStyle
 
-class StyleError:
+    def apply(self, h):
+        h.SetLineStyle(self.lineStyle)
+
+class StyleError(StyleBase):
     def __init__(self, color, style=3004, linecolor=None):
         self.color = color
         self.style = style
@@ -47,11 +63,8 @@ class StyleError:
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
-    def __call__(self, h):
-        self.apply(h.getRootHisto())
-
-#dataStyle = Style(-2, ROOT.kBlack)
-dataStyle = Style(-22+6, ROOT.kBlack)
+dataStyle = Style(-2, ROOT.kBlack)
+#dataStyle = Style(-22+6, ROOT.kBlack)
 errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
@@ -123,8 +136,8 @@ class Generator:
         self.styles = styles
         self.index = 0
 
-    def reset(self):
-        self.index = 0
+    def reset(self, index=0):
+        self.index = index
 
     def reorder(self, indices):
         self.styles = [self.styles[i] for i in indices]
@@ -141,3 +154,6 @@ def generator(fill=False, **kwargs):
         return Generator(getStylesFill(**kwargs))
     else:
         return Generator(getStyles(**kwargs))
+
+def generator2(styleCustomisations):
+    return Generator([StyleCompound([s]+styleCustomisations) for s in styles])

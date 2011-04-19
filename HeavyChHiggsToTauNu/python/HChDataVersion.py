@@ -65,17 +65,22 @@ config = {
     },
     "39Xdata": {
         "triggerProcess": "HLT",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/BTau_148822-149182_Dec22/BTau/Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9/9bdd93eeac3a09280bc73f406326390f/pattuple_102_1_kIm.root",
     },
     "311Xredigi": {
         "triggerProcess": "REDIGI311X",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
+        "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-150_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER/pattuple_8_1_GHD.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_1_X/TTToHplusBWB_M150_Spring11/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10/7482fea56f5721e68c0db13cc3e1d0fc/pattuple_8_1_GHD.root",
     },
     "41Xdata": {
         "triggerProcess": "HLT",
         "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v1/AOD/84CA2525-5750-E011-AEC1-003048D375AA.root",
+        "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1-ecb64a326bff780f833933d40177edb0/USER/pattuple_5_1_g68.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_1_X/Tau_160431-161016_Prompt/Tau/Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1/ecb64a326bff780f833933d40177edb0/pattuple_5_1_g68.root",
     },
 }
 

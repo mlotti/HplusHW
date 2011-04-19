@@ -15,13 +15,12 @@ embedding = "multicrab_110217_155220"
 embeddingData = "multicrab_110221_085312"
 signalAnalysis = "../multicrab_110218_092432"
 
-embedding = "multicrab_110228_091023"
+#embedding = "multicrab_110228_091023"
 #embedding = "multicrab_110228_143151"
+embedding = "multicrab_signalAnalysis_110405_093754"
 embeddingData = embedding
-signalAnalysis = "../multicrab_110228_085943"
-
-tuneD6T = False
-tuneD6T = True
+#signalAnalysis = "../multicrab_110228_085943"
+signalAnalysis = "../multicrab_110404_134156"
 
 lumi = 36
 
@@ -37,12 +36,6 @@ else:
 
 # Datasets from the original signal analysis
 datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"))
-
-for d in [datasets, datasetsExpected]:
-    if tuneD6T:
-        d.remove(["TTJets_TuneZ2_Winter10", "WJets_TuneZ2_Winter10"])
-    else:
-        d.remove(["TTJets_TuneD6T_Winter10", "WJets_TuneD6T_Winter10"])
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)

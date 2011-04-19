@@ -130,17 +130,19 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
 class LegendCreator:
     ## Constructor
     #
-    # \param x1        Default x1 (left x)
-    # \param y1        Default y1 (lower y)
-    # \param x2        Default x2 (right x)
-    # \param y2        Default y2 (upper y)
-    # \param textSize  Default text size
-    def __init__(self, x1, y1, x2, y2, textSize=0.025):
+    # \param x1          Default x1 (left x)
+    # \param y1          Default y1 (lower y)
+    # \param x2          Default x2 (right x)
+    # \param y2          Default y2 (upper y)
+    # \param textSize    Default text size
+    # \param borderSize  Default border size
+    def __init__(self, x1, y1, x2, y2, textSize=0.025, borderSize=1):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
         self.textSize = textSize
+        self.borderSize = borderSize
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -150,11 +152,12 @@ class LegendCreator:
     ## Set new default positions
     #
     # <b>Keyword arguments</b>
-    # \li \a x1       X1 coordinate
-    # \li \a y1       Y1 coordinate
-    # \li \a x2       X2 coordinate
-    # \li \a y2       Y2 coordinate
-    # \li \a textSize Text size
+    # \li \a x1          X1 coordinate
+    # \li \a y1          Y1 coordinate
+    # \li \a x2          X2 coordinate
+    # \li \a y2          Y2 coordinate
+    # \li \a textSize    Text size
+    # \li \a borderSize  Border size
     def setDefaults(self, **kwargs):
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
@@ -183,7 +186,7 @@ class LegendCreator:
 
         legend = ROOT.TLegend(kwargs["x1"], kwargs["y1"], kwargs["x2"], kwargs["y2"])
         legend.SetFillColor(ROOT.kWhite)
-        legend.SetBorderSize(1)
+        legend.SetBorderSize(self.borderSize)
         legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
@@ -199,12 +202,23 @@ class LegendCreator:
     # Y2 coordinate
     ## \var textSize
     # Text size
+    ## \var boderSize
+    # Border size
     ## \var _keys
     # List of valid coordinate names for __call__() function
 
 
 ## Default legend creator object
 createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
+
+## Move TLegend
+def moveLegend(legend, dx=0, dy=0):
+    legend.SetX1(legend.GetX1() + dx)
+    legend.SetX2(legend.GetX2() + dx)
+    legend.SetY1(legend.GetY1() + dy)
+    legend.SetY2(legend.GetY2() + dy)
+    return legend
+    
 
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
@@ -378,12 +392,16 @@ class CanvasFrameTwo:
         canvasHeightCorrection = kwargs.get("canvasHeightCorrection", 0.022)
         divisionPoint = 1-1/canvasFactor
 
-        opts1 = kwargs.get("opts", {})
+        # Do it like this (create empty, update from kwargs) in order
+        # to make a copy and NOT modify the dictionary in the caller
+        opts1 = {}
+        opts1.update(kwargs.get("opts", {}))
         if "opts1" in kwargs:
             if "opts" in kwargs:
                 raise Exception("Can not give both 'opts' and 'opts1' as keyword arguments")
             opts1 = kwargs["opts1"]
-        opts2 = kwargs.get("opts2", {})
+        opts2 = {}
+        opts2.update(kwargs.get("opts2", {}))
 
         if "xmin" in opts2 or "xmax" in opts2:
             raise Exception("No 'xmin' or 'xmax' allowed in opts2")
@@ -435,6 +453,7 @@ class CanvasFrameTwo:
         self.frame2.GetYaxis().SetTitle(histos2[0].GetYaxis().GetTitle())
         self.frame2.GetYaxis().SetTitleOffset(self.frame2.GetYaxis().GetTitleOffset()*yoffsetFactor)
         self.frame2.GetXaxis().SetTitleOffset(self.frame2.GetXaxis().GetTitleOffset()*xoffsetFactor)
+        self.frame2.GetYaxis().SetLabelSize(int(self.frame2.GetYaxis().GetLabelSize()*0.8))
 
         self.canvas.cd(1)
         self.frame = FrameWrapper(self.frame1, self.frame2)

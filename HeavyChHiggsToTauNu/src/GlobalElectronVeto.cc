@@ -264,29 +264,31 @@ namespace HPlus {
       hElectronEta_gsfTrack_AfterSelection->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
       
       // Selection purity from MC
-      for (size_t i=0; i < genParticles->size(); ++i){  
-	const reco::Candidate & p = (*genParticles)[i];
-	const reco::Candidate & electron = (*iElectron);
-	int status = p.status();
-	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , electron.p4() );
-	if ( deltaR > 0.05 || status != 1) continue;
-	bElecMatchingMCelectron = true;
-	hElectronPt_matchingMCelectron->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
-	hElectronEta_matchingMCelectron->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
-	int id = p.pdgId();
-	if ( abs(id) == 11 ) {
-	  int numberOfTauMothers = p.numberOfMothers(); 
-	  for (int im=0; im < numberOfTauMothers; ++im){  
-	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-	    if ( !dparticle) continue;
-	    int idmother = dparticle->pdgId();
-	    if ( abs(idmother) == 24 ) {
-	      bElecMatchingMCelectronFromW = true;
-	      hElectronPt_matchingMCelectronFromW->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
-	      hElectronEta_matchingMCelectronFromW->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
-	    }
-	  }
-	}
+      if(!iEvent.isRealData()) {
+        for (size_t i=0; i < genParticles->size(); ++i){  
+          const reco::Candidate & p = (*genParticles)[i];
+          const reco::Candidate & electron = (*iElectron);
+          int status = p.status();
+          double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() , electron.p4() );
+          if ( deltaR > 0.05 || status != 1) continue;
+          bElecMatchingMCelectron = true;
+          hElectronPt_matchingMCelectron->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+          hElectronEta_matchingMCelectron->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
+          int id = p.pdgId();
+          if ( abs(id) == 11 ) {
+            int numberOfTauMothers = p.numberOfMothers(); 
+            for (int im=0; im < numberOfTauMothers; ++im){  
+              const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+              if ( !dparticle) continue;
+              int idmother = dparticle->pdgId();
+              if ( abs(idmother) == 24 ) {
+                bElecMatchingMCelectronFromW = true;
+                hElectronPt_matchingMCelectronFromW->Fill(myGsfTrackRef->pt(), fEventWeight.getWeight());
+                hElectronEta_matchingMCelectronFromW->Fill(myGsfTrackRef->eta(), fEventWeight.getWeight());
+              }
+            }
+          }
+        }
       }
      
 
