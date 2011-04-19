@@ -10,4 +10,4 @@
 head -1 output_LandS_temp | awk '{print $12}' >& output_LandS
 tail -1 output_LandS_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS
 echo
-ls -al output*
+ls -al output_LandS*
