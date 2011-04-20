@@ -280,37 +280,6 @@ def addTo(datasets):
 
 ################################################################################
 
-    datasets["TTJets_TuneZ2_Winter10"]["data"].update({
-            "tauembedding_skim_v8": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 130#30 # ~4800 ev/job #130 # ~1200 ev/job
-            },
-            })
-
-    datasets["WW_TuneZ2_Winter10"]["data"].update({
-            "tauembedding_skim_v8": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 45#15 # ~4800 ev/job #45 # ~1600 ev/job
-            },
-            })
-
-    datasets["WZ_TuneZ2_Winter10"]["data"].update({
-            "tauembedding_skim_v8": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 45#15 # ~4800 ev/job #45 # ~1800 ev/job
-            },
-            })
-    datasets["ZZ_TuneZ2_Winter10"]["data"].update({
-            "tauembedding_skim_v8": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 40#10 # ~6800 ev/job #40 # ~1700 ev/job
-            },
-            })
-
     datasets["QCD_Pt20_MuEnriched_TuneZ2_Winter10"]["data"].update({
             "tauembedding_skim_v8": {
                 "dbs_url": common.pattuple_dbs,
@@ -343,11 +312,19 @@ def addTo(datasets):
                 "number_of_jobs": 25#5 # ~5500 ev/job #25 # ~1100 ev/job
             },
             })
+
     datasets["WJets_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
                 "number_of_jobs": 50#10 # ~5500 ev/job #50 # ~1100 ev/job
+            },
+            })
+    datasets["TTJets_TuneZ2_Spring11"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
+                "number_of_jobs": 130#30 # ~4800 ev/job #130 # ~1200 ev/job
             },
             })
     datasets["TToBLNu_s-channel_TuneZ2_Spring11"]["data"].update({
@@ -378,6 +355,28 @@ def addTo(datasets):
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
                 "number_of_jobs": 30 # ~3500 ev/job
+            },
+            })
+
+    datasets["WW_TuneZ2_Spring11"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
+                "number_of_jobs": 45#15 # ~4800 ev/job #45 # ~1600 ev/job
+            },
+            })
+    datasets["WZ_TuneZ2_Spring11"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
+                "number_of_jobs": 45#15 # ~4800 ev/job #45 # ~1800 ev/job
+            },
+            })
+    datasets["ZZ_TuneZ2_Spring11"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
+                "number_of_jobs": 40#10 # ~6800 ev/job #40 # ~1700 ev/job
             },
             })
 
