@@ -9,8 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-#dataVersion = "39Xredigi
-dataVersion = "311Xredigi"
+dataVersion = "39Xredigi"
+#dataVersion = "311Xredigi"
 
 ################################################################################
 
@@ -95,6 +95,31 @@ process.triggeredCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.triggeredCount
 counters.append("triggeredCount")
 
+# Primary vertex
+process.firstPrimaryVertex = cms.EDProducer(
+    "HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.goodPrimaryVertex = cms.EDFilter("VertexSelector",
+    filter = cms.bool(False),
+    src = cms.InputTag("firstPrimaryVertex"),
+    cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
+)
+process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
+    src = cms.InputTag("goodPrimaryVertex"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999)
+)
+process.primaryVertexCount = cms.EDProducer("EventCountProducer")
+process.commonSequence *= (
+    process.firstPrimaryVertex *
+    process.goodPrimaryVertex *
+    process.primaryVertexFilter *
+    process.primaryVertexCount
+)
+counters.append("primaryVertexCount")
+
+
 # HLT matching and embedding
 import MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff as muonTrigger
 process.load("MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff")
@@ -116,7 +141,11 @@ process.trackCands = cms.EDProducer("ConcreteChargedCandidateProducer",
     src = cms.InputTag("goodTracks"),
     particleType = cms.string("mu+")
 )
-process.commonSequence *= (process.goodTracks * process.goodTracksCount * process.trackCands)
+process.commonSequence *= (
+    process.goodTracks *
+    process.goodTracksCount *
+    process.trackCands
+)
 
 # Preselection by track invariant mass
 process.zCands = cms.EDProducer("CandViewShallowCloneCombiner",
@@ -132,7 +161,7 @@ counters.append("zCandsCount")
 process.commonSequence *= (process.zCands * process.zCandsFilter * process.zCandsCount)
 
 # Tag and Probe definitions
-process.tagMuons = cms.EDFilter("PATMuonRefSelector",
+process.tagMuonsWithoutZ = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("patMuonsWithTrigger"),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
@@ -146,17 +175,31 @@ process.tagMuons = cms.EDFilter("PATMuonRefSelector",
         "&& !triggerObjectMatchesByFilter('%s').empty()" % triggerFilter
     ),
 )
+process.tagMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+    src = cms.InputTag("tagMuonsWithoutZ"),
+    vertexSrc = cms.InputTag("goodPrimaryVertex"),
+    maxZ = cms.double(1.0)
+)
 
 #process.trkProbes  = cms.EDProducer("ConcreteChargedCandidateProducer", 
 #    src  = cms.InputTag("goodTracks"),      
 #    particleType = cms.string("mu+"),     # this is needed to define a mass
 #)
-process.probeMuons = cms.EDFilter("PATMuonRefSelector",
+process.probeMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("patMuonsWithTrigger"),
     cut = cms.string(
         "isTrackerMuon()"
         "&& pt() > 30"
     )
+)
+process.probeMuonsVertexZ = cms.EDProducer("HPlusCandViewVertexZProducer",
+    candSrc = cms.InputTag("probeMuons"),
+    vertexSrc = cms.InputTag("goodPrimaryVertex")
+)
+
+process.tagMuonsVertexZ = cms.EDProducer("HPlusCandViewVertexZProducer",
+    candSrc = cms.InputTag("tagMuons"),
+    vertexSrc = cms.InputTag("goodPrimaryVertex")
 )
 
 process.muonMultiplicity = cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
@@ -187,11 +230,17 @@ process.tagProbes = cms.EDProducer("CandViewShallowCloneCombiner",
     cut   = cms.string("60 < mass < 120"),
 )
 
+process.debug = cms.EDAnalyzer("EventContentAnalyzer")
+
 process.tagAndProbeSequence = cms.Sequence(
+    process.tagMuonsWithoutZ *
     process.tagMuons *
+    process.tagMuonsVertexZ *
 #    process.trkProbes *
     process.probeMuons *
+    process.probeMuonsVertexZ *
     process.muonMultiplicity *
+#    process.debug *
     process.tagProbes
 )
 
@@ -204,7 +253,11 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     # probe variables
     variables = cms.PSet(
         pt     = cms.string("pt"),
+        eta    = cms.string("eta"),
         abseta = cms.string("abs(eta)"),
+        
+        # external variables
+        dz = cms.InputTag("probeMuonsVertexZ"),
     ),
     # choice of what defines a 'passing' probe
     flags = cms.PSet(
