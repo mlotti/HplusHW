@@ -1,0 +1,50 @@
+To run the analysis:
+===================
+
+0) Modifications:
+------------------
+
+Modify the following files, if needed:
+
+* HPlusHadronic.txt	rates & uncertainties
+* input_ett		efficiency of tt
+* input_luminosity	luminosity
+* input_nrest		sum of dibosons, single top and Drell-Yan
+* input_nttww		N tt->WW
+* input_nwjets		N W+jets
+* input_sigma		sigma_tt of SM
+
+
+1) obtain LandS software from http://mschen.web.cern.ch/mschen/lands/:
+------------------------------------------------------------------------
+
+wget http://mschen-exp.web.cern.ch/mschen-exp/Statistics/lands.tgz
+tar -xzf lands.tgz
+cmsenv
+# compile LandS
+# NOTE: if LandS version has changed, update the name of the directory 
+cd LandS_20101116; 
+gmake clean; gmake all;
+cd ..
+
+
+2) modify the LandS datacard and run LandS
+-------------------------------------------------------------
+
+./script_run_LandS
+
+
+3) run the ROOT analysis to obtain Br limit (mH,Br)
+---------------------------------------------------
+
+root -l -b -q brlimit.C
+
+*As a result, the br limit plot brlimits.png/eps is generated
+
+
+4) run the python analysis to obtain MSSM limit (mH,tanB)
+---------------------------------------------------------
+
+./mssmLimit.py
+
+*As a result, the tanB limit plot mssmLimit.png is generated
