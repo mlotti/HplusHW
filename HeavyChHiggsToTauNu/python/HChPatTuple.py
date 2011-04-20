@@ -18,6 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDis
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
 
 # Assumes that process.out is the output module
 #
@@ -440,6 +441,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         counters = HChDataSelection.dataSelectionCounters[:]
     if options.tauEmbeddingInput != 0:
         counters = MuonSelection.muonSelectionCounters[:]
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
 
     if options.doPat == 0:
         return (cms.Sequence(), counters)
