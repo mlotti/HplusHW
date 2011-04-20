@@ -78,22 +78,20 @@ tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
 )
 
 
-tauSelections = [#tauSelectionCaloTauCutBased,
+tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
                  tauSelectionHPSMediumTauBased,
-                 tauSelectionHPSLooseTauBased
-                 #tauSelectionCombinedHPSTaNCTauBased
-                 ]
-tauSelectionNames = [#"TauSelectionCaloTauCutBased",
+                 tauSelectionHPSLooseTauBased,
+                 tauSelectionCombinedHPSTaNCTauBased]
+tauSelectionNames = ["TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
                      "TauSelectionHPSTightTauBased",
                      "TauSelectionHPSMediumTauBased",
-                     "TauSelectionHPSLooseTauBased"
-                     #"TauSelectionCombinedHPSTaNCBased"
-                     ]
+                     "TauSelectionHPSLooseTauBased",
+                     "TauSelectionCombinedHPSTaNCBased"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
@@ -303,8 +301,14 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
-    del selections[hpsLoose]
-    del names[hpsLoose]
+    #del selections[hpsLoose]
+    #del names[hpsLoose]
+    caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
+    del selections[caloTauIndex]
+    del names[caloTauIndex]
+    combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
+    del selections[combinedHPSTaNCIndex]
+    del names[combinedHPSTaNCIndex]
 
     addAnalysisArray(process, prefix, module, setTauSelection,
                      values = selections, names = names,
