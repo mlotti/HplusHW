@@ -419,14 +419,12 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
     edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
     double myBestPtMax = 9999.;
-    std::cout << "taus:" << tauCandidates.size() << std::endl;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = tauCandidates.begin(); iter != tauCandidates.end(); ++iter) {
       if (!(*iter)->isPFTau()) continue;
       //const edm::Ptr<pat::Tau> iTau = *iter;
       double mySumPt = 999.;
       double myMaxPt = 999.;
       size_t myOccupancy = 999.;
-      std::cout << "taus:" << std::endl;
       fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
       if (myMaxPt < myBestPtMax) {
         if (myMaxPt < 0.5) {
