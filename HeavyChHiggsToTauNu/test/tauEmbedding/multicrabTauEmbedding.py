@@ -4,8 +4,8 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
-#step = "generation"
+#step = "skim"
+step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
@@ -14,12 +14,16 @@ step = "skim"
 dirPrefix = ""
 #dirPrefix = "_TauIdScan"
 
-config = {"skim":           {"input": "AOD",                        "config": "muonSkim_cfg.py", "output": "skim.root"},
-#          "generation":     {"input": "tauembedding_skim_v8",       "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-#          "embedding":      {"input": "tauembedding_generation_v8", "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-#          "analysis":       {"input": "tauembedding_embedding_v6_2",  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v10",                "config": "tauAnalysis_cfg.py"},
-#          "signalAnalysis": {"input": "tauembedding_embedding_v6_2",  "config": "../signalAnalysis_cfg.py"},
+#pt = "_pt30"
+pt = "_pt40"
+dirPrefix += pt
+
+config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
+          "generation":     {"input": "tauembedding_skim_v9",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+          "embedding":      {"input": "tauembedding_generation_v9"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "analysis":       {"input": "tauembedding_embedding_v9"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v10",                  "config": "tauAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v9"+pt,  "config": "../signalAnalysis_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -38,7 +42,7 @@ datasets = [
     "TTJets_TuneZ2_Spring11",
     "WJets_TuneZ2_Spring11",
     # Background MC
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
+#    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
     "DYJetsToLL_M50_TuneZ2_Spring11",
     "TToBLNu_s-channel_TuneZ2_Spring11",
     "TToBLNu_t-channel_TuneZ2_Spring11",
@@ -58,7 +62,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v9" % step
+tauname = ("_tauembedding_%s_v9" % step) + pt
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 

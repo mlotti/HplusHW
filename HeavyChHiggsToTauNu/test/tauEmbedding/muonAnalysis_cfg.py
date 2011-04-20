@@ -2,8 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-dataVersion = "39Xredigi"
+#dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
+dataVersion = "311Xredigi"
 
 ################################################################################
 
@@ -37,8 +38,10 @@ process.source = cms.Source('PoolSource',
 if options.doPat != 0:
     process.source.fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileCastor()
-        dataVersion.getPatDefaultFileMadhatter(dcap=True)
+        #dataVersion.getPatDefaultFileMadhatter(dcap=True)
+        "file:skim_1000.root"
     )
+
 
 ################################################################################
 
@@ -191,7 +194,7 @@ class MuonAnalysis:
         self._jets = jets
         self._isolationCut = "%s < %f" % (isolations["sumIsoRel"], muonIsolationCut)
 
-        self.analysis = Analysis(self.process, "analysis", options, prefix, additionalCounters=additionalCounters)
+        self.analysis = Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
@@ -509,8 +512,9 @@ class MuonAnalysis:
             name,
             selector = cms.EDProducer("HPlusCandViewPtrTauIsolationSelector",
                                       candSrc = self.selectedMuons,
-                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
-                                      isolationDiscriminator = cms.string("byIsolation"),
+#                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
+                                      tauSrc = cms.InputTag("selectedPatTausHPS"),
+                                      isolationDiscriminator = cms.string("byTightIsolation"),
                                       deltaR = cms.double(0.15),
                                       minCands = cms.uint32(1)),
             filter = makeCountFilter(cms.InputTag("dummy"), 1),
@@ -768,7 +772,7 @@ def createAnalysis2(**kwargs):
     #for pt, met, njets in [(30, 20, 1), (30, 20, 2),
     #                       (30, 20, 3), (30, 30, 3), (30, 40, 3),
     #                       (40, 20, 3), (40, 30, 3), (40, 40, 3)]:
-    for pt, met, njets in [(30, 20, 1), (30, 20, 2),
+    for pt, met, njets in [(30, 20, 2),
                            (30, 20, 3), (40, 20, 3)]:
         kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
         kwargs["muonPtCut"] = pt
