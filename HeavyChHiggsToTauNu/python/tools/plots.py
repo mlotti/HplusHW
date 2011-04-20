@@ -485,6 +485,9 @@ class PlotBase:
         self.histoMgr.draw()
         if hasattr(self, "legend"):
             self.legend.Draw()
+        # Redraw the axes in order to get the tick marks on top of the
+        # histogram
+        self.getPad().RedrawAxis()
 
     ## Add text for integrated luminosity
     #
@@ -749,6 +752,10 @@ class DataMCPlot(PlotSameBase):
             self.line.Draw("L")
 
             self.ratio.Draw("EP same")
+            # Redraw the axes in order to get the tick marks on top of the
+            # histogram
+            self.getPad1().RedrawAxis()
+
             self.cf.canvas.cd()
 
             # Create an empty, white-colored pad to hide the topmost
@@ -835,6 +842,10 @@ class ComparisonPlot(PlotBase):
             self.line.Draw("L")
 
             self.ratio.Draw("EP same")
+            # Redraw the axes in order to get the tick marks on top of the
+            # histogram
+            self.getPad1().RedrawAxis()
+
             self.cf.canvas.cd()
 
             # Create an empty, white-colored pad to hide the topmost
