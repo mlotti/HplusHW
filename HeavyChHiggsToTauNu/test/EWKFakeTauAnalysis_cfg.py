@@ -47,14 +47,16 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChEWKFakeTauAnalysis")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
 #	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-        "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
+        "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root",
+        "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample2.root",
+        "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample3.root"
         # For testing in lxplus
 #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
 #        dataVersion.getAnalysisDefaultFileCastor()
