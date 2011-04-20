@@ -143,13 +143,17 @@ class LegendCreator:
     # \param y2          Default y2 (upper y)
     # \param textSize    Default text size
     # \param borderSize  Default border size
-    def __init__(self, x1, y1, x2, y2, textSize=0.025, borderSize=1):
+    # \param fillStyle   Default fill style
+    # \param fillColor   Default fill color
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.025, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
         self.textSize = textSize
         self.borderSize = borderSize
+        self.fillStyle = fillStyle
+        self.fillColor = fillColor
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -165,6 +169,8 @@ class LegendCreator:
     # \li \a y2          Y2 coordinate
     # \li \a textSize    Text size
     # \li \a borderSize  Border size
+    # \li \a fillStyle   Fill style
+    # \li \a fillColor   Fill color
     def setDefaults(self, **kwargs):
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
@@ -192,7 +198,9 @@ class LegendCreator:
                     kwargs[i] = getattr(self, i)
 
         legend = ROOT.TLegend(kwargs["x1"], kwargs["y1"], kwargs["x2"], kwargs["y2"])
-        legend.SetFillColor(ROOT.kWhite)
+        legend.SetFillStyle(self.fillStyle)
+        if self.fillStyle != 0:
+            legend.SetFillColor(self.fillColor)
         legend.SetBorderSize(self.borderSize)
         legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
@@ -216,7 +224,7 @@ class LegendCreator:
 
 
 ## Default legend creator object
-createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
+createLegend = LegendCreator()
 
 ## Move TLegend
 def moveLegend(legend, dx=0, dy=0):
@@ -531,7 +539,12 @@ class HistoBase:
     #
     # \param legend   TLegend object
     def addToLegend(self, legend):
-        legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
+        # Hack to get the black border to the legend
+        h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
+        h.SetLineWidth(1)
+        h.SetLineColor(ROOT.kBlack)
+        legend.AddEntry(h, self.legendLabel, self.legendStyle)
+        self.rootHistoForLegend = h # keep the reference in order to avoid segfault
 
     ## Call a function with self as an argument.
     #
