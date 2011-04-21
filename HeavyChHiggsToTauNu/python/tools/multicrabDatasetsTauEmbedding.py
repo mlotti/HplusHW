@@ -281,18 +281,6 @@ def addTo(datasets):
             }
             })
 
-
-################################################################################
-
-    datasets["QCD_Pt20_MuEnriched_TuneZ2_Winter10"]["data"].update({
-            "tauembedding_skim_v8": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 180#60 # ~4800 ev/job #180 # ~1600 ev/job
-            },
-            })
-
-
 ################################################################################
 
     datasets["Mu_136035-144114_Dec22"]["data"].update({
@@ -388,6 +376,13 @@ def addTo(datasets):
             },
             })
 
+    datasets["QCD_Pt20_MuEnriched_TuneZ2_Spring11"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9-00c200b343cbc3d5ec3f111d1d98acde/USER",
+                "number_of_jobs": 180#60 # ~4800 ev/job #180 # ~1600 ev/job
+            },
+            })
 
     datasets["DYJetsToLL_M50_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
