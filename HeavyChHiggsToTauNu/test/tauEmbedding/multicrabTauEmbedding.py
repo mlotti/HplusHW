@@ -42,6 +42,8 @@ datasets = [
 #    "Mu_136035-144114_Dec22", # HLT_Mu9
 #    "Mu_146428-147116_Dec22", # HLT_Mu9
 #    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
+#    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
+#    "SingleMu_162803-162828_Prompt", # HLT_Mu20_v1
     # Signal MC
     "TTJets_TuneZ2_Spring11",
 #    "WJets_TuneZ2_Spring11",

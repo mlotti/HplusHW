@@ -125,4 +125,32 @@ datasets = {
             },
         }
     },
+
+    # Single Mu
+    "SingleMu_160431-161016_Prompt": {
+        "dataVersion": "41Xdata",
+        "trigger": "HLT_Mu20_v1",
+        "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-PromptReco-v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "SingleMu_162803-162828_Prompt": {
+        "dataVersion": "41Xdata",
+        "trigger": "HLT_Mu20_v1",
+        "runs": (162803, 162828), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-PromptReco-v2/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 10, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        },
+    },
 }
