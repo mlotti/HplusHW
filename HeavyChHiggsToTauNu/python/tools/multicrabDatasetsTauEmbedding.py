@@ -329,7 +329,21 @@ def addTo(datasets):
                 "number_of_jobs": 1 # ~12 kev/job
             },
             })
-
+    datasets["SingleMu_160431-161016_Prompt"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_skim_v9-4067cec3a37dbb567632ac52f5e8496d/USER",
+                "number_of_jobs": 5 # ~1 kev/job
+            },
+            })
+    datasets["SingleMu_162803-162828_Prompt"]["data"].update({
+            "tauembedding_skim_v9": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_162803_tauembedding_skim_v9-4067cec3a37dbb567632ac52f5e8496d/USER",
+                "number_of_jobs": 5 # ~1 kev/job
+            },
+            })
+    
     datasets["WJets_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
