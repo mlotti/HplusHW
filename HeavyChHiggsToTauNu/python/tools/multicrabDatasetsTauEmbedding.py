@@ -335,12 +335,32 @@ def addTo(datasets):
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_skim_v9-4067cec3a37dbb567632ac52f5e8496d/USER",
                 "number_of_jobs": 5 # ~1 kev/job
             },
+            "tauembedding_generation_v9_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_generation_v9_pt40-63a3abcff1280f0a104de095775cda8a/USER",
+                "number_of_jobs": 1 # ~2.5 kev/job
+            },
+            "tauembedding_embedding_v9_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_embedding_v9_pt40-9fa4df4950a5013c36bb04ce6d0a226a/USER",
+                "number_of_jobs": 1 # ~2.5 kev/job
+            },
             })
     datasets["SingleMu_162803-162828_Prompt"]["data"].update({
             "tauembedding_skim_v9": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_162803_tauembedding_skim_v9-4067cec3a37dbb567632ac52f5e8496d/USER",
                 "number_of_jobs": 5 # ~1 kev/job
+            },
+            "tauembedding_generation_v9_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_162803_tauembedding_generation_v9_pt40-63a3abcff1280f0a104de095775cda8a/USER",
+                "number_of_jobs": 1 # ~2 kev/job
+            },
+            "tauembedding_embedding_v9_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_162803_tauembedding_embedding_v9_pt40-9fa4df4950a5013c36bb04ce6d0a226a/USER",
+                "number_of_jobs": 1 # ~2 kev/job
             },
             })
     
