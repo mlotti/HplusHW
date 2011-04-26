@@ -103,7 +103,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Set tau sources to non-trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiencies
 # one trigger
