@@ -10,6 +10,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
@@ -26,6 +27,7 @@ public:
 private:
 
   typedef edm::PtrVector<reco::Candidate> ProductType;
+  typedef edm::ValueMap<float> MapType;
 
   virtual void beginJob();
   virtual void produce(edm::Event&, const edm::EventSetup&);
@@ -56,6 +58,7 @@ HPlusCandViewPtrTauIsolationSelector::HPlusCandViewPtrTauIsolationSelector(const
 {
   produces<ProductType>();
   produces<bool>();
+  produces<MapType>();
 
   edm::Service<TFileService> fs;
   if(fs.isAvailable()) {
@@ -75,6 +78,10 @@ void HPlusCandViewPtrTauIsolationSelector::produce(edm::Event& iEvent, const edm
   iEvent.getByLabel(tauSrc, htau);
 
   std::auto_ptr<ProductType> product(new ProductType());
+  std::vector<float> isolated(hcand->size(), 0);
+  isolated.reserve(hcand->size());
+
+  // Loop over the candidates to check the isolation
   for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
     ++nCand;
     edm::Ptr<pat::Tau> found;
@@ -103,13 +110,22 @@ void HPlusCandViewPtrTauIsolationSelector::produce(edm::Event& iEvent, const edm
       continue;
 
     product->push_back(hcand->ptrAt(iCand));
+    isolated[iCand] = 1;
   }
 
+  // Fill the value map
+  std::auto_ptr<MapType> valueMap(new MapType());
+  MapType::Filler filler(*valueMap);
+  filler.insert(hcand, isolated.begin(), isolated.end());
+  filler.fill();
+
+  // Cut on number
   std::auto_ptr<bool> pass(new bool(true));
   if(product->size() < minCands)
     *pass = false;
   
   iEvent.put(product);
+  iEvent.put(valueMap);
   iEvent.put(pass);
 }
 

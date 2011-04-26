@@ -282,7 +282,8 @@ class AnalysisModule:
 
         if filter != None:
             if selector != None:
-                self.filter.src = cms.InputTag(self.selectorName)
+                if hasattr(self.filter, "src"):
+                    self.filter.src = cms.InputTag(self.selectorName)
             process.__setattr__(self.filterName, self.filter)
             if invertFilter:
                 self.filterSequence *= ~self.filter
@@ -316,10 +317,24 @@ class AnalysisModule:
     def getSequence(self):
         return self.sequence
 
-    def getSelectorInputTag(self):
+    def getSelectorName(self):
         if self.selector == None:
             raise Exception("No selector for name %s!" % self.selectorName)
-        return cms.InputTag(self.selectorName)
+        return self.selectorName
+
+    def getSelectorInputTag(self):
+        return cms.InputTag(self.getSelectorName())
+
+    def getFilterName(self):
+        if self.filter == None:
+            raise Exception("No filter for name %s!" % self.filterName)
+        return self.filterName
+
+    def setFilterSrcToSelector(self, srcGetter):
+        if self.filter == None:
+            raise Exception("No filter for name %s!" % self.filterName)
+
+        srcGetter(self.filter).setValue(self.getSelectorName())
 
 # Helpers for selector and count filter modules
 def makeSelector(src, expression, selector):
@@ -337,7 +352,7 @@ def makeCountFilter(src, minNumber, maxNumber=None):
                             maxNumber = cms.uint32(maxNumber))
 
 class Analysis:
-    def __init__(self, process, seqname, options, prefix="", allCounterName="countAll", additionalCounters=[]):
+    def __init__(self, process, seqname, prefix="", allCounterName="countAll", additionalCounters=[]):
         self.process = process
         self.prefix = prefix
 

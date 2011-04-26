@@ -9,7 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-dataVersion = "39Xredigi"
+#dataVersion = "39Xredigi
+dataVersion = "311Xredigi"
 
 ################################################################################
 
@@ -80,6 +81,7 @@ patArgs = {
     }
 process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
 del process.out
+process.patDefaultSequence.remove(process.countPatTaus)
 
 # Triggering
 process.load("HLTrigger.HLTfilters.triggerResultsFilter_cfi")

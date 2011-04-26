@@ -195,7 +195,7 @@ pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
 
 
-analysis = Analysis(process, "analysis", options, additionalCounters=additionalCounters)
+analysis = Analysis(process, "analysis", additionalCounters=additionalCounters)
 analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 
 selectedTaus = analysis.addSelection("LooseTauId", taus,
