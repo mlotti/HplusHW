@@ -216,12 +216,15 @@ def overrideTriggerFromOptions(options):
         trigger.triggers = [options.trigger]
 
 
+# One trigger
 def setEfficiencyTrigger(trigger):
     triggerEfficiency.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
 
+# Many triggers in  (trigger, lumi) pairs
 def setEfficiencyTriggers(triggers):
     triggerEfficiency.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
 
+# Triggers and lumis from task names
 def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10"):
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
     triggers = []
@@ -246,6 +249,18 @@ def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_
                 data["luminosity"]
             ) )
     setEfficiencyTriggers(triggers)
+
+def setEfficiencyTriggersFor2010(datasetType="pattuple_v9"):
+    setEfficiencyTriggersFromMulticrabDatasets([
+            "BTau_146428-148058_Dec22",
+            "BTau_148822-149182_Dec22",
+            "BTau_149291-149294_Dec22",
+            ], datasetType)
+def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
+    setEfficiencyTriggersFromMulticrabDatasets([
+            "Tau_160431-161016_Prompt",
+            ])
+
 
 def formatEfficiencyTrigger(pset):
     if pset.luminosity.value() < 0:
