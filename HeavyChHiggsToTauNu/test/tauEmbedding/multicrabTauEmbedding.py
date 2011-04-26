@@ -162,7 +162,7 @@ elif step in ["muonAnalysis"]:
 else:
     multicrab.forEachDataset(modify)
 
-multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel", "T2_BE_IIHE", "T2_IN_TIFR"])
+multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab_"+step+dirPrefix
 

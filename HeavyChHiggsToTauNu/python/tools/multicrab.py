@@ -8,6 +8,8 @@ import OrderedDict
 import multicrabDatasets
 import certifiedLumi
 
+defaultSeBlacklist = ["T2_UK_London_Brunel", "T2_BE_IIHE", "T2_IN_TIFR"]
+
 def getTaskDirectories(opts, filename="multicrab.cfg"):
     """Returns the list of CRAB task directories from a MultiCRAB configuration.
     
