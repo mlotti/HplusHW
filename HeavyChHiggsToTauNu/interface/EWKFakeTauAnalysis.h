@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_EWKFakeTauAnalysis_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_EWKFakeTauAnalysis_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
@@ -21,7 +21,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 
 namespace edm {
   class ParameterSet;
@@ -33,19 +32,50 @@ class TH1;
 class TH2;
 
 namespace HPlus {
-  class SignalAnalysis {
+  class EWKFakeTauAnalysis {
+    class CounterGroup {
+    public:
+      CounterGroup(EventCounter& eventCounter, std::string prefix);
+      ~CounterGroup();
+  
+      void incrementOneTauCounter() { increment(fOneTauCounter); }
+      void incrementElectronVetoCounter() { increment(fElectronVetoCounter); }
+      void incrementMuonVetoCounter() { increment(fMuonVetoCounter); }
+      void incrementMETCounter() { increment(fMETCounter); }
+      void incrementNJetsCounter() { increment(fNJetsCounter); }
+      void incrementBTaggingCounter() { increment(fBTaggingCounter); }
+      void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
+  
+    private:
+      Count fOneTauCounter;
+      Count fElectronVetoCounter;
+      Count fMuonVetoCounter;
+      Count fMETCounter;
+      Count fNJetsCounter;
+      Count fBTaggingCounter;
+      Count fFakeMETVetoCounter;
+    };
+
+  enum MCTauMatchType {
+    kElectronToTau,
+    kMuonToTau,
+    kTauToTau,
+    kJetToTau,
+    kNoMC
+  };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~SignalAnalysis();
+    explicit EWKFakeTauAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~EWKFakeTauAnalysis();
 
     // Interface towards the EDProducer
-    bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
+    void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    MCTauMatchType matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau);
+    CounterGroup* getCounterGroupByTauMatch(MCTauMatchType tauMatch);
     // We need a reference in order to use the same object (and not a
-    // copied one) given in HPlusSignalAnalysisProducer
+    // copied one) given in HPlusEWKFakeTauAnalysisProducer
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;
@@ -55,15 +85,15 @@ namespace HPlus {
     //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
-    Count fOneTauCounter;
-    Count fElectronVetoCounter;
-    Count fMuonVetoCounter;
-    Count fMETCounter;
-    Count fNJetsCounter;
-    Count fBTaggingCounter;
-    Count fFakeMETVetoCounter;
-    Count fTopSelectionCounter;
-    Count fForwardJetVetoCounter;
+    
+    CounterGroup fAllTausCounterGroup;
+    CounterGroup fElectronToTausCounterGroup;
+    CounterGroup fMuonToTausCounterGroup;
+    CounterGroup fGenuineToTausCounterGroup;
+    CounterGroup fJetToTausCounterGroup;
+    
+    //Count fTopSelectionCounter;
+    //Count fForwardJetVetoCounter;
     //    Count ftransverseMassCutCounter;
 
     TriggerSelection fTriggerSelection;
@@ -84,7 +114,6 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     //
-    TriggerEfficiency fTriggerEfficiency;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     // Histograms
@@ -100,11 +129,6 @@ namespace HPlus {
     TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
-    TH1 *hMETBeforeMETCut;
-    TH1 *hSelectedTauEt;
-    TH1 *hSelectedTauEta;
-    TH1 *hSelectedTauPhi;
-    TH1 *hSelectedTauRtau;
   };
 }
 

@@ -34,7 +34,7 @@ tauSelectionBase = cms.untracked.PSet(
 #    operatingMode = cms.untracked.string("antiisolatedtau"), # Tau candidate selection applied, required prong cut and anti-isolation
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(30), # jet pt > value
+    ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.3), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20), # ldg. track > value
     rtauCut = cms.untracked.double(0.8), # rtau > value
@@ -162,7 +162,7 @@ InvMassVetoOnJets = cms.untracked.PSet(
 
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
-  minDeltaPhi = cms.untracked.double(5.) # in degrees
+  minDeltaPhi = cms.untracked.double(10.) # in degrees
 )
 
 TauEmbeddingAnalysis = cms.untracked.PSet(
@@ -311,8 +311,14 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
-    del selections[hpsLoose]
-    del names[hpsLoose]
+    #del selections[hpsLoose]
+    #del names[hpsLoose]
+    caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
+    del selections[caloTauIndex]
+    del names[caloTauIndex]
+    combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
+    del selections[combinedHPSTaNCIndex]
+    del names[combinedHPSTaNCIndex]
 
     addAnalysisArray(process, prefix, module, setTauSelection,
                      values = selections, names = names,
