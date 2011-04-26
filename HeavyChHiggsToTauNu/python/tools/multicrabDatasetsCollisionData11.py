@@ -51,8 +51,14 @@ datasets = {
                 "luminosity": 5.066715,
                 "number_of_jobs": 1
             },
+            "pattuple_v10_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_2-ecb64a326bff780f833933d40177edb0/USER",
+                "luminosity": 5.066715,
+                "number_of_jobs": 1
+            },
             "pattuple_v10": {
-                "fallback": "pattuple_v10_1"
+                "fallback": "pattuple_v10_2"
             },
         }
     },
@@ -66,6 +72,15 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 12, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v10_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v10_2-73cd95539afc8c9780e365506b68ad55/USER",
+                "luminosity": 4.641724,
+                "number_of_jobs": 1, # Adjusted for PATtuple file size
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_2"
             },
         },
     },
@@ -107,8 +122,14 @@ datasets = {
                 "luminosity": 5.066715,
                 "number_of_jobs": 1
             },
+            "pattuple_v10_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_2-7c7e43599bead125d0cad4b457dd8f70/USER",
+                "luminosity": 5.066715,
+                "number_of_jobs": 1
+            },
             "pattuple_v10": {
-                "fallback": "pattuple_v10_1"
+                "fallback": "pattuple_v10_2"
             },
         }
     },
@@ -122,6 +143,15 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 5, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v10_2": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v10_2-7c7e43599bead125d0cad4b457dd8f70/USER",
+                "luminosity": 4.641724,
+                "number_of_jobs": 1
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_2"
             },
         }
     },
