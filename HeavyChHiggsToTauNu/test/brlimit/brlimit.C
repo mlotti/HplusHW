@@ -3,22 +3,11 @@
 void plotTxtMh(double lumi, int mH); 
 void plotTxt(double lumi);
 
-// LIP  obs(black)
-// 80   25
-// 100  23
-// 120  24
-// 140  27
-// 150  32.7
-// 155  38.5
-// 160  53
-
-
 int brlimit()
 {
   gROOT->ProcessLine(".L tdrstyle_mod.C");
   setTDRStyle();
 
-  //  tdrStyle->SetOptTitle(1);
   tdrStyle->SetTitleFillColor(0);
   tdrStyle->SetTitleFontSize(0.05);
   tdrStyle->SetTitleX(0.3); // Set the position of the title box
@@ -48,16 +37,6 @@ int brlimit()
      0.003202,
      0.002619 };
 
-//   const int nData = 4; // 90 not yet ready
-//   double mH[nData]   = {100,     120,     140,   , 160};//{90, 100, 120, 140, 160};
-//   double e_HW[nData] = {1.95e-3, 2.55e-3, 2.74e-3, 2.28e-3};
-
-
-//   double e_HH2HW[nData] = {1.86, 1.67,   1.16,    0.41};
-//   double e_HH[nData];
-//   for (int i=0; i<nData; i++)
-//     e_HH[i] = e_HH2HW[i] * e_HW[i];
-
   double e_HH[nData] =
     {
       0.003782,
@@ -68,24 +47,6 @@ int brlimit()
       0.001123
     } ;
   
-//   // --- test read file 
-//   ifstream logFile("output_LandS_120",ios::in);
-//   if (!logFile) {
-//     cout << "No input file!!" << endl;
-//     exit (-1) ;
-//   }
-
-//   // Read values from file
-//   double valueLandS_obs;
-//   double valueLandS_exp[5];
-//   logFile >> valueLandS_obs;
-//   for (int i=0; i<5; i++) logFile >> valueLandS_exp[i];
-//   cout << "LandS Observed: " << valueLandS_obs << endl;
-//   cout << "LandS Expected ";
-//   for (int i=0; i<5; i++) 
-//     cout << valueLandS_exp[i] << "  ";
-//   cout << endl;
-
   char temp[200];
   double vlueLandS_obs[nData];
   double vlueLandS_exp[nData][5];
@@ -213,7 +174,8 @@ int brlimit()
   tg_obs->Draw("LP same");
   tg_exp->Draw("LP same");
 
-  // Plot LIP results, obs(black) 10.3.2011
+  // Plot LIP results, obs(black) 
+  // from approval of 10.3.2011
   if (1) {
     double xLip[] = {80,100,120,140,  150,  155,160};
     double yLipObs[] = {.25 , .23 , .24 , .27, .327, .385, .53};
@@ -314,9 +276,6 @@ double make_plot_shaded(double c,
 			double coef1, 
 			double coef2_hwhh, 
 			double coef2_hw, 
-			//			double Nlimitminus, 
-			//			double Nlimit, 
-			//			double Nlimitplus, 
 			double lands[],
 			int L, 
 			int mH)
@@ -365,20 +324,6 @@ double make_plot_shaded(double c,
   lineEvts->SetLineStyle(2);
   lineEvts->SetFillStyle(3005);
   lineEvts->Draw();
-//   x1[0]=0.01;x1[1]=solutionminus;
-//   y1[0]=Nlimitminus;y1[1]=Nlimitminus;
-//   TGraph * lineEvtsM = new TGraph(2,x1,y1);
-//   lineEvtsM->SetLineWidth(4);
-//   lineEvtsM->SetLineStyle(2);
-//   lineEvtsM->SetFillStyle(3005);
-//   lineEvtsM->Draw();
-//   x1[0]=0.01;x1[1]=solutionplus;
-//   y1[0]=Nlimitplus;y1[1]=Nlimitplus;
-//   TGraph * lineEvtsP = new TGraph(2,x1,y1);
-//   lineEvtsP->SetLineWidth(4);
-//   lineEvtsP->SetLineStyle(2);
-//   lineEvtsP->SetFillStyle(3005);
-//   lineEvtsP->Draw();
 
   x1[0]=solution;x1[1]=solution;
   y1[0]=0.01;y1[1]=fu(1.0); if (fu(0.5)>y1[1]) y1[1]=fu(0.5);
@@ -391,18 +336,6 @@ double make_plot_shaded(double c,
   lineBr->Draw();
   x1[0]=solutionminus;x1[1]=solutionminus;
   y1[0]=0.01;y1[1]=fu(solutionminus);
-//   TGraph * lineBrM = new TGraph(2,x1,y1);
-//   lineBrM->SetLineWidth(2);
-//   lineBrM->SetLineColor(2);
-//   lineBrM->SetLineStyle(2);
-//   lineBrM->Draw();
-//   x1[0]=solutionplus;x1[1]=solutionplus;
-//   y1[0]=0.01;y1[1]=fu(solutionplus);
-//   TGraph * lineBrP = new TGraph(2,x1,y1);
-//   lineBrP->SetLineWidth(2);
-//   lineBrP->SetLineColor(2);
-//   lineBrP->SetLineStyle(2);
-//   lineBrP->Draw();
 
   TLatex text;
   //  text.SetNDC();
