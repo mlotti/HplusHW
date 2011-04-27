@@ -15,11 +15,13 @@ import dataset
 #
 # The attributes which can be set are the x and y coordinates and the
 # text size.
+#
+# \todo Set the text fonts to non-bold
 class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
-        self._setDefaults("energy", x=0.3, y=0.96)
-        self._setDefaults("lumi", x=0.65, y=0.85)
+        self._setDefaults("energy", x=0.2, y=0.96)
+        self._setDefaults("lumi", x=0.45, y=0.96)
 
     ## Modify the default values
     # 
@@ -91,6 +93,7 @@ def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("cmsPreliminary"))
     l.DrawLatex(x, y, "CMS Preliminary")
 
@@ -103,6 +106,7 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
     (x, y) = textDefaults.getValues("energy", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("energy"))
     l.DrawLatex(x, y, "#sqrt{s} = "+s)
 
@@ -116,8 +120,11 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
     l.SetTextSize(textDefaults.getSize("lumi"))
-    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
+#    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
+#    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
+    l.DrawLatex(x, y, "%.0f %s" % (lumi, unit))
 
 ## Class for generating legend creation functions with default positions.
 #
@@ -136,13 +143,17 @@ class LegendCreator:
     # \param y2          Default y2 (upper y)
     # \param textSize    Default text size
     # \param borderSize  Default border size
-    def __init__(self, x1, y1, x2, y2, textSize=0.025, borderSize=1):
+    # \param fillStyle   Default fill style
+    # \param fillColor   Default fill color
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.025, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
         self.textSize = textSize
         self.borderSize = borderSize
+        self.fillStyle = fillStyle
+        self.fillColor = fillColor
         self._keys = ["x1", "y1", "x2", "y2"]
 
     ## Create a copy of the object
@@ -158,6 +169,8 @@ class LegendCreator:
     # \li \a y2          Y2 coordinate
     # \li \a textSize    Text size
     # \li \a borderSize  Border size
+    # \li \a fillStyle   Fill style
+    # \li \a fillColor   Fill color
     def setDefaults(self, **kwargs):
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
@@ -185,7 +198,9 @@ class LegendCreator:
                     kwargs[i] = getattr(self, i)
 
         legend = ROOT.TLegend(kwargs["x1"], kwargs["y1"], kwargs["x2"], kwargs["y2"])
-        legend.SetFillColor(ROOT.kWhite)
+        legend.SetFillStyle(self.fillStyle)
+        if self.fillStyle != 0:
+            legend.SetFillColor(self.fillColor)
         legend.SetBorderSize(self.borderSize)
         legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
@@ -209,7 +224,16 @@ class LegendCreator:
 
 
 ## Default legend creator object
-createLegend = LegendCreator(0.7, 0.5, 0.92, 0.8)
+createLegend = LegendCreator()
+
+## Move TLegend
+def moveLegend(legend, dx=0, dy=0):
+    legend.SetX1(legend.GetX1() + dx)
+    legend.SetX2(legend.GetX2() + dx)
+    legend.SetY1(legend.GetY1() + dy)
+    legend.SetY2(legend.GetY2() + dy)
+    return legend
+    
 
 ## Update the style of palette Z axis according to ROOT.gStyle.
 #
@@ -224,6 +248,17 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelFont(ROOT.gStyle.GetLabelFont())
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
+
+## Sum TH1 histograms
+#
+# \param rootHistos  List of TH1 objects
+# \param postfix     Postfix for the sum histo name
+def sumRootHistos(rootHistos, postfix="_sum"):
+    h = rootHistos[0].Clone()
+    h.SetName(h.GetName()+"_sum")
+    for a in rootHistos[1:]:
+        h.Add(a)
+    return h
 
 ## Infer the frame bounds from the histograms and keyword arguments
 #
@@ -472,6 +507,8 @@ class CanvasFrameTwo:
 class HistoBase:
     ## Constructor
     #
+    # \todo test draw style "9"
+    #
     # \param rootHisto    ROOT histogram object (TH1)
     # \param name         Name of the histogram
     # \param legendStyle  Style string for TLegend (third parameter for TLegend.AddEntry())
@@ -513,7 +550,15 @@ class HistoBase:
     #
     # \param legend   TLegend object
     def addToLegend(self, legend):
-        legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
+        # Hack to get the black border to the legend, only if the legend style is fill
+        if "f" in self.legendStyle.lower():
+            h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
+            h.SetLineWidth(1)
+            h.SetLineColor(ROOT.kBlack)
+            legend.AddEntry(h, self.legendLabel, self.legendStyle)
+            self.rootHistoForLegend = h # keep the reference in order to avoid segfault
+        else:
+            legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
 
     ## Call a function with self as an argument.
     #
@@ -638,11 +683,7 @@ class HistoStacked(HistoBase):
 
     ## Get the sum of the original histograms.
     def getSumRootHisto(self):
-        h = self.histos[0].getRootHisto().Clone()
-        h.SetName(h.GetName()+"_sum")
-        for d in self.histos[1:]:
-            h.Add(d.getRootHisto())
-        return h
+        return sumRootHistos([d.getRootHisto() for d in self.histos])
 
     ## Is the histogram from MC?
     def isMC(self):
@@ -798,7 +839,7 @@ class HistoManagerImpl:
     def getHisto(self, name):
         return self.nameHistoMap[name]
 
-    ## Get all histogram.HistoBase objects
+    ## Get all histograms.HistoBase objects
     def getHistos(self):
         return self.drawList[:]
 

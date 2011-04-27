@@ -28,9 +28,11 @@ multicrab.extendDatasets(pattupleVersion,
         #### 41X data and 311X MC
         # Data: single tau + MET
         "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
+        "Tau_162803-162828_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
 
         # Data: quadjet
         "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
+        "TauPlusX_162803-162828_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
 
         # MC Signal WH Spring11
         "TTToHplusBWB_M100_Spring11", # v10

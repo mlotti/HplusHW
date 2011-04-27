@@ -166,7 +166,7 @@ namespace HPlus {
     
     float fMassW = 80.399; // PDG value
     for(int i= 0; i < diJetSize; i++){ 
-      hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); 
+      hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); 
       if( fabs(sAlphaT.vDiJetMassesNoTau[i]-fMassW) < (myDiJetMassClosestToW-fMassW) ){
 	myDiJetMassClosestToW = sAlphaT.vDiJetMassesNoTau[i];
       }
@@ -193,7 +193,7 @@ namespace HPlus {
     fDiJetMassClosestToW = myDiJetMassClosestToW;
     
     /// Fill histos
-    hAlphaTDiJetMassClosestToW->Fill(fDiJetMassClosestToW);
+    hAlphaTDiJetMassClosestToW->Fill(fDiJetMassClosestToW, fEventWeight.getWeight());
     // Fill TTree for HPlusSignalOptimisation
     myTree->Fill();
   }

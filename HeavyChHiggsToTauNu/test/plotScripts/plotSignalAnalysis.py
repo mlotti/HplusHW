@@ -506,24 +506,64 @@ def transverseMass(h, rebin=20):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
-def transverseMass2(h,name, rebin=10):
-#    name = flipName(h.getRootHistoPath())
+
+def transverseMass2(h, name="transverseMass", rebin=2, log=True):
+#    name = h.getRootHistoPath()
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    particle = "allCuts"
+    if "Before" in name:
+        particle = "beforeVeto"
+        name = name.replace("TransverseMass", "TransverseMassBeforeVeto")
+    if "After" in name:
+        particle = "afterVeto"
+        name = name.replace("TransverseMass", "TransverseMassAfterVeto")
+
+    if log:
+        name += "_log"
+
+
     xlabel = "m_{T}(#tau jet, MET) (GeV/c^{2})" 
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
+
     scaleMCfromWmunu(h)    
 #    h.stackMCHistograms()
     h.stackMCHistograms(stackSignal=True)
     h.addMCUncertainty()
 
     opts = {"xmax": 200}
-    name = "transverseMass"
-#    opts = {"ymin": 0.00001, "ymaxfactor": 3,"xmax": 200 }
-    opts = {"xmax": 200 }
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    if log:
+        opts["ymin"] = 0.0001
+        opts["ymaxfacror"] = 1.3
+
+#    opts = {"xmax": 200}
+
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
+
+    if log:
+        h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
+    
+def topMass(h, name, rebin=5):
+#    name = flipName(h.getRootHistoPath())
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    
+    xlabel = "m(jjb) (GeV/c^{2})" 
+    ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
+    
+    scaleMCfromWmunu(h)      
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+#    name = "deltaPhiMetJet"
+    #h.createFrameFraction(name)    
+    opts = {"ymin": 0.0, "ymaxfactor": 1.1}
+    h.createFrame(name, opts=opts) 
+    h.setLegend(histograms.createLegend(0.3, 0.6, 0.5, 0.9))
 #    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.2, 0.2, 0.4, 0.5))
     common(h, xlabel, ylabel)
