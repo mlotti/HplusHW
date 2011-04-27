@@ -91,7 +91,7 @@ def createAnalysis(name, postfix="", **kwargs):
                                     **kwargs)
 
     prefix = name+postfix
-    create(prefix=prefix)
+    create(prefix=prefix, **kwargs)
     if not "doIsolationWithTau" in kwargs:
         create(prefix=prefix+"IsoTau", doIsolationWithTau=True, **kwargs)
 
@@ -100,17 +100,19 @@ def createAnalysis(name, postfix="", **kwargs):
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
+    args = {}
+    args.update(kwargs)
     postfix = kwargs.get("postfix", "")
     for pt, met, njets in [
         (30, 20, 2),
         (30, 20, 3),
         (40, 20, 3)
         ]:
-        kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
-        kwargs["muonPtCut"] = pt
-        kwargs["metCut"] = met
-        kwargs["njets"] = njets
-        createAnalysis("muonSelectionPF", **kwargs)
+        args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
+        args["muonPtCut"] = pt
+        args["metCut"] = met
+        args["njets"] = njets
+        createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2()
 
