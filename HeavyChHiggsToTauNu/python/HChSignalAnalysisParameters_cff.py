@@ -189,6 +189,12 @@ topSelection = cms.untracked.PSet(
   TopMassHigh = cms.untracked.double(300.0)
 )
 
+vertexWeight = cms.untracked.PSet(
+    src = cms.InputTag("goodPrimaryVertices"),
+    weights = cms.vdouble(1.0),
+    enabled = cms.bool(True),
+)
+
 triggerEfficiency = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
     # given, the parametrization of it is used as it is (i.e.

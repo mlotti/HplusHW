@@ -22,6 +22,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -85,9 +86,12 @@ namespace HPlus {
 
     //
     TriggerEfficiency fTriggerEfficiency;
+    VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     // Histograms
+    TH1 *hVerticesBeforeWeight;
+    TH1 *hVerticesAfterWeight;
     TH1 *hTransverseMass;
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;

@@ -148,8 +148,9 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     triggerEfficiency = param.triggerEfficiency,
+    vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
-    GenParticleAnalysis = param.GenParticleAnalysis                                     
+    GenParticleAnalysis = param.GenParticleAnalysis
 )
 
 # Prescale fetching done automatically for data
