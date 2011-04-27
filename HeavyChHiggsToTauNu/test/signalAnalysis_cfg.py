@@ -5,10 +5,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data
-dataVersion = "39Xredigi"
+#dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
 #dataVersion = "311Xredigi"
-#dataVersion = "41Xdata"
+dataVersion = "41Xdata"
 
 
 ##########
@@ -100,7 +100,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Set tau sources to non-trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTaus()
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
@@ -121,6 +121,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    jetTauInvMass = param.jetTauInvMass,                                      
     topSelection = param.topSelection,                                      
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,

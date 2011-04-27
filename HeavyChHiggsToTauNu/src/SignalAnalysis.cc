@@ -26,6 +26,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
+    fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
     //    ftransverseMassCutCounter(eventCounter.addCounter("transverseMass cut")),
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
@@ -39,6 +40,7 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, eventWeight),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("ftransverseMassCut"), eventCounter, eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
@@ -138,6 +140,14 @@ namespace HPlus {
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMassBeforeVeto->Fill(transverseMass);
+    // Hadronic jet selection                                                                                                                                      
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+
+    //Z mass veto                                                                                                                                                  
+    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+    if (!jetTauInvMassData.passedEvent()) return false;
+    increment(fZmassVetoCounter);
+
  
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -158,7 +168,7 @@ namespace HPlus {
    
     
     // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
    
@@ -173,7 +183,12 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-                                                                                                                  
+                                                                                                                     
+    //Z mass veto
+    //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+   //7 if (!jetTauInvMassData.passedEvent()) return false;
+   // increment(fZmassVetoCounter);
+                                   
                                
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
