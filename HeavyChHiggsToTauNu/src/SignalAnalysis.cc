@@ -162,14 +162,14 @@ namespace HPlus {
       // Apply trigger efficiency as weight for simulated events
       fEventWeight.multiplyWeight(triggerEfficiency);
     }
-    hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt());
-    hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta());
-    hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi());
-    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau());
+    hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
+    hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
+    hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
+    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
 
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hTransverseMassBeforeVeto->Fill(transverseMass);
+    hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
 
 
     //    Global electron veto
@@ -182,11 +182,11 @@ namespace HPlus {
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
-    hTransverseMassAfterVeto->Fill(transverseMass);
+    hTransverseMassAfterVeto->Fill(transverseMass, fEventWeight.getWeight());
 
 
     // MET cut
-    hMETBeforeMETCut->Fill(metData.getSelectedMET()->et());
+    hMETBeforeMETCut->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
@@ -201,7 +201,7 @@ namespace HPlus {
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return false;
-    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
+    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     increment(fBTaggingCounter);
 
     
@@ -220,17 +220,17 @@ namespace HPlus {
     //if(!evtTopologyData.passedEvent()) return false;
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
-    hDeltaPhi->Fill(deltaPhi*57.3);
+    hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     //    hDeltaPhi->Fill(deltaPhi);
 
     //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hTransverseMass->Fill(transverseMass);
+    hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
 
     //    if(transverseMass < 100 ) return false;
     //   increment(ftransverseMassCutCounter);
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-    hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
+    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
 
     
     // top mass
@@ -238,7 +238,7 @@ namespace HPlus {
     if (!TopSelectionData.passedEvent()) return false;
     increment(fTopSelectionCounter);
 
-    hTransverseMassWithTopCut->Fill(transverseMass);
+    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
                                            
     // Forward jet veto                                                                                                                                                                                                           
@@ -255,7 +255,7 @@ namespace HPlus {
     //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
 
 //    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 

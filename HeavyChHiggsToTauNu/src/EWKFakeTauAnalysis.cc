@@ -149,7 +149,7 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hTransverseMassBeforeVeto->Fill(transverseMass);
+    hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
  
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -162,7 +162,7 @@ namespace HPlus {
     if (!muonVetoData.passedEvent()) return;
     fAllTausCounterGroup.incrementMuonVetoCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMuonVetoCounter();
-    hTransverseMassAfterVeto->Fill(transverseMass);
+    hTransverseMassAfterVeto->Fill(transverseMass, fEventWeight.getWeight());
 
     // MET cut
     if(!metData.passedEvent()) return;
@@ -179,7 +179,7 @@ namespace HPlus {
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
-    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et());
+    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     fAllTausCounterGroup.incrementBTaggingCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementBTaggingCounter();
 
@@ -197,24 +197,24 @@ namespace HPlus {
     //if(!evtTopologyData.passedEvent()) return;
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
-    hDeltaPhi->Fill(deltaPhi*57.3);
-    //    hDeltaPhi->Fill(deltaPhi);
+    hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
+    //    hDeltaPhi->Fill(deltaPhi, fEventWeight.getWeight());
 
     //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hTransverseMass->Fill(transverseMass);
+    hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
 
     //    if(transverseMass < 100 ) return;
     //   increment(ftransverseMassCutCounter);
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-    hAlphaT->Fill(sAlphaT.fAlphaT); // FIXME: move this histogramming to evt topology
+    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
     /*
     // top mass
     TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
     if (!TopSelectionData.passedEvent()) return;
     increment(fTopSelectionCounter);
 
-    hTransverseMassWithTopCut->Fill(transverseMass);
+    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
     */
                                            
     // Forward jet veto                                                                                                                                                                                                                
@@ -231,7 +231,7 @@ namespace HPlus {
     //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
 
     int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i]); }
+    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
 
 //    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 

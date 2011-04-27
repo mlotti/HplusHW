@@ -438,17 +438,17 @@ namespace HPlus {
   }
 
   void TauSelection::fillOperationModeHistogram() {
-    hTauIdOperatingMode->Fill(0); // Control
+    hTauIdOperatingMode->Fill(0., fEventWeight.getWeight()); // Control
     if (fOperationMode == kNormalTauID)
-      hTauIdOperatingMode->Fill(1);
+      hTauIdOperatingMode->Fill(1., fEventWeight.getWeight());
     else if (fOperationMode == kFactorizedTauID)
-      hTauIdOperatingMode->Fill(2);
+      hTauIdOperatingMode->Fill(2., fEventWeight.getWeight());
     else if (fOperationMode == kTauCandidateSelectionOnly)
-      hTauIdOperatingMode->Fill(3);
+      hTauIdOperatingMode->Fill(3., fEventWeight.getWeight());
     else if (fOperationMode == kTauIDWithoutRtauOnly)
-      hTauIdOperatingMode->Fill(4);
+      hTauIdOperatingMode->Fill(4., fEventWeight.getWeight());
     else if (fOperationMode == kTauIDWithRtauOnly)
-      hTauIdOperatingMode->Fill(5);
+      hTauIdOperatingMode->Fill(5., fEventWeight.getWeight());
   }
 
   void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {
