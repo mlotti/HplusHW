@@ -16,7 +16,6 @@ options.register("WDecaySeparate",
                  options.varType.int,
                  "Separate W decays from MC information")
 options, dataVersion = getOptionsDataVersion(dataVersion, options)
-#options.doPat=1
 
 process = cms.Process("HChMuonAnalysis")
 

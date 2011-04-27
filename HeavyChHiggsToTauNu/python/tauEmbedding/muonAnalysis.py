@@ -7,12 +7,12 @@ isolations = {
     "trackIso": "isolationR03().sumPt",
     "caloIso": "isolationR03().emEt+isolationR03().hadEt",
     # 'standard' PF isolation
-#    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
-#    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
-#    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
+    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
+    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
 }
 isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
-#isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
+isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
 
