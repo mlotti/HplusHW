@@ -249,6 +249,17 @@ def updatePaletteStyle(histo):
     paletteAxis.SetLabelOffset(ROOT.gStyle.GetLabelOffset())
     paletteAxis.SetLabelSize(ROOT.gStyle.GetLabelSize())
 
+## Sum TH1 histograms
+#
+# \param rootHistos  List of TH1 objects
+# \param postfix     Postfix for the sum histo name
+def sumRootHistos(rootHistos, postfix="_sum"):
+    h = rootHistos[0].Clone()
+    h.SetName(h.GetName()+"_sum")
+    for a in rootHistos[1:]:
+        h.Add(a)
+    return h
+
 ## Infer the frame bounds from the histograms and keyword arguments
 #
 # \param histos  List of histograms.HistoBase objects
@@ -539,12 +550,15 @@ class HistoBase:
     #
     # \param legend   TLegend object
     def addToLegend(self, legend):
-        # Hack to get the black border to the legend
-        h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
-        h.SetLineWidth(1)
-        h.SetLineColor(ROOT.kBlack)
-        legend.AddEntry(h, self.legendLabel, self.legendStyle)
-        self.rootHistoForLegend = h # keep the reference in order to avoid segfault
+        # Hack to get the black border to the legend, only if the legend style is fill
+        if "f" in self.legendStyle.lower():
+            h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
+            h.SetLineWidth(1)
+            h.SetLineColor(ROOT.kBlack)
+            legend.AddEntry(h, self.legendLabel, self.legendStyle)
+            self.rootHistoForLegend = h # keep the reference in order to avoid segfault
+        else:
+            legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
 
     ## Call a function with self as an argument.
     #
@@ -669,11 +683,7 @@ class HistoStacked(HistoBase):
 
     ## Get the sum of the original histograms.
     def getSumRootHisto(self):
-        h = self.histos[0].getRootHisto().Clone()
-        h.SetName(h.GetName()+"_sum")
-        for d in self.histos[1:]:
-            h.Add(d.getRootHisto())
-        return h
+        return sumRootHistos([d.getRootHisto() for d in self.histos])
 
     ## Is the histogram from MC?
     def isMC(self):
@@ -829,7 +839,7 @@ class HistoManagerImpl:
     def getHisto(self, name):
         return self.nameHistoMap[name]
 
-    ## Get all histogram.HistoBase objects
+    ## Get all histograms.HistoBase objects
     def getHistos(self):
         return self.drawList[:]
 
