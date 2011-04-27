@@ -125,6 +125,9 @@ namespace HPlus {
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;
+    
+    TH1 *hEMFractionAll;
+    TH1 *hEMFractionElectrons;
     // Histograms for validation at every Selection Cut step
     TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
