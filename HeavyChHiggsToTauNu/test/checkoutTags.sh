@@ -32,6 +32,7 @@ set -e
 # 24.3.2011/M.Kortelainen CMSSW_4_1_3_patch2 Updated PAT tags
 # 1.4.2011/M.Kortelainen CMSSW_4_1_3_patch3 Updated tau and PAT tags to the latest recipe for 41X
 # 4.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tags for the new release, 
+# 27.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tau tags for the latest recipe for 41X
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -46,7 +47,7 @@ eval $(scram runtime -sh)
 # Tau
 cvs co -r V01-00-07-01   DataFormats/TauReco
 cvs co -r V01-00-27      RecoTauTag/Configuration
-cvs co -r V01-00-33      RecoTauTag/RecoTau
+cvs co -r V01-00-33-03   RecoTauTag/RecoTau
 cvs co -r V01-00-12      RecoTauTag/TauTagTools
 # PAT
 cvs co -r V06-04-02      DataFormats/PatCandidates
