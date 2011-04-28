@@ -17,10 +17,6 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
-# Jet trigger (for cleaning of tau->HLT matching
-myJetTrigger = "HLT_Jet30U"
-#myJetTrigger = "HLT_Jet50U"
-
 ################################################################################
 # Source
 process.source = cms.Source('PoolSource',
@@ -53,7 +49,6 @@ if dataVersion.isData():
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
 print "Trigger used for tau matching: "+myTrigger
-print "Trigger used for jet matching: "+myJetTrigger
 
 ################################################################################
 # Output module
@@ -81,7 +76,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.s = addPat(process, dataVersion,
                    matchingTauTrigger=myTrigger,
-                   matchingJetTrigger=myJetTrigger,
                    includeTracksPFCands=False,
                    )
 
