@@ -91,6 +91,15 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
+            },
+            "pattuple_v10_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_146428_pattuple_v10_1b-c4ea815147b859c202ad50a9425ec5e1/USER",
+                "luminosity": 14.448978,
+                "number_of_jobs": 20
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
             }
         }
     },
@@ -113,7 +122,16 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
-            }
+            },
+            "pattuple_v10_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v10_1b-825f9f3a2228e308bb923d3925115592/USER",
+                "luminosity": 16.084022,
+                "number_of_jobs": 10
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
+            },
         }
     },
     "BTau_149291-149294_Dec22": {
@@ -135,7 +153,16 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
-            }
+            },
+            "pattuple_v10_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_149291_pattuple_v10_1b-79566228a8278608a71cc48012464cce/USER",
+                "luminosity": 2.270373,
+                "number_of_jobs": 2
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
+            },
         }
     },
 

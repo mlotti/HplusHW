@@ -25,8 +25,13 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 multicrab.extendDatasets(pattupleVersion,
     [
-        #### 41X data and 311X MC
+        #### 39X/41X data and 311X MC
         # Data: single tau + MET
+        # 2010
+        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20;    v9, v10
+        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3; v9, v10
+        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10
+        # 2011
         "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
         "Tau_162803-162828_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
 
