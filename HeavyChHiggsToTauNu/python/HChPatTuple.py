@@ -157,21 +157,15 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         process.patTaus.embedLeadPFChargedHadrCand = True
         process.patTaus.embedLeadPFNeutralCand = True
 
-    # There's probably a bug in pat::Tau which in practice prevents
-    # the emedding of PFCands. Therefore we keep the PFCandidates
-    # collection in the event so that the PFCands can be accessed via
-    # edm::Refs. (note: PFCand embedding works, so it is just the
-    # collection embedding which doesn't. The PFCand embedding is
-    # disabled for consistenty and saving even some disk space.
-
-    # process.patTaus.embedSignalPFCands = True
-    # process.patTaus.embedSignalPFChargedHadrCands = True
-    # process.patTaus.embedSignalPFNeutralHadrCands = True
-    # process.patTaus.embedSignalPFGammaCands = True
-    # process.patTaus.embedIsolationPFCands = True
-    # process.patTaus.embedIsolationPFChargedHadrCands = True
-    # process.patTaus.embedIsolationPFNeutralHadrCands = True
-    # process.patTaus.embedIsolationPFGammaCands = True
+        process.patTaus.embedSignalPFCands = True
+        process.patTaus.embedSignalPFChargedHadrCands = True
+        process.patTaus.embedSignalPFNeutralHadrCands = True
+        process.patTaus.embedSignalPFGammaCands = True
+        process.patTaus.embedIsolationPFCands = True
+        process.patTaus.embedIsolationPFChargedHadrCands = True
+        process.patTaus.embedIsolationPFNeutralHadrCands = True
+        process.patTaus.embedIsolationPFGammaCands = True
+    
 
     if doPatTaus:
         if doHChTauDiscriminators:
