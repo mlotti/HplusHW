@@ -556,13 +556,23 @@ def addSelectedPFlowParticle(process,verbose=False):
         print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
     process.load("PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff")
     process.load("PhysicsTools.PFCandProducer.pfNoPileUp_cff")
+
+    # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+    process.pfPileUpCandidates = cms.EDProducer("TPPFCandidatesOnPFCandidates",
+        enable =  cms.bool( True ),
+        verbose = cms.untracked.bool( False ),
+        name = cms.untracked.string("pileUpCandidates"),
+        topCollection = cms.InputTag("pfNoPileUp"),
+        bottomCollection = cms.InputTag("particleFlow"),
+    )
+    process.pfNoPileUpSequence *= process.pfPileUpCandidates
+
     process.pfCandidateSelectionByType = cms.Sequence(
-        process.pfNoPileUpSequence *
-        ( process.pfAllNeutralHadrons +
-          process.pfAllChargedHadrons +
-          process.pfAllPhotons
-          )  +
-        process.pfAllMuons +
+        process.pfNoPileUpSequence * 
+        process.pfAllNeutralHadrons *
+        process.pfAllChargedHadrons *
+        process.pfAllPhotons *
+        process.pfAllMuons *
         process.pfAllElectrons
         )
     process.pfPileUp.Enable = True # enable pile-up filtering
@@ -570,11 +580,96 @@ def addSelectedPFlowParticle(process,verbose=False):
     process.pfAllMuons.src = "particleFlow"
     process.pfAllElectrons.src = "particleFlow"
     
+    # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+    process.pileUpHadrons = cms.EDFilter("PdgIdPFCandidateSelector",
+        src = cms.InputTag("pfPileUpCandidates"),
+        #Pick if you want  electrons and muons as well 
+        pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212,11,-11,13,-13)
+        #pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212)
+    )
+    process.pfCandidateSelectionByType *= process.pileUpHadrons
+
     process.hplusPatSequence.replace(process.hplusPatTauSequence,
                                      process.pfCandidateSelectionByType+
                                      process.hplusPatTauSequence)
 
-def addPFMuonIsolation(process,module,postfix="",verbose=False):
+# From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+def addPFMuonIsolation(process, module, verbose=False):
+#    if verbose:
+#        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
+
+    if not hasattr(process, "pfCandidateSelectionByType"):
+        addSelectedPFlowParticle(process,verbose=verbose)
+
+    process.muPFIsoDepositAll = isoDepositReplace('muons',"pfNoPileUp")
+    process.muPFIsoDepositCharged = isoDepositReplace('muons',"pfAllChargedHadrons")
+    process.muPFIsoDepositNeutral = isoDepositReplace('muons',"pfAllNeutralHadrons")
+    process.muPFIsoDepositGamma = isoDepositReplace('muons',"pfAllPhotons")
+    #For Delta beta methos create an additional one fot charged particles from PV
+    process.muPFIsoDepositPU = isoDepositReplace('muons',"pileUpHadrons")
+
+    prototype = cms.EDProducer("CandIsolatorFromDeposits",
+        deposits = cms.VPSet(
+            cms.PSet(
+                src = cms.InputTag("dummy"),
+                deltaR = cms.double(0.4),
+                weight = cms.string('1'),
+                vetos = cms.vstring(""),
+                skipDefaultVeto = cms.bool(True),
+                mode = cms.string('sum')
+            )
+        )
+    )
+
+    for a in ["All", "Charged", "Neutral", "Gamma", "PU"]:
+        m = prototype.clone()
+        m.deposits[0].src = "muPFIsoDeposit"+a
+        setattr(process, "muPFIsoValue"+a, m)
+    process.muPFIsoValueAll.deposits[0].vetos = ['0.001','Threshold(0.5)']
+    process.muPFIsoValueCharged.deposits[0].vetos = ['0.0001','Threshold(0.0)']
+    process.muPFIsoValueNeutral.deposits[0].vetos = ['0.01','Threshold(0.5)']
+    process.muPFIsoValueGamma.deposits[0].vetos = ['0.01','Threshold(0.5)']
+    #For delta beta add one that has the same threshold as the neutral ones above
+    process.muPFIsoValuePU.deposits[0].vetos = ['0.0001','Threshold(0.5)']
+    
+    process.patMuonIsolationSequence = cms.Sequence(
+        process.muPFIsoDepositAll *
+        process.muPFIsoDepositCharged *
+        process.muPFIsoDepositNeutral *
+        process.muPFIsoDepositGamma *
+        process.muPFIsoDepositPU *
+        process.muPFIsoValueAll *
+        process.muPFIsoValueCharged *
+        process.muPFIsoValueNeutral *
+        process.muPFIsoValueGamma *
+        process.muPFIsoValuePU
+    )
+    
+    module.isoDeposits = cms.PSet(
+        particle         = cms.InputTag("muPFIsoDepositAll"),
+        pfChargedHadrons = cms.InputTag("muPFIsoDepositCharged"),
+        pfNeutralHadrons = cms.InputTag("muPFIsoDepositNeutral"),
+        pfPhotons        = cms.InputTag("muPFIsoDepositGamma")
+    )
+
+    #as you can see the PU deposit will be accessed by muon.userIso(0)
+    module.isolationValues = cms.PSet(
+        particle         = cms.InputTag("muPFIsoValueAll"),
+        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged"),
+        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral"),
+        pfPhotons        = cms.InputTag("muPFIsoValueGamma"),
+        user = cms.VInputTag(
+            cms.InputTag("muPFIsoValuePU")
+        )
+    )
+
+    process.patDefaultSequence.replace(module,
+                                       process.patMuonIsolationSequence+module)
+
+
+### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
+### revision 1.7
+def addPFMuonIsolationOld(process,module,postfix="",verbose=False):
     if verbose:
         print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
 
@@ -591,6 +686,7 @@ def addPFMuonIsolation(process,module,postfix="",verbose=False):
     setattr(process,"isoDepMuonWithPhotons"+postfix,
             isoDepositReplace(module.muonSource,
                               'pfAllPhotons'))
+
 
     #compute isolation values form deposits
     process.load("PhysicsTools.PFCandProducer.Isolation.pfMuonIsolationFromDeposits_cff")
