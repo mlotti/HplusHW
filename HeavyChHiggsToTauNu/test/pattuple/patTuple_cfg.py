@@ -75,6 +75,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 process.s = addPat(process, dataVersion,
+                   doPatMuonPFIsolation=True,
                    matchingTauTrigger=myTrigger,
                    includeTracksPFCands=False,
                    )
