@@ -79,7 +79,11 @@ process.out = cms.OutputModule("PoolOutputModule",
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.s = addPat(process, dataVersion, matchingTauTrigger=myTrigger, matchingJetTrigger=myJetTrigger)
+process.s = addPat(process, dataVersion,
+                   matchingTauTrigger=myTrigger,
+                   matchingJetTrigger=myJetTrigger,
+                   includeTracksPFCands=False,
+                   )
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
