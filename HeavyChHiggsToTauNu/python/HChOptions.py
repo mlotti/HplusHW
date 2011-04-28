@@ -63,6 +63,10 @@ def getOptionsDataVersion(dataVersion, options=None):
     print "Data version is", dataVersion
 
     dataVersion = DataVersion(dataVersion)
+
+    if options.trigger == "" and dataVersion.isMC():
+        options.trigger = dataVersion.getDefaultSignalTrigger()
+
     return (options, dataVersion)
 
 
