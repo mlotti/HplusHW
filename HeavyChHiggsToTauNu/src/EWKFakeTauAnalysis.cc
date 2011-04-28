@@ -69,6 +69,9 @@ namespace HPlus {
     hTransverseMassAfterVeto = makeTH<TH1F>(*fs, "transverseMassAfterVeto", "transverseMassAfterVeto", 400, 0., 400.);
     hTransverseMassBeforeVeto = makeTH<TH1F>(*fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto", 400, 0., 400.);
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi", 400, 0., 3.2);
+    hEMFractionAll = makeTH<TH1F>(*fs, "FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
+    hEMFractionElectrons = makeTH<TH1F>(*fs, "FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
+    
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 500, 0.0, 5.0);
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
     hAlphaTVsRtau = makeTH<TH2F>(*fs, "alphaT(y)-Vs-Rtau(x)", "alphaT-Vs-Rtau",  120, 0.0, 1.2, 500, 0.0, 5.0);
@@ -137,6 +140,7 @@ namespace HPlus {
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return; // Require exactly one tau
     
+    
     // Obtain MC matching
     MCTauMatchType myTauMatch = matchTauToMC(iEvent, tauData.getSelectedTaus()[0]);
     fAllTausCounterGroup.incrementOneTauCounter();
@@ -145,6 +149,10 @@ namespace HPlus {
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
 
+    if (myTauMatch == kElectronToTau)
+      hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
+    hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
+    
     // MET 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
