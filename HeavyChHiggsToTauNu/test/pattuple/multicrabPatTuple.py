@@ -220,7 +220,7 @@ multicrab.forEachDataset(addSplitMode)
 
 # Many failures with 60307 and 70500 from T2_UK_London_Brunel for
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
-multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel"])
+multicrab.extendBlackWhiteListAll("se_black_list", ["T2_UK_London_Brunel", "T2_BE_IIHE", "T2_IN_TIFR", "T2_RU_SINP"])
 
 # Create multicrab task configuration and run 'multicrab -create'
 multicrab.createTasks()
