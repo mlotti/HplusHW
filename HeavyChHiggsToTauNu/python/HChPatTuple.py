@@ -532,7 +532,9 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 #
 # PF2PAT
 #
-def addPF2PAT(process, dataVersion):
+def addPF2PAT(process, dataVersion,
+              doTauHLTMatching=True, matchingTauTrigger=None, 
+              ):
     if hasattr(process, "patDefaultSequence"):
         raise Exception("PAT should not exist before calling addPF2PAT at the moment")
 
@@ -638,10 +640,13 @@ def addPF2PAT(process, dataVersion):
         getattr(process, "patTaus"+postfix)
     )
             
-
     seq = cms.Sequence(
         getattr(process, "patPF2PATSequence"+postfix)
     )
+
+    if doTauHLTMatching:
+        seq *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, collections=["selectedPatTaus"+postfix], postfix=postfix)
+
     return seq
 
 

@@ -76,7 +76,9 @@ process.out = cms.OutputModule("PoolOutputModule",
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 # Add first PF2PAT so that we get a clean patDefaultSequence
-process.sPF2PAT = addPF2PAT(process, dataVersion)
+process.sPF2PAT = addPF2PAT(process, dataVersion,
+                            matchingTauTrigger=myTrigger,
+                            )
 
 process.sPAT = addPat(process, dataVersion,
 #                      doPatMuonPFIsolation=True,
@@ -113,8 +115,8 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
-    process.sPF2PAT *
-    process.sPAT
+    process.sPAT *
+    process.sPF2PAT
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence

@@ -72,18 +72,19 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 #   2) a copy of the same collection with the patTau matching to the HLT jet trigger
 #      removed (needed to remove trigger bias in QCD backround measurement).
 # Yes, I agree that this sounds (and is) a bit compicated :)
-def addTauHLTMatching(process, tauTrigger, jetTrigger):
+def addTauHLTMatching(process, tauTrigger, jetTrigger=None, collections=_patTauCollectionsDefault, postfix=""):
     if tauTrigger == None:
         raise Exception("Tau trigger missing for matching")
 
-    process.tauTriggerMatchingSequence = addTauTriggerMatching(process, tauTrigger, "Tau")
-    process.triggerMatchingSequence = cms.Sequence(
-        process.tauTriggerMatchingSequence
-    )
+    setattr(process, "tauTriggerMatchingSequence"+postfix, addTauTriggerMatching(process, tauTrigger, "Tau", collections=collections))
+    setattr(process, "triggerMatchingSequence"+postfix, cms.Sequence(
+            getattr(process, "tauTriggerMatchingSequence"+postfix)
+    ))
 
     if jetTrigger != None:
-        process.jetTriggerMatchingSequence = addTauTriggerMatching(process, jetTrigger, "Jet")
-        process.triggerMatchingSequence *= process.jetTriggerMatchingSequence
+        setattr(process, "jetTriggerMatchingSequence"+postfix, addTauTriggerMatching(process, jetTrigger, "Jet", collections=collections))
+        seq = getattr(process, "triggerMatchingSequence"+postfix)
+        seq *= getattr(process, "jetTriggerMatchingSequence"+postfix)
 
         ###########################################################################
         # Remove first tau matching to the jet trigger from the list
@@ -93,9 +94,10 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger):
                 tausMatchedToTauTriggerSrc = cms.InputTag(collection+"TauTriggerMatched"),
                 tausMatchedToJetTriggerSrc = cms.InputTag(collection+"JetTriggerMatched"),
             )
-            patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"
+            patJetTriggerCleanedTauTriggerMatchedTausName = collection+"TauTriggerMatchedAndJetTriggerCleaned"+postfix
             setattr(process, patJetTriggerCleanedTauTriggerMatchedTausName, patJetTriggerCleanedTauTriggerMatchedTaus)
-            process.triggerMatchingSequence *= patJetTriggerCleanedTauTriggerMatchedTaus
+            seq = getattr(process, "triggerMatchingSequence"+postfix)
+            seq *= patJetTriggerCleanedTauTriggerMatchedTaus
     
     out = None
     outdict = process.outputModules_()
@@ -110,4 +112,4 @@ def addTauHLTMatching(process, tauTrigger, jetTrigger):
             "keep *_*TauTriggerMatchedAndJetTriggerCleaned_*_*"
         ])
 
-    return process.triggerMatchingSequence
+    return getattr(process, "triggerMatchingSequence"+postfix)
