@@ -74,11 +74,15 @@ process.out = cms.OutputModule("PoolOutputModule",
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.s = addPat(process, dataVersion,
-                   doPatMuonPFIsolation=True,
-                   matchingTauTrigger=myTrigger,
-                   includeTracksPFCands=False,
-                   )
+
+# Add first PF2PAT so that we get a clean patDefaultSequence
+process.sPF2PAT = addPF2PAT(process, dataVersion)
+
+process.sPAT = addPat(process, dataVersion,
+#                      doPatMuonPFIsolation=True,
+                      matchingTauTrigger=myTrigger,
+                      includeTracksPFCands=False,
+                      )
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
@@ -109,7 +113,8 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
-    process.s 
+    process.sPF2PAT *
+    process.sPAT
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence

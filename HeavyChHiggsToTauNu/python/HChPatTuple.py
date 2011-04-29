@@ -296,10 +296,10 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
         import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
-        tauAlgos = ["shrinkingConePFTau", "hpsTancTaus"]
+        tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
         # to synchronize with addPF2PAT
-        if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
-            tauAlgos.append("hpsPFTau")
+        #if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
+        #    tauAlgos.append("hpsPFTau")
 
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
