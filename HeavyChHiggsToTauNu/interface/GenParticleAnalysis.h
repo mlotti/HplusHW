@@ -37,6 +37,7 @@ namespace HPlus {
     //   const double fEtaCut;
     
     // Histograms
+    TH1 *hHpMass;
     TH1 *hTauStatus;
     TH1 *hRtau1pHp;
     TH1 *hRtau13pHp;

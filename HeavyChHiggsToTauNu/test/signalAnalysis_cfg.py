@@ -4,6 +4,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
+
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
@@ -105,9 +106,10 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
 
+
 # Set the triggers for trigger efficiencies
 # 2010 and 2011 scenarios
-#param.setEfficiencyTriggersFor2010()
+param.setEfficiencyTriggersFor2010()
 #param.setEfficiencyTriggersFor2011()
 
 # Set the data scenario for trigger efficiencies and vertex weighting
@@ -133,6 +135,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    jetTauInvMass = param.jetTauInvMass,                                      
     topSelection = param.topSelection,                                      
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
@@ -182,6 +185,17 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
+
+# b tagging testing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+module = process.signalAnalysis.clone()
+#module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+module.bTagging.discriminatorCut = 3.0
+addAnalysis(process, "signalAnalysisBtaggingTest", module,
+            preSequence=process.commonSequence,
+            additionalCounters=additionalCounters,
+            signalAnalysisCounters=True)
 
 
 ################################################################################

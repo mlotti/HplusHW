@@ -57,6 +57,7 @@ namespace HPlus {
     hThetaCM1pW = makeTH<TH1F>(*fs, "genThetaCM1pW", "genThetaCMs1pW", 100, 0., 3.);
     hMagCM1pHp = makeTH<TH1F>(*fs, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
     hMagCM1pW = makeTH<TH1F>(*fs, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
+    hHpMass = makeTH<TH1F>(*fs, "HpMass", "HpMass", 100, 100, 200.);
   }
 
   void GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
@@ -89,9 +90,13 @@ namespace HPlus {
 
       for (size_t i=0; i < genParticles->size(); ++i){  
 	const reco::Candidate & p = (*genParticles)[i];
+	double mass = p.mass();
+	int id = p.pdgId();
+	if ( abs(id) == 37) {
+	  hHpMass->Fill(mass);
+	}
 	double deltaR = ROOT::Math::VectorUtil::DeltaR( p.p4() ,*tau );
 	if ( deltaR > 0.2) continue;
-	int id = p.pdgId();
 	if ( abs(id) == 15 ) {
 	  int numberOfTauMothers = p.numberOfMothers(); 
 	  for (int im=0; im < numberOfTauMothers; ++im){  
