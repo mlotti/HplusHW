@@ -367,15 +367,6 @@ datasets = {
                 "number_of_jobs": 100, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMETTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": .284734728,
-                "number_of_jobs": 10 # 1.7M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
     "JetMET_141950-144114_Nov4": {
@@ -388,15 +379,6 @@ datasets = {
                 "number_of_jobs": 300, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMET/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 2.895797321,
-                "number_of_jobs": 20 # 2.9M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
     "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
@@ -410,15 +392,6 @@ datasets = {
                 "number_of_jobs": 40, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Jet/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 14.527814041,
-                "number_of_jobs": 4
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
 
