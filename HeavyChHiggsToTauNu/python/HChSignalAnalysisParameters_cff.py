@@ -192,7 +192,7 @@ topSelection = cms.untracked.PSet(
 vertexWeight = cms.untracked.PSet(
     src = cms.InputTag("goodPrimaryVertices"),
     weights = cms.vdouble(1.0),
-    enabled = cms.bool(True),
+    enabled = cms.bool(False),
 )
 
 triggerEfficiency = cms.untracked.PSet(
@@ -220,6 +220,15 @@ for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff
 def overrideTriggerFromOptions(options):
     if options.trigger != "":
         trigger.triggers = [options.trigger]
+
+
+def setTriggerVertexFor2010(**kwargs):
+    setEfficiencyTriggersFor2010(**kwargs)
+    setVertexWeightFor2010()
+
+def setTriggerVertexFor2011(**kwargs):
+    setEfficiencyTriggersFor2011(**kwargs)
+    setVertexWeightFor2011()
 
 
 # One trigger
@@ -267,14 +276,25 @@ def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
             "Tau_160431-161016_Prompt",
             ])
 
-
 def formatEfficiencyTrigger(pset):
     if pset.luminosity.value() < 0:
         return pset.trigger.value()
     else:
         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
-    
 
+# Vertex weighting
+def setVertexWeightFor2010():
+    # From runs 136035-149294 single tau trigger and W+jet
+    vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    vertexWeight.enabled = True
+
+def setVertexWeightFor2011():
+    # From runs 160431-162828 single tau trigger and W+jets
+    vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    vertexWeight.enabled = True
+
+
+# Tau selection
 def forEachTauSelection(function):
     for selection in tauSelections:
         function(selection)

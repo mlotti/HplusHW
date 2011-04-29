@@ -106,22 +106,13 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiencies
-# one trigger
-#param.setEfficiencyTrigger("HLT_SingleIsoTau20_Trk15_MET25_v4")
-# many triggers, efficiencies weighted by their luminosities
-#param.setEfficiencyTriggers([
-#        ("HLT_SingleIsoTau20_Trk15_MET25_v3", 16.084022481),
-#        ("HLT_SingleIsoTau20_Trk15_MET25_v4", 2.270373344),
-#        ])
-# many triggers, efficiencies weighted by their luminosities, triggers
-# and luminosities taken from the multicrab dataset definitions
-#param.setEfficiencyTriggersFromMulticrabDatasets([
-#        "BTau_141956-144114_Dec22",
-#        "BTau_146428-148058_Dec22",
-#    ])
 # 2010 and 2011 scenarios
 #param.setEfficiencyTriggersFor2010()
 #param.setEfficiencyTriggersFor2011()
+
+# Set the data scenario for trigger efficiencies and vertex weighting
+#param.setTriggerVertexFor2010()
+#param.setTriggerVertexFor2011()
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
