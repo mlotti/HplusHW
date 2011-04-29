@@ -81,7 +81,7 @@ process.sPF2PAT = addPF2PAT(process, dataVersion,
                             )
 
 process.sPAT = addPat(process, dataVersion,
-#                      doPatMuonPFIsolation=True,
+                      doPatMuonPFIsolation=True,
                       matchingTauTrigger=myTrigger,
                       includeTracksPFCands=False,
                       )
