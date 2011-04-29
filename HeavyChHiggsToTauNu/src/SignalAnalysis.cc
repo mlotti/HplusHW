@@ -161,8 +161,8 @@ namespace HPlus {
 
     // Trigger efficiency
     double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    if (!iEvent.isRealData()) {
-      // Apply trigger efficiency as weight for simulated events
+    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
+      // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
       fEventWeight.multiplyWeight(triggerEfficiency);
     }
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
