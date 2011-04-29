@@ -105,10 +105,10 @@ int brlimit()
     //    cout<< "mH = " <<  mH[i] << "   BR95 = " << BR_95_obs[i] << endl;
   }
   TCanvas * can_br = new TCanvas();
-  can_br->SetTitle("95\% CL limits for BR");
+  can_br->SetTitle("95\% CL limit for BR");
   TGraph * tg_obs = new TGraph(nData, mH, BR_95_obs);
 
-  tg_obs->SetTitle("95\% CL limits for BR");
+  tg_obs->SetTitle("95\% CL limit for BR");
   //  tg_obs->SetLineWidth(2505);
   tg_obs->SetMarkerStyle(20);
   tg_obs->SetFillStyle(3005);
@@ -120,8 +120,8 @@ int brlimit()
 //   tg_obs_shade->SetFillStyle(3005);
 //   tg_obs_shade->Draw("F same");
   tg_obs->GetYaxis()->SetRangeUser(0,1.0); 
-  tg_obs->GetYaxis()->SetTitle("95\% CL limits for Br(t#rightarrow bH^{#pm})");
-  tg_obs->GetXaxis()->SetTitle("m_{H^{+}} [GeV/c^{2}]");
+  tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{#pm})");
+  tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
   TGraph * tg_exp = new TGraph(nData, mH, BR_95_exp);
   // tg_exp->SetLineStyle(2);
   tg_exp->SetLineColor(2);
@@ -371,23 +371,37 @@ double calculate_BR(double c1, double coef1, double coef2_hwhh, double events)
 
 
 void plotTxt(double lumi) {
-  Double_t top       = 0.85;
+  Double_t linePos       = 0.9;
   Double_t lineSpace = 0.038;
   Double_t left      = 0.185;
   TLatex text;
   text.SetTextAlign(12);
   text.SetTextSize(0.04);
   text.SetNDC();
-  text.DrawLatex(left,0.9,"CMS preliminary");
+  //  text.DrawLatex(left,0.9,"CMS preliminary");
 
   text.SetTextSize(0.03);
-  text.DrawLatex(left,top,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
-  text.DrawLatex(left,top -  lineSpace,"Fully hadronic final state");
+  text.DrawLatex(left,linePos,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
+  text.DrawLatex(left,linePos -= lineSpace,"Fully hadronic final state");
   char temp[300];
-  sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
-  text.DrawLatex(left,top -2*lineSpace,temp);
-  text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limits");
-  text.DrawLatex(left,top -4*lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
+  //  sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
+  //  text.DrawLatex(left,linePos -= lineSpace,temp);
+  text.DrawLatex(left,linePos -= lineSpace,"Bayesian CL limit");
+  text.DrawLatex(left,linePos -= lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
+
+  // Style copied from python/tools/histograms.py
+  double x = 0.62; double y= 0.96;
+  TLatex l;
+  l.SetNDC();
+  l.SetTextFont(l.GetTextFont()-20); //# bold -> normal;
+  l.DrawLatex(x,y,"CMS Preliminary");
+
+  x = 0.45;
+  sprintf(temp,"%.0f pb^{-1}",lumi);
+  l.DrawLatex(x, y, temp);
+
+  x = 0.2;
+  l.DrawLatex(x, y, "#sqrt{s} = 7 TeV");
 
   return;
 }
@@ -408,7 +422,7 @@ void plotTxtMh(double lumi, int mH) {
   char temp[300];
   sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
   text.DrawLatex(left,top -2*lineSpace,temp);
-  text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limits");
+  text.DrawLatex(left,top -3*lineSpace,"Bayesian CL limit");
   text.DrawLatex(left,top -4*lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
   sprintf(temp,"M_{H}=%i",mH);
   text.DrawLatex(left,top -5*lineSpace,temp);
