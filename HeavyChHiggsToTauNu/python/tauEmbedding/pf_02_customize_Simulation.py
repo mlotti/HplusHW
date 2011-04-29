@@ -123,6 +123,7 @@ def customise(process):
             "keep *_genParticles_*_%s" % hltProcessName,
             "keep recoGenJets_*_*_%s" % hltProcessName,
             "keep recoGenMETs_*_*_%s" % hltProcessName,
+            "keep edmMergeableCounter_*_*_%s" % hltProcessName,
 
             "drop *_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
@@ -131,6 +132,7 @@ def customise(process):
             "keep *_muons_*_%s" % processName,
             "keep *_globalMuons_*_%s" % processName,
             "keep *_offlinePrimaryVertices_*_%s" % processName,
+            "keep edmMergeableCounter_*_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
     #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [
