@@ -80,10 +80,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
-    process.patJets.addJetID = True
-    process.patJets.embedCaloTowers = False
-    process.patJets.embedPFCandidates = False
-    process.patJets.addTagInfos = False
+    setPatJetDefaults(process.patJets)
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
     # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
@@ -146,42 +143,18 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    if includeTracksPFCands:
-        process.patTaus.embedLeadTrack = False
-        process.patTaus.embedLeadPFCand = False
-        process.patTaus.embedLeadPFChargedHadrCand = False
-        process.patTaus.embedLeadPFNeutralCand = False
-    else:
-        process.patTaus.embedLeadTrack = True
-        process.patTaus.embedLeadPFCand = True
-        process.patTaus.embedLeadPFChargedHadrCand = True
-        process.patTaus.embedLeadPFNeutralCand = True
-
-        process.patTaus.embedSignalPFCands = True
-        process.patTaus.embedSignalPFChargedHadrCands = True
-        process.patTaus.embedSignalPFNeutralHadrCands = True
-        process.patTaus.embedSignalPFGammaCands = True
-        process.patTaus.embedIsolationPFCands = True
-        process.patTaus.embedIsolationPFChargedHadrCands = True
-        process.patTaus.embedIsolationPFNeutralHadrCands = True
-        process.patTaus.embedIsolationPFGammaCands = True
-    
+    setPatTauDefaults(process.patTaus, includeTracksPFCands)
 
     if doPatTaus:
         if doHChTauDiscriminators:
-            for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
-                idSources.extend(HChTaus.HChTauIDSources)
-                idSources.extend(HChTausCont.HChTauIDSourcesCont)
-            for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
-                idSources.extend(HChTausTest.TestTauIDSources)
+            addHChTauDiscriminators()
 
         if doPatCalo:
             tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                              algoLabel = "caloReco",
                              typeLabel = "Tau")
-            process.patTausCaloRecoTau.embedLeadPFCand = False
-            process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
-            process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
+            setPatTauDefaults(process.patTausCaloRecoTau, True)
+            process.patTausCaloRecoTau.embedLeadTrack = not includeTracksPFCands
     
         tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
@@ -249,50 +222,19 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         del process.patMETs
 
     # Muons
-    # In order to calculate the transverse impact parameter w.r.t.
-    # beam spot instead of primary vertex, see
-    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
-    process.patMuons.usePV = False
-    if includeTracksPFCands:
-        process.patMuons.embedTrack = False
-    else:
-        process.patMuons.embedTrack = True
-
+    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
     if doPatMuonPFIsolation:
         addPFMuonIsolation(process, process.patMuons, verbose=True)
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
-    process.patElectrons.usePV = False
-    if includeTracksPFCands:
-        process.patElectrons.embedTrack = False
-    else:
-        process.patElectrons.embedTrack = True
+    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
-        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        process.patDefaultSequence.replace(process.patElectrons, (
-            process.simpleEleIdSequence *
-            process.patElectronIsolation *
-            process.patElectrons
-        ))
-                                           
-        process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
-        process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
-        process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
-        process.patElectrons.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
-        process.patElectrons.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
-        process.patElectrons.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
-        process.patElectrons.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
-        process.patElectrons.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
-        process.patElectrons.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
-        process.patElectrons.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
-        process.patElectrons.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
-        process.patElectrons.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
-
+        addPatElectronID(process, process.patElectrons, process.patDefaultSequence)
 
     # Select good primary vertices
     # For data this is already ran, see HChDataSelection.py
@@ -300,7 +242,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         process.hplusPatSequence *= process.goodPrimaryVertices
     outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
-
 
     # Trigger
     if doPatTrigger:
@@ -343,7 +284,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     return seq
 
-
+# Helper functions
 def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
@@ -394,6 +335,71 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         )
 
     return sequence
+
+def setPatJetDefaults(module):
+    module.addJetID = True
+    module.embedCaloTowers = False
+    module.embedPFCandidates = False
+    module.addTagInfos = False
+
+def setPatTauDefaults(module, includeTracksPFCands):
+    attrs = [
+        "embedLeadTrack",
+        "embedLeadPFCand",
+        "embedLeadPFChargedHadrCand",
+        "embedLeadPFNeutralCand",
+        "embedSignalPFCands",
+        "embedSignalPFChargedHadrCands",
+        "embedSignalPFNeutralHadrCands",
+        "embedSignalPFGammaCands",
+        "embedIsolationPFCands",
+        "embedIsolationPFChargedHadrCands",
+        "embedIsolationPFNeutralHadrCands",
+        "embedIsolationPFGammaCands",
+        ]
+
+    value = not includeTracksPFCands
+    for a in attrs:
+        setattr(module, a, value)
+
+def addHChTauDiscriminators():
+    if HChTaus.HChTauIDSources[0] in tauTools.classicTauIDSources:
+        print "addHChTauDiscriminators called already once, not adding them again"
+        return
+
+    for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+        idSources.extend(HChTaus.HChTauIDSources)
+        idSources.extend(HChTausCont.HChTauIDSourcesCont)
+    for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+        idSources.extend(HChTausTest.TestTauIDSources)
+
+def setPatLeptonDefaults(module, includeTracksPFCands):
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+    module.usePV = False
+    module.embedTrack = not includeTracksPFCands
+
+def addPatElectronID(process, module, sequence):
+    process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+    sequence.replace(module, (
+            process.simpleEleIdSequence *
+            process.patElectronIsolation *
+            module
+    ))
+                                           
+    module.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
+    module.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
+    module.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
+    module.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
+    module.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
+    module.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
+    module.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
+    module.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+    module.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
+    module.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
+    module.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
+    module.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
 
 
 
