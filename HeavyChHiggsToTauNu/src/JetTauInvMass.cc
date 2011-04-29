@@ -17,12 +17,14 @@ namespace HPlus {
   JetTauInvMass::Data::~Data() {}
   
   JetTauInvMass::JetTauInvMass(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):    
-      fMinMass(iConfig.getUntrackedParameter<double>("ZmassResolution")),
+      fMassResolution(iConfig.getUntrackedParameter<double>("ZmassResolution")),
+      //     fMassFromZll(iConfig.getUntrackedParameter<double>("ZmassFromZll")),
       fInvMassCutCount(eventCounter.addSubCounter("Jet-Tau invariant mass", "Jet-Tau invariant mass")),  
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hTauJetMass = makeTH<TH1F>(*fs, "hTauJetMass", "hTauJetMass", 400, 0., 400.);
+    hTauJetMass = makeTH<TH1F>(*fs, "TauJetMass", "TauJetMass", 400, 0., 400.);
+    hClosestMass = makeTH<TH1F>(*fs, "TauJetMassClosest", "TauJetMassClosest", 400, 0., 400.);
   }
 
   JetTauInvMass::~JetTauInvMass() {}
@@ -33,7 +35,7 @@ namespace HPlus {
   
     double minMass = 99999;
     size_t cleanPassed = 0;
-
+    double closestMass = -999;
     
 
     for(edm::PtrVector<reco::Candidate>::const_iterator iterjet = jets.begin(); iterjet != jets.end(); ++iterjet) {
@@ -54,14 +56,17 @@ namespace HPlus {
 	hTauJetMass->Fill(TauJetMass);
 
 
-	if (fabs(TauJetMass-90.3) < minMass ) {
-	  minMass = fabs(TauJetMass-90.3);
+  	if (fabs(TauJetMass-91.2) < minMass ) {
+	//	if (fabs(TauJetMass-fMassFromZll) < minMass ) {
+	  minMass = fabs(TauJetMass-91.2);
+	  //	  minMass = fabs(TauJetMass-fMassFromZll);
+	  closestMass = TauJetMass; 
 	}	
       }
     }
-
+    hClosestMass->Fill(closestMass);
     passEvent = true;
-    if(minMass < fMinMass) passEvent = false;
+    if(minMass < fMassResolution) passEvent = false;
     increment(fInvMassCutCount);
 
     return Data(this, passEvent);

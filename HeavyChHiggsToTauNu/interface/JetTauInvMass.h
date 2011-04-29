@@ -52,7 +52,7 @@ namespace HPlus {
 
   private:
     // Input parameters
-    const double fMinMass;
+    const double fMassResolution;
 
     // Counters
     Count fInvMassCutCount;
@@ -62,6 +62,7 @@ namespace HPlus {
     
     // Histograms
     TH1 *hTauJetMass;
+    TH1 *hClosestMass;
 
     // Selected jets
     //    edm::PtrVector<pat::Jet> fSelectedJets;

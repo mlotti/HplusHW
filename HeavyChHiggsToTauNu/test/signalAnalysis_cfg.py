@@ -122,8 +122,8 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 #        "BTau_146428-148058_Dec22",
 #    ])
 # 2010 and 2011 scenarios
-param.setEfficiencyTriggersFor2010()
-#param.setEfficiencyTriggersFor2011()
+#param.setEfficiencyTriggersFor2010()
+param.setEfficiencyTriggersFor2011()
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
