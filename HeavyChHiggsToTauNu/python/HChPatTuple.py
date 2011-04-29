@@ -7,6 +7,7 @@ import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
+import PhysicsTools.PatAlgos.tools.helpers as patHelpers
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
@@ -295,7 +296,11 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
         import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
-        tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+        tauAlgos = ["shrinkingConePFTau", "hpsTancTaus"]
+        # to synchronize with addPF2PAT
+        if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
+            tauAlgos.append("hpsPFTau")
+
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
         PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
@@ -533,22 +538,112 @@ def addPF2PAT(process, dataVersion):
 
     # Hack to not to crash if something in PAT assumes process.out
     hasOut = hasattr(process, "out")
-    if not hasOut:
+    outputCommands = []
+    outputCommandsBackup = []
+    if hasOut:
+        outputCommandsBackup = process.out.outputCommands[:]
+    else:
         process.out = cms.OutputModule("PoolOutputModule",
             fileName = cms.untracked.string('dummy.root'),
             outputCommands = cms.untracked.vstring()
         )
 
+    outputCommands = []
+
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
-    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix="PFlow")
+    postfix = "PFlow"
+    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix=postfix)
+
+    outputCommands = [
+        "keep *_selectedPatPhotons%s_*_*" % postfix,
+#        'keep *_selectedPatElectrons%s_*_*' % postfix, 
+        'keep *_selectedPatMuons%s_*_*' % postfix,
+        'keep *_selectedPatTaus%s_*_*' % postfix,
+        'keep *_selectedPatJet%s*_*_*' % postfix,
+        'drop *_selectedPatJets%s_pfCandidates_*' % postfix,
+        'drop *_*PF_caloTowers_*',
+        'drop *_*JPT_pfCandidates_*',
+        'drop *_*Calo_pfCandidates_*',
+        'keep *_patMETs%s_*_*' % postfix,
+        'keep *_selectedPatPFParticles%s_*_*' % postfix,
+        ]
+
+    # Jet modifications
+    setPatJetDefaults(getattr(process, "patJets"+postfix))
+
+    # Use HPS taus
+    addHChTauDiscriminators()
+    if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
+        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+
+        tauAlgos = ["hpsPFTau"]
+        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+    
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequence, postfix)
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequenceCont, postfix)
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusTestDiscriminationSequence, postfix)
+
+    patTauSeq = cms.Sequence(
+        getattr(process, "hpsPFTauHplusDiscriminationSequence"+postfix) *
+        getattr(process, "hpsPFTauHplusDiscriminationSequenceCont"+postfix) * 
+        getattr(process, "hpsPFTauHplusTestDiscriminationSequence"+postfix)
+    )
+    setattr(process, "hplusPatTauSequence"+postfix, patTauSeq)
+    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("pfTaus"+postfix))
+    #patHelpers.massSearchReplaceParam(patTauSeq, "Producer", cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
+    patHelpers.massSearchReplaceAnyInputTag(patTauSeq, cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
+
+    pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
+    setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
+
+#    process.debug = cms.EDAnalyzer("EventContentAnalyzer")
+#    process.patDefaultSequencePFlow.replace(process.patTausPFlow,
+#                                            process.debug * process.patTausPFlow)
+
+    # Lepton modifications
+    setPatLeptonDefaults(getattr(process, "patMuons"+postfix), False)
+    #setPatLeptonDefaults(getattr(process, "patElectrons"+postfix), False)
+    #addPatElectronID(process, getattr(process, "patElectrons"+postfix), getattr(process, "makePatElectrons"+postfix))
+
+    # PATElectronProducer segfaults, and we don't really need them now
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "makePatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "selectedPatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "countPatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "countPatLeptons"+postfix))
+
+    # Disable muon and electron top projections, needs wider
+    # discussion about lepton definitions
+    getattr(process, "pfNoMuon"+postfix).enable = False
+    getattr(process, "pfNoElectron"+postfix).enable = False
+
+    # Disable tau top projection, the taus are identified separately
+    getattr(process, "pfNoTau"+postfix).enable = False
+    getattr(process, "pfTaus"+postfix).discriminators = cms.VPSet()
 
     # Remove photon MC matcher in order to avoid keeping photons in the event content
-    process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
+    #process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
 
-    if not hasOut:
+    if hasOut:
+        process.out.outputCommands = outputCommandsBackup
+        process.out.outputCommands.extend(outputCommands)
+    else:
         del process.out
 
-    return process.patPF2PATSequencePFlow
+    getattr(process, "patDefaultSequence"+postfix).replace(
+        getattr(process, "patTaus"+postfix),
+        patTauSeq *
+        getattr(process, "patTaus"+postfix)
+    )
+            
+
+    seq = cms.Sequence(
+        getattr(process, "patPF2PATSequence"+postfix)
+    )
+    return seq
+
 
 ### The functions below are taken from
 ### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
