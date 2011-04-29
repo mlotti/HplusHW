@@ -51,7 +51,8 @@ class MuonAnalysis:
     def __init__(self, process, dataVersion, additionalCounters, 
                  prefix="", beginSequence=None, afterOtherCuts=False,
                  trigger=None,
-                 muons="selectedPatMuons", muonPtCut=30, doIsolationWithTau=False,
+                 muons="selectedPatMuons", muonPtCut=30,
+                 doIsolationWithTau=False, isolationWithTauDiscriminator="byTightIsolation",
                  muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
@@ -72,6 +73,7 @@ class MuonAnalysis:
         self._jets = cms.InputTag(jets)
         self._muonIsolation = muonIsolation
         self._isolationCut = "%s < %f" % (isolations[muonIsolation], muonIsolationCut)
+        self._isolationWithTauDiscriminator = isolationWithTauDiscriminator
 
         if self._trigger == None:
             raise Exception("Must specify trigger!")
@@ -366,7 +368,7 @@ class MuonAnalysis:
                                       candSrc = self.selectedMuons,
 #                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
                                       tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
-                                      isolationDiscriminator = cms.string("byTightIsolation"),
+                                      isolationDiscriminator = cms.string(self._isolationWithTauDiscriminator),
                                       againstMuonDiscriminator = cms.string("againstMuonLoose"),
                                       deltaR = cms.double(0.15),
                                       minCands = cms.uint32(1)),
