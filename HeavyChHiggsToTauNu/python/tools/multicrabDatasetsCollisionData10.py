@@ -166,107 +166,6 @@ datasets = {
         }
     },
 
-    "BTau_141950-144114_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk5",
-        "data": {
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_3-dfc6d27ce5aa60b808b4a2bcd34b7c86/USER",
-                "luminosity": 2.799065107,
-                "number_of_jobs": 20
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        }
-
-    },
-    "BTau_146240-148107_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "runs": (146240, 148107),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 50,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ba8b03606ed700d03389442a6378453f/USER",
-                "luminosity": 14.527814041,
-                "number_of_jobs": 20
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-    "BTau_148108-149182_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
-        "runs": (148108, 149182),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 15, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 15,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-9e6b3ce3f61ebd1c080721235dd644e5/USER",
-                "luminosity": 16.166113934,
-                "number_of_jobs": 10
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-    "BTau_149291-149442_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
-        "runs": (149291, 149442),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 20, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 20,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ae876897d946fa7a17cf73f63fd66244/USER",
-                "luminosity": 2.270540967,
-                "number_of_jobs": 2
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-
     # Jet PD (for QCD background analysis"
     "JetMETTau_Jet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
@@ -367,15 +266,6 @@ datasets = {
                 "number_of_jobs": 100, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMETTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": .284734728,
-                "number_of_jobs": 10 # 1.7M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
     "JetMET_141950-144114_Nov4": {
@@ -388,15 +278,6 @@ datasets = {
                 "number_of_jobs": 300, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMET/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 2.895797321,
-                "number_of_jobs": 20 # 2.9M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
     "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
@@ -410,15 +291,6 @@ datasets = {
                 "number_of_jobs": 40, # Adjusted for PATtuple
                 "lumiMask": "Nov4ReReco"
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Jet/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 14.527814041,
-                "number_of_jobs": 4
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
         }
     },
 
