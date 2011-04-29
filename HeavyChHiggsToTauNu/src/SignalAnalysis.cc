@@ -26,8 +26,10 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
-    //    ftransverseMassCutCounter(eventCounter.addCounter("transverseMass cut")),
+    fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
+    ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 80")),
+    ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 100")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
@@ -39,8 +41,9 @@ namespace HPlus {
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, eventWeight),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
-    //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("ftransverseMassCut"), eventCounter, eventWeight),
+    //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
@@ -169,7 +172,19 @@ namespace HPlus {
 
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
+
+	  //    hTransverseMassBeforeVeto->Fill(transverseMass);
+    // Hadronic jet selection                                                                                                                                      
+	  //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
+
+    //Z mass veto                                                                                                                                                  
+	  //   JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+	  //  if (!jetTauInvMassData.passedEvent()) return false;
+	  //increment(fZmassVetoCounter);
+
+ 
     hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
+
 
 
     //    Global electron veto
@@ -209,7 +224,12 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-                                                                                                                  
+                                                                                                                     
+    //Z mass veto
+    //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+    //    if (!jetTauInvMassData.passedEvent()) return false;
+    //    increment(fZmassVetoCounter);
+                                   
                                
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
@@ -226,8 +246,7 @@ namespace HPlus {
     //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
 
-    //    if(transverseMass < 100 ) return false;
-    //   increment(ftransverseMassCutCounter);
+
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
@@ -240,6 +259,12 @@ namespace HPlus {
 
     hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
+    //    if(transverseMass < ftransverseMassCut-20.0 ) return false;
+    if(transverseMass < 80 ) return false;
+    increment(ftransverseMassCut80Counter);
+
+    if(transverseMass < 100 ) return false;
+    increment(ftransverseMassCut100Counter);
                                            
     // Forward jet veto                                                                                                                                                                                                           
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
