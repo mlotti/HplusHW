@@ -20,14 +20,6 @@ def addTo(datasets):
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 1
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("TTToHplusBWB_M100_Fall10", {
             "RECO": {
@@ -37,14 +29,6 @@ def addTo(datasets):
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 1
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
             },
             })
     add("TTToHplusBWB_M120_Fall10", {
@@ -56,14 +40,6 @@ def addTo(datasets):
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 1
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("TTToHplusBWB_M140_Fall10", {
             "RECO": {
@@ -74,14 +50,6 @@ def addTo(datasets):
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 1
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("TTToHplusBWB_M160_Fall10", {
             "RECO": {
@@ -91,14 +59,6 @@ def addTo(datasets):
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 20,
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 1
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
             },
             })
 
@@ -112,14 +72,6 @@ def addTo(datasets):
                 "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 450,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_30to50_TuneZ2_7TeV_pythia6/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 10,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("QCD_Pt50to80_TuneZ2_Fall10", {
             "RECO": {
@@ -129,14 +81,6 @@ def addTo(datasets):
             "AOD": {
                 "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 450,
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 10,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
             },
             })
     add("QCD_Pt80to120_TuneZ2_Fall10", {
@@ -148,14 +92,6 @@ def addTo(datasets):
                 "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 450,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_80to120_TuneZ2_7TeV_pythia6/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 10,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("QCD_Pt120to170_TuneZ2_Fall10", {
             "RECO": {
@@ -166,14 +102,6 @@ def addTo(datasets):
                 "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 450,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_120to170_TuneZ2_7TeV_pythia6/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 10,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("QCD_Pt170to300_TuneZ2_Fall10", {
             "RECO": {
@@ -183,14 +111,6 @@ def addTo(datasets):
             "AOD": {
                 "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 450,
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/QCD_Pt_170to300_TuneZ2_7TeV_pythia6/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 10,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
             },
             })
 
@@ -205,14 +125,6 @@ def addTo(datasets):
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 400,
             },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 5,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            },
             })
     add("WJets_TuneZ2_Fall10", {
             "RECO": {
@@ -224,14 +136,6 @@ def addTo(datasets):
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/AODSIM",
                 "number_of_jobs": 1500,
                 "use_server": 1,
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Fall10_E7TeV_ProbDist_2010Data_BX156_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_4-ec569a29593f1a4b1391204dd7806a3f/USER",
-                "number_of_jobs": 60,
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
             },
             })
 
