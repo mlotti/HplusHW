@@ -33,6 +33,7 @@ set -e
 # 1.4.2011/M.Kortelainen CMSSW_4_1_3_patch3 Updated tau and PAT tags to the latest recipe for 41X
 # 4.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tags for the new release, 
 # 27.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tau tags for the latest recipe for 41X
+# 28.4.2011/M.Kortelainen CMSSW_4_1_5 Updated PAT tags for the latest recipe from Michal Bluj
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -41,7 +42,7 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes41X
 
 # Tau+PAT
-# https://hypernews.cern.ch/HyperNews/CMS/get/physTools/2286/1/1/1/1/1/1/2/2/2/1.html
+# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/83/1/1/1/1.html
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePFTauID#Recommended_tags_for_2011_data_t
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 # Tau
@@ -50,15 +51,14 @@ cvs co -r V01-00-27      RecoTauTag/Configuration
 cvs co -r V01-00-33-03   RecoTauTag/RecoTau
 cvs co -r V01-00-12      RecoTauTag/TauTagTools
 # PAT
-cvs co -r V06-04-02      DataFormats/PatCandidates
+# PAT taked form 42X (V08-06-21 [part of CMSSW_4_2_1]), 
+# PF2PAT from the 4_1_5 release
+cvs co -r V06-04-08      DataFormats/PatCandidates
 cvs co -r V04-07-02      PhysicsTools/PFCandProducer
-cvs co -r V08-06-18      PhysicsTools/PatAlgos
+cvs co -r V08-06-21      PhysicsTools/PatAlgos
 # patches
-patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatAlgos_V08-06-18.patch
+patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatAlgos_V08-06-21.patch
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PFCandProducer_V04-07-02.patch
-
-# Luminosity
-cvs co -r V02-01-03 RecoLuminosity/LumiDB
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
