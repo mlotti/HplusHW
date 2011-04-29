@@ -3,7 +3,6 @@ import multicrabDatasetsCollisionData11 as collisionData11
 
 import multicrabDatasetsMCSummer10 as mcSummer10
 import multicrabDatasetsMCFall10 as mcFall10
-import multicrabDatasetsMCFall10PU as mcFall10PU
 import multicrabDatasetsMCWinter10 as mcWinter10
 import multicrabDatasetsMCSpring11 as mcSpring11
 
@@ -16,7 +15,6 @@ datasets.update(collisionData11.datasets)
 
 datasets.update(mcSummer10.datasets)
 datasets.update(mcFall10.datasets)
-mcFall10PU.addTo(datasets)
 datasets.update(mcWinter10.datasets)
 datasets.update(mcSpring11.datasets)
 
