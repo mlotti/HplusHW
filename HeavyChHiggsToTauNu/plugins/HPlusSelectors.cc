@@ -5,6 +5,8 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIsolationSelector.h"
+
 #include<vector>
 
 namespace {
@@ -74,8 +76,13 @@ typedef ObjectSelector<
   > HPlusLargestPtCandViewPtrSelector;
 
 
+typedef HPlus::TauIsolationSelector<reco::Candidate> HPlusTauIsolationCandViewPtrSelector;
+typedef HPlus::TauIsolationSelector<pat::Muon> HPlusTauIsolationPATMuonViewPtrSelector;
+
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtCandViewPtrSelector );
+DEFINE_FWK_MODULE( HPlusTauIsolationCandViewPtrSelector );
+DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonViewPtrSelector );

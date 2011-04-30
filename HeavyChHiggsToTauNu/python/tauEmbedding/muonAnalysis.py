@@ -364,7 +364,7 @@ class MuonAnalysis:
         name = "MuonIsolationWithTau"
         self.selectedMuons = self.analysis.addAnalysisModule(
             name,
-            selector = cms.EDProducer("HPlusCandViewPtrTauIsolationSelector",
+            selector = cms.EDProducer("HPlusTauIsolationCandViewPtrSelector",
                                       candSrc = self.selectedMuons,
 #                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
                                       tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
