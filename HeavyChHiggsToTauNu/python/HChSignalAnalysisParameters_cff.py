@@ -279,6 +279,8 @@ def setEfficiencyTriggersFor2010(datasetType="pattuple_v9"):
 def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
     setEfficiencyTriggersFromMulticrabDatasets([
             "Tau_160431-161016_Prompt",
+            "Tau_162803-163261_Prompt",
+            "Tau_163270-163369_Prompt",
             ])
 
 def formatEfficiencyTrigger(pset):
