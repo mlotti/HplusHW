@@ -1,6 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.Modules import _Module
 
+import FWCore.ParameterSet.VarParsing as VarParsing
+
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
+
 # Searches for self.lookFor module in cms.Path. When found, next and prev module is stored
 class SeqVisitor(object):
     def __init__(self, lookFor):
@@ -43,12 +47,16 @@ def replaceInputTag(tag, old, new):
     return tag
 
 def customise(process):
+    # Command line arguments
+    options, dataVersion = getOptionsDataVersion("41Xdata")
+
     processName = process.name_()
 
     #process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
-    recoProcessName = "RECO"
-    hltProcessName = "EMBEDDINGHLT"
+    hltProcessName = dataVersion.getTriggerProcess()
+    recoProcessName = dataVersion.getRecoProcess()
+    generationProcessName = "EMBEDDINGHLT"
     processName = process.name_()
 
     # Track embedding
@@ -116,13 +124,17 @@ def customise(process):
             "keep *_globalMuons_*_%s" % recoProcessName,
             "keep *_offlineBeamSpot_*_%s" % recoProcessName,
             "keep *_gtDigis_*_%s" % recoProcessName,
+            "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
+            "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
+            "keep *_addPileupInfo*_%s" % recoProcessName, # for MC
 
-            "drop *_*_*_%s" % hltProcessName,
-            "keep *_dimuonsGlobal_*_%s" % hltProcessName,
-            "keep *_generator_weight_%s" % hltProcessName,
-            "keep *_genParticles_*_%s" % hltProcessName,
-            "keep recoGenJets_*_*_%s" % hltProcessName,
-            "keep recoGenMETs_*_*_%s" % hltProcessName,
+            "drop *_*_*_%s" % generationProcessName,
+            "keep *_dimuonsGlobal_*_%s" % generationProcessName,
+            "keep *_generator_weight_%s" % generationProcessName,
+            "keep *_genParticles_*_%s" % generationProcessName,
+            "keep recoGenJets_*_*_%s" % generationProcessName,
+            "keep recoGenMETs_*_*_%s" % generationProcessName,
+            "keep edmMergeableCounter_*_*_%s" % generationProcessName,
 
             "drop *_*_*_%s" % processName,
             "keep *_particleFlow*_*_%s" % processName,
@@ -131,6 +143,7 @@ def customise(process):
             "keep *_muons_*_%s" % processName,
             "keep *_globalMuons_*_%s" % processName,
             "keep *_offlinePrimaryVertices_*_%s" % processName,
+            "keep edmMergeableCounter_*_*_%s" % processName,
     ])
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
     #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [

@@ -12,6 +12,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4",
                                      "HLT_IsoPFTau35_Trk20_MET45_v1",
                                      "HLT_IsoPFTau35_Trk20_MET45_v2",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
 )
@@ -194,7 +195,7 @@ topSelection = cms.untracked.PSet(
 )
 
 vertexWeight = cms.untracked.PSet(
-    src = cms.InputTag("goodPrimaryVertices"),
+    src = cms.InputTag("goodPrimaryVertices10"),
     weights = cms.vdouble(1.0),
     enabled = cms.bool(False),
 )
@@ -278,6 +279,8 @@ def setEfficiencyTriggersFor2010(datasetType="pattuple_v9"):
 def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
     setEfficiencyTriggersFromMulticrabDatasets([
             "Tau_160431-161016_Prompt",
+            "Tau_162803-163261_Prompt",
+            "Tau_163270-163369_Prompt",
             ])
 
 def formatEfficiencyTrigger(pset):
@@ -289,12 +292,16 @@ def formatEfficiencyTrigger(pset):
 # Vertex weighting
 def setVertexWeightFor2010():
     # From runs 136035-149294 single tau trigger and W+jet
-    vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    # From runs 136035-149294 single tau trigger and QCd, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000, 0.00260647, 0.00000000)
     vertexWeight.enabled = True
 
 def setVertexWeightFor2011():
     # From runs 160431-162828 single tau trigger and W+jets
-    vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
     vertexWeight.enabled = True
 
 
@@ -343,9 +350,13 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
     #del selections[hpsLoose]
     #del names[hpsLoose]
-    caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
-    del selections[caloTauIndex]
-    del names[caloTauIndex]
+    # TCTau can be missing in tau embedding case
+    try: 
+        caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
+        del selections[caloTauIndex]
+        del names[caloTauIndex]
+    except ValueError:
+        pass
     combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]

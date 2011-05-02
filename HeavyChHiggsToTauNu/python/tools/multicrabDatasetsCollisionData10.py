@@ -256,45 +256,7 @@ datasets = {
         }
     },
 
-    "JetMETTau_136033-141887_Nov4": { # first run actually 135821, but lumi list starts from this one
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "data": {
-            "RECO": {
-                "datasetpath": "/JetMETTau/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-        }
-    },
-    "JetMET_141950-144114_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "data": {
-            "RECO": {
-                "datasetpath": "/JetMET/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 300, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-        }
-    },
-    "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "runs": (146240, 148058),
-        "data": {
-            "RECO": {
-                "datasetpath": "/Jet/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-        }
-    },
-
-    # For QyadJet trigger
+    # For QuadJet trigger
     "JetMETTau_QuadJet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_QuadJet15U",
@@ -431,21 +393,6 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
-    "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu9",
-        "data": {}
-    },
-    "Mu_146240-147116_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu9",
-        "data": {}
-    },
-    "Mu_147196-149442_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu15_v1",
-        "data": {}
-    },
     "Mu_136035-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",
