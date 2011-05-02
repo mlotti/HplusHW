@@ -32,11 +32,13 @@ multicrab.extendDatasets(pattupleVersion,
         "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10
         # 2011
         "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
-        "Tau_162803-162828_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
+        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
+        "Tau_163270-163369_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v10
 
         # Data: quadjet
         "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
-        "TauPlusX_162803-162828_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
+        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
+        "TauPlusX_163270-163369_Prompt", # HLT_QuadJet40_IsoPFTau40_v3; v10
 
         # MC Signal WH Spring11
         "TTToHplusBWB_M100_Spring11", # v10

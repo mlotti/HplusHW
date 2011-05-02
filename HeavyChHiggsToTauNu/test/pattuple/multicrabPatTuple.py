@@ -23,10 +23,12 @@ multicrab.extendDatasets(
 #    "TauPlusX_160404-161312_Prompt" # HLT_QuadJet40_IsoPFTau40_v1
 # With certified json
 #        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
-#        "Tau_162803-162828_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
+#        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
+#        "Tau_163270-163369_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4
 
 #        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
-#        "TauPlusX_162803-162828_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+#        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
+#        "TauPlusX_163270-163369_Prompt", # HLT_QuadJet40_IsoPFTau40_v3
 
 ########
 #
@@ -187,7 +189,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v10_2"
+    name += "_pattuple_v10_3"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
