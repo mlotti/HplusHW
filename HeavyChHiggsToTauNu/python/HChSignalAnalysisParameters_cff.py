@@ -12,6 +12,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk15_MET25_v4",
                                      "HLT_IsoPFTau35_Trk20_MET45_v1",
                                      "HLT_IsoPFTau35_Trk20_MET45_v2",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
 )
