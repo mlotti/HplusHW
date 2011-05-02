@@ -290,12 +290,16 @@ def formatEfficiencyTrigger(pset):
 # Vertex weighting
 def setVertexWeightFor2010():
     # From runs 136035-149294 single tau trigger and W+jet
-    vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    # From runs 136035-149294 single tau trigger and QCd, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.09268, 2.24386, 1.55092, 0.59239, 0.17919, 0.04979, 0.01336, 0.00359, 0.00072, 0.00017, 0.00000, 0.00261, 0.00000)
     vertexWeight.enabled = True
 
 def setVertexWeightFor2011():
     # From runs 160431-162828 single tau trigger and W+jets
-    vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.03445, 0.76996, 1.36990, 1.32347, 0.96836, 0.63932, 0.41221, 0.25240, 0.15959, 0.11445, 0.07332, 0.10596, 0.00000)
     vertexWeight.enabled = True
 
 
