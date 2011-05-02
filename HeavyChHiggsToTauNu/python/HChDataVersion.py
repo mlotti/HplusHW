@@ -65,6 +65,7 @@ config = {
     },
     "39Xdata": {
         "triggerProcess": "HLT",
+        "recoProcess": "HLT",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/BTau_148822-149182_Dec22/BTau/Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9/9bdd93eeac3a09280bc73f406326390f/pattuple_102_1_kIm.root",
     },
     "311Xredigi": {
@@ -154,6 +155,8 @@ class DataVersion:
         return self.signalTrigger
 
     def getRecoProcess(self):
+        if not self.recoProcess:
+            raise Exception("Reco process name is not available for %s" % self.version)
         return self.recoProcess
 
     def getGlobalTag(self):
