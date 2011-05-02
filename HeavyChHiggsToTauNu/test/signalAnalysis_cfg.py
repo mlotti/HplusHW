@@ -20,6 +20,9 @@ dataVersion = "311Xredigi" # Spring11 MC
 # to the "golden" analysis
 doAllTauIds = True
 
+# Perform b tagging scanning
+doBTagScan = False
+
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
@@ -118,10 +121,11 @@ param.setEfficiencyTriggersFor2010()
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
     if tauEmbeddingTightenMuonSelection:
-        counters = tauEmbeddingCustomisations.addMuonRelativeIsolation(process, process.commonSequence, cut=0.1)
-        additionalCounters.extend(counters)
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -188,14 +192,15 @@ process.signalAnalysisPath = cms.Path(
 
 
 # b tagging testing
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-module = process.signalAnalysis.clone()
-#module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-module.bTagging.discriminatorCut = 3.0
-addAnalysis(process, "signalAnalysisBtaggingTest", module,
-            preSequence=process.commonSequence,
-            additionalCounters=additionalCounters,
-            signalAnalysisCounters=True)
+if doBTagScan:
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    module = process.signalAnalysis.clone()
+    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 3.0
+    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 
 ################################################################################
