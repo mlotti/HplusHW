@@ -7,9 +7,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
     # IO parameters:
-#    InputFileNames = cms.vstring("histograms.root"),
+    InputFileNames = cms.vstring("histograms.root"),
 #    InputFileNames = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root"),
-    InputFileNames = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root"),
+#    InputFileNames = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root"),
     InputDirectoryName = cms.string("tnpTree"),
     InputTreeName = cms.string("fitter_tree"),
     OutputFileName = cms.string("tagprobe_output.root"),
@@ -28,6 +28,10 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         pt = cms.vstring("Probe p_{T}", "0", "1000", "GeV/c"),
 #        eta = cms.vstring("Probe #eta", "-2.1", "2.1", ""),
         abseta = cms.vstring("Probe |#eta|", "0", "2.1", ""),
+        
+        dz = cms.vstring("Probe dz(muy, vtx)", "0", "10", "cm"),
+        sumIsoRel = cms.vstring("Probe sumIso/pt", "0", "2", ""),
+        pfSumIsoRel = cms.vstring("Probe pfSumIso/pt", "0", "2", ""),
     ),
 
     # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations
@@ -36,11 +40,21 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         isTrackerMuon = cms.vstring("Tracker muon", "dummy[pass=1,fail=0]"),
         isGlobalMuon = cms.vstring("Global muon", "dummy[pass=1,fail=0]"),
         isHLTMu9 = cms.vstring("HLT_Mu9", "dummy[pass=1,fail=0]"),
-        isHLTMu15 = cms.vstring("HLT_Mu15", "dummy[pass=1,fail=0]"),
+        isHLTMu15 = cms.vstring("HLT_Mu15", "dummy[pass=1,fail=0]"), 
+        isHLTMu20 = cms.vstring("HLT_Mu20", "dummy[pass=1,fail=0]"),
         hitQuality = cms.vstring("Hit quality", "dummy[pass=1,fail=0]"),
-        isClose = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
-        isIsolated = cms.vstring("Isolated", "dummy[pass=1,fail=0]"),
+        dB = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
+        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
+        sumIsoRel15 = cms.vstring("Rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
+        pfSumIsoRel10 = cms.vstring("PF rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
+        pfSumIsoRel15 = cms.vstring("PF rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
+        tauIsoVLoose = cms.vstring("Tau Iso VLoose", "dummy[pass=1,fail=0]"),
         fullSelection = cms.vstring("Full selection", "dummy[pass=1,fail=0]"),
+    ),
+    Cuts = cms.PSet(
+        dz1cm = cms.vstring("dz(mu, vtx) < 1", "dz", "1.0"),
+        sumIsoRel50 = cms.vstring("Rel sum iso < 0.5", "sumIsoRel", "0.5"),
+        pfSumIsoRel50 = cms.vstring("Rel sum iso < 0.5", "pfSumIsoRel", "0.5"),
     ),
 
     # defines all the PDFs that will be available for the efficiency calculations; uses RooFit's "factory" syntax;
@@ -71,7 +85,15 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
     Efficiencies = cms.PSet(
         All = cms.PSet(
             EfficiencyCategoryAndState = cms.vstring(
-                "fullSelection", "pass"
+                "isTrackerMuon", "pass",
+                "isGlobalMuon", "pass",
+                "isHLTMu9", "pass",
+                "hitQuality", "pass",
+                "dB", "pass",
+#                "sumIsoRel10", "pass",
+                "tauIsoVLoose", "pass",
+                "dz1cm", "below",
+#                "fullSelection", "pass",
             ),
             UnbinnedVariables = cms.vstring("mass"),
             BinnedVariables = cms.PSet(
@@ -81,30 +103,44 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
             #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
         ),
-        All_pt = cms.PSet(
-            EfficiencyCategoryAndState = cms.vstring(
-                "fullSelection", "pass"
-            ),
-            UnbinnedVariables = cms.vstring("mass"),
-            BinnedVariables = cms.PSet(
-                pt = cms.vdouble(range(30, 410, 10)),
-            ),
-            #BinToPDFmap = cms.vstring("gaussPlusLinear")
-            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        ),
-        All_abseta = cms.PSet(
-            EfficiencyCategoryAndState = cms.vstring(
-                "fullSelection", "pass"
-            ),
-            UnbinnedVariables = cms.vstring("mass"),
-            BinnedVariables = cms.PSet(
-                abseta = cms.vdouble([x*0.21 for x in range(0, 11)]), # 0.21 stepping [0, 2.1]
-            ),
-            #BinToPDFmap = cms.vstring("gaussPlusLinear")
-            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        ),
+        # All_pt = cms.PSet(
+        #     EfficiencyCategoryAndState = cms.vstring(
+        #         "fullSelection", "pass"
+        #     ),
+        #     UnbinnedVariables = cms.vstring("mass"),
+        #     BinnedVariables = cms.PSet(
+        #         pt = cms.vdouble(range(30, 410, 10)),
+        #     ),
+        #     #BinToPDFmap = cms.vstring("gaussPlusLinear")
+        #     BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+        #     #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+        # ),
+        # All_abseta = cms.PSet(
+        #     EfficiencyCategoryAndState = cms.vstring(
+        #         "fullSelection", "pass"
+        #     ),
+        #     UnbinnedVariables = cms.vstring("mass"),
+        #     BinnedVariables = cms.PSet(
+        #         abseta = cms.vdouble([x*0.21 for x in range(0, 11)]), # 0.21 stepping [0, 2.1]
+        #     ),
+        #     #BinToPDFmap = cms.vstring("gaussPlusLinear")
+        #     BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+        #     #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+        # ),
+    )
+)
+# process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
+#     BinnedVariables = cms.PSet(
+#         pt = cms.vdouble(range(30, 410, 10)),
+#     ),
+# )
+# process.TagProbeFitTreeAnalyzer.Efficiencies.All_abseta = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
+#     BinnedVariables = cms.PSet(
+#         abseta = cms.vdouble([x*0.21 for x in range(0, 11)]), # 0.21 stepping [0, 2.1]
+#     ),
+# )
+
+
 #         All_eta = cms.PSet(
 #             EfficiencyCategoryAndState = cms.vstring(
 #                 "fullSelection", "pass"
@@ -176,8 +212,8 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
 #                pt = cms.vdouble(3.0, 6.0, 20.0),
 #            )
 #        ),
-    )
-)
+#    )
+#)
 
 process.fitness = cms.Path(
     process.TagProbeFitTreeAnalyzer
