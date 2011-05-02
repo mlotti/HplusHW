@@ -350,9 +350,13 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
     #del selections[hpsLoose]
     #del names[hpsLoose]
-    caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
-    del selections[caloTauIndex]
-    del names[caloTauIndex]
+    # TCTau can be missing in tau embedding case
+    try: 
+        caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
+        del selections[caloTauIndex]
+        del names[caloTauIndex]
+    except ValueError:
+        pass
     combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]
