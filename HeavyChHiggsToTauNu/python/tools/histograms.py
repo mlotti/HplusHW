@@ -727,6 +727,24 @@ class HistoStacked(HistoBase):
     ## \var histos
     # List of histograms.Histo objects which are stacked
 
+class HistoGraph(HistoBase):
+    def __init__(self, rootGraph, name):
+        HistoBase.__init__(self, rootGraph, name, "l", "L")
+
+    def getRootGraph(self):
+        return self.getRootHisto()
+
+    def getXmin(self):
+        values = self.getRootGraph().GetX()
+        return min([values[i] for i in xrange(0, self.getRootGraph().N())])
+
+    def getXmax(self):
+        values = self.getRootGraph().GetX()
+        return max([values[i] for i in xrange(0, self.getRootGraph().N())])
+
+    def getBinWidth(self, bin):
+        raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
+
 ## Implementation of HistoManager.
 #
 # Intended to be used only from HistoManager. This class contains all
