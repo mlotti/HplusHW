@@ -79,7 +79,7 @@ config = {
     },
     "41Xdata": {
         "triggerProcess": "HLT",
-        "recoProcess": "HLT",
+        "recoProcess": "RECO",
         "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v1/AOD/84CA2525-5750-E011-AEC1-003048D375AA.root",
         "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1-ecb64a326bff780f833933d40177edb0/USER/pattuple_5_1_g68.root",
