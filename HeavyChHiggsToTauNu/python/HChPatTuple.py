@@ -576,16 +576,34 @@ def addPF2PAT(process, dataVersion,
     # Jet modifications
     # L1FastJet
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
+    # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
     doL1Fastjet = True
     if doL1Fastjet:
         process.ak5PFL1Fastjet.useCondDB = False
+
+        #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+        #m = cms.EDFilter("PrimaryVertexObjectFilter",
+        #    filterParams = pvSelector.clone(maxZ = 24.0),
+        #    src = cms.InputTag("offlinePrimaryVertices")
+        #)
+        #setattr(process, "goodOfflinePrimaryVerticesForJets"+postfix, m)
+        #sequence *= m
+
         process.load('RecoJets.Configuration.RecoPFJets_cff')
+        #process.kt6PFJets.src = "pfNoElectron"+postfix
+        #process.kt6PFJets.doAreaFastjet = True
         process.kt6PFJets.doRhoFastjet = True
         process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
-        process.pfJetsPFlow.doAreaFastjet = True # ak5PFJets
-        process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+        #process.kt6PFJets.voronoiRfact = cms.double(0.9)
         sequence *= process.kt6PFJets
+
+        # ak5PFJets
+        #process.pfJetsPFlow.Vertices = cms.InputTag("goodOfflinePrimaryVerticesForJets"+postfix)
+        process.pfJetsPFlow.doAreaFastjet = True
+        #process.pfJetsPFlow.doRhoFastjet = False
+        process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+
         process.patJetCorrFactorsPFlow.levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
