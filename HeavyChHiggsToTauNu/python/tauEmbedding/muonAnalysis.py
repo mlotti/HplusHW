@@ -7,12 +7,12 @@ isolations = {
     "trackIso": "isolationR03().sumPt",
     "caloIso": "isolationR03().emEt+isolationR03().hadEt",
     # 'standard' PF isolation
-#    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
-#    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
-#    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
+    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.4)",
+    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
+    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
 }
 isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
-#isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
+isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
 
@@ -51,7 +51,8 @@ class MuonAnalysis:
     def __init__(self, process, dataVersion, additionalCounters, 
                  prefix="", beginSequence=None, afterOtherCuts=False,
                  trigger=None,
-                 muons="selectedPatMuons", muonPtCut=30, doIsolationWithTau=False,
+                 muons="selectedPatMuons", muonPtCut=30,
+                 doIsolationWithTau=False, isolationWithTauDiscriminator="byTightIsolation",
                  muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
@@ -72,6 +73,7 @@ class MuonAnalysis:
         self._jets = cms.InputTag(jets)
         self._muonIsolation = muonIsolation
         self._isolationCut = "%s < %f" % (isolations[muonIsolation], muonIsolationCut)
+        self._isolationWithTauDiscriminator = isolationWithTauDiscriminator
 
         if self._trigger == None:
             raise Exception("Must specify trigger!")
@@ -362,11 +364,11 @@ class MuonAnalysis:
         name = "MuonIsolationWithTau"
         self.selectedMuons = self.analysis.addAnalysisModule(
             name,
-            selector = cms.EDProducer("HPlusCandViewPtrTauIsolationSelector",
+            selector = cms.EDProducer("HPlusTauIsolationCandViewPtrSelector",
                                       candSrc = self.selectedMuons,
 #                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
                                       tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
-                                      isolationDiscriminator = cms.string("byTightIsolation"),
+                                      isolationDiscriminator = cms.string(self._isolationWithTauDiscriminator),
                                       againstMuonDiscriminator = cms.string("againstMuonLoose"),
                                       deltaR = cms.double(0.15),
                                       minCands = cms.uint32(1)),

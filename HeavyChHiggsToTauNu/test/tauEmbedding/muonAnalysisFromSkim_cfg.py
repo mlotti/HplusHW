@@ -32,17 +32,10 @@ process.source = cms.Source('PoolSource',
         # For testing in lxplus
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
+        #dataVersion.getAnalysisDefaultFileMadhatter()
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9/00c200b343cbc3d5ec3f111d1d98acde/skim_107_1_CZl.root"
   )
 )
-if options.doPat != 0:
-    process.source.fileNames = cms.untracked.vstring(
-        #dataVersion.getPatDefaultFileCastor()
-        #dataVersion.getPatDefaultFileMadhatter(dcap=True)
-        #"file:skim_1000.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/WJets_TuneZ2_Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9/00c200b343cbc3d5ec3f111d1d98acde/skim_127_2_AUw.root"
-    )
-
 
 ################################################################################
 
@@ -61,12 +54,16 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
 patArgs = {"doPatTrigger": False,
 #           "doPatTaus": False,
-           "doHChTauDiscriminators": False,
+#           "doHChTauDiscriminators": False,
            "doPatElectronID": False,
            "doTauHLTMatching": False,
            "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+
+# Add the muon selection counters, as this is done after the skim
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
+additionalCounters.extend(MuonSelection.muonSelectionCounters)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
@@ -89,29 +86,33 @@ if len(trigger) == 0:
 
 def createAnalysis(name, postfix="", **kwargs):
     def create(**kwargs):
-        muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name, trigger=trigger, **kwargs)
+        muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
+                                    trigger=trigger, jets="goodJets", met="pfMet",
+                                    **kwargs)
 
     prefix = name+postfix
-    create(prefix=prefix)
+    create(prefix=prefix, **kwargs)
     if not "doIsolationWithTau" in kwargs:
         create(prefix=prefix+"IsoTau", doIsolationWithTau=True, **kwargs)
 
     create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
 
 def createAnalysis2(**kwargs):
-    #createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
+    createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
+    args = {}
+    args.update(kwargs)
     postfix = kwargs.get("postfix", "")
     for pt, met, njets in [
         (30, 20, 2),
         (30, 20, 3),
         (40, 20, 3)
         ]:
-        kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
-        kwargs["muonPtCut"] = pt
-        kwargs["metCut"] = met
-        kwargs["njets"] = njets
-        createAnalysis("muonSelectionPF", **kwargs)
+        args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
+        args["muonPtCut"] = pt
+        args["metCut"] = met
+        args["njets"] = njets
+        createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2()
 

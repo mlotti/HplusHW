@@ -4,12 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-#dataVersion = "38X"
-#dataVersion = "39Xredigi"
 dataVersion = "311Xredigi"
+#dataVersion = "41Xdata"
 
 debug = False
 #debug = True
@@ -41,12 +37,13 @@ process.source = cms.Source('PoolSource',
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
     #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1_test1/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_8Ag.root"
-        "file:embedded_RECO.root"
+        #"file:embedded_RECO.root"
         #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/WJets_TuneZ2_Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_test1/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_1_1_uqe.root"
   )
 )
 if dataVersion.isData():
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/Mu_147196-149294_Dec22/Mu/Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v6_2/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_1_1_92A.root"]
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/Mu_147196-149294_Dec22/Mu/Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v9_test1/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_2_1_2K0.root"]
 
 ################################################################################
 
@@ -71,7 +68,11 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 #recoProcess = "REDIGI36X"
 #recoProcess = "REDIGI39X"
-recoProcess = "REDIGI311X"
+#recoProcess = "REDIGI311X"
+#recoProcess = "REDIGI311X"
+recoProcess = dataVersion.getTriggerProcess()
+if dataVersion.isData():
+    recoProcess = "RECO"
 
 # Calculate PF MET for 
 from PhysicsTools.PFCandProducer.pfMET_cfi import pfMET

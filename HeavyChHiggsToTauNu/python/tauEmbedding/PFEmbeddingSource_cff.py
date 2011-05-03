@@ -47,6 +47,8 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     src = cms.untracked.InputTag("generator")
 )
 
+muonSelectionCounters = [ "tightenedMuonsCount" ]
+
 # Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing
 try:
     from TauAnalysis.MCEmbeddingTools.MCParticleReplacer_cfi import *

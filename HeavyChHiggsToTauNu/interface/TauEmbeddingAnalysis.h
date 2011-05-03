@@ -79,6 +79,10 @@ namespace HPlus {
     void fillAfterMetCut();
     void fillEnd();
 
+    bool isEmbeddingInput() const {
+      return fEmbeddingMode;
+    }
+
   private:
     edm::InputTag fOriginalMetSrc;
     edm::InputTag fEmbeddingMetSrc;

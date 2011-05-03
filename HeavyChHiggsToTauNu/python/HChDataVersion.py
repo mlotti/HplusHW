@@ -65,10 +65,12 @@ config = {
     },
     "39Xdata": {
         "triggerProcess": "HLT",
+        "recoProcess": "RECO",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/BTau_148822-149182_Dec22/BTau/Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9/9bdd93eeac3a09280bc73f406326390f/pattuple_102_1_kIm.root",
     },
     "311Xredigi": {
         "triggerProcess": "REDIGI311X",
+        "recoProcess": "REDIGI311X",
         "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
         "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
@@ -77,6 +79,7 @@ config = {
     },
     "41Xdata": {
         "triggerProcess": "HLT",
+        "recoProcess": "RECO",
         "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v1/AOD/84CA2525-5750-E011-AEC1-003048D375AA.root",
         "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10_1-ecb64a326bff780f833933d40177edb0/USER/pattuple_5_1_g68.root",
@@ -95,6 +98,7 @@ class DataVersion:
         conf = config[dataVersion]
 
         self.trigger = conf["triggerProcess"]
+        self.recoProcess = conf.get("recoProcess", None)
         self.version = dataVersion
 
         for f in ["patCastor", "patMadhatter", "analysisCastor", "analysisMadhatter"]:
@@ -149,6 +153,11 @@ class DataVersion:
         if self.isData():
             raise Exception("Default signal trigger is available only for MC")
         return self.signalTrigger
+
+    def getRecoProcess(self):
+        if not self.recoProcess:
+            raise Exception("Reco process name is not available for %s" % self.version)
+        return self.recoProcess
 
     def getGlobalTag(self):
         return self.globalTag

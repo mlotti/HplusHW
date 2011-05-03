@@ -195,13 +195,11 @@ class Count:
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
 
+## Transform histogram (TH1) to a list of (name, Count) pairs.
+#
+# The name is taken from the x axis label and the count is Count
+# object with value and (statistical) uncertainty.
 def _histoToCounter(histo):
-    """Transform histogram (TH1) to a list of (name, Count) pairs.
-
-    The name is taken from the x axis label and the count is Count
-    object with value and (statistical) uncertainty.
-    """
-
     ret = []
 
     for bin in xrange(1, histo.GetNbinsX()+1):
@@ -211,13 +209,16 @@ def _histoToCounter(histo):
 
     return ret
 
+## Transform histogram (TH1) to a list of values
+def histoToList(histo):
+    return [histo.GetBinContent(bin) for bin in xrange(1, histo.GetNbinsX()+1)]
+
+
+## Transform histogram (TH1) to a dictionary.
+#
+# The key is taken from the x axis label, and the value is the bin
+# content.
 def _histoToDict(histo):
-    """Transform histogram (TH1) to a dictionary.
-
-    The key is taken from the x axis label, and the value is the bin
-    content.
-    """
-
     ret = {}
 
     for bin in xrange(1, histo.GetNbinsX()+1):

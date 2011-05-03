@@ -91,6 +91,15 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
+            },
+            "pattuple_v10_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_146428_pattuple_v10_1b-c4ea815147b859c202ad50a9425ec5e1/USER",
+                "luminosity": 14.448978,
+                "number_of_jobs": 20
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
             }
         }
     },
@@ -113,7 +122,16 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
-            }
+            },
+            "pattuple_v10_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v10_1b-825f9f3a2228e308bb923d3925115592/USER",
+                "luminosity": 16.084022,
+                "number_of_jobs": 10
+            },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
+            },
         }
     },
     "BTau_149291-149294_Dec22": {
@@ -135,109 +153,17 @@ datasets = {
             },
             "pattuple_v9": {
                 "fallback": "pattuple_v9_1"
-            }
-        }
-    },
-
-    "BTau_141950-144114_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk5",
-        "data": {
-            "pattuple_v6_3": {
+            },
+            "pattuple_v10_1": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_3-dfc6d27ce5aa60b808b4a2bcd34b7c86/USER",
-                "luminosity": 2.799065107,
-                "number_of_jobs": 20
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        }
-
-    },
-    "BTau_146240-148107_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "runs": (146240, 148107),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 50, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 50,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ba8b03606ed700d03389442a6378453f/USER",
-                "luminosity": 14.527814041,
-                "number_of_jobs": 20
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-    "BTau_148108-149182_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v3",
-        "runs": (148108, 149182),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 15, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 15,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-9e6b3ce3f61ebd1c080721235dd644e5/USER",
-                "luminosity": 16.166113934,
-                "number_of_jobs": 10
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
-    },
-    "BTau_149291-149442_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
-        "runs": (149291, 149442),
-        "data": {
-            "RECO": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "lumis_per_job": 20, # Adjusted for PATtuple file size
-                "lumiMask": "Nov4ReReco"
-            },
-            "AOD": {
-                "datasetpath": "/BTau/Run2010B-Nov4ReReco_v1/AOD",
-                "luminosity": 0,
-                "lumis_per_job": 20,
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_3": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_3-ae876897d946fa7a17cf73f63fd66244/USER",
-                "luminosity": 2.270540967,
+                "datasetpath": "/BTau/local-Run2010B_Dec22ReReco_v1_AOD_149291_pattuple_v10_1b-79566228a8278608a71cc48012464cce/USER",
+                "luminosity": 2.270373,
                 "number_of_jobs": 2
             },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_3"
-            }
-        },
+            "pattuple_v10": {
+                "fallback": "pattuple_v10_1"
+            },
+        }
     },
 
     # Jet PD (for QCD background analysis"
@@ -330,72 +256,7 @@ datasets = {
         }
     },
 
-    "JetMETTau_136033-141887_Nov4": { # first run actually 135821, but lumi list starts from this one
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "data": {
-            "RECO": {
-                "datasetpath": "/JetMETTau/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMETTau/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": .284734728,
-                "number_of_jobs": 10 # 1.7M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
-        }
-    },
-    "JetMET_141950-144114_Nov4": {
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "data": {
-            "RECO": {
-                "datasetpath": "/JetMET/Run2010A-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 300, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/JetMET/local-Run2010A_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 2.895797321,
-                "number_of_jobs": 20 # 2.9M events
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
-        }
-    },
-    "Jet_146240-148058_Nov4": { # last run really 149442, but last run with HLT_Jet30U is this one
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Jet30U",
-        "runs": (146240, 148058),
-        "data": {
-            "RECO": {
-                "datasetpath": "/Jet/Run2010B-Nov4ReReco_v1/RECO",
-                "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple
-                "lumiMask": "Nov4ReReco"
-            },
-            "pattuple_v6_4": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Jet/local-Run2010B_Nov4ReReco_v1_RECO_pattuple_v6_4-4c46839dc2dbfe33eac25fb0510aaca6/USER",
-                "luminosity": 14.527814041,
-                "number_of_jobs": 4
-            },
-            "pattuple_v6": {
-                "fallback": "pattuple_v6_4"
-            }
-        }
-    },
-
-    # For QyadJet trigger
+    # For QuadJet trigger
     "JetMETTau_QuadJet_136035-141881_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_QuadJet15U",
@@ -532,21 +393,6 @@ datasets = {
 
 
     # Mu PD (for electroweak background analysis)
-    "Mu_135821-144114_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu9",
-        "data": {}
-    },
-    "Mu_146240-147116_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu9",
-        "data": {}
-    },
-    "Mu_147196-149442_Nov4": { # needed to keep tau embedding happy
-        "dataVersion": "38Xdata",
-        "trigger": "HLT_Mu15_v1",
-        "data": {}
-    },
     "Mu_136035-144114_Dec22": {
         "dataVersion": "39Xdata",
         "trigger": "HLT_Mu9",

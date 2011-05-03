@@ -441,8 +441,15 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     if options.tauEmbeddingInput != 0:
         counters = MuonSelection.muonSelectionCounters[:]
 
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
+
     if options.doPat == 0:
-        return (cms.Sequence(), counters)
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+        seq = cms.Sequence(
+            process.goodPrimaryVertices10
+        )
+        return (seq, counters)
 
     print "Running PAT on the fly"
 
@@ -489,6 +496,11 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         # Another part of the PAT process.out hack
         if not hasOut:
             del process.out
+
+        # Add PV selection, if not yet done by PAT
+        if dataVersion.isData():
+            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+            process.patSequence *= process.goodPrimaryVertices
     else:
         if dataVersion.isData():
             process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
@@ -506,6 +518,9 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
                 pargs["matchingJetTrigger"] = jetTrigger            
 
         process.patSequence = addPat(process, dataVersion, **pargs)
+    
+    # Add selection of PVs with sumPt > 10
+    process.patSequence *= process.goodPrimaryVertices10
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *
