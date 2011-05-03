@@ -134,6 +134,7 @@ def scaleMCHistos(h, scale):
 
 def scaleMCfromWmunu(h):
     # Data/MC scale factor from AN 2011/053
+#    scaleMCHistos(h, 1.736)
     scaleMCHistos(h, 1.0)
 
 
@@ -480,7 +481,7 @@ def deltaPhi(h, rebin=40, ratio=False):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
     
-def deltaPhi2(h, name, rebin=1):
+def deltaPhi2(h, name, rebin=2):
 #    name = flipName(h.getRootHistoPath())
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
@@ -541,7 +542,7 @@ def transverseMass2(h,name, rebin=5):
     h.addMCUncertainty()
 
     opts = {"xmax": 200}
-    name = "transverseMass"
+#    name = "transverseMass"
     opts = {"ymin": 0.00001, "ymaxfactor": 3,"xmax": 300 }
 #    opts = {"xmax": 200 }
     #h.createFrameFraction(name, opts=opts)
@@ -713,7 +714,7 @@ def tauJetMass(h, name, rebin=1, ratio=False):
 
 
 
-def topMass(h, name, rebin=10, ratio=False):
+def topMass(h, name, rebin=20, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 #    particle = "jet"
 #    if "bjet" in name:
@@ -735,7 +736,7 @@ def topMass(h, name, rebin=10, ratio=False):
     else:
         h.createFrame(name, opts=opts)
 #    h.createFrame(name)
-    h.getPad().SetLogy(True)
+#    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
