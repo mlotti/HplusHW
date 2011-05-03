@@ -570,8 +570,24 @@ def addPF2PAT(process, dataVersion,
         'keep *_selectedPatPFParticles%s_*_*' % postfix,
         ]
 
+    sequence = cms.Sequence()
+
+
     # Jet modifications
+    # L1FastJet
+    # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
+    # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
+    process.ak5PFL1Fastjet.useCondDB = False
+    process.load('RecoJets.Configuration.RecoPFJets_cff')
+    process.kt6PFJets.doRhoFastjet = True
+    process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
+    process.pfJetsPFlow.doAreaFastjet = True # ak5PFJets
+    process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+    sequence *= process.kt6PFJets
+
     setPatJetDefaults(getattr(process, "patJets"+postfix))
+    process.patJetCorrFactorsPFlow.levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
+
 
     # Use HPS taus
     addHChTauDiscriminators()
@@ -639,15 +655,13 @@ def addPF2PAT(process, dataVersion,
         patTauSeq *
         getattr(process, "patTaus"+postfix)
     )
-            
-    seq = cms.Sequence(
-        getattr(process, "patPF2PATSequence"+postfix)
-    )
+
+    sequence *= getattr(process, "patPF2PATSequence"+postfix)
 
     if doTauHLTMatching:
-        seq *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, collections=["selectedPatTaus"+postfix], postfix=postfix)
+        sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, collections=["selectedPatTaus"+postfix], postfix=postfix)
 
-    return seq
+    return sequence
 
 
 ### The functions below are taken from
