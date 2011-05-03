@@ -11,6 +11,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 dataVersion = "39Xredigi"
 #dataVersion = "311Xredigi"
+#dataVersion = "41Xdata"
 
 ################################################################################
 
@@ -27,6 +28,7 @@ if len(trigger) == 0:
 mu9filter = "hltSingleMu9L3Filtered9"
 mu15filter = "hltSingleMu15L3Filtered15"
 mu20filter = "hltSingleMu20L3Filtered20"
+mu24filter = "hltSingleMu24L3Filtered24"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -35,6 +37,8 @@ elif "HLT_Mu15" in trigger:
     triggerFilter = mu15filter
 elif "HLT_Mu20" in trigger:
     triggerFilter = mu20filter
+elif "HLT_Mu24" in trigger:
+    triggerFilter = mu24filter
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
@@ -55,6 +59,7 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileMadhatter()
         "file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM/E28BCD86-B311-E011-A953-E0CB4E19F95B.root"
+        #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
     )
 )
 
@@ -87,20 +92,22 @@ del process.out
 process.patDefaultSequence.remove(process.countPatTaus)
 
 # Triggering
-process.load("HLTrigger.HLTfilters.triggerResultsFilter_cfi")
-process.triggerResultsFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
-process.triggerResultsFilter.l1tResults = cms.InputTag("") # dummy
-process.triggerResultsFilter.throw = cms.bool(True)
-process.triggerResultsFilter.triggerConditions = cms.vstring(trigger)
-process.commonSequence *= process.triggerResultsFilter
+if dataVersion.isMC():
+    process.load("HLTrigger.HLTfilters.triggerResultsFilter_cfi")
+    process.triggerResultsFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+    process.triggerResultsFilter.l1tResults = cms.InputTag("") # dummy
+    process.triggerResultsFilter.throw = cms.bool(True)
+    process.triggerResultsFilter.triggerConditions = cms.vstring(trigger)
+    process.commonSequence *= process.triggerResultsFilter
+else:
+    process.TriggerFilter.triggerConditions = [trigger]
 
 process.triggeredCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.triggeredCount
 counters.append("triggeredCount")
 
 # Primary vertex
-process.firstPrimaryVertex = cms.EDProducer(
-    "HPlusSelectFirstVertex",
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 process.goodPrimaryVertex = cms.EDFilter("VertexSelector",
@@ -108,19 +115,19 @@ process.goodPrimaryVertex = cms.EDFilter("VertexSelector",
     src = cms.InputTag("firstPrimaryVertex"),
     cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
 )
-process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
+process.goodPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
     src = cms.InputTag("goodPrimaryVertex"),
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999)
 )
-process.primaryVertexCount = cms.EDProducer("EventCountProducer")
+process.goodPrimaryVertexCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= (
     process.firstPrimaryVertex *
     process.goodPrimaryVertex *
-    process.primaryVertexFilter *
-    process.primaryVertexCount
+    process.goodPrimaryVertexFilter *
+    process.goodPrimaryVertexCount
 )
-counters.append("primaryVertexCount")
+counters.append("goodPrimaryVertexCount")
 
 
 # HLT matching and embedding
@@ -288,6 +295,7 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         isHLTMu9     = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu9filter),
         isHLTMu15    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu15filter),
         isHLTMu20    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu20filter),
+        isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
