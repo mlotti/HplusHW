@@ -353,14 +353,14 @@ def setPatTauDefaults(module, includeTracksPFCands):
         "embedLeadPFCand",
         "embedLeadPFChargedHadrCand",
         "embedLeadPFNeutralCand",
-        "embedSignalPFCands",
-        "embedSignalPFChargedHadrCands",
-        "embedSignalPFNeutralHadrCands",
-        "embedSignalPFGammaCands",
-        "embedIsolationPFCands",
-        "embedIsolationPFChargedHadrCands",
-        "embedIsolationPFNeutralHadrCands",
-        "embedIsolationPFGammaCands",
+#        "embedSignalPFCands",
+#        "embedSignalPFChargedHadrCands",
+#        "embedSignalPFNeutralHadrCands",
+#        "embedSignalPFGammaCands",
+#        "embedIsolationPFCands",
+#        "embedIsolationPFChargedHadrCands",
+#        "embedIsolationPFNeutralHadrCands",
+#        "embedIsolationPFGammaCands",
         ]
 
     value = not includeTracksPFCands
@@ -577,16 +577,18 @@ def addPF2PAT(process, dataVersion,
     # L1FastJet
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
-    process.ak5PFL1Fastjet.useCondDB = False
-    process.load('RecoJets.Configuration.RecoPFJets_cff')
-    process.kt6PFJets.doRhoFastjet = True
-    process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
-    process.pfJetsPFlow.doAreaFastjet = True # ak5PFJets
-    process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
-    sequence *= process.kt6PFJets
+    doL1Fastjet = True
+    if doL1Fastjet:
+        process.ak5PFL1Fastjet.useCondDB = False
+        process.load('RecoJets.Configuration.RecoPFJets_cff')
+        process.kt6PFJets.doRhoFastjet = True
+        process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
+        process.pfJetsPFlow.doAreaFastjet = True # ak5PFJets
+        process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+        sequence *= process.kt6PFJets
+        process.patJetCorrFactorsPFlow.levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
-    process.patJetCorrFactorsPFlow.levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
 
 
     # Use HPS taus
