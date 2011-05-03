@@ -167,7 +167,7 @@ fakeMETVeto = cms.untracked.PSet(
 )
 
 jetTauInvMass = cms.untracked.PSet(
-  ZmassResolution = cms.untracked.double(10.0),
+  ZmassResolution = cms.untracked.double(5.0),
 )
 
 TauEmbeddingAnalysis = cms.untracked.PSet(
