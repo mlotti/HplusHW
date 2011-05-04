@@ -227,14 +227,26 @@ def overrideTriggerFromOptions(options):
         trigger.triggers = [options.trigger]
 
 
+def _getTriggerVertexArgs(kwargs):
+    effargs = {}
+    vargs = {}
+    effargs.update(kwargs)
+    if "module" in effargs:
+        module = effargs["module"]
+        del effargs["module"]
+        effargs["pset"] = module.triggerEfficiency
+        vargs["pset"] = module.vertexWeight
+    return (effargs, vargs)
+
 def setTriggerVertexFor2010(**kwargs):
-    setEfficiencyTriggersFor2010(**kwargs)
-    setVertexWeightFor2010()
+    (effargs, vargs) = _getTriggerVertexArgs(kwargs)
+    setEfficiencyTriggersFor2010(**effargs)
+    setVertexWeightFor2010(**vargs)
 
 def setTriggerVertexFor2011(**kwargs):
-    setEfficiencyTriggersFor2011(**kwargs)
-    setVertexWeightFor2011()
-
+    (effargs, vargs) = _getTriggerVertexArgs(kwargs)
+    setEfficiencyTriggersFor2011(**effargs)
+    setVertexWeightFor2011(**vargs)
 
 # One trigger
 def setEfficiencyTrigger(trigger, pset=triggerEfficiency):
