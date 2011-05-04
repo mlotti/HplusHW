@@ -237,15 +237,15 @@ def setTriggerVertexFor2011(**kwargs):
 
 
 # One trigger
-def setEfficiencyTrigger(trigger):
-    triggerEfficiency.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
+def setEfficiencyTrigger(trigger, pset=triggerEfficiency):
+    pset.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
 
 # Many triggers in  (trigger, lumi) pairs
-def setEfficiencyTriggers(triggers):
-    triggerEfficiency.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
+def setEfficiencyTriggers(triggers, pset=triggerEfficiency):
+    pset.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
 
 # Triggers and lumis from task names
-def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10"):
+def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10", **kwargs):
     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
     triggers = []
     for name in tasknames:
@@ -268,20 +268,20 @@ def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_
                 conf["trigger"],
                 data["luminosity"]
             ) )
-    setEfficiencyTriggers(triggers)
+    setEfficiencyTriggers(triggers, **kwargs)
 
-def setEfficiencyTriggersFor2010(datasetType="pattuple_v9"):
+def setEfficiencyTriggersFor2010(datasetType="pattuple_v10", **kwargs):
     setEfficiencyTriggersFromMulticrabDatasets([
             "BTau_146428-148058_Dec22",
             "BTau_148822-149182_Dec22",
             "BTau_149291-149294_Dec22",
-            ], datasetType)
-def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
+            ], datasetType, **kwargs)
+def setEfficiencyTriggersFor2011(datasetType="pattuple_v10", **kwargs):
     setEfficiencyTriggersFromMulticrabDatasets([
             "Tau_160431-161016_Prompt",
             "Tau_162803-163261_Prompt",
             "Tau_163270-163369_Prompt",
-            ])
+            ], **kwargs)
 
 def formatEfficiencyTrigger(pset):
     if pset.luminosity.value() < 0:
@@ -290,19 +290,19 @@ def formatEfficiencyTrigger(pset):
         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
 
 # Vertex weighting
-def setVertexWeightFor2010():
+def setVertexWeightFor2010(pset=vertexWeight):
     # From runs 136035-149294 single tau trigger and W+jet
     #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
     # From runs 136035-149294 single tau trigger and QCd, vertex sumpt > 10
-    vertexWeight.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000, 0.00260647, 0.00000000)
-    vertexWeight.enabled = True
+    pset.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000, 0.00260647, 0.00000000)
+    pset.enabled = True
 
-def setVertexWeightFor2011():
+def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets
     #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
     # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
-    vertexWeight.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
-    vertexWeight.enabled = True
+    pset.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
+    pset.enabled = True
 
 
 # Tau selection
