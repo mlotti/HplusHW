@@ -8,14 +8,17 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
 
 # write text to plot
-def writePreliminaryText():
-    text = TLatex()
-    text.SetTextColor(1)
-    text.SetTextAlign(12)
-    text.SetTextSize(0.04)
-    text.SetTextFont(1)
-    text.SetNDC()
-    text.DrawLatex(0.185,0.9,"CMS preliminary")
+def writeTitleTexts(lumi):
+    x = 0.62
+    y = 0.96
+    l = TLatex()
+    l.SetNDC()
+    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
+    l.DrawLatex(x, y, "CMS Preliminary")
+    x = 0.2
+    l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
+    x = 0.45
+    l.DrawLatex(x, y, lumi + " pb^{-1}")
     return 0
 
 def writeText( myText, y ):
@@ -139,7 +142,7 @@ def main():
     observed_tanb.Draw("LP")
 
     # Axis labels
-    frame.GetXaxis().SetTitle("m_{H^{#pm}} [GeV/c^{2}]")
+    frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame.GetYaxis().SetTitle("tan(#beta)")
 
     # Legends
@@ -164,14 +167,13 @@ def main():
     lumifile = open("input_luminosity","r")
     lumi = lumifile.readline()
 #    print("Lumi is %d",(L))
-    writePreliminaryText()
-    top = 0.85
+    writeTitleTexts(lumi)
+    top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     writeText("Fully hadronic final state",   top - lineSpace)
-    writeText("#sqrt{s}=7 TeV, "+ lumi + " pb^{-1}", top - 2*lineSpace)
-    writeText("Bayesian CL limits",           top - 3*lineSpace)
-    writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 4*lineSpace)
+    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     
     # Save to file
     formats = [

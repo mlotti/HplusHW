@@ -113,6 +113,10 @@ namespace HPlus {
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
+    TH1 *hSelectedTauEtMetCut;
+    TH1 *hSelectedTauEtaMetCut;
+    TH1 *hSelectedTauPhiMetCut;
+    TH1 *hSelectedTauRtauMetCut;
   };
 }
 
