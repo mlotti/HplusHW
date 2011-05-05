@@ -431,6 +431,17 @@ class MuonAnalysis:
         self.cloneAnalyzers(name)
         return name
 
+    def electronVetoSignalAnalysis(self):
+        name = "ElectronVeto"
+        from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalElectronVeto
+        self.analysis.addAnalysisModule(name,
+            filter = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+                GlobalElectronVeto=GlobalElectronVeto.clone()
+            ),
+            counter=True)
+        self.cloneAnalyzers(name)
+        return name
+
     def electronVeto(self):
         name = "ElectronVeto"
         electronVeto = "et() > 15 && abs(eta()) < 2.5 && (dr03TkSumPt()+dr03EcalRecHitSumEt()+dr03HcalTowerSumEt())/et() < 0.2"
@@ -501,6 +512,7 @@ class MuonAnalysis:
         #self.muonLargestPt()
 
         name = self.muonVetoSignalAnalysis()
+        name = self.electronVetoSignalAnalysis()
 
         if not self.afterOtherCuts:
             self.addWtransverseMassHistos()
