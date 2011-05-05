@@ -55,18 +55,21 @@ def addDataSelection(process, dataVersion, trigger):
     # Require a good primary vertex (we might want to do this for MC too), see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Good_Vertex_selection
     # This is from rev. 1.4 of DPGAnalysis/Skims/python/GoodVertex_cfg.py
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-    process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
-        src = cms.InputTag("goodPrimaryVertices"),
-        minNumber = cms.uint32(1),
-        maxNumber = cms.uint32(999)
-    )
+#    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+#    process.primaryVertexFilter = cms.EDFilter("VertexCountFilter",
+#        src = cms.InputTag("goodPrimaryVertices"),
+#        minNumber = cms.uint32(1),
+#        maxNumber = cms.uint32(999)
+#    )
 
-    process.passedPrimaryVertexFilter = cms.EDProducer("EventCountProducer")
-    seq *= process.goodPrimaryVertices
-    seq *= process.primaryVertexFilter
-    seq *= process.passedPrimaryVertexFilter
+#    process.passedPrimaryVertexFilter = cms.EDProducer("EventCountProducer")
+#    seq *= process.goodPrimaryVertices
+#    seq *= process.primaryVertexFilter
+#    seq *= process.passedPrimaryVertexFilter
 
     return seq
 
-dataSelectionCounters = ["allEvents", "passedTrigger", "passedScrapingVeto", "passedHBHENoiseFilter", "passedPrimaryVertexFilter"]
+dataSelectionCounters = [
+    "allEvents", "passedTrigger", "passedScrapingVeto", "passedHBHENoiseFilter",
+#    "passedPrimaryVertexFilter"
+    ]
