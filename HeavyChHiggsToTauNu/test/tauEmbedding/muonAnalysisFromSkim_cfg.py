@@ -17,6 +17,8 @@ options.register("WDecaySeparate",
                  "Separate W decays from MC information")
 options, dataVersion = getOptionsDataVersion(dataVersion, options)
 
+#options.doPat=1
+
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -55,7 +57,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
 patArgs = {"doPatTrigger": False,
 #           "doPatTaus": False,
 #           "doHChTauDiscriminators": False,
-           "doPatElectronID": False,
+           "doPatElectronID": True,
            "doTauHLTMatching": False,
            "doPatMuonPFIsolation": True,
            }
@@ -91,26 +93,34 @@ def createAnalysis(name, postfix="", **kwargs):
                                     **kwargs)
 
     prefix = name+postfix
-    create(prefix=prefix)
+    create(prefix=prefix, **kwargs)
     if not "doIsolationWithTau" in kwargs:
-        create(prefix=prefix+"IsoTau", doIsolationWithTau=True, **kwargs)
-
+        for iso in [
+            "VLoose",
+            "Loose",
+            "Medium",
+            "Tight",
+            ]:
+            create(prefix=prefix+"IsoTau"+iso, doIsolationWithTau=True, isolationWithTauDiscriminator="by%sIsolation"%iso, **kwargs)
+        
     create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
 
 def createAnalysis2(**kwargs):
     createAnalysis("topMuJetRefMet", doIsolationWithTau=False, **kwargs)
 
+    args = {}
+    args.update(kwargs)
     postfix = kwargs.get("postfix", "")
     for pt, met, njets in [
         (30, 20, 2),
         (30, 20, 3),
         (40, 20, 3)
         ]:
-        kwargs["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
-        kwargs["muonPtCut"] = pt
-        kwargs["metCut"] = met
-        kwargs["njets"] = njets
-        createAnalysis("muonSelectionPF", **kwargs)
+        args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
+        args["muonPtCut"] = pt
+        args["metCut"] = met
+        args["njets"] = njets
+        createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2()
 

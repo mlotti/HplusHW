@@ -1,5 +1,5 @@
 Date: Apr. 13, 2011
-Description: HPlusHadronic
+Description: HPlusHadronic_120
 --------------------------------------------------------------------------------------------------------
 imax   1  number of channels
 jmax   4  number of backgrounds

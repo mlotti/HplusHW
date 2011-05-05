@@ -6,7 +6,7 @@ To run the analysis:
 
 Modify the following files, if needed:
 
-* HPlusHadronic.txt	rates & uncertainties
+* HPlusHadronic_x.txt	rates & uncertainties for mH=x
 * input_ett		efficiency of tt
 * input_luminosity	luminosity
 * input_nrest		sum of dibosons, single top and Drell-Yan

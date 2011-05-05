@@ -5,7 +5,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-#pattupleVersion = "pattuple_v6"
 #pattupleVersion = "pattuple_v9"
 pattupleVersion = "pattuple_v10"
 
@@ -25,14 +24,21 @@ if runPatOnTheFly:
 # The dataset definitions are in python/tools/multicrabDatasets.py
 multicrab.extendDatasets(pattupleVersion,
     [
-        #### 41X data and 311X MC
+        #### 39X/41X data and 311X MC
         # Data: single tau + MET
+        # 2010
+        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20;    v9, v10
+        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3; v9, v10
+        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10
+        # 2011
         "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
-        "Tau_162803-162828_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
+        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10
+        "Tau_163270-163369_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v10
 
         # Data: quadjet
         "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
-        "TauPlusX_162803-162828_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
+        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
+        "TauPlusX_163270-163369_Prompt", # HLT_QuadJet40_IsoPFTau40_v3; v10
 
         # MC Signal WH Spring11
         "TTToHplusBWB_M100_Spring11", # v10
@@ -118,62 +124,6 @@ multicrab.extendDatasets(pattupleVersion,
 #        "TToBLNu_t-channel_TuneZ2_Winter10", # v9
 #        "TToBLNu_tW-channel_TuneZ2_Winter10", # v9
 #        "DYJetsToLL_M50_TuneZ2_Winter10", # v9
-
-        #### 38X data and MC
-        # Data
-#        "BTau_141950-144114_Nov4", # v6
-#        "BTau_146240-148107_Nov4", # v6
-#        "BTau_148108-148864_Nov4", # v6
-        # Data for QCD
-#        "JetMETTau_136033-141887_Nov4", # v6
-#        "JetMET_141950-144114_Nov4",    # v6
-#        "Jet_146240-148058_Nov4",       # v6
-        # MC Signal Fall10
-#        "TTToHplusBWB_M90_Fall10",  # v6
-#        "TTToHplusBWB_M100_Fall10", # v6
-#        "TTToHplusBWB_M120_Fall10", # v6
-#        "TTToHplusBWB_M140_Fall10", # v6
-#        "TTToHplusBWB_M160_Fall10", # v6
-        # MC Signal Fall10 PU
-#        "TTToHplusBWB_M90_Fall10_PU",  # v6
-#        "TTToHplusBWB_M100_Fall10_PU", # v6
-#        "TTToHplusBWB_M120_Fall10_PU", # v6
-#        "TTToHplusBWB_M140_Fall10_PU", # v6
-#        "TTToHplusBWB_M160_Fall10_PU", # v6
-        # MC Background Fall10
-#        "QCD_Pt30to50_Fall10",   # v6
-#        "QCD_Pt50to80_Fall10",   # v6
-#        "QCD_Pt80to120_Fall10",  # v6
-#        "QCD_Pt120to170_Fall10", # v6
-#        "QCD_Pt170to300_Fall10", # v6
-#        "TTJets",                # v6 
-#        "WJets_Fall10",          # v6
-        # MC Background Fall10 PU
-#        "QCD_Pt30to50_Fall10_PU",   # v6
-#        "QCD_Pt50to80_Fall10_PU",   # v6
-#        "QCD_Pt80to120_Fall10_PU",  # v6
-#        "QCD_Pt120to170_Fall10_PU", # v6
-#        "QCD_Pt170to300_Fall10_PU", # v6
-#        "TTJets_PU",                # v6 
-#        "WJets_Fall10_PU",          # v6
-
-        #### 35X/36X MC
-        # MC Signal Spring10
-#        "TTToHpmToTauNu_M90_Spring10",  # v6
-#        "TTToHpmToTauNu_M100_Spring10", # v6
-#        "TTToHpmToTauNu_M120_Spring10", # v6
-#        "TTbar_Htaunu_M140_Spring10",   # v6
-#        "TTbar_Htaunu_M160_Spring10",   # v6
-        # MC Background Summer10
-#        "QCD_Pt30to50_Summer10",   # v6
-#        "QCD_Pt50to80_Summer10",   # v6
-#        "QCD_Pt80to120_Summer10",  # v6
-#        "QCD_Pt120to170_Summer10", # v6
-#        "QCD_Pt170to230_Summer10", # v6
-#        "QCD_Pt230to300_Summer10", # v6
-#        "TTbar_Summer10",          # v6
-#        "TTbarJets_Summer10",      # v6
-#        "WJets_Summer10",          # v6
         ])
 
 # Force all jobs go to jade, in some situations this might speed up

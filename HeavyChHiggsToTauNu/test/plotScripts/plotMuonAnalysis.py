@@ -194,7 +194,7 @@ def main():
         normalizeToLumi = 36
 
     def createPlot(name, **kwargs):
-        return Plot(datasets, sel+"/"+name, normalizeToLumi=normalizeToLumi, **kwargs)
+        return Plot(datasets, name, normalizeToLumi=normalizeToLumi, **kwargs)
 
     plotMet = PlotMet(datasets, rebin=5, normalizeToLumi=normalizeToLumi)
     
@@ -209,22 +209,22 @@ def main():
     
         printFraction = isel in [0, 2, 3]
     
-        muonPt(createPlot("muon_pt"), prefix)
-        muonEta(createPlot("muon_eta"), prefix)
-        muonPhi(createPlot("muon_phi"), prefix)
+        muonPt(createPlot(sel+"/muon_pt"), prefix)
+        muonEta(createPlot(sel+"/muon_eta"), prefix)
+        muonPhi(createPlot(sel+"/muon_phi"), prefix)
     
         isoPassed = []
         isoNames = ["sumIsoRel", "pfSumIsoRel"]
         for iso in isoNames:
-            isoPassed.append(muonIso(createPlot("muon_"+iso), prefix, iso, printFraction=printFraction))
+            isoPassed.append(muonIso(createPlot(sel+"/muon_"+iso), prefix, iso, printFraction=printFraction))
         muonIsoQcd(PlotIso(isoPassed, isoNames), prefix)
     
-        jetPt(createPlot("jet_pt"), prefix)
+        jetPt(createPlot(sel+"/jet_pt"), prefix)
     
         plotMet.plotLog("met", selection=sel)
     
         if isel > 0:
-            wTransMass(createPlot("wmumetPF_tmass"), prefix)
+            wTransMass(createPlot(sel+"/wmumetPF_tmass"), prefix)
     
     #for sel in [multipMuon, multipMuonJetSelection]:
     #    prefix = sel+"_"

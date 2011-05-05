@@ -7,3 +7,13 @@ goodPrimaryVertices = cms.EDFilter("VertexSelector",
     src = cms.InputTag("offlinePrimaryVertices"),
     cut = cms.string("!isFake && ndof > 4 && abs(z) < 24.0 && position.rho < 2.0")
 )
+
+goodPrimaryVertices10 = cms.EDFilter("PATPrimaryVertexCleaner",
+    src = cms.InputTag("goodPrimaryVertices"),
+    minMultiplicity = cms.uint32(0),
+    minPtSum = cms.double(10.),
+    maxTrackEta = cms.double(1e10),
+    maxNormChi2 = cms.double(1e10),
+    maxDeltaR = cms.double(1e10),
+    maxDeltaZ = cms.double(1e10),
+)
