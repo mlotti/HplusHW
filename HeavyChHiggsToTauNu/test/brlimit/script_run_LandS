@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# -- mH = 100
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_100.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_100_temp
+head -1 output_LandS_100_temp | awk '{print $12}' >& output_LandS_100
+tail -1 output_LandS_100_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_100
+
+# -- mH = 120
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_120.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_120_temp
+head -1 output_LandS_120_temp | awk '{print $12}' >& output_LandS_120
+tail -1 output_LandS_120_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_120
+
+# -- mH = 140
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_140.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_140_temp
+head -1 output_LandS_140_temp | awk '{print $12}' >& output_LandS_140
+tail -1 output_LandS_140_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_140
+
+# -- mH = 150
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_150.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_150_temp
+head -1 output_LandS_150_temp | awk '{print $12}' >& output_LandS_150
+tail -1 output_LandS_150_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_150
+
+# -- mH = 155
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_155.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_155_temp
+head -1 output_LandS_155_temp | awk '{print $12}' >& output_LandS_155
+tail -1 output_LandS_155_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_155
+
+# -- mH = 160
+./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_160.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_160_temp
+head -1 output_LandS_160_temp | awk '{print $12}' >& output_LandS_160
+tail -1 output_LandS_160_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_160
+
+#original
+#./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_temp
+#head -1 output_LandS_temp | awk '{print $12}' >& output_LandS
+#tail -1 output_LandS_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS
+#####
+echo
+ls -al output_LandS*

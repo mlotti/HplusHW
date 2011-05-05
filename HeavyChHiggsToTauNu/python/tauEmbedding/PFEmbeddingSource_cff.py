@@ -15,6 +15,21 @@ TauolaPolar = cms.PSet(
 #        fileNames = cms.untracked.vstring('/store/mc/Summer10/WJets_7TeV-madgraph-tauola/AODSIM/START36_V9_S09-v1/0046/E250F96A-CF7B-DF11-99E5-001BFCDBD1BE.root')
 #)
 
+tightenedMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("tightMuonsZ"),
+    cut = cms.string("pt() > 40")
+)
+tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("tightenedMuons"),
+    minNumber = cms.uint32(1)
+)
+tightenedMuonsCount = cms.EDProducer("EventCountProducer")
+tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
+    src = cms.InputTag("tightenedMuons"),
+    filter = cms.bool(False),
+    maxNumber = cms.uint32(1)
+)
+
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
    muonSrc = cms.untracked.InputTag("tauEmbeddingMuons"),
    metSrc = cms.untracked.InputTag("pfMet")
@@ -28,9 +43,11 @@ dimuonsGlobal = cms.EDProducer('ZmumuPFEmbedder',
 )
 
 filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
-    minEvents = cms.untracked.int32(1),
-    target =  cms.untracked.int32(1) 
+    target =  cms.untracked.int32(1),
+    src = cms.untracked.InputTag("generator")
 )
+
+muonSelectionCounters = [ "tightenedMuonsCount" ]
 
 # Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing
 try:
@@ -46,7 +63,16 @@ try:
     generator = newSource.clone()
     generator.src = cms.InputTag("adaptedMuonsFromWmunu")
 
-    ProductionFilterSequence = cms.Sequence(adaptedMuonsFromWmunu*dimuonsGlobal*generator*filterEmptyEv)
+    ProductionFilterSequence = cms.Sequence(
+        tightenedMuons *
+        tightenedMuonsFilter *
+        tightenedMuonsCount *
+        tauEmbeddingMuons *
+        adaptedMuonsFromWmunu *
+        dimuonsGlobal * 
+        generator * 
+        filterEmptyEv
+    )
 except ImportError:
     print
     print "  TauAnalysis/MCEmbeddingTools package is missing"

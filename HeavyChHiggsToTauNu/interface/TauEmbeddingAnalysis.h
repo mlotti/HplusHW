@@ -58,8 +58,6 @@ namespace HPlus {
       TH1 *hRtau;
       TH1 *hDeltaPhiOriginal;
       TH1 *hTransverseMassOriginal;
-      TH1 *hDeltaPhiOriginalTauID;
-      TH1 *hTransverseMassOriginalTauID;
       TH1 *hDeltaPhi;
       TH1 *hTransverseMass;
       TH2 *hEmbVSOrigMet;
@@ -80,6 +78,10 @@ namespace HPlus {
     void fillAfterTauId();
     void fillAfterMetCut();
     void fillEnd();
+
+    bool isEmbeddingInput() const {
+      return fEmbeddingMode;
+    }
 
   private:
     edm::InputTag fOriginalMetSrc;

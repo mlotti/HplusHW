@@ -160,14 +160,14 @@ namespace HPlus {
 
 
     // Create and attach handle to Muon Collection
-    edm::Handle<std::vector<pat::Muon> > myMuonHandle;
+    edm::Handle<edm::View<pat::Muon> > myMuonHandle;
     iEvent.getByLabel(fMuonCollectionName, myMuonHandle);    
     // In the case where the handle is empty...
     if ( !myMuonHandle->size() ){
       // std::cout << "Muon handle for '" << fMuonCollectionName << " is empty!" << std::endl;
     }
 
-    edm::Handle <reco::GenParticleCollection> genParticles;
+    edm::Handle <edm::View<reco::GenParticle> > genParticles;
     iEvent.getByLabel("genParticles", genParticles);
 
     // Reset/initialise variables
@@ -191,7 +191,7 @@ namespace HPlus {
     bool bMuonMatchingMCmuonFromW = false;
     
     // Loop over all Muons
-    for(pat::MuonCollection::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
+    for(edm::View<pat::Muon>::const_iterator iMuon = myMuonHandle->begin(); iMuon != myMuonHandle->end(); ++iMuon) {
 
       // Keep track of the muons analyzed
       bMuonPresent = true;

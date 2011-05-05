@@ -17,31 +17,44 @@ signalAnalysis = "../multicrab_110218_092432"
 
 #embedding = "multicrab_110228_091023"
 #embedding = "multicrab_110228_143151"
-embedding = "multicrab_signalAnalysis_110405_093754"
+#embedding = "multicrab_signalAnalysis_110405_093754"
+embedding = "multicrab_signalAnalysis_TauIdScan_110412_090749"
 embeddingData = embedding
 #signalAnalysis = "../multicrab_110228_085943"
-signalAnalysis = "../multicrab_110404_134156"
+#signalAnalysis = "../multicrab_110404_134156"
+signalAnalysis = "../multicrab_signalAnalysis_tauIdScan_110411_165833"
 
 #analysis = "signalAnalysis"
 analysis = "signalAnalysisTauSelectionHPSTightTauBased"
+#analysis = "signalAnalysisTauSelectionHPSTightTauNoRtauBased"
+#analysis = "signalAnalysisTauSelectionHPSMediumTauBased"
+#analysis = "signalAnalysisTauSelectionHPSMediumTauNoRtauBased"
+#analysis = "signalAnalysisTauSelectionHPSLooseTauBased"
+#analysis = "signalAnalysisTauSelectionHPSLooseTauNoRtauBased"
+counters = analysis+"Counters"
 
 # Datasets from embedding
-datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embedding, "multicrab.cfg"))
+datasets = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embedding, "multicrab.cfg"), counters=counters)
 if embeddingData == embedding:
     datasets.loadLuminosities()
-    pass
 else:
-    datasetsData = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embeddingData, "multicrab.cfg"))
+    datasetsData = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(embeddingData, "multicrab.cfg"), counters=counters)
     datasetsData.loadLuminosities()
     datasets.extend(datasetsData)
 
 # Datasets from the original signal analysis
-datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"))
+datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"), counters=counters)
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)
 
 lumi = datasetsExpected.getDataset("Data").getLuminosity()
+
+#datasets.getDataset("Data").setLuminosity(36)
+#datasetsExpected.getDataset("Data").setLuminosity(36)
+
+print "Embedded lumi %f" % datasets.getDataset("Data").getLuminosity()
+print "Expected lumi %f" % datasetsExpected.getDataset("Data").getLuminosity()
 
 datasets.remove("TToHplusBWB_M120")
 
@@ -79,8 +92,14 @@ def floatEqualAssert(a, b):
         raise Exception("a %f and b %f differ" % (a, b))
     
 
+def integrate(th, firstBin, lastBin):
+    integral = dataset.Count(0, 0)
+    for bin in xrange(firstBin, lastBin+1):
+        integral.add(dataset.Count(th.GetBinContent(bin), th.GetBinError(bin)))
+    return integral
+
 def normalizationFactor(embedded, expected):
-    mtRange = (0, 40)
+    mtRange = (30, 70)
 
     lowBin = embedded.FindBin(mtRange[0])
     upBin = embedded.FindBin(mtRange[1])-1
@@ -90,58 +109,76 @@ def normalizationFactor(embedded, expected):
     floatEqualAssert(mtRange[0], embedded.GetBinLowEdge(lowBin))
     floatEqualAssert(mtRange[1], embedded.GetXaxis().GetBinUpEdge(upBin))
 
-    embeddedCount = embedded.Integral(lowBin, upBin)
-    expectedCount = expected.Integral(lowBin, upBin)
-    normfactor = expectedCount/embeddedCount
+    embeddedCount = integrate(embedded, lowBin, upBin)
+    expectedCount = integrate(expected, lowBin, upBin)
+    normfactor = expectedCount.copy()
+    normfactor.divide(embeddedCount)
 
     print "mT normalization range %.1f - %.1f GeV/c^2 (bins %d - %d)" % (mtRange[0], mtRange[1], lowBin, upBin)
-    print "Embedded events %.1f" % embeddedCount
-    print "Expected events %.1f" % expectedCount
-    print "Normalization factor %f" % normfactor
+    print "Embedded events %.1f +- %.1f" % (embeddedCount.value(), embeddedCount.uncertainty())
+    print "Expected events %.1f +- %.1f" % (expectedCount.value(), expectedCount.uncertainty())
+    print "Normalization factor %.3f +- %.3f" % (normfactor.value(), normfactor.uncertainty())
 
     return normfactor
 
-def signalAreaEvents(embedded, expected):
-    mtMin = 40
+def signalAreaEvents(embedded, expected, normfactor):
+    mtMin = 0
 
     lowBin = embedded.FindBin(mtMin)
     upBin = embedded.GetNbinsX()+1 # include the overflow bin
 
-    embeddedCount = embedded.Integral(lowBin, upBin)
-    expectedCount = expected.Integral(lowBin, upBin)
+    #embeddedCount = integrate(embedded, lowBin, upBin)
+    #expectedCount = integrate(expected, lowBin, upBin)
+    #embeddedCount = dataset.Count(embedded.Integral(lowBin, upBin), 0)
+    #expectedCount = dataset.Count(expected.Integral(lowBin, upBin), 0)
+    embeddedCount = dataset.Count(embedded.Integral(), 0)
+    expectedCount = dataset.Count(expected.Integral(), 0)
 
-    print "Embedded events %.2f" % embeddedCount
-    print "Expected events %.2f" % expectedCount
+    prediction = embeddedCount.copy()
+    prediction.multiply(normfactor)
+
+    print "Embedded events %.2f" % embeddedCount.value()
+    print "Predicted events %.2f +- %.2f" % (prediction.value(), prediction.uncertainty())
+    print "Expected events %.2f" % expectedCount.value()
 
 mtEmbedded = plots.DataMCPlot(datasets, analysis+"/transverseMass")
 mtExpected = plots.DataMCPlot(datasetsExpected, analysis+"/transverseMass")
 
 def run(func, getter):
-    func(getter(mtEmbedded.histoMgr), getter(mtExpected.histoMgr))
+    return func(getter(mtEmbedded.histoMgr), getter(mtExpected.histoMgr))
+
+norms = {}
 
 for d in ["Data", "TTJets", "WJets"]:
     print
     print "From %s" % d
-    run(normalizationFactor, lambda h: h.getHisto(d).getRootHisto())
+    norms[d] = run(normalizationFactor, lambda h: h.getHisto(d).getRootHisto())
 
 mtEmbedded.stackMCHistograms()
 mtExpected.stackMCHistograms()
 
 print
 print "From all MC"
-run(normalizationFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+norms["MCSum"] = run(normalizationFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
 
 # Scale
-mtEmbedded.histoMgr.forEachHisto(lambda histo: histo.getRootHisto().Scale(0.406020))
+#mtEmbedded.histoMgr.forEachHisto(lambda histo: histo.getRootHisto().Scale(0.406020))
+
+normFactor = norms["Data"]
+#normFactor = dataset.Count(0.429, 0.296)
+#normFactor = dataset.Count(0.7, 0.345) # Data
+normFactor = dataset.Count(0.369, 0.042) # MC
+def signalAreaEventsFactor(x, y):
+    signalAreaEvents(x, y, normFactor)
 
 print
 print
 print "From Data"
-run(signalAreaEvents, lambda h: h.getHisto("Data").getRootHisto())
+run(signalAreaEventsFactor, lambda h: h.getHisto("Data").getRootHisto())
 
 print
 print "From all MC"
-run(signalAreaEvents, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+run(signalAreaEventsFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
 
 
 

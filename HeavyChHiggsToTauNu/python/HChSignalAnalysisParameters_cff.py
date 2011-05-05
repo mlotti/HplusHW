@@ -9,7 +9,10 @@ trigger = cms.untracked.PSet(
                                      "HLT_SingleIsoTau20_Trk5",
                                      "HLT_SingleIsoTau20_Trk15_MET20",
                                      "HLT_SingleIsoTau20_Trk15_MET25_v3",
-                                     "HLT_SingleIsoTau20_Trk15_MET25_v4"
+                                     "HLT_SingleIsoTau20_Trk15_MET25_v4",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v1",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v2",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
 )
@@ -32,7 +35,7 @@ tauSelectionBase = cms.untracked.PSet(
 #    operatingMode = cms.untracked.string("antiisolatedtau"), # Tau candidate selection applied, required prong cut and anti-isolation
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
-    ptCut = cms.untracked.double(30), # jet pt > value
+    ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.3), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20), # ldg. track > value
     rtauCut = cms.untracked.double(0.8), # rtau > value
@@ -67,6 +70,11 @@ tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
     selection = "HPSMediumTauBased"
 )
 
+tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    selection = "HPSLooseTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
     src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
     selection = "CombinedHPSTaNCTauBased"
@@ -78,12 +86,14 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTauBased,
                  tauSelectionHPSMediumTauBased,
+                 tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
 tauSelectionNames = ["TauSelectionCaloTauCutBased",
                      "TauSelectionShrinkingConeCutBased",
                      "TauSelectionShrinkingConeTaNCBased",
                      "TauSelectionHPSTightTauBased",
                      "TauSelectionHPSMediumTauBased",
+                     "TauSelectionHPSLooseTauBased",
                      "TauSelectionCombinedHPSTaNCBased"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
@@ -99,7 +109,7 @@ jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     cleanTauDR = cms.untracked.double(0.5), #no change
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(20),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
     METCut = cms.untracked.double(60.0)
@@ -115,7 +125,7 @@ MET = cms.untracked.PSet(
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminatorCut = cms.untracked.double(2.0),
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(20),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)
 )
@@ -153,7 +163,11 @@ InvMassVetoOnJets = cms.untracked.PSet(
 
 fakeMETVeto = cms.untracked.PSet(
   src = MET.src,
-  minDeltaPhi = cms.untracked.double(5.) # in degrees
+  minDeltaPhi = cms.untracked.double(10.) # in degrees
+)
+
+jetTauInvMass = cms.untracked.PSet(
+  ZmassResolution = cms.untracked.double(5.0),
 )
 
 TauEmbeddingAnalysis = cms.untracked.PSet(
@@ -180,11 +194,118 @@ topSelection = cms.untracked.PSet(
   TopMassHigh = cms.untracked.double(300.0)
 )
 
+vertexWeight = cms.untracked.PSet(
+    src = cms.InputTag("goodPrimaryVertices10"),
+    weights = cms.vdouble(1.0),
+    enabled = cms.bool(False),
+)
+
+triggerEfficiency = cms.untracked.PSet(
+    # The selected triggers for the efficiency. If one trigger is
+    # given, the parametrization of it is used as it is (i.e.
+    # luminosity below is ignored). If multiple triggers are given,
+    # their parametrizations are used weighted by the luminosities
+    # given below.
+    selectTriggers = cms.VPSet(
+        cms.PSet(
+            trigger = cms.string("HLT_SingleIsoTau20_Trk15_MET25_v4"),
+            luminosity = cms.double(2.270373344)
+        ),
+    ),
+    # The parameters of the trigger efficiency parametrizations,
+    # looked dynamically from TriggerEfficiency_cff.py
+    parameters = cms.PSet()
+)
+# Look up dynamically the triggers for which the parameters exist
+import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
+for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
+    setattr(triggerEfficiency.parameters, triggerName, getattr(trigEff, triggerName))
+
 # Functions
 def overrideTriggerFromOptions(options):
     if options.trigger != "":
         trigger.triggers = [options.trigger]
 
+
+def setTriggerVertexFor2010(**kwargs):
+    setEfficiencyTriggersFor2010(**kwargs)
+    setVertexWeightFor2010()
+
+def setTriggerVertexFor2011(**kwargs):
+    setEfficiencyTriggersFor2011(**kwargs)
+    setVertexWeightFor2011()
+
+
+# One trigger
+def setEfficiencyTrigger(trigger):
+    triggerEfficiency.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
+
+# Many triggers in  (trigger, lumi) pairs
+def setEfficiencyTriggers(triggers):
+    triggerEfficiency.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
+
+# Triggers and lumis from task names
+def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10"):
+    from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
+    triggers = []
+    for name in tasknames:
+        if not name in datasets:
+            raise Exception("No configuration fragment for datasets '%s' in multicrabDatasets.py" % name)
+        conf = datasets[name]
+        if not "trigger" in conf:
+            raise Exception("No trigger field in configuration fragment of dataset '%s'" % name)
+
+        if not datasetType in conf["data"]:
+            raise Exception("No definition for datasetType '%s' for dataset '%s', required to deduce the integrated luminosity" % (datasetType, name))
+        data = conf["data"][datasetType]
+        while "fallback" in data:
+            data = conf["data"][ data["fallback"] ]
+
+        if not "luminosity" in data:
+            raise Exception("No luminosity for dataset '%s' with datasetType '%s'" % (name, datasetType))
+
+        triggers.append( (
+                conf["trigger"],
+                data["luminosity"]
+            ) )
+    setEfficiencyTriggers(triggers)
+
+def setEfficiencyTriggersFor2010(datasetType="pattuple_v9"):
+    setEfficiencyTriggersFromMulticrabDatasets([
+            "BTau_146428-148058_Dec22",
+            "BTau_148822-149182_Dec22",
+            "BTau_149291-149294_Dec22",
+            ], datasetType)
+def setEfficiencyTriggersFor2011(datasetType="pattuple_v10"):
+    setEfficiencyTriggersFromMulticrabDatasets([
+            "Tau_160431-161016_Prompt",
+            "Tau_162803-163261_Prompt",
+            "Tau_163270-163369_Prompt",
+            ])
+
+def formatEfficiencyTrigger(pset):
+    if pset.luminosity.value() < 0:
+        return pset.trigger.value()
+    else:
+        return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
+
+# Vertex weighting
+def setVertexWeightFor2010():
+    # From runs 136035-149294 single tau trigger and W+jet
+    #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
+    # From runs 136035-149294 single tau trigger and QCd, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000, 0.00260647, 0.00000000)
+    vertexWeight.enabled = True
+
+def setVertexWeightFor2011():
+    # From runs 160431-162828 single tau trigger and W+jets
+    #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
+    # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
+    vertexWeight.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
+    vertexWeight.enabled = True
+
+
+# Tau selection
 def forEachTauSelection(function):
     for selection in tauSelections:
         function(selection)
@@ -198,6 +319,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
+    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
@@ -206,6 +328,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
 def setTauIDFactorizationMap(options):
@@ -222,8 +345,24 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val
 def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
+    selections = tauSelections[:]
+    names = tauSelectionNames[:]
+    hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
+    #del selections[hpsLoose]
+    #del names[hpsLoose]
+    # TCTau can be missing in tau embedding case
+    try: 
+        caloTauIndex = selections.index(tauSelectionCaloTauCutBased)
+        del selections[caloTauIndex]
+        del names[caloTauIndex]
+    except ValueError:
+        pass
+    combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
+    del selections[combinedHPSTaNCIndex]
+    del names[combinedHPSTaNCIndex]
+
     addAnalysisArray(process, prefix, module, setTauSelection,
-                     values = tauSelections, names = tauSelectionNames,
+                     values = selections, names = names,
                      preSequence = commonSequence,
                      additionalCounters = additionalCounters)
 

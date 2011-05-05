@@ -19,10 +19,10 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPtjjb = makeTH<TH1F>(*fs, "hPt_jjb", "hPt_jjb", 400, 0., 400.);
-    hPtmax = makeTH<TH1F>(*fs, "hPt_top", "hPt_top", 400, 0., 400.);
-    hjjbMass = makeTH<TH1F>(*fs, "jjbMass", "jjbMass", 400, 0., 400.);
-    htopMass = makeTH<TH1F>(*fs, "topMass", "topMass", 400, 0., 400.);
+    hPtjjb = makeTH<TH1F>(*fs, "hPt_jjb", "hPt_jjb", 400, 0., 800.);
+    hPtmax = makeTH<TH1F>(*fs, "hPt_top", "hPt_top", 400, 0., 800.);
+    hjjbMass = makeTH<TH1F>(*fs, "jjbMass", "jjbMass", 400, 0., 800.);
+    htopMass = makeTH<TH1F>(*fs, "topMass", "topMass", 400, 0., 800.);
   }
 
   TopSelection::~TopSelection() {}
@@ -60,8 +60,8 @@ namespace HPlus {
 
 	  double jjbMass = -999; 	  
 	  if ( jjbMass2 > 0)  jjbMass = sqrt(jjbMass2);
-	  hPtjjb->Fill(ptjjb);
-	  hjjbMass->Fill(jjbMass);
+	  hPtjjb->Fill(ptjjb, fEventWeight.getWeight());
+	  hjjbMass->Fill(jjbMass, fEventWeight.getWeight());
 	  if (ptjjb > ptmax ) {
 	    ptmax = ptjjb;
 	    topMass = jjbMass;
@@ -70,8 +70,8 @@ namespace HPlus {
       }
     }
 
-    hPtmax->Fill(ptmax);
-    htopMass->Fill(topMass);
+    hPtmax->Fill(ptmax, fEventWeight.getWeight());
+    htopMass->Fill(topMass, fEventWeight.getWeight());
 
     passEvent = true;
     if(topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;

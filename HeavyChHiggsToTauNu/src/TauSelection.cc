@@ -44,9 +44,11 @@ namespace HPlus {
       fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight, prongNumber);
     else if(fSelection == "HPSMediumTauBased")
       fTauID = new TauIDPFShrinkingConeHPSMedium(iConfig, eventCounter, eventWeight, prongNumber);
+    else if(fSelection == "HPSLooseTauBased")
+      fTauID = new TauIDPFShrinkingConeHPSLoose(iConfig, eventCounter, eventWeight, prongNumber);
     else if(fSelection == "CombinedHPSTaNCTauBased")
       fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, HPSLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
@@ -56,13 +58,7 @@ namespace HPlus {
       fOperationMode = kFactorizedTauID;
     else if (myOperatingModeSelection == "tauCandidateSelectionOnly")
       fOperationMode = kTauCandidateSelectionOnly;
-    else if (myOperatingModeSelection == "tauCandidateSelectionOnlyReversedRtau")
-      fOperationMode = kTauCandidateSelectionOnlyReversedRtau;
-    else if (myOperatingModeSelection == "antitautag")
-      fOperationMode = kAntiTauTag;
-    else if (myOperatingModeSelection == "antiisolatedtau")
-      fOperationMode = kAntiTauTagIsolationOnly;
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'tauCandidateSelectionOnly', 'antitautag', 'antiisolatedtau' (you chose '" << myOperatingModeSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'tauCandidateSelectionOnly' (you chose '" << myOperatingModeSelection << "')" << std::endl;
 
     // Histograms
     edm::Service<TFileService> fs;
@@ -172,16 +168,13 @@ namespace HPlus {
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 9, 0., 9.);
+    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 6, 0., 6.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Factorized tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "Anti-tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "Anti-isolated tau");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauCandidateSelectionOnly");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(7, "tauCandidateSelectionOnlyReversedRtau");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(8, "tauIDWithoutRtauOnly");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(9, "tauIDWithRtauOnly");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "tauCandidateSelectionOnly");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "tauIDWithoutRtauOnly");
+    hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauIDWithRtauOnly");
 
     // Factorization / general histograms
     // NB! change binning and range only if you ARE sure what you are doing ...
@@ -319,42 +312,11 @@ namespace HPlus {
     // Fill number of taus histograms
     hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
     // Make decision
-    if (fSelectedTaus.size() == 1)
+    if (fSelectedTaus.size() > 0)
       passEvent = true;
     // Return data object
     return Data(this, passEvent);
   }
-
-  /*TauSelection::Data TauSelection::analyzeTauIDWithRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    // Initialize
-    fOperationMode = kTauIDWithRtauOnly;
-    bool passEvent = false;
-    edm::PtrVector<pat::Tau> myTaus = fSelectedTaus;
-    fSelectedTaus.clear();
-    fSelectedTaus.reserve(fCleanedTauCandidates.size());
-    fTauID->reset();
-    // Document operation mode
-    fillOperationModeHistogram();
-    // Do selection
-    for(edm::PtrVector<pat::Tau>::const_iterator iter = myTaus.begin();
-        iter != myTaus.end(); ++iter) {
-      const edm::Ptr<pat::Tau> iTau = *iter;
-      if (!fTauID->passRTauCut(iTau)) continue;
-      }
-      // All cuts have been passed, save tau
-      fillHistogramsForSelectedTaus(iTau, iEvent);
-      fSelectedTaus.push_back(iTau);
-    }
-    // Handle counters
-    fTauID->updatePassedCounters();
-    // Fill number of taus histograms
-    hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight()); 
-    // Make decision
-    if (fSelectedTaus.size() == 1)
-      passEvent = true;
-    // Return data object
-    return Data(this, passEvent);
-  }*/
 
   bool TauSelection::doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus){
     // Document operation mode
@@ -365,7 +327,6 @@ namespace HPlus {
     fSelectedTaus.reserve(taus.size());
     fCleanedTauCandidates.clear();
     fCleanedTauCandidates.reserve(taus.size());
-    bool fAntiTauTagStatus = true;
     fTauID->reset();
 
     // Loop over the taus
@@ -378,12 +339,7 @@ namespace HPlus {
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
-      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;
-      // Include Rtau cut in cleaned tau candidates if it is used as a control region 
-      if (fOperationMode == kTauCandidateSelectionOnlyReversedRtau) {
-        if (fTauID->passRTauCut(iTau)) continue;
-      }
-      
+      if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;      
       fillHistogramsForCleanedTauCandidates(iTau, iEvent);
       fCleanedTauCandidates.push_back(iTau);
       
@@ -404,25 +360,6 @@ namespace HPlus {
           //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
           if (!fTauID->passRTauCut(iTau)) continue;
         }
-      } else if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly) {
-        // Anti-tau tag
-        if (fProngNumber == 1) {
-          if (!fTauID->passOneProngCut(iTau)) continue;
-        } else if (fProngNumber == 3) {
-          if (!fTauID->passThreeProngCut(iTau)) continue;
-        }
-        if (!fTauID->passAntiIsolation(iTau)) {
-          fAntiTauTagStatus = false; // Reject event if even one isolated jet exists
-          continue;
-        }
-        if (fOperationMode == kAntiTauTag) {
-          if (!fTauID->passAntiRTauCut(iTau)) {
-            fAntiTauTagStatus = false; // Reject event if even one jet fails the anti rtau cut
-            continue;
-          }
-          // NOTE: it is possible to add here some cut on E(hadr.energy)/E(jet) 
-          //if (!fTauID->passAntiDeltaECut(iTau)) continue;
-        }
       }
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
@@ -433,8 +370,7 @@ namespace HPlus {
     // Fill number of taus histograms
     hNumberOfTauCandidates->Fill(static_cast<float>(taus.size()), fEventWeight.getWeight());
     hNumberOfCleanedTauCandidates->Fill(static_cast<float>(fCleanedTauCandidates.size()), fEventWeight.getWeight());
-    if (fOperationMode != kTauCandidateSelectionOnlyReversedRtau || 
-        fOperationMode != kTauCandidateSelectionOnly) {
+    if (fOperationMode != kTauCandidateSelectionOnly) {
       hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight());
     }
 
@@ -454,7 +390,7 @@ namespace HPlus {
     }
     // Handle result of tau candidate selection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
-      return (fCleanedTauCandidates.size() == 1);
+      return (fCleanedTauCandidates.size() > 0);
     }
 
     // Check if taus have been found
@@ -466,10 +402,6 @@ namespace HPlus {
     // Handle result of standard tau ID 
     if (fOperationMode == kNormalTauID)
       return true;
-
-    // Handle result of anti-tau tag
-    if (fOperationMode == kAntiTauTag || fOperationMode == kAntiTauTagIsolationOnly)
-      return fAntiTauTagStatus;
 
     // Never reached
     return true;
@@ -506,23 +438,17 @@ namespace HPlus {
   }
 
   void TauSelection::fillOperationModeHistogram() {
-    hTauIdOperatingMode->Fill(0); // Control
+    hTauIdOperatingMode->Fill(0., fEventWeight.getWeight()); // Control
     if (fOperationMode == kNormalTauID)
-      hTauIdOperatingMode->Fill(1);
+      hTauIdOperatingMode->Fill(1., fEventWeight.getWeight());
     else if (fOperationMode == kFactorizedTauID)
-      hTauIdOperatingMode->Fill(2);
-    else if (fOperationMode == kAntiTauTag)
-      hTauIdOperatingMode->Fill(3);
-    else if (fOperationMode == kAntiTauTagIsolationOnly)
-      hTauIdOperatingMode->Fill(4);
+      hTauIdOperatingMode->Fill(2., fEventWeight.getWeight());
     else if (fOperationMode == kTauCandidateSelectionOnly)
-      hTauIdOperatingMode->Fill(5);
-    else if (fOperationMode == kTauCandidateSelectionOnlyReversedRtau)
-      hTauIdOperatingMode->Fill(6);
+      hTauIdOperatingMode->Fill(3., fEventWeight.getWeight());
     else if (fOperationMode == kTauIDWithoutRtauOnly)
-      hTauIdOperatingMode->Fill(7);
+      hTauIdOperatingMode->Fill(4., fEventWeight.getWeight());
     else if (fOperationMode == kTauIDWithRtauOnly)
-      hTauIdOperatingMode->Fill(8);
+      hTauIdOperatingMode->Fill(5., fEventWeight.getWeight());
   }
 
   void TauSelection::fillHistogramsForTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {

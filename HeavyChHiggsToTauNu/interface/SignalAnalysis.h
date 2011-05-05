@@ -15,12 +15,15 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/CorrelationAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEmulationEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 
 namespace edm {
   class ParameterSet;
@@ -61,9 +64,11 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
+    Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
-    //    Count ftransverseMassCutCounter;
+    Count ftransverseMassCut80Counter;
+    Count ftransverseMassCut100Counter;
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -75,6 +80,7 @@ namespace HPlus {
     METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
+    JetTauInvMass fJetTauInvMass;
     TopSelection fTopSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
@@ -83,9 +89,13 @@ namespace HPlus {
     EvtTopology fEvtTopology;
 
     //
+    TriggerEfficiency fTriggerEfficiency;
+    VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     // Histograms
+    TH1 *hVerticesBeforeWeight;
+    TH1 *hVerticesAfterWeight;
     TH1 *hTransverseMass;
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;
@@ -98,6 +108,15 @@ namespace HPlus {
     TH1 *hMet_AfterTauSelection;
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
+    TH1 *hMETBeforeMETCut;
+    TH1 *hSelectedTauEt;
+    TH1 *hSelectedTauEta;
+    TH1 *hSelectedTauPhi;
+    TH1 *hSelectedTauRtau;
+    TH1 *hSelectedTauEtMetCut;
+    TH1 *hSelectedTauEtaMetCut;
+    TH1 *hSelectedTauPhiMetCut;
+    TH1 *hSelectedTauRtauMetCut;
   };
 }
 

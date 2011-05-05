@@ -47,9 +47,6 @@ namespace HPlus {
       double getRtauOfSelectedTau() const {
         return fTauSelection->getSelectedRtauValue();
       }
-      bool shouldRtauBeAppliedOnSelectedTau() const {
-        return fTauSelection->fOperationMode != kTauCandidateSelectionOnlyReversedRtau;
-      }
       bool selectedTauPassedRtau() const {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
@@ -68,11 +65,8 @@ namespace HPlus {
       kNormalTauID, // Tau candidate selection + tau ID selections
       kFactorizedTauID,
       kTauCandidateSelectionOnly, // Only tau candidate selection is applied
-      kTauCandidateSelectionOnlyReversedRtau, // Only tau candidate selection is applied with reversed Rtau cut
       kTauIDWithoutRtauOnly, // For QCD bkg measurement - set internally
-      kTauIDWithRtauOnly, // For QCD bkg measurement - set internally
-      kAntiTauTag, // Selects anti-tagged taus
-      kAntiTauTagIsolationOnly // Selects anti-isolated tau jets
+      kTauIDWithRtauOnly // For QCD bkg measurement - set internally
     };
 
     TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber);

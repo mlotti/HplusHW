@@ -294,6 +294,11 @@ void makePlotBRlimits(const Int_t nPoints,
   TGraph * tevaGraph;
   TGraph * tevaGraphShade;
   if (plotTevatron1fb) {
+    // Tevatron 1.0/fb data obtained from presentation by A. Ferrari, ATLAS
+    // no explanation of source given
+    // page 20 of these slides
+    // http://indico.cern.ch/getFile.py/access?contribId=38&sessionId=5&resId=0&materialId=slides&confId=87890
+    //
     Double_t tevax[] = {  90,  110,  130,  150};
     Double_t tevay[] = {  15,   15,   17,   19};
     const int h=shadeWidth; // shade width

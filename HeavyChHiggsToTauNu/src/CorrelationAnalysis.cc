@@ -45,14 +45,14 @@ namespace HPlus {
 		if (ntaus > 1 ) continue;
 		if( input2.size() > 0 ) {
 		  DeltaR_tauB1 = reco::deltaR((*iCand1), *(input2[0]));
-		  hDeltaR_tauB1->Fill(DeltaR_tauB1);
-		  hPtB1->Fill((input2[0])->pt());
-		  hEtaB1->Fill((input2[0])->eta());
+		  hDeltaR_tauB1->Fill(DeltaR_tauB1, fEventWeight.getWeight());
+		  hPtB1->Fill((input2[0])->pt(), fEventWeight.getWeight());
+		  hEtaB1->Fill((input2[0])->eta(), fEventWeight.getWeight());
 		  if( input2.size() > 1 ) {
 		    DeltaR_tauB2 = reco::deltaR((*iCand1), *(input2[1]));
-		    hDeltaR_tauB2->Fill(DeltaR_tauB2);
-		    hPtB2->Fill((input2[1])->pt());
-		    hEtaB2->Fill((input2[1])->eta());
+		    hDeltaR_tauB2->Fill(DeltaR_tauB2, fEventWeight.getWeight());
+		    hPtB2->Fill((input2[1])->pt(), fEventWeight.getWeight());
+		    hEtaB2->Fill((input2[1])->eta(), fEventWeight.getWeight());
 		  }
 		}  
 		ntaus++;	       

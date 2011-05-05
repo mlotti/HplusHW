@@ -53,6 +53,9 @@ def customise(process):
         index += 1
 
 
+    # Set the empty event filter source
+    process.filterEmptyEv.src.setProcessName(processName)
+
     # Do we have to override the beam spot for data?
     if options.overrideBeamSpot !=  0:
         bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
@@ -71,6 +74,9 @@ def customise(process):
         process.hltTrigReport.HLTriggerResults.setProcessName(processName)
     if hasattr(process, "DQM_FEDIntegrity_v2"):
         process.schedule.remove(process.DQM_FEDIntegrity_v2)
+    if hasattr(process, "HLTAnalyzerEndpath"):
+        process.schedule.remove(process.HLTAnalyzerEndpath)
+        del process.HLTAnalyzerEndpath
 
     #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
     #process.generation_step *= process.printGenParticles

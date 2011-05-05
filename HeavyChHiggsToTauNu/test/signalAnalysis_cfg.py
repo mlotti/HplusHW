@@ -4,11 +4,13 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-# Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
-#dataVersion = "311Xredigi"
-#dataVersion = "41Xdata"
+
+# Select the version of the data (needed only for interactice running,
+# overridden automatically from multicrab
+#dataVersion = "39Xredigi" # Winter10 MC
+#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
+dataVersion = "311Xredigi" # Spring11 MC
+#dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
 ##########
@@ -17,6 +19,9 @@ dataVersion = "39Xredigi"
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
+
+# Perform b tagging scanning
+doBTagScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -29,6 +34,8 @@ JESUnclusteredMETVariation = 0.10
 tauEmbeddingTightenMuonSelection = True
 # With tau embedding input, do the muon selection scan
 doTauEmbeddingMuonSelectionScan = False
+# Do tau id scan for tau embedding normalisation (no tau embedding input required)
+doTauEmbeddingTauSelectionScan = False
 
 ################################################################################
 
@@ -100,14 +107,25 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Set tau sources to non-trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTaus()
+
+
+# Set the triggers for trigger efficiencies
+# 2010 and 2011 scenarios
+#param.setEfficiencyTriggersFor2010()
+#param.setEfficiencyTriggersFor2011()
+
+# Set the data scenario for trigger efficiencies and vertex weighting
+#param.setTriggerVertexFor2010()
+param.setTriggerVertexFor2011()
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
     if tauEmbeddingTightenMuonSelection:
-        counters = tauEmbeddingCustomisations.addMuonRelativeIsolation(process, process.commonSequence, cut=0.1)
-        additionalCounters.extend(counters)
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -121,13 +139,16 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    jetTauInvMass = param.jetTauInvMass,                                      
     topSelection = param.topSelection,                                      
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    triggerEfficiency = param.triggerEfficiency,
+    vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
-    GenParticleAnalysis = param.GenParticleAnalysis                                     
+    GenParticleAnalysis = param.GenParticleAnalysis
 )
 
 # Prescale fetching done automatically for data
@@ -141,6 +162,7 @@ if dataVersion.isData():
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
@@ -167,6 +189,18 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
+
+# b tagging testing
+if doBTagScan:
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    module = process.signalAnalysis.clone()
+    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 3.0
+    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 
 ################################################################################
@@ -216,6 +250,9 @@ if doJESVariation:
 # Signal analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
     tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
+
+if doTauEmbeddingTauSelectionScan:
+    tauEmbeddingCustomisations.addTauAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

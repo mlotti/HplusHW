@@ -120,7 +120,7 @@ def getDatasetsFromCrabDirs(taskdirs, **kwargs):
             raise Exception("No datasets. Have you merged the files with hplusMergeHistograms.py?")
 
     if len(dlist) == 0:
-        raise Exception("No datasets")
+        raise Exception("No datasets from CRAB task directories %s" % ", ".join(taskdirs))
 
     return getDatasetsFromRootFiles(dlist, **kwargs)
 
@@ -195,13 +195,11 @@ class Count:
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
 
+## Transform histogram (TH1) to a list of (name, Count) pairs.
+#
+# The name is taken from the x axis label and the count is Count
+# object with value and (statistical) uncertainty.
 def _histoToCounter(histo):
-    """Transform histogram (TH1) to a list of (name, Count) pairs.
-
-    The name is taken from the x axis label and the count is Count
-    object with value and (statistical) uncertainty.
-    """
-
     ret = []
 
     for bin in xrange(1, histo.GetNbinsX()+1):
@@ -211,13 +209,16 @@ def _histoToCounter(histo):
 
     return ret
 
+## Transform histogram (TH1) to a list of values
+def histoToList(histo):
+    return [histo.GetBinContent(bin) for bin in xrange(1, histo.GetNbinsX()+1)]
+
+
+## Transform histogram (TH1) to a dictionary.
+#
+# The key is taken from the x axis label, and the value is the bin
+# content.
 def _histoToDict(histo):
-    """Transform histogram (TH1) to a dictionary.
-
-    The key is taken from the x axis label, and the value is the bin
-    content.
-    """
-
     ret = {}
 
     for bin in xrange(1, histo.GetNbinsX()+1):
@@ -817,7 +818,9 @@ class Dataset:
         factor one gets the corresponding cross section.
         """
         if not hasattr(self, "nAllEvents"):
-            raise Exception("Number of all events is not set! The counter directory was not given, and setNallEvents() was not called.")
+            raise Exception("Number of all events is not set for dataset %s! The counter directory was not given, and setNallEvents() was not called." % self.name)
+        if self.nAllEvents == 0:
+            raise Exception("Number of all events is 0 for dataset %s" % self.name)
 
         return self.getCrossSection() / self.nAllEvents
 

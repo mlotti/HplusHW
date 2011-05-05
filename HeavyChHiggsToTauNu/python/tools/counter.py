@@ -444,6 +444,9 @@ class CounterColumn:
         if len(rowNames) != len(values):
             raise Exception("len(rowNames) != len(values) (%d != %d)" % (len(rowNames), len(values)))
 
+    def copy(self):
+        return CounterColumn(self.name, self.rowNames[:], [v.copy() for v in self.values])
+
     def getName(self):
         return self.name
 
@@ -466,8 +469,8 @@ class CounterColumn:
         del self.values[irow]
         del self.rowNames[irow]
 
-    def multiply(self, value):
-        count = dataset.Count(value, 0)
+    def multiply(self, value, uncertainty=0):
+        count = dataset.Count(value, uncertainty)
         for v in self.values:
             v.multiply(count)
 
