@@ -36,6 +36,7 @@ set -e
 # 28.4.2011/M.Kortelainen CMSSW_4_1_5 Updated PAT tags for the latest recipe from Michal Bluj
 # 3.5.2011/M.Kortelainen CMSSW_4_1_5 Minor tau tag update thanks to Mike Bachtis
 # 4.5.2011/M.Kortelainen CMSSW_4_1_5 Checkout JEC sqlite file
+# 4.5.2011/M.Kortelainen CMSSW_4_1_5 Updated tau tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -49,14 +50,9 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 #
 # Tau
-#
-# The PFRecoTauDiscriminationAgainstElectron has a bug fix in
-# V01-00-33-02 which is NOT included in V01-00-33-03 tag of the entire
-# package.
 cvs co -r V01-00-07-01   DataFormats/TauReco
 cvs co -r V01-00-27      RecoTauTag/Configuration
-cvs co -r V01-00-33-03   RecoTauTag/RecoTau
-cvs up -r V01-00-33-02   RecoTauTag/RecoTau/plugins/PFRecoTauDiscriminationAgainstElectron.cc
+cvs co -r V01-00-33-04   RecoTauTag/RecoTau
 cvs co -r V01-00-12      RecoTauTag/TauTagTools
 # PAT
 # PAT taked form 42X (V08-06-21 [part of CMSSW_4_2_1]), 
