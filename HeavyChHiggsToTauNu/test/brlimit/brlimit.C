@@ -13,12 +13,12 @@ int brlimit()
   tdrStyle->SetTitleX(0.3); // Set the position of the title box
 
   double L, Nwjets, Nttww, Nrest, sigma, ett; // rest contains dibosons, single top and Drell-Yan 
-  ifstream fileLumi("input_luminosity",ios::in); fileLumi>>L;
-  ifstream fileNwjets("input_nwjets",ios::in); fileNwjets>>Nwjets;
-  ifstream fileNttww("input_nttww",ios::in); fileNttww>>Nttww;
-  ifstream fileNrest("input_nrest",ios::in); fileNrest>>Nrest;
-  ifstream fileSigma("input_sigma",ios::in); fileSigma>>sigma;
-  ifstream fileEtt("input_ett",ios::in); fileEtt>>ett;
+  ifstream fileLumi("input_luminosity",ios::in); fileLumi   >> L;
+  ifstream fileNwjets("input_nwjets",ios::in);   fileNwjets >> Nwjets;
+  ifstream fileNttww("input_nttww",ios::in);     fileNttww  >> Nttww;
+  ifstream fileNrest("input_nrest",ios::in);     fileNrest  >> Nrest;
+  ifstream fileSigma("input_sigma",ios::in);     fileSigma  >> sigma;
+  ifstream fileEtt("input_ett",ios::in);         fileEtt    >> ett;
 
   // -- my data -- 
    const int nData = 6; // 90 not yet ready
