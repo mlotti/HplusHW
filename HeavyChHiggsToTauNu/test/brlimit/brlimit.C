@@ -48,8 +48,8 @@ int brlimit()
     } ;
   
   char temp[200];
-  double vlueLandS_obs[nData];
-  double vlueLandS_exp[nData][5];
+  double valueLandS_obs[nData];
+  double valueLandS_exp[nData][5];
   cout << "----- reading values from LandS files -----" << endl;
   for (int i=0; i<nData; i++){
     sprintf(temp,"output_LandS_%d",mH[i]);
@@ -59,12 +59,12 @@ int brlimit()
       cout << "No input file " << temp << endl;
       exit (-1) ;
     }
-    logFile >> vlueLandS_obs[i];
-    cout << "Observed: " << vlueLandS_obs[i] << endl;
-    for (int j=0; j<5; j++) logFile >> vlueLandS_exp[i][j];
+    logFile >> valueLandS_obs[i];
+    cout << "Observed: " << valueLandS_obs[i] << endl;
+    for (int j=0; j<5; j++) logFile >> valueLandS_exp[i][j];
     cout << "Expected ";
   for (int j=0; j<5; j++) 
-    cout << vlueLandS_exp[i][j] << "  ";
+    cout << valueLandS_exp[i][j] << "  ";
   cout << endl;
   }
 
@@ -80,7 +80,7 @@ int brlimit()
   double coef2_hw=L*sigma*ett*(2*kappa+1); //remember that this should be negative
   double coef2_hwhh=-L*sigma*(e_HH[plot_this]-2*e_HW[plot_this]);//remember that this should be negative
   make_plot_simple(Nbkg,coef1,coef2_hwhh,coef2_hw,L,mH[plot_this]);
-  make_plot_shaded(Nbkg,coef1,coef2_hwhh,coef2_hw, vlueLandS_exp[plot_this],L,mH[plot_this]);
+  make_plot_shaded(Nbkg,coef1,coef2_hwhh,coef2_hw, valueLandS_exp[plot_this],L,mH[plot_this]);
 
   // Plot Br limit plot
   //  cout << "--- BR limits --- " << endl; 
@@ -88,12 +88,12 @@ int brlimit()
   for (int i=0; i<nData; i++){ 
     coef1=L*sigma*e_HW[i]*2;
     coef2_hwhh=-L*sigma*(e_HH[i]-2*e_HW[i]);
-    double ev_obs = vlueLandS_obs[i]    + Nbkg;
-    double ev_exp = vlueLandS_exp[i][2] + Nbkg;
-    double ev_exp_p1 = vlueLandS_exp[i][2+1] + Nbkg;
-    double ev_exp_m1 = vlueLandS_exp[i][2-1] + Nbkg;
-    double ev_exp_p2 = vlueLandS_exp[i][2+2] + Nbkg;
-    double ev_exp_m2 = vlueLandS_exp[i][2-2] + Nbkg;
+    double ev_obs = valueLandS_obs[i]    + Nbkg;
+    double ev_exp = valueLandS_exp[i][2] + Nbkg;
+    double ev_exp_p1 = valueLandS_exp[i][2+1] + Nbkg;
+    double ev_exp_m1 = valueLandS_exp[i][2-1] + Nbkg;
+    double ev_exp_p2 = valueLandS_exp[i][2+2] + Nbkg;
+    double ev_exp_m2 = valueLandS_exp[i][2-2] + Nbkg;
     BR_95_obs[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_obs);
     BR_95_exp[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp);
     BR_95_exp_p1[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_p1);
