@@ -35,6 +35,7 @@ set -e
 # 27.4.2011/M.Kortelainen CMSSW_4_1_4 Updated tau tags for the latest recipe for 41X
 # 28.4.2011/M.Kortelainen CMSSW_4_1_5 Updated PAT tags for the latest recipe from Michal Bluj
 # 3.5.2011/M.Kortelainen CMSSW_4_1_5 Minor tau tag update thanks to Mike Bachtis
+# 4.5.2011/M.Kortelainen CMSSW_4_1_5 Checkout JEC sqlite file
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -74,3 +75,7 @@ cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
+
+# JEC
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
+cvs co -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db
