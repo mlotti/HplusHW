@@ -39,10 +39,10 @@ process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
     #"file:test_pattuple_v9_JetMet2010A_86.root"
-    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
-    "file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
+    #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"

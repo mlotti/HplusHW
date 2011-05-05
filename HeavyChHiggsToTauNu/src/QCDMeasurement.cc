@@ -28,6 +28,7 @@ namespace HPlus {
     fEvtTopologyCounter(eventCounter.addCounter("EvtTopology")),             // dumbie
     fBTaggingCounter(eventCounter.addCounter("bTagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("FakeMETVeto")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
@@ -41,11 +42,15 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
+    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fPFTauIsolationCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("tauIsolationCalculator")),
-    fFactorizationTable(iConfig, "METTables")
+    fFactorizationTable(iConfig, "METTables"),
+    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
+    fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight"))
+    // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
    {
     edm::Service<TFileService> fs;
@@ -53,8 +58,10 @@ namespace HPlus {
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
     // Book histograms
+    hVerticesBeforeWeight = fs->make<TH1F>("verticesBeforeWeight", "Number of vertices without weightingVertices;N_{events} / 1 Vertex", 30, 0, 30);
 
     // Histograms with weights
+    hVerticesAfterWeight =  fs->make<TH1F>("verticesAfterWeight", "Number of vertices with weighting; Vertices;N_{events} / 1 Vertex", 30, 0, 30);
     hMETAfterJetSelection = fs->make<TH1F>("QCD_METctrl_METAfterJetSelection", "METAfterJetSelection;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hMETAfterJetSelection->Sumw2();
     hWeightedMETAfterJetSelection = fs->make<TH1F>("QCD_METctrl_METAfterJetSelectionWeighted", "METAfterJetSelectionWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
@@ -238,6 +245,13 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent);
     increment(fAllCounter);
 
+    // Apply PU re-weighting (Vertex weight)
+    std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
+    if(!iEvent.isRealData())
+      fEventWeight.multiplyWeight(weightSize.first);
+    hVerticesBeforeWeight->Fill(weightSize.second);
+    hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+
 
     // Trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
@@ -254,7 +268,6 @@ namespace HPlus {
     // Get MET just for reference; do not apply a MET cut but instead use P(MET>70 GeV) as weight
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
-
     // Apply tau candidate selection (with or without Rtau control region)
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauCandidateData.passedEvent()) return;
@@ -268,6 +281,16 @@ namespace HPlus {
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
     fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+
+    // Apply Trigger efficiency parametrization weights (Right after calling Tau & MET functions)
+    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauCandidateData.getSelectedTaus()[0]), *metData.getSelectedMET());
+    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
+    if (!iEvent.isRealData() ) {
+      // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
+      fEventWeight.multiplyWeight(triggerEfficiency);
+    }
+
 
     // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
@@ -383,6 +406,20 @@ namespace HPlus {
     if (metData.passedEvent())
       hMETPassProbabilityAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
+    // Apply TopMass reconstruction
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (!TopSelectionData.passedEvent()) return;
+    increment(fTopSelectionCounter);
+
+    // hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+
+    //     //    if(transverseMass < ftransverseMassCut-20.0 ) return false;
+    //     if(transverseMass < 80 ) return false;
+    //     increment(ftransverseMassCut80Counter);
+    
+    //     if(transverseMass < 100 ) return false;
+    //     increment(ftransverseMassCut100Counter);
+    
 
     // Do final histogramming
     fWeightedSelectedEventsAnalyzer.fill(mySelectedTau,

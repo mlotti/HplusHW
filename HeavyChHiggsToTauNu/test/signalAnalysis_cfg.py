@@ -56,16 +56,17 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-#       "rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
-        # For testing in lxplus
-#       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
-#        dataVersion.getAnalysisDefaultFileCastor()
-        # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
-        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+    # For testing in lxplus
+    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    # dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #        dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
 if options.tauEmbeddingInput != 0:

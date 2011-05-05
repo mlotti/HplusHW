@@ -22,6 +22,11 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h" //trigg. eff. param.
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
+
 
 #include "TTree.h"
 #include "TH2F.h"
@@ -74,6 +79,7 @@ namespace HPlus {
     Count fEvtTopologyCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
+    Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
     
     // Counters for propagating result into signal region from reversed rtau control region
@@ -91,18 +97,26 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
-    ForwardJetVeto fForwardJetVeto;
     DeltaPhi fDeltaPhi;
+    TopSelection fTopSelection;
+    ForwardJetVeto fForwardJetVeto;
     TransverseMass fTransverseMass;
     SelectedEventsAnalyzer fWeightedSelectedEventsAnalyzer;
     SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
     PFTauIsolationCalculator fPFTauIsolationCalculator;
+    
+    //
+    TriggerEfficiency fTriggerEfficiency;
+    VertexWeight fVertexWeight;
+    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
     
     // Factorization table
     FactorizationTable fFactorizationTable;
     std::vector<double> fFactorizationBinLowEdges;
     
     // MET Histograms
+    TH1 *hVerticesBeforeWeight;
+    TH1 *hVerticesAfterWeight;
     TH1 *hMETAfterJetSelection;
     TH1 *hWeightedMETAfterJetSelection;
     TH1 *hWeightedMETAfterTauIDNoRtau;
