@@ -2,6 +2,7 @@
 
 void plotTxtMh(double lumi, int mH); 
 void plotTxt(double lumi);
+void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
 int brlimit()
 {
@@ -53,19 +54,7 @@ int brlimit()
   cout << "----- reading values from LandS files -----" << endl;
   for (int i=0; i<nData; i++){
     sprintf(temp,"output_LandS_%d",mH[i]);
-    cout << temp << endl;
-    ifstream logFile(temp,ios::in);    
-    if (!logFile) {
-      cout << "No input file " << temp << endl;
-      exit (-1) ;
-    }
-    logFile >> valueLandS_obs[i];
-    cout << "Observed: " << valueLandS_obs[i] << endl;
-    for (int j=0; j<5; j++) logFile >> valueLandS_exp[i][j];
-    cout << "Expected ";
-  for (int j=0; j<5; j++) 
-    cout << valueLandS_exp[i][j] << "  ";
-  cout << endl;
+    readValuesFromLandsFile(temp,valueLandS_obs[i],valueLandS_exp[i]);
   }
 
   // Plot #events vs. Br
@@ -234,6 +223,26 @@ int brlimit()
   
   return 0;
 }
+
+
+void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp)
+{
+  cout << temp << endl;
+  ifstream logFile(temp,ios::in);    
+  if (!logFile) {
+    cout << "No input file " << temp << endl;
+    exit (-1) ;
+  }
+  logFile >> my_obs;
+  cout << "Observed: " << my_obs << endl;
+  for (int j=0; j<5; j++) logFile >> my_exp[j];
+  cout << "Expected ";
+  for (int j=0; j<5; j++) 
+    cout << my_exp[j] << "  ";
+  cout << endl;
+  return;
+}
+
 
 double make_plot_simple(double bkg, 
 			double coef1, 
