@@ -532,11 +532,12 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 #
 # PF2PAT
 #
-def addPF2PAT(process, dataVersion,
+def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
               doTauHLTMatching=True, matchingTauTrigger=None, 
+              doPFnoPU=True,
               ):
-    if hasattr(process, "patDefaultSequence"):
-        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
+#    if hasattr(process, "patDefaultSequence"):
+#        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
 
     # Hack to not to crash if something in PAT assumes process.out
     hasOut = hasattr(process, "out")
@@ -553,11 +554,10 @@ def addPF2PAT(process, dataVersion,
     outputCommands = []
 
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
-    postfix = "PFlow"
     pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix=postfix)
 
     outputCommands = [
-        "keep *_selectedPatPhotons%s_*_*" % postfix,
+#        "keep *_selectedPatPhotons%s_*_*" % postfix,
 #        'keep *_selectedPatElectrons%s_*_*' % postfix, 
         'keep *_selectedPatMuons%s_*_*' % postfix,
         'keep *_selectedPatTaus%s_*_*' % postfix,
@@ -572,6 +572,8 @@ def addPF2PAT(process, dataVersion,
 
     sequence = cms.Sequence()
 
+    # Enable/disable PFnoPU
+    getattr(process, "pfPileUp"+postfix).Enable = doPFnoPU
 
     # Jet modifications
     # L1FastJet
@@ -604,7 +606,10 @@ def addPF2PAT(process, dataVersion,
         #process.pfJetsPFlow.doRhoFastjet = False
         process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
 
-        process.patJetCorrFactorsPFlow.levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
+        getattr(process, "patJetCorrFactors"+postfix).levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
+        # With PFnoPU we need separache "charged hadron subtracted" corrections
+#        if doPFnoPU:
+#            getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
 

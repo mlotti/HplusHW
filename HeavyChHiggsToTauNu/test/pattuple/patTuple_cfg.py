@@ -10,7 +10,10 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # Create Process
 process = cms.Process("HChPatTuple")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -75,10 +78,19 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
+# JEC
+import HiggsAnalysis.HeavyChHiggsToTauNu.Jec2010 as Jec
+Jec.customise(process)
+
+
 # Add first PF2PAT so that we get a clean patDefaultSequence
 process.sPF2PAT = addPF2PAT(process, dataVersion,
                             matchingTauTrigger=myTrigger,
+                            postfix="PFlow", doPFnoPU=False,
                             )
+process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
+                                matchingTauTrigger=myTrigger,
+                                )
 
 process.sPAT = addPat(process, dataVersion,
                       doPatMuonPFIsolation=True,
@@ -116,7 +128,8 @@ process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
     process.sPAT *
-    process.sPF2PAT
+    process.sPF2PAT *
+    process.sPF2PATnoPU
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
