@@ -263,6 +263,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         backup = process.out.outputCommands[:]
         removeCleaning(process, True)
         backup_pat = process.out.outputCommands[:]
+
+        # Remove PFParticles here, they are explicitly included when needed
+        backup_pat = filter(lambda n: "selectedPatPFParticles" not in n, backup_pat)
+
         process.out.outputCommands = backup
         process.out.outputCommands.extend(backup_pat)
         process.out.outputCommands.extend(outputCommands)
