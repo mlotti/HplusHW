@@ -3,31 +3,31 @@ import os
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECDataMC
-def customise(process):
-    # Infer dynamically where the sqlite file is
-    head = os.getcwd()
-    relpath = ""
+def customise(process, options):
     path = None
-    i = 100
-    while head.count("/") > 1 and i >= 0:
-        p = os.path.join(head, "data/Jec10V3.db")
-        if os.path.exists(p):
-            path = relpath+"data/Jec10V3.db"
-            break
-        (head, tail) = os.path.split(head)
-        relpath += "../"
-        i -= 1
-#    import sys
-#    print path
-#    sys.exit(0)
 
-    if path == None:
-        if i == 0:
-            raise Exception("Maximum number of iterations reached for finding Jec10V3.db, i = %d, head = %s" % (i, head))
-        else:
-            raise Exception("Unable to find data/Jec10V3.db")
-
-    path = "src/HiggsAnalysis/HeavyChHiggsToTauNu/data/Jec10V3.db"
+    if options.runOnCrab == 0:
+        # Infer dynamically where the sqlite file is
+        head = os.getcwd()
+        relpath = ""
+        i = 100
+        while head.count("/") > 1 and i >= 0:
+            p = os.path.join(head, "data/Jec10V3.db")
+            if os.path.exists(p):
+                path = relpath+"data/Jec10V3.db"
+                break
+            (head, tail) = os.path.split(head)
+            relpath += "../"
+            i -= 1
+    
+        if path == None:
+            if i == 0:
+                raise Exception("Maximum number of iterations reached for finding Jec10V3.db, i = %d, head = %s" % (i, head))
+            else:
+                raise Exception("Unable to find data/Jec10V3.db")
+    else:
+        # When run with crab, the position is fixed
+        path = "src/HiggsAnalysis/HeavyChHiggsToTauNu/data/Jec10V3.db"
 
     # Load the JEC sqlite file
     process.load("CondCore.DBCommon.CondDBCommon_cfi")

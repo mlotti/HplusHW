@@ -80,7 +80,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 # JEC
 import HiggsAnalysis.HeavyChHiggsToTauNu.Jec2010 as Jec
-Jec.customise(process)
+Jec.customise(process, options)
 
 
 # Add first PF2PAT so that we get a clean patDefaultSequence
