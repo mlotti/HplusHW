@@ -655,11 +655,12 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         getattr(process, "hpsPFTauHplusTestDiscriminationSequence"+postfix)
     )
     setattr(process, "hplusPatTauSequence"+postfix, patTauSeq)
-    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("pfTaus"+postfix))
+    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("hpsPFTauProducer"+postfix))
     patHelpers.massSearchReplaceAnyInputTag(patTauSeq, cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
 
     pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
     setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
+    getattr(process, "patTaus"+postfix).tauSource = "hpsPFTauProducer"+postfix
     # Disable iso depositsm, they take a LOT of space
     getattr(process, "patTaus"+postfix).isoDeposits = cms.PSet()
 
@@ -681,15 +682,6 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
     # Disable tau top projection, the taus are identified separately
     getattr(process, "pfNoTau"+postfix).enable = False
-    getattr(process, "pfTaus"+postfix).discriminators = cms.VPSet()
-
-    # FIXME, testing
-#    getattr(process, "pfTausBase"+postfix).piZeroSrc = "ak5PFJetsLegacyHPSPiZeros"
-#    getattr(process, "pfTausBase"+postfix).modifiers[2].pfTauTagInfoSrc = "pfRecoTauTagInfoProducer"
-#    getattr(process, "pfTausBase"+postfix).modifiers[2].name = "TTIworkaround"
-#    getattr(process, "pfTausBase"+postfix).jetRegionSrc = "recoTauAK5PFJets08Region"
-#    getattr(process, "pfTausBase"+postfix).jetSrc = "ak5PFJets"
-#    getattr(process, "pfTausBase"+postfix).builders[0].pfCandSrc = "particleFlow"
 
     # Remove photon MC matcher in order to avoid keeping photons in the event content
     #process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
