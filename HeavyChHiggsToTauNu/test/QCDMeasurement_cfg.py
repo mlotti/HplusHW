@@ -99,7 +99,7 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 # Set the triggers for trigger efficiencies
 # 2010 and 2011 scenarios
 #param.setEfficiencyTriggersFor2010()
-param.setEfficiencyTriggersFor2011()
+#param.setEfficiencyTriggersFor2011()
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
