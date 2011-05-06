@@ -238,11 +238,19 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         addPatElectronID(process, process.patElectrons, process.patDefaultSequence)
 
     # Select good primary vertices
-    # For data this is already ran, see HChDataSelection.py
-    if not dataVersion.isData():
-        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-        process.hplusPatSequence *= process.goodPrimaryVertices
-    outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
+        src = cms.InputTag("offlinePrimaryVertices")
+    )
+    process.hplusPatSequence *= (
+        process.goodPrimaryVertices *
+        process.goodPrimaryVertices10 *
+        process.offlinePrimaryVerticesSumPt
+    )
+    outputCommands.extend([
+        "keep *_goodPrimaryVertices*_*_*",
+        "keep *_offlinePrimaryVerticesSumPt_*_*",
+        ])
 
     # Trigger
     if doPatTrigger:
@@ -508,9 +516,9 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
             del process.out
 
         # Add PV selection, if not yet done by PAT
-        if dataVersion.isData():
-            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-            process.patSequence *= process.goodPrimaryVertices
+#        if dataVersion.isData():
+#            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+#            process.patSequence *= process.goodPrimaryVertices
     else:
         if dataVersion.isData():
             process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
