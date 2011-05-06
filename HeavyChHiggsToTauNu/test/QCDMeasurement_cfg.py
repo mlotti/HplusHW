@@ -4,15 +4,22 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-# Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+# Select the version of the data (needed only for interactice running,
+# overridden automatically from multicrab
+#dataVersion = "39Xredigi" # Winter10 MC
+#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
+dataVersion = "311Xredigi" # Spring11 MC
+#dataVersion = "41Xdata"   # Run2011 PromptReco
+
 
 ##########
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
+
+# Perform b tagging scanning
+doBTagScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -26,21 +33,24 @@ JESUnclusteredMETVariation = 0.10
 disablePrescales = True
 
 ################################################################################
+
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
 ################################################################################
 # Define the process
-process = cms.Process("HChQCDMeasurementMethod3Part2")
+#process = cms.Process("HChQCDMeasurementMethod3Part2")
+process = cms.Process("HChQCDMeasurementMethod3")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
+    "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
     #"file:test_pattuple_v9_JetMet2010A_86.root"
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
     #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
@@ -58,7 +68,7 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
-#process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
+process.MessageLogger.cerr.threshold = cms.untracked.string("INFO") #tmp
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Fragment to run PAT on the fly if requested from command line
@@ -81,8 +91,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 # Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
 # other options (use not recommended here): 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
-#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnlyReversedRtau')
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+param.setTauIDFactorizationMap(options)
 
 ### Use trigger matched taus and standard signal trigger => Disable below
 # Set tau sources to non-trigger matched tau collections
@@ -94,7 +103,6 @@ param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-#param.InvMassVetoOnJets.setTrueToUseModule = True
 param.InvMassVetoOnJets.setTrueToUseModule = False
 # param.overrideTriggerFromOptions(options) => obsolete
 
@@ -111,8 +119,11 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     bTagging = param.bTagging,
     MET = param.MET,
     fakeMETVeto = param.fakeMETVeto,
+    topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    triggerEfficiency = param.triggerEfficiency,
+    vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
         pvSrc = cms.InputTag("offlinePrimaryVertices")
     ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
@@ -138,24 +149,34 @@ if dataVersion.isData() and not disablePrescales:
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "Trigger:", process.QCDMeasurement.trigger
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value):", process.QCDMeasurement.trigger.hltMetCut
-print "TauSelection algorithm:", process.QCDMeasurement.tauSelection.selection
+print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
+print "\nTrigger:", process.QCDMeasurement.trigger
+print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
+print "\nTauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
 print "TauSelection src:", process.QCDMeasurement.tauSelection.src
-print "TauSelection operating mode:", process.QCDMeasurement.tauSelection.operatingMode
 print "TauSelection selection:", process.QCDMeasurement.tauSelection.selection
-print "TauSelection invMassCut:", process.QCDMeasurement.tauSelection.invMassCut
+print "TauSelection ptCut:", process.QCDMeasurement.tauSelection.ptCut
+print "TauSelection etacut:", process.QCDMeasurement.tauSelection.etaCut
+print "TauSelection leadingTrackPtCut:", process.QCDMeasurement.tauSelection.leadingTrackPtCut
 print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut
 print "TauSelection antiRtauCut:", process.QCDMeasurement.tauSelection.antiRtauCut
-print "\nGlobalElectronVeto: ", process.QCDMeasurement.GlobalElectronVeto
-print "\nGlobalMuonVeto: ", process.QCDMeasurement.GlobalMuonVeto
-print "\nMET: ", process.QCDMeasurement.MET
+print "TauSelection invMassCut:", process.QCDMeasurement.tauSelection.invMassCut
+print "TauSelection nprongs:", process.QCDMeasurement.tauSelection.nprongs
+print "\nTriggerEfficiency:", process.QCDMeasurement.triggerEfficiency
+print "\nMET:", process.QCDMeasurement.MET
+print "\nGlobalElectronVeto:", process.QCDMeasurement.GlobalElectronVeto
+print "\nGlobalMuonVeto:", process.QCDMeasurement.GlobalMuonVeto
+print "\nJetSelection:", process.QCDMeasurement.jetSelection
 print "\nbTagging: ", process.QCDMeasurement.bTagging
-print "\nInvMassVetoOnJets:", process.QCDMeasurement.InvMassVetoOnJets
 print "\nFakeMETVeto:", process.QCDMeasurement.fakeMETVeto
 print "\nTriggerEmulationEfficiency:", process.QCDMeasurement.TriggerEmulationEfficiency
 print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
-print "\nMetTables:", process.QCDMeasurement.factorization
+#print "\nMetTables:", process.QCDMeasurement.factorization
+print "\nTopSelection:", process.QCDMeasurement.topSelection
+print "****************************************************"
+print "\nInvMassVetoOnJets:", process.QCDMeasurement.InvMassVetoOnJets
+print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
+print "\nForwardJetVeto:", process.QCDMeasurement.forwardJetVeto
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
