@@ -353,7 +353,7 @@ double make_plot_shaded(double c,
 
 double calculate_BR(double c1, double coef1, double coef2_hwhh, double events)
 {
-  // second order equation
+  // second order equation ax^2 + bx + c = 0, return lower solution
   // return BR = 100% if cannot find answer
   double a = -coef2_hwhh;
   double b = coef1;
