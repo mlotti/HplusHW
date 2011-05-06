@@ -323,7 +323,7 @@ namespace HPlus {
 
     // Obtain weight for P(MET>70 GeV) and apply it
     double myEventWeightBeforeMetFactorization = fEventWeight.getWeight();
-    fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(mySelectedTauPt, 0.));
+    // tmp fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(mySelectedTauPt, 0.));
     hWeightedMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterJetSelection->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent()) {
