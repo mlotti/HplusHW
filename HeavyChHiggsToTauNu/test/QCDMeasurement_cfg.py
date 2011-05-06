@@ -8,8 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
 #dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-dataVersion = "311Xredigi" # Spring11 MC
-#dataVersion = "41Xdata"   # Run2011 PromptReco
+#dataVersion = "311Xredigi" # Spring11 MC
+dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
 ##########
@@ -93,6 +93,18 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 param.setTauIDFactorizationMap(options)
 
+# Set tau sources to non-trigger matched tau collections
+param.setAllTauSelectionSrcSelectedPatTaus()
+
+# Set the triggers for trigger efficiencies
+# 2010 and 2011 scenarios
+#param.setEfficiencyTriggersFor2010()
+#param.setEfficiencyTriggersFor2011()
+
+# Set the data scenario for trigger efficiencies and vertex weighting
+#param.setTriggerVertexFor2010()
+param.setTriggerVertexFor2011()
+
 ### Use trigger matched taus and standard signal trigger => Disable below
 # Set tau sources to non-trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -102,7 +114,8 @@ param.setTauIDFactorizationMap(options)
 #]
 
 # Overwrite necessary values here
-param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+#param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.trigger.hltMetCut = 0.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
 param.InvMassVetoOnJets.setTrueToUseModule = False
 # param.overrideTriggerFromOptions(options) => obsolete
 

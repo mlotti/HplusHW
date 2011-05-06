@@ -162,6 +162,7 @@ if dataVersion.isData():
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
+print "VertexWeight:",process.signalAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
 print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
