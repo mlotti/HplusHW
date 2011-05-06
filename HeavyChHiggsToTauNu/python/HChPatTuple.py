@@ -457,7 +457,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
     if options.doPat == 0:
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         seq = cms.Sequence(
-            process.goodPrimaryVertices10
+#            process.goodPrimaryVertices10
         )
         return (seq, counters)
 
@@ -530,7 +530,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         process.patSequence = addPat(process, dataVersion, **pargs)
     
     # Add selection of PVs with sumPt > 10
-    process.patSequence *= process.goodPrimaryVertices10
+#    process.patSequence *= process.goodPrimaryVertices10
 
     dataPatSequence = cms.Sequence(
         process.collisionDataSelection *
