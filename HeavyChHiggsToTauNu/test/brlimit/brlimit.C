@@ -13,15 +13,17 @@ int brlimit()
   tdrStyle->SetTitleFontSize(0.05);
   tdrStyle->SetTitleX(0.3); // Set the position of the title box
 
-  double L, Nwjets, Nttww, Nrest, sigma, ett; // rest contains dibosons, single top and Drell-Yan 
-  ifstream fileLumi("input_luminosity",ios::in); fileLumi   >> L;
-  ifstream fileNwjets("input_nwjets",ios::in);   fileNwjets >> Nwjets;
-  ifstream fileNttww("input_nttww",ios::in);     fileNttww  >> Nttww;
-  ifstream fileNrest("input_nrest",ios::in);     fileNrest  >> Nrest;
-  ifstream fileSigma("input_sigma",ios::in);     fileSigma  >> sigma;
-  ifstream fileEtt("input_ett",ios::in);         fileEtt    >> ett;
+  // --- Read initial values from input files ---
+  // "rest" contains dibosons, single top and Drell-Yan 
+  double L, Nwjets, Nttww, Nrest, sigma, ett; 
+  ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
+  ifstream fileNwjets("input_nwjets",ios::in);     fileNwjets >> Nwjets;
+  ifstream fileNttww( "input_nttww",ios::in);      fileNttww  >> Nttww;
+  ifstream fileNrest( "input_nrest",ios::in);      fileNrest  >> Nrest;
+  ifstream fileSigma( "input_sigma",ios::in);      fileSigma  >> sigma;
+  ifstream fileEtt(   "input_ett",ios::in);        fileEtt    >> ett;
 
-  // -- my data -- 
+  // --- Data: mass points and efficiencies  --- 
    const int nData = 6; // 90 not yet ready
    double mH[nData]   = 
      {100,     
@@ -47,7 +49,9 @@ int brlimit()
       0.001470,
       0.001123
     } ;
-  
+
+  // --- Read values from LandS files ---
+  // obs, exp, exp+-1sigma, exp+-2sigma
   char temp[200];
   double valueLandS_obs[nData];
   double valueLandS_exp[nData][5];
@@ -57,22 +61,18 @@ int brlimit()
     readValuesFromLandsFile(temp,valueLandS_obs[i],valueLandS_exp[i]);
   }
 
-  // Plot #events vs. Br
+  // --- Plot #events vs. Br ---
   // for mH = 120
-  double solution;
-  const int plot_this = 1; // 1 for mH=120
-  double ehh =  e_HH[plot_this];
-  double kappa=e_HW[plot_this]/ett-1;
+  const int plot_this = 1; // makes plots for illustration, 1 for mH=120 
   double Nbkg=Nwjets + Nttww + Nrest;//Nwjets + L*sigma*ett;
   double coef1=L*sigma*e_HW[plot_this]*2;
-  //double coef1=L*sigma*ett*2*kappa;
-  double coef2_hw=L*sigma*ett*(2*kappa+1); //remember that this should be negative
+  double coef2_hw=L*sigma*ett*
+    (2*(e_HW[plot_this]/ett-1)+1); //remember that this should be negative
   double coef2_hwhh=-L*sigma*(e_HH[plot_this]-2*e_HW[plot_this]);//remember that this should be negative
   make_plot_simple(Nbkg,coef1,coef2_hwhh,coef2_hw,L,mH[plot_this]);
   make_plot_shaded(Nbkg,coef1,coef2_hwhh,coef2_hw, valueLandS_exp[plot_this],L,mH[plot_this]);
 
-  // Plot Br limit plot
-  //  cout << "--- BR limits --- " << endl; 
+  // --- Plot Br 95% CL limit plot ---
   double BR_95_obs[nData],BR_95_exp[nData], BR_95_exp_p1[nData], BR_95_exp_m1[nData], BR_95_exp_p2[nData], BR_95_exp_m2[nData];
   for (int i=0; i<nData; i++){ 
     coef1=L*sigma*e_HW[i]*2;
@@ -89,30 +89,20 @@ int brlimit()
     BR_95_exp_m1[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_m1);
     BR_95_exp_p2[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_p2);
     BR_95_exp_m2[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_m2);
-    //    cout << "calc " << BR_95_exp_p1[i] << "  " << BR_95_exp_m1[i] << endl;
-    // cout<< "limit is " <<  calculate_BR(Nbkg,coef1,coef2_hwhh,10) << endl;
-    //    cout<< "mH = " <<  mH[i] << "   BR95 = " << BR_95_obs[i] << endl;
   }
   TCanvas * can_br = new TCanvas();
   can_br->SetTitle("95\% CL limit for BR");
   TGraph * tg_obs = new TGraph(nData, mH, BR_95_obs);
-
   tg_obs->SetTitle("95\% CL limit for BR");
-  //  tg_obs->SetLineWidth(2505);
   tg_obs->SetMarkerStyle(20);
   tg_obs->SetFillStyle(3005);
   tg_obs->SetMarkerSize(1.4);
   tg_obs->SetLineWidth(3);
   tg_obs->Draw("LPA");
-//   TGraph * tg_obs_shade = new TGraph(nData, mH, BR_95_obs);
-//   tg_obs_shade->SetLineWidth(2000);
-//   tg_obs_shade->SetFillStyle(3005);
-//   tg_obs_shade->Draw("F same");
   tg_obs->GetYaxis()->SetRangeUser(0,1.0); 
   tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{#pm})");
   tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
   TGraph * tg_exp = new TGraph(nData, mH, BR_95_exp);
-  // tg_exp->SetLineStyle(2);
   tg_exp->SetLineColor(2);
   tg_exp->SetMarkerColor(2);
   tg_exp->SetMarkerStyle(21);
@@ -126,9 +116,8 @@ int brlimit()
     BR_95_exp_contour1[nData+i] = BR_95_exp_p1[nData-1-i];
     BR_95_exp_contour2[i]       = BR_95_exp_m2[i];
     BR_95_exp_contour2[nData+i] = BR_95_exp_p2[nData-1-i];
-    myx[i]           = mH[i];
+    myx[i]       = mH[i];
     myx[nData+i] = mH[nData-1-i];
-    //   cout << myx[i] << "  " << BR_95_exp_contour[i] << endl;
   }
   TGraph * tg_exp_cont1 = new TGraph(2*nData, myx, BR_95_exp_contour1);
   TGraph * tg_exp_cont2 = new TGraph(2*nData, myx, BR_95_exp_contour2);
@@ -136,12 +125,6 @@ int brlimit()
   tg_exp_cont2->SetFillColor(kOrange);
   tg_exp_cont2->Draw("F");
   tg_exp_cont1->Draw("F");
-  //   for (int i=0 ; i<nData; i++)
-  //     cout << myx[i] << "  " << BR_95_exp_contour2[i] 
-  // 	 << "  " << BR_95_exp_contour1[i] 
-  // 	 << "  " << BR_95_exp_contour1[nData+i] 
-  // 	 << "  " << BR_95_exp_contour2[nData+i] 
-  // 	 << endl;
 
   TLegend *pl = new TLegend(0.5,0.70,0.8,0.92);
   pl->SetTextSize(0.03);
@@ -156,60 +139,16 @@ int brlimit()
   ple = pl->AddEntry(tg_exp_cont1, temp, "f");
   sprintf(temp,"Expected #pm2 #sigma");
   ple = pl->AddEntry(tg_exp_cont2, temp, "f");
-  //  ple->SetMarkerSize(0.1);
   pl->Draw();
-
   // Redraw lines on top of filled area
   tg_obs->Draw("LP same");
   tg_exp->Draw("LP same");
 
-  // Plot LIP results, obs(black) 
-  // from approval of 10.3.2011
-  if (1) {
-    double xLip[] = {80,100,120,140,  150,  155,160};
-    double yLipObs[] = {.25 , .23 , .24 , .27, .327, .385, .53};
-    double yLipExp[] = {.255, .235, .245, .28, .34 , .405, .58};
-    TGraph * tgLIPObs = new TGraph(7,xLip,yLipObs);
-    TGraph * tgLIPExp = new TGraph(7,xLip,yLipExp);
-    tgLIPObs->SetLineWidth(1);
-    tgLIPObs->SetLineStyle(3);
-    tgLIPObs->SetMarkerStyle(22);
-    tgLIPObs->SetMarkerSize(1.1);
-    //    tgLIPObs->SetFillStyle(3005);
-    tgLIPExp->SetLineWidth(1);
-    tgLIPExp->SetLineColor(2);
-    tgLIPExp->SetLineStyle(3);
-    tgLIPExp->SetMarkerColor(2);
-    tgLIPExp->SetMarkerStyle(23);
-    tgLIPExp->SetMarkerSize(1.1);
-    tgLIPObs->Draw("LP");
-    tgLIPExp->Draw("LP");
-    ple = pl->AddEntry(tgLIPObs, "hadr.#tau+e/#mu channel, observed", "lp");
-    ple = pl->AddEntry(tgLIPExp, "hadr.#tau+e/#mu channel, expected", "lp");
-  }
-
-  // Plot Tevatron results
-  if (1) {
-    TGraph * tevaGraph;
-
-    //    Double_t tevax[] = {  90,  110,  130,  150};
-    //    Double_t tevay[] = {  0.15,  0.15, 0.17,0.19};
-
-    // Results fom arxiv:0908.181v2, table II, tauonic observed values
-    Double_t tevax[] =    {  80, 100, 120, 140, 150, 160};
-    Double_t tevayObs[] = { .16, .15, .17, .18, .19, .18}; 
-
-    tgObsTeva = new TGraph(6,tevax,tevayObs);
-    tgObsTeva->SetLineColor(kBlue);
-    tgObsTeva->SetLineStyle(2);
-    tgObsTeva->SetLineWidth(1);
-    tgObsTeva->SetMarkerColor(kBlue);
-    tgObsTeva->SetMarkerSize(1.0);
-    tgObsTeva->Draw("LP");
-    ple = pl->AddEntry(tgObsTeva, "D0 1.0 fb^{-1} observed, approximate", "lp");
-  }
-
   plotTxt(L);
+
+  // --- Plot LIP and Tevatron results, obs(black) ---
+  if (1) plotLipResults(pl);
+  if (1) plotTevatronResults(pl);
 
   // Save TGraphs and plots
   TFile myfi("brlimits.root","recreate");
@@ -225,12 +164,56 @@ int brlimit()
 }
 
 
-void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp)
+void plotTevatronResults(TLegend * pl){
+    TGraph * tevaGraph;
+
+    // Results fom arxiv:0908.181v2, table II, tauonic observed values
+    Double_t tevax[] =    {  80, 100, 120, 140, 150, 160};
+    Double_t tevayObs[] = { .16, .15, .17, .18, .19, .18}; 
+
+    tgObsTeva = new TGraph(6,tevax,tevayObs);
+    tgObsTeva->SetLineColor(kBlue);
+    tgObsTeva->SetLineStyle(2);
+    tgObsTeva->SetLineWidth(1);
+    tgObsTeva->SetMarkerColor(kBlue);
+    tgObsTeva->SetMarkerSize(1.0);
+    tgObsTeva->Draw("LP");
+    pl->AddEntry(tgObsTeva, "D0 1.0 fb^{-1} observed, approximate", "lp");
+  return;
+}
+
+
+void plotLipResults(TLegend * pl){
+  // from approval of 10.3.2011
+  double xLip[] = {80,100,120,140,  150,  155,160};
+  double yLipObs[] = {.25 , .23 , .24 , .27, .327, .385, .53};
+  double yLipExp[] = {.255, .235, .245, .28, .34 , .405, .58};
+  TGraph * tgLIPObs = new TGraph(7,xLip,yLipObs);
+  TGraph * tgLIPExp = new TGraph(7,xLip,yLipExp);
+  tgLIPObs->SetLineWidth(1);
+  tgLIPObs->SetLineStyle(3);
+  tgLIPObs->SetMarkerStyle(22);
+  tgLIPObs->SetMarkerSize(1.1);
+  tgLIPExp->SetLineWidth(1);
+  tgLIPExp->SetLineColor(2);
+  tgLIPExp->SetLineStyle(3);
+  tgLIPExp->SetMarkerColor(2);
+  tgLIPExp->SetMarkerStyle(23);
+  tgLIPExp->SetMarkerSize(1.1);
+  tgLIPObs->Draw("LP");
+  tgLIPExp->Draw("LP");
+  pl->AddEntry(tgLIPObs, "hadr.#tau+e/#mu channel, observed", "lp");
+  pl->AddEntry(tgLIPExp, "hadr.#tau+e/#mu channel, expected", "lp");
+  return;
+}
+
+
+void readValuesFromLandsFile(char * fileName, double &my_obs,double * my_exp)
 {
-  cout << temp << endl;
-  ifstream logFile(temp,ios::in);    
+  cout << fileName << endl;
+  ifstream logFile(fileName,ios::in);    
   if (!logFile) {
-    cout << "No input file " << temp << endl;
+    cout << "No LandS input file " << fileName << endl;
     exit (-1) ;
   }
   logFile >> my_obs;
@@ -370,10 +353,16 @@ double make_plot_shaded(double c,
 
 double calculate_BR(double c1, double coef1, double coef2_hwhh, double events)
 {
+  // second order equation
   // return BR = 100% if cannot find answer
-  double temp = coef1*coef1 - 4*(-coef2_hwhh)*(c1-events);
+  double a = -coef2_hwhh;
+  double b = coef1;
+  double c = c1-events;
+
+  double temp = b*b - 4*a*c;
   if (temp<0) return 1.0;
-  double BR = (-coef1 +sqrt( temp ))/(2*(-coef2_hwhh));
+
+  double BR = (-b + sqrt(temp)) / (2*a);
 
   return BR;
 }
@@ -385,10 +374,7 @@ void plotTxt(double lumi) {
   Double_t left      = 0.185;
   TLatex text;
   text.SetTextAlign(12);
-  text.SetTextSize(0.04);
   text.SetNDC();
-  //  text.DrawLatex(left,0.9,"CMS preliminary");
-
   text.SetTextSize(0.03);
   text.DrawLatex(left,linePos,"t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu");
   text.DrawLatex(left,linePos -= lineSpace,"Fully hadronic final state");
