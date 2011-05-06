@@ -183,6 +183,7 @@ multicrab.extendDatasets(
 #multicrab.addLineAll("USER.local_stage_out=1")
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
+multicrab.appendArgAll("runOnCrab=1")
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
