@@ -369,6 +369,11 @@ datasets = {
                 "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v10-7482fea56f5721e68c0db13cc3e1d0fc/USER",
                 "number_of_jobs": 6
             },
+            "pattuple_v11_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v11_test1-03dcbf3e1b24d51e48cedb4e0e7cb67e/USER",
+                "number_of_jobs": 1
+            },
         },
     }, 
     "WJets_TuneZ2_Spring11": {

@@ -182,6 +182,8 @@ multicrab.extendDatasets(
 # writing to /store/group/local ...
 #multicrab.addLineAll("USER.local_stage_out=1")
 
+multicrab.appendLineAll("GRID.maxtarballsize = 15")
+
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
 
@@ -189,7 +191,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v10_3"
+    name += "_pattuple_v11_test1"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
