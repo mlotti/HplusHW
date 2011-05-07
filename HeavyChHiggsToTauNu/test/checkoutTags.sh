@@ -74,4 +74,4 @@ rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
 # JEC
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
-cvs co -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db
+cvs co -r 1.3 -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db

@@ -640,8 +640,8 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
         getattr(process, "patJetCorrFactors"+postfix).levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
         # With PFnoPU we need separache "charged hadron subtracted" corrections
-#        if doPFnoPU:
-#            getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
+        if doPFnoPU:
+            getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
 

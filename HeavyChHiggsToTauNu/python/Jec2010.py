@@ -39,7 +39,7 @@ def customise(process, options):
         toGet = cms.VPSet(
             cms.PSet(
                 record = cms.string('JetCorrectionsRecord'),
-                tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PF'),
+                tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5Calo'),
                 label  = cms.untracked.string('AK5Calo')
             ),
             cms.PSet(
@@ -49,7 +49,7 @@ def customise(process, options):
             ),
             cms.PSet(
                 record = cms.string('JetCorrectionsRecord'),
-                tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PF'),
+                tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PFchs'),
                 label  = cms.untracked.string('AK5PFchs')
             ),
         ),
