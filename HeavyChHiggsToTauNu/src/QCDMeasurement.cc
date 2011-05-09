@@ -188,6 +188,9 @@ namespace HPlus {
     // Other control histograms
     hTauCandidateSelectionIsolatedPtMax = fs->make<TH1F>("QCD_SelectedTauCandidateMaxIsolatedPt", "QCD_SelectedTauCandidateMaxIsolatedPt;Isol. track p_{T}, GeV/c; N_{jets} / 1 GeV/c", 100, 0., 100.);
     hTauCandidateSelectionIsolatedPtMax->Sumw2();
+
+    // Other histograms
+    hAlphaTAfterTauID = fs->make<TH1F>("QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID; #alpha_{T} , N_{events} / 0.1", 50, 0.0, 5.0);
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -396,6 +399,12 @@ namespace HPlus {
       hStdNonWeightedSelectedTauPt->Fill(mySelectedTau[0]->pt(), myEventWeightBeforeMetFactorization);
       hStdNonWeightedSelectedTauEta->Fill(mySelectedTau[0]->eta(), myEventWeightBeforeMetFactorization);
     }
+
+
+    // Has to be done after full TauID
+    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+    hAlphaTAfterTauID->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
+
 
     // Apply FakeMETVeto
     hStdWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight());

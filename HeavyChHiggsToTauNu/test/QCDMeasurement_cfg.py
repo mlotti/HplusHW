@@ -105,6 +105,11 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
 
+#Reminder(from HChSignalAnalysisParameters_cff.py):
+#def setTriggerVertexFor2011(**kwargs):
+#    setEfficiencyTriggersFor2011(**kwargs)
+#    setVertexWeightFor2011()
+
 ### Use trigger matched taus and standard signal trigger => Disable below
 # Set tau sources to non-trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -197,8 +202,8 @@ process.QCDMeasurementCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("QCDMeasurement", "counterNames"),
     counterInstances = cms.untracked.InputTag("QCDMeasurement", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False),
-    printAvailableCounters = cms.untracked.bool(True),
+    printSubCounters = cms.untracked.bool(True),
+    printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
     process.QCDMeasurementCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])

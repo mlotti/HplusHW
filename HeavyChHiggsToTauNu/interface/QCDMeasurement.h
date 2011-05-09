@@ -180,6 +180,9 @@ namespace HPlus {
     // Other control histograms
     TH1 *hTauCandidateSelectionIsolatedPtMax;
 
+    // Other histograms
+    TH1 *hAlphaTAfterTauID;
+
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauCandidateSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterJetSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauIsolation;
