@@ -127,16 +127,6 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     
     outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
 
-    #### needed for CMSSW35x data
-    if dataVersion.is35X():
-        process.load("RecoJets.Configuration.GenJetParticles_cff")
-        process.load("RecoJets.Configuration.RecoGenJets_cff")
-        ## creating JPT jets
-        process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-        process.load('RecoJets.Configuration.RecoJPTJets_cff')
-
-        run36xOn35xInput(process)
-
 
     # Taus
 
@@ -280,16 +270,9 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         process.out.outputCommands.extend(outputCommands)
 
     # Build sequence
-    seq = cms.Sequence()
-    if dataVersion.is35X():
-        process.hplusJptSequence = cms.Sequence(
-            process.genJetParticles *
-            process.ak5GenJets *
-            process.recoJPTJets
-        )
-        seq *= process.hplusJptSequence
-
-    seq *= process.hplusPatSequence
+    seq = cms.Sequence(
+        process.hplusPatSequence
+    )
 
     # Tau+HLT matching
     if doTauHLTMatching:
@@ -320,16 +303,6 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
-    # These are already in 36X AOD, se remove them from the tautagging
-    # sequence
-    if not dataVersion.is35X():
-        process.tautagging.remove(process.jptRecoTauProducer)
-        process.tautagging.remove(process.caloRecoTauProducer)
-        process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
-        process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
-        
 
     process.hplusHpsTancTauSequence = cms.Sequence()
     sequence = cms.Sequence()
@@ -723,13 +696,13 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 ### revision 1.7
 
 ###################a#################################################
-from PhysicsTools.PFCandProducer.Isolation.tools_cfi import isoDepositReplace
+from CommonTools.ParticleFlow.Isolation.tools_cfi import isoDepositReplace
 
 def addSelectedPFlowParticle(process,verbose=False):
     if verbose:
         print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
-    process.load("PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff")
-    process.load("PhysicsTools.PFCandProducer.pfNoPileUp_cff")
+    process.load("CommonTools.ParticleFlow.ParticleSelectors.pfSortByType_cff")
+    process.load("CommonTools.ParticleFlow.pfNoPileUp_cff")
 
     # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
     process.pfPileUpCandidates = cms.EDProducer("TPPFCandidatesOnPFCandidates",

@@ -1,9 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-#dataVersion="39Xredigi"
-dataVersion="311Xredigi"
-#dataVersion="41Xdata"
+dataVersion="42Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -78,11 +76,6 @@ process.out = cms.OutputModule("PoolOutputModule",
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-
-# JEC
-import HiggsAnalysis.HeavyChHiggsToTauNu.Jec2010 as Jec
-Jec.customise(process, options)
-
 
 # Add first PF2PAT so that we get a clean patDefaultSequence
 process.sPF2PAT = addPF2PAT(process, dataVersion,
