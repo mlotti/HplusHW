@@ -272,6 +272,9 @@ namespace HPlus {
     // Get MET just for reference; do not apply a MET cut but instead use P(MET>70 GeV) as weight
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
+    /// Apply pre-MET cut to see if MC Normalization is better.
+    if(metData.getSelectedMET()->et() < 30 ) return;
+
     // Apply tau candidate selection (with or without Rtau control region)
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauCandidateData.passedEvent()) return;
