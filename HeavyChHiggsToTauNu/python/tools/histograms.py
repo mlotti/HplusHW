@@ -280,7 +280,7 @@ def _boundsArgs(histos, kwargs):
     if not "xmin" in kwargs:
         kwargs["xmin"] = min([h.getXmin() for h in histos])
     if not "xmax" in kwargs:
-        kwargs["xmax"] = min([h.getXmax() for h in histos])
+        kwargs["xmax"] = max([h.getXmax() for h in histos])
 
 ## Create TCanvas and frame for one TPad.
 class CanvasFrame:
