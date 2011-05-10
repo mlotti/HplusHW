@@ -270,12 +270,12 @@ def _boundsArgs(histos, kwargs):
     ymaxfactor = kwargs.get("ymaxfactor", 1.1)
 
     if not "ymax" in kwargs:
-        kwargs["ymax"] = ymaxfactor * max([h.getRootHisto().GetMaximum() for h in histos])
+        kwargs["ymax"] = ymaxfactor * max([h.getYmax() for h in histos])
     if not "ymin" in kwargs:
         if "yminfactor" in kwargs:
             kwargs["ymin"] = kwargs["yminfactor"]*kwargs["ymax"]
         else:
-            kwargs["ymin"] = min([h.getRootHisto().GetMinimum() for h in histos])
+            kwargs["ymin"] = min([h.getYmin() for h in histos])
 
     if not "xmin" in kwargs:
         kwargs["xmin"] = min([h.getXmin() for h in histos])
@@ -583,6 +583,14 @@ class HistoBase:
     def getXmax(self):
         return self.rootHisto.GetXaxis().GetBinUpEdge(self.rootHisto.GetXaxis().GetLast())
 
+    ## Get the minimum value of the Y axis
+    def getYmin(self):
+        return self.rootHisto.GetMinimum()
+
+    ## Get the maximum value of the Y axis
+    def getYmax(self):
+        return self.rootHisto.GetMaximum()
+
     ## Get the width of a bin
     #
     # \param bin  Bin number
@@ -740,6 +748,14 @@ class HistoGraph(HistoBase):
 
     def getXmax(self):
         values = self.getRootGraph().GetX()
+        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+
+    def getYmin(self):
+        values = self.getRootGraph().GetY()
+        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+
+    def getYmax(self):
+        values = self.getRootGraph().GetY()
         return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
 
     def getBinWidth(self, bin):
