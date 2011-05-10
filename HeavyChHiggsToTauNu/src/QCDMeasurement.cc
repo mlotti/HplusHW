@@ -191,6 +191,8 @@ namespace HPlus {
 
     // Other histograms
     hAlphaTAfterTauID = fs->make<TH1F>("QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID; #alpha_{T} , N_{events} / 0.1", 50, 0.0, 5.0);
+    hAlphaTAfterTauID->Sumw2();
+
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -257,10 +259,17 @@ namespace HPlus {
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
 
-    // Trigger and HLT_MET cut
+    // Trigger and HLT_MET cut (only applied to REAL data)
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    if(!triggerData.passedEvent()) return;
+    if (iEvent.isRealData()) {
+      // Trigger is applied only if the data sample is real data
+      // std::cout <<"*** QCDMeasurement.cc ***  isRealData = " << iEvent.isRealData() << std::endl;
+	if(!triggerData.passedEvent()) return;
+    }
     increment(fTriggerAndHLTMetCutCounter);
+    
+//     if(!triggerData.passedEvent()) return;
+//     increment(fTriggerAndHLTMetCutCounter);
 
 
     // Primary vertex
@@ -423,7 +432,7 @@ namespace HPlus {
     TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
     if (!TopSelectionData.passedEvent()) return;
     increment(fTopSelectionCounter);
-
+ 
     // hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
     //     //    if(transverseMass < ftransverseMassCut-20.0 ) return false;
@@ -465,6 +474,8 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
   }
 
+
+
   edm::PtrVector<pat::Tau> QCDMeasurement::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
     edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
@@ -496,6 +507,7 @@ namespace HPlus {
     return mySelectedTauCandidate;
   }
   
+
   void QCDMeasurement::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;
