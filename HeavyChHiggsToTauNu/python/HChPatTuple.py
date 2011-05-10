@@ -82,6 +82,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     setPatJetDefaults(process.patJets)
+    setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion)
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
     # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
@@ -304,6 +305,16 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
 
 
+    # These are already in 36X AOD, se remove them from the tautagging
+    # sequence
+    process.tautagging.remove(process.jptRecoTauProducer)
+    process.tautagging.remove(process.caloRecoTauProducer)
+    process.tautagging.remove(process.caloRecoTauDiscriminationAgainstElectron)
+    process.tautagging.remove(process.caloRecoTauDiscriminationByIsolation)
+    process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackFinding)
+    process.tautagging.remove(process.caloRecoTauDiscriminationByLeadingTrackPtCut)
+
+
     process.hplusHpsTancTauSequence = cms.Sequence()
     sequence = cms.Sequence()
 
@@ -331,6 +342,17 @@ def setPatJetDefaults(module):
     module.embedCaloTowers = False
     module.embedPFCandidates = False
     module.addTagInfos = False
+
+def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
+    module.levels = []
+    if L1FastJet:
+        module.levels.append("L1FastJet")
+    else:
+        module.levels.append("L1Offset")
+    module.levels.extend(["L2Relative", "L3Absolute"])
+#    if dataVersion.isData():
+#        module.levels.append("L2L3Residual")
+    module.levels.extend(["L5Flavor", "L7Parton"])
 
 def setPatTauDefaults(module, includeTracksPFCands):
     attrs = [
@@ -375,7 +397,7 @@ def addPatElectronID(process, module, sequence):
     process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
     sequence.replace(module, (
             process.simpleEleIdSequence *
-            process.patElectronIsolation *
+#            process.patElectronIsolation *
             module
     ))
                                            
@@ -587,8 +609,6 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
     doL1Fastjet = True
     if doL1Fastjet:
-        process.ak5PFL1Fastjet.useCondDB = False
-
         #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
         #m = cms.EDFilter("PrimaryVertexObjectFilter",
         #    filterParams = pvSelector.clone(maxZ = 24.0),
@@ -611,7 +631,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         #process.pfJetsPFlow.doRhoFastjet = False
         process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
 
-        getattr(process, "patJetCorrFactors"+postfix).levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
+        setPatJetCorrDefaults(getattr(process, "patJetCorrFactors"+postfix), dataVersion, L1FastJet=True)
         # With PFnoPU we need separache "charged hadron subtracted" corrections
         if doPFnoPU:
             getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
