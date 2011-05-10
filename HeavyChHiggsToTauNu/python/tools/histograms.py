@@ -736,11 +736,11 @@ class HistoGraph(HistoBase):
 
     def getXmin(self):
         values = self.getRootGraph().GetX()
-        return min([values[i] for i in xrange(0, self.getRootGraph().N())])
+        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
 
     def getXmax(self):
         values = self.getRootGraph().GetX()
-        return max([values[i] for i in xrange(0, self.getRootGraph().N())])
+        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
