@@ -21,7 +21,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 doAllTauIds = True
 
 # Perform b tagging scanning
-doBTagScan = False
+doBTagScan = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -195,9 +195,18 @@ process.signalAnalysisPath = cms.Path(
 if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
-    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 3.0
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 1.5
     addAnalysis(process, "signalAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+if doBTagScan:
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    module = process.signalAnalysis.clone()
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 2.0
+    addAnalysis(process, "signalAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)

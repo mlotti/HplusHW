@@ -45,7 +45,7 @@ namespace HPlus {
     TopSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TopSelection();
 
-    Data analyze(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
   private:
     // Input parameters
@@ -63,6 +63,9 @@ namespace HPlus {
     TH1 *hPtmax;
     TH1 *hjjbMass;
     TH1 *htopMass;
+    TH1 *hPtmaxTop;
+    TH1 *htopMassReal;
+    TH1 *htopMassRealb;
 
     // Selected jets
     //    edm::PtrVector<pat::Jet> fSelectedJets;
