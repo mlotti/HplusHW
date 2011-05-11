@@ -180,7 +180,7 @@ namespace HPlus {
 
     // MET cut
     hMETBeforeMETCut->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    // tmp    if(!metData.passedEvent()) return false;
+    if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
     
