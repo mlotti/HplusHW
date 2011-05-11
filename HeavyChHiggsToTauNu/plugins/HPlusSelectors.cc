@@ -30,7 +30,7 @@ namespace {
     typedef T first_argument_type;
     typedef T second_argument_type;
     bool operator()(const T& t1, const T& t2) const {
-      return relIso(t1) < relIso(t2);
+      return relIso(t1) > relIso(t2);
     }
   };
 }
@@ -69,6 +69,15 @@ typedef ObjectSelector<
 
 typedef ObjectSelector<
   SortCollectionSelector<
+    edm::View<pat::Muon>,
+    GreaterByPt<pat::Muon>,
+    edm::PtrVector<pat::Muon>
+    >,
+  std::vector<pat::Muon>
+  > HPlusLargestPtPATMuonViewPtrSelector;
+
+typedef ObjectSelector<
+  SortCollectionSelector<
     edm::View<reco::Candidate>,
     GreaterByPt<reco::Candidate>,
     edm::PtrVector<reco::Candidate>
@@ -94,9 +103,12 @@ typedef HPlus::TauIsolationSelector<
 
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
+
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtCandViewPtrSelector );
+
 DEFINE_FWK_MODULE( HPlusTauIsolationCandViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonRefSelector );
