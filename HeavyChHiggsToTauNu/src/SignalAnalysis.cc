@@ -180,7 +180,7 @@ namespace HPlus {
 
     // MET cut
     hMETBeforeMETCut->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    if(!metData.passedEvent()) return false;
+    // tmp    if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     fTauEmbeddingAnalysis.fillAfterMetCut();
     
@@ -191,7 +191,7 @@ namespace HPlus {
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
 
-    hTransverseMassBeforeVeto->Fill(transverseMass);
+    // hTransverseMassBeforeVeto->Fill(transverseMass);
     // Hadronic jet selection                                                                                                                                      
     //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
 
