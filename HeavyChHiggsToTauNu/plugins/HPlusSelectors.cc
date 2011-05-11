@@ -1,6 +1,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "CommonTools/UtilAlgos/interface/ObjectSelector.h"
 #include "CommonTools/UtilAlgos/interface/SortCollectionSelector.h"
+#include "CommonTools/UtilAlgos/interface/SingleObjectSelector.h"
+#include "CommonTools/UtilAlgos/interface/StringCutObjectSelector.h"
 #include "CommonTools/Utils/interface/PtComparator.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -35,6 +37,12 @@ namespace {
   };
 }
 
+typedef SingleObjectSelector<
+  edm::View<pat::Muon>,
+  StringCutObjectSelector<pat::Muon>,
+  edm::PtrVector<pat::Muon>
+  > PATMuonViewPtrSelector;
+
 typedef ObjectSelector<
   SortCollectionSelector<
     std::vector<pat::Muon>,
@@ -50,6 +58,15 @@ typedef ObjectSelector<
     >,
   std::vector<pat::Muon>
   > HPlusSmallestRelIsoPATMuonViewSelector;
+
+typedef ObjectSelector<
+  SortCollectionSelector<
+    edm::View<pat::Muon>,
+    LessByRelIso<pat::Muon>,
+    edm::PtrVector<pat::Muon>
+    >,
+  edm::PtrVector<pat::Muon>
+  > HPlusSmallestRelIsoPATMuonViewPtrSelector;
 
 typedef ObjectSelector<
   SortCollectionSelector<
@@ -73,7 +90,7 @@ typedef ObjectSelector<
     GreaterByPt<pat::Muon>,
     edm::PtrVector<pat::Muon>
     >,
-  std::vector<pat::Muon>
+  edm::PtrVector<pat::Muon>
   > HPlusLargestPtPATMuonViewPtrSelector;
 
 typedef ObjectSelector<
@@ -101,8 +118,11 @@ typedef HPlus::TauIsolationSelector<
   edm::RefVector<std::vector<pat::Muon> >
   > HPlusTauIsolationPATMuonRefSelector;
 
+DEFINE_FWK_MODULE( PATMuonViewPtrSelector );
+
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewPtrSelector );
 
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
