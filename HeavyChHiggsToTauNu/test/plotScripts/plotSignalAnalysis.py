@@ -105,7 +105,8 @@ def main():
     
 #    genComparison(datasets)
     zMassComparison(datasets)
-    topMassComparison(datasets) 
+    topMassComparison(datasets)
+    topPtComparison(datasets) 
     vertexComparison(datasets)
 
 
@@ -134,6 +135,7 @@ def zMassComparison(datasets):
     rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TauJetMass"),
                                  datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
             "TauJetMass_Hp_vs_Zll")
+    
 def topMassComparison(datasets):
     signal = "TTToHplusBWB_M120"
     background = "TTToHplusBWB_M120"
@@ -141,6 +143,14 @@ def topMassComparison(datasets):
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_bFromTop")]),
              "topMass_all_vs_real")
+
+def topPtComparison(datasets):
+    signal = "TTToHplusBWB_M120"
+    background = "TTToHplusBWB_M120"
+    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Pt_jjb"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_jjbmax"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_top")]),
+             "topPt_all_vs_real")
 
 def scaleMC(histo, scale):
     if histo.isMC():
@@ -178,6 +188,35 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
+
+
+
+def rtauGen(h, name, rebin=5, ratio=False):
+    #h.setDefaultStyles()
+    h.histoMgr.forEachHisto(styles.generator())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "R_{#tau}"
+    if "Mass" in name:
+        xlabel = "m (GeV/c^{2})"
+    elif "Pt" in name:
+        xlabel = "p_{T}(GeV/c)"
+    elif "vertices" in name:
+        xlabel = "N_{vertices}"
+    ylabel = "Events / %.2f" % h.binWidth()
+
+    kwargs = {"ymin": 0.1}
+#    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
+    if ratio:
+        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
+        kwargs["createRatio"] = True
+#    name = name+"_log"
+
+    h.createFrame(name, **kwargs)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
+    common(h, xlabel, ylabel, addLuminosityText=False)
+
 
 
 def tauCandPt(h, step="", rebin=2):
@@ -395,25 +434,6 @@ def rtau(h, name, rebin=5, ratio=False):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
 
-def rtauGen(h, name, rebin=1, ratio=False):
-    #h.setDefaultStyles()
-    h.histoMgr.forEachHisto(styles.generator())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "R_{#tau}"
-    ylabel = "Events / %.2f" % h.binWidth()
-
-    kwargs = {}
-#    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
-    if ratio:
-        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
-        kwargs["createRatio"] = True
-#    name = name+"_log"
-
-    h.createFrame(name, **kwargs)
-#    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
-    common(h, xlabel, ylabel, addLuminosityText=False)
 
 def met(h, rebin=20, ratio=True):
     name = flipName(h.getRootHistoPath())
@@ -736,7 +756,7 @@ def tauJetMass(h, name, rebin=1, ratio=False):
 
 
 
-def topMass(h, name, rebin=20, ratio=False):
+def topMass(h, name, rebin=10, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 #    particle = "jet"
 #    if "bjet" in name:

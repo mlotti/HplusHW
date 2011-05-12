@@ -22,10 +22,14 @@ namespace HPlus {
     hPtjjb = makeTH<TH1F>(*fs, "Pt_jjb", "Pt_jjb", 400, 0., 800.);
     hPtmax = makeTH<TH1F>(*fs, "Pt_jjbmax", "Pt_jjbmax", 400, 0., 800.);
     hPtmaxTop = makeTH<TH1F>(*fs, "Pt_top", "Pt_top", 400, 0., 800.);
+    hPtmaxTopReal = makeTH<TH1F>(*fs, "Pt_topReal", "Pt_topReal", 400, 0., 800.);
+    hPtmaxTopHplus = makeTH<TH1F>(*fs, "Pt_topHplus", "Pt_topHplus", 400, 0., 800.);
     hjjbMass = makeTH<TH1F>(*fs, "jjbMass", "jjbMass", 400, 0., 800.);
     htopMass = makeTH<TH1F>(*fs, "Mass_jjbMax", "Mass_jjbMax", 400, 0., 800.);
     htopMassReal = makeTH<TH1F>(*fs, "Mass_Top", "Mass_Top", 400, 0., 800.);
+    htopMassMaxReal = makeTH<TH1F>(*fs, "MassMax_Top", "MassMax_Top", 400, 0., 800.);
     htopMassRealb = makeTH<TH1F>(*fs, "Mass_bFromTop", "Mass_bFromTop", 400, 0., 800.);
+    htopMassRealHplus = makeTH<TH1F>(*fs, "Mass_TopHplus", "Mass_TopHplus", 400, 0., 800.);
   }
 
   TopSelection::~TopSelection() {}
@@ -41,14 +45,11 @@ namespace HPlus {
     size_t passed = 0;
     double ptmax = 0;
     double topMass = -999;
-    bool bFromTop = false;
-    bool q1FromTop = false;
-    bool q2FromTop = false;
+    bool correctCombination = false;
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
-      //      const reco::GenParticle* dparticle =  iJet1->genParticle();
-      // if ( dparticle) std::cout << " jet particle " << dparticle->pdgId();
+
 
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
 	edm::Ptr<pat::Jet> iJet2 = *iter2;
@@ -74,65 +75,87 @@ namespace HPlus {
 	  if (ptjjb > ptmax ) {
 	    ptmax = ptjjb;
 	    topMass = jjbMass;
+	  }
 
 
-	    if (iEvent.isRealData()) continue;
+	  // real top in all combinations
+	  if (iEvent.isRealData()) continue;
 
-	    int bmother = 99999;
-	    const reco::GenParticle* bparticle =  iJetb->genParticle();
-	    if ( bparticle) {
-	      if (abs(bparticle->pdgId()) == 5) {
-		int numberOfbMothers = bparticle->numberOfMothers();
-		for (int im=0; im < numberOfbMothers; ++im){
-		  const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(bparticle->mother(im));
-		  if ( !mparticle) continue;
-		  bmother = mparticle->pdgId();
-		  if (abs(bmother) != 6) continue;
-		  bFromTop = true;
-		}
-	      }
-	    }
-	    if (!bFromTop) continue;
+	  bool bFromTop = false;
+	  bool q1FromTop = false;
+	  bool q2FromTop = false;
 
-	    const reco::GenParticle* q1particle =  iJet1->genParticle();
-	    if ( q1particle) {
-	      if (abs(q1particle->pdgId()) < 5) {
-		int numberOfq1Mothers = q1particle->numberOfMothers();
-		for (int im2=0; im2 < numberOfq1Mothers; ++im2){
-		  const reco::GenParticle* m1particle = dynamic_cast<const reco::GenParticle*>(q1particle->mother(im2));
-		  if ( !m1particle) continue;
-		  int q1mother = m1particle->pdgId();
-		  if (abs(q1mother) == 24 && (q1mother * bmother) > 0 ) q1FromTop = true;
-		  //		  std::cout << " jet1 particle " << q1particle->pdgId() << " jet1 mother " << q1mother  << " b mother " << bmother  << std::endl;
-		}
-	      }
-	    }
-	    const reco::GenParticle* q2particle =  iJet2->genParticle();
-	    if ( q2particle) {
-	      if (abs(q2particle->pdgId()) < 5) {
-		int numberOfq2Mothers = q2particle->numberOfMothers();
-		for (int im3=0; im3 < numberOfq2Mothers; ++im3){
-		  const reco::GenParticle* m2particle = dynamic_cast<const reco::GenParticle*>(q2particle->mother(im3));
-		  if ( !m2particle) continue;
-		  int q2mother = m2particle->pdgId();
-		  if (abs(q2mother) == 24 && (q2mother * bmother) > 0 ) q2FromTop = true;
-		  //		  std::cout << " jet2 particle " << q2particle->pdgId() << " jet2 mother " << q2mother  << " b mother " << bmother << std::endl;
-		}												 
+
+	  int q1mother = 999999;
+	  const reco::GenParticle* q1particle =  iJet1->genParticle();
+	  if ( q1particle) {
+	    if (abs(q1particle->pdgId()) < 5) {
+	      int numberOfq1Mothers = q1particle->numberOfMothers();
+	      for (int im2=0; im2 < numberOfq1Mothers; ++im2){
+		const reco::GenParticle* m1particle = dynamic_cast<const reco::GenParticle*>(q1particle->mother(im2));
+		if ( !m1particle) continue;
+      		q1mother = m1particle->pdgId();
 	      }
 	    }
 	  }
+	  int q2mother = -999999;
+	  const reco::GenParticle* q2particle =  iJet2->genParticle();
+	  if ( q2particle) {
+	    if (abs(q2particle->pdgId()) < 5) {
+
+	      int numberOfq2Mothers = q2particle->numberOfMothers();
+	      for (int im3=0; im3 < numberOfq2Mothers; ++im3){
+		const reco::GenParticle* m2particle = dynamic_cast<const reco::GenParticle*>(q2particle->mother(im3));
+		if ( !m2particle) continue;
+		q2mother = m2particle->pdgId();
+	      }												 
+	    }
+	  }
+	  if( abs(q1mother) == 24 && abs(q2mother) == 24 &&  (q1mother == q2mother)) {	    
+	    q1FromTop = true;
+	    q2FromTop = true;
+	  }
+
+
+	  int bmother = 99999;
+	  const reco::GenParticle* bparticle =  iJetb->genParticle();
+	  if ( bparticle) {
+	    if (abs(bparticle->pdgId()) == 5) {
+	      int numberOfbMothers = bparticle->numberOfMothers();
+	      for (int im=0; im < numberOfbMothers; ++im){
+		const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(bparticle->mother(im));
+		if ( !mparticle) continue;
+		bmother = mparticle->pdgId();
+	      }
+	    }
+	  }
+	  if( abs(bmother) == 6 &&  (q1mother * bmother) > 0 ) {	    
+	    bFromTop = true;
+	  }
+	  if (bFromTop && q1FromTop &&  abs(bmother) == 6 && (q1mother * bmother) > 0) {
+	    correctCombination = true;
+	    hPtmaxTop->Fill(ptjjb, fEventWeight.getWeight());
+	    htopMassReal->Fill(jjbMass, fEventWeight.getWeight());
+	  }
+	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
+	    hPtmaxTopHplus->Fill(ptjjb, fEventWeight.getWeight());
+	    htopMassRealHplus->Fill(jjbMass, fEventWeight.getWeight());
+	  }
+	  if (bFromTop ) htopMassRealb->Fill(jjbMass, fEventWeight.getWeight());
+
 	}
       }
     }
+ 
   
   
     hPtmax->Fill(ptmax, fEventWeight.getWeight());
     htopMass->Fill(topMass, fEventWeight.getWeight());
-    if (bFromTop && q1FromTop && q2FromTop ) {
-      hPtmaxTop->Fill(ptmax, fEventWeight.getWeight());
-      htopMassReal->Fill(topMass, fEventWeight.getWeight());
+    if ( correctCombination ) {
+      hPtmaxTopReal->Fill(ptmax, fEventWeight.getWeight());
+      htopMassMaxReal->Fill(topMass, fEventWeight.getWeight());
     }
-    if (bFromTop ) htopMassRealb->Fill(topMass, fEventWeight.getWeight());
+    //    if (bFromTop ) htopMassRealb->Fill(topMass, fEventWeight.getWeight());
 
     passEvent = true;
     if(topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;

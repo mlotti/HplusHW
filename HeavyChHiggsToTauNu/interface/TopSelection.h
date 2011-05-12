@@ -64,7 +64,11 @@ namespace HPlus {
     TH1 *hjjbMass;
     TH1 *htopMass;
     TH1 *hPtmaxTop;
+    TH1 *hPtmaxTopReal;
+    TH1 *hPtmaxTopHplus;
     TH1 *htopMassReal;
+    TH1 *htopMassMaxReal;
+    TH1 *htopMassRealHplus;
     TH1 *htopMassRealb;
 
     // Selected jets
