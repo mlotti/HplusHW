@@ -195,7 +195,8 @@ topSelection = cms.untracked.PSet(
 )
 
 vertexWeight = cms.untracked.PSet(
-    src = cms.InputTag("goodPrimaryVertices10"),
+#    src = cms.InputTag("goodPrimaryVertices10"),
+    src = cms.InputTag("goodPrimaryVertices"), # FIXME
     weights = cms.vdouble(1.0),
     enabled = cms.bool(False),
 )

@@ -8,7 +8,12 @@ import OrderedDict
 import multicrabDatasets
 import certifiedLumi
 
-defaultSeBlacklist = ["T2_UK_London_Brunel", "T2_BE_IIHE", "T2_IN_TIFR"]
+defaultSeBlacklist = [
+    "T2_UK_London_Brunel", # I don't anymore remember why this is here
+    "T2_BE_IIHE", # All jobs failed with stageout timeout
+    "T2_IN_TIFR", # All jobs failed file open errors
+    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout 
+    ]
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
     """Returns the list of CRAB task directories from a MultiCRAB configuration.
