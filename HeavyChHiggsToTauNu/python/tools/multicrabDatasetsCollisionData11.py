@@ -60,6 +60,12 @@ datasets = {
             "pattuple_v10": {
                 "fallback": "pattuple_v10_2"
             },
+            "pattuple_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": " /Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v11b-30bec5347ffdac4381c1a8c0982c0f67/USER",
+                "luminosity": 5.064475,
+                "number_of_jobs": 1
+            },
         }
     },
     "Tau_162803-162828_Prompt": {
@@ -71,7 +77,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v10_2-73cd95539afc8c9780e365506b68ad55/USER",
                 "luminosity": 4.641724,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "number_of_jobs": 1,
             },
             "pattuple_v10": {
                 "fallback": "pattuple_v10_2"
@@ -93,10 +99,16 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v10_3-73cd95539afc8c9780e365506b68ad55/USER",
                 "luminosity": 19.877959,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "number_of_jobs": 1,
             },
             "pattuple_v10": {
                 "fallback": "pattuple_v10_3"
+            },
+            "pattuple_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v11b-3fa3be0859a4d6ac95290d7925e5b48e/USER",
+                "luminosity": 26.220099,
+                "number_of_jobs": 2,
             },
         },
     },
@@ -126,6 +138,12 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 200, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_163270_pattuple_v11b-0fbacf41641faa252a2bc6c4d4cd404b/USER",
+                "luminosity": 121.519197,
+                "number_of_jobs": 7,
             },
         },
     },
