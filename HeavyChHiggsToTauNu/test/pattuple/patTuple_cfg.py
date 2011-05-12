@@ -71,7 +71,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-    )
+    ),
+    dropMetaData = cms.untracked.string("ALL")
 )
 
 ################################################################################
