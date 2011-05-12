@@ -24,11 +24,11 @@ multicrab.extendDatasets(
 # With certified json
 #        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
 #        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
-#        "Tau_163270-163369_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4
+#        "Tau_163270-163757_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4
 
 #        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
 #        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
-#        "TauPlusX_163270-163369_Prompt", # HLT_QuadJet40_IsoPFTau40_v3
+#        "TauPlusX_163270-163757_Prompt", # HLT_QuadJet40_IsoPFTau40_v3
 
 ########
 #
@@ -61,7 +61,7 @@ multicrab.extendDatasets(
 #        "QCD_Pt170to300_TuneZ2_Spring11",
 #        "QCD_Pt300to470_TuneZ2_Spring11",
 #        "TTJets_TuneZ2_Spring11",
-#        "WJets_TuneZ2_Spring11"
+#        "WJets_TuneZ2_Spring11",
 #        "TToBLNu_s-channel_TuneZ2_Spring11",
 #        "TToBLNu_t-channel_TuneZ2_Spring11",
 #        "TToBLNu_tW-channel_TuneZ2_Spring11",
@@ -182,6 +182,9 @@ multicrab.extendDatasets(
 # writing to /store/group/local ...
 #multicrab.addLineAll("USER.local_stage_out=1")
 
+multicrab.appendLineAll("GRID.maxtarballsize = 15")
+multicrab.appendArgAll("runOnCrab=1")
+
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
 
@@ -189,7 +192,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v10_3"
+    name += "_pattuple_v11b"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD

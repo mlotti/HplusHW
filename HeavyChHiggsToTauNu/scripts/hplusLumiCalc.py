@@ -14,7 +14,12 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LumiCalc
 
 def isMCTask(taskdir):
-    f = open(os.path.join(taskdir, "share", "crab.cfg"))
+    path = os.path.join(taskdir, "share", "crab.cfg")
+    if not os.path.exists(path):
+        print "crab.cfg at %s doesn't exist, assuming task is MC" % path
+        return True
+
+    f = open(path)
     mc = False
     for line in f:
         if "pycfg_params" in line:

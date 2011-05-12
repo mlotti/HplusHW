@@ -10,16 +10,15 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # Create Process
 process = cms.Process("HChPatTuple")
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 # Global tag
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
-
-# Jet trigger (for cleaning of tau->HLT matching
-myJetTrigger = "HLT_Jet30U"
-#myJetTrigger = "HLT_Jet50U"
 
 ################################################################################
 # Source
@@ -53,7 +52,6 @@ if dataVersion.isData():
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
 print "Trigger used for tau matching: "+myTrigger
-print "Trigger used for jet matching: "+myJetTrigger
 
 ################################################################################
 # Output module
@@ -73,13 +71,33 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-    )
+    ),
+    dropMetaData = cms.untracked.string("ALL")
 )
 
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
-process.s = addPat(process, dataVersion, matchingTauTrigger=myTrigger, matchingJetTrigger=myJetTrigger)
+
+# JEC
+import HiggsAnalysis.HeavyChHiggsToTauNu.Jec2010 as Jec
+Jec.customise(process, options)
+
+
+# Add first PF2PAT so that we get a clean patDefaultSequence
+process.sPF2PAT = addPF2PAT(process, dataVersion,
+                            matchingTauTrigger=myTrigger,
+                            postfix="PFlow", doPFnoPU=False,
+                            )
+process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
+                                matchingTauTrigger=myTrigger,
+                                )
+
+process.sPAT = addPat(process, dataVersion,
+                      doPatMuonPFIsolation=True,
+                      matchingTauTrigger=myTrigger,
+                      includeTracksPFCands=False,
+                      )
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
@@ -110,7 +128,9 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
-    process.s 
+    process.sPAT *
+    process.sPF2PAT *
+    process.sPF2PATnoPU
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence

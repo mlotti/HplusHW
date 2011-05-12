@@ -17,6 +17,8 @@ options.register("WDecaySeparate",
                  "Separate W decays from MC information")
 options, dataVersion = getOptionsDataVersion(dataVersion, options)
 
+#options.doPat=1
+
 process = cms.Process("HChMuonAnalysis")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -55,11 +57,12 @@ from PhysicsTools.PatAlgos.tools.coreTools import removeSpecificPATObjects
 patArgs = {"doPatTrigger": False,
 #           "doPatTaus": False,
 #           "doHChTauDiscriminators": False,
-           "doPatElectronID": False,
+           "doPatElectronID": True,
            "doTauHLTMatching": False,
            "doPatMuonPFIsolation": True,
            }
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence.remove(process.goodPrimaryVertices10)
 
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
@@ -93,8 +96,14 @@ def createAnalysis(name, postfix="", **kwargs):
     prefix = name+postfix
     create(prefix=prefix, **kwargs)
     if not "doIsolationWithTau" in kwargs:
-        create(prefix=prefix+"IsoTau", doIsolationWithTau=True, **kwargs)
-
+        for iso in [
+            "VLoose",
+            "Loose",
+            "Medium",
+            "Tight",
+            ]:
+            create(prefix=prefix+"IsoTau"+iso, doIsolationWithTau=True, isolationWithTauDiscriminator="by%sIsolation"%iso, **kwargs)
+        
     create(prefix=prefix+"Aoc", afterOtherCuts=True, **kwargs)
 
 def createAnalysis2(**kwargs):
@@ -106,6 +115,7 @@ def createAnalysis2(**kwargs):
     for pt, met, njets in [
         (30, 20, 2),
         (30, 20, 3),
+#        (40, 20, 2),
         (40, 20, 3)
         ]:
         args["postfix"] = "Pt%dMet%dNJets%d%s" % (pt, met, njets, postfix)
@@ -115,6 +125,7 @@ def createAnalysis2(**kwargs):
         createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2()
+#createAnalysis2(muons="tightMuonsZ")
 
 # process.out = cms.OutputModule("PoolOutputModule",
 #     fileName = cms.untracked.string('foo.root'),

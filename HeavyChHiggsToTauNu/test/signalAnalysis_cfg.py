@@ -31,11 +31,14 @@ JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
 # With tau embedding input, tighten the muon selection
-tauEmbeddingTightenMuonSelection = True
+tauEmbeddingFinalizeMuonSelection = True
 # With tau embedding input, do the muon selection scan
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+filterGenTaus = False
+filterGenTausInaccessible = False
 
 ################################################################################
 
@@ -69,7 +72,9 @@ process.source = cms.Source('PoolSource',
     )
 )
 if options.tauEmbeddingInput != 0:
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
+    process.source.fileNames = [
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_pt40/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_23_1_YLm.root"
+        ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -90,6 +95,11 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
+###
+# MC Filter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+if filterGenTaus:
+    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
 
 ################################################################################
 # The "golden" version of the signal analysis
@@ -113,16 +123,15 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 # Set the triggers for trigger efficiencies
 # 2010 and 2011 scenarios
 #param.setEfficiencyTriggersFor2010()
-#param.setEfficiencyTriggersFor2011()
+param.setEfficiencyTriggersFor2011()
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+#param.setTriggerVertexFor2011()
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingTightenMuonSelection:
+    if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
@@ -133,14 +142,14 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    # Change default tau algorithm here as needed         
+    # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
-    jetTauInvMass = param.jetTauInvMass,                                      
-    topSelection = param.topSelection,                                      
+    jetTauInvMass = param.jetTauInvMass,
+    topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
@@ -192,8 +201,8 @@ process.signalAnalysisPath = cms.Path(
 
 
 # b tagging testing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 if doBTagScan:
-    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
     module.bTagging.discriminator = "trackCountingHighPurBJetTags"
     module.bTagging.discriminatorCut = 1.2
