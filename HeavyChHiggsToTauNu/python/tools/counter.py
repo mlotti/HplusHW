@@ -754,6 +754,9 @@ class SimpleCounter:
             self._createCounter()
         return self.counter[icount]
 
+    def getDataset(self):
+        return self.datasetRootHisto.getDataset()
+
     def getCountByName(self, name):
         if self.counter == None:
             self._createCounter()
@@ -795,6 +798,18 @@ class Counter:
     def scale(self, value):
         self.forEachDataset(lambda x: x.scale(value))
 
+    def scaleMC(self, value):
+        def scale(x):
+            if x.getDataset().isMC():
+                x.scale(value)
+        self.forEachDataset(scale)
+
+    def scaleData(self, value):
+        def scale(x):
+            if x.getDataset().isData():
+                x.scale(value)
+        self.forEachDataset(scale)
+
     def getTable(self):
         table = CounterTable()
         for h in self.counters:
@@ -803,21 +818,24 @@ class Counter:
 
 class EventCounter:
     """Many counters."""
-    def __init__(self, datasets, countNameFunction=None):
+    def __init__(self, datasets, countNameFunction=None, counters=None):
         counterNames = {}
 
         if len(datasets.getAllDatasets()) == 0:
             raise Exception("No datasets")
 
-        # Pick all possible names of counters
-        counterDir = None
-        for dataset in datasets.getAllDatasets():
-            if counterDir == None:
-                counterDir = dataset.getCounterDirectory()
-            else:
-                if counterDir != dataset.getCounterDirectory():
-                    raise Exception("Sanity check failed, datasets have different counter directories!")
+        # Take the default counter directory if none is explicitly given
+        counterDir = counters
+        if counterDir == None:
+            for dataset in datasets.getAllDatasets():
+                if counterDir == None:
+                    counterDir = dataset.getCounterDirectory()
+                else:
+                    if counterDir != dataset.getCounterDirectory():
+                        raise Exception("Sanity check failed, datasets have different counter directories!")
 
+        # Pick all possible names of counters
+        for dataset in datasets.getAllDatasets():
             for name in dataset.getDirectoryContent(counterDir, lambda obj: isinstance(obj, ROOT.TH1)):
                 counterNames[name] = 1
 
@@ -857,6 +875,14 @@ class EventCounter:
     def scale(self, value):
         self._forEachCounter(lambda x: x.scale(value))
         self.normalization += " (scaled with %g)" % value
+
+    def scaleMC(self, value):
+        self._forEachCounter(lambda x: x.scaleData(value))
+        self.normalization += " (MC scaled with %g)" % value
+
+    def scaleData(self, value):
+        self._forEachCounter(lambda x: x.scaleData(value))
+        self.normalization += " (data scaled with %g)" % value
 
     def getMainCounter(self):
         return self.mainCounter

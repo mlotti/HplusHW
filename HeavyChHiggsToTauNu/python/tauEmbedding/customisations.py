@@ -36,12 +36,19 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag("tauEmbeddingMuons")
     param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonSelection"):
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
     counters = []
+
+    cname = prefix+"AllEvents"
+    m = cms.EDProducer("EventCountProducer")
+    setattr(process, cname, m)
+    sequence *= m
+    counters.append(cname)
 
     if enableIsolation:
         counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
+    counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
 
     return counters
@@ -77,6 +84,22 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
         GlobalMuonVeto = param.GlobalMuonVeto.clone(
             src = cms.untracked.InputTag("selectedPatMuonsEmbeddingMuonCleaned")
         )
+    )
+    m2 = cms.EDProducer("EventCountProducer")
+
+    setattr(process, filter, m1)
+    setattr(process, counter, m2)
+
+    sequence *= (m1 * m2)
+
+    return [counter]
+
+def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"):
+    filter = prefix+"Filter"
+    counter = prefix
+
+    m1 = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+        GlobalElectronVeto = param.GlobalElectronVeto.clone()
     )
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -305,3 +328,64 @@ def addTauEmbeddingMuonTaus(process):
     return seq
 
     
+def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="generatorTaus"):
+    counters = []
+
+    allCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"AllCount", allCount)
+    counters.append(prefix+"AllCount")
+
+    genTaus = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles"),
+        cut = cms.string("abs(pdgId()) == 15")
+    )
+    genTausName = prefix
+    setattr(process, genTausName, genTaus)
+
+    genTausFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(genTausName),
+        minNumber = cms.uint32(1),
+    )
+    setattr(process, prefix+"Filter", genTausFilter)
+
+    genTausCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"Count", genTausCount)
+    counters.append(prefix+"Count")
+
+    genTauSequence = cms.Sequence(
+        allCount *
+        genTaus *
+        genTausFilter *
+        genTausCount
+    )
+    setattr(process, prefix+"Sequence", genTauSequence)
+
+    if filterInaccessible:
+        genTausAccessible =  cms.EDFilter("GenParticleSelector",
+            src = cms.InputTag("genParticles"),
+            cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        )
+        name = prefix+"Accessible"
+        setattr(process, genTausAccessible, name)
+
+        genTausInaccessibleFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(name),
+            minNumber = cms.uint32(0),
+            maxNumber = cms.uint32(0),
+        )
+        setattr(process, prefix+"InaccessibleFilter", genTausInaccessibleFilter)
+
+        genTausInaccessibleCount = cms.EDProducer("EventCountProducer")
+        name = prefix+"InaccessibleCount"
+        setattr(process, name, genTausInaccessibleCount)
+        counters.append(name)
+
+        genTauSequence *= (
+            genTausAccessible *
+            genTausInaccessibleFilter *
+            genTausInaccessibleCount
+        )
+
+    sequence *= genTauSequence
+
+    return counters
