@@ -43,10 +43,10 @@ namespace HPlus {
 
   bool TauIDPFHPSBase::passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau) {
     // Electron veto
-    if(tau->tauID("againstElectronLoose") < 0.5 ) return false;
+    if(tau->tauID("againstElectronMedium") < 0.5 ) return false;
     fCounterPackager.incrementSubCount(fIDAgainstElectronCut);
     // Muon veto
-    if(tau->tauID("againstMuonLoose") < 0.5 ) return false;
+    if(tau->tauID("againstMuonTight") < 0.5 ) return false;
     fCounterPackager.incrementSubCount(fIDAgainstMuonCut);
     // All cuts passed, return true
     return true;

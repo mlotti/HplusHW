@@ -21,7 +21,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 doAllTauIds = True
 
 # Perform b tagging scanning
-doBTagScan = True
+doBTagScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -123,11 +123,11 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 # Set the triggers for trigger efficiencies
 # 2010 and 2011 scenarios
 #param.setEfficiencyTriggersFor2010()
-param.setEfficiencyTriggersFor2011()
+#param.setEfficiencyTriggersFor2011()
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
-#param.setTriggerVertexFor2011()
+param.setTriggerVertexFor2011()
 
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)

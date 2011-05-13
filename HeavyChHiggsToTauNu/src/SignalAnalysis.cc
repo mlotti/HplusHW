@@ -115,10 +115,10 @@ namespace HPlus {
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    if (iEvent.isRealData()) {
+    //    if (iEvent.isRealData()) {
       // Trigger is applied only if the data sample is real data
           if(!triggerData.passedEvent()) return false;
-    }
+	  //   }
     increment(fTriggerCounter);
 
 
@@ -170,11 +170,11 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Trigger efficiency
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
+    //    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
+    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
       // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
-      fEventWeight.multiplyWeight(triggerEfficiency);
-    }
+    //      fEventWeight.multiplyWeight(triggerEfficiency);
+    //    }
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
