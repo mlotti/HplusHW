@@ -180,7 +180,7 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.3, 1.0);
+    hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 50, 0.0, 5.0);
     /*
     hDiJetInvMass      = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMass", "EvtTopology_DiJetInvMass", 1000, 0.0, 1000.0);
     hDiJetInvMassCutFail    = makeTH<TH1F>(*fs, "EvtTopology_DiJetInvMassCutFail", "EvtTopology_DiJetInvMassCutFail", 1000, 0.0, 1000.0);

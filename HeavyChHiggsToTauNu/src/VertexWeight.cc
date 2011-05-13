@@ -25,9 +25,12 @@ namespace HPlus {
       return std::make_pair(1.0, hvertex->size());
 
     size_t n = hvertex->size();
+    // std::cout << " *** VertexWeight::getWeightAndSize() *** vertex->size() = " << n << std::endl;
+
     if(n >= fWeights.size())
       n = fWeights.size()-1;
 
+    /// Return "Vertex Weight" according to the number of vertices found in Event
     return std::make_pair(fWeights[n], hvertex->size());
   }
 

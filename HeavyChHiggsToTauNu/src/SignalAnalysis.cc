@@ -191,7 +191,7 @@ namespace HPlus {
 
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
 
-    hTransverseMassBeforeVeto->Fill(transverseMass);
+    // hTransverseMassBeforeVeto->Fill(transverseMass);
     // Hadronic jet selection                                                                                                                                      
     //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
 
