@@ -151,6 +151,8 @@ namespace HPlus {
     TH1 *hStdNonWeightedTauPtAfterFakeMETVeto;
     TH1 *hStdNonWeightedTauPtAfterForwardJetVeto;
     TH1 *hStdWeightedRtau;
+    TH1 *hStdWeightedRtauWithoutNjetsBeforeCut;
+    TH1 *hStdWeightedRtauWithoutNjetsAfterCut;
     TH1 *hStdWeightedBjets;
     TH1 *hStdWeightedFakeMETVeto;
     TH1 *hStdNonWeightedRtau;
