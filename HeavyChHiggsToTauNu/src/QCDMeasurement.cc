@@ -1,4 +1,4 @@
- #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurement.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurement.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
@@ -80,6 +80,7 @@ namespace HPlus {
     createMETHistogramGroupByTauPt("QCD_MET_afterTauCandidateSelection", fMETHistogramsByTauPtAfterTauCandidateSelection);
     createMETHistogramGroupByTauPt("QCD_MET_afterJetSelection", fMETHistogramsByTauPtAfterJetSelection);
     createMETHistogramGroupByTauPt("QCD_MET_afterTauIsolation", fMETHistogramsByTauPtAfterTauIsolation);
+    createNBtagsHistogramGroupByTauPt("QCD_NBtags_afterJetSelection", fNBtagsHistogramsByTauPtAfterJetSelection);
 
     // Histograms for later change of factorization map
 
@@ -220,8 +221,7 @@ namespace HPlus {
 	myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
 	myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";MET, GeV;N/" 
 		     << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), 
-					    myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
       } else {
 	// Treat other bins
 	myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
@@ -244,6 +244,53 @@ namespace HPlus {
       (*it)->Sumw2();
     }
   }
+
+
+
+
+  void QCDMeasurement::createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
+    // Get tau pt edge table
+    fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
+    // Make histograms
+    edm::Service<TFileService> fs;
+    size_t myTableSize = fFactorizationBinLowEdges.size(); 
+    int nBins = 10; // number of bins for the histograms
+    double xMin = 0.0; // x range minimum
+    double xMax = 10.0; // x range maximum
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+
+    /// Loop ofver all tau pT bins
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+	// Treat first bin
+	myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
+	myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";NBtags;N/" << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
+	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
+      } else {
+	// Treat other bins
+	myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
+	myHistoLabel << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i] << ";NBtags;N/"  << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1];
+    myHistoLabel << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1] <<";NBtags;N/"  << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    // Apply sumw2 on the histograms
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
+      (*it)->Sumw2();
+    }
+    return;
+  }
+
+
+
 
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
@@ -358,6 +405,8 @@ namespace HPlus {
     
     // Obtain btagging, fakeMETVeto, and forwardJetVeto data objects - internal plots will be wrong since they are not produced at the spot where the cut is applied
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
+    fNBtagsHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
+    
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
     ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     // Obtain tau ID data object
