@@ -147,6 +147,35 @@ datasets = {
             },
         },
     },
+    "Tau_163758-163869_Prompt": {
+        "dataVersion": "41Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
+        "runs": (163758, 163869), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v2/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    # The dataset below is a merge of Tau_163270-163757_Prompt,
+    # Tau_163758-163869_Prompt, which should be used when they both
+    # need to be reprocessed
+    "Tau_163270-163869_Prompt": {
+        "dataVersion": "41Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
+        "runs": (163270, 163869), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v2/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
 
     # Tau + jets
     "TauPlusX_160404-161312_Prompt": {
@@ -250,10 +279,10 @@ datasets = {
             },
         }
     },
-    "TauPlusX_163270-163757_Prompt": {
+    "TauPlusX_163270-163869_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_QuadJet40_IsoPFTau40_v3",
-        "runs": (163270, 163757), # This is prompt RECO, so check the run range again when running!
+        "runs": (163270, 163869), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/TauPlusX/Run2011A-PromptReco-v2/AOD",
@@ -305,10 +334,10 @@ datasets = {
         "data": {
         },
     },
-    "SingleMu_163270-163757_Prompt": {
+    "SingleMu_163270-163869_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_Mu24_v2",
-        "runs": (163270, 163757), # This is prompt RECO, so check the run range again when running!
+        "runs": (163270, 163869), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v2/AOD",
