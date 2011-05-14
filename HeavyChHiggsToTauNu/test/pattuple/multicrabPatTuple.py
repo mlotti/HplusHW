@@ -25,10 +25,12 @@ multicrab.extendDatasets(
 #        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1
 #        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2
 #        "Tau_163270-163757_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4
+#        "Tau_163758-163869_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4
+#        "Tau_163758-163869_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4 (merge of the two above ones)
 
 #        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
 #        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1
-#        "TauPlusX_163270-163757_Prompt", # HLT_QuadJet40_IsoPFTau40_v3
+#        "TauPlusX_163270-163869_Prompt", # HLT_QuadJet40_IsoPFTau40_v3
 
 ########
 #
