@@ -28,13 +28,15 @@ multicrab.extendDatasets(pattupleVersion,
         #### 39X/41X data and 311X MC
         # Data: single tau + MET
         # 2010
-#        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20;    v9, v10
-#        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3; v9, v10
-#        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10
+        "BTau_141956-144114_Dec22", # HLT_SingleIsoTau20_Trk5;           v9, v11 
+        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20;    v9, v10, v11
+        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3; v9, v10, v11
+        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10, v11
         # 2011
-        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10
+        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10, v11
         "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10, v11
         "Tau_163270-163757_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v11
+        "Tau_163758-163869_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v11
 
         # Data: quadjet
 #        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10

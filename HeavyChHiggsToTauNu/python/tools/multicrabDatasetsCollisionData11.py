@@ -158,6 +158,12 @@ datasets = {
                 "number_of_jobs": 200, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_163758_pattuple_v11b-0fbacf41641faa252a2bc6c4d4cd404b/USER",
+                "luminosity": 38.238908,
+                "number_of_jobs": 2,
+            },
         }
     },
     # The dataset below is a merge of Tau_163270-163757_Prompt,
