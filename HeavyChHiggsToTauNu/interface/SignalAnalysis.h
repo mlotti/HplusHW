@@ -36,6 +36,19 @@ class TH2;
 
 namespace HPlus {
   class SignalAnalysis {
+  enum SignalSelectionOrder {
+    kSignalOrderTrigger,
+    kSignalOrderVertexSelection,
+    kSignalOrderTauID,
+    kSignalOrderElectronVeto,
+    kSignalOrderMuonVeto,
+    kSignalOrderMETSelection,
+    kSignalOrderJetSelection,
+    kSignalOrderBTagSelection,
+    kSignalOrderFakeMETVeto,
+    kSignalOrderTopSelection
+  };
+
   public:
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalAnalysis();
@@ -117,6 +130,9 @@ namespace HPlus {
     TH1 *hSelectedTauEtaMetCut;
     TH1 *hSelectedTauPhiMetCut;
     TH1 *hSelectedTauRtauMetCut;
+
+    TH1 *hSelectionFlow;
+
   };
 }
 
