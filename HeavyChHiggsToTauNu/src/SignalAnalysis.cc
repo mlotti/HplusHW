@@ -175,11 +175,29 @@ namespace HPlus {
       // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
     //      fEventWeight.multiplyWeight(triggerEfficiency);
     //    }
+    double Met = metData.getSelectedMET()->et();
+    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;  
+      
+    if( Met > 0 && Met < 10) fEventWeight.multiplyWeight(3.4);
+    if( Met > 10 && Met < 20) fEventWeight.multiplyWeight(10.09);
+    if( Met > 20 && Met < 30) fEventWeight.multiplyWeight(9.15);
+    if( Met > 30 && Met < 40) fEventWeight.multiplyWeight(3.82);
+    if( Met > 40 && Met < 50) fEventWeight.multiplyWeight(2.05);
+    if( Met > 50 && Met < 60) fEventWeight.multiplyWeight(1.72);
+    if( Met > 60 && Met < 70) fEventWeight.multiplyWeight(1.09);
+    if( Met > 70 && Met < 80) fEventWeight.multiplyWeight(1.18);
+    if( Met > 80 && Met < 90) fEventWeight.multiplyWeight(0.73);
+    if( Met > 90 && Met < 100) fEventWeight.multiplyWeight(0.995);
+    if( Met > 100 && Met < 150) fEventWeight.multiplyWeight(0.9766);
+    if( Met > 150 && Met < 200) fEventWeight.multiplyWeight(0.387);
+    if( Met > 200 && Met < 250) fEventWeight.multiplyWeight(0.833);
+    if( Met > 250 && Met < 300) fEventWeight.multiplyWeight(2.586);
+    //    std::cout << " weight after  = " << fEventWeight.getWeight() << std::endl;  
+   
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
-
 
   
 

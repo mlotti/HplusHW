@@ -32,7 +32,7 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBWB_M120_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M155_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M140_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
 
@@ -66,7 +66,7 @@ def main():
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 #    met2(plots.DataMCPlot(datasets, analysis+"/met"), "met", rebin=5)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=5)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=50)
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
@@ -121,8 +121,8 @@ def main():
 
 
 def vertexComparison(datasets):
-    signal = "TTToHplusBWB_M140"
-    background = "TTToHplusBWB_M140"
+    signal = "TTToHplusBWB_M120"
+    background = "TTToHplusBWB_M120"
     rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
                                  datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
             "vertices_H120")
@@ -141,16 +141,16 @@ def vertexComparison(datasets):
 #            "TauJetMass_Hp_vs_Zll")
     
 def topMassComparison(datasets):
-    signal = "TTToHplusBWB_M140"
-    background = "TTToHplusBWB_M140"
+    signal = "TTToHplusBWB_M120"
+    background = "TTToHplusBWB_M120"
     rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Mass_jjbMax"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_bFromTop")]),
              "topMass_all_vs_real")
 
 def topPtComparison(datasets):
-    signal = "TTToHplusBWB_M140"
-    background = "TTToHplusBWB_M140"
+    signal = "TTToHplusBWB_M120"
+    background = "TTToHplusBWB_M120"
     rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Pt_jjb"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_jjbmax"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_top")]),
@@ -167,7 +167,7 @@ def scaleMCHistos(h, scale):
 def scaleMCfromWmunu(h):
     # Data/MC scale factor from AN 2011/053
 #    scaleMCHistos(h, 1.736)
-    scaleMCHistos(h, 2.5)
+    scaleMCHistos(h, 1.0)
 
 
 
@@ -469,7 +469,7 @@ def met(h, rebin=20, ratio=True):
 
 
     
-def met2(h, name, rebin=20, ratio=True):
+def met2(h, name, rebin=40, ratio=True):
 #    name = h.getRootHistoPath()
     name = "met"
 
