@@ -5,11 +5,23 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.source = cms.Source("EmptySource")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )    
 
-process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
+process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
+    "TagProbeFitTreeAnalyzer",
     # IO parameters:
-    InputFileNames = cms.vstring("histograms.root"),
+#    InputFileNames = cms.vstring("histograms.root"),
 #    InputFileNames = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root"),
+    # Run2010A HLT_Mu9
+#    InputFileNames = cms.vstring("Mu_136035-144114_Dec22/res/histograms-Mu_136035-144114_Dec22.root"),
+    # Run2010B HLT_Mu9
 #    InputFileNames = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root"),
+    # Run2010B HLT_Mu15
+#    InputFileNames = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root"),
+    # Run2011A HLT_Mu20
+#    InputFileNames = cms.vstring("SingleMu_160431-161016_Prompt/res/histograms-SingleMu_160431-161016_Prompt.root", "SingleMu_162803-163261_Prompt/res/histograms-SingleMu_162803-163261_Prompt.root"),
+    # Run2010A HLT_Mu24
+#    InputFileNames = cms.vstring("SingleMu_163270-163369_Prompt/res/histograms-SingleMu_163270-163369_Prompt.root"),
+    # MC 
+    InputFileNames = cms.vstring("DYJetsToLL_M50_TuneZ2_Spring11/res/histograms-DYJetsToLL_M50_TuneZ2_Spring11.root"),
     InputDirectoryName = cms.string("tnpTree"),
     InputTreeName = cms.string("fitter_tree"),
     OutputFileName = cms.string("tagprobe_output.root"),
@@ -42,6 +54,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         isHLTMu9 = cms.vstring("HLT_Mu9", "dummy[pass=1,fail=0]"),
         isHLTMu15 = cms.vstring("HLT_Mu15", "dummy[pass=1,fail=0]"), 
         isHLTMu20 = cms.vstring("HLT_Mu20", "dummy[pass=1,fail=0]"),
+        isHLTMu24 = cms.vstring("HLT_Mu24", "dummy[pass=1,fail=0]"),
         hitQuality = cms.vstring("Hit quality", "dummy[pass=1,fail=0]"),
         dB = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
         sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
@@ -88,10 +101,13 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
                 "isTrackerMuon", "pass",
                 "isGlobalMuon", "pass",
                 "isHLTMu9", "pass",
+#                "isHLTMu15", "pass",
+#                "isHLTMu20", "pass",
+#                "isHLTMu24", "pass",
                 "hitQuality", "pass",
                 "dB", "pass",
-#                "sumIsoRel10", "pass",
-                "tauIsoVLoose", "pass",
+                "sumIsoRel10", "pass",
+#                "tauIsoVLoose", "pass",
                 "dz1cm", "below",
 #                "fullSelection", "pass",
             ),
@@ -129,16 +145,26 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer("TagProbeFitTreeAnalyzer",
         # ),
     )
 )
+ptbins = range(30, 410, 10)
+etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
+
 # process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
 #     BinnedVariables = cms.PSet(
-#         pt = cms.vdouble(range(30, 410, 10)),
+#         pt = cms.vdouble(ptbins),
 #     ),
 # )
 # process.TagProbeFitTreeAnalyzer.Efficiencies.All_abseta = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
 #     BinnedVariables = cms.PSet(
-#         abseta = cms.vdouble([x*0.21 for x in range(0, 11)]), # 0.21 stepping [0, 2.1]
+#         abseta = cms.vdouble(etabins),
 #     ),
 # )
+# process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt_abseta = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
+#     BinnedVariables = cms.PSet(
+#         pt = cms.vdouble(ptbins),
+#         abseta = cms.vdouble(etabins),
+#     ),
+# )
+
 
 
 #         All_eta = cms.PSet(
