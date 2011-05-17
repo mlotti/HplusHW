@@ -195,7 +195,9 @@ topSelection = cms.untracked.PSet(
 )
 
 vertexWeight = cms.untracked.PSet(
-    src = cms.InputTag("goodPrimaryVertices10"),
+    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
+    pileupSrc = cms.InputTag("PileupSummaryInfos"),
+    useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
     weights = cms.vdouble(1.0),
     enabled = cms.bool(False),
 )
