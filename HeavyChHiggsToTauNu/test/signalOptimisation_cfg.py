@@ -4,16 +4,22 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-# Select the version of the data
-dataVersion = "39Xredigi"
-#dataVersion = "39Xdata"
+# Select the version of the data (needed only for interactice running,
+# overridden automatically from multicrab
+#dataVersion = "39Xredigi" # Winter10 MC
+#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
+dataVersion = "311Xredigi" # Spring11 MC
+#dataVersion = "41Xdata"   # Run2011 PromptReco
+
 
 ##########
 # Flags for additional signal analysis modules
-
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
+
+# Perform b tagging scanning
+doBTagScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -22,35 +28,55 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
+# With tau embedding input, tighten the muon selection
+tauEmbeddingTightenMuonSelection = True
+# With tau embedding input, do the muon selection scan
+doTauEmbeddingMuonSelectionScan = False
+# Do tau id scan for tau embedding normalisation (no tau embedding input required)
+doTauEmbeddingTauSelectionScan = False
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
 
+# These are needed for running against tau embedding samples, can be
+# given also from command line
+#options.doPat=1
+#options.tauEmbeddingInput=1
+
 ################################################################################
 # Define the process
 process = cms.Process("HChSignalOptimisation")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-        # For testing in lxplus
-        #dataVersion.getAnalysisDefaultFileCastor()
-        # For testing in jade
-        #dataVersion.getAnalysisDefaultFileMadhatter()
-        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-  )
+   "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+    # For testing in lxplus
+    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    # dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #        dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    )
 )
+if options.tauEmbeddingInput != 0:
+    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
@@ -65,43 +91,61 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
+
 ################################################################################
-# The "golden" version of the signal optimisation
+# The "golden" version of the signal analysis
 
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
 addPrimaryVertexSelection(process, process.commonSequence)
 
-# Import signal analysis parameters and tweak them here
+# Import Standard SignalAnalysis Parameters and change accordingly
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard' or 'factorized'
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+# Set Tau ID factorization map
+param.setTauIDFactorizationMap(options)
 
-# Set other cuts
-param.MET.METCut = -1.0
-param.bTagging.minNumber = 0
-param.transverseMassCut = -1.0
-param.alphaT = -1.0
-param.maxDeltaPhi = 999.
+# Set tau sources to non-trigger matched tau collections
+param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Signal optimisation module
-process.signalOptimisation = cms.EDProducer("HPlusSignalOptimisationProducer",
+# Set the data scenario for trigger efficiencies and vertex weighting
+#param.setTriggerVertexFor2010()
+param.setTriggerVertexFor2011()
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+if options.tauEmbeddingInput != 0:
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
+    if tauEmbeddingTightenMuonSelection:
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
+
+# Signal analysis module for the "golden analysis"
+process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    # Change default tau algorithm here as needed
+    # Change default tau algorithm here as needed         
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
+    jetTauInvMass = param.jetTauInvMass,                                      
+    topSelection = param.topSelection,                                      
+    forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency
+    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
+    triggerEfficiency = param.triggerEfficiency,
+    vertexWeight = param.vertexWeight,
+    tauEmbedding = param.TauEmbeddingAnalysis,
+    GenParticleAnalysis = param.GenParticleAnalysis
 )
 
 # Prescale fetching done automatically for data
@@ -113,12 +157,34 @@ if dataVersion.isData():
     process.signalOptimisation.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "Trigger:", process.signalOptimisation.trigger
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalOptimisation.trigger.hltMetCut
-print "TauSelection algorithm:", process.signalOptimisation.tauSelection.selection
+print "\nVertexWeight:", process.signalOptimisation.vertexWeight
+print "\nTrigger:", process.signalOptimisation.trigger
+print "\nPV Selection:", process.signalOptimisation.primaryVertexSelection
+print "\nTauSelection operating mode:", process.signalOptimisation.tauSelection.operatingMode
 print "TauSelection src:", process.signalOptimisation.tauSelection.src
-print "TauSelection Rtau:", process.signalOptimisation.tauSelection.rtauCut
-print "TauSelection operating mode:", process.signalOptimisation.tauSelection.operatingMode
+print "TauSelection selection:", process.signalOptimisation.tauSelection.selection
+print "TauSelection ptCut:", process.signalOptimisation.tauSelection.ptCut
+print "TauSelection etacut:", process.signalOptimisation.tauSelection.etaCut
+print "TauSelection leadingTrackPtCut:", process.signalOptimisation.tauSelection.leadingTrackPtCut
+print "TauSelection rtauCut:", process.signalOptimisation.tauSelection.rtauCut
+print "TauSelection antiRtauCut:", process.signalOptimisation.tauSelection.antiRtauCut
+print "TauSelection invMassCut:", process.signalOptimisation.tauSelection.invMassCut
+print "TauSelection nprongs:", process.signalOptimisation.tauSelection.nprongs
+print "\nTriggerEfficiency:", process.signalOptimisation.triggerEfficiency
+print "\nMET:", process.signalOptimisation.MET
+print "\nGlobalElectronVeto:", process.signalOptimisation.GlobalElectronVeto
+print "\nGlobalMuonVeto:", process.signalOptimisation.GlobalMuonVeto
+print "\nJetSelection:", process.signalOptimisation.jetSelection
+print "\nbTagging: ", process.signalOptimisation.bTagging
+print "\nFakeMETVeto:", process.signalOptimisation.fakeMETVeto
+print "\nTriggerEmulationEfficiency:", process.signalOptimisation.TriggerEmulationEfficiency
+print "\nEvtTopology:", process.signalOptimisation.EvtTopology
+#print "\nMetTables:", process.signalOptimisation.factorization
+print "\nTopSelection:", process.signalOptimisation.topSelection
+print "****************************************************"
+#print "\nInvMassVetoOnJets:", process.signalOptimisation.InvMassVetoOnJets
+print "\nEvtTopology:", process.signalOptimisation.EvtTopology
+print "\nForwardJetVeto:", process.signalOptimisation.forwardJetVeto
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -126,7 +192,7 @@ process.signalOptimisationCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("signalOptimisation", "counterNames"),
     counterInstances = cms.untracked.InputTag("signalOptimisation", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(False),
+    printSubCounters = cms.untracked.bool(False), # Default False
     printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
@@ -141,6 +207,19 @@ process.signalOptimisationPath = cms.Path(
     process.signalOptimisationCounters *
     process.PickEvents
 )
+
+
+# b tagging testing
+if doBTagScan:
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    module = process.signalOptimisation.clone()
+    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 3.0
+    addAnalysis(process, "signalOptimisationBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalOptimisationCounters=True)
+
 
 ################################################################################
 # The signal analysis with different tau ID algorithms
@@ -181,10 +260,17 @@ if doJESVariation:
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalOptimisation", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalOptimisation, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalOptimisation", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalOptimisation, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalOptimisation", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalOptimisation, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalOptimisation", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalOptimisation, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+
+# Signal analysis with various tightened muon selections for tau embedding
+if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
+    tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "signalOptimisation", process.signalOptimisation, process.commonSequence, additionalCounters)
+
+if doTauEmbeddingTauSelectionScan:
+    tauEmbeddingCustomisations.addTauAnalyses(process, "signalOptimisation", process.signalOptimisation, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
@@ -192,7 +278,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
     src = process.signalOptimisation.tauSelection.src
 )
 #process.tauDiscriminatorPrintPath = cms.Path(
-#    process.patSequence *
+#    process.commonSequence *
 #    process.tauDiscriminatorPrint
 #)
 

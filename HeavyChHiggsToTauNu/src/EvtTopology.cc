@@ -122,7 +122,9 @@ namespace{
       tauJetCandidate.SetXYZM(vJetsInPseudoJetA[i].Px(), vJetsInPseudoJetA[i].Py(),vJetsInPseudoJetA[i].Pz(), 1.777);
       float fDeltaR = oMath.getDeltaR( oMath.getDeltaPhi(tauJetCandidate.Phi(),tau.Phi()), oMath.getDeltaEta(tauJetCandidate.Eta(),tau.Eta()) );      
       /// make sure that it is indeed the tau-jet. Comapare Et and deltaR
-      if( (fabs(tau.Et() - tauJetCandidate.Et()) < 2.0) && (fabs(fDeltaR) < 0.5) ){bTauJetInGroupA = 1;}
+      //      if( (fabs(tau.Et() - tauJetCandidate.Et()) < 2.0) && (fabs(fDeltaR) < 0.5) ){bTauJetInGroupA = 1;}
+      if( fabs(fDeltaR) < 0.4 ) bTauJetInGroupA = 1;
+      else bTauJetInGroupA = 0;
     }//eof: for(unsigned i = 0; i < vJetsInPseudoJetA.size(); i++){
     if(bTauJetInGroupA){
       // std::cout << "Tau-jet found in Pseudo-Jet A" << std::endl;
@@ -236,7 +238,7 @@ namespace HPlus {
     /// Minimum Delta Et for two pseudo-jets
     float fMin_delta_sum_et = -1.0;
     
-    if(iNJets > 18){ 
+    if(iNJets > 20){ 
       // Fill the function structure with -2.0 to indicate that combinatorics too much
       sAlpha.fAlphaT  = -2.0;
       sAlpha.fJt      = -2.0;

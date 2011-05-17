@@ -51,6 +51,7 @@ namespace HPlus {
 
   private:
     void createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
+    void createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
     edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
@@ -186,6 +187,7 @@ namespace HPlus {
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauCandidateSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterJetSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauIsolation;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterJetSelection;
   };
 }
 
