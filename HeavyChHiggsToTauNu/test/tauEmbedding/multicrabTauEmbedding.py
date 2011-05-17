@@ -53,10 +53,10 @@ datasets = [
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
 #    "SingleMu_162803-162828_Prompt", # HLT_Mu20_v1 (old)
-#    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
-#    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
+    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
+    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
    # Signal MC
-#    "TTJets_TuneZ2_Spring11",
+    "TTJets_TuneZ2_Spring11",
     "WJets_TuneZ2_Spring11",
     # Background MC
     "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
@@ -68,7 +68,7 @@ datasets = [
     "WZ_TuneZ2_Spring11",
     "ZZ_TuneZ2_Spring11",
     # For testing
-#    "TTToHplusBWB_M120_Spring11"
+    "TTToHplusBWB_M120_Spring11"
     ]
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -79,13 +79,14 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v9_1b" % step
+tauname = "_tauembedding_%s_v10" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
 skimNjobs = {
+    "Mu_146428-147116_Dec22": 25,
     "WJets_TuneZ2_Spring11": 400,
     "TTJets_TuneZ2_Spring11": 400,
     "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 400,
