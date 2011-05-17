@@ -24,13 +24,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 # Configuration
 #analysis = "signalAnalysis"
 analysis = "signalAnalysisTauSelectionHPSTightTauBased"
+#analysis = "signalAnalysisBtaggingTest"
 counters = analysis+"Counters"
 
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11","TTToHplusBWB_M140_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M155_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11",
+                    "TTToHplusBWB_M120_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M155_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
 
@@ -44,17 +46,21 @@ def main():
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
 #    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), ratio=False)
-    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterTauID"), ratio=False)
-    tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterTauID"), ratio=True)
+    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID")
+    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5)
+    tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID")
-
+    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterMetCut"), "SelectedTau_pT_AfterMetCut")
+    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterMetCut"), "SelectedTau_eta_AfterMetCut")
+    tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
+    rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
+    
     rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
     rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
    
-    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
-    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
-    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
+#    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
+#    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
+#    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
     
    
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
@@ -62,15 +68,15 @@ def main():
 #    met2(plots.DataMCPlot(datasets, analysis+"/met"), "met", rebin=5)
     met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=5)
      
-    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
- #   deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhiJetMet"), "DeltaPhiJetMet")
+#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
 
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
-
+    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
     jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
     jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
     jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
@@ -90,11 +96,17 @@ def main():
 
     etSumRatio(plots.DataMCPlot(datasets, analysis+"/EtSumRatio"), "etSumRatio")
     tauJetMass(plots.DataMCPlot(datasets, analysis+"/TauJetMass"), "TauJetMass")
-    topMass(plots.DataMCPlot(datasets, analysis+"/topMass"), "topMass")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/hPt_top"), "ptTop")
+    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_jjbMax"), "topMass")
+    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_Top"), "topMass_realTop")
+    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_bFromTop"), "topMass_bFromTop") 
+    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_jjb"), "pt_jjb")
+    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_jjbmax"), "ptTop")
+    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_top"), "ptTop_realTop") 
     
 #    genComparison(datasets)
-    zMassComparison(datasets)
+#    zMassComparison(datasets)
+    topMassComparison(datasets)
+    topPtComparison(datasets) 
     vertexComparison(datasets)
 
 
@@ -109,8 +121,8 @@ def main():
 
 
 def vertexComparison(datasets):
-    signal = "TTToHplusBWB_M120"
-    background = "TTToHplusBWB_M120"
+    signal = "TTToHplusBWB_M140"
+    background = "TTToHplusBWB_M140"
     rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
                                  datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
             "vertices_H120")
@@ -121,12 +133,28 @@ def vertexComparison(datasets):
 #    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Rtau1ProngHp"),
 #                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/Rtau1ProngW")),
 #       
-def zMassComparison(datasets):
-    signal = "TTToHplusBWB_M120"
-    background = "DYJetsToLL"
-    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TauJetMass"),
-                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
-            "TauJetMass_Hp_vs_Zll")
+#def zMassComparison(datasets):
+#    signal = "TTToHplusBWB_M120"
+#    background = "DYJetsToLL"
+#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TauJetMass"),
+#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
+#            "TauJetMass_Hp_vs_Zll")
+    
+def topMassComparison(datasets):
+    signal = "TTToHplusBWB_M140"
+    background = "TTToHplusBWB_M140"
+    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Mass_jjbMax"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_bFromTop")]),
+             "topMass_all_vs_real")
+
+def topPtComparison(datasets):
+    signal = "TTToHplusBWB_M140"
+    background = "TTToHplusBWB_M140"
+    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Pt_jjb"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_jjbmax"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_top")]),
+             "topPt_all_vs_real")
 
 def scaleMC(histo, scale):
     if histo.isMC():
@@ -139,7 +167,7 @@ def scaleMCHistos(h, scale):
 def scaleMCfromWmunu(h):
     # Data/MC scale factor from AN 2011/053
 #    scaleMCHistos(h, 1.736)
-    scaleMCHistos(h, 1.0)
+    scaleMCHistos(h, 2.5)
 
 
 
@@ -151,18 +179,48 @@ def flipName(name):
     return tmp[-1] + "_" + tmp[-2]
 
 # Common formatting
-def common(h, xlabel, ylabel):
+def common(h, xlabel, ylabel, addLuminosityText=True):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
-    h.addLuminosityText()
+    if addLuminosityText:
+        h.addLuminosityText()
     h.save()
 
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
+
+
+
+def rtauGen(h, name, rebin=5, ratio=False):
+    #h.setDefaultStyles()
+    h.histoMgr.forEachHisto(styles.generator())
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "R_{#tau}"
+    if "Mass" in name:
+        xlabel = "m (GeV/c^{2})"
+    elif "Pt" in name:
+        xlabel = "p_{T}(GeV/c)"
+    elif "vertices" in name:
+        xlabel = "N_{vertices}"
+    ylabel = "Events / %.2f" % h.binWidth()
+
+    kwargs = {"ymin": 0.1}
+#    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
+    if ratio:
+        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
+        kwargs["createRatio"] = True
+#    name = name+"_log"
+
+    h.createFrame(name, **kwargs)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
+    common(h, xlabel, ylabel, addLuminosityText=False)
+
 
 
 def tauCandPt(h, step="", rebin=2):
@@ -262,7 +320,7 @@ def tauCandPhi(h, step="", rebin=5):
     
 
 
-def tauPt(h, rebin=5, ratio=False):
+def tauPt(h, name, rebin=5, ratio=False):
 #    name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -275,7 +333,7 @@ def tauPt(h, rebin=5, ratio=False):
     
     opts = {"ymin": 0.0001, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = "selectedTauPt"
+#    name = "selectedTauPt"
 #    name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
@@ -287,7 +345,7 @@ def tauPt(h, rebin=5, ratio=False):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
-def tauEta(h, rebin=5, ratio=True):
+def tauEta(h, name, rebin=5, ratio=False):
 #    name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -301,7 +359,7 @@ def tauEta(h, rebin=5, ratio=True):
     
     opts = {"ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = "selectedTauEta"
+#    name = "selectedTauEta"
 #    name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
@@ -313,7 +371,7 @@ def tauEta(h, rebin=5, ratio=True):
     h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
     common(h, xlabel, ylabel)
     
-def tauPhi(h, rebin=10, ratio=True):
+def tauPhi(h, name, rebin=10, ratio=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -326,7 +384,7 @@ def tauPhi(h, rebin=10, ratio=True):
     
     opts = {"ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
-    name = "selectedTauPhi"
+#    name = "selectedTauPhi"
 #    name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
@@ -358,7 +416,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def rtau(h, name, rebin=1, ratio=False):
+def rtau(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "R_{#tau}"
     ylabel = "Events / %.2f" % h.binWidth()
@@ -380,21 +438,6 @@ def rtau(h, name, rebin=1, ratio=False):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
 
-def rtauGen(h, name, rebin=2, ratio=False):
-    h.setDefaultStyles()
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "R_{#tau}"
-    ylabel = "Events / %.2f" % h.binWidth()
-
-    kwargs = {"opts": {"ymin": 1, "ymaxfactor": 10}}
-    if ratio:
-        kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
-    name = name+"_log"
-
-    h.createFrame(name, createRatio=ratio, **kwargs)
-    h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
-    common(h, xlabel, ylabel)
 
 def met(h, rebin=20, ratio=True):
     name = flipName(h.getRootHistoPath())
@@ -499,7 +542,7 @@ def deltaPhi2(h, name, rebin=2):
     h.stackMCHistograms()
     h.addMCUncertainty()
     
-    name = "deltaPhiMetJet"
+#    name = "deltaPhiMetJet"
     #h.createFrameFraction(name)
 #    h.createFrame(name)
     opts = {"ymin": 0.001, "ymaxfactor": 2}
@@ -534,7 +577,7 @@ def transverseMass(h, rebin=20):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
-def transverseMass2(h,name, rebin=5):
+def transverseMass2(h,name, rebin=10):
 #    name = flipName(h.getRootHistoPath())
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "m_{T}(#tau jet, MET) (GeV/c^{2})" 
@@ -544,10 +587,9 @@ def transverseMass2(h,name, rebin=5):
 #    h.stackMCHistograms()
     h.stackMCHistograms(stackSignal=True)
     h.addMCUncertainty()
-
-    opts = {"xmax": 200}
-#    name = "transverseMass"
-    opts = {"ymin": 0.00001, "ymaxfactor": 3,"xmax": 300 }
+    
+    name = name+"_log"
+    opts = {"ymin": 0.001, "ymaxfactor": 2.0,"xmax": 350 }
 #    opts = {"xmax": 200 }
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
@@ -718,7 +760,7 @@ def tauJetMass(h, name, rebin=1, ratio=False):
 
 
 
-def topMass(h, name, rebin=20, ratio=False):
+def topMass(h, name, rebin=10, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 #    particle = "jet"
 #    if "bjet" in name:
