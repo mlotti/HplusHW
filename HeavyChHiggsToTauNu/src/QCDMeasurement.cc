@@ -478,7 +478,7 @@ namespace HPlus {
       hMETPassProbabilityAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
 
     // Apply TopMass reconstruction
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     if (!TopSelectionData.passedEvent()) return;
     increment(fTopSelectionCounter);
  
