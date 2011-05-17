@@ -27,6 +27,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
+    fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 80")),
     ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 100")),
     fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
@@ -80,6 +81,7 @@ namespace HPlus {
     hSelectedTauEta = makeTH<TH1F>(*fs, "SelectedTau_eta_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
     hSelectedTauPhi = makeTH<TH1F>(*fs, "SelectedTau_phi_AfterTauID", "SelectedTau_eta_AfterTauID;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
     hSelectedTauRtau = makeTH<TH1F>(*fs, "SelectedTau_Rtau_AfterTauID", "SelectedTau_Rtau_AfterTauID;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
+    hSelectedTauRtauAfterCuts = makeTH<TH1F>(*fs, "SelectedTau_Rtau_AfterCuts", "SelectedTau_Rtau_AfterCuts;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
 
     hSelectedTauEtMetCut = makeTH<TH1F>(*fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
     hSelectedTauEtaMetCut = makeTH<TH1F>(*fs, "SelectedTau_eta_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
@@ -113,11 +115,14 @@ namespace HPlus {
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    if (iEvent.isRealData()) {
+    //    if (iEvent.isRealData()) {
       // Trigger is applied only if the data sample is real data
-      if(!triggerData.passedEvent()) return false;
-    }
+          if(!triggerData.passedEvent()) return false;
+	  //   }
     increment(fTriggerCounter);
+
+
+
 /*
     // Tau+MET trigger emulation
     // HLT_MET cut is applied at trigger step
@@ -166,11 +171,11 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Trigger efficiency
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
+    //    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
+    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
       // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
-      fEventWeight.multiplyWeight(triggerEfficiency);
-    }
+    //      fEventWeight.multiplyWeight(triggerEfficiency);
+    //    }
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
@@ -253,23 +258,37 @@ namespace HPlus {
 
     
     // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     if (!TopSelectionData.passedEvent()) return false;
     increment(fTopSelectionCounter);
 
     hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
+
+    hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+
+    // double LdgTrackPt = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p();
+    //   double Rtau = -9999;  
+    // if (tauData.getSelectedTaus()[0]->energy() > 0) {
+    //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
+    //  hSelectedTauRtauAfterCuts->Fill(Rtau, fEventWeight.getWeight());
+    // }
+
+    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    //    if( Rtau < 0.8 ) return false;
+    //    increment(fRtauAfterCutsCounter);
+
     //    if(transverseMass < ftransverseMassCut-20.0 ) return false;
-    if(transverseMass < 80 ) return false;
+     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
 
     if(transverseMass < 100 ) return false;
     increment(ftransverseMassCut100Counter);
                                            
     //Z mass veto
-    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
-    if (!jetTauInvMassData.passedEvent()) return false;
-    increment(fZmassVetoCounter);
+    //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+    //    if (!jetTauInvMassData.passedEvent()) return false;
+    //    increment(fZmassVetoCounter);
                                
     // Forward jet veto                                                                                                                                                                                                           
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);

@@ -14,12 +14,21 @@ step = "muonAnalysis"
 
 dirPrefix = ""
 #dirPrefix = "_TauIdScan"
+#dirPrefix = "_iso05"
+#dirPrefix = "_test"
 
 #pt = "_pt30"
 pt = "_pt40"
 
 if step in ["generation", "embedding", "analysis", "signalAnalysis"]:
     dirPrefix += pt
+
+if step == "signalAnalysis":
+    #dirPrefix += "_triggerVertex2010"
+    #dirPrefix += "_triggerVertex2011"
+    #dirPrefix += "_trigger2010"
+    #dirPrefix += "_trigger2011"
+    pass
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v9",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
@@ -39,23 +48,25 @@ multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
 datasets = [
     # Data
-#    "Mu_136035-144114_Dec22", # HLT_Mu9
-#    "Mu_146428-147116_Dec22", # HLT_Mu9
-#    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
-#    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
-#    "SingleMu_162803-162828_Prompt", # HLT_Mu20_v1
-    # Signal MC
-    "TTJets_TuneZ2_Spring11",
-#    "WJets_TuneZ2_Spring11",
+    "Mu_136035-144114_Dec22", # HLT_Mu9
+    "Mu_146428-147116_Dec22", # HLT_Mu9
+    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
+    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
+#    "SingleMu_162803-162828_Prompt", # HLT_Mu20_v1 (old)
+#    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
+#    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
+   # Signal MC
+#    "TTJets_TuneZ2_Spring11",
+    "WJets_TuneZ2_Spring11",
     # Background MC
-#    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
-#    "DYJetsToLL_M50_TuneZ2_Spring11",
-#    "TToBLNu_s-channel_TuneZ2_Spring11",
-#    "TToBLNu_t-channel_TuneZ2_Spring11",
-#    "TToBLNu_tW-channel_TuneZ2_Spring11",
-#    "WW_TuneZ2_Spring11",
-#    "WZ_TuneZ2_Spring11",
-#    "ZZ_TuneZ2_Spring11",
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
+    "DYJetsToLL_M50_TuneZ2_Spring11",
+    "TToBLNu_s-channel_TuneZ2_Spring11",
+    "TToBLNu_t-channel_TuneZ2_Spring11",
+    "TToBLNu_tW-channel_TuneZ2_Spring11",
+    "WW_TuneZ2_Spring11",
+    "WZ_TuneZ2_Spring11",
+    "ZZ_TuneZ2_Spring11",
     # For testing
 #    "TTToHplusBWB_M120_Spring11"
     ]
@@ -68,7 +79,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v9" % step
+tauname = "_tauembedding_%s_v9_1b" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
@@ -91,16 +102,18 @@ muonAnalysisNjobs = { # goal: 30k events/job
     "Mu_136035-144114_Dec22": 1,
     "Mu_146428-147116_Dec22": 1,
     "Mu_147196-149294_Dec22": 1,
-    "WJets_TuneZ2_Spring11": 2,
-    "TTJets_TuneZ2_Spring11": 6,
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 10, #?
-    "DYJetsToLL_M50_TuneZ2_Spring11": 4,
-    "TToBLNu_s-channel_TuneZ2_Spring11": 2,
-    "TToBLNu_t-channel_TuneZ2_Spring11": 2,
-    "TToBLNu_tW-channel_TuneZ2_Spring11": 2,
-    "WW_TuneZ2_Spring11": 3,
-    "WZ_TuneZ2_Spring11": 3,
-    "ZZ_TuneZ2_Spring11": 3,
+    "SingleMu_160431-161016_Prompt": 1,
+    "SingleMu_162803-162828_Prompt": 1,
+    "WJets_TuneZ2_Spring11": 4,
+    "TTJets_TuneZ2_Spring11": 10,
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 20, #?
+    "DYJetsToLL_M50_TuneZ2_Spring11": 8,
+    "TToBLNu_s-channel_TuneZ2_Spring11": 4,
+    "TToBLNu_t-channel_TuneZ2_Spring11": 4,
+    "TToBLNu_tW-channel_TuneZ2_Spring11": 4,
+    "WW_TuneZ2_Spring11": 6,
+    "WZ_TuneZ2_Spring11": 6,
+    "ZZ_TuneZ2_Spring11": 6,
     }
    
 

@@ -66,6 +66,7 @@ namespace HPlus {
     Count fFakeMETVetoCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
+    Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
@@ -113,6 +114,7 @@ namespace HPlus {
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
+    TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
     TH1 *hSelectedTauPhiMetCut;

@@ -435,6 +435,12 @@ class PlotBase:
         if self.histoMgr.hasHisto("Data"):
             self.histoMgr.setHistoDrawStyle("Data", "EP")
 
+    ## Set default legend labels and styles, and plot styles
+    def setDefaultStyles(self):
+        self._setLegendStyles()
+        self._setLegendLabels()
+        self._setPlotStyles()
+
     ## Get the bin width (assuming it is constant)
     def binWidth(self):
         return self.histoMgr.getHistos()[0].getBinWidth(1)
@@ -791,12 +797,6 @@ class ComparisonPlot(PlotBase):
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
         PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
 
-    ## Set default legend labels and styles, and plot styles
-    def setDefaultStyles(self):
-        self._setLegendStyles()
-        self._setLegendLabels()
-        self._setPlotStyles()
-    
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
     # \param filename     Name for TCanvas (becomes the file name)

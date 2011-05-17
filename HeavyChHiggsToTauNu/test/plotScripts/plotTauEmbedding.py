@@ -610,7 +610,7 @@ def embeddingPlots():
         datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-        datasets.selectAndReorder(["TTJets_TuneZ2_Winter10"])
+        datasets.selectAndReorder(["WJets_TuneZ2_Spring11"])
 #        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
 
     #isoAnalyses = ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]]
