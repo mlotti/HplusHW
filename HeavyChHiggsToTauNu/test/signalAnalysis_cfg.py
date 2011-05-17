@@ -130,6 +130,7 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 param.setTriggerVertexFor2011()
 
 if options.tauEmbeddingInput != 0:
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
