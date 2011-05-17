@@ -126,7 +126,7 @@ def customise(process):
             "keep *_gtDigis_*_%s" % recoProcessName,
             "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
             "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
-            "keep *_addPileupInfo*_%s" % recoProcessName, # for MC
+            "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
 
             "drop *_*_*_%s" % generationProcessName,
             "keep *_dimuonsGlobal_*_%s" % generationProcessName,
