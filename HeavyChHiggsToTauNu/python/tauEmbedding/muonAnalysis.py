@@ -28,6 +28,17 @@ isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["p
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
 
+tauIsolations = {
+    "tauTightIso": "userInt('byTightOccupancy')",
+    "tauMediumIso": "userInt('byMediumOccupancy')",
+    "tauLooseIso": "userInt('byLooseOccupancy')",
+    "tauVLooseIso": "userInt('byVLooseOccupancy')"
+    }
+for key, value in tauIsolations.items():
+    userFloat = value.replace("userInt", "userFloat")
+    tauIsolations[key+"SumPt"] = userFloat.replace("Occupancy", "SumPt")
+    tauIsolations[key+"MaxPt"] = userFloat.replace("Occupancy", "MaxPt")
+isolations.update(tauIsolations)
 
 # Define the histograms
 histoPt = HChTools.Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
@@ -55,7 +66,10 @@ histoTransverseMass = HChTools.Histo("tmass", "sqrt((daughter(0).pt+daughter(1).
                                      min=0, max=400, nbins=400, description="W transverse mass")
 histoZMass = HChTools.Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoPhi] + histoIsos.values()
+histoGenMother = HChTools.Histo("genMother", "abs(userInt('genMotherPdgId'))", min=0, max=100, nbins=100, description="Muon mother pdgid")
+histoGenGrandMother = HChTools.Histo("genGrandMother", "abs(userInt('genGrandMotherPdgId'))", min=0, max=100, nbins=100, description="Muon grandmother pdgid")
+
+histosBeginning = [histoPt, histoEta, histoPhi, histoGenMother, histoGenGrandMother] + histoIsos.values()
 histosTrack = [histoDB, histoNhits, histoChi2]
 histosJet = [histoPt, histoEta, histoPhi]
 histosMet = [histoMet]
@@ -67,7 +81,7 @@ class MuonAnalysis:
                  trigger=None,
                  muons="selectedPatMuons", allMuons="selectedPatMuons", muonPtCut=30,
                  doIsolationWithTau=False, isolationWithTauDiscriminator="byTightIsolation",
-                 muonIsolation="sumIsoRel", muonIsolationCut=0.05,
+                 doMuonIsolation=False, muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
                  jets="selectedPatJetsAK5PF", njets=3):
@@ -76,6 +90,7 @@ class MuonAnalysis:
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
         self.doIsolationWithTau = doIsolationWithTau
+        self.doMuonIsolation = doMuonIsolation
         self._trigger = trigger
         self._muons = cms.InputTag(muons)
         self._allMuons = cms.InputTag(allMuons)
@@ -543,9 +558,12 @@ class MuonAnalysis:
 
         self.muonQuality()
         self.muonImpactParameter()
-        self.muonVertexDiff()
-        if self.doIsolationWithTau:
-            self.muonIsolationWithTau()
+        #self.muonVertexDiff()
+        if self.doMuonIsolation:
+            if self.doIsolationWithTau:
+                self.muonIsolationWithTau()
+            else:
+                self.muonIsolation()
             self.muonExactlyOne()
         else:
             #self.muonLargestPt()
