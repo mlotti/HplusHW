@@ -17,8 +17,8 @@ def main():
 
     #mc = "WJets"
     mc = "QCD"
-    data = "2010"
-    #data = "2011"
+    #data = "2010"
+    data = "2011"
 
 #    maxVtx = 15
     maxVtx = 20
@@ -65,7 +65,9 @@ def main():
 
     weightHisto = dataHisto.Clone("weights")
     weightHisto.Divide(mcHisto)
-#    print "Weight histo integral", weightHisto.Integral()
+    print "Weight histo integral", weightHisto.Integral()
+    weightHisto.Scale(1/weightHisto.Integral())
+    print "Weight histo integral", weightHisto.Integral()
 
     print "weights = cms.vdouble(%s)" % ", ".join(["%.8f" % weightHisto.GetBinContent(bin) for bin in xrange(1, min(maxVtx, weightHisto.GetNbinsX())+1)])
 
