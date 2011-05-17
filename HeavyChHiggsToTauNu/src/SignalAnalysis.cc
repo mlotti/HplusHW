@@ -157,7 +157,8 @@ namespace HPlus {
                                                                              
     //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
 
-    // Hadronic jet selection                                                                                                                                                                                                      
+    // Hadronic jet selection
+
     //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
     //    if(!jetData.passedEvent()) return false;
     //    increment(fNJetsCounter);
