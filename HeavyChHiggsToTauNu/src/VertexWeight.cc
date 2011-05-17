@@ -21,7 +21,7 @@ namespace HPlus {
     edm::Handle<edm::View<reco::Vertex> > hvertex;
     iEvent.getByLabel(fSrc, hvertex);
 
-    if(!fEnabled)
+    if(!fEnabled || iEvent.isRealData())
       return std::make_pair(1.0, hvertex->size());
 
     size_t n = hvertex->size();
