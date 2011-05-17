@@ -342,7 +342,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v2/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple file size
+                "number_of_jobs": 80, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         },
