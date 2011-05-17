@@ -76,7 +76,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
         candSrc = "patMuonsWithLoose",
         embedPrefix = "byVLoose"+postfix,
     )
-    name = "patMuonsWithVLoose"
+    name = "patMuonsWithVLoose"+postfix
     setattr(process, name, vloose)
     
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, tight)
@@ -84,14 +84,27 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
 
+    sequence *= (tight * medium * loose *vloose)
+
+    gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
+        candSrc = cms.InputTag(name),
+        genParticleSrc = cms.InputTag("genParticles"),
+        embedPrefix = cms.string("gen"),
+        maxDR = cms.double(0.5),
+        pdgId = cms.uint32(13)
+    )
+    name = "patMuonsWithGen"
+    setattr(process, name, gen)
+    sequence *= gen
+
     import PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi as muonSelector
     m = muonSelector.selectedPatMuons.clone(
-        src = "patMuonsWithVLoose"
+        src = name
     )
     name = "selectedPatMuonsWithIso"+postfix
     setattr(process, name, m)
+    sequence *= m
 
-    sequence *= (tight * medium * loose * vloose * m)
     return name
 
 def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):

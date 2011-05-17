@@ -66,7 +66,10 @@ histoTransverseMass = HChTools.Histo("tmass", "sqrt((daughter(0).pt+daughter(1).
                                      min=0, max=400, nbins=400, description="W transverse mass")
 histoZMass = HChTools.Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoPhi] + histoIsos.values()
+histoGenMother = HChTools.Histo("genMother", "abs(userInt('genMotherPdgId'))", min=0, max=100, nbins=100, description="Muon mother pdgid")
+histoGenGrandMother = HChTools.Histo("genGrandMother", "abs(userInt('genGrandMotherPdgId'))", min=0, max=100, nbins=100, description="Muon grandmother pdgid")
+
+histosBeginning = [histoPt, histoEta, histoPhi, histoGenMother, histoGenGrandMother] + histoIsos.values()
 histosTrack = [histoDB, histoNhits, histoChi2]
 histosJet = [histoPt, histoEta, histoPhi]
 histosMet = [histoMet]
