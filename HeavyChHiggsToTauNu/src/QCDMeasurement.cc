@@ -159,18 +159,18 @@ namespace HPlus {
     hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
 
     hSelectionFlow = makeTH<TH1F>(*fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderTrigger,"Trigger");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderVertexSelection,"Vertex");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderTauCandidateSelection,"#tau candidate");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderElectronVeto,"Isol. e veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderMuonVeto,"Isol. #mu veto");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderJetSelection,"#geq 3 jets");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderTauID,"#tau ID (no R_{#tau})");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderFakeMETVeto,"Further QCD rej.");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderTopSelection,"Top mass");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderMETFactorized,"MET (factorized)");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderBTagFactorized,"#geq 1 b jet (factorized)");
-    hSelectionFlow->GetXaxis()->SetBinLabel(kQCDOrderRtauFactorized,"R_{#tau} (factorized)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau candidate");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"#geq 3 jets");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"#tau ID (no R_{#tau})");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderFakeMETVeto,"Further QCD rej.");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"Top mass");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMETFactorized,"MET (factorized)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTagFactorized,"#geq 1 b jet (factorized)");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderRtauFactorized,"R_{#tau} (factorized)");
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -217,10 +217,6 @@ namespace HPlus {
       << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
     histograms.push_back(makeTH<TH1F>(*fs, myHistoName.str().c_str(),
       myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
   }
 
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
