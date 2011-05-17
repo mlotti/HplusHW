@@ -4,7 +4,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
@@ -15,7 +14,6 @@ dataVersion = "311Xredigi" # Spring11 MC
 
 ##########
 # Flags for additional signal analysis modules
-
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
@@ -59,16 +57,19 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-#       "rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
-        # For testing in lxplus
-#       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
-#        dataVersion.getAnalysisDefaultFileCastor()
-        # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
-        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+    # For testing in lxplus
+    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    # dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #        dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
 if options.tauEmbeddingInput != 0:
@@ -170,8 +171,10 @@ if dataVersion.isData():
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
+print "VertexWeight:",process.signalAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
 print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
+#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
