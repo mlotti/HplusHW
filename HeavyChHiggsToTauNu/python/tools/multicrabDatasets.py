@@ -5,6 +5,7 @@ import multicrabDatasetsCollisionData11 as collisionData11
 
 import multicrabDatasetsMCWinter10 as mcWinter10
 import multicrabDatasetsMCSpring11 as mcSpring11
+import multicrabDatasetsMCSummer11 as mcSummer11
 
 import multicrabDatasetsTauEmbedding as tauEmbedding
 
@@ -17,6 +18,7 @@ datasets.update(collisionData11.datasets)
 
 datasets.update(mcWinter10.datasets)
 datasets.update(mcSpring11.datasets)
+datasets.update(mcSummer11.datasets)
 
 tauEmbedding.addTo(datasets)
 
