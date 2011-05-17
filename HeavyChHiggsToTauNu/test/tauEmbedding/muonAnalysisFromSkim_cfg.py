@@ -80,52 +80,8 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
 )
 process.commonSequence *= process.firstPrimaryVertex
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
-import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
-process.patMuonsWithTight = cms.EDProducer("HPlusPATMuonViewTauLikeIsolationEmbedder",
-    candSrc = cms.InputTag("selectedPatMuons"),
-    pfCandSrc = cms.InputTag("particleFlow"),
-    vertexSrc = cms.InputTag("firstPrimaryVertex"),
-    embedPrefix = cms.string("byTight"),
-    signalCone = cms.double(0.1),
-    isolationCone = cms.double(0.5)
-)
-process.patMuonsWithMedium = process.patMuonsWithTight.clone(
-    candSrc = "patMuonsWithTight",
-    embedPrefix = "byMedium",
-)
-process.patMuonsWithLoose = process.patMuonsWithTight.clone(
-    candSrc = "patMuonsWithMedium",
-    embedPrefix = "byLoose",
-)
-process.patMuonsWithVLoose = process.patMuonsWithTight.clone(
-    candSrc = "patMuonsWithLoose",
-    embedPrefix = "byVLoose",
-)
-
-HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, process.patMuonsWithTight)
-HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, process.patMuonsWithMedium)
-HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, process.patMuonsWithLoose)
-HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, process.patMuonsWithVLoose)
-
-process.patMuonsWithTightNoSignalCone = process.patMuonsWithTight.clone(
-    candSrc = "patMuonsWithVLoose",
-    embedPrefix = "byTightNoSignalCone",
-    signalCone = 0.0
-)
-
-import PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi as muonSelector
-process.selectedPatMuonsWithIso = muonSelector.selectedPatMuons.clone(
-    src = "patMuonsWithVLoose"
-)
-
-process.commonSequence *= (
-    process.patMuonsWithTight *
-    process.patMuonsWithMedium *
-    process.patMuonsWithLoose *
-    process.patMuonsWithVLoose *
-    process.selectedPatMuonsWithIso
-)
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
 
@@ -181,7 +137,7 @@ def createAnalysis2(**kwargs):
         args["njets"] = njets
         createAnalysis("muonSelectionPF", **args)
 
-createAnalysis2(muons="selectedPatMuonsWithIso", allMuons="selectedPatMuonsWithIso")
+createAnalysis2(muons=muons, allMuons=muons)
 #createAnalysis2(muons="tightMuonsZ")
 
 # process.out = cms.OutputModule("PoolOutputModule",
