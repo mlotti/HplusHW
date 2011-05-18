@@ -12,7 +12,7 @@ import multicrabDatasetsTauEmbedding as tauEmbedding
 datasets = {}
 
 datasets.update(collisionData10.datasets)
-#datasets.update(collisoinData10Apr21.datasets)
+datasets.update(collisoinData10Apr21.datasets)
 datasets.update(collisionData11.datasets)
 #datasets.update(collisionData11May10.datasets)
 
