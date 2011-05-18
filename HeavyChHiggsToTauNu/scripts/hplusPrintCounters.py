@@ -5,11 +5,12 @@ import sys
 import glob
 from optparse import OptionParser
 
+import ROOT
+ROOT.gROOT.SetBatch(True)
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
-
-import ROOT
 
 def main(opts):
     datasets = None

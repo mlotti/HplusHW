@@ -134,8 +134,8 @@ multicrab.extendDatasets(pattupleVersion,
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
 # CMS jobs typically go to korundi).
-if not runPatOnTheFly:
-    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+#if not runPatOnTheFly:
+#    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
 # If PAT is ran on the fly, add the
