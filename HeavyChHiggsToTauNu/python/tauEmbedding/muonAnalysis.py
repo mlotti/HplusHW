@@ -32,11 +32,15 @@ tauIsolations = {
     "tauTightIso": "userInt('byTightOccupancy')",
     "tauMediumIso": "userInt('byMediumOccupancy')",
     "tauLooseIso": "userInt('byLooseOccupancy')",
-    "tauVLooseIso": "userInt('byVLooseOccupancy')"
+    "tauVLooseIso": "userInt('byVLooseOccupancy')",
+    "tauTightIsoSc0": "userInt('byTightSc0Occupancy')",
+    "tauTightIsoSc0Ic04": "userInt('byTightSc0Ic04Occupancy')",
+    "tauTightIsoSc0Ic04Noq": "userInt('byTightSc0Ic04NoqOccupancy')",
     }
 for key, value in tauIsolations.items():
     userFloat = value.replace("userInt", "userFloat")
     tauIsolations[key+"SumPt"] = userFloat.replace("Occupancy", "SumPt")
+    tauIsolations[key+"SumPtRel"] = "(%s)/pt()" % userFloat.replace("Occupancy", "SumPt")
     tauIsolations[key+"MaxPt"] = userFloat.replace("Occupancy", "MaxPt")
 isolations.update(tauIsolations)
 
@@ -48,7 +52,7 @@ histoPhi = HChTools.Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, descripti
 histoIsos = {}
 for name, value in isolations.iteritems():
     h = None
-    if "IsoRel" in name:
+    if "IsoRel" in name or "SumPtRel" in name:
         h = HChTools.Histo(name, value, min=0, max=0.5, nbins=100, description=name)
         histoIsos[name+"Full"] = HChTools.Histo(name+"Full", value, min=0, max=5.0, nbins=500, description=name)
     else:

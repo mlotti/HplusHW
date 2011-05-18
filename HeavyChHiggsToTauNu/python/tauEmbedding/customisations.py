@@ -66,25 +66,58 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, medium)
 
     loose = tight.clone(
-        candSrc = "patMuonsWithMedium",
+        candSrc = name,
         embedPrefix = "byLoose"+postfix,
     )
     name = "patMuonsWithLoose"+postfix
     setattr(process, name, loose)
 
     vloose = tight.clone(
-        candSrc = "patMuonsWithLoose",
+        candSrc = name,
         embedPrefix = "byVLoose"+postfix,
     )
     name = "patMuonsWithVLoose"+postfix
     setattr(process, name, vloose)
     
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, tight)
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
 
     sequence *= (tight * medium * loose *vloose)
+
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0"+postfix,
+        signalCone = 0.0
+    )
+    name = "patMuonsWithTightSc0"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    m = m.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0Ic04"+postfix,
+        isolationCone = 0.4,
+    )
+    name = "patMuonsWithTightSc0Ic04"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    m = m.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0Ic04Noq",
+        minTrackHits = 0,
+        minTrackPt = 0.0,
+        maxTrackChi2 = 9999.,
+        minTrackPixelHits = 0,
+        minGammaEt = 0.0,
+        maxDeltaZ = 9999.,
+        maxTransverseImpactParameter = 9999.,
+    )
+    name = "patMuonsWithTightSc0Ic04Noq"+postfix
+    setattr(process, name, m)
+    sequence *= m
 
     gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
         candSrc = cms.InputTag(name),
