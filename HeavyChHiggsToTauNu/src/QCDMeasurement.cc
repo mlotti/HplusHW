@@ -75,6 +75,8 @@ namespace HPlus {
     createMETHistogramGroupByTauPt("QCD_MET_afterJetSelection", fMETHistogramsByTauPtAfterJetSelection);
     createMETHistogramGroupByTauPt("QCD_MET_afterTauIsolation", fMETHistogramsByTauPtAfterTauIsolation);
     createNBtagsHistogramGroupByTauPt("QCD_NBtags_afterJetSelection", fNBtagsHistogramsByTauPtAfterJetSelection);
+    createLdgJetPtHistogramGroupByMET("QCD_LdgJetPt_afterJetSelection", fLdgJetPtHistogramGroupByMET);
+    createNBtagsHistogramGroupByMET("QCD_NBtags_afterJetSelection", fNBtagsPtHistogramGroupByMET);
 
     // Histograms for later change of factorization map
 
@@ -221,6 +223,138 @@ namespace HPlus {
   }
 
 
+  //attikis
+  const int QCDMeasurement::getMetIndex(double met){
+  
+    if( (met < 10.0) ) return 0;
+    else if( (met >= 10.0) && (met < 20.0 ) )  return 1;
+    else if( (met >= 20.0) && (met < 30.0 ) )  return 2;
+    else if( (met >= 30.0) && (met < 40.0 ) )  return 3;
+    else if( (met >= 40.0) && (met < 50.0 ) )  return 4;
+    else if( (met >= 50.0) && (met < 60.0 ) )  return 5;
+    else if( (met >= 60.0) && (met < 70.0 ) )  return 6;
+    else if( (met >= 70.0) && (met < 80.0 ) )  return 7;
+    else if( (met >= 80.0) && (met < 90.0 ) )  return 8;
+    else if( (met >= 90.0) && (met < 100.0 ) ) return 9;
+    else if( (met >= 100.0) ) return 10;
+    else throw cms::Exception("Configuration") << "QCDMeasruement: Cannot determine the index for MET factorization histograms for MET = " << met << ". Please check the function getMETFactorizationindex(const double met)" << std::endl;
+  
+    return -1;
+  }
+
+
+  std::vector<double> QCDMeasurement::getMetBins(void){
+
+    std::vector<double> fMetBinLowEdges;
+    fMetBinLowEdges.push_back(10);
+    fMetBinLowEdges.push_back(20);
+    fMetBinLowEdges.push_back(30);
+    fMetBinLowEdges.push_back(40);
+    fMetBinLowEdges.push_back(50);
+    fMetBinLowEdges.push_back(60);
+    fMetBinLowEdges.push_back(70);
+    fMetBinLowEdges.push_back(80);
+    fMetBinLowEdges.push_back(90);
+    fMetBinLowEdges.push_back(100);
+
+    return fMetBinLowEdges;;
+  }
+
+
+
+  void QCDMeasurement::createNBtagsHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
+   // Decide the MET bins you want to investigate
+    std::vector<double> fMetBinLowEdges = getMetBins();
+    size_t myTableSize = fMetBinLowEdges.size(); 
+
+    // Make histograms
+    edm::Service<TFileService> fs;
+    int nBins = 10; // number of bins for the histograms
+    double xMin = 0.0; // x range minimum
+    double xMax = 10.0; // x range maximum
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+
+    // 
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+	// Treat first bin
+	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
+	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
+	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
+	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+      } else {
+	// Treat other bins
+	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
+	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
+    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+    // Apply sumw2 on the histograms
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
+      (*it)->Sumw2();
+    }
+    return;  
+  }
+
+
+
+  void QCDMeasurement::createLdgJetPtHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
+
+    // Decide the MET bins you want to investigate
+    std::vector<double> fMetBinLowEdges = getMetBins();
+    size_t myTableSize = fMetBinLowEdges.size(); 
+
+    // Make histograms
+    edm::Service<TFileService> fs;
+    int nBins = 10; // number of bins for the histograms
+    double xMin = 0.0; // x range minimum
+    double xMax = 200.0; // x range maximum
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+
+    // 
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+	// Treat first bin
+	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
+	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
+	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
+	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+      } else {
+	// Treat other bins
+	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
+	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
+    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] <<  ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
+    // Apply sumw2 on the histograms
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
+      (*it)->Sumw2();
+    }
+
+    return;
+  }
 
 
   void QCDMeasurement::createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
@@ -373,6 +507,14 @@ namespace HPlus {
     hMETFactorizationNJets->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
 
+    // attikis
+    // Check B-tag and MET correlations
+    const int myMetIndex =  getMetIndex( metData.getSelectedMET()->et() );
+    edm::PtrVector<pat::Jet> selectedJets = jetData.getSelectedJets();
+    fLdgJetPtHistogramGroupByMET[myMetIndex]->Fill( selectedJets[0]->et(), fEventWeight.getWeight());
+    // std::cout << "*** LdgJet pT = << " << selectedJets[0]->et() <<  ", 2nd LdgJet pT = << " << selectedJets[1]->et() << ", 3rd LdgJet pT = << " << selectedJets[2]->et() << std::endl;
+
+
     // Factorize out MET cut
     double myEventWeightBeforeMetFactorization = fEventWeight.getWeight();
     hWeightedMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -398,6 +540,7 @@ namespace HPlus {
     // Obtain btagging, fakeMETVeto, and forwardJetVeto data objects - internal plots will be wrong since they are not produced at the spot where the cut is applied
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets());
     fNBtagsHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
+    fNBtagsPtHistogramGroupByMET[myMetIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
     ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
