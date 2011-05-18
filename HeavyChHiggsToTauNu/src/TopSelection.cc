@@ -29,7 +29,7 @@ namespace HPlus {
     htopMassReal = makeTH<TH1F>(*fs, "Mass_Top", "Mass_Top", 400, 0., 800.);
     htopMassMaxReal = makeTH<TH1F>(*fs, "MassMax_Top", "MassMax_Top", 400, 0., 800.);
     htopMassRealb = makeTH<TH1F>(*fs, "Mass_bFromTop", "Mass_bFromTop", 400, 0., 800.);
-    htopMassRealHplus = makeTH<TH1F>(*fs, "Mass_TopHplus", "Mass_TopHplus", 400, 0., 800.);
+    htopMassRealHplus = makeTH<TH1F>(*fs, "Mass_TopHplusSide", "Mass_TopHplusSide", 400, 0., 800.);
   }
 
   TopSelection::~TopSelection() {}

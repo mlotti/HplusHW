@@ -82,7 +82,7 @@ def main():
     jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "NumberOfJets")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPt", rebin=10)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPt", rebin=20)
     jetEta(plots.DataMCPlot(datasets, analysis+"/bjet_eta"), "bjetEta", rebin=10)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfBtaggedJets"), "NumberOfBJets")
     
@@ -145,7 +145,7 @@ def topMassComparison(datasets):
     background = "TTToHplusBWB_M120"
     rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Mass_jjbMax"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_bFromTop")]),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/MassMax_Top")]),
              "topMass_all_vs_real")
 
 def topPtComparison(datasets):
@@ -167,7 +167,7 @@ def scaleMCHistos(h, scale):
 def scaleMCfromWmunu(h):
     # Data/MC scale factor from AN 2011/053
 #    scaleMCHistos(h, 1.736)
-    scaleMCHistos(h, 1.0)
+    scaleMCHistos(h, 1.2)
 
 
 
@@ -209,7 +209,7 @@ def rtauGen(h, name, rebin=5, ratio=False):
         xlabel = "N_{vertices}"
     ylabel = "Events / %.2f" % h.binWidth()
 
-    kwargs = {"ymin": 0.1}
+    kwargs = {"ymin": 0.1, "xmax": 500}
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
         kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
@@ -217,7 +217,7 @@ def rtauGen(h, name, rebin=5, ratio=False):
 #    name = name+"_log"
 
     h.createFrame(name, **kwargs)
-    h.getPad().SetLogy(True)
+#    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
     common(h, xlabel, ylabel, addLuminosityText=False)
 
@@ -598,7 +598,7 @@ def transverseMass2(h,name, rebin=10):
     h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
        
-def jetPt(h, name, rebin=5, ratio=False):
+def jetPt(h, name, rebin=20, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
     if "bjet" in name:
@@ -800,7 +800,7 @@ def ptTop(h, name, rebin=10, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.0001, "ymaxfactor": 1.1}
+    opts = {"ymin": 0.0001, "xmax": 500, "ymaxfactor": 1.1}
     opts2 = {"ymin": 0.01, "ymax": 1.5}
     name = name+"_log"
     if ratio:

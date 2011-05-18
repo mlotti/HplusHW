@@ -177,7 +177,7 @@ namespace HPlus {
     //    }
     double Met = metData.getSelectedMET()->et();
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;  
-      
+    /*      
     if( Met > 0 && Met < 10) fEventWeight.multiplyWeight(3.4);
     if( Met > 10 && Met < 20) fEventWeight.multiplyWeight(10.09);
     if( Met > 20 && Met < 30) fEventWeight.multiplyWeight(9.15);
@@ -193,7 +193,7 @@ namespace HPlus {
     if( Met > 200 && Met < 250) fEventWeight.multiplyWeight(0.833);
     if( Met > 250 && Met < 300) fEventWeight.multiplyWeight(2.586);
     //    std::cout << " weight after  = " << fEventWeight.getWeight() << std::endl;  
-   
+    */
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
