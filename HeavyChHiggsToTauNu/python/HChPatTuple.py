@@ -19,16 +19,138 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDis
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
+
+
+##################################################
+#
+# PAT on the fly
+#
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
+    def setPatArg(args, name, value):
+        if name in args:
+            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
+        args[name] = value
+    def setPatArgs(args, d):
+        for name, value in d.iteritems():
+            setPatArg(args, name, value)
+
+    counters = []
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
+        counters = HChDataSelection.dataSelectionCounters[:]
+    if options.tauEmbeddingInput != 0:
+        counters = MuonSelection.muonSelectionCounters[:]
+
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
+
+    if options.doPat == 0:
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+        seq = cms.Sequence(
+#            process.goodPrimaryVertices10
+        )
+        return (seq, counters)
+
+    print "Running PAT on the fly"
+
+    process.collisionDataSelection = cms.Sequence()
+    if options.tauEmbeddingInput != 0:
+
+        # Hack to not to crash if something in PAT assumes process.out
+        hasOut = hasattr(process, "out")
+        if not hasOut:
+            process.out = cms.OutputModule("PoolOutputModule",
+                fileName = cms.untracked.string('dummy.root'),
+                outputCommands = cms.untracked.vstring()
+            )
+        setPatArgs(patArgs, {"doPatTrigger": False,
+                             "doTauHLTMatching": False,
+                             "doPatCalo": False,
+                             "doBTagging": True,
+                             "doPatElectronID": False,
+                             "doPatMET": False})
+
+        process.patSequence = addPat(process, dataVersion, **patArgs)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        process.patDefaultSequence.remove(process.patMuons)
+        process.patDefaultSequence.remove(process.selectedPatMuons)
+        process.patDefaultSequence.remove(process.muonMatch)
+        process.patDefaultSequence.remove(process.patElectrons)
+        process.patDefaultSequence.remove(process.selectedPatElectrons)
+        process.patDefaultSequence.remove(process.electronMatch)
+        process.patDefaultSequence.remove(process.patPhotons)
+        process.patDefaultSequence.remove(process.selectedPatPhotons)
+        process.patDefaultSequence.remove(process.photonMatch)
+
+        # Remove soft muon b tagging discriminators as they are not
+        # well defined, cause technical problems and we don't use
+        # them.
+        process.patJets.discriminatorSources = filter(lambda tag: "softMuon" not in tag.getModuleLabel(), process.patJets.discriminatorSources)
+        for seq in [process.btagging, process.btaggingJetTagsAOD, process.btaggingTagInfosAOD]:
+            softMuonRemover = RemoveSoftMuonVisitor.RemoveSoftMuonVisitor()
+            seq.visit(softMuonRemover)
+            softMuonRemover.removeFound(process, seq)
+
+        # Use the merged track collection
+        process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+        process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+
+        # Another part of the PAT process.out hack
+        if not hasOut:
+            del process.out
+
+        # Add PV selection, if not yet done by PAT
+#        if dataVersion.isData():
+#            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+#            process.patSequence *= process.goodPrimaryVertices
+    else:
+        if dataVersion.isData():
+            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+
+        pargs = patArgs.copy()
+
+        if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
+            if options.trigger == "":
+                raise Exception("Command line argument 'trigger' is missing")
+
+            print "Trigger used for tau matching:", options.trigger
+            pargs["matchingTauTrigger"] = options.trigger
+            if jetTrigger != None:
+                print "Trigger used for jet matching:", jetTrigger
+                pargs["matchingJetTrigger"] = jetTrigger            
+
+        process.patSequence = addPat(process, dataVersion, **pargs)
+    
+    # Add selection of PVs with sumPt > 10
+#    process.patSequence *= process.goodPrimaryVertices10
+
+    dataPatSequence = cms.Sequence(
+        process.collisionDataSelection *
+        process.patSequence
+    )
+
+    if options.tauEmbeddingInput != 0:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+        process.patSequence *= process.patMuonTauSequence
+    
+    return (dataPatSequence, counters)
+
+
+# Add the PAT sequences as requested
+def addPat(*args, **kwargs):
+    return addPlainPat(*args, **kwargs)
 
 # Assumes that process.out is the output module
 #
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
-           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
-           includeTracksPFCands=True):
+def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
+                doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
+                doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
+                includeTracksPFCands=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -419,141 +541,6 @@ def addPatElectronID(process, module, sequence):
     module.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
     module.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
 
-
-
-
-##################################################
-#
-# PAT on the fly
-#
-from FWCore.ParameterSet.Modules import _Module
-class RemoveSoftMuonVisitor:
-    def __init__(self):
-        self.found = []
-
-    def enter(self, visitee):
-        if isinstance(visitee, _Module) and "softMuon" in visitee.label():
-            self.found.append(visitee)
-
-    def leave(self, visitee):
-        pass
-
-    def removeFound(self, process, sequence):
-        for mod in self.found:
-            print "Removing '%s' from sequence '%s' and process" % (mod.label(), sequence.label())
-            sequence.remove(mod)
-            delattr(process, mod.label())
-
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
-    def setPatArg(args, name, value):
-        if name in args:
-            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
-        args[name] = value
-    def setPatArgs(args, d):
-        for name, value in d.iteritems():
-            setPatArg(args, name, value)
-
-    counters = []
-    if dataVersion.isData() and options.tauEmbeddingInput == 0:
-        counters = HChDataSelection.dataSelectionCounters[:]
-    if options.tauEmbeddingInput != 0:
-        counters = MuonSelection.muonSelectionCounters[:]
-
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters.extend(PFEmbeddingSource.muonSelectionCounters)
-
-    if options.doPat == 0:
-        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-        seq = cms.Sequence(
-#            process.goodPrimaryVertices10
-        )
-        return (seq, counters)
-
-    print "Running PAT on the fly"
-
-    process.collisionDataSelection = cms.Sequence()
-    if options.tauEmbeddingInput != 0:
-
-        # Hack to not to crash if something in PAT assumes process.out
-        hasOut = hasattr(process, "out")
-        if not hasOut:
-            process.out = cms.OutputModule("PoolOutputModule",
-                fileName = cms.untracked.string('dummy.root'),
-                outputCommands = cms.untracked.vstring()
-            )
-        setPatArgs(patArgs, {"doPatTrigger": False,
-                             "doTauHLTMatching": False,
-                             "doPatCalo": False,
-                             "doBTagging": True,
-                             "doPatElectronID": False,
-                             "doPatMET": False})
-
-        process.patSequence = addPat(process, dataVersion, **patArgs)
-        # FIXME: this is broken at the moment
-        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
-        process.patDefaultSequence.remove(process.patMuons)
-        process.patDefaultSequence.remove(process.selectedPatMuons)
-        process.patDefaultSequence.remove(process.muonMatch)
-        process.patDefaultSequence.remove(process.patElectrons)
-        process.patDefaultSequence.remove(process.selectedPatElectrons)
-        process.patDefaultSequence.remove(process.electronMatch)
-        process.patDefaultSequence.remove(process.patPhotons)
-        process.patDefaultSequence.remove(process.selectedPatPhotons)
-        process.patDefaultSequence.remove(process.photonMatch)
-
-        # Remove soft muon b tagging discriminators as they are not
-        # well defined, cause technical problems and we don't use
-        # them.
-        process.patJets.discriminatorSources = filter(lambda tag: "softMuon" not in tag.getModuleLabel(), process.patJets.discriminatorSources)
-        for seq in [process.btagging, process.btaggingJetTagsAOD, process.btaggingTagInfosAOD]:
-            softMuonRemover = RemoveSoftMuonVisitor()
-            seq.visit(softMuonRemover)
-            softMuonRemover.removeFound(process, seq)
-
-        # Use the merged track collection
-        process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
-        process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
-
-        # Another part of the PAT process.out hack
-        if not hasOut:
-            del process.out
-
-        # Add PV selection, if not yet done by PAT
-#        if dataVersion.isData():
-#            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-#            process.patSequence *= process.goodPrimaryVertices
-    else:
-        if dataVersion.isData():
-            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
-
-        pargs = patArgs.copy()
-
-        if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
-            if options.trigger == "":
-                raise Exception("Command line argument 'trigger' is missing")
-
-            print "Trigger used for tau matching:", options.trigger
-            pargs["matchingTauTrigger"] = options.trigger
-            if jetTrigger != None:
-                print "Trigger used for jet matching:", jetTrigger
-                pargs["matchingJetTrigger"] = jetTrigger            
-
-        process.patSequence = addPat(process, dataVersion, **pargs)
-    
-    # Add selection of PVs with sumPt > 10
-#    process.patSequence *= process.goodPrimaryVertices10
-
-    dataPatSequence = cms.Sequence(
-        process.collisionDataSelection *
-        process.patSequence
-    )
-
-    if options.tauEmbeddingInput != 0:
-        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
-        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
-        process.patSequence *= process.patMuonTauSequence
-    
-    return (dataPatSequence, counters)
 
 
 ##################################################
