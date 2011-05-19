@@ -391,18 +391,25 @@ def addMuonIsolationAnalyses(process, prefix, prototype, commonSequence, additio
         ("IsoTauLikeLoose",  muonAnalysis.isolations["tauLooseIso"] +" == 0"),
         ("IsoTauLikeMedium", muonAnalysis.isolations["tauMediumIso"]+" == 0"),
         ("IsoTauLikeTight",  muonAnalysis.isolations["tauTightIso"] +" == 0"),
+        ("IsoTauLikeTightSc015", muonAnalysis.isolations["tauTightSc015Iso"] +" == 0" ),
+        ("IsoTauLikeTightSc02", muonAnalysis.isolations["tauTightSc02Iso"] +" == 0" ),
+
+        ("IsoTauLikeTightIc04",  muonAnalysis.isolations["tauTightIc04Iso"] +" == 0"),
+        ("IsoTauLikeTightSc015Ic04", muonAnalysis.isolations["tauTightSc015Ic04Iso"] +" == 0" ),
+        ("IsoTauLikeTightSc02Ic04", muonAnalysis.isolations["tauTightSc02Ic04Iso"] +" == 0" ),
+
 
         ("IsoTauLikeTightSumPtRel10",  muonAnalysis.isolations["tauTightIso"] +" < 0.1"),
         ("IsoTauLikeTightSumPtRel15",  muonAnalysis.isolations["tauTightIso"] +" < 0.15"),
 
-        ("IsoTauLikeTightSc0SumPtRel10",  muonAnalysis.isolations["tauTightIsoSc0SumPtRel"] +" < 0.1"),
-        ("IsoTauLikeTightSc0SumPtRel15",  muonAnalysis.isolations["tauTightIsoSc0SumPtRel"] +" < 0.15"),
+        ("IsoTauLikeTightSc0SumPtRel10",  muonAnalysis.isolations["tauTightSc0SumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0SumPtRel15",  muonAnalysis.isolations["tauTightSc0SumPtIsoRel"] +" < 0.15"),
 
-        ("IsoTauLikeTightSc0Ic04SumPtRel10",  muonAnalysis.isolations["tauTightIsoSc0Ic04SumPtRel"] +" < 0.1"),
-        ("IsoTauLikeTightSc0Ic04SumPtRel15",  muonAnalysis.isolations["tauTightIsoSc0Ic04SumPtRel"] +" < 0.15"),
+        ("IsoTauLikeTightSc0Ic04SumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04SumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0Ic04SumPtRel15",  muonAnalysis.isolations["tauTightSc0Ic04SumPtIsoRel"] +" < 0.15"),
 
-        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightIsoSc0Ic04NoqSumPtRel"] +" < 0.1"),
-        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightIsoSc0Ic04NoqSumPtRel"] +" < 0.15"),
+        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04NoqSumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04NoqSumPtIsoRel"] +" < 0.15"),
 
         ]
 
