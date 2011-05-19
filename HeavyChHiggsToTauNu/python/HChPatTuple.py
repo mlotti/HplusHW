@@ -597,7 +597,8 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
                 'drop *_selectedPatPFParticles%s_*_*' % postfix,
                 ])
 
-    sequence = cms.Sequence()
+    pfKt6Sequence = cms.Sequence()
+    setattr(process, "pfKt6Sequence"+postfix, pfKt6Sequence)
 
     # Enable/disable PFnoPU
     getattr(process, "pfPileUp"+postfix).Enable = doPFnoPU
@@ -609,27 +610,41 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
     doL1Fastjet = True
     if doL1Fastjet:
-        #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-        #m = cms.EDFilter("PrimaryVertexObjectFilter",
-        #    filterParams = pvSelector.clone(maxZ = 24.0),
-        #    src = cms.InputTag("offlinePrimaryVertices")
-        #)
-        #setattr(process, "goodOfflinePrimaryVerticesForJets"+postfix, m)
-        #sequence *= m
+        kt6name = "kt6PFJets"+postfix
 
-        process.load('RecoJets.Configuration.RecoPFJets_cff')
-        #process.kt6PFJets.src = "pfNoElectron"+postfix
-        #process.kt6PFJets.doAreaFastjet = True
-        process.kt6PFJets.doRhoFastjet = True
-        process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
-        #process.kt6PFJets.voronoiRfact = cms.double(0.9)
-        sequence *= process.kt6PFJets
+        if doPFnoPU:
+            from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+            m = cms.EDFilter("PrimaryVertexObjectFilter",
+                filterParams = pvSelector.clone(maxZ = 24.0),
+                src = cms.InputTag("offlinePrimaryVertices")
+            )
+            setattr(process, "goodOfflinePrimaryVerticesForJets"+postfix, m)
+            pfKt6Sequence *= m
+    
+            from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
+            setattr(process, kt6name, kt4PFJets.clone(
+                rParam = cms.double(0.6),
+                src = cms.InputTag('pfNoElectron'+postfix),
+                doAreaFastjet = cms.bool(True),
+                doRhoFastjet = cms.bool(True),
+                voronoiRfact = cms.double(0.9)
+            ))
+        else:
+            process.load('RecoJets.Configuration.RecoPFJets_cff')
+            setattr(process, kt6name, process.kt6PFJets.clone(
+                    doRhoFastjet = True,
+                    Rgo_EtaMax = cms.double(4.5)
+            ))
+        pfKt6Sequence *= getattr(process, kt6name)
+        getattr(process, "patJetCorrFactors"+postfix).rho.setModuleLabel(kt6name)
 
         # ak5PFJets
-        #process.pfJetsPFlow.Vertices = cms.InputTag("goodOfflinePrimaryVerticesForJets"+postfix)
-        process.pfJetsPFlow.doAreaFastjet = True
-        #process.pfJetsPFlow.doRhoFastjet = False
-        process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+        getattr(process, "pfJets"+postfix).doAreaFastjet = True
+        getattr(process, "pfJets"+postfix).Rho_EtaMax = cms.double(4.5)
+
+        if doPFnoPU:
+            getattr(process, "pfJets"+postfix).Vertices = cms.InputTag("goodOfflinePrimaryVerticesForJets"+postfix)
+            getattr(process, "pfJets"+postfix).doRhoFastjet = False
 
         setPatJetCorrDefaults(getattr(process, "patJetCorrFactors"+postfix), dataVersion, L1FastJet=True)
         # With PFnoPU we need separache "charged hadron subtracted" corrections
@@ -703,7 +718,10 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         getattr(process, "patTaus"+postfix)
     )
 
-    sequence *= getattr(process, "patPF2PATSequence"+postfix)
+    sequence = cms.Sequence(
+        getattr(process, "patPF2PATSequence"+postfix) *
+        pfKt6Sequence
+    )
 
     if doTauHLTMatching:
         sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, collections=["selectedPatTaus"+postfix], postfix=postfix)
