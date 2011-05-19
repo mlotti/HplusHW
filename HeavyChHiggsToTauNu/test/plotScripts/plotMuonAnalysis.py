@@ -82,8 +82,11 @@ class Selections:
         #        "h07_JetSelection",
         #        "h07_JetId",
                 "h08_MuonVeto",
-                "h09_JetMultiplicityCut",
-                "h10_METCut"]]
+#                "h09_JetMultiplicityCut",
+#                "h10_METCut"]]
+                "h09_ElectronVeto",
+                "h10_JetMultiplicityCut",
+                "h11_METCut"]]
         self.muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
                 "h07_MuonLargestPt",
                 "h08_JetMultiplicityCut",
@@ -99,9 +102,13 @@ class Selections:
                 "h06_MuonIP",
                 "h07_MuonVertexDiff",
                 "h08_MuonIsolationWithTau",
-                "h09_MuonVeto",
-                "h10_JetMultiplicityCut",
-                "h11_METCut"
+                "h09_MuonExactlyOne"
+                "h10_MuonVeto",
+#                "h10_JetMultiplicityCut",
+#                "h11_METCut"
+                "h11_ElectronVeto",
+                "h12_JetMultiplicityCut",
+                "h13_METCut"
                 ]]
         self.muonSelectionPFIsoTauAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
                 "h08_MuonLargestPt",
@@ -144,14 +151,21 @@ def main():
     #analysisPrefix = "noIsoNoVetoMetNJets3"
     #analysisPrefix = "noIsoNoVetoMetPFPt30Met20NJets3"
     #analysisPrefix = "topMuJetRefMet"
-    analysisPrefix = "muonSelectionPFPt40Met20NJets3"
+    #analysisPrefix = "muonSelectionPFPt30Met20NJets2"
+    #analysisPrefix = "muonSelectionPFPt30Met20NJets3"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3"
     #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTau"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauVLoose"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLoose"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauMedium"
+    analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauTight"
     sel = Selections(analysisPrefix)
 
     WdecaySeparate = False
     #WdecaySeparate = True
 
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=analysisPrefix+"countAnalyzer")
+#    datasets.remove(["Mu_136035-144114_Dec22", "Mu_147196-149294_Dec22", "SingleMu_160431-161016_Prompt", "SingleMu_160431-161016_Prompt"])
     datasets.loadLuminosities()
     
     datasetsMC = datasets.deepCopy()
@@ -316,6 +330,8 @@ class PlotPassed(plots.PlotBase):
         st_all = 0.0
         dyjets = 0.0
         dyjets_all = 0.0
+        diboson = 0.0
+        
         other = 0.0
         for histo in self.histoMgr.getHistos():
             if not histo.isMC():
@@ -337,18 +353,25 @@ class PlotPassed(plots.PlotBase):
             elif "DYJets" in histo.getName():
                 dyjets += content
                 dyjets_all += content
+            elif "Diboson" in histo.getName():
+                diboson += content
             else:
                 other += content
 
         cut = self.histoMgr.getHistos()[0].getRootHisto().GetBinCenter(bin)
         #print "Bin cut  TTJets WJets TT+W QCD Other TT+W/all QCD/all QCD/QCD/tt+w"
         #print "%d %f  %f %f %f %f %f %f %f %f" % (bin, cut, ttjets, wjets, (ttjets+wjets), qcd, other, ((ttjets+wjets)/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd+other)), (qcd/(ttjets+wjets+qcd)))
-        nall = ttjets+wjets+st+dyjets+qcd+other
+        nall = ttjets+wjets+st+dyjets+qcd+diboson+other
 #        print "Bin cut   TT_eff W_eff  TT+W/all  QCD/all"
 #        print "%d %f   %f %f  %f %f" % (bin, cut, ttjets/ttjets_all, wjets/wjets_all, (ttjets+wjets)/nall, qcd/nall)
         
         print "Bin cut   TT W QCD  TT+W+ST/all  QCD/all  DY/all"
         print "%d %f   %f %f %f  %f %f %f" % (bin, cut, ttjets, wjets, qcd, (ttjets+wjets+st)/nall, qcd/nall, dyjets/nall)
+
+        print "Bin cut   sum W TT ST QCD DY DiB other"
+        print "%d %f    %.0f %.0f %.0f %.0f %.0f %.0f %.0f %f" % (bin, cut, nall, wjets, ttjets, st, qcd, dyjets, diboson, other)
+        print "Bin cut   sum W TT ST QCD DY DiB other"
+        print "%d %f    \\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %.0f \\eTD\\bTD %f \\eTD" % (bin, cut, nall, wjets, ttjets, st, qcd, dyjets, diboson, other)
 
 
 def getSumOrRootHisto(histo):
@@ -370,7 +393,7 @@ class PlotIso(plots.PlotBase):
         with SetTH1Directory(False):
             rootHistos = []
             for plot, name in zip(passedPlots, names):
-                mcSum = histograms.sumRootHistos([getSumOrRootHisto(histo) for histo in filter(lambda h: not h.isMC(), plot.histoMgr.getHistos())])
+                mcSum = histograms.sumRootHistos([getSumOrRootHisto(histo) for histo in filter(lambda h: h.isMC(), plot.histoMgr.getHistos())])
                 qcdHisto = plot.histoMgr.getHisto("QCD_Pt20_MuEnriched")
                 qcd = getSumOrRootHisto(qcdHisto).Clone(name+"_QCDfraction")
                 qcd.Divide(mcSum) # qcd/mcSum
@@ -380,9 +403,41 @@ class PlotIso(plots.PlotBase):
 
             self.histoMgr.forEachHisto(styles.generator())
             self.histoMgr.setHistoLegendStyleAll("l")
-                
-                                          
 
+# class PlotIsoBase(plots.PlotBase):
+#     def __init__(self, saveFormats, legendLabels={}):
+#         plots.PlotBase.__init__(self, [], saveFormats)
+#         self.legends = {
+#             "sumIsoRel": "Rel iso",
+#             "pfSumIsoRel": "PF rel iso",
+#         }
+#         self.legends.update(legendLabels)
+
+#     def _sumRootHisto(plot, func):
+#         return histograms.sumRootHistos([getSumOrRootHisto(histo) for histo in filter(func, plot.histoMgr.getHistos())])
+
+#     def _mcSum(plot):
+#         return self._sumRootHisto(plot, lambda h: not h.isMC())
+
+# class PlotIsoSignal(plots.PlotBase):
+#     def __init__(self, passedPlots, names, **kwargs):
+
+#         plots.PlotBase(passedPlots[0].saveFormats, **kwargs)
+#         with SetTH1Directory(False):
+#             for plot, name in zip(passedPlots, names):
+#                 mcSum = self._mcSum(plot)
+
+#                 signalDatasets = ["TTJets", "WJets", "SingleTop"]
+#                 signalSum = self._sumRootHisto(plot, lambda h: h.getName() in signalDatasets)
+
+#                 signal = signalSum.Clone(name+"_signal_fraction")
+#                 signal.Divide(mcSum) # signal/mcSum
+#                 h = histograms.Histo(theHisto.getDataset(), th1, name)
+#                 h.setLegendLabel(self.legends.get(name, ""))
+#                 self.histoMgr.appendHisto(h)
+
+#                 self.histoMgr.forEachHisto(styles.generator())
+#                 self.histoMgr.setHistoLegendStyleAll("l")
 
 # dist = TH1
 def dist2pass(hdist):
@@ -416,6 +471,20 @@ def dist2pass(hdist):
         #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
         hpass.SetBinContent(bin+1, passed)
     #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
+    return hpass
+
+def dist2eff(hdist):
+    hpass = dist2pass(hdist)
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        hpass.SetBinContent(bin, hpass.GetBinContent(bin)/total)
+    return hpass
+
+def dist2rej(hdist):
+    hpass = dist2pass(hdist)
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        hpass.SetBinContent(bin, 1-hpass.GetBinContent(bin)/total)
     return hpass
 
 def jetMultiplicity(h, prefix=""):
@@ -474,7 +543,7 @@ def muonPt(h, prefix="", plotAll=False):
     ylabel = "Number of muons / %.1f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
     ptcut = 30
-    xmax = 400
+    xmax = 300
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(5))
     ylabel = ylabel % h.binWidth()
@@ -515,7 +584,7 @@ def muonPt(h, prefix="", plotAll=False):
     h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, xmin=ptcut, xmax=xmax, ymin=0.1, yfactor=2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.moveLegend(histograms.createLegend(), dx=-0.1))
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
@@ -605,7 +674,7 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False):
     h.createFrame(prefix+"muon_%s_log" % q, ymin=1e-2, ymaxfactor=10)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
-    #h.setLegend(histograms.createLegend(0.72, 0.7, 0.92, 0.92))
+    h.setLegend(histograms.createLegend(0.65, 0.7, 0.92, 0.92))
     ROOT.gPad.SetLogy(True)
     h.draw()
     histograms.addCmsPreliminaryText()
@@ -625,6 +694,7 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False):
         print "quantity %s" % q
         passed.printFractions(21)
         passed.printFractions(31)
+        passed.printFractions(101)
         print "----------------------------------------"
 
     qcdFraction = PlotIso([passed], q)
@@ -643,6 +713,15 @@ def muonIsoQcd(plot, prefix=""):
     plot.setLegend(histograms.createLegend(0.2, 0.8, 0.4, 0.9))
     plot.draw()
     plot.save()
+
+    plot.createFrame(prefix+"muon_qcdfraction_zoom", xmax=0.2, ymax=0.1)
+    plot.frame.GetXaxis().SetTitle("Cut on isolation")
+    plot.frame.GetYaxis().SetTitle("Fraction of QCD")
+    plot.setLegend(histograms.createLegend(0.2, 0.8, 0.4, 0.9))
+    plot.draw()
+    plot.save()
+
+    
 
 def muonD0():
     # Muon track ip w.r.t. beam spot
@@ -852,6 +931,17 @@ def addDataMcRatioColumn(table):
     ratio = counter.divideColumn("Data/MCsum", table.getColumn(dataColumn), table.getColumn(mcSumColumn))
     table.appendColumn(ratio)
 
+def reorderCounterTable(table):
+    # Move QCD
+    tmp = table.getColumn(2)
+    table.removeColumn(2)
+    table.insertColumn(4, tmp)
+
+    # Move Single top
+    tmp = table.getColumn(6)
+    table.removeColumn(6)
+    table.insertColumn(4, tmp)
+
 def printCounters(datasets, datasetsMC, analysisPrefix, normalizeToLumi=None):
     print "============================================================"
     print "Dataset info: "
@@ -881,19 +971,24 @@ def printCounters(datasets, datasetsMC, analysisPrefix, normalizeToLumi=None):
         analysisPrefix+"countMETCut": "MET cut"
         }
     
-    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.0f"))
-    #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.0f", valueOnly=True))
+    #latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.0f"))
+    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.0f", valueOnly=True))
     
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
     #eventCounter.getMainCounter().printCounter()
     table = eventCounter.getMainCounterTable()
+
     addSumColumn(table)
     addTtwFractionColumn(table)
     addPurityColumn(table)
     addDyFractionColumn(table)
     addQcdFractionColumn(table)
+
+    reorderCounterTable(table)
+
     print table.format()
+    print table.format(latexFormat)
     
     #print "------------------------------------------------------------"
     #print counterEfficiency(eventCounter.getMainCounterTable()).format(FloatDecimalFormat(4))

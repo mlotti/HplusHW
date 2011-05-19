@@ -20,5 +20,14 @@ typedef ObjectSelector<
   std::vector<pat::Muon>
   > HPlusPATMuonViewVertexZSelector;
 
+typedef ObjectSelector<
+  VertexZSelector<
+    edm::View<pat::Muon>,
+    edm::PtrVector<pat::Muon>
+    >,
+  edm::PtrVector<pat::Muon>
+  > HPlusPATMuonViewPtrVertexZSelector;
+
 DEFINE_FWK_MODULE( HPlusCandViewPtrVertexZSelector );
 DEFINE_FWK_MODULE( HPlusPATMuonViewVertexZSelector );
+DEFINE_FWK_MODULE( HPlusPATMuonViewPtrVertexZSelector );

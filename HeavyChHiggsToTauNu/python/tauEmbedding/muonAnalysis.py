@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 
 # PfAllParticleIso=3,PfChargedHadronIso=4, PfNeutralHadronIso=5, PfGammaIso=6, 
-isolations = {
+isolations0304 = {
     # Detector iso
     "trackIso": "isolationR03().sumPt",
     "caloIso": "isolationR03().emEt+isolationR03().hadEt",
@@ -11,11 +11,34 @@ isolations = {
     "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.4)",
     "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.4)",
 }
+isolations05 = {
+    # Detector iso
+    "trackIso": "isolationR05().sumPt",
+    "caloIso": "isolationR05().emEt+isolationR05().hadEt",
+    # 'standard' PF isolation
+    "pfChargedIso": "isoDeposit('PfChargedHadronIso').depositWithin(0.5)",
+    "pfNeutralIso": "isoDeposit('PfNeutralHadronIso').depositWithin(0.5)",
+    "pfGammaIso": "isoDeposit('PfGammaIso').depositWithin(0.5)",
+}
+
+isolations = isolations0304
+#isolations = isolations05
 isolations["sumIso"] = "%s+%s" % (isolations["trackIso"], isolations["caloIso"])
 isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["pfNeutralIso"], isolations["pfGammaIso"])
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
 
+tauIsolations = {
+    "tauTightIso": "userInt('byTightOccupancy')",
+    "tauMediumIso": "userInt('byMediumOccupancy')",
+    "tauLooseIso": "userInt('byLooseOccupancy')",
+    "tauVLooseIso": "userInt('byVLooseOccupancy')"
+    }
+for key, value in tauIsolations.items():
+    userFloat = value.replace("userInt", "userFloat")
+    tauIsolations[key+"SumPt"] = userFloat.replace("Occupancy", "SumPt")
+    tauIsolations[key+"MaxPt"] = userFloat.replace("Occupancy", "MaxPt")
+isolations.update(tauIsolations)
 
 # Define the histograms
 histoPt = HChTools.Histo("pt", "pt()", min=0., max=800., nbins=800, description="pt (GeV/c)")
@@ -27,9 +50,11 @@ for name, value in isolations.iteritems():
     h = None
     if "IsoRel" in name:
         h = HChTools.Histo(name, value, min=0, max=0.5, nbins=100, description=name)
+        histoIsos[name+"Full"] = HChTools.Histo(name+"Full", value, min=0, max=5.0, nbins=500, description=name)
     else:
         h = HChTools.Histo(name, value, min=0, max=100.0, nbins=100, description=name)
     histoIsos[name] = h
+    
 
 histoDB = HChTools.Histo("trackDB", "dB()", min=-0.1, max=0.1, nbins=50, description="Track ip @ PV (cm)")
 histoNhits = HChTools.Histo("trackNhits", "innerTrack().numberOfValidHits()", min=0, max=60, nbins=60, description="N(valid global hits)")
@@ -41,7 +66,10 @@ histoTransverseMass = HChTools.Histo("tmass", "sqrt((daughter(0).pt+daughter(1).
                                      min=0, max=400, nbins=400, description="W transverse mass")
 histoZMass = HChTools.Histo("mass", "mass()", min=0, max=400, nbins=400, description="Z mass")
 
-histosBeginning = [histoPt, histoEta, histoPhi] + histoIsos.values()
+histoGenMother = HChTools.Histo("genMother", "abs(userInt('genMotherPdgId'))", min=0, max=100, nbins=100, description="Muon mother pdgid")
+histoGenGrandMother = HChTools.Histo("genGrandMother", "abs(userInt('genGrandMotherPdgId'))", min=0, max=100, nbins=100, description="Muon grandmother pdgid")
+
+histosBeginning = [histoPt, histoEta, histoPhi, histoGenMother, histoGenGrandMother] + histoIsos.values()
 histosTrack = [histoDB, histoNhits, histoChi2]
 histosJet = [histoPt, histoEta, histoPhi]
 histosMet = [histoMet]
@@ -51,9 +79,9 @@ class MuonAnalysis:
     def __init__(self, process, dataVersion, additionalCounters, 
                  prefix="", beginSequence=None, afterOtherCuts=False,
                  trigger=None,
-                 muons="selectedPatMuons", muonPtCut=30,
+                 muons="selectedPatMuons", allMuons="selectedPatMuons", muonPtCut=30,
                  doIsolationWithTau=False, isolationWithTauDiscriminator="byTightIsolation",
-                 muonIsolation="sumIsoRel", muonIsolationCut=0.05,
+                 doMuonIsolation=False, muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
                  jets="selectedPatJetsAK5PF", njets=3):
@@ -62,8 +90,10 @@ class MuonAnalysis:
         self.prefix = prefix
         self.afterOtherCuts = afterOtherCuts
         self.doIsolationWithTau = doIsolationWithTau
+        self.doMuonIsolation = doMuonIsolation
         self._trigger = trigger
         self._muons = cms.InputTag(muons)
+        self._allMuons = cms.InputTag(allMuons)
         self._ptCut = "pt() > %d" % muonPtCut
         self._etaCut = "abs(eta()) < 2.1"
         self._electrons = electrons
@@ -339,32 +369,32 @@ class MuonAnalysis:
         # These two are included in the GlobalMuonPromptThigh ID
         #qualityCut += "globalTrack().normalizedChi2() < 10.0 && " +
         #qualityCut += "globalTrack().hitPattern().numberOfValidMuonHits () > 0 && " 
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, qualityCut)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, qualityCut, selector="PATMuonViewPtrSelector")
         self.cloneAnalyzers(name, muonSrc=self.selectedMuons)
         return name
 
     def muonImpactParameter(self):
         name = "MuonIP"
         dbCut = "abs(dB()) < 0.02" # w.r.t. beamSpot (note process.patMuons.usePV = False, PATMuonProducer takes beam spot from the event, so this could be safe also for 36X data
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, dbCut)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, dbCut, selector="PATMuonViewPtrSelector")
         self.cloneAnalyzers(name, muonSrc=self.selectedMuons)
         return name
 
     def muonIsolation(self):
         name = "MuonIsolation"
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCut)
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, self._isolationCut, selector="PATMuonViewPtrSelector")
         self.cloneAnalyzers(name, muonSrc=self.selectedMuons)
 
     def muonIsolationCustom(self, postfix, cut):
         name = "MuonIsolation"+postfix
-        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (isolations[self.muonIsolation], cut))
+        self.selectedMuons = self.analysis.addCut(name, self.selectedMuons, "%s < %f " % (isolations[self.muonIsolation], cut), selector="PATMuonViewPtrSelector")
         self.cloneAnalyzers(name, muonSrc=self.selectedMuons)
 
     def muonIsolationWithTau(self):
         name = "MuonIsolationWithTau"
         self.selectedMuons = self.analysis.addAnalysisModule(
             name,
-            selector = cms.EDProducer("HPlusTauIsolationCandViewPtrSelector",
+            selector = cms.EDProducer("HPlusTauIsolationPATMuonViewPtrSelector",
                                       candSrc = self.selectedMuons,
 #                                      tauSrc = cms.InputTag("selectedPatTausShrinkingConePFTau"),
                                       tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
@@ -380,7 +410,7 @@ class MuonAnalysis:
         name = "MuonVertexDiff"
         maxVertexZ = 1.0 # cm
         self.selectedMuons = self.analysis.addAnalysisModule(name,
-            selector = cms.EDFilter("HPlusCandViewPtrVertexZSelector",
+            selector = cms.EDFilter("HPlusPATMuonViewPtrVertexZSelector",
                                     src = self.selectedMuons,
                                     vertexSrc = self.selectedPrimaryVertex,
                                     maxZ = cms.double(maxVertexZ)),
@@ -392,12 +422,33 @@ class MuonAnalysis:
     def muonLargestPt(self):
         name = "MuonLargestPt"
         self.selectedMuons = self.analysis.addAnalysisModule(name,
-            selector = cms.EDFilter("HPlusLargestPtCandViewPtrSelector",
+            selector = cms.EDFilter("HPlusLargestPtPATMuonViewPtrSelector",
                 src = self.selectedMuons,
                 filter = cms.bool(False),
                 maxNumber = cms.uint32(1))).getSelectorInputTag()
         if not self.afterOtherCuts:
             self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+        return name
+
+    def muonMostIsolated(self):
+        name = "MuonMostIsolated"
+        self.selectedMuons = self.analysis.addAnalysisModule(name,
+            selector = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewPtrSelector",
+                src = self.selectedMuons,
+                filter = cms.bool(False),
+                maxNumber = cms.uint32(1))).getSelectorInputTag()
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name, muonSrc=self.selectedMuons)
+        return name
+
+    def muonExactlyOne(self):
+        name = "MuonExactlyOne"
+        self.analysis.addAnalysisModule(name,
+            filter = HChTools.makeCountFilter(self.selectedMuons, minNumber=1, maxNumber=1),
+            counter = True
+        )
+        if not self.afterOtherCuts:
+            self.cloneHistoAnalyzer(name)
         return name
 
     # Vetoes
@@ -411,7 +462,7 @@ class MuonAnalysis:
     def muonVetoSignalAnalysis(self):
         name = "MuonVeto"
         m = self.muonJetCleanerPrototype.clone(
-            src = self._muons
+            src = self._allMuons
         )
         m.checkOverlaps.muons = m.checkOverlaps.jets.clone(
             src = self.selectedMuons,
@@ -429,6 +480,7 @@ class MuonAnalysis:
             counter=True)
         am.setFilterSrcToSelector(lambda f: f.GlobalMuonVeto.MuonCollectionName)
         self.cloneAnalyzers(name)
+#        self.multipAnalyzer.cleanedMuons = self.multipAnalyzer.selMuons.clone(src = am.selectorName)
         return name
 
     def electronVetoSignalAnalysis(self):
@@ -506,10 +558,16 @@ class MuonAnalysis:
 
         self.muonQuality()
         self.muonImpactParameter()
-        self.muonVertexDiff()
-        if self.doIsolationWithTau:
-            self.muonIsolationWithTau()
-        #self.muonLargestPt()
+        #self.muonVertexDiff()
+        if self.doMuonIsolation:
+            if self.doIsolationWithTau:
+                self.muonIsolationWithTau()
+            else:
+                self.muonIsolation()
+            self.muonExactlyOne()
+        else:
+            #self.muonLargestPt()
+            self.muonMostIsolated()
 
         name = self.muonVetoSignalAnalysis()
         name = self.electronVetoSignalAnalysis()

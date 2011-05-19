@@ -1,6 +1,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "CommonTools/UtilAlgos/interface/ObjectSelector.h"
 #include "CommonTools/UtilAlgos/interface/SortCollectionSelector.h"
+#include "CommonTools/UtilAlgos/interface/SingleObjectSelector.h"
+#include "CommonTools/UtilAlgos/interface/StringCutObjectSelector.h"
 #include "CommonTools/Utils/interface/PtComparator.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -30,10 +32,16 @@ namespace {
     typedef T first_argument_type;
     typedef T second_argument_type;
     bool operator()(const T& t1, const T& t2) const {
-      return relIso(t1) < relIso(t2);
+      return relIso(t1) > relIso(t2);
     }
   };
 }
+
+typedef SingleObjectSelector<
+  edm::View<pat::Muon>,
+  StringCutObjectSelector<pat::Muon>,
+  edm::PtrVector<pat::Muon>
+  > PATMuonViewPtrSelector;
 
 typedef ObjectSelector<
   SortCollectionSelector<
@@ -53,6 +61,15 @@ typedef ObjectSelector<
 
 typedef ObjectSelector<
   SortCollectionSelector<
+    edm::View<pat::Muon>,
+    LessByRelIso<pat::Muon>,
+    edm::PtrVector<pat::Muon>
+    >,
+  edm::PtrVector<pat::Muon>
+  > HPlusSmallestRelIsoPATMuonViewPtrSelector;
+
+typedef ObjectSelector<
+  SortCollectionSelector<
     std::vector<pat::Muon>,
     GreaterByPt<pat::Muon>
     >
@@ -66,6 +83,15 @@ typedef ObjectSelector<
     >,
   std::vector<pat::Muon>
   > HPlusLargestPtPATMuonViewSelector;
+
+typedef ObjectSelector<
+  SortCollectionSelector<
+    edm::View<pat::Muon>,
+    GreaterByPt<pat::Muon>,
+    edm::PtrVector<pat::Muon>
+    >,
+  edm::PtrVector<pat::Muon>
+  > HPlusLargestPtPATMuonViewPtrSelector;
 
 typedef ObjectSelector<
   SortCollectionSelector<
@@ -92,11 +118,17 @@ typedef HPlus::TauIsolationSelector<
   edm::RefVector<std::vector<pat::Muon> >
   > HPlusTauIsolationPATMuonRefSelector;
 
+DEFINE_FWK_MODULE( PATMuonViewPtrSelector );
+
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusSmallestRelIsoPATMuonViewPtrSelector );
+
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewSelector );
+DEFINE_FWK_MODULE( HPlusLargestPtPATMuonViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusLargestPtCandViewPtrSelector );
+
 DEFINE_FWK_MODULE( HPlusTauIsolationCandViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonViewPtrSelector );
 DEFINE_FWK_MODULE( HPlusTauIsolationPATMuonRefSelector );

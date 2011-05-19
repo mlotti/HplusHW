@@ -4,7 +4,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
@@ -15,7 +14,6 @@ dataVersion = "311Xredigi" # Spring11 MC
 
 ##########
 # Flags for additional signal analysis modules
-
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
@@ -31,11 +29,14 @@ JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
 # With tau embedding input, tighten the muon selection
-tauEmbeddingTightenMuonSelection = True
+tauEmbeddingFinalizeMuonSelection = True
 # With tau embedding input, do the muon selection scan
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+filterGenTaus = False
+filterGenTausInaccessible = False
 
 ################################################################################
 
@@ -56,20 +57,25 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-#	"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-#       "rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
-        # For testing in lxplus
-#       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
-#        dataVersion.getAnalysisDefaultFileCastor()
-        # For testing in jade
-        dataVersion.getAnalysisDefaultFileMadhatter()
-        #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-#      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+   "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+    # For testing in lxplus
+    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    # dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #        dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
 if options.tauEmbeddingInput != 0:
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
+    process.source.fileNames = [
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_pt40/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_23_1_YLm.root"
+        ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -90,6 +96,11 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
+###
+# MC Filter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+if filterGenTaus:
+    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
 
 ################################################################################
 # The "golden" version of the signal analysis
@@ -113,16 +124,16 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 # Set the triggers for trigger efficiencies
 # 2010 and 2011 scenarios
 #param.setEfficiencyTriggersFor2010()
-param.setEfficiencyTriggersFor2011()
+#param.setEfficiencyTriggersFor2011()
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
-#param.setTriggerVertexFor2011()
+param.setTriggerVertexFor2011()
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingTightenMuonSelection:
+    if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
@@ -133,14 +144,14 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    # Change default tau algorithm here as needed         
+    # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
-    jetTauInvMass = param.jetTauInvMass,                                      
-    topSelection = param.topSelection,                                      
+    jetTauInvMass = param.jetTauInvMass,
+    topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
@@ -161,8 +172,10 @@ if dataVersion.isData():
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
+print "VertexWeight:",process.signalAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
 print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
+#print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
@@ -192,12 +205,21 @@ process.signalAnalysisPath = cms.Path(
 
 
 # b tagging testing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+if doBTagScan:
+    module = process.signalAnalysis.clone()
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 1.2
+    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
-    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 3.0
-    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 1.8
+    addAnalysis(process, "signalAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)

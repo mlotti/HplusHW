@@ -13,6 +13,10 @@ def addConfigInfo(process, options, dataVersion):
         print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
     return cms.Path(process.configInfo)
 
+def insertPSetContentsTo(src, dst):
+    names = src.parameterNames_()
+    for n in names:
+        setattr(dst, n, getattr(src, n))
 
 # Add an array of analysis+counter modules by varying one
 # configuration parameter of the analysis module. This is done by

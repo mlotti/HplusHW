@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
 
+tauEmbeddingMuons = "tauEmbeddingMuons"
+
 def customiseParamForTauEmbedding(param, dataVersion):
     # Change the triggers to muon
     param.trigger.triggers = [
@@ -33,15 +35,91 @@ def customiseParamForTauEmbedding(param, dataVersion):
     # Set the analyzer
     param.TauEmbeddingAnalysis.embeddingMode = True
     param.TauEmbeddingAnalysis.originalMetSrc = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
-    param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag("tauEmbeddingMuons")
+    param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag(tauEmbeddingMuons)
     param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
 
-def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonSelection"):
+def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
+    global tauEmbeddingMuons
+    muons = addMuonIsolationEmbedding(process, sequence, tauEmbeddingMuons, **kwargs)
+    tauEmbeddingMuons = muons
+
+def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", primaryVertex="firstPrimaryVertex", postfix=""):
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+    import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
+
+    tight = cms.EDProducer("HPlusPATMuonViewTauLikeIsolationEmbedder",
+        candSrc = cms.InputTag(muons),
+        pfCandSrc = cms.InputTag(pfcands),
+        vertexSrc = cms.InputTag(primaryVertex),
+        embedPrefix = cms.string("byTight"+postfix),
+        signalCone = cms.double(0.1),
+        isolationCone = cms.double(0.5)
+    )
+    name = "patMuonsWithTight"+postfix
+    setattr(process, name, tight)
+
+    medium = tight.clone(
+        candSrc = name,
+        embedPrefix = "byMedium"+postfix,
+    )
+    name = "patMuonsWithMedium"+postfix
+    setattr(process, name, medium)
+
+    loose = tight.clone(
+        candSrc = "patMuonsWithMedium",
+        embedPrefix = "byLoose"+postfix,
+    )
+    name = "patMuonsWithLoose"+postfix
+    setattr(process, name, loose)
+
+    vloose = tight.clone(
+        candSrc = "patMuonsWithLoose",
+        embedPrefix = "byVLoose"+postfix,
+    )
+    name = "patMuonsWithVLoose"+postfix
+    setattr(process, name, vloose)
+    
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, tight)
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
+
+    sequence *= (tight * medium * loose *vloose)
+
+    gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
+        candSrc = cms.InputTag(name),
+        genParticleSrc = cms.InputTag("genParticles"),
+        embedPrefix = cms.string("gen"),
+        maxDR = cms.double(0.5),
+        pdgId = cms.uint32(13)
+    )
+    name = "patMuonsWithGen"
+    setattr(process, name, gen)
+    sequence *= gen
+
+    import PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi as muonSelector
+    m = muonSelector.selectedPatMuons.clone(
+        src = name
+    )
+    name = "selectedPatMuonsWithIso"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    return name
+
+def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix="muonFinalSelection"):
     counters = []
+
+    cname = prefix+"AllEvents"
+    m = cms.EDProducer("EventCountProducer")
+    setattr(process, cname, m)
+    sequence *= m
+    counters.append(cname)
 
     if enableIsolation:
         counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
+    counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
 
     return counters
@@ -87,6 +165,22 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
 
     return [counter]
 
+def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"):
+    filter = prefix+"Filter"
+    counter = prefix
+
+    m1 = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+        GlobalElectronVeto = param.GlobalElectronVeto.clone()
+    )
+    m2 = cms.EDProducer("EventCountProducer")
+
+    setattr(process, filter, m1)
+    setattr(process, counter, m2)
+
+    sequence *= (m1 * m2)
+
+    return [counter]
+
 
 def addMuonSelection(process, postfix="", cut="(isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.10"):
     body = "muonSelectionAnalysis"+postfix
@@ -97,7 +191,7 @@ def addMuonSelection(process, postfix="", cut="(isolationR03().emEt+isolationR03
     counters.append(body+"AllEvents")
 
     muons = cms.EDFilter("PATMuonSelector",
-        src = cms.InputTag("tauEmbeddingMuons"),
+        src = cms.InputTag(tauEmbeddingMuons),
         cut = cms.string(cut)
     )
     setattr(process, body+"Muons", muons)
@@ -131,7 +225,7 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
     counters.append(body+"AllEvents")
 
     muons = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
-        candSrc = cms.InputTag("tauEmbeddingMuons"),
+        candSrc = cms.InputTag(tauEmbeddingMuons),
         tauSrc = cms.InputTag("selectedPatTausHpsPFTau", "", "MUONSKIM"),
         isolationDiscriminator = cms.string(discriminator),
         againstMuonDiscriminator = cms.string("againstMuonLoose"),
@@ -164,7 +258,6 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
 def _signalAnalysisSetMuon(module, muons):
     module.tauEmbedding.originalMuon = cms.untracked.InputTag(muons)
 
-  
 def addMuonIsolation(process, sequence, prefix, isolation):
     selector = prefix+"Selected"
     filter = prefix+"Filter"
@@ -172,7 +265,7 @@ def addMuonIsolation(process, sequence, prefix, isolation):
 
     # Create modules
     m1 = cms.EDFilter("HPlusCandViewLazyPtrSelector",
-        src = cms.InputTag("tauEmbeddingMuons"),
+        src = cms.InputTag(tauEmbeddingMuons),
         cut = cms.string(isolation)
     )
     m2 = cms.EDFilter("CandViewCountFilter",
@@ -205,19 +298,25 @@ def addMuonIsolationAnalyses(process, prefix, prototype, commonSequence, additio
 #        ("RelIso20", detRelIso+" < 0.20"),
         ("RelIso25", detRelIso+" < 0.25"),
         ("RelIso50", detRelIso+" < 0.50"),
+
         ("PfRelIso05", pfRelIso+" < 0.05"),
         ("PfRelIso10", pfRelIso+" < 0.10"),
         ("PfRelIso15", pfRelIso+" < 0.15"),
 #        ("PfRelIso20", pfRelIso+" < 0.20"),
         ("PfRelIso25", pfRelIso+" < 0.25"),
         ("PfRelIso50", pfRelIso+" < 0.50"),
+
+        ("IsoTauLikeVLoose", muonAnalysis.isolations["tauVLooseIso"]+" == 0"),
+        ("IsoTauLikeLoose",  muonAnalysis.isolations["tauLooseIso"] +" == 0"),
+        ("IsoTauLikeMedium", muonAnalysis.isolations["tauMediumIso"]+" == 0"),
+        ("IsoTauLikeTight",  muonAnalysis.isolations["tauTightIso"] +" == 0"),
         ]
 
     tauIsolations = [
-        "VLoose",
-        "Loose",
-        "Medium",
-        "Tight"
+#        "VLoose",
+#        "Loose",
+#        "Medium",
+#        "Tight"
         ]
 
     for name, cut in isolations:
@@ -276,7 +375,7 @@ def addTauEmbeddingMuonTaus(process):
         src = cms.InputTag("selectedPatMuons"),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
-                src                 = cms.InputTag("tauEmbeddingMuons"),
+                src                 = cms.InputTag(tauEmbeddingMuons),
                 algorithm           = cms.string("byDeltaR"),
                 preselection        = cms.string(""),
                 deltaR              = cms.double(0.1),
@@ -291,7 +390,7 @@ def addTauEmbeddingMuonTaus(process):
     # Select the taus matching to the original muon
     prototype = cms.EDProducer("HPlusPATTauCandViewDeltaRSelector",
         src = cms.InputTag("dummy"),
-        refSrc = cms.InputTag("tauEmbeddingMuons"),
+        refSrc = cms.InputTag(tauEmbeddingMuons),
         deltaR = cms.double(0.1),
     )
 
@@ -305,3 +404,64 @@ def addTauEmbeddingMuonTaus(process):
     return seq
 
     
+def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="generatorTaus"):
+    counters = []
+
+    allCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"AllCount", allCount)
+    counters.append(prefix+"AllCount")
+
+    genTaus = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles"),
+        cut = cms.string("abs(pdgId()) == 15")
+    )
+    genTausName = prefix
+    setattr(process, genTausName, genTaus)
+
+    genTausFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(genTausName),
+        minNumber = cms.uint32(1),
+    )
+    setattr(process, prefix+"Filter", genTausFilter)
+
+    genTausCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"Count", genTausCount)
+    counters.append(prefix+"Count")
+
+    genTauSequence = cms.Sequence(
+        allCount *
+        genTaus *
+        genTausFilter *
+        genTausCount
+    )
+    setattr(process, prefix+"Sequence", genTauSequence)
+
+    if filterInaccessible:
+        genTausAccessible =  cms.EDFilter("GenParticleSelector",
+            src = cms.InputTag("genParticles"),
+            cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+        )
+        name = prefix+"Accessible"
+        setattr(process, genTausAccessible, name)
+
+        genTausInaccessibleFilter = cms.EDFilter("PATCandViewCountFilter",
+            src = cms.InputTag(name),
+            minNumber = cms.uint32(0),
+            maxNumber = cms.uint32(0),
+        )
+        setattr(process, prefix+"InaccessibleFilter", genTausInaccessibleFilter)
+
+        genTausInaccessibleCount = cms.EDProducer("EventCountProducer")
+        name = prefix+"InaccessibleCount"
+        setattr(process, name, genTausInaccessibleCount)
+        counters.append(name)
+
+        genTauSequence *= (
+            genTausAccessible *
+            genTausInaccessibleFilter *
+            genTausInaccessibleCount
+        )
+
+    sequence *= genTauSequence
+
+    return counters

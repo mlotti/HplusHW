@@ -28,7 +28,10 @@ multicrab.extendDatasets("AOD", aodDatasets)
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
 multicrab.appendLineAll("CMSSW.output_file = histograms.root")
 
-numberOfJobs = {}
+numberOfJobs = {
+    "Mu_146428-147116_Dec22": 5,
+    "DYJetsToLL_M50_TuneZ2_Spring11": 20,
+}
 
 def modify(dataset):
     try:
