@@ -21,10 +21,10 @@ options, dataVersion = getOptionsDataVersion(dataVersion, options)
 
 process = cms.Process("HChMuonAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -105,8 +105,20 @@ def createAnalysis(name, postfix="", **kwargs):
             "Loose",
             "Medium",
             "Tight",
+            "TightSc015",
+            "TightSc02",
+            "TightIc04",
+            "TightSc015Ic04",
+            "TightSc02Ic04",
             ]:
             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=1.0, **kwargs)
+
+#         for iso in [
+#             "Tight",
+#             "TightSc0",
+#             "TightSc0Ic04",
+#             "TightSc0Ic04Noq",
+#             create(prefix=prefix+"IsoTauLikeRel"+iso, doMuonIsolation=True, muonIsolation="tau%sIsoRel"%iso, muonIsolationCut=
 
 #    if not "doIsolationWithTau" in kwargs:
 #        for iso in [

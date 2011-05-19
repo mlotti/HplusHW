@@ -32,12 +32,24 @@ tauIsolations = {
     "tauTightIso": "userInt('byTightOccupancy')",
     "tauMediumIso": "userInt('byMediumOccupancy')",
     "tauLooseIso": "userInt('byLooseOccupancy')",
-    "tauVLooseIso": "userInt('byVLooseOccupancy')"
+    "tauVLooseIso": "userInt('byVLooseOccupancy')",
+
+    "tauTightSc015Iso": "userInt('byTightSc015Occupancy')",
+    "tauTightSc02Iso": "userInt('byTightSc02Occupancy')",
+    "tauTightIc04Iso": "userInt('byTightIc04Occupancy')",
+    "tauTightSc015Ic04Iso": "userInt('byTightSc015Ic04Occupancy')",
+    "tauTightSc02Ic04Iso": "userInt('byTightSc02Ic04Occupancy')",
+
+    "tauTightSc0Iso": "userInt('byTightSc0Occupancy')",
+    "tauTightSc0Ic04Iso": "userInt('byTightSc0Ic04Occupancy')",
+    "tauTightSc0Ic04NoqIso": "userInt('byTightSc0Ic04NoqOccupancy')",
     }
 for key, value in tauIsolations.items():
     userFloat = value.replace("userInt", "userFloat")
-    tauIsolations[key+"SumPt"] = userFloat.replace("Occupancy", "SumPt")
-    tauIsolations[key+"MaxPt"] = userFloat.replace("Occupancy", "MaxPt")
+    base = key.replace("Iso", "")
+    tauIsolations[base+"SumPtIso"] = userFloat.replace("Occupancy", "SumPt")
+    tauIsolations[base+"SumPtIsoRel"] = "(%s)/pt()" % userFloat.replace("Occupancy", "SumPt")
+    tauIsolations[base+"MaxPtIso"] = userFloat.replace("Occupancy", "MaxPt")
 isolations.update(tauIsolations)
 
 # Define the histograms
@@ -48,7 +60,7 @@ histoPhi = HChTools.Histo("phi", "phi()", min=-3.5, max=3.5, nbins=70, descripti
 histoIsos = {}
 for name, value in isolations.iteritems():
     h = None
-    if "IsoRel" in name:
+    if "IsoRel" in name or "SumPtRel" in name:
         h = HChTools.Histo(name, value, min=0, max=0.5, nbins=100, description=name)
         histoIsos[name+"Full"] = HChTools.Histo(name+"Full", value, min=0, max=5.0, nbins=500, description=name)
     else:

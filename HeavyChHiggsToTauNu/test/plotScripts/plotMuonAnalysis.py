@@ -77,16 +77,16 @@ class Selections:
                 "h04_MuonKin",
                 "h05_MuonQuality",
                 "h06_MuonIP",
-                "h07_MuonVertexDiff",
+#                "h07_MuonVertexDiff",
         #        "h07_MuonLargestPt",
         #        "h07_JetSelection",
         #        "h07_JetId",
-                "h08_MuonVeto",
+                "h07_MuonVeto",
 #                "h09_JetMultiplicityCut",
 #                "h10_METCut"]]
-                "h09_ElectronVeto",
-                "h10_JetMultiplicityCut",
-                "h11_METCut"]]
+                "h08_ElectronVeto",
+                "h09_JetMultiplicityCut",
+                "h10_METCut"]]
         self.muonSelectionPFAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
                 "h07_MuonLargestPt",
                 "h08_JetMultiplicityCut",
@@ -100,15 +100,16 @@ class Selections:
                 "h04_MuonKin",
                 "h05_MuonQuality",
                 "h06_MuonIP",
-                "h07_MuonVertexDiff",
-                "h08_MuonIsolationWithTau",
-                "h09_MuonExactlyOne"
-                "h10_MuonVeto",
+#                "h07_MuonVertexDiff",
+#                "h07_MuonIsolationWithTau",
+                "h07_MuonIsolation",
+                "h08_MuonExactlyOne"
+                "h09_MuonVeto",
 #                "h10_JetMultiplicityCut",
 #                "h11_METCut"
-                "h11_ElectronVeto",
-                "h12_JetMultiplicityCut",
-                "h13_METCut"
+                "h10_ElectronVeto",
+                "h11_JetMultiplicityCut",
+                "h12_METCut"
                 ]]
         self.muonSelectionPFIsoTauAoc = [analysisPrefix+"Aoc"+x+"AfterOtherCuts" for x in [
                 "h08_MuonLargestPt",
@@ -158,7 +159,16 @@ def main():
     #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauVLoose"
     #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLoose"
     #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauMedium"
-    analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauTight"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauTight"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeVLoose"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeLoose"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeMedium"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTight"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02"
+    analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightIc04"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015Ic04"
+    #analysisPrefix = "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02Ic04"
     sel = Selections(analysisPrefix)
 
     WdecaySeparate = False
@@ -648,16 +658,33 @@ def muonPhi(h, prefix="", plotAll=False):
     h.histoMgr.addLuminosityText()
     h.save()
 
-def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False):
-    #rebin = 2
-    rebin = 5
-
+def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False, rebin=5, opts={}):
     #dist2pass(h.histoMgr.getHisto("QCD_Pt20_MuEnriched").getRootHisto())
 
     passed = PlotPassed(h)
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "Muon rel. isol."
-    ylabel = "Number of muons / %.3f" % h.binWidth()
+    xlabel = {"sumIsoRel": "Muon rel. iso",
+              "sumIsoRelFull": "Muon rel. iso",
+              "pfSumIsoRel": "Muon PF rel. iso",
+              "pfSumIsoRelFull": "Muon PF rel. iso",
+              "tauTightIso": "N(PFCand) in isolation annulus",
+              "tauTightSc015Iso": "N(PFCand) in isolation annulus",
+              "tauTightSc02Iso": "N(PFCand) in isolation annulus",
+              "tauTightIc04Iso": "N(PFCand) in isolation annulus",
+              "tauTightSc015Ic04Iso": "N(PFCand) in isolation annulus",
+              "tauTightSc02Ic04Iso": "N(PFCand) in isolation annulus",
+              "tauMediumIso": "Tau-like medium occupancy",
+              "tauLooseIso": "Tau-like loose occupancy",
+              "tauVLooseIso": "Tau-like vloose occupancy",
+              }[q]
+    bw = h.binWidth()
+    if bw < 1:
+        ylabel = "Number of muons / %.3f" % bw
+#    elif int(bw) == 1:
+#        ylabel = "Number of muons"
+    else:
+        ylabel = "Number of muons / %.0f" % bw
+    
     h.stackMCHistograms()
 
     if plotAll:
@@ -671,7 +698,10 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False):
         h.histoMgr.addLuminosityText()
         h.save()
 
-    h.createFrame(prefix+"muon_%s_log" % q, ymin=1e-2, ymaxfactor=10)
+    args = {"ymin": 1e-2, "ymaxfactor": 10}
+    args.update(opts)
+
+    h.createFrame(prefix+"muon_%s_log" % q, **args)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend(0.65, 0.7, 0.92, 0.92))
