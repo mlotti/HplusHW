@@ -73,7 +73,7 @@ namespace HPlus {
   }
 
   template <typename T>
-  class ExpressionHisto: ExpressionHistoBase<T> {
+  class ExpressionHisto: public ExpressionHistoBase<T> {
     typedef ExpressionHistoBase<T> Base;
   public:
     ExpressionHisto(const edm::ParameterSet& iConfig);
