@@ -19,8 +19,8 @@
 
 
 template <typename T>
-class HPlusExpressionEfficiencyHistoPerObject: public HPlus::ExpressionHisto<T> {
-  typedef HPlus::ExpressionHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerObject: public HPlus::ExpressionHistoBase<T> {
+  typedef HPlus::ExpressionHistoBase<T> Base;
 public:
   HPlusExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig);
   ~HPlusExpressionEfficiencyHistoPerObject();
@@ -47,8 +47,8 @@ bool HPlusExpressionEfficiencyHistoPerObject<T>::fill(const T& element, double w
 
 
 template <typename T>
-class HPlusExpressionEfficiencyHistoPerEvent: public HPlus::ExpressionHisto<T> {
-  typedef HPlus::ExpressionHisto<T> Base;
+class HPlusExpressionEfficiencyHistoPerEvent: public HPlus::ExpressionHistoBase<T> {
+  typedef HPlus::ExpressionHistoBase<T> Base;
 public:
   HPlusExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig);
   ~HPlusExpressionEfficiencyHistoPerEvent();

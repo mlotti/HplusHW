@@ -8,6 +8,7 @@
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "TFile.h"
 #include "TH1F.h"
@@ -18,10 +19,10 @@
 
 namespace HPlus {
   template <typename T>
-  class ExpressionHisto {
+  class ExpressionHistoBase {
   public:
-    ExpressionHisto(const edm::ParameterSet& iConfig);
-    ~ExpressionHisto();
+    ExpressionHistoBase(const edm::ParameterSet& iConfig);
+    ~ExpressionHistoBase();
   
     void initialize(TFileDirectory& fs);
 
@@ -38,11 +39,11 @@ namespace HPlus {
      */
     TH1 *histo;
     StringObjectFunction<T> function;
-    std::auto_ptr<HPlus::ExpressionHistoComparison> cmp;
+    std::auto_ptr<ExpressionHistoComparison> cmp;
   };
 
   template<typename T>
-  ExpressionHisto<T>::ExpressionHisto(const edm::ParameterSet& iConfig):
+  ExpressionHistoBase<T>::ExpressionHistoBase(const edm::ParameterSet& iConfig):
     min(iConfig.template getUntrackedParameter<double>("min")),
     max(iConfig.template getUntrackedParameter<double>("max")),
     nbins(iConfig.template getUntrackedParameter<int>("nbins")),
@@ -51,7 +52,7 @@ namespace HPlus {
     histo(0),
     function(iConfig.template getUntrackedParameter<std::string>("plotquantity"), 
              iConfig.template getUntrackedParameter<bool>("lazyParsing", false)),
-    cmp(HPlus::ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
+    cmp(ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
 
     if(cmp.get() == 0)
       throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
@@ -59,20 +60,20 @@ namespace HPlus {
   }
 
   template<typename T>
-  ExpressionHisto<T>::~ExpressionHisto() {
+  ExpressionHistoBase<T>::~ExpressionHistoBase() {
   }
 
   template<typename T>
-  void ExpressionHisto<T>::initialize(TFileDirectory& fs) 
+  void ExpressionHistoBase<T>::initialize(TFileDirectory& fs) 
   {
-    histo = fs.make<TH1F>(name.c_str(),description.c_str(),nbins,min,max);
+    histo = makeTH<TH1F>(fs, name.c_str(), description.c_str(), nbins, min, max);
   }
 
 
 
   template <typename T>
-  class ExpressionValueHisto: ExpressionHisto<T> {
-    typedef ExpressionHisto<T> Base;
+  class ExpressionValueHisto: ExpressionHistoBase<T> {
+    typedef ExpressionHistoBase<T> Base;
   public:
     ExpressionValueHisto(const edm::ParameterSet& iConfig);
     ~ExpressionValueHisto();
