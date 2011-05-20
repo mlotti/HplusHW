@@ -8,6 +8,7 @@
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHisto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
 
 
 #include "TFile.h"
@@ -19,8 +20,26 @@
 
 namespace HPlus {
   template <typename T>
-  class ExpressionEfficiencyHistoPerObject: public ExpressionHistoBase<T> {
+  class ExpressionEfficiencyHistoBase: public ExpressionHistoBase<T> {
     typedef ExpressionHistoBase<T> Base;
+  protected:
+    // prevent construction
+    ExpressionEfficiencyHistoBase(const edm::ParameterSet& iConfig):
+      Base(iConfig),
+      cmp(ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype")))
+    {
+      if(cmp.get() == 0)
+        throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
+                                              << "' for variable " << this->getName() << "; supported types are '<', '<=', '>', '>='";
+    }
+    ~ExpressionEfficiencyHistoBase() {}
+
+    std::auto_ptr<ExpressionHistoComparison> cmp;
+  };
+
+  template <typename T>
+  class ExpressionEfficiencyHistoPerObject: public ExpressionEfficiencyHistoBase<T> {
+    typedef ExpressionEfficiencyHistoBase<T> Base;
   public:
     ExpressionEfficiencyHistoPerObject(const edm::ParameterSet& iConfig);
     ~ExpressionEfficiencyHistoPerObject();
@@ -47,8 +66,8 @@ namespace HPlus {
 
 
   template <typename T>
-  class ExpressionEfficiencyHistoPerEvent: public ExpressionHistoBase<T> {
-    typedef ExpressionHistoBase<T> Base;
+  class ExpressionEfficiencyHistoPerEvent: public ExpressionEfficiencyHistoBase<T> {
+    typedef ExpressionEfficiencyHistoBase<T> Base;
   public:
     ExpressionEfficiencyHistoPerEvent(const edm::ParameterSet& iConfig);
     ~ExpressionEfficiencyHistoPerEvent();

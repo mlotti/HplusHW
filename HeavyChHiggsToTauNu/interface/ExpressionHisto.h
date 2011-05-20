@@ -7,7 +7,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 #include "CommonTools/Utils/interface/StringObjectFunction.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHistoComparison.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "TFile.h"
@@ -18,46 +17,50 @@
 #include<algorithm>
 
 namespace HPlus {
-  template <typename T>
-  class ExpressionHistoBase {
-  public:
-    ExpressionHistoBase(const edm::ParameterSet& iConfig);
-    ~ExpressionHistoBase();
-  
-    void initialize(TFileDirectory& fs);
+  class ExpressionHistoVeryBase {
+  protected:
+    // prevent construction
+    ExpressionHistoVeryBase(const edm::ParameterSet& iConfig);
+    ~ExpressionHistoVeryBase();
+
+    const std::string& getName() const { return name; }
+    const std::string& getDescription() const { return description; }
+    double getMin() { return min; }
+    double getMax() { return max; }
+    int getNbins() { return nbins; }
+
+    TH1 *histo;
 
   private:
     double min, max;
     int nbins;
     std::string name, description;
+  };
+
+  template <typename T>
+  class ExpressionHistoBase: public ExpressionHistoVeryBase {
+  public:
+    void initialize(TFileDirectory& fs);
 
   protected:
+    // Prevent construction
+    ExpressionHistoBase(const edm::ParameterSet& iConfig);
+    ~ExpressionHistoBase();
+
     /**
      * For efficiency mode, we don't actually need the total, because
      * we can store the number of total fills to to the number of
      * entries in passed!
      */
-    TH1 *histo;
     StringObjectFunction<T> function;
-    std::auto_ptr<ExpressionHistoComparison> cmp;
   };
 
   template<typename T>
   ExpressionHistoBase<T>::ExpressionHistoBase(const edm::ParameterSet& iConfig):
-    min(iConfig.template getUntrackedParameter<double>("min")),
-    max(iConfig.template getUntrackedParameter<double>("max")),
-    nbins(iConfig.template getUntrackedParameter<int>("nbins")),
-    name(iConfig.template getUntrackedParameter<std::string>("name")),
-    description(iConfig.template getUntrackedParameter<std::string>("description")),
-    histo(0),
+    ExpressionHistoVeryBase(iConfig),
     function(iConfig.template getUntrackedParameter<std::string>("plotquantity"), 
-             iConfig.template getUntrackedParameter<bool>("lazyParsing", false)),
-    cmp(ExpressionHistoComparison::create(iConfig.template getUntrackedParameter<std::string>("cuttype"))) {
-
-    if(cmp.get() == 0)
-      throw cms::Exception("Configuration") << "Unsupported cut type '" << iConfig.template getUntrackedParameter<std::string>("cuttype")
-                                            << "' for variable " << name << "; supported types are '<', '<=', '>', '>='";
-  }
+             iConfig.template getUntrackedParameter<bool>("lazyParsing", false))
+  {}
 
   template<typename T>
   ExpressionHistoBase<T>::~ExpressionHistoBase() {
@@ -66,7 +69,7 @@ namespace HPlus {
   template<typename T>
   void ExpressionHistoBase<T>::initialize(TFileDirectory& fs) 
   {
-    histo = makeTH<TH1F>(fs, name.c_str(), description.c_str(), nbins, min, max);
+    histo = makeTH<TH1F>(fs, this->getName().c_str(), this->getDescription().c_str(), this->getNbins(), this->getMin(), this->getMax());
   }
 
   template <typename T>
