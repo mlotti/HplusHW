@@ -73,11 +73,11 @@ namespace HPlus {
   }
 
   template <typename T>
-  class ExpressionValueHisto: ExpressionHistoBase<T> {
+  class ExpressionHisto: ExpressionHistoBase<T> {
     typedef ExpressionHistoBase<T> Base;
   public:
-    ExpressionValueHisto(const edm::ParameterSet& iConfig);
-    ~ExpressionValueHisto();
+    ExpressionHisto(const edm::ParameterSet& iConfig);
+    ~ExpressionHisto();
 
     /** Plot the quantity for the specified element and index.
         Returns true if the quantity has been plotted, false otherwise.
@@ -88,13 +88,13 @@ namespace HPlus {
   };
 
   template <typename T>
-  ExpressionValueHisto<T>::ExpressionValueHisto(const edm::ParameterSet& iConfig): Base(iConfig) {}
+  ExpressionHisto<T>::ExpressionHisto(const edm::ParameterSet& iConfig): Base(iConfig) {}
 
   template <typename T>
-  ExpressionValueHisto<T>::~ExpressionValueHisto(){}
+  ExpressionHisto<T>::~ExpressionHisto(){}
 
   template <typename T>
-  bool ExpressionValueHisto<T>::fill(const T& element, double weight, uint32_t i) {
+  bool ExpressionHisto<T>::fill(const T& element, double weight, uint32_t i) {
     this->histo->Fill(this->function(element), weight);
     return true;
   }
