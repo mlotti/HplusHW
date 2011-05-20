@@ -206,6 +206,10 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
     TH1 *hMETPassProbabilityAfterForwardJetVeto;
 
+    // MET and B-tagging factorisation possibility check
+    TH1 *hCounterByTauPtAfterStdCutFlowMetBtag;
+    TH1 *hCounterByTauPtAfterStdCutFlowMetBtagFakeMet;
+
     // Other control histograms
     TH1 *hTauCandidateSelectionIsolatedPtMax;
 
@@ -217,6 +221,8 @@ namespace HPlus {
     std::vector<TH1*> fMETHistogramsByTauPtAfterJetSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauIsolation;
     std::vector<TH1*> fNBtagsHistogramsByTauPtAfterJetSelection;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterTauIdNoRtau;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterTauIdAndRtau;
     std::vector<TH1*> fLdgJetPtHistogramGroupByMET;
     std::vector<TH1*> fNBtagsPtHistogramGroupByMET;
     

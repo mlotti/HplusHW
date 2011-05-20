@@ -66,8 +66,8 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hMuonPt = makeTH<TH1F>(*fs, "GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
-    hMuonEta = makeTH<TH1F>(*fs, "GlobalMuonEta", "GlobalMuonEta", 400, -3., 3.);
+    hMuonPt = makeTH<TH1F>(*fs, "GlobalMuonPt", "GlobalMuonPt", 80, 0., 400.);
+    hMuonEta = makeTH<TH1F>(*fs, "GlobalMuonEta", "GlobalMuonEta", 150, -3., 3.);
     hMuonPt_matchingMCmuon = makeTH<TH1F>(*fs, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
     hMuonEta_matchingMCmuon = makeTH<TH1F>(*fs, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
     hMuonPt_matchingMCmuonFromW = makeTH<TH1F>(*fs, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
