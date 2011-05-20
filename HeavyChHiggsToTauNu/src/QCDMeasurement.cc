@@ -68,7 +68,7 @@ namespace HPlus {
     hWeightedMETAfterTauIDNoRtau = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterTauIDNoRtauWeighted", "METAfterTauIDNoRtauWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterTauID = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterTauIDWeighted", "METAfterTauIDWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterBTagging = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterBTaggingWeighted", "METAfterBTaggingWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
-    hWeightedMETAfterFakeMETVeto = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
+    hWeightedMETAfterFakeMETVeto = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 30, 0., 300.);
     hWeightedMETAfterForwardJetVeto = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterForwardJetVetoWeighted", "METAfterForwardJetVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
 
     createMETHistogramGroupByTauPt("QCD_MET_afterTauCandidateSelection", fMETHistogramsByTauPtAfterTauCandidateSelection);
@@ -317,9 +317,9 @@ namespace HPlus {
 
     // Make histograms
     edm::Service<TFileService> fs;
-    int nBins = 10; // number of bins for the histograms
+    int nBins = 100; // number of bins for the histograms
     double xMin = 0.0; // x range minimum
-    double xMax = 200.0; // x range maximum
+    double xMax = 500.0; // x range maximum
     std::stringstream myHistoName;
     std::stringstream myHistoLabel;
 
@@ -408,8 +408,7 @@ namespace HPlus {
 
     // Apply PU re-weighting (Vertex weight)
     std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
-    if(!iEvent.isRealData())
-      fEventWeight.multiplyWeight(weightSize.first);
+    if(!iEvent.isRealData()) fEventWeight.multiplyWeight(weightSize.first);
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
@@ -436,7 +435,7 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Apply pre-MET cut to see if MC Normalization is better.
-    //if(metData.getSelectedMET()->et() < 30 ) return;
+    // if(metData.getSelectedMET()->et() < 30 ) return;
 
     // Apply tau candidate selection (with or without Rtau control region)
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
