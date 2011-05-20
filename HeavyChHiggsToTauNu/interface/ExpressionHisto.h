@@ -69,8 +69,6 @@ namespace HPlus {
     histo = makeTH<TH1F>(fs, name.c_str(), description.c_str(), nbins, min, max);
   }
 
-
-
   template <typename T>
   class ExpressionValueHisto: ExpressionHistoBase<T> {
     typedef ExpressionHistoBase<T> Base;
