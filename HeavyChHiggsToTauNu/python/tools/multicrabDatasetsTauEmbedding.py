@@ -732,8 +732,8 @@ def addTo(datasets):
     datasets["QCD_Pt20_MuEnriched_TuneZ2_Spring11"]["data"].update({
             "tauembedding_skim_v10": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
-                "number_of_jobs": 180#60 # ~4800 ev/job #180 # ~1600 ev/job
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10-b3c16f1ee121445edb6d9b12e0772d8e/USER",
+                "number_of_jobs": 200 # ~1.5 kev/job
             },
             })
 
