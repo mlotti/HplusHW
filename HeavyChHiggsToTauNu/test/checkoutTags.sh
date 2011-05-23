@@ -38,6 +38,7 @@ set -e
 # 4.5.2011/M.Kortelainen CMSSW_4_1_5 Checkout JEC sqlite file
 # 4.5.2011/M.Kortelainen CMSSW_4_1_5 Updated tau tags
 # 9.5.2011/M.Kortelainen CMSSW_4_2_2 Updated tags for the new release
+# 23.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -51,13 +52,15 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 #
 # Tau
-cvs co -r V01-00-07-01   DataFormats/TauReco
 #cvs co -r V01-00-27      RecoTauTag/Configuration
-cvs co -r V01-00-33-04   RecoTauTag/RecoTau
+cvs co -r V01-00-33-06   RecoTauTag/RecoTau
 cvs co -r V01-00-12      RecoTauTag/TauTagTools
 # PAT
-#cvs co -r V06-04-08      DataFormats/PatCandidates
-#cvs co -r V08-06-21      PhysicsTools/PatAlgos
+addpkg PhysicsTools/PatAlgos    V08-06-25
+addpkg PhysicsTools/PatExamples V00-05-17
+addpkg RecoJets/Configuration   V02-04-16
+addpkg RecoJets/JetAlgorithms   V04-01-00      
+addpkg RecoJets/JetProducers    V05-05-03
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
