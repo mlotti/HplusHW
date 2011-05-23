@@ -16,8 +16,8 @@ TauolaPolar = cms.PSet(
 #)
 
 tightenedMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuonsZ"),
-    cut = cms.string("pt() > 40")
+    src = cms.InputTag("tightMuons"),
+    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightenedMuons"),

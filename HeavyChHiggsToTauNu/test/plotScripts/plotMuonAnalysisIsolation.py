@@ -12,6 +12,7 @@
 
 import sys
 import array
+import re
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -24,19 +25,43 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import plotMuonAnalysis as muonAnalysis
 
+plotStyles = [
+    styles.Style(26, ROOT.kBlue),
+    styles.Style(27, ROOT.kRed),
+
+    styles.Style(ROOT.kFullSquare, ROOT.kGreen+2),
+    styles.Style(ROOT.kOpenSquare, ROOT.kMagenta+3),
+
+    styles.Style(ROOT.kFullCircle, ROOT.kYellow+2),
+    styles.Style(ROOT.kOpenCircle, ROOT.kOrange+9),
+
+    styles.Style(34, ROOT.kMagenta),
+    styles.Style(ROOT.kFullTriangleUp, ROOT.kCyan-5),
+    styles.Style(ROOT.kFullTriangleDown, ROOT.kOrange+3),
+    ]
+
 def main():
 #    mainAnalysis = "muonSelectionPFPt40Met20NJets3"
     mainAnalysis = "muonSelectionPFPt40Met20NJets3"
     tauIsoAnalyses = [
-        "muonSelectionPFPt40Met20NJets3IsoTauVLoose",
-        "muonSelectionPFPt40Met20NJets3IsoTauLoose",
-        "muonSelectionPFPt40Met20NJets3IsoTauMedium",
-        "muonSelectionPFPt40Met20NJets3IsoTauTight",
+#        "muonSelectionPFPt40Met20NJets3IsoTauVLoose",
+#        "muonSelectionPFPt40Met20NJets3IsoTauLoose",
+#        "muonSelectionPFPt40Met20NJets3IsoTauMedium",
+#        "muonSelectionPFPt40Met20NJets3IsoTauTight",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeTight",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015",
+#        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightIc04",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015Ic04",
+#        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02Ic04",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeMedium",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeLoose",
+        "muonSelectionPFPt40Met20NJets3IsoTauLikeVLoose",
         ]
 
     signals = ["TTJets",
                "WJets", "SingleTop",
-#               "DYJetsToLL", "Diboson"
+               "DYJetsToLL", "Diboson"
                ]
     backgrounds = ["QCD_Pt20_MuEnriched",
 #                   "DYJetsToLL", "Diboson"
@@ -56,12 +81,19 @@ def main():
     isoPassed = []
     isoNames = ["sumIsoRel", "pfSumIsoRel"]
 #    isoNames = ["sumIsoRelFull", "pfSumIsoRelFull"]
-    for iso in isoNames:
-        isoPassed.append(muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso))
+    additionalIsoNames = ["tauTightIso", "tauMediumIso", "tauLooseIso", "tauVLooseIso",
+                          "tauTightSc015Iso", "tauTightSc02Iso",
+                          "tauTightIc04Iso", "tauTightSc015Ic04Iso", "tauTightSc02Ic04Iso"
+                          ]
+    for iso in isoNames+additionalIsoNames:
+        isoPassed.append(muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=5))
 
         for tauIso in tauIsoAnalyses:
             tmp = muonAnalysis.Selections(tauIso).selectionJet
             muonAnalysis.muonIso(muonAnalysis.Plot(datasets, tmp+"/muon_"+iso), tmp+"_", iso)
+
+    for iso in additionalIsoNames:
+        muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=1, opts={"xmax": 45, "ymin": 1e-1})
 
     isoPlot = muonAnalysis.PlotIso(isoPassed, isoNames)
     muonAnalysis.muonIsoQcd(isoPlot, prefix)
@@ -114,7 +146,7 @@ def main():
 #    datasets.selectAndReorder(["Signal", "Background"])
     print ", ".join([d.getName() for d in datasets.getAllDatasets()])
 
-    histograms.createLegend.setDefaults(x1=0.2, y1=0.6, x2=0.4, y2=0.8)
+    histograms.createLegend.setDefaults(x1=0.2, y1=0.5, x2=0.4, y2=0.8)
 
     seff = PlotEff(datasets, "Signal", [selection+"/muon_"+iso for iso in isoNames], isoNames)
     beff = PlotEff(datasets, "Background", [selection+"/muon_"+iso for iso in isoNames], isoNames)
@@ -137,12 +169,14 @@ def main():
     plotRoc(plot, prefix)
 
     #plot.pointStyle()
-    plotRoc(plot, prefix, postfix="_zoom", opts={"ymin": 0.97, "ymax": 1.005, "xmin": 0.2, "xmax": 1},
+    plotRoc(plot, prefix, postfix="_zoom", #opts={"ymin": 0.97, "ymax": 1.005, "xmin": 0.2, "xmax": 1},
+            opts={"ymin": 0.8, "ymax": 1.005, "xmin": 0.2, "xmax": 1},
             moveLegend={"dy":-0.1})
     #plotRoc(plot, prefix, postfix="_zoom2", opts={"xmin": 0.8, "xmax": 1})
 
-    plotRoc(plotf, prefix, opts={"ymax":0.1, "xmax":1.0})
-    plotRoc(plotf, prefix, log=True)
+    plotRoc(plotf, prefix, opts={"ymax":0.4, "xmax":1.0}, moveLegend={"dy":0.1})
+    #plotRoc(plotf, prefix, opts={"ymax":0.1, "xmax":1.0})
+    plotRoc(plotf, prefix, log=True, moveLegend={"dy": -0.2})
 
 def getRootHisto(datasets, dname, hname):
     tmp = self.datasets.getDataset(dname).getDatasetRootHisto(hname)
@@ -163,7 +197,7 @@ class PlotEff(plots.PlotBase):
             dh.setName(label)
             self.histoMgr.append(dh)
 
-        self.histoMgr.forEachHisto(styles.generator())
+        self.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSize=1.5), plotStyles))
         self.histoMgr.setHistoLegendStyleAll("l")
 
 
@@ -176,10 +210,27 @@ class PlotRocBase(plots.PlotBase):
     def finalize(self):
         def setLabel(histo):
             name = histo.getName()
+            scic_re = re.compile("Sc(?P<sig>\d+)(Ic(?P<iso>\d+))?")
+            ic_re = re.compile("Ic(?P<iso>\d+)")
             for tauIso in ["VLoose", "Loose", "Medium", "Tight"]:
                 if "IsoTau"+tauIso in name:
-                    histo.setLegendLabel("Tau iso "+tauIso)
+                    histo.setLegendLabel('Counting iso "'+tauIso+'"')
                     break
+                if "IsoTauLike"+tauIso in name:
+                    m = scic_re.search(name)
+                    sc = "0.1"
+                    ic = "0.5"
+                    if m:
+                        sc = m.group("sig").replace("0", "0.")
+                        if m.group("iso"):
+                            ic = m.group("iso").replace("0", "0.")
+                    else:
+                        m = ic_re.search(name)
+                        if m:
+                            ic = m.group("iso").replace("0", "0.")
+                    label = 'Counting iso "'+tauIso + '" %s < DR < %s' % (sc, ic)
+                    print label
+                    histo.setLegendLabel(label)
 
         self.histoMgr.setHistoLegendLabelMany({
                 "sumIsoRel": "Rel iso",
@@ -189,7 +240,7 @@ class PlotRocBase(plots.PlotBase):
                 })
         self.histoMgr.forEachHisto(setLabel)
 
-        self.histoMgr.forEachHisto(styles.generator())
+        self.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSize=1.5), plotStyles))
         self.defaultStyle()
 
     def defaultStyle(self):
@@ -276,11 +327,11 @@ def plotRoc(h, prefix, postfix="", log=False, opts={}, zoom_opts={}, moveLegend=
     name = prefix+"isolation_%s"%h.name + postfix
     if log:
         name += "_log"
-        args["ymin"] = 1e-4
+        args["ymin"] = 1e-3
     args.update(opts)
 
     h.createFrame(name, **args)
-    h.frame.GetXaxis().SetTitle("EWK efficiency")
+    h.frame.GetXaxis().SetTitle("Non-QCD efficiency")
     h.frame.GetYaxis().SetTitle(h.ylabel)
     if log:
         ROOT.gPad.SetLogy(True)

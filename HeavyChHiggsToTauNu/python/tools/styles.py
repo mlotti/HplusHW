@@ -46,6 +46,16 @@ class StyleLine(StyleBase):
     def apply(self, h):
         h.SetLineStyle(self.lineStyle)
 
+class StyleMarker(StyleBase):
+    def __init__(self, markerSize=1, markerColor=None):
+        self.markerSize = markerSize
+        self.markerColor = markerColor
+
+    def apply(self, h):
+        h.SetMarkerSize(self.markerSize)
+        if self.markerColor != None:
+            h.SetMarkerColor(self.markerColor)
+
 class StyleError(StyleBase):
     def __init__(self, color, style=3004, linecolor=None):
         self.color = color
@@ -164,5 +174,7 @@ def generator(fill=False, **kwargs):
     else:
         return Generator(getStyles(**kwargs))
 
-def generator2(styleCustomisations):
+def generator2(styleCustomisations, styles=styles):
+    if not isinstance(styleCustomisations, list):
+        styleCustomisations = [styleCustomisations]
     return Generator([StyleCompound([s]+styleCustomisations) for s in styles])

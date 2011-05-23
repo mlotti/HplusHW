@@ -133,9 +133,19 @@ void HPlusEventCountAnalyzer::endLuminosityBlock(const edm::LuminosityBlock & lu
     // Read first the plain edm::MergeableCounters 
     if(countersGiven) {
       edm::Handle<edm::MergeableCounter> count;
+      edm::Handle<double> weight;
       for(size_t i=0; i<countersPlainEnd; ++i) {
         lumi.getByLabel(counters[i].tag_, count);
         counters[i].count_ += count->value;
+
+        edm::InputTag tag(counters[i].tag_.label(), "Weights", counters[i].tag_.process());
+        if(lumi.getByLabel(tag, weight)) {
+          counters[i].weight_ += *weight;
+
+          edm::InputTag tag2(counters[i].tag_.label(), "WeightsSquared", counters[i].tag_.process());
+          lumi.getByLabel(tag, weight);
+          counters[i].weightSquared_ += *weight;
+        }
       }
     }
     // Then, read the ones produced in EventCounter

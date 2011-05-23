@@ -98,7 +98,7 @@ class DataVersion:
 
     def getAnalysisDefaultFileCastor(self):
         if not hasattr(self, "analysisCastor"):
-            print "No default file for analysis in CASTOR for dataVersion "+self.version
+            print "No default file for analysis in CASTOR for dataVersion "+self.version+ ". Perhaps you could copy one there?"
             return ""
         return self.analysisCastor
 
