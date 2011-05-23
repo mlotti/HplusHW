@@ -23,16 +23,10 @@ primaryVertexSelection = cms.untracked.PSet(
     enabled = cms.untracked.bool(True)
 )
 
-# Tau ID factorization map
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
-
 # Default tau selection
 tauSelectionBase = cms.untracked.PSet(
-    # Operating mode options: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
+    # Operating mode options: 'standard'
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
-#    operatingMode = cms.untracked.string("factorized"), # Tau candidate selection applied, tau ID factorized
-#    operatingMode = cms.untracked.string("antitautag"), # Tau candidate selection applied, required prong cut, anti-isolation, and anti-rtau
-#    operatingMode = cms.untracked.string("antiisolatedtau"), # Tau candidate selection applied, required prong cut and anti-isolation
     src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40), # jet pt > value
@@ -41,8 +35,7 @@ tauSelectionBase = cms.untracked.PSet(
     rtauCut = cms.untracked.double(0.8), # rtau > value
     antiRtauCut = cms.untracked.double(0.4), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
-    nprongs = cms.untracked.uint32(1), # not used at the moment FIXME: has no effect in TauSelection.cc
-    factorization = factorizationParams.tauIDFactorizationParameters
+    nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone(
@@ -345,16 +338,6 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
-def setTauIDFactorizationMap(options):
-    from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getTauIDFactorizationMap
-    myFactorizationFilename = getTauIDFactorizationMap(options)
-    tauIDCoefficients = __import__(myFactorizationFilename, fromlist=['dummy'])
-    tauSelectionCaloTauCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionShrinkingConeTaNCBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionShrinkingConeCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionHPSTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionCombinedHPSTaNCTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val

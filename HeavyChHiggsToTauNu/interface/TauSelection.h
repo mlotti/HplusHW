@@ -9,7 +9,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FactorizationTable.h"
 
 namespace edm {
   class ParameterSet;
@@ -63,7 +62,6 @@ namespace HPlus {
 
     enum TauSelectionOperationMode {
       kNormalTauID, // Tau candidate selection + tau ID selections
-      kFactorizedTauID,
       kTauCandidateSelectionOnly, // Only tau candidate selection is applied
       kTauIDWithoutRtauOnly, // For QCD bkg measurement - set internally
       kTauIDWithRtauOnly // For QCD bkg measurement - set internally
@@ -118,7 +116,6 @@ namespace HPlus {
     TauSelectionOperationMode fOperationMode;
 
     /// Factorization table objects
-    FactorizationTable fFactorizationTable;
 
     // Counters
     Count fTauFound;
@@ -148,25 +145,6 @@ namespace HPlus {
     TH1 *hMCPurityOfTauCandidates;
     TH1 *hMCPurityOfCleanedTauCandidates;
     TH1 *hMCPurityOfSelectedTaus;
-
-    // Factorization / selected taus
-    TH1 *hFactorizationPtSelectedTaus;
-    TH1 *hFactorizationEtaSelectedTaus;
-    TH1 *hFactorizationCategory;
-    // Factorization / weighted histograms
-    TH1 *hFactorizationPtBeforeTauID;
-    TH1 *hFactorizationPtAfterTauID;
-    TH1 *hFactorizationEtaBeforeTauID;
-    TH1 *hFactorizationEtaAfterTauID;
-    TH2 *hFactorizationPtVsEtaBeforeTauID;
-    TH2 *hFactorizationPtVsEtaAfterTauID;
-    // Factorization / unweighted histograms (needed to obtain the statistical error)
-    TH1 *hFactorizationPtBeforeTauIDUnweighted;
-    TH1 *hFactorizationPtAfterTauIDUnweighted;
-    TH1 *hFactorizationEtaBeforeTauIDUnweighted;
-    TH1 *hFactorizationEtaAfterTauIDUnweighted;
-    TH2 *hFactorizationPtVsEtaBeforeTauIDUnweighted;
-    TH2 *hFactorizationPtVsEtaAfterTauIDUnweighted;
 
     // Selected tau
     edm::PtrVector<pat::Tau> fCleanedTauCandidates;
