@@ -1,7 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="42Xdata"
+dataVersion="42Xmc"
+#dataVersion="42Xdata"
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
@@ -78,19 +79,28 @@ process.out = cms.OutputModule("PoolOutputModule",
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 # Add first PF2PAT so that we get a clean patDefaultSequence
-process.sPF2PAT = addPF2PAT(process, dataVersion,
-                            matchingTauTrigger=myTrigger,
-                            postfix="PFlow", doPFnoPU=False,
-                            )
-process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
-                                matchingTauTrigger=myTrigger,
-                                )
+# process.sPF2PAT = addPF2PAT(process, dataVersion,
+#                             matchingTauTrigger=myTrigger,
+#                             postfix="PFlow", doPFnoPU=False,
+#                             )
+# process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
+#                                 matchingTauTrigger=myTrigger,
+#                                 )
 
-process.sPAT = addPlainPat(process, dataVersion,
-                           doPatMuonPFIsolation=True,
-                           matchingTauTrigger=myTrigger,
-                           includeTracksPFCands=False,
-                           )
+# process.sPAT = addPlainPat(process, dataVersion,
+#                            doPatMuonPFIsolation=True,
+#                            matchingTauTrigger=myTrigger,
+#                            includeTracksPFCands=False,
+#                            )
+
+
+process.sPAT = addPat(process, dataVersion, doPlainPat=True, doPF2PAT=True, doPF2PATNoPu=True,
+                      plainPatArgs={"matchingTauTrigger": myTrigger,
+                                    "doPatMuonPFIsolation": True},
+                      pf2patArgs={"matchingTauTrigger": myTrigger},
+                      pf2patNoPuArgs={"matchingTauTrigger": myTrigger},
+                      includePFCands=True,
+                      )
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
@@ -121,9 +131,9 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 process.path    = cms.Path(
     process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
-    process.sPAT *
-    process.sPF2PAT *
-    process.sPF2PATnoPU
+    process.sPAT
+#    process.sPF2PAT *
+#    process.sPF2PATnoPU
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence

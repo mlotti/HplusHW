@@ -150,22 +150,48 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 # Add the PAT sequences as requested
 def addPat(process, dataVersion,
            doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
-           plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
+           plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={},
+           includePFCands=False):
     process.pf2patSequence = cms.Sequence()
     process.pf2patNoPuSequence = cms.Sequence()
     process.plainPatSequence = cms.Sequence()
 
+    # Select good primary vertices
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
+        src = cms.InputTag("offlinePrimaryVertices")
+    )
+
+    # Run various PATs
     if doPF2PAT:
         process.pf2patSequence = addPF2PAT(process, dataVersion, postfix="PFlow", doPFnoPU=False, **pf2patArgs)
     if doPF2PATNoPu:
         process.pf2patNoPuSequence = addPF2PAT(process, dataVersion, **pf2patNoPuArgs)
     if doPlainPat:
-        process.plainPatSequence = addPlainPat(process, dataVersion, **plainPatArgs)
+        process.plainPatSequence = addPlainPat(process, dataVersion, includePFCands=includePFCands, **plainPatArgs)
+
+    # Adjust event conent
+    outdict = process.outputModules_()
+    if outdict.has_key("out"):
+        out = outdict["out"]
+        out.outputCommands.extend([
+                "keep *_goodPrimaryVertices*_*_*",
+                "keep *_offlinePrimaryVerticesSumPt_*_*",
+                "keep *_offlineBeamSpot_*_*",
+                ])
+
+        if includePFCands:
+            out.outputCommands.extend([
+                    "keep *_particleFlow_*_*",
+                    ])
 
     # PAT function must be added last (PF2PAT requires unmodified
     # patDefaultSequence), but run first (we use some stuff produced
     # with plain PAT in PF2PAT)
     sequence = cms.Sequence(
+        process.goodPrimaryVertices *
+        process.goodPrimaryVertices10 *
+        process.offlinePrimaryVerticesSumPt *
         process.plainPatSequence *
         process.pf2patSequence *
         process.pf2patNoPuSequence
@@ -180,33 +206,13 @@ def addPat(process, dataVersion,
 def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
                 doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
                 doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
-                includeTracksPFCands=True):
+                includePFCands=False):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
         out = outdict["out"]
 
     outputCommands = []
-
-    if includeTracksPFCands:
-        outputCommands.extend([
-                "keep *_generalTracks_*_*",
-                "keep *_particleFlow_*_*",
-
-                # required for PF2PAT
-                "keep *_electronGsfTracks_*_*",
-                "keep *_gsfElectrons_*_*",
-                "keep *_gsfElectronCores_*_*",
-                "keep *_eid*_*_*",
-                "keep recoSuperClusters_*_*_*", # I don't know which one is required
-                "keep *_hfEMClusters_*_*",
-#                "keep *_photons_*_*",
-                "keep *_globalMuons_*_*",
-                "keep *_standAloneMuons_*_*",
-                "keep *_muons_*_*",
-                "keep *_offlineBeamSpot_*_*",
-                "keep *_genMetTrue_*_*",
-                ])
 
     # Tau Discriminators
     process.hplusPatTauSequence = cms.Sequence()
@@ -287,7 +293,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    setPatTauDefaults(process.patTaus, includeTracksPFCands)
+    setPatTauDefaults(process.patTaus, includePFCands)
 
     if doPatTaus:
         if doHChTauDiscriminators:
@@ -298,7 +304,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                              algoLabel = "caloReco",
                              typeLabel = "Tau")
             setPatTauDefaults(process.patTausCaloRecoTau, True)
-            process.patTausCaloRecoTau.embedLeadTrack = not includeTracksPFCands
+            process.patTausCaloRecoTau.embedLeadTrack = not includePFCands
     
         tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
@@ -355,7 +361,11 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     if doPatMET:
         addTcMET(process, 'TC')
         addPfMET(process, 'PF')
-        outputCommands.extend(["keep *_patMETsTC_*_*", "keep *_patMETsPF_*_*"])
+        outputCommands.extend([
+                "keep *_patMETsTC_*_*",
+                "keep *_patMETsPF_*_*",
+                "keep *_genMetTrue_*_*",
+        ])
     else:
         # FIXME: This is broken at the moment...
         #removeSpecificPATObjects(process, ["METs"], outputInProcess= out != None)
@@ -366,34 +376,19 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         del process.patMETs
 
     # Muons
-    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
+    setPatLeptonDefaults(process.patMuons, includePFCands)
     if doPatMuonPFIsolation:
         addPFMuonIsolation(process, process.patMuons, verbose=True)
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
-    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
+    setPatLeptonDefaults(process.patMuons, includePFCands)
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
         addPatElectronID(process, process.patElectrons, process.patDefaultSequence)
-
-    # Select good primary vertices
-    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
-        src = cms.InputTag("offlinePrimaryVertices")
-    )
-    process.hplusPatSequence *= (
-        process.goodPrimaryVertices *
-        process.goodPrimaryVertices10 *
-        process.offlinePrimaryVerticesSumPt
-    )
-    outputCommands.extend([
-        "keep *_goodPrimaryVertices*_*_*",
-        "keep *_offlinePrimaryVerticesSumPt_*_*",
-        ])
 
     # Trigger
     if doPatTrigger:
@@ -411,16 +406,16 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     if out == None:
         removeCleaning(process, False)
     else:
-        backup = process.out.outputCommands[:]
+        backup = out.outputCommands[:]
         removeCleaning(process, True)
-        backup_pat = process.out.outputCommands[:]
+        backup_pat = out.outputCommands[:]
 
         # Remove PFParticles here, they are explicitly included when needed
         backup_pat = filter(lambda n: "selectedPatPFParticles" not in n, backup_pat)
 
-        process.out.outputCommands = backup
-        process.out.outputCommands.extend(backup_pat)
-        process.out.outputCommands.extend(outputCommands)
+        out.outputCommands = backup
+        out.outputCommands.extend(backup_pat)
+        out.outputCommands.extend(outputCommands)
 
     # Build sequence
     seq = cms.Sequence(
@@ -495,18 +490,24 @@ def setPatJetDefaults(module):
     module.embedPFCandidates = False
     module.addTagInfos = False
 
-def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
-    module.levels = []
+def patJetCorrLevels(dataVersion, L1FastJet=False):
+    levels = []
     if L1FastJet:
-        module.levels.append("L1FastJet")
+        levels.append("L1FastJet")
     else:
-        module.levels.append("L1Offset")
-    module.levels.extend(["L2Relative", "L3Absolute"])
+        levels.append("L1Offset")
+    levels.extend(["L2Relative", "L3Absolute"])
 #    if dataVersion.isData():
 #        module.levels.append("L2L3Residual")
-    module.levels.extend(["L5Flavor", "L7Parton"])
+    levels.extend(["L5Flavor", "L7Parton"])
+    return levels
 
-def setPatTauDefaults(module, includeTracksPFCands):
+def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
+    module.levels = patJetCorrLevels(dataVersion, L1FastJet)
+    if not L1FastJet:
+        module.useRho = False
+
+def setPatTauDefaults(module, includePFCands):
     attrs = [
         "embedLeadTrack",
         "embedLeadPFCand",
@@ -522,7 +523,7 @@ def setPatTauDefaults(module, includeTracksPFCands):
 #        "embedIsolationPFGammaCands",
         ]
 
-    value = not includeTracksPFCands
+    value = not includePFCands
     for a in attrs:
         setattr(module, a, value)
     
@@ -538,12 +539,12 @@ def addHChTauDiscriminators():
     for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
         idSources.extend(HChTausTest.TestTauIDSources)
 
-def setPatLeptonDefaults(module, includeTracksPFCands):
+def setPatLeptonDefaults(module, includePFCands):
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     module.usePV = False
-    module.embedTrack = not includeTracksPFCands
+    module.embedTrack = not includePFCands
 
 def addPatElectronID(process, module, sequence):
     process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
@@ -593,8 +594,17 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
     outputCommands = []
 
+    # Jet modifications
+    # PhysicsTools/PatExamples/test/patTuple_42x_jec_cfg.py
+    doL1Fastjet = True
+    jetCorrFactors = patJetCorrLevels(dataVersion, doL1Fastjet)
+    jetCorrPayload = "AK5PF"
+    if doPFnoPU:
+        jetCorrPayload = "AK5PFchs"
+
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
-    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix=postfix)
+    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", jetCorrections=(jetCorrPayload, jetCorrFactors),
+                      runOnMC=dataVersion.isMC(), postfix=postfix)
 
     outputCommands = [
 #        "keep *_selectedPatPhotons%s_*_*" % postfix,
@@ -617,30 +627,21 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
                 'drop *_selectedPatPFParticles%s_*_*' % postfix,
                 ])
 
-    pfKt6Sequence = cms.Sequence()
-    setattr(process, "pfKt6Sequence"+postfix, pfKt6Sequence)
-
     # Enable/disable PFnoPU
-    getattr(process, "pfPileUp"+postfix).Enable = doPFnoPU
+    if doPFnoPU:
+        getattr(process, "pfPileUp"+postfix).Enable = True
+        getattr(process, "pfPileUp"+postfix).checkClosestZVertex = False
+        getattr(process, "pfPileUp"+postfix).Vertices = "goodPrimaryVertices"
 
     # Jet modifications
     # L1FastJet
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
-    doL1Fastjet = True
     if doL1Fastjet:
         kt6name = "kt6PFJets"+postfix
 
         if doPFnoPU:
-            from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-            m = cms.EDFilter("PrimaryVertexObjectFilter",
-                filterParams = pvSelector.clone(maxZ = 24.0),
-                src = cms.InputTag("offlinePrimaryVertices")
-            )
-            setattr(process, "goodOfflinePrimaryVerticesForJets"+postfix, m)
-            pfKt6Sequence *= m
-    
             from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
             setattr(process, kt6name, kt4PFJets.clone(
                 rParam = cms.double(0.6),
@@ -653,23 +654,20 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
             process.load('RecoJets.Configuration.RecoPFJets_cff')
             setattr(process, kt6name, process.kt6PFJets.clone(
                     doRhoFastjet = True,
-                    Rgo_EtaMax = cms.double(4.5)
+                    Rho_EtaMax = cms.double(4.5)
             ))
-        pfKt6Sequence *= getattr(process, kt6name)
-        getattr(process, "patJetCorrFactors"+postfix).rho.setModuleLabel(kt6name)
+        getattr(process, "patPF2PATSequence"+postfix).replace(
+            getattr(process, "pfNoElectron"+postfix),
+            getattr(process, "pfNoElectron"+postfix) * getattr(process, kt6name))
+        getattr(process, "patJetCorrFactors"+postfix).rho = cms.InputTag(kt6name, "rho")
+        getattr(process, "patJetCorrFactors"+postfix).useRho = True
 
         # ak5PFJets
         getattr(process, "pfJets"+postfix).doAreaFastjet = True
-        getattr(process, "pfJets"+postfix).Rho_EtaMax = cms.double(4.5)
-
         if doPFnoPU:
-            getattr(process, "pfJets"+postfix).Vertices = cms.InputTag("goodOfflinePrimaryVerticesForJets"+postfix)
+            getattr(process, "pfJets"+postfix).Vertices = cms.InputTag("goodPrimaryVertices")
             getattr(process, "pfJets"+postfix).doRhoFastjet = False
 
-        setPatJetCorrDefaults(getattr(process, "patJetCorrFactors"+postfix), dataVersion, L1FastJet=True)
-        # With PFnoPU we need separache "charged hadron subtracted" corrections
-        if doPFnoPU:
-            getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
 
@@ -739,8 +737,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     )
 
     sequence = cms.Sequence(
-        getattr(process, "patPF2PATSequence"+postfix) *
-        pfKt6Sequence
+        getattr(process, "patPF2PATSequence"+postfix)
     )
 
     if doTauHLTMatching:
