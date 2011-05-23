@@ -26,7 +26,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as R
 #
 # PAT on the fly
 #
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
+                   doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
+                   plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -55,6 +57,8 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 
     process.collisionDataSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
+        if doPF2PAT or doPF2PATNoPU or not doPlainPat:
+            raise Exception("Only plainPat can be done for tau embedding input at the moment")
 
         # Hack to not to crash if something in PAT assumes process.out
         hasOut = hasattr(process, "out")
@@ -63,14 +67,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
                 fileName = cms.untracked.string('dummy.root'),
                 outputCommands = cms.untracked.vstring()
             )
-        setPatArgs(patArgs, {"doPatTrigger": False,
+        setPatArgs(plainPatArgs, {"doPatTrigger": False,
                              "doTauHLTMatching": False,
                              "doPatCalo": False,
                              "doBTagging": True,
                              "doPatElectronID": False,
                              "doPatMET": False})
 
-        process.patSequence = addPat(process, dataVersion, **patArgs)
+        process.patSequence = addPat(process, dataVersion, plainPatArgs=plainPatArgs)
         # FIXME: this is broken at the moment
         #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
         process.patDefaultSequence.remove(process.patMuons)
@@ -108,19 +112,24 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
         if dataVersion.isData():
             process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
 
-        pargs = patArgs.copy()
+        pargs = plainPatArgs.copy()
+        pargs2 = pf2patArgs.copy()
+        pargs2NoPu = pf2patNoPuArgs.copy()
 
-        if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
-            if options.trigger == "":
-                raise Exception("Command line argument 'trigger' is missing")
+        for args in [pargs, pargs2, pargs2NoPu]:
+            if args.get("doTauHLTMatching", True):
+                if options.trigger == "":
+                    raise Exception("Command line argument 'trigger' is missing")
+    
+                print "Trigger used for tau matching:", options.trigger
+                args["matchingTauTrigger"] = options.trigger
+                if jetTrigger != None:
+                    print "Trigger used for jet matching:", jetTrigger
+                    args["matchingJetTrigger"] = jetTrigger
 
-            print "Trigger used for tau matching:", options.trigger
-            pargs["matchingTauTrigger"] = options.trigger
-            if jetTrigger != None:
-                print "Trigger used for jet matching:", jetTrigger
-                pargs["matchingJetTrigger"] = jetTrigger            
-
-        process.patSequence = addPat(process, dataVersion, **pargs)
+        process.patSequence = addPat(process, dataVersion,
+                                     doPlainPat=doPlainPat, doPF2PAT=doPF2PAT, doPF2PATNoPu=doPF2PATNoPu,
+                                     plainPatArgs=pargs, pf2patArgs=pargs2, pf2patNoPuArgs=pargs2NoPu)
     
     # Add selection of PVs with sumPt > 10
 #    process.patSequence *= process.goodPrimaryVertices10
@@ -139,8 +148,29 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
 
 
 # Add the PAT sequences as requested
-def addPat(*args, **kwargs):
-    return addPlainPat(*args, **kwargs)
+def addPat(process, dataVersion,
+           doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
+           plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
+    process.pf2patSequence = cms.Sequence()
+    process.pf2patNoPuSequence = cms.Sequence()
+    process.plainPatSequence = cms.Sequence()
+
+    if doPF2PAT:
+        process.pf2patSequence = addPF2PAT(process, dataVersion, postfix="PFlow", doPFnoPU=False, **pf2patArgs)
+    if doPF2PATNoPu:
+        process.pf2patNoPuSequence = addPF2PAT(process, dataVersion, **pf2patNoPuArgs)
+    if doPlainPat:
+        process.plainPatSequence = addPlainPat(process, dataVersion, **plainPatArgs)
+
+    # PAT function must be added last (PF2PAT requires unmodified
+    # patDefaultSequence), but run first (we use some stuff produced
+    # with plain PAT in PF2PAT)
+    sequence = cms.Sequence(
+        process.plainPatSequence *
+        process.pf2patSequence *
+        process.pf2patNoPuSequence
+    )
+    return sequence
 
 # Assumes that process.out is the output module
 #
