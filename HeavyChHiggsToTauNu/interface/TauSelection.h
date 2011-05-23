@@ -67,7 +67,7 @@ namespace HPlus {
       kTauIDWithRtauOnly // For QCD bkg measurement - set internally
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber);
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label);
     ~TauSelection();
 
     /// Default tauID
@@ -109,6 +109,7 @@ namespace HPlus {
     edm::InputTag fSrc;
     const std::string fSelection;
     const int fProngNumber;
+    const std::string fLabel;
 
     /// TauID object
     TauIDBase* fTauID;

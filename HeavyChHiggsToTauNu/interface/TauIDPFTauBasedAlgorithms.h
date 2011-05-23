@@ -11,7 +11,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingCone tau ID functionality
      */
-    TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingCone();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
@@ -25,7 +25,7 @@ namespace HPlus {
   // TauIDPFHPSBase ---------------------------------------------
   class TauIDPFHPSBase: public TauIDPFTauBase {
   public:
-    TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel);
+    TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDPFHPSBase();
 
     bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
@@ -39,7 +39,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingConeHPS tau ID functionality
      */
-    TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeHPS();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
@@ -56,7 +56,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingConeHPSMedium tau ID functionality
      */
-    TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeHPSLoose();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
@@ -75,7 +75,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingConeHPSMedium tau ID functionality
      */
-    TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeHPSMedium();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
@@ -92,7 +92,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingConeHPS tau ID functionality
      */
-    TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeTaNC();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
@@ -111,7 +111,7 @@ namespace HPlus {
     /**
      * Implementation of the TauIDPFShrinkingConeCombinedHPSTaNC tau ID functionality
      */
-    TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount);
+    TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeCombinedHPSTaNC();
 
     bool passIsolation(const edm::Ptr<pat::Tau> tau);

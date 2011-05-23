@@ -5,8 +5,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 namespace HPlus {
-  TauIDPFTauBase::TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel):
-    TauIDBase(iConfig, eventCounter, eventWeight, baseLabel) {
+  TauIDPFTauBase::TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir):
+    TauIDBase(iConfig, eventCounter, eventWeight, baseLabel, myDir) {
   
   }
 

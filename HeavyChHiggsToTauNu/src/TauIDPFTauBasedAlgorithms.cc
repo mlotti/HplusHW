@@ -7,12 +7,11 @@
 namespace HPlus {
   // TauIDPFShrinkingCone ------------------------------------------------
   
-  TauIDPFShrinkingCone::TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, "PFShrink")
+  TauIDPFShrinkingCone::TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFTauBase(iConfig, eventCounter, eventWeight, label+"_PFShrink", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDIsolation = fCounterPackager.addSubCounter("PFShrink", "Isolation", 0);
+    fIDIsolation = fCounterPackager.addSubCounter(label+"_PFShrink", "Isolation", 0);
     // Histograms
     
     // Initialize rest counter objects
@@ -36,8 +35,8 @@ namespace HPlus {
   }
 
   // TauIDPFHPSBase ---------------------------------------------
-  TauIDPFHPSBase::TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, baseLabel)
+  TauIDPFHPSBase::TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir):
+    TauIDPFTauBase(iConfig, eventCounter, eventWeight, baseLabel, myDir)
   {}
   TauIDPFHPSBase::~TauIDPFHPSBase() {}
 
@@ -53,12 +52,11 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeHPS ---------------------------------------------
-  TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSTight")
+  TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSTight", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDHPS = fCounterPackager.addSubCounter("HPSTight", "HPS", 0);
+    fIDHPS = fCounterPackager.addSubCounter(label+"_HPSTight", "HPS", 0);
     // Histograms
     
     // Initialize rest counter objects
@@ -82,12 +80,11 @@ namespace HPlus {
   }
   
   // TauIDPFShrinkingConeHPSMedium ---------------------------------------
-  TauIDPFShrinkingConeHPSMedium::TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSMedium")
+  TauIDPFShrinkingConeHPSMedium::TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSMedium", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDHPS = fCounterPackager.addSubCounter("HPSMedium", "HPS", 0);
+    fIDHPS = fCounterPackager.addSubCounter(label+"_HPSMedium", "HPS", 0);
     // Histograms
     
     // Initialize rest counter objects
@@ -111,12 +108,11 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeHPSLoose ---------------------------------------
-  TauIDPFShrinkingConeHPSLoose::TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSLoose")
+  TauIDPFShrinkingConeHPSLoose::TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSLoose", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDHPS = fCounterPackager.addSubCounter("HPSLoose", "HPS", 0);
+    fIDHPS = fCounterPackager.addSubCounter(label+"_HPSLoose", "HPS", 0);
     // Histograms
     
     // Initialize rest counter objects
@@ -140,13 +136,12 @@ namespace HPlus {
   }
   
   // TauIDPFShrinkingConeTaNC --------------------------------------------
-  TauIDPFShrinkingConeTaNC::TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFTauBase(iConfig, eventCounter, eventWeight, "TaNCTenth")
+  TauIDPFShrinkingConeTaNC::TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFTauBase(iConfig, eventCounter, eventWeight, label+"_TaNCTenth", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDTaNC = fCounterPackager.addSubCounter("TaNCTenth", "TaNCTenth",
-      makeTH<TH1F>(*fs, "TauID_TaNC", "TaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
+    fIDTaNC = fCounterPackager.addSubCounter(label+"_TaNCTenth", "TaNCTenth",
+      makeTH<TH1F>(myDir, "TauID_TaNC", "TaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
     // Histograms
     
     // Initialize rest counter objects
@@ -172,14 +167,13 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeCombinedHPSTaNC --------------------------------------------
-  TauIDPFShrinkingConeCombinedHPSTaNC::TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, "HPSTaNC")
+  TauIDPFShrinkingConeCombinedHPSTaNC::TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSTaNC", myDir)
   {
-    edm::Service<TFileService> fs;
     // Initialize counter objects for tau isolation
-    fIDHPS = fCounterPackager.addSubCounter("HPSTaNC", "HPSTight", 0);
-    fIDTaNC = fCounterPackager.addSubCounter("HPSTaNC", "TaNCTenth",
-      makeTH<TH1F>(*fs, "TauID_CombinedHPSTaNC", "CombinedHPSTaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
+    fIDHPS = fCounterPackager.addSubCounter(label+"_HPSTaNC", "HPSTight", 0);
+    fIDTaNC = fCounterPackager.addSubCounter(label+"_HPSTaNC", "TaNCTenth",
+      makeTH<TH1F>(myDir, "TauID_CombinedHPSTaNC", "CombinedHPSTaNC;TaNC output;N_{jets}/0.02", 60, 0., 1.2));
     // Histograms
     
     // Initialize rest counter objects
