@@ -35,29 +35,31 @@ namespace HPlus {
 
   void GenParticleAnalysis::init(){
     edm::Service<TFileService> fs;
-    hRtau1pHp = makeTH<TH1F>(*fs, "genRtau1ProngHp", "genRtau1ProngHp", 100, 0., 1.2);
-    hRtau13pHp = makeTH<TH1F>(*fs, "genRtau13ProngHp", "genRtau13ProngHp", 100, 0., 1.2);
-    hRtau3pHp = makeTH<TH1F>(*fs, "genRtau3ProngHp", "genRtau3ProngHp", 100, 0., 1.2);
-    hRtau1pW = makeTH<TH1F>(*fs, "genRtau1ProngW", "genRtau1ProngW", 100, 0., 1.2);
-    hRtau13pW = makeTH<TH1F>(*fs, "genRtau13ProngW", "genRtau13ProngW", 100, 0., 1.2);
-    hRtau3pW = makeTH<TH1F>(*fs, "genRtau3ProngW", "genRtau3ProngW", 100, 0., 1.2);
-    hptVisibleTau1pHp = makeTH<TH1F>(*fs, "genptVisibleTau1ProngHp", "ptVisibleTau1ProngHp", 100, 0., 200);
-    hptVisibleTau13pHp = makeTH<TH1F>(*fs, "genptVisibleTau13ProngHp", "ptVisibleTau13ProngHp", 100, 0., 200);
-    hptVisibleTau3pHp = makeTH<TH1F>(*fs, "genptVisibleTau3ProngHp", "ptVisibleTau3ProngHp", 100, 0., 200);
-    hEtaVisibleTau1pHp = makeTH<TH1F>(*fs, "genEtaVisibleTau1ProngHp", "etaVisibleTau1ProngHp", 100, -5., 5);
-    hLeadingTrack1pHp = makeTH<TH1F>(*fs, "genLeadingTrack1ProngHp", "LeadingTrack1ProngHp", 100, 0., 200);
-    hptVisibleTau1pW = makeTH<TH1F>(*fs, "genPtVisibleTau1ProngW", "ptVisibleTau1ProngW", 100, 0., 200);
-    hptVisibleTau13pW = makeTH<TH1F>(*fs, "genPtVisibleTau13ProngW", "ptVisibleTau13ProngW", 100, 0., 200);
-    hptVisibleTau3pW = makeTH<TH1F>(*fs, "genPtVisibleTau3ProngW", "ptVisibleTau3ProngW", 100, 0., 200);
-    hEtaVisibleTau1pW = makeTH<TH1F>(*fs, "genEtaVisibleTau1ProngW", "etaVisibleTau1ProngW", 100, -5., 5);
-    hLeadingTrack1pW = makeTH<TH1F>(*fs, "genLeadingTrack1ProngW", "LeadingTrack1ProngW", 100, 0., 200);
-    hTauMass1pHp = makeTH<TH1F>(*fs, "genTauMass1pHp", "genTauMass1pHp", 100, 0., 2.);
-    hTauMass1pW = makeTH<TH1F>(*fs, "genTauMass1pW", "genTauMass1pW", 100, 0., 2.);
-    hThetaCM1pHp = makeTH<TH1F>(*fs, "genThetaCM1pHp", "genThetaCMs1pHp", 100, 0., 3.);
-    hThetaCM1pW = makeTH<TH1F>(*fs, "genThetaCM1pW", "genThetaCMs1pW", 100, 0., 3.);
-    hMagCM1pHp = makeTH<TH1F>(*fs, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
-    hMagCM1pW = makeTH<TH1F>(*fs, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
-    hHpMass = makeTH<TH1F>(*fs, "HpMass", "HpMass", 100, 100, 200.);
+    TFileDirectory myDir = fs->mkdir("GenParticleAnalysis");
+    
+    hRtau1pHp = makeTH<TH1F>(myDir, "genRtau1ProngHp", "genRtau1ProngHp", 100, 0., 1.2);
+    hRtau13pHp = makeTH<TH1F>(myDir, "genRtau13ProngHp", "genRtau13ProngHp", 100, 0., 1.2);
+    hRtau3pHp = makeTH<TH1F>(myDir, "genRtau3ProngHp", "genRtau3ProngHp", 100, 0., 1.2);
+    hRtau1pW = makeTH<TH1F>(myDir, "genRtau1ProngW", "genRtau1ProngW", 100, 0., 1.2);
+    hRtau13pW = makeTH<TH1F>(myDir, "genRtau13ProngW", "genRtau13ProngW", 100, 0., 1.2);
+    hRtau3pW = makeTH<TH1F>(myDir, "genRtau3ProngW", "genRtau3ProngW", 100, 0., 1.2);
+    hptVisibleTau1pHp = makeTH<TH1F>(myDir, "genptVisibleTau1ProngHp", "ptVisibleTau1ProngHp", 100, 0., 200);
+    hptVisibleTau13pHp = makeTH<TH1F>(myDir, "genptVisibleTau13ProngHp", "ptVisibleTau13ProngHp", 100, 0., 200);
+    hptVisibleTau3pHp = makeTH<TH1F>(myDir, "genptVisibleTau3ProngHp", "ptVisibleTau3ProngHp", 100, 0., 200);
+    hEtaVisibleTau1pHp = makeTH<TH1F>(myDir, "genEtaVisibleTau1ProngHp", "etaVisibleTau1ProngHp", 100, -5., 5);
+    hLeadingTrack1pHp = makeTH<TH1F>(myDir, "genLeadingTrack1ProngHp", "LeadingTrack1ProngHp", 100, 0., 200);
+    hptVisibleTau1pW = makeTH<TH1F>(myDir, "genPtVisibleTau1ProngW", "ptVisibleTau1ProngW", 100, 0., 200);
+    hptVisibleTau13pW = makeTH<TH1F>(myDir, "genPtVisibleTau13ProngW", "ptVisibleTau13ProngW", 100, 0., 200);
+    hptVisibleTau3pW = makeTH<TH1F>(myDir, "genPtVisibleTau3ProngW", "ptVisibleTau3ProngW", 100, 0., 200);
+    hEtaVisibleTau1pW = makeTH<TH1F>(myDir, "genEtaVisibleTau1ProngW", "etaVisibleTau1ProngW", 100, -5., 5);
+    hLeadingTrack1pW = makeTH<TH1F>(myDir, "genLeadingTrack1ProngW", "LeadingTrack1ProngW", 100, 0., 200);
+    hTauMass1pHp = makeTH<TH1F>(myDir, "genTauMass1pHp", "genTauMass1pHp", 100, 0., 2.);
+    hTauMass1pW = makeTH<TH1F>(myDir, "genTauMass1pW", "genTauMass1pW", 100, 0., 2.);
+    hThetaCM1pHp = makeTH<TH1F>(myDir, "genThetaCM1pHp", "genThetaCMs1pHp", 100, 0., 3.);
+    hThetaCM1pW = makeTH<TH1F>(myDir, "genThetaCM1pW", "genThetaCMs1pW", 100, 0., 3.);
+    hMagCM1pHp = makeTH<TH1F>(myDir, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
+    hMagCM1pW = makeTH<TH1F>(myDir, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
+    hHpMass = makeTH<TH1F>(myDir, "HpMass", "HpMass", 100, 100, 200.);
   }
 
   void GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){

@@ -21,14 +21,15 @@ namespace HPlus {
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir("FakeMETVeto");
     
-    hClosestDeltaPhi = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
-    hClosestDeltaPhiToJets = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
-    hClosestDeltaPhiToTaus = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhi = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhiToJets = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_selected_jets", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hClosestDeltaPhiToTaus = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_taus", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
     
-    hClosestDeltaPhiZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
-    hClosestDeltaPhiToJetsZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
-    hClosestDeltaPhiToTausZoom = makeTH<TH1F>(*fs, "Closest_DeltaPhi_of_MET_and_taus_Zoom", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
+    hClosestDeltaPhiZoom = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_or_taus_Zoom", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
+    hClosestDeltaPhiToJetsZoom = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_selected_jets_Zoom", "min DeltaPhi(MET,selected jets);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
+    hClosestDeltaPhiToTausZoom = makeTH<TH1F>(myDir, "Closest_DeltaPhi_of_MET_and_taus_Zoom", "min DeltaPhi(MET,selected taus);min(#Delta#phi(MET,jets)), degrees;N / 2", 25, 0., 50.0);
   }
 
   FakeMETVeto::~FakeMETVeto() {}
