@@ -6,7 +6,7 @@ datasets = {
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
     "QCD_Pt15to30_TuneZ2_Summer11": {
-        "dataVersion": "42Xredigi",
+        "dataVersion": "42Xmc",
         "crossSection": 8.159e+08,
         "data": {
             "AOD": {
@@ -17,7 +17,7 @@ datasets = {
         },
     },
     "QCD_Pt30to50_TuneZ2_Summer11": {
-        "dataVersion": "42Xredigi",
+        "dataVersion": "42Xmc",
         "crossSection": 5.312e+07,
         "data": {
             "AOD": {
@@ -28,7 +28,7 @@ datasets = {
         },
     },
     "QCD_Pt50to80_TuneZ2_Summer11": {
-        "dataVersion":  "42Xredigi",
+        "dataVersion":  "42Xmc",
         "crossSection": 6.359e+06,
         "data": {
             "AOD": {
@@ -38,7 +38,7 @@ datasets = {
         },
     },
     "QCD_Pt80to120_TuneZ2_Summer11": {
-        "dataVersion": "42Xredigi",
+        "dataVersion": "42Xmc",
         "crossSection": 7.843e+05,
         "data": {
             "AOD": {
@@ -48,7 +48,7 @@ datasets = {
         },
     },
     "QCD_Pt120to170_TuneZ2_Summer11": {
-        "dataVersion": "42Xredigi",
+        "dataVersion": "42Xmc",
         "crossSection": 1.151e+05,
         "data": {
             "AOD": {
@@ -58,7 +58,7 @@ datasets = {
         },
     },
     "QCD_Pt170to300_TuneZ2_Summer11": {
-        "dataVersion": "42Xredigi",
+        "dataVersion": "42Xmc",
         "crossSection": 2.426e+04,
         "data": {
             "AOD": {

@@ -16,7 +16,12 @@ config = {
 #        "analysisCastor": "",
 #        "analysisMadhatter": "",
     },
-    
+    "42Xmc": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data//QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM/FE47C9F3-C97D-E011-B103-003048670B66.root",
+    },
 }
 
 
@@ -40,7 +45,7 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_42_V13::All"
+            self.globalTag = "GR_R_42_V14::All"
 
         # MC
         else:
