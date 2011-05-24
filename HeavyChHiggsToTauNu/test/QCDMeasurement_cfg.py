@@ -42,14 +42,17 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 #process = cms.Process("HChQCDMeasurementMethod3Part2")
 process = cms.Process("HChQCDMeasurementMethod3")
 
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" lsxplus303
+    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
+    #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
     "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
     #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
     #"file:test_pattuple_v9_JetMet2010A_86.root"
@@ -124,7 +127,8 @@ param.setTriggerVertexFor2011()
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
-#param.trigger.hltMetCut = 0.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+#param.trigger.hltMetCut = 0.0 
+print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
 # param.overrideTriggerFromOptions(options) => obsolete
 
@@ -145,9 +149,10 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     forwardJetVeto = param.forwardJetVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     triggerEfficiency = param.triggerEfficiency,
+    GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
-        pvSrc = cms.InputTag("offlinePrimaryVertices")
+    pvSrc = cms.InputTag("offlinePrimaryVertices")
     ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
 )
 # Factorization (quick and dirty version)

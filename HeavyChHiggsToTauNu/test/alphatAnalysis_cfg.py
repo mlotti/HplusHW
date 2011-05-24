@@ -8,20 +8,20 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
 #dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-dataVersion = "311Xredigi" # Spring11 MC
-#dataVersion = "41Xdata"   # Run2011 PromptReco
+#dataVersion = "311Xredigi" # Spring11 MC
+dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
 ##########
-# Flags for additional signal analysis modules
-# Perform the signal analysis with all tau ID algorithms in addition
+# Flags for additional alphat analysis modules
+# Perform the alphat analysis with all tau ID algorithms in addition
 # to the "golden" analysis
 doAllTauIds = True
 
 # Perform b tagging scanning
 doBTagScan = False
 
-# Perform the signal analysis with the JES variations in addition to
+# Perform the alphat analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
 JESVariation = 0.03
@@ -29,11 +29,14 @@ JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
 # With tau embedding input, tighten the muon selection
-tauEmbeddingTightenMuonSelection = True
+tauEmbeddingFinalizeMuonSelection = False
 # With tau embedding input, do the muon selection scan
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+filterGenTaus = False
+filterGenTausInaccessible = False
 
 ################################################################################
 
@@ -54,7 +57,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
+  #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    "file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
     # "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
     # "file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
     # "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
@@ -71,7 +77,9 @@ process.source = cms.Source('PoolSource',
     )
 )
 if options.tauEmbeddingInput != 0:
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
+    process.source.fileNames = [
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_pt40/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_23_1_YLm.root"
+        ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -92,9 +100,14 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
+###
+# MC Filter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+if filterGenTaus:
+    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
 
 ################################################################################
-# The "golden" version of the signal analysis
+# The "golden" version of the alphat analysis
 
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
@@ -121,28 +134,28 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForAlphatAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingTightenMuonSelection:
+    if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
 
-# Signal analysis module for the "golden analysis"
+# alphat analysis module for the "golden analysis"
 process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
-    # Change default tau algorithm here as needed         
+    # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
     fakeMETVeto = param.fakeMETVeto,
-    jetTauInvMass = param.jetTauInvMass,                                      
-    topSelection = param.topSelection,                                      
+    jetTauInvMass = param.jetTauInvMass,
+    topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
@@ -162,34 +175,15 @@ if dataVersion.isData():
     process.alphatAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "\nVertexWeight:", process.alphatAnalysis.vertexWeight
-print "\nTrigger:", process.alphatAnalysis.trigger
-print "\nPV Selection:", process.alphatAnalysis.primaryVertexSelection
-print "\nTauSelection operating mode:", process.alphatAnalysis.tauSelection.operatingMode
+print "Trigger:", process.alphatAnalysis.trigger
+print "VertexWeight:",process.alphatAnalysis.vertexWeight
+print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.alphatAnalysis.trigger.hltMetCut
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.alphatAnalysis.triggerEfficiency.selectTriggers])
+#print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
+print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
 print "TauSelection src:", process.alphatAnalysis.tauSelection.src
-print "TauSelection selection:", process.alphatAnalysis.tauSelection.selection
-print "TauSelection ptCut:", process.alphatAnalysis.tauSelection.ptCut
-print "TauSelection etacut:", process.alphatAnalysis.tauSelection.etaCut
-print "TauSelection leadingTrackPtCut:", process.alphatAnalysis.tauSelection.leadingTrackPtCut
-print "TauSelection rtauCut:", process.alphatAnalysis.tauSelection.rtauCut
-print "TauSelection antiRtauCut:", process.alphatAnalysis.tauSelection.antiRtauCut
-print "TauSelection invMassCut:", process.alphatAnalysis.tauSelection.invMassCut
-print "TauSelection nprongs:", process.alphatAnalysis.tauSelection.nprongs
-print "\nTriggerEfficiency:", process.alphatAnalysis.triggerEfficiency
-print "\nMET:", process.alphatAnalysis.MET
-print "\nGlobalElectronVeto:", process.alphatAnalysis.GlobalElectronVeto
-print "\nGlobalMuonVeto:", process.alphatAnalysis.GlobalMuonVeto
-print "\nJetSelection:", process.alphatAnalysis.jetSelection
-print "\nbTagging: ", process.alphatAnalysis.bTagging
-print "\nFakeMETVeto:", process.alphatAnalysis.fakeMETVeto
-print "\nTriggerEmulationEfficiency:", process.alphatAnalysis.TriggerEmulationEfficiency
-print "\nEvtTopology:", process.alphatAnalysis.EvtTopology
-#print "\nMetTables:", process.alphatAnalysis.factorization
-print "\nTopSelection:", process.alphatAnalysis.topSelection
-print "****************************************************"
-#print "\nInvMassVetoOnJets:", process.alphatAnalysis.InvMassVetoOnJets
-print "\nEvtTopology:", process.alphatAnalysis.EvtTopology
-print "\nForwardJetVeto:", process.alphatAnalysis.forwardJetVeto
+print "TauSelection operating mode:", process.alphatAnalysis.tauSelection.operatingMode
+print "TauSelection factorization source:", process.alphatAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -209,25 +203,34 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.PickEventsDumper_cfi")
 process.alphatAnalysisPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.alphatAnalysis *
-    process.alphatAnalysisCounters #*
-#    process.PickEvents
+    process.alphatAnalysisCounters *
+    process.PickEvents
 )
 
 
 # b tagging testing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+if doBTagScan:
+    module = process.alphatAnalysis.clone()
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 1.2
+    addAnalysis(process, "alphatAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                alphatAnalysisCounters=True)
 if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.alphatAnalysis.clone()
-    #module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 3.0
-    addAnalysis(process, "alphatAnalysisBtaggingTest", module,
+    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 1.8
+    addAnalysis(process, "alphatAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 alphatAnalysisCounters=True)
 
 
 ################################################################################
-# The signal analysis with different tau ID algorithms
+# The alphat analysis with different tau ID algorithms
 #
 # Run the analysis for the different tau ID algorithms at the same job
 # as the golden analysis. It is significantly more efficiency to run
@@ -250,10 +253,10 @@ if doAllTauIds:
     param.addTauIdAnalyses(process, "alphatAnalysis", process.alphatAnalysis, process.commonSequence, additionalCounters)
 
 ################################################################################
-# The signal analysis with jet energy scale variation
+# The alphat analysis with jet energy scale variation
 #
 # If the flag is true, create two paths for the variation in plus and
-# minus, and clone the signal analysis and counter modules to the
+# minus, and clone the alphat analysis and counter modules to the
 # paths. The tau, jet and MET collections to adjust are taken from the
 # configuration of the golden analysis. The fragment below creates the
 # following histogram directories
@@ -270,7 +273,7 @@ if doJESVariation:
     addJESVariationAnalysis(process, "alphatAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.alphatAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "alphatAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.alphatAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
-# Signal analysis with various tightened muon selections for tau embedding
+# alphat analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
     tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "alphatAnalysis", process.alphatAnalysis, process.commonSequence, additionalCounters)
 
@@ -295,7 +298,7 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChSignalAnalysis",
+        "keep *_*_*_HChAlphatAnalysis",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
 #	"drop *",

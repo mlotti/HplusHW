@@ -51,16 +51,15 @@ namespace HPlus {
         iEvent.getByLabel(fSrc, trigger);
 
 	for(std::vector<TriggerPath* >::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i){
-		if((*i)->analyze(*trigger)) {
-			passEvent = true;
-			returnPath = *i;
-		}
+	  if((*i)->analyze(*trigger)) {
+	    passEvent = true;
+	    returnPath = *i;
+	  }
 	}
         if(passEvent)
           increment(fTriggerPathCount);
 
-	// Get HLT MET object
-        // but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
+	// Get HLT MET object but only if the trigger has been passed (otherwise it makes no sense to emulate MET)
         if(passEvent) {
           // Print all trigger object types of all triggers
           /*
@@ -119,6 +118,7 @@ namespace HPlus {
     pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
+	// std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         increment(fTriggerCount);
         return true;
       }

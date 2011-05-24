@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "TTree.h"
 
 namespace edm {
   class ParameterSet;
@@ -42,9 +43,11 @@ namespace HPlus {
 
     // Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
 
   private:
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    void FillCountersAndHistos(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusAlphatAnalysisProducer
@@ -54,6 +57,7 @@ namespace HPlus {
 
     Count fAllCounter;
     Count fTriggerCounter;
+    Count fMETCounter;
     //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
@@ -68,7 +72,7 @@ namespace HPlus {
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
-    Count fMETCounter;
+
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -87,11 +91,34 @@ namespace HPlus {
     TauEmbeddingAnalysis fTauEmbeddingAnalysis;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
-
-    //
     TriggerEfficiency fTriggerEfficiency;
     VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+
+    // For Tree
+    TTree *myTree;
+    float fEvtWeight;
+    bool bTriggerPassed;
+    bool bTauIdPassed;
+    int  iNSelectedTaus;
+    float fTauJetEt;
+    float fTauJetEta;
+    float fRtau;
+    float fMET;
+    float fFakeMETDeltaPhi;
+    float fLdgJetEt;
+    float fSecondLdgJetEt;
+    float fThirdLdgJetEt;
+    int iNHadronicJets;
+    int iNHadronicJetsInFwdDir;
+    int iNBtags;
+    float fGlobalMuonVetoHighestPt;
+    float fGlobalElectronVetoHighestPt;
+    float fTransverseMass;
+    float fAlphaT;
+    float fHt;
+    float fJt; // Jt = Ht - TauJetEt - LdgJetEt
+    float fTopMass; // Jt = Ht - TauJetEt - LdgJetEt
 
     // Histograms
     TH1 *hVerticesBeforeWeight;
