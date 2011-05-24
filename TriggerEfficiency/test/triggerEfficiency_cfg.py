@@ -80,7 +80,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.TFileService.fileName = cms.string("triggerEfficiency.root")
+process.TFileService.fileName = cms.string("efficiencyTree.root")
 
 
 # Uncomment the following in order to print the counters at the end of

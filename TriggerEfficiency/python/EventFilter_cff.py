@@ -4,10 +4,12 @@ eventFilter = cms.Sequence()
 
 # Tau selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi import *
-#tauSelectionBase.rtauCut = cms.untracked.double(0.)
-eventFilter *= hPlusTauPtrSelectorFilter
+tauSelectionFilter = hPlusTauPtrSelectorFilter.clone()
+tauSelectionFilter.tauSelection.rtauCut = cms.untracked.double(0.)
+eventFilter *= tauSelectionFilter
 
 # MET selection
-#from HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi import *
-#eventFilter *=
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi import *
+metSelectionFilter = hPlusMETPtrSelectorFilter.clone()
+eventFilter *= metSelectionFilter
 
