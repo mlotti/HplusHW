@@ -45,9 +45,12 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	std::cout << "MET src : " << metSrc.label() << std::endl;
 
 	edm::Service<TFileService> fs;
-	fs->make<TTree>("TriggerEfficiencyTree", triggerBitName.c_str());
+	TriggerEfficiencyTree = fs->make<TTree>("TriggerEfficiencyTree", triggerBitName.c_str(),1);
 
-	TriggerEfficiencyTree->Branch("triggerBit",&triggerBit,"triggerBit/I");
+	TriggerEfficiencyTree->Branch("TriggerBit",&triggerBit,"triggerBit/I");
+	TriggerEfficiencyTree->Branch("TauPt",&taupt,"taupt/F");
+	TriggerEfficiencyTree->Branch("TauEta",&taueta,"taueta/F");
+	TriggerEfficiencyTree->Branch("MET",&met,"met/F");
 }
 
 TriggerEfficiencyAnalyzer::~TriggerEfficiencyAnalyzer(){}
@@ -57,6 +60,9 @@ void TriggerEfficiencyAnalyzer::beginJob(){}
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event&, const edm::EventSetup&){
 
 	triggerBit = 0;
+	taupt      = 0;
+	taueta     = 0;
+	met 	   = 0;
 
 	TriggerEfficiencyTree->Fill();
 }
