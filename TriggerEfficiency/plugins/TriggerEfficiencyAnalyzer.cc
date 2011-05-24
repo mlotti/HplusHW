@@ -6,6 +6,14 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/Handle.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"  
+#include "FWCore/Common/interface/TriggerNames.h"
+
+#include "DataFormats/Common/interface/Ptr.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
+
+#include "DataFormats/METReco/interface/MET.h"
+
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TTree.h"
@@ -57,14 +65,51 @@ TriggerEfficiencyAnalyzer::~TriggerEfficiencyAnalyzer(){}
 
 void TriggerEfficiencyAnalyzer::beginRun(const edm::Run&,const edm::EventSetup&){}
 void TriggerEfficiencyAnalyzer::beginJob(){}
-void TriggerEfficiencyAnalyzer::analyze( const edm::Event&, const edm::EventSetup&){
+void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	triggerBit = 0;
 	taupt      = 0;
 	taueta     = 0;
 	met 	   = 0;
 
+// Trigger bit
+	edm::Handle<edm::TriggerResults> hltHandle;
+	iEvent.getByLabel(triggerResults,hltHandle);
+
+	const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltHandle);
+      	for (unsigned int i=0; i<triggerNames.size(); i++) {
+        	//std::cout << "trigger path= " << triggerNames.triggerName(i) << std::endl;
+        	if(triggerBitName == triggerNames.triggerName(i) && hltHandle->accept(i)){
+			triggerBit = 1;
+                	i = triggerNames.size();
+        	}
+      	}
+
+// Offline taus
+	edm::Handle<edm::View<pat::Tau> > htaus;
+	iEvent.getByLabel(tauSrc, htaus);
+
+	const edm::PtrVector<pat::Tau>& taus = htaus->ptrVector();
+
+	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin();
+                                                     iter!= taus.end(); ++iter) {
+      		const edm::Ptr<pat::Tau> iTau = *iter;
+		taupt  = iTau->pt();
+		taueta = iTau->eta();
+	}
+
+// Offline MET
+	edm::Handle<edm::View<reco::MET> > hmet;
+	iEvent.getByLabel(metSrc, hmet);
+
+	edm::Ptr<reco::MET> metptr = hmet->ptrAt(0);
+	met = metptr->et();
+
+
+// Filling..
+
 	TriggerEfficiencyTree->Fill();
+
 }
 void TriggerEfficiencyAnalyzer::endJob(){}
 void TriggerEfficiencyAnalyzer::endRun(const edm::Run&,const edm::EventSetup&){}
