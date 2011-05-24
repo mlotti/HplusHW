@@ -196,7 +196,7 @@ topSelection = cms.untracked.PSet(
 
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices10"),
-    pileupSrc = cms.InputTag("PileupSummaryInfos"),
+    pileupSrc = cms.InputTag("addPileupInfo"),
     useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
     weights = cms.vdouble(1.0),
     enabled = cms.bool(False),
@@ -303,7 +303,15 @@ def formatEfficiencyTrigger(pset):
     else:
         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
 
-# Vertex weighting
+
+# Weighting by instantaneous luminosity, and the number of true
+# simulated pile up interactions
+def setPileupWeightFor2011(pset=vertexWeight):
+    pset.weights = cms.vdouble(0.35702197, 0.39872966, 0.93383097, 1.57574239, 2.06786668, 2.23237405, 2.05856116, 1.66571901, 1.20680394, 0.79514625, 0.48238646, 0.30154678, 0.19093225, 0.12479613, 0.08150170, 0.05577673, 0.03874763, 0.02759475, 0.02023368, 0.01580798, 0.01150307, 0.01010894, 0.00765439, 0.00596082, 0.00469376, 0.00000000)
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+
+# Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
     # From runs 136035-149294 single tau trigger and W+jet
     #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
