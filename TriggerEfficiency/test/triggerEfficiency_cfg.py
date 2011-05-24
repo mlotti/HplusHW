@@ -121,8 +121,8 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
 
-#process.load("HiggsAnalysis.TriggerEfficiency.EventFilter_cff")
-#
+process.load("HiggsAnalysis.TriggerEfficiency.EventFilter_cff")
+
 process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
     triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
@@ -133,7 +133,7 @@ process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
 
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
-#    process.eventFilter *
+    process.eventFilter *
     process.triggerEfficiencyAnalyzer
 )
 
