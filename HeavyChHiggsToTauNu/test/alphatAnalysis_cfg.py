@@ -16,7 +16,7 @@ dataVersion = "41Xdata"   # Run2011 PromptReco
 # Flags for additional alphat analysis modules
 # Perform the alphat analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False

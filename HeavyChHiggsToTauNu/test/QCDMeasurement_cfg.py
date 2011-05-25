@@ -16,7 +16,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -54,9 +54,9 @@ process.source = cms.Source('PoolSource',
     #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
     #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
-    #"file:/home/wendland/data/pattuple_176_1_ikP.root"
+    "file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 

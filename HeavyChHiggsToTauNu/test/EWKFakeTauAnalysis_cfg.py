@@ -17,7 +17,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
