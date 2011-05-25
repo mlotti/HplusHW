@@ -122,15 +122,17 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiency parametrisation
-#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased # VeryLoose
-param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased # Tight
-param.trigger.triggerTauSelection.rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
-param.trigger.triggerMETSelection = param.MET
-param.trigger.triggerMETSelection.METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+)
+param.trigger.triggerMETSelection = param.MET.clone(
+  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+)
 if (doTriggerParametrisation and not dataVersion.isData()):
     # 2010 and 2011 scenarios
     #param.setEfficiencyTriggersFor2010()
-    #param.setEfficiencyTriggersFor2011()
+    param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
     param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
