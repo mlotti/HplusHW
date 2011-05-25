@@ -51,6 +51,9 @@ namespace HPlus {
     hHltMetAfterTrigger = makeTH<TH1F>(myDir, "Trigger_HLT_MET_After_Trigger", "HLT_MET_After_Trigger;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
     hHltMetSelected = makeTH<TH1F>(myDir, "Trigger_HLT_MET_Selected", "HLT_MET_Selected;HLT_MET, GeV;N_{events} / 3 GeV", 100, 0., 300.);
     hTriggerParametrisationWeight = makeTH<TH1F>(myDir, "Trigger_Parametrisation_Weight", "Trigger_Parametrisation_Weight;Weight*1000;N_{events} / 0.1 percent", 1000, 0., 1000.);
+    hControlSelectionType = makeTH<TH1F>(myDir, "Control_Trigger_Selection_Type", "Control_Trigger_Selection_Type;;N_{events}", 2, 0., 2.);
+    hControlSelectionType->GetXaxis()->SetBinLabel(1, "byTriggerBit");
+    hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerEffParam");
   }
 
   TriggerSelection::~TriggerSelection() {
@@ -60,6 +63,7 @@ namespace HPlus {
   TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     bool passEvent = false;
     TriggerPath* returnPath = NULL;
+    hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit)
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)

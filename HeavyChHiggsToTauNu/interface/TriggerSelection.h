@@ -111,6 +111,7 @@ namespace HPlus {
     TH1 *hHltMetAfterTrigger;
     TH1 *hHltMetSelected;
     TH1 *hTriggerParametrisationWeight;
+    TH1 *hControlSelectionType;
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;
