@@ -151,6 +151,7 @@ namespace HPlus {
     pat::TriggerPathRefVector accepted = trigger.acceptedPaths();
     for(pat::TriggerPathRefVector::const_iterator iter = accepted.begin(); iter != accepted.end(); ++iter) {
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
+	// std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         increment(fTriggerCount);
         return true;
       }

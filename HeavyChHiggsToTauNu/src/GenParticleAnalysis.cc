@@ -60,10 +60,13 @@ namespace HPlus {
     hMagCM1pHp = makeTH<TH1F>(myDir, "genMagCM1pHp", "genMagCMs1pHp", 100, 0.95, 1.);
     hMagCM1pW = makeTH<TH1F>(myDir, "genMagCM1pW", "genMagCMs1pW", 100, 0.95, 1.);
     hHpMass = makeTH<TH1F>(myDir, "HpMass", "HpMass", 100, 100, 200.);
+    hBquarkMultiplicity = makeTH<TH1F>(myDir, "genBquark_Multiplicity", "genBquark_Multiplicity", 20, -0.5, 19.5);
+    hBquarkStatus2Multiplicity = makeTH<TH1F>(myDir, "genBquark_Status2_Multiplicity", "genBquark_Status2_Multiplicity", 20, -0.5, 19.5);
+    hBquarkStatus3Multiplicity = makeTH<TH1F>(myDir, "genBquark_Status3_Multiplicity", "genBquark_Status3_Multiplicity", 20, -0.5, 19.5);
   }
 
   void GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
-
+  
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
 
@@ -281,6 +284,64 @@ namespace HPlus {
 	}
       }
     }
+
+    
+    // b-quark analysis
+    int nBquarks = 0;
+    for (size_t i=0; i < genParticles->size(); ++i){  
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      
+      if ( abs(id) != 5 ) continue;      
+      nBquarks++;
+    }
+    hBquarkMultiplicity->Fill(nBquarks, fEventWeight.getWeight());
+
+  } //eof: void GenParticleAnalysis::analyze()
+
+
+
+
+  //  edm::PtrVector<const reco::Candidate*> GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+  std::vector<const reco::Candidate*> GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+  //  double GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+
+ 
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+
+    // typedef math::XYZTLorentzVectorD LorentzVector;
+    // typedef std::vector<LorentzVector> LorentzVectorCollection;
+    
+    // edm::PtrVector<const reco::Candidate*> genBquarks;
+    std::vector<const reco::Candidate*> genBquarks;
+
+    
+    // b-quark analysis
+    int nBquarks = 0;
+    int nStatus2Bquarks = 0;
+    int nStatus3Bquarks = 0;
+
+    /// Loop over all genParticles
+    for (size_t i=0; i < genParticles->size(); ++i){  
+      const reco::Candidate & p = (*genParticles)[i];
+      int id = p.pdgId();
+      
+      if ( abs(id) != 5 ) continue;      
+      nBquarks++;
+      if (p.status() == 2) nStatus2Bquarks++;
+      if (p.status() == 3) nStatus3Bquarks++;
+      
+      genBquarks.push_back(&p);
+
+      
+    } //eof:  for 
+    hBquarkMultiplicity->Fill(nBquarks, fEventWeight.getWeight());
+    hBquarkStatus2Multiplicity ->Fill(nStatus2Bquarks, fEventWeight.getWeight());
+    hBquarkStatus3Multiplicity ->Fill(nStatus3Bquarks, fEventWeight.getWeight());
+    
+    return genBquarks;
   }
+
   
 }

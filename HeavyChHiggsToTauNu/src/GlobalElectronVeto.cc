@@ -54,8 +54,8 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalElectronVeto");
     
-    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt", 400, 0.0, 400.0);
-    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta", 400, -3.0, 3.0);
+    hElectronPt  = makeTH<TH1F>(myDir, "GlobalElectronPt", "GlobalElectronPt;isolated electron p_{T}, GeV/c;N_{electrons} / 5 GeV/c", 80, 0.0, 400.0);
+    hElectronEta = makeTH<TH1F>(myDir, "GlobalElectronEta", "GlobalElectronEta;isolated electron #eta;N_{electrons} / 0.1", 60, -3.0, 3.0);
     hElectronPt_matchingMCelectron  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectron", "GlobalElectronPt_matchingMCelectron", 400, 0.0, 400.0);
     hElectronEta_matchingMCelectron = makeTH<TH1F>(myDir, "GlobalElectronEta_matchingMCelectron", "GlobalElectronEta_matchingMCelectron", 400, -3.0, 3.0);
     hElectronPt_matchingMCelectronFromW  = makeTH<TH1F>(myDir, "GlobalElectronPt_matchingMCelectronFromW", "GlobalElectronPt_matchingMCelectronFromW", 400, 0.0, 400.0);
@@ -67,7 +67,7 @@ namespace HPlus {
     hElectronEta_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_AfterSelection", "GlobalElectronEta_AfterSelection", 60, -3.0, 3.0);
     hElectronPt_gsfTrack_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsfTrack_AfterSelection", 100, 0.0, 200.0);
     hElectronEta_gsfTrack_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
-     hElectronImpactParameter = makeTH<TH1F>(myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
+    hElectronImpactParameter = makeTH<TH1F>(myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
     bDecision = false;
     bPassedElecID = false;

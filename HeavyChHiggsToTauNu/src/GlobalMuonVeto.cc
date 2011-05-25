@@ -68,8 +68,8 @@ namespace HPlus {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("GlobalMuonVeto");
     
-    hMuonPt = makeTH<TH1F>(myDir, "GlobalMuonPt", "GlobalMuonPt", 400, 0., 400.);
-    hMuonEta = makeTH<TH1F>(myDir, "GlobalMuonEta", "GlobalMuonEta", 400, -3., 3.);
+    hMuonPt = makeTH<TH1F>(myDir, "GlobalMuonPt", "GlobalMuonPt;isolated muon p_{T}, GeV/c;N_{muons} / 5 GeV/c", 80, 0., 400.);
+    hMuonEta = makeTH<TH1F>(myDir, "GlobalMuonEta", "GlobalMuonEta;isolated muon #eta;N_{muons} / 0.1", 60, -3., 3.);
     hMuonPt_matchingMCmuon = makeTH<TH1F>(myDir, "GlobalMuonPtmatchingMCmuon", "GlobalMuonPtmatchingMCmuon", 400, 0., 400.);
     hMuonEta_matchingMCmuon = makeTH<TH1F>(myDir, "GlobalMuonEtamatchingMCmuon", "GlobalMuonEtamatchingMCmuon", 400, -3., 3.);
     hMuonPt_matchingMCmuonFromW = makeTH<TH1F>(myDir, "GlobalMuonPtmatchingMCmuonFromW", "GlobalMuonPtmatchingMCmuonFromW", 400, 0., 400.);
@@ -84,8 +84,8 @@ namespace HPlus {
     hMuonEta_InnerTrack_AfterSelection = makeTH<TH1F>(myDir, "GlobalMuonEta_InnerTrack_AfterSelection", "GlobalMuonEta_InnerTrack_AfterSelection", 60, -3., 3.);
     hMuonPt_GlobalTrack_AfterSelection  = makeTH<TH1F>(myDir, "GlobalMuonPt_GlobalTrack_AfterSelection", "GlobalMuonPt_GlobalTrack_AfterSelection", 100, 0., 400.);
     hMuonEta_GlobalTrack_AfterSelection = makeTH<TH1F>(myDir, "GlobalMuonEta_GlobalTrack_AfterSelection", "GlobalMuonEta_GlobalTrack_AfterSelection", 60, -3., 3.);
-     hMuonImpactParameter = makeTH<TH1F>(myDir, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
-     hMuonZdiff = makeTH<TH1F>(myDir, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
+    hMuonImpactParameter = makeTH<TH1F>(myDir, "MuonImpactParameter", "MuonImpactParameter", 100, 0., 0.1);
+    hMuonZdiff = makeTH<TH1F>(myDir, "MuonZdiff", "MuonZdiff", 100, 0., 10.);
  
     // Check here that the muon selection is reasonable
     if(fMuonSelection != "All" &&
