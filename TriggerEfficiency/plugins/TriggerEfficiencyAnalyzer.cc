@@ -23,13 +23,13 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
         TriggerEfficiencyAnalyzer(const edm::ParameterSet&);
         ~TriggerEfficiencyAnalyzer();
 
-        void beginRun(const edm::Run&,const edm::EventSetup&);
-        void beginJob();
-        void analyze( const edm::Event&, const edm::EventSetup&);
-        void endJob();
-        void endRun(const edm::Run&,const edm::EventSetup&);
-
     private:
+        virtual void beginRun(const edm::Run&,const edm::EventSetup&);
+        virtual void beginJob();
+        virtual void analyze( const edm::Event&, const edm::EventSetup&);
+        virtual void endJob();
+        virtual void endRun(const edm::Run&,const edm::EventSetup&);
+
 	edm::InputTag triggerResults;
 	std::string   triggerBitName;
 	edm::InputTag tauSrc;
@@ -38,7 +38,7 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 	TTree* TriggerEfficiencyTree;
 
 	int triggerBit;
-	double taupt,taueta,met;
+	float taupt,taueta,met;
 };
 
 TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iConfig) :
@@ -63,8 +63,10 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 
 TriggerEfficiencyAnalyzer::~TriggerEfficiencyAnalyzer(){}
 
-void TriggerEfficiencyAnalyzer::beginRun(const edm::Run&,const edm::EventSetup&){}
+void TriggerEfficiencyAnalyzer::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
+
 void TriggerEfficiencyAnalyzer::beginJob(){}
+
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	triggerBit = 0;
@@ -90,7 +92,7 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
 	iEvent.getByLabel(tauSrc, htaus);
 
 	const edm::PtrVector<pat::Tau>& taus = htaus->ptrVector();
-
+//FIXME: what if we have more than 1 taus passing the selection? 25.5.2011/SL
 	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin();
                                                      iter!= taus.end(); ++iter) {
       		const edm::Ptr<pat::Tau> iTau = *iter;
@@ -107,12 +109,12 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
 
 
 // Filling..
-
 	TriggerEfficiencyTree->Fill();
 
 }
+
 void TriggerEfficiencyAnalyzer::endJob(){}
-void TriggerEfficiencyAnalyzer::endRun(const edm::Run&,const edm::EventSetup&){}
+void TriggerEfficiencyAnalyzer::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(TriggerEfficiencyAnalyzer);

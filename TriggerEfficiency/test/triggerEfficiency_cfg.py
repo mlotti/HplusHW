@@ -92,6 +92,23 @@ process.TFileService.fileName = cms.string("efficiencyTree.root")
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs={"doTauHLTMatching":False})
 
+process.patDefaultSequence.remove(process.patElectrons)
+process.patDefaultSequence.remove(process.selectedPatElectrons)
+process.patDefaultSequence.remove(process.electronMatch)
+process.patDefaultSequence.remove(process.cleanPatElectrons)
+process.patDefaultSequence.remove(process.cleanPatPhotons)
+process.patDefaultSequence.remove(process.cleanPatTaus)
+process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
+process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
+process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
+process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
+process.patDefaultSequence.remove(process.cleanPatJets)
+process.patDefaultSequence.remove(process.countPatElectrons)
+process.patDefaultSequence.remove(process.countPatLeptons)
+
+
+process.commonSequence.remove(process.collisionDataSelection)
+del process.collisionDataSelection
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
