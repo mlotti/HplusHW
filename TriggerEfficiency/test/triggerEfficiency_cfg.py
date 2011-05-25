@@ -90,7 +90,7 @@ process.TFileService.fileName = cms.string("efficiencyTree.root")
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs={"doTauHLTMatching":False})
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
 
 # Add configuration information to histograms.root
