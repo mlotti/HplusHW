@@ -43,15 +43,17 @@ namespace HPlus {
       fTauID = new TauIDPFShrinkingCone(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "ShrinkingConePFTauTaNCBased")
       fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else if(fSelection == "HPSTauBased")
-      fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+    else if(fSelection == "HPSTightTauBased")
+      fTauID = new TauIDPFHPSTight(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "HPSMediumTauBased")
-      fTauID = new TauIDPFShrinkingConeHPSMedium(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+      fTauID = new TauIDPFHPSMedium(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "HPSLooseTauBased")
-      fTauID = new TauIDPFShrinkingConeHPSLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+      fTauID = new TauIDPFHPSLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+    else if(fSelection == "HPSVeryLooseTauBased")
+      fTauID = new TauIDPFHPSVeryLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "CombinedHPSTaNCTauBased")
       fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, HPSLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTightTauBased, HPSMediumTauBased, HPSLooseTauBased, HPSVeryLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");

@@ -38,7 +38,7 @@ namespace HPlus {
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -48,7 +48,6 @@ namespace HPlus {
     fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fPFTauIsolationCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("tauIsolationCalculator")),
-    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -264,9 +263,6 @@ namespace HPlus {
     return;
   }
 
-
-
-
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
@@ -279,17 +275,12 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
-    // Trigger and HLT_MET cut (only applied to REAL data)
+
+    // Trigger and HLT_MET cut; or trigger efficiency parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-// tmp    if (iEvent.isRealData()) {
-      // Trigger is applied only if the data sample is real data
-      // std::cout <<"*** QCDMeasurement.cc ***  isRealData = " << iEvent.isRealData() << std::endl;
-      if(!triggerData.passedEvent()) return;
-// tmp    }
+    if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
-//     if(!triggerData.passedEvent()) return;
-//     increment(fTriggerAndHLTMetCutCounter);
 
 
     // Primary vertex
@@ -298,8 +289,6 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
 
-    // Get MET just for reference; do not apply a MET cut but instead use P(MET>70 GeV) as weight
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Apply pre-MET cut to see if MC Normalization is better.
     //if(metData.getSelectedMET()->et() < 30 ) return;
@@ -317,18 +306,10 @@ namespace HPlus {
 
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-
-    // Apply Trigger efficiency parametrization weights (Right after calling Tau & MET functions)
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauCandidateData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
-/* tmp    if (!iEvent.isRealData() ) {
-      // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
-      fEventWeight.multiplyWeight(triggerEfficiency);
-  } tmp */
-
-
+    
     // GlobalElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 

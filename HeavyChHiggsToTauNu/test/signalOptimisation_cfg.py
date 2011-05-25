@@ -35,6 +35,9 @@ doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
 
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = True
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -108,9 +111,18 @@ param.setAllTauSelectionOperatingMode('standard')
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+# Set the triggers for trigger efficiency parametrisation
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased # Tight
+param.trigger.triggerTauSelection.rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+param.trigger.triggerMETSelection = param.MET
+param.trigger.triggerMETSelection.METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
@@ -127,7 +139,7 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed         
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -137,8 +149,6 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
@@ -166,14 +176,12 @@ print "TauSelection rtauCut:", process.signalOptimisation.tauSelection.rtauCut
 print "TauSelection antiRtauCut:", process.signalOptimisation.tauSelection.antiRtauCut
 print "TauSelection invMassCut:", process.signalOptimisation.tauSelection.invMassCut
 print "TauSelection nprongs:", process.signalOptimisation.tauSelection.nprongs
-print "\nTriggerEfficiency:", process.signalOptimisation.triggerEfficiency
 print "\nMET:", process.signalOptimisation.MET
 print "\nGlobalElectronVeto:", process.signalOptimisation.GlobalElectronVeto
 print "\nGlobalMuonVeto:", process.signalOptimisation.GlobalMuonVeto
 print "\nJetSelection:", process.signalOptimisation.jetSelection
 print "\nbTagging: ", process.signalOptimisation.bTagging
 print "\nFakeMETVeto:", process.signalOptimisation.fakeMETVeto
-print "\nTriggerEmulationEfficiency:", process.signalOptimisation.TriggerEmulationEfficiency
 print "\nEvtTopology:", process.signalOptimisation.EvtTopology
 #print "\nMetTables:", process.signalOptimisation.factorization
 print "\nTopSelection:", process.signalOptimisation.topSelection
@@ -228,7 +236,7 @@ if doBTagScan:
 # signalOptimisationTauSelectionShrinkingConeCutBased
 # signalOptimisationTauSelectionShrinkingConeTaNCBased
 # signalOptimisationTauSelectionCaloTauCutBased
-# signalOptimisationTauSelectionHPSTauBased
+# signalOptimisationTauSelectionHPSTightTauBased
 # signalOptimisationTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and

@@ -24,7 +24,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h" //trigg. eff. param.
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
 
 
@@ -123,7 +122,6 @@ namespace HPlus {
     PFTauIsolationCalculator fPFTauIsolationCalculator;
     
     //
-    TriggerEfficiency fTriggerEfficiency;
     VertexWeight fVertexWeight;
     // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
     

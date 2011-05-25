@@ -15,7 +15,12 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
+    selectionType = cms.untracked.string("byTriggerBit"),
+    triggerTauSelection = cms.untracked.PSet(),
+    triggerMETSelection = cms.untracked.PSet(),
+    triggerEfficiency = cms.untracked.PSet()
 )
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
 primaryVertexSelection = cms.untracked.PSet(
@@ -27,7 +32,7 @@ primaryVertexSelection = cms.untracked.PSet(
 tauSelectionBase = cms.untracked.PSet(
     # Operating mode options: 'standard'
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
+    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.3), # jet |eta| < value
@@ -39,37 +44,42 @@ tauSelectionBase = cms.untracked.PSet(
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausCaloRecoTauTauTriggerMatched",
+    src = "selectedPatTausCaloRecoTau",
     selection = "CaloTauCutBased"
 )
 
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTauTauTriggerMatched",
+    src = "selectedPatTausShrinkingConePFTau",
     selection = "ShrinkingConePFTauCutBased"
 )
 
 tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTauTauTriggerMatched",
+    src = "selectedPatTausShrinkingConePFTau",
     selection = "ShrinkingConePFTauTaNCBased"
 )
 
-tauSelectionHPSTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
-    selection = "HPSTauBased"
+tauSelectionHPSTightTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTau",
+    selection = "HPSTightTauBased"
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsPFTau",
     selection = "HPSMediumTauBased"
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsPFTau",
     selection = "HPSLooseTauBased"
 )
 
+tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTau",
+    selection = "HPSVeryLooseTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsTancPFTau",
     selection = "CombinedHPSTaNCTauBased"
 )
 
@@ -77,7 +87,7 @@ tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
 tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
-                 tauSelectionHPSTauBased,
+                 tauSelectionHPSTightTauBased,
                  tauSelectionHPSMediumTauBased,
                  tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
@@ -92,7 +102,7 @@ tauSelectionNames = ["TauSelectionCaloTauCutBased",
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+tauSelection = tauSelectionHPSTightTauBased
 #tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
 
@@ -211,6 +221,8 @@ triggerEfficiency = cms.untracked.PSet(
     # looked dynamically from TriggerEfficiency_cff.py
     parameters = cms.PSet()
 )
+trigger.triggerEfficiency = triggerEfficiency
+
 # Look up dynamically the triggers for which the parameters exist
 import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
@@ -324,7 +336,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTau"
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
-    tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
+    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
@@ -333,7 +345,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTauTauTriggerMatched"
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
@@ -344,6 +356,19 @@ def setTauSelection(module, val):
 def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
     selections = tauSelections[:]
     names = tauSelectionNames[:]
+    # Remove TCTau from list
+    tctauIndex = selections.index(tauSelectionCaloTauCutBased)
+    del selections[tctauIndex]
+    del names[tctauIndex]
+    # Remove PF shrinking cone from list
+    pfShrinkingConeIndex = selections.index(tauSelectionShrinkingConeCutBased)
+    del selections[pfShrinkingConeIndex]
+    del names[pfShrinkingConeIndex]
+    # Remove TaNC from list
+    tancIndex = selections.index(tauSelectionShrinkingConeTaNCBased)
+    del selections[tancIndex]
+    del names[tancIndex]
+    # HPS loose
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
     #del selections[hpsLoose]
     #del names[hpsLoose]
@@ -354,6 +379,7 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
         del names[caloTauIndex]
     except ValueError:
         pass
+    # Remove combined HPS TaNC from list
     combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]

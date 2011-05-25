@@ -33,6 +33,9 @@ doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
 
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = True
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -101,8 +104,22 @@ param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
 
-# Set tau sources to non-trigger matched tau collections
+# Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
+
+# Set the triggers for trigger efficiency parametrisation
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased # Tight
+param.trigger.triggerTauSelection.rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+param.trigger.triggerMETSelection = param.MET
+param.trigger.triggerMETSelection.METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+
 
 # Set the triggers for trigger efficiencies
 # one trigger
@@ -134,7 +151,7 @@ process.EWKFakeTauAnalysis = cms.EDProducer("HPlusEWKFakeTauAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed         
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -144,7 +161,6 @@ process.EWKFakeTauAnalysis = cms.EDProducer("HPlusEWKFakeTauAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis                                     
 )
@@ -160,11 +176,10 @@ if dataVersion.isData():
 # Print output
 print "Trigger:", process.EWKFakeTauAnalysis.trigger
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.EWKFakeTauAnalysis.trigger.hltMetCut
-print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.EWKFakeTauAnalysis.triggerEfficiency.selectTriggers])
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.EWKFakeTauAnalysis.trigger.triggerEfficiency.selectTriggers])
 print "TauSelection algorithm:", process.EWKFakeTauAnalysis.tauSelection.selection
 print "TauSelection src:", process.EWKFakeTauAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.EWKFakeTauAnalysis.tauSelection.operatingMode
-print "TauSelection factorization source:", process.EWKFakeTauAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -200,7 +215,7 @@ process.EWKFakeTauAnalysisPath = cms.Path(
 # EWKFakeTauAnalysisTauSelectionShrinkingConeCutBased
 # EWKFakeTauAnalysisTauSelectionShrinkingConeTaNCBased
 # EWKFakeTauAnalysisTauSelectionCaloTauCutBased
-# EWKFakeTauAnalysisTauSelectionHPSTauBased
+# EWKFakeTauAnalysisTauSelectionHPSTightTauBased
 # EWKFakeTauAnalysisTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and

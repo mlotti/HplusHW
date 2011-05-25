@@ -52,7 +52,7 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeHPS ---------------------------------------------
-  TauIDPFShrinkingConeHPS::TauIDPFShrinkingConeHPS(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+  TauIDPFHPSTight::TauIDPFHPSTight(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
     TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSTight", myDir)
   {
     // Initialize counter objects for tau isolation
@@ -63,16 +63,16 @@ namespace HPlus {
     createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
-  TauIDPFShrinkingConeHPS::~TauIDPFShrinkingConeHPS() { }
+  TauIDPFHPSTight::~TauIDPFHPSTight() { }
   
-  bool TauIDPFShrinkingConeHPS::passIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSTight::passIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byTightIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDPFShrinkingConeHPS::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSTight::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
@@ -80,7 +80,7 @@ namespace HPlus {
   }
   
   // TauIDPFShrinkingConeHPSMedium ---------------------------------------
-  TauIDPFShrinkingConeHPSMedium::TauIDPFShrinkingConeHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+  TauIDPFHPSMedium::TauIDPFHPSMedium(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
     TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSMedium", myDir)
   {
     // Initialize counter objects for tau isolation
@@ -91,16 +91,16 @@ namespace HPlus {
     createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
-  TauIDPFShrinkingConeHPSMedium::~TauIDPFShrinkingConeHPSMedium() { }
+  TauIDPFHPSMedium::~TauIDPFHPSMedium() { }
   
-  bool TauIDPFShrinkingConeHPSMedium::passIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSMedium::passIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byMediumIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDPFShrinkingConeHPSMedium::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSMedium::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byMediumIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
@@ -108,7 +108,7 @@ namespace HPlus {
   }
 
   // TauIDPFShrinkingConeHPSLoose ---------------------------------------
-  TauIDPFShrinkingConeHPSLoose::TauIDPFShrinkingConeHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+  TauIDPFHPSLoose::TauIDPFHPSLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
     TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSLoose", myDir)
   {
     // Initialize counter objects for tau isolation
@@ -119,22 +119,50 @@ namespace HPlus {
     createSelectionCounterPackagesBeyondIsolation(prongCount);
   }
 
-  TauIDPFShrinkingConeHPSLoose::~TauIDPFShrinkingConeHPSLoose() { }
+  TauIDPFHPSLoose::~TauIDPFHPSLoose() { }
   
-  bool TauIDPFShrinkingConeHPSLoose::passIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSLoose::passIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byLooseIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
-  bool TauIDPFShrinkingConeHPSLoose::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+  bool TauIDPFHPSLoose::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
+
+  // TauIDPFShrinkingConeHPSVeryLoose ---------------------------------------
+  TauIDPFHPSVeryLoose::TauIDPFHPSVeryLoose(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDPFHPSBase(iConfig, eventCounter, eventWeight, label+"_HPSVeryLoose", myDir)
+  {
+    // Initialize counter objects for tau isolation
+    fIDHPS = fCounterPackager.addSubCounter(label+"_HPSVeryLoose", "HPS", 0);
+    // Histograms
+    
+    // Initialize rest counter objects
+    createSelectionCounterPackagesBeyondIsolation(prongCount);
+  }
+
+  TauIDPFHPSVeryLoose::~TauIDPFHPSVeryLoose() { }
   
+  bool TauIDPFHPSVeryLoose::passIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byVLooseIsolation") < 0.5) return false;
+    fCounterPackager.incrementSubCount(fIDHPS);
+    // All cuts passed, return true
+    return true;
+  }
+
+  bool TauIDPFHPSVeryLoose::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
+    if (tau->tauID("byVLooseIsolation") > 0.5) return false;
+    fCounterPackager.incrementSubCount(fIDHPS);
+    // All cuts passed, return true
+    return true;
+  }
+
   // TauIDPFShrinkingConeTaNC --------------------------------------------
   TauIDPFShrinkingConeTaNC::TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, label+"_TaNCTenth", myDir)

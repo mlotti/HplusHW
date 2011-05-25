@@ -15,14 +15,14 @@ namespace HPlus {
     fMETSelection(metSelection), fPassedEvent(passedEvent) {}
   METSelection::Data::~Data() {}
   
-  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  METSelection::METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
-    fMetCutCount(eventCounter.addSubCounter("MET","MET cut")),
+    fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    TFileDirectory myDir = fs->mkdir("METSelection");
+    TFileDirectory myDir = fs->mkdir(label);
     
     hMet = makeTH<TH1F>(myDir, "met", "met", 400, 0., 400.);
     hMetSignif = makeTH<TH1F>(myDir, "metSignif", "metSignif", 50, 0., 500.);
