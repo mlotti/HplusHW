@@ -2,10 +2,10 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Single tau + MET
-    "Tau_160404-161176_May10": {
+    "Tau_160431-161176_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
-        "runs": (0, 0), #
+        "runs": (160431, 161176), #
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
@@ -15,10 +15,10 @@ datasets = {
             },
         }
     },
-    "Tau_161216-163261_May10": {
+    "Tau_161217-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
-        "runs": (0, 163261),
+        "runs": (161217, 163261),
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
@@ -28,10 +28,10 @@ datasets = {
             },
         },
     },
-    "Tau_163269-?_May10": {
+    "Tau_163270-163869_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
-        "runs": (0, 0),
+        "runs": (163270, 163869),
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
@@ -43,10 +43,10 @@ datasets = {
     },
 
     # Single Mu
-    "SingleMu_160404-163261_May10": {
+    "SingleMu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",
-        "runs": (0, 0),
+        "runs": (160431, 163261),
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
@@ -56,10 +56,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_163269-?_May10": {
+    "SingleMu_163270-163869_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu24_v2",
-        "runs": (0, 0),
+        "runs": (163270, 163869),
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
