@@ -40,8 +40,34 @@ namespace edm {
 class TH1;
 class TH2;
 
-namespace HPlus {
+
+namespace HPlus { 
   class QCDMeasurement {  
+    class AnalysisVariation {
+    public:
+      AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins);
+      ~AnalysisVariation();
+      
+      void analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+
+    private:
+      double fMETCut;
+      double fFakeMETVetoCut;
+      // event counts in bins of tau jet pt
+      TH1F* hAfterBigBox;
+      TH1F* hLeg1AfterBTagging;
+      TH1F* hLeg1AfterMET;
+      TH1F* hLeg1AfterFakeMETVeto;
+      TH1F* hLeg1AfterTopSelection;
+      TH1F* hLeg1AfterAntiTopSelection;
+      TH1F* hAfterBigBoxAndTauIDNoRtau;
+      TH1F* hLeg2AfterRtau;
+      TH1F* hLeg3AfterFakeMETVeto;      
+      
+      TH1F* hLeg1FakeMetVetoDistribution;
+      TH1F* hLeg3FakeMetVetoDistribution;
+    };
+    
   enum QCDSelectionOrder {
     kQCDOrderTrigger,
     kQCDOrderVertexSelection,
@@ -56,7 +82,7 @@ namespace HPlus {
     kQCDOrderBTagFactorized,
     kQCDOrderRtauFactorized
   };
-
+  
   public:
     explicit QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~QCDMeasurement();
@@ -85,6 +111,8 @@ namespace HPlus {
     /// ABCD method between tau isolation and b-tagging (very low statistics for passing tauID)
     void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
     void analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+    // Analysis variations
+    std::vector<AnalysisVariation> fAnalyses;
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;

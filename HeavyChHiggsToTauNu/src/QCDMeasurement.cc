@@ -188,6 +188,17 @@ namespace HPlus {
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMETFactorized,"MET (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTagFactorized,"#geq 1 b jet (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderRtauFactorized,"R_{#tau} (factorized)");
+    
+    // Analysis variations
+    fAnalyses.push_back(AnalysisVariation(70., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(70., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(70., 30., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 30., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -820,6 +831,13 @@ namespace HPlus {
     analyzeCorrelation(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
+    for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
+      (*it).analyse(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+                       fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
+                       myEventWeightBeforeMetFactorization);
+    }
+
+    
     // Continue best cut path
 
     /// FakeMETVeto and MET Correlations
@@ -908,7 +926,7 @@ namespace HPlus {
 					    fakeMETData,
 					    forwardJetData,
 					    myEventWeightBeforeMetFactorization);
-
+    
     // Forward jet veto -- experimental
     if (!forwardJetData.passedEvent()) return;
     increment(fForwardJetVetoCounter);
@@ -1011,6 +1029,62 @@ namespace HPlus {
       hCorrelationRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
       if (btagData.passedEvent()) {
         hCorrelationBtagAndRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
+      }
+    }
+  }
+  
+  
+  
+  QCDMeasurement::AnalysisVariation::AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins)
+  : fMETCut(METcut),
+    fFakeMETVetoCut(fakeMETVetoCut) {
+    std::stringstream myName;
+    myName << "QCDAnalysisVariation_METcut" << METcut << "_FakeMETCut" << fakeMETVetoCut;
+    // Create histograms
+    edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir(myName.str());
+    hAfterBigBox = makeTH<TH1F>(myDir, "AfterBigBox", "AfterBigBox", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterFakeMETVeto = makeTH<TH1F>(myDir, "Leg1AfterFakeMETVeto", "Leg1AfterFakeMETVeto", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterTopSelection = makeTH<TH1F>(myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterAntiTopSelection = makeTH<TH1F>(myDir, "Leg1AfterAntiTopSelection", "Leg1AfterAntiTopSelection", nTauPtBins, 0, nTauPtBins);
+    hAfterBigBoxAndTauIDNoRtau = makeTH<TH1F>(myDir, "AfterBigBoxAndTauIDNoRtau", "AfterBigBoxAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hLeg2AfterRtau = makeTH<TH1F>(myDir, "Leg2AfterRtau", "Leg2AfterRtau", nTauPtBins, 0, nTauPtBins);
+    hLeg3AfterFakeMETVeto = makeTH<TH1F>(myDir, "Leg3AfterFakeMETVeto", "Leg3AfterFakeMETVeto", nTauPtBins, 0, nTauPtBins);
+    hLeg1FakeMetVetoDistribution = makeTH<TH1F>(myDir, "Leg1_Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hLeg3FakeMetVetoDistribution = makeTH<TH1F>(myDir, "Leg3_Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+  }
+  QCDMeasurement::AnalysisVariation::~AnalysisVariation() { }
+  void QCDMeasurement::AnalysisVariation::analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
+    hAfterBigBox->Fill(tauPtBin, weightWithoutMET);
+    // Leg 1
+    if (btagData.passedEvent()) {
+      hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
+      if (METData.getSelectedMET()->et() > fMETCut) {
+        hLeg1AfterMET->Fill(tauPtBin, weightWithoutMET);
+        hLeg1FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
+        if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+          hLeg1AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
+          if (topSelectionData.passedEvent()) {
+            hLeg1AfterTopSelection->Fill(tauPtBin, weightWithoutMET);
+          } else {
+            hLeg1AfterAntiTopSelection->Fill(tauPtBin, weightWithoutMET);
+          }
+        }
+      }
+    }
+    // TauID without Rtau
+    if (tauData.passedEvent()) {
+      hAfterBigBoxAndTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
+      // Leg2
+      if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+        hLeg2AfterRtau->Fill(tauPtBin, weightWithoutMET);
+      }
+      // Leg3
+      hLeg3FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
+      if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+        hLeg3AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
       }
     }
   }
