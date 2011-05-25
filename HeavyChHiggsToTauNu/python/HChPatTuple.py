@@ -183,6 +183,7 @@ def addPat(process, dataVersion,
         if includePFCands:
             out.outputCommands.extend([
                     "keep *_particleFlow_*_*",
+                    "keep *_generalTracks_*_*",
                     ])
 
     # PAT function must be added last (PF2PAT requires unmodified
