@@ -36,6 +36,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fBTagging->fSelectedJets; }
       const int getBJetCount() const { return fBTagging->iNBtags; }
+      const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
 
     private:
       const BTagging *fBTagging;
@@ -78,6 +79,7 @@ namespace HPlus {
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     int iNBtags;
+    double fMaxDiscriminatorValue;
   };
 }
 
