@@ -48,7 +48,15 @@ def replaceInputTag(tag, old, new):
 
 def customise(process):
     # Command line arguments
-    options, dataVersion = getOptionsDataVersion("41Xdata")
+    import FWCore.ParameterSet.VarParsing as VarParsing
+    options = VarParsing.VarParsing ('analysis')
+    options.register ('overrideBeamSpot',
+                      0, # default value, false
+                      VarParsing.VarParsing.multiplicity.singleton,
+                      VarParsing.VarParsing.varType.int,
+                      "should I override beamspot in globaltag?")
+
+    options, dataVersion = getOptionsDataVersion("41Xdata", options)
 
     processName = process.name_()
 
@@ -126,7 +134,7 @@ def customise(process):
             "keep *_gtDigis_*_%s" % recoProcessName,
             "keep *_l1GtTriggerMenuLite_*_%s" % recoProcessName, # in run block
             "keep *_conditionsInEdm_*_%s" % recoProcessName, # in run block
-            "keep *_addPileupInfo*_%s" % recoProcessName, # for MC
+            "keep *_addPileupInfo*_*_%s" % recoProcessName, # for MC
 
             "drop *_*_*_%s" % generationProcessName,
             "keep *_dimuonsGlobal_*_%s" % generationProcessName,
@@ -228,16 +236,6 @@ def customise(process):
         print "particleFlow as input in module %s, InputTags: %s" % (label, ", ".join(str(x) for x in pfInputNeeded[label]))
         pfOutputCommands.append("keep *_%s_*_%s" % (label, processName))
     outputModule.outputCommands.extend(pfOutputCommands)
-
-
-    import FWCore.ParameterSet.VarParsing as VarParsing
-    options = VarParsing.VarParsing ('analysis')
-
-    options.register ('overrideBeamSpot',
-                      0, # default value, false
-                      VarParsing.VarParsing.multiplicity.singleton,
-                      VarParsing.VarParsing.varType.int,
-                      "should I override beamspot in globaltag?")
 
 
     if options.overrideBeamSpot !=  0:

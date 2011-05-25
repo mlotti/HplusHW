@@ -66,26 +66,107 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, medium)
 
     loose = tight.clone(
-        candSrc = "patMuonsWithMedium",
+        candSrc = name,
         embedPrefix = "byLoose"+postfix,
     )
     name = "patMuonsWithLoose"+postfix
     setattr(process, name, loose)
 
     vloose = tight.clone(
-        candSrc = "patMuonsWithLoose",
+        candSrc = name,
         embedPrefix = "byVLoose"+postfix,
     )
     name = "patMuonsWithVLoose"+postfix
     setattr(process, name, vloose)
     
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, tight)
+    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
     HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
 
     sequence *= (tight * medium * loose *vloose)
 
+    #######################
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc015"+postfix,
+        signalCone = 0.15
+    )
+    name = "patMuonsWithTightSc015"
+    setattr(process, name, m)
+    sequence *= m
+
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc02"+postfix,
+        signalCone = 0.2
+    )
+    name = "patMuonsWithTightSc02"
+    setattr(process, name, m)
+    sequence *= m
+
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightIc04"+postfix,
+        isolationCone = 0.4
+    )
+    name = "patMuonsWithTightIc04"
+    setattr(process, name, m)
+    sequence *= m
+
+    m = m.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc015Ic04"+postfix,
+        signalCone = 0.15
+    )
+    name = "patMuonsWithTightSc015Ic04"
+    setattr(process, name, m)
+    sequence *= m
+
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc02Ic04"+postfix,
+        signalCone = 0.2
+    )
+    name = "patMuonsWithTightSc02Ic04"
+    setattr(process, name, m)
+    sequence *= m
+
+    #######################
+    m = tight.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0"+postfix,
+        signalCone = 0.01
+    )
+    name = "patMuonsWithTightSc0"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    m = m.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0Ic04"+postfix,
+        isolationCone = 0.4,
+    )
+    name = "patMuonsWithTightSc0Ic04"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    m = m.clone(
+        candSrc = name,
+        embedPrefix = "byTightSc0Ic04Noq",
+        minTrackHits = 0,
+        minTrackPt = 0.0,
+        maxTrackChi2 = 9999.,
+        minTrackPixelHits = 0,
+        minGammaEt = 0.0,
+        maxDeltaZ = 9999.,
+        maxTransverseImpactParameter = 9999.,
+    )
+    name = "patMuonsWithTightSc0Ic04Noq"+postfix
+    setattr(process, name, m)
+    sequence *= m
+
+    #######################
     gen = cms.EDProducer("HPlusPATMuonViewGenEmbedder",
         candSrc = cms.InputTag(name),
         genParticleSrc = cms.InputTag("genParticles"),
@@ -310,6 +391,26 @@ def addMuonIsolationAnalyses(process, prefix, prototype, commonSequence, additio
         ("IsoTauLikeLoose",  muonAnalysis.isolations["tauLooseIso"] +" == 0"),
         ("IsoTauLikeMedium", muonAnalysis.isolations["tauMediumIso"]+" == 0"),
         ("IsoTauLikeTight",  muonAnalysis.isolations["tauTightIso"] +" == 0"),
+        ("IsoTauLikeTightSc015", muonAnalysis.isolations["tauTightSc015Iso"] +" == 0" ),
+        ("IsoTauLikeTightSc02", muonAnalysis.isolations["tauTightSc02Iso"] +" == 0" ),
+
+        ("IsoTauLikeTightIc04",  muonAnalysis.isolations["tauTightIc04Iso"] +" == 0"),
+        ("IsoTauLikeTightSc015Ic04", muonAnalysis.isolations["tauTightSc015Ic04Iso"] +" == 0" ),
+        ("IsoTauLikeTightSc02Ic04", muonAnalysis.isolations["tauTightSc02Ic04Iso"] +" == 0" ),
+
+
+        ("IsoTauLikeTightSumPtRel10",  muonAnalysis.isolations["tauTightIso"] +" < 0.1"),
+        ("IsoTauLikeTightSumPtRel15",  muonAnalysis.isolations["tauTightIso"] +" < 0.15"),
+
+        ("IsoTauLikeTightSc0SumPtRel10",  muonAnalysis.isolations["tauTightSc0SumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0SumPtRel15",  muonAnalysis.isolations["tauTightSc0SumPtIsoRel"] +" < 0.15"),
+
+        ("IsoTauLikeTightSc0Ic04SumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04SumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0Ic04SumPtRel15",  muonAnalysis.isolations["tauTightSc0Ic04SumPtIsoRel"] +" < 0.15"),
+
+        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04NoqSumPtIsoRel"] +" < 0.1"),
+        ("IsoTauLikeTightSc0Ic04NoqSumPtRel10",  muonAnalysis.isolations["tauTightSc0Ic04NoqSumPtIsoRel"] +" < 0.15"),
+
         ]
 
     tauIsolations = [

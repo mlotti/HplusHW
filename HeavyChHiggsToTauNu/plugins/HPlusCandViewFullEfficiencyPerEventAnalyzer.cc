@@ -11,7 +11,7 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusExpressionEfficiencyHisto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionEfficiencyHisto.h"
 
 #include<iostream>
 #include<algorithm>
@@ -20,8 +20,8 @@
 
 namespace {
   template <typename T>
-  class ExpressionCutHisto: public HPlusExpressionEfficiencyHistoPerEvent<T> {
-    typedef HPlusExpressionEfficiencyHistoPerEvent<T> Base;
+  class ExpressionCutHisto: public HPlus::ExpressionEfficiencyHistoPerEvent<T> {
+    typedef HPlus::ExpressionEfficiencyHistoPerEvent<T> Base;
   public:
     ExpressionCutHisto(const edm::ParameterSet& iConfig);
     ~ExpressionCutHisto();
