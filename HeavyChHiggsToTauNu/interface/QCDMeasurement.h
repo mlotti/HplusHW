@@ -66,6 +66,7 @@ namespace HPlus {
       
       TH1F* hLeg1FakeMetVetoDistribution;
       TH1F* hLeg3FakeMetVetoDistribution;
+      TH1F* hTopMassDistribution;
     };
     
   enum QCDSelectionOrder {
