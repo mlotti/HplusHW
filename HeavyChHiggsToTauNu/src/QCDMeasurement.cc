@@ -91,9 +91,13 @@ namespace HPlus {
     createNBquarksHistogramGroupByMET("QCD_NBquarks_afterJetSelection_", fNBquarksHistogramGroupByMET);
     createNBquarksHistogramGroupByMET("QCD_NBquarksStatus2_afterJetSelection_", fNBquarksStatus2HistogramGroupByMET);
     createNBquarksHistogramGroupByMET("QCD_NBquarksStatus3_afterJetSelection_", fNBquarksStatus3HistogramGroupByMET);
-
-    
-    
+    // Purity
+    createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJets_", fPurityBeforeAfterJets, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+    createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsMet_",fPurityBeforeAfterJetsMet , 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+    createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsMetBtag_", fPurityBeforeAfterJetsMetBtag, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+    createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsFakeMet_", fPurityBeforeAfterJetsFakeMet, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+    createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsTauIdNoRtau_", fPurityBeforeAfterJetsTauIdNoRtau, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+        
     // Histograms for later change of factorization map
     // MET factorization details
     int myCoefficientBinCount = fFactorizationTable.getCoefficientTableSize();
@@ -534,7 +538,7 @@ namespace HPlus {
     myHistoLabel.str("");
     myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
     myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] <<  ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax)); 
     // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
     // Apply sumw2 on the histograms
     for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
@@ -588,6 +592,48 @@ namespace HPlus {
     return;
   }
 
+
+
+  // generic function for create histogram groups
+  void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> myVariableBins, const TString BinnedVariableName, const TString BinnedVariableUnits, const TString xAxisName ){
+
+    // Make histograms
+    edm::Service<TFileService> fs;
+    size_t myTableSize = myVariableBins.size(); 
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+
+    /// Loop ofver all tau pT bins
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+	// Treat first bin
+	myHistoName << name <<  BinnedVariableName << "RangeBelow" << myVariableBins[0];
+	// myHistoLabel << name << BinnedVariableName << "RangeBelow" << myVariableBins[0] <<";Pass;N";
+	myHistoLabel << name << BinnedVariableName << "RangeBelow" << myVariableBins[0] <<"; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
+	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
+      } else {
+	// Treat other bins
+	myHistoName << name << BinnedVariableName << "Range" << myVariableBins[i-1] << "to" << myVariableBins[i];
+	// myHistoLabel << name << "TauPtRange" << myVariableBins[i-1] << "to" << myVariableBins[i] << ";Pass;N"; 
+	myHistoLabel << name << BinnedVariableName << "Range" << myVariableBins[i-1] << "to" << myVariableBins[i] << "; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1];
+    // myHistoLabel << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1] <<";Pass;N"; 
+    myHistoLabel << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1] << "; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    // Apply sumw2 on the histograms
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
+      (*it)->Sumw2();
+    }
+    return;
+}
 
 
 
@@ -740,15 +786,15 @@ namespace HPlus {
       hMETFactorizationNJetsAfter->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     hMETFactorizationNJets->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-
     // Check BTag-MET correlations
     edm::PtrVector<pat::Jet> selectedJets = jetData.getSelectedJets();
     const int myMetIndex =  getMetIndex( metData.getSelectedMET()->et() );
     const int myJetPtIndex =  getJetPtIndex( selectedJets[0]->et() );
     fLdgJetPtHistogramGroupByMET[myMetIndex]->Fill( selectedJets[0]->et(), fEventWeight.getWeight());
 
+
+
     // Look at MC level
-    // if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
     if( !(iEvent.isRealData()) ) {
       std::vector<const reco::Candidate*> myBquarks = fGenparticleAnalysis.doQCDmAnalysis(iEvent, iSetup);
       const int nBquarks = myBquarks.size();
@@ -757,8 +803,18 @@ namespace HPlus {
       std::vector<const reco::Candidate*>::iterator iBquark;
       // Loop over all bquarks
       for(iBquark = myBquarks.begin(); iBquark < myBquarks.end(); iBquark++){
-	// std::cout << "(*iBquark)->status() = " << (*iBquark)->status() << ", iBquark->pdgId() = " << (*iBquark)->pdgId() << std::endl;
+	if ( (*iBquark)->pt() < 30 || (*iBquark)->eta() > 2.5 ) continue;
 	const int st = (*iBquark)->status();
+	bool bHasBquarkDaughter = false;
+	// Check whether the genParticle decays to itself. If yes do not consider in counting
+	if ( (*iBquark)->numberOfDaughters() != 0 ){
+	  // Loop over all 1st daughters of genParticle    
+	  for(size_t j = 0; j < (*iBquark)->numberOfDaughters() ; ++ j) {
+	    const reco::Candidate *d = (*iBquark)->daughter( j );
+	    if( (*iBquark)->pdgId() == d->pdgId() ) bHasBquarkDaughter = true;
+	  }
+	}
+	if(bHasBquarkDaughter) continue;
 	if(st == 2) nBquarksStatus2++;
 	else if (st == 3) nBquarksStatus3++;
 	else std::cout << "*** WARNING! Found Bquark with status = " << st << std::endl;
@@ -800,6 +856,8 @@ namespace HPlus {
     ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
 
+    // Save histograms to enable QCD purity evaluation
+    analyzePurities( tauDataForTauID, jetData, metData, btagData, fakeMETData, myFactorizationTableIndex, fEventWeight.getWeight(), fPurityBeforeAfterJets, fPurityBeforeAfterJetsMet, fPurityBeforeAfterJetsMetBtag, fPurityBeforeAfterJetsFakeMet, fPurityBeforeAfterJetsTauIdNoRtau);
 
 
     // Check FakeMETVeto-MET Correlations
@@ -1031,5 +1089,40 @@ namespace HPlus {
         hCorrelationBtagAndRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
       }
     }
+    return;
   }
+
+
+  
+  void QCDMeasurement::analyzePurities(const TauSelection::Data& tauDataForTauID, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau){
+    
+    
+    // Purity histograms
+    // JetSelection has probably already been passed but it matters not. I will get a histo with only entries on 1.0
+    if( jetData.passedEvent() ) fPurityBeforeAfterJets[myTauPtIndex]->Fill( 1.0, EventWeight);
+    else fPurityBeforeAfterJets[myTauPtIndex]->Fill( 0.0, EventWeight);
+    
+    // Exit if jet-Selection is not satisfied  
+    if( !jetData.passedEvent() ) return;
+    
+    if( METData.passedEvent() ) fPurityBeforeAfterJetsMet[myTauPtIndex]->Fill( 1.0, EventWeight);
+    else fPurityBeforeAfterJetsMet[myTauPtIndex]->Fill( 0.0, EventWeight);
+
+
+    if( METData.passedEvent() && btagData.passedEvent() ) fPurityBeforeAfterJetsMetBtag[myTauPtIndex]->Fill( 1.0, EventWeight);
+    else fPurityBeforeAfterJetsMetBtag[myTauPtIndex]->Fill( 0.0, EventWeight);
+
+
+    if( fakeMETData.passedEvent() ) fPurityBeforeAfterJetsFakeMet[myTauPtIndex]->Fill( 1.0, EventWeight);
+    else fPurityBeforeAfterJetsFakeMet[myTauPtIndex]->Fill( 0.0, EventWeight);
+
+
+    //if (tauDataForTauID.selectedTauPassedRtau())
+    if (tauDataForTauID.passedEvent() ) fPurityBeforeAfterJetsTauIdNoRtau[myTauPtIndex]->Fill( 1.0, EventWeight);
+    else fPurityBeforeAfterJetsTauIdNoRtau[myTauPtIndex]->Fill( 0.0, EventWeight);
+
+    return;
+  }
+
+
 }

@@ -8,8 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
 #dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-#dataVersion = "311Xredigi" # Spring11 MC
-dataVersion = "41Xdata"   # Run2011 PromptReco
+dataVersion = "311Xredigi" # Spring11 MC
+#dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
 ##########
@@ -48,10 +48,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
+    "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
     #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
     #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"

@@ -70,6 +70,7 @@ namespace HPlus {
     const int getMetIndex(double met);
     const int getJetPtIndex(double JetPt);
     std::vector<double> getJetPtBins(void);
+    void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> myVariableBins, const TString BinnedVariableName, const TString BinnedVariableUnits, const TString xAxisName );
     void createCounterHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
     void createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
     void createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
@@ -86,6 +87,7 @@ namespace HPlus {
     /// ABCD method between tau isolation and b-tagging (very low statistics for passing tauID)
     void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
     void analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+    void analyzePurities(const TauSelection::Data& tauDataForTauID, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau);
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -238,7 +240,12 @@ namespace HPlus {
     std::vector<TH1*> fNBquarksHistogramGroupByMET;
     std::vector<TH1*> fNBquarksStatus2HistogramGroupByMET;
     std::vector<TH1*> fNBquarksStatus3HistogramGroupByMET;
-
+    // Purity
+    std::vector<TH1*> fPurityBeforeAfterJets;
+    std::vector<TH1*> fPurityBeforeAfterJetsMet;
+    std::vector<TH1*> fPurityBeforeAfterJetsMetBtag;
+    std::vector<TH1*> fPurityBeforeAfterJetsFakeMet;
+    std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau;
 
   };
 }

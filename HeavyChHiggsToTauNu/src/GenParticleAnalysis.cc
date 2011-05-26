@@ -286,11 +286,21 @@ namespace HPlus {
     
     // b-quark analysis
     int nBquarks = 0;
+    // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){  
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
-      
       if ( abs(id) != 5 ) continue;      
+      bool bHasBquarkDaughter = false;
+      // Check whether the genParticle decays to itself. If yes do not consider in counting
+      if ( p.numberOfDaughters() != 0 ){
+	// Loop over all 1st daughters of genParticle    
+	for(size_t j = 0; j < p.numberOfDaughters() ; ++ j) {
+	  const reco::Candidate *d = p.daughter( j );
+	  if( p.pdgId() == d->pdgId() ) bHasBquarkDaughter = true; 
+	}
+      }
+      if(bHasBquarkDaughter) continue;
       nBquarks++;
     }
     hBquarkMultiplicity->Fill(nBquarks, fEventWeight.getWeight());
@@ -300,21 +310,12 @@ namespace HPlus {
 
 
 
-  //  edm::PtrVector<const reco::Candidate*> GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
   std::vector<const reco::Candidate*> GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
-  //  double GenParticleAnalysis::doQCDmAnalysis(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
 
- 
     edm::Handle <reco::GenParticleCollection> genParticles;
     iEvent.getByLabel("genParticles", genParticles);
-
-    // typedef math::XYZTLorentzVectorD LorentzVector;
-    // typedef std::vector<LorentzVector> LorentzVectorCollection;
-    
-    // edm::PtrVector<const reco::Candidate*> genBquarks;
     std::vector<const reco::Candidate*> genBquarks;
-
-    
+  
     // b-quark analysis
     int nBquarks = 0;
     int nStatus2Bquarks = 0;
@@ -325,13 +326,12 @@ namespace HPlus {
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
       
-      if ( abs(id) != 5 ) continue;      
+      if ( abs(id) != 5 ) continue;
       nBquarks++;
       if (p.status() == 2) nStatus2Bquarks++;
       if (p.status() == 3) nStatus3Bquarks++;
       
       genBquarks.push_back(&p);
-
       
     } //eof:  for 
     hBquarkMultiplicity->Fill(nBquarks, fEventWeight.getWeight());
