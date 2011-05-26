@@ -311,6 +311,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                              typeLabel = "Tau")
             setPatTauDefaults(process.patTausCaloRecoTau, True)
             process.patTausCaloRecoTau.embedLeadTrack = not includePFCands
+            process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
     
         tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
@@ -542,6 +543,10 @@ def setPatTauDefaults(module, includePFCands):
     value = not includePFCands
     for a in attrs:
         setattr(module, a, value)
+
+    # Embed these always in order to not to read generalTracks/particleFlow when accessed
+    module.embedLeadTrack = True
+    module.embedLeadPFChargedHadrCand = True
     
 
 def addHChTauDiscriminators():
