@@ -197,6 +197,11 @@ def addPat(process, dataVersion,
         process.pf2patSequence *
         process.pf2patNoPuSequence
     )
+
+    # Tau bugfixes
+    # The ...DA is for 41X, in 42X we have DA vertices already in AOD
+    patHelpers.massSearchReplaceAnyInputTag(sequence, cms.InputTag("offlinePrimaryVerticesDA"), cms.InputTag("offlinePrimaryVertices"))
+
     return sequence
 
 # Assumes that process.out is the output module
@@ -430,6 +435,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     return seq
 
 # Helper functions
+def fixFlightPath(process, prefix, postfix=""):
+    from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import PFTauQualityCuts
+    getattr(process, prefix+"DiscriminationByFlightPathSignificance"+postfix).qualityCuts = PFTauQualityCuts
+
 def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
@@ -451,6 +460,12 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
 
         HChCaloTauDiscriminators.addCaloTauDiscriminationSequenceForChargedHiggs(process)
         HChCaloTauDiscriminatorsCont.addCaloTauDiscriminationSequenceForChargedHiggsCont(process)
+
+        # Tau bugfixes
+        # The quality PSet is missing
+        for tauAlgo in ["caloRecoTau"]+tauAlgos:
+            fixFlightPath(process, tauAlgo)
+            fixFlightPath(process, tauAlgo, "Cont")
 
 
     # These are already in 36X AOD, se remove them from the tautagging
@@ -674,6 +689,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
 
     # Use HPS taus
+    # Add and recalculate the discriminators
     addHChTauDiscriminators()
     if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
         import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
@@ -683,6 +699,9 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
         PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+
+        fixFlightPath(process, tauAlgos[0])
+        fixFlightPath(process, tauAlgos[0], "Cont")
     
     patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequence, postfix)
     patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequenceCont, postfix)
@@ -698,10 +717,37 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     patHelpers.massSearchReplaceAnyInputTag(patTauSeq, cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
 
     pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
+
     setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
+
+    # The prediscriminant of pfTausBaseDiscriminationByLooseIsolation
+    # is missing from the default sequence, but since we don't want to
+    # apply any tau selections as a part of PF2PAT anyway, let's just
+    # remove this too
+    #getattr(process, "pfTaus"+postfix).discriminators = cms.VPSet()
+    getattr(process, "pfTauSequence"+postfix).remove(getattr(process, "pfTaus"+postfix))
+    delattr(process, "pfTaus"+postfix)
+    getattr(process, "pfTausBaseSequence"+postfix).remove(getattr(process, "pfTausBaseDiscriminationByLooseIsolation"+postfix))
+    
+
+    # Remove the shrinking cone altogether, we don't care about it
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "patShrinkingConePFTauDiscrimination"+postfix))
+
+    # Override the tau source (this is WRONG in the standard PF2PAT, the expers should know it already)
     getattr(process, "patTaus"+postfix).tauSource = "hpsPFTauProducer"+postfix
-    # Disable iso depositsm, they take a LOT of space
+    patHelpers.massSearchReplaceAnyInputTag(getattr(process, "patHPSPFTauDiscrimination"+postfix),
+                                            cms.InputTag("pfTaus"+postfix),
+                                            cms.InputTag("hpsPFTauProducer"+postfix))
+    getattr(process, "pfNoTau"+postfix).topCollection = cms.InputTag("hpsPFTauProducer"+postfix)
+
+    # Disable iso deposits, they take a LOT of space
     getattr(process, "patTaus"+postfix).isoDeposits = cms.PSet()
+
+    # Disable tau top projection, the taus are identified and removed
+    # from jets as a part of the analysis
+    getattr(process, "pfNoTau"+postfix).enable = False
+
+
 
     # Lepton modifications
     setPatLeptonDefaults(getattr(process, "patMuons"+postfix), False)
@@ -718,9 +764,6 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     # discussion about lepton definitions
     getattr(process, "pfNoMuon"+postfix).enable = False
     getattr(process, "pfNoElectron"+postfix).enable = False
-
-    # Disable tau top projection, the taus are identified separately
-    getattr(process, "pfNoTau"+postfix).enable = False
 
     # Remove photon MC matcher in order to avoid keeping photons in the event content
     #process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
@@ -792,9 +835,9 @@ def addSelectedPFlowParticle(process,verbose=False):
     )
     process.pfCandidateSelectionByType *= process.pileUpHadrons
 
-    process.hplusPatSequence.replace(process.hplusPatTauSequence,
+    process.hplusPatSequence.replace(process.patDefaultSequence,
                                      process.pfCandidateSelectionByType+
-                                     process.hplusPatTauSequence)
+                                     process.patDefaultSequence)
 
 # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
 def addPFMuonIsolation(process, module, verbose=False):
