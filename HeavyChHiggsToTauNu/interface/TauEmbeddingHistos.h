@@ -27,6 +27,10 @@ class TFileDirectory;
 class TH1;
 class TH2;
 
+namespace HPlus {
+  class EventWeight;
+}
+
 namespace hplus {
   namespace te {
 
@@ -70,7 +74,7 @@ namespace hplus {
 
     class Histo {
     public:
-      Histo();
+      explicit Histo(const HPlus::EventWeight& eventWeight);
       ~Histo();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
@@ -83,6 +87,8 @@ namespace hplus {
       }
 
     private:
+      const HPlus::EventWeight& fEventWeight;
+
       TH1 *hPt;
       TH1 *hEta;
       TH1 *hPhi;
@@ -90,13 +96,15 @@ namespace hplus {
 
     class HistoTrack {
     public:
-      HistoTrack();
+      explicit HistoTrack(const HPlus::EventWeight& eventWeight);
       ~HistoTrack();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
       void fill(const reco::Track& track, const math::XYZPoint& vertex);
 
     private:
+      const HPlus::EventWeight& fEventWeight;
+
       TH1 *hNhits;
       TH1 *hChi2Norm;
       TH1 *hDxy;
@@ -105,7 +113,7 @@ namespace hplus {
 
     class Histo2 {
     public:
-      Histo2();
+      explicit Histo2(const HPlus::EventWeight& eventWeight);
       ~Histo2();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title);
@@ -125,6 +133,8 @@ namespace hplus {
       }
 
     private:
+      const HPlus::EventWeight& fEventWeight;
+
       TH2 *hPt;
       TH2 *hEta;
       TH2 *hPhi;
@@ -138,8 +148,8 @@ namespace hplus {
 
     class HistoMet {
     public:
-      explicit HistoMet(const edm::InputTag src);
-      HistoMet();
+      explicit HistoMet(const edm::InputTag src, const HPlus::EventWeight& eventWeight);
+      explicit HistoMet(const HPlus::EventWeight& eventWeight);
       ~HistoMet();
 
       void init(TFileDirectory& dir, const std::string& name, const std::string& title,
@@ -150,6 +160,7 @@ namespace hplus {
 
     private:
       edm::InputTag src_;
+      const HPlus::EventWeight& fEventWeight;
 
       TH1 *hMet;
       TH1 *hMetX;
@@ -163,8 +174,8 @@ namespace hplus {
 
     class HistoMet2 {
     public:
-      HistoMet2(const edm::ParameterSet& pset, double metCut);
-      explicit HistoMet2(double metCut);
+      HistoMet2(const edm::ParameterSet& pset, double metCut, const HPlus::EventWeight& eventWeight);
+      HistoMet2(double metCut, const HPlus::EventWeight& eventWeight);
       ~HistoMet2();
 
       void init(TFileDirectory& dir, const std::string& name);
@@ -186,6 +197,7 @@ namespace hplus {
       edm::InputTag originalSrc_;
 
       double metCut_;
+      const HPlus::EventWeight& fEventWeight;
 
       HistoMet hMet;
       HistoMet hOrigMet;
@@ -211,7 +223,7 @@ namespace hplus {
 
     class HistoIso {
     public:
-      HistoIso();
+      explicit HistoIso(const HPlus::EventWeight& eventWeight);
       ~HistoIso();
 
       void init(TFileDirectory& dir, const std::string& name);
@@ -219,6 +231,7 @@ namespace hplus {
       void fill(double sumPt, double maxPt, size_t occupancy);
 
     private:
+      const HPlus::EventWeight& fEventWeight;
       TH1 *hSumPt;
       TH1 *hMaxPt;
       TH1 *hOccupancy;
@@ -226,7 +239,7 @@ namespace hplus {
 
     class HistoIso2 {
     public:
-      HistoIso2();
+      explicit HistoIso2(const HPlus::EventWeight& eventWeight);
       ~HistoIso2();
 
       void init(TFileDirectory& dir, const std::string& muonName, const std::string& tauName);
@@ -234,6 +247,7 @@ namespace hplus {
       void fill(double muonIso, double tauSumPt, double tauMaxPt, size_t tauOccupancy);
 
     private:
+      const HPlus::EventWeight& fEventWeight;
       TH2 *hSumPt;
       TH2 *hMaxPt;
       TH2 *hOccupancy;

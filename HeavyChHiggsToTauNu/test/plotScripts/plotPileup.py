@@ -17,8 +17,8 @@ def main():
 
     #mc = "WJets"
     mc = "QCD"
-    #data = "2010"
-    data = "2011"
+    data = "2010"
+    #data = "2011"
 
 #    maxVtx = 15
     maxVtx = 20
@@ -63,11 +63,14 @@ def main():
     dataHisto = h.getHisto("Data").getRootHisto()
     mcHisto = h.getHisto(mc).getRootHisto()
 
+    # For normalization, see https://twiki.cern.ch/twiki/bin/view/CMS/PileupReweighting
     weightHisto = dataHisto.Clone("weights")
     weightHisto.Divide(mcHisto)
     print "Weight histo integral", weightHisto.Integral()
-    weightHisto.Scale(1/weightHisto.Integral())
+    #weightHisto.Scale(1/dataHisto.Integral())
+    #weightHisto.Scale(1/weightHisto.Integral())
     print "Weight histo integral", weightHisto.Integral()
+    print "Sum of [weight*prob]", sum([weightHisto.GetBinContent(bin)*mcHisto.GetBinContent(bin) for bin in xrange(1, weightHisto.GetNbinsX())])
 
     print "weights = cms.vdouble(%s)" % ", ".join(["%.8f" % weightHisto.GetBinContent(bin) for bin in xrange(1, min(maxVtx, weightHisto.GetNbinsX())+1)])
 

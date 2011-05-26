@@ -16,7 +16,7 @@ dataVersion = "41Xdata"   # Run2011 PromptReco
 # Flags for additional alphat analysis modules
 # Perform the alphat analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -34,6 +34,9 @@ tauEmbeddingFinalizeMuonSelection = False
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = False
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -119,16 +122,23 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+# Set tau sources to trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Set tau sources to non-trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
-
-
-# Set the triggers for trigger efficiencies
-# 2010 and 2011 scenarios
-#param.setEfficiencyTriggersFor2010()
-#param.setEfficiencyTriggersFor2011()
+# Set the triggers for trigger efficiency parametrisation
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+)
+param.trigger.triggerMETSelection = param.MET.clone(
+  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+)
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
@@ -149,7 +159,7 @@ process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -160,7 +170,6 @@ process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
@@ -178,12 +187,11 @@ if dataVersion.isData():
 print "Trigger:", process.alphatAnalysis.trigger
 print "VertexWeight:",process.alphatAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.alphatAnalysis.trigger.hltMetCut
-print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.alphatAnalysis.triggerEfficiency.selectTriggers])
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.alphatAnalysis.trigger.triggerEfficiency.selectTriggers])
 #print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
 print "TauSelection src:", process.alphatAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.alphatAnalysis.tauSelection.operatingMode
-print "TauSelection factorization source:", process.alphatAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)

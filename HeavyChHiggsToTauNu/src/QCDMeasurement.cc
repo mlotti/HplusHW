@@ -34,22 +34,21 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
-    fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fPFTauIsolationCalculator(iConfig.getUntrackedParameter<edm::ParameterSet>("tauIsolationCalculator")),
-    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
+    fGenparticleAnalysis(eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -193,6 +192,17 @@ namespace HPlus {
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMETFactorized,"MET (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTagFactorized,"#geq 1 b jet (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderRtauFactorized,"R_{#tau} (factorized)");
+    
+    // Analysis variations
+    fAnalyses.push_back(AnalysisVariation(70., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(70., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(70., 30., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(65., 30., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 10., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
+    fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -678,9 +688,6 @@ namespace HPlus {
     return;
   }
 
-
-
-
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
@@ -692,28 +699,22 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
-    // GenParticle analysis
-    // if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
-
-
+    // Trigger and HLT_MET cut; or trigger efficiency parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    // Trigger and HLT_MET cut (only applied to REAL data)
-    // if (iEvent.isRealData()) if(!triggerData.passedEvent()) return;
-    //
-    // Trigger and HLT_MET cut (both MC and REAL data)
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
 
+    // GenParticle analysis
+    if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
+    
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
     increment(fPrimaryVertexCounter);
     hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
 
-    // Get MET just for reference; do not apply a MET cut but instead use P(MET>70 GeV) as weight
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Apply pre-MET cut to see if MC Normalization is better.
     //if(metData.getSelectedMET()->et() < 30 ) return;
@@ -731,16 +732,8 @@ namespace HPlus {
 
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
-
-    // Apply Trigger efficiency parametrization weights (Right after calling Tau & MET functions)
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauCandidateData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
-    /* tmp    if (!iEvent.isRealData() ) {
-    // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
-    fEventWeight.multiplyWeight(triggerEfficiency);
-    } tmp */
 
 
     // GlobalElectronVeto 
@@ -896,6 +889,13 @@ namespace HPlus {
     analyzeCorrelation(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
+    for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
+      (*it).analyse(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+                       fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
+                       myEventWeightBeforeMetFactorization);
+    }
+
+    
     // Continue best cut path
 
     /// FakeMETVeto and MET Correlations
@@ -984,7 +984,7 @@ namespace HPlus {
 					    fakeMETData,
 					    forwardJetData,
 					    myEventWeightBeforeMetFactorization);
-
+    
     // Forward jet veto -- experimental
     if (!forwardJetData.passedEvent()) return;
     increment(fForwardJetVetoCounter);
@@ -1123,6 +1123,64 @@ namespace HPlus {
 
     return;
   }
+  
 
+  QCDMeasurement::AnalysisVariation::AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins)
+    : fMETCut(METcut),
+      fFakeMETVetoCut(fakeMETVetoCut) {
+    std::stringstream myName;
+    myName << "QCDAnalysisVariation_METcut" << METcut << "_FakeMETCut" << fakeMETVetoCut;
+    // Create histograms
+    edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir(myName.str());
+    hAfterBigBox = makeTH<TH1F>(myDir, "AfterBigBox", "AfterBigBox", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterFakeMETVeto = makeTH<TH1F>(myDir, "Leg1AfterFakeMETVeto", "Leg1AfterFakeMETVeto", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterTopSelection = makeTH<TH1F>(myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterAntiTopSelection = makeTH<TH1F>(myDir, "Leg1AfterAntiTopSelection", "Leg1AfterAntiTopSelection", nTauPtBins, 0, nTauPtBins);
+    hAfterBigBoxAndTauIDNoRtau = makeTH<TH1F>(myDir, "AfterBigBoxAndTauIDNoRtau", "AfterBigBoxAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hLeg2AfterRtau = makeTH<TH1F>(myDir, "Leg2AfterRtau", "Leg2AfterRtau", nTauPtBins, 0, nTauPtBins);
+    hLeg3AfterFakeMETVeto = makeTH<TH1F>(myDir, "Leg3AfterFakeMETVeto", "Leg3AfterFakeMETVeto", nTauPtBins, 0, nTauPtBins);
+    hLeg1FakeMetVetoDistribution = makeTH<TH1F>(myDir, "Leg1_Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hLeg3FakeMetVetoDistribution = makeTH<TH1F>(myDir, "Leg3_Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
+    hTopMassDistribution = makeTH<TH1F>(myDir, "TopMass_jjbMax", "Mass_jjbMax;;N_{Events} / 5 GeV/c^{2}", 160, 0., 800.);
+  }
+  QCDMeasurement::AnalysisVariation::~AnalysisVariation() { }
+  void QCDMeasurement::AnalysisVariation::analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
+    hAfterBigBox->Fill(tauPtBin, weightWithoutMET);
+    // Leg 1
+    if (btagData.passedEvent()) {
+      hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
+      if (METData.getSelectedMET()->et() > fMETCut) {
+        hLeg1AfterMET->Fill(tauPtBin, weightWithoutMET);
+        hLeg1FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
+        if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+          hLeg1AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
+          hTopMassDistribution->Fill(topSelectionData.getTopMass(), weightWithoutMET);
+          if (topSelectionData.passedEvent()) {
+            hLeg1AfterTopSelection->Fill(tauPtBin, weightWithoutMET);
+          } else {
+            hLeg1AfterAntiTopSelection->Fill(tauPtBin, weightWithoutMET);
+          }
+        }
+      }
+    }
+    // TauID without Rtau
+    if (tauData.passedEvent()) {
+      hAfterBigBoxAndTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
+      // Leg2
+      if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+        hLeg2AfterRtau->Fill(tauPtBin, weightWithoutMET);
+      }
+      // Leg3
+      hLeg3FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
+      if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+        hLeg3AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
+      }
+    }
+    return;
+  }
 
 }
+

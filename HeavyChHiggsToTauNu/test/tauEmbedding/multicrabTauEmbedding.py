@@ -6,11 +6,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
 #step = "generation"
-#step = "embedding"
+step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
-step = "muonAnalysis"
+#step = "muonAnalysis"
 
 dirPrefix = ""
 #dirPrefix = "_TauIdScan"
@@ -31,12 +31,12 @@ if step == "signalAnalysis":
     pass
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v9",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v9"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v9"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "generation":     {"input": "tauembedding_skim_v10",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+          "embedding":      {"input": "tauembedding_generation_v10"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "analysis":       {"input": "tauembedding_embedding_v10"+pt,  "config": "embeddingAnalysis_cfg.py"},
           "analysisTau":    {"input": "pattuple_v10",                  "config": "tauAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v9"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v9",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v10"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v10",          "config": "muonAnalysisFromSkim_cfg.py"},
           }
 
 crabcfg = "crab.cfg"

@@ -16,7 +16,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -34,6 +34,9 @@ tauEmbeddingTightenMuonSelection = True
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = True
 
 ################################################################################
 
@@ -102,19 +105,26 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Import Standard SignalAnalysis Parameters and change accordingly
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
-# Set tau selection mode to 'standard' or 'factorized'
+# Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
-#param.setAllTauSelectionOperatingMode('factorized')
-
-# Set Tau ID factorization map
-param.setTauIDFactorizationMap(options)
 
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+# Set the triggers for trigger efficiency parametrisation
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+)
+param.trigger.triggerMETSelection = param.MET.clone(
+  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+)
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
@@ -131,7 +141,7 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed         
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -141,8 +151,6 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
@@ -170,14 +178,12 @@ print "TauSelection rtauCut:", process.signalOptimisation.tauSelection.rtauCut
 print "TauSelection antiRtauCut:", process.signalOptimisation.tauSelection.antiRtauCut
 print "TauSelection invMassCut:", process.signalOptimisation.tauSelection.invMassCut
 print "TauSelection nprongs:", process.signalOptimisation.tauSelection.nprongs
-print "\nTriggerEfficiency:", process.signalOptimisation.triggerEfficiency
 print "\nMET:", process.signalOptimisation.MET
 print "\nGlobalElectronVeto:", process.signalOptimisation.GlobalElectronVeto
 print "\nGlobalMuonVeto:", process.signalOptimisation.GlobalMuonVeto
 print "\nJetSelection:", process.signalOptimisation.jetSelection
 print "\nbTagging: ", process.signalOptimisation.bTagging
 print "\nFakeMETVeto:", process.signalOptimisation.fakeMETVeto
-print "\nTriggerEmulationEfficiency:", process.signalOptimisation.TriggerEmulationEfficiency
 print "\nEvtTopology:", process.signalOptimisation.EvtTopology
 #print "\nMetTables:", process.signalOptimisation.factorization
 print "\nTopSelection:", process.signalOptimisation.topSelection
@@ -232,7 +238,7 @@ if doBTagScan:
 # signalOptimisationTauSelectionShrinkingConeCutBased
 # signalOptimisationTauSelectionShrinkingConeTaNCBased
 # signalOptimisationTauSelectionCaloTauCutBased
-# signalOptimisationTauSelectionHPSTauBased
+# signalOptimisationTauSelectionHPSTightTauBased
 # signalOptimisationTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and

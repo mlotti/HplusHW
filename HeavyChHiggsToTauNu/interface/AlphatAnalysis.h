@@ -22,7 +22,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "TTree.h"
 
@@ -91,7 +90,6 @@ namespace HPlus {
     TauEmbeddingAnalysis fTauEmbeddingAnalysis;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
-    TriggerEfficiency fTriggerEfficiency;
     VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 

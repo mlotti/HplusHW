@@ -29,14 +29,15 @@ namespace HPlus {
     //fCount(eventCounter.addCounter(" ")),
     fEventWeight(eventWeight) {
     edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir("ForwardJetVeto");
 
-    hForwJetEt = makeTH<TH1F>(*fs, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
-    hForwJetEta = makeTH<TH1F>(*fs, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
-    hMaxForwJetEt = makeTH<TH1F>(*fs, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
-    hEtSumCentral = makeTH<TH1F>(*fs, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
-    hEtSumForward = makeTH<TH1F>(*fs, "EtSumForward", "EtSumForward", 100, 0., 1000.);
-    hEtMetSumRatio = makeTH<TH1F>(*fs, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
-    hEtSumRatio = makeTH<TH1F>(*fs, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
+    hForwJetEt = makeTH<TH1F>(myDir, "ForwJetEt", "ForwJetEt", 100, 0., 200.);
+    hForwJetEta = makeTH<TH1F>(myDir, "ForwJetEta", "ForwJetEta", 100, -5., 5.);
+    hMaxForwJetEt = makeTH<TH1F>(myDir, "MaxForwJetEt", "MaxForwJetEt", 100, 0., 100.);
+    hEtSumCentral = makeTH<TH1F>(myDir, "EtSumCentral", "EtSumCentral", 100, 0., 1000.);
+    hEtSumForward = makeTH<TH1F>(myDir, "EtSumForward", "EtSumForward", 100, 0., 1000.);
+    hEtMetSumRatio = makeTH<TH1F>(myDir, "EtMetSumRatio", "EtMetSumRatio", 100, 0., 2.);
+    hEtSumRatio = makeTH<TH1F>(myDir, "EtSumRatio", "EtSumRatio", 100, 0., 2.);
   }
 
   ForwardJetVeto::~ForwardJetVeto() {}

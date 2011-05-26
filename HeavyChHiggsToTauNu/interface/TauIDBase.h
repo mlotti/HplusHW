@@ -10,6 +10,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectionCounterPackager.h"
 
+#include "CommonTools/Utils/interface/TFileDirectory.h"
+
 namespace edm {
   class ParameterSet;
   class Event;
@@ -29,7 +31,7 @@ namespace HPlus {
      * Base class for tau ID operations.
      * Actual tau ID specific classes are inherited from this class.
      */
-    TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel);
+    TauIDBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
@@ -58,6 +60,8 @@ namespace HPlus {
     void createSelectionCounterPackagesBeyondIsolation(int prongCount); // Guess what this is doing? :)
     
   protected:
+    TFileDirectory fMyDir;
+    
     // Input parameters
     const double fPtCut;
     const double fEtaCut;

@@ -21,10 +21,10 @@ options, dataVersion = getOptionsDataVersion(dataVersion, options)
 
 process = cms.Process("HChMuonAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -36,7 +36,7 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v9/00c200b343cbc3d5ec3f111d1d98acde/skim_107_1_CZl.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10/b3c16f1ee121445edb6d9b12e0772d8e/skim_104_1_sYD.root"
   )
 )
 
@@ -62,15 +62,34 @@ patArgs = {"doPatTrigger": False,
            "doTauHLTMatching": False,
            "doPatMuonPFIsolation": True,
            }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
-process.commonSequence.remove(process.goodPrimaryVertices10)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
+#process.commonSequence.remove(process.goodPrimaryVertices10)
+if options.doPat == 0:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+    process.commonSequence *= (
+        process.goodPrimaryVertices *
+        process.goodPrimaryVertices10
+    )
+
+
+# Vertex weighting
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+param.setVertexWeightFor2010()
+param.setVertexWeightFor2011()
+process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("vertexWeight"),
+)
+insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+process.commonSequence *= process.vertexWeight
+
+weightName = "vertexWeight"
 
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 additionalCounters.extend(MuonSelection.muonSelectionCounters)
 
 # Add configuration information to histograms.root
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
@@ -105,8 +124,20 @@ def createAnalysis(name, postfix="", **kwargs):
             "Loose",
             "Medium",
             "Tight",
+            "TightSc015",
+            "TightSc02",
+            "TightIc04",
+            "TightSc015Ic04",
+            "TightSc02Ic04",
             ]:
             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=1.0, **kwargs)
+
+#         for iso in [
+#             "Tight",
+#             "TightSc0",
+#             "TightSc0Ic04",
+#             "TightSc0Ic04Noq",
+#             create(prefix=prefix+"IsoTauLikeRel"+iso, doMuonIsolation=True, muonIsolation="tau%sIsoRel"%iso, muonIsolationCut=
 
 #    if not "doIsolationWithTau" in kwargs:
 #        for iso in [

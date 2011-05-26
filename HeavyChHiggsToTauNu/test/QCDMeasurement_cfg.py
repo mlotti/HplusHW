@@ -16,7 +16,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -27,6 +27,9 @@ doJESVariation = False
 JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
+
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = False
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
 # with Btau data where no prescale is needed at the moment) 
@@ -52,6 +55,7 @@ process.source = cms.Source('PoolSource',
     #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+<<<<<<< HEAD
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
     #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
@@ -61,8 +65,10 @@ process.source = cms.Source('PoolSource',
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
     #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
+=======
+>>>>>>> sami/master
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
+    "file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 
@@ -96,17 +102,26 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 # Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
-# other options (use not recommended here): 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
+# other options (use not recommended here): 'standard'
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
-param.setTauIDFactorizationMap(options)
 
-# Set tau sources to non-trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
+# Set tau sources to trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Set the triggers for trigger efficiencies
-# 2010 and 2011 scenarios
-#param.setEfficiencyTriggersFor2010()
-#param.setEfficiencyTriggersFor2011()
+# Set the triggers for trigger efficiency parametrisation
+param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+#param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+)
+param.trigger.triggerMETSelection = param.MET.clone(
+  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+)
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
@@ -136,7 +151,7 @@ param.InvMassVetoOnJets.setTrueToUseModule = False
 process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     jetSelection = param.jetSelection,
@@ -148,7 +163,6 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
@@ -189,14 +203,12 @@ print "TauSelection rtauCut:", process.QCDMeasurement.tauSelection.rtauCut
 print "TauSelection antiRtauCut:", process.QCDMeasurement.tauSelection.antiRtauCut
 print "TauSelection invMassCut:", process.QCDMeasurement.tauSelection.invMassCut
 print "TauSelection nprongs:", process.QCDMeasurement.tauSelection.nprongs
-print "\nTriggerEfficiency:", process.QCDMeasurement.triggerEfficiency
 print "\nMET:", process.QCDMeasurement.MET
 print "\nGlobalElectronVeto:", process.QCDMeasurement.GlobalElectronVeto
 print "\nGlobalMuonVeto:", process.QCDMeasurement.GlobalMuonVeto
 print "\nJetSelection:", process.QCDMeasurement.jetSelection
 print "\nbTagging: ", process.QCDMeasurement.bTagging
 print "\nFakeMETVeto:", process.QCDMeasurement.fakeMETVeto
-print "\nTriggerEmulationEfficiency:", process.QCDMeasurement.TriggerEmulationEfficiency
 print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
 #print "\nMetTables:", process.QCDMeasurement.factorization
 print "\nTopSelection:", process.QCDMeasurement.topSelection
@@ -204,7 +216,6 @@ print "****************************************************"
 print "\nInvMassVetoOnJets:", process.QCDMeasurement.InvMassVetoOnJets
 print "\nEvtTopology:", process.QCDMeasurement.EvtTopology
 print "\nForwardJetVeto:", process.QCDMeasurement.forwardJetVeto
-
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
 process.QCDMeasurementCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
@@ -238,7 +249,7 @@ process.QCDMeasurementPath = cms.Path(
 # QCDMeasurementTauSelectionShrinkingConeCutBased
 # QCDMeasurementTauSelectionShrinkingConeTaNCBased
 # QCDMeasurementTauSelectionCaloTauCutBased
-# QCDMeasurementTauSelectionHPSTauBased
+# QCDMeasurementTauSelectionHPSTightTauBased
 # QCDMeasurementTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and

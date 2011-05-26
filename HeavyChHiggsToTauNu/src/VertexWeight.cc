@@ -37,6 +37,7 @@ namespace HPlus {
         // Bunch crossing 0 is the in-time crossing
         if(iBX->getBunchCrossing() == 0) {
           n = iBX->getPU_NumInteractions();
+          break;
         }
       }
       if(iBX == hpileup->end())

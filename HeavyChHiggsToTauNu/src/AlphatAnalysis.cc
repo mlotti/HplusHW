@@ -36,9 +36,9 @@ namespace HPlus {
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauID"),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, eventWeight),
@@ -49,7 +49,6 @@ namespace HPlus {
     fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
-    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
    
@@ -141,10 +140,7 @@ namespace HPlus {
     
     // Apply trigger and HLT_MET cut (Only if REAL Data)
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    if (iEvent.isRealData()) {
-      // Trigger is applied only if the data sample is real data
-      if(!triggerData.passedEvent()) return;
-    }
+    if(!triggerData.passedEvent()) return;
     increment(fTriggerCounter);
 
 
@@ -163,7 +159,7 @@ namespace HPlus {
     hMet_BeforeTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
 
-    // TauID (with optional factorization)
+    // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     // Require at least one tau
     if(!tauData.passedEvent()) return;
@@ -172,11 +168,6 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return; 
     increment(fOneTauCounter);
 
-    // Trigger efficiency (Before ANY histo-filling)
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-     // Apply trigger efficiency as weight for MC events only!
-    if (!iEvent.isRealData() ) fEventWeight.multiplyWeight(triggerEfficiency);
-    
 
     // Selected Jets
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
@@ -370,11 +361,6 @@ namespace HPlus {
     iNSelectedTaus = tauData.getSelectedTaus().size();
     fRtau = tauData.getRtauOfSelectedTau();
 
-    // Trigger efficiency
-    // double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    // Apply trigger efficiency as weight for MC events only! This should be enabled only if a tau or tau+MET trigger is used. =>disable
-    // if( !iEvent.isRealData() ) fEventWeight.multiplyWeight(triggerEfficiency);
-    
     
     // Tau-Embedding (After TauID) - needed?
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);

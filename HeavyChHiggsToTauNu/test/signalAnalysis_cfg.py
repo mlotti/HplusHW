@@ -16,7 +16,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = True
+doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -34,6 +34,9 @@ tauEmbeddingFinalizeMuonSelection = True
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+
+# Do trigger parametrisation for MC and tau embedding
+doTriggerParametrisation = True
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -112,20 +115,26 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
-# Set tau selection mode to 'standard' or 'factorized'
+# Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
-#param.setAllTauSelectionOperatingMode('factorized')
 
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+# Set tau sources to trigger matched tau collections
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
-# Set tau sources to non-trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
-
-
-# Set the triggers for trigger efficiencies
-# 2010 and 2011 scenarios
-#param.setEfficiencyTriggersFor2010()
-#param.setEfficiencyTriggersFor2011()
+# Set the triggers for trigger efficiency parametrisation
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
+)
+param.trigger.triggerMETSelection = param.MET.clone(
+  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
+)
+if (doTriggerParametrisation and not dataVersion.isData()):
+    # 2010 and 2011 scenarios
+    #param.setEfficiencyTriggersFor2010()
+    param.setEfficiencyTriggersFor2011()
+    # Settings for the configuration
+    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
@@ -146,7 +155,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -157,7 +166,6 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    triggerEfficiency = param.triggerEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
@@ -175,12 +183,11 @@ if dataVersion.isData():
 print "Trigger:", process.signalAnalysis.trigger
 print "VertexWeight:",process.signalAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
-print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.triggerEfficiency.selectTriggers])
+print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.trigger.triggerEfficiency.selectTriggers])
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
 print "TauSelection operating mode:", process.signalAnalysis.tauSelection.operatingMode
-print "TauSelection factorization source:", process.signalAnalysis.tauSelection.factorization.factorizationTables.factorizationSourceName
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)
@@ -237,7 +244,7 @@ if doBTagScan:
 # signalAnalysisTauSelectionShrinkingConeCutBased
 # signalAnalysisTauSelectionShrinkingConeTaNCBased
 # signalAnalysisTauSelectionCaloTauCutBased
-# signalAnalysisTauSelectionHPSTauBased
+# signalAnalysisTauSelectionHPSTightTauBased
 # signalAnalysisTauSelectionCombinedHPSTaNCBased
 #
 # The corresponding Counter directories have "Counters" postfix, and
