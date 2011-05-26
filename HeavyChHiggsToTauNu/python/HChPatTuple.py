@@ -340,20 +340,20 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             addHChTauDiscriminators()
 
         # Don't enable TCTau nor shrinking cone tau
-        if doPatCalo:
-            tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
-                             algoLabel = "caloReco",
-                             typeLabel = "Tau")
-            setPatTauDefaults(process.patTausCaloRecoTau, True)
-            process.patTausCaloRecoTau.embedLeadTrack = not includePFCands
-            process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
+        # if doPatCalo:
+        #     tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
+        #                      algoLabel = "caloReco",
+        #                      typeLabel = "Tau")
+        #     setPatTauDefaults(process.patTausCaloRecoTau, True)
+        #     process.patTausCaloRecoTau.embedLeadTrack = not includePFCands
+        #     process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
     
-        tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
-                         algoLabel = "shrinkingCone",
-                         typeLabel = "PFTau")
-        # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
-        if not doPatTauIsoDeposits:
-            process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
+        # tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
+        #                  algoLabel = "shrinkingCone",
+        #                  typeLabel = "PFTau")
+        # # Disable isoDeposits like this until the problem with doPFIsoDeposits is fixed 
+        # if not doPatTauIsoDeposits:
+        #     process.patTausShrinkingConePFTau.isoDeposits = cms.PSet()
 
         tauTools.addTauCollection(process,cms.InputTag('hpsPFTauProducer'),
                          algoLabel = "hps",
@@ -390,10 +390,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         process.patDefaultSequence.remove(process.selectedPatTaus)
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
-                           "keep *_selectedPatTausCaloRecoTau_*_*",
+#                           "keep *_selectedPatTausCaloRecoTau_*_*",
+#                           "keep *_selectedPatTausShrinkingConePFTau_*_*",
                            "keep *_selectedPatTausHpsPFTau_*_*",
                            "keep *_selectedPatTausHpsTancPFTau_*_*",
-                           "keep *_selectedPatTausShrinkingConePFTau_*_*",
                            #"keep *_cleanPatTaus_*_*",
                            #"drop *_cleanPatTaus_*_*",
                            #"keep *_patTaus*_*_*",

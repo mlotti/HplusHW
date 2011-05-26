@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 _patTauCollectionsDefault = [
-    "selectedPatTausShrinkingConePFTau",
+#    "selectedPatTausShrinkingConePFTau",
     "selectedPatTausHpsPFTau",
     "selectedPatTausHpsTancPFTau",
-    "selectedPatTausCaloRecoTau"
+#    "selectedPatTausCaloRecoTau"
     ] # add to the list new sources for patTauCollections, if necessary
 
 def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault):
