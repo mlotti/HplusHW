@@ -37,7 +37,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1)
+  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauFilter")
 {
   eventCounter.produces(this);
   produces<Product>();

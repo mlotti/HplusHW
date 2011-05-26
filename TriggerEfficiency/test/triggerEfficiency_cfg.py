@@ -90,8 +90,26 @@ process.TFileService.fileName = cms.string("efficiencyTree.root")
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+options.trigger = "HLT_FOO"
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
+process.patDefaultSequence.remove(process.patElectrons)
+process.patDefaultSequence.remove(process.selectedPatElectrons)
+process.patDefaultSequence.remove(process.electronMatch)
+process.patDefaultSequence.remove(process.cleanPatElectrons)
+process.patDefaultSequence.remove(process.cleanPatPhotons)
+process.patDefaultSequence.remove(process.cleanPatTaus)
+process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
+process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
+process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
+process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
+process.patDefaultSequence.remove(process.cleanPatJets)
+process.patDefaultSequence.remove(process.countPatElectrons)
+process.patDefaultSequence.remove(process.countPatLeptons)
+
+
+process.commonSequence.remove(process.collisionDataSelection)
+del process.collisionDataSelection
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -111,7 +129,7 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+#param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()

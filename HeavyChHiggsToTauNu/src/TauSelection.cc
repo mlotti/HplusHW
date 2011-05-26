@@ -23,45 +23,47 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fProngNumber(prongNumber),
+    fLabel(label),
     fTauID(0),
     fOperationMode(kNormalTauID),
-    fFactorizationTable(iConfig),
-    fTauFound(eventCounter.addSubCounter("TauSelection","Tau found")), // FIXME: include prong number into counter name
+    fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
     fEventWeight(eventWeight)
   {
+    edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir(label);
+    
     // Create tauID algorithm handler
     if     (fSelection == "CaloTauCutBased")
-      fTauID = new TauIDTCTau(iConfig, eventCounter, eventWeight, prongNumber);
+      fTauID = new TauIDTCTau(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "ShrinkingConePFTauCutBased")
-      fTauID = new TauIDPFShrinkingCone(iConfig, eventCounter, eventWeight, prongNumber);
+      fTauID = new TauIDPFShrinkingCone(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "ShrinkingConePFTauTaNCBased")
-      fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight, prongNumber);
-    else if(fSelection == "HPSTauBased")
-      fTauID = new TauIDPFShrinkingConeHPS(iConfig, eventCounter, eventWeight, prongNumber);
+      fTauID = new TauIDPFShrinkingConeTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+    else if(fSelection == "HPSTightTauBased")
+      fTauID = new TauIDPFHPSTight(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "HPSMediumTauBased")
-      fTauID = new TauIDPFShrinkingConeHPSMedium(iConfig, eventCounter, eventWeight, prongNumber);
+      fTauID = new TauIDPFHPSMedium(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "HPSLooseTauBased")
-      fTauID = new TauIDPFShrinkingConeHPSLoose(iConfig, eventCounter, eventWeight, prongNumber);
+      fTauID = new TauIDPFHPSLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+    else if(fSelection == "HPSVeryLooseTauBased")
+      fTauID = new TauIDPFHPSVeryLoose(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
     else if(fSelection == "CombinedHPSTaNCTauBased")
-      fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber);
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTauBased, HPSMediumTauBased, HPSLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
+      fTauID = new TauIDPFShrinkingConeCombinedHPSTaNC(iConfig, eventCounter, eventWeight, prongNumber, label, myDir);
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown tau selection used! Options for 'selection' are: CaloTauCutBased, ShrinkingConePFTauCutBased, ShrinkingConePFTauTaNCBased, HPSTightTauBased, HPSMediumTauBased, HPSLooseTauBased, HPSVeryLooseTauBased, CombinedHPSTaNCBased (you chose '" << fSelection << "')" << std::endl;
     
     // Define tau selection operation mode
     std::string myOperatingModeSelection = iConfig.getUntrackedParameter<std::string>("operatingMode");
     if      (myOperatingModeSelection == "standard")
       fOperationMode = kNormalTauID;
-    else if (myOperatingModeSelection == "factorized")
-      fOperationMode = kFactorizedTauID;
     else if (myOperatingModeSelection == "tauCandidateSelectionOnly")
       fOperationMode = kTauCandidateSelectionOnly;
-    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'factorized', 'tauCandidateSelectionOnly' (you chose '" << myOperatingModeSelection << "')" << std::endl;
+    else throw cms::Exception("Configuration") << "TauSelection: no or unknown operating mode! Options for 'operatingMode' are: 'standard', 'tauCandidateSelectionOnly' (you chose '" << myOperatingModeSelection << "')" << std::endl;
 
     // Histograms
-    edm::Service<TFileService> fs;
 
     // Selected tau pt, eta, and N_jets distributions
     int myTauJetPtBins = 60;
@@ -77,89 +79,89 @@ namespace HPlus {
     float myTauJetNumberMin = 0.;
     float myTauJetNumberMax = 20.; 
     // Pt
-    hPtTauCandidates = makeTH<TH1F>(*fs,
+    hPtTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_all_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hPtCleanedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
-    hPtSelectedTaus = makeTH<TH1F>(*fs,
+    hPtSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_pt",
       "selected_tau_pt;#tau p_{T}, GeV/c;N_{jets} / 5 GeV/c",
       myTauJetPtBins, myTauJetPtMin, myTauJetPtMax);
     // Eta
-    hEtaTauCandidates = makeTH<TH1F>(*fs,
+    hEtaTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_all_tau_candidates_eta",
       "tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hEtaCleanedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_eta",
       "cleaned_tau_candidates_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
-    hEtaSelectedTaus = makeTH<TH1F>(*fs,
+    hEtaSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_eta",
       "selected_tau_eta;#tau #eta;N_{jets} / 0.1",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax);
     // Eta vs. phi
-    hEtaPhiTauCandidates = makeTH<TH2F>(*fs,
+    hEtaPhiTauCandidates = makeTH<TH2F>(myDir,
       "TauSelection_all_tau_candidates_eta_vs_phi",
       "tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hEtaPhiCleanedTauCandidates = makeTH<TH2F>(*fs,
+    hEtaPhiCleanedTauCandidates = makeTH<TH2F>(myDir,
       "TauSelection_cleaned_tau_candidates_eta_vs_phi",
       "cleaned_tau_candidates_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hEtaPhiSelectedTaus = makeTH<TH2F>(*fs,
+    hEtaPhiSelectedTaus = makeTH<TH2F>(myDir,
       "TauSelection_selected_taus_eta_vs_phi",
       "selected_tau_eta_vs_phi;#tau #eta;#tau phi",
       myTauJetEtaBins, myTauJetEtaMin, myTauJetEtaMax,
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
     // Phi
-    hPhiTauCandidates = makeTH<TH1F>(*fs,
+    hPhiTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_all_tau_candidates_phi",
       "tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hPhiCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hPhiCleanedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_phi",
       "cleaned_tau_candidates_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
-    hPhiSelectedTaus = makeTH<TH1F>(*fs,
+    hPhiSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_phi",
       "selected_tau_phi;#tau #phi;N_{jets} / 0.087",
       myTauJetPhiBins, myTauJetPhiMin, myTauJetPhiMax);
     // N
-    hNumberOfTauCandidates = makeTH<TH1F>(*fs,
+    hNumberOfTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_all_tau_candidates_N",
       "tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hNumberOfCleanedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_N",
       "cleaned_tau_candidates_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
-    hNumberOfSelectedTaus = makeTH<TH1F>(*fs,
+    hNumberOfSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_N",
       "selected_tau_N;Number of #tau's;N_{jets}",
       myTauJetNumberBins, myTauJetNumberMin, myTauJetNumberMax);
     // MC purity
-    hMCPurityOfTauCandidates = makeTH<TH1F>(*fs,
+    hMCPurityOfTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_all_tau_candidates_MC_purity",
       "tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
     hMCPurityOfTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
-    hMCPurityOfCleanedTauCandidates = makeTH<TH1F>(*fs,
+    hMCPurityOfCleanedTauCandidates = makeTH<TH1F>(myDir,
       "TauSelection_cleaned_tau_candidates_MC_purity",
       "cleaned_tau_candidates_MC_purity;;N_{jets}", 4, 0., 4.);
     hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
     hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(2, "#tau from W#pm");
     hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(3, "Other #tau source");
     hMCPurityOfCleanedTauCandidates->GetXaxis()->SetBinLabel(4, "No MC #tau match");
-    hMCPurityOfSelectedTaus = makeTH<TH1F>(*fs,
+    hMCPurityOfSelectedTaus = makeTH<TH1F>(myDir,
       "TauSelection_selected_taus_MC_purity",
       "selected_tau_MC_purity;;N_{jets}", 4, 0., 4.);
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(1, "#tau from H#pm");
@@ -168,96 +170,12 @@ namespace HPlus {
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
 
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
-    hTauIdOperatingMode = makeTH<TH1F>(*fs, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 6, 0., 6.);
+    hTauIdOperatingMode = makeTH<TH1F>(myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 6, 0., 6.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(2, "Normal tau ID");
-    hTauIdOperatingMode->GetXaxis()->SetBinLabel(3, "Factorized tau ID");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "tauCandidateSelectionOnly");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "tauIDWithoutRtauOnly");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauIDWithRtauOnly");
-
-    // Factorization / general histograms
-    // NB! change binning and range only if you ARE sure what you are doing ...
-    int myFactorizationJetPtBins = 60;
-    float myFactorizationJetPtMin = 0.;
-    float myFactorizationJetPtMax = 300.; 
-    int myFactorizationJetEtaBins = 60;
-    float myFactorizationJetEtaMin = -3.;
-    float myFactorizationJetEtaMax = 3.;
-    if (fOperationMode == kFactorizedTauID) {
-      hFactorizationPtSelectedTaus = makeTH<TH1F>(*fs,
-        "TauID_factorization_selected_tau_pt",
-        "factorized_selected_tau_pt;Selected #tau p_{T}, GeV/c;N_{events} / 5 GeV/c",
-        myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
-      hFactorizationEtaSelectedTaus = makeTH<TH1F>(*fs,
-        "TauID_factorization_selected_tau_eta",
-        "factorized_selected_tau_eta;Selected #tau #eta;N_{events} / 0.1",
-        myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-      hFactorizationCategory = makeTH<TH1F>(*fs,
-        "TauID_factorized_tau_category",
-        "factorized_tau_category;;N_{events}",
-        5, 0, 5);
-      hFactorizationCategory->GetXaxis()->SetBinLabel(1, "All events");
-      hFactorizationCategory->GetXaxis()->SetBinLabel(2, "No tau candidates");
-      hFactorizationCategory->GetXaxis()->SetBinLabel(3, "Only one tau candidate");
-      hFactorizationCategory->GetXaxis()->SetBinLabel(4, "Highest tau that passed tauID");
-      hFactorizationCategory->GetXaxis()->SetBinLabel(5, "No tau after tauID; tau=highest tau candidate");
-    }
-    // The following factorization histograms can be used to calculate the factorization coefficients
-    // Factorization / weighted histograms
-    hFactorizationPtBeforeTauID = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_pt_before_tauID",
-      "tau_pt_before_weighted;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
-    hFactorizationPtAfterTauID = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_pt_after_tauID",
-      "tau_pt_after_weighted;#tau jet p_{T}, GeV/c;N_{jets} / 5 GeV/c",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
-    hFactorizationEtaBeforeTauID = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_eta_before_tauID",
-      "tau_eta_before_weighted;#tau jet #eta;N_{jets} / 0.1", 
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationEtaAfterTauID = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_eta_after_tauID",
-      "tau_eta_after_weighted;#tau jet #eta;N_{jets} / 0.1",
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationPtVsEtaBeforeTauID = makeTH<TH2F>(*fs,
-      "TauID_factorization_calculation_pt_vs_eta_before_tauID",
-      "tau_pt_vs_eta_before_weighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax,
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationPtVsEtaAfterTauID = makeTH<TH2F>(*fs,
-      "TauID_factorization_calculation_pt_vs_eta_after_tauID",
-      "tau_pt_vs_eta_after_weighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax,
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    // Factorization / unweighted histograms
-    hFactorizationPtBeforeTauIDUnweighted = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_unweighted_pt_before_tauID",
-      "tau_pt_before_unweighted;#tau jet p_{T}, GeV/c;N",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
-    hFactorizationPtAfterTauIDUnweighted = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_unweighted_pt_after_tauID",
-      "tau_pt_after_unweighted;#tau jet p_{T}, GeV/c;N",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax);
-    hFactorizationEtaBeforeTauIDUnweighted = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_unweighted_eta_before_tauID",
-      "tau_eta_before_unweighted;#tau jet #eta;N",
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationEtaAfterTauIDUnweighted = makeTH<TH1F>(*fs,
-      "TauID_factorization_calculation_unweighted_eta_after_tauID",
-      "tau_eta_after_unweighted;#tau jet #eta;N",
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationPtVsEtaBeforeTauIDUnweighted = makeTH<TH2F>(*fs,
-      "TauID_factorization_calculation_unweighted_pt_vs_eta_before_tauID",
-      "tau_pt_vs_eta_before_unweighted;#tau jet p_{T}, GeV/c;#tau jet #eta",
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax, 
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
-    hFactorizationPtVsEtaAfterTauIDUnweighted = makeTH<TH2F>(*fs,
-      "TauID_factorization_calculation_unweighted_pt_vs_eta_after_tauID",
-      "tau_pt_vs_eta_after_unweighted;#tau jet p_{T}, GeV/c;#tau jet #eta", 
-      myFactorizationJetPtBins, myFactorizationJetPtMin, myFactorizationJetPtMax, 
-      myFactorizationJetEtaBins, myFactorizationJetEtaMin, myFactorizationJetEtaMax);
   }
 
   TauSelection::~TauSelection() {
@@ -344,8 +262,8 @@ namespace HPlus {
       fCleanedTauCandidates.push_back(iTau);
       
       // Tau ID selections
-      if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
-        // Standard tau ID or factorized tau ID (necessary for the tau selection logic) 
+      if (fOperationMode == kNormalTauID) {
+        // Standard tau ID (necessary for the tau selection logic) 
         if (!fTauID->passIsolation(iTau)) continue;
 
         if (fProngNumber == 1) {
@@ -374,20 +292,6 @@ namespace HPlus {
       hNumberOfSelectedTaus->Fill(static_cast<float>(fSelectedTaus.size()), fEventWeight.getWeight());
     }
 
-    // Handle result of factorized tau ID
-    if (fOperationMode == kFactorizedTauID) {
-      if (!doFactorizationLookup())
-        // No tau found
-        return false;
-      // Selected tau is the first entry in the fSelectedTaus vector
-      double myTauPt = fSelectedTaus[0]->pt();
-      double myTauEta = fSelectedTaus[0]->eta();
-      hFactorizationPtSelectedTaus->Fill(myTauPt, fEventWeight.getWeight());
-      hFactorizationEtaSelectedTaus->Fill(myTauEta, fEventWeight.getWeight());
-      increment(fTauFound);
-      // Update event weight with the factorization coefficient
-      fEventWeight.multiplyWeight(fFactorizationTable.getWeightByPtAndEta(myTauPt, myTauEta));
-    }
     // Handle result of tau candidate selection only
     if (fOperationMode == kTauCandidateSelectionOnly) {
       return (fCleanedTauCandidates.size() > 0);
@@ -407,42 +311,10 @@ namespace HPlus {
     return true;
   }
 
-  bool TauSelection::doFactorizationLookup() {
-    // If the method returns true, the selected tau is the first entry of the fSelectedTaus vector
-  
-    // Check if there are entries in the tau collection
-    hFactorizationCategory->Fill(0.0, fEventWeight.getWeight());
-    if (!fCleanedTauCandidates.size()) {
-      hFactorizationCategory->Fill(1.0, fEventWeight.getWeight());
-      return false;
-    }
-    if (fCleanedTauCandidates.size() == 1) {
-      // Only one tau in the cleaned tau candidate collection: take as tau the only tau object
-      fSelectedTaus.clear();
-      fSelectedTaus.push_back(fCleanedTauCandidates[0]);
-      hFactorizationCategory->Fill(2.0, fEventWeight.getWeight());
-      return true;
-    }
-    // More than one tau exists in the cleaned tau candidate collection
-    // Strategy: apply tauID and see if any of the candidates pass
-    if (fSelectedTaus.size()) {
-      // At least one tau object has passed tauID, take as tau the tau object with highest ET
-      hFactorizationCategory->Fill(3.0, fEventWeight.getWeight());
-      return true;
-    }
-    // No tau objects have passed the tauID, take as tau the tau object with the highest ET
-    fSelectedTaus.clear();
-    fSelectedTaus.push_back(fCleanedTauCandidates[0]);
-    hFactorizationCategory->Fill(4.0, fEventWeight.getWeight());
-    return true;
-  }
-
   void TauSelection::fillOperationModeHistogram() {
     hTauIdOperatingMode->Fill(0., fEventWeight.getWeight()); // Control
     if (fOperationMode == kNormalTauID)
       hTauIdOperatingMode->Fill(1., fEventWeight.getWeight());
-    else if (fOperationMode == kFactorizedTauID)
-      hTauIdOperatingMode->Fill(2., fEventWeight.getWeight());
     else if (fOperationMode == kTauCandidateSelectionOnly)
       hTauIdOperatingMode->Fill(3., fEventWeight.getWeight());
     else if (fOperationMode == kTauIDWithoutRtauOnly)
@@ -474,15 +346,6 @@ namespace HPlus {
     hPhiCleanedTauCandidates->Fill(myTauPhi, fEventWeight.getWeight());
     hEtaPhiCleanedTauCandidates->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
 
-    // Factorization histograms
-    if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
-      hFactorizationPtBeforeTauID->Fill(myTauPt, fEventWeight.getWeight());
-      hFactorizationEtaBeforeTauID->Fill(myTauEta, fEventWeight.getWeight());
-      hFactorizationPtVsEtaBeforeTauID->Fill(myTauPt, myTauEta, fEventWeight.getWeight());
-      hFactorizationPtBeforeTauIDUnweighted->Fill(myTauPt);
-      hFactorizationEtaBeforeTauIDUnweighted->Fill(myTauEta);
-      hFactorizationPtVsEtaBeforeTauIDUnweighted->Fill(myTauPt, myTauEta);
-    }
     // Purity
     if (!iEvent.isRealData()) {
       ObtainMCPurity(tau, iEvent, hMCPurityOfCleanedTauCandidates); 
@@ -499,15 +362,6 @@ namespace HPlus {
     hPhiSelectedTaus->Fill(myTauPhi, fEventWeight.getWeight());
     hEtaPhiSelectedTaus->Fill(myTauEta, myTauPhi, fEventWeight.getWeight());
 
-    // Factorization histograms
-    if (fOperationMode == kNormalTauID || fOperationMode == kFactorizedTauID) {
-      hFactorizationPtAfterTauID->Fill(myTauPt, fEventWeight.getWeight());
-      hFactorizationEtaAfterTauID->Fill(myTauEta, fEventWeight.getWeight());
-      hFactorizationPtVsEtaAfterTauID->Fill(myTauPt, myTauEta, fEventWeight.getWeight());
-      hFactorizationPtAfterTauIDUnweighted->Fill(myTauPt);
-      hFactorizationEtaAfterTauIDUnweighted->Fill(myTauEta);
-      hFactorizationPtVsEtaAfterTauIDUnweighted->Fill(myTauPt, myTauEta);
-    }
     // Purity
     if (!iEvent.isRealData()) {
       ObtainMCPurity(tau, iEvent, hMCPurityOfSelectedTaus); 

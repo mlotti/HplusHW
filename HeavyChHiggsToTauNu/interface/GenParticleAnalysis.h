@@ -26,10 +26,12 @@ namespace HPlus {
     ~GenParticleAnalysis();
 
     void analyze(const edm::Event&, const edm::EventSetup&);
-  
+    // edm::PtrVector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); //doesn't work
+    std::vector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
+    // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
+
   private:
     void init();
-    
     // EventWeight object
     EventWeight& fEventWeight;
     //    edm::InputTag fSrc;
@@ -61,6 +63,11 @@ namespace HPlus {
     TH1 *hThetaCM1pW;
     TH1 *hMagCM1pHp;
     TH1 *hMagCM1pW;	 
+    TH1 *hBquarkMultiplicity;
+    TH1 *hBquarkStatus2Multiplicity;
+    TH1 *hBquarkStatus3Multiplicity;
+
+
   };
 }
 

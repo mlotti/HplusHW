@@ -31,7 +31,7 @@ class HPlusMETPtrSelectorFilter: public edm::EDFilter {
 HPlusMETPtrSelectorFilter::HPlusMETPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight)
+  fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET")
 {
   eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
