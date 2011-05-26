@@ -99,7 +99,6 @@ process.sPAT = addPat(process, dataVersion, doPlainPat=True, doPF2PAT=True, doPF
                                     "doPatMuonPFIsolation": True},
                       pf2patArgs={"matchingTauTrigger": myTrigger},
                       pf2patNoPuArgs={"matchingTauTrigger": myTrigger},
-                      includePFCands=True,
                       )
 
 if dataVersion.isData():

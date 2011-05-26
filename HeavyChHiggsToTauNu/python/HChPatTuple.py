@@ -544,10 +544,6 @@ def setPatTauDefaults(module, includePFCands):
     for a in attrs:
         setattr(module, a, value)
 
-    # Embed these always in order to not to read generalTracks/particleFlow when accessed
-    module.embedLeadTrack = True
-    module.embedLeadPFChargedHadrCand = True
-    
 
 def addHChTauDiscriminators():
     if HChTaus.HChTauIDSources[0] in tauTools.classicTauIDSources:
