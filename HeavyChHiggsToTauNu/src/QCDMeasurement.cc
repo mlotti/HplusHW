@@ -71,25 +71,28 @@ namespace HPlus {
     hWeightedMETAfterFakeMETVeto = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterFakeMETVetoWeighted", "METAfterFakeMETVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
     hWeightedMETAfterForwardJetVeto = makeTH<TH1F>(*fs, "QCD_METctrl_METAfterForwardJetVetoWeighted", "METAfterForwardJetVetoWeighted;MET, GeV;N_{events} / 5 GeV", 60, 0., 300.);
 
-    // Histograms in bins of another variable
-    createMETHistogramGroupByTauPt("QCD_MET_afterTauCandidateSelection_", fMETHistogramsByTauPtAfterTauCandidateSelection);
-    createMETHistogramGroupByTauPt("QCD_MET_afterJetSelection_", fMETHistogramsByTauPtAfterJetSelection);
-    createMETHistogramGroupByTauPt("QCD_MET_afterTauIsolation_", fMETHistogramsByTauPtAfterTauIsolation);
-    createNBtagsHistogramGroupByTauPt("QCD_NBtags_afterJetSelection_", fNBtagsHistogramsByTauPtAfterJetSelection);
-    createLdgJetPtHistogramGroupByMET("QCD_LdgJetPt_afterJetSelection_", fLdgJetPtHistogramGroupByMET);
-    createNBtagsHistogramGroupByMET("QCD_NBtags_afterJetSelection_", fNBtagsHistogramGroupByMET);
-    createNBtagsHistogramGroupByTauPt("QCD_NBtags_afterTauIdNoRtau_", fNBtagsHistogramsByTauPtAfterTauIdNoRtau );
-    createNBtagsHistogramGroupByTauPt("QCD_NBtags_afterTauIdAndRtau_", fNBtagsHistogramsByTauPtAfterTauIdAndRtau);
-    createMETHistogramGroupByLdgJetPt("QCD_MET_afterJetSelection_", fMETHistogramGroupByLdgJetPt);
-    createFakeMETVetoHistogramGroupByMET("QCD_FakeMETVeto_afterJetSelection_", fFakeMETVetoHistogramGroupByMET);
-    createCounterHistogramGroupByTauPt("QCD_Counter_afterJetsMetBtag_", fCounterAfterJetsMetBtagByTauPt);
-    createCounterHistogramGroupByTauPt("QCD_Counter_afterJetsMetBtagFakeMet_", fCounterAfterJetsMetBtagFakeMetByTauPt);
-    createCounterHistogramGroupByTauPt("QCD_Counter_afterJetsTauIdNoRtau_", fCounterAfterJetsTauIdNoRtauByTauPt);
-    createCounterHistogramGroupByTauPt("QCD_Counter_afterJetsTauIdNoRtauFakeMet_", fCounterAfterJetsTauIdNoRtauFakeMetByTauPt);
-    // MC
-    createNBquarksHistogramGroupByMET("QCD_NBquarks_afterJetSelection_", fNBquarksHistogramGroupByMET);
-    createNBquarksHistogramGroupByMET("QCD_NBquarksStatus2_afterJetSelection_", fNBquarksStatus2HistogramGroupByMET);
-    createNBquarksHistogramGroupByMET("QCD_NBquarksStatus3_afterJetSelection_", fNBquarksStatus3HistogramGroupByMET);
+    // Histograms in bins of another variable: in bins of tau pt
+    createHistogramGroupByOtherVariableBins("QCD_MET_afterTauCandidateSelection_", fMETHistogramsByTauPtAfterTauCandidateSelection, 20, 0.0, 100.0, fFactorizationTable.getBinLowEdges(), "TauPt", "E_{T}^{miss}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_Counter_afterJetsMetBtag_", fCounterAfterJetsMetBtagByTauPt, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "pass", "");
+    createHistogramGroupByOtherVariableBins("QCD_Counter_afterJetsMetBtagFakeMet_", fCounterAfterJetsMetBtagFakeMetByTauPt, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "pass", "");
+    createHistogramGroupByOtherVariableBins("QCD_Counter_afterJetsTauIdNoRtau_", fCounterAfterJetsTauIdNoRtauByTauPt, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "pass", "");
+    createHistogramGroupByOtherVariableBins("QCD_Counter_afterJetsTauIdNoRtauFakeMet_", fCounterAfterJetsTauIdNoRtauFakeMetByTauPt, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "pass", "");
+    createHistogramGroupByOtherVariableBins("QCD_MET_afterJetSelection_", fMETHistogramsByTauPtAfterJetSelection, 20, 0.0, 100.0, fFactorizationTable.getBinLowEdges(), "TauPt", "E_{T}^{miss}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_MET_afterTauIsolation_", fMETHistogramsByTauPtAfterTauIsolation, 20, 0.0, 100.0, fFactorizationTable.getBinLowEdges(), "TauPt", "E_{T}^{miss}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_NBtags_afterJetSelection_", fNBtagsHistogramsByTauPtAfterJetSelection, 16, -0.5, 15.5, fFactorizationTable.getBinLowEdges(), "TauPt", "NBtags", "");
+    createHistogramGroupByOtherVariableBins("QCD_NBtags_afterTauIdNoRtau_", fNBtagsHistogramsByTauPtAfterTauIdNoRtau, 16, -0.5, 15.5, fFactorizationTable.getBinLowEdges(), "TauPt", "NBtags", "");
+    createHistogramGroupByOtherVariableBins("QCD_NBtags_afterTauIdAndRtau_", fNBtagsHistogramsByTauPtAfterTauIdAndRtau, 16, -0.5, 15.5, fFactorizationTable.getBinLowEdges(), "TauPt", "NBtags", "");
+
+    //  Histograms in bins of another variable: in bins of MET
+    createHistogramGroupByOtherVariableBins("QCD_LdgJetPt_afterJetSelection_", fLdgJetPtHistogramGroupByMET, 100, 0.0, 500.0, getMetBins(), "MET", "E_{T}^{LdgJet}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_NBtags_afterJetSelection_", fNBtagsHistogramGroupByMET, 16, -0.5, 15.5, getMetBins(), "MET", "NBtags", "");
+    createHistogramGroupByOtherVariableBins("QCD_FakeMETVeto_afterJetSelection_", fFakeMETVetoHistogramGroupByMET, 36, 0.0, 180.0, getMetBins(), "MET", "#Delta#phi(MET, jets)_{min}", "degrees");
+    createHistogramGroupByOtherVariableBins("QCD_NBquarks_afterJetSelection_", fNBquarksHistogramGroupByMET, 16, -0.5, 15.5, getMetBins(), "MET", "NBquarks", "");
+    createHistogramGroupByOtherVariableBins("QCD_NBquarksStatus2_afterJetSelection_", fNBquarksStatus2HistogramGroupByMET, 16, -0.5, 15.5, getMetBins(), "MET", "NBquarks(st=2)", "");
+    createHistogramGroupByOtherVariableBins("QCD_NBquarksStatus3_afterJetSelection_", fNBquarksStatus3HistogramGroupByMET, 16, -0.5, 15.5, getMetBins(), "MET", "NBquarks(st=3)", "");
+    //  Histograms in bins of another variable: in  bins of Ldg Jet Pt 
+    createHistogramGroupByOtherVariableBins("QCD_MET_afterJetSelection_", fMETHistogramGroupByLdgJetPt, 50, 0.0, 250.0, getJetPtBins(), "LdgJetPt", "MET", "GeV");
+
     // Purity
     createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJets_", fPurityBeforeAfterJets, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
     createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsMet_",fPurityBeforeAfterJetsMet , 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
@@ -211,49 +214,10 @@ namespace HPlus {
     analyze(iEvent, iSetup);
   }
 
-  void QCDMeasurement::createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
-    // Get tau pt edge table
-    fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
-    // Make histograms
-    edm::Service<TFileService> fs;
-    size_t myTableSize = fFactorizationBinLowEdges.size(); 
-    int myMETBins = 20; // number of bins for the histograms
-    double myMETMin = 0.; // MET range minimum
-    double myMETMax = 100.; // MET range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-        // Treat first bin
-        myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
-        myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";MET, GeV;N/"
-          << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV";
-        histograms.push_back(makeTH<TH1F>(*fs, myHistoName.str().c_str(),
-          myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
-        } else {
-          // Treat other bins
-          myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
-          myHistoLabel << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i] << ";MET, GeV;N/"
-            << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV";
-          histograms.push_back(makeTH<TH1F>(*fs, myHistoName.str().c_str(),
-            myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1] <<";MET, GeV;N/" 
-      << static_cast<int>((myMETMax-myMETMin)/myMETBins) << " GeV"; 
-    histograms.push_back(makeTH<TH1F>(*fs, myHistoName.str().c_str(),
-      myHistoLabel.str().c_str(), myMETBins, myMETMin, myMETMax));
-  }
 
-
-  const int QCDMeasurement::getMetIndex(double met){
   
+  const int QCDMeasurement::getMetIndex(double met){
+    
     if( (met < 10.0) ) return 0;
     else if( (met >= 10.0) && (met < 20.0 ) )  return 1;
     else if( (met >= 20.0) && (met < 30.0 ) )  return 2;
@@ -326,367 +290,6 @@ namespace HPlus {
     return fJetPtBinLowEdges;;
   }
 
-
-  void QCDMeasurement::createFakeMETVetoHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
-    // Decide the MET bins you want to investigate
-    std::vector<double> fMetBinLowEdges = getMetBins();
-    size_t myTableSize = fMetBinLowEdges.size(); 
-    
-    // Make histograms
-    edm::Service<TFileService> fs;
-    int nBins = 36; // number of bins for the histograms
-    double xMin = 0.0; // x range minimum
-    double xMax = 180.0; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    // Loop 
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
-	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";min(#Delta#phi(MET, jets)), degrees;N/" << static_cast<int>((xMax-xMin)/nBins) << " degrees";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      } else {
-	// Treat other bins
-	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
-	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";min(#Delta#phi(MET, jets)), degrees;N/" << static_cast<int>((xMax-xMin)/nBins) << " degrees";
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] << ";min(#Delta#phi(MET, jets)), degrees;N/" << static_cast<int>((xMax-xMin)/nBins) << " degrees";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }    return;
-  }
-
-
-
-  void QCDMeasurement::createNBquarksHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
-    // Decide the MET bins you want to investigate
-    std::vector<double> fMetBinLowEdges = getMetBins();
-    size_t myTableSize = fMetBinLowEdges.size(); 
-
-    // Make histograms
-    edm::Service<TFileService> fs;
-    int nBins = 16; // number of bins for the histograms
-    double xMin = -0.5; // x range minimum
-    double xMax = 15.5; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    // Loop 
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
-	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";b-quarks;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-quarks";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      } else {
-	// Treat other bins
-	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
-	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";b-quarks;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-quarks";
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] << ";b-quarks;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-quarks";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }    return;
-  }
-
-  
-  void QCDMeasurement::createMETHistogramGroupByLdgJetPt(std::string name, std::vector<TH1*>&  histograms){
-    // Decide the MET bins you want to investigate
-    std::vector<double> fJetPtBinLowEdges = getJetPtBins();
-    size_t myTableSize = fJetPtBinLowEdges.size(); 
-    
-    // Make histograms
-    edm::Service<TFileService> fs;
-    int nBins = 50; // number of bins for the histograms
-    double xMin = 0.0; // x range minimum
-    double xMax = 250.0; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    // Loop 
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "LdgJetPtBelow" << fJetPtBinLowEdges[0]; //attikis
-	myHistoLabel << name << "LdgJetPtBelow" << fJetPtBinLowEdges[0] << ";MET, GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      } else {
-	// Treat other bins
-	myHistoName << name << "LdgJetPt" << fJetPtBinLowEdges[i-1] << "to" << fJetPtBinLowEdges[i];
-	myHistoLabel << name << "LdgJetPt" << fJetPtBinLowEdges[i-1] << "to" << fJetPtBinLowEdges[i] << ";MET, GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "LdgJetPtAbove" << fJetPtBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "LdgJetPtAbove" << fJetPtBinLowEdges[myTableSize-1] << ";MET, GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-      return;
-    }
-  }
-
-
-  void QCDMeasurement::createNBtagsHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
-    // Decide the MET bins you want to investigate
-    std::vector<double> fMetBinLowEdges = getMetBins();
-    size_t myTableSize = fMetBinLowEdges.size(); 
-
-    // Make histograms
-    edm::Service<TFileService> fs;
-    int nBins = 10; // number of bins for the histograms
-    double xMin = 0.0; // x range minimum
-    double xMax = 10.0; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    // 
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
-	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      } else {
-	// Treat other bins
-	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
-	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] << ";b-tagged jets;N/" << static_cast<int>((xMax-xMin)/nBins) << " b-tagged jets";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
-    return;  
-  }
-
-
-
-  void QCDMeasurement::createLdgJetPtHistogramGroupByMET(std::string name, std::vector<TH1*>&  histograms){
-
-    // Decide the MET bins you want to investigate
-    std::vector<double> fMetBinLowEdges = getMetBins();
-    size_t myTableSize = fMetBinLowEdges.size(); 
-
-    // Make histograms
-    edm::Service<TFileService> fs;
-    int nBins = 100; // number of bins for the histograms
-    double xMin = 0.0; // x range minimum
-    double xMax = 500.0; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    // 
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "METRangeBelow" << fMetBinLowEdges[0];
-	myHistoLabel << name << "METRangeBelow" << fMetBinLowEdges[0] << ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      } else {
-	// Treat other bins
-	myHistoName << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i];
-	myHistoLabel << name << "METRange" << fMetBinLowEdges[i-1] << "to" << fMetBinLowEdges[i] << ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-	// std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "METRangeAbove" << fMetBinLowEdges[myTableSize-1] <<  ";jet E_{T},GeV;N/" << static_cast<int>((xMax-xMin)/nBins) << " GeV";
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax)); 
-    // std::cout << "myHistoName.str().c_str() = " << myHistoName.str().c_str() << std::endl;
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
-
-    return;
-  }
-
-
-
-
-  void QCDMeasurement::createCounterHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
-    // Get tau pt edge table
-    fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
-    // Make histograms
-    edm::Service<TFileService> fs;
-    size_t myTableSize = fFactorizationBinLowEdges.size(); 
-    int nBins = 2; // number of bins for the histograms
-    double xMin = -0.5;
-    double xMax = 1.5; 
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    /// Loop ofver all tau pT bins
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
-	myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";Pass;N";
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-      } else {
-	// Treat other bins
-	myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
-	myHistoLabel << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i] << ";Pass;N"; 
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1] <<";Pass;N"; 
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
-    return;
-  }
-
-
-
-  // generic function for create histogram groups
-  void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> myVariableBins, const TString BinnedVariableName, const TString BinnedVariableUnits, const TString xAxisName ){
-
-    // Make histograms
-    edm::Service<TFileService> fs;
-    size_t myTableSize = myVariableBins.size(); 
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    /// Loop ofver all tau pT bins
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name <<  BinnedVariableName << "RangeBelow" << myVariableBins[0];
-	// myHistoLabel << name << BinnedVariableName << "RangeBelow" << myVariableBins[0] <<";Pass;N";
-	myHistoLabel << name << BinnedVariableName << "RangeBelow" << myVariableBins[0] <<"; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-      } else {
-	// Treat other bins
-	myHistoName << name << BinnedVariableName << "Range" << myVariableBins[i-1] << "to" << myVariableBins[i];
-	// myHistoLabel << name << "TauPtRange" << myVariableBins[i-1] << "to" << myVariableBins[i] << ";Pass;N"; 
-	myHistoLabel << name << BinnedVariableName << "Range" << myVariableBins[i-1] << "to" << myVariableBins[i] << "; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1];
-    // myHistoLabel << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1] <<";Pass;N"; 
-    myHistoLabel << name << BinnedVariableName << "RangeAbove" << myVariableBins[myTableSize-1] << "; "<< xAxisName << "[" << BinnedVariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << BinnedVariableUnits; 
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
-    return;
-}
-
-
-
-  void QCDMeasurement::createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms) {
-    // Get tau pt edge table
-    fFactorizationBinLowEdges = fFactorizationTable.getBinLowEdges();
-    // Make histograms
-    edm::Service<TFileService> fs;
-    size_t myTableSize = fFactorizationBinLowEdges.size(); 
-    int nBins = 10; // number of bins for the histograms
-    double xMin = 0.0; // x range minimum
-    double xMax = 10.0; // x range maximum
-    std::stringstream myHistoName;
-    std::stringstream myHistoLabel;
-
-    /// Loop ofver all tau pT bins
-    for (size_t i = 0; i < myTableSize; ++i) {
-      myHistoName.str("");
-      myHistoLabel.str("");
-      if (i == 0) {
-	// Treat first bin
-	myHistoName << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0];
-	myHistoLabel << name << "TauPtRangeBelow" << fFactorizationBinLowEdges[0] <<";NBtags;N/" << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
-	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
-      } else {
-	// Treat other bins
-	myHistoName << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i];
-	myHistoLabel << name << "TauPtRange" << fFactorizationBinLowEdges[i-1] << "to" << fFactorizationBinLowEdges[i] << ";NBtags;N/"  << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
-	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-      }
-    }
-    // Treat last bin
-    myHistoName.str("");
-    myHistoLabel.str("");
-    myHistoName << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1];
-    myHistoLabel << name << "TauPtRangeAbove" << fFactorizationBinLowEdges[myTableSize-1] <<";NBtags;N/"  << static_cast<int>((xMax-xMin)/nBins) << " BTag"; 
-    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
-    // Apply sumw2 on the histograms
-    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
-      (*it)->Sumw2();
-    }
-    return;
-  }
 
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
@@ -787,7 +390,7 @@ namespace HPlus {
 
 
 
-    // Look at MC level
+    // Perform GenParticle Level Analysis
     if( !(iEvent.isRealData()) ) {
       std::vector<const reco::Candidate*> myBquarks = fGenparticleAnalysis.doQCDmAnalysis(iEvent, iSetup);
       const int nBquarks = myBquarks.size();
@@ -799,7 +402,7 @@ namespace HPlus {
 	if ( (*iBquark)->pt() < 30 || (*iBquark)->eta() > 2.5 ) continue;
 	const int st = (*iBquark)->status();
 	bool bHasBquarkDaughter = false;
-	// Check whether the genParticle decays to itself. If yes do not consider in counting
+	// Check whether the GenParticle decays to itself. If yes do not consider in counting
 	if ( (*iBquark)->numberOfDaughters() != 0 ){
 	  // Loop over all 1st daughters of genParticle    
 	  for(size_t j = 0; j < (*iBquark)->numberOfDaughters() ; ++ j) {
@@ -1028,6 +631,52 @@ namespace HPlus {
     return mySelectedTauCandidate;
   }
   
+
+
+
+  // attikis
+  void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits ){
+
+    // Make histograms
+    edm::Service<TFileService> fs;
+    size_t myTableSize = BinVariableBins.size(); 
+    std::stringstream myHistoName;
+    std::stringstream myHistoLabel;
+
+    /// Loop ofver all tau pT bins
+    for (size_t i = 0; i < myTableSize; ++i) {
+      myHistoName.str("");
+      myHistoLabel.str("");
+      if (i == 0) {
+	// Treat first bin
+	myHistoName << name <<  BinVariableName << "RangeBelow" << BinVariableBins[0];
+	// myHistoLabel << name << BinVariableName << "RangeBelow" << BinVariableBins[0] <<";Pass;N";
+	myHistoLabel << name << BinVariableName << "RangeBelow" << BinVariableBins[0] <<"; "<< VariableName << "[" << VariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << VariableUnits; 
+	histograms.push_back( fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax) );
+      } else {
+	// Treat other bins
+	myHistoName << name << BinVariableName << "Range" << BinVariableBins[i-1] << "to" << BinVariableBins[i];
+	// myHistoLabel << name << "TauPtRange" << BinVariableBins[i-1] << "to" << BinVariableBins[i] << ";Pass;N"; 
+	myHistoLabel << name << BinVariableName << "Range" << BinVariableBins[i-1] << "to" << BinVariableBins[i] << "; "<< VariableName << "[" << VariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << VariableUnits; 
+	histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+      }
+    }
+    // Treat last bin
+    myHistoName.str("");
+    myHistoLabel.str("");
+    myHistoName << name << BinVariableName << "RangeAbove" << BinVariableBins[myTableSize-1];
+    // myHistoLabel << name << BinVariableName << "RangeAbove" << BinVariableBins[myTableSize-1] <<";Pass;N"; 
+    myHistoLabel << name << BinVariableName << "RangeAbove" << BinVariableBins[myTableSize-1] << "; "<< VariableName << "[" << VariableUnits << "]" << ";N/" << static_cast<int>((xMax-xMin)/nBins) << VariableUnits; 
+    histograms.push_back(fs->make<TH1F>(myHistoName.str().c_str(), myHistoLabel.str().c_str(), nBins, xMin, xMax));
+    // Apply sumw2 on the histograms
+    for (std::vector<TH1*>::iterator it = histograms.begin(); it != histograms.end(); ++it) {
+      (*it)->Sumw2();
+    }
+    return;
+}
+
+
+
 
   void QCDMeasurement::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions

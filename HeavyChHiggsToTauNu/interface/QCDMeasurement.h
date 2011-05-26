@@ -96,15 +96,7 @@ namespace HPlus {
     const int getMetIndex(double met);
     const int getJetPtIndex(double JetPt);
     std::vector<double> getJetPtBins(void);
-    void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> myVariableBins, const TString BinnedVariableName, const TString BinnedVariableUnits, const TString xAxisName );
-    void createCounterHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
-    void createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
-    void createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
-    void createLdgJetPtHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
-    void createNBtagsHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
-    void createNBquarksHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
-    void createMETHistogramGroupByLdgJetPt(std::string name, std::vector<TH1*>& histograms);
-    void createFakeMETVetoHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
+    void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
     edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
@@ -248,6 +240,7 @@ namespace HPlus {
     TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
 
+    // For Histogram Groups 
     std::vector<TH1*> fCounterAfterJetsTauIdNoRtauByTauPt;
     std::vector<TH1*> fCounterAfterJetsTauIdNoRtauFakeMetByTauPt;
     std::vector<TH1*> fCounterAfterJetsMetBtagByTauPt;
