@@ -132,10 +132,10 @@ namespace HPlus {
   bool TriggerSelection::passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Get Tau object
     TauSelection::Data triggerTauData = fTriggerTauSelection.analyze(iEvent, iSetup);
-    if (triggerTauData.passedEvent()) return false;
+    if (triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events
     // Get MET object 
     METSelection::Data triggerMetData = fTriggerMETSelection.analyze(iEvent, iSetup);
-    if (triggerMetData.passedEvent()) return false;
+    //if (triggerMetData.passedEvent()) return false;
     // Obtain trigger efficiency and apply it as a weight
     double triggerEfficiency = fTriggerEfficiency.efficiency(*(triggerTauData.getSelectedTaus()[0]), *triggerMetData.getSelectedMET());
     hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
