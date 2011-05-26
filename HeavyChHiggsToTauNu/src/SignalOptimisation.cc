@@ -315,7 +315,7 @@ namespace HPlus {
         btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
         METData.getSelectedMET()->et() > fMETCut &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
-      std::cout << "top mass: " << topSelectionData.getTopMass() << std::endl;
+      //std::cout << "top mass: " << topSelectionData.getTopMass() << std::endl;
       hTopSelectionAfterAllOthers->Fill(topSelectionData.getTopMass(), weight);
       hTransverseMassAfterAllOthers->Fill(transverseMass, weight);
       hEventCount->Fill(0., weight);
@@ -333,7 +333,7 @@ namespace HPlus {
         tauData.getRtauOfSelectedTau() > fRtauCut &&
         METData.getSelectedMET()->et() > fMETCut &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
-      std::cout << "btag: " << btagData.getMaxDiscriminatorValue() << std::endl;
+      //std::cout << "btag: " << btagData.getMaxDiscriminatorValue() << std::endl;
       hBTaggingDiscriminatorAfterAllOthers->Fill(btagData.getMaxDiscriminatorValue(), weight);
     }
     // MET leg
