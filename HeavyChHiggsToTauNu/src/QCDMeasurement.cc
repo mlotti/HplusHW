@@ -181,7 +181,6 @@ namespace HPlus {
 
     // Other histograms
     hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
-
     hSelectionFlow = makeTH<TH1F>(*fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
@@ -371,10 +370,12 @@ namespace HPlus {
       increment(fJetSelectionCounter2);
     }
     if (!jetData.passedEvent()) return;
+    
+    ///////////////////////////////// After Jet Selection /////////////////////////////////
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-
+    
     // Fill factorization info into histogram
     fMETHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hMETFactorizationNJetsBefore->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
@@ -387,9 +388,7 @@ namespace HPlus {
     const int myMetIndex =  getMetIndex( metData.getSelectedMET()->et() );
     const int myJetPtIndex =  getJetPtIndex( selectedJets[0]->et() );
     fLdgJetPtHistogramGroupByMET[myMetIndex]->Fill( selectedJets[0]->et(), fEventWeight.getWeight());
-
-
-
+    
     // Perform GenParticle Level Analysis
     if( !(iEvent.isRealData()) ) {
       std::vector<const reco::Candidate*> myBquarks = fGenparticleAnalysis.doQCDmAnalysis(iEvent, iSetup);
@@ -633,8 +632,6 @@ namespace HPlus {
   
 
 
-
-  // attikis
   void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits ){
 
     // Make histograms
@@ -677,7 +674,6 @@ namespace HPlus {
 
 
 
-
   void QCDMeasurement::analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
     // Divide phase space into ABCD regions
     int myIndex = 0;
@@ -716,6 +712,7 @@ namespace HPlus {
 	hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[myIndex]->Fill(tauPtBin, weightWithoutMET);
       }
     }
+    return;
   }
 
 
@@ -747,7 +744,7 @@ namespace HPlus {
     
     
     // Purity histograms
-    // JetSelection has probably already been passed but it matters not. I will get a histo with only entries on 1.0
+    // JetSelection has probably already been passed but it matters not. I will get a histo with only entries on 1.0. Still can calculate Purity after Jet Selection.
     if( jetData.passedEvent() ) fPurityBeforeAfterJets[myTauPtIndex]->Fill( 1.0, EventWeight);
     else fPurityBeforeAfterJets[myTauPtIndex]->Fill( 0.0, EventWeight);
     
