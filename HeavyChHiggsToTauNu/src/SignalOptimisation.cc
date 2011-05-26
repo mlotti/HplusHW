@@ -12,26 +12,24 @@
 
 namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
     fAllCounter(eventCounter.addCounter("All Events")),
     fTriggerCounter(eventCounter.addCounter("Trigger Counter")),
     fPrimaryVertexCounter(eventCounter.addCounter("Primary vertex")),
     fTausExistCounter(eventCounter.addCounter("Taus > 0")),
     fOneTauCounter(eventCounter.addCounter("Taus == 1")),
+    fMETCounter(eventCounter.addCounter("MET")),
     fElectronVetoCounter(eventCounter.addCounter("Electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("Muon veto")),
-    fMETCounter(eventCounter.addCounter("MET")),
     fNJetsCounter(eventCounter.addCounter("NJets")),
     fBTaggingCounter(eventCounter.addCounter("Btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("Fake MET veto")),
-    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
-    ftransverseMassCutCounter(eventCounter.addCounter("TransverseMass Cut")),
     fEvtTopologyCounter(eventCounter.addCounter("Evt Topology")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fZmassVetoCounter(eventCounter.addCounter("Z Mass Veto")),
+    ftransverseMassCutCounter(eventCounter.addCounter("TransverseMass Cut")),
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
@@ -44,11 +42,48 @@ namespace HPlus {
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight"))//,
-    // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
-  {
-    edm::Service<TFileService> fs;
+    {
+        
+    // Analysis variations
+    std::vector<double> vTauPt;
+    vTauPt.push_back(40);
+    vTauPt.push_back(50);
+    vTauPt.push_back(60);
+    vTauPt.push_back(70);
+    std::vector<double> vRTau;
+    vRTau.push_back(0);
+    vRTau.push_back(0.7);
+    vRTau.push_back(0.8);
+    std::vector<double> vMET;
+    vMET.push_back(60);
+    vMET.push_back(70);
+    vMET.push_back(80);
+    std::vector<double> vBTagDiscr;
+    vBTagDiscr.push_back(1.5);
+    vBTagDiscr.push_back(2.0);
+    vBTagDiscr.push_back(2.5);
+    vBTagDiscr.push_back(3.0);
+    std::vector<double> vFakeMETVeto;
+    vFakeMETVeto.push_back(10);
+    vFakeMETVeto.push_back(20);
+    vFakeMETVeto.push_back(30);
+    size_t myCount = 0;
+    for (std::vector<double>::iterator itTauPt = vTauPt.begin(); itTauPt != vTauPt.end(); ++itTauPt) {
+      for (std::vector<double>::iterator itRtau = vRTau.begin(); itRtau != vRTau.end(); ++itRtau) {
+        for (std::vector<double>::iterator itMET = vMET.begin(); itMET != vMET.end(); ++itMET) {
+          for (std::vector<double>::iterator itBtagDiscr= vBTagDiscr.begin(); itBtagDiscr != vBTagDiscr.end(); ++itBtagDiscr) {
+            for (std::vector<double>::iterator itFakeMETVeto = vFakeMETVeto.begin(); itFakeMETVeto != vFakeMETVeto.end(); ++itFakeMETVeto) {
+              fAnalyses.push_back(AnalysisVariation(*itTauPt, *itRtau, *itMET, *itBtagDiscr, *itFakeMETVeto));
+              fAnalysisVariationCounters.push_back(eventCounter.addCounter(fAnalyses[myCount].getLabel()));
+              ++myCount;
+            }
+          }
+        }
+      }
+    }
+
+  edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
     fs->make<TNamed>("parameterSet", iConfig.dump().c_str());
 
@@ -82,11 +117,11 @@ namespace HPlus {
   // analyze(iEvent, iSetup);
   // }
   bool SignalOptimisation::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    return analyze(iEvent, iSetup);
+    return analyse(iEvent, iSetup);
   }
 
   // void SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  bool SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool SignalOptimisation::analyse(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.updatePrescale(iEvent); // set prescale for Real Data triggers
 
     // Reset variables
@@ -118,11 +153,9 @@ namespace HPlus {
     increment(fAllCounter);
     
 
-    // 2) Apply trigger and HLT_MET cut (Only if REAL Data)
+    // 2) Apply trigger and HLT_MET cut
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    if (iEvent.isRealData()) {
-      if(!triggerData.passedEvent()) return false;   // Trigger is applied only if the data sample is real data
-    }
+    if(!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
 
 
@@ -132,7 +165,7 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     
 
-    // 4) TauID (with optional factorization)
+    // 4) TauID 
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     increment(fTausExistCounter);
@@ -144,22 +177,8 @@ namespace HPlus {
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
 
 
-    // 5) Get MET object and apply pre-MET cut to see if MC Normalization is better.
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    // if(metData.getSelectedMET()->et() < 30 ) return false;
-	
-
-    // 6) Trigger efficiency
-    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    if (!iEvent.isRealData() ) {
-      fEventWeight.multiplyWeight(triggerEfficiency); // Apply trigger efficiency as weight for simulated events
-    }
-
-
-    // SignalOptimisation will be performed from this point on. Henceforth no cut will be applied!
-    // -----> No CUTS <----- (start)
-
     // MET
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     // if(!metData.passedEvent()) return false;
     fMET = metData.getSelectedMET()->et();
     
@@ -212,8 +231,8 @@ namespace HPlus {
 
 
     // Top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    // if (!TopSelectionData.passedEvent()) return false;
+    TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    // if (!topSelectionData.passedEvent()) return false;
     // increment(fTopSelectionCounter);
 
                                            
@@ -228,8 +247,15 @@ namespace HPlus {
     fTransverseMass = transverseMass;
 
 
+    // Handle variations of analysis
+    for (size_t i = 0; i < fAnalyses.size(); ++i) {
+      if (fAnalyses[i].analyse(metData, tauData.getSelectedTaus(), tauData, btagData, fakeMETData, topSelectionData, transverseMass, fEventWeight.getWeight()))
+        increment(fAnalysisVariationCounters[i]);
+    }
+    
     // Fill TTree before any cut
-    myTree->Fill();
+// uncomment the following to produce the ROOT tree
+//myTree->Fill();
     // -----> No CUTS <----- (end)
     
     // Fill Counters for reference - to see that all is normal
@@ -245,16 +271,86 @@ namespace HPlus {
     increment(fBTaggingCounter);
     if(!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-    if(!evtTopologyData.passedEvent()) return false;
+    //if(!evtTopologyData.passedEvent()) return false;
     increment(fEvtTopologyCounter);
-    if(!TopSelectionData.passedEvent()) return false;
+    //if(!TopSelectionData.passedEvent()) return false;
     increment(fTopSelectionCounter);
-    if(!TopSelectionData.passedEvent()) return false;
+    //if(!TopSelectionData.passedEvent()) return false;
     increment(fZmassVetoCounter);
-    if(!jetTauInvMassData.passedEvent()) return false;
+    //if(!jetTauInvMassData.passedEvent()) return false;
     increment(ftransverseMassCutCounter);
 
 
     return true;
   }
+
+  
+    SignalOptimisation::AnalysisVariation::AnalysisVariation(double tauPtCut, double rtau, double METcut, double btaggingDiscriminator, double fakeMETVetoCut)
+  : fTauPtCut(tauPtCut),
+    fRtauCut(rtau),
+    fBTaggingDiscriminator(btaggingDiscriminator),
+    fMETCut(METcut),
+    fFakeMETVetoCut(fakeMETVetoCut) {
+    std::stringstream myName;
+    myName << "QCDAnalysisVariation_tauPt" << tauPtCut << "_rtau" << rtau << "_btag" << btaggingDiscriminator << "_METcut" << METcut << "_FakeMETCut" << fakeMETVetoCut;
+    fLabel = myName.str();
+    // Create histograms
+    edm::Service<TFileService> fs;
+    TFileDirectory myDir = fs->mkdir(myName.str());
+    hEventCount = makeTH<TH1F>(myDir, "EventCount", "EventCount", 1, 0, 1);
+    hRtauAfterAllOthers = makeTH<TH1F>(myDir, "Rtau", "Rtau", 22, 0., 1.1);
+    hBTaggingDiscriminatorAfterAllOthers = makeTH<TH1F>(myDir, "BTaggingDiscriminator", "BTaggingDiscriminator", 100, 0., 50.0);
+    hMETAfterAllOthers = makeTH<TH1F>(myDir, "MET", "MET", 40, 0., 200.);
+    hFakeMETVetoAfterAllOthers = makeTH<TH1F>(myDir, "FakeMETVeto", "FakeMETVeto", 36, 0., 180.);
+    hTopSelectionAfterAllOthers = makeTH<TH1F>(myDir, "TopSelection", "TopSelection", 161, -5., 800.);
+    hTransverseMassAfterAllOthers = makeTH<TH1F>(myDir, "TransverseMass", "TransverseMass", 30., 0., 300.);
+    
+  }
+  SignalOptimisation::AnalysisVariation::~AnalysisVariation() { }
+  bool SignalOptimisation::AnalysisVariation::analyse(const METSelection::Data& METData, const edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const TopSelection::Data& topSelectionData, double transverseMass, double weight) {
+    bool myPassedStatus = false;
+    // All cuts
+    if (selectedTau[0]->pt() > fTauPtCut &&
+        tauData.getRtauOfSelectedTau() > fRtauCut &&
+        btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
+        METData.getSelectedMET()->et() > fMETCut &&
+        fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+      std::cout << "top mass: " << topSelectionData.getTopMass() << std::endl;
+      hTopSelectionAfterAllOthers->Fill(topSelectionData.getTopMass(), weight);
+      hTransverseMassAfterAllOthers->Fill(transverseMass, weight);
+      hEventCount->Fill(0., weight);
+      myPassedStatus = true;
+    }
+    // Rtau leg
+    if (selectedTau[0]->pt() > fTauPtCut &&
+        btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
+        METData.getSelectedMET()->et() > fMETCut &&
+        fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+      hRtauAfterAllOthers->Fill(tauData.getRtauOfSelectedTau(), weight);
+    }
+    // BTagging leg
+    if (selectedTau[0]->pt() > fTauPtCut &&
+        tauData.getRtauOfSelectedTau() > fRtauCut &&
+        METData.getSelectedMET()->et() > fMETCut &&
+        fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+      std::cout << "btag: " << btagData.getMaxDiscriminatorValue() << std::endl;
+      hBTaggingDiscriminatorAfterAllOthers->Fill(btagData.getMaxDiscriminatorValue(), weight);
+    }
+    // MET leg
+    if (selectedTau[0]->pt() > fTauPtCut &&
+        tauData.getRtauOfSelectedTau() > fRtauCut &&
+        btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
+        fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+      hMETAfterAllOthers->Fill(METData.getSelectedMET()->et(), weight);
+    }
+    // Fake MET Veto leg
+    if (selectedTau[0]->pt() > fTauPtCut &&
+        tauData.getRtauOfSelectedTau() > fRtauCut &&
+        btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
+        METData.getSelectedMET()->et() > fMETCut) {
+      hFakeMETVetoAfterAllOthers->Fill(fakeMETData.closestDeltaPhi(), weight);
+    }
+    return myPassedStatus;
+  }
+
 }
