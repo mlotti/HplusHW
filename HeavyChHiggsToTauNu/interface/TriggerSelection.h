@@ -7,6 +7,9 @@
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 
 #include <string>
 #include <vector>
@@ -28,6 +31,11 @@ namespace HPlus {
   class EventCounter;
 
   class TriggerSelection {
+  enum TriggerSelectionType {
+    kTriggerSelectionByTriggerBit,
+    kTriggerSelectionByTriggerEfficiencyParametrisation
+  };
+  
   public:
     class Data;
     class TriggerPath {
@@ -61,7 +69,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
 
       pat::TriggerObjectRef getHltMetObject() const {
-	return fTriggerSelection->fHltMet;
+        return fTriggerSelection->fHltMet;
       }
 
     private:
@@ -77,22 +85,33 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
+    bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+
+  private:
     std::vector<TriggerPath* > triggerPaths;
-    edm::InputTag fSrc;
-    double fMetCut;
+    const edm::InputTag fSrc;
+    const double fMetCut;
 
     EventWeight& fEventWeight;
-
+    TauSelection fTriggerTauSelection;
+    METSelection fTriggerMETSelection;
+    TriggerEfficiency fTriggerEfficiency;
+    
     // Counters
     Count fTriggerPathCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;
 
+    TriggerSelectionType fTriggerSelectionType;
+    
     // Histograms
     TH1 *hHltMetBeforeTrigger;
     TH1 *hHltMetAfterTrigger;
     TH1 *hHltMetSelected;
+    TH1 *hTriggerParametrisationWeight;
+    TH1 *hControlSelectionType;
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;

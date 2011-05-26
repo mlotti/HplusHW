@@ -37,9 +37,9 @@ namespace HPlus {
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID"),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, eventWeight),
@@ -50,7 +50,6 @@ namespace HPlus {
     fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
-    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
    
@@ -124,13 +123,11 @@ namespace HPlus {
    
 
     increment(fAllCounter);
-//fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
-    // Apply trigger and HLT_MET cut
+    //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
+    
+    // Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
-    //    if (iEvent.isRealData()) {
-      // Trigger is applied only if the data sample is real data
-          if(!triggerData.passedEvent()) return false;
-	  //   }
+    if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
 /*
@@ -153,20 +150,9 @@ namespace HPlus {
     increment(fPrimaryVertexCounter);
     hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
     
-    // TauID (with optional factorization) 
-                                                                             
-    //    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-
-    // Hadronic jet selection
-
-    //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus());
-    //    if(!jetData.passedEvent()) return false;
-    //    increment(fNJetsCounter);
-    
-
     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
-    // TauID (with optional factorization)
+    // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     increment(fTausExistCounter);
@@ -178,15 +164,6 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterTauId();
     
     
-    // Get MET object 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-
-    // Trigger efficiency
-    //    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
-    //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
-      // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
-    //      fEventWeight.multiplyWeight(triggerEfficiency);
-    //    }
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
@@ -194,6 +171,7 @@ namespace HPlus {
 
 
     // MET cut
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     hMETBeforeMETCut->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);

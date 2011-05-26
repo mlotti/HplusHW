@@ -19,17 +19,19 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPtjjb = makeTH<TH1F>(*fs, "Pt_jjb", "Pt_jjb", 400, 0., 800.);
-    hPtmax = makeTH<TH1F>(*fs, "Pt_jjbmax", "Pt_jjbmax", 400, 0., 800.);
-    hPtmaxTop = makeTH<TH1F>(*fs, "Pt_top", "Pt_top", 400, 0., 800.);
-    hPtmaxTopReal = makeTH<TH1F>(*fs, "Pt_topReal", "Pt_topReal", 400, 0., 800.);
-    hPtmaxTopHplus = makeTH<TH1F>(*fs, "Pt_topHplus", "Pt_topHplus", 400, 0., 800.);
-    hjjbMass = makeTH<TH1F>(*fs, "jjbMass", "jjbMass", 400, 0., 800.);
-    htopMass = makeTH<TH1F>(*fs, "Mass_jjbMax", "Mass_jjbMax", 400, 0., 800.);
-    htopMassReal = makeTH<TH1F>(*fs, "Mass_Top", "Mass_Top", 400, 0., 800.);
-    htopMassMaxReal = makeTH<TH1F>(*fs, "MassMax_Top", "MassMax_Top", 400, 0., 800.);
-    htopMassRealb = makeTH<TH1F>(*fs, "Mass_bFromTop", "Mass_bFromTop", 400, 0., 800.);
-    htopMassRealHplus = makeTH<TH1F>(*fs, "Mass_TopHplus", "Mass_TopHplus", 400, 0., 800.);
+    TFileDirectory myDir = fs->mkdir("TopSelection");
+    
+    hPtjjb = makeTH<TH1F>(myDir, "Pt_jjb", "Pt_jjb", 400, 0., 800.);
+    hPtmax = makeTH<TH1F>(myDir, "Pt_jjbmax", "Pt_jjbmax", 400, 0., 800.);
+    hPtmaxTop = makeTH<TH1F>(myDir, "Pt_top", "Pt_top", 400, 0., 800.);
+    hPtmaxTopReal = makeTH<TH1F>(myDir, "Pt_topReal", "Pt_topReal", 400, 0., 800.);
+    hPtmaxTopHplus = makeTH<TH1F>(myDir, "Pt_topHplus", "Pt_topHplus", 400, 0., 800.);
+    hjjbMass = makeTH<TH1F>(myDir, "jjbMass", "jjbMass", 400, 0., 800.);
+    htopMass = makeTH<TH1F>(myDir, "Mass_jjbMax", "Mass_jjbMax", 400, 0., 800.);
+    htopMassReal = makeTH<TH1F>(myDir, "Mass_Top", "Mass_Top", 400, 0., 800.);
+    htopMassMaxReal = makeTH<TH1F>(myDir, "MassMax_Top", "MassMax_Top", 400, 0., 800.);
+    htopMassRealb = makeTH<TH1F>(myDir, "Mass_bFromTop", "Mass_bFromTop", 400, 0., 800.);
+    htopMassRealHplus = makeTH<TH1F>(myDir, "Mass_TopHplus", "Mass_TopHplus", 400, 0., 800.);
   }
 
   TopSelection::~TopSelection() {}
@@ -44,7 +46,8 @@ namespace HPlus {
 
     size_t passed = 0;
     double ptmax = 0;
-    double topMass = -999;
+    // double topMass = -999;
+    topMass = -999;
     bool correctCombination = false;
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {

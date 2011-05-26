@@ -11,13 +11,13 @@
 #include "TH1F.h"
 
 namespace HPlus {
-  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount):
-    TauIDBase(iConfig, eventCounter, eventWeight, "TCTau")
+  TauIDTCTau::TauIDTCTau(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir):
+    TauIDBase(iConfig, eventCounter, eventWeight, label+"_TCTau", myDir)
   {
     edm::Service<TFileService> fs;
 
     // Initialize counter objects for tau isolation
-    fIDIsolation = fCounterPackager.addSubCounter("TCTau", "Isolation", 0);
+    fIDIsolation = fCounterPackager.addSubCounter(label+"_TCTau", "Isolation", 0);
     // Histograms
     
     // Initialize rest counter objects 

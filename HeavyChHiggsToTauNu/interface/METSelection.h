@@ -41,7 +41,7 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    METSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, std::string label);
     ~METSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);

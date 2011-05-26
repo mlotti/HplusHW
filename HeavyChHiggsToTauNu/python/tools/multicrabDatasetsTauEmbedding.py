@@ -745,6 +745,11 @@ def addTo(datasets):
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_163270_tauembedding_generation_v10_pt40-2e94a29a39e067876e90268e9726e74b/USER",
                 "number_of_jobs": 15 # 5 kev/job
             },
+            "tauembedding_embedding_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_pt40-cee94be795a40bbb5b546b09a0917318/USER",
+                "number_of_jobs": 15 # 5 kev/job
+            },
             })
 
     
@@ -840,6 +845,16 @@ def addTo(datasets):
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10-b3c16f1ee121445edb6d9b12e0772d8e/USER",
                 "number_of_jobs": 200 # ~1.5 kev/job
             },
+            "tauembedding_generation_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_generation_v10_pt40-407f41e7ada5cc209b7b3dca1b2a4528/USER",
+                "number_of_jobs": 20 # 5 kev/job
+            },
+            "tauembedding_embedding_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_pt40-ac95b0c9ecfd651039bbe079053aed03/USER",
+                "number_of_jobs": 20 # 5 kev/job
+            },
             })
 
     datasets["DYJetsToLL_M50_TuneZ2_Spring11"]["data"].update({
@@ -853,6 +868,11 @@ def addTo(datasets):
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_generation_v10_pt40-407f41e7ada5cc209b7b3dca1b2a4528/USER",
                 "number_of_jobs": 9 # 5 kev/job
             },
+            "tauembedding_embedding_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_pt40-ac95b0c9ecfd651039bbe079053aed03/USER",
+                "number_of_jobs": 9 # 5 kev/job
+            },
             })
 
     datasets["WW_TuneZ2_Spring11"]["data"].update({
@@ -864,6 +884,11 @@ def addTo(datasets):
             "tauembedding_generation_v10_pt40": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_generation_v10_pt40-407f41e7ada5cc209b7b3dca1b2a4528/USER",
+                "number_of_jobs": 11 # 5 kev/job
+            },
+            "tauembedding_embedding_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_pt40-ac95b0c9ecfd651039bbe079053aed03/USER",
                 "number_of_jobs": 11 # 5 kev/job
             },
             })
@@ -893,6 +918,11 @@ def addTo(datasets):
             "tauembedding_generation_v10_pt40": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_generation_v10_pt40-407f41e7ada5cc209b7b3dca1b2a4528/USER",
+                "number_of_jobs": 12 # 5 kev/job
+            },
+            "tauembedding_embedding_v10_pt40": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/local-Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_pt40-ac95b0c9ecfd651039bbe079053aed03/USER",
                 "number_of_jobs": 12 # 5 kev/job
             },
             })

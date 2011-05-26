@@ -204,6 +204,32 @@ def addPat(process, dataVersion,
 
     return sequence
 
+def myRemoveCleaning(process, postfix=""):
+    modulesInSequence = getattr(process, "patDefaultSequence"+postfix).moduleNames()
+    for module in [
+        "cleanPatMuons",
+        "cleanPatElectrons",
+        "cleanPatPhotons",
+        "cleanPatTaus",
+        "cleanPatTausHpsTancPFTau",
+        "cleanPatTausHpsPFTau",
+        "cleanPatTausShrinkingConePFTau",
+        "cleanPatTausCaloRecoTau",
+        "cleanPatJets",
+        "cleanPatCandidateSummary",
+        "countPatElectrons",
+        "countPatMuons",
+        "countPatTaus",
+        "countPatLeptons",
+        "countPatPhotons",
+        "countPatJets",
+        "countPatJetsAK5PF",
+        "countPatJetsAK5JPT",
+        "foo"
+        ]:
+        if hasattr(process, module+postfix) and module+postfix in modulesInSequence:
+            getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, module+postfix))
+
 # Assumes that process.out is the output module
 #
 #
@@ -411,10 +437,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # Remove cleaning step and set the event content
     if out == None:
-        removeCleaning(process, False)
+        myRemoveCleaning(process)
     else:
         backup = out.outputCommands[:]
-        removeCleaning(process, True)
+        myRemoveCleaning(process)
         backup_pat = out.outputCommands[:]
 
         # Remove PFParticles here, they are explicitly included when needed

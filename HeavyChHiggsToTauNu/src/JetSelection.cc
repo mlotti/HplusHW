@@ -41,12 +41,14 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPt = makeTH<TH1F>(*fs, "jet_pt", "het_pt", 400, 0., 400.);
-    hPtCentral = makeTH<TH1F>(*fs, "jet_pt_central", "het_pt_central", 100, 0., 200.);
-    hEta = makeTH<TH1F>(*fs, "jet_eta", "jet_eta", 400, -5., 5.);
-    hPhi = makeTH<TH1F>(*fs, "jet_phi", "jet_phi", 400, -3.2, 3.2);
-    hNumberOfSelectedJets = makeTH<TH1F>(*fs, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2); 
+    TFileDirectory myDir = fs->mkdir("JetSelection");
+    
+    hPt = makeTH<TH1F>(myDir, "jet_pt", "het_pt", 400, 0., 400.);
+    hPtCentral = makeTH<TH1F>(myDir, "jet_pt_central", "het_pt_central", 100, 0., 200.);
+    hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 400, -5., 5.);
+    hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
+    hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
+    hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2); 
  }
 
   JetSelection::~JetSelection() {}

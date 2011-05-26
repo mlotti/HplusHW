@@ -21,6 +21,8 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingHistos.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -68,10 +70,41 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
   double muonTauCone_;
 
+  HPlus::EventWeight eventWeight_;
   HPlus::PFTauIsolationCalculator tauIsolationCalculator_;
 
   struct HistoAll {
-    HistoAll(double metCut, const HPlus::PFTauIsolationCalculator& isoCalc): metCut_(metCut), hMetNu(metCut), tauIsolationCalculator_(isoCalc) {}
+    HistoAll(double metCut, const HPlus::EventWeight& eventWeight, const HPlus::PFTauIsolationCalculator& isoCalc):
+      eventWeight_(eventWeight), tauIsolationCalculator_(isoCalc),
+      metCut_(metCut), hMetNu(metCut, eventWeight_),
+      hMuon(eventWeight_),
+      hMuonTrack(eventWeight_),
+      hTau(eventWeight_),
+      hTauLead(eventWeight_),
+      hTauLeadChargedHadr(eventWeight_),
+      hTauIsoShrinkingCone(eventWeight_),
+      hTauIsoShrinkingCone05(eventWeight_),
+      hTauIsoHpsLoose(eventWeight_),
+      hTauIsoHpsMedium(eventWeight_),
+      hTauIsoHpsTight(eventWeight_),
+      hMuonRelIsoTauIsoShrinkingCone(eventWeight_),
+      hMuonRelIsoTauIsoHpsMedium(eventWeight_),
+      hMuonRelIsoTauIsoHpsTight(eventWeight_),
+      hPFCandLead(eventWeight_),
+      hTauPFCandLead(eventWeight_),
+      hPFCandLeadHadr(eventWeight_),
+      hPFCandLeadHadrTrack(eventWeight_),
+      hTauPFCandLeadHadr(eventWeight_),
+      hTauGen(eventWeight_),
+      hTauGenVis(eventWeight_),
+      hNuGen(eventWeight_),
+      hTauNuGen(eventWeight_),
+      hTauGenLeadingChargedPi(eventWeight_),
+      hTauGenTauGenLeadingChargedPi(eventWeight_),
+      hTauGenVisTauGenLeadingChargedPi(eventWeight_),
+      hMuonTau(eventWeight_),
+      hMuonTauLdg(eventWeight_)
+    {}
     ~HistoAll() {
       for(size_t i=0; i<hMets.size(); ++i) {
         delete hMets[i];
@@ -83,7 +116,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       for(std::vector<std::string>::const_iterator iName = metNames.begin(); iName != metNames.end(); ++iName) {
         if(*iName == "GenMetNu")
           throw cms::Exception("Configuration") << "GenMetNu is a reserved MET name" << std::endl;
-        HistoMet2 *met = new HistoMet2(pset.getUntrackedParameter<edm::ParameterSet>(*iName), metCut_);
+        HistoMet2 *met = new HistoMet2(pset.getUntrackedParameter<edm::ParameterSet>(*iName), metCut_, eventWeight_);
         met->init(dir, *iName);
         hMets.push_back(met);
       }
@@ -92,21 +125,21 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hMuon.init(dir, "Muon", "Muon");
       hMuonTrack.init(dir, "Muon", "Muon");
       /*
-      hMuonTrkIso = dir.make<TH1F>("Muon_IsoTrk", "Muon track isolation", 100, 0, 100);
-      hMuonTrkRelIso = dir.make<TH1F>("Muon_IsoTrkRel", "Muon track relative isolation", 100, 0, 1);
-      hMuonCaloIso = dir.make<TH1F>("Muon_IsoCalo", "Muon calo isolation", 100, 0, 100);
-      hMuonCaloRelIso = dir.make<TH1F>("Muon_IsoCaloRel", "Muon calo relative isolation", 100, 0, 1);
-      hMuonIso = dir.make<TH1F>("Muon_IsoTotal", "Muon total isolation", 50, 0, 50);
+      hMuonTrkIso = HPlus::makeTH<TH1F>("Muon_IsoTrk", "Muon track isolation", 100, 0, 100);
+      hMuonTrkRelIso = HPlus::makeTH<TH1F>("Muon_IsoTrkRel", "Muon track relative isolation", 100, 0, 1);
+      hMuonCaloIso = HPlus::makeTH<TH1F>("Muon_IsoCalo", "Muon calo isolation", 100, 0, 100);
+      hMuonCaloRelIso = HPlus::makeTH<TH1F>("Muon_IsoCaloRel", "Muon calo relative isolation", 100, 0, 1);
+      hMuonIso = HPlus::makeTH<TH1F>("Muon_IsoTotal", "Muon total isolation", 50, 0, 50);
       */
-      hMuonRelIso = dir.make<TH1F>("Muon_IsoTotalRel", "Muon total relative isolation", 100, 0, 1);
+      hMuonRelIso = HPlus::makeTH<TH1F>(dir, "Muon_IsoTotalRel", "Muon total relative isolation", 100, 0, 1);
 
       hTau.init(dir, "Tau", "Tau");
       hTauLead.init(dir, "Tau_LeadPFCand", "Tau leading cand");
-      hTauLeadExists = dir.make<TH1F>("Tau_LeadPFCand_Exists", "Tau leading cand exists", 2, 0, 2);
+      hTauLeadExists = HPlus::makeTH<TH1F>(dir, "Tau_LeadPFCand_Exists", "Tau leading cand exists", 2, 0, 2);
       hTauLeadChargedHadr.init(dir, "Tau_LeadPFChargedHadrCand", "Tau leading charged hadr cand");
-      hTauLeadChargedHadrExists = dir.make<TH1F>("Tau_LeadPFChargedHadrCand_Exists", "Tau leading charged hadr cand exists", 2, 0, 2);
-      hTauLeadTrackExists = dir.make<TH1F>("Tau_LeadTrack_Exists", "Tau leading track exists", 2, 0, 2);
-      hTauR = dir.make<TH1F>("Tau_Rtau", "Rtau", 120, 0., 1.2);
+      hTauLeadChargedHadrExists = HPlus::makeTH<TH1F>(dir, "Tau_LeadPFChargedHadrCand_Exists", "Tau leading charged hadr cand exists", 2, 0, 2);
+      hTauLeadTrackExists = HPlus::makeTH<TH1F>(dir, "Tau_LeadTrack_Exists", "Tau leading track exists", 2, 0, 2);
+      hTauR = HPlus::makeTH<TH1F>(dir, "Tau_Rtau", "Rtau", 120, 0., 1.2);
 
       hTauIsoShrinkingCone.init(dir, "Tau_IsoShrinkingCone");
       hTauIsoShrinkingCone05.init(dir, "Tau_IsoShrinkingCone05");
@@ -118,26 +151,26 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hMuonRelIsoTauIsoHpsMedium.init(dir, "IsoTotalRel", "IsoHpsMedium");
       hMuonRelIsoTauIsoHpsTight.init(dir, "IsoTotalRel", "IsoHpsTight");
       /*
-      hTauIsoChargedHadrPtSum = dir.make<TH1F>("Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 200, 0, 100);
-      hTauIsoChargedHadrPt05Sum = dir.make<TH1F>("Tau_IsoChargedHadrPt05Sum", "Tau isolation charged hadr cand pt sum, pt > 0.5", 200, 0, 100);
-      hTauIsoChargedHadrPt10Sum = dir.make<TH1F>("Tau_IsoChargedHadrPt10Sum", "Tau isolation charged hadr cand pt sum, pt > 1.0", 200, 0, 100);
-      hTauIsoChargedHadrPtSumRel = dir.make<TH1F>("Tau_IsoChargedHadrPtSumRel", "Tau isolation charged hadr cand relative pt sum", 200, 0, 20);
-      hTauIsoChargedHadrPtMax = dir.make<TH1F>("Tau_IsoChargedHadrPtMax", "Tau isolation charged hadr cand pt max", 100, 0, 100);
-      hTauIsoChargedHadrPtMaxRel = dir.make<TH1F>("Tau_IsoChargedHadrPtMaxRel", "Tau isolation charged hadr cand relative pt max", 200, 0, 20);
-      hMuonTrkTauPtSumIso = dir.make<TH2F>("Muon_IsoTrk_Tau_IsoChargedHadrPtSum", "Muon trk vs. tau ptsum isolation", 100,0,100, 100,0,100);
-      hMuonTrkTauPtSumIsoRel = dir.make<TH2F>("Muon_IsoTrkRel_Tau_IsoChargedHadrPtSumRel", "Muon trk vs. tau ptsum relative isolation", 200,0,1, 200,0,20);
-      hMuonTauPtSumIso = dir.make<TH2F>("Muon_IsoTotal_Tau_IsoChargedHadrPtSum", "Muon total vs. tau ptsum isolation", 100,0,100, 200,0,20);
-      hMuonTauPtSumIsoRel = dir.make<TH2F>("Muon_IsoTotal_Tau_IsoChargedHadrPtSumRel", "Muon total vs. tau ptsum relative isolation", 200,0,1, 200,0,20);
+      hTauIsoChargedHadrPtSum = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 200, 0, 100);
+      hTauIsoChargedHadrPt05Sum = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPt05Sum", "Tau isolation charged hadr cand pt sum, pt > 0.5", 200, 0, 100);
+      hTauIsoChargedHadrPt10Sum = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPt10Sum", "Tau isolation charged hadr cand pt sum, pt > 1.0", 200, 0, 100);
+      hTauIsoChargedHadrPtSumRel = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPtSumRel", "Tau isolation charged hadr cand relative pt sum", 200, 0, 20);
+      hTauIsoChargedHadrPtMax = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPtMax", "Tau isolation charged hadr cand pt max", 100, 0, 100);
+      hTauIsoChargedHadrPtMaxRel = HPlus::makeTH<TH1F>("Tau_IsoChargedHadrPtMaxRel", "Tau isolation charged hadr cand relative pt max", 200, 0, 20);
+      hMuonTrkTauPtSumIso = HPlus::makeTH<TH2F>("Muon_IsoTrk_Tau_IsoChargedHadrPtSum", "Muon trk vs. tau ptsum isolation", 100,0,100, 100,0,100);
+      hMuonTrkTauPtSumIsoRel = HPlus::makeTH<TH2F>("Muon_IsoTrkRel_Tau_IsoChargedHadrPtSumRel", "Muon trk vs. tau ptsum relative isolation", 200,0,1, 200,0,20);
+      hMuonTauPtSumIso = HPlus::makeTH<TH2F>("Muon_IsoTotal_Tau_IsoChargedHadrPtSum", "Muon total vs. tau ptsum isolation", 100,0,100, 200,0,20);
+      hMuonTauPtSumIsoRel = HPlus::makeTH<TH2F>("Muon_IsoTotal_Tau_IsoChargedHadrPtSumRel", "Muon total vs. tau ptsum relative isolation", 200,0,1, 200,0,20);
       */
 
-      hPFCandNumber = dir.make<TH1F>("PFCand_Number", "Number of PF Candidates", 100, 0, 100);
+      hPFCandNumber = HPlus::makeTH<TH1F>(dir, "PFCand_Number", "Number of PF Candidates", 100, 0, 100);
       hPFCandLead.init(dir, "PFCand_Leading", "Leading PF Candidate");
-      hPFCandLeadParticleType = dir.make<TH1F>("PFCand_Leading_ParticleType", "Leading PF Candidate particle type", 10, 0, 10);
-      hPFCandLeadCharge = dir.make<TH1F>("PFCand_Leading_Charge", "Leading PF Candidate charge", 5, -2, 2);
+      hPFCandLeadParticleType = HPlus::makeTH<TH1F>(dir, "PFCand_Leading_ParticleType", "Leading PF Candidate particle type", 10, 0, 10);
+      hPFCandLeadCharge = HPlus::makeTH<TH1F>(dir, "PFCand_Leading_Charge", "Leading PF Candidate charge", 5, -2, 2);
       hTauPFCandLead.init(dir, "Tau_PFCand_Leading", "Tau vs. leading PF Candidate");
 
       hPFCandLeadHadr.init(dir, "PFCand_LeadingHadr", "Leading hadronic PF Candidate");
-      hPFCandLeadHadrCharge = dir.make<TH1F>("PFCand_LeadingHadr_Charge", "Leading hadronic PF Candidate charge", 5, -2, 2);
+      hPFCandLeadHadrCharge = HPlus::makeTH<TH1F>(dir, "PFCand_LeadingHadr_Charge", "Leading hadronic PF Candidate charge", 5, -2, 2);
       hPFCandLeadHadrTrack.init(dir, "PFCand_LeadingHadr", "Leading hadronic PF Candidate");
       hTauPFCandLeadHadr.init(dir, "Tau_PFCand_LeadingHadr", "Tau vs. leading hadronic PF Candidate");
 
@@ -145,13 +178,13 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hTauGenVis.init(dir, "GenTauVis", "Visible tau gen");
       hNuGen.init(dir, "GenTauNu", "Nu gen");
       hTauNuGen.init(dir, "GenTau_GenTauNu", "Gen tau vs. nu");
-      hTauGenNprongs = dir.make<TH1F>("GenTau_NProngs", "Number of charged pion daughters of generator tau", 10, 0, 10);
+      hTauGenNprongs = HPlus::makeTH<TH1F>(dir, "GenTau_NProngs", "Number of charged pion daughters of generator tau", 10, 0, 10);
       hTauGenLeadingChargedPi.init(dir, "GenTauLeadingChargedPi", "Gen tau leading charged pi");
       hTauGenTauGenLeadingChargedPi.init(dir, "GenTau_GenTauLeadingChargedPi", "Gen tau vs. leading charged pi");
       hTauGenVisTauGenLeadingChargedPi.init(dir, "GenTauVis_GenTauLeadingChargedPi", "Visible gen tau vs. leading charged pi");
 
-      hTauGenMass = dir.make<TH1F>("GenTau_Mass", "Tau mass at generator level", 100, 1.7, 1.9);
-      hTauGenDecayMass = dir.make<TH1F>("GenTauDecay_Mass", "Tau mass from decay products at generator level", 100, 1.7, 1.9);
+      hTauGenMass = HPlus::makeTH<TH1F>(dir, "GenTau_Mass", "Tau mass at generator level", 100, 1.7, 1.9);
+      hTauGenDecayMass = HPlus::makeTH<TH1F>(dir, "GenTauDecay_Mass", "Tau mass from decay products at generator level", 100, 1.7, 1.9);
 
       hMuonTau.init(dir, "Muon_Tau", "Mu vs. tau");
       hMuonTauLdg.init(dir, "Muon_TauLdg", "Mu vs. tau ldg cand");
@@ -178,7 +211,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hMuonCaloRelIso->Fill(caloIso/muon.pt());
       hMuonIso->Fill(totalIso);
       */
-      hMuonRelIso->Fill(totalIsoRel);
+      hMuonRelIso->Fill(totalIsoRel, eventWeight_.getWeight());
 
       double sumPt=0;
       double maxPt=0;
@@ -267,43 +300,43 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
       const reco::PFCandidateRef leadCand = tau.leadPFCand();
       if(leadCand.isNonnull()) {
-        hTauLeadExists->Fill(1);
+        hTauLeadExists->Fill(1.0, eventWeight_.getWeight());
         hTauLead.fill(*leadCand);
       }
       else {
-        hTauLeadExists->Fill(0);
+        hTauLeadExists->Fill(0.0, eventWeight_.getWeight());
       }
 
       const reco::PFCandidateRef leadChargedCand = tau.leadPFChargedHadrCand();
       if(leadChargedCand.isNonnull()) {
-        hTauLeadChargedHadrExists->Fill(1);
+        hTauLeadChargedHadrExists->Fill(1, eventWeight_.getWeight());
         hTauLeadChargedHadr.fill(*leadChargedCand);
         if(tau.p() > 0)
-          hTauR->Fill(leadChargedCand->p()/tau.p());
+          hTauR->Fill(leadChargedCand->p()/tau.p(), eventWeight_.getWeight());
         hMuonTauLdg.fill(muon, *leadChargedCand);
       }
       else {
-        hTauLeadChargedHadrExists->Fill(0);
+        hTauLeadChargedHadrExists->Fill(0.0, eventWeight_.getWeight());
       }
       if(tau.leadTrack().isNonnull()) {
-        hTauLeadTrackExists->Fill(1);
+        hTauLeadTrackExists->Fill(1.0, eventWeight_.getWeight());
       }
       else {
-        hTauLeadTrackExists->Fill(0);
+        hTauLeadTrackExists->Fill(0.0, eventWeight_.getWeight());
       }
                             
       fillMuonTauIso(muon, tau);
 
-      hPFCandNumber->Fill(pfCandsSize);
+      hPFCandNumber->Fill(pfCandsSize, eventWeight_.getWeight());
       if(pfCandLeading.get()) {
         hPFCandLead.fill(*pfCandLeading);
-        hPFCandLeadParticleType->Fill(pfCandLeading->particleId());
-        hPFCandLeadCharge->Fill(pfCandLeading->charge());
+        hPFCandLeadParticleType->Fill(pfCandLeading->particleId(), eventWeight_.getWeight());
+        hPFCandLeadCharge->Fill(pfCandLeading->charge(), eventWeight_.getWeight());
         hTauPFCandLead.fill(tau, *pfCandLeading);
       }
       if(pfCandLeadingHadr.get()) {
         hPFCandLeadHadr.fill(*pfCandLeadingHadr);
-        hPFCandLeadHadrCharge->Fill(pfCandLeadingHadr->charge());
+        hPFCandLeadHadrCharge->Fill(pfCandLeadingHadr->charge(), eventWeight_.getWeight());
         reco::TrackRef track = pfCandLeadingHadr->trackRef();
         if(track.isNonnull()) {
           hPFCandLeadHadrTrack.fill(*track, vertex.position());
@@ -315,22 +348,23 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hTauGenVis.fill(tauDaughters.visible);
       hNuGen.fill(*genTauNu);
       hTauNuGen.fill(*genTau, *genTauNu);
-      hTauGenNprongs->Fill(tauDaughters.nprongs);
+      hTauGenNprongs->Fill(tauDaughters.nprongs, eventWeight_.getWeight());
       if(tauDaughters.leadingChargedPion) {
         hTauGenLeadingChargedPi.fill(*tauDaughters.leadingChargedPion);
         hTauGenTauGenLeadingChargedPi.fill(*genTau, *tauDaughters.leadingChargedPion);
         hTauGenVisTauGenLeadingChargedPi.fill(tauDaughters.visible, *tauDaughters.leadingChargedPion);
       }
 
-      hTauGenMass->Fill(genTau->p4().M());
-      hTauGenDecayMass->Fill(tauDecayMass);
+      hTauGenMass->Fill(genTau->p4().M(), eventWeight_.getWeight());
+      hTauGenDecayMass->Fill(tauDecayMass, eventWeight_.getWeight());
     }
+
+    const HPlus::EventWeight& eventWeight_;
+    const HPlus::PFTauIsolationCalculator& tauIsolationCalculator_;
 
     double metCut_;
     std::vector<HistoMet2 *> hMets;
     HistoMet2 hMetNu;
-
-    const HPlus::PFTauIsolationCalculator& tauIsolationCalculator_;
 
     Histo hMuon;
     HistoTrack hMuonTrack;
@@ -414,9 +448,10 @@ HPlusTauEmbeddingAnalyzer::HPlusTauEmbeddingAnalyzer(const edm::ParameterSet& iC
   genParticleOriginalSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genParticleOriginalSrc")),
   genParticleEmbeddedSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genParticleEmbeddedSrc")),
   muonTauCone_(iConfig.getUntrackedParameter<double>("muonTauMatchingCone")),
+  eventWeight_(iConfig),
   tauIsolationCalculator_(iConfig.getUntrackedParameter<edm::ParameterSet>("tauIsolationCalculator")),
-  histos(iConfig.getUntrackedParameter<double>("metCut"), tauIsolationCalculator_),
-  histosMatched(iConfig.getUntrackedParameter<double>("metCut"), tauIsolationCalculator_)
+  histos(iConfig.getUntrackedParameter<double>("metCut"), eventWeight_, tauIsolationCalculator_),
+  histosMatched(iConfig.getUntrackedParameter<double>("metCut"), eventWeight_, tauIsolationCalculator_)
 {
   edm::Service<TFileService> fs;
 
@@ -472,6 +507,7 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     }
   }
 
+  eventWeight_.updatePrescale(iEvent); // set prescale
   tauIsolationCalculator_.beginEvent(iEvent);
 
   /*
