@@ -11,6 +11,7 @@
 <use name="DataFormats/METReco"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="DataFormats/WrappedStdDictionaries"/>
+<use name="SimDataFormats/PileupSummaryInfo"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="RecoTauTag/TauTagTools"/>
 <export>

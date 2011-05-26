@@ -30,7 +30,7 @@ tightMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("selectedPatMuons"),
     cut = cms.string(
     "isGlobalMuon() && isTrackerMuon()"
-    "&& pt() > 30 && abs(eta()) < 2.1"
+    "&& pt() > 30 && abs(eta()) < 2.5"
     "&& muonID('GlobalMuonPromptTight')"
     "&& innerTrack().numberOfValidHits() > 10"
     "&& innerTrack().hitPattern().pixelLayersWithMeasurement() >= 1"
@@ -39,26 +39,26 @@ tightMuons = cms.EDFilter("PATMuonSelector",
 #    "&& (isolationR03().emEt+isolationR03().hadEt+isolationR03().sumPt)/pt() < 0.05",
     )
 )
-tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
-    src = cms.InputTag("tightMuons"),
-    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
-    maxZ = cms.double(1.0)
-)
+#tightMuonsZ = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#    src = cms.InputTag("tightMuons"),
+#    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
+#    maxZ = cms.double(1.0)
+#)
 tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
-    src = cms.InputTag("tightMuonsZ"),
+    src = cms.InputTag("tightMuons"),
     minNumber = cms.uint32(1)
 )
 #tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
 tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
-    src = cms.InputTag("tightMuonsZ"),
+    src = cms.InputTag("tightMuons"),
     filter = cms.bool(False),
     maxNumber = cms.uint32(1)
 )
-# tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
-#     src = cms.InputTag("tightMuons"),
-#     vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
-#     maxZ = cms.double(1.0)
-# )
+#tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#    src = cms.InputTag("tightMuons"),
+#    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
+#    maxZ = cms.double(1.0)
+#)
 # tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
 #     src = cms.InputTag("tauEmbeddingMuons"),
 #     minNumber = cms.uint32(1),
@@ -111,7 +111,7 @@ muonSelectionSequence = cms.Sequence(
     * muonTrigger * muonSelectionTriggered
     * muonFirstPrimaryVertex * muonGoodPrimaryVertex * muonPrimaryVertexFilter * muonSelectionPrimaryVertex
     * tightMuons 
-    * tightMuonsZ 
+#    * tightMuonsZ 
     * tightMuonsFilter
     * tauEmbeddingMuons 
 #    * tauEmbeddingMuonsFilter

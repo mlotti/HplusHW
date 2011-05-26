@@ -19,15 +19,24 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hPtjjb = makeTH<TH1F>(*fs, "hPt_jjb", "hPt_jjb", 400, 0., 800.);
-    hPtmax = makeTH<TH1F>(*fs, "hPt_top", "hPt_top", 400, 0., 800.);
-    hjjbMass = makeTH<TH1F>(*fs, "jjbMass", "jjbMass", 400, 0., 800.);
-    htopMass = makeTH<TH1F>(*fs, "topMass", "topMass", 400, 0., 800.);
+    TFileDirectory myDir = fs->mkdir("TopSelection");
+    
+    hPtjjb = makeTH<TH1F>(myDir, "Pt_jjb", "Pt_jjb", 400, 0., 800.);
+    hPtmax = makeTH<TH1F>(myDir, "Pt_jjbmax", "Pt_jjbmax", 400, 0., 800.);
+    hPtmaxTop = makeTH<TH1F>(myDir, "Pt_top", "Pt_top", 400, 0., 800.);
+    hPtmaxTopReal = makeTH<TH1F>(myDir, "Pt_topReal", "Pt_topReal", 400, 0., 800.);
+    hPtmaxTopHplus = makeTH<TH1F>(myDir, "Pt_topHplus", "Pt_topHplus", 400, 0., 800.);
+    hjjbMass = makeTH<TH1F>(myDir, "jjbMass", "jjbMass", 400, 0., 800.);
+    htopMass = makeTH<TH1F>(myDir, "Mass_jjbMax", "Mass_jjbMax", 400, 0., 800.);
+    htopMassReal = makeTH<TH1F>(myDir, "Mass_Top", "Mass_Top", 400, 0., 800.);
+    htopMassMaxReal = makeTH<TH1F>(myDir, "MassMax_Top", "MassMax_Top", 400, 0., 800.);
+    htopMassRealb = makeTH<TH1F>(myDir, "Mass_bFromTop", "Mass_bFromTop", 400, 0., 800.);
+    htopMassRealHplus = makeTH<TH1F>(myDir, "Mass_TopHplus", "Mass_TopHplus", 400, 0., 800.);
   }
 
   TopSelection::~TopSelection() {}
 
-  TopSelection::Data TopSelection::analyze(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
+  TopSelection::Data TopSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     // Reset variables
 
     bool passEvent = false;
@@ -37,10 +46,14 @@ namespace HPlus {
 
     size_t passed = 0;
     double ptmax = 0;
-    double topMass = -999;
+    // double topMass = -999;
+    topMass = -999;
+    bool correctCombination = false;
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet1 = *iter;
+
+
       for(edm::PtrVector<pat::Jet>::const_iterator iter2 = jets.begin(); iter2 != jets.end(); ++iter2) {
 	edm::Ptr<pat::Jet> iJet2 = *iter2;
 
@@ -66,12 +79,86 @@ namespace HPlus {
 	    ptmax = ptjjb;
 	    topMass = jjbMass;
 	  }
+
+
+	  // real top in all combinations
+	  if (iEvent.isRealData()) continue;
+
+	  bool bFromTop = false;
+	  bool q1FromTop = false;
+	  bool q2FromTop = false;
+
+
+	  int q1mother = 999999;
+	  const reco::GenParticle* q1particle =  iJet1->genParticle();
+	  if ( q1particle) {
+	    if (abs(q1particle->pdgId()) < 5) {
+	      int numberOfq1Mothers = q1particle->numberOfMothers();
+	      for (int im2=0; im2 < numberOfq1Mothers; ++im2){
+		const reco::GenParticle* m1particle = dynamic_cast<const reco::GenParticle*>(q1particle->mother(im2));
+		if ( !m1particle) continue;
+      		q1mother = m1particle->pdgId();
+	      }
+	    }
+	  }
+	  int q2mother = -999999;
+	  const reco::GenParticle* q2particle =  iJet2->genParticle();
+	  if ( q2particle) {
+	    if (abs(q2particle->pdgId()) < 5) {
+
+	      int numberOfq2Mothers = q2particle->numberOfMothers();
+	      for (int im3=0; im3 < numberOfq2Mothers; ++im3){
+		const reco::GenParticle* m2particle = dynamic_cast<const reco::GenParticle*>(q2particle->mother(im3));
+		if ( !m2particle) continue;
+		q2mother = m2particle->pdgId();
+	      }												 
+	    }
+	  }
+	  if( abs(q1mother) == 24 && abs(q2mother) == 24 &&  (q1mother == q2mother)) {	    
+	    q1FromTop = true;
+	    q2FromTop = true;
+	  }
+
+
+	  int bmother = 99999;
+	  const reco::GenParticle* bparticle =  iJetb->genParticle();
+	  if ( bparticle) {
+	    if (abs(bparticle->pdgId()) == 5) {
+	      int numberOfbMothers = bparticle->numberOfMothers();
+	      for (int im=0; im < numberOfbMothers; ++im){
+		const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(bparticle->mother(im));
+		if ( !mparticle) continue;
+		bmother = mparticle->pdgId();
+	      }
+	    }
+	  }
+	  if( abs(bmother) == 6 &&  (q1mother * bmother) > 0 ) {	    
+	    bFromTop = true;
+	  }
+	  if (bFromTop && q1FromTop &&  abs(bmother) == 6 && (q1mother * bmother) > 0) {
+	    correctCombination = true;
+	    hPtmaxTop->Fill(ptjjb, fEventWeight.getWeight());
+	    htopMassReal->Fill(jjbMass, fEventWeight.getWeight());
+	  }
+	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
+	    hPtmaxTopHplus->Fill(ptjjb, fEventWeight.getWeight());
+	    htopMassRealHplus->Fill(jjbMass, fEventWeight.getWeight());
+	  }
+	  if (bFromTop ) htopMassRealb->Fill(jjbMass, fEventWeight.getWeight());
+
 	}
       }
     }
-
+ 
+  
+  
     hPtmax->Fill(ptmax, fEventWeight.getWeight());
     htopMass->Fill(topMass, fEventWeight.getWeight());
+    if ( correctCombination ) {
+      hPtmaxTopReal->Fill(ptmax, fEventWeight.getWeight());
+      htopMassMaxReal->Fill(topMass, fEventWeight.getWeight());
+    }
+    //    if (bFromTop ) htopMassRealb->Fill(topMass, fEventWeight.getWeight());
 
     passEvent = true;
     if(topMass < fTopMassLow || topMass > fTopMassHigh ) passEvent = false;

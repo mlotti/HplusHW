@@ -13,6 +13,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
@@ -22,6 +23,10 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
+
 
 #include "TTree.h"
 #include "TH2F.h"
@@ -35,8 +40,50 @@ namespace edm {
 class TH1;
 class TH2;
 
-namespace HPlus {
+
+namespace HPlus { 
   class QCDMeasurement {  
+    class AnalysisVariation {
+    public:
+      AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins);
+      ~AnalysisVariation();
+      
+      void analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+
+    private:
+      double fMETCut;
+      double fFakeMETVetoCut;
+      // event counts in bins of tau jet pt
+      TH1F* hAfterBigBox;
+      TH1F* hLeg1AfterBTagging;
+      TH1F* hLeg1AfterMET;
+      TH1F* hLeg1AfterFakeMETVeto;
+      TH1F* hLeg1AfterTopSelection;
+      TH1F* hLeg1AfterAntiTopSelection;
+      TH1F* hAfterBigBoxAndTauIDNoRtau;
+      TH1F* hLeg2AfterRtau;
+      TH1F* hLeg3AfterFakeMETVeto;      
+      
+      TH1F* hLeg1FakeMetVetoDistribution;
+      TH1F* hLeg3FakeMetVetoDistribution;
+      TH1F* hTopMassDistribution;
+    };
+    
+  enum QCDSelectionOrder {
+    kQCDOrderTrigger,
+    kQCDOrderVertexSelection,
+    kQCDOrderTauCandidateSelection,
+    kQCDOrderElectronVeto,
+    kQCDOrderMuonVeto,
+    kQCDOrderJetSelection,
+    kQCDOrderTauID,
+    kQCDOrderFakeMETVeto,
+    kQCDOrderTopSelection,
+    kQCDOrderMETFactorized,
+    kQCDOrderBTagFactorized,
+    kQCDOrderRtauFactorized
+  };
+  
   public:
     explicit QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~QCDMeasurement();
@@ -45,14 +92,28 @@ namespace HPlus {
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    std::vector<double> getMetBins(void);
+    const int getMetIndex(double met);
+    const int getJetPtIndex(double JetPt);
+    std::vector<double> getJetPtBins(void);
+    void createCounterHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
     void createMETHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
+    void createNBtagsHistogramGroupByTauPt(std::string name, std::vector<TH1*>& histograms);
+    void createLdgJetPtHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
+    void createNBtagsHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
+    void createNBquarksHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
+    void createMETHistogramGroupByLdgJetPt(std::string name, std::vector<TH1*>& histograms);
+    void createFakeMETVetoHistogramGroupByMET(std::string name, std::vector<TH1*>& histograms);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
     edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
     
     // Different forks of analysis
     /// ABCD method between tau isolation and b-tagging (very low statistics for passing tauID)
-    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data forwardData, int tauPtBin, double weightWithoutMET);
+    void analyzeABCDByTauIsolationAndBTagging(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETDat, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+    void analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET);
+    // Analysis variations
+    std::vector<AnalysisVariation> fAnalyses;
 
     // We need a reference in order to use the same object (and not a copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
@@ -74,6 +135,7 @@ namespace HPlus {
     Count fEvtTopologyCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
+    Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
     
     // Counters for propagating result into signal region from reversed rtau control region
@@ -91,18 +153,25 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
-    ForwardJetVeto fForwardJetVeto;
     DeltaPhi fDeltaPhi;
+    TopSelection fTopSelection;
+    ForwardJetVeto fForwardJetVeto;
     TransverseMass fTransverseMass;
     SelectedEventsAnalyzer fWeightedSelectedEventsAnalyzer;
     SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
     PFTauIsolationCalculator fPFTauIsolationCalculator;
+    GenParticleAnalysis fGenparticleAnalysis;   
+    //
+    VertexWeight fVertexWeight;
+    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
     
     // Factorization table
     FactorizationTable fFactorizationTable;
     std::vector<double> fFactorizationBinLowEdges;
     
     // MET Histograms
+    TH1 *hVerticesBeforeWeight;
+    TH1 *hVerticesAfterWeight;
     TH1 *hMETAfterJetSelection;
     TH1 *hWeightedMETAfterJetSelection;
     TH1 *hWeightedMETAfterTauIDNoRtau;
@@ -137,6 +206,8 @@ namespace HPlus {
     TH1 *hStdNonWeightedTauPtAfterFakeMETVeto;
     TH1 *hStdNonWeightedTauPtAfterForwardJetVeto;
     TH1 *hStdWeightedRtau;
+    TH1 *hStdNonWeightedTauPtAfterRtauWithoutNjetsBeforeCut;
+    TH1 *hStdNonWeightedTauPtAfterRtauWithoutNjetsAfterCut;
     TH1 *hStdWeightedBjets;
     TH1 *hStdWeightedFakeMETVeto;
     TH1 *hStdNonWeightedRtau;
@@ -155,6 +226,12 @@ namespace HPlus {
     TH1 *hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterFakeMETVeto[4];
     TH1 *hABCDTauIsolBWithFactorizedRtauNonWeightedTauPtAfterForwardJetVeto[4];
 
+    // Correlation of factorisation
+    TH1 *hCorrelationMETAfterAllSelections;
+    TH1 *hCorrelationBtagAfterAllSelections;
+    TH1 *hCorrelationRtauAfterAllSelections;
+    TH1 *hCorrelationBtagAndRtauAfterAllSelections;
+
     // Control histograms for P(MET>70)
     TH1 *hMETPassProbabilityAfterJetSelection;
     TH1 *hMETPassProbabilityAfterTauIDNoRtau;
@@ -162,13 +239,34 @@ namespace HPlus {
     TH1 *hMETPassProbabilityAfterBTagging;
     TH1 *hMETPassProbabilityAfterFakeMETVeto;
     TH1 *hMETPassProbabilityAfterForwardJetVeto;
-    
+
     // Other control histograms
     TH1 *hTauCandidateSelectionIsolatedPtMax;
 
+    // Other histograms
+    TH1 *hAlphaTAfterTauID;
+    TH1 *hSelectionFlow;
+
+    std::vector<TH1*> fCounterAfterJetsTauIdNoRtauByTauPt;
+    std::vector<TH1*> fCounterAfterJetsTauIdNoRtauFakeMetByTauPt;
+    std::vector<TH1*> fCounterAfterJetsMetBtagByTauPt;
+    std::vector<TH1*> fCounterAfterJetsMetBtagFakeMetByTauPt;
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauCandidateSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterJetSelection;
     std::vector<TH1*> fMETHistogramsByTauPtAfterTauIsolation;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterJetSelection;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterTauIdNoRtau;
+    std::vector<TH1*> fNBtagsHistogramsByTauPtAfterTauIdAndRtau;
+    std::vector<TH1*> fLdgJetPtHistogramGroupByMET;
+    std::vector<TH1*> fNBtagsHistogramGroupByMET;
+    std::vector<TH1*> fMETHistogramGroupByLdgJetPt;
+    std::vector<TH1*> fFakeMETVetoHistogramGroupByMET;
+    // MC
+    std::vector<TH1*> fNBquarksHistogramGroupByMET;
+    std::vector<TH1*> fNBquarksStatus2HistogramGroupByMET;
+    std::vector<TH1*> fNBquarksStatus3HistogramGroupByMET;
+
+
   };
 }
 

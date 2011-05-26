@@ -12,7 +12,7 @@ namespace HPlus {
      * Base class for PF tau ID operations.
      * Actual tau ID specific classes are inherited from this class.
      */
-    TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel);
+    TauIDPFTauBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDPFTauBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 

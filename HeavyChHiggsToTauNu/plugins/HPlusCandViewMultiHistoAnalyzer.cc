@@ -1,9 +1,9 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/HPlusMultiHistoAnalyzer.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MultiHistoAnalyzer.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "CommonTools/UtilAlgos/interface/ExpressionHisto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ExpressionHisto.h"
 
-typedef HPlusMultiHistoAnalyzer<reco::CandidateView, ExpressionHisto> HPlusCandViewMultiHistoAnalyzer;
+typedef HPlus::MultiHistoAnalyzer<reco::CandidateView, HPlus::ExpressionHisto> HPlusCandViewMultiHistoAnalyzer;
 
 DEFINE_FWK_MODULE( HPlusCandViewMultiHistoAnalyzer );

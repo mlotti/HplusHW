@@ -16,3 +16,7 @@ Skimming
 *.orig
 *.html
 fjr*.xml
+*.tar.gz
+CVS
+HeavyChHiggsToTauNu/CVS
+HeavyChHiggsToTauNu/data

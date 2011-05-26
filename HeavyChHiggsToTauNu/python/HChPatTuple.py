@@ -7,6 +7,7 @@ import PhysicsTools.PatAlgos.tools.tauTools as tauTools
 from PhysicsTools.PatAlgos.tools.metTools import addTcMET, addPfMET
 from PhysicsTools.PatAlgos.tools.trigTools import switchOnTrigger
 from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpecificPATObjects, removeCleaning, runOnData
+import PhysicsTools.PatAlgos.tools.helpers as patHelpers
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
@@ -18,16 +19,168 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDis
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
+
+
+##################################################
+#
+# PAT on the fly
+#
+def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
+                   doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
+                   plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
+    def setPatArg(args, name, value):
+        if name in args:
+            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
+        args[name] = value
+    def setPatArgs(args, d):
+        for name, value in d.iteritems():
+            setPatArg(args, name, value)
+
+    counters = []
+    if dataVersion.isData() and options.tauEmbeddingInput == 0:
+        counters = HChDataSelection.dataSelectionCounters[:]
+    if options.tauEmbeddingInput != 0:
+        counters = MuonSelection.muonSelectionCounters[:]
+
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
+
+    if options.doPat == 0:
+        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+        seq = cms.Sequence(
+#            process.goodPrimaryVertices10
+        )
+        return (seq, counters)
+
+    print "Running PAT on the fly"
+
+    process.collisionDataSelection = cms.Sequence()
+    if options.tauEmbeddingInput != 0:
+        if doPF2PAT or doPF2PATNoPU or not doPlainPat:
+            raise Exception("Only plainPat can be done for tau embedding input at the moment")
+
+        # Hack to not to crash if something in PAT assumes process.out
+        hasOut = hasattr(process, "out")
+        if not hasOut:
+            process.out = cms.OutputModule("PoolOutputModule",
+                fileName = cms.untracked.string('dummy.root'),
+                outputCommands = cms.untracked.vstring()
+            )
+        setPatArgs(plainPatArgs, {"doPatTrigger": False,
+                             "doTauHLTMatching": False,
+                             "doPatCalo": False,
+                             "doBTagging": True,
+                             "doPatElectronID": False,
+                             "doPatMET": False})
+
+        process.patSequence = addPat(process, dataVersion, plainPatArgs=plainPatArgs)
+        # FIXME: this is broken at the moment
+        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
+        process.patDefaultSequence.remove(process.patMuons)
+        process.patDefaultSequence.remove(process.selectedPatMuons)
+        process.patDefaultSequence.remove(process.muonMatch)
+        process.patDefaultSequence.remove(process.patElectrons)
+        process.patDefaultSequence.remove(process.selectedPatElectrons)
+        process.patDefaultSequence.remove(process.electronMatch)
+        process.patDefaultSequence.remove(process.patPhotons)
+        process.patDefaultSequence.remove(process.selectedPatPhotons)
+        process.patDefaultSequence.remove(process.photonMatch)
+
+        # Remove soft muon b tagging discriminators as they are not
+        # well defined, cause technical problems and we don't use
+        # them.
+        process.patJets.discriminatorSources = filter(lambda tag: "softMuon" not in tag.getModuleLabel(), process.patJets.discriminatorSources)
+        for seq in [process.btagging, process.btaggingJetTagsAOD, process.btaggingTagInfosAOD]:
+            softMuonRemover = RemoveSoftMuonVisitor.RemoveSoftMuonVisitor()
+            seq.visit(softMuonRemover)
+            softMuonRemover.removeFound(process, seq)
+
+        # Use the merged track collection
+        process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+        process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
+
+        # Another part of the PAT process.out hack
+        if not hasOut:
+            del process.out
+
+        # Add PV selection, if not yet done by PAT
+#        if dataVersion.isData():
+#            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+#            process.patSequence *= process.goodPrimaryVertices
+    else:
+        if dataVersion.isData():
+            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+
+        pargs = plainPatArgs.copy()
+        pargs2 = pf2patArgs.copy()
+        pargs2NoPu = pf2patNoPuArgs.copy()
+
+        for args in [pargs, pargs2, pargs2NoPu]:
+            if args.get("doTauHLTMatching", True):
+                if options.trigger == "":
+                    raise Exception("Command line argument 'trigger' is missing")
+    
+                print "Trigger used for tau matching:", options.trigger
+                args["matchingTauTrigger"] = options.trigger
+                if jetTrigger != None:
+                    print "Trigger used for jet matching:", jetTrigger
+                    args["matchingJetTrigger"] = jetTrigger
+
+        process.patSequence = addPat(process, dataVersion,
+                                     doPlainPat=doPlainPat, doPF2PAT=doPF2PAT, doPF2PATNoPu=doPF2PATNoPu,
+                                     plainPatArgs=pargs, pf2patArgs=pargs2, pf2patNoPuArgs=pargs2NoPu)
+    
+    # Add selection of PVs with sumPt > 10
+#    process.patSequence *= process.goodPrimaryVertices10
+
+    dataPatSequence = cms.Sequence(
+        process.collisionDataSelection *
+        process.patSequence
+    )
+
+    if options.tauEmbeddingInput != 0:
+        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
+        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
+        process.patSequence *= process.patMuonTauSequence
+    
+    return (dataPatSequence, counters)
+
+
+# Add the PAT sequences as requested
+def addPat(process, dataVersion,
+           doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
+           plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
+    process.pf2patSequence = cms.Sequence()
+    process.pf2patNoPuSequence = cms.Sequence()
+    process.plainPatSequence = cms.Sequence()
+
+    if doPF2PAT:
+        process.pf2patSequence = addPF2PAT(process, dataVersion, postfix="PFlow", doPFnoPU=False, **pf2patArgs)
+    if doPF2PATNoPu:
+        process.pf2patNoPuSequence = addPF2PAT(process, dataVersion, **pf2patNoPuArgs)
+    if doPlainPat:
+        process.plainPatSequence = addPlainPat(process, dataVersion, **plainPatArgs)
+
+    # PAT function must be added last (PF2PAT requires unmodified
+    # patDefaultSequence), but run first (we use some stuff produced
+    # with plain PAT in PF2PAT)
+    sequence = cms.Sequence(
+        process.plainPatSequence *
+        process.pf2patSequence *
+        process.pf2patNoPuSequence
+    )
+    return sequence
 
 # Assumes that process.out is the output module
 #
 #
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
-def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
-           doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
-           doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
-           includeTracksPFCands=True):
+def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
+                doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
+                doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
+                includeTracksPFCands=True):
     out = None
     outdict = process.outputModules_()
     if outdict.has_key("out"):
@@ -80,10 +233,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
-    process.patJets.addJetID = True
-    process.patJets.embedCaloTowers = False
-    process.patJets.embedPFCandidates = False
-    process.patJets.addTagInfos = False
+    setPatJetDefaults(process.patJets)
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
     # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
@@ -146,48 +296,18 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
     # replicated to all added tau collections (and the first call to
     # addTauCollection should replace the default producer modified
     # here)
-    if includeTracksPFCands:
-        process.patTaus.embedLeadTrack = False
-        process.patTaus.embedLeadPFCand = False
-        process.patTaus.embedLeadPFChargedHadrCand = False
-        process.patTaus.embedLeadPFNeutralCand = False
-    else:
-        process.patTaus.embedLeadTrack = True
-        process.patTaus.embedLeadPFCand = True
-        process.patTaus.embedLeadPFChargedHadrCand = True
-        process.patTaus.embedLeadPFNeutralCand = True
-
-    # There's probably a bug in pat::Tau which in practice prevents
-    # the emedding of PFCands. Therefore we keep the PFCandidates
-    # collection in the event so that the PFCands can be accessed via
-    # edm::Refs. (note: PFCand embedding works, so it is just the
-    # collection embedding which doesn't. The PFCand embedding is
-    # disabled for consistenty and saving even some disk space.
-
-    # process.patTaus.embedSignalPFCands = True
-    # process.patTaus.embedSignalPFChargedHadrCands = True
-    # process.patTaus.embedSignalPFNeutralHadrCands = True
-    # process.patTaus.embedSignalPFGammaCands = True
-    # process.patTaus.embedIsolationPFCands = True
-    # process.patTaus.embedIsolationPFChargedHadrCands = True
-    # process.patTaus.embedIsolationPFNeutralHadrCands = True
-    # process.patTaus.embedIsolationPFGammaCands = True
+    setPatTauDefaults(process.patTaus, includeTracksPFCands)
 
     if doPatTaus:
         if doHChTauDiscriminators:
-            for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
-                idSources.extend(HChTaus.HChTauIDSources)
-                idSources.extend(HChTausCont.HChTauIDSourcesCont)
-            for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
-                idSources.extend(HChTausTest.TestTauIDSources)
+            addHChTauDiscriminators()
 
         if doPatCalo:
             tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                              algoLabel = "caloReco",
                              typeLabel = "Tau")
-            process.patTausCaloRecoTau.embedLeadPFCand = False
-            process.patTausCaloRecoTau.embedLeadPFChargedHadrCand = False
-            process.patTausCaloRecoTau.embedLeadPFNeutralCand = False
+            setPatTauDefaults(process.patTausCaloRecoTau, True)
+            process.patTausCaloRecoTau.embedLeadTrack = not includeTracksPFCands
     
         tauTools.addTauCollection(process,cms.InputTag('shrinkingConePFTauProducer'),
                          algoLabel = "shrinkingCone",
@@ -255,58 +375,34 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         del process.patMETs
 
     # Muons
-    # In order to calculate the transverse impact parameter w.r.t.
-    # beam spot instead of primary vertex, see
-    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
-    process.patMuons.usePV = False
-    if includeTracksPFCands:
-        process.patMuons.embedTrack = False
-    else:
-        process.patMuons.embedTrack = True
-
+    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
     if doPatMuonPFIsolation:
         addPFMuonIsolation(process, process.patMuons, verbose=True)
 
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
-    process.patElectrons.usePV = False
-    if includeTracksPFCands:
-        process.patElectrons.embedTrack = False
-    else:
-        process.patElectrons.embedTrack = True
+    setPatLeptonDefaults(process.patMuons, includeTracksPFCands)
 
     # Electron ID, see
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
-        process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
-        process.patDefaultSequence.replace(process.patElectrons, (
-            process.simpleEleIdSequence *
-            process.patElectronIsolation *
-            process.patElectrons
-        ))
-                                           
-        process.patElectrons.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
-        process.patElectrons.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
-        process.patElectrons.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
-        process.patElectrons.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
-        process.patElectrons.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
-        process.patElectrons.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
-        process.patElectrons.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
-        process.patElectrons.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
-        process.patElectrons.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
-        process.patElectrons.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
-        process.patElectrons.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
-        process.patElectrons.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
-
+        addPatElectronID(process, process.patElectrons, process.patDefaultSequence)
 
     # Select good primary vertices
-    # For data this is already ran, see HChDataSelection.py
-    if not dataVersion.isData():
-        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-        process.hplusPatSequence *= process.goodPrimaryVertices
-    outputCommands.extend(["keep *_goodPrimaryVertices_*_*"])
-
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+    process.offlinePrimaryVerticesSumPt = cms.EDProducer("HPlusVertexViewSumPtComputer",
+        src = cms.InputTag("offlinePrimaryVertices")
+    )
+    process.hplusPatSequence *= (
+        process.goodPrimaryVertices *
+        process.goodPrimaryVertices10 *
+        process.offlinePrimaryVerticesSumPt
+    )
+    outputCommands.extend([
+        "keep *_goodPrimaryVertices*_*_*",
+        "keep *_offlinePrimaryVerticesSumPt_*_*",
+        ])
 
     # Trigger
     if doPatTrigger:
@@ -327,6 +423,10 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
         backup = process.out.outputCommands[:]
         removeCleaning(process, True)
         backup_pat = process.out.outputCommands[:]
+
+        # Remove PFParticles here, they are explicitly included when needed
+        backup_pat = filter(lambda n: "selectedPatPFParticles" not in n, backup_pat)
+
         process.out.outputCommands = backup
         process.out.outputCommands.extend(backup_pat)
         process.out.outputCommands.extend(outputCommands)
@@ -349,7 +449,7 @@ def addPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDisc
 
     return seq
 
-
+# Helper functions
 def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
     process.load("RecoTauTag.Configuration.RecoTCTauTag_cff")
@@ -361,6 +461,10 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
         import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
         tauAlgos = ["shrinkingConePFTau", "hpsPFTau", "hpsTancTaus"]
+        # to synchronize with addPF2PAT
+        #if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
+        #    tauAlgos.append("hpsPFTau")
+
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
         PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
@@ -401,166 +505,238 @@ def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
 
     return sequence
 
+def setPatJetDefaults(module):
+    module.addJetID = True
+    module.embedCaloTowers = False
+    module.embedPFCandidates = False
+    module.addTagInfos = False
 
+def setPatTauDefaults(module, includeTracksPFCands):
+    attrs = [
+        "embedLeadTrack",
+        "embedLeadPFCand",
+        "embedLeadPFChargedHadrCand",
+        "embedLeadPFNeutralCand",
+#        "embedSignalPFCands",
+#        "embedSignalPFChargedHadrCands",
+#        "embedSignalPFNeutralHadrCands",
+#        "embedSignalPFGammaCands",
+#        "embedIsolationPFCands",
+#        "embedIsolationPFChargedHadrCands",
+#        "embedIsolationPFNeutralHadrCands",
+#        "embedIsolationPFGammaCands",
+        ]
 
-
-##################################################
-#
-# PAT on the fly
-#
-from FWCore.ParameterSet.Modules import _Module
-class RemoveSoftMuonVisitor:
-    def __init__(self):
-        self.found = []
-
-    def enter(self, visitee):
-        if isinstance(visitee, _Module) and "softMuon" in visitee.label():
-            self.found.append(visitee)
-
-    def leave(self, visitee):
-        pass
-
-    def removeFound(self, process, sequence):
-        for mod in self.found:
-            print "Removing '%s' from sequence '%s' and process" % (mod.label(), sequence.label())
-            sequence.remove(mod)
-            delattr(process, mod.label())
-
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None, patArgs={}):
-    def setPatArg(args, name, value):
-        if name in args:
-            print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
-        args[name] = value
-    def setPatArgs(args, d):
-        for name, value in d.iteritems():
-            setPatArg(args, name, value)
-
-    counters = []
-    if dataVersion.isData() and options.tauEmbeddingInput == 0:
-        counters = HChDataSelection.dataSelectionCounters[:]
-    if options.tauEmbeddingInput != 0:
-        counters = MuonSelection.muonSelectionCounters[:]
-
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters.extend(PFEmbeddingSource.muonSelectionCounters)
-
-    if options.doPat == 0:
-        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-        seq = cms.Sequence(
-            process.goodPrimaryVertices10
-        )
-        return (seq, counters)
-
-    print "Running PAT on the fly"
-
-    process.collisionDataSelection = cms.Sequence()
-    if options.tauEmbeddingInput != 0:
-
-        # Hack to not to crash if something in PAT assumes process.out
-        hasOut = hasattr(process, "out")
-        if not hasOut:
-            process.out = cms.OutputModule("PoolOutputModule",
-                fileName = cms.untracked.string('dummy.root'),
-                outputCommands = cms.untracked.vstring()
-            )
-        setPatArgs(patArgs, {"doPatTrigger": False,
-                             "doTauHLTMatching": False,
-                             "doPatCalo": False,
-                             "doBTagging": True,
-                             "doPatElectronID": False,
-                             "doPatMET": False})
-
-        process.patSequence = addPat(process, dataVersion, **patArgs)
-        # FIXME: this is broken at the moment
-        #removeSpecificPATObjects(process, ["Muons", "Electrons", "Photons"], False)
-        process.patDefaultSequence.remove(process.patMuons)
-        process.patDefaultSequence.remove(process.selectedPatMuons)
-        process.patDefaultSequence.remove(process.patElectrons)
-        process.patDefaultSequence.remove(process.selectedPatElectrons)
-        process.patDefaultSequence.remove(process.patPhotons)
-        process.patDefaultSequence.remove(process.selectedPatPhotons)
-
-        # Remove soft muon b tagging discriminators as they are not
-        # well defined, cause technical problems and we don't use
-        # them.
-        process.patJets.discriminatorSources = filter(lambda tag: "softMuon" not in tag.getModuleLabel(), process.patJets.discriminatorSources)
-        for seq in [process.btagging, process.btaggingJetTagsAOD, process.btaggingTagInfosAOD]:
-            softMuonRemover = RemoveSoftMuonVisitor()
-            seq.visit(softMuonRemover)
-            softMuonRemover.removeFound(process, seq)
-
-        # Use the merged track collection
-        process.ak5PFJetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
-        process.jetTracksAssociatorAtVertex.tracks.setModuleLabel("tmfTracks")
-
-        # Another part of the PAT process.out hack
-        if not hasOut:
-            del process.out
-
-        # Add PV selection, if not yet done by PAT
-        if dataVersion.isData():
-            process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-            process.patSequence *= process.goodPrimaryVertices
-    else:
-        if dataVersion.isData():
-            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
-
-        pargs = patArgs.copy()
-
-        if not ("doTauHLTMatching" in patArgs and patArgs["doTauHLTMatching"] == False):
-            if options.trigger == "":
-                raise Exception("Command line argument 'trigger' is missing")
-
-            print "Trigger used for tau matching:", options.trigger
-            pargs["matchingTauTrigger"] = options.trigger
-            if jetTrigger != None:
-                print "Trigger used for jet matching:", jetTrigger
-                pargs["matchingJetTrigger"] = jetTrigger            
-
-        process.patSequence = addPat(process, dataVersion, **pargs)
+    value = not includeTracksPFCands
+    for a in attrs:
+        setattr(module, a, value)
     
-    # Add selection of PVs with sumPt > 10
-    process.patSequence *= process.goodPrimaryVertices10
 
-    dataPatSequence = cms.Sequence(
-        process.collisionDataSelection *
-        process.patSequence
-    )
+def addHChTauDiscriminators():
+    if HChTaus.HChTauIDSources[0] in tauTools.classicTauIDSources:
+        print "addHChTauDiscriminators called already once, not adding them again"
+        return
 
-    if options.tauEmbeddingInput != 0:
-        from HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations import addTauEmbeddingMuonTaus
-        process.patMuonTauSequence = addTauEmbeddingMuonTaus(process)
-        process.patSequence *= process.patMuonTauSequence
-    
-    return (dataPatSequence, counters)
+    for idSources in [tauTools.classicTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+        idSources.extend(HChTaus.HChTauIDSources)
+        idSources.extend(HChTausCont.HChTauIDSourcesCont)
+    for idSources in [tauTools.classicPFTauIDSources, tauTools.hpsTauIDSources, tauTools.hpsTancTauIDSources]:
+        idSources.extend(HChTausTest.TestTauIDSources)
+
+def setPatLeptonDefaults(module, includeTracksPFCands):
+    # In order to calculate the transverse impact parameter w.r.t.
+    # beam spot instead of primary vertex, see
+    # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
+    module.usePV = False
+    module.embedTrack = not includeTracksPFCands
+
+def addPatElectronID(process, module, sequence):
+    process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
+    sequence.replace(module, (
+            process.simpleEleIdSequence *
+            process.patElectronIsolation *
+            module
+    ))
+                                           
+    module.electronIDSources.simpleEleId95relIso = cms.InputTag("simpleEleId95relIso")
+    module.electronIDSources.simpleEleId90relIso = cms.InputTag("simpleEleId90relIso")
+    module.electronIDSources.simpleEleId85relIso = cms.InputTag("simpleEleId85relIso")
+    module.electronIDSources.simpleEleId80relIso = cms.InputTag("simpleEleId80relIso")
+    module.electronIDSources.simpleEleId70relIso = cms.InputTag("simpleEleId70relIso")
+    module.electronIDSources.simpleEleId60relIso = cms.InputTag("simpleEleId60relIso")
+    module.electronIDSources.simpleEleId95cIso = cms.InputTag("simpleEleId95cIso")
+    module.electronIDSources.simpleEleId90cIso = cms.InputTag("simpleEleId90cIso")
+    module.electronIDSources.simpleEleId85cIso = cms.InputTag("simpleEleId85cIso")
+    module.electronIDSources.simpleEleId80cIso = cms.InputTag("simpleEleId80cIso")
+    module.electronIDSources.simpleEleId70cIso = cms.InputTag("simpleEleId70cIso")
+    module.electronIDSources.simpleEleId60cIso = cms.InputTag("simpleEleId60cIso")
+
 
 
 ##################################################
 #
 # PF2PAT
 #
-def addPF2PAT(process, dataVersion):
-    if hasattr(process, "patDefaultSequence"):
-        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
+def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
+              doTauHLTMatching=True, matchingTauTrigger=None, 
+              doPFnoPU=True,
+              ):
+#    if hasattr(process, "patDefaultSequence"):
+#        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
 
     # Hack to not to crash if something in PAT assumes process.out
     hasOut = hasattr(process, "out")
-    if not hasOut:
+    outputCommands = []
+    outputCommandsBackup = []
+    if hasOut:
+        outputCommandsBackup = process.out.outputCommands[:]
+    else:
         process.out = cms.OutputModule("PoolOutputModule",
             fileName = cms.untracked.string('dummy.root'),
             outputCommands = cms.untracked.vstring()
         )
 
+    outputCommands = []
+
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
-    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix="PFlow")
+    pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", runOnMC=dataVersion.isMC(), postfix=postfix)
+
+    outputCommands = [
+#        "keep *_selectedPatPhotons%s_*_*" % postfix,
+#        'keep *_selectedPatElectrons%s_*_*' % postfix, 
+        'keep *_selectedPatMuons%s_*_*' % postfix,
+        'keep *_selectedPatTaus%s_*_*' % postfix,
+        'keep *_selectedPatJet%s*_*_*' % postfix,
+        'drop *_selectedPatJets%s_pfCandidates_*' % postfix,
+        'drop *_*PF_caloTowers_*',
+        'drop *_*JPT_pfCandidates_*',
+        'drop *_*Calo_pfCandidates_*',
+        'keep *_patMETs%s_*_*' % postfix,
+        ]
+    if doPFnoPU:
+        outputCommands.extend([
+                'keep *_selectedPatPFParticles%s_*_*' % postfix,
+                ])
+    else:
+        outputCommands.extend([
+                'drop *_selectedPatPFParticles%s_*_*' % postfix,
+                ])
+
+    sequence = cms.Sequence()
+
+    # Enable/disable PFnoPU
+    getattr(process, "pfPileUp"+postfix).Enable = doPFnoPU
+
+    # Jet modifications
+    # L1FastJet
+    # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
+    # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011
+    # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
+    doL1Fastjet = True
+    if doL1Fastjet:
+        process.ak5PFL1Fastjet.useCondDB = False
+
+        #from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+        #m = cms.EDFilter("PrimaryVertexObjectFilter",
+        #    filterParams = pvSelector.clone(maxZ = 24.0),
+        #    src = cms.InputTag("offlinePrimaryVertices")
+        #)
+        #setattr(process, "goodOfflinePrimaryVerticesForJets"+postfix, m)
+        #sequence *= m
+
+        process.load('RecoJets.Configuration.RecoPFJets_cff')
+        #process.kt6PFJets.src = "pfNoElectron"+postfix
+        #process.kt6PFJets.doAreaFastjet = True
+        process.kt6PFJets.doRhoFastjet = True
+        process.kt6PFJets.Rho_EtaMax = cms.double(4.5)
+        #process.kt6PFJets.voronoiRfact = cms.double(0.9)
+        sequence *= process.kt6PFJets
+
+        # ak5PFJets
+        #process.pfJetsPFlow.Vertices = cms.InputTag("goodOfflinePrimaryVerticesForJets"+postfix)
+        process.pfJetsPFlow.doAreaFastjet = True
+        #process.pfJetsPFlow.doRhoFastjet = False
+        process.pfJetsPFlow.Rho_EtaMax = cms.double(4.5)
+
+        getattr(process, "patJetCorrFactors"+postfix).levels = ["L1FastJet"]+process.patJetCorrFactorsPFlow.levels[1:]
+        # With PFnoPU we need separache "charged hadron subtracted" corrections
+        if doPFnoPU:
+            getattr(process, "patJetCorrFactors"+postfix).payload = "AK5PFchs"
+
+    setPatJetDefaults(getattr(process, "patJets"+postfix))
+
+
+    # Use HPS taus
+    addHChTauDiscriminators()
+    if not hasattr(process, "hpsPFTauDiscriminationForChargedHiggsByLeadingTrackPtCut"):
+        import RecoTauTag.RecoTau.PFRecoTauDiscriminationForChargedHiggs_cfi as HChPFTauDiscriminators
+        import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
+
+        tauAlgos = ["hpsPFTau"]
+        HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
+        HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
+        PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
+    
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequence, postfix)
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusDiscriminationSequenceCont, postfix)
+    patHelpers.cloneProcessingSnippet(process, process.hpsPFTauHplusTestDiscriminationSequence, postfix)
+
+    patTauSeq = cms.Sequence(
+        getattr(process, "hpsPFTauHplusDiscriminationSequence"+postfix) *
+        getattr(process, "hpsPFTauHplusDiscriminationSequenceCont"+postfix) * 
+        getattr(process, "hpsPFTauHplusTestDiscriminationSequence"+postfix)
+    )
+    setattr(process, "hplusPatTauSequence"+postfix, patTauSeq)
+    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("hpsPFTauProducer"+postfix))
+    patHelpers.massSearchReplaceAnyInputTag(patTauSeq, cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
+
+    pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
+    setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
+    getattr(process, "patTaus"+postfix).tauSource = "hpsPFTauProducer"+postfix
+    # Disable iso depositsm, they take a LOT of space
+    getattr(process, "patTaus"+postfix).isoDeposits = cms.PSet()
+
+    # Lepton modifications
+    setPatLeptonDefaults(getattr(process, "patMuons"+postfix), False)
+    #setPatLeptonDefaults(getattr(process, "patElectrons"+postfix), False)
+    #addPatElectronID(process, getattr(process, "patElectrons"+postfix), getattr(process, "makePatElectrons"+postfix))
+
+    # PATElectronProducer segfaults, and we don't really need them now
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "makePatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "selectedPatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "countPatElectrons"+postfix))
+    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "countPatLeptons"+postfix))
+
+    # Disable muon and electron top projections, needs wider
+    # discussion about lepton definitions
+    getattr(process, "pfNoMuon"+postfix).enable = False
+    getattr(process, "pfNoElectron"+postfix).enable = False
+
+    # Disable tau top projection, the taus are identified separately
+    getattr(process, "pfNoTau"+postfix).enable = False
 
     # Remove photon MC matcher in order to avoid keeping photons in the event content
-    process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
+    #process.patDefaultSequencePFlow.remove(process.photonMatchPFlow)
 
-    if not hasOut:
+    if hasOut:
+        process.out.outputCommands = outputCommandsBackup
+        process.out.outputCommands.extend(outputCommands)
+    else:
         del process.out
 
-    return process.patPF2PATSequencePFlow
+    getattr(process, "patDefaultSequence"+postfix).replace(
+        getattr(process, "patTaus"+postfix),
+        patTauSeq *
+        getattr(process, "patTaus"+postfix)
+    )
+
+    sequence *= getattr(process, "patPF2PATSequence"+postfix)
+
+    if doTauHLTMatching:
+        sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, collections=["selectedPatTaus"+postfix], postfix=postfix)
+
+    return sequence
+
 
 ### The functions below are taken from
 ### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
@@ -574,13 +750,23 @@ def addSelectedPFlowParticle(process,verbose=False):
         print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
     process.load("PhysicsTools.PFCandProducer.ParticleSelectors.pfSortByType_cff")
     process.load("PhysicsTools.PFCandProducer.pfNoPileUp_cff")
+
+    # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+    process.pfPileUpCandidates = cms.EDProducer("TPPFCandidatesOnPFCandidates",
+        enable =  cms.bool( True ),
+        verbose = cms.untracked.bool( False ),
+        name = cms.untracked.string("pileUpCandidates"),
+        topCollection = cms.InputTag("pfNoPileUp"),
+        bottomCollection = cms.InputTag("particleFlow"),
+    )
+    process.pfNoPileUpSequence *= process.pfPileUpCandidates
+
     process.pfCandidateSelectionByType = cms.Sequence(
-        process.pfNoPileUpSequence *
-        ( process.pfAllNeutralHadrons +
-          process.pfAllChargedHadrons +
-          process.pfAllPhotons
-          )  +
-        process.pfAllMuons +
+        process.pfNoPileUpSequence * 
+        process.pfAllNeutralHadrons *
+        process.pfAllChargedHadrons *
+        process.pfAllPhotons *
+        process.pfAllMuons *
         process.pfAllElectrons
         )
     process.pfPileUp.Enable = True # enable pile-up filtering
@@ -588,11 +774,96 @@ def addSelectedPFlowParticle(process,verbose=False):
     process.pfAllMuons.src = "particleFlow"
     process.pfAllElectrons.src = "particleFlow"
     
+    # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+    process.pileUpHadrons = cms.EDFilter("PdgIdPFCandidateSelector",
+        src = cms.InputTag("pfPileUpCandidates"),
+        #Pick if you want  electrons and muons as well 
+        pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212,11,-11,13,-13)
+        #pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212)
+    )
+    process.pfCandidateSelectionByType *= process.pileUpHadrons
+
     process.hplusPatSequence.replace(process.hplusPatTauSequence,
                                      process.pfCandidateSelectionByType+
                                      process.hplusPatTauSequence)
 
-def addPFMuonIsolation(process,module,postfix="",verbose=False):
+# From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+def addPFMuonIsolation(process, module, verbose=False):
+#    if verbose:
+#        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
+
+    if not hasattr(process, "pfCandidateSelectionByType"):
+        addSelectedPFlowParticle(process,verbose=verbose)
+
+    process.muPFIsoDepositAll = isoDepositReplace('muons',"pfNoPileUp")
+    process.muPFIsoDepositCharged = isoDepositReplace('muons',"pfAllChargedHadrons")
+    process.muPFIsoDepositNeutral = isoDepositReplace('muons',"pfAllNeutralHadrons")
+    process.muPFIsoDepositGamma = isoDepositReplace('muons',"pfAllPhotons")
+    #For Delta beta methos create an additional one fot charged particles from PV
+    process.muPFIsoDepositPU = isoDepositReplace('muons',"pileUpHadrons")
+
+    prototype = cms.EDProducer("CandIsolatorFromDeposits",
+        deposits = cms.VPSet(
+            cms.PSet(
+                src = cms.InputTag("dummy"),
+                deltaR = cms.double(0.4),
+                weight = cms.string('1'),
+                vetos = cms.vstring(""),
+                skipDefaultVeto = cms.bool(True),
+                mode = cms.string('sum')
+            )
+        )
+    )
+
+    for a in ["All", "Charged", "Neutral", "Gamma", "PU"]:
+        m = prototype.clone()
+        m.deposits[0].src = "muPFIsoDeposit"+a
+        setattr(process, "muPFIsoValue"+a, m)
+    process.muPFIsoValueAll.deposits[0].vetos = ['0.001','Threshold(0.5)']
+    process.muPFIsoValueCharged.deposits[0].vetos = ['0.0001','Threshold(0.0)']
+    process.muPFIsoValueNeutral.deposits[0].vetos = ['0.01','Threshold(0.5)']
+    process.muPFIsoValueGamma.deposits[0].vetos = ['0.01','Threshold(0.5)']
+    #For delta beta add one that has the same threshold as the neutral ones above
+    process.muPFIsoValuePU.deposits[0].vetos = ['0.0001','Threshold(0.5)']
+    
+    process.patMuonIsolationSequence = cms.Sequence(
+        process.muPFIsoDepositAll *
+        process.muPFIsoDepositCharged *
+        process.muPFIsoDepositNeutral *
+        process.muPFIsoDepositGamma *
+        process.muPFIsoDepositPU *
+        process.muPFIsoValueAll *
+        process.muPFIsoValueCharged *
+        process.muPFIsoValueNeutral *
+        process.muPFIsoValueGamma *
+        process.muPFIsoValuePU
+    )
+    
+    module.isoDeposits = cms.PSet(
+        particle         = cms.InputTag("muPFIsoDepositAll"),
+        pfChargedHadrons = cms.InputTag("muPFIsoDepositCharged"),
+        pfNeutralHadrons = cms.InputTag("muPFIsoDepositNeutral"),
+        pfPhotons        = cms.InputTag("muPFIsoDepositGamma")
+    )
+
+    #as you can see the PU deposit will be accessed by muon.userIso(0)
+    module.isolationValues = cms.PSet(
+        particle         = cms.InputTag("muPFIsoValueAll"),
+        pfChargedHadrons = cms.InputTag("muPFIsoValueCharged"),
+        pfNeutralHadrons = cms.InputTag("muPFIsoValueNeutral"),
+        pfPhotons        = cms.InputTag("muPFIsoValueGamma"),
+        user = cms.VInputTag(
+            cms.InputTag("muPFIsoValuePU")
+        )
+    )
+
+    process.patDefaultSequence.replace(module,
+                                       process.patMuonIsolationSequence+module)
+
+
+### UserCode/PFAnalyses/VBFHTauTau/python/vbfDiTauPATTools.py
+### revision 1.7
+def addPFMuonIsolationOld(process,module,postfix="",verbose=False):
     if verbose:
         print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
 
@@ -609,6 +880,7 @@ def addPFMuonIsolation(process,module,postfix="",verbose=False):
     setattr(process,"isoDepMuonWithPhotons"+postfix,
             isoDepositReplace(module.muonSource,
                               'pfAllPhotons'))
+
 
     #compute isolation values form deposits
     process.load("PhysicsTools.PFCandProducer.Isolation.pfMuonIsolationFromDeposits_cff")

@@ -16,8 +16,8 @@ TauolaPolar = cms.PSet(
 #)
 
 tightenedMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuonsZ"),
-    cut = cms.string("pt() > 40")
+    src = cms.InputTag("tightMuons"),
+    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
 )
 tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightenedMuons"),
@@ -55,8 +55,8 @@ try:
     newSource.algorithm = "ZTauTau"
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideTauolaInterface for mdtau parameter
-    #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
-    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
+    newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(0) # for all decay modes
+    #newSource.ZTauTau.TauolaOptions.InputCards.mdtau = cms.int32(230) # for hadronic modes
     newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.double(0)
     newSource.ZTauTau.transformationMode = cms.untracked.int32(3)
 

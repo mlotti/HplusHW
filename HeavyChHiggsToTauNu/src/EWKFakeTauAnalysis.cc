@@ -18,7 +18,8 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter(prefix+":MET")),
     fNJetsCounter(eventCounter.addCounter(prefix+":njets")),
     fBTaggingCounter(eventCounter.addCounter(prefix+":btagging")),
-    fFakeMETVetoCounter(eventCounter.addCounter(prefix+":fake MET veto")) { }
+    fFakeMETVetoCounter(eventCounter.addCounter(prefix+":fake MET veto")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")) { }
   EWKFakeTauAnalysis::CounterGroup::~CounterGroup() { }
 
   EWKFakeTauAnalysis::EWKFakeTauAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
@@ -35,16 +36,15 @@ namespace HPlus {
     fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
     fJetToTausCounterGroup(eventCounter, "jet->tau"),
     //    ftransverseMassCutCounter(eventCounter.addCounter("transverseMass cut")),
-    //fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     //fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID"),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
     fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
@@ -196,7 +196,15 @@ namespace HPlus {
     if (!fakeMETData.passedEvent()) return;
     fAllTausCounterGroup.incrementFakeMETVetoCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementFakeMETVetoCounter();
-    
+
+    // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (!TopSelectionData.passedEvent()) return;
+    fAllTausCounterGroup.incrementTopSelectionCounter();
+    if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementTopSelectionCounter();
+
+    //hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
@@ -216,16 +224,8 @@ namespace HPlus {
 
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
-    /*
-    // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (!TopSelectionData.passedEvent()) return;
-    increment(fTopSelectionCounter);
 
-    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
-    */
-                                           
-    // Forward jet veto                                                                                                                                                                                                                
+    // Forward jet veto
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return;
     //    increment(fForwardJetVetoCounter);

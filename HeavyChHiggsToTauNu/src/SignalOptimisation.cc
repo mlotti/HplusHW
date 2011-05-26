@@ -14,31 +14,39 @@ namespace HPlus {
   SignalOptimisation::SignalOptimisation(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     // fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     ftransverseMassCut(iConfig.getUntrackedParameter<double>("transverseMassCut")),
-    fAllCounter(eventCounter.addCounter("All events")),
-    fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger & HLT MET Cut")),
-    fTriggerEmulationCounter(eventCounter.addCounter("Trigger Emulation")),
+    fAllCounter(eventCounter.addCounter("All Events")),
+    fTriggerCounter(eventCounter.addCounter("Trigger Counter")),
     fPrimaryVertexCounter(eventCounter.addCounter("Primary vertex")),
-    fClobalMuonVetoCounter(eventCounter.addCounter("Global Muon Veto")),
-    fClobalElectronVetoCounter(eventCounter.addCounter("Global Electron Veto")),
-    fOneProngTauSelectionCounter(eventCounter.addCounter("Tau selection")),
+    fTausExistCounter(eventCounter.addCounter("Taus > 0")),
+    fOneTauCounter(eventCounter.addCounter("Taus == 1")),
+    fElectronVetoCounter(eventCounter.addCounter("Electron veto")),
+    fMuonVetoCounter(eventCounter.addCounter("Muon veto")),
     fMETCounter(eventCounter.addCounter("MET")),
-    fJetSelectionCounter(eventCounter.addCounter("Jet Selection")),
-    fBTaggingCounter(eventCounter.addCounter("BTagging")),
-    fFakeMETVetoCounter(eventCounter.addCounter("Fake MET Veto")),
+    fNJetsCounter(eventCounter.addCounter("NJets")),
+    fBTaggingCounter(eventCounter.addCounter("Btagging")),
+    fFakeMETVetoCounter(eventCounter.addCounter("Fake MET veto")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
+    ftransverseMassCutCounter(eventCounter.addCounter("TransverseMass Cut")),
     fEvtTopologyCounter(eventCounter.addCounter("Evt Topology")),
+    fZmassVetoCounter(eventCounter.addCounter("Z Mass Veto")),
     fEventWeight(eventWeight),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1),
-    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID"),
+    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
     fFakeMETVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("fakeMETVeto"), eventCounter, eventWeight),
-    // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
-    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight)
+    fJetTauInvMass(iConfig.getUntrackedParameter<edm::ParameterSet>("jetTauInvMass"), eventCounter, eventWeight),
+    fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
+    fTopSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("topSelection"), eventCounter, eventWeight),
+    fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
+    fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
+    fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight"))//,
+    // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -59,29 +67,30 @@ namespace HPlus {
     myTree->Branch("fGlobalMuonVetoHighestPt", &fGlobalMuonVetoHighestPt);
     myTree->Branch("fGlobalElectronVetoHighestPt", &fGlobalElectronVetoHighestPt);
     myTree->Branch("fTransverseMass", &fTransverseMass);
-    myTree->Branch("fDeltaPhi",  &fDeltaPhi);
     myTree->Branch("fAlphaT", &fAlphaT);
     myTree->Branch("fHt", &fHt);
     myTree->Branch("fJt", &fJt);
-    myTree->Branch("fDiJetMassClosestToW", &fDiJetMassClosestToW);
 
     // Book histograms filled in the analysis body
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
-    hAlphaTDiJetMassClosestToW= makeTH<TH1F>(*fs, "alphaT-DiJetMassClosestToW", "alphaT-DiJetMassClosestToW", 150, 0.0, 300.0);    
     
   }
 
   SignalOptimisation::~SignalOptimisation() {}
 
-  void SignalOptimisation::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    analyze(iEvent, iSetup);
+  // void SignalOptimisation::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  // analyze(iEvent, iSetup);
+  // }
+  bool SignalOptimisation::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    return analyze(iEvent, iSetup);
   }
 
-  void SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    increment(fAllCounter);
-    
+  // void SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool SignalOptimisation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    fEventWeight.updatePrescale(iEvent); // set prescale for Real Data triggers
+
     // Reset variables
-    bTauIDStatus = -5.0;
+    bTauIDStatus = 0;
     fTauJetEt = -5.0;
     fTauJetEta = -999.99;
     fMET = -5.0;
@@ -92,109 +101,160 @@ namespace HPlus {
     fGlobalMuonVetoHighestPt = -5.0;
     fGlobalElectronVetoHighestPt = -5.0;
     fTransverseMass = -5.0;
-    fDeltaPhi = -5.0;
     fAlphaT = -5.0;
     fHt = -5.0;
     fJt = -5.0;
-    fDiJetMassClosestToW = -5.0;
     
-    // 1) Trigger
-    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
-    if(!triggerData.passedEvent()) return;
-    increment(fTriggerAndHLTMetCutCounter);
-         
-    // 2) Trigger Emulation (for MC data)
-    TriggerTauMETEmulation::Data triggerMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup); 
-    if(!triggerMETEmulationData.passedEvent()) return;
-    increment(fTriggerEmulationCounter);
 
-    // Primary vertex
+    // 1) Vertex Re-Weight (PU spectrum correction)
+    std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
+    if(!iEvent.isRealData())
+      fEventWeight.multiplyWeight(weightSize.first);
+    
+    // // GenParticle analysis
+    // if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
+
+    // Start the general counter (after Vertex re-weighting)
+    increment(fAllCounter);
+    
+
+    // 2) Apply trigger and HLT_MET cut (Only if REAL Data)
+    TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
+    if (iEvent.isRealData()) {
+      if(!triggerData.passedEvent()) return false;   // Trigger is applied only if the data sample is real data
+    }
+    increment(fTriggerCounter);
+
+
+    // 3) Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
-    if(!pvData.passedEvent()) return;
+    if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     
-    // 3) GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    if (!muonVetoData.passedEvent()) return; 
-    increment(fClobalMuonVetoCounter);
-    
-    // 4) GlobalElectronVeto
-    // GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyzeCustomElecID(iEvent, iSetup);
-    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    if (!electronVetoData.passedEvent()) return; 
-    increment(fClobalElectronVetoCounter);
 
-    // 5) tauID
-    // TauID (with optional factorization (recommended only for data and QCD))
+    // 4) TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return; // No tau found!
-    increment(fOneProngTauSelectionCounter);
-    
-    // 6) MET 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    //if(!metData.passedEvent()) return;
-    increment(fMETCounter);
-
-    // 7) Jet Selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
-    //if(!jetData.passedEvent()) return; // after tauID. Note: jets close to tau-Jet in eta-phi space are removed from jet list.
-    increment(fJetSelectionCounter);
-    
-    // 8) BTagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
-    //if(!btagData.passedEvent()) return;
-    increment(fBTaggingCounter);
-
-    // 9) FakeMETVeto
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    // if (!fakeMETData.passedEvent()) return;
-    increment(fFakeMETVetoCounter);
-    
-    // 10) AlphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
-    //if(!evtTopologyData.passedEvent()) return;
-    increment(fEvtTopologyCounter);
-     
-    // Create some variables
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-
-    float myDiJetMassClosestToW = 999;
-    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    if(diJetSize < 1){myDiJetMassClosestToW = -1.0;}
-    
-    float fMassW = 80.399; // PDG value
-    for(int i= 0; i < diJetSize; i++){ 
-      hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); 
-      if( fabs(sAlphaT.vDiJetMassesNoTau[i]-fMassW) < (myDiJetMassClosestToW-fMassW) ){
-	myDiJetMassClosestToW = sAlphaT.vDiJetMassesNoTau[i];
-      }
-    }
-       
-    // bool bDecision = triggerData.passedEvent() * triggerMETEmulationData.passedEvent() * tauData.passedEvent() * jetData.passedEvent() * metData.passedEvent() * btagData.passedEvent() * evtTopologyData.passedEvent();
-
-    // Fill Vectors for HPlusSignalOptimisation
-    bTauIDStatus = tauData.passedEvent();
+    if(!tauData.passedEvent()) return false; // Require at least one tau
+    increment(fTausExistCounter);
+    if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    bTauIDStatus = 1;
+    increment(fOneTauCounter);
+    // Get Tau-related variables
     fTauJetEt  = static_cast<float>( (tauData.getSelectedTaus()[0])->pt() );
     fTauJetEta = static_cast<float>( (tauData.getSelectedTaus()[0])->eta() );
+
+
+    // 5) Get MET object and apply pre-MET cut to see if MC Normalization is better.
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    // if(metData.getSelectedMET()->et() < 30 ) return false;
+	
+
+    // 6) Trigger efficiency
+    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
+    if (!iEvent.isRealData() ) {
+      fEventWeight.multiplyWeight(triggerEfficiency); // Apply trigger efficiency as weight for simulated events
+    }
+
+
+    // SignalOptimisation will be performed from this point on. Henceforth no cut will be applied!
+    // -----> No CUTS <----- (start)
+
+    // MET
+    // if(!metData.passedEvent()) return false;
     fMET = metData.getSelectedMET()->et();
-    fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
-    iNHadronicJets = jetData.getHadronicJetCount();
-    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
-    iNBtags = btagData.getBJetCount();
-    fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
+    
+
+    // Global electron veto
+    GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    // if (!electronVetoData.passedEvent()) return false;
+    // increment(fElectronVetoCounter);
     fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();
-    fTransverseMass = transverseMass;
-    fDeltaPhi = deltaPhi;
+
+
+    // Global muon veto
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    // if (!muonVetoData.passedEvent()) return false;
+    // increment(fMuonVetoCounter);
+    fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
+ 
+
+    // Hadronic jet selection
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    // if(!jetData.passedEvent()) return false;
+    // increment(fNJetsCounter);
+    iNHadronicJets = jetData.getHadronicJetCount();   
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
+    
+
+    // b-tagging
+    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    // if(!btagData.passedEvent()) return false;
+    // increment(fBTaggingCounter);    
+    iNBtags = btagData.getBJetCount();
+    
+    
+    // Fake MET veto a.k.a. further QCD suppression
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    // if (!fakeMETData.passedEvent()) return false;
+    // increment(fFakeMETVetoCounter);
+    fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
+
+
+    // Alpha T
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
+    // if(!evtTopologyData.passedEvent()) return false;
+    // increment(fEvtTopologyCounter);
+    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+    // hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
     fAlphaT = sAlphaT.fAlphaT;
     fHt = sAlphaT.fHt;
     fJt = sAlphaT.fJt;
-    fDiJetMassClosestToW = myDiJetMassClosestToW;
-    
-    /// Fill histos
-    hAlphaTDiJetMassClosestToW->Fill(fDiJetMassClosestToW, fEventWeight.getWeight());
-    // Fill TTree for HPlusSignalOptimisation
+
+
+    // Top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    // if (!TopSelectionData.passedEvent()) return false;
+    // increment(fTopSelectionCounter);
+
+                                           
+    // Z mass veto
+    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
+    // if (!jetTauInvMassData.passedEvent()) return false;
+    // increment(fZmassVetoCounter);
+                               
+
+    // Transverse Mass Reconstruction 
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
+    fTransverseMass = transverseMass;
+
+
+    // Fill TTree before any cut
     myTree->Fill();
+    // -----> No CUTS <----- (end)
+    
+    // Fill Counters for reference - to see that all is normal
+    if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
+    if(!electronVetoData.passedEvent()) return false;
+    increment(fElectronVetoCounter);
+    if(!muonVetoData.passedEvent()) return false;
+    increment(fMuonVetoCounter);
+    if(!jetData.passedEvent()) return false;
+    increment(fNJetsCounter);
+    if(!btagData.passedEvent()) return false;
+    increment(fBTaggingCounter);
+    if(!fakeMETData.passedEvent()) return false;
+    increment(fFakeMETVetoCounter);
+    if(!evtTopologyData.passedEvent()) return false;
+    increment(fEvtTopologyCounter);
+    if(!TopSelectionData.passedEvent()) return false;
+    increment(fTopSelectionCounter);
+    if(!TopSelectionData.passedEvent()) return false;
+    increment(fZmassVetoCounter);
+    if(!jetTauInvMassData.passedEvent()) return false;
+    increment(ftransverseMassCutCounter);
+
+
+    return true;
   }
 }
