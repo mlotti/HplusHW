@@ -316,7 +316,15 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                             doJetID      = True
         )
     
-    outputCommands.append("keep *_selectedPatJetsAK5JPT_*_*")
+    outputCommands.extend([
+            "keep *_selectedPatJets_*_*",
+            "keep *_selectedPatJetsAK5JPT_*_*",
+            "keep *_selectedPatJetsAK5PF_*_*",
+            'drop *_selectedPatJets_pfCandidates_*', ## drop for default patJets which are CaloJets
+            'drop *_*PF_caloTowers_*',
+            'drop *_*JPT_pfCandidates_*',
+            'drop *_*Calo_pfCandidates_*',
+            ])
 
 
     # Taus
@@ -331,6 +339,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         if doHChTauDiscriminators:
             addHChTauDiscriminators()
 
+        # Don't enable TCTau nor shrinking cone tau
         if doPatCalo:
             tauTools.addTauCollection(process,cms.InputTag('caloRecoTauProducer'),
                              algoLabel = "caloReco",
@@ -381,6 +390,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         process.patDefaultSequence.remove(process.selectedPatTaus)
 
     outputCommands.extend(["drop *_selectedPatTaus_*_*",
+                           "keep *_selectedPatTausCaloRecoTau_*_*",
+                           "keep *_selectedPatTausHpsPFTau_*_*",
+                           "keep *_selectedPatTausHpsTancPFTau_*_*",
+                           "keep *_selectedPatTausShrinkingConePFTau_*_*",
                            #"keep *_cleanPatTaus_*_*",
                            #"drop *_cleanPatTaus_*_*",
                            #"keep *_patTaus*_*_*",
@@ -395,6 +408,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         addTcMET(process, 'TC')
         addPfMET(process, 'PF')
         outputCommands.extend([
+                "keep *_patMETs_*_*",
                 "keep *_patMETsTC_*_*",
                 "keep *_patMETsPF_*_*",
                 "keep *_genMetTrue_*_*",
@@ -413,6 +427,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     if doPatMuonPFIsolation:
         addPFMuonIsolation(process, process.patMuons, verbose=True)
 
+    outputCommands.extend([
+            "keep *_selectedPatMuons_*_*"
+            ])
+
     # Electrons
     # In order to calculate the transverse impact parameter w.r.t.
     # beam spot instead of primary vertex, see
@@ -422,6 +440,15 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     if doPatElectronID:
         addPatElectronID(process, process.patElectrons, process.patDefaultSequence)
+
+    outputCommands.extend([
+            "keep *_selectedPatElectrons_*_*"
+            ])
+
+    # Photons
+    outputCommands.extend([
+            "keep *_selectedPatPhotons_*_*"
+            ])
 
     # Trigger
     if doPatTrigger:
@@ -441,13 +468,13 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     else:
         backup = out.outputCommands[:]
         myRemoveCleaning(process)
-        backup_pat = out.outputCommands[:]
+#        backup_pat = out.outputCommands[:]
 
         # Remove PFParticles here, they are explicitly included when needed
-        backup_pat = filter(lambda n: "selectedPatPFParticles" not in n, backup_pat)
+#        backup_pat = filter(lambda n: "selectedPatPFParticles" not in n, backup_pat)
 
         out.outputCommands = backup
-        out.outputCommands.extend(backup_pat)
+#        out.outputCommands.extend(backup_pat)
         out.outputCommands.extend(outputCommands)
 
     # Build sequence
@@ -653,9 +680,8 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 #        "keep *_selectedPatPhotons%s_*_*" % postfix,
 #        'keep *_selectedPatElectrons%s_*_*' % postfix, 
         'keep *_selectedPatMuons%s_*_*' % postfix,
-        'keep *_selectedPatTaus%s_*_*' % postfix,
-        'keep *_selectedPatJet%s*_*_*' % postfix,
-        'drop *_selectedPatJets%s_pfCandidates_*' % postfix,
+        'keep *_selectedPatJets%s*_*_*' % postfix,
+        'keep *_selectedPatJets%s_pfCandidates_*' % postfix,
         'drop *_*PF_caloTowers_*',
         'drop *_*JPT_pfCandidates_*',
         'drop *_*Calo_pfCandidates_*',
@@ -663,10 +689,12 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         ]
     if doPFnoPU:
         outputCommands.extend([
+                'keep *_selectedPatTaus%s_*_*' % postfix,
                 'keep *_selectedPatPFParticles%s_*_*' % postfix,
                 ])
     else:
         outputCommands.extend([
+                'drop *_selectedPatTaus%s_*_*' % postfix,
                 'drop *_selectedPatPFParticles%s_*_*' % postfix,
                 ])
 
