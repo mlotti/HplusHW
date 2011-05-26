@@ -154,7 +154,7 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
-    pvSrc = cms.InputTag("offlinePrimaryVertices")
+    vertexSrc = cms.InputTag("offlinePrimaryVertices")
     ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
 )
 # Factorization (quick and dirty version)

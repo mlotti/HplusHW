@@ -248,7 +248,7 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonTauMatchingCone = cms.untracked.double(0.5),
     metCut = cms.untracked.double(60),
     tauIsolationCalculator = cms.untracked.PSet(
-        pvSrc = cms.InputTag("offlinePrimaryVertices")
+        vertexSrc = cms.InputTag("offlinePrimaryVertices")
     )
 )
 # if dataVersion.isMC():
