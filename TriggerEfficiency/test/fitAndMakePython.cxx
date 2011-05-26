@@ -110,14 +110,14 @@ class PythonWriter {
 		fOUT << "])" << endl;
 */
 	void addBin(double binmin,double binmax,double par0, double par1, double par2){
-		fOUT << "        bin" << iCurrentBin << " = cms.PSet(" << endl;
+		fOUT << "        cms.PSet(" << endl;
                 fOUT << "            binMin = cms.double(" << binmin << "),"<< endl;
                 fOUT << "            binMax = cms.double(" << binmax << "),"<< endl;
-                fOUT << "            parameters = cms.vdouble([";
+                fOUT << "            parameters = cms.vdouble(";
 		fOUT << par0 << ",";
 		fOUT << par1 << ",";
 		fOUT << par2;
-		fOUT << "])" << endl;
+		fOUT << ")" << endl;
 		fOUT << "        )";
 		if(iCurrentBin < nBins - 1) fOUT << ",";
 		fOUT << endl;
