@@ -96,7 +96,8 @@ class MuonAnalysis:
                  doMuonIsolation=False, muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
-                 jets="selectedPatJetsAK5PF", njets=3):
+                 jets="selectedPatJetsAK5PF", njets=3,
+                 weightSrc=None):
         self.process = process
         self.dataVersion = dataVersion
         self.prefix = prefix
@@ -120,7 +121,7 @@ class MuonAnalysis:
         if self._trigger == None:
             raise Exception("Must specify trigger!")
 
-        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters)
+        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=weightSrc)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)

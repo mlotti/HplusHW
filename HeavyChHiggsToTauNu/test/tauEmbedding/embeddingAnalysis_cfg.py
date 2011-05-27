@@ -180,6 +180,22 @@ if debug:
 
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+
+# Pileup weighting
+weight = None
+if dataVersion.isMC():
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+    params.setPileupWeightFor2010()
+    params.setPileupWeightFor2011()
+    params.setPileupWeightFor2010and2011()
+    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight")
+    )
+    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+    process.commonSequence *= process.pileupWeight
+    weight = "pileupWeigh"
+
+
 histoMuonPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
 histoMuonEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
 
@@ -196,7 +212,7 @@ pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
 
 
-analysis = Analysis(process, "analysis", additionalCounters=additionalCounters)
+analysis = Analysis(process, "analysis", additionalCounters=additionalCounters, weightSrc=weight)
 analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 
 selectedTaus = analysis.addSelection("LooseTauId", taus,
@@ -251,6 +267,10 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
         pvSrc = cms.InputTag("offlinePrimaryVertices")
     )
 )
+if weight != None:
+    process.EmbeddingAnalyzer.prescaleSource = cms.untracked.InputTag(weight)
+
+
 # if dataVersion.isMC():
 #     process.EmbeddingAnalyzer.GenMetTrue = cms.untracked.PSet(
 #         embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),

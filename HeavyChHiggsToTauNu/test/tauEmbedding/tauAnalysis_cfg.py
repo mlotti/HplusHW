@@ -82,6 +82,21 @@ process.commonSequence *= process.genMetNu
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 
+# Pileup weighting
+weight = None
+if dataVersion.isMC():
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+    params.setPileupWeightFor2010()
+    params.setPileupWeightFor2011()
+    params.setPileupWeightFor2010and2011()
+    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight")
+    )
+    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+    process.commonSequence *= process.pileupWeight
+    weight = "pileupWeigh"
+
+
 #taus = "selectedPatTausShrinkingConePFTau"
 taus = "selectedPatTausHpsPFTau"
 #pfMET = "pfMet"
@@ -124,6 +139,8 @@ EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingTauAnalyzer",
     genTauPtCut = cms.untracked.double(-1),
     genTauEtaCut = cms.untracked.double(-1)
 )
+if weight != None:
+    EmbeddingAnalyzer.prescaleSource = cms.untracked.InputTag(weight)
 
 def addPath(prefix, **kwargs):
     path = cms.Path(process.commonSequence)

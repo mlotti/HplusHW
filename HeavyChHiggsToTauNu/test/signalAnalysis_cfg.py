@@ -141,6 +141,10 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 param.setTriggerVertexFor2011()
 
 if options.tauEmbeddingInput != 0:
+    param.trigger.selectionType = "byParametrisation"
+    param.setTriggerEfficiencyTriggersFor2011()
+    param.setPileupWeightFor2011
+#    param.setPileupWeightFor2011and2010()
     tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
