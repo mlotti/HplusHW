@@ -23,14 +23,17 @@ multicrab.extendDatasets(
 #        "BTau_148822-149182_Apr21",          # HLT_SingleIsoTau20_Trk15_MET25_v3
 #        "BTau_149291-149294_Apr21",          # HLT_SingleIsoTau20_Trk15_MET25_v4
         # Data 2011 (May10 ReReco)
+#        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
+#        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
+#        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
         # Data 2011 (PromptReco)
+#        "Tau_165088-165121_Prompt",          # HLT_IsoPFTau35_Trk20_MET45_v6
 
         # Signal MC (WH)
 
         # Signal MC (HH)
 
         # Background MC
-#        "QCD_Pt15to30_TuneZ2_Summer11",
 #        "QCD_Pt30to50_TuneZ2_Summer11",
 #        "QCD_Pt50to80_TuneZ2_Summer11",
 #        "QCD_Pt80to120_TuneZ2_Summer11",

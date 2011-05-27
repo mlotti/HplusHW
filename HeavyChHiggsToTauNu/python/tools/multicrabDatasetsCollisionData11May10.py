@@ -23,7 +23,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 80, # Adjusted for PATtuple file size
+                "number_of_jobs": 100, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         },
@@ -36,7 +36,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 200,
+                "number_of_jobs": 220,
                 "lumiMask": "May10ReReco"
             },
         }

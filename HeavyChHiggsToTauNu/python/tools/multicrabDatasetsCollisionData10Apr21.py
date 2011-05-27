@@ -39,7 +39,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010A-Apr21ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 1000, # Adjusted for PATtuple file size
+                "number_of_jobs": 800, # Adjusted for PATtuple file size
                 "use_server": 1,
                 "lumiMask": "Apr21ReReco"
             },
@@ -53,7 +53,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
                 "luminosity": 0,
-                "number_of_jobs": 490, # Adjusted for PATtuple file size
+                "number_of_jobs": 360, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
         }
@@ -66,7 +66,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
                 "luminosity": 0,
-                "number_of_jobs": 450, # Adjusted for PATtuple file size
+                "number_of_jobs": 220, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
         }
@@ -79,7 +79,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
                 "luminosity": 0,
-                "number_of_jobs": 60, # Adjusted for PATtuple file size
+                "number_of_jobs": 35, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
         }
