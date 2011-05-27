@@ -68,4 +68,39 @@ datasets = {
             },
         },
     },
+
+    # EWK pythia
+    "TT_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
+                "use_server": 1,
+                "number_of_jobs": 350, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "WToTauNu_Z2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 7899,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WToTauNu_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
+                "use_server": 1,
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "WToMuNu_Z2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 7899,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WToMuNu_TuneZ2_7TeV-pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
+                "use_server": 1,
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
+            },
+        },
+    },
 }
