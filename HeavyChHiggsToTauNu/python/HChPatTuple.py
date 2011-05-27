@@ -22,6 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
+tauPreSelection = "pt() > 10"
+
 
 ##################################################
 #
@@ -331,6 +333,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # addTauCollection should replace the default producer modified
     # here)
     setPatTauDefaults(process.patTaus, includePFCands)
+    process.selectedPatTaus.cut = tauPreSelection
 
     if doPatTaus:
         if doHChTauDiscriminators:
@@ -795,6 +798,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
     setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
     addPatTauIsolationEmbedding(process, getattr(process, "patDefaultSequence"+postfix), postfix)
+    getattr(process, "selectedPatTaus"+postfix).cut = tauPreSelection
 
     # The prediscriminant of pfTausBaseDiscriminationByLooseIsolation
     # is missing from the default sequence, but since we don't want to
