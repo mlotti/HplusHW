@@ -34,12 +34,12 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_3_1_5lB.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_1_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_16_1_JtV.root"
   )
 )
 if dataVersion.isData():
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_163270-163869_Prompt/SingleMu/Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_pt40/cee94be795a40bbb5b546b09a0917318/embedded_RECO_3_1_qgy.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_163270-163869_Prompt/SingleMu/Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_1_pt40/cee94be795a40bbb5b546b09a0917318/embedded_RECO_2_1_5GD.root"
         ]
 
 ################################################################################
