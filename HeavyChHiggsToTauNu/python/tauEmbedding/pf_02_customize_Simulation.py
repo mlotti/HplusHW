@@ -267,7 +267,4 @@ def customise(process):
     print "  and probably shouldnt be used. "
     print "#############################################################"
 
-
-    print "\n".join(outputModule.outputCommands[:])
-
     return process
