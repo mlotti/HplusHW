@@ -6,7 +6,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
 #step = "generation"
-step = "embedding"
+#step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
@@ -33,9 +33,9 @@ if step == "signalAnalysis":
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v10",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
           "embedding":      {"input": "tauembedding_generation_v10"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v10"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v10",                  "config": "tauAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v10"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "analysis":       {"input": "tauembedding_embedding_v10_1"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v11",                  "config": "tauAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v10_1"+pt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v10",          "config": "muonAnalysisFromSkim_cfg.py"},
           }
 
@@ -52,7 +52,6 @@ datasets = [
     "Mu_146428-147116_Dec22", # HLT_Mu9
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
     "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
-#    "SingleMu_162803-162828_Prompt", # HLT_Mu20_v1 (old)
     "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
     "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
    # Signal MC
@@ -79,7 +78,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v10" % step
+tauname = "_tauembedding_%s_v10_1" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
