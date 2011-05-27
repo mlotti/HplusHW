@@ -90,6 +90,7 @@ process.TFileService.fileName = cms.string("efficiencyTree.root")
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
+options.trigger = "HLT_FOO"
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
 process.patDefaultSequence.remove(process.patElectrons)
@@ -128,7 +129,7 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('factorized')
 
-param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
+#param.setTauIDFactorizationMap(options) # Set Tau ID factorization map
 
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTaus()
