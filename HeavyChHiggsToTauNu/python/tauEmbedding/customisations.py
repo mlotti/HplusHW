@@ -123,7 +123,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, m)
     sequence *= m
 
-    m = tight.clone(
+    m = m.clone(
         candSrc = name,
         embedPrefix = "byTightSc02Ic04"+postfix,
         signalCone = 0.2
