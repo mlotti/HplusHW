@@ -40,6 +40,7 @@ set -e
 # 9.5.2011/M.Kortelainen CMSSW_4_2_2 Updated tags for the new release
 # 23.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 # 25.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
+# 27.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -56,16 +57,17 @@ eval $(scram runtime -sh)
 #cvs co -r V01-00-27      RecoTauTag/Configuration
 #cvs co -r V01-00-33-06   RecoTauTag/RecoTau
 #cvs co -r V01-00-12      RecoTauTag/TauTagTools
-cvs co -r RecoTauDAVerticesPatch_V4 RecoTauTag/RecoTau 
-cvs co -r RecoTauDAVerticesPatch_V4 RecoTauTag/TauTagTools
-cvs co -r RecoTauDAVerticesPatch_V4 RecoTauTag/Configuration
+cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/RecoTau 
+cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/TauTagTools
+cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/Configuration
 # PAT
-addpkg DataFormats/PatCandidates V06-04-09
-addpkg PhysicsTools/PatAlgos     V08-06-26
+addpkg DataFormats/PatCandidates V06-04-11
+addpkg PhysicsTools/PatAlgos     V08-06-27
 addpkg PhysicsTools/PatExamples  V00-05-17
 addpkg RecoJets/Configuration    V02-04-16
 addpkg RecoJets/JetAlgorithms    V04-01-00      
 addpkg RecoJets/JetProducers     V05-05-03
+
 
 
 # Electron ID

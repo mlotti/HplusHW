@@ -198,10 +198,6 @@ def addPat(process, dataVersion,
         process.pf2patNoPuSequence
     )
 
-    # Tau bugfixes
-    # The ...DA is for 41X, in 42X we have DA vertices already in AOD
-    patHelpers.massSearchReplaceAnyInputTag(sequence, cms.InputTag("offlinePrimaryVerticesDA"), cms.InputTag("offlinePrimaryVertices"))
-
     return sequence
 
 def myRemoveCleaning(process, postfix=""):

@@ -31,7 +31,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     selectorPrototype = cms.EDFilter("PATTauSelector",
         src = cms.InputTag("dummy"),
-        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s').empty()"%t for t in trigger])),
+        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s', 1).empty()"%t for t in trigger])),
     )
 
     for collection in collections:
