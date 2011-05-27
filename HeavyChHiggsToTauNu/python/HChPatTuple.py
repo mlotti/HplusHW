@@ -18,6 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
@@ -356,6 +357,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          typeLabel = "PFTau")
         if not doPatTauIsoDeposits:
             process.patTausHpsPFTau.isoDeposits = cms.PSet()
+        addPatTauIsolationEmbedding(process, process.patDefaultSequence, "HpsPFTau")
 
         tauTools.addTauCollection(process,cms.InputTag('hpsTancTaus'),
                                   algoLabel = "hpsTanc",
@@ -365,6 +367,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         # Disable discriminators which are not in AOD
 #        del process.patTausHpsTancPFTau.tauIDSources.againstCaloMuon
 #        del process.patTausHpsTancPFTau.tauIDSources.byHPSvloose
+        addPatTauIsolationEmbedding(process, process.patDefaultSequence, "HpsTancPFTau")
 
         # Add visible taus    
         if dataVersion.isMC():
@@ -488,6 +491,27 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 def fixFlightPath(process, prefix, postfix=""):
     from RecoTauTag.RecoTau.PFRecoTauQualityCuts_cfi import PFTauQualityCuts
     getattr(process, prefix+"DiscriminationByFlightPathSignificance"+postfix).qualityCuts = PFTauQualityCuts
+
+def addPatTauIsolationEmbedding(process, sequence, name):
+    import RecoTauTag.Configuration.RecoPFTauTag_cff as RecoPFTauTag
+
+    prevName = "patTaus"+name
+    for iso in ["Tight", "Medium", "Loose", "VLoose"]:
+        module = cms.EDProducer("HPlusPATTauViewIsolationEmbedder",
+            candSrc = cms.InputTag(prevName),
+            vertexSrc = cms.InputTag("goodPrimaryVertices"),
+            embedPrefix = cms.string("by"+iso)
+        )
+        HChTools.insertPSetContentsTo(getattr(RecoPFTauTag, "hpsPFTauDiscriminationBy%sIsolation"%iso).qualityCuts.isolationQualityCuts, module)
+        
+        newName = "patTausWith%sEmbedded" % iso
+        setattr(process, newName, module)
+
+        sequence.replace(getattr(process, prevName),
+                         getattr(process, prevName)*getattr(process, newName))
+        prevName = newName
+
+    getattr(process, "selectedPatTaus"+name).src = prevName
 
 def addPFTausAndDiscriminators(process, dataVersion, doCalo, doDiscriminators):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
@@ -770,6 +794,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
 
     setPatTauDefaults(getattr(process, "patTaus"+postfix), False)
+    addPatTauIsolationEmbedding(process, getattr(process, "patDefaultSequence"+postfix), postfix)
 
     # The prediscriminant of pfTausBaseDiscriminationByLooseIsolation
     # is missing from the default sequence, but since we don't want to
