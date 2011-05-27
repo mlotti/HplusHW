@@ -731,7 +731,7 @@ def addTo(datasets):
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_embedding_v10_pt40-cee94be795a40bbb5b546b09a0917318/USER",
                 "number_of_jobs": 1 # 5 kev/job
             },
-            "tauembedding_embedding_v10_pt40": {
+            "tauembedding_embedding_v10_1_pt40": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v1_AOD_160431_tauembedding_embedding_v10_1_pt40-cee94be795a40bbb5b546b09a0917318/USER",
                 "number_of_jobs": 1 # 5 kev/job
