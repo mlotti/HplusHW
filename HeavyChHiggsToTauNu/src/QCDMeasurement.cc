@@ -1060,10 +1060,10 @@ namespace HPlus {
   void QCDMeasurement::AnalysisVariation::analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
     hAfterBigBox->Fill(tauPtBin, weightWithoutMET);
     // Leg 1
-    if (btagData.passedEvent()) {
-      hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
-      if (METData.getSelectedMET()->et() > fMETCut) {
+    if (METData.getSelectedMET()->et() > fMETCut) {
         hLeg1AfterMET->Fill(tauPtBin, weightWithoutMET);
+      if (btagData.passedEvent()) {
+        hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
         hLeg1FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
         if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
           hLeg1AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
