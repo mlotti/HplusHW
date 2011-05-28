@@ -111,13 +111,23 @@ namespace HPlus {
 
       edm::Handle<edm::View<reco::Vertex> > hvertex;
       iEvent.getByLabel(fVertexSrc, hvertex);
-      thePV = hvertex->ptrAt(0);
-
-      fTraits.beginEvent(iEvent);
-
 
       std::auto_ptr<OutputCollection> output(new OutputCollection());
       output->reserve(hcand->size());
+
+      if(hvertex->empty()) {
+        for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
+          ValueType copy = hcand->at(iCand);
+          copy.addUserInt(this->fOccupancyName, -1);
+          copy.addUserFloat(this->fMaxPtName, -1);
+          copy.addUserFloat(this->fSumPtName, -1);
+          output->push_back(copy);
+        }
+        iEvent.put(output);
+      }
+      thePV = hvertex->ptrAt(0);
+
+      fTraits.beginEvent(iEvent);
 
       for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
         reco::PFCandidateRefVector pfcands = fTraits.isolationCands(hcand->at(iCand));
