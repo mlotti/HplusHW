@@ -39,10 +39,14 @@ class HPlusCandViewMultiplicityAnalyzer: public edm::EDAnalyzer {
   };
 
   std::vector<Data> data_;
+  edm::InputTag weights_;
+  bool usingWeights_;
 };
 
 
-HPlusCandViewMultiplicityAnalyzer::HPlusCandViewMultiplicityAnalyzer(const edm::ParameterSet& iConfig) {
+HPlusCandViewMultiplicityAnalyzer::HPlusCandViewMultiplicityAnalyzer(const edm::ParameterSet& iConfig):
+  weights_(iConfig.getUntrackedParameter<edm::InputTag>("weights", edm::InputTag("fake"))),
+  usingWeights_(iConfig.exists("weights") {
   edm::Service<TFileService> fs;
 
   std::vector<std::string> names = iConfig.getParameterNamesForType<edm::ParameterSet>(false); // take only untracked parameters
@@ -68,11 +72,18 @@ HPlusCandViewMultiplicityAnalyzer::~HPlusCandViewMultiplicityAnalyzer() {}
 void HPlusCandViewMultiplicityAnalyzer::beginJob() {}
 
 void HPlusCandViewMultiplicityAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  double weight = 1.0;
+  if(usingWeights_) {
+    edm::Handle<double> hweight;
+    iEvent.getByLabel(weights_, hweight);
+    weight = *hweight;
+  }
+
   for(size_t i=0; i<data_.size(); ++i) {
     edm::Handle<edm::View<reco::Candidate> > hcands;
     iEvent.getByLabel(data_[i].src, hcands);
 
-    data_[i].histo->Fill(hcands->size());
+    data_[i].histo->Fill(hcands->size(), weight);
   }
 }
 
