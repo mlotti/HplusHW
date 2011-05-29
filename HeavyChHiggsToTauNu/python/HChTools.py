@@ -150,14 +150,17 @@ def cloneModule(process, sequence, name, mod):
 # name      Name of the module
 # src       Source collection InputTag
 # lst       List of Histo objects, one histogram is booked for each
-def createHistoAnalyzer(src, lst):
+def createHistoAnalyzer(src, lst, weightSrc=None):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    return cms.EDanalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
+    m = cms.EDanalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
+    if weightSrc != None:
+        m.weights = cms.untracked.InputTag(weightSrc)
+    return m
 
-def addHistoAnalyzer(process, sequence, name, src, lst):
-    return addModule(process, sequence, name, createHistoAnalyzer(src, lst))
+def addHistoAnalyzer(process, sequence, name, src, lst, **kwargs):
+    return addModule(process, sequence, name, createHistoAnalyzer(src, lst, **kwargs))
 
 # Add multiple CandViewHistoAnalyzers to process and sequence
 #
@@ -169,21 +172,23 @@ def addHistoAnalyzer(process, sequence, name, src, lst):
 #           name         name of the histogramming module
 #           source       source collection InputTag
 #           histo        list of Histo objects
-def addHistoAnalyzers(process, sequence, prefix, lst):
+def addHistoAnalyzers(process, sequence, prefix, lst, **kwargs):
     for t in lst:
-        addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2])
+        addHistoAnalyzer(process, sequence, prefix+"_"+t[0], t[1], t[2], **kwargs)
 
-def createMultiAnalyzer(lst, analyzer):
+def createMultiAnalyzer(lst, analyzer, weightSrc=None):
     m = cms.EDAnalyzer(analyzer)
     for t in lst:
         histos = cms.VPSet()
         for histo in t[2]:
             histos.append(histo.pset())
         setattr(m, t[0], cms.untracked.PSet(src = t[1], histograms = histos))
+    if weightSrc != None:
+        m.weights = cms.untracked.InputTag(weightSrc)
     return m
 
-def addMultiAnalyzer(process, sequence, name, lst, analyzer):
-    m = createMultiAnalyzer(lst, analyzer)
+def addMultiAnalyzer(process, sequence, name, lst, analyzer, **kwargs):
+    m = createMultiAnalyzer(lst, analyzer, **kwargs)
     process.__setattr__(name, m)
     sequence *= m
     return m
@@ -198,14 +203,14 @@ def addMultiAnalyzer(process, sequence, name, lst, analyzer):
 #           name     prefix of the histograms for this source collection
 #           source   source collection InputTag
 #           histo    list of Histo objects
-def addMultiHistoAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiHistoAnalyzer")
+def addMultiHistoAnalyzer(process, sequence, name, lst, **kwargs):
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiHistoAnalyzer", **kwargs)
 
-def addMultiEfficiencyPerObjectAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerObjectAnalyzer")
+def addMultiEfficiencyPerObjectAnalyzer(process, sequence, name, lst, **kwargs):
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerObjectAnalyzer", **kwargs)
 
-def addMultiEfficiencyPerEventAnalyzer(process, sequence, name, lst):
-    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerEventAnalyzer")
+def addMultiEfficiencyPerEventAnalyzer(process, sequence, name, lst, **kwargs):
+    return addMultiAnalyzer(process, sequence, name, lst, "HPlusCandViewMultiEfficiencyPerEventAnalyzer", **kwargs)
 
 
 # Helper class to decrease the required amount of typing when adding
@@ -458,10 +463,10 @@ class Analysis:
         return module
 
     def addHistoAnalyzer(self, postfix, src, histos):
-        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createHistoAnalyzer(src, histos))
+        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createHistoAnalyzer(src, histos), weightSrc=self.weightSrc)
 
     def addMultiHistoAnalyzer(self, postfix, histos):
-        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createMultiAnalyzer(histos, "HPlusCandViewMultiHistoAnalyzer"))
+        return self.addModule(("h%02d_"%self.histoIndex)+postfix, createMultiAnalyzer(histos, "HPlusCandViewMultiHistoAnalyzer", weightSrc=self.weightSrc))
 
     def addCloneAnalyzer(self, postfix, module):
         return self.addCloneModule(("h%02d_"%self.histoIndex)+postfix, module)

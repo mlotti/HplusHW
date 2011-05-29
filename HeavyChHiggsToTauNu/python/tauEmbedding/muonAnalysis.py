@@ -159,6 +159,8 @@ class MuonAnalysis:
                         nbins = cms.untracked.int32(20)
                     )
             ))
+            if self.weightSrc != None:
+                self.multipAnalyzer.weights = cms.untracked.InputTag(self.weightSrc)
     
         # Create the prototype for muon cleaner
         from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
@@ -209,6 +211,8 @@ class MuonAnalysis:
                     histoEta.pset().clone(cut=cms.untracked.string(self._etaCut)),
                 )
             )
+            if self.weightSrc != None:
+                self.afterOtherCutsModule.weights = cms.untracked.InputTag(self.weightSrc)
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
             self.afterOtherCutsModuleIso.histograms.append(histoIsos[muonIsolation].pset().clone(
                     cut=cms.untracked.string(self._isolationCut)
