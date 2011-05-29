@@ -502,11 +502,11 @@ def addPatTauIsolationEmbedding(process, sequence, name):
     for iso in ["Tight", "Medium", "Loose", "VLoose"]:
         module = cms.EDProducer("HPlusPATTauViewIsolationEmbedder",
             candSrc = cms.InputTag(prevName),
-            vertexSrc = cms.InputTag("goodPrimaryVertices"),
+            primaryVertexSrc = cms.InputTag("offlinePrimaryVertices"),
             embedPrefix = cms.string("by"+iso)
         )
-        HChTools.insertPSetContentsTo(getattr(RecoPFTauTag, "hpsPFTauDiscriminationBy%sIsolation"%iso).qualityCuts.isolationQualityCuts, module)
-        
+        module.qualityCuts = getattr(RecoPFTauTag, "hpsPFTauDiscriminationBy%sIsolation"%iso).qualityCuts.clone()
+
         newName = "patTausWith%sEmbedded" % iso
         setattr(process, newName, module)
 

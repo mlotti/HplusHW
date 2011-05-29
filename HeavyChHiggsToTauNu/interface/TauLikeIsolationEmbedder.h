@@ -9,7 +9,6 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Common/interface/View.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
@@ -19,6 +18,7 @@
 
 #include "RecoTauTag/TauTagTools/interface/TauTagTools.h"
 #include "RecoTauTag/RecoTau/src/RecoTauVertexAssociator.cc"
+#include "RecoTauTag/RecoTau/interface/RecoTauQualityCuts.h"
 
 #include "DataFormats/PatCandidates/interface/Tau.h"
 
@@ -27,11 +27,9 @@ namespace HPlus {
   template <typename ValueType>
   class TauLikeIsolationEmbedderTraits {
   public:
-    typedef edm::Ptr<reco::Vertex> VertexPtr;
-
     explicit TauLikeIsolationEmbedderTraits(const edm::ParameterSet& iConfig):
       fPfCandSrc(iConfig.getParameter<edm::InputTag>("pfCandSrc")),
-      fVertexSrc(iConfig.getParameter<edm::InputTag>("primaryVertexSrc")),
+      fVertexSrc(iConfig.getParameter<edm::ParameterSet>("qualityCuts").getParameter<edm::InputTag>("primaryVertexSrc")),
       fSignalCone(iConfig.getParameter<double>("signalCone")),
       fIsolationCone(iConfig.getParameter<double>("isolationCone")),
       fThrow(iConfig.getUntrackedParameter<bool>("throw", true))
@@ -43,20 +41,44 @@ namespace HPlus {
       iEvent.getByLabel(fVertexSrc, theVertices);
     }
     
-    VertexPtr getVertex(const ValueType& iCand) const {
+    reco::VertexRef getVertex(const ValueType& iCand) const {
       if(theVertices->empty()) {
         if(fThrow)
           throw cms::Exception("LogicError") << "Vertex collection " << fVertexSrc.encode() << " is empty!" << std::endl;
-        return VertexPtr();
+        return reco::VertexRef();
       }
-      return theVertices->ptrAt(0);
+      reco::VertexRef vertex(theVertices, 0);
+      double maxDz = std::abs(iCand.vertex().z() - vertex->z());
+
+      for(size_t iVertex=1; iVertex < theVertices->size(); ++iVertex) {
+        double dz = std::abs(iCand.vertex().z() - theVertices->at(iVertex).z());
+        if(dz < maxDz) {
+          dz = maxDz;
+          vertex = reco::VertexRef(theVertices, iVertex);
+        }
+      }
+
+      return vertex;
     }
 
-    reco::PFCandidateRefVector isolationCands(const ValueType& iCand) const {
+    reco::PFCandidateRefVector isolationChargedHadrCands(const ValueType& iCand) const {
       reco::PFCandidateRefVector pfcands(thePFCands.id());
       for(size_t i=0; i<thePFCands->size(); ++i) {
         double dr = reco::deltaR(thePFCands->at(i), iCand);
-        if(fSignalCone < dr && dr < fIsolationCone) {
+        if(thePFCands->at(i).particleId() == reco::PFCandidate::h && 
+           fSignalCone < dr && dr < fIsolationCone) {
+          pfcands.push_back(reco::PFCandidateRef(thePFCands, i));
+        }
+      }
+      return pfcands;
+    }
+
+    reco::PFCandidateRefVector isolationGammaCands(const ValueType& iCand) const {
+      reco::PFCandidateRefVector pfcands(thePFCands.id());
+      for(size_t i=0; i<thePFCands->size(); ++i) {
+        double dr = reco::deltaR(thePFCands->at(i), iCand);
+        if(thePFCands->at(i).particleId() == reco::PFCandidate::gamma && 
+           fSignalCone < dr && dr < fIsolationCone) {
           pfcands.push_back(reco::PFCandidateRef(thePFCands, i));
         }
       }
@@ -75,7 +97,7 @@ namespace HPlus {
     double fIsolationCone;
 
     edm::Handle<std::vector<reco::PFCandidate> > thePFCands;
-    edm::Handle<edm::View<reco::Vertex> > theVertices;
+    edm::Handle<std::vector<reco::Vertex> > theVertices;
 
     bool fThrow;
   };
@@ -84,15 +106,15 @@ namespace HPlus {
   template <>
   class TauLikeIsolationEmbedderTraits<pat::Tau> {
   public:
-    typedef reco::VertexRef VertexPtr;
-
     explicit TauLikeIsolationEmbedderTraits(const edm::ParameterSet& iConfig):
       fVertexAssociator(iConfig.getParameter<edm::ParameterSet>("qualityCuts")),
       fThrow(iConfig.getUntrackedParameter<bool>("throw", true))
     {}
 
     ~TauLikeIsolationEmbedderTraits() {}
-    void beginEvent(const edm::Event& iEvent) {}
+    void beginEvent(const edm::Event& iEvent) {
+      fVertexAssociator.setEvent(iEvent);
+    }
     void endEvent() {}
 
     reco::VertexRef getVertex(const pat::Tau& iCand) const {
@@ -103,8 +125,11 @@ namespace HPlus {
       return pv;
     }
 
-    reco::PFCandidateRefVector isolationCands(const pat::Tau& iCand) const {
-      return iCand.isolationPFCands();
+    reco::PFCandidateRefVector isolationChargedHadrCands(const pat::Tau& iCand) const {
+      return iCand.isolationPFChargedHadrCands();
+    }
+    reco::PFCandidateRefVector isolationGammaCands(const pat::Tau& iCand) const {
+      return iCand.isolationPFGammaCands();
     }
 
   private:
@@ -117,19 +142,12 @@ namespace HPlus {
             typename ValueType>
   class TauLikeIsolationEmbedder: public edm::EDProducer {
     typedef std::vector<ValueType> OutputCollection;
-    typedef typename TauLikeIsolationEmbedderTraits<ValueType>::VertexPtr VertexPtr;
 
   public:
     explicit TauLikeIsolationEmbedder(const edm::ParameterSet& iConfig):
       fTraits(iConfig),
       fCandSrc(iConfig.getParameter<edm::InputTag>("candSrc")),
-      fMinTrackHits(iConfig.getParameter<uint32_t>("minTrackHits")),
-      fMinTrackPt(iConfig.getParameter<double>("minTrackPt")),
-      fMaxTrackChi2(iConfig.getParameter<double>("maxTrackChi2")),
-      fMinTrackPixelHits(iConfig.getParameter<uint32_t>("minTrackPixelHits")),
-      fMinGammaEt(iConfig.getParameter<double>("minGammaEt")),
-      fMaxDeltaZ(iConfig.getParameter<double>("maxDeltaZ")),
-      fMaxTransverseImpactParameter(iConfig.getParameter<double>("maxTransverseImpactParameter"))
+      fQcuts(iConfig.getParameter<edm::ParameterSet>("qualityCuts").getParameter<edm::ParameterSet>("isolationQualityCuts"))
     {
       std::string embedPrefix = iConfig.getParameter<std::string>("embedPrefix");
       fOccupancyName = embedPrefix+"Occupancy";
@@ -152,35 +170,28 @@ namespace HPlus {
       fTraits.beginEvent(iEvent);
 
       for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
-        VertexPtr thePV = fTraits.getVertex(hcand->at(iCand));
+        reco::VertexRef thePV = fTraits.getVertex(hcand->at(iCand));
 
         size_t occupancy = 0;
         double sumPt = 0;
         double maxPt = 0;
         if(thePV.isNonnull()) {
-          reco::PFCandidateRefVector pfcands = fTraits.isolationCands(hcand->at(iCand));
+          fQcuts.setPV(thePV);
 
-          reco::PFCandidateRefVector chargedCands = TauTagTools::filteredPFChargedHadrCands(pfcands,
-                                                                                            this->fMinTrackPt,
-                                                                                            this->fMinTrackPixelHits,
-                                                                                            this->fMinTrackHits,
-                                                                                            this->fMaxTransverseImpactParameter,
-                                                                                            this->fMaxTrackChi2,
-                                                                                            this->fMaxDeltaZ,
-                                                                                            *thePV,
-                                                                                            thePV->position().z());
-          reco::PFCandidateRefVector gammaCands = TauTagTools::filteredPFGammaCands(pfcands, this->fMinGammaEt);
+          reco::PFCandidateRefVector pfchcands = fTraits.isolationChargedHadrCands(hcand->at(iCand));
+          reco::PFCandidateRefVector pfgammacands = fTraits.isolationGammaCands(hcand->at(iCand));
 
+          reco::PFCandidateRefVector selectedChCands = fQcuts.filterRefs(pfchcands);
+          reco::PFCandidateRefVector selectedGammaCands = fQcuts.filterRefs(pfgammacands);
 
-          occupancy = chargedCands.size() + gammaCands.size();
-          for(size_t i=0; i<chargedCands.size(); ++i) {
-            double pt = chargedCands[i]->pt();
+          occupancy = selectedChCands.size() + selectedGammaCands.size();
+          for(size_t i=0; i<selectedChCands.size(); ++i) {
+            double pt = selectedChCands[i]->pt();
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
-
-          for(size_t i=0; i<gammaCands.size(); ++i) {
-            double pt = gammaCands[i]->pt();
+          for(size_t i=0; i<selectedGammaCands.size(); ++i) {
+            double pt = selectedGammaCands[i]->pt();
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
@@ -203,24 +214,16 @@ namespace HPlus {
       iEvent.put(output);
     }
 
-
-
   protected:
     TauLikeIsolationEmbedderTraits<ValueType> fTraits;
 
     edm::InputTag fCandSrc;
+
+    reco::tau::RecoTauQualityCuts fQcuts;
     
     std::string fOccupancyName;
     std::string fSumPtName;
     std::string fMaxPtName;
-
-    uint32_t fMinTrackHits;
-    double fMinTrackPt;
-    double fMaxTrackChi2;
-    uint32_t fMinTrackPixelHits;
-    double fMinGammaEt;
-    double fMaxDeltaZ;
-    double fMaxTransverseImpactParameter;
   };
 }
 
