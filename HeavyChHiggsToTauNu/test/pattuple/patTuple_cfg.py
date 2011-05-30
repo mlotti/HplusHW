@@ -68,7 +68,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
         "keep *_conditionsInEdm_*_*",
         "keep edmMergeableCounter_*_*_*", # in lumi block
-        "keep PileupSummaryInfo_*_*_*", # this seems to be available only in 38X MC
+        "keep PileupSummaryInfos_*_*_*", # only in MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
     ),

@@ -21,7 +21,10 @@ namespace HPlus {
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
-    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
+    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),  
+    fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
+    fTaggedOneTaggedJet(eventCounter.addSubCounter("b-tagging", "one b-tagged jet")),
+    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets")),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -88,6 +91,9 @@ namespace HPlus {
       //	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
+    if( passed == 0)   increment(fTaggedNoTaggedJet);
+    if( passed == 1)   increment(fTaggedOneTaggedJet);
+    if( passed == 2)   increment(fTaggedTwoTaggedJets);
 
     passEvent = true;
     if(passed < fMin) passEvent = false;

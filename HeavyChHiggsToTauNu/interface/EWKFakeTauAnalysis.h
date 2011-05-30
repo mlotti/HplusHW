@@ -45,7 +45,7 @@ namespace HPlus {
       void incrementNJetsCounter() { increment(fNJetsCounter); }
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
-  
+      void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
     private:
       Count fOneTauCounter;
       Count fElectronVetoCounter;
@@ -54,6 +54,7 @@ namespace HPlus {
       Count fNJetsCounter;
       Count fBTaggingCounter;
       Count fFakeMETVetoCounter;
+      Count fTopSelectionCounter;
     };
 
   enum MCTauMatchType {
@@ -85,14 +86,13 @@ namespace HPlus {
     //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
-    
+
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
     CounterGroup fMuonToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
-    
-    //Count fTopSelectionCounter;
+
     //Count fForwardJetVetoCounter;
     //    Count ftransverseMassCutCounter;
 
@@ -125,7 +125,7 @@ namespace HPlus {
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;
-    
+
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
     // Histograms for validation at every Selection Cut step

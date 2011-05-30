@@ -49,16 +49,16 @@ tightMuonsFilter = cms.EDFilter("CandViewCountFilter",
     minNumber = cms.uint32(1)
 )
 #tauEmbeddingMuons = cms.EDFilter("HPlusLargestPtPATMuonViewSelector",
-#tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
-#    src = cms.InputTag("tightMuonsZ"),
-#    filter = cms.bool(False),
-#    maxNumber = cms.uint32(1)
-#)
-tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
     src = cms.InputTag("tightMuons"),
-    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
-    maxZ = cms.double(1.0)
+    filter = cms.bool(False),
+    maxNumber = cms.uint32(1)
 )
+#tauEmbeddingMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#    src = cms.InputTag("tightMuons"),
+#    vertexSrc = cms.InputTag("muonGoodPrimaryVertex"),
+#    maxZ = cms.double(1.0)
+#)
 # tauEmbeddingMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
 #     src = cms.InputTag("tauEmbeddingMuons"),
 #     minNumber = cms.uint32(1),

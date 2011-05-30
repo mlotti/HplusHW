@@ -15,6 +15,16 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/JetTauInvMass.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "TTree.h"
 
 namespace edm {
@@ -33,26 +43,30 @@ namespace HPlus {
     ~SignalOptimisation();
 
     // Interface towards the EDProducer
-    void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    // void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    // void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     const double  ftransverseMassCut;
 
-    // Counters
     Count fAllCounter;
-    Count fTriggerAndHLTMetCutCounter;
-    Count fTriggerEmulationCounter;
+    Count fTriggerCounter;
     Count fPrimaryVertexCounter;
-    Count fClobalMuonVetoCounter;
-    Count fClobalElectronVetoCounter;
-    Count fOneProngTauSelectionCounter;
+    Count fTausExistCounter;
+    Count fOneTauCounter;
     Count fMETCounter;
-    Count fJetSelectionCounter;
+    Count fElectronVetoCounter;
+    Count fMuonVetoCounter;
+    Count fNJetsCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
     Count fEvtTopologyCounter;
+    Count fTopSelectionCounter;
+    Count fZmassVetoCounter;
+    Count ftransverseMassCutCounter;
     //
     EventWeight& fEventWeight;
 
@@ -67,12 +81,18 @@ namespace HPlus {
     JetSelection fJetSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
+    JetTauInvMass fJetTauInvMass;
     EvtTopology fEvtTopology;
+    TopSelection fTopSelection;
+    // GenParticleAnalysis fGenparticleAnalysis;
+    ForwardJetVeto fForwardJetVeto;
+    //
+    TriggerEfficiency fTriggerEfficiency;
+    VertexWeight fVertexWeight;
+    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
-    
     // Histograms
     TH1 *hAlphaTInvMass;
-    TH1 *hAlphaTDiJetMassClosestToW;
 
     // for Tree
     TTree *myTree;
@@ -88,11 +108,10 @@ namespace HPlus {
     float fGlobalMuonVetoHighestPt;
     float fGlobalElectronVetoHighestPt;
     float fTransverseMass;
-    float fDeltaPhi;
     float fAlphaT;
     float fHt;
     float fJt; // Jt = Ht - TauJetEt - LdgJetEt
-    float fDiJetMassClosestToW;
+
   };
 }
 

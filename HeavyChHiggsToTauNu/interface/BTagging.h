@@ -61,6 +61,10 @@ namespace HPlus {
     Count fAllSubCount;
     Count fTaggedSubCount;
     Count fTaggedEtaCutSubCount;
+    Count fTaggedNoTaggedJet;
+    Count fTaggedOneTaggedJet;
+    Count fTaggedTwoTaggedJets;
+
 
     // EventWeight object
     EventWeight& fEventWeight;

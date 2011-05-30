@@ -22,8 +22,10 @@ namespace HPlus {
     double getWeight(const edm::Event& iEvent, const edm::EventSetup& iSetup) const;
 
   private:
-    edm::InputTag fSrc;
+    edm::InputTag fVertexSrc;
+    edm::InputTag fPileupSrc;
     std::vector<double> fWeights;
+    bool fUseSimulatedPileup;
     bool fEnabled;
   };
 }

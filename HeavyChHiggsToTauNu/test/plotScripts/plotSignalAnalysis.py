@@ -24,7 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 # Configuration
 #analysis = "signalAnalysis"
 analysis = "signalAnalysisTauSelectionHPSTightTauBased"
-#analysis = "signalAnalysisBtaggingTest"
+#analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
 
 # main function
@@ -128,11 +128,13 @@ def vertexComparison(datasets):
             "vertices_H120")
 
 #def genComparison(datasets):
-#    signal = "TTToHplusBWB_M120_Spring11"
-#    background = "TTJets_TuneZ2_Spring11"
-#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Rtau1ProngHp"),
-#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/Rtau1ProngW")),
-#       
+#    signal = "TTToHplusBWB_M120"
+#    background = "TTJets_TuneZ2"
+#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/genRtau1ProngHp"),
+#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/genRtau1ProngW")),
+#          "RtauGen_Hp_vs_tt")
+    
+    
 #def zMassComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "DYJetsToLL"
@@ -144,7 +146,7 @@ def topMassComparison(datasets):
     signal = "TTToHplusBWB_M120"
     background = "TTToHplusBWB_M120"
     rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Mass_jjbMax"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
                             datasets.getDataset(background).getDatasetRootHisto(analysis+"/MassMax_Top")]),
              "topMass_all_vs_real")
 
@@ -167,7 +169,7 @@ def scaleMCHistos(h, scale):
 def scaleMCfromWmunu(h):
     # Data/MC scale factor from AN 2011/053
 #    scaleMCHistos(h, 1.736)
-    scaleMCHistos(h, 1.2)
+    scaleMCHistos(h, 1.0)
 
 
 
@@ -209,6 +211,13 @@ def rtauGen(h, name, rebin=5, ratio=False):
         xlabel = "N_{vertices}"
     ylabel = "Events / %.2f" % h.binWidth()
 
+    if "gen" in name:
+        kwargs = {"ymin": 0.1, "xmax": 1.1}        
+    elif "Pt" in name:
+        kwargs = {"ymin": 0.1, "xmax": 400}
+    elif "Mass" in name:
+        kwargs = {"ymin": 0.1, "xmax": 500}
+        
     kwargs = {"ymin": 0.1, "xmax": 500}
 #    kwargs["opts"] = {"ymin": 0, "xmax": 14, "ymaxfactor": 1.1}}
     if ratio:
@@ -528,7 +537,7 @@ def deltaPhi(h, rebin=40, ratio=False):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
     
-def deltaPhi2(h, name, rebin=2):
+def deltaPhi2(h, name, rebin=5):
 #    name = flipName(h.getRootHistoPath())
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
@@ -760,7 +769,7 @@ def tauJetMass(h, name, rebin=1, ratio=False):
 
 
 
-def topMass(h, name, rebin=10, ratio=False):
+def topMass(h, name, rebin=20, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 #    particle = "jet"
 #    if "bjet" in name:
