@@ -198,7 +198,8 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     counters.append(cname)
 
     if enableIsolation:
-        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
+#        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
+        counters.extend(addMuonIsolation(process, sequence, "muonSelectionIsolation", "userInt('byTightIc04Occupancy')==0"))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
