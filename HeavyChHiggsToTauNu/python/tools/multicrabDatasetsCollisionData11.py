@@ -143,15 +143,15 @@ datasets = {
         }
     },
     ##### 42X starts here
-    "Tau_165088-165121_Prompt": {
+    "Tau_165088-165525_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v6",
-        "runs": (165088, 165121), # This is prompt RECO, so check the run range again when running!
+        "runs": (165088, 165525), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 10, # Adjusted for PATtuple file size
+                "number_of_jobs": 130, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -160,6 +160,7 @@ datasets = {
 
 
     # Tau + jets
+    # FIXME: this is wrong, we shoud use MultiJet PD!
     "TauPlusX_160404-161312_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
@@ -178,12 +179,6 @@ datasets = {
         "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
         "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "AOD": {
-                "datasetpath": "/TauPlusX/Run2011A-PromptReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 5, # Adjusted for PATtuple file size
-                "lumiMask": "PromptReco"
-            },
             "pattuple_v10_old": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v10-7c7e43599bead125d0cad4b457dd8f70/USER",
@@ -228,12 +223,6 @@ datasets = {
         "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
         "runs": (162803, 163261), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "AOD": {
-                "datasetpath": "/TauPlusX/Run2011A-PromptReco-v2/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 5, # Adjusted for PATtuple file size
-                "lumiMask": "PromptReco"
-            },
             "pattuple_v10_3": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TauPlusX/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v10_3-7c7e43599bead125d0cad4b457dd8f70/USER",
