@@ -15,8 +15,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("TauEmbeddingAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -79,17 +79,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 
 # Pileup weighting
 weight = None
-if dataVersion.isMC():
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
-    params.setPileupWeightFor2010()
-    params.setPileupWeightFor2011()
-    params.setPileupWeightFor2010and2011()
-    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight")
-    )
-    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
-    process.commonSequence *= process.pileupWeight
-    weight = "pileupWeigh"
+# weighting not possible with tauAnalysis (necessary collection missing from tauAnalysis)
+# if dataVersion.isMC():
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+#     params.setPileupWeightFor2010()
+#     params.setPileupWeightFor2011()
+#     params.setPileupWeightFor2010and2011()
+#     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#         alias = cms.string("pileupWeight")
+#     )
+#     insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+#     process.commonSequence *= process.pileupWeight
+#     weight = "pileupWeight"
 
 
 #taus = "selectedPatTausShrinkingConePFTau"
@@ -179,8 +180,29 @@ process.goodJetFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("goodJets"),
     minNumber = cms.uint32(3)
 )
+
+
 process.goodJetSequence = cms.Sequence(
     process.goodJets *
     process.goodJetFilter
 )
+
+
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.goodJetSequence *= process.firstPrimaryVertex
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+process.muonVeto = cms.EDFilter("HPlusGlobalMuonVetoFilter",
+    vertexSrc = cms.InputTag("firstPrimaryVertex"),
+    GlobalMuonVeto = param.GlobalMuonVeto
+)
+process.electronVeto = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+    GlobalElectronVeto = param.GlobalElectronVeto
+)
+process.goodJetSequence *= (process.muonVeto*process.electronVeto)
+
+
 addPath("Jets3", preSequence=process.goodJetSequence)
