@@ -802,16 +802,16 @@ namespace HPlus {
         hLeg1AfterMET->Fill(tauPtBin, weightWithoutMET);
       if (btagData.passedEvent()) {
         hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
-        hLeg1FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
-        if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
-          hLeg1AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
-          hTopMassDistribution->Fill(topSelectionData.getTopMass(), weightWithoutMET);
-          if (topSelectionData.passedEvent()) {
-            hLeg1AfterTopSelection->Fill(tauPtBin, weightWithoutMET);
-          } else {
-            hLeg1AfterAntiTopSelection->Fill(tauPtBin, weightWithoutMET);
-          }
+        hTopMassDistribution->Fill(topSelectionData.getTopMass(), weightWithoutMET);
+        if (topSelectionData.passedEvent()) {
+          hLeg1AfterTopSelection->Fill(tauPtBin, weightWithoutMET);
+        } else {
+          hLeg1AfterAntiTopSelection->Fill(tauPtBin, weightWithoutMET);
         }
+      }
+      hLeg1FakeMetVetoDistribution->Fill(fakeMETData.closestDeltaPhi(), weightWithoutMET);
+      if (fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
+        hLeg1AfterFakeMETVeto->Fill(tauPtBin, weightWithoutMET);
       }
     }
     // TauID without Rtau
