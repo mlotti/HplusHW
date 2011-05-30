@@ -91,7 +91,7 @@ def addAnalysis(process, analysisName, analysisModule, preSequence=None, additio
 # counter     HPlusEventCountAnalyzer EDAnalyzer object, if the event count should be added to that (default: None)
 #
 # returns the name of the object selector module, so that it can be used in subsequent cuts
-def addCut(process, sequence, name, src, cut, min=1, selector="HPlusCandViewLazyPtrSelector", counter=None
+def addCut(process, sequence, name, src, cut, min=1, selector="HPlusCandViewLazyPtrSelector", counter=None,
            weightSrc=None):
     cutname = name
     filtername = name+"Filter"
