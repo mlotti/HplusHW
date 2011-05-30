@@ -46,7 +46,7 @@ class HPlusCandViewMultiplicityAnalyzer: public edm::EDAnalyzer {
 
 HPlusCandViewMultiplicityAnalyzer::HPlusCandViewMultiplicityAnalyzer(const edm::ParameterSet& iConfig):
   weights_(iConfig.getUntrackedParameter<edm::InputTag>("weights", edm::InputTag("fake"))),
-  usingWeights_(iConfig.exists("weights") {
+  usingWeights_(iConfig.exists("weights")) {
   edm::Service<TFileService> fs;
 
   std::vector<std::string> names = iConfig.getParameterNamesForType<edm::ParameterSet>(false); // take only untracked parameters
