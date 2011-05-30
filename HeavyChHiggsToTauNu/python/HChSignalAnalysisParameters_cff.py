@@ -424,4 +424,10 @@ def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
 def changeMetCollection(**kwargs):
-    _changeCollection([jetSelection.src_met, MET.src, fakeMETVeto.src, forwardJetVeto.src_met], **kwargs)
+    _changeCollection([
+            jetSelection.src_met,
+            MET.src,
+            fakeMETVeto.src,
+            TauEmbeddingAnalysis.embeddingMetSrc,
+            forwardJetVeto.src_met
+            ], **kwargs)
