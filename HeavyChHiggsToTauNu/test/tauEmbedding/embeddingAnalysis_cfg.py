@@ -311,9 +311,9 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    process.EmbeddingAnalyzer# *
-#    process.tauIdEmbeddingAnalyzer *
-#    process.tauPtIdEmbeddingAnalyzer
+    process.EmbeddingAnalyzer *
+    process.tauIdEmbeddingAnalyzer *
+    process.tauPtIdEmbeddingAnalyzer
 )
 
 # def _setMuon(module, muonSrc):
