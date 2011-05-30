@@ -23,7 +23,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "use_server": 1,
-                "number_of_jobs": 495, # Adjusted for PATtuple file size
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
             },
         },
     },
@@ -33,7 +33,8 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 495, # Adjusted for PATtuple file size
+                "use_server": 1,
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
             },
         },
     },
@@ -43,7 +44,8 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 495, # Adjusted for PATtuple file size
+                "use_server": 1,
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
             },
         },
     },
@@ -53,7 +55,8 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 495, # Adjusted for PATtuple file size
+                "use_server": 1,
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
             },
         },
     },
@@ -64,7 +67,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "use_server": 1,
-                "number_of_jobs": 495, # Adjusted for PATtuple file size
+                "number_of_jobs": 1000, # Adjusted for PATtuple file size
             },
         },
     },
