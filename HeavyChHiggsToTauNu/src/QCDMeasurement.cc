@@ -389,6 +389,7 @@ namespace HPlus {
     const int myJetPtIndex =  getJetPtIndex( selectedJets[0]->et() );
     fLdgJetPtHistogramGroupByMET[myMetIndex]->Fill( selectedJets[0]->et(), fEventWeight.getWeight());
     
+    // FIXME: put inside a method
     // Perform GenParticle Level Analysis
     if( !(iEvent.isRealData()) ) {
       std::vector<const reco::Candidate*> myBquarks = fGenparticleAnalysis.doQCDmAnalysis(iEvent, iSetup);
@@ -418,8 +419,10 @@ namespace HPlus {
       fNBquarksStatus2HistogramGroupByMET[myMetIndex]->Fill(nBquarksStatus2, fEventWeight.getWeight());
       fNBquarksStatus3HistogramGroupByMET[myMetIndex]->Fill(nBquarksStatus3 , fEventWeight.getWeight());
     } // eof: if(!iEvent.isRealData()){
-    fMETHistogramGroupByLdgJetPt[myJetPtIndex]->Fill( metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    // FIXME: end of put to separate method
 
+    fMETHistogramGroupByLdgJetPt[myJetPtIndex]->Fill( metData.getSelectedMET()->et(), fEventWeight.getWeight());
+  
     // Factorize out MET cut
     double myEventWeightBeforeMetFactorization = fEventWeight.getWeight();
     hWeightedMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -467,7 +470,6 @@ namespace HPlus {
 
     if( tauDataForTauID.passedEvent() && fakeMETData.passedEvent() ) fCounterAfterJetsTauIdNoRtauFakeMetByTauPt[myFactorizationTableIndex]->Fill( 1.0, fEventWeight.getWeight());
     else fCounterAfterJetsTauIdNoRtauFakeMetByTauPt[myFactorizationTableIndex]->Fill( 0.0, fEventWeight.getWeight());
-
 
 
     // Factorize out b-tagging
