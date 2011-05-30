@@ -150,7 +150,7 @@ def addPath(prefix, **kwargs):
     for name, tag in [("", taus),
                       ("tauId", "LooseTauId"),
                       ("tauPtId", "LooseTauPtId")]:
-        for ptcut, etacut in [(-1, -1), (30, -1), (30, 2.1)]:
+        for ptcut, etacut in [(-1, -1), (40, -1), (40, 2.1)]:
             pteta = ""
             if ptcut > 0 or etacut > 0:
                 pteta += "Gen"
