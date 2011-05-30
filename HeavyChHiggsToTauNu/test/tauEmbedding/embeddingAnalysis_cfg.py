@@ -28,6 +28,7 @@ if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -180,17 +181,18 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 
 # Pileup weighting
 weight = None
-if dataVersion.isMC():
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
-    params.setPileupWeightFor2010()
-    params.setPileupWeightFor2011()
-    params.setPileupWeightFor2010and2011()
-    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight")
-    )
-    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
-    process.commonSequence *= process.pileupWeight
-    weight = "pileupWeigh"
+# weighting not possible with tauAnalysis (necessary collection missing from tauAnalysis)
+# if dataVersion.isMC():
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+#     params.setPileupWeightFor2010()
+#     params.setPileupWeightFor2011()
+#     params.setPileupWeightFor2010and2011()
+#     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#         alias = cms.string("pileupWeight")
+#     )
+#     insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+#     process.commonSequence *= process.pileupWeight
+#     weight = "pileupWeight"
 
 
 histoMuonPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
@@ -207,6 +209,17 @@ muons = cms.InputTag("tauEmbeddingMuons")
 taus = cms.InputTag("selectedPatTausHpsPFTau")
 pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
+
+# Finalise muon selection
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.commonSequence *= process.firstPrimaryVertex
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
+additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
 
 
 analysis = Analysis(process, "analysis", additionalCounters=additionalCounters, weightSrc=weight)
@@ -237,6 +250,8 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.tauSelectionSequence = analysis.getSequence()
 process.commonSequence *= process.tauSelectionSequence
 
+
+# Embedding analyzer
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
@@ -301,10 +316,9 @@ process.analysisPath = cms.Path(
 #    process.tauPtIdEmbeddingAnalyzer
 )
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-def _setMuon(module, muonSrc):
-    module.muonSrc = cms.untracked.InputTag(muonSrc)
+# def _setMuon(module, muonSrc):
+#     module.muonSrc = cms.untracked.InputTag(muonSrc)
 
-tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
-                                                    process.commonSequence, [],
-                                                    modify=_setMuon, signalAnalysisCounters=False)
+# tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
+#                                                     process.commonSequence, [],
+#                                                     modify=_setMuon, signalAnalysisCounters=False)
