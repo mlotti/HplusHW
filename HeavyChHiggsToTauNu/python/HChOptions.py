@@ -60,7 +60,7 @@ def getOptions(options=None):
     return options
 
 
-def getOptionsDataVersion(dataVersion, options=None):
+def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=True):
     options = getOptions(options)
 
     if options.dataVersion != "":
@@ -69,7 +69,7 @@ def getOptionsDataVersion(dataVersion, options=None):
 
     dataVersion = DataVersion(dataVersion)
 
-    if options.trigger == "" and dataVersion.isMC():
+    if useDefaultSignalTrigger and options.trigger == "" and dataVersion.isMC():
         options.trigger = dataVersion.getDefaultSignalTrigger()
 
     return (options, dataVersion)

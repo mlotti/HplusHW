@@ -115,6 +115,16 @@ param.setAllTauSelectionOperatingMode('standard')
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
+if options.tauEmbeddingInput != 0:
+#    param.setPileupWeightFor2011
+#    param.setPileupWeightFor2011and2010()
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
+    if tauEmbeddingFinalizeMuonSelection:
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
+
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
 param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
@@ -123,7 +133,7 @@ param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # 
 param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
-if (doTriggerParametrisation and not dataVersion.isData()):
+if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddingInput != 0:
     # 2010 and 2011 scenarios
     #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
@@ -135,14 +145,6 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 #param.setTriggerVertexFor2011()
 
 param.setPileupWeightFor2011()
-
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
-        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                   enableIsolation=applyIsolation))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",

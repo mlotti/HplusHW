@@ -72,19 +72,21 @@ if options.doPat == 0:
     )
 
 
-# Vertex weighting
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-param.setVertexWeightFor2010()
-param.setVertexWeightFor2011()
-process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("vertexWeight"),
-)
-insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
-process.commonSequence *= process.vertexWeight
-
-weightName = "vertexWeight"
-
+# Pileup weighting
+weight = None:
+if dataVersion.isMC():
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+    params.setPileupWeightFor2010()
+    params.setPileupWeightFor2011()
+    params.setPileupWeightFor2010and2011()
+    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("vertexWeight"),
+    )
+    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+    process.commonSequence *= process.pileupWeight
+    weight = "pileupWeigh"
+    
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 additionalCounters.extend(MuonSelection.muonSelectionCounters)
@@ -102,6 +104,9 @@ process.commonSequence *= process.firstPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
 
+
+
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
 
 # Configuration
@@ -114,6 +119,7 @@ def createAnalysis(name, postfix="", **kwargs):
     def create(**kwargs):
         muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
                                     trigger=trigger, jets="goodJets", met="pfMet",
+                                    weightSrc = weight,
                                     **kwargs)
 
     prefix = name+postfix

@@ -96,7 +96,8 @@ class MuonAnalysis:
                  doMuonIsolation=False, muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
-                 jets="selectedPatJetsAK5PF", njets=3):
+                 jets="selectedPatJetsAK5PF", njets=3,
+                 weightSrc=None):
         self.process = process
         self.dataVersion = dataVersion
         self.prefix = prefix
@@ -120,7 +121,7 @@ class MuonAnalysis:
         if self._trigger == None:
             raise Exception("Must specify trigger!")
 
-        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters)
+        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=weightSrc)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
@@ -158,6 +159,8 @@ class MuonAnalysis:
                         nbins = cms.untracked.int32(20)
                     )
             ))
+            if weightSrc != None:
+                self.multipAnalyzer.weights = cms.untracked.InputTag(weightSrc)
     
         # Create the prototype for muon cleaner
         from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
@@ -208,6 +211,8 @@ class MuonAnalysis:
                     histoEta.pset().clone(cut=cms.untracked.string(self._etaCut)),
                 )
             )
+            if weightSrc != None:
+                self.afterOtherCutsModule.weights = cms.untracked.InputTag(weightSrc)
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
             self.afterOtherCutsModuleIso.histograms.append(histoIsos[muonIsolation].pset().clone(
                     cut=cms.untracked.string(self._isolationCut)

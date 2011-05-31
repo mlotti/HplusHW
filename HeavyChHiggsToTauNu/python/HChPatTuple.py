@@ -60,7 +60,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     process.collisionDataSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
-        if doPF2PAT or doPF2PATNoPU or not doPlainPat:
+        if doPF2PAT or doPF2PATNoPu or not doPlainPat:
             raise Exception("Only plainPat can be done for tau embedding input at the moment")
 
         # Hack to not to crash if something in PAT assumes process.out

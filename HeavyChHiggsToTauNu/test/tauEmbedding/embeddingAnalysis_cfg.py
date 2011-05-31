@@ -28,22 +28,20 @@ if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_AODSIM_tauembedding_embedding_v3_3/ed6563e15d1b423a9bd5d11109ca1e30/embedded_RECO_7_1_vMi.root"
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_T59.root"
-    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/DYJetsToLL_TuneZ2_Winter10/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1_test1/a19686e39e81c7cc3074cf9dcfd07453/embedded_RECO_1_1_8Ag.root"
-        #"file:embedded_RECO.root"
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/WJets_TuneZ2_Spring11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_test1/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_1_1_uqe.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_1_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_16_1_JtV.root"
   )
 )
 if dataVersion.isData():
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/Mu_147196-149294_Dec22/Mu/Run2010B_Dec22ReReco_v1_AOD_147196_tauembedding_embedding_v9_test1/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_2_1_2K0.root"]
+    process.source.fileNames = [
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_163270-163869_Prompt/SingleMu/Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_1_pt40/cee94be795a40bbb5b546b09a0917318/embedded_RECO_2_1_5GD.root"
+        ]
 
 ################################################################################
 
@@ -58,7 +56,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 patArgs = {
     "doPatTauIsoDeposits": True
 }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -180,6 +178,23 @@ if debug:
 
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+
+# Pileup weighting
+weight = None
+# weighting not possible with tauAnalysis (necessary collection missing from tauAnalysis)
+# if dataVersion.isMC():
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+#     params.setPileupWeightFor2010()
+#     params.setPileupWeightFor2011()
+#     params.setPileupWeightFor2010and2011()
+#     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#         alias = cms.string("pileupWeight")
+#     )
+#     insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+#     process.commonSequence *= process.pileupWeight
+#     weight = "pileupWeight"
+
+
 histoMuonPt = Histo("pt", "pt()", min=0., max=200., nbins=200, description="muon pt (GeV/c)")
 histoMuonEta = Histo("eta", "eta()", min=-3, max=3, nbins=60, description="muon eta")
 
@@ -195,8 +210,19 @@ taus = cms.InputTag("selectedPatTausHpsPFTau")
 pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
 
+# Finalise muon selection
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.commonSequence *= process.firstPrimaryVertex
 
-analysis = Analysis(process, "analysis", additionalCounters=additionalCounters)
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+muons = cms.InputTag(tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.commonSequence, muons.value()))
+additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param))
+
+
+analysis = Analysis(process, "analysis", additionalCounters=additionalCounters, weightSrc=weight)
 analysis.getCountAnalyzer().verbose = cms.untracked.bool(True)
 
 selectedTaus = analysis.addSelection("LooseTauId", taus,
@@ -224,6 +250,8 @@ histoAnalyzer = analysis.addMultiHistoAnalyzer("All", [
 process.tauSelectionSequence = analysis.getSequence()
 process.commonSequence *= process.tauSelectionSequence
 
+
+# Embedding analyzer
 process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
     muonSrc = cms.untracked.InputTag(muons.value()),
     tauSrc = cms.untracked.InputTag(taus.value()),
@@ -251,6 +279,10 @@ process.EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingAnalyzer",
         vertexSrc = cms.InputTag("offlinePrimaryVertices")
     )
 )
+if weight != None:
+    process.EmbeddingAnalyzer.prescaleSource = cms.untracked.InputTag(weight)
+
+
 # if dataVersion.isMC():
 #     process.EmbeddingAnalyzer.GenMetTrue = cms.untracked.PSet(
 #         embeddedSrc = cms.untracked.InputTag("genMetTrueEmbedded"),
@@ -279,15 +311,14 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    process.EmbeddingAnalyzer# *
-#    process.tauIdEmbeddingAnalyzer *
-#    process.tauPtIdEmbeddingAnalyzer
+    process.EmbeddingAnalyzer *
+    process.tauIdEmbeddingAnalyzer *
+    process.tauPtIdEmbeddingAnalyzer
 )
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-def _setMuon(module, muonSrc):
-    module.muonSrc = cms.untracked.InputTag(muonSrc)
+# def _setMuon(module, muonSrc):
+#     module.muonSrc = cms.untracked.InputTag(muonSrc)
 
-tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
-                                                    process.commonSequence, [],
-                                                    modify=_setMuon, signalAnalysisCounters=False)
+# tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EmbeddingAnalyzer", process.EmbeddingAnalyzer,
+#                                                     process.commonSequence, [],
+#                                                     modify=_setMuon, signalAnalysisCounters=False)
