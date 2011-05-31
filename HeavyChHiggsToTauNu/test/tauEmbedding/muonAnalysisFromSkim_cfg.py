@@ -15,7 +15,7 @@ options.register("WDecaySeparate",
                  options.multiplicity.singleton,
                  options.varType.int,
                  "Separate W decays from MC information")
-options, dataVersion = getOptionsDataVersion(dataVersion, options)
+options, dataVersion = getOptionsDataVersion(dataVersion, options, useDefaultSignalTrigger=False)
 
 #options.doPat=1
 
@@ -71,21 +71,20 @@ if options.doPat == 0:
         process.goodPrimaryVertices10
     )
 
-
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 # Pileup weighting
-weight = None:
+weight = None
 if dataVersion.isMC():
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-    params.setPileupWeightFor2010()
-    params.setPileupWeightFor2011()
-    params.setPileupWeightFor2010and2011()
+#    param.setPileupWeightFor2010()
+#    param.setPileupWeightFor2011()
+    param.setPileupWeightFor2010and2011()
     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
         alias = cms.string("vertexWeight"),
     )
-    insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+    insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
     process.commonSequence *= process.pileupWeight
-    weight = "pileupWeigh"
+    weight = "pileupWeight"
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
@@ -131,10 +130,10 @@ def createAnalysis(name, postfix="", **kwargs):
             "Medium",
             "Tight",
             "TightSc015",
-            "TightSc02",
+#            "TightSc02",
             "TightIc04",
             "TightSc015Ic04",
-            "TightSc02Ic04",
+#            "TightSc02Ic04",
             ]:
             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=1.0, **kwargs)
 
