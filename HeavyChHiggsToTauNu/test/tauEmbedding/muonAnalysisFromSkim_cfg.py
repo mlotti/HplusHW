@@ -76,15 +76,22 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 weight = None
 if dataVersion.isMC():
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
-#    param.setPileupWeightFor2010()
-#    param.setPileupWeightFor2011()
-    param.setPileupWeightFor2010and2011()
+
+    # Pileup weighting
     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight"),
+    )
+    param.setPileupWeightFor2011()
+    insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
+
+    # Vertex weighting
+    process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
         alias = cms.string("vertexWeight"),
     )
-    insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
-    process.commonSequence *= process.pileupWeight
-    weight = "pileupWeight"
+    param.setVertexWeightFor2011()
+    insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+
+    process.commonSequence *= (process.pileupWeight*process.vertexWeight)
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
@@ -114,11 +121,14 @@ if len(trigger) == 0:
 #    trigger = "HLT_Mu9"
     trigger = "HLT_Mu15_v1"
 
-def createAnalysis(name, postfix="", **kwargs):
+def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
+    wSrc = weightSrc
+    if dataVersion.isData():
+        wSrc = None
     def create(**kwargs):
         muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
                                     trigger=trigger, jets="goodJets", met="pfMet",
-                                    weightSrc = weight,
+                                    weightSrc = wSrc,
                                     **kwargs)
 
     prefix = name+postfix
@@ -162,8 +172,8 @@ def createAnalysis2(**kwargs):
     args.update(kwargs)
     postfix = kwargs.get("postfix", "")
     for pt, met, njets in [
-        (30, 20, 2),
-        (30, 20, 3),
+#        (30, 20, 2),
+#        (30, 20, 3),
 #        (40, 20, 2),
         (40, 20, 3)
         ]:
@@ -174,6 +184,8 @@ def createAnalysis2(**kwargs):
         createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2(muons=muons, allMuons=muons)
+createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
+createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
 #createAnalysis2(muons="tightMuonsZ")
 
 # process.out = cms.OutputModule("PoolOutputModule",
