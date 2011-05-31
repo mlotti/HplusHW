@@ -33,7 +33,8 @@ namespace HPlus {
   class TriggerSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
-    kTriggerSelectionByTriggerEfficiencyParametrisation
+    kTriggerSelectionByTriggerEfficiencyParametrisation,
+    kTriggerSelectionDisabled
   };
   
   public:

@@ -15,7 +15,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
-    selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation
+    selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
     triggerTauSelection = cms.untracked.PSet(),
     triggerMETSelection = cms.untracked.PSet(),
     triggerEfficiency = cms.untracked.PSet()

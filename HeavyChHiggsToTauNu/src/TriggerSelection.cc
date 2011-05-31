@@ -40,7 +40,9 @@ namespace HPlus {
       fTriggerSelectionType = kTriggerSelectionByTriggerBit;
     } else if (mySelectionType == "byParametrisation") {
       fTriggerSelectionType = kTriggerSelectionByTriggerEfficiencyParametrisation;
-    } else throw cms::Exception("Configuration") << "TriggerSelection: no or unknown selection type! Options for 'selectionType' are: byTriggerBit, byParametrisation (you chose '"
+    } else if(mySelectionType == "disabled") {
+      fTriggerSelectionType = kTriggerSelectionDisabled;
+    } else throw cms::Exception("Configuration") << "TriggerSelection: no or unknown selection type! Options for 'selectionType' are: byTriggerBit, byParametrisation, disabled (you chose '"
       << mySelectionType << "')" << std::endl;
 
     // Histograms
@@ -68,6 +70,8 @@ namespace HPlus {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
       passEvent = passedTriggerParametrisation(iEvent, iSetup);
+    if(fTriggerSelectionType == kTriggerSelectionDisabled)
+      passEvent = true;
     
     if(passEvent) increment(fTriggerCount);
     return Data(this, returnPath, passEvent);
