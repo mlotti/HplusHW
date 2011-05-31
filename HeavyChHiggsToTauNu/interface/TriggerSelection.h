@@ -105,6 +105,10 @@ namespace HPlus {
 
     Count fTriggerHltMetExistsCount;
 
+    Count fTriggerParamAllCount;
+    Count fTriggerParamTauCount;
+    Count fTriggerParamMetCount;
+
     TriggerSelectionType fTriggerSelectionType;
     
     // Histograms
