@@ -62,7 +62,11 @@ namespace HPlus {
     kMuonToTau,
     kTauToTau,
     kJetToTau,
-    kNoMC
+    kNoMC,
+    kElectronToTauAndTauOutsideAcceptance,
+    kMuonToTauAndTauOutsideAcceptance,
+    kTauToTauAndTauOutsideAcceptance,
+    kJetToTauAndTauOutsideAcceptance
   };
   public:
     explicit EWKFakeTauAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
@@ -92,6 +96,11 @@ namespace HPlus {
     CounterGroup fMuonToTausCounterGroup;
     CounterGroup fGenuineToTausCounterGroup;
     CounterGroup fJetToTausCounterGroup;
+    CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
 
     //Count fForwardJetVetoCounter;
     //    Count ftransverseMassCutCounter;
