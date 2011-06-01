@@ -82,14 +82,14 @@ if dataVersion.isMC():
         alias = cms.string("pileupWeight"),
     )
     param.setPileupWeightFor2011()
-    insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
+    insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeight)
 
     # Vertex weighting
     process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
         alias = cms.string("vertexWeight"),
     )
     param.setVertexWeightFor2011()
-    insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+    insertPSetContentsTo(param.vertexWeight.clone(), process.vertexWeight)
 
     process.commonSequence *= (process.pileupWeight*process.vertexWeight)
     
