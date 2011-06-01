@@ -162,6 +162,7 @@ class MuonAnalysis:
                     ),
             ))
             if weightSrc != None:
+                self.histoAnalyzer.weights = cms.untracked.InputTag(weightSrc)
                 self.multipAnalyzer.weights = cms.untracked.InputTag(weightSrc)
         self.pileupAnalyzer = None
         if beginSequence == None:
