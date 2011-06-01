@@ -16,12 +16,12 @@ dataVersion = "39Xredigi"
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
-options, dataVersion = getOptionsDataVersion(dataVersion)
+options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
 options.doPat=1
 
+if len(options.trigger) == 0:
+    options.trigger = "HLT_Mu9"
 trigger = options.trigger
-if len(trigger) == 0:
-    trigger = "HLT_Mu9"
 
 #mu9filter = "hltSingleL3MuonPre9"
 #mu15filter = "hltSingleL3MuonPre15"
@@ -29,6 +29,7 @@ mu9filter = "hltSingleMu9L3Filtered9"
 mu15filter = "hltSingleMu15L3Filtered15"
 mu20filter = "hltSingleMu20L3Filtered20"
 mu24filter = "hltSingleMu24L3Filtered24"
+mu30filter = "hltSingleMu30L3Filtered30"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -39,6 +40,8 @@ elif "HLT_Mu20" in trigger:
     triggerFilter = mu20filter
 elif "HLT_Mu24" in trigger:
     triggerFilter = mu24filter
+elif "HLT_Mu30" in trigger:
+    triggerFilter = mu30filter
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
@@ -87,7 +90,7 @@ patArgs = {
     "doPatMuonPFIsolation": True,
     "doTauHLTMatching": False,
     }
-process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
 del process.out
 process.patDefaultSequence.remove(process.countPatTaus)
 
@@ -136,6 +139,37 @@ process.load("MuonAnalysis.MuonAssociators.patMuonsWithTrigger_cff")
 muonTrigger.useExistingPATMuons(process, "patMuons")
 process.patTrigger.onlyStandAlone = False
 process.commonSequence *= process.patMuonsWithTriggerSequence
+muons = "patMuonsWithTrigger"
+
+# Isolation embedding
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, muons=muons)
+
+# Pileup weighting
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+
+# Pileup weighting
+process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("pileupWeight"),
+)
+param.setPileupWeightFor2011()
+insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
+
+# Vertex weighting
+process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("vertexWeight"),
+)
+param.setVertexWeightFor2011()
+insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+
+process.commonSequence *= (process.pileupWeight*process.vertexWeight)
+
+if dataVersion.isData():
+    process.pileupWeight.enabled = False
+    process.vertexWeight.enabled = False
+
+
 
 # Preselection by tracks
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
@@ -171,8 +205,8 @@ counters.append("zCandsCount")
 process.commonSequence *= (process.zCands * process.zCandsFilter * process.zCandsCount)
 
 # Tag and Probe definitions
-process.tagMuonsWithoutZ = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("patMuonsWithTrigger"),
+process.tagMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag(muons),
     cut = cms.string(
         "isGlobalMuon() && isTrackerMuon()"
         "&& pt() > 30 && abs(eta()) < 2.1"
@@ -185,18 +219,18 @@ process.tagMuonsWithoutZ = cms.EDFilter("PATMuonSelector",
         "&& !triggerObjectMatchesByFilter('%s').empty()" % triggerFilter
     ),
 )
-process.tagMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
-    src = cms.InputTag("tagMuonsWithoutZ"),
-    vertexSrc = cms.InputTag("goodPrimaryVertex"),
-    maxZ = cms.double(1.0)
-)
+#process.tagMuons = cms.EDFilter("HPlusPATMuonViewVertexZSelector",
+#    src = cms.InputTag("tagMuonsWithoutZ"),
+#    vertexSrc = cms.InputTag("goodPrimaryVertex"),
+#    maxZ = cms.double(1.0)
+#)
 
 #process.trkProbes  = cms.EDProducer("ConcreteChargedCandidateProducer", 
 #    src  = cms.InputTag("goodTracks"),      
 #    particleType = cms.string("mu+"),     # this is needed to define a mass
 #)
 process.probeMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("patMuonsWithTrigger"),
+    src = cms.InputTag(muons),
     cut = cms.string(
         "isTrackerMuon()"
         "&& pt() > 40"
@@ -206,22 +240,22 @@ process.probeMuonsVertexZ = cms.EDProducer("HPlusCandViewVertexZDiffComputer",
     candSrc = cms.InputTag("probeMuons"),
     vertexSrc = cms.InputTag("goodPrimaryVertex")
 )
-process.probeMuonsTauIsolationVLoose = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
-    candSrc = cms.InputTag("probeMuons"),
-    tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
-    isolationDiscriminator = cms.string("byVLooseIsolation"),
-    againstMuonDiscriminator = cms.string("againstMuonLoose"),
-    deltaR = cms.double(0.15),
-    minCands = cms.uint32(1)
-)
-process.probeMuonsTauIsolationLoose = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byLooseIsolation")
-process.probeMuonsTauIsolationMedium = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byMediumIsolation")
-process.probeMuonsTauIsolationTight = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byTightIsolation")
+# process.probeMuonsTauIsolationVLoose = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
+#     candSrc = cms.InputTag("probeMuons"),
+#     tauSrc = cms.InputTag("selectedPatTausHpsPFTau"),
+#     isolationDiscriminator = cms.string("byVLooseIsolation"),
+#     againstMuonDiscriminator = cms.string("againstMuonLoose"),
+#     deltaR = cms.double(0.15),
+#     minCands = cms.uint32(1)
+# )
+# process.probeMuonsTauIsolationLoose = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byLooseIsolation")
+# process.probeMuonsTauIsolationMedium = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byMediumIsolation")
+# process.probeMuonsTauIsolationTight = process.probeMuonsTauIsolationVLoose.clone(isolationDiscriminator = "byTightIsolation")
 
 
 process.muonMultiplicity = cms.EDAnalyzer("HPlusCandViewMultiplicityAnalyzer",
     allMuons = cms.untracked.PSet(
-        src = cms.InputTag("patMuonsWithTrigger"),
+        src = cms.InputTag(muons),
         min = cms.untracked.int32(0),
         max = cms.untracked.int32(20),
         nbins = cms.untracked.int32(20)
@@ -250,15 +284,15 @@ process.tagProbes = cms.EDProducer("CandViewShallowCloneCombiner",
 process.debug = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.tagAndProbeSequence = cms.Sequence(
-    process.tagMuonsWithoutZ *
+#    process.tagMuonsWithoutZ *
     process.tagMuons *
 #    process.trkProbes *
     process.probeMuons *
     process.probeMuonsVertexZ *
-    process.probeMuonsTauIsolationVLoose *
-    process.probeMuonsTauIsolationLoose *
-    process.probeMuonsTauIsolationMedium *
-    process.probeMuonsTauIsolationTight *
+#    process.probeMuonsTauIsolationVLoose *
+#    process.probeMuonsTauIsolationLoose *
+#    process.probeMuonsTauIsolationMedium *
+#    process.probeMuonsTauIsolationTight *
     process.muonMultiplicity *
 #    process.debug *
     process.tagProbes
@@ -268,24 +302,32 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalys
 sumIsoRel = muonAnalysis.isolations["sumIsoRel"]
 pfSumIsoRel = muonAnalysis.isolations["pfSumIsoRel"]
 
+
+variables = cms.PSet(
+    pt     = cms.string("pt"),
+    eta    = cms.string("eta"),
+    abseta = cms.string("abs(eta)"),
+
+    #
+#    sumIsoRel = cms.string(sumIsoRel),
+#    pfSumIsoRel = cms.string(pfSumIsoRel),
+
+    # external variables
+    dz = cms.InputTag("probeMuonsVertexZ"),
+)
+
+for key, value in muonAnalysis.isolations.iteritems():
+    if "SumPt" in key or "MaxPt" in key:
+        continue
+    setattr(variables, key, cms.string(value))
+
 # Tag and Probe tree
 process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     # choice of tag and probe pairs, and arbitration
     tagProbePairs = cms.InputTag("tagProbes"),
     arbitration   = cms.string("OneProbe"), ## that is, use only tags associated to a single probe.
     # probe variables
-    variables = cms.PSet(
-        pt     = cms.string("pt"),
-        eta    = cms.string("eta"),
-        abseta = cms.string("abs(eta)"),
-
-        #
-        sumIsoRel = cms.string(sumIsoRel),
-        pfSumIsoRel = cms.string(pfSumIsoRel),
-
-        # external variables
-        dz = cms.InputTag("probeMuonsVertexZ"),
-    ),
+    variables = variables,
     # choice of what defines a 'passing' probe
     flags = cms.PSet(
         isGlobalMuon = cms.string("isGlobalMuon"),
@@ -296,6 +338,7 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         isHLTMu15    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu15filter),
         isHLTMu20    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu20filter),
         isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
+        isHLTMu30    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu30filter),
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
@@ -316,16 +359,18 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         ),
 
         # external flags
-        tauIsolationVLoose = cms.InputTag("probeMuonsTauIsolationVLoose"),
-        tauIsolationLoose = cms.InputTag("probeMuonsTauIsolationLoose"),
-        tauIsolationMedium = cms.InputTag("probeMuonsTauIsolationMedium"),
-        tauIsolationTight = cms.InputTag("probeMuonsTauIsolationTight"),
+#        tauIsolationVLoose = cms.InputTag("probeMuonsTauIsolationVLoose"),
+#        tauIsolationLoose = cms.InputTag("probeMuonsTauIsolationLoose"),
+#        tauIsolationMedium = cms.InputTag("probeMuonsTauIsolationMedium"),
+#        tauIsolationTight = cms.InputTag("probeMuonsTauIsolationTight"),
     ),
     ## DATA-related info
     addRunLumiInfo = cms.bool(True),
     ## MC-related info
     isMC = cms.bool(False), ## on MC you can set this to true, add some parameters and get extra info in the tree.
 #    isMC = cms.bool(dataVersion.isMC()), ## on MC you can set this to true, add some parameters and get extra info in the tree.
+    eventWeight = cms.InputTag("vertexWeight"),
+#    eventWeight = cms.InputTag("pileupWeight"),
 )
 
 # Count analyzer
