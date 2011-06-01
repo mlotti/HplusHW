@@ -240,6 +240,19 @@ namespace HPlus {
     TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
 
+    // PAS Control Plots
+    TH1 *hCtrlPlot_TauJetPt_AfterLeptonVeto_WithTauId;
+    TH1 *hCtrlPlot_TauJetLdgTrkPt_AfterLeptonVeto_WithTauId;
+    TH1 *hCtrlPlot_Rtau_AfterLeptonVeto_WithTauId;
+    TH1 *hCtrlPlot_JetMultiplicity_AfterLeptonVeto_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_MET_AfterLeptonVeto_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_JetMultiplicity_AfterMET_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_NBtags_AfterMET_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_TransverseMass_AfterAllSelectionNoFakeMet;
+    // TH1 *hCtrlPlot_Counter_AfterJetSelection_ByTauPt;
+    std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelection_ByTauPt;
+    std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelectionAndFakeMet_ByTauPt;
+
     // For Histogram Groups 
     std::vector<TH1*> fCounterAfterJetsTauIdNoRtauByTauPt;
     std::vector<TH1*> fCounterAfterJetsTauIdNoRtauFakeMetByTauPt;
