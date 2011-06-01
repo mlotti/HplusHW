@@ -1,0 +1,22 @@
+<library   file="*.cc" name="HiggsAnalysisTriggerEfficiencyPlugins">
+  <flags   EDM_PLUGIN="1"/>
+  <use   name="DataFormats/TauReco"/>
+  <use   name="RecoTauTag/RecoTau"/>
+  <use   name="RecoBTag/SecondaryVertex"/>
+  <use   name="FWCore/Framework"/>
+  <use   name="FWCore/MessageLogger"/>
+  <use   name="FWCore/ServiceRegistry"/>
+  <use   name="DataFormats/Candidate"/>
+  <use   name="DataFormats/METReco"/>
+  <use   name="DataFormats/VertexReco"/>
+  <use   name="DataFormats/PatCandidates"/>
+  <use   name="DataFormats/WrappedStdDictionaries"/>
+  <use   name="DataFormats/HepMCCandidate"/>
+  <use   name="DataFormats/ParticleFlowCandidate"/>
+  <use   name="CommonTools/UtilAlgos"/>
+  <use   name="CommonTools/TriggerUtils"/>
+  <use   name="HLTrigger/HLTcore"/>
+  <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>
+  <use   name="PhysicsTools/PatUtils"/>
+</library>
+

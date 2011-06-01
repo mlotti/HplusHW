@@ -22,8 +22,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 # Configuration
-#analysis = "signalAnalysis"
-analysis = "signalAnalysisTauSelectionHPSTightTauBased"
+analysis = "signalAnalysis"
+#analysis = "signalAnalysisTauSelectionHPSTightTauBased"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
 
@@ -55,8 +55,8 @@ def main():
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
     
-    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
-    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
+#    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
+#    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
    
 #    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
 #    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
@@ -70,38 +70,38 @@ def main():
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
-    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
+    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
 
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
-    jetPt(plots.DataMCPlot(datasets, analysis+"/jet_pt"), "jetPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/jet_eta"), "jetEta")
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/jet_phi"), "jetPhi")
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfSelectedJets"), "NumberOfJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt")
+    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta")
+    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi")
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/bjet_pt"), "bjetPt", rebin=20)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/bjet_eta"), "bjetEta", rebin=10)
-    numberOfJets(plots.DataMCPlot(datasets, analysis+"/NumberOfBtaggedJets"), "NumberOfBJets")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=20)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=10)
+    numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronPt"), "electronPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronEta"), "electronEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt")
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronEta"), "electronEta")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonPt"), "muonPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonEta"), "muonEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonPt"), "muonPt")
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonEta"), "muonEta")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/MaxForwJetEt"), "maxForwJetPt")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/ForwardJetVeto/MaxForwJetEt"), "maxForwJetPt")
 
-    etSumRatio(plots.DataMCPlot(datasets, analysis+"/EtSumRatio"), "etSumRatio")
+    etSumRatio(plots.DataMCPlot(datasets, analysis+"/ForwardJetVeto/EtSumRatio"), "etSumRatio")
     tauJetMass(plots.DataMCPlot(datasets, analysis+"/TauJetMass"), "TauJetMass")
-    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_jjbMax"), "topMass")
-    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_Top"), "topMass_realTop")
-    topMass(plots.DataMCPlot(datasets, analysis+"/Mass_bFromTop"), "topMass_bFromTop") 
-    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_jjb"), "pt_jjb")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_jjbmax"), "ptTop")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/Pt_top"), "ptTop_realTop") 
+    topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_jjbMax"), "topMass")
+    topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_Top"), "topMass_realTop")
+    topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_bFromTop"), "topMass_bFromTop") 
+    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjb"), "pt_jjb")
+    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjbmax"), "ptTop")
+    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_top"), "ptTop_realTop") 
     
 #    genComparison(datasets)
 #    zMassComparison(datasets)
@@ -145,17 +145,17 @@ def vertexComparison(datasets):
 def topMassComparison(datasets):
     signal = "TTToHplusBWB_M120"
     background = "TTToHplusBWB_M120"
-    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Mass_jjbMax"),
+    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/MassMax_Top")]),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")]),
              "topMass_all_vs_real")
 
 def topPtComparison(datasets):
     signal = "TTToHplusBWB_M120"
     background = "TTToHplusBWB_M120"
-    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/Pt_jjb"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_jjbmax"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Pt_top")]),
+    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjb"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
+                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
              "topPt_all_vs_real")
 
 def scaleMC(histo, scale):

@@ -15,7 +15,12 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
+    selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation
+    triggerTauSelection = cms.untracked.PSet(),
+    triggerMETSelection = cms.untracked.PSet(),
+    triggerEfficiency = cms.untracked.PSet()
 )
+
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
 
 primaryVertexSelection = cms.untracked.PSet(
@@ -23,60 +28,58 @@ primaryVertexSelection = cms.untracked.PSet(
     enabled = cms.untracked.bool(True)
 )
 
-# Tau ID factorization map
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauIDFactorization_cfi as factorizationParams
-
 # Default tau selection
 tauSelectionBase = cms.untracked.PSet(
-    # Operating mode options: 'standard', 'factorized', 'antitautag', 'antiisolatedtau'
+    # Operating mode options: 'standard'
     operatingMode = cms.untracked.string("standard"), # Standard tau ID (Tau candidate selection + tau ID applied)
-#    operatingMode = cms.untracked.string("factorized"), # Tau candidate selection applied, tau ID factorized
-#    operatingMode = cms.untracked.string("antitautag"), # Tau candidate selection applied, required prong cut, anti-isolation, and anti-rtau
-#    operatingMode = cms.untracked.string("antiisolatedtau"), # Tau candidate selection applied, required prong cut and anti-isolation
-    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTauTauTriggerMatched"),
+    src = cms.untracked.InputTag("selectedPatTausShrinkingConePFTau"),
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40), # jet pt > value
-    etaCut = cms.untracked.double(2.3), # jet |eta| < value
+    etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20), # ldg. track > value
     rtauCut = cms.untracked.double(0.8), # rtau > value
     antiRtauCut = cms.untracked.double(0.4), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
-    nprongs = cms.untracked.uint32(1), # not used at the moment FIXME: has no effect in TauSelection.cc
-    factorization = factorizationParams.tauIDFactorizationParameters
+    nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
 
 tauSelectionCaloTauCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausCaloRecoTauTauTriggerMatched",
+    src = "selectedPatTausCaloRecoTau",
     selection = "CaloTauCutBased"
 )
 
 tauSelectionShrinkingConeCutBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTauTauTriggerMatched",
+    src = "selectedPatTausShrinkingConePFTau",
     selection = "ShrinkingConePFTauCutBased"
 )
 
 tauSelectionShrinkingConeTaNCBased = tauSelectionBase.clone(
-    src = "selectedPatTausShrinkingConePFTauTauTriggerMatched",
+    src = "selectedPatTausShrinkingConePFTau",
     selection = "ShrinkingConePFTauTaNCBased"
 )
 
-tauSelectionHPSTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
-    selection = "HPSTauBased"
+tauSelectionHPSTightTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTau",
+    selection = "HPSTightTauBased"
 )
 
 tauSelectionHPSMediumTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsPFTau",
     selection = "HPSMediumTauBased"
 )
 
 tauSelectionHPSLooseTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsPFTau",
     selection = "HPSLooseTauBased"
 )
 
+tauSelectionHPSVeryLooseTauBased = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTau",
+    selection = "HPSVeryLooseTauBased"
+)
+
 tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
-    src = "selectedPatTausHpsTancPFTauTauTriggerMatched",
+    src = "selectedPatTausHpsTancPFTau",
     selection = "CombinedHPSTaNCTauBased"
 )
 
@@ -84,7 +87,7 @@ tauSelectionCombinedHPSTaNCTauBased = tauSelectionBase.clone(
 tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
-                 tauSelectionHPSTauBased,
+                 tauSelectionHPSTightTauBased,
                  tauSelectionHPSMediumTauBased,
                  tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
@@ -99,7 +102,7 @@ tauSelectionNames = ["TauSelectionCaloTauCutBased",
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
 #tauSelection = tauSelectionCaloTauCutBased
-tauSelection = tauSelectionHPSTauBased
+tauSelection = tauSelectionHPSTightTauBased
 #tauSelection = tauSelectionHPSMediumTauBased
 #tauSelection = tauSelectionCombinedHPSTaNCTauBased
 
@@ -196,7 +199,7 @@ topSelection = cms.untracked.PSet(
 
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices10"),
-    pileupSrc = cms.InputTag("PileupSummaryInfos"),
+    pileupSrc = cms.InputTag("addPileupInfo"),
     useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
     weights = cms.vdouble(1.0),
     enabled = cms.bool(False),
@@ -218,6 +221,8 @@ triggerEfficiency = cms.untracked.PSet(
     # looked dynamically from TriggerEfficiency_cff.py
     parameters = cms.PSet()
 )
+trigger.triggerEfficiency = triggerEfficiency
+
 # Look up dynamically the triggers for which the parameters exist
 import HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEfficiency_cff as trigEff
 for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff)):
@@ -303,19 +308,27 @@ def formatEfficiencyTrigger(pset):
     else:
         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
 
-# Vertex weighting
+
+# Weighting by instantaneous luminosity, and the number of true
+# simulated pile up interactions
+def setPileupWeightFor2011(pset=vertexWeight):
+    pset.weights = cms.vdouble(0.35702197, 0.39872966, 0.93383097, 1.57574239, 2.06786668, 2.23237405, 2.05856116, 1.66571901, 1.20680394, 0.79514625, 0.48238646, 0.30154678, 0.19093225, 0.12479613, 0.08150170, 0.05577673, 0.03874763, 0.02759475, 0.02023368, 0.01580798, 0.01150307, 0.01010894, 0.00765439, 0.00596082, 0.00469376, 0.00000000)
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+
+# Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
     # From runs 136035-149294 single tau trigger and W+jet
     #vertexWeight.weights = cms.vdouble(0.00000, 3.66926, 3.00360, 1.39912, 0.50035, 0.15271, 0.04164, 0.01124, 0.00293, 0.00083, 0.00022, 0.00006, 0.00000)
     # From runs 136035-149294 single tau trigger and QCD, vertex sumpt > 10
-    pset.weights = cms.vdouble(0.01959606, 0.47446048, 0.32793999, 0.12526016, 0.03788969, 0.01052797, 0.00282504, 0.00075970, 0.00015295, 0.00003682, 0.00000000, 0.00055113, 0.00000000)
+    pset.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000)
     pset.enabled = True
 
 def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets
     #vertexWeight.weights = cms.vdouble(0.00000, 0.24846, 0.88677, 1.52082, 1.79081, 1.53684, 1.08603, 0.71142, 0.45012, 0.27843, 0.17420, 0.13067, 0.08622, 0.04736, 0.03079, 0.14548, 0.00000)
     # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
-    pset.weights = cms.vdouble(0.00553621, 0.12371974, 0.22012135, 0.21266034, 0.15559946, 0.10272823, 0.06623531, 0.04055686, 0.02564348, 0.01839078, 0.01178197, 0.01702626, 0.00000000)
+    pset.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
     pset.enabled = True
 
 
@@ -331,7 +344,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTau"
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
-    tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTau"
+    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
@@ -340,27 +353,30 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTauTauTriggerMatched"
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionHPSTauBased.src             = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
     
-def setTauIDFactorizationMap(options):
-    from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getTauIDFactorizationMap
-    myFactorizationFilename = getTauIDFactorizationMap(options)
-    tauIDCoefficients = __import__(myFactorizationFilename, fromlist=['dummy'])
-    tauSelectionCaloTauCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionShrinkingConeTaNCBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionShrinkingConeCutBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionHPSTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-    tauSelectionCombinedHPSTaNCTauBased.factorization.factorizationTables = tauIDCoefficients.tauIDFactorizationCoefficients
-
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
     module.tauSelection = val
 def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
     selections = tauSelections[:]
     names = tauSelectionNames[:]
+    # Remove TCTau from list
+    tctauIndex = selections.index(tauSelectionCaloTauCutBased)
+    del selections[tctauIndex]
+    del names[tctauIndex]
+    # Remove PF shrinking cone from list
+    pfShrinkingConeIndex = selections.index(tauSelectionShrinkingConeCutBased)
+    del selections[pfShrinkingConeIndex]
+    del names[pfShrinkingConeIndex]
+    # Remove TaNC from list
+    tancIndex = selections.index(tauSelectionShrinkingConeTaNCBased)
+    del selections[tancIndex]
+    del names[tancIndex]
+    # HPS loose
     hpsLoose = selections.index(tauSelectionHPSLooseTauBased)
     #del selections[hpsLoose]
     #del names[hpsLoose]
@@ -371,6 +387,7 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
         del names[caloTauIndex]
     except ValueError:
         pass
+    # Remove combined HPS TaNC from list
     combinedHPSTaNCIndex = selections.index(tauSelectionCombinedHPSTaNCTauBased)
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]

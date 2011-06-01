@@ -34,6 +34,7 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
+      const float getTopMass() const { return fTopSelection->topMass; }
       //      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fTopSelection->fSelectedJets; }
       //      const int getBJetCount() const { return fTopSelection->iNBtags; }
 
@@ -70,6 +71,10 @@ namespace HPlus {
     TH1 *htopMassMaxReal;
     TH1 *htopMassRealHplus;
     TH1 *htopMassRealb;
+
+    // Variables
+    double topMass;
+
 
     // Selected jets
     //    edm::PtrVector<pat::Jet> fSelectedJets;

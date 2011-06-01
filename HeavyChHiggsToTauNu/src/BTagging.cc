@@ -28,14 +28,15 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
-    hDiscr = makeTH<TH1F>(*fs, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
-    hPt = makeTH<TH1F>(*fs, "bjet_pt", "bjet_pt", 400, 0., 400.);
-    hPt1 = makeTH<TH1F>(*fs, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
-    hPt2 = makeTH<TH1F>(*fs, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
-    hEta = makeTH<TH1F>(*fs, "bjet_eta", "bjet_pt", 400, -5., 5.);
-    hEta1 = makeTH<TH1F>(*fs, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
-    hEta2 = makeTH<TH1F>(*fs, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
-    hNumberOfBtaggedJets = makeTH<TH1F>(*fs, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    TFileDirectory myDir = fs->mkdir("Btagging");
+    hDiscr = makeTH<TH1F>(myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
+    hPt = makeTH<TH1F>(myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hPt1 = makeTH<TH1F>(myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
+    hPt2 = makeTH<TH1F>(myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
+    hEta = makeTH<TH1F>(myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
+    hEta1 = makeTH<TH1F>(myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
+    hEta2 = makeTH<TH1F>(myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
+    hNumberOfBtaggedJets = makeTH<TH1F>(myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
   }
 
   BTagging::~BTagging() {}

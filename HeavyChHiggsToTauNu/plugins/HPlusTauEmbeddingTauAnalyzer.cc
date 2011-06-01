@@ -17,6 +17,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingHistos.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -56,8 +58,17 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
   double genTauPt_;
   double genTauEta_;
 
+  HPlus::EventWeight eventWeight_;
+
   struct HistoAll {
-    HistoAll(): hMetNu(0.0) {}
+    explicit HistoAll(const HPlus::EventWeight& eventWeight):
+      eventWeight_(eventWeight),
+      hMetNu(0.0, eventWeight_),
+      hTau(eventWeight_),
+      hTauGen(eventWeight_),
+      hNuGen(eventWeight_),
+      hTauNuGen(eventWeight_)
+    {}
     ~HistoAll() {
       for(size_t i=0; i<hMets.size(); ++i) {
         delete hMets[i];
@@ -69,22 +80,22 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
       for(std::vector<std::string>::const_iterator iName = metNames.begin(); iName != metNames.end(); ++iName) {
         if(*iName == "GenMetNu")
           throw cms::Exception("Configuration") << "GenMetNu is a reserved MET name" << std::endl;
-        HistoMet *met = new HistoMet(pset.getUntrackedParameter<edm::InputTag>(*iName));
+        HistoMet *met = new HistoMet(pset.getUntrackedParameter<edm::InputTag>(*iName), eventWeight_);
         met->init(dir, *iName, "Tau+jets", "tau", "tau");
         hMets.push_back(met);
       }
       hMetNu.init(dir, "GenMetNu");
 
       hTau.init(dir, "Tau", "Tau");
-      hTauR = dir.make<TH1F>("Tau_Rtau", "R tau variable", 120, 0., 1.2);
-      hTauIsoChargedHadrPtSum = dir.make<TH1F>("Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 100, 0, 100);
-      hTauIsoChargedHadrPtSumRel = dir.make<TH1F>("Tau_IsoChargedHadrPtSumRel", "Tau isolation charged hadr cand relative pt sum", 200, 0, 20);
+      hTauR = HPlus::makeTH<TH1F>(dir, "Tau_Rtau", "R tau variable", 120, 0., 1.2);
+      hTauIsoChargedHadrPtSum = HPlus::makeTH<TH1F>(dir, "Tau_IsoChargedHadrPtSum", "Tau isolation charged hadr cand pt sum", 100, 0, 100);
+      hTauIsoChargedHadrPtSumRel = HPlus::makeTH<TH1F>(dir, "Tau_IsoChargedHadrPtSumRel", "Tau isolation charged hadr cand relative pt sum", 200, 0, 20);
 
       hTauGen.init(dir, "GenTau", "Tau gen");
       hNuGen.init(dir, "GenTauNu", "Nu gen");
       hTauNuGen.init(dir, "GenTau_GenTauNu", "Gen tau vs. nu");
 
-      hTauGenDR = dir.make<TH1F>("Tau,GenTau_DR", "DR(tau, gen tau)", 700, 0, 7);
+      hTauGenDR = HPlus::makeTH<TH1F>(dir, "Tau,GenTau_DR", "DR(tau, gen tau)", 700, 0, 7);
     }
 
     void fillMets(const reco::BaseTau& tau,
@@ -97,9 +108,11 @@ class HPlusTauEmbeddingTauAnalyzer: public edm::EDAnalyzer {
 
     void fillTauIso(const pat::Tau& tau) {
       double ptSum = tau.isolationPFChargedHadrCandsPtSum();
-      hTauIsoChargedHadrPtSum->Fill(ptSum);
-      hTauIsoChargedHadrPtSumRel->Fill(ptSum/tau.pt());
+      hTauIsoChargedHadrPtSum->Fill(ptSum, eventWeight_.getWeight());
+      hTauIsoChargedHadrPtSumRel->Fill(ptSum/tau.pt(), eventWeight_.getWeight());
     }
+
+    const HPlus::EventWeight& eventWeight_;
 
     std::vector<HistoMet *> hMets;
     HistoMet2 hMetNu;
@@ -126,7 +139,9 @@ HPlusTauEmbeddingTauAnalyzer::HPlusTauEmbeddingTauAnalyzer(const edm::ParameterS
   genTauMatch_(iConfig.getUntrackedParameter<double>("genTauMatchingCone")),
   genTauPt_(iConfig.getUntrackedParameter<double>("genTauPtCut")),
   genTauEta_(iConfig.getUntrackedParameter<double>("genTauEtaCut")),
-  histos()
+  eventWeight_(iConfig),
+  histos(eventWeight_),
+  histosMatched(eventWeight_)
 {
   edm::Service<TFileService> fs;
 
@@ -171,7 +186,9 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
       }
     }
 
-    histos.hTauGenDR->Fill(minDR);
+    eventWeight_.updatePrescale(iEvent); // set prescale
+
+    histos.hTauGenDR->Fill(minDR, eventWeight_.getWeight());
     histos.fillMets(*tau, tauNus.wnu, tauNus.taunu, iEvent);
 
     reco::GenParticle::LorentzVector nuWTauSum = tauNus.wnu->p4() + tauNus.taunu->p4();
@@ -180,7 +197,7 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
     histos.hTau.fill(*tau);
     const reco::PFCandidateRef leadCand = tau->leadPFChargedHadrCand();
     if(leadCand.isNonnull() && tau->p() > 0)
-      histos.hTauR->Fill(leadCand->p()/tau->p());
+      histos.hTauR->Fill(leadCand->p()/tau->p(), eventWeight_.getWeight());
 
     histos.fillTauIso(*tau);
     histos.hTauGen.fill(*tauNus.tau);
@@ -188,14 +205,14 @@ void HPlusTauEmbeddingTauAnalyzer::analyze(const edm::Event& iEvent, const edm::
     histos.hTauNuGen.fill(*tauNus.tau, *tauNus.taunu);
 
     if(minDR < genTauMatch_) {
-      histosMatched.hTauGenDR->Fill(minDR);
+      histosMatched.hTauGenDR->Fill(minDR, eventWeight_.getWeight());
       histosMatched.fillMets(*tau, tauNus.wnu, tauNus.taunu, iEvent);
 
       histosMatched.hMetNu.fill(*tau, *tau, tauNus.wnu, tauNus.taunu, tauNus.wnu->p4(), nuWTauSum);
 
       histosMatched.hTau.fill(*tau);
       if(leadCand.isNonnull() && tau->p() > 0)
-        histosMatched.hTauR->Fill(leadCand->p()/tau->p());
+        histosMatched.hTauR->Fill(leadCand->p()/tau->p(), eventWeight_.getWeight());
 
       histosMatched.fillTauIso(*tau);
       histosMatched.hTauGen.fill(*tauNus.tau);

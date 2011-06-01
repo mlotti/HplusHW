@@ -93,11 +93,11 @@ process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
                                 matchingTauTrigger=myTrigger,
                                 )
 
-process.sPAT = addPat(process, dataVersion,
-                      doPatMuonPFIsolation=True,
-                      matchingTauTrigger=myTrigger,
-                      includeTracksPFCands=False,
-                      )
+process.sPAT = addPlainPat(process, dataVersion,
+                           doPatMuonPFIsolation=True,
+                           matchingTauTrigger=myTrigger,
+                           includeTracksPFCands=False,
+                           )
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
