@@ -9,7 +9,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 #step = "muonAnalysis"
 
 dirPrefix = ""
@@ -46,19 +46,19 @@ if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis"]:
 
 multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
-datasets = [
-    # Data
+datasetsData2010 = [
     "Mu_136035-144114_Dec22", # HLT_Mu9
     "Mu_146428-147116_Dec22", # HLT_Mu9
     "Mu_147196-149294_Dec22", # HLT_Mu15_v1
+]
+datasetsData2011 = [
     "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
     "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
     "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
-   # Signal MC
+]
+datasetsMCnoQCD = [
     "TTJets_TuneZ2_Spring11",
     "WJets_TuneZ2_Spring11",
-    # Background MC
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
     "DYJetsToLL_M50_TuneZ2_Spring11",
     "TToBLNu_s-channel_TuneZ2_Spring11",
     "TToBLNu_t-channel_TuneZ2_Spring11",
@@ -66,9 +66,25 @@ datasets = [
     "WW_TuneZ2_Spring11",
     "WZ_TuneZ2_Spring11",
     "ZZ_TuneZ2_Spring11",
-    # For testing
+]
+datasetsMCQCD = [
+    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
+]
+datasetsTest = [
     "TTToHplusBWB_M120_Spring11"
-    ]
+]
+    
+datasets = []
+if step in ["analysis", "analysisTau"]:
+    datasets.extend(datasetsMCnoQCD)
+else:
+#    datasets.extend(datasetsData2010)
+    datasets.extend(datasetsData2011)
+    datasets.extend(datasetsMCnoQCD)
+    datasets.extend(datasetsMCQCD)
+
+    if step in ["skim", "generation", "embedding"]:
+        datasets.extend(datasetsTest)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 
