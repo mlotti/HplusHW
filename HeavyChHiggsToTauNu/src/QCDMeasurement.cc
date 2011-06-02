@@ -570,10 +570,10 @@ namespace HPlus {
       hCtrlPlot_JetMultiplicity_AfterMET_WithTauIdAndRtau->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
       hCtrlPlot_NBtags_AfterMET_WithTauIdAndRtau->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     }
-
+    
     // PAS Control Plots: Transverse Mass distribution
     double transverseMass = TransverseMass::reconstruct(*(tauDataForTauID.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hCtrlPlot_TransverseMass_AfterAllSelectionNoFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+    if( btagData.passedEvent() && metData.passedEvent() ) hCtrlPlot_TransverseMass_AfterAllSelectionNoFakeMet->Fill(transverseMass, fEventWeight.getWeight());
 
     // Fill Btagging-TauID correlation histos (in tau pT bins)
     fNBtagsHistogramsByTauPtAfterTauIdNoRtau[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
