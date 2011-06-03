@@ -26,11 +26,12 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
-    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 80")),
     ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 100")),
+    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
+    ftransverseMassCut100TopCounter(eventCounter.addCounter("transverseMass > 100 top cut")),
     fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
@@ -161,14 +162,14 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
-    //    fTauEmbeddingAnalysis.fil
-
+    fTauEmbeddingAnalysis.fillAfterTauId();
 
     // Get MET object 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // Trigger efficiency
     //    double triggerEfficiency = fTriggerEfficiency.efficiency(*(tauData.getSelectedTaus()[0]), *metData.getSelectedMET());
+
     //    if (!iEvent.isRealData() || fTauEmbeddingAnalysis.isEmbeddingInput()) {
       // Apply trigger efficiency as weight for simulated events, or if the input is from tau embedding
     //      fEventWeight.multiplyWeight(triggerEfficiency);
@@ -276,14 +277,6 @@ namespace HPlus {
     EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
 
-    
-    // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (!TopSelectionData.passedEvent()) return false;
-    increment(fTopSelectionCounter);
-    hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
-
-    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
@@ -299,13 +292,25 @@ namespace HPlus {
     //    if( Rtau < 0.8 ) return false;
     //    increment(fRtauAfterCutsCounter);
 
-    //    if(transverseMass < ftransverseMassCut-20.0 ) return false;
-     if(transverseMass < 80 ) return false;
+
+    if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
 
     if(transverseMass < 100 ) return false;
     increment(ftransverseMassCut100Counter);
-                                           
+
+
+
+   // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (!TopSelectionData.passedEvent()) return false;
+    increment(fTopSelectionCounter);
+    hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
+
+    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+
+     if(transverseMass < 100 ) return false;
+    increment(ftransverseMassCut100Counter);                                          
     //Z mass veto
     //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
     //    if (!jetTauInvMassData.passedEvent()) return false;

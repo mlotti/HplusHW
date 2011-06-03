@@ -81,7 +81,9 @@ namespace HPlus {
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
+    Count ftransverseMassCut100TopCounter;
     Count fZmassVetoCounter;
+
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;

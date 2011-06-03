@@ -36,7 +36,7 @@ doTauEmbeddingMuonSelectionScan = False
 doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
-doTriggerParametrisation = True
+doTriggerParametrisation = False
 
 filterGenTaus = False
 filterGenTausInaccessible = False
