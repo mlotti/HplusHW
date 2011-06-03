@@ -72,6 +72,7 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
   
     HPlus::BTagging::Data btagData = fBTagging.analyze(casted);
     if(btagData.passedEvent()) {
+      *passed = true;
       std::auto_ptr<Product> product(new Product(hjets->id()));
       edm::PtrVector<pat::Jet> selected = btagData.getSelectedJets();
       for(size_t i=0; i<selected.size(); ++i) {
