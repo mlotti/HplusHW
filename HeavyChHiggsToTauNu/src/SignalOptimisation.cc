@@ -60,14 +60,14 @@ namespace HPlus {
     vMET.push_back(70);
     vMET.push_back(80);
     std::vector<double> vBTagDiscr;
-    vBTagDiscr.push_back(1.5);
     vBTagDiscr.push_back(2.0);
     vBTagDiscr.push_back(2.5);
     vBTagDiscr.push_back(3.0);
     std::vector<double> vFakeMETVeto;
+    vFakeMETVeto.push_back(0);
     vFakeMETVeto.push_back(10);
     vFakeMETVeto.push_back(20);
-    vFakeMETVeto.push_back(30);
+    //vFakeMETVeto.push_back(30);
     size_t myCount = 0;
     for (std::vector<double>::iterator itTauPt = vTauPt.begin(); itTauPt != vTauPt.end(); ++itTauPt) {
       for (std::vector<double>::iterator itRtau = vRTau.begin(); itRtau != vRTau.end(); ++itRtau) {
