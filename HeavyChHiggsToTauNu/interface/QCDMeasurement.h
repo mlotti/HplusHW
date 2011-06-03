@@ -248,8 +248,12 @@ namespace HPlus {
     TH1 *hCtrlPlot_MET_AfterLeptonVeto_WithTauIdAndRtau;
     TH1 *hCtrlPlot_JetMultiplicity_AfterMET_WithTauIdAndRtau;
     TH1 *hCtrlPlot_NBtags_AfterMET_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelection;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelectionAndTauId;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelectionMetAndBtag;
     TH1 *hCtrlPlot_TransverseMass_AfterAllSelectionNoFakeMet;
-    // TH1 *hCtrlPlot_Counter_AfterJetSelection_ByTauPt;
+    TH1 *hCtrlPlot_TauCandPt_AfterJetSelection;
+    TH1 *hCtrlPlot_JetMultiplicity_AfterMETNoJetSelection_WithTauIdAndRtau;
     std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelection_ByTauPt;
     std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelectionAndFakeMet_ByTauPt;
 
