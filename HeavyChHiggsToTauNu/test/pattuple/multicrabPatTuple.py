@@ -43,7 +43,7 @@ multicrab.extendDatasets(
 
 # local_stage_out doesn't work due to denied permission because we're
 # writing to /store/group/local ...
-multicrab.appendLineAll("USER.local_stage_out=1")
+#multicrab.appendLineAll("USER.local_stage_out=1")
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
 multicrab.appendArgAll("runOnCrab=1")
@@ -55,7 +55,7 @@ def addOutputName(dataset):
     path = dataset.getDatasetPath().split("/")
     name = path[2].replace("-", "_")
     name += "_"+path[3]
-    name += "_pattuple_v12_test4"
+    name += "_pattuple_v12_1"
 
     # Add the begin run in the dataset name to the publish name in
     # order to distinguish pattuple datasets from the same PD
