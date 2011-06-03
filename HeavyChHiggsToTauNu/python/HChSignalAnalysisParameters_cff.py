@@ -13,6 +13,8 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v1",
                                      "HLT_IsoPFTau35_Trk20_MET45_v2",
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v6",
+                                     "HLT_IsoPFTau35_Trk20_MET60_v2",
     ),
     hltMetCut = cms.untracked.double(45.0),
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
