@@ -116,7 +116,30 @@ namespace HPlus {
         fHltMet = pat::TriggerObjectRef();
         if(fMetCut >= 0)
           passEvent = false;
-      } else if(hltMets.size() == 1) {
+      }
+      else {
+        if(hltMets.size() > 1) {
+          pat::TriggerObjectRefVector selectedHltMet;
+          for(size_t i=0; i<hltMets.size(); ++i) {
+            if(trigger->objectInPath(hltMets[i],  returnPath->getPathName())) {
+              /*
+              std::cout << "HLT MET " << i
+                        << " et " << hltMets[i]->et()
+                        << " collection " << hltMets[i]->collection()
+                        << std::endl;
+              */
+              selectedHltMet.push_back(hltMets[i]);
+              break;
+            }
+          }
+          if(selectedHltMet.size() == 0) {
+            throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() 
+                                               << ", tried to find a MET object used in path " << returnPath->getPathName()
+                                               << " but did not find one." << std::endl;
+          }
+          hltMets = selectedHltMet;
+        }
+        
         increment(fTriggerHltMetExistsCount);
         fHltMet = hltMets[0];
         hHltMetBeforeTrigger->Fill(fHltMet->et(), fEventWeight.getWeight());
@@ -129,9 +152,7 @@ namespace HPlus {
         } else if (passEvent) {
           hHltMetSelected->Fill(fHltMet->et(), fEventWeight.getWeight());
         }
-      } else
-        //precaution
-        throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() << " instead of 1" << std::endl;
+      }
     }
     return passEvent;
   }
