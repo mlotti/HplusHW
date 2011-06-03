@@ -8,8 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
 #dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-#dataVersion = "311Xredigi" # Spring11 MC
-dataVersion = "41Xdata"   # Run2011 PromptReco
+dataVersion = "311Xredigi" # Spring11 MC
+#dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
 ##########
@@ -35,7 +35,8 @@ doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
 
-# Do trigger parametrisation for MC and tau embedding
+# Do trigger parametrisation for MC and tau embedding? Do NOT switch this on for alphaT
+print "Do Not apply trigger parametrization. Prefer to uset the triggers, especially if TriJet/QuadJet are available"
 doTriggerParametrisation = False
 
 filterGenTaus = False
@@ -60,16 +61,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-  #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
-    "file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
-    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
-    # "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
-    # "file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
-    # "rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-    # "file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    # "rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    # "rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
+    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
     # For testing in lxplus
     #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     # dataVersion.getAnalysisDefaultFileCastor()
@@ -126,8 +119,8 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiency parametrisation
-#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
-param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+#param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
   rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
 )
 param.trigger.triggerMETSelection = param.MET.clone(
@@ -159,7 +152,8 @@ process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
+    #tauSelection = param.tauSelectionHPSTightTauBased,
+    tauSelection = param.tauSelectionHPSVeryLooseTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -184,14 +178,32 @@ if dataVersion.isData():
     process.alphatAnalysis.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "Trigger:", process.alphatAnalysis.trigger
-print "VertexWeight:",process.alphatAnalysis.vertexWeight
-print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.alphatAnalysis.trigger.hltMetCut
-print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.alphatAnalysis.trigger.triggerEfficiency.selectTriggers])
-#print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
-print "TauSelection algorithm:", process.alphatAnalysis.tauSelection.selection
+print "\ndoTriggerParametrisation:", doTriggerParametrisation
+print "\nVertexWeight:", process.alphatAnalysis.vertexWeight
+print "\nTrigger:", process.alphatAnalysis.trigger
+print "\nPV Selection:", process.alphatAnalysis.primaryVertexSelection
+print "\nTauSelection operating mode:", process.alphatAnalysis.tauSelection.operatingMode
 print "TauSelection src:", process.alphatAnalysis.tauSelection.src
-print "TauSelection operating mode:", process.alphatAnalysis.tauSelection.operatingMode
+print "TauSelection selection:", process.alphatAnalysis.tauSelection.selection
+print "TauSelection ptCut:", process.alphatAnalysis.tauSelection.ptCut
+print "TauSelection etacut:", process.alphatAnalysis.tauSelection.etaCut
+print "TauSelection leadingTrackPtCut:", process.alphatAnalysis.tauSelection.leadingTrackPtCut
+print "TauSelection rtauCut:", process.alphatAnalysis.tauSelection.rtauCut
+print "TauSelection antiRtauCut:", process.alphatAnalysis.tauSelection.antiRtauCut
+print "TauSelection invMassCut:", process.alphatAnalysis.tauSelection.invMassCut
+print "TauSelection nprongs:", process.alphatAnalysis.tauSelection.nprongs
+print "\nMET:", process.alphatAnalysis.MET
+print "\nGlobalElectronVeto:", process.alphatAnalysis.GlobalElectronVeto
+print "\nGlobalMuonVeto:", process.alphatAnalysis.GlobalMuonVeto
+print "\nJetSelection:", process.alphatAnalysis.jetSelection
+print "\nbTagging: ", process.alphatAnalysis.bTagging
+print "\nFakeMETVeto:", process.alphatAnalysis.fakeMETVeto
+print "\nTransverseMassCut:", process.alphatAnalysis.transverseMassCut
+#print "\nMetTables:", process.alphatAnalysis.factorization
+print "\nTopSelection:", process.alphatAnalysis.topSelection
+#print "\nInvMassVetoOnJets:", process.alphatAnalysis.InvMassVetoOnJets
+print "\nEvtTopology:", process.alphatAnalysis.EvtTopology
+print "\nForwardJetVeto:", process.alphatAnalysis.forwardJetVeto
 
 # Counter analyzer (in order to produce compatible root file with the
 # python approach)

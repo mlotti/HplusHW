@@ -46,32 +46,29 @@ namespace HPlus {
 
   private:
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    void FillCountersAndHistos(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    void FillCounters(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusAlphatAnalysisProducer
     EventWeight& fEventWeight;
 
-    //    const double ftransverseMassCut;
-
     Count fAllCounter;
     Count fTriggerCounter;
-    Count fMETCounter;
-    //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
-    Count fTausExistCounter;
-    Count fOneTauCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
+    Count fTausExistCounter;
+    Count fOneTauCounter;
+    Count fRtauCounter;
+    Count fMETCounter;
     Count fNJetsCounter;
     Count fBTaggingCounter;
+    Count fAlphaTCounter;
     Count fFakeMETVetoCounter;
-    Count fZmassVetoCounter;
+    Count ftransverseMassCutCounter;
     Count fTopSelectionCounter;
+    Count fZmassVetoCounter;
     Count fForwardJetVetoCounter;
-    Count ftransverseMassCut80Counter;
-    Count ftransverseMassCut100Counter;
-
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -97,13 +94,18 @@ namespace HPlus {
     TTree *myTree;
     float fEvtWeight;
     bool bTriggerPassed;
+    bool bPVPassed;
     bool bTauIdPassed;
+    bool bRtauPassed;
+    bool bElectronVetoPassed;
+    bool bMuonVetoPassed;
     int  iNSelectedTaus;
     float fTauJetEt;
     float fTauJetEta;
     float fRtau;
     float fMET;
     float fFakeMETDeltaPhi;
+    float fDeltaPhiTauMET;
     float fLdgJetEt;
     float fSecondLdgJetEt;
     float fThirdLdgJetEt;

@@ -22,7 +22,8 @@ namespace HPlus {
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
     fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
-    fEventWeight(eventWeight)
+    fEventWeight(eventWeight),
+    fMaxDiscriminatorValue(0)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
@@ -55,6 +56,9 @@ namespace HPlus {
 
 
       float discr = iJet->bDiscriminator(fDiscriminator);
+      if (discr > fMaxDiscriminatorValue)
+        fMaxDiscriminatorValue = discr;
+      
       hDiscr->Fill(discr, fEventWeight.getWeight());
       if(!(discr > fDiscrCut)) continue;
       increment(fTaggedSubCount);
