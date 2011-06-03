@@ -229,7 +229,6 @@ namespace HPlus {
     increment(fFakeMETVetoCounter);
     hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
 
-
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
@@ -286,8 +285,7 @@ namespace HPlus {
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return false;
     //    increment(fForwardJetVetoCounter);
-    //    fTauEmbeddingAnalysis.fillEnd();
-
+    
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau

@@ -141,8 +141,8 @@ namespace HPlus {
     fBegin.book(*fs, prefix+"begin");
     fAfterTauId.book(*fs, prefix+"afterTauId");
     fAfterMetCut.book(*fs, prefix+"afterMetCut");
-    fEnd.book(*fs, prefix+"end");
-
+    fAfterBTagging.book(*fs, prefix+"afterBTagging");
+    fAfterFakeMetVeto.book(*fs, prefix+"afterFakeMetVeto");
   }
   TauEmbeddingAnalysis::~TauEmbeddingAnalysis() {}
 
@@ -180,7 +180,10 @@ namespace HPlus {
   void TauEmbeddingAnalysis::fillAfterMetCut() {
     fAfterMetCut.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
-  void TauEmbeddingAnalysis::fillEnd() {
-    fEnd.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
+  void TauEmbeddingAnalysis::fillAfterBTagging() {
+    fAfterBTagging.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
+  }
+  void TauEmbeddingAnalysis::fillAfterFakeMetVeto() {
+    fAfterFakeMetVeto.fill(fEventWeight.getWeight(), fOriginalMet.get(), fEmbeddingMet.get(), fOriginalMuon.get(), fSelectedTau.get());
   }
 }
