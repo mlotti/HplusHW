@@ -13,8 +13,39 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include <iostream>
+#include <algorithm>
+#include <functional>
+
+namespace {
+  template<typename T>
+  struct JetTauEqTraits {
+    static const T& toRef(const T& obj) {
+      return obj;
+    }
+  };
+
+  template<typename T>
+  struct JetTauEqTraits<edm::Ptr<T> > {
+    static const T& toRef(const edm::Ptr<T>& ptr) {
+      return *ptr;
+    }
+  };
+
+  template<typename Jet, typename Tau>
+  struct JetTauEq: public std::binary_function<Jet, Tau, bool> {
+    explicit JetTauEq(double mc): matchingCone(mc) {}
+
+    bool operator()(const Jet& jet, const Tau& tau) const {
+      return reco::deltaR(JetTauEqTraits<Jet>::toRef(jet),
+                          JetTauEqTraits<Tau>::toRef(tau)) < matchingCone;
+    }
+
+    double matchingCone;
+  };
+}
 
 class JetEnergyScaleVariation: public edm::EDProducer {
     public:
@@ -24,6 +55,12 @@ class JetEnergyScaleVariation: public edm::EDProducer {
 	typedef math::XYZTLorentzVector LorentzVector;
 
     private:
+
+  enum JetVariationMode {
+    kAll,
+    kOnlyTauMatching,
+    kOnlyNoTauMatching
+  };
 
   	virtual void beginJob();
   	virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -35,6 +72,8 @@ class JetEnergyScaleVariation: public edm::EDProducer {
 	double JESVariation;
         double JESEtaVariation;
         double unclusteredMETVariation;
+  double tauJetMatchingDR;
+  JetVariationMode jetVariationMode;
 };
 
 JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfig) :
@@ -43,7 +82,8 @@ JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfi
 	metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
 	JESVariation(iConfig.getParameter<double>("JESVariation")),
         JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation")),
-        unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation"))
+        unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation")),
+        tauJetMatchingDR(iConfig.getParameter<double>("tauJetMatchingDR"))
 {
 	produces<pat::TauCollection>();
 	produces<pat::JetCollection>();
@@ -58,6 +98,19 @@ JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfi
         if (unclusteredMETVariation < -1. || unclusteredMETVariation > 1.) {
           throw cms::Exception("Configuration") << "JetEnergyScaleVariation: Invalid value for unclusteredMETVariation! Please provide a value between -1..1 (value=" << unclusteredMETVariation << ").";  
         }
+
+        std::string mode = iConfig.getParameter<std::string>("jetVariationMode");
+        if(mode == "all")
+          jetVariationMode = kAll;
+        else if(mode == "onlyTauMatching")
+          jetVariationMode = kOnlyTauMatching;
+        else if(mode == "onlyNoTauMatching")
+          jetVariationMode = kOnlyNoTauMatching;
+        else
+          throw cms::Exception("Configuration") << "JetEnergyScaleVaration: Invalid value for jetVariationMode '"
+                                                << mode
+                                                << "', valid values are 'all', 'onlyTauMatching', 'onlyNoTauMatching'"
+                                                << std::endl;
 }
 
 JetEnergyScaleVariation::~JetEnergyScaleVariation() {}
@@ -101,22 +154,35 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
         LorentzVector myVariatedJetSum(0., 0., 0., 0.);
 	for(edm::PtrVector<pat::Jet>::iterator iter = jets.begin(); iter != jets.end(); ++iter) {
 		edm::Ptr<pat::Jet> iJet = *iter;
-                // Note: a jet can have mass, which must stay constant in the measurement
-                // Hence only the momentum and energy are scaled
-                double myM = iJet->p4().M();
-                double myP = iJet->p4().P();
-                // JES +- 2%/eta
-                double myChange = std::sqrt(JESVariation*JESVariation 
-                  + JESEtaVariation*JESEtaVariation / iJet->eta() / iJet->eta());
-                double myFactor = 1. + myChange;
-                if (JESVariation < 0) myFactor = 1. - myChange;
-                const LorentzVector p4(iJet->p4().X()*myFactor, iJet->p4().Y()*myFactor, iJet->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
 		pat::Jet jet = *iJet;
-		jet.setP4(p4);
+
+                bool variateJet = true;
+                if(jetVariationMode != kAll) {
+                  bool jetTauMatch = std::find_if(taus.begin(), taus.end(),
+                                                  std::bind1st(JetTauEq<pat::Jet, edm::Ptr<pat::Tau> >(tauJetMatchingDR), *iJet)) != taus.end();
+                  if(jetVariationMode == kOnlyTauMatching)
+                    variateJet = jetTauMatch;
+                  else if(jetVariationMode == kOnlyNoTauMatching)
+                    variateJet = !jetTauMatch;
+                }
+
+                if(variateJet) {
+                  // Note: a jet can have mass, which must stay constant in the measurement
+                  // Hence only the momentum and energy are scaled
+                  double myM = iJet->p4().M();
+                  double myP = iJet->p4().P();
+                  // JES +- 2%/eta
+                  double myChange = std::sqrt(JESVariation*JESVariation 
+                                              + JESEtaVariation*JESEtaVariation / iJet->eta() / iJet->eta());
+                  double myFactor = 1. + myChange;
+                  if (JESVariation < 0) myFactor = 1. - myChange;
+                  const LorentzVector p4(iJet->p4().X()*myFactor, iJet->p4().Y()*myFactor, iJet->p4().Z()*myFactor, std::sqrt(myM*myM + myP*myFactor*myP*myFactor)); 
+                  jet.setP4(p4);
+                }
 		rescaledJets->push_back(jet);
                 // Negative sign for MET correction comes from MET definition
                 myJetSum -= iJet->p4();
-                myVariatedJetSum -= p4;
+                myVariatedJetSum -= jet.p4();
 	}
 
 	// MET

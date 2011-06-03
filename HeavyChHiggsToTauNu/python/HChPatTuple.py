@@ -119,7 +119,15 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         pargs2 = pf2patArgs.copy()
         pargs2NoPu = pf2patNoPuArgs.copy()
 
-        for args in [pargs, pargs2, pargs2NoPu]:
+        argsList = []
+        if doPlainPat:
+            argsList.append(pargs)
+        if doPF2PAT:
+            argsList.append(pargs2)
+        if doPF2PATNoPu:
+            argsList.append(pargs2NoPu)
+
+        for args in argsList:
             if args.get("doTauHLTMatching", True):
                 if options.trigger == "":
                     raise Exception("Command line argument 'trigger' is missing")

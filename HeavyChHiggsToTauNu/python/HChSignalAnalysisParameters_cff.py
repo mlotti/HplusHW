@@ -336,6 +336,7 @@ def setVertexWeightFor2010(pset=vertexWeight):
     # From runs 136035-149294 single tau trigger and QCD, vertex sumpt > 10
     pset.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000)
     pset.enabled = True
+    pset.useSimulatedPileup = False
 
 def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets
@@ -343,6 +344,7 @@ def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
     pset.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
     pset.enabled = True
+    pset.useSimulatedPileup = False
 
 
 # Tau selection
