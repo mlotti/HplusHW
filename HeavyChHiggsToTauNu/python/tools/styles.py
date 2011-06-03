@@ -14,7 +14,7 @@ class Style(StyleBase):
         h.SetLineColor(self.color)
         h.SetMarkerColor(self.color)
         h.SetMarkerStyle(self.marker)
-        h.SetMarkerSize(1)
+        h.SetMarkerSize(1.2)
 	h.SetFillColor(0)
 
 class StyleCompound(StyleBase):
@@ -47,7 +47,7 @@ class StyleLine(StyleBase):
         h.SetLineStyle(self.lineStyle)
 
 class StyleMarker(StyleBase):
-    def __init__(self, markerSize=1, markerColor=None):
+    def __init__(self, markerSize=1.2, markerColor=None):
         self.markerSize = markerSize
         self.markerColor = markerColor
 
