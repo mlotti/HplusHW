@@ -40,7 +40,7 @@ namespace HPlus {
       AnalysisVariation(double tauPtCut, double rtau, double METcut, double btaggingDiscriminator, double fakeMETVetoCut);
       ~AnalysisVariation();
       
-      bool analyse(const METSelection::Data& METData, const edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const JetSelection::Data& jetData, BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const TopSelection::Data& topSelectionData, double transverseMass, double weight);
+      bool analyse(const METSelection::Data& METData, const edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const TopSelection::Data& topSelectionData, double transverseMass, double weight);
       std::string getLabel() { return fLabel; }
 
     private:
