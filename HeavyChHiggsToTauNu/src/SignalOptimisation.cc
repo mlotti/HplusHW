@@ -249,7 +249,7 @@ namespace HPlus {
 
     // Handle variations of analysis
     for (size_t i = 0; i < fAnalyses.size(); ++i) {
-      if (fAnalyses[i].analyse(metData, tauData.getSelectedTaus(), tauData, jetData, fakeMETData, topSelectionData, transverseMass, fEventWeight.getWeight()))
+      if (fAnalyses[i].analyse(metData, tauData.getSelectedTaus(), tauData, jetData, btagData, fakeMETData, topSelectionData, transverseMass, fEventWeight.getWeight()))
         increment(fAnalysisVariationCounters[i]);
     }
     
