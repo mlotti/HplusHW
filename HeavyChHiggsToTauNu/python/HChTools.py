@@ -369,12 +369,12 @@ class Analysis:
     def __init__(self, process, seqname, prefix="", allCounterName="countAll", additionalCounters=[], weightSrc=None):
         self.process = process
         self.prefix = prefix
-        self.weightSrc = None
+        self.weightSrc = weightSrc
 
         # Event counter for all events
         countAll = cms.EDProducer("HPlusEventCountProducer")
         if self.weightSrc != None:
-            countall.weightSrc = cms.InputTag(weightSrc)
+            countAll.weightSrc = cms.InputTag(weightSrc)
         setattr(self.process, prefix+allCounterName, countAll)
 
         # Create the analysis sequence
