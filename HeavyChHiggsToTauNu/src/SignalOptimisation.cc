@@ -185,14 +185,14 @@ namespace HPlus {
 
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    // if (!electronVetoData.passedEvent()) return false;
+    if (!electronVetoData.passedEvent()) return false;
     // increment(fElectronVetoCounter);
     fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();
 
 
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    // if (!muonVetoData.passedEvent()) return false;
+    if (!muonVetoData.passedEvent()) return false;
     // increment(fMuonVetoCounter);
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
  
