@@ -43,6 +43,14 @@ tauSelectionBase = cms.untracked.PSet(
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
 
+#for QCD control plots
+tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut = tauSelectionBase.clone(
+    src = "selectedPatTausHpsPFTau",
+    selection = "HPSTightTauBased",
+    leadingTrackPtCut = cms.untracked.double(0.0),
+    rtauCut = cms.untracked.double(0.0)
+    )
+
 tauSelectionCaloTauCutBased = tauSelectionBase.clone(
     src = "selectedPatTausCaloRecoTau",
     selection = "CaloTauCutBased"
@@ -88,16 +96,18 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionShrinkingConeCutBased,
                  tauSelectionShrinkingConeTaNCBased,
                  tauSelectionHPSTightTauBased,
+                 tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut, #for QCD control plots
                  tauSelectionHPSMediumTauBased,
                  tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
-tauSelectionNames = ["TauSelectionCaloTauCutBased",
-                     "TauSelectionShrinkingConeCutBased",
-                     "TauSelectionShrinkingConeTaNCBased",
-                     "TauSelectionHPSTightTauBased",
-                     "TauSelectionHPSMediumTauBased",
-                     "TauSelectionHPSLooseTauBased",
-                     "TauSelectionCombinedHPSTaNCBased"]
+tauSelectionNames = ["TauSelectionCaloTauCutBasedTauTriggerMatched",
+                     "TauSelectionShrinkingConeCutBasedTauTriggerMatched",
+                     "TauSelectionShrinkingConeTaNCBasedTauTriggerMatched",
+                     "TauSelectionHPSTightTauBasedTauTriggerMatched",
+                     "TauSelectionHPSTightTauBasedNoLdgPtOrRtauCutTauTriggerMatched",
+                     "TauSelectionHPSMediumTauBasedTauTriggerMatched",
+                     "TauSelectionHPSLooseTauBasedTauTriggerMatched",
+                     "TauSelectionCombinedHPSTaNCBasedTauTriggerMatched"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased
@@ -345,6 +355,7 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTau"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTau"
     tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTau"
+    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "selectedPatTausHpsPFTau" #for QCD control plots
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTau"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTau"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
@@ -354,6 +365,7 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
     tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "selectedPatTausHpsPFTauTauTriggerMatched"#for QCD control plots
     tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"

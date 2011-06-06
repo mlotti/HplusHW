@@ -249,7 +249,7 @@ namespace HPlus {
 
     // Handle variations of analysis
     for (size_t i = 0; i < fAnalyses.size(); ++i) {
-      if (fAnalyses[i].analyse(metData, tauData.getSelectedTaus(), tauData, btagData, fakeMETData, topSelectionData, transverseMass, fEventWeight.getWeight()))
+      if (fAnalyses[i].analyse(metData, tauData.getSelectedTaus(), tauData, jetData, fakeMETData, topSelectionData, transverseMass, fEventWeight.getWeight()))
         increment(fAnalysisVariationCounters[i]);
     }
     
@@ -307,11 +307,12 @@ namespace HPlus {
     
   }
   SignalOptimisation::AnalysisVariation::~AnalysisVariation() { }
-  bool SignalOptimisation::AnalysisVariation::analyse(const METSelection::Data& METData, const edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const TopSelection::Data& topSelectionData, double transverseMass, double weight) {
+  bool SignalOptimisation::AnalysisVariation::analyse(const METSelection::Data& METData, const edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauData, const JetSelection::Data& jetData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const TopSelection::Data& topSelectionData, double transverseMass, double weight) {
     bool myPassedStatus = false;
     // All cuts
     if (selectedTau[0]->pt() > fTauPtCut &&
         tauData.getRtauOfSelectedTau() > fRtauCut &&
+        jetData.passedEvent() &&
         btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
         METData.getSelectedMET()->et() > fMETCut &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
@@ -323,6 +324,7 @@ namespace HPlus {
     }
     // Rtau leg
     if (selectedTau[0]->pt() > fTauPtCut &&
+        jetData.passedEvent() &&
         btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
         METData.getSelectedMET()->et() > fMETCut &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
@@ -331,6 +333,7 @@ namespace HPlus {
     // BTagging leg
     if (selectedTau[0]->pt() > fTauPtCut &&
         tauData.getRtauOfSelectedTau() > fRtauCut &&
+        jetData.passedEvent() &&
         METData.getSelectedMET()->et() > fMETCut &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
       //std::cout << "btag: " << btagData.getMaxDiscriminatorValue() << std::endl;
@@ -339,6 +342,7 @@ namespace HPlus {
     // MET leg
     if (selectedTau[0]->pt() > fTauPtCut &&
         tauData.getRtauOfSelectedTau() > fRtauCut &&
+        jetData.passedEvent() &&
         btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
         fakeMETData.closestDeltaPhi() > fFakeMETVetoCut) {
       hMETAfterAllOthers->Fill(METData.getSelectedMET()->et(), weight);
@@ -346,6 +350,7 @@ namespace HPlus {
     // Fake MET Veto leg
     if (selectedTau[0]->pt() > fTauPtCut &&
         tauData.getRtauOfSelectedTau() > fRtauCut &&
+        jetData.passedEvent() &&
         btagData.getMaxDiscriminatorValue() > fBTaggingDiscriminator &&
         METData.getSelectedMET()->et() > fMETCut) {
       hFakeMETVetoAfterAllOthers->Fill(fakeMETData.closestDeltaPhi(), weight);
