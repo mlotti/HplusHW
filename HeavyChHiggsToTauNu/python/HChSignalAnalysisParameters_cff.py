@@ -112,7 +112,7 @@ jetSelection = cms.untracked.PSet(
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
     src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     cleanTauDR = cms.untracked.double(0.5), #no change
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
     METCut = cms.untracked.double(60.0)
@@ -128,7 +128,7 @@ MET = cms.untracked.PSet(
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
     discriminatorCut = cms.untracked.double(2.0),
-    ptCut = cms.untracked.double(30),
+    ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)
 )

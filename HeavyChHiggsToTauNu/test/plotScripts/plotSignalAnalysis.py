@@ -23,8 +23,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
 # Configuration
 analysis = "signalAnalysis"
+#analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased"
-#analysis = "signalAnalysisBtaggingTest2"
+#analysis = "signalAnalysisBtaggingTest"
 counters = analysis+"Counters"
 
 # main function
@@ -32,10 +33,11 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M140_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M120_Spring11",
+                     "TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11",
+                     "TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
-
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -46,6 +48,8 @@ def main():
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
 #    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
+#    met2(plots.DataMCPlot(datasets, analysis+"/MET"), "met1", rebin=50)
+    
     tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID")
     tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5)
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID")
@@ -54,6 +58,7 @@ def main():
     tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterMetCut"), "SelectedTau_eta_AfterMetCut")
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
+    rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterCuts"), "SelectedTau_Rtau_AfterCuts")
     
 #    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
 #    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
@@ -105,9 +110,9 @@ def main():
     
 #    genComparison(datasets)
 #    zMassComparison(datasets)
-    topMassComparison(datasets)
-    topPtComparison(datasets) 
-    vertexComparison(datasets)
+#    topMassComparison(datasets)
+#    topPtComparison(datasets) 
+#    vertexComparison(datasets)
 
 
     eventCounter = counter.EventCounter(datasets)
@@ -120,12 +125,12 @@ def main():
 #    print eventCounter.getMainCounterTable().format(latexFormat)
 
 
-def vertexComparison(datasets):
-    signal = "TTToHplusBWB_M120"
-    background = "TTToHplusBWB_M120"
-    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
-                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
-            "vertices_H120")
+#def vertexComparison(datasets):
+#    signal = "TTToHplusBWB_M120"
+#    background = "TTToHplusBWB_M120"
+#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
+#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
+#            "vertices_H120")
 
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
@@ -142,21 +147,21 @@ def vertexComparison(datasets):
 #                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/TauJetMass")),
 #            "TauJetMass_Hp_vs_Zll")
     
-def topMassComparison(datasets):
-    signal = "TTToHplusBWB_M120"
-    background = "TTToHplusBWB_M120"
-    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
+#def topMassComparison(datasets):
+#    signal = "TTToHplusBWB_M120"
+#    background = "TTToHplusBWB_M120"
+#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Mass_jjbMax"),
 #                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/Mass_Top"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")]),
-             "topMass_all_vs_real")
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/MassMax_Top")]),
+#             "topMass_all_vs_real")
 
-def topPtComparison(datasets):
-    signal = "TTToHplusBWB_M120"
-    background = "TTToHplusBWB_M120"
-    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjb"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
-                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
-             "topPt_all_vs_real")
+#def topPtComparison(datasets):
+#    signal = "TTToHplusBWB_M120"
+#    background = "TTToHplusBWB_M120"
+#    rtauGen(plots.PlotBase([datasets.getDataset(signal).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjb"),
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_jjbmax"),
+#                            datasets.getDataset(background).getDatasetRootHisto(analysis+"/TopSelection/Pt_top")]),
+#             "topPt_all_vs_real")
 
 def scaleMC(histo, scale):
     if histo.isMC():
@@ -425,7 +430,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def rtau(h, name, rebin=5, ratio=False):
+def rtau(h, name, rebin=15, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "R_{#tau}"
     ylabel = "Events / %.2f" % h.binWidth()
@@ -434,7 +439,7 @@ def rtau(h, name, rebin=5, ratio=False):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
-    opts = {"ymin": 0.01, "ymaxfactor": 10}
+    opts = {"ymin": 0.001, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
     name = name+"_log"
     if ratio:

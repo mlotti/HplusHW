@@ -246,7 +246,7 @@ namespace HPlus {
    
 
     // b tagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return false;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     increment(fBTaggingCounter);
@@ -272,15 +272,15 @@ namespace HPlus {
 
 
     // Alpha T
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
+    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
     //if(!evtTopologyData.passedEvent()) return false;
-    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
-    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
+    //    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
+    //    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
 
 
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
-
+   
     // double LdgTrackPt = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p();
     //   double Rtau = -9999;  
     // if (tauData.getSelectedTaus()[0]->energy() > 0) {
@@ -293,24 +293,25 @@ namespace HPlus {
     //    increment(fRtauAfterCutsCounter);
 
 
+   
+
+   // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (TopSelectionData.passedEvent()) {
+      increment(fTopSelectionCounter);
+      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+      hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+      if(transverseMass > 100 ) increment(ftransverseMassCut100TopCounter);   
+    } 
+
+
+
     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
 
     if(transverseMass < 100 ) return false;
     increment(ftransverseMassCut100Counter);
-
-
-
-   // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (!TopSelectionData.passedEvent()) return false;
-    increment(fTopSelectionCounter);
-    hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
-
-    hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
-
-     if(transverseMass < 100 ) return false;
-    increment(ftransverseMassCut100Counter);                                          
+                                     
     //Z mass veto
     //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
     //    if (!jetTauInvMassData.passedEvent()) return false;
@@ -329,8 +330,8 @@ namespace HPlus {
     //std::cout << "tauData.Rtau = " << tauData.Rtau << std::endl;
     //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
 
-    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
+    //    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
+    //   for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
 
 //    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 

@@ -36,18 +36,23 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fBTagging->fSelectedJets; }
       const int getBJetCount() const { return fBTagging->iNBtags; }
+      const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
 
     private:
       const BTagging *fBTagging;
       const bool fPassedEvent;
     };
     
-    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);  
     ~BTagging();
 
-    Data analyze(const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
   private:
+
+    // Input parameters                                                                                                                                                                          
+    edm::InputTag fSrc;
+
     // Input parameters
     const double fPtCut;
     const double fEtaCut;
@@ -61,6 +66,8 @@ namespace HPlus {
     Count fAllSubCount;
     Count fTaggedSubCount;
     Count fTaggedEtaCutSubCount;
+    Count fTaggedAllRealBJetsSubCount;
+    Count fTaggedTaggedRealBJetsSubCount;
     Count fTaggedNoTaggedJet;
     Count fTaggedOneTaggedJet;
     Count fTaggedTwoTaggedJets;
@@ -82,6 +89,7 @@ namespace HPlus {
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     int iNBtags;
+    double fMaxDiscriminatorValue;
   };
 }
 

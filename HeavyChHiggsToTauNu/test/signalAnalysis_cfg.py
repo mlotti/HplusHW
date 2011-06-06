@@ -23,7 +23,7 @@ doBTagScan = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
-doJESVariation = False
+doJESVariation = True
 JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
@@ -217,7 +217,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 if doBTagScan:
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 2.2
+    module.bTagging.discriminatorCut = 2.5
     addAnalysis(process, "signalAnalysisBtaggingTest", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -226,7 +226,7 @@ if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 1.8
+    module.bTagging.discriminatorCut = 1.5
     addAnalysis(process, "signalAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,

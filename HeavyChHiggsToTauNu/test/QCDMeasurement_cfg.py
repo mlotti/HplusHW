@@ -28,7 +28,7 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# Do trigger parametrisation for MC and tau embedding
+# Do trigger parametrisation for MC and tau embedding. If set to False trigger will be applied automatically
 doTriggerParametrisation = False
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
@@ -51,12 +51,21 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
+    "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
     #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
+    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
-    "file:/home/wendland/data/pattuple_176_1_ikP.root"
+    #"file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 
@@ -178,6 +187,7 @@ if dataVersion.isData() and not disablePrescales:
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
+print "\ndoTriggerParametrisation:", doTriggerParametrisation
 print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
 print "\nTrigger:", process.QCDMeasurement.trigger
 print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection

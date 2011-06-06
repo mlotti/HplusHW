@@ -19,7 +19,7 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter(prefix+":njets")),
     fBTaggingCounter(eventCounter.addCounter(prefix+":btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter(prefix+":fake MET veto")),
-    fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")) { }
+    fTopSelectionCounter(eventCounter.addCounter(prefix+":Top Selection cut")) { }
   EWKFakeTauAnalysis::CounterGroup::~CounterGroup() { }
 
   EWKFakeTauAnalysis::EWKFakeTauAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
@@ -35,6 +35,11 @@ namespace HPlus {
     fMuonToTausCounterGroup(eventCounter, "mu->tau"),
     fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
     fJetToTausCounterGroup(eventCounter, "jet->tau"),
+    fAllTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "All with tau outside acceptance"),
+    fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
+    fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
+    fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
+    fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
     //    ftransverseMassCutCounter(eventCounter.addCounter("transverseMass cut")),
     //fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
@@ -185,7 +190,7 @@ namespace HPlus {
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementNJetsCounter();
 
     // b tagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     fAllTausCounterGroup.incrementBTaggingCounter();
@@ -247,6 +252,7 @@ namespace HPlus {
 
   EWKFakeTauAnalysis::MCTauMatchType EWKFakeTauAnalysis::matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau) {
     if (iEvent.isRealData()) return kNoMC;
+    bool foundMCTauOutsideAcceptanceStatus = false;
     bool isMCTau = false;
     bool isMCElectron = false;
     bool isMCMuon = false;
@@ -266,12 +272,23 @@ namespace HPlus {
             if (std::abs(p.pdgId()) == 15) isMCTau = true;
           }
         }
+        // Check if there is a tau outside the acceptance in the event
+        if (!foundMCTauOutsideAcceptanceStatus && std::abs(p.pdgId()) == 15) {
+          if (p.pt() < 40 || abs(p.eta()) > 2.1)
+            foundMCTauOutsideAcceptanceStatus = true;
+        }
       }
     }
-    if (isMCElectron) return kElectronToTau;
-    if (isMCMuon) return kMuonToTau;
-    if (isMCTau) return kTauToTau;
-    return kJetToTau;
+    if (!foundMCTauOutsideAcceptanceStatus) {
+      if (isMCElectron) return kElectronToTau;
+      if (isMCMuon) return kMuonToTau;
+      if (isMCTau) return kTauToTau;
+      return kJetToTau;
+    }
+    if (isMCElectron) return kElectronToTauAndTauOutsideAcceptance;
+    if (isMCMuon) return kMuonToTauAndTauOutsideAcceptance;
+    if (isMCTau) return kTauToTauAndTauOutsideAcceptance;
+    return kJetToTauAndTauOutsideAcceptance;
   }
 
   EWKFakeTauAnalysis::CounterGroup* EWKFakeTauAnalysis::getCounterGroupByTauMatch(MCTauMatchType tauMatch) {
@@ -279,6 +296,10 @@ namespace HPlus {
     else if (tauMatch == kMuonToTau) return &fMuonToTausCounterGroup;
     else if (tauMatch == kTauToTau) return &fGenuineToTausCounterGroup;
     else if (tauMatch == kJetToTau) return &fJetToTausCounterGroup;
+    else if (tauMatch == kElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
     return 0;
   }
 }

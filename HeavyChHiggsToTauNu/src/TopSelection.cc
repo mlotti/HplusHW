@@ -48,7 +48,7 @@ namespace HPlus {
     size_t passed = 0;
     double ptmax = 0;
     // double topMass = -999;
-    topMass = -999;
+    topMass = -1;
     bool correctCombination = false;
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {

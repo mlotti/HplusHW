@@ -215,7 +215,7 @@ namespace HPlus {
 
     
     // Btagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
     // histos
@@ -325,7 +325,7 @@ namespace HPlus {
     if( tauData.getSelectedTaus().size() < 1) return false;
     if(jetData.getSelectedJets().size() < 1) return false;
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
