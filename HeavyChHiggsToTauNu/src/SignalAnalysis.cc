@@ -222,12 +222,16 @@ namespace HPlus {
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterBTagging();
+
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
     hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
+
+    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
