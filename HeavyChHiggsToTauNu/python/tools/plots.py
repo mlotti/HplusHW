@@ -414,8 +414,11 @@ class PlotBase:
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
-        if self.histoMgr.hasHisto("Data"):
-            self.histoMgr.setHistoLegendStyle("Data", "p")
+        for h in self.histoMgr.getHistos():
+            if h.isData():
+                h.setLegendStyle("P")
+            elif "TTTo" in h.getName():
+                h.setLegendStyle("L")
 
     ## Set the default legend labels
     #
