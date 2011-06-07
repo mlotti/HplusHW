@@ -20,9 +20,9 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fMETCounter(eventCounter.addCounter("MET")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
-    fMETCounter(eventCounter.addCounter("MET")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
@@ -252,6 +252,8 @@ namespace HPlus {
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterBTagging();
+
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
@@ -259,6 +261,7 @@ namespace HPlus {
     increment(fFakeMETVetoCounter);
     hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
@@ -321,8 +324,7 @@ namespace HPlus {
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return false;
     //    increment(fForwardJetVetoCounter);
-    //    fTauEmbeddingAnalysis.fillEnd();
-
+    
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau

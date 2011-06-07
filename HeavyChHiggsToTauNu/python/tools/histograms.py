@@ -408,6 +408,12 @@ class CanvasFrameTwo:
             def getXmax(self):
                 return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
 
+            def getYmin(self):
+                return self.histo.GetMinimum()
+
+            def getYmax(self):
+                return self.histo.GetMaximum()
+
         histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")

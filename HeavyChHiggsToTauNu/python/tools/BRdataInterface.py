@@ -1,4 +1,4 @@
-from HiggsAnalysis.HeavyChHiggsToTauNu.tools.FeynHiggsBRdata import *
+from FeynHiggsBRdata import *
 
 def getBR_top2bHp(mHp,tanb,mu):
     return interpolate(mHp,tanb,mu).BRt2bH

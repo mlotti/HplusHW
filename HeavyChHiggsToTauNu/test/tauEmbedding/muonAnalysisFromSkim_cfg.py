@@ -15,7 +15,7 @@ options.register("WDecaySeparate",
                  options.multiplicity.singleton,
                  options.varType.int,
                  "Separate W decays from MC information")
-options, dataVersion = getOptionsDataVersion(dataVersion, options)
+options, dataVersion = getOptionsDataVersion(dataVersion, options, useDefaultSignalTrigger=False)
 
 #options.doPat=1
 
@@ -71,20 +71,28 @@ if options.doPat == 0:
         process.goodPrimaryVertices10
     )
 
-
-# Vertex weighting
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
-param.setVertexWeightFor2010()
-param.setVertexWeightFor2011()
-process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("vertexWeight"),
-)
-insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
-process.commonSequence *= process.vertexWeight
+# Pileup weighting
+weight = None
+if dataVersion.isMC():
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 
-weightName = "vertexWeight"
+    # Pileup weighting
+    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("pileupWeight"),
+    )
+    param.setPileupWeightFor2011()
+    insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeight)
 
+    # Vertex weighting
+    process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
+        alias = cms.string("vertexWeight"),
+    )
+    param.setVertexWeightFor2011()
+    insertPSetContentsTo(param.vertexWeight.clone(), process.vertexWeight)
+
+    process.commonSequence *= (process.pileupWeight*process.vertexWeight)
+    
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 additionalCounters.extend(MuonSelection.muonSelectionCounters)
@@ -102,6 +110,9 @@ process.commonSequence *= process.firstPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 muons = customisations.addMuonIsolationEmbedding(process, process.commonSequence, "selectedPatMuons")
 
+
+
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalysis
 
 # Configuration
@@ -110,10 +121,14 @@ if len(trigger) == 0:
 #    trigger = "HLT_Mu9"
     trigger = "HLT_Mu15_v1"
 
-def createAnalysis(name, postfix="", **kwargs):
+def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
+    wSrc = weightSrc
+    if dataVersion.isData():
+        wSrc = None
     def create(**kwargs):
         muonAnalysis.createAnalysis(process, dataVersion, additionalCounters, name=name,
                                     trigger=trigger, jets="goodJets", met="pfMet",
+                                    weightSrc = wSrc,
                                     **kwargs)
 
     prefix = name+postfix
@@ -125,10 +140,10 @@ def createAnalysis(name, postfix="", **kwargs):
             "Medium",
             "Tight",
             "TightSc015",
-            "TightSc02",
+#            "TightSc02",
             "TightIc04",
             "TightSc015Ic04",
-            "TightSc02Ic04",
+#            "TightSc02Ic04",
             ]:
             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=1.0, **kwargs)
 
@@ -157,8 +172,8 @@ def createAnalysis2(**kwargs):
     args.update(kwargs)
     postfix = kwargs.get("postfix", "")
     for pt, met, njets in [
-        (30, 20, 2),
-        (30, 20, 3),
+#        (30, 20, 2),
+#        (30, 20, 3),
 #        (40, 20, 2),
         (40, 20, 3)
         ]:
@@ -169,6 +184,8 @@ def createAnalysis2(**kwargs):
         createAnalysis("muonSelectionPF", **args)
 
 createAnalysis2(muons=muons, allMuons=muons)
+createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
+createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
 #createAnalysis2(muons="tightMuonsZ")
 
 # process.out = cms.OutputModule("PoolOutputModule",

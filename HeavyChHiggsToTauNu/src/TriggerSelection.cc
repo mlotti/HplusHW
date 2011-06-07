@@ -27,7 +27,10 @@ namespace HPlus {
     fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fTriggerPathCount(eventCounter.addSubCounter("Trigger", "Path passed")),
     fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
-    fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists"))
+    fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
+    fTriggerParamAllCount(eventCounter.addSubCounter("Trigger parametrisation", "All events")),
+    fTriggerParamTauCount(eventCounter.addSubCounter("Trigger parametrisation", "Tau passed")),
+    fTriggerParamMetCount(eventCounter.addSubCounter("Trigger parametrisation", "Met passed"))
   {
     std::vector<std::string> paths = iConfig.getUntrackedParameter<std::vector<std::string> >("triggers");
     for(size_t i = 0; i < paths.size(); ++i){
@@ -40,7 +43,9 @@ namespace HPlus {
       fTriggerSelectionType = kTriggerSelectionByTriggerBit;
     } else if (mySelectionType == "byParametrisation") {
       fTriggerSelectionType = kTriggerSelectionByTriggerEfficiencyParametrisation;
-    } else throw cms::Exception("Configuration") << "TriggerSelection: no or unknown selection type! Options for 'selectionType' are: byTriggerBit, byParametrisation (you chose '"
+    } else if(mySelectionType == "disabled") {
+      fTriggerSelectionType = kTriggerSelectionDisabled;
+    } else throw cms::Exception("Configuration") << "TriggerSelection: no or unknown selection type! Options for 'selectionType' are: byTriggerBit, byParametrisation, disabled (you chose '"
       << mySelectionType << "')" << std::endl;
 
     // Histograms
@@ -66,8 +71,10 @@ namespace HPlus {
     hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit)
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
-    if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
+    else if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
       passEvent = passedTriggerParametrisation(iEvent, iSetup);
+    else if(fTriggerSelectionType == kTriggerSelectionDisabled)
+      passEvent = true;
     
     if(passEvent) increment(fTriggerCount);
     return Data(this, returnPath, passEvent);
@@ -130,12 +137,15 @@ namespace HPlus {
   }
   
   bool TriggerSelection::passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    increment(fTriggerParamAllCount);
     // Get Tau object
     TauSelection::Data triggerTauData = fTriggerTauSelection.analyze(iEvent, iSetup);
-    if (triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events
+    if (!triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events
+    increment(fTriggerParamTauCount);
     // Get MET object 
     METSelection::Data triggerMetData = fTriggerMETSelection.analyze(iEvent, iSetup);
-    //if (triggerMetData.passedEvent()) return false;
+    //if (!triggerMetData.passedEvent()) return false;
+    increment(fTriggerParamMetCount);
     // Obtain trigger efficiency and apply it as a weight
     double triggerEfficiency = fTriggerEfficiency.efficiency(*(triggerTauData.getSelectedTaus()[0]), *triggerMetData.getSelectedMET());
     hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());

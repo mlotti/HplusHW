@@ -2,6 +2,7 @@ import BRdataInterface as br
 
 # All cross sections are in pb
 ttCrossSection = 165.0
+defaultMu = 200
 
 whDatasetMass = {
     # Spring10
@@ -40,26 +41,32 @@ hhDatasetMass = {
     "TToHplusBHminusB_M160": 160,
 }
 
-def whTauNuCrossSection(mass, tanbeta, mu=200):
+def whTauNuCrossSection(mass, tanbeta, mu, toTop=False):
+    if toTop:
+        return ttCrossSection
+
     br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
 
     return 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
 
 
-def hhTauNuCrossSection(mass, tanbeta, mu=200):
+def hhTauNuCrossSection(mass, tanbeta, mu, toTop=False):
+    if toTop:
+        return ttCrossSection
+
     br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
 
     return ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
 
 
-def setHplusCrossSections(datasets, tanbeta, mu=200):
+def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
     for name, mass in whMass.iteritems():
         if not datasets.hasDataset(name):
             continue
 
-        crossSection = whTauNuCrossSection(mass, tanbeta, mu)
+        crossSection = whTauNuCrossSection(mass, tanbeta, mu, toTop)
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
@@ -67,13 +74,11 @@ def setHplusCrossSections(datasets, tanbeta, mu=200):
         if not datasets.hasDataset(name):
             continue
 
-        crossSection = hhCrossSection(mass, tanbeta, mu)
+        crossSection = hhCrossSection(mass, tanbeta, mu, toTop)
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
-def printHplusCrossSections():
-    mu = 200
-
+def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu):
     print "ttbar cross section %.1f pb" % ttCrossSection
     print "mu %.1f" % mu
     print

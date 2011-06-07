@@ -15,5 +15,7 @@ HChEventContent = cms.PSet(
         "keep *_patTrigger_*_*",
         "keep *_hltL1GtObjectMap_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
+        "keep recoCaloMETs_*_*_*",
+        "keep *_towerMaker_*_*",
     )
 )

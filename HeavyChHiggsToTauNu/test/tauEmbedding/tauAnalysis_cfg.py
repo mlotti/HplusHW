@@ -3,12 +3,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-#dataVersion = "38X"
-#dataVersion = "data" # this is for collision data 
-dataVersion = "39Xredigi"
+dataVersion = "311Xredigi"
+#dataVersion = "41Xdata"
 
 options = getOptions()
 if options.dataVersion != "":
@@ -19,8 +15,8 @@ dataVersion = DataVersion(dataVersion) # convert string to object
 
 process = cms.Process("TauEmbeddingAnalysis")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -28,8 +24,7 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
 #    duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-#        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1/2366fe480375ff6f751e0b7e8ec70b52/pattuple_158_1_ThM.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/WJets_TuneZ2_Winter10/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v2_AODSIM_pattuple_v9b/c2f22ab9ac43296d989acccdef834e2a/pattuple_127_1_B5I.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v11b/8f83bb72c10133f1e52d950030b925c8/pattuple_134_1_0lc.root"
   )
 )
 ################################################################################
@@ -82,6 +77,22 @@ process.commonSequence *= process.genMetNu
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 
+# Pileup weighting
+weight = None
+# weighting not possible with tauAnalysis (necessary collection missing from tauAnalysis)
+# if dataVersion.isMC():
+#     import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as params
+#     params.setPileupWeightFor2010()
+#     params.setPileupWeightFor2011()
+#     params.setPileupWeightFor2010and2011()
+#     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#         alias = cms.string("pileupWeight")
+#     )
+#     insertPSetContentsTo(params.vertexWeight, process.pileupWeight)
+#     process.commonSequence *= process.pileupWeight
+#     weight = "pileupWeight"
+
+
 #taus = "selectedPatTausShrinkingConePFTau"
 taus = "selectedPatTausHpsPFTau"
 #pfMET = "pfMet"
@@ -90,9 +101,10 @@ jets = "selectedPatJetsAK5PF"
 
 process.LooseTauId = cms.EDFilter("PATTauSelector",
     src = cms.InputTag(taus),
-    cut = cms.string("abs(eta) < 2.4 "
+    cut = cms.string("abs(eta) < 2.1 "
                      "&& leadPFChargedHadrCand().isNonnull() "
-                     "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
+                     "&& tauID('againstMuonTight') > 0.5 && tauID('againstElectronMedium') > 0.5"
+                     "&& tauID('byVLooseIsolation')"
 #                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
                      )
 )
@@ -100,10 +112,11 @@ process.commonSequence *= process.LooseTauId
 
 process.LooseTauPtId = cms.EDFilter("PATTauSelector",
     src = cms.InputTag(taus),
-    cut = cms.string("pt > 30 "
-                     "&& abs(eta) < 2.4 "
+    cut = cms.string("pt > 40 "
+                     "&& abs(eta) < 2.1 "
                      "&& leadPFChargedHadrCand().isNonnull() "
-                     "&& tauID('againstMuon') > 0.5 && tauID('againstElectron') > 0.5"
+                     "&& tauID('againstMuonTight') > 0.5 && tauID('againstElectronMedium') > 0.5"
+                     "&& tauID('byVLooseIsolation')"
 #                     "&& tauID('byIsolation') > 0.5 && tauID('ecalIsolation') > 0.5"
                      )
 )
@@ -124,6 +137,8 @@ EmbeddingAnalyzer = cms.EDAnalyzer("HPlusTauEmbeddingTauAnalyzer",
     genTauPtCut = cms.untracked.double(-1),
     genTauEtaCut = cms.untracked.double(-1)
 )
+if weight != None:
+    EmbeddingAnalyzer.prescaleSource = cms.untracked.InputTag(weight)
 
 def addPath(prefix, **kwargs):
     path = cms.Path(process.commonSequence)
@@ -135,7 +150,7 @@ def addPath(prefix, **kwargs):
     for name, tag in [("", taus),
                       ("tauId", "LooseTauId"),
                       ("tauPtId", "LooseTauPtId")]:
-        for ptcut, etacut in [(-1, -1), (30, -1), (30, 2.1)]:
+        for ptcut, etacut in [(-1, -1), (40, -1), (40, 2.1)]:
             pteta = ""
             if ptcut > 0 or etacut > 0:
                 pteta += "Gen"
@@ -165,8 +180,29 @@ process.goodJetFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("goodJets"),
     minNumber = cms.uint32(3)
 )
+
+
 process.goodJetSequence = cms.Sequence(
     process.goodJets *
     process.goodJetFilter
 )
+
+
+process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    src = cms.InputTag("offlinePrimaryVertices")
+)
+process.goodJetSequence *= process.firstPrimaryVertex
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+process.muonVeto = cms.EDFilter("HPlusGlobalMuonVetoFilter",
+    vertexSrc = cms.InputTag("firstPrimaryVertex"),
+    GlobalMuonVeto = param.GlobalMuonVeto
+)
+process.electronVeto = cms.EDFilter("HPlusGlobalElectronVetoFilter",
+    GlobalElectronVeto = param.GlobalElectronVeto
+)
+process.goodJetSequence *= (process.muonVeto*process.electronVeto)
+
+
 addPath("Jets3", preSequence=process.goodJetSequence)

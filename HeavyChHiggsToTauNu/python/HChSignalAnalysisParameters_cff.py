@@ -15,7 +15,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
     ),
     hltMetCut = cms.untracked.double(45.0),
-    selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation
+    selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
     triggerTauSelection = cms.untracked.PSet(),
     triggerMETSelection = cms.untracked.PSet(),
     triggerEfficiency = cms.untracked.PSet()
@@ -321,8 +321,21 @@ def formatEfficiencyTrigger(pset):
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
+def setPileupWeightFor2010(pset=vertexWeight):
+    # From Apr21 JSON
+    pset.weights = cms.vdouble(2.17905734, 3.57481462, 3.45593082, 2.45853780, 1.42664179, 0.71282896, 0.31676356, 0.12779020, 0.04743868, 0.01635333, 0.00526898, 0.00176643, 0.00060303, 0.00021282, 0.00007491, 0.00002750, 0.00001017, 0.00000382, 0.00000146, 0.00000059, 0.00000022, 0.00000010, 0.00000004, 0.00000001, 0.00000001, 0.00000000)
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+
 def setPileupWeightFor2011(pset=vertexWeight):
+    # From May10 JSON
     pset.weights = cms.vdouble(0.35702197, 0.39872966, 0.93383097, 1.57574239, 2.06786668, 2.23237405, 2.05856116, 1.66571901, 1.20680394, 0.79514625, 0.48238646, 0.30154678, 0.19093225, 0.12479613, 0.08150170, 0.05577673, 0.03874763, 0.02759475, 0.02023368, 0.01580798, 0.01150307, 0.01010894, 0.00765439, 0.00596082, 0.00469376, 0.00000000)
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+
+def setPileupWeightFor2010and2011(pset=vertexWeight):
+    # From Apr21 (2010) and May10 (2011) JSONs
+    pset.weights = cms.vdouble(0.55669307, 0.89223000, 1.33000619, 1.69326210, 1.91344756, 1.92774735, 1.73919965, 1.41792615, 1.05583012, 0.72551064, 0.46426616, 0.30894711, 0.20983226, 0.14807083, 0.10498652, 0.07838662, 0.05967027, 0.04674974, 0.03785193, 0.03277864, 0.02654201, 0.02607185, 0.02217936, 0.01951763, 0.01748345, 0.00000000)
     pset.enabled = True
     pset.useSimulatedPileup = True
 
@@ -333,6 +346,7 @@ def setVertexWeightFor2010(pset=vertexWeight):
     # From runs 136035-149294 single tau trigger and QCD, vertex sumpt > 10
     pset.weights = cms.vdouble(0.09267533, 2.24385810, 1.55092120, 0.59239078, 0.17919108, 0.04978977, 0.01336043, 0.00359282, 0.00072334, 0.00017415, 0.00000000)
     pset.enabled = True
+    pset.useSimulatedPileup = False
 
 def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets
@@ -340,6 +354,7 @@ def setVertexWeightFor2011(pset=vertexWeight):
     # From runs 160431-162828 single tau trigger and W+jets, vertex sumpt > 10
     pset.weights = cms.vdouble(0.03445398, 0.76995593, 1.36990047, 1.32346773, 0.96835577, 0.63931763, 0.41220802, 0.25240105, 0.15958929, 0.11445294, 0.07332379, 0.10596101, 0.00000000)
     pset.enabled = True
+    pset.useSimulatedPileup = False
 
 
 # Tau selection
@@ -423,4 +438,10 @@ def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
 def changeMetCollection(**kwargs):
-    _changeCollection([jetSelection.src_met, MET.src, fakeMETVeto.src, forwardJetVeto.src_met], **kwargs)
+    _changeCollection([
+            jetSelection.src_met,
+            MET.src,
+            fakeMETVeto.src,
+            TauEmbeddingAnalysis.embeddingMetSrc,
+            forwardJetVeto.src_met
+            ], **kwargs)

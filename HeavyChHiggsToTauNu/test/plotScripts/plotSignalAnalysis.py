@@ -20,6 +20,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 analysis = "signalAnalysis"
@@ -38,6 +39,14 @@ def main():
                      "TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
+
+
+    # Set the signal cross sections to the ttbar
+    xsect.setHplusCrossSections(datasets, toTop=True)
+
+    # Set the signal cross sections to a value from MSSM
+#    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
+
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
