@@ -32,13 +32,13 @@ whDatasetMass = {
 }
 
 hhDatasetMass = {
-    "TToHplusBHminusB_M80": 80,
-    "TToHplusBHminusB_M100": 100,
-    "TToHplusBHminusB_M120": 120,
-    "TToHplusBHminusB_M140": 140,
-    "TToHplusBHminusB_M150": 150,
-    "TToHplusBHminusB_M155": 155,
-    "TToHplusBHminusB_M160": 160,
+    "TTToHplusBHminusB_M80": 80,
+    "TTToHplusBHminusB_M100": 100,
+    "TTToHplusBHminusB_M120": 120,
+    "TTToHplusBHminusB_M140": 140,
+    "TTToHplusBHminusB_M150": 150,
+    "TTToHplusBHminusB_M155": 155,
+    "TTToHplusBHminusB_M160": 160,
 }
 
 def whTauNuCrossSection(mass, tanbeta, mu, toTop=False):
@@ -74,7 +74,7 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
         if not datasets.hasDataset(name):
             continue
 
-        crossSection = hhCrossSection(mass, tanbeta, mu, toTop)
+        crossSection = hhTauNuCrossSection(mass, tanbeta, mu, toTop)
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
