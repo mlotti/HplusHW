@@ -560,7 +560,8 @@ class HistoBase:
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
             h.SetLineWidth(1)
-            h.SetLineColor(ROOT.kBlack)
+            if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
+                h.SetLineColor(ROOT.kBlack)
             legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
         else:
