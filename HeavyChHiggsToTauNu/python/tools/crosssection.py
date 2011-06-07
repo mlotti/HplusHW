@@ -21,6 +21,7 @@ whDatasetMass = {
     "TTToHplusBWB_M160_Winter10": 160,
 
     # Logical names (see plots.py)
+    "TTToHplusBWB_M80": 80,
     "TTToHplusBWB_M90": 90,
     "TTToHplusBWB_M100": 100,
     "TTToHplusBWB_M120": 120,
@@ -41,32 +42,29 @@ hhDatasetMass = {
     "TTToHplusBHminusB_M160": 160,
 }
 
-def whTauNuCrossSection(mass, tanbeta, mu, toTop=False):
-    if toTop:
-        return ttCrossSection
-
+def whTauNuCrossSectionMSSM(mass, tanbeta, mu):
     br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
+    return whTauNuCrossSection(br_tH, br_Htaunu)
 
+def whTauNuCrossSection(br_tH, br_Htaunu):
     return 2 * ttCrossSection * br_tH * (1-br_tH) * br_Htaunu
 
 
-def hhTauNuCrossSection(mass, tanbeta, mu, toTop=False):
-    if toTop:
-        return ttCrossSection
-
+def hhTauNuCrossSectionMSSM(mass, tanbeta, mu):
     br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
     br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
+    return hhTauNuCrossSection(br_tH, br_Htaunu)
 
+def hhTauNuCrossSection(br_tH, br_Htaunu):
     return ttCrossSection * br_tH*br_tH * br_Htaunu*br_Htaunu
 
-
-def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
+def setHplusCrossSectionsToTop(datasets):
     for name, mass in whDatasetMass.iteritems():
         if not datasets.hasDataset(name):
             continue
 
-        crossSection = whTauNuCrossSection(mass, tanbeta, mu, toTop)
+        crossSection = ttCrossSection
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
@@ -74,9 +72,51 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
         if not datasets.hasDataset(name):
             continue
 
-        crossSection = hhTauNuCrossSection(mass, tanbeta, mu, toTop)
+        crossSection = ttCrossSection
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
+
+
+def setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=defaultMu):
+    for name, mass in whDatasetMass.iteritems():
+        if not datasets.hasDataset(name):
+            continue
+
+        crossSection = whTauNuCrossSectionMSSM(mass, tanbeta, mu)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
+
+    for name, mass in hhDatasetMass.iteritems():
+        if not datasets.hasDataset(name):
+            continue
+
+        crossSection = hhTauNuCrossSectionMSSM(mass, tanbeta, mu)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
+
+def setHplusCrossSectionsToBR(datasets, br_tH, br_Htaunu):
+    for name, mass in whDatasetMass.iteritems():
+        if not datasets.hasDataset(name):
+            continue
+
+        crossSection = whTauNuCrossSection(br_tH, br_Htaunu)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
+
+    for name, mass in hhDatasetMass.iteritems():
+        if not datasets.hasDataset(name):
+            continue
+
+        crossSection = hhTauNuCrossSection(br_tH, br_Htaunu)
+        datasets.getDataset(name).setCrossSection(crossSection)
+        print "Setting %s cross section to %f pb" % (name, crossSection)
+
+
+def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
+    if toTop:
+        setHplusCrossSectionsToTop(datasets)
+    else:
+        setHplusCrossSectionsToMSSM(tanbeta, mu)
 
 def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu):
     print "ttbar cross section %.1f pb" % ttCrossSection
@@ -90,7 +130,7 @@ def printHplusCrossSections(tanbetas=[10, 20, 30, 40], mu=defaultMu):
             br_tH = br.getBR_top2bHp(mass, tanbeta, mu)
             br_Htaunu = br.getBR_Hp2tau(mass, tanbeta, mu)
 
-            print "%10d | %10f | %13f | %24f | %27f |" % (mass, br_tH, br_Htaunu, whTauNuCrossSection(mass, tanbeta, mu), hhTauNuCrossSection(mass, tanbeta, mu))
+            print "%10d | %10f | %13f | %24f | %27f |" % (mass, br_tH, br_Htaunu, whTauNuCrossSectionMSSM(mass, tanbeta, mu), hhTauNuCrossSectionMSSM(mass, tanbeta, mu))
 
 
 if __name__ == "__main__":
