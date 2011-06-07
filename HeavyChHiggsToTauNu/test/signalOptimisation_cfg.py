@@ -110,7 +110,8 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to non-trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
