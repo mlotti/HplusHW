@@ -183,14 +183,14 @@ namespace HPlus {
     hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
     hSelectionFlow = makeTH<TH1F>(*fs, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauCandidateSelection,"#tau candidate");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderElectronVeto,"Isol. e veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMuonVeto,"Isol. #mu veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderJetSelection,"#geq 3 jets");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTauID,"#tau ID (no R_{#tau})");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderFakeMETVeto,"Further QCD rej.");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"Top mass");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderFakeMETVeto,"Further QCD rej.");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTopSelection,"Top mass");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderMETFactorized,"MET (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderBTagFactorized,"#geq 1 b jet (factorized)");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderRtauFactorized,"R_{#tau} (factorized)");
@@ -335,7 +335,7 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
     increment(fPrimaryVertexCounter);
-    hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderVertexSelection, fEventWeight.getWeight());
 
 
     // Apply pre-MET cut to see if MC Normalization is better.
@@ -537,7 +537,7 @@ namespace HPlus {
     // Factorize out b-tagging
     hStdWeightedBjets->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     hStdNonWeightedBjets->Fill(btagData.getBJetCount(), myEventWeightBeforeMetFactorization);
-    if (btagData.passedEvent()) {
+    if (metData.passedEvent() && btagData.passedEvent()) {
       increment(fBTaggingCounter);
       hWeightedMETAfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       hSelectionFlow->Fill(kQCDOrderBTagFactorized, fEventWeight.getWeight());
@@ -611,7 +611,7 @@ namespace HPlus {
     hStdNonWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), myEventWeightBeforeMetFactorization);
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderFakeMETVeto, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderFakeMETVeto, fEventWeight.getWeight());
     hWeightedMETAfterFakeMETVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())
@@ -621,7 +621,7 @@ namespace HPlus {
     // Apply top mass reconstruction
     if (!topSelectionData.passedEvent()) return;
     increment(fTopSelectionCounter);
-    hSelectionFlow->Fill(kQCDOrderTopSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderTopSelection, fEventWeight.getWeight());
 
 
     // AlphaT

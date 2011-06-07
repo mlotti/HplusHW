@@ -120,6 +120,7 @@ param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 if options.tauEmbeddingInput != 0:
 #    param.setPileupWeightFor2011

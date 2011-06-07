@@ -100,14 +100,14 @@ tauSelections = [tauSelectionCaloTauCutBased,
                  tauSelectionHPSMediumTauBased,
                  tauSelectionHPSLooseTauBased,
                  tauSelectionCombinedHPSTaNCTauBased]
-tauSelectionNames = ["TauSelectionCaloTauCutBased",
-                     "TauSelectionShrinkingConeCutBased",
-                     "TauSelectionShrinkingConeTaNCBased",
-                     "TauSelectionHPSTightTauBased",
-                     "TauSelectionHPSTightTauBasedNoLdgPtOrRtauCut",
-                     "TauSelectionHPSMediumTauBased",
-                     "TauSelectionHPSLooseTauBased",
-                     "TauSelectionCombinedHPSTaNCBased"]
+tauSelectionNames = ["TauSelectionCaloTauCutBasedTauTriggerMatched",
+                     "TauSelectionShrinkingConeCutBasedTauTriggerMatched",
+                     "TauSelectionShrinkingConeTaNCBasedTauTriggerMatched",
+                     "TauSelectionHPSTightTauBasedTauTriggerMatched",
+                     "TauSelectionHPSTightTauBasedNoLdgPtOrRtauCutTauTriggerMatched",
+                     "TauSelectionHPSMediumTauBasedTauTriggerMatched",
+                     "TauSelectionHPSLooseTauBasedTauTriggerMatched",
+                     "TauSelectionCombinedHPSTaNCBasedTauTriggerMatched"]
 
 #tauSelection = tauSelectionShrinkingConeCutBased
 #tauSelection = tauSelectionShrinkingConeTaNCBased

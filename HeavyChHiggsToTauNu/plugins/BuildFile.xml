@@ -19,5 +19,6 @@
   <use   name="SimDataFormats/GeneratorProducts"/>
   <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>
   <use   name="PhysicsTools/PatUtils"/>
+  <use   name="CondFormats/JetMETObjects"/>
 </library>
 
