@@ -23,10 +23,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
-analysis = "signalAnalysis"
+#analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
-#analysis = "signalAnalysisBtaggingTest2"
+analysis = "signalAnalysisBtaggingTest"
 counters = analysis+"Counters"
 
 # main function
@@ -139,7 +139,9 @@ def main():
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     print eventCounter.getMainCounterTable().format()
-
+#    print eventCounter.getMainCounterTable().format()
+    print eventCounter.getSubCounterTable("b-tagging").format()
+    
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
 
