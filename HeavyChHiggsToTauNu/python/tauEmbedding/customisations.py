@@ -13,6 +13,9 @@ def customiseParamForTauEmbedding(param, dataVersion):
         "HLT_Mu20_v1",
         ]
     param.trigger.hltMetCut = -1 # disable
+#    param.trigger.caloMetSelection.src = cms.untracked.InputTag("met", "", dataVersion.getRecoProcess())
+    param.trigger.caloMetSelection.src = "caloMetSum"
+    param.trigger.caloMetSelection.metEmulationCut = 45.0
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
@@ -38,7 +41,8 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag(tauEmbeddingMuons)
     param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
 
-def setCaloMetSum(process, sequence, param, dataVersion, name="caloMetSum"):
+def setCaloMetSum(process, sequence, param, dataVersion):
+    name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
                        src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
                                            cms.InputTag("met", "", "EMBEDDINGRECO")
