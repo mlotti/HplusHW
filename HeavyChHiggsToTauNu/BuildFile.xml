@@ -14,7 +14,6 @@
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="RecoTauTag/TauTagTools"/>
-<use name="JetMETCorrections/Objects"/>
 <export>
   <lib name="HiggsAnalysisHeavyChHiggsToTauNu"/>
 </export>
