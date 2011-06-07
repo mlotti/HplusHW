@@ -38,6 +38,16 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag(tauEmbeddingMuons)
     param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
 
+def setCaloMetSum(process, sequence, param, dataVersion, name="caloMetSum"):
+    m = cms.EDProducer("HPlusCaloMETSumProducer",
+                       src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("met", "", "EMBEDDINGRECO")
+                                           )
+                       )
+    setattr(process, name, m)
+    sequence *= m
+    # param.trigger.caloMet = name    
+
 def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     global tauEmbeddingMuons
     muons = addMuonIsolationEmbedding(process, sequence, tauEmbeddingMuons, **kwargs)
