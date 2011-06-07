@@ -597,7 +597,7 @@ namespace HPlus {
     hStdNonWeightedFakeMETVeto->Fill(fakeMETData.closestDeltaPhi(), myEventWeightBeforeMetFactorization);
     if (!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
-    hSelectionFlow->Fill(kQCDOrderFakeMETVeto, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderFakeMETVeto, fEventWeight.getWeight());
     hWeightedMETAfterFakeMETVeto->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hStdNonWeightedTauPtAfterFakeMETVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     if (metData.passedEvent())
@@ -607,7 +607,7 @@ namespace HPlus {
     // Apply top mass reconstruction
     if (!topSelectionData.passedEvent()) return;
     increment(fTopSelectionCounter);
-    hSelectionFlow->Fill(kQCDOrderTopSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kQCDOrderTopSelection, fEventWeight.getWeight());
 
 
     // AlphaT
