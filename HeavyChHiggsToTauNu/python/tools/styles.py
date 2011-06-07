@@ -46,7 +46,7 @@ class StyleLine(StyleBase):
 
     def apply(self, h):
         h.SetLineStyle(self.lineStyle)
-        h.SetLinewidth(self.linewidth)
+        h.SetLineWidth(self.lineWidth)
 
 class StyleMarker(StyleBase):
     def __init__(self, markerSize=1.2, markerColor=None):
