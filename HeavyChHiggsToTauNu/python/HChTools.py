@@ -154,7 +154,7 @@ def createHistoAnalyzer(src, lst, weightSrc=None):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    m = cms.EDanalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
+    m = cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
     if weightSrc != None:
         m.weights = cms.untracked.InputTag(weightSrc)
     return m
