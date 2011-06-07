@@ -62,7 +62,7 @@ def hhTauNuCrossSection(mass, tanbeta, mu, toTop=False):
 
 
 def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
-    for name, mass in whMass.iteritems():
+    for name, mass in whDatasetMass.iteritems():
         if not datasets.hasDataset(name):
             continue
 
@@ -70,7 +70,7 @@ def setHplusCrossSections(datasets, tanbeta=20, mu=defaultMu, toTop=False):
         datasets.getDataset(name).setCrossSection(crossSection)
         print "Setting %s cross section to %f pb" % (name, crossSection)
 
-    for name, mass in hhMass.iteritems():
+    for name, mass in hhDatasetMass.iteritems():
         if not datasets.hasDataset(name):
             continue
 
