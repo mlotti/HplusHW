@@ -220,7 +220,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 if doBTagScan:
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 2.5
+    module.bTagging.discriminatorCut = 3.0
     addAnalysis(process, "signalAnalysisBtaggingTest", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -229,7 +229,7 @@ if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 1.5
+    module.bTagging.discriminatorCut = 1.2
     addAnalysis(process, "signalAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,

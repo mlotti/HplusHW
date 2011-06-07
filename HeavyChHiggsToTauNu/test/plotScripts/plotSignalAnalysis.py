@@ -25,18 +25,20 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 # Configuration
 analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
-#analysis = "signalAnalysisTauSelectionHPSTightTauBased"
-#analysis = "signalAnalysisBtaggingTest"
+#analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
+#analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
 
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M120_Spring11",
+    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10",
+                     "TTToHplusBWB_M80_Spring11","TTToHplusBWB_M100_Spring11","TTToHplusBWB_M90_Spring11",
+                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M140_Spring11",
                      "TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11",
-                     "TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+                     "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M155_Spring11",
+                     "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
 
@@ -86,11 +88,19 @@ def main():
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
 
+
+    # Set temporarily the signal cross sections to a value from MSSM
+#    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
+    datasets.getDataset("TTToHplusBHminusB_M120").setCrossSection(0.2*165)
+    datasets.getDataset("TTToHplusBWB_M120").setCrossSection(0.2*165)
     transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
+    xsect.setHplusCrossSections(datasets, toTop=True)
+
+
     jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt")
     jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta")
     jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi")
@@ -590,7 +600,7 @@ def transverseMass(h, rebin=20):
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
     scaleMCfromWmunu(h)     
-    h.stackMCHistograms(stackSignal=True)
+    h.stackMCHistograms()#stackSignal=True)
     h.addMCUncertainty()
 
     opts = {"xmax": 200}
@@ -608,7 +618,7 @@ def transverseMass2(h,name, rebin=10):
     
     scaleMCfromWmunu(h)    
 #    h.stackMCHistograms()
-    h.stackMCHistograms(stackSignal=True)
+    h.stackMCHistograms()#stackSignal=True)
     h.addMCUncertainty()
     
     name = name+"_log"
@@ -617,11 +627,11 @@ def transverseMass2(h,name, rebin=10):
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
+#    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
        
-def jetPt(h, name, rebin=20, ratio=False):
+def jetPt(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
     if "bjet" in name:
@@ -653,7 +663,7 @@ def jetPt(h, name, rebin=20, ratio=False):
     common(h, xlabel, ylabel)
 
     
-def jetEta(h, name, rebin=20, ratio=False):
+def jetEta(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
     if "bjet" in name:
@@ -681,7 +691,7 @@ def jetEta(h, name, rebin=20, ratio=False):
 #    h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def jetPhi(h, name, rebin=20, ratio=True):
+def jetPhi(h, name, rebin=5, ratio=True):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
     if "bjet" in name:
