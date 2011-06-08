@@ -855,6 +855,8 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir(myName.str());
     hAfterBigBox = makeTH<TH1F>(myDir, "AfterBigBox", "AfterBigBox", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterBTagging17 = makeTH<TH1F>(myDir, "Leg1AfterBTagging17", "Leg1AfterBTagging17", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterBTagging33 = makeTH<TH1F>(myDir, "Leg1AfterBTagging33", "Leg1AfterBTagging33", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterFakeMETVeto = makeTH<TH1F>(myDir, "Leg1AfterFakeMETVeto", "Leg1AfterFakeMETVeto", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterTopSelection = makeTH<TH1F>(myDir, "Leg1AfterTopSelection", "Leg1AfterTopSelection", nTauPtBins, 0, nTauPtBins);
@@ -872,6 +874,10 @@ namespace HPlus {
     // Leg 1
     if (METData.getSelectedMET()->et() > fMETCut) {
         hLeg1AfterMET->Fill(tauPtBin, weightWithoutMET);
+      if (btagData.getMaxDiscriminatorValue() > 1.7)
+        hLeg1AfterBTagging17->Fill(tauPtBin, weightWithoutMET);
+      if (btagData.getMaxDiscriminatorValue() > 3.3)
+        hLeg1AfterBTagging33->Fill(tauPtBin, weightWithoutMET);
       if (btagData.passedEvent()) {
         hLeg1AfterBTagging->Fill(tauPtBin, weightWithoutMET);
         hTopMassDistribution->Fill(topSelectionData.getTopMass(), weightWithoutMET);

@@ -55,7 +55,9 @@ namespace HPlus {
       double fFakeMETVetoCut;
       // event counts in bins of tau jet pt
       TH1F* hAfterBigBox;
+      TH1F* hLeg1AfterBTagging17;
       TH1F* hLeg1AfterBTagging;
+      TH1F* hLeg1AfterBTagging33;
       TH1F* hLeg1AfterMET;
       TH1F* hLeg1AfterFakeMETVeto;
       TH1F* hLeg1AfterTopSelection;
