@@ -23,35 +23,43 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
-#analysis = "signalAnalysis"
+analysis = "signalAnalysis"
+#analysis = "signalAnalysisJESMinus03eta02METMinus10"
+#analysis = "EWKFakeTauAnalysisJESMinus03eta02METMinus10"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
-analysis = "signalAnalysisBtaggingTest"
+#analysis = "signalAnalysisBtaggingTest"
 counters = analysis+"Counters"
 
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+
     datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10",
                      "TTToHplusBWB_M80_Spring11","TTToHplusBWB_M100_Spring11","TTToHplusBWB_M90_Spring11",
-                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M140_Spring11",
-                     "TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11",
-                     "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M155_Spring11",
+                   "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M140_Spring11",
+                    "TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11",
+                     "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M155_Spring11",
                      "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+    
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
 
 
     # Set the signal cross sections to the ttbar
-    xsect.setHplusCrossSections(datasets, toTop=True)
+    xsect.setHplusCrossSectionsToTop(datasets)
+
+    # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
+#    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
-#    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
+#    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
+
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
@@ -61,8 +69,8 @@ def main():
 #    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET"), "met1", rebin=50)
     
-    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID")
-    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=5)
+    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=10)
+    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=10)
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID")
     tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterMetCut"), "SelectedTau_pT_AfterMetCut")
@@ -70,6 +78,8 @@ def main():
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterCuts"), "SelectedTau_Rtau_AfterCuts")
+
+    selectionFlow(plots.DataMCPlot(datasets, analysis+"/SignalSelectionFlow"), "SignalSelectionFlow")
     
 #    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
 #    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
@@ -82,7 +92,7 @@ def main():
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 #    met2(plots.DataMCPlot(datasets, analysis+"/met"), "met", rebin=5)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=50)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=40)
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
@@ -91,23 +101,29 @@ def main():
 
     # Set temporarily the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
-    datasets.getDataset("TTToHplusBHminusB_M120").setCrossSection(0.2*165)
-    datasets.getDataset("TTToHplusBWB_M120").setCrossSection(0.2*165)
-    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass")
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
+#    datasets.getDataset("TTToHplusBHminusB_M120").setCrossSection(0.2*165)
+#    datasets.getDataset("TTToHplusBWB_M120").setCrossSection(0.2*165)
+    datasets_tm = datasets.deepCopy()
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.2, br_Htaunu=1)
+    datasets_tm.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])
+
+    transverseMass(plots.DataMCPlot(datasets_tm, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMass"), "transverseMass")
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet")
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
     xsect.setHplusCrossSections(datasets, toTop=True)
 
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta")
-    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=10)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
+    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=20)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=10)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=30)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=30)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets")
     
     jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt")
@@ -256,7 +272,30 @@ def rtauGen(h, name, rebin=5, ratio=False):
     h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
     common(h, xlabel, ylabel, addLuminosityText=False)
 
+def selectionFlow(h, name, rebin=1, ratio=False):
 
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "Cut"
+    ylabel = "Events"
+
+    h.stackMCHistograms()
+    h.addMCUncertainty()
+    scaleMCfromWmunu(h)
+    
+    opts = {"xmax": 8, "ymin": 0.01, "ymaxfactor": 2}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+
+    if ratio:
+        h.createFrameFraction(name, opts=opts, opts2=opts2)
+    else:
+        h.createFrame(name, opts=opts)
+    h.getPad().SetLogy(True)
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    #h.addLuminosityText()
+    h.save()    
 
 def tauCandPt(h, step="", rebin=2):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -474,7 +513,7 @@ def rtau(h, name, rebin=15, ratio=False):
     common(h, xlabel, ylabel)
 
 
-def met(h, rebin=20, ratio=True):
+def met(h, rebin=20, ratio=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -504,7 +543,7 @@ def met(h, rebin=20, ratio=True):
 
 
     
-def met2(h, name, rebin=40, ratio=True):
+def met2(h, name, rebin=30, ratio=False):
 #    name = h.getRootHistoPath()
     name = "met"
 
@@ -583,8 +622,11 @@ def deltaPhi2(h, name, rebin=5):
     opts = {"ymin": 0.001, "ymaxfactor": 2}
     h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.5, 0.9, 0.8))
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
+
+
+    
     
 def transverseMass(h, rebin=20):
     name = flipName(h.getRootHistoPath())
@@ -602,7 +644,8 @@ def transverseMass(h, rebin=20):
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
     scaleMCfromWmunu(h)     
-    h.stackMCHistograms()#stackSignal=True)
+    h.stackMCSignalHistograms()
+    h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
 
     opts = {"xmax": 200}
@@ -619,8 +662,8 @@ def transverseMass2(h,name, rebin=10):
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
     scaleMCfromWmunu(h)    
-#    h.stackMCHistograms()
-    h.stackMCHistograms()#stackSignal=True)
+    h.stackMCSignalHistograms()
+    h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
     
     name = name+"_log"
@@ -629,7 +672,7 @@ def transverseMass2(h,name, rebin=10):
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
-#    h.getPad().SetLogy(True)
+    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
        
@@ -648,7 +691,8 @@ def jetPt(h, name, rebin=5, ratio=False):
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
     
     scaleMCfromWmunu(h)  
-    h.stackMCHistograms()
+    h.stackMCSignalHistograms()
+    h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
     opts = {"ymin": 0.00001, "ymaxfactor": 5}
@@ -693,7 +737,7 @@ def jetEta(h, name, rebin=5, ratio=False):
 #    h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def jetPhi(h, name, rebin=5, ratio=True):
+def jetPhi(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
     if "bjet" in name:

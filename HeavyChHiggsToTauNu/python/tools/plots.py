@@ -167,6 +167,8 @@ _legendLabels = {
     "TTToHplusBHminusB_M155": "H^{+}H^{-} m=155",
     "TTToHplusBHminusB_M160": "H^{+}H^{-} m=160",
 
+    "TTToHplus_M120": "H^{#pm} m=120",
+
     "TTJets":                "t#bar{t}+jets",
     "WJets":                 "W+jets",
 
@@ -206,6 +208,8 @@ _plotStyles = {
     "TToHplusBHminusB_M150":      styles.signalHH150Style,
     "TToHplusBHminusB_M155":      styles.signalHH155Style,
     "TToHplusBHminusB_M160":      styles.signalHH160Style,
+
+    "TTToHplus_M120":             styles.signal120Style,
 
     "TTJets":                styles.ttStyle,
     "WJets":                 styles.wStyle,
@@ -414,8 +418,11 @@ class PlotBase:
     # Intended to be called from the deriving classes
     def _setLegendStyles(self):
         self.histoMgr.setHistoLegendStyleAll("F")
-        if self.histoMgr.hasHisto("Data"):
-            self.histoMgr.setHistoLegendStyle("Data", "p")
+        for h in self.histoMgr.getHistos():
+            if h.isData():
+                h.setLegendStyle("P")
+            elif "TTTo" in h.getName():
+                h.setLegendStyle("L")
 
     ## Set the default legend labels
     #
@@ -545,6 +552,9 @@ class PlotSameBase(PlotBase):
         self.rootHistoPath = name
         self.normalizeToOne = normalizeToOne
 
+    def _isSignal(self, name):
+        return "TTToHplus" in name
+
     ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
@@ -555,17 +565,18 @@ class PlotSameBase(PlotBase):
     #
     # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
-        def isNotSignal(name):
-            return not "TTToHplus" in name
-
         mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(isNotSignal, mcNames)
+        mcNamesNoSignal = filter(lambda n: not self._isSignal(n), mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
 
         # Leave the signal datasets unfilled
         self.histoMgr.forEachHisto(UpdatePlotStyleFill( _plotStyles, mcNamesNoSignal))
         self.histoMgr.stackHistograms("StackedMC", mcNames)
+
+    def stackMCSignalHistograms(self):
+        mcSignal = filter(lambda n: self._isSignal(n), self.datasetMgr.getMCDatasetNames())
+        self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band
     def addMCUncertainty(self):
