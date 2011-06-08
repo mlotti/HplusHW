@@ -11,6 +11,19 @@
 #include "TNamed.h"
 
 namespace HPlus {
+  SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
+    fOneTauCounter(eventCounter.addCounter(prefix+":taus == 1")),
+    fElectronVetoCounter(eventCounter.addCounter(prefix+":electron veto")),
+    fMuonVetoCounter(eventCounter.addCounter(prefix+":muon veto")),
+    fMETCounter(eventCounter.addCounter(prefix+":MET")),
+    fNJetsCounter(eventCounter.addCounter(prefix+":njets")),
+    fBTaggingCounter(eventCounter.addCounter(prefix+":btagging")),
+    fBTaggingCounter17(eventCounter.addCounter(prefix+":btagging17")),
+    fBTaggingCounter33(eventCounter.addCounter(prefix+":btagging33")),
+    fFakeMETVetoCounter(eventCounter.addCounter(prefix+":fake MET veto")),
+    fTopSelectionCounter(eventCounter.addCounter(prefix+":Top Selection cut")) { }
+  SignalAnalysis::CounterGroup::~CounterGroup() { }
+
   SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
@@ -25,6 +38,8 @@ namespace HPlus {
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fBTaggingCounter17(eventCounter.addCounter("btagging17")),
+    fBTaggingCounter33(eventCounter.addCounter("btagging33")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
@@ -51,8 +66,18 @@ namespace HPlus {
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
-    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
-   
+    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency")),
+    // EWK Type II related
+    fAllTausCounterGroup(eventCounter, "All"),
+    fElectronToTausCounterGroup(eventCounter, "e->tau"),
+    fMuonToTausCounterGroup(eventCounter, "mu->tau"),
+    fGenuineToTausCounterGroup(eventCounter, "tau->tau"),
+    fJetToTausCounterGroup(eventCounter, "jet->tau"),
+    fAllTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "All with tau outside acceptance"),
+    fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
+    fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
+    fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
+    fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance")
   {
 
     edm::Service<TFileService> fs;
@@ -98,6 +123,9 @@ namespace HPlus {
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderBTagSelection,"#geq 1 b jet");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
+
+    hEMFractionAll = makeTH<TH1F>(*fs, "FakeTau_EMFraction_All", "FakeTau_EMFraction_All", 22, 0., 1.1);
+    hEMFractionElectrons = makeTH<TH1F>(*fs, "FakeTau_EMFraction_Electrons", "FakeTau_EMFraction_Electrons", 22, 0., 1.1);
   }
 
   SignalAnalysis::~SignalAnalysis() { }
@@ -161,13 +189,20 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
-    fTauEmbeddingAnalysis.fillAfterTauId();
-    
+    fTauEmbeddingAnalysis.fillAfterTauId();   
     
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+
+    // Obtain MC matching
+    MCSelectedTauMatchType myTauMatch = matchTauToMC(iEvent, tauData.getSelectedTaus()[0]);
+    fAllTausCounterGroup.incrementOneTauCounter();
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementOneTauCounter();
+    if (myTauMatch == kkElectronToTau)
+      hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
+    hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
 
 
     // MET cut
@@ -191,13 +226,14 @@ namespace HPlus {
 
 
     hTransverseMassBeforeVeto->Fill(transverseMass, fEventWeight.getWeight());
-
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMETCounter();
 
     //    Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto, fEventWeight.getWeight());
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementElectronVetoCounter();
 
 
     // Global muon veto
@@ -206,17 +242,22 @@ namespace HPlus {
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kSignalOrderMuonVeto, fEventWeight.getWeight());
     hTransverseMassAfterVeto->Fill(transverseMass, fEventWeight.getWeight());
-  
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMuonVetoCounter();  
+
 
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
-   
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementNJetsCounter();
+
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    if (btagData.getMaxDiscriminatorValue() > 1.7) increment(fBTaggingCounter17);
+    if (btagData.getMaxDiscriminatorValue() > 3.3) increment(fBTaggingCounter33);
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementBTaggingCounter(btagData.getMaxDiscriminatorValue(),btagData.passedEvent());
     if(!btagData.passedEvent()) return false;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     increment(fBTaggingCounter);
@@ -228,6 +269,7 @@ namespace HPlus {
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementFakeMETVetoCounter();
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
@@ -252,6 +294,8 @@ namespace HPlus {
     if (!TopSelectionData.passedEvent()) return false;
     increment(fTopSelectionCounter);
     //hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
+    if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementTopSelectionCounter();
+
 
     hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
@@ -300,4 +344,58 @@ namespace HPlus {
 
     return true;
   }
+
+  SignalAnalysis::MCSelectedTauMatchType SignalAnalysis::matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau) {
+    if (iEvent.isRealData()) return kkNoMC;
+    bool foundMCTauOutsideAcceptanceStatus = false;
+    bool isMCTau = false;
+    bool isMCElectron = false;
+    bool isMCMuon = false;
+
+    edm::Handle <reco::GenParticleCollection> genParticles;
+    iEvent.getByLabel("genParticles", genParticles);
+    //std::cout << "matchfinding:" << std::endl;
+    for (size_t i=0; i < genParticles->size(); ++i) {
+      const reco::Candidate & p = (*genParticles)[i];
+      if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15) {
+        // Check match with tau
+        if (reco::deltaR(p, tau->p4()) < 0.1) {
+          if (p.pt() > 10.) {
+            //std::cout << "  match found, pid=" << p.pdgId() << " eta=" << std::abs(p.eta()) << " pt=" << p.pt() << std::endl;
+            if (std::abs(p.pdgId()) == 11) isMCElectron = true;
+            if (std::abs(p.pdgId()) == 13) isMCMuon = true;
+            if (std::abs(p.pdgId()) == 15) isMCTau = true;
+          }
+        }
+        // Check if there is a tau outside the acceptance in the event
+        if (!foundMCTauOutsideAcceptanceStatus && std::abs(p.pdgId()) == 15) {
+          if (p.pt() < 40 || abs(p.eta()) > 2.1)
+            foundMCTauOutsideAcceptanceStatus = true;
+        }
+      }
+    }
+    if (!foundMCTauOutsideAcceptanceStatus) {
+      if (isMCElectron) return kkElectronToTau;
+      if (isMCMuon) return kkMuonToTau;
+      if (isMCTau) return kkTauToTau;
+      return kkJetToTau;
+    }
+    if (isMCElectron) return kkElectronToTauAndTauOutsideAcceptance;
+    if (isMCMuon) return kkMuonToTauAndTauOutsideAcceptance;
+    if (isMCTau) return kkTauToTauAndTauOutsideAcceptance;
+    return kkJetToTauAndTauOutsideAcceptance;
+  }
+
+  SignalAnalysis::CounterGroup* SignalAnalysis::getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch) {
+    if (tauMatch == kkElectronToTau) return &fElectronToTausCounterGroup;
+    else if (tauMatch == kkMuonToTau) return &fMuonToTausCounterGroup;
+    else if (tauMatch == kkTauToTau) return &fGenuineToTausCounterGroup;
+    else if (tauMatch == kkJetToTau) return &fJetToTausCounterGroup;
+    else if (tauMatch == kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
+    return 0;
+  }
+
 }
