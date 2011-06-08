@@ -813,8 +813,8 @@ class HistoStacked(HistoBase):
     # List of histograms.Histo objects which are stacked
 
 class HistoGraph(HistoBase):
-    def __init__(self, rootGraph, name):
-        HistoBase.__init__(self, rootGraph, name, "l", "L")
+    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
+        HistoBase.__init__(self, rootGraph, name, legendStyle, drawStyle)
 
     def getRootGraph(self):
         return self.getRootHisto()
