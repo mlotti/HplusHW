@@ -877,7 +877,7 @@ class EventCounter:
         self.normalization += " (scaled with %g)" % value
 
     def scaleMC(self, value):
-        self._forEachCounter(lambda x: x.scaleData(value))
+        self._forEachCounter(lambda x: x.scaleMC(value))
         self.normalization += " (MC scaled with %g)" % value
 
     def scaleData(self, value):
