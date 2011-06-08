@@ -71,14 +71,14 @@ namespace HPlus {
     
   enum QCDSelectionOrder {
     kQCDOrderTrigger,
-    kQCDOrderVertexSelection,
+    //kQCDOrderVertexSelection,
     kQCDOrderTauCandidateSelection,
     kQCDOrderElectronVeto,
     kQCDOrderMuonVeto,
     kQCDOrderJetSelection,
     kQCDOrderTauID,
-    kQCDOrderFakeMETVeto,
-    kQCDOrderTopSelection,
+    //kQCDOrderFakeMETVeto,
+    //kQCDOrderTopSelection,
     kQCDOrderMETFactorized,
     kQCDOrderBTagFactorized,
     kQCDOrderRtauFactorized
