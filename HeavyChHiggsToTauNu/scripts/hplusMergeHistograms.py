@@ -39,11 +39,11 @@ def getHistogramFile(stdoutFile):
             continue
     f.close()
     if exeExitCode == None:
-        raise Exception("Internal error, exeExitCode is None")
+        raise ExitCodeException("No exeExitCode")
     if jobExitCode == None:
-        raise Exception("Internal error, jobExitCode is None")
+        raise ExitCodeException("No jobExitCode")
     if histoFile == None:
-        raise Exception("Internal error, histoFile is None")
+        raise Exception("Internal error, histoFile is None in file "+stdoutFile)
     if exeExitCode != 0:
         raise ExitCodeException("Executable exit code is %d" % exeExitCode)
     if jobExitCode != 0:
