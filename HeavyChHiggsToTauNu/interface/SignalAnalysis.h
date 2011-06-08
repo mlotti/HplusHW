@@ -37,15 +37,15 @@ namespace HPlus {
   class SignalAnalysis {
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
-    kSignalOrderVertexSelection,
+    //kSignalOrderVertexSelection,
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderMETSelection,
     kSignalOrderJetSelection,
-    kSignalOrderBTagSelection,
-    kSignalOrderFakeMETVeto,
-    kSignalOrderTopSelection
+    kSignalOrderBTagSelection
+    //kSignalOrderFakeMETVeto,
+    //kSignalOrderTopSelection
   };
 
   public:

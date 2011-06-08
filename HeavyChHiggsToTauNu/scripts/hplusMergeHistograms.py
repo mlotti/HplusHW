@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, re
 import sys
 import glob
 import shutil
@@ -9,15 +9,69 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def main(opts, args):
+re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
+re_job = re.compile("JobExitCode=(?P<code>\d+)")
+re_histo = None
 
+class ExitCodeException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
+def getHistogramFile(stdoutFile):
+    exeExitCode = None
+    jobExitCode = None
+    histoFile = None
+    f = open(stdoutFile)
+    for line in f:
+        m = re_exe.search(line)
+        if m:
+            exeExitCode = int(m.group("code"))
+            continue
+        m = re_job.search(line)
+        if m:
+            jobExitCode = int(m.group("code"))
+            continue
+        m = re_histo.search(line)
+        if m:
+            histoFile = m.group("file")
+            continue
+    f.close()
+    if exeExitCode == None:
+        raise Exception("Internal error, exeExitCode is None")
+    if jobExitCode == None:
+        raise Exception("Internal error, jobExitCode is None")
+    if histoFile == None:
+        raise Exception("Internal error, histoFile is None")
+    if exeExitCode != 0:
+        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0:
+        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    return histoFile
+
+def main(opts, args):
     crabdirs = multicrab.getTaskDirectories(opts)
+
+    global re_histo
+    re_histo = re.compile("^output files:.*?(?P<file>%s)" % opts.input)
 
     mergedFiles = []
     for d in crabdirs:
-        files = glob.glob(os.path.join(d, "res", opts.input))
+        d = d.replace("/", "")
+        stdoutFiles = glob.glob(os.path.join(d, "res", "CMSSW_*.stdout"))
+
+        files = []
+        for f in stdoutFiles:
+            try:
+                files.append(os.path.join(os.path.dirname(f), getHistogramFile(f)))
+            except ExitCodeException, e:
+                print "Skipping task %s, job %s: %s" % (d, f, str(e))
+            
         if len(files) == 0:
+            print "Task %s, skipping, no files to merge" % d
             continue
+        print "Task %s, merging %d file(s)" % (d, len(files))
 
         mergeName = os.path.join(d, "res", opts.output % d)
         #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
@@ -28,24 +82,27 @@ def main(opts, args):
         if os.path.exists(mergeName):
             shutil.move(mergeName, mergeName+".backup")
 
-        ret = subprocess.call(["hadd", mergeName]+files) 
+        p = subprocess.Popen(["hadd", mergeName]+files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = p.communicate()[0]
+        ret = p.returncode
         if ret != 0:
+            print output
             print "Merging failed with exit code %d" % ret
             return 1
-        mergedFiles.append(mergeName)
+        mergedFiles.append((mergeName, len(files)))
 
     print
     print "Merged histogram files:"
-    for f in mergedFiles:
-        print "  %s" % f
+    for f, num in mergedFiles:
+        print "  %s (from %d file(s))" % (f, num)
 
     return 0
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
-    parser.add_option("-i", dest="input", type="string", default="histograms_*.root",
-                      help="Pattern for input root files (note: remember to escape * and ? !) (default: 'histograms_*.root')")
+    parser.add_option("-i", dest="input", type="string", default="histograms_.*\.root",
+                      help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_\.*\.root')")
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
     

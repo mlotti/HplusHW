@@ -81,7 +81,8 @@ errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
-mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
+#mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
+mcStyle = Style(ROOT.kFullSquare, ROOT.kRed+1)
 signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
                              StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
                              ])
