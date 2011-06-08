@@ -69,8 +69,9 @@ def main(opts, args):
                 print "Skipping task %s, job %s: %s" % (d, f, str(e))
             
         if len(files) == 0:
-            print "Skipping task %s, no files to merge" % d
+            print "Task %s, skipping, no files to merge" % d
             continue
+        print "Task %s, merging %d file(s)" % (d, len(files))
 
         mergeName = os.path.join(d, "res", opts.output % d)
         #cmd = "mergeTFileServiceHistograms -o %s -i %s" % ("histograms-"+d+".root", " ".join(files))
@@ -81,8 +82,11 @@ def main(opts, args):
         if os.path.exists(mergeName):
             shutil.move(mergeName, mergeName+".backup")
 
-        ret = subprocess.call(["hadd", mergeName]+files) 
+        p = subprocess.Popen(["hadd", mergeName]+files, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = p.communicate()[0]
+        ret = p.returncode
         if ret != 0:
+            print output
             print "Merging failed with exit code %d" % ret
             return 1
         mergedFiles.append((mergeName, len(files)))
