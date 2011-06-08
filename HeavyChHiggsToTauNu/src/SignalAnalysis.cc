@@ -263,6 +263,8 @@ namespace HPlus {
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterBTagging();
+
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
@@ -270,6 +272,8 @@ namespace HPlus {
     increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
     if (myTauMatch != kkNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementFakeMETVetoCounter();
+
+    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());

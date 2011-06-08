@@ -2,11 +2,13 @@ import multicrabDatasetsCommon as common
 
 # Goal: ~3kev/job
 
+# Default signal cross section taken the same as ttbar
+
 datasets = {
     # Signal WH
     "TTToHplusBWB_M80_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -21,7 +23,7 @@ datasets = {
     },
     "TTToHplusBWB_M90_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 16.188976,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -36,7 +38,7 @@ datasets = {
     },
     "TTToHplusBWB_M100_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 13.815713,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -56,7 +58,7 @@ datasets = {
     },
     "TTToHplusBWB_M120_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 8.772209,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -76,7 +78,7 @@ datasets = {
     },
     "TTToHplusBWB_M140_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 4.068511,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -96,7 +98,7 @@ datasets = {
     },
     "TTToHplusBWB_M150_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 2.156448,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -116,7 +118,7 @@ datasets = {
     },
     "TTToHplusBWB_M155_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 1.375513,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-155_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -136,7 +138,7 @@ datasets = {
     },
     "TTToHplusBWB_M160_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.738874,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-160_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -158,7 +160,7 @@ datasets = {
     # Signal HH
     "TTToHplusBHminusB_M80_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": -1,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-80_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -178,7 +180,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M100_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.316988,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -198,7 +200,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M120_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.123367,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -218,7 +220,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M140_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.025729,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -238,7 +240,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M150_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.007141,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -258,7 +260,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M155_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.002891,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",
@@ -278,7 +280,7 @@ datasets = {
     },
     "TTToHplusBHminusB_M160_Spring11": {
         "dataVersion": "311Xredigi",
-        "crossSection": 0.000831,
+        "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM",

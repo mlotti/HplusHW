@@ -18,7 +18,11 @@ trigger = cms.untracked.PSet(
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
     triggerTauSelection = cms.untracked.PSet(),
     triggerMETSelection = cms.untracked.PSet(),
-    triggerEfficiency = cms.untracked.PSet()
+    triggerEfficiency = cms.untracked.PSet(),
+    caloMetSelection = cms.untracked.PSet(
+        src = cms.untracked.InputTag("patMETs"), # Calo MET
+        metEmulationCut = cms.untracked.double(-1), # disabled by default
+    )
 )
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.TriggerEmulationEfficiency_cfi import *
@@ -137,7 +141,7 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(2.0),
+    discriminatorCut = cms.untracked.double(3.3),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)

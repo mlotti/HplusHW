@@ -78,7 +78,7 @@ process.source = cms.Source('PoolSource',
 )
 if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_1_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_16_1_JtV.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_2_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_3_2_ymZ.root"
         ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -126,6 +126,7 @@ if options.tauEmbeddingInput != 0:
 #    param.setPileupWeightFor2011
 #    param.setPileupWeightFor2011and2010()
     tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
         applyIsolation = not doTauEmbeddingMuonSelectionScan

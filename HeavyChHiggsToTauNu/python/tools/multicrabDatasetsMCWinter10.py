@@ -4,7 +4,7 @@ datasets = {
     # Signal
     "TTToHplusBWB_M90_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 16.442915,
+        "crossSection": 165,
         "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M90_Winter10_cfi",
         "data": {
             "AOD": {
@@ -20,7 +20,7 @@ datasets = {
     },
     "TTToHplusBWB_M100_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 14.057857,
+        "crossSection": 165,
         "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M100_Winter10_cfi",
         "data": {
             "AOD": {
@@ -36,7 +36,7 @@ datasets = {
     },
     "TTToHplusBWB_M120_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 8.984715,
+        "crossSection": 165,
         "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M120_Winter10_cfi",
         "data": {
             "AOD": {
@@ -52,7 +52,7 @@ datasets = {
     },
     "TTToHplusBWB_M140_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 4.223402,
+        "crossSection": 165,
         "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M140_Winter10_cfi",
         "data": {
             "AOD": {
@@ -68,7 +68,7 @@ datasets = {
     },
     "TTToHplusBWB_M160_Winter10": {
         "dataVersion": "39Xredigi",
-        "crossSection": 0.811493,
+        "crossSection": 165,
         "tauIDFactorizationMap": "FactorizationMaphistograms_TTToHplusBWB_M160_Winter10_cfi",
         "data": {
             "AOD": {
