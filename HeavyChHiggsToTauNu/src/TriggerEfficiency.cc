@@ -150,7 +150,7 @@ namespace HPlus {
     else
       eff = fFakeTaus.efficiency(tau, met);
 
-    std::cout << "Is true tau? " << (tau.genJet() != 0) << " tau pt " << tau.pt() << " met " << met.et() << " efficiency " << eff << std::endl;
+    //std::cout << "Is true tau? " << (tau.genJet() != 0) << " tau pt " << tau.pt() << " met " << met.et() << " efficiency " << eff << std::endl;
 
     return eff;
   }
