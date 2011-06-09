@@ -16,26 +16,25 @@ namespace pat {
 
 namespace HPlus {
   class TriggerEfficiency {
-    class EfficiencyCalculator {
+  public:
+    class EfficiencyCalculatorBase {
     public:
-      EfficiencyCalculator(const std::vector<double>& tauParams, const std::vector<double>& metParams);
-      ~EfficiencyCalculator();
+      EfficiencyCalculatorBase();
+      virtual ~EfficiencyCalculatorBase();
 
-      double efficiency(const pat::Tau& tau, const reco::MET& met) const;
-    private:
-      std::vector<double> fTauParams;
-      std::vector<double> fMetParams;
+      virtual double efficiency(const pat::Tau& tau, const reco::MET& met) const = 0;
     };
 
+  private:
     class WeightedEfficiencyCalculator {
     public:
       WeightedEfficiencyCalculator();
       ~WeightedEfficiencyCalculator();
 
       double efficiency(const pat::Tau& tau, const reco::MET& met) const;
-      void addCalculator(double lumi, const EfficiencyCalculator& effcalc);
+      void addCalculator(double lumi, EfficiencyCalculatorBase *effcalc);
     private:
-      std::vector<EfficiencyCalculator> fCalculators;
+      std::vector<EfficiencyCalculatorBase *> fCalculators;
       std::vector<double> fLumis;
       double fTotalLumi;
     };

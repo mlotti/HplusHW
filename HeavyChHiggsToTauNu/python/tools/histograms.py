@@ -176,6 +176,16 @@ class LegendCreator:
         for x, value in kwargs.iteritems():
             setattr(self, x, value)
 
+    def moveDefaults(self, dx=0, dy=0, dw=0, dh=0):
+        self.x1 += dx
+        self.x2 += dx
+
+        self.y1 += dy
+        self.y2 += dy
+
+        self.x2 += dw
+        self.y2 += dh
+
     ## Create a new TLegend object (function call syntax)
     #
     # Arguments can be either
@@ -229,11 +239,15 @@ class LegendCreator:
 createLegend = LegendCreator()
 
 ## Move TLegend
-def moveLegend(legend, dx=0, dy=0):
+def moveLegend(legend, dx=0, dy=0, dw=0, dh=0):
     legend.SetX1(legend.GetX1() + dx)
     legend.SetX2(legend.GetX2() + dx)
     legend.SetY1(legend.GetY1() + dy)
     legend.SetY2(legend.GetY2() + dy)
+
+    legend.SetX1(legend.GetX1() + dw)
+    legend.SetY1(legend.GetY1() + dh)
+    
     return legend
     
 
