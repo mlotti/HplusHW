@@ -20,6 +20,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.counter as counter
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 #analysis = "signalAnalysis"
@@ -32,9 +33,18 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
     datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10","TTToHplusBWB_M90_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBWB_M120_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M155_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+                    "TTToHplusBWB_M120_Spring11","TTToHplusBWB_M140_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M155_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M160_Spring11","TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M120_Spring11","TTToHplusBHminusB_M155_Spring11","TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     datasets.loadLuminosities()
     plots.mergeRenameReorderForDataMC(datasets)
+
+    # Set the signal cross sections to the ttbar
+#    xsect.setHplusCrossSectionsToTop(datasets)
+
+    # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+
+    # Set the signal cross sections to a value from MSSM
+#    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
 
     # Apply TDR style

@@ -78,7 +78,7 @@ process.source = cms.Source('PoolSource',
 )
 if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_pt40/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_23_1_YLm.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_2_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_3_2_ymZ.root"
         ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -120,6 +120,18 @@ param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+
+if options.tauEmbeddingInput != 0:
+#    param.setPileupWeightFor2011
+#    param.setPileupWeightFor2011and2010()
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
+    if tauEmbeddingFinalizeMuonSelection:
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
 
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
@@ -129,7 +141,7 @@ param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # 
 param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
-if (doTriggerParametrisation and not dataVersion.isData()):
+if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddingInput != 0:
     # 2010 and 2011 scenarios
     #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
@@ -139,14 +151,6 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
-
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
-        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                   enableIsolation=applyIsolation))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
@@ -268,14 +272,19 @@ if doAllTauIds:
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
 if doJESVariation:
-    # In principle here could be more than two JES variation analyses
+    # Exceptions for tau embedding
+    jetVariationMode="all"
+    if options.tauEmbeddingInput != 0:
+        JESUnclusteredMETVariation=0
+        jetVariationMode="onlyTauMatching"
+
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
 
 # Signal analysis with various tightened muon selections for tau embedding
 if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:

@@ -1,3 +1,5 @@
+import re
+
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.Modules import _Module
 
@@ -122,9 +124,11 @@ def customise(process):
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.HChEventContent_cff")
     outputModule.outputCommands = cms.untracked.vstring("drop *")
     outputModule.outputCommands.extend(process.RECOSIMEventContent.outputCommands)
-    outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
     outputModule.outputCommands.extend([
             "drop *_*_*_%s" % recoProcessName,
+            "keep *_genParticles_*_%s" % recoProcessName,
+            "keep recoGenJets_*_*_%s" % recoProcessName,
+            "keep recoGenMETs_*_*_%s" % recoProcessName,
             "keep *_pfMet_*_%s" % recoProcessName,
             "keep *_offlinePrimaryVertices_*_%s" % recoProcessName,
             "keep *_generalTracks_*_%s" % recoProcessName,
@@ -153,8 +157,11 @@ def customise(process):
             "keep *_offlinePrimaryVertices_*_%s" % processName,
             "keep edmMergeableCounter_*_*_%s" % processName,
     ])
+#    re_procName = re.compile("_\*$")
+#    outputModule.outputCommands.extend([re_procName.sub("_"+processName, x) for x in process.RECOSIMEventContent.outputCommands])
+    outputModule.outputCommands.extend(process.HChEventContent.outputCommands)
     #outputModule.outputCommands.extend(process.RecoParticleFlowRECO.outputCommands)
-    #outputModule.outputCommansd.extend(["keep *_%s_*_%s" % (x, processName) for x in [
+    #outputModule.outputCommands.extend(["keep *_%s_*_%s" % (x, processName) for x in [
     #]])
 
     # Remove duplicate "drop *"
@@ -259,4 +266,5 @@ def customise(process):
     print " Warning! PFCandidates 'electron' collection is not mixed, "
     print "  and probably shouldnt be used. "
     print "#############################################################"
+
     return process

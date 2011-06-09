@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>
 #include <vector>
@@ -33,7 +34,8 @@ namespace HPlus {
   class TriggerSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
-    kTriggerSelectionByTriggerEfficiencyParametrisation
+    kTriggerSelectionByTriggerEfficiencyParametrisation,
+    kTriggerSelectionDisabled
   };
   
   public:
@@ -97,12 +99,18 @@ namespace HPlus {
     TauSelection fTriggerTauSelection;
     METSelection fTriggerMETSelection;
     TriggerEfficiency fTriggerEfficiency;
+    TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
     Count fTriggerPathCount;
+    Count fTriggerBitParamCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;
+
+    Count fTriggerParamAllCount;
+    Count fTriggerParamTauCount;
+    Count fTriggerParamMetCount;
 
     TriggerSelectionType fTriggerSelectionType;
     

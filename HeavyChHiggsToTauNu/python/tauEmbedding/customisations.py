@@ -13,6 +13,9 @@ def customiseParamForTauEmbedding(param, dataVersion):
         "HLT_Mu20_v1",
         ]
     param.trigger.hltMetCut = -1 # disable
+#    param.trigger.caloMetSelection.src = cms.untracked.InputTag("met", "", dataVersion.getRecoProcess())
+    param.trigger.caloMetSelection.src = "caloMetSum"
+    param.trigger.caloMetSelection.metEmulationCut = 45.0
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
@@ -37,6 +40,17 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.TauEmbeddingAnalysis.originalMetSrc = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
     param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag(tauEmbeddingMuons)
     param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
+
+def setCaloMetSum(process, sequence, param, dataVersion):
+    name = "caloMetSum"
+    m = cms.EDProducer("HPlusCaloMETSumProducer",
+                       src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("met", "", "EMBEDDINGRECO")
+                                           )
+                       )
+    setattr(process, name, m)
+    sequence *= m
+    # param.trigger.caloMet = name    
 
 def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     global tauEmbeddingMuons
@@ -123,7 +137,7 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     setattr(process, name, m)
     sequence *= m
 
-    m = tight.clone(
+    m = m.clone(
         candSrc = name,
         embedPrefix = "byTightSc02Ic04"+postfix,
         signalCone = 0.2
@@ -198,7 +212,8 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     counters.append(cname)
 
     if enableIsolation:
-        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
+#        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
+        counters.extend(addMuonIsolation(process, sequence, "muonSelectionIsolation", "userInt('byTightIc04Occupancy')==0"))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))

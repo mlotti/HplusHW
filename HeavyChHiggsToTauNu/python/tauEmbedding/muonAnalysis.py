@@ -96,7 +96,9 @@ class MuonAnalysis:
                  doMuonIsolation=False, muonIsolation="sumIsoRel", muonIsolationCut=0.05,
                  electrons="selectedPatElectrons",
                  met="patMETsPF", metCut=20,
-                 jets="selectedPatJetsAK5PF", njets=3):
+                 jets="selectedPatJetsAK5PF", njets=3,
+                 vertexCollections=["offlinePrimaryVertices", "goodPrimaryVertices", "goodPrimaryVertices10"],
+                 weightSrc=None):
         self.process = process
         self.dataVersion = dataVersion
         self.prefix = prefix
@@ -120,7 +122,7 @@ class MuonAnalysis:
         if self._trigger == None:
             raise Exception("Must specify trigger!")
 
-        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters)
+        self.analysis = HChTools.Analysis(self.process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=weightSrc)
         #self.analysis.getCountAnalyzer().printMainCounter = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printSubCounters = cms.untracked.bool(True)
         #self.analysis.getCountAnalyzer().printAvailableCounters = cms.untracked.bool(True)
@@ -128,6 +130,7 @@ class MuonAnalysis:
         if beginSequence != None:
             self.analysis.appendToSequence(beginSequence)
         self.multipName = "Multiplicity"
+        self.pileupName = "VertexCount"
 
         self.selectedMuons = cms.InputTag(muons)
         self.selectedJets = self._jets
@@ -156,9 +159,22 @@ class MuonAnalysis:
                         min = cms.untracked.int32(0),
                         max = cms.untracked.int32(20),
                         nbins = cms.untracked.int32(20)
-                    )
+                    ),
             ))
-    
+            if weightSrc != None:
+                self.histoAnalyzer.weights = cms.untracked.InputTag(weightSrc)
+                self.multipAnalyzer.weights = cms.untracked.InputTag(weightSrc)
+        self.pileupAnalyzer = None
+        if beginSequence == None:
+            self.pileupAnalyzer = self.analysis.addAnalyzer(self.pileupName, cms.EDAnalyzer("HPlusVertexCountAnalyzer",
+                    src = cms.untracked.VInputTag([cms.untracked.InputTag(x) for x in vertexCollections]),
+                    min = cms.untracked.double(0),
+                    max = cms.untracked.double(20),
+                    nbins = cms.untracked.int32(20),
+            ))
+            if weightSrc != None:
+                self.pileupAnalyzer.weights = cms.untracked.InputTag(weightSrc)
+
         # Create the prototype for muon cleaner
         from PhysicsTools.PatAlgos.cleaningLayer1.muonCleaner_cfi import cleanPatMuons
         self.muonJetCleanerPrototype = cleanPatMuons.clone(
@@ -208,6 +224,8 @@ class MuonAnalysis:
                     histoEta.pset().clone(cut=cms.untracked.string(self._etaCut)),
                 )
             )
+            if weightSrc != None:
+                self.afterOtherCutsModule.weights = cms.untracked.InputTag(weightSrc)
             self.afterOtherCutsModuleIso = self.afterOtherCutsModule.clone()
             self.afterOtherCutsModuleIso.histograms.append(histoIsos[muonIsolation].pset().clone(
                     cut=cms.untracked.string(self._isolationCut)
@@ -232,12 +250,19 @@ class MuonAnalysis:
         if "jetSrc" in kwargs:
             self.multipAnalyzer.jets.src = kwargs["jetSrc"]
 
-    def cloneAnalyzers(self, name, **kwargs):
+    def clonePileupAnalyzer(self):
+        if self.pileupAnalyzer:
+            self.pileupAnalyzer = self.analysis.addCloneAnalyzer(self.pileupName, self.pileupAnalyzer)
+
+    def cloneAnalyzers(self, name, doMultip=False, doPileup=False, **kwargs):
         if self.afterOtherCuts:
             return False
 
         self.cloneHistoAnalyzer(name, **kwargs)
-        #self.cloneMultipAnalyzer(name=self.multipName+name, **kwargs)
+        if doMultip:
+            self.cloneMultipAnalyzer(name=self.multipName+name, **kwargs)
+        if doPileup:
+            self.clonePileupAnalyzer()
         return True
         
 
@@ -292,7 +317,7 @@ class MuonAnalysis:
 
         # Trigger
         self.analysis.addTriggerCut(self.dataVersion, self._trigger)
-        self.cloneAnalyzers("Triggered")
+        self.cloneAnalyzers("Triggered", doPileup=True)
 
         # Select primary vertex
         self.selectedPrimaryVertex = self.analysis.addAnalysisModule("PrimaryVertex",
@@ -302,7 +327,7 @@ class MuonAnalysis:
                                   minNumber = cms.uint32(1),
                                   maxNumber = cms.uint32(999)),
             counter=True).getSelectorInputTag()
-        self.cloneAnalyzers("PrimaryVertex")
+        self.cloneAnalyzers("PrimaryVertex", doPileup=True)
 
     # Jet selections
     def jetSelection(self, analyze=True):

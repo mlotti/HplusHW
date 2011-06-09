@@ -71,15 +71,19 @@ namespace HPlus {
       for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
         
         // Select the PF cands between signal and isolation cones
-        reco::PFCandidateRefVector pfcands(hpfcand.id());
+        reco::PFCandidateRefVector pfchcands(hpfcand.id());
+        reco::PFCandidateRefVector pfgammacands(hpfcand.id());
         for(size_t i=0; i<hpfcand->size(); ++i) {
           double dr = reco::deltaR(hpfcand->at(i), hcand->at(iCand));
           if(fSignalCone < dr && dr < fIsolationCone) {
-            pfcands.push_back(reco::PFCandidateRef(hpfcand, i));
+            if(hpfcand->at(i).particleId() == reco::PFCandidate::h)
+              pfchcands.push_back(reco::PFCandidateRef(hpfcand, i));
+            else if(hpfcand->at(i).particleId() == reco::PFCandidate::gamma)
+              pfgammacands.push_back(reco::PFCandidateRef(hpfcand, i));
           }
         }
 
-        reco::PFCandidateRefVector chargedCands = TauTagTools::filteredPFChargedHadrCands(pfcands,
+        reco::PFCandidateRefVector chargedCands = TauTagTools::filteredPFChargedHadrCands(pfchcands,
                                                                                           fMinTrackPt,
                                                                                           fMinTrackPixelHits,
                                                                                           fMinTrackHits,
@@ -88,7 +92,7 @@ namespace HPlus {
                                                                                           fMaxDeltaZ,
                                                                                           *thePV,
                                                                                           thePV->position().z());
-        reco::PFCandidateRefVector gammaCands = TauTagTools::filteredPFGammaCands(pfcands, fMinGammaEt);
+        reco::PFCandidateRefVector gammaCands = TauTagTools::filteredPFGammaCands(pfgammacands, fMinGammaEt);
       
 
         size_t occupancy = chargedCands.size() + gammaCands.size();

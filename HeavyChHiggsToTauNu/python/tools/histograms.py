@@ -5,6 +5,7 @@
 
 import os, sys
 import glob
+import array
 from optparse import OptionParser
 
 import ROOT
@@ -145,7 +146,7 @@ class LegendCreator:
     # \param borderSize  Default border size
     # \param fillStyle   Default fill style
     # \param fillColor   Default fill color
-    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.025, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
+    def __init__(self, x1=0.73, y1=0.62, x2=0.93, y2=0.92, textSize=0.03, borderSize=0, fillStyle=4000, fillColor=ROOT.kWhite):
         self.x1 = x1
         self.y1 = y1
         self.x2 = x2
@@ -202,7 +203,8 @@ class LegendCreator:
         if self.fillStyle != 0:
             legend.SetFillColor(self.fillColor)
         legend.SetBorderSize(self.borderSize)
-        legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
+        if legend.GetTextFont() % 10 == 3:
+            legend.SetTextFont(legend.GetTextFont()-1) # From x3 to x2
         legend.SetTextSize(self.textSize)
         #legend.SetMargin(0.1)
         return legend
@@ -259,6 +261,74 @@ def sumRootHistos(rootHistos, postfix="_sum"):
     for a in rootHistos[1:]:
         h.Add(a)
     return h
+
+## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
+def dist2pass(hdist, **kwargs):
+    lessThan = True
+    if len(kwargs) != 1:
+        raise Exception("Should give only either 'lessThan' or 'greaterThan' as a keyword argument")
+    elif "lessThan" in kwargs:
+        lessThan = kwargs["lessThan"]
+    elif "greaterThan" in kwargs:
+        lessThan = not kwargs["greaterThan"]
+    else:
+        raise Exception("Must give either 'lessThan' or 'greaterThan' as a keyword argument")
+
+    # for less than
+    integral = None
+    if lessThan:
+        integral = lambda h, bin: h.Integral(0, bin)
+    else:    
+        integral = lambda h, bin: h.Integral(bin, h.GetNbinsX()+1)
+        
+    # bin 0             underflow bin
+    # bin 1             first bin
+    # bin GetNbinsX()   last bin
+    # bin GetNbinsX()+1 overflow bin
+
+    # Construct the passed histogram such that the bin low edges in
+    # the distribution histogram become the bin centers
+    binLowEdges = []
+    for bin in xrange(1, hdist.GetNbinsX()+3):
+        prevBin = bin-1
+        prevLowEdge = hdist.GetBinLowEdge(prevBin)
+        thisLowEdge = hdist.GetBinLowEdge(bin)
+        binLowEdges.append( (prevLowEdge+thisLowEdge)/2 )
+
+    name = "passed_"+hdist.GetName()
+    hpass = ROOT.TH1F(name, name, len(binLowEdges)-1, array.array("d", binLowEdges))
+
+    #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
+
+    #print ["%.4f" % i for i in binLowEdges]
+    #print ["%.3f" % hdist.GetBinLowEdge(bin) for bin in xrange(1, hdist.GetNbinsX()+2)]
+    #print ["%.3f" % hpass.GetBinCenter(bin) for bin in xrange(1, hpass.GetNbinsX()+1)]
+    #for bin in xrange(1, hpass.GetNbinsX()):
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    #print "total %f" % total
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        passed = integral(hdist, bin)
+        #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
+        hpass.SetBinContent(bin+1, passed)
+    #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
+    return hpass
+
+## Convert TH1 distribution to TH1 of efficiency as a function of cut value
+def dist2eff(hdist, **kwargs):
+    hpass = dist2pass(hdist, **kwargs)
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        hpass.SetBinContent(bin, hpass.GetBinContent(bin)/total)
+    return hpass
+
+## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
+def dist2rej(hdist, **kwargs):
+    hpass = dist2pass(hdist, **kwargs)
+    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    for bin in xrange(0, hdist.GetNbinsX()+2):
+        hpass.SetBinContent(bin, 1-hpass.GetBinContent(bin)/total)
+    return hpass
+
 
 ## Infer the frame bounds from the histograms and keyword arguments
 #
@@ -408,6 +478,12 @@ class CanvasFrameTwo:
             def getXmax(self):
                 return self.histo.GetXaxis().GetBinUpEdge(self.histo.GetXaxis().GetLast())
 
+            def getYmin(self):
+                return self.histo.GetMinimum()
+
+            def getYmax(self):
+                return self.histo.GetMaximum()
+
         histos1 = histoManager1.getHistos()
         if len(histos1) == 0:
             raise Exception("Empty set of histograms for first pad!")
@@ -554,7 +630,8 @@ class HistoBase:
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
             h.SetLineWidth(1)
-            h.SetLineColor(ROOT.kBlack)
+            if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
+                h.SetLineColor(ROOT.kBlack)
             legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
         else:
@@ -736,8 +813,8 @@ class HistoStacked(HistoBase):
     # List of histograms.Histo objects which are stacked
 
 class HistoGraph(HistoBase):
-    def __init__(self, rootGraph, name):
-        HistoBase.__init__(self, rootGraph, name, "l", "L")
+    def __init__(self, rootGraph, name, legendStyle="l", drawStyle="L"):
+        HistoBase.__init__(self, rootGraph, name, legendStyle, drawStyle)
 
     def getRootGraph(self):
         return self.getRootHisto()

@@ -57,7 +57,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     process.collisionDataSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
-        if doPF2PAT or doPF2PATNoPU or not doPlainPat:
+        if doPF2PAT or doPF2PATNoPu or not doPlainPat:
             raise Exception("Only plainPat can be done for tau embedding input at the moment")
 
         # Hack to not to crash if something in PAT assumes process.out
@@ -116,7 +116,15 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         pargs2 = pf2patArgs.copy()
         pargs2NoPu = pf2patNoPuArgs.copy()
 
-        for args in [pargs, pargs2, pargs2NoPu]:
+        argsList = []
+        if doPlainPat:
+            argsList.append(pargs)
+        if doPF2PAT:
+            argsList.append(pargs2)
+        if doPF2PATNoPu:
+            argsList.append(pargs2NoPu)
+
+        for args in argsList:
             if args.get("doTauHLTMatching", True):
                 if options.trigger == "":
                     raise Exception("Command line argument 'trigger' is missing")
@@ -171,6 +179,32 @@ def addPat(process, dataVersion,
         process.pf2patNoPuSequence
     )
     return sequence
+
+def myRemoveCleaning(process, postfix=""):
+    modulesInSequence = getattr(process, "patDefaultSequence"+postfix).moduleNames()
+    for module in [
+        "cleanPatMuons",
+        "cleanPatElectrons",
+        "cleanPatPhotons",
+        "cleanPatTaus",
+        "cleanPatTausHpsTancPFTau",
+        "cleanPatTausHpsPFTau",
+        "cleanPatTausShrinkingConePFTau",
+        "cleanPatTausCaloRecoTau",
+        "cleanPatJets",
+        "cleanPatCandidateSummary",
+        "countPatElectrons",
+        "countPatMuons",
+        "countPatTaus",
+        "countPatLeptons",
+        "countPatPhotons",
+        "countPatJets",
+        "countPatJetsAK5PF",
+        "countPatJetsAK5JPT",
+        "foo"
+        ]:
+        if hasattr(process, module+postfix) and module+postfix in modulesInSequence:
+            getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, module+postfix))
 
 # Assumes that process.out is the output module
 #
@@ -418,10 +452,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # Remove cleaning step and set the event content
     if out == None:
-        removeCleaning(process, False)
+        myRemoveCleaning(process)
     else:
         backup = process.out.outputCommands[:]
-        removeCleaning(process, True)
+        myRemoveCleaning(process)
         backup_pat = process.out.outputCommands[:]
 
         # Remove PFParticles here, they are explicitly included when needed

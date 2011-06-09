@@ -37,15 +37,15 @@ namespace HPlus {
   class SignalAnalysis {
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
-    kSignalOrderVertexSelection,
+    //kSignalOrderVertexSelection,
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderMETSelection,
     kSignalOrderJetSelection,
-    kSignalOrderBTagSelection,
-    kSignalOrderFakeMETVeto,
-    kSignalOrderTopSelection
+    kSignalOrderBTagSelection
+    //kSignalOrderFakeMETVeto,
+    //kSignalOrderTopSelection
   };
 
   public:
@@ -70,9 +70,9 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
+    Count fMETCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
-    Count fMETCounter;
     Count fNJetsCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;

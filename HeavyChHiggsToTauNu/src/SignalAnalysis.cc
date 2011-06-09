@@ -20,9 +20,9 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fMETCounter(eventCounter.addCounter("MET")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
-    fMETCounter(eventCounter.addCounter("MET")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
@@ -89,15 +89,15 @@ namespace HPlus {
 
     hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 10, 0, 10);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderElectronVeto,"Isol. e veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderMuonVeto,"Isol. #mu veto");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderMETSelection,"MET");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderJetSelection,"#geq 3 jets");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderBTagSelection,"#geq 1 b jet");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
+    //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
   }
 
   SignalAnalysis::~SignalAnalysis() { }
@@ -148,7 +148,7 @@ namespace HPlus {
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
-    hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
     
     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
                                                                                                                                             
@@ -222,13 +222,16 @@ namespace HPlus {
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterBTagging();
+
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (!fakeMETData.passedEvent()) return false;
     increment(fFakeMETVetoCounter);
-    hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
 
+    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
@@ -252,7 +255,7 @@ namespace HPlus {
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     if (!TopSelectionData.passedEvent()) return false;
     increment(fTopSelectionCounter);
-    hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
+    //hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
 
     hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
@@ -286,8 +289,7 @@ namespace HPlus {
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return false;
     //    increment(fForwardJetVetoCounter);
-    //    fTauEmbeddingAnalysis.fillEnd();
-
+    
 
     // The following code is not correct, because there could be more than one tau jet
     // passing the tau ID (and hence multiple values of Rtau
