@@ -28,7 +28,7 @@ def tanbAtNsigma(nSignal,tanbRef,nBackgr,sysError,mHp,mu,Nsigma):
     return tanbForXsec(xSecAtLimit,mHp,tanbRef,mu)
 
 def signalXsecAtNsigma(nSignal,tanbRef,nSignalAtLimit,mHp,mu):
-    xSec_atRef = crosssection.whTauNuCrossSection(mHp, tanbRef, mu)
+    xSec_atRef = crosssection.whTauNuCrossSectionMSSM(mHp, tanbRef, mu)
     xSec_atLimit = xSec_atRef*nSignalAtLimit/nSignal
 #    print "check signalXsecAtNsigma xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal ",xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal
     return xSec_atLimit
