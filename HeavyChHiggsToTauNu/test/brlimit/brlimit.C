@@ -15,13 +15,8 @@ int brlimit()
 
   // --- Read initial values from input files ---
   // "rest" contains dibosons, single top and Drell-Yan 
-  double L, Nwjets, Nttww, Nrest, sigma, ett; 
+  double L;
   ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
-  ifstream fileNwjets("input_nwjets",ios::in);     fileNwjets >> Nwjets;
-  ifstream fileNttww( "input_nttww",ios::in);      fileNttww  >> Nttww;
-  ifstream fileNrest( "input_nrest",ios::in);      fileNrest  >> Nrest;
-  ifstream fileSigma( "input_sigma",ios::in);      fileSigma  >> sigma;
-  ifstream fileEtt(   "input_ett",ios::in);        fileEtt    >> ett;
 
   // --- Data: mass points and efficiencies  --- 
    const int nData = 6; // 90 not yet ready
@@ -32,23 +27,6 @@ int brlimit()
       150,    
       155, 
       160};
-   double e_HW[nData] = {
-     0.001845,
-     0.002301,
-     0.002490,
-     0.002788,
-     0.003202,
-     0.002619 };
-
-  double e_HH[nData] =
-    {
-      0.003782,
-      0.004135,
-      0.003318,
-      0.002129,
-      0.001470,
-      0.001123
-    } ;
 
   // --- Read values from LandS files ---
   // obs, exp, exp+-1sigma, exp+-2sigma
@@ -64,31 +42,15 @@ int brlimit()
   // --- Plot #events vs. Br ---
   // for mH = 120
   const int plot_this = 1; // makes plots for illustration, 1 for mH=120 
-  double Nbkg=Nwjets + Nttww + Nrest;//Nwjets + L*sigma*ett;
-  double coef1=L*sigma*e_HW[plot_this]*2;
-  double coef2_hw=L*sigma*ett*
-    (2*(e_HW[plot_this]/ett-1)+1); //remember that this should be negative
-  double coef2_hwhh=-L*sigma*(e_HH[plot_this]-2*e_HW[plot_this]);//remember that this should be negative
-  make_plot_simple(Nbkg,coef1,coef2_hwhh,coef2_hw,L,mH[plot_this]);
-  make_plot_shaded(Nbkg,coef1,coef2_hwhh,coef2_hw, valueLandS_exp[plot_this],L,mH[plot_this]);
-
   // --- Plot Br 95% CL limit plot ---
   double BR_95_obs[nData],BR_95_exp[nData], BR_95_exp_p1[nData], BR_95_exp_m1[nData], BR_95_exp_p2[nData], BR_95_exp_m2[nData];
   for (int i=0; i<nData; i++){ 
-    coef1=L*sigma*e_HW[i]*2;
-    coef2_hwhh=-L*sigma*(e_HH[i]-2*e_HW[i]);
-    double ev_obs = valueLandS_obs[i]    + Nbkg;
-    double ev_exp = valueLandS_exp[i][2] + Nbkg;
-    double ev_exp_p1 = valueLandS_exp[i][2+1] + Nbkg;
-    double ev_exp_m1 = valueLandS_exp[i][2-1] + Nbkg;
-    double ev_exp_p2 = valueLandS_exp[i][2+2] + Nbkg;
-    double ev_exp_m2 = valueLandS_exp[i][2-2] + Nbkg;
-    BR_95_obs[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_obs);
-    BR_95_exp[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp);
-    BR_95_exp_p1[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_p1);
-    BR_95_exp_m1[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_m1);
-    BR_95_exp_p2[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_p2);
-    BR_95_exp_m2[i] = calculate_BR(Nbkg,coef1,coef2_hwhh,ev_exp_m2);
+    BR_95_obs[i] = valueLandS_obs[i]    ;
+    BR_95_exp[i] =  valueLandS_exp[i][2] ;
+    BR_95_exp_p1[i] = valueLandS_exp[i][2+1] ;
+    BR_95_exp_m1[i] = valueLandS_exp[i][2-1] ;
+    BR_95_exp_p2[i] = valueLandS_exp[i][2+2] ;
+    BR_95_exp_m2[i] = valueLandS_exp[i][2-2] ;
   }
   TCanvas * can_br = new TCanvas();
   can_br->SetTitle("95\% CL limit for BR");
@@ -99,7 +61,7 @@ int brlimit()
   tg_obs->SetMarkerSize(1.4);
   tg_obs->SetLineWidth(3);
   tg_obs->Draw("LPA");
-  tg_obs->GetYaxis()->SetRangeUser(0,1.0); 
+  tg_obs->GetYaxis()->SetRangeUser(0,0.4);
   tg_obs->GetYaxis()->SetTitle("95\% CL limit for Br(t#rightarrow bH^{#pm})");
   tg_obs->GetXaxis()->SetTitle("m_{H^{+}} (GeV/c^{2})");
   TGraph * tg_exp = new TGraph(nData, mH, BR_95_exp);
@@ -133,11 +95,11 @@ int brlimit()
   pl->SetBorderSize(0);
   TLegendEntry *ple;
   ple = pl->AddEntry(tg_obs, "Observed", "lp");
-  ple = pl->AddEntry(tg_exp, "Expected", "lp");
+  ple = pl->AddEntry(tg_exp, "Expected median", "lp");
   char temp[200];
-  sprintf(temp,"Expected #pm1 #sigma");
+  sprintf(temp,"Expected median #pm1 #sigma");
   ple = pl->AddEntry(tg_exp_cont1, temp, "f");
-  sprintf(temp,"Expected #pm2 #sigma");
+  sprintf(temp,"Expected median #pm2 #sigma");
   ple = pl->AddEntry(tg_exp_cont2, temp, "f");
   pl->Draw();
   // Redraw lines on top of filled area
@@ -147,7 +109,7 @@ int brlimit()
   plotTxt(L);
 
   // --- Plot LIP and Tevatron results, obs(black) ---
-  if (1) plotLipResults(pl);
+  if (0) plotLipResults(pl);
   if (1) plotTevatronResults(pl);
 
   // Save TGraphs and plots
@@ -159,6 +121,7 @@ int brlimit()
   myfi.Close();
   can_br->SaveAs("brlimits.eps");
   can_br->SaveAs("brlimits.png");
+  can_br->SaveAs("brlimits.C");
   
   return 0;
 }
@@ -220,151 +183,11 @@ void readValuesFromLandsFile(char * fileName, double &my_obs,double * my_exp)
   cout << "Observed: " << my_obs << endl;
   for (int j=0; j<5; j++) logFile >> my_exp[j];
   cout << "Expected ";
-  for (int j=0; j<5; j++) 
+  for (int j=0; j<5; j++) {
     cout << my_exp[j] << "  ";
+  }
   cout << endl;
   return;
-}
-
-
-double make_plot_simple(double bkg, 
-			double coef1, 
-			double coef2_hwhh, 
-			double coef2_hw, 
-			int L, 
-			int mH)
-{
-  char temp[500];
-  const double c = bkg;
-
-  TCanvas * can = new TCanvas();
-
-  // print formula and draw function
-  sprintf(temp,"%.2f+%.2f*x-%.2f*x^2",c,coef1,coef2_hwhh);//coef2_hwhh is negative
-  TF1 * fu = new TF1("function",temp,0,1);
-  fu->GetXaxis()->SetTitle("Br(t->bH+)");
-  fu->GetYaxis()->SetTitle("Number of expected events");
-  fu->SetLineColor(1);
-  fu->SetLineWidth(3);
-  fu->Draw();
-
-  // draw hw line
-  sprintf(temp,"%.2f+%.2f*x-%.2f*x^2",c,coef1,coef2_hw);//coef2_hwhh is negative
-  TF1 * fuhw = new TF1("functionhw",temp,0,1);
-  fuhw->SetLineStyle(2);
-  fuhw->SetLineColor(1);
-  fuhw->SetLineWidth(3);
-  fuhw->Draw("same");
-
-  plotTxt(L);
-
-  can->SaveAs("Nevents.eps");
-  can->SaveAs("Nevents.png");
-
-  return 0;
-}
-
-double make_plot_shaded(double c, 
-			double coef1, 
-			double coef2_hwhh, 
-			double coef2_hw, 
-			double lands[],
-			int L, 
-			int mH)
-{
-  char temp[500];
-
-  double Nlimit = lands[2];
-  double Nlimitminus = lands[1];
-  double Nlimitplus = lands[3];
-
-  // print formula and draw function
-  sprintf(temp,"%.2f+%.2f*x-%.2f*x^2",c,coef1,coef2_hwhh);//coef2_hwhh is negative
-  cout << endl << "Equation is: " << temp << endl;
-  TF1 * fu = new TF1("function",temp,0,0.35);
-  fu->GetXaxis()->SetTitle("Br(t->bH+)");
-  fu->GetYaxis()->SetTitle("Number of expected events");
-  TCanvas * can = new TCanvas();
-  fu->SetLineColor(1);
-  fu->SetLineWidth(3);
-  fu->Draw();
-
-  // calculate solution (lower value) and its 1 sigma errors
-  double solution = (-coef1 +sqrt(coef1*coef1 - 4*(-coef2_hwhh)*(c-Nlimit)))/(2*(-coef2_hwhh));//coef2_hwhh is negative
-  double solutionplus = (-coef1 +sqrt(coef1*coef1 - 4*(-coef2_hwhh)*(c-Nlimitplus)))/(2*(-coef2_hwhh));//coef2_hwhh is negative
-  double solutionminus = (-coef1 +sqrt(coef1*coef1 - 4*(-coef2_hwhh)*(c-Nlimitminus)))/(2*(-coef2_hwhh));//coef2_hwhh is negative
-  cout << "sol " << solution << " min " << solutionminus << " plus  " << solutionplus <<  endl;
-  double solution_hw = (-coef1 +sqrt(coef1*coef1 - 4*(-coef2_hw)*(c-Nlimit)))/(2*(-coef2_hw));//coef2_hwhh is negative
-  cout << "Obtained Nlimit is " << solution << ", only considering HW events would give " << solution_hw << endl;
-
-  // Draw yellow area
-  double areaY[] = {Nlimitminus,  Nlimitminus,          0.001,         0.001,  Nlimitplus,Nlimitplus };
-  double areaX[] = {        0.001,solutionminus,solutionminus,solutionplus,solutionplus,       0.001 };
-  TGraph * area = new TGraph(6,areaX,areaY);
-  area->SetFillColor(5);
-  area->SetFillStyle(3001);
-  area->Draw("F");
-  fu->Draw("same"); // redraw
-
-  // draw lines
-  Double_t x1[2],y1[2];
-  x1[0]=0.01;x1[1]=solution;
-  y1[0]=Nlimit;y1[1]=Nlimit;
-  TGraph * lineEvts = new TGraph(2,x1,y1);
-  //lineEvts->SetLineWidth(1504);
-  lineEvts->SetLineWidth(7);
-  lineEvts->SetLineStyle(2);
-  lineEvts->SetFillStyle(3005);
-  lineEvts->Draw();
-
-  x1[0]=solution;x1[1]=solution;
-  y1[0]=0.01;y1[1]=fu(1.0); if (fu(0.5)>y1[1]) y1[1]=fu(0.5);
-  TGraph * lineBr = new TGraph(2,x1,y1);
-  //t1.Draw();
-  lineBr->SetLineWidth(-16004);
-  lineBr->SetLineColor(2);
-  lineBr->SetLineStyle(2);
-  lineBr->SetFillStyle(3004);
-  lineBr->Draw();
-  x1[0]=solutionminus;x1[1]=solutionminus;
-  y1[0]=0.01;y1[1]=fu(solutionminus);
-
-  TLatex text;
-  //  text.SetNDC();
-  text.SetTextSize(0.04);
-  text.DrawLatex(solution+0.01,2.5,"Excluded");
-  text.DrawLatex(solution+0.01,2,"Vr values");
-  text.DrawLatex(solution-0.11,Nlimit-0.8,"N_{95\%}^{expected}");
-
-  plotTxtMh(L,mH);
-
-  can->SaveAs("Nevents_zoom.eps");
-  can->SaveAs("Nevents_zoom.png");
-
-  ofstream fileNsig("output_root_Nsig",ios::out); fileNsig<<Nlimit-c;
-  ofstream fileNlimit("output_root_Nlimit",ios::out); fileNlimit<<Nlimit;
-  ofstream fileSolution("output_root_N95",ios::out); fileSolution<<solution;
-  ofstream fileSolutionp("output_root_N95plus",ios::out); fileSolutionp<<solutionplus-solution;
-  ofstream fileSolutionm("output_root_N95minus",ios::out); fileSolutionm<<solution-solutionminus;
-
-  return solution;
-}
-
-
-double calculate_BR(double c1, double coef1, double coef2_hwhh, double events)
-{
-  // second order equation ax^2 + bx + c = 0, return lower solution
-  // return BR = 100% if cannot find answer
-  double a = -coef2_hwhh;
-  double b = coef1;
-  double c = c1-events;
-
-  double temp = b*b - 4*a*c;
-  if (temp<0) return 1.0;
-
-  double BR = (-b + sqrt(temp)) / (2*a);
-
-  return BR;
 }
 
 
@@ -381,7 +204,7 @@ void plotTxt(double lumi) {
   char temp[300];
   //  sprintf(temp,"#sqrt{s}=7 TeV, %.0d pb^{-1}",lumi);
   //  text.DrawLatex(left,linePos -= lineSpace,temp);
-  text.DrawLatex(left,linePos -= lineSpace,"Bayesian CL limit");
+  //  text.DrawLatex(left,linePos -= lineSpace,"Bayesian CL limit");
   text.DrawLatex(left,linePos -= lineSpace,"Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1");
 
   // Style copied from python/tools/histograms.py
@@ -400,6 +223,7 @@ void plotTxt(double lumi) {
 
   return;
 }
+
 
 void plotTxtMh(double lumi, int mH) {
   Double_t top       = 0.85;
