@@ -42,6 +42,7 @@ set -e
 # 25.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 # 27.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 # 31.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated PAT tags
+# 10.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -62,13 +63,11 @@ cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/RecoTau
 cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/TauTagTools
 cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/Configuration
 # PAT
-addpkg DataFormats/PatCandidates V06-04-13
-addpkg PhysicsTools/PatAlgos     V08-06-28
-addpkg PhysicsTools/PatExamples  V00-05-17
-addpkg RecoJets/Configuration    V02-04-16
-addpkg RecoJets/JetAlgorithms    V04-01-00    
-addpkg RecoJets/JetProducers     V05-05-03
-
+addpkg DataFormats/PatCandidates V06-04-15
+addpkg PhysicsTools/PatAlgos     V08-06-31
+addpkg PhysicsTools/PatExamples  V00-05-18
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
+addpkg RecoJets/Configuration    V02-04-17
 
 
 # Electron ID

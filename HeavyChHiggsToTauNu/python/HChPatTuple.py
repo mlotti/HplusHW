@@ -31,8 +31,8 @@ tauPreSelection = "pt() > 10"
 # PAT on the fly
 #
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
-                   doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
-                   plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={}):
+                   doPlainPat=True, doPF2PAT=False,
+                   plainPatArgs={}, pf2patArgs={}):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -63,7 +63,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     process.eventPreSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
-        if doPF2PAT or doPF2PATNoPu or not doPlainPat:
+        if doPF2PAT or not doPlainPat:
             raise Exception("Only plainPat can be done for tau embedding input at the moment")
 
         # Hack to not to crash if something in PAT assumes process.out
@@ -122,15 +122,12 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
         pargs = plainPatArgs.copy()
         pargs2 = pf2patArgs.copy()
-        pargs2NoPu = pf2patNoPuArgs.copy()
 
         argsList = []
         if doPlainPat:
             argsList.append(pargs)
         if doPF2PAT:
             argsList.append(pargs2)
-        if doPF2PATNoPu:
-            argsList.append(pargs2NoPu)
 
         for args in argsList:
             if args.get("doTauHLTMatching", True):
@@ -144,8 +141,8 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
                     args["matchingJetTrigger"] = jetTrigger
 
         process.patSequence = addPat(process, dataVersion,
-                                     doPlainPat=doPlainPat, doPF2PAT=doPF2PAT, doPF2PATNoPu=doPF2PATNoPu,
-                                     plainPatArgs=pargs, pf2patArgs=pargs2, pf2patNoPuArgs=pargs2NoPu)
+                                     doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
+                                     plainPatArgs=pargs, pf2patArgs=pargs2,)
     
     # Add selection of PVs with sumPt > 10
 #    process.patSequence *= process.goodPrimaryVertices10
@@ -165,11 +162,10 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
 # Add the PAT sequences as requested
 def addPat(process, dataVersion,
-           doPlainPat=True, doPF2PAT=False, doPF2PATNoPu=False,
-           plainPatArgs={}, pf2patArgs={}, pf2patNoPuArgs={},
+           doPlainPat=True, doPF2PAT=False,
+           plainPatArgs={}, pf2patArgs={},
            includePFCands=False):
     process.pf2patSequence = cms.Sequence()
-    process.pf2patNoPuSequence = cms.Sequence()
     process.plainPatSequence = cms.Sequence()
 
     # Select good primary vertices
@@ -180,9 +176,7 @@ def addPat(process, dataVersion,
 
     # Run various PATs
     if doPF2PAT:
-        process.pf2patSequence = addPF2PAT(process, dataVersion, postfix="PFlow", doPFnoPU=False, **pf2patArgs)
-    if doPF2PATNoPu:
-        process.pf2patNoPuSequence = addPF2PAT(process, dataVersion, **pf2patNoPuArgs)
+        process.pf2patSequence = addPF2PAT(process, dataVersion, **pf2patArgs)
     if doPlainPat:
         process.plainPatSequence = addPlainPat(process, dataVersion, includePFCands=includePFCands, **plainPatArgs)
 
@@ -210,8 +204,7 @@ def addPat(process, dataVersion,
         process.goodPrimaryVertices10 *
         process.offlinePrimaryVerticesSumPt *
         process.plainPatSequence *
-        process.pf2patSequence *
-        process.pf2patNoPuSequence
+        process.pf2patSequence
     )
 
     return sequence
@@ -237,7 +230,7 @@ def myRemoveCleaning(process, postfix=""):
         "countPatJets",
         "countPatJetsAK5PF",
         "countPatJetsAK5JPT",
-        "foo"
+        "countPatPFParticlesPFlow",
         ]:
         if hasattr(process, module+postfix) and module+postfix in modulesInSequence:
             getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, module+postfix))
@@ -280,15 +273,22 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         runOnData(process, outputInProcess = out!=None)
 
     # Jets
+    # Produce kt6 rho for L1Fastjet
+    process.load('RecoJets.Configuration.RecoPFJets_cff')
+    process.kt6PFJets.doRhoFastjet = True
+    process.ak5PFJets.doAreaFastjet = True
+    process.ak5PFJetSequence = cms.Sequence(process.kt6PFJets * process.ak5PFJets)
+   
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     setPatJetDefaults(process.patJets)
     setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion)
+    process.patDefaultSequence.replace(process.patJetCorrFactors,
+                                       process.ak5PFJetSequence*process.patJetCorrFactors)
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
-    # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
-    # adds the L2L3Residual to the list. The default JEC to be applied
+    # L3Absolute, L5Flavor and L7Parton. The default JEC to be applied
     # is L2L3Residual, or L3Absolute, or Uncorrected (in this order).
 
     if doPatCalo:
@@ -317,8 +317,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          genJetCollection = cms.InputTag("ak5GenJets"),
                          doJetID      = True
         )
+        setPatJetCorrDefaults(process.patJetCorrFactorsAK5PF, dataVersion, True)
 
     else:
+#        setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion, True)
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
                             doBTagging   = doBTagging,
@@ -609,9 +611,8 @@ def patJetCorrLevels(dataVersion, L1FastJet=False):
     return levels
 
 def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
-    module.levels = patJetCorrLevels(dataVersion, L1FastJet)
-    if not L1FastJet:
-        module.useRho = False
+    module.levels = cms.vstring(patJetCorrLevels(dataVersion, L1FastJet))
+    module.useRho = L1FastJet
 
 def setPatTauDefaults(module, includePFCands):
     attrs = [
@@ -679,9 +680,8 @@ def addPatElectronID(process, module, sequence):
 #
 # PF2PAT
 #
-def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
+def addPF2PAT(process, dataVersion, postfix="PFlow",
               doTauHLTMatching=True, matchingTauTrigger=None, 
-              doPFnoPU=True,
               ):
 #    if hasattr(process, "patDefaultSequence"):
 #        raise Exception("PAT should not exist before calling addPF2PAT at the moment")
@@ -702,11 +702,8 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 
     # Jet modifications
     # PhysicsTools/PatExamples/test/patTuple_42x_jec_cfg.py
-    doL1Fastjet = True
-    jetCorrFactors = patJetCorrLevels(dataVersion, doL1Fastjet)
-    jetCorrPayload = "AK5PF"
-    if doPFnoPU:
-        jetCorrPayload = "AK5PFchs"
+    jetCorrFactors = patJetCorrLevels(dataVersion, True)
+    jetCorrPayload = "AK5PFchs"
 
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
     pfTools.usePF2PAT(process, runPF2PAT=True, jetAlgo="AK5", jetCorrections=(jetCorrPayload, jetCorrFactors),
@@ -717,64 +714,44 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
 #        'keep *_selectedPatElectrons%s_*_*' % postfix, 
         'keep *_selectedPatMuons%s_*_*' % postfix,
         'keep *_selectedPatJets%s*_*_*' % postfix,
+        'keep *_selectedPatTaus%s_*_*' % postfix,
+        'keep *_selectedPatPFParticles%s_*_*' % postfix,
         'keep *_selectedPatJets%s_pfCandidates_*' % postfix,
         'drop *_*PF_caloTowers_*',
         'drop *_*JPT_pfCandidates_*',
         'drop *_*Calo_pfCandidates_*',
         'keep *_patMETs%s_*_*' % postfix,
         ]
-    if doPFnoPU:
-        outputCommands.extend([
-                'keep *_selectedPatTaus%s_*_*' % postfix,
-                'keep *_selectedPatPFParticles%s_*_*' % postfix,
-                ])
-    else:
-        outputCommands.extend([
-                'drop *_selectedPatTaus%s_*_*' % postfix,
-                'drop *_selectedPatPFParticles%s_*_*' % postfix,
-                ])
 
-    # Enable/disable PFnoPU
-    if doPFnoPU:
-        getattr(process, "pfPileUp"+postfix).Enable = True
-        getattr(process, "pfPileUp"+postfix).checkClosestZVertex = False
-        getattr(process, "pfPileUp"+postfix).Vertices = "goodPrimaryVertices"
+    # Enable PFnoPU
+    getattr(process, "pfPileUp"+postfix).Enable = True
+    getattr(process, "pfPileUp"+postfix).checkClosestZVertex = False
+    getattr(process, "pfPileUp"+postfix).Vertices = "goodPrimaryVertices"
 
     # Jet modifications
     # L1FastJet
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#OffsetJEC
     # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2011
     # https://hypernews.cern.ch/HyperNews/CMS/get/jes/184.html
-    if doL1Fastjet:
-        kt6name = "kt6PFJets"+postfix
+    kt6name = "kt6PFJets"+postfix
+    process.load('RecoJets.Configuration.RecoPFJets_cff')
+    from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
+    setattr(process, kt6name, kt4PFJets.clone(
+        rParam = 0.6,
+        src = 'pfNoElectron'+postfix,
+        doRhoFastjet = True,
+        doAreaFastJet = cms.bool(True),
+    ))
+    getattr(process, "patPF2PATSequence"+postfix).replace(
+        getattr(process, "pfNoElectron"+postfix),
+        getattr(process, "pfNoElectron"+postfix) * getattr(process, kt6name))
+    getattr(process, "patJetCorrFactors"+postfix).rho = cms.InputTag(kt6name, "rho")
+    getattr(process, "patJetCorrFactors"+postfix).useRho = True
 
-        if doPFnoPU:
-            from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
-            setattr(process, kt6name, kt4PFJets.clone(
-                rParam = cms.double(0.6),
-                src = cms.InputTag('pfNoElectron'+postfix),
-                doAreaFastjet = cms.bool(True),
-                doRhoFastjet = cms.bool(True),
-                voronoiRfact = cms.double(0.9)
-            ))
-        else:
-            process.load('RecoJets.Configuration.RecoPFJets_cff')
-            setattr(process, kt6name, process.kt6PFJets.clone(
-                    doRhoFastjet = True,
-                    Rho_EtaMax = cms.double(4.5)
-            ))
-        getattr(process, "patPF2PATSequence"+postfix).replace(
-            getattr(process, "pfNoElectron"+postfix),
-            getattr(process, "pfNoElectron"+postfix) * getattr(process, kt6name))
-        getattr(process, "patJetCorrFactors"+postfix).rho = cms.InputTag(kt6name, "rho")
-        getattr(process, "patJetCorrFactors"+postfix).useRho = True
-
-        # ak5PFJets
-        getattr(process, "pfJets"+postfix).doAreaFastjet = True
-        if doPFnoPU:
-            getattr(process, "pfJets"+postfix).Vertices = cms.InputTag("goodPrimaryVertices")
-            getattr(process, "pfJets"+postfix).doRhoFastjet = False
-
+    # ak5PFJets
+    getattr(process, "pfJets"+postfix).doAreaFastjet = cms.bool(True)
+    getattr(process, "pfJets"+postfix).doRhoFastjet = False
+#    getattr(process, "pfJets"+postfix).Vertices = cms.InputTag("goodPrimaryVertices")
 
     setPatJetDefaults(getattr(process, "patJets"+postfix))
 
@@ -787,6 +764,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         import RecoTauTag.RecoTau.CaloRecoTauDiscriminationForChargedHiggs_cfi as HChCaloTauDiscriminators
 
         tauAlgos = ["hpsPFTau"]
+#        tauAlgos = ["pfTaus"+postfix]
         HChPFTauDiscriminators.addPFTauDiscriminationSequenceForChargedHiggs(process, tauAlgos)
         HChPFTauDiscriminatorsCont.addPFTauDiscriminationSequenceForChargedHiggsCont(process, tauAlgos)
         PFTauTestDiscrimination.addPFTauTestDiscriminationSequence(process, tauAlgos)
@@ -802,9 +780,12 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
         getattr(process, "hpsPFTauHplusDiscriminationSequence"+postfix) *
         getattr(process, "hpsPFTauHplusDiscriminationSequenceCont"+postfix) * 
         getattr(process, "hpsPFTauHplusTestDiscriminationSequence"+postfix)
+#        getattr(process, "pfTaus"+postfix+"HplusDiscriminationSequence") *
+#        getattr(process, "pfTaus"+postfix+"HplusDiscriminationSequenceCont") * 
+#        getattr(process, "pfTaus"+postfix+"HplusTestDiscriminationSequence")
     )
     setattr(process, "hplusPatTauSequence"+postfix, patTauSeq)
-    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("hpsPFTauProducer"+postfix))
+    patHelpers.massSearchReplaceParam(patTauSeq, "PFTauProducer", cms.InputTag("hpsPFTauProducer"), cms.InputTag("pfTaus"+postfix))
     patHelpers.massSearchReplaceAnyInputTag(patTauSeq, cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"), cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"+postfix))
 
     pfTools.adaptPFTaus(process, "hpsPFTau", postfix=postfix)
@@ -817,21 +798,21 @@ def addPF2PAT(process, dataVersion, postfix="PFlowNoPU",
     # is missing from the default sequence, but since we don't want to
     # apply any tau selections as a part of PF2PAT anyway, let's just
     # remove this too
-    #getattr(process, "pfTaus"+postfix).discriminators = cms.VPSet()
-    getattr(process, "pfTauSequence"+postfix).remove(getattr(process, "pfTaus"+postfix))
-    delattr(process, "pfTaus"+postfix)
-    getattr(process, "pfTausBaseSequence"+postfix).remove(getattr(process, "pfTausBaseDiscriminationByLooseIsolation"+postfix))
+    getattr(process, "pfTaus"+postfix).discriminators = cms.VPSet()
+#    getattr(process, "pfTauSequence"+postfix).remove(getattr(process, "pfTaus"+postfix))
+#    delattr(process, "pfTaus"+postfix)
+#    getattr(process, "pfTausBaseSequence"+postfix).remove(getattr(process, "pfTausBaseDiscriminationByLooseIsolation"+postfix))
     
 
     # Remove the shrinking cone altogether, we don't care about it
-    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "patShrinkingConePFTauDiscrimination"+postfix))
+#    getattr(process, "patDefaultSequence"+postfix).remove(getattr(process, "patShrinkingConePFTauDiscrimination"+postfix))
 
     # Override the tau source (this is WRONG in the standard PF2PAT, the expers should know it already)
-    getattr(process, "patTaus"+postfix).tauSource = "hpsPFTauProducer"+postfix
-    patHelpers.massSearchReplaceAnyInputTag(getattr(process, "patHPSPFTauDiscrimination"+postfix),
-                                            cms.InputTag("pfTaus"+postfix),
-                                            cms.InputTag("hpsPFTauProducer"+postfix))
-    getattr(process, "pfNoTau"+postfix).topCollection = cms.InputTag("hpsPFTauProducer"+postfix)
+#    getattr(process, "patTaus"+postfix).tauSource = "hpsPFTauProducer"+postfix
+#    patHelpers.massSearchReplaceAnyInputTag(getattr(process, "patHPSPFTauDiscrimination"+postfix),
+#                                            cms.InputTag("pfTaus"+postfix),
+#                                            cms.InputTag("hpsPFTauProducer"+postfix))
+#    getattr(process, "pfNoTau"+postfix).topCollection = cms.InputTag("hpsPFTauProducer"+postfix)
 
     # Disable iso deposits, they take a LOT of space
     getattr(process, "patTaus"+postfix).isoDeposits = cms.PSet()

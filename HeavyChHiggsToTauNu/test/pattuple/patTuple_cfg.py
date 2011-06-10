@@ -10,8 +10,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Create Process
 process = cms.Process("HChPatTuple")
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 # Global tag
@@ -78,27 +78,10 @@ process.out = cms.OutputModule("PoolOutputModule",
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
-# Add first PF2PAT so that we get a clean patDefaultSequence
-# process.sPF2PAT = addPF2PAT(process, dataVersion,
-#                             matchingTauTrigger=myTrigger,
-#                             postfix="PFlow", doPFnoPU=False,
-#                             )
-# process.sPF2PATnoPU = addPF2PAT(process, dataVersion,
-#                                 matchingTauTrigger=myTrigger,
-#                                 )
-
-# process.sPAT = addPlainPat(process, dataVersion,
-#                            doPatMuonPFIsolation=True,
-#                            matchingTauTrigger=myTrigger,
-#                            includeTracksPFCands=False,
-#                            )
-
-
-process.sPAT = addPat(process, dataVersion, doPlainPat=True, doPF2PAT=True, doPF2PATNoPu=True,
+process.sPAT = addPat(process, dataVersion, doPlainPat=True, doPF2PAT=True,
                       plainPatArgs={"matchingTauTrigger": myTrigger,
                                     "doPatMuonPFIsolation": True},
                       pf2patArgs={"matchingTauTrigger": myTrigger},
-                      pf2patNoPuArgs={"matchingTauTrigger": myTrigger},
                       )
 
 if dataVersion.isData():
