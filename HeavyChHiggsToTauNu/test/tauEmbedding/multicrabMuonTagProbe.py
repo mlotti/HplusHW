@@ -5,22 +5,11 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("../crab_analysis.cfg", "muonTagProbe_cfg.py", lumiMaskDir="..")
 
 aodDatasets = [
-    # Data
-    "Mu_136035-144114_Dec22",
-    "Mu_146428-147116_Dec22",
-#    "Mu_147196-149294_Dec22"
-    # Signal MC
-    # Background MC
-#    "QCD_Pt20_MuEnriched_TuneZ2_Winter10",
-#    "DYJetsToLL_TuneZ2_Winter10",
-#    "TToBLNu_s-channel_TuneZ2_Winter10",
-#    "TToBLNu_t-channel_TuneZ2_Winter10",
-#    "TToBLNu_tW-channel_TuneZ2_Winter10",
-    # Signal MC
-#    "WJets_TuneZ2_Winter10",
-#    "WJets_TuneD6T_Winter10",
-#    "TTJets_TuneZ2_Winter10",
-#    "TTJets_TuneD6T_Winter10",
+    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
+    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
+    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
+
+    "DYJetsToLL_M50_TuneZ2_Spring11",
 ]
 
 
@@ -29,7 +18,11 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 multicrab.appendLineAll("CMSSW.output_file = histograms.root")
 
 numberOfJobs = {
-    "Mu_146428-147116_Dec22": 5,
+#    "Mu_146428-147116_Dec22": 5,
+    "SingleMu_160431-161016_Prompt": 4,
+    "SingleMu_162803-163261_Prompt": 8,
+    "SingleMu_163270-163869_Prompt": 10,
+    
     "DYJetsToLL_M50_TuneZ2_Spring11": 20,
 }
 
