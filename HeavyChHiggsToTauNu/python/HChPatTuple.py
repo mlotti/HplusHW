@@ -18,6 +18,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTausTest_cfi as HChTausTest
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFTauTestDiscrimination as PFTauTestDiscrimination
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatching
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMcSelection as HChMcSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
@@ -41,10 +42,12 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
             setPatArg(args, name, value)
 
     counters = []
-    if dataVersion.isData() and options.tauEmbeddingInput == 0:
-        counters = HChDataSelection.dataSelectionCounters[:]
     if options.tauEmbeddingInput != 0:
         counters = MuonSelection.muonSelectionCounters[:]
+    elif dataVersion.isData():
+        counters = HChDataSelection.dataSelectionCounters[:]
+#    elif dataVersion.isMC():
+#        counters = HChMcSelection.mcSelectionCounters[:]
 
         import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
         counters.extend(PFEmbeddingSource.muonSelectionCounters)
@@ -58,7 +61,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     print "Running PAT on the fly"
 
-    process.collisionDataSelection = cms.Sequence()
+    process.eventPreSelection = cms.Sequence()
     if options.tauEmbeddingInput != 0:
         if doPF2PAT or doPF2PATNoPu or not doPlainPat:
             raise Exception("Only plainPat can be done for tau embedding input at the moment")
@@ -113,7 +116,9 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 #            process.patSequence *= process.goodPrimaryVertices
     else:
         if dataVersion.isData():
-            process.collisionDataSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+        elif dataVersion.isMC():
+            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
         pargs = plainPatArgs.copy()
         pargs2 = pf2patArgs.copy()
@@ -146,7 +151,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 #    process.patSequence *= process.goodPrimaryVertices10
 
     dataPatSequence = cms.Sequence(
-        process.collisionDataSelection *
+        process.eventPreSelection *
         process.patSequence
     )
 
