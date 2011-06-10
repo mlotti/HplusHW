@@ -64,7 +64,7 @@ cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/TauTagTools
 cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/Configuration
 # PAT
 addpkg DataFormats/PatCandidates V06-04-15
-addpkg PhysicsTools/PatAlgos     V08-06-31
+addpkg PhysicsTools/PatAlgos     V08-06-32
 addpkg PhysicsTools/PatExamples  V00-05-18
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration    V02-04-17
