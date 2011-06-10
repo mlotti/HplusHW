@@ -57,6 +57,15 @@ datasets = {
                 "number_of_jobs": 220,
                 "lumiMask": "May10ReReco"
             },
+            "pattuple_v12_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v12_1-6ae1d9d348269e1efba464a7f56ab58d/USER",
+                "luminosity": 159.758105,
+                "number_of_jobs": 10,
+            },
+            "pattuple_v12": {
+                "fallback": "pattuple_v12_1"
+            },
         }
     },
 
