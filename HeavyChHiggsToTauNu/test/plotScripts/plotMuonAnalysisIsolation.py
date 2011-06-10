@@ -41,22 +41,26 @@ plotStyles = [
     ]
 
 def main():
+#    weight = ""
+    weight = "VertexWeight"
+#    weight = "PileupWeight"
+
 #    mainAnalysis = "muonSelectionPFPt40Met20NJets3"
-    mainAnalysis = "muonSelectionPFPt40Met20NJets3"
+    mainAnalysis = "muonSelectionPFPt40Met20NJets3%s" % weight
     tauIsoAnalyses = [
-#        "muonSelectionPFPt40Met20NJets3IsoTauVLoose",
-#        "muonSelectionPFPt40Met20NJets3IsoTauLoose",
-#        "muonSelectionPFPt40Met20NJets3IsoTauMedium",
-#        "muonSelectionPFPt40Met20NJets3IsoTauTight",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeTight",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015",
-#        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightIc04",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc015Ic04",
-#        "muonSelectionPFPt40Met20NJets3IsoTauLikeTightSc02Ic04",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeMedium",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeLoose",
-        "muonSelectionPFPt40Met20NJets3IsoTauLikeVLoose",
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauVLoose" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLoose" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauMedium" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauTight" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTight" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc02" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightIc04" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015Ic04" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc02Ic04" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeMedium" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeLoose" % weight,
+        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeVLoose" % weight,
         ]
 
     signals = ["TTJets",
@@ -72,18 +76,22 @@ def main():
 
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=mainAnalysis+"countAnalyzer")
     datasets.loadLuminosities()
+#    datasets.remove(["SingleMu_163270-163869_Prompt", "SingleMu_162803-163261_Prompt", "SingleMu_160431-161016_Prompt"])
     plots.mergeRenameReorderForDataMC(datasets)
 
     style = tdrstyle.TDRStyle()
 
+    histograms.createLegend.moveDefaults(dx=-0.15, dy=0.1, dh=-0.1)
+
     # QCD fraction for the continuous isolation variables
     prefix = selection+"_"
     isoPassed = []
-    isoNames = ["sumIsoRel", "pfSumIsoRel"]
-#    isoNames = ["sumIsoRelFull", "pfSumIsoRelFull"]
+#    isoNames = ["sumIsoRel", "pfSumIsoRel"]
+    isoNames = ["sumIsoRelFull", "pfSumIsoRelFull"]
     additionalIsoNames = ["tauTightIso", "tauMediumIso", "tauLooseIso", "tauVLooseIso",
                           "tauTightSc015Iso", "tauTightSc02Iso",
-                          "tauTightIc04Iso", "tauTightSc015Ic04Iso", "tauTightSc02Ic04Iso"
+                          "tauTightIc04Iso", "tauTightSc015Ic04Iso", "tauTightSc02Ic04Iso",
+                          "tauTightIc04SumPtIso", "tauTightIc04MaxPtIso", 
                           ]
     for iso in isoNames+additionalIsoNames:
         isoPassed.append(muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=5))
@@ -93,7 +101,13 @@ def main():
             muonAnalysis.muonIso(muonAnalysis.Plot(datasets, tmp+"/muon_"+iso), tmp+"_", iso)
 
     for iso in additionalIsoNames:
-        muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=1, opts={"xmax": 45, "ymin": 1e-1})
+        opts = {"ymin": 1e-1}
+        rebin = 1
+        if iso == "tauTightIc04Iso":
+            opts["xmax"] = 45
+        elif "Pt" in iso:
+            rebin = 5
+        muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=rebin, opts=opts)
 
     isoPlot = muonAnalysis.PlotIso(isoPassed, isoNames)
     muonAnalysis.muonIsoQcd(isoPlot, prefix)

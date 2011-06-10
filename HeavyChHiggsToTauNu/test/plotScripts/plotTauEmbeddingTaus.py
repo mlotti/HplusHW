@@ -22,22 +22,28 @@ createLegend.setDefaults(x1=0.5, y1=0.8, y2=0.9,
                          borderSize=0)
 
 #embeddingDir = "multicrab_analysis_110328_175023"
-embeddingDir = "multicrab_analysis_110407_161105"
+#embeddingDir = "multicrab_analysis_110407_161105"
+embeddingDir = "multicrab_analysis_pt40_110530_121618"
 #tauDir = "multicrab_analysisTau_110328_175424"
-tauDir = "multicrab_analysisTau_110407_132703"
+#tauDir = "multicrab_analysisTau_110407_132703"
+tauDir = "multicrab_analysisTau_110530_125659"
 
 
-embeddingAnalysis = "EmbeddingAnalyzer"
-#embeddingAnalysis = "EmbeddingAnalyzer/matched"
+#embeddingAnalysis = "EmbeddingAnalyzer"
+embeddingAnalysis = "EmbeddingAnalyzer/matched"
 #tauAnalysis = "GenPt30Eta21TauAnalyzer/matched"
 #tauAnalysis = "Jets3GenPt30Eta21TauAnalyzer/matched"
-tauAnalysis = "Jets3GenPt30Eta21TauAnalyzer"
+#tauAnalysis = "Jets3GenPt30Eta21TauAnalyzer"
+tauAnalysis = "Jets3GenPt40Eta21TauAnalyzer"
 
 
 embeddingData = True
 embeddingData = False
 mcSample = "WJets"
 #mcSample = "TTJets"
+#mcSample = "SingleTop"
+#mcSample = DYJetsToLL
+#mcSample = DiBoson
 
 dataLabel = "Data"
 mcLabel = plots._legendLabels[mcSample]+" MC"
