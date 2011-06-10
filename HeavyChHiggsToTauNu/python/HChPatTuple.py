@@ -273,15 +273,22 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         runOnData(process, outputInProcess = out!=None)
 
     # Jets
+    # Produce kt6 rho for L1Fastjet
+    process.load('RecoJets.Configuration.RecoPFJets_cff')
+    process.kt6PFJets.doRhoFastjet = True
+    process.ak5PFJets.doAreaFastjet = True
+    process.ak5PFJetSequence = cms.Sequence(process.kt6PFJets * process.ak5PFJets)
+   
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
     setPatJetDefaults(process.patJets)
     setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion)
+    process.patDefaultSequence.replace(process.patJetCorrFactors,
+                                       process.ak5PFJetSequence*process.patJetCorrFactors)
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
-    # L3Absolute, L5Flavor and L7Parton. The call to runOnData above
-    # adds the L2L3Residual to the list. The default JEC to be applied
+    # L3Absolute, L5Flavor and L7Parton. The default JEC to be applied
     # is L2L3Residual, or L3Absolute, or Uncorrected (in this order).
 
     if doPatCalo:
@@ -310,8 +317,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          genJetCollection = cms.InputTag("ak5GenJets"),
                          doJetID      = True
         )
+        setPatJetCorrDefaults(process.patJetCorrFactorsAK5PF, dataVersion, True)
 
     else:
+#        setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion, True)
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
                             doBTagging   = doBTagging,
@@ -602,9 +611,8 @@ def patJetCorrLevels(dataVersion, L1FastJet=False):
     return levels
 
 def setPatJetCorrDefaults(module, dataVersion, L1FastJet=False):
-    module.levels = patJetCorrLevels(dataVersion, L1FastJet)
-    if not L1FastJet:
-        module.useRho = False
+    module.levels = cms.vstring(patJetCorrLevels(dataVersion, L1FastJet))
+    module.useRho = L1FastJet
 
 def setPatTauDefaults(module, includePFCands):
     attrs = [
