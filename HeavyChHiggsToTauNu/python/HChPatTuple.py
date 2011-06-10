@@ -43,15 +43,14 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     counters = []
     if options.tauEmbeddingInput != 0:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
         counters = MuonSelection.muonSelectionCounters[:]
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
     elif dataVersion.isData():
         counters = HChDataSelection.dataSelectionCounters[:]
-#    elif dataVersion.isMC():
-#        counters = HChMcSelection.mcSelectionCounters[:]
-
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters.extend(PFEmbeddingSource.muonSelectionCounters)
-
+    elif dataVersion.isMC():
+        counters = HChMcSelection.mcSelectionCounters[:]
+    
     if options.doPat == 0:
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         seq = cms.Sequence(

@@ -14,6 +14,11 @@ def addMcSelection(process, dataVersion, trigger):
 
     # Trigger
     if len(trigger) > 0:
+        print "########################################"
+        print "#"
+        print "# Applying trigger filter for MC"
+        print "#"
+        print "########################################"
         process.TriggerFilter = triggerResultsFilter.clone()
         process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
         process.TriggerFilter.l1tResults = cms.InputTag("")
