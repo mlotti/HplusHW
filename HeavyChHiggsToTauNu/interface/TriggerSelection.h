@@ -10,6 +10,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiency.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerMETEmulation.h"
 
 #include <string>
 #include <vector>
@@ -100,9 +101,11 @@ namespace HPlus {
     TauSelection fTriggerTauSelection;
     METSelection fTriggerMETSelection;
     TriggerEfficiency fTriggerEfficiency;
+    TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
     Count fTriggerPathCount;
+    Count fTriggerBitParamCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;

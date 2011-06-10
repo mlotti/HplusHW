@@ -16,7 +16,7 @@ dataVersion = "311Xredigi" # Spring11 MC
 # Flags for additional signal analysis modules
 # Perform the signal analysis with all tau ID algorithms in addition
 # to the "golden" analysis
-doAllTauIds = False
+doAllTauIds = True #for QCD control plots
 
 # Perform b tagging scanning
 doBTagScan = False
@@ -28,7 +28,7 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# Do trigger parametrisation for MC and tau embedding
+# Do trigger parametrisation for MC and tau embedding. If set to False trigger will be applied automatically
 doTriggerParametrisation = False
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
@@ -55,8 +55,17 @@ process.source = cms.Source('PoolSource',
     #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
     #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
     #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
+    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
+    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
+    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
+    #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
+    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
-    "file:/home/wendland/data/pattuple_176_1_ikP.root"
+    #"file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 
@@ -129,7 +138,7 @@ param.setTriggerVertexFor2011()
 #]
 
 # Overwrite necessary values here
-param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met)
+param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met) attikis
 #param.trigger.hltMetCut = 0.0 
 print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
@@ -178,6 +187,7 @@ if dataVersion.isData() and not disablePrescales:
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
+print "\ndoTriggerParametrisation:", doTriggerParametrisation
 print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
 print "\nTrigger:", process.QCDMeasurement.trigger
 print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
@@ -283,18 +293,32 @@ process.tauDiscriminatorPrint = cms.EDAnalyzer("HPlusTauDiscriminatorPrintAnalyz
 
 
 ################################################################################
-
-process.out = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('output.root'),
-    outputCommands = cms.untracked.vstring(
+#for QCD control plots
+if doAllTauIds:
+    process.out = cms.OutputModule("PoolOutputModule",
+                                   fileName = cms.untracked.string('output.root'),
+                                   outputCommands = cms.untracked.vstring(
+        "keep *_*_*_HChQCDMeasurement_*_*_*",
+        "drop *_*_counterNames_*",
+        "drop *_*_counterInstances_*"
+        #	"drop *",
+        #	"keep *",
+        #        "keep edmMergeableCounter_*_*_*"
+        )
+                                   )
+else:
+    process.out = cms.OutputModule("PoolOutputModule",
+                                   fileName = cms.untracked.string('output.root'),
+                                   outputCommands = cms.untracked.vstring(
         "keep *_*_*_HChQCDMeasurement",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
-#	"drop *",
-#	"keep *",
-#        "keep edmMergeableCounter_*_*_*"
-    )
-)
+        #	"drop *",
+        #	"keep *",
+        #        "keep edmMergeableCounter_*_*_*"
+        )
+                                   )
+    
 
 # Uncomment the following line to get also the event output (can be
 # useful for debugging purposes)

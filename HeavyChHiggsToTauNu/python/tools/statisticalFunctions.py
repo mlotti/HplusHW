@@ -28,7 +28,7 @@ def tanbAtNsigma(nSignal,tanbRef,nBackgr,sysError,mHp,mu,Nsigma):
     return tanbForXsec(xSecAtLimit,mHp,tanbRef,mu)
 
 def signalXsecAtNsigma(nSignal,tanbRef,nSignalAtLimit,mHp,mu):
-    xSec_atRef = crosssection.whTauNuCrossSection(mHp, tanbRef, mu)
+    xSec_atRef = crosssection.whTauNuCrossSectionMSSM(mHp, tanbRef, mu)
     xSec_atLimit = xSec_atRef*nSignalAtLimit/nSignal
 #    print "check signalXsecAtNsigma xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal ",xSec_atRef,xSec_atLimit,nSignalAtLimit,nSignal
     return xSec_atLimit
@@ -37,10 +37,10 @@ def tanbForXsec(xSecAtLimit,mHp,tanbRef,mu):
 
     tanb = tanbRef
 
-    xSec = crosssection.whTauNuCrossSection(mHp,tanb,mu)
+    xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
     while(abs(xSecAtLimit - xSec)/xSecAtLimit > 0.001 and xSec > 0 and tanb < 219 ):
         tanb = tanb + 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
-	xSec = crosssection.whTauNuCrossSection(mHp,tanb,mu)
+	xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
 #        print "       tanbForXsec loop, tanb, xsec ",tanb,xSec
 #    print "check tanbForXsec ",tanb
     if tanb > 219 or xSec <= 0:

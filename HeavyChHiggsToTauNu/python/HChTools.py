@@ -154,7 +154,7 @@ def createHistoAnalyzer(src, lst, weightSrc=None):
     histos = cms.VPSet()
     for histo in lst:
         histos.append(histo.pset())
-    m = cms.EDanalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
+    m = cms.EDAnalyzer("CandViewHistoAnalyzer", src=src, histograms=histos)
     if weightSrc != None:
         m.weights = cms.untracked.InputTag(weightSrc)
     return m
@@ -369,12 +369,12 @@ class Analysis:
     def __init__(self, process, seqname, prefix="", allCounterName="countAll", additionalCounters=[], weightSrc=None):
         self.process = process
         self.prefix = prefix
-        self.weightSrc = None
+        self.weightSrc = weightSrc
 
         # Event counter for all events
         countAll = cms.EDProducer("HPlusEventCountProducer")
         if self.weightSrc != None:
-            countall.weightSrc = cms.InputTag(weightSrc)
+            countAll.weightSrc = cms.InputTag(weightSrc)
         setattr(self.process, prefix+allCounterName, countAll)
 
         # Create the analysis sequence

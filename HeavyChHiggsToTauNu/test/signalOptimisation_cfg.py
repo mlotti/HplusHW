@@ -36,7 +36,7 @@ doTauEmbeddingMuonSelectionScan = False
 doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
-doTriggerParametrisation = True
+doTriggerParametrisation = False
 
 ################################################################################
 
@@ -57,7 +57,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-   "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
     #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
     #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
@@ -70,6 +70,7 @@ process.source = cms.Source('PoolSource',
     #        dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+    "file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 if options.tauEmbeddingInput != 0:
@@ -109,7 +110,8 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to non-trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+#param.setAllTauSelectionSrcSelectedPatTaus()
 
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
@@ -155,6 +157,7 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
     tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
 )
+process.signalOptimisation.tauSelection.rtauCut = cms.untracked.double(0.0) #### tmp to be used for Rtau optimisation
 
 # Prescale fetching done automatically for data
 if dataVersion.isData():

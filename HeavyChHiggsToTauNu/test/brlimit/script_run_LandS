@@ -1,39 +1,59 @@
 #!/bin/sh
 
-# -- mH = 100
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_100.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_100_temp
-head -1 output_LandS_100_temp | awk '{print $12}' >& output_LandS_100
-tail -1 output_LandS_100_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_100
+#-- mH = 100
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_100.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_100_temp_obs
+head -3 output_LandS_100_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_100
+#
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_100.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_100_temp_exp
+head -3 output_LandS_100_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_100
 
 # -- mH = 120
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_120.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_120_temp
-head -1 output_LandS_120_temp | awk '{print $12}' >& output_LandS_120
-tail -1 output_LandS_120_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_120
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_120.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_120_temp_obs
+head -3 output_LandS_120_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_120
+
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_120.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_120_temp_exp
+head -3 output_LandS_120_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_120
 
 # -- mH = 140
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_140.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_140_temp
-head -1 output_LandS_140_temp | awk '{print $12}' >& output_LandS_140
-tail -1 output_LandS_140_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_140
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_140.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_140_temp_obs
+head -3 output_LandS_140_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_140
+#
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_140.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_140_temp_exp
+head -3 output_LandS_140_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_140
 
 # -- mH = 150
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_150.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_150_temp
-head -1 output_LandS_150_temp | awk '{print $12}' >& output_LandS_150
-tail -1 output_LandS_150_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_150
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_150.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_150_temp_obs
+head -3 output_LandS_150_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_150
+#
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_150.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_150_temp_exp
+head -3 output_LandS_150_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_150
 
 # -- mH = 155
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_155.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_155_temp
-head -1 output_LandS_155_temp | awk '{print $12}' >& output_LandS_155
-tail -1 output_LandS_155_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_155
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_155.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_155_temp_obs
+head -3 output_LandS_155_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_155
+#
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_155.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_155_temp_exp
+head -3 output_LandS_155_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_155
 
 # -- mH = 160
-./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic_160.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_160_temp
-head -1 output_LandS_160_temp | awk '{print $12}' >& output_LandS_160
-tail -1 output_LandS_160_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS_160
+# observed limit
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_160.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_160_temp_obs
+head -3 output_LandS_160_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_160
+#
+# expected bands (ignore median)
+./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_160.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_160_temp_exp
+head -3 output_LandS_160_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_160
 
-#original
-#./LandS_20101116/test/Bayesian_dataCard.exe HPlusHadronic.txt 1 | grep -v process | tail -7 | head -6 >& output_LandS_temp
-#head -1 output_LandS_temp | awk '{print $12}' >& output_LandS
-#tail -1 output_LandS_temp | awk '{print $2 " " $3 " "  $4 " " $5 " " $6}' >> output_LandS
-#####
-echo
+######
+#echo
 ls -al output_LandS*

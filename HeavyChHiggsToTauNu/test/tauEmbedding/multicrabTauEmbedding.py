@@ -6,10 +6,10 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
 #step = "generation"
-#step = "embedding"
+step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
 #step = "muonAnalysis"
 
 dirPrefix = ""
@@ -78,7 +78,7 @@ datasets = []
 if step in ["analysis", "analysisTau"]:
     datasets.extend(datasetsMCnoQCD)
 else:
-#    datasets.extend(datasetsData2010)
+    datasets.extend(datasetsData2010)
     datasets.extend(datasetsData2011)
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
@@ -94,7 +94,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v10_1" % step
+tauname = "_tauembedding_%s_v10_2" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 

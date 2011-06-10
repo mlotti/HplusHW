@@ -77,7 +77,11 @@ namespace HPlus {
     // Fill the rest of the histogram sets
     void fillAfterTauId();
     void fillAfterMetCut();
-    void fillEnd();
+    void fillAfterBTagging();
+    void fillAfterFakeMetVeto();
+
+    // just to provide the method and do nothing, I'm lazy to fix AlphatAnalysis, Matti 2011-06-03
+    void fillEnd() {}
 
     bool isEmbeddingInput() const {
       return fEmbeddingMode;
@@ -97,7 +101,8 @@ namespace HPlus {
     Histograms fBegin;
     Histograms fAfterTauId;
     Histograms fAfterMetCut;
-    Histograms fEnd;
+    Histograms fAfterBTagging;
+    Histograms fAfterFakeMetVeto;
 
     // Holders of the objects
     edm::Ptr<reco::MET> fOriginalMet;

@@ -14,7 +14,7 @@ class Style(StyleBase):
         h.SetLineColor(self.color)
         h.SetMarkerColor(self.color)
         h.SetMarkerStyle(self.marker)
-        h.SetMarkerSize(1)
+        h.SetMarkerSize(1.2)
 	h.SetFillColor(0)
 
 class StyleCompound(StyleBase):
@@ -40,14 +40,16 @@ class StyleFill(StyleBase):
         h.SetFillStyle(self.fillStyle)
 
 class StyleLine(StyleBase):
-    def __init__(self, lineStyle=1):
+    def __init__(self, lineStyle=1, lineWidth=2):
         self.lineStyle = lineStyle
+        self.lineWidth = lineWidth
 
     def apply(self, h):
         h.SetLineStyle(self.lineStyle)
+        h.SetLineWidth(self.lineWidth)
 
 class StyleMarker(StyleBase):
-    def __init__(self, markerSize=1, markerColor=None):
+    def __init__(self, markerSize=1.2, markerColor=None):
         self.markerSize = markerSize
         self.markerColor = markerColor
 
@@ -79,8 +81,11 @@ errorStyle = StyleError(ROOT.kBlack, 3354)
 errorStyle2 = StyleError(ROOT.kGray+2, 3354)
 errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
 
-mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
-signalStyle = Style(34, ROOT.kPink-9)
+#mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
+mcStyle = Style(ROOT.kFullSquare, ROOT.kRed+1)
+signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
+                             StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
+                             ])
 signal80Style =  signalStyle
 signal90Style =  signalStyle
 signal100Style = signalStyle
