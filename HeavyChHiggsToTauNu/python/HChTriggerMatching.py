@@ -23,7 +23,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
-        matchedCuts           = cms.string(" || ".join([ "path('%s')"%path for path in trigger ]) ),
+        matchedCuts           = cms.string(" || ".join([ "path('%s', 1, 0)"%path for path in trigger ]) ),
         maxDeltaR             = cms.double(0.4), # start with 0.4; patTrigger pages propose 0.1 or 0.2
         resolveAmbiguities    = cms.bool(True),
         resolveByMatchQuality = cms.bool(False)
@@ -31,15 +31,18 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     selectorPrototype = cms.EDFilter("PATTauSelector",
         src = cms.InputTag("dummy"),
-        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s', 1).empty()"%t for t in trigger])),
+        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s', 1, 0).empty()"%t for t in trigger])),
     )
 
     for collection in collections:
-        print "Matching collection %s to trigger(s) %s" % (collection, ",".join(trigger))
+        name = collection
+#        if "selectedPat" in name:
+#            name = getattr(process, collection).src.getModuleLabel()
+        print "Matching collection %s to trigger(s) %s" % (name, ",".join(trigger))
 
         # DeltaR matching between the trigger object and the PAT objects
         matcher = matcherPrototype.clone(
-            src = cms.InputTag(collection)
+            src = cms.InputTag(name)
         )
         matcherName = collection+postfix+"TriggerMatcher"
         setattr(process, matcherName, matcher)
@@ -47,7 +50,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
         # Embed the patTriggerObjectStandAloneedmAssociation to a tau collection
         embedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
-            src     = cms.InputTag(collection),
+            src     = cms.InputTag(name),
             matches = cms.VInputTag(matcherName)
         )
         embedderName = collection+postfix+"TriggerEmbedder"
