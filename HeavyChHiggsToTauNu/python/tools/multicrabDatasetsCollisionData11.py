@@ -169,15 +169,6 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "DCSOnly"
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v12_1-d1c4cd85cab9d999f1df5ad330471be7/USER",
-                "luminosity": 37.236332,
-                "number_of_jobs": 1,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         }
     },
 
@@ -192,20 +183,8 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "DCSOnly"
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Control_165970_pattuple_v12_1-4f228cbdccbe253fb8fc10a07a3c6bf1/USER",
-                "luminosity": 37.236332,
-                "number_of_jobs": 1,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         }
     },
-
-
-
 
 
     # Tau + jets

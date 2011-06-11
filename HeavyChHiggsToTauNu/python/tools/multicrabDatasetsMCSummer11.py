@@ -252,14 +252,6 @@ datasets = {
                 "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "number_of_jobs": 80, # Adjusted for PATtuple file size
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v12_1-551dade371acd96c6f6754e39de844be/USER",
-                "number_of_jobs": 4,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         },
     },
     "WToTauNu_Z2_Summer11": {

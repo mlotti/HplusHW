@@ -82,15 +82,6 @@ datasets = {
                 "number_of_jobs": 35, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/BTau/local-Run2010B_Apr21ReReco_v1_AOD_149291_pattuple_v12_1-918f76efc8b8f61e731c646d742c4acc/USER",
-                "luminosity": 2.270373,
-                "number_of_jobs": 2,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         }
     },
 

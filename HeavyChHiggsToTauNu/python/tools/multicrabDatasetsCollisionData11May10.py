@@ -13,15 +13,6 @@ datasets = {
                 "number_of_jobs": 15, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v12_1-e58fd78c46977c4806bf0c028ea245b8/USER",
-                "luminosity": 5.884518,
-                "number_of_jobs": 1,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         }
     },
     "Tau_161217-163261_May10": {
@@ -35,15 +26,6 @@ datasets = {
                 "number_of_jobs": 100, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v12_1-a743757f4d8b3812c8f1a7f4febc5425/USER",
-                "luminosity": 38.518306,
-                "number_of_jobs": 2,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
-            },
         },
     },
     "Tau_163270-163869_May10": {
@@ -56,15 +38,6 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 220,
                 "lumiMask": "May10ReReco"
-            },
-            "pattuple_v12_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v12_1-6ae1d9d348269e1efba464a7f56ab58d/USER",
-                "luminosity": 159.758105,
-                "number_of_jobs": 10,
-            },
-            "pattuple_v12": {
-                "fallback": "pattuple_v12_1"
             },
         }
     },
