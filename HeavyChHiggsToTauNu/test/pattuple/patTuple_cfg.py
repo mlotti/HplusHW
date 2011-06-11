@@ -10,8 +10,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Create Process
 process = cms.Process("HChPatTuple")
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 # Global tag
@@ -43,10 +43,10 @@ myTrigger = options.trigger
 if len(myTrigger) == 0:
     myTrigger = dataVersion.getDefaultSignalTrigger()
 
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
-process.collisionDataSelection = cms.Sequence()
-if dataVersion.isData():
-    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
+#from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
+#process.collisionDataSelection = cms.Sequence()
+#if dataVersion.isData():
+#    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
@@ -55,9 +55,6 @@ print "Trigger used for tau matching: "+myTrigger
 ################################################################################
 # Output module
 process.out = cms.OutputModule("PoolOutputModule",
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring("path")
-    ),
     fileName = cms.untracked.string('pattuple.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
@@ -73,22 +70,45 @@ process.out = cms.OutputModule("PoolOutputModule",
     ),
     dropMetaData = cms.untracked.string("ALL")
 )
+# For MC we apply the trigger filter, but save all events in order to
+# get a correct handle to all events with pileup weighting. The trict
+# is that the rest of the path (after triggering) is NOT executed,
+# hence the branches are empty for those events.
+if dataVersion.isData():
+    process.out.SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring("path")
+    )
+
 
 ################################################################################
 # Add PAT sequences
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
-process.sPAT = addPat(process, dataVersion, doPlainPat=True, doPF2PAT=True,
-                      plainPatArgs={"matchingTauTrigger": myTrigger,
-                                    "doPatMuonPFIsolation": True},
-                      pf2patArgs={"matchingTauTrigger": myTrigger},
-                      )
+options.doPat=1
+(process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
+                                   doPlainPat=True, doPF2PAT=True,
+                                   plainPatArgs={"matchingTauTrigger": myTrigger,
+                                                 "doPatMuonPFIsolation": True},
+                                   pf2patArgs={"matchingTauTrigger": myTrigger},
+                                   )
+# Redo the
+if dataVersion.isMC():
+    process.genParticles = cms.EDProducer("GenParticlePruner",
+        src = cms.InputTag("genParticles"),
+        select = cms.vstring("keep *")
+    )
+    process.out.outputCommands.extend([
+        "drop *_genParticles_*_*",
+        "keep *_genParticles_*_"+process.name_(),
+        ])
+
+    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
+
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
 else:
     process.out.outputCommands.extend([
-            "keep *_genParticles_*_*",
             "keep GenEventInfoProduct_*_*_*",
             "keep GenRunInfoProduct_*_*_*",
             ])
@@ -111,7 +131,7 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
 
 # Create paths
 process.path    = cms.Path(
-    process.collisionDataSelection * # this is supposed to be empty for MC
+#    process.collisionDataSelection * # this is supposed to be empty for MC
 #    process.HLTTauEmu * # Hopefully not needed anymore in 39X as the tau trigger should be fixed
     process.sPAT
 #    process.sPF2PAT *

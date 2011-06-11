@@ -24,6 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as Muo
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
 tauPreSelection = "pt() > 10"
+#tauPreSelection = ""
 
 
 ##################################################
@@ -32,7 +33,8 @@ tauPreSelection = "pt() > 10"
 #
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
                    doPlainPat=True, doPF2PAT=False,
-                   plainPatArgs={}, pf2patArgs={}):
+                   plainPatArgs={}, pf2patArgs={},
+                   doMcPreselection=True):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -43,20 +45,22 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
     counters = []
     if options.tauEmbeddingInput != 0:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
         counters = MuonSelection.muonSelectionCounters[:]
+        counters.extend(PFEmbeddingSource.muonSelectionCounters)
     elif dataVersion.isData():
         counters = HChDataSelection.dataSelectionCounters[:]
-#    elif dataVersion.isMC():
-#        counters = HChMcSelection.mcSelectionCounters[:]
-
-        import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters.extend(PFEmbeddingSource.muonSelectionCounters)
-
+    elif dataVersion.isMC() and doMcPreselection:
+        counters = HChMcSelection.mcSelectionCounters[:]
+    
     if options.doPat == 0:
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         seq = cms.Sequence(
 #            process.goodPrimaryVertices10
         )
+        if dataVersion.isMC():
+            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+            seq *= process.eventPreSelection
         return (seq, counters)
 
     print "Running PAT on the fly"
@@ -117,7 +121,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
     else:
         if dataVersion.isData():
             process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
-        elif dataVersion.isMC():
+        elif dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
         pargs = plainPatArgs.copy()
@@ -463,6 +467,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             ])
 
     # Photons
+#    process.patPhotons.embedGenMatch = False
     outputCommands.extend([
             "keep *_selectedPatPhotons_*_*"
             ])
@@ -633,6 +638,7 @@ def setPatTauDefaults(module, includePFCands):
     value = not includePFCands
     for a in attrs:
         setattr(module, a, value)
+#    module.embedGenMatch = False
 
 
 def addHChTauDiscriminators():
@@ -652,6 +658,7 @@ def setPatLeptonDefaults(module, includePFCands):
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     module.usePV = False
     module.embedTrack = not includePFCands
+#    module.embedGenMatch = False
 
 def addPatElectronID(process, module, sequence):
     process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
