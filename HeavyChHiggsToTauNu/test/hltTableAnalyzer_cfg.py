@@ -72,4 +72,4 @@ if options.printPaths != 0:
     process.MessageLogger.cout.HLTrigReport = cms.untracked.PSet(limit = cms.untracked.int32(1000000))
 
 
-print process.dumpPython()
+#print process.dumpPython()
