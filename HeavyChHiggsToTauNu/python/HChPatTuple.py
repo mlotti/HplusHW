@@ -467,6 +467,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             ])
 
     # Photons
+#    process.patPhotons.embedGenMatch = False
     outputCommands.extend([
             "keep *_selectedPatPhotons_*_*"
             ])
@@ -637,6 +638,7 @@ def setPatTauDefaults(module, includePFCands):
     value = not includePFCands
     for a in attrs:
         setattr(module, a, value)
+#    module.embedGenMatch = False
 
 
 def addHChTauDiscriminators():
@@ -656,6 +658,7 @@ def setPatLeptonDefaults(module, includePFCands):
     # https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookPATExampleTopQuarks
     module.usePV = False
     module.embedTrack = not includePFCands
+#    module.embedGenMatch = False
 
 def addPatElectronID(process, module, sequence):
     process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
