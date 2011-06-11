@@ -259,28 +259,6 @@ def addTo(datasets):
             }
             })
 
-    datasets["TTToHplusBWB_M120_Winter10"]["data"].update({
-            "tauembedding_skim_v6": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_skim_v6-356976479e058d2236b19259096d6dbe/USER",
-                "number_of_jobs": 15 # ~700 ev/job
-            },
-            "tauembedding_generation_v6_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_generation_v6_1-e186a9fcb0f6b229006bacc604d044d9/USER",
-                "number_of_jobs": 10 # ~700 ev/job
-            },
-            "tauembedding_embedding_v6_1": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1-105b277d7ebabf8cba6c221de6c7ed8a/USER",
-                "number_of_jobs": 3 # ~2000 ev/job
-            },
-            # Fake the v6_2 for MC for time being
-            "tauembedding_embedding_v6_2": {
-                "fallback": "tauembedding_embedding_v6_1"
-            }
-            })
-
 ################################################################################
 
     datasets["Mu_136035-144114_Dec22"]["data"].update({
