@@ -13,6 +13,12 @@ datasets = {
                 "number_of_jobs": 15, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
+            "pattuple_v13_test1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v13_test1-4b4a75d9ac041a0a4d66f94ae4d63d28/USER",
+                "luminosity": 5.884518,
+                "number_of_jobs": 1
+            },
         }
     },
     "Tau_161217-163261_May10": {
