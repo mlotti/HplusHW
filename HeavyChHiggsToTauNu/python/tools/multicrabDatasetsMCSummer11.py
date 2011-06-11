@@ -16,7 +16,7 @@ datasets = {
             },
         }
     },
-    "TTToHplusBWB_M80_Summer11": {
+    "TTToHplusBWB_M90_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 165,
         "data": {
@@ -243,6 +243,7 @@ datasets = {
     
 
     # EWK pythia
+    # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "TT_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 165,
