@@ -93,6 +93,10 @@ def main(opts):
     allJobs = 0
 
     for task in taskDirs:
+        if not os.path.exists(task):
+            print "%s: Task directory missing" % task
+            continue
+        
         output = statusOutput(task)
         jobs = outputToJobs(task, output)
 
