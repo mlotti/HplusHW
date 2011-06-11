@@ -45,19 +45,19 @@ class CrabJob:
     def stdoutFile(self):
         return os.path.join(self.task, "res", "CMSSW_%d.stdout"%self.id)
 
-    def failed(self, what):
-        if (what == "all" or what == "aborted") and self.origStatus == "Aborted":
+    def failed(self, filter):
+        if (filter == "all" or filter == "aborted") and self.origStatus == "Aborted":
             return True
         if self.origStatus != "Retrieved":
             return False
         if self.exeExitCode == 0 and self.jobExitCode == 0:
             return False
 
-        if what == "all":
+        if filter == "all":
             return True
-        if what == "aborted":
+        if filter == "aborted":
             return False
-        if self.jobExitCode in what:
+        if self.jobExitCode in filter:
             return True
         return False
 
@@ -137,7 +137,7 @@ def main(opts):
         resubmit = []
         for key, joblist in jobs.iteritems():
             for job in joblist:
-                if job.failed(opts.resubmit):
+                if job.failed(opts.filter):
                     resubmit.append(job.id)
         if len(resubmit) > 0:
             resubmit.sort()
@@ -177,13 +177,13 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
-    parser.add_option("--resubmit", dest="resubmit", default="all", 
+    parser.add_option("--filter", dest="filter", default="all", 
                       help="Provide the resubmit list for these jobs ('all', 'Aborted', comma separated list of exit codes; default 'all'")
     (opts, args) = parser.parse_args()
 
-    opts.resubmit = opts.resubmit.lower()
-    if opts.resubmit not in ["all", "aborted"]:
-        codes = opts.resubmit.split(",")
-        opts.resubmit = [int(c) for c in codes]
+    opts.filter = opts.filter.lower()
+    if opts.filter not in ["all", "aborted"]:
+        codes = opts.filter.split(",")
+        opts.filter = [int(c) for c in codes]
 
     sys.exit(main(opts))
