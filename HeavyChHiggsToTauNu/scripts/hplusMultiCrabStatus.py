@@ -38,8 +38,8 @@ class CrabJob:
 
         failed = True
         if self.jobExitCode != None and self.jobExitCode != 0:
-            self.status += " (job %d)" % self.jobExitCode
-        if self.exeExitCode != None and self.exeExitCode != 0:
+            self.status += " (%d)" % self.jobExitCode
+        elif self.exeExitCode != None and self.exeExitCode != 0:
             self.status += " (exe %d)" % self.jobExitCode
 
     def stdoutFile(self):
