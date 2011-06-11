@@ -36,8 +36,8 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     for collection in collections:
         name = collection
-#        if "selectedPat" in name:
-#            name = getattr(process, collection).src.getModuleLabel()
+        if "selectedPat" in name and hasattr(process, collection):
+            name = getattr(process, collection).src.getModuleLabel()
         print "Matching collection %s to trigger(s) %s" % (name, ",".join(trigger))
 
         # DeltaR matching between the trigger object and the PAT objects

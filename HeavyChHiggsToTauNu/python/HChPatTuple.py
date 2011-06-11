@@ -23,8 +23,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
-#tauPreSelection = "pt() > 10"
-tauPreSelection = ""
+tauPreSelection = "pt() > 10"
+#tauPreSelection = ""
 
 
 ##################################################
