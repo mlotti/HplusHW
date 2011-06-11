@@ -27,8 +27,8 @@ def getHistogramFile(stdoutFile):
             histoFile = m.group("file")
             continue
     f.close()
-    if jobExitCode != 0:
-        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+    if histoFile == None:
+        raise Exception("Internal error, histoFile is None in file "+stdoutFile)
     return histoFile
 
 def main(opts, args):
