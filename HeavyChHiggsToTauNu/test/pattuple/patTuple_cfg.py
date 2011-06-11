@@ -5,7 +5,7 @@ dataVersion="42Xmc"
 #dataVersion="42Xdata"
 
 # Command line arguments (options) and DataVersion object
-options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigger=False)
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # Create Process
 process = cms.Process("HChPatTuple")
@@ -77,7 +77,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 if dataVersion.isData():
     process.out.SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring("path")
-    ),
+    )
 
 
 ################################################################################
@@ -85,17 +85,30 @@ if dataVersion.isData():
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
-(process.sPAT, c) = addPatOnTheFly(process, options, dataVersion, doPlainPat=True, doPF2PAT=True,
+(process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
+                                   doPlainPat=True, doPF2PAT=True,
                                    plainPatArgs={"matchingTauTrigger": myTrigger,
                                                  "doPatMuonPFIsolation": True},
                                    pf2patArgs={"matchingTauTrigger": myTrigger},
                                    )
+# Redo the
+if dataVersion.isMC():
+    process.genParticles = cms.EDProducer("GenParticlePruner",
+        src = cms.InputTag("genParticles"),
+        select = cms.vstring("keep *")
+    )
+    process.out.outputCommands.extend([
+        "drop *_genParticles_*_*",
+        "keep *_genParticles_*_"+process.name_(),
+        ])
+
+    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
+
 
 if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
 else:
     process.out.outputCommands.extend([
-            "keep *_genParticles_*_*",
             "keep GenEventInfoProduct_*_*_*",
             "keep GenRunInfoProduct_*_*_*",
             ])

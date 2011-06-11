@@ -33,7 +33,8 @@ tauPreSelection = ""
 #
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
                    doPlainPat=True, doPF2PAT=False,
-                   plainPatArgs={}, pf2patArgs={}):
+                   plainPatArgs={}, pf2patArgs={},
+                   doMcPreselection=True):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
@@ -49,7 +50,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         counters.extend(PFEmbeddingSource.muonSelectionCounters)
     elif dataVersion.isData():
         counters = HChDataSelection.dataSelectionCounters[:]
-    elif dataVersion.isMC():
+    elif dataVersion.isMC() and doMcPreselection:
         counters = HChMcSelection.mcSelectionCounters[:]
     
     if options.doPat == 0:
@@ -57,6 +58,9 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         seq = cms.Sequence(
 #            process.goodPrimaryVertices10
         )
+        if dataVersion.isMC():
+            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+            seq *= process.eventPreSelection
         return (seq, counters)
 
     print "Running PAT on the fly"
@@ -117,7 +121,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
     else:
         if dataVersion.isData():
             process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
-        elif dataVersion.isMC():
+        elif dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 
         pargs = plainPatArgs.copy()
