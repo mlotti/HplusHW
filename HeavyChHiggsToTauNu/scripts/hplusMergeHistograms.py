@@ -9,8 +9,6 @@ from optparse import OptionParser
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
-re_job = re.compile("JobExitCode=(?P<code>\d+)")
 re_histo = None
 
 class ExitCodeException(Exception):
@@ -20,32 +18,15 @@ class ExitCodeException(Exception):
         return self.message
 
 def getHistogramFile(stdoutFile):
-    exeExitCode = None
-    jobExitCode = None
+    multicrab.assertJobSucceeded(stdoutFile)
     histoFile = None
     f = open(stdoutFile)
     for line in f:
-        m = re_exe.search(line)
-        if m:
-            exeExitCode = int(m.group("code"))
-            continue
-        m = re_job.search(line)
-        if m:
-            jobExitCode = int(m.group("code"))
-            continue
         m = re_histo.search(line)
         if m:
             histoFile = m.group("file")
             continue
     f.close()
-    if exeExitCode == None:
-        raise ExitCodeException("No exeExitCode")
-    if jobExitCode == None:
-        raise ExitCodeException("No jobExitCode")
-    if histoFile == None:
-        raise Exception("Internal error, histoFile is None in file "+stdoutFile)
-    if exeExitCode != 0:
-        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
     if jobExitCode != 0:
         raise ExitCodeException("Job exit code is %d" % jobExitCode)
     return histoFile

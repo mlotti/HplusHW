@@ -31,7 +31,13 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
     configuration file.
     """
     if hasattr(opts, "dirs") and len(opts.dirs) > 0:
-        return opts.dirs
+        ret = []
+        for d in opts.dirs:
+            if d[-1] == "/":
+                ret.append(d[0:-1])
+            else:
+                ret.append(d)
+        return ret
     else:
         directory = os.path.dirname(filename)
 
@@ -96,6 +102,69 @@ def filterRuns(lumiList, runMin, runMax):
 
     lumiList.removeRuns(runsToRemove)
     return lumiList
+
+def assertJobSucceeded(stdoutFile):
+    re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
+    re_job = re.compile("JobExitCode=(?P<code>\d+)")
+
+    exeExitCode = None
+    jobExitCode = None
+    f = open(stdoutFile)
+    for line in f:
+        m = re_exe.search(line)
+        if m:
+            exeExitCode = int(m.group("code"))
+            continue
+        m = re_job.search(line)
+        if m:
+            jobExitCode = int(m.group("code"))
+            continue
+    f.close()
+    if exeExitCode == None:
+        raise ExitCodeException("No exeExitCode")
+    if jobExitCode == None:
+        raise ExitCodeException("No jobExitCode")
+    if exeExitCode != 0:
+        raise ExitCodeException("Executable exit code is %d" % exeExitCode)
+    if jobExitCode != 0:
+        raise ExitCodeException("Job exit code is %d" % jobExitCode)
+
+def prettyJobnums(jobnums):
+    ret = []
+
+    stack = []
+    for i in range(0, len(jobnums)):
+        if len(stack) == 0:
+            stack.append(jobnums[i])
+        elif len(stack) == 1:
+            if stack[-1] != jobnums[i]-1:
+                num = stack.pop()
+                ret.append(str(num))
+            stack.append(jobnums[i])
+        else:
+            if stack[-1] == jobnums[i]-1:
+                stack.pop()
+            else:
+                end = stack.pop()
+                begin = stack.pop()
+                if begin == end-1:
+                    ret.append("%d,%d" % (begin, end))
+                else:
+                    ret.append("%d-%d" % (begin, end))
+            stack.append(jobnums[i])
+    if len(stack) == 1:
+        ret.append(str(stack.pop()))
+    elif len(stack) == 2:
+        end = stack.pop()
+        begin = stack.pop()
+        if begin == end-1:
+            ret.append("%d,%d" % (begin, end))
+        else:
+            ret.append("%d-%d" % (begin, end))
+    elif len(stack) != 0:
+        raise Exception("Internal error: stack size is %d, content is %s" % (len(stack), str(stack)), "pretty_jobnums")
+
+    return ",".join(ret)
 
 class MulticrabDataset:
     """Dataset class for generating multicrab.cfg."""
