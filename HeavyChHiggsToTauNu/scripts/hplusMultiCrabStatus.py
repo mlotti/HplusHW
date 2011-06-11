@@ -9,7 +9,7 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+(\(\s+\S+\))?)\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+\s+(\(.*?\))?)\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
 
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
