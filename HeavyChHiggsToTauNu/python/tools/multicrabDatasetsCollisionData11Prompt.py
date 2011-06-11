@@ -2,20 +2,6 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Single tau + MET
-    "Tau_160404-161176_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
-        "runs": (160404, 161176), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "Tau_161216-161312_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
-        "runs": (161216, 161312), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
     "Tau_160431-161016_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
@@ -177,13 +163,6 @@ datasets = {
 
     # Tau + jets
     # FIXME: this is wrong, we shoud use MultiJet PD!
-    "TauPlusX_160404-161312_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
-        "runs": (160404, 161312), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
     "TauPlusX_160431-161016_Prompt": {
         "dataVersion": "41Xdata",
         "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
