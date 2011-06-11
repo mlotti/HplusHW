@@ -117,45 +117,44 @@ datasets = {
         }
     },
     ##### 42X starts here
-    "Tau_165088-165525_Prompt": {
+    "Tau_165088-165633_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v6",
-        "runs": (165088, 165525), # This is prompt RECO, so check the run range again when running!
+        "runs": (165088, 165633), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 130, # Adjusted for PATtuple file size
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "Tau_165970-166502_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
+        "runs": (165970, 166502), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 100, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
     },
 
-    ##### 42X DCSOnly
-    "Tau_165970-166164_DCS": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
-        "runs": (165970, 166164), # This is prompt RECO, so check the run range again when running!
-        "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 20, # Adjusted for PATtuple file size
-                "lumiMask": "DCSOnly"
-            },
-        }
-    },
-
-    "Tau_Control_165970-166164_DCS": {
+    # Single tau (control)
+    "Tau_Single_165970-166164_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_v2",
-        "runs": (165970, 166164), # This is prompt RECO, so check the run range again when running!
+        "runs": (165970, 166502), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 20, # Adjusted for PATtuple file size
-                "lumiMask": "DCSOnly"
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
             },
         }
     },
