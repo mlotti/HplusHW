@@ -55,14 +55,23 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
 
 #        sections.sort()
 
-        return [os.path.join(directory, sec) for sec in sections]
+        def filt(dir):
+            if opts.filter in dir:
+                return True
+            return False
+        fi = lambda x: True
+        if opts.filter != "":
+            fi = filt
+
+        return filter(filt, [os.path.join(directory, sec) for sec in sections])
 
 
 def addOptions(parser):
     """Add common MultiCRAB options to OptionParser object."""
     parser.add_option("--dir", "-d", dest="dirs", type="string", action="append", default=[],
                       help="CRAB task directory to have the files to merge (default: read multicrab.cfg and use the sections in it)")
-
+    parser.add_option("--filter", dest="filter", type="string", default="",
+                      help="When reading CRAB tasks from multicrab.cfg, take only tasks whose names contain this string")
 
 def checkCrabInPath():
     """Raise OSError if 'crab' command is not found in $PATH."""
