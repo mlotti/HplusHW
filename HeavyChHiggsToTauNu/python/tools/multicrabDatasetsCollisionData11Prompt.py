@@ -128,6 +128,12 @@ datasets = {
                 "number_of_jobs": 200, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v12": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v13-612b93c0d939e947e4b67c54ba0c3c1c/USER",
+                "luminosity": 38.518306,
+                "number_of_jobs": 2,
+            },
         }
     },
     "Tau_165970-166502_Prompt": {
@@ -145,7 +151,7 @@ datasets = {
     },
 
     # Single tau (control)
-    "Tau_Single_165970-166164_Prompt": {
+    "Tau_Single_165970-166502_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_v2",
         "runs": (165970, 166502), # This is prompt RECO, so check the run range again when running!
