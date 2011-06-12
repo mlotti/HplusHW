@@ -175,6 +175,76 @@ def prettyJobnums(jobnums):
 
     return ",".join(ret)
 
+
+def crabStatusOutput(task):
+    command = ["crab", "-status", "-c", task]
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = p.communicate()[0]
+    if p.returncode != 0:
+        raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
+    return output
+
+def _addToDictList(d, name, item):
+    if name in d:
+        d[name].append(item)
+    else:
+        d[name] = [item]
+
+def crabOutputToJobs(task, output):
+    status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+    jobs = {}
+    for line in output.split("\n"):
+        m = status_re.search(line)
+        if m:
+            job = CrabJob(task, m)
+            _addToDictList(jobs, job.status, job)
+    return jobs
+
+def _intIfNotNone(n):
+    if n == None:
+        return n
+    return int(n)
+
+def crabStatusToJobs(task):
+    output = crabStatusOutput(task)
+    return crabOutputToJobs(task, output)
+
+class CrabJob:
+    def __init__(self, task, match):
+        self.task = task
+        self.id = int(match.group("id"))
+        self.end = match.group("end")
+        self.status = match.group("status")
+        self.origStatus = self.status[:]
+        self.action = match.group("action")
+        self.exeExitCode = _intIfNotNone(match.group("execode"))
+        self.jobExitCode = _intIfNotNone(match.group("jobcode"))
+        self.host = match.group("host")
+
+        if self.jobExitCode != None and self.jobExitCode != 0:
+            self.status += " (%d)" % self.jobExitCode
+        elif self.exeExitCode != None and self.exeExitCode != 0:
+            self.status += " (exe %d)" % self.jobExitCode
+
+    def stdoutFile(self):
+        return os.path.join(self.task, "res", "CMSSW_%d.stdout"%self.id)
+
+    def failed(self, status):
+        if (status == "all" or status == "aborted") and self.origStatus == "Aborted":
+            return True
+        if self.origStatus != "Retrieved":
+            return False
+        if self.exeExitCode == 0 and self.jobExitCode == 0:
+            return False
+
+        if status == "all":
+            return True
+        if status == "aborted":
+            return False
+        if self.jobExitCode in status:
+            return True
+        return False
+
 class MulticrabDataset:
     """Dataset class for generating multicrab.cfg."""
 
