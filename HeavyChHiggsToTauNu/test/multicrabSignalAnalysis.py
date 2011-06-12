@@ -26,7 +26,9 @@ multicrab.extendDatasets(pattupleVersion,
         
         # Data: single tau + MET
         "Tau_160431-161176_May10", # HLT_IsoPFTau35_Trk20_MET45_v1  
-
+        "Tau_161217-163261_May10", # HLT_IsoPFTau35_Trk20_MET45_v2
+        "Tau_163270-163869_May10", # HLT_IsoPFTau35_Trk20_MET45_v4
+        
         # MC Signal (WH)
         "TTToHplusBWB_M80_Summer11",
         "TTToHplusBWB_M90_Summer11",
@@ -43,7 +45,7 @@ multicrab.extendDatasets(pattupleVersion,
         "TTToHplusBHminusB_M120_Summer11",
         "TTToHplusBHminusB_M140_Summer11",
         "TTToHplusBHminusB_M150_Summer11",
-        "TTToHplusBHminusB_M16_Summer11",
+        "TTToHplusBHminusB_M155_Summer11",
         "TTToHplusBHminusB_M160_Summer11",
 
         # MC Background
