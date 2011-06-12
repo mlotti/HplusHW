@@ -121,13 +121,13 @@ if (doTriggerParametrisation and not dataVersion.isData()):
     param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+#param.setTriggerPileupFor2010()
+param.setTriggerPileupFor2011()
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
-#def setTriggerVertexFor2011(**kwargs):
+#def setTriggerPileupFor2011(**kwargs):
 #    setEfficiencyTriggersFor2011(**kwargs)
-#    setVertexWeightFor2011()
+#    setPileupWeightFor2011()
 
 ### Use trigger matched taus and standard signal trigger => Disable below
 # Set tau sources to non-trigger matched tau collections

@@ -34,7 +34,7 @@ doTauEmbeddingMuonSelectionScan = False
 doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
-doTriggerParametrisation = True
+doTriggerParametrisation = False
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -55,19 +55,15 @@ process = cms.Process("HChSignalAnalysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # For testing in lxplus
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #        dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-        "file:pattuple.root"
-#        "file:pattuple_orig.root"
-#        "file:pattuple_selected.root"
-#        "/store/user/mkortela/pattuple_orig.root"
-#        "/store/user/mkortela/pattuple_selected.root"
     )
 )
 
@@ -113,12 +109,10 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
-param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+param.setAllTauSelectionSrcSelectedPatTaus()
+#param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 if options.tauEmbeddingInput != 0:
-#    param.setPileupWeightFor2011
-#    param.setPileupWeightFor2011and2010()
     tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
@@ -136,17 +130,16 @@ param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
 if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddingInput != 0:
-    # 2010 and 2011 scenarios
-    #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
-    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-#param.setTriggerVertexFor2011()
+param.setPileupWeightFor2011May10() # Only May10ReReco part
+#param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
+#param.setPileupWeightFor2011All() # May10ReReco+PromptReco
 
-param.setPileupWeightFor2011()
+#param.trigger.selectionType = "disabled"
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
