@@ -101,8 +101,9 @@ def main(opts):
     else:
         print "Following jobs failed/aborted, and can be resubmitted"
         print
-        for task, jobs in resubmitJobs.iteritems():
-            print "crab -c %s -resubmit %s" % (task, jobs)
+        for task in taskDirs:
+            if task in resubmitJobs:
+                print "crab -c %s -resubmit %s" % (task, resubmitJobs[task])
         print
     return 0
 
