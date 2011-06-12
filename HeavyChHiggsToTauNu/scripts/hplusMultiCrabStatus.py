@@ -9,7 +9,7 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+\s+(\(.*?\))?)\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
+status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
 
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
@@ -31,12 +31,6 @@ class CrabJob:
         self.jobExitCode = intIfNotNone(match.group("jobcode"))
         self.host = match.group("host")
 
-        # Let's not care the difference of 'Done (success)' and 'Done
-        # (failed)' at this level
-        if "Done" in self.status:
-            self.status = "Done"
-
-        failed = True
         if self.jobExitCode != None and self.jobExitCode != 0:
             self.status += " (%d)" % self.jobExitCode
         elif self.exeExitCode != None and self.exeExitCode != 0:
@@ -94,7 +88,8 @@ def main(opts):
 
     for task in taskDirs:
         if not os.path.exists(task):
-            print "%s: Task directory missing" % task
+            if opts.showMissing:
+                print "%s: Task directory missing" % task
             continue
         
         output = statusOutput(task)
@@ -183,6 +178,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("--status", dest="status", default="all", 
                       help="Provide the resubmit list for these jobs ('all', 'Aborted', comma separated list of exit codes; default 'all'")
+    parser.add_option("--showMissing", dest="showMissing", action="store_true", default=False,
+                      help="Show also the missing task directories")
     (opts, args) = parser.parse_args()
 
     opts.status = opts.status.lower()
