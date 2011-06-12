@@ -62,7 +62,7 @@ datasets = {
             },
             "pattuple_v13": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "",
+                "datasetpath": "/TTToHplusBWB_M-120_7TeV-pythia6-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
                 "number_of_jobs": 1
             },
         }
