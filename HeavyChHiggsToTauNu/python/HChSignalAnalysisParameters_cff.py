@@ -349,18 +349,16 @@ def setPileupWeightFor2011May10(pset=vertexWeight):
 def setPileupWeightFor2011Prompt(pset=vertexWeight):
     # From PromptReco JSON, excluding May10
     pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
-    pset.dataDist = cms.vdouble()
+    pset.dataDist = cms.vdouble(3364411.22646056, 6507536.11599253, 15783688.78330901, 27546803.40290805, 37805440.04499011, 43130651.44049883, 42413959.59334268, 36886700.45408770, 28916975.43342970, 20735332.44659095, 13757174.49119082, 8522971.03806628, 4967396.75218076, 2740323.71571966, 1438216.13654605, 721205.63553246, 346808.38911421, 160424.48638762, 71576.36381337, 30874.28861973, 12901.20200799, 5231.57827249, 2061.90603311, 790.88902422, 295.57795295)
     pset.enabled = True
     pset.useSimulatedPileup = True
-    raise Exception("Data PU distribution for 2011 is not yet available")
 
 def setPileupWeightFor2011All(pset=vertexWeight):
     # From May10+PromptReco JSON
     pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
-    pset.dataDist = cms.vdouble()
+    pset.dataDist = cms.vdouble(7285172.03275537, 12589341.39881099, 29594046.77342086, 50052562.34239509, 66669483.87818073, 74048079.30104686, 71135284.15336381, 60633104.35815605, 46720415.20442367, 33010235.05672242, 21625284.96185776, 13252886.43754622, 7653407.89417986, 4190155.27207472, 2186108.16443100, 1091702.01401312, 523847.57776371, 242353.83445289, 108429.14028640, 47038.73482953, 19834.17251443, 8145.97144305, 3264.82242723, 1279.04303343, 490.51227915)
     pset.enabled = True
     pset.useSimulatedPileup = True
-    raise Exception("Data PU distribution for 2011 is not yet available")
 
 def setPileupWeightFor2010and2011(pset=vertexWeight):
     # From Apr21 (2010) and May10+PromptReco (2011) JSONs
