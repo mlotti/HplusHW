@@ -42,6 +42,7 @@ namespace HPlus {
   BTagging::Data BTagging::analyze(const edm::PtrVector<pat::Jet>& jets) {
     // Reset variables
     iNBtags = -1;
+    fMaxDiscriminatorValue = 0;
     bool passEvent = false;
 
     fSelectedJets.clear();
