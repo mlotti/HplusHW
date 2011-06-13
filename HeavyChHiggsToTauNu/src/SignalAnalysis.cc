@@ -273,6 +273,15 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterBTagging();
 
     hTransverseMassBeforeFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+    hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    //   increment(fRtauAfterCutsCounter);
+
+    if(transverseMass < 80 ) return false;
+    increment(ftransverseMassCut80Counter);
+
+    if(transverseMass < 100 ) return false;
+    increment(ftransverseMassCut100Counter);
 
     
     // Fake MET veto a.k.a. further QCD suppression
@@ -314,18 +323,15 @@ namespace HPlus {
     // hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
 
 
-    hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    //   hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
    
     // double LdgTrackPt = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p();
     //   double Rtau = -9999;  
-    // if (tauData.getSelectedTaus()[0]->energy() > 0) {
-    //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
+    //if (tauData.getSelectedTaus()[0]->energy() > 0) {
+      //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
     //  hSelectedTauRtauAfterCuts->Fill(Rtau, fEventWeight.getWeight());
     // }
 
-    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    //    if( Rtau < 0.8 ) return false;
-    //    increment(fRtauAfterCutsCounter);
 
 
    
@@ -341,11 +347,11 @@ namespace HPlus {
 
 
 
-    if(transverseMass < 80 ) return false;
-    increment(ftransverseMassCut80Counter);
+    //    if(transverseMass < 80 ) return false;
+    //    increment(ftransverseMassCut80Counter);
 
-    if(transverseMass < 100 ) return false;
-    increment(ftransverseMassCut100Counter);
+    //    if(transverseMass < 100 ) return false;
+    //    increment(ftransverseMassCut100Counter);
                                      
     //Z mass veto
     //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());

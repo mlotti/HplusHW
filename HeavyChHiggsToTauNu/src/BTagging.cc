@@ -37,6 +37,9 @@ namespace HPlus {
     TFileDirectory myDir = fs->mkdir("Btagging");
     hDiscr = makeTH<TH1F>(myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = makeTH<TH1F>(myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hDiscrB = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtB = makeTH<TH1F>(myDir, "relabjet_pt", "realbjet_pt", 400, 0., 400.);
+    hEtaB = makeTH<TH1F>(myDir, "realbjet_eta", "realbjet_pt", 400, -5., 5.);
     hPt1 = makeTH<TH1F>(myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
     hPt2 = makeTH<TH1F>(myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
     hEta = makeTH<TH1F>(myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
@@ -69,8 +72,8 @@ namespace HPlus {
 	iEvent.getByLabel("genParticles", genParticles);
 	for (size_t i=0; i < genParticles->size(); ++i) {
 	  const reco::Candidate & p = (*genParticles)[i];
-	  if (std::abs(p.pdgId()) == 5) {
-	    
+	  if (p.status() != 2 ) continue;
+	  if (std::abs(p.pdgId()) == 5) {	    
 	    if (reco::deltaR(p, iJet->p4()) < 0.4) {
 	      bmatchedJet = true;
 	    }
@@ -82,6 +85,14 @@ namespace HPlus {
       float discr = iJet->bDiscriminator(fDiscriminator);
       if (discr > fMaxDiscriminatorValue)
         fMaxDiscriminatorValue = discr;
+      if (bmatchedJet ) {
+	if(discr > fDiscrCut ) {
+	  hPtB->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaB->Fill(iJet->eta(), fEventWeight.getWeight());
+	}
+	hDiscrB->Fill(discr, fEventWeight.getWeight());
+      }
+
       
       hDiscr->Fill(discr, fEventWeight.getWeight());
       if(!(discr > fDiscrCut)) continue;

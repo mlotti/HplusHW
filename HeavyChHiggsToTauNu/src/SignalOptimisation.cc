@@ -52,8 +52,8 @@ namespace HPlus {
     vTauPt.push_back(60);
     vTauPt.push_back(70);
     std::vector<double> vRTau;
-    vRTau.push_back(0);
     vRTau.push_back(0.7);
+    vRTau.push_back(0.2);
     vRTau.push_back(0.8);
     std::vector<double> vMET;
     vMET.push_back(60);
@@ -61,8 +61,8 @@ namespace HPlus {
     vMET.push_back(80);
     std::vector<double> vBTagDiscr;
     vBTagDiscr.push_back(2.0);
+    vBTagDiscr.push_back(0.0);
     vBTagDiscr.push_back(2.5);
-    vBTagDiscr.push_back(3.0);
     std::vector<double> vFakeMETVeto;
     vFakeMETVeto.push_back(0);
     vFakeMETVeto.push_back(10);

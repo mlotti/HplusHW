@@ -80,6 +80,9 @@ namespace HPlus {
     TH1 *hDiscr;
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hDiscrB;
+    TH1 *hPtB;
+    TH1 *hEtaB;
     TH1 *hPt1;
     TH1 *hEta1;
     TH1 *hPt2;
