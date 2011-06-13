@@ -43,11 +43,15 @@ def main(opts):
             command = ["crab", "-c", task, "-submit", pretty]
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
-#            ret = subprocess.call(command)
-#            if ret != 0:
-#                raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), ret))
-        print "Submitted, sleeping %f seconds" % opts.sleep
-        time.sleep(opts.sleep)
+            if not opts.test:
+                ret = subprocess.call(command)
+                if ret != 0:
+                    raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), ret))
+        if njobsSumitted < maxJobs:
+            print "Submitted, sleeping %f seconds" % opts.sleep
+            time.sleep(opts.sleep)
+        else:
+            print "Submitted"
 
     return 0
 
@@ -60,6 +64,8 @@ if __name__ == "__main__":
                       help="Maximum number of jobs to submit (default: -1, i.e. all")
     parser.add_option("--sleep", dest="sleep", type="float", default=900.0,
                       help="Number of seconds to sleep between submissions (default: 900 s= 15 min)")
+    parser.add_option("--test", dest="test", default=False, action="store_true",
+                      help="Test only, do not submit anything")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
