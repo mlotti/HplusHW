@@ -425,13 +425,21 @@ def divideColumn(name, column1, column2):
     if nrows != column2.getNrows():
         raise Exception("Unable to divide the columns, column1 has '%d' rows, column2 has '%d'." % (nrows, column2.getNrows()))
 
+    origRownames = column1.getRowNames()
+
     rows = []
+    rowNames = []
     for irow in xrange(nrows):
         count = column1.getCount(irow).copy()
-        count.divide(column2.getCount(irow))
+        dcount = column2.getCount(irow)
+        if dcount.value() == 0:
+            continue
+            
+        count.divide(dcount)
         rows.append(count)
+        rowNames.append(origRownames[irow])
 
-    return CounterColumn(name, column1.getRowNames(), rows)
+    return CounterColumn(name, rowNames, rows)
 
 
 class CounterColumn:

@@ -5,23 +5,33 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.source = cms.Source("EmptySource")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )    
 
+#trigger = "isHLTMu9"
+#trigger = "isHLTMu15"
+#trigger = "isHLTMu20"
+trigger = "isHLTMu24"
+
+input = cms.vstring("histograms.root")
+if "Mu9" in trigger:
+    # Run2010A
+#    input = cms.vstring("Mu_136035-144114_Dec22/res/histograms-Mu_136035-144114_Dec22.root")
+    # Run2010B
+#    input = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root")
+    # MC
+    input = cms.vstring("DYJetsToLL_M50_TuneZ2_Spring11/res/histograms-DYJetsToLL_M50_TuneZ2_Spring11.root")
+elif "Mu15" in trigger:
+    # Run2010B
+    input = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root")
+elif "Mu20" in trigger:
+    # Run2011A
+    input = cms.vstring("SingleMu_160431-161016_Prompt/res/histograms-SingleMu_160431-161016_Prompt.root", "SingleMu_162803-163261_Prompt/res/histograms-SingleMu_162803-163261_Prompt.root")
+elif "Mu24" in trigger:
+    # Run2011A
+    input = cms.vstring("SingleMu_163270-163869_Prompt/res/histograms-SingleMu_163270-163869_Prompt.root")
+
 process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
     "TagProbeFitTreeAnalyzer",
     # IO parameters:
-#    InputFileNames = cms.vstring("histograms.root"),
-#    InputFileNames = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root"),
-    # Run2010A HLT_Mu9
-#    InputFileNames = cms.vstring("Mu_136035-144114_Dec22/res/histograms-Mu_136035-144114_Dec22.root"),
-    # Run2010B HLT_Mu9
-#    InputFileNames = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root"),
-    # Run2010B HLT_Mu15
-#    InputFileNames = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root"),
-    # Run2011A HLT_Mu20
-#    InputFileNames = cms.vstring("SingleMu_160431-161016_Prompt/res/histograms-SingleMu_160431-161016_Prompt.root", "SingleMu_162803-163261_Prompt/res/histograms-SingleMu_162803-163261_Prompt.root"),
-    # Run2010A HLT_Mu24
-#    InputFileNames = cms.vstring("SingleMu_163270-163369_Prompt/res/histograms-SingleMu_163270-163369_Prompt.root"),
-    # MC 
-    InputFileNames = cms.vstring("DYJetsToLL_M50_TuneZ2_Spring11/res/histograms-DYJetsToLL_M50_TuneZ2_Spring11.root"),
+    InputFileNames = input,
     InputDirectoryName = cms.string("tnpTree"),
     InputTreeName = cms.string("fitter_tree"),
     OutputFileName = cms.string("tagprobe_output.root"),
@@ -41,9 +51,10 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
 #        eta = cms.vstring("Probe #eta", "-2.1", "2.1", ""),
         abseta = cms.vstring("Probe |#eta|", "0", "2.1", ""),
         
-        dz = cms.vstring("Probe dz(muy, vtx)", "0", "10", "cm"),
+#        dz = cms.vstring("Probe dz(muy, vtx)", "0", "10", "cm"),
         sumIsoRel = cms.vstring("Probe sumIso/pt", "0", "2", ""),
         pfSumIsoRel = cms.vstring("Probe pfSumIso/pt", "0", "2", ""),
+        tauTightIc04Iso = cms.vstring("Probe counting iso occupancy", "0", "100", "")
     ),
 
     # defines all the discrete variables of the probes available in the input tree and intended for use in the efficiency calculations
@@ -57,17 +68,18 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
         isHLTMu24 = cms.vstring("HLT_Mu24", "dummy[pass=1,fail=0]"),
         hitQuality = cms.vstring("Hit quality", "dummy[pass=1,fail=0]"),
         dB = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
-        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
-        sumIsoRel15 = cms.vstring("Rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
-        pfSumIsoRel10 = cms.vstring("PF rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
-        pfSumIsoRel15 = cms.vstring("PF rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
-        tauIsoVLoose = cms.vstring("Tau Iso VLoose", "dummy[pass=1,fail=0]"),
+#        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
+#        sumIsoRel15 = cms.vstring("Rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
+#        pfSumIsoRel10 = cms.vstring("PF rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
+#        pfSumIsoRel15 = cms.vstring("PF rel sum iso < 0.15", "dummy[pass=1,fail=0]"),
+#        tauIsoVLoose = cms.vstring("Tau Iso VLoose", "dummy[pass=1,fail=0]"),
         fullSelection = cms.vstring("Full selection", "dummy[pass=1,fail=0]"),
     ),
     Cuts = cms.PSet(
-        dz1cm = cms.vstring("dz(mu, vtx) < 1", "dz", "1.0"),
-        sumIsoRel50 = cms.vstring("Rel sum iso < 0.5", "sumIsoRel", "0.5"),
-        pfSumIsoRel50 = cms.vstring("Rel sum iso < 0.5", "pfSumIsoRel", "0.5"),
+         countIso = cms.vstring("Counting iso", "tauTightIc04Iso", "1.0"), 
+#        dz1cm = cms.vstring("dz(mu, vtx) < 1", "dz", "1.0"),
+        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "sumIsoRel", "0.1"),
+        pfSumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "pfSumIsoRel", "0.1"),
     ),
 
     # defines all the PDFs that will be available for the efficiency calculations; uses RooFit's "factory" syntax;
@@ -98,17 +110,15 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
     Efficiencies = cms.PSet(
         All = cms.PSet(
             EfficiencyCategoryAndState = cms.vstring(
-                "isTrackerMuon", "pass",
-                "isGlobalMuon", "pass",
-                "isHLTMu9", "pass",
-#                "isHLTMu15", "pass",
-#                "isHLTMu20", "pass",
-#                "isHLTMu24", "pass",
-                "hitQuality", "pass",
-                "dB", "pass",
-                "sumIsoRel10", "pass",
+                 "isTrackerMuon", "pass",
+                 "isGlobalMuon", "pass",
+                 trigger, "pass",
+                 "hitQuality", "pass",
+                 "dB", "pass",
+#                "countIso", "below",
+#                "sumIsoRel10", "pass",
 #                "tauIsoVLoose", "pass",
-                "dz1cm", "below",
+#                "dz1cm", "below",
 #                "fullSelection", "pass",
             ),
             UnbinnedVariables = cms.vstring("mass"),
@@ -119,40 +129,67 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
             #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
         ),
-        # All_pt = cms.PSet(
-        #     EfficiencyCategoryAndState = cms.vstring(
-        #         "fullSelection", "pass"
-        #     ),
-        #     UnbinnedVariables = cms.vstring("mass"),
-        #     BinnedVariables = cms.PSet(
-        #         pt = cms.vdouble(range(30, 410, 10)),
-        #     ),
-        #     #BinToPDFmap = cms.vstring("gaussPlusLinear")
-        #     BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-        #     #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        # ),
-        # All_abseta = cms.PSet(
-        #     EfficiencyCategoryAndState = cms.vstring(
-        #         "fullSelection", "pass"
-        #     ),
-        #     UnbinnedVariables = cms.vstring("mass"),
-        #     BinnedVariables = cms.PSet(
-        #         abseta = cms.vdouble([x*0.21 for x in range(0, 11)]), # 0.21 stepping [0, 2.1]
-        #     ),
-        #     #BinToPDFmap = cms.vstring("gaussPlusLinear")
-        #     BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-        #     #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        # ),
+        AllStdIso = cms.PSet(
+            EfficiencyCategoryAndState = cms.vstring(
+                 "isTrackerMuon", "pass",
+                 "isGlobalMuon", "pass",
+                 trigger, "pass",
+                 "hitQuality", "pass",
+                 "dB", "pass",
+                 "sumIsoRel10", "below",
+            ),
+            UnbinnedVariables = cms.vstring("mass"),
+            BinnedVariables = cms.PSet(
+                pt = cms.vdouble(0, 1000),
+            ),
+            #BinToPDFmap = cms.vstring("gaussPlusLinear")
+            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+        ),
+        Iso = cms.PSet(
+            EfficiencyCategoryAndState = cms.vstring(
+                "countIso", "below",
+            ),
+            UnbinnedVariables = cms.vstring("mass"),
+            BinnedVariables = cms.PSet(
+                isTrackerMuon = cms.vstring("pass"),
+                isGlobalMuon = cms.vstring("pass"),
+                hitQuality = cms.vstring("pass"),
+                dB = cms.vstring("pass"),
+                pt = cms.vdouble(0, 1000),
+            ),
+            #BinToPDFmap = cms.vstring("gaussPlusLinear")
+            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+        ),
+        Trigger = cms.PSet(
+            EfficiencyCategoryAndState = cms.vstring(
+                trigger, "pass",
+            ),
+            UnbinnedVariables = cms.vstring("mass"),
+            BinnedVariables = cms.PSet(
+                isTrackerMuon = cms.vstring("pass"),
+                isGlobalMuon = cms.vstring("pass"),
+                hitQuality = cms.vstring("pass"), 
+                tauTightIc04Iso = cms.vdouble(0, 0.1),
+                dB = cms.vstring("pass"),
+                pt = cms.vdouble(0, 1000),
+            ),
+            #BinToPDFmap = cms.vstring("gaussPlusLinear")
+            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+        ),
     )
 )
+setattr(process.TagProbeFitTreeAnalyzer.Efficiencies.Iso.BinnedVariables, trigger, cms.vstring("pass"))
 ptbins = range(30, 410, 10)
 etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
 
-# process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
-#     BinnedVariables = cms.PSet(
-#         pt = cms.vdouble(ptbins),
-#     ),
-# )
+#process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
+#    BinnedVariables = cms.PSet(
+#        pt = cms.vdouble(ptbins),
+#    ),
+#)
 # process.TagProbeFitTreeAnalyzer.Efficiencies.All_abseta = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
 #     BinnedVariables = cms.PSet(
 #         abseta = cms.vdouble(etabins),

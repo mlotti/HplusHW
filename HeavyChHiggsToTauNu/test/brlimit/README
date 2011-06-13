@@ -1,5 +1,5 @@
-To run the analysis:
-===================
+To run the analysis in lxplus:
+===============================
 
 0) Modifications:
 ------------------
@@ -7,31 +7,38 @@ To run the analysis:
 Modify the following files, if needed:
 
 * HPlusHadronic_x.txt	rates & uncertainties for mH=x
-* input_ett		efficiency of tt
 * input_luminosity	luminosity
-* input_nrest		sum of dibosons, single top and Drell-Yan
-* input_nttww		N tt->WW
-* input_nwjets		N W+jets
-* input_sigma		sigma_tt of SM
 
 
-1) obtain LandS software from http://mschen.web.cern.ch/mschen/lands/:
+1) compile the modified LandS software
 ------------------------------------------------------------------------
 
-wget http://mschen-exp.web.cern.ch/mschen-exp/Statistics/lands.tgz
-tar -xzf lands.tgz
-cmsenv
-# compile LandS
-# NOTE: if LandS version has changed, update the name of the directory 
-cd LandS_20101116; 
+NOTE: do not give "cmsenv" command before compiling LandS
+
+mkdir LandS_AN
+tar -xzf /afs/cern.ch/user/t/tlampen/public/LandS_AN_110610.tgz -C LandS_AN
+cd LandS_AN/LandS
+setenv ROOTSYS "/afs/cern.ch/sw/lcg/app/releases/ROOT/5.28.00/x86_64-slc5-gcc43-dbg/root"
+setenv PATH "$ROOTSYS/bin:$PATH"
+setenv LD_LIBRARY_PATH "$ROOTSYS/lib"
 gmake clean; gmake all;
-cd ..
+cd ../..
+
+Sidenote:
+ This LandS version is modified by Sasha, and copied from his directory 10.6.2011:
+ cp /afs/cern.ch/user/a/anikiten/scratch0/LandS/LandSmod/LandS.tgz .
+ Instructions of how to use LandS are here:
+ http://cmsdoc.cern.ch/~anikiten/cms-higgs/LandsInstructions.txt
 
 
-2) modify the LandS datacard and run LandS
+2) run LandS (takes 20-30 min; you may skip this and directly make 
+the plots with the presaved values if you want don't want 
+to run LandS again)
 -------------------------------------------------------------
 
 ./script_run_LandS
+
+*As a result, files output_LandS_xxx are (re)generated
 
 
 3) run the ROOT analysis to obtain Br limit (mH,Br)
@@ -45,6 +52,7 @@ root -l -b -q brlimit.C
 4) run the python analysis to obtain MSSM limit (mH,tanB)
 ---------------------------------------------------------
 
+cmsenv
 ./mssmLimit.py
 
 *As a result, the tanB limit plot mssmLimit.png is generated

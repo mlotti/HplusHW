@@ -129,7 +129,7 @@ def main():
     # Define the axis ranges
     massMin = valid_mp[0] - 5
     massMax = valid_mp[-1] + 5
-    tanbMax = 160#200
+    tanbMax = 60#200
 
     # Create the TCanvas, frame, etc
     canvas = ROOT.TCanvas("mssmLimit")
@@ -153,9 +153,9 @@ def main():
     pl.SetBorderSize(0)
     ple = ROOT.TLegendEntry()
     pl.AddEntry(observed_tanb,     "Observed", "lp")
-    pl.AddEntry(expected_tanb,     "Expected", "lp")
-    pl.AddEntry(expected_1s_tanb,  "Expected #pm1 #sigma", "f")
-    pl.AddEntry(expected_2s_tanb,  "Expected #pm2 #sigma", "f")
+    pl.AddEntry(expected_tanb,     "Expected median", "lp")
+    pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
+    pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
     pl.Draw()
     
     # Text
@@ -172,14 +172,14 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     writeText("Fully hadronic final state",   top - lineSpace)
-    writeText("Bayesian CL limit",           top - 2*lineSpace)
+#    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     
     # Save to file
     formats = [
         ".png",
-#        ".C",
-#        ".eps",
+        ".C",
+        ".eps"
         ]
     for format in formats:
         canvas.SaveAs(format)

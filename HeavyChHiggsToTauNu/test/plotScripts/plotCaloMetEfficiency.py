@@ -20,8 +20,18 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
-analysis = "caloMetEfficiency"
-counters = analysis+"Counters"
+weight = ""
+#weight = "VertexWeight"
+#weight = "PileupWeight"
+
+analysis = "caloMetEfficiency%sh00_h01_All" % weight
+afterCut = "caloMetEfficiency%sh02_h02_CaloMet45" % weight
+counters = "caloMetEfficiency%scountAnalyzer" % weight
+
+plotStyles = [
+    styles.dataStyle,
+    styles.mcStyle
+    ]
 
 # main function
 def main():
@@ -31,8 +41,12 @@ def main():
 
     datasets.mergeData()
 
-    printEfficiencies(datasets, analysis+"/caloMet")
-    
+    printEfficiencies(datasets, analysis+"/calomet_et")
+
+    # Apply TDR style
+    style = tdrstyle.TDRStyle()
+    plotTurnOn(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
+
 #    plots.mergeRenameReorderForDataMC(datasets)
 
     # Set the signal cross sections to the ttbar
@@ -42,10 +56,8 @@ def main():
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 
 
-    # Apply TDR style
-    style = tdrstyle.TDRStyle()
 
-    caloMet(plots.DataMCPlot(datasets, analysis+"/caloMet"))
+#    caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
 
 
 class Eff:
@@ -68,12 +80,23 @@ class Eff:
         if dataset.isMC():
             self.effobj.SetWeight(dataset.getCrossSection())
 
+class HistoEff:
+    def __init__(self, all, passed, dataset):
+        self.effobj = ROOT.TEfficiency(passed, all)
+        self.effobj.SetStatisticOption(ROOT.TEfficiency.kFCP)
+        if dataset.isMC():
+            self.effobj.SetWeight(dataset.getCrossSection())
+
 def combineEffs(effList):
+    gr = combineHistoEffs(effList)
+    return (gr.GetY()[0], gr.GetErrorYhigh(0), gr.GetErrorYlow(0))
+
+def combineHistoEffs(effList):
     coll = ROOT.TList()
     for o in [x.effobj for x in effList]:
         coll.AddLast(o)
     gr = ROOT.TEfficiency.Combine(coll)
-    return (gr.GetY()[0], gr.GetErrorYhigh(0), gr.GetErrorYlow(0))
+    return gr
 
 def printEfficiencies(datasets, path):
     printEfficiency(datasets, path, 46)
@@ -133,6 +156,52 @@ def printEfficiency(datasets, path, bin):
     print "  data %f/%f = %f + %f - %f" % (data_all, data_passed, data_eff, data_eff_up, data_eff_down)
     print "  rho = %f \\pm %f" % (rho, rho_err)
 
+class PlotTurnOn(plots.PlotBase):
+    def __init__(self):
+        plots.PlotBase.__init__(self, [])
+
+    def addGraph(self, gr, name):
+        self.histoMgr.appendHisto(histograms.HistoGraph(gr, name, "p", "P"))
+    def finalize(self):
+        self.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSize=1.5), plotStyles))
+
+def plotTurnOn(datasets, pathAll, pathPassed, rebin=10):
+    mc_effs = []
+    data_eff_gr = None
+    binWidth = None
+    for dataset in datasets.getAllDatasets():
+        all = dataset.getDatasetRootHisto(pathAll).getHistogram()
+        passed = dataset.getDatasetRootHisto(pathPassed).getHistogram()
+
+        all.Rebin(rebin)
+        passed.Rebin(rebin)
+        binWidth = all.GetBinWidth(1)
+
+        #if dataset.isMC() and not "TTTo" in dataset.getName() and not "QCD" in dataset.getName():
+        if dataset.isMC() and "QCD" in dataset.getName():
+            mc_effs.append(HistoEff(all, passed, dataset))
+
+        elif dataset.isData():
+            data_eff_gr = ROOT.TGraphAsymmErrors(passed, all, "cp")
+
+    mc_eff_gr = combineHistoEffs(mc_effs)
+
+    p = PlotTurnOn()
+    p.addGraph(data_eff_gr, "Data")
+    p.addGraph(mc_eff_gr, "Simulation")
+    p.finalize()
+
+    p.createFrame("calomet_turnon", xmin=0, xmax=250)
+    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.05))
+
+    def text():
+        l = ROOT.TLatex()
+        l.SetNDC()
+#        l.SetTextFont(l.GetTextFont()-20) # bold -> normal
+        l.SetTextSize(l.GetTextSize()*0.8)
+        l.DrawLatex(0.4, 0.4, "Calo E_{T}^{miss} > 45 GeV")
+    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%binWidth, False, afterDraw=text)
+
 def caloMet(h, rebin=10):
     name = h.getRootHistoPath().replace("/", "_")
 
@@ -151,10 +220,12 @@ def caloMet(h, rebin=10):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
-def common(h, xlabel, ylabel, addLuminosityText=True):
+def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.draw()
+    if afterDraw != None:
+        afterDraw()
     histograms.addCmsPreliminaryText()
     histograms.addEnergyText()
     if addLuminosityText:

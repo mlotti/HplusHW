@@ -19,23 +19,129 @@ import re
 from array import array
 
 import ROOT
+ROOT.gROOT.SetBatch(True)
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 
-ROOT.gROOT.SetBatch(True)
 
 style = tdrstyle.TDRStyle()
 style.setPalettePretty()
 
-histograms.textDefaults.setEnergyDefaults(x=0.17)
-histograms.textDefaults.setCmsPreliminaryDefaults(x=0.6)
-
 createLegend = histograms.createLegend
 createLegend2 = createLegend.copy()
 createLegend2.setDefaults(x1=0.6, y1=0.8, y2=0.94)
+
+def main():
+
+    histograms.textDefaults.setEnergyDefaults(x=0.17)
+    histograms.textDefaults.setCmsPreliminaryDefaults(x=0.6)
+
+    embeddingPlots()
+    #tauPlots()
+    #embeddingVsTauPlots()
+
+def embeddingPlots():
+    datasets = None
+    if os.path.exists("histograms.root"):
+        datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
+    else:
+        datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+        datasets.selectAndReorder(["TTJets_TuneZ2_Spring11"])
+#        datasets.selectAndReorder(["WJets_TuneZ2_Spring11"])
+#        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
+
+    #isoAnalyses = ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]]
+    isoAnalyses = ["EmbeddingAnalyzer"]
+
+    muonTau = PlotMuonTau()
+    genTauNu = PlotGenTauNu()
+    met = PlotMet()
+    muonTauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
+
+    muonTauIso = PlotMuonTauIso()
+    #muonTauIso.plot(datasets, isoAnalyses)
+    #muonTauIso.plot(datasets, isoAnalyses, normalizeToOne=True)
+
+    for analysis in [
+        "EmbeddingAnalyzer",
+    #    "tauIdEmbeddingAnalyzer",
+    #    "tauPtIdEmbeddingAnalyzer"
+        "EmbeddingAnalyzer/matched",
+    #    "tauIdEmbeddingAnalyzer/matched",
+    #    "tauPtIdEmbeddingAnalyzer/matched"
+        ]:
+        for q in ["Pt", "Eta", "Phi"]:
+            muonTau.plot(datasets, analysis, q)
+#            genTauNu.plot(datasets, analysis, q)
+        muonTauDR(datasets, analysis)
+#        muonTauIso2(datasets, analysis)
+#        tauGenMass(datasets, analysis)
+    
+#        muonTauMetDeltaPhi.plot(datasets, analysis, "Met")
+        for t in [
+            "Met",
+    #        "MetNoMuon",
+    #        "GenMetTrue",
+    #        "GenMetCalo",
+    #        "GenMetCaloAndNonPrompt",
+    #        "GenMetNuSum",
+    #        "GenMetNu"
+            ]:
+            muonTauMetDeltaPhi.plot(datasets, analysis, t)
+            for q, log in [
+                ("Et", True),
+                ("X", True),
+                ("Y", True),
+                ("Phi", False)
+                ]:
+                met.plot(datasets, analysis, t=t, q=q, log=log)
+
+def tauPlots():
+    datasets = None
+    if os.path.exists("histograms.root"):
+        datasets = getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
+    else:
+        datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+        datasets.selectAndReorder("TTJets_TuneZ2_Winter10")
+    
+    genTauNu = PlotGenTauNu()
+    tauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
+    met = PlotMet()
+
+    for analysis in [
+        "TauAnalyzer",
+        "GenPt40TauAnalyzer",
+        "GenPt40Eta21TauAnalyzer"
+        ]:
+        for q in ["Pt", "Eta", "Phi"]:
+            genTauNu.plot(datasets, analysis, q)
+        genTauNu.plotDR(datasets, analysis)
+        tauMetDeltaPhi.plot(datasets, analysis, "GenMetNu")
+
+        met.plot(datasets, analysis, "GenMetNu", "Et")
+        met.plot(datasets, analysis, "GenMetNu", "Phi")
+
+        for t in [
+            "Met",
+            "GenMetNuSum",
+            "GenMetNu"
+            ]:
+            for q in [
+                "Et",
+#                "X",
+#                "Y",
+                "Phi"
+                ]:
+                met.plotOne(datasets, analysis, t=t, q=q)
+
+
+def embeddingVsTauPlots():
+    datasetsTau = getDatasetsFromCrabDirs(["WJets"], counters=None)
+    datasetsTau = getDatasetsFromRootFiles[("WJets", "histograms.root")], counters=None
+
 
 def getHisto(datasets, path, name):
     h = datasets.getDatasetRootHistos(path)[0]
@@ -106,7 +212,7 @@ def drawSave(h, updatePaletteStyle=False):
 
 class PlotMuonTau:
     def __init__(self, rebin={}):
-        self.rebin = {"Pt": 2,
+        self.rebin = {"Pt": 10,
                       "Eta": 10,
                       "Phi": 10
                       }
@@ -122,7 +228,7 @@ class PlotMuonTau:
         h = Plot(datasets, an, ["Tau_"+q, "GenTauVis_"+q, "Muon_"+q])
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
-        ylabel = "Number of MC events / %.1f" % h.binWidth() 
+        ylabel = "Number of MC events / %.1f " % h.binWidth() 
         if q == "Pt":
             ylabel += " GeV/c"
         elif q == "Phi":
@@ -357,18 +463,14 @@ def muonTauIso2(datasets, an):
     drawSave(h)
     style.setWide(False)
 
-def muonTauDR(datasets, an):
-    rebin = 1
-
+def muonTauDR(datasets, an, rebin=1):
+    ylabel = "Number of MC events / %.2f"
     name = "Muon,Tau_DR"
     h = Plot(datasets, an, [name])
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-
-    ylabel = "Number of MC events / %.2f" % h.binWidth()
-
     h.createFrame(name, ymin=0.1, yfactor=2, xmax=1)
     h.frame.GetXaxis().SetTitle("#DeltaR(#mu, #tau)")
-    h.frame.GetYaxis().SetTitle(ylabel)
+    h.frame.GetYaxis().SetTitle(ylabel % h.binWidth())
     ROOT.gPad.SetLogy(True)
     drawSave(h)
 
@@ -377,19 +479,19 @@ def muonTauDR(datasets, an):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     h.createFrame(name, ymin=0.1, yfactor=2, xmax=1)
     h.frame.GetXaxis().SetTitle("#DeltaR(#mu, #tau ldg cand)")
-    h.frame.GetYaxis().SetTitle(ylabel)
+    h.frame.GetYaxis().SetTitle(ylabel % h.binWidth())
     ROOT.gPad.SetLogy(True)
     drawSave(h)
 
 class PlotMet:
     def __init__(self, rebin={}):
-        self.rebin = {"Et": 2,
-                      "X": 2,
-                      "Y": 2,
+        self.rebin = {"Et": 5,
+                      "X": 5,
+                      "Y": 5,
                       "Phi": 2
                       }
         self.rebin.update(rebin)
-        self.ylabel = "Number of MC events / %.1f"
+        self.ylabel = "Number of MC events / %.0f"
         self.xlabels = {
             "Et": "MET (GeV)",
             "X": "MET_{x} (GeV)",
@@ -397,7 +499,7 @@ class PlotMet:
             "Phi": "#phi_{MET} (rad)"
             }
 
-    def plot(self, datasets, an, t="Met", q="Et"):
+    def plot(self, datasets, an, t="Met", q="Et", log=False):
         rebin = self.rebin[q]
         xlabel = self.xlabels[q]
     
@@ -415,6 +517,14 @@ class PlotMet:
         h.setLegend(createLegend2())
         drawSave(h)
     
+        if log:
+            h.createFrame(t+"_"+q+"_log", ymin=0.1, ymaxfactor=2)
+            ROOT.gPad.SetLogy(True)
+            h.frame.GetXaxis().SetTitle(xlabel)
+            h.frame.GetYaxis().SetTitle(ylabel)
+            h.setLegend(createLegend2())
+            drawSave(h)
+
         if t == "Met" and q == "Et":
             name = t+"Original_"+q+"_AfterCut"
             h = Plot(datasets, an, [name])
@@ -603,106 +713,5 @@ class PlotMuonTauMetDeltaPhi:
         drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
     
-
-def embeddingPlots():
-    datasets = None
-    if os.path.exists("histograms.root"):
-        datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
-    else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-        datasets.selectAndReorder(["WJets_TuneZ2_Spring11"])
-#        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
-
-    #isoAnalyses = ["EmbeddingAnalyzer"+x for x in ["RelIso05", "RelIso10", "RelIso15", "RelIso20", "RelIso25", "RelIso50", ""]]
-    isoAnalyses = ["EmbeddingAnalyzer"]
-
-    muonTau = PlotMuonTau()
-    genTauNu = PlotGenTauNu()
-    met = PlotMet()
-    muonTauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
-
-    muonTauIso = PlotMuonTauIso()
-    #muonTauIso.plot(datasets, isoAnalyses)
-    #muonTauIso.plot(datasets, isoAnalyses, normalizeToOne=True)
-
-    for analysis in [
-        "EmbeddingAnalyzer",
-    #    "tauIdEmbeddingAnalyzer",
-    #    "tauPtIdEmbeddingAnalyzer"
-    #    "EmbeddingAnalyzer/matched",
-    #    "tauIdEmbeddingAnalyzer/matched",
-    #    "tauPtIdEmbeddingAnalyzer/matched"
-        ]:
-        for q in ["Pt", "Eta", "Phi"]:
-            muonTau.plot(datasets, analysis, q)
-#            genTauNu.plot(datasets, analysis, q)
-#        muonTauDR(datasets, analysis)
-#        muonTauIso2(datasets, analysis)
-#        tauGenMass(datasets, analysis)
-    
-#        muonTauMetDeltaPhi.plot(datasets, analysis, "Met")
-        for t in [
-            "Met",
-    #        "MetNoMuon",
-    #        "GenMetTrue",
-    #        "GenMetCalo",
-    #        "GenMetCaloAndNonPrompt",
-    #        "GenMetNuSum",
-    #        "GenMetNu"
-            ]:
-            muonTauMetDeltaPhi.plot(datasets, analysis, t)
-            for q in [
-                "Et",
-                "X",
-                "Y",
-                "Phi"
-                ]:
-                met.plot(datasets, analysis, t=t, q=q)
-
-def tauPlots():
-    datasets = None
-    if os.path.exists("histograms.root"):
-        datasets = getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
-    else:
-        datasets = getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-        datasets.selectAndReorder("TTJets_TuneZ2_Winter10")
-    
-    genTauNu = PlotGenTauNu()
-    tauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
-    met = PlotMet()
-
-    for analysis in [
-        "TauAnalyzer",
-        "GenPt40TauAnalyzer",
-        "GenPt40Eta21TauAnalyzer"
-        ]:
-        for q in ["Pt", "Eta", "Phi"]:
-            genTauNu.plot(datasets, analysis, q)
-        genTauNu.plotDR(datasets, analysis)
-        tauMetDeltaPhi.plot(datasets, analysis, "GenMetNu")
-
-        met.plot(datasets, analysis, "GenMetNu", "Et")
-        met.plot(datasets, analysis, "GenMetNu", "Phi")
-
-        for t in [
-            "Met",
-            "GenMetNuSum",
-            "GenMetNu"
-            ]:
-            for q in [
-                "Et",
-#                "X",
-#                "Y",
-                "Phi"
-                ]:
-                met.plotOne(datasets, analysis, t=t, q=q)
-
-
-def embeddingVsTauPlots():
-    datasetsTau = getDatasetsFromCrabDirs(["WJets"], counters=None)
-    datasetsTau = getDatasetsFromRootFiles[("WJets", "histograms.root")], counters=None
-
-
-embeddingPlots()
-#tauPlots()
-#embeddingVsTauPlots()
+if __name__ == "__main__":
+    main()
