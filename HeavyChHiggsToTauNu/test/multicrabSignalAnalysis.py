@@ -49,6 +49,7 @@ multicrab.extendDatasets(pattupleVersion,
         "TTToHplusBHminusB_M160_Summer11",
 
         # MC Background
+        "QCD_Pt80to120_TuneZ2_Summer11",
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
