@@ -61,7 +61,7 @@ if __name__ == "__main__":
     parser.add_option("--jobs", dest="jobs", type="int", default=50, 
                       help="Number of jobs to submit at a time (default: 50)")
     parser.add_option("--maxJobs", dest="maxJobs", type="int", default=-1,
-                      help="Maximum number of jobs to submit (default: -1, i.e. all")
+                      help="Maximum number of jobs to submit (default: -1, i.e. all)")
     parser.add_option("--sleep", dest="sleep", type="float", default=900.0,
                       help="Number of seconds to sleep between submissions (default: 900 s= 15 min)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
