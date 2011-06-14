@@ -11,12 +11,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 re_histo = None
 
-class ExitCodeException(Exception):
-    def __init__(self, message):
-        self.message = message
-    def __str__(self):
-        return self.message
-
 def getHistogramFile(stdoutFile):
     multicrab.assertJobSucceeded(stdoutFile)
     histoFile = None
