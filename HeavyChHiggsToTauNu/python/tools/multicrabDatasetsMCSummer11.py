@@ -312,7 +312,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 250 # Adjusted for PATtuple file size
+                "number_of_jobs": 450 # Adjusted for PATtuple file size
             },
         }
     },
