@@ -60,10 +60,10 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 return True
             return False
         fi = lambda x: True
-        if opts.filter != "":
+        if opts != None and opts.filter != "":
             fi = filt
 
-        return filter(filt, [os.path.join(directory, sec) for sec in sections])
+        return filter(fi, [os.path.join(directory, sec) for sec in sections])
 
 
 def addOptions(parser):
