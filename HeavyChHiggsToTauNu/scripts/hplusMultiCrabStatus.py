@@ -35,6 +35,13 @@ class CrabJob:
             self.status += " (%d)" % self.jobExitCode
         elif self.exeExitCode != None and self.exeExitCode != 0:
             self.status += " (exe %d)" % self.jobExitCode
+        if self.status == "Retrieved":
+            try:
+                multicrab.assertJobSucceeded(self.stdoutFile())
+            except multicrab.ExitCodeException:
+                self.status += "(malformed stdout)"
+                self.jobExitCode = -1
+                self.exeExitCode = -1
 
     def stdoutFile(self):
         return os.path.join(self.task, "res", "CMSSW_%d.stdout"%self.id)
