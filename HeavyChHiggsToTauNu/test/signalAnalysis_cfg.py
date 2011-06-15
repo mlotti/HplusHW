@@ -19,7 +19,10 @@ dataVersion = "311Xredigi" # Spring11 MC
 doAllTauIds = False
 
 # Perform b tagging scanning
-doBTagScan = False
+doBTagScan = True
+
+# PerformRtau scanning
+doRtauScan = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -36,7 +39,7 @@ doTauEmbeddingMuonSelectionScan = False
 doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
-doTriggerParametrisation = True
+doTriggerParametrisation = False
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -60,7 +63,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
+#   "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
+#    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
     #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
     #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
@@ -68,10 +72,10 @@ process.source = cms.Source('PoolSource',
     #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
     #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
     # For testing in lxplus
-    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+#    "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #        dataVersion.getAnalysisDefaultFileMadhatter()
+            dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
@@ -108,7 +112,6 @@ if filterGenTaus:
 
 ################################################################################
 # The "golden" version of the signal analysis
-
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
 addPrimaryVertexSelection(process, process.commonSequence)
@@ -214,14 +217,22 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
-
+# Rtau testing
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+if doRtauScan:
+    module = process.signalAnalysis.clone()
+    module.tauSelection.rtauCut = 0.8
+    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 # b tagging testing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 if doBTagScan:
     module = process.signalAnalysis.clone()
-    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 1.2
+#    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 2.0
     addAnalysis(process, "signalAnalysisBtaggingTest", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -229,8 +240,8 @@ if doBTagScan:
 if doBTagScan:
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
-    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
-    module.bTagging.discriminatorCut = 1.8
+#    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
+    module.bTagging.discriminatorCut = 3.3
     addAnalysis(process, "signalAnalysisBtaggingTest2", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,

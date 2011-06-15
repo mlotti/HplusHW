@@ -128,7 +128,9 @@ namespace HPlus {
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
+    Count ftransverseMassCut100TopCounter;
     Count fZmassVetoCounter;
+
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -158,6 +160,7 @@ namespace HPlus {
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
+    TH1 *hTransverseMassBeforeFakeMet;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
@@ -171,10 +174,16 @@ namespace HPlus {
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
+    TH1 *hSelectedTauLeadingTrackPt;
     TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
     TH1 *hSelectedTauPhiMetCut;
+
+    TH1 *hSelectedTauEtAfterCuts;
+    TH1 *hSelectedTauEtaAfterCuts;
+    TH1 *hMetAfterCuts;
+
     TH1 *hSelectedTauRtauMetCut;
 
     TH1 *hSelectionFlow;

@@ -1,6 +1,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
-
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -21,14 +22,24 @@ namespace HPlus {
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
-    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
+    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),  
+    fTaggedAllRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "All real b jets")),
+    fTaggedTaggedRealBJetsSubCount(eventCounter.addSubCounter("b-tagging", "Btagged real b jets")),
+    fTaggedNoTaggedJet(eventCounter.addSubCounter("b-tagging", "no b-tagged jet")),
+    fTaggedOneTaggedJet(eventCounter.addSubCounter("b-tagging", "one b-tagged jet")),
+    fTaggedTwoTaggedJets(eventCounter.addSubCounter("b-tagging", "two b-tagged jets")),
     fEventWeight(eventWeight),
+    //    fTaggedEtaCutSubCount(eventCounter.addSubCounter("b-tagging", "eta  cut")),
+    //   fEventWeight(eventWeight),
     fMaxDiscriminatorValue(0)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir("Btagging");
     hDiscr = makeTH<TH1F>(myDir, "jet_bdiscriminator", ("b discriminator "+fDiscriminator).c_str(), 100, -10, 10);
     hPt = makeTH<TH1F>(myDir, "bjet_pt", "bjet_pt", 400, 0., 400.);
+    hDiscrB = makeTH<TH1F>(myDir, "RealBjet_discrim", ("realm b discrimi. "+fDiscriminator).c_str(), 100, -10, 10);
+    hPtB = makeTH<TH1F>(myDir, "relabjet_pt", "realbjet_pt", 400, 0., 400.);
+    hEtaB = makeTH<TH1F>(myDir, "realbjet_eta", "realbjet_pt", 400, -5., 5.);
     hPt1 = makeTH<TH1F>(myDir, "bjet1_pt", "bjet1_pt", 100, 0., 400.);
     hPt2 = makeTH<TH1F>(myDir, "bjet2_pt", "bjet2_pt", 100, 0., 400.);
     hEta = makeTH<TH1F>(myDir, "bjet_eta", "bjet_pt", 400, -5., 5.);
@@ -39,7 +50,7 @@ namespace HPlus {
 
   BTagging::~BTagging() {}
 
-  BTagging::Data BTagging::analyze(const edm::PtrVector<pat::Jet>& jets) {
+  BTagging::Data BTagging::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets) {
     // Reset variables
     iNBtags = -1;
     fMaxDiscriminatorValue = 0;
@@ -49,6 +60,7 @@ namespace HPlus {
     fSelectedJets.reserve(jets.size());
 
     size_t passed = 0;
+    bool bmatchedJet = false;
    
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
@@ -56,9 +68,32 @@ namespace HPlus {
       increment(fAllSubCount);
 
 
+      if (!iEvent.isRealData()) {
+	edm::Handle <reco::GenParticleCollection> genParticles;
+	iEvent.getByLabel("genParticles", genParticles);
+	for (size_t i=0; i < genParticles->size(); ++i) {
+	  const reco::Candidate & p = (*genParticles)[i];
+	  if (p.status() != 2 ) continue;
+	  if (std::abs(p.pdgId()) == 5) {	    
+	    if (reco::deltaR(p, iJet->p4()) < 0.4) {
+	      bmatchedJet = true;
+	    }
+	  }
+	}
+      }
+      if( bmatchedJet )   increment(fTaggedAllRealBJetsSubCount);
+
       float discr = iJet->bDiscriminator(fDiscriminator);
       if (discr > fMaxDiscriminatorValue)
         fMaxDiscriminatorValue = discr;
+      if (bmatchedJet ) {
+	if(discr > fDiscrCut ) {
+	  hPtB->Fill(iJet->pt(), fEventWeight.getWeight());
+	  hEtaB->Fill(iJet->eta(), fEventWeight.getWeight());
+	}
+	hDiscrB->Fill(discr, fEventWeight.getWeight());
+      }
+
       
       hDiscr->Fill(discr, fEventWeight.getWeight());
       if(!(discr > fDiscrCut)) continue;
@@ -71,6 +106,8 @@ namespace HPlus {
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
       ++passed;
+      if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
+
 
       fSelectedJets.push_back(iJet);
     }
@@ -94,6 +131,9 @@ namespace HPlus {
       //	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
       //	  hDeltaPhiJetMet->Fill(deltaPhi*57.3);
       //      }
+    if( passed == 0)   increment(fTaggedNoTaggedJet);
+    if( passed == 1)   increment(fTaggedOneTaggedJet);
+    if( passed == 2)   increment(fTaggedTwoTaggedJets);
 
     passEvent = true;
     if(passed < fMin) passEvent = false;

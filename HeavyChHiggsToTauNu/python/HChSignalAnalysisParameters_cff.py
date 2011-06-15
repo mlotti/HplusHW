@@ -40,9 +40,9 @@ tauSelectionBase = cms.untracked.PSet(
     selection = cms.untracked.string(""),
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
-    leadingTrackPtCut = cms.untracked.double(20), # ldg. track > value
-    rtauCut = cms.untracked.double(0.8), # rtau > value
-    antiRtauCut = cms.untracked.double(0.4), # rtau < value
+    leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
+    rtauCut = cms.untracked.double(0.0), # rtau > value
+    antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
@@ -141,7 +141,7 @@ MET = cms.untracked.PSet(
 
 bTagging = cms.untracked.PSet(
     discriminator = cms.untracked.string("trackCountingHighEffBJetTags"),
-    discriminatorCut = cms.untracked.double(3.3),
+    discriminatorCut = cms.untracked.double(1.7),
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(1)
@@ -203,7 +203,7 @@ forwardJetVeto = cms.untracked.PSet(
  )
 
 GenParticleAnalysis = cms.untracked.PSet(
-  ptCut = cms.untracked.double(30),
+  ptCut = cms.untracked.double(40),
   etaCut = cms.untracked.double(2.3)
 )
 topSelection = cms.untracked.PSet(
