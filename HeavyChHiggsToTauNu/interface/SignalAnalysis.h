@@ -101,7 +101,7 @@ namespace HPlus {
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau);
     CounterGroup* getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch);
-    void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, bool passedStatus = true, double value = 0);
+    void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -123,14 +123,14 @@ namespace HPlus {
     Count fBTaggingCounter17;
     Count fBTaggingCounter33;
     Count fFakeMETVetoCounter;
-    Count fTopSelectionCounter;
+    
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
-    Count ftransverseMassCut100TopCounter;
     Count fZmassVetoCounter;
-
+    Count fTopSelectionCounter;
+    Count ftransverseMassCut100TopCounter;
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -183,6 +183,8 @@ namespace HPlus {
     TH1 *hSelectedTauEtAfterCuts;
     TH1 *hSelectedTauEtaAfterCuts;
     TH1 *hMetAfterCuts;
+    TH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
+    TH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
 
     TH1 *hSelectedTauRtauMetCut;
 
