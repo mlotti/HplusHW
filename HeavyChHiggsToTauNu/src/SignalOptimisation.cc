@@ -49,8 +49,8 @@ namespace HPlus {
     std::vector<double> vTauPt;
     vTauPt.push_back(40);
     vTauPt.push_back(50);
-    //    vTauPt.push_back(60);
-    //    vTauPt.push_back(70);
+    vTauPt.push_back(60);
+    vTauPt.push_back(80);
     std::vector<double> vRTau;
     vRTau.push_back(0.0);
     vRTau.push_back(0.4);
