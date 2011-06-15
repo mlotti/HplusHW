@@ -60,10 +60,10 @@ def getTaskDirectories(opts, filename="multicrab.cfg"):
                 return True
             return False
         fi = lambda x: True
-        if opts.filter != "":
+        if opts != None and opts.filter != "":
             fi = filt
 
-        return filter(filt, [os.path.join(directory, sec) for sec in sections])
+        return filter(fi, [os.path.join(directory, sec) for sec in sections])
 
 
 def addOptions(parser):
@@ -111,6 +111,12 @@ def filterRuns(lumiList, runMin, runMax):
 
     lumiList.removeRuns(runsToRemove)
     return lumiList
+
+class ExitCodeException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
 
 def assertJobSucceeded(stdoutFile):
     re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
