@@ -65,6 +65,7 @@ multicrab.extendDatasets(pattupleVersion,
         "QCD_Pt300to470_TuneZ2_Summer11",
         "TT_TuneZ2_Summer11",
         "WToTauNu_TuneZ2_Summer11",
+        "DYToTauTau_TuneZ2_Summer11",
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
