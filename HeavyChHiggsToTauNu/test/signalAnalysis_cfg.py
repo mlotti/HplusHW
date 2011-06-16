@@ -19,10 +19,10 @@ dataVersion = "311Xredigi" # Spring11 MC
 doAllTauIds = False
 
 # Perform b tagging scanning
-doBTagScan = True
+doBTagScan = False
 
 # PerformRtau scanning
-doRtauScan = True
+doRtauScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -221,8 +221,8 @@ process.signalAnalysisPath = cms.Path(
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
 if doRtauScan:
     module = process.signalAnalysis.clone()
-    module.tauSelection.rtauCut = 0.8
-    addAnalysis(process, "signalAnalysisBtaggingTest", module,
+    module.tauSelection.rtauCut = 0.0
+    addAnalysis(process, "signalAnalysisRtauTest", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
