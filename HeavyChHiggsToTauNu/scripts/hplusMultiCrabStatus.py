@@ -12,13 +12,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
 
-        if self.status == "Retrieved":
-            try:
-                multicrab.assertJobSucceeded(self.stdoutFile())
-            except multicrab.ExitCodeException:
-                self.status += "(malformed stdout)"
-                self.jobExitCode = -1
-                self.exeExitCode = -1
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
