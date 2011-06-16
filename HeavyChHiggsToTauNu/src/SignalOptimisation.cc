@@ -50,23 +50,24 @@ namespace HPlus {
     vTauPt.push_back(40);
     vTauPt.push_back(50);
     vTauPt.push_back(60);
-    vTauPt.push_back(70);
+    vTauPt.push_back(80);
     std::vector<double> vRTau;
-    vRTau.push_back(0);
+    vRTau.push_back(0.0);
+    vRTau.push_back(0.4);
     vRTau.push_back(0.7);
     vRTau.push_back(0.8);
     std::vector<double> vMET;
     vMET.push_back(60);
     vMET.push_back(70);
-    vMET.push_back(80);
+    //    vMET.push_back(80);
     std::vector<double> vBTagDiscr;
     vBTagDiscr.push_back(2.0);
-    vBTagDiscr.push_back(2.5);
-    vBTagDiscr.push_back(3.0);
+    vBTagDiscr.push_back(1.7);
+    vBTagDiscr.push_back(3.3);
     std::vector<double> vFakeMETVeto;
     vFakeMETVeto.push_back(0);
     vFakeMETVeto.push_back(10);
-    vFakeMETVeto.push_back(20);
+    //    vFakeMETVeto.push_back(20);
     //vFakeMETVeto.push_back(30);
     size_t myCount = 0;
     for (std::vector<double>::iterator itTauPt = vTauPt.begin(); itTauPt != vTauPt.end(); ++itTauPt) {
@@ -186,14 +187,14 @@ namespace HPlus {
     // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
-    // increment(fElectronVetoCounter);
+    increment(fElectronVetoCounter);
     fGlobalElectronVetoHighestPt = electronVetoData.getSelectedElectronPt();
 
 
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return false;
-    // increment(fMuonVetoCounter);
+    increment(fMuonVetoCounter);
     fGlobalMuonVetoHighestPt = muonVetoData.getSelectedMuonPt();
  
 
@@ -206,7 +207,7 @@ namespace HPlus {
     
 
     // b-tagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     // if(!btagData.passedEvent()) return false;
     // increment(fBTaggingCounter);    
     iNBtags = btagData.getBJetCount();
