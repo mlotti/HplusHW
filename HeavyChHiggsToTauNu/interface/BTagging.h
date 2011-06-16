@@ -43,12 +43,16 @@ namespace HPlus {
       const bool fPassedEvent;
     };
     
-    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);  
     ~BTagging();
 
-    Data analyze(const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
   private:
+
+    // Input parameters                                                                                                                                                                          
+    edm::InputTag fSrc;
+
     // Input parameters
     const double fPtCut;
     const double fEtaCut;
@@ -62,6 +66,12 @@ namespace HPlus {
     Count fAllSubCount;
     Count fTaggedSubCount;
     Count fTaggedEtaCutSubCount;
+    Count fTaggedAllRealBJetsSubCount;
+    Count fTaggedTaggedRealBJetsSubCount;
+    Count fTaggedNoTaggedJet;
+    Count fTaggedOneTaggedJet;
+    Count fTaggedTwoTaggedJets;
+
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -70,6 +80,9 @@ namespace HPlus {
     TH1 *hDiscr;
     TH1 *hPt;
     TH1 *hEta;
+    TH1 *hDiscrB;
+    TH1 *hPtB;
+    TH1 *hEtaB;
     TH1 *hPt1;
     TH1 *hEta1;
     TH1 *hPt2;

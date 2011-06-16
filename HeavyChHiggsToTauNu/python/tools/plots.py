@@ -167,6 +167,8 @@ _legendLabels = {
     "TTToHplusBHminusB_M155": "H^{+}H^{-} m=155",
     "TTToHplusBHminusB_M160": "H^{+}H^{-} m=160",
 
+    "TTToHplus_M120": "H^{#pm} m=120",
+
     "TTJets":                "t#bar{t}+jets",
     "WJets":                 "W+jets",
 
@@ -206,6 +208,8 @@ _plotStyles = {
     "TToHplusBHminusB_M150":      styles.signalHH150Style,
     "TToHplusBHminusB_M155":      styles.signalHH155Style,
     "TToHplusBHminusB_M160":      styles.signalHH160Style,
+
+    "TTToHplus_M120":             styles.signal120Style,
 
     "TTJets":                styles.ttStyle,
     "WJets":                 styles.wStyle,

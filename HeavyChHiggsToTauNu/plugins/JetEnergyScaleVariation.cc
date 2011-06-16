@@ -13,11 +13,11 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
-#include "DataFormats/Math/interface/deltaR.h"
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 #include <iostream>
+
 #include <algorithm>
 #include <functional>
 
@@ -87,7 +87,7 @@ JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfi
 	metSrc(iConfig.getParameter<edm::InputTag>("metSrc")),
 	JESVariation(iConfig.getParameter<double>("JESVariation")),
   JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation")),
-        unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation")),
+  unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation")),
         tauJetMatchingDR(iConfig.getParameter<double>("tauJetMatchingDR"))
 {
 	produces<pat::TauCollection>();
