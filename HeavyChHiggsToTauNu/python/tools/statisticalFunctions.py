@@ -54,8 +54,30 @@ def tanbForXsec(xSecAtLimit,mHp,tanbRef,mu):
 	return -1
     return tanb
 
+def tanbForXsecLow(xSecAtLimit,mHp,tanbRef,mu):
+
+    tanb = tanbRef
+        
+    accuracy = 0.001
+    
+    counter = 0
+    xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
+    while(abs(xSecAtLimit - xSec)/xSecAtLimit > accuracy and xSec > 0 and tanb > 1.1 ):
+        tanb = tanb - 0.1*(xSecAtLimit - xSec)/xSecAtLimit*tanb
+        xSec = crosssection.whTauNuCrossSectionMSSM(mHp,tanb,mu)
+        counter = counter+1
+        if counter > 10: # to prevent infinite loops
+            counter = 0
+            accuracy = accuracy*2
+    if tanb < 1.1 or xSec <= 0:
+        return -1
+    return tanb
+
 def tanbForBR(brAtLimit, mHp, tanbRef, mu):
     return tanbForXsec(crosssection.ttCrossSection*brAtLimit, mHp, tanbRef, mu)
+
+def tanbForBRlow(brAtLimit, mHp, tanbRef, mu):
+    return tanbForXsecLow(crosssection.ttCrossSection*brAtLimit, mHp, tanbRef, mu)
 
 def tanbForTheoryLimit(mHp,mu):
     nTanbs = 0
