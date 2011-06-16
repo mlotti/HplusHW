@@ -6,7 +6,7 @@ void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
 int brlimit()
 {
-  gROOT->ProcessLine(".L tdrstyle_mod.C");
+  gROOT->ProcessLine(".L tdrstyle_mod.cxx");
   setTDRStyle();
 
   tdrStyle->SetTitleFillColor(0);
