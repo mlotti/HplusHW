@@ -259,6 +259,11 @@ datasets = {
                 "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13_test1-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
                 "number_of_jobs": 6
             },
+           "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 6
+            },
         },
     },
     "QCD_Pt50to80_TuneZ2_Summer11": {
@@ -269,6 +274,11 @@ datasets = {
                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                "number_of_jobs": 200, # Adjusted for PATtuple file size
            },
+           "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-50to80_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 6
+            },
         },
     },
     "QCD_Pt80to120_TuneZ2_Summer11": {
@@ -294,6 +304,11 @@ datasets = {
                 "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "number_of_jobs": 250, # Adjusted for PATtuple file size
             },
+           "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-120to170_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 10
+            },
         },
     },
     "QCD_Pt170to300_TuneZ2_Summer11": {
@@ -302,7 +317,12 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 250, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
+            },
+           "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 10
             },
         },
     },
@@ -313,6 +333,11 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "number_of_jobs": 450 # Adjusted for PATtuple file size
+            },
+           "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-300to470_TuneZ2_7TeV_pythia6/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 10
             },
         }
     },
@@ -343,6 +368,11 @@ datasets = {
                 "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13_test1-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
                 "number_of_jobs": 1
             },
+            "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 2
+            },
         },
     },
     "WToTauNu_Z2_Summer11": {
@@ -351,7 +381,12 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WToTauNu_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size
+                "number_of_jobs": 150, # Adjusted for PATtuple file size
+            },
+            "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WToTauNu_TuneZ2_7TeV-pythia6-tauola/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 10
             },
         },
     },
@@ -361,7 +396,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/WToMuNu_TuneZ2_7TeV-pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 300, # Adjusted for PATtuple file size
+                "number_of_jobs": 150,
             },
         },
     },
