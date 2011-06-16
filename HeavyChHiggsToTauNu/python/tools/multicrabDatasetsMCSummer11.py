@@ -375,7 +375,7 @@ datasets = {
             },
         },
     },
-    "WToTauNu_Z2_Summer11": {
+    "WToTauNu_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 7899,
         "data": {
@@ -390,13 +390,38 @@ datasets = {
             },
         },
     },
-    "WToMuNu_Z2_Summer11": {
+    "WToMuNu_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 7899,
         "data": {
             "AOD": {
                 "datasetpath": "/WToMuNu_TuneZ2_7TeV-pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "number_of_jobs": 150,
+            },
+        },
+    },
+    "DYToTauTau_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 1300,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYToTauTau_M-20_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
+            },
+            "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYToTauTau_M-20_TuneZ2_7TeV-pythia6-tauola/local-Summer11_PU_S3_START42_V11_v2_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
+                "number_of_jobs": 5
+            },
+        },
+    },
+    "DYToMuMu_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 1300,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYToMuMu_M-20_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
+                "number_of_jobs": 100,
             },
         },
     },
