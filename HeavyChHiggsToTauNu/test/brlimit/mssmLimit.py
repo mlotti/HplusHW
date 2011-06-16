@@ -77,6 +77,53 @@ def graphToTanBeta(graph, mu=200, removeNotValid=True):
                 
     return graph
 
+# Create a TGraph for tanb y values from a TGraph with BR y values
+# Convention: begin with low mH, lower limit for 1/2s band
+# then go counterclockwise: increase mH, then switch to upper limit, decrease mH
+def graphToTanBetaLow(graph, mu=200, removeNotValid=True):
+    # Don't modify the original
+    graph = graph.Clone()
+
+    # Loop over the graph points
+    yvalues = graph.GetY()
+    tanbRef = 10 # initial guess
+    for i in xrange(0, graph.GetN()):
+        mass = graph.GetX()[i]
+        # For some reason tanbForBR gets stuck for some large values; solution: do not
+        # even bother to calculate values for Br>=0.5
+        if yvalues[i]<0.50:
+            tanb = statisticalFunctions.tanbForBRlow(yvalues[i], mass, tanbRef, mu)
+        else:
+            tanb = -1
+        print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
+#        if tanb < 0:
+#           print "No valid tanb for BR %f" % yvalues[i]
+        print tanb
+
+        graph.SetPoint(i, mass, tanb)
+
+    # For points for which a valid tanb value can not be obtained,
+    # either remove the point, or set a huge value
+    if removeNotValid:
+        found = True
+        while found:
+            found = False
+            for i in xrange(0, graph.GetN()):
+                if graph.GetY()[i] < 0:
+                    graph.RemovePoint(i)
+                    found = True
+                    break
+    else:
+        for i in xrange(0, graph.GetN()):
+            if graph.GetY()[i] < 0:
+                # set huge value or zero
+                if 2*i>=graph.GetN():
+                    graph.SetPoint(i, graph.GetX()[i], 1e6)
+                else:
+                    graph.SetPoint(i, graph.GetX()[i], 0.0)
+                
+    return graph
+
 # Get the mass points (x values) of a TGraph as integers, so that they
 # can be reliably compared
 def getMassPoints(graph):
@@ -114,6 +161,9 @@ def main():
     expected_tanb = graphToTanBeta(expected)
     expected_1s_tanb = graphToTanBeta(expected_1s, removeNotValid=False)
     expected_2s_tanb = graphToTanBeta(expected_2s, removeNotValid=False)
+    showLow = 0
+    if showLow:
+        observed_tanb_low = graphToTanBetaLow(observed)
 
     # Take the mass points of observed and expected graphs. If the
     # mass point is missing from both of them, remove it from the 1/2
@@ -132,7 +182,7 @@ def main():
     tanbMax = 60#200
 
     # Create the TCanvas, frame, etc
-    canvas = ROOT.TCanvas("mssmLimit")
+    canvas = ROOT.TCanvas("mssmLimits")
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
@@ -140,6 +190,9 @@ def main():
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
     observed_tanb.Draw("LP")
+
+    if showLow:
+        observed_tanb_low.Draw("LP")
 
     # Axis labels
     frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
@@ -156,6 +209,8 @@ def main():
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
+    if showLow:
+        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
     pl.Draw()
     
     # Text

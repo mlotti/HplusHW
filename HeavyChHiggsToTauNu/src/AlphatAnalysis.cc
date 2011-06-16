@@ -224,7 +224,7 @@ namespace HPlus {
     //    if(!jetData.passedEvent()) return false;
 
     // 8) Btagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(btagData.passedEvent())  iNBtags = btagData.getBJetCount();
 
     // 9) AlphaT 
@@ -336,7 +336,7 @@ namespace HPlus {
     // hAlphatAfterJetSelection->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
     
     // 8) B-tagging
-    BTagging::Data btagData = fBTagging.analyze(jetData.getSelectedJets()); 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
     increment(fBTaggingCounter);
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());

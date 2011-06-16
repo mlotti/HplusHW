@@ -35,6 +35,35 @@ class TH2;
 
 namespace HPlus {
   class SignalAnalysis {
+    class CounterGroup {
+    public:
+      CounterGroup(EventCounter& eventCounter, std::string prefix);
+      ~CounterGroup();
+
+      void incrementOneTauCounter() { increment(fOneTauCounter); }
+      void incrementElectronVetoCounter() { increment(fElectronVetoCounter); }
+      void incrementMuonVetoCounter() { increment(fMuonVetoCounter); }
+      void incrementMETCounter() { increment(fMETCounter); }
+      void incrementNJetsCounter() { increment(fNJetsCounter); }
+      void incrementBTaggingCounter(double maxDiscr, bool passed) {
+        if (passed) increment(fBTaggingCounter);
+        if (maxDiscr > 1.7) increment(fBTaggingCounter17);
+        if (maxDiscr > 3.3) increment(fBTaggingCounter33);
+      }
+      void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
+      void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
+    private:
+      Count fOneTauCounter;
+      Count fElectronVetoCounter;
+      Count fMuonVetoCounter;
+      Count fMETCounter;
+      Count fNJetsCounter;
+      Count fBTaggingCounter;
+      Count fBTaggingCounter17;
+      Count fBTaggingCounter33;
+      Count fFakeMETVetoCounter;
+      Count fTopSelectionCounter;
+    };
   enum SignalSelectionOrder {
     kSignalOrderTrigger,
     //kSignalOrderVertexSelection,
@@ -47,7 +76,17 @@ namespace HPlus {
     //kSignalOrderFakeMETVeto,
     //kSignalOrderTopSelection
   };
-
+  enum MCSelectedTauMatchType {
+    kkElectronToTau,
+    kkMuonToTau,
+    kkTauToTau,
+    kkJetToTau,
+    kkNoMC,
+    kkElectronToTauAndTauOutsideAcceptance,
+    kkMuonToTauAndTauOutsideAcceptance,
+    kkTauToTauAndTauOutsideAcceptance,
+    kkJetToTauAndTauOutsideAcceptance
+  };
   public:
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalAnalysis();
@@ -57,6 +96,8 @@ namespace HPlus {
 
   private:
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau);
+    CounterGroup* getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -75,13 +116,17 @@ namespace HPlus {
     Count fMuonVetoCounter;
     Count fNJetsCounter;
     Count fBTaggingCounter;
+    Count fBTaggingCounter17;
+    Count fBTaggingCounter33;
     Count fFakeMETVetoCounter;
     Count fTopSelectionCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
+    Count ftransverseMassCut100TopCounter;
     Count fZmassVetoCounter;
+
 
     TriggerSelection fTriggerSelection;
     TriggerTauMETEmulation  fTriggerTauMETEmulation;
@@ -111,6 +156,7 @@ namespace HPlus {
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
+    TH1 *hTransverseMassBeforeFakeMet;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
@@ -124,13 +170,33 @@ namespace HPlus {
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
+    TH1 *hSelectedTauLeadingTrackPt;
     TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
     TH1 *hSelectedTauPhiMetCut;
+
+    TH1 *hSelectedTauEtAfterCuts;
+    TH1 *hSelectedTauEtaAfterCuts;
+    TH1 *hMetAfterCuts;
+
     TH1 *hSelectedTauRtauMetCut;
 
     TH1 *hSelectionFlow;
+
+    CounterGroup fAllTausCounterGroup;
+    CounterGroup fElectronToTausCounterGroup;
+    CounterGroup fMuonToTausCounterGroup;
+    CounterGroup fGenuineToTausCounterGroup;
+    CounterGroup fJetToTausCounterGroup;
+    CounterGroup fAllTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    CounterGroup fJetToTausAndTauOutsideAcceptanceCounterGroup;
+
+    TH1 *hEMFractionAll;
+    TH1 *hEMFractionElectrons;
 
   };
 }
