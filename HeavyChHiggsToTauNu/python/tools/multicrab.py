@@ -9,10 +9,14 @@ import multicrabDatasets
 import certifiedLumi
 
 defaultSeBlacklist = [
-    "T2_UK_London_Brunel", # I don't anymore remember why this is here
-    "T2_BE_IIHE", # All jobs failed with stageout timeout
-    "T2_IN_TIFR", # All jobs failed file open errors
-    "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout 
+    # blacklist before v13
+    #"T2_UK_London_Brunel", # I don't anymore remember why this is here
+    #"T2_BE_IIHE", # All jobs failed with stageout timeout
+    #"T2_IN_TIFR", # All jobs failed file open errors
+    #"T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout
+
+    # blacklist after v13
+    "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through
     ]
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
