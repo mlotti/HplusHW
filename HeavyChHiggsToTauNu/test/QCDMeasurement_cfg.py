@@ -103,7 +103,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Set the triggers for trigger efficiency parametrisation
 param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
@@ -128,14 +128,6 @@ param.setTriggerPileupFor2011()
 #def setTriggerPileupFor2011(**kwargs):
 #    setEfficiencyTriggersFor2011(**kwargs)
 #    setPileupWeightFor2011()
-
-### Use trigger matched taus and standard signal trigger => Disable below
-# Set tau sources to non-trigger matched tau collections
-#param.setAllTauSelectionSrcSelectedPatTaus()
-# Set other cuts
-#param.trigger.triggers = [
-#    "HLT_Jet30U_v3"
-#]
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met) attikis

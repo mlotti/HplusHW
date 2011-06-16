@@ -70,7 +70,7 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
       casted.push_back(edm::Ptr<pat::Jet>(ptr.id(), dynamic_cast<const pat::Jet *>(ptr.get()), ptr.key()));
     }
   
-    HPlus::BTagging::Data btagData = fBTagging.analyze(casted);
+    HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, casted);
     if(btagData.passedEvent()) {
       *passed = true;
       std::auto_ptr<Product> product(new Product(hjets->id()));
