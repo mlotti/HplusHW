@@ -112,6 +112,12 @@ def filterRuns(lumiList, runMin, runMax):
     lumiList.removeRuns(runsToRemove)
     return lumiList
 
+class ExitCodeException(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 def assertJobSucceeded(stdoutFile):
     re_exe = re.compile("ExeExitCode=(?P<code>\d+)")
     re_job = re.compile("JobExitCode=(?P<code>\d+)")

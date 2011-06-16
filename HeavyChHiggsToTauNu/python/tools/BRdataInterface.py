@@ -63,6 +63,16 @@ def getTanb(mHp,mu,targetBRt2bH):
 
     return tanb
 
+def getLowTanb(mHp,mu,targetBRt2bH):
+    tanb = 10 # initial guess
+    BRt2bH = interpolate(mHp,tanb,mu).BRt2bH
+    while abs(BRt2bH - targetBRt2bH)/targetBRt2bH > 0.00001 and tanb > 1.1 :
+        tanb = tanb + 0.01*tanb*(BRt2bH - targetBRt2bH)/targetBRt2bH
+        BRt2bH = interpolate(mHp,tanb,mu).BRt2bH
+        #print targetBRt2bH,BRt2bH,tanb
+            
+    return tanb
+
 def main():
 #    print lowerTanBPoint(100,121.2,1000)
 #    print higherTanBPoint(100,121.2,1000)
@@ -70,5 +80,6 @@ def main():
 #    print interpolate(100,121.2,1000).BRH2taunu
 #    print interpolate(100,121.2,1000).mA
     print getTanb(100,200,0.05);
+    print getLowTanb(100,200,0.05);
 
 #main()

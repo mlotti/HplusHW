@@ -11,12 +11,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 re_histo = None
 
-class ExitCodeException(Exception):
-    def __init__(self, message):
-        self.message = message
-    def __str__(self):
-        return self.message
-
 def getHistogramFile(stdoutFile):
     multicrab.assertJobSucceeded(stdoutFile)
     histoFile = None
@@ -46,7 +40,7 @@ def main(opts, args):
         for f in stdoutFiles:
             try:
                 files.append(os.path.join(os.path.dirname(f), getHistogramFile(f)))
-            except ExitCodeException, e:
+            except multicrab.ExitCodeException, e:
                 print "Skipping task %s, job %s: %s" % (d, f, str(e))
             
         if len(files) == 0:
