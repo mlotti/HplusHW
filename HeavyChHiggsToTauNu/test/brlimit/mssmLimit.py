@@ -31,7 +31,7 @@ def writeText( myText, y ):
     text.DrawLatex(0.185,y,myText)
     return 0
 
-# Create a TGraph for tanb y values from a TGraph with BR y values
+# Create a TGraph for upper limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
 def graphToTanBeta(graph, mu=200, removeNotValid=True):
@@ -77,7 +77,7 @@ def graphToTanBeta(graph, mu=200, removeNotValid=True):
                 
     return graph
 
-# Create a TGraph for tanb y values from a TGraph with BR y values
+# Create a TGraph for lower limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
 def graphToTanBetaLow(graph, mu=200, removeNotValid=True):
@@ -98,12 +98,16 @@ def graphToTanBetaLow(graph, mu=200, removeNotValid=True):
         print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
 #        if tanb < 0:
 #           print "No valid tanb for BR %f" % yvalues[i]
-        print tanb
 
         graph.SetPoint(i, mass, tanb)
 
     # For points for which a valid tanb value can not be obtained,
     # either remove the point, or set a huge value
+    #
+    # Note that in tanb space the order of points for 1/2 sigma bands
+    # is now reversed: first begin with low mH, upper limit for 1/2s
+    # band, then go clockwise: increase mH, then switch to lower limit,
+    # decrease mH
     if removeNotValid:
         found = True
         while found:
@@ -118,9 +122,9 @@ def graphToTanBetaLow(graph, mu=200, removeNotValid=True):
             if graph.GetY()[i] < 0:
                 # set huge value or zero
                 if 2*i>=graph.GetN():
-                    graph.SetPoint(i, graph.GetX()[i], 1e6)
-                else:
                     graph.SetPoint(i, graph.GetX()[i], 0.0)
+                else:
+                    graph.SetPoint(i, graph.GetX()[i], 1e6)
                 
     return graph
 
@@ -161,9 +165,12 @@ def main():
     expected_tanb = graphToTanBeta(expected)
     expected_1s_tanb = graphToTanBeta(expected_1s, removeNotValid=False)
     expected_2s_tanb = graphToTanBeta(expected_2s, removeNotValid=False)
-    showLow = 0
+    showLow = 1
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed)
+        expected_tanb_low = graphToTanBetaLow(expected)
+        expected_1s_tanb_low = graphToTanBetaLow(expected_1s, removeNotValid=False)
+        expected_2s_tanb_low = graphToTanBetaLow(expected_2s, removeNotValid=False)
 
     # Take the mass points of observed and expected graphs. If the
     # mass point is missing from both of them, remove it from the 1/2
@@ -175,6 +182,14 @@ def main():
     valid_mp.sort()
     keepOnlyMassPoints(expected_1s_tanb, valid_mp)
     keepOnlyMassPoints(expected_2s_tanb, valid_mp)
+    # Similarly for lower limits
+    if showLow:
+        observed_mp_low = getMassPoints(observed_tanb_low)
+        expected_mp_low = getMassPoints(expected_tanb_low)
+        valid_mp_low = list(set(observed_mp_low) | set(expected_mp_low)) # make a union of observed and expected
+        valid_mp_low.sort()
+        keepOnlyMassPoints(expected_1s_tanb_low, valid_mp_low)
+        keepOnlyMassPoints(expected_2s_tanb_low, valid_mp_low)
 
     # Define the axis ranges
     massMin = valid_mp[0] - 5
@@ -189,9 +204,16 @@ def main():
     expected_2s_tanb.Draw("F")
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
+    observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
     if showLow:
+        expected_2s_tanb_low.Draw("F")
+        expected_1s_tanb_low.Draw("F")
+        expected_tanb_low.Draw("LP")
+#        observed_tanb_low.SetFillColor(1)
+#        observed_tanb_low.SetFillStyle(3006)
+        observed_tanb_low.SetLineWidth(-804)
         observed_tanb_low.Draw("LP")
 
     # Axis labels
@@ -209,8 +231,8 @@ def main():
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
-    if showLow:
-        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
+#    if showLow:
+#        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
     pl.Draw()
     
     # Text
