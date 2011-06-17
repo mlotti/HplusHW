@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import ROOT
-from ROOT import TLatex, TLegend, TLegendEntry
 ROOT.gROOT.SetBatch(True) # batch mode
+from ROOT import TLatex, TLegend, TLegendEntry
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
+
+mu = 200
+#mu = 1000
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -34,7 +37,7 @@ def writeText( myText, y ):
 # Create a TGraph for tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
-def graphToTanBeta(graph, mu=200, removeNotValid=True):
+def graphToTanBeta(graph, removeNotValid=True):
     # Don't modify the original
     graph = graph.Clone()
 
@@ -110,9 +113,13 @@ def main():
     # Create tan beta graphs
     # Convention: begin with low mH, lower limit for 1/2s band
     # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
+    print "Constructing observed"
     observed_tanb = graphToTanBeta(observed)
+    print "Constructing expected"
     expected_tanb = graphToTanBeta(expected)
+    print "Constructing expected 1 sigma"
     expected_1s_tanb = graphToTanBeta(expected_1s, removeNotValid=False)
+    print "Constructing expected 2 sigma"
     expected_2s_tanb = graphToTanBeta(expected_2s, removeNotValid=False)
 
     # Take the mass points of observed and expected graphs. If the
@@ -174,6 +181,7 @@ def main():
     writeText("Fully hadronic final state",   top - lineSpace)
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
+    writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
     
     # Save to file
     formats = [
