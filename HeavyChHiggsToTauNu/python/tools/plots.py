@@ -727,11 +727,14 @@ class DataMCPlot(PlotSameBase):
     # \param datasetMgr      DatasetManager for datasets
     # \param name            Path of the histogram in the ROOT files
     # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
-    def __init__(self, datasetMgr, name, **kwargs):
+    def __init__(self, datasetMgr, name, normalizeToLumi=None, **kwargs):
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
-        self.histoMgr.normalizeMCByLuminosity()
+        if normalizeToLumi == None:
+            self.histoMgr.normalizeMCByLuminosity()
+        else:
+            self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
         self._setLegendStyles()
         self._setLegendLabels()

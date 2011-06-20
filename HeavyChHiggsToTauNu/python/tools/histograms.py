@@ -400,8 +400,12 @@ class CanvasFrame:
 
         opts = kwargs
         if "opts" in kwargs:
-            if len(kwargs) != 1:
-                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given")
+            tmp = {}
+            tmp.update(kwargs)
+            if "opts2" in tmp:
+                del tmp["opts2"]
+            if len(tmp) != 1:
+                raise Exception("If giving 'opts' as keyword argument, no other keyword arguments can be given (except opts2, which is ignored)")
             opts = kwargs["opts"]
 
         if "yfactor" in opts:
@@ -520,7 +524,7 @@ class CanvasFrameTwo:
         opts2.update(kwargs.get("opts2", {}))
 
         if "xmin" in opts2 or "xmax" in opts2:
-            raise Exception("No 'xmin' or 'xmax' allowed in opts2")
+            raise Exception("No 'xmin' or 'xmax' allowed in opts2, values are taken from opts/opts1")
         
 
         _boundsArgs(histos1, opts1)
