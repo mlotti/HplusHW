@@ -2,7 +2,7 @@
 
 import ROOT
 ROOT.gROOT.SetBatch(True) # batch mode
-from ROOT import TLatex, TLegend, TLegendEntry
+from ROOT import TLatex, TLegend, TLegendEntry, TGraph
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
@@ -153,7 +153,44 @@ def cleanGraph(graph):
     for i in xrange(0, graph.GetN()):
         if int(graph.GetX()[i])<100:
             graph.RemovePoint(i)
-            
+
+# Draw Tevatron exclusion
+# picked from P-TDR2, page 369
+def getTevaCurve():
+    curve = TGraph(11)
+    curve.Set(11)
+    curve.SetPoint(0,100,58)
+    curve.SetPoint(1,105,60)
+    curve.SetPoint(2,110,65)
+    curve.SetPoint(3,120,78)
+    curve.SetPoint(4,120,100)
+    curve.SetPoint(5,100,100)
+    curve.SetFillStyle(4)
+    curve.SetFillColor(618)
+    return curve
+
+# Draw LEP exclusion
+# picked from P-TDR2, page 369
+def getLepCurve():
+    curve = TGraph(11)
+    curve.Set(11)
+    curve.SetPoint(0,100,8.4)
+    curve.SetPoint(1,105,9.0)
+    curve.SetPoint(2,110,9.2)
+    curve.SetPoint(3,115,9.1)
+    curve.SetPoint(4,120,8.5)
+    curve.SetPoint(5,130,7.7)
+    curve.SetPoint(6,140,7.4)
+    curve.SetPoint(7,150,6.9)
+    curve.SetPoint(8,160,6.8)
+    curve.SetPoint(9,160,0.0)
+    curve.SetPoint(10,100,0.0)
+#    curve.SetPoint(4,150,0.0)
+#    curve.SetPoint(5,100,0.0)
+    curve.SetFillStyle(4)
+    curve.SetFillColor(407)
+    return curve
+    
 # Main function, called explicilty from the end of the script
 def main():
     # Apply TDR style
@@ -228,6 +265,11 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
+    TevaCurve = getTevaCurve()
+    TevaCurve.Draw("F")
+    LepCurve = getLepCurve()
+    LepCurve.Draw("F")
+
     if showLow:
         expected_2s_tanb_low.Draw("F")
         expected_1s_tanb_low.Draw("F")
@@ -242,7 +284,9 @@ def main():
     frame.GetYaxis().SetTitle("tan(#beta)")
 
     # Legends
-    pl  = ROOT.TLegend(0.58,0.73,0.8,0.92)
+    legeX = 0.58
+    legeY = 0.36
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.22,legeY+0.28)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
@@ -252,6 +296,8 @@ def main():
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
+    pl.AddEntry(LepCurve,  "LEP exclusion", "f")
+    pl.AddEntry(TevaCurve,  "Tevatron exclusion", "f")
 #    if showLow:
 #        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
     pl.Draw()
@@ -273,7 +319,7 @@ def main():
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
-    
+
     # Save to file
     formats = [
         ".png",
@@ -282,6 +328,7 @@ def main():
         ]
     for format in formats:
         canvas.SaveAs(format)
+
 
 
 # If the file is run (and not imported), call function main()
