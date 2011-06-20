@@ -19,9 +19,10 @@ int brlimit()
   ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
 
   // --- Data: mass points and efficiencies  --- 
-   const int nData = 6; // 90 not yet ready
+   const int nData = 7; // 90 not yet ready
    double mH[nData]   = 
-     {100,     
+     {80,
+      100,     
       120,     
       140,         
       150,    
