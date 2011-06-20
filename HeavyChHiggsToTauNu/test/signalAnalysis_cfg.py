@@ -20,6 +20,7 @@ doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
+doRtauScan = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -152,6 +153,21 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
 
+if options.tauEmbeddingInput != 0:
+    #param.trigger.selectionType = cms.untracked.string("disabled")
+    param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string("SIMPLE"), luminosity = cms.double(0)))
+    param.trigger.triggerEfficiency.parameters = cms.PSet(
+        SIMPLE = cms.PSet(
+            tauPtBins = cms.VPSet(
+                cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.5)),
+                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(1.0)),
+#                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7)),
+#                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(1.0)),
+            )
+        )
+    )
+    
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     trigger = param.trigger,
@@ -226,7 +242,7 @@ if doBTagScan:
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
-if doBTagScan:
+
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
     module = process.signalAnalysis.clone()
     module.bTagging.discriminator = "trackCountingHighPurBJetTags"
@@ -235,6 +251,15 @@ if doBTagScan:
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
+
+if doRtauScan:
+    for val in [0.0, 0.7, 0.8]:
+        module = process.signalAnalysis.clone()
+        module.tauSelection.rtauCut = val
+        addAnalysis(process, "signalAnalysisRtau%d"%int(val*100), module,
+                    preSequence=process.commonSequence,
+                    additionalCounters=additionalCounters,
+                    signalAnalysisCounters=True)
 
 
 ################################################################################
