@@ -132,6 +132,7 @@ namespace HPlus {
     Count fFakeMETVetoCounter;
     Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
+    Count fControlSignalLikeCounterAfterBTag;
     
     // Counters for propagating result into signal region from reversed rtau control region
 

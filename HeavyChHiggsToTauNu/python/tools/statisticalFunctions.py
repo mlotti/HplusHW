@@ -1,7 +1,6 @@
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface import *
 from math import sqrt,log
 import crosssection
-import BRdataInterface
 
 def signif(nSignal,nBackgr,sysErrorBackgr):
     if (sysErrorBackgr > 1 or sysErrorBackgr < 0):
@@ -74,7 +73,25 @@ def tanbForXsecLow(xSecAtLimit,mHp,tanbRef,mu):
     return tanb
 
 def tanbForBR(brAtLimit, mHp, tanbRef, mu):
-    return tanbForXsec(crosssection.ttCrossSection*brAtLimit, mHp, tanbRef, mu)
+    tanb = tanbRef
+    
+    br = getBR_top2bHp(mHp, tanb, mu)
+    maxIter = 100
+    i = 0
+    while abs(br - brAtLimit)/brAtLimit > 0.01 and br > 0 and tanb < 219 and i < maxIter:
+        i += 1
+        tanb_delta = 0.1*(brAtLimit - br)/brAtLimit * tanb
+        tanb = tanb + tanb_delta
+        br = getBR_top2bHp(mHp, tanb, mu)
+#        print "       tanbForBR loop, tanb %f, tanb_delta %f, br %f" % (tanb, tanb_delta, br)
+#    print "check tanbForBR ",tanb
+    if i >= maxIter:
+        print "Maximum number of iterations reached (%d), difference in (br-limit)/limit = %f" % (maxIter, (br-brAtLimit)/brAtLimit)
+
+    if tanb > 219 or br <= 0:
+        return -1
+    return tanb
+#    return tanbForXsec(crosssection.whTauNuCrossSection(brAtLimit, 1), mHp, tanbRef, mu)
 
 def tanbForBRlow(brAtLimit, mHp, tanbRef, mu):
     return tanbForXsecLow(crosssection.ttCrossSection*brAtLimit, mHp, tanbRef, mu)
@@ -87,7 +104,7 @@ def tanbForTheoryLimit(mHp,mu):
     for tanb in tanbs:
 #        print "    check loop tanb ",tanb,getBR_top2bHp(mHp,tanb,mu),mHp,tanb,mu
 	nTanbs = nTanbs+1
-	if BRdataInterface.getBR_top2bHp(mHp,tanb,mu) > 0:
+	if getBR_top2bHp(mHp,tanb,mu) > 0:
 	   nValidTanbs = nValidTanbs+1
 	   lastTanb = tanb
 

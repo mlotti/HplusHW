@@ -66,6 +66,10 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
+
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
+    
 #    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
@@ -246,7 +250,47 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
 
+def vertexCount(h, prefix="", postfix=""):
+    xlabel = "Number of vertices"
+    ylabel = "A.u."
 
+    h.stackMCHistograms()
+
+    stack = h.histoMgr.getHisto("StackedMC")
+    hsum = stack.getSumRootHisto()
+    total = hsum.Integral(0, hsum.GetNbinsX()+1)
+    for rh in stack.getAllRootHistos():
+        dataset._normalizeToFactor(rh, 1/total)
+    dataset._normalizeToOne(h.histoMgr.getHisto("Data").getRootHisto())
+
+    h.addMCUncertainty()
+
+    opts = {"xmax": 16}
+    opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
+    opts_log.update(opts)
+
+    h.createFrame(prefix+"vertices"+postfix, opts=opts)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+#    h.histoMgr.addLuminosityText()
+    h.save()
+
+    h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    ROOT.gPad.SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+#    h.histoMgr.addLuminosityText()
+    h.save()
 
 def rtauGen(h, name, rebin=5, ratio=False):
     #h.setDefaultStyles()
