@@ -19,6 +19,7 @@ namespace HPlus {
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
+
     TFileDirectory myDir = fs->mkdir("TopSelection");
     
     hPtjjb = makeTH<TH1F>(myDir, "Pt_jjb", "Pt_jjb", 400, 0., 800.);
@@ -75,6 +76,7 @@ namespace HPlus {
 	  if ( jjbMass2 > 0)  jjbMass = sqrt(jjbMass2);
 	  hPtjjb->Fill(ptjjb, fEventWeight.getWeight());
 	  hjjbMass->Fill(jjbMass, fEventWeight.getWeight());
+
 	  if (ptjjb > ptmax ) {
 	    ptmax = ptjjb;
 	    topMass = jjbMass;
@@ -87,17 +89,25 @@ namespace HPlus {
 	  bool bFromTop = false;
 	  bool q1FromTop = false;
 	  bool q2FromTop = false;
-
+	  int q1Top = 0;
+	  int q2Top = 0;
+	  int bTop = 0;
 
 	  int q1mother = 999999;
 	  const reco::GenParticle* q1particle =  iJet1->genParticle();
 	  if ( q1particle) {
 	    if (abs(q1particle->pdgId()) < 5) {
+	      if (q1particle->status() != 2) continue;
 	      int numberOfq1Mothers = q1particle->numberOfMothers();
 	      for (int im2=0; im2 < numberOfq1Mothers; ++im2){
 		const reco::GenParticle* m1particle = dynamic_cast<const reco::GenParticle*>(q1particle->mother(im2));
 		if ( !m1particle) continue;
-      		q1mother = m1particle->pdgId();
+		q1mother = m1particle->pdgId();
+		//		if (abs(q1mother) == 24 ) q1FromTop = true;
+		if (abs(q1mother) == 24 ) {
+		  q1FromTop = true;
+		  q1Top = q1mother;
+		}
 	      }
 	    }
 	  }
@@ -105,42 +115,54 @@ namespace HPlus {
 	  const reco::GenParticle* q2particle =  iJet2->genParticle();
 	  if ( q2particle) {
 	    if (abs(q2particle->pdgId()) < 5) {
-
+	      if (q2particle->status() != 2) continue;
 	      int numberOfq2Mothers = q2particle->numberOfMothers();
 	      for (int im3=0; im3 < numberOfq2Mothers; ++im3){
 		const reco::GenParticle* m2particle = dynamic_cast<const reco::GenParticle*>(q2particle->mother(im3));
 		if ( !m2particle) continue;
 		q2mother = m2particle->pdgId();
+		//		if (abs(q1mother) == 24 ) q2FromTop = true;
+		if (abs(q2mother) == 24 ) {
+		  q2FromTop = true;
+		  q2Top = q2mother;
+		}
 	      }												 
 	    }
 	  }
-	  if( abs(q1mother) == 24 && abs(q2mother) == 24 &&  (q1mother == q2mother)) {	    
-	    q1FromTop = true;
-	    q2FromTop = true;
-	  }
+	  //	  if( abs(q1mother) == 24 && abs(q2mother) == 24 &&  (q1mother == q2mother)) {	    
+	  //  q1FromTop = true;
+	  //  q2FromTop = true;
+	  // }
 
 
 	  int bmother = 99999;
 	  const reco::GenParticle* bparticle =  iJetb->genParticle();
 	  if ( bparticle) {
 	    if (abs(bparticle->pdgId()) == 5) {
+	      if (bparticle->status() != 2) continue;
 	      int numberOfbMothers = bparticle->numberOfMothers();
 	      for (int im=0; im < numberOfbMothers; ++im){
 		const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(bparticle->mother(im));
 		if ( !mparticle) continue;
 		bmother = mparticle->pdgId();
+		//		if ( abs(bmother) == 6 ) bFromTop = true;
+		if (abs(bmother) == 6 ) {
+		  bFromTop = true;
+		  bTop = bmother;
+		}
 	      }
 	    }
 	  }
-	  if( abs(bmother) == 6 &&  (q1mother * bmother) > 0 ) {	    
-	    bFromTop = true;
-	  }
-	  if (bFromTop && q1FromTop &&  abs(bmother) == 6 && (q1mother * bmother) > 0) {
+	  //	  if( abs(bmother) == 6 &&  (q1mother * bmother) > 0 ) {	    
+	  //  bFromTop = true;
+	  // }
+	  if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop) > 0  ) {
 	    correctCombination = true;
 	    hPtmaxTop->Fill(ptjjb, fEventWeight.getWeight());
 	    htopMassReal->Fill(jjbMass, fEventWeight.getWeight());
 	  }
-	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
+	  //	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
+	  if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop)<0  ) {
 	    hPtmaxTopHplus->Fill(ptjjb, fEventWeight.getWeight());
 	    htopMassRealHplus->Fill(jjbMass, fEventWeight.getWeight());
 	  }

@@ -55,7 +55,9 @@ namespace HPlus {
       double fFakeMETVetoCut;
       // event counts in bins of tau jet pt
       TH1F* hAfterBigBox;
+      TH1F* hLeg1AfterBTagging17;
       TH1F* hLeg1AfterBTagging;
+      TH1F* hLeg1AfterBTagging33;
       TH1F* hLeg1AfterMET;
       TH1F* hLeg1AfterFakeMETVeto;
       TH1F* hLeg1AfterTopSelection;
@@ -130,6 +132,7 @@ namespace HPlus {
     Count fFakeMETVetoCounter;
     Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
+    Count fControlSignalLikeCounterAfterBTag;
     
     // Counters for propagating result into signal region from reversed rtau control region
 
@@ -248,8 +251,12 @@ namespace HPlus {
     TH1 *hCtrlPlot_MET_AfterLeptonVeto_WithTauIdAndRtau;
     TH1 *hCtrlPlot_JetMultiplicity_AfterMET_WithTauIdAndRtau;
     TH1 *hCtrlPlot_NBtags_AfterMET_WithTauIdAndRtau;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelection;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelectionAndTauId;
+    TH1 *hCtrlPlot_TransverseMass_AfterJetSelectionMetAndBtag;
     TH1 *hCtrlPlot_TransverseMass_AfterAllSelectionNoFakeMet;
-    // TH1 *hCtrlPlot_Counter_AfterJetSelection_ByTauPt;
+    TH1 *hCtrlPlot_TauCandPt_AfterJetSelection;
+    TH1 *hCtrlPlot_JetMultiplicity_AfterMETNoJetSelection_WithTauIdAndRtau;
     std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelection_ByTauPt;
     std::vector<TH1*> fCtrlPlot_MetAndBtagEff_AfterJetSelectionAndFakeMet_ByTauPt;
 
