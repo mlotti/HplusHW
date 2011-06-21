@@ -1,4 +1,4 @@
-esimport multicrabDatasetsCommon as common
+import multicrabDatasetsCommon as common
 
 # For pattuples: ~15kev/job (~20 kB/event on average, depending trigger selection efficiency)
 # For analysis: ~500kev/job
@@ -230,6 +230,48 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/TTToHplusBHminusB_M-160_7TeV-pythia6-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v13-f4fa5e38ef8e2164af1f351b44ad93c5/USER",
                 "number_of_jobs": 1
+            },
+        }
+    },
+
+    # Signal heavy
+    "HplusTB_M190_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M200_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M220_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M250_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
             },
         }
     },

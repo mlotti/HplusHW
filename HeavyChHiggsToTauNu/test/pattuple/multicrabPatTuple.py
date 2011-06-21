@@ -53,6 +53,11 @@ multicrab.extendDatasets(
 #        "TTToHplusBHminusB_M150_Summer11",
 #        "TTToHplusBHminusB_M155_Summer11",
 #        "TTToHplusBHminusB_M160_Summer11",
+        # Signal MC (Heavy)
+#        "HplusTB_M190_Summer11",
+#        "HplusTB_M200_Summer11",
+#        "HplusTB_M220_Summer11",
+#        "HplusTB_M250_Summer11",
     
         # Background MC
 #        "QCD_Pt30to50_TuneZ2_Summer11",
