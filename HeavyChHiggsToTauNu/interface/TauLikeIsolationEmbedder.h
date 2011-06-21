@@ -187,12 +187,12 @@ namespace HPlus {
 
           double sumPt = 0;
           double maxPt = 0;
-          for(size_t i=0; i<selectedChCands.size(); ++i)
+          for(size_t i=0; i<selectedChCands.size(); ++i) {
             double pt = selectedChCands[i]->pt();
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
-          copy.addUserInt(fChOccupancyName, chargedCands.size());
+          copy.addUserInt(fChOccupancyName, selectedChCands.size());
           copy.addUserFloat(fChMaxPtName, maxPt);
           copy.addUserFloat(fChSumPtName, sumPt);
           maxPt = 0;
@@ -203,7 +203,7 @@ namespace HPlus {
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
-          copy.addUserInt(fGamOccupancyName, gammaCands.size());
+          copy.addUserInt(fGamOccupancyName, selectedGammaCands.size());
           copy.addUserFloat(fGamMaxPtName, maxPt);
           copy.addUserFloat(fGamSumPtName, sumPt);
         }
@@ -214,7 +214,6 @@ namespace HPlus {
           std::cout << "Cand pt " << copy.pt() << " occupancy " << occupancy << " sumPt " << sumPt << " maxPt " << maxPt << std::endl;
         */
       }
-
       fTraits.endEvent();
       
       iEvent.put(output);
