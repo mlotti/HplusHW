@@ -147,6 +147,13 @@ def keepOnlyMassPoints(graph, massPoints):
                 found = True
                 break
 
+# Remove mass points lower than 100 since
+# statisticalFunctions.tanbForBR cannot handle them (they are unphysical)
+def cleanGraph(graph):
+    for i in xrange(0, graph.GetN()):
+        if int(graph.GetX()[i])<100:
+            graph.RemovePoint(i)
+            
 # Main function, called explicilty from the end of the script
 def main():
     # Apply TDR style
@@ -160,6 +167,13 @@ def main():
     expected = f.Get("tg_exp")
     expected_1s = f.Get("tg_exp_cont1")
     expected_2s = f.Get("tg_exp_cont2")
+
+    # Remove mass points lower than 100 from graphs since
+    # gra
+    cleanGraph(observed)
+    cleanGraph(expected)
+    cleanGraph(expected_1s)
+    cleanGraph(expected_2s)
 
     # Create tan beta graphs
     # Convention: begin with low mH, lower limit for 1/2s band
