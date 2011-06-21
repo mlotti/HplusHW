@@ -97,6 +97,7 @@ namespace HPlus {
     TH1 *hEta2;
     TH1 *hNumberOfBtaggedJets;
     TH1 *hScaleFactor;
+    TH1 *hMCMatchForPassedJets;
     TH1 *hControlBTagUncertaintyMode;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
