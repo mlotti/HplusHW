@@ -63,15 +63,15 @@ namespace HPlus {
     if (fVariationMode == kBTagVariationPlus) {
       fScaleFactorBFlavor += fScaleFactorBFlavorUncertainty;
       fScaleFactorLightFlavor += fScaleFactorLightFlavorUncertainty;
-    else if (fVariationMode == kBTagVariationMinus) {
+    } else if (fVariationMode == kBTagVariationMinus) {
       fScaleFactorBFlavor -= fScaleFactorBFlavorUncertainty;
       fScaleFactorLightFlavor -= fScaleFactorLightFlavorUncertainty;      
     }
     hScaleFactor = makeTH<TH1F>(myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.02", 100, 0., 2.);
     hControlBTagUncertaintyMode = makeTH<TH1F>(myDir, "scaleUncertaintyMode", "scaleUncertaintyMode;;N_{events}", 3, 0., 3.);
-    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationNormal, "Normal");
-    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationMinus, "Minus");
-    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationPlus, "Plus");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationNormal, "Normal");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationMinus, "Minus");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationPlus, "Plus");
   }
 
   BTagging::~BTagging() {}

@@ -44,8 +44,6 @@ namespace HPlus {
       const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
 
     private:
-      void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets);
-      
       const BTagging *fBTagging;
       const bool fPassedEvent;
     };
@@ -56,6 +54,7 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
   private:
+    void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets);
 
     // Input parameters                                                                                                                                                                          
     edm::InputTag fSrc;
