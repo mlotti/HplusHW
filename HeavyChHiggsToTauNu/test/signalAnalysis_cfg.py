@@ -142,7 +142,8 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-param.setPileupWeightFor2011May10() # Only May10ReReco part
+param.setVertexWeightFor2011()
+#param.setPileupWeightFor2011May10() # Only May10ReReco part
 #param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
 #param.setPileupWeightFor2011All() # May10ReReco+PromptReco
 
