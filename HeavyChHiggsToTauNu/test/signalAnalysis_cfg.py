@@ -119,7 +119,8 @@ addPrimaryVertexSelection(process, process.commonSequence)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard'
-param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -162,7 +163,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
+    tauSelection = param.tauSelectionHPSLooseTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
