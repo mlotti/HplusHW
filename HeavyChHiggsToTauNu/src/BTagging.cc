@@ -19,8 +19,8 @@ namespace HPlus {
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
-    fScaleFactorBFlavor(iConfig.getUntrackedParameter<uint32_t>("scaleFactorBFlavorValue")),
-    fScaleFactorLightFlavor(iConfig.getUntrackedParameter<uint32_t>("scaleFactorLightFlavorValue")),
+    fScaleFactorBFlavor(iConfig.getUntrackedParameter<double>("scaleFactorBFlavorValue")),
+    fScaleFactorLightFlavor(iConfig.getUntrackedParameter<double>("scaleFactorLightFlavorValue")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
@@ -58,20 +58,27 @@ namespace HPlus {
     else if (myVariationModeName == "minus")
       fVariationMode = kBTagVariationMinus;
     else throw cms::Exception("Configuration") << "BTagging: Error: Unknown variationMode! options are 'normal', 'plus', 'minus', you had '" << myVariationModeName << "'.";
-    double fScaleFactorBFlavorUncertainty = iConfig.getUntrackedParameter<uint32_t>("scaleFactorBFlavorUncertainty");
-    double fScaleFactorLightFlavorUncertainty = iConfig.getUntrackedParameter<uint32_t>("scaleFactorLightFlavorUncertainty");
+    double fScaleFactorBFlavorUncertainty = iConfig.getUntrackedParameter<double>("scaleFactorBFlavorUncertainty");
+    double fScaleFactorLightFlavorUncertainty = iConfig.getUntrackedParameter<double>("scaleFactorLightFlavorUncertainty");
     if (fVariationMode == kBTagVariationPlus) {
       fScaleFactorBFlavor += fScaleFactorBFlavorUncertainty;
       fScaleFactorLightFlavor += fScaleFactorLightFlavorUncertainty;
     } else if (fVariationMode == kBTagVariationMinus) {
       fScaleFactorBFlavor -= fScaleFactorBFlavorUncertainty;
       fScaleFactorLightFlavor -= fScaleFactorLightFlavorUncertainty;      
+      // Protection against negative values
+      if (fScaleFactorBFlavor < 0) fScaleFactorBFlavor = 0;
+      if (fScaleFactorLightFlavor < 0) fScaleFactorLightFlavor = 0;
     }
-    hScaleFactor = makeTH<TH1F>(myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.02", 100, 0., 2.);
+    hScaleFactor = makeTH<TH1F>(myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.05", 100, 0., 5.);
     hControlBTagUncertaintyMode = makeTH<TH1F>(myDir, "scaleUncertaintyMode", "scaleUncertaintyMode;;N_{events}", 3, 0., 3.);
-    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationNormal, "Normal");
-    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationMinus, "Minus");
-    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationPlus, "Plus");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationNormal+1, "Normal");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationMinus+1, "Minus");
+    hControlBTagUncertaintyMode->GetXaxis()->SetBinLabel(kBTagVariationPlus+1, "Plus");
+    hMCMatchForPassedJets = makeTH<TH1F>(myDir, "MCMatchForPassedJets", "MCMatchForPassedJets;;N_{jets}", 3, 0., 3.);
+    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(1, "b jet");
+    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
+    hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
   }
 
   BTagging::~BTagging() {}
@@ -87,17 +94,12 @@ namespace HPlus {
 
     size_t passed = 0;
     bool bmatchedJet = false;
-   
-    // Obtain and apply scale factor for MC events
-    if (!iEvent.isRealData())
-      applyScaleFactor(jets);
     
     // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
 
       increment(fAllSubCount);
-
 
       if (!iEvent.isRealData()) {
 	edm::Handle <reco::GenParticleCollection> genParticles;
@@ -142,9 +144,13 @@ namespace HPlus {
 
 
       fSelectedJets.push_back(iJet);
-    }
+    } // end of jet loop
+    
+    // Obtain and apply scale factor for MC events
+    if (!iEvent.isRealData())
+      applyScaleFactor(fSelectedJets);
 
-
+    // Fill histograms
     hNumberOfBtaggedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     iNBtags = fSelectedJets.size();
 
@@ -185,19 +191,24 @@ namespace HPlus {
       edm::Ptr<pat::Jet> iJet = *iter;
       const reco::GenParticle* myParticle = (*iJet).genParton();
       if (myParticle == 0) {
-        ++nLightJets;
-        std::cout << "zero pointer genParticle" << std::endl;
+        ++nLightJets; // no MC match; assume its a light flavor jet
+        //std::cout << "zero pointer genParticle" << std::endl;
+        hMCMatchForPassedJets->Fill(2);
       } else {
-        if (std::abs(myParticle->pdgId()) == 5)
+        //std::cout << "pid=" << myParticle->pdgId() << std::endl;
+        if (std::abs(myParticle->pdgId()) == 5) {
           ++nBJets;
-        else
+          hMCMatchForPassedJets->Fill(0);
+        } else {
           ++nLightJets;
+          hMCMatchForPassedJets->Fill(1);
+        }
       }
     }
     fScaleFactor = std::pow(fScaleFactorBFlavor, nBJets) * std::pow(fScaleFactorLightFlavor, nLightJets);
     hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
     // Apply scale factor as weight to event
     fEventWeight.multiplyWeight(fScaleFactor);
-    std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
+    //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
   }
 }

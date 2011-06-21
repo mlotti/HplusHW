@@ -151,7 +151,7 @@ bTagging = cms.untracked.PSet(
     scaleFactorBFlavorUncertainty = cms.untracked.double(0.06), # from BTV-11-001, flat in pT
     scaleFactorLightFlavorValue = cms.untracked.double(1.11), # from BTV-11-001, flat in pT
     scaleFactorLightFlavorUncertainty = cms.untracked.double(0.11), # from BTV-11-001, flat in pT
-    variationMode = = cms.untracked.string("normal")
+    variationMode = cms.untracked.string("normal")
 )
 
 transverseMassCut = cms.untracked.double(100)
