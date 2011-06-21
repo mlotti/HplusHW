@@ -83,7 +83,7 @@ def graphToTanBeta(graph, removeNotValid=True):
 # Create a TGraph for lower limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
-def graphToTanBetaLow(graph, mu=200, removeNotValid=True):
+def graphToTanBetaLow(graph, removeNotValid=True):
     # Don't modify the original
     graph = graph.Clone()
 
