@@ -494,6 +494,8 @@ namespace HPlus {
 
 
     // Obtain btagging, fakeMETVeto, and forwardJetVeto data objects - internal plots will be wrong since they are not produced at the spot where the cut is applied
+    
+    double myStoredWeight = fEventWeight.getWeight(); // needed because of btag scale factor 
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     fNBtagsHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     fNBtagsHistogramGroupByMET[myMetIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
@@ -565,12 +567,13 @@ namespace HPlus {
     if (metData.passedEvent() && btagData.passedEvent() && tauDataForTauID.passedEvent() && tauDataForTauID.selectedTauCandidatePassedRtau())
       increment(fControlSignalLikeCounterAfterBTag);
 
+    // FakeMETVeto and MET Correlations
+    fFakeMETVetoHistogramGroupByMET[myMetIndex]->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight() );
     
     // Continue best cut path
 
-    /// FakeMETVeto and MET Correlations
-    fFakeMETVetoHistogramGroupByMET[myMetIndex]->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight() );
-    
+    // undo btag scale factor
+    fEventWeight.multiplyWeight(myStoredWeight / fEventWeight.getWeight()); // needed because of btag scale factor
 
     // Apply rest of tauID without Rtau
     if(!tauDataForTauID.passedEvent()) return;
