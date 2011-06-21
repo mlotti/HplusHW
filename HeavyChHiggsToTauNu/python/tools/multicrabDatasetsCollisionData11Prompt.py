@@ -174,18 +174,18 @@ datasets = {
             },
         }
     },
-    "Tau_166374-166502_Prompt": {
+    "Tau_166374-166861_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
-        "runs": (166374, 166502), # This is prompt RECO, so check the run range again when running!
+        "runs": (166374, 166861), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 100, # Adjusted for PATtuple file size
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v13": {
+            "pattuple_v13_JSON_160404-166502": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v13b-cd1d6a028c0df766eab2f022f5ff5ed1/USER",
                 "luminosity": 77.918424,
@@ -222,7 +222,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple file size
+4                "number_of_jobs": 40, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
             "pattuple_v13": {
@@ -241,10 +241,10 @@ datasets = {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple file size
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v13": {
+            "pattuple_v13_JSON_160404-166502": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v13b-07d060c3c16368a349833c94996731fd/USER",
                 "luminosity": 77.918424,
