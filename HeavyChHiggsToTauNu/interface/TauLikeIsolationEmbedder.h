@@ -150,9 +150,13 @@ namespace HPlus {
       fQcuts(iConfig.getParameter<edm::ParameterSet>("qualityCuts").getParameter<edm::ParameterSet>("isolationQualityCuts"))
     {
       std::string embedPrefix = iConfig.getParameter<std::string>("embedPrefix");
-      fOccupancyName = embedPrefix+"Occupancy";
-      fSumPtName = embedPrefix+"SumPt";
-      fMaxPtName = embedPrefix+"MaxPt";
+      fChOccupancyName = embedPrefix+"ChargedOccupancy";
+      fChSumPtName = embedPrefix+"ChargedSumPt";
+      fChMaxPtName = embedPrefix+"ChargedMaxPt";
+
+      fGamOccupancyName = embedPrefix+"GammaOccupancy";
+      fGamSumPtName = embedPrefix+"GammaSumPt";
+      fGamMaxPtName = embedPrefix+"GammaMaxPt";
 
       produces<OutputCollection>();
     }
@@ -171,10 +175,7 @@ namespace HPlus {
 
       for(size_t iCand=0; iCand<hcand->size(); ++iCand) {
         reco::VertexRef thePV = fTraits.getVertex(hcand->at(iCand));
-
-        size_t occupancy = 0;
-        double sumPt = 0;
-        double maxPt = 0;
+        ValueType copy = hcand->at(iCand);
         if(thePV.isNonnull()) {
           fQcuts.setPV(thePV);
 
@@ -184,23 +185,28 @@ namespace HPlus {
           reco::PFCandidateRefVector selectedChCands = fQcuts.filterRefs(pfchcands);
           reco::PFCandidateRefVector selectedGammaCands = fQcuts.filterRefs(pfgammacands);
 
-          occupancy = selectedChCands.size() + selectedGammaCands.size();
-          for(size_t i=0; i<selectedChCands.size(); ++i) {
+          double sumPt = 0;
+          double maxPt = 0;
+          for(size_t i=0; i<selectedChCands.size(); ++i)
             double pt = selectedChCands[i]->pt();
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
+          copy.addUserInt(fChOccupancyName, chargedCands.size());
+          copy.addUserFloat(fChMaxPtName, maxPt);
+          copy.addUserFloat(fChSumPtName, sumPt);
+          maxPt = 0;
+          sumPt = 0;
+
           for(size_t i=0; i<selectedGammaCands.size(); ++i) {
             double pt = selectedGammaCands[i]->pt();
             sumPt += pt;
             maxPt = std::max(maxPt, pt);
           }
+          copy.addUserInt(fGamOccupancyName, gammaCands.size());
+          copy.addUserFloat(fGamMaxPtName, maxPt);
+          copy.addUserFloat(fGamSumPtName, sumPt);
         }
-
-        ValueType copy = hcand->at(iCand);
-        copy.addUserInt(this->fOccupancyName, occupancy);
-        copy.addUserFloat(this->fMaxPtName, maxPt);
-        copy.addUserFloat(this->fSumPtName, sumPt);
         output->push_back(copy);
 
         /*
@@ -221,9 +227,13 @@ namespace HPlus {
 
     reco::tau::RecoTauQualityCuts fQcuts;
     
-    std::string fOccupancyName;
-    std::string fSumPtName;
-    std::string fMaxPtName;
+    std::string fChOccupancyName;
+    std::string fChSumPtName;
+    std::string fChMaxPtName;
+
+    std::string fGamOccupancyName;
+    std::string fGamSumPtName;
+    std::string fGamMaxPtName;
   };
 }
 

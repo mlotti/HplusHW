@@ -41,7 +41,8 @@ def main():
 
     datasets.mergeData()
 
-    printEfficiencies(datasets, analysis+"/calomet_et")
+    printEfficienciesCalo(datasets, analysis+"/calomet_et")
+    printEfficienciesPF(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -98,10 +99,37 @@ def combineHistoEffs(effList):
     gr = ROOT.TEfficiency.Combine(coll)
     return gr
 
-def printEfficiencies(datasets, path):
-    printEfficiency(datasets, path, 46)
+def getFromCalo(dataset, path, bin):
+    hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
+    all = hpass.GetBinContent(1)
+    passed = hpass.GetBinContent(bin)
+    cutvalue = hpass.GetBinCenter(bin)
+    return (all, passed, cutvalue)
 
-def printEfficiency(datasets, path, bin):
+def getFromPF(dataset, pathAll, pathPassed, bin):
+    hall = histograms.dist2pass(dataset.getDatasetRootHisto(pathAll).getHistogram(), greaterThan=True)
+    hpassed= histograms.dist2pass(dataset.getDatasetRootHisto(pathPassed).getHistogram(), greaterThan=True)
+    all = hall.GetBinContent(bin)
+    passed = hpassed.GetBinContent(bin)
+    cutvalue = hpassed.GetBinCenter(bin)
+    if abs(cutvalue-hall.GetBinCenter(bin)) > 1e-4:
+        raise Exception("Internal error, cutvalue %f, hall.GetBinCenter(bin) %f" % (cutvalue, hall.GetBinCenter(bin)))
+    return (all, passed, cutvalue)
+
+def printEfficienciesCalo(datasets, path):
+    print "Calo:"
+    printEfficiency(datasets, 46, lambda d, b: getFromCalo(d, path, b))
+    print
+
+def printEfficienciesPF(datasets, pathAll, pathPassed):
+    print "PF:"
+    printEfficiency(datasets, 71, lambda d, b: getFromPF(d, pathAll, pathPassed, b))
+    print
+
+def printEfficiency(datasets, bin, function):
+    backup = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kError
+
     mc_all = 0
     mc_passed = 0
     data_all = 0
@@ -112,10 +140,12 @@ def printEfficiency(datasets, path, bin):
     for dataset in datasets.getAllDatasets():
 #        print histo.getRootHisto().GetNbinsX(), histo.getXmin(), histo.getXmax()
 #        hpass = histograms.dist2pass(histo.getRootHisto(), greaterThan=True)
-        hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
-        all = hpass.GetBinContent(1)
-        passed = hpass.GetBinContent(bin)
-        cutvalue = hpass.GetBinCenter(bin)
+
+#        hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
+#        all = hpass.GetBinContent(1)
+#        passed = hpass.GetBinContent(bin)
+#        cutvalue = hpass.GetBinCenter(bin)
+        (all, passed, cutvalue) = function(dataset, bin)
         eff = Eff(all, passed, dataset)
         print "Dataset %s, eff %f + %f - %f" % (dataset.getName(), eff.eff, eff.eff_up, eff.eff_down)
 #        print all, passed, cutvalue
@@ -155,6 +185,8 @@ def printEfficiency(datasets, path, bin):
     print "  Comb. MC %f + %f - %f" % (cmc_eff, cmc_eff_up, cmc_eff_down)
     print "  data %f/%f = %f + %f - %f" % (data_all, data_passed, data_eff, data_eff_up, data_eff_down)
     print "  rho = %f \\pm %f" % (rho, rho_err)
+
+    ROOT.gErrorIgnoreLevel = backup
 
 class PlotTurnOn(plots.PlotBase):
     def __init__(self):
