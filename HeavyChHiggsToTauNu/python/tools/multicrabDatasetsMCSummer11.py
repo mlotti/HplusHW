@@ -1,4 +1,4 @@
-import multicrabDatasetsCommon as common
+esimport multicrabDatasetsCommon as common
 
 # For pattuples: ~15kev/job (~20 kB/event on average, depending trigger selection efficiency)
 # For analysis: ~500kev/job
@@ -422,6 +422,20 @@ datasets = {
             "AOD": {
                 "datasetpath": "/DYToMuMu_M-20_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
                 "number_of_jobs": 100,
+            },
+        },
+    },
+
+
+    # EWK MadGraph
+    # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+    "TTJets_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
             },
         },
     },
