@@ -115,7 +115,7 @@ wStyle = Style(ROOT.kFullTriangleDown, ROOT.kOrange+9)
 wwStyle = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle = Style(ROOT.kMultiply, ROOT.kPink-7)
 zzStyle = Style(ROOT.kMultiply, ROOT.kPink-5)
-dibStyle = Style(ROOT.kMultiply, ROOT.kBlue+1)
+dibStyle = Style(ROOT.kMultiply, ROOT.kBlue-4)
 
 stsStyle = Style(ROOT.kPlus, ROOT.kSpring-9)
 sttStyle = Style(ROOT.kPlus, ROOT.kSpring-7)
