@@ -19,6 +19,8 @@ namespace HPlus {
     fDiscriminator(iConfig.getUntrackedParameter<std::string>("discriminator")),
     fDiscrCut(iConfig.getUntrackedParameter<double>("discriminatorCut")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
+    fScaleFactorBFlavor(iConfig.getUntrackedParameter<uint32_t>("scaleFactorBFlavorValue")),
+    fScaleFactorLightFlavor(iConfig.getUntrackedParameter<uint32_t>("scaleFactorLightFlavorValue")),
     fTaggedCount(eventCounter.addSubCounter("b-tagging main","b-tagging")),
     fAllSubCount(eventCounter.addSubCounter("b-tagging", "all jets")),
     fTaggedSubCount(eventCounter.addSubCounter("b-tagging", "tagged")),
@@ -46,6 +48,30 @@ namespace HPlus {
     hEta1 = makeTH<TH1F>(myDir, "bjet1_eta", "bjet1_pt", 100, -5., 5.);
     hEta2 = makeTH<TH1F>(myDir, "bjet2_eta", "bjet2_pt", 100, -5., 5.);
     hNumberOfBtaggedJets = makeTH<TH1F>(myDir, "NumberOfBtaggedJets", "NumberOfBtaggedJets", 15, 0., 15.);
+    
+    // Obtain scale factor variation information
+    std::string myVariationModeName = iConfig.getUntrackedParameter<std::string>("variationMode");
+    if (myVariationModeName == "normal")
+      fVariationMode = kBTagVariationNormal;
+    else if (myVariationModeName == "plus")
+      fVariationMode = kBTagVariationPlus;
+    else if (myVariationModeName == "minus")
+      fVariationMode = kBTagVariationMinus;
+    else throw cms::Exception("Configuration") << "BTagging: Error: Unknown variationMode! options are 'normal', 'plus', 'minus', you had '" << myVariationModeName << "'.";
+    double fScaleFactorBFlavorUncertainty = iConfig.getUntrackedParameter<uint32_t>("scaleFactorBFlavorUncertainty");
+    double fScaleFactorLightFlavorUncertainty = iConfig.getUntrackedParameter<uint32_t>("scaleFactorLightFlavorUncertainty");
+    if (fVariationMode == kBTagVariationPlus) {
+      fScaleFactorBFlavor += fScaleFactorBFlavorUncertainty;
+      fScaleFactorLightFlavor += fScaleFactorLightFlavorUncertainty;
+    else if (fVariationMode == kBTagVariationMinus) {
+      fScaleFactorBFlavor -= fScaleFactorBFlavorUncertainty;
+      fScaleFactorLightFlavor -= fScaleFactorLightFlavorUncertainty;      
+    }
+    hScaleFactor = makeTH<TH1F>(myDir, "scaleFactor", "scaleFactor;b-tag/mistag scale factor;N_{events}/0.02", 100, 0., 2.);
+    hControlBTagUncertaintyMode = makeTH<TH1F>(myDir, "scaleUncertaintyMode", "scaleUncertaintyMode;;N_{events}", 3, 0., 3.);
+    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationNormal, "Normal");
+    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationMinus, "Minus");
+    hControlBTagUncertaintyMode->GetXAxis()->SetBinLabel(kBTagVariationPlus, "Plus");
   }
 
   BTagging::~BTagging() {}
@@ -62,6 +88,11 @@ namespace HPlus {
     size_t passed = 0;
     bool bmatchedJet = false;
    
+    // Obtain and apply scale factor for MC events
+    if (!iEvent.isRealData())
+      applyScaleFactor(jets);
+    
+    // Calculate 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
 
@@ -141,5 +172,26 @@ namespace HPlus {
     increment(fTaggedCount);
 
     return Data(this, passEvent);
+  }
+  
+  void BTagging::applyScaleFactor(const edm::PtrVector<pat::Jet>& jets) {
+    // Control
+    hControlBTagUncertaintyMode->Fill(fVariationMode, fEventWeight.getWeight());
+    // Count number of b jets and light jets
+    
+    int nBJets = 0;
+    int nLightJets = 0;
+    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+      edm::Ptr<pat::Jet> iJet = *iter;
+      if (std::abs((*iJet)->genParton()->pdgId()) == 5)
+        ++nBJets;
+      else
+        ++nLightJets
+    }
+    fScaleFactor = std::pow(fScaleFactorBFlavor, nBJets) * std::pow(fScaleFactorLightFlavor, nLightJets);
+    hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
+    // Apply scale factor as weight to event
+    fEventWeight.multiplyWeight(fScaleFactor);
+    std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
   }
 }
