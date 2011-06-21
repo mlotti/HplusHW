@@ -37,7 +37,7 @@ def writeText( myText, y ):
 # Create a TGraph for upper limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
-def graphToTanBeta(graph, removeNotValid=True):
+def graphToTanBeta(graph, mymu, removeNotValid=True):
     # Don't modify the original
     graph = graph.Clone()
 
@@ -49,7 +49,7 @@ def graphToTanBeta(graph, removeNotValid=True):
         # For some reason tanbForBR gets stuck for some large values; solution: do not
         # even bother to calculate values for Br>=0.5
         if yvalues[i]<0.50:
-            tanb = statisticalFunctions.tanbForBR(yvalues[i], mass, tanbRef, mu)
+            tanb = statisticalFunctions.tanbForBR(yvalues[i], mass, tanbRef, mymu)
         else:
             tanb = -1
         print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
@@ -83,7 +83,7 @@ def graphToTanBeta(graph, removeNotValid=True):
 # Create a TGraph for lower limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
-def graphToTanBetaLow(graph, removeNotValid=True):
+def graphToTanBetaLow(graph, mymu, removeNotValid=True):
     # Don't modify the original
     graph = graph.Clone()
 
@@ -95,7 +95,7 @@ def graphToTanBetaLow(graph, removeNotValid=True):
         # For some reason tanbForBR gets stuck for some large values; solution: do not
         # even bother to calculate values for Br>=0.5
         if yvalues[i]<0.50:
-            tanb = statisticalFunctions.tanbForBRlow(yvalues[i], mass, tanbRef, mu)
+            tanb = statisticalFunctions.tanbForBRlow(yvalues[i], mass, tanbRef, mymu)
         else:
             tanb = -1
         print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
@@ -216,19 +216,19 @@ def main():
     # Convention: begin with low mH, lower limit for 1/2s band
     # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
     print "Constructing observed"
-    observed_tanb = graphToTanBeta(observed)
+    observed_tanb = graphToTanBeta(observed,mu)
     print "Constructing expected"
-    expected_tanb = graphToTanBeta(expected)
+    expected_tanb = graphToTanBeta(expected,mu)
     print "Constructing expected 1 sigma"
-    expected_1s_tanb = graphToTanBeta(expected_1s, removeNotValid=False)
+    expected_1s_tanb = graphToTanBeta(expected_1s, mu, removeNotValid=False)
     print "Constructing expected 2 sigma"
-    expected_2s_tanb = graphToTanBeta(expected_2s, removeNotValid=False)
+    expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
     showLow = 1
     if showLow:
-        observed_tanb_low = graphToTanBetaLow(observed)
-        expected_tanb_low = graphToTanBetaLow(expected)
-        expected_1s_tanb_low = graphToTanBetaLow(expected_1s, removeNotValid=False)
-        expected_2s_tanb_low = graphToTanBetaLow(expected_2s, removeNotValid=False)
+        observed_tanb_low = graphToTanBetaLow(observed,mu)
+        expected_tanb_low = graphToTanBetaLow(expected,mu)
+        expected_1s_tanb_low = graphToTanBetaLow(expected_1s, mu, removeNotValid=False)
+        expected_2s_tanb_low = graphToTanBetaLow(expected_2s, mu, removeNotValid=False)
 
     # Take the mass points of observed and expected graphs. If the
     # mass point is missing from both of them, remove it from the 1/2
@@ -329,7 +329,76 @@ def main():
     for format in formats:
         canvas.SaveAs(format)
 
+####################
 
+            # Define the axis ranges
+    massMin = valid_mp[0] - 5
+    massMax = valid_mp[-1] + 5
+    tanbMax = 100
+
+
+    # Create the TCanvas, frame, etc
+    canvas2 = ROOT.TCanvas("mssmLimits_mus")
+    frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
+
+    observed_p2 = graphToTanBeta(observed,200)
+    observed_m2 = graphToTanBeta(observed,-200)
+    observed_pk = graphToTanBeta(observed,1000)
+    observed_mk = graphToTanBeta(observed,-1000)
+                                 
+# Axis labels
+    frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+    frame.GetYaxis().SetTitle("tan(#beta)")
+
+                                     
+    observed_p2.SetLineColor(2)
+    observed_p2.SetMarkerColor(2)
+    observed_m2.SetLineColor(2)
+    observed_m2.SetMarkerColor(2)
+    observed_m2.SetLineStyle(2)
+    observed_pk.SetLineColor(4)
+    observed_pk.SetMarkerColor(4)
+    observed_mk.SetLineColor(4)
+    observed_mk.SetMarkerColor(4)
+    observed_mk.SetLineStyle(2)
+
+    observed_p2.Draw("LP")
+    observed_m2.Draw("LP")
+    observed_pk.Draw("LP")
+    observed_mk.Draw("LP")
+
+    # Legends
+    legeX = 0.58
+    legeY = 0.76
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.27,legeY+0.14)
+    pl2.SetTextSize(0.03)
+    pl2.SetFillStyle(4000)
+    pl2.SetTextFont(132)
+    pl2.SetBorderSize(0)
+    pl2.AddEntry(observed_pk,     "Observed, mu=1000", "lp")
+    pl2.AddEntry(observed_p2,     "Observed, mu=200", "lp")
+    pl2.AddEntry(observed_m2,     "Observed, mu=-200", "lp")
+    pl2.AddEntry(observed_mk,     "Observed, mu=-1000", "lp")
+                
+
+    pl2.Draw()
+
+    writeTitleTexts(lumi)
+    top = 0.9
+    lineSpace = 0.038
+    writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
+    writeText("Fully hadronic final state",   top - lineSpace)
+#    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
+
+    # Save to file
+    formats = [
+        ".png",
+        ".C",
+        ".eps"
+        ]
+    for format in formats:
+        canvas2.SaveAs(format)
 
 # If the file is run (and not imported), call function main()
 if __name__ == "__main__":
