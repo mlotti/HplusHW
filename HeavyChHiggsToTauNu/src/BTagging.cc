@@ -181,12 +181,17 @@ namespace HPlus {
     
     int nBJets = 0;
     int nLightJets = 0;
-    for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
+    for (edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-      if (std::abs((*iJet)->genParton()->pdgId()) == 5)
-        ++nBJets;
-      else
-        ++nLightJets
+      const reco::GenParticle* myParticle = (*iJet)->genParton();
+      if (myParticle == 0)
+        ++nLightJets;
+      else {
+        if (std::abs(myParticle->pdgId()) == 5)
+          ++nBJets;
+        else
+          ++nLightJets;
+      }
     }
     fScaleFactor = std::pow(fScaleFactorBFlavor, nBJets) * std::pow(fScaleFactorLightFlavor, nLightJets);
     hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
