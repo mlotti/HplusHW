@@ -25,7 +25,6 @@ multicrab.extendDatasets(pattupleVersion,
         # Data: single tau (control trigger)
 #        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
 #        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
-#        "Tau_Single_166374-166502_Prompt",   # HLT_IsoPFTau35_Trk20_v2
         
         # Data: single tau + MET
         "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1  
@@ -34,7 +33,6 @@ multicrab.extendDatasets(pattupleVersion,
         "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
         "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
-        "Tau_166374-166502_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
 
         
         # MC Signal (WH)
