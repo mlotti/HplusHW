@@ -19,6 +19,11 @@ namespace HPlus {
   class JetSelection;
 
   class BTagging {
+  enum BTaggingVariationMode {
+    kBTagVariationNormal,
+    kBTagVariationMinus,
+    kBTagVariationPlus
+  };
   public:
     /**
      * Class to encapsulate the access to the data members of
@@ -49,6 +54,7 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
   private:
+    void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets);
 
     // Input parameters                                                                                                                                                                          
     edm::InputTag fSrc;
@@ -57,9 +63,12 @@ namespace HPlus {
     const double fPtCut;
     const double fEtaCut;
     const std::string fDiscriminator;
-    const double fDiscrCut;    
+    const double fDiscrCut;
     const uint32_t fMin;
-
+    double fScaleFactorBFlavor;
+    double fScaleFactorLightFlavor;
+    BTaggingVariationMode fVariationMode;
+    
     // Counters
     Count fTaggedCount;
 
@@ -71,7 +80,6 @@ namespace HPlus {
     Count fTaggedNoTaggedJet;
     Count fTaggedOneTaggedJet;
     Count fTaggedTwoTaggedJets;
-
 
     // EventWeight object
     EventWeight& fEventWeight;
@@ -88,11 +96,14 @@ namespace HPlus {
     TH1 *hPt2;
     TH1 *hEta2;
     TH1 *hNumberOfBtaggedJets;
-
+    TH1 *hScaleFactor;
+    TH1 *hMCMatchForPassedJets;
+    TH1 *hControlBTagUncertaintyMode;
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     int iNBtags;
     double fMaxDiscriminatorValue;
+    double fScaleFactor;
   };
 }
 
