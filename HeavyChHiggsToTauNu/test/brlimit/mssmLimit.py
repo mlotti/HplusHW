@@ -265,8 +265,10 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
-    TevaCurve = getTevaCurve()
-    TevaCurve.Draw("F")
+    showTeva = 0
+    if showTeva:
+        TevaCurve = getTevaCurve()
+        TevaCurve.Draw("F")
     LepCurve = getLepCurve()
     LepCurve.Draw("F")
 
@@ -284,9 +286,9 @@ def main():
     frame.GetYaxis().SetTitle("tan(#beta)")
 
     # Legends
-    legeX = 0.58
-    legeY = 0.36
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.22,legeY+0.28)
+    legeX = 0.60
+    legeY = 0.28
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.34)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
@@ -297,7 +299,8 @@ def main():
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
     pl.AddEntry(LepCurve,  "LEP exclusion", "f")
-    pl.AddEntry(TevaCurve,  "Tevatron exclusion", "f")
+    if showTeva:
+        pl.AddEntry(TevaCurve,  "Tevatron exclusion", "f")
 #    if showLow:
 #        pl.AddEntry(observed_tanb_low,     "Observed", "lp")
     pl.Draw()
@@ -398,17 +401,15 @@ def main():
     observed_pk.Draw("LP")
     observed_mk.Draw("LP")
 
-    observed_p2l.Draw("LP")
-    observed_m2l.Draw("LP")
     observed_pkl.Draw("LP")
+    observed_p2l.Draw("LP")
+    observed_m2l.Draw("LP")    
     observed_mkl.Draw("LP")
-
-                              
 
     # Legends
     legeX = 0.58
-    legeY = 0.26
-    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.14)
+    legeY = 0.20
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.24)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
