@@ -347,9 +347,9 @@ namespace HPlus {
     if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
     fPFTauIsolationCalculator.beginEvent(iEvent); // Set primary vertex to PF tau isolation calculation
+    // Choose tau to be used throughout the event as the selected tau jet
     edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
-    // Require that just one tau has been found
-    if (mySelectedTau.size() != 1) return;
+    // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection,fEventWeight.getWeight());
 
@@ -375,7 +375,7 @@ namespace HPlus {
 
     // Factorized out Rtau (after full tauID, but without Njets; assume that Njets cut does not correlate with Rtau)
     // Obtain tau ID data object
-    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup);
+    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
     if (tauDataForTauID.passedEvent()) {
       hStdNonWeightedTauPtAfterRtauWithoutNjetsBeforeCut->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
       if (tauDataForTauID.selectedTauPassedRtau()) {
@@ -681,15 +681,21 @@ namespace HPlus {
 
   edm::PtrVector<pat::Tau> QCDMeasurement::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
+
+    // TMP code starts - to be removed when all 42X pattuples are available
+    mySelectedTauCandidate.push_back(tauCandidates[0]); // take highest ET tau as the tau jet
+    return mySelectedTauCandidate;
+    // TMP code ends
+    
     edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
     double myBestPtMax = 9999.;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = tauCandidates.begin(); iter != tauCandidates.end(); ++iter) {
       if (!(*iter)->isPFTau()) continue;
-      //const edm::Ptr<pat::Tau> iTau = *iter;
+      const edm::Ptr<pat::Tau> iTau = *iter;
       double mySumPt = 999.;
       double myMaxPt = 999.;
       size_t myOccupancy = 999.;
-      // TMP //fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
+      fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
       myMaxPt = 0.; // TMP
       if (myMaxPt < myBestPtMax) {
         if (myMaxPt < 0.5) {
