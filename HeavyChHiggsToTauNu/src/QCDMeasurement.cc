@@ -323,12 +323,14 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent);
     increment(fAllCounter);
 
+///////// Start vertex reweighting
     // Apply PU re-weighting (Vertex weight)
     std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
     if(!iEvent.isRealData()) fEventWeight.multiplyWeight(weightSize.first);
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
+///////// Start trigger
     // Trigger and HLT_MET cut; or trigger efficiency parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
@@ -338,7 +340,7 @@ namespace HPlus {
     // GenParticle analysis
     if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
-    
+///////// Start primary vertex
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
@@ -349,6 +351,7 @@ namespace HPlus {
     // Apply pre-MET cut to see if MC Normalization is better.
     //if(metData.getSelectedMET()->et() < 30 ) return;
 
+///////// Start tau candidate selection
     // Apply tau candidate selection (with or without Rtau control region)
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauCandidateData.passedEvent()) return;
@@ -371,7 +374,9 @@ namespace HPlus {
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    double myWeightWithBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
     ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
@@ -396,13 +401,17 @@ namespace HPlus {
         }
       }
     }
-    
+    // undo btag scale factor
+    fEventWeight.multiplyWeight(myWeightWithoutBTagScale / fEventWeight.getWeight()); // needed because of btag scale factor
+
+
+///////// Start global electron veto
     // GlobalElectronVeto 
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
-
+///////// Start global muon veto
     // GlobalMuonVeto
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
@@ -451,12 +460,13 @@ namespace HPlus {
       increment(fJetSelectionCounter2);
     }
     if (!jetData.passedEvent()) return;
-    
+
     ///////////////////////////////// After Jet Selection /////////////////////////////////
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
+///////// Start MET factorisation
     // Fill factorization info into histogram
     fMETHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hMETFactorizationNJetsBefore->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
@@ -528,7 +538,11 @@ namespace HPlus {
 
     // Obtain btagging, fakeMETVeto, and forwardJetVeto data objects - internal plots will be wrong since they are not produced at the spot where the cut is applied
     
-    double myStoredWeight = fEventWeight.getWeight(); // needed because of btag scale factor 
+///////// Start btagging factorisation
+    
+    // Reapply the btagging scale factor
+    fEventWeight.multiplyWeight(myWeightWithBTagScale / myWeightWithoutBTagScale);
+    
     fNBtagsHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     fNBtagsHistogramGroupByMET[myMetIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     
@@ -579,6 +593,11 @@ namespace HPlus {
       hMETFactorizationBJets->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), myEventWeightBeforeMetFactorization);
     }
 
+    // Undo the btagging scale factor
+    fEventWeight.multiplyWeight(myWeightWithoutBTagScale / myWeightWithBTagScale);
+
+///////// Start parallel paths after big box
+
     // Apply non-standard cut paths
     analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData,
                                          fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex, 
@@ -597,11 +616,8 @@ namespace HPlus {
 
     // FakeMETVeto and MET Correlations
     fFakeMETVetoHistogramGroupByMET[myMetIndex]->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight() );
-    
-    // Continue best cut path
 
-    // undo btag scale factor
-    fEventWeight.multiplyWeight(myStoredWeight / fEventWeight.getWeight()); // needed because of btag scale factor
+///////// Continue cut path to tau isolation and rtau
 
     // Apply rest of tauID without Rtau
     if(!tauDataForTauID.passedEvent()) return;
