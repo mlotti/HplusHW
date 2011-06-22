@@ -27,8 +27,12 @@ class CrabJob:
         self.status = match.group("status")
         self.origStatus = self.status[:]
         self.action = match.group("action")
-        self.exeExitCode = intIfNotNone(match.group("execode"))
-        self.jobExitCode = intIfNotNone(match.group("jobcode"))
+        if self.status == "Cancelled":
+            self.exeExitCode = None
+            self.jobExitCode = None
+        else:
+            self.exeExitCode = intIfNotNone(match.group("execode"))
+            self.jobExitCode = intIfNotNone(match.group("jobcode"))
         self.host = match.group("host")
 
         if self.jobExitCode != None and self.jobExitCode != 0:
