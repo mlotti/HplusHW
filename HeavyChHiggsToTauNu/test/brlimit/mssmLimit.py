@@ -323,6 +323,8 @@ def main():
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
 
+    ROOT.gPad.RedrawAxis()
+
     # Save to file
     formats = [
         ".png",
