@@ -334,43 +334,81 @@ def main():
             # Define the axis ranges
     massMin = valid_mp[0] - 5
     massMax = valid_mp[-1] + 5
-    tanbMax = 100
+    tanbMax = 60
 
 
     # Create the TCanvas, frame, etc
     canvas2 = ROOT.TCanvas("mssmLimits_mus")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
+    # Axis labels
+    frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+    frame2.GetYaxis().SetTitle("tan(#beta)")
+
     observed_p2 = graphToTanBeta(observed,200)
     observed_m2 = graphToTanBeta(observed,-200)
     observed_pk = graphToTanBeta(observed,1000)
     observed_mk = graphToTanBeta(observed,-1000)
-                                 
-# Axis labels
-    frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
-    frame.GetYaxis().SetTitle("tan(#beta)")
 
+    observed_p2l = graphToTanBetaLow(observed,200)
+    observed_m2l = graphToTanBetaLow(observed,-200)
+    observed_pkl = graphToTanBetaLow(observed,1000)
+    observed_mkl = graphToTanBetaLow(observed,-1000)
                                      
-    observed_p2.SetLineColor(2)
-    observed_p2.SetMarkerColor(2)
-    observed_m2.SetLineColor(2)
-    observed_m2.SetMarkerColor(2)
+    observed_p2.SetLineColor(1)
+    observed_p2.SetMarkerColor(1)
+    observed_p2.SetMarkerStyle(20)
+    observed_p2.SetLineWidth(504)
+    observed_m2.SetLineColor(1)
+    observed_m2.SetMarkerColor(1)
+    observed_m2.SetMarkerStyle(20)
     observed_m2.SetLineStyle(2)
+    observed_m2.SetLineWidth(504)
     observed_pk.SetLineColor(4)
     observed_pk.SetMarkerColor(4)
+    observed_pk.SetMarkerStyle(21)
+    observed_pk.SetLineWidth(504)
     observed_mk.SetLineColor(4)
     observed_mk.SetMarkerColor(4)
+    observed_mk.SetMarkerStyle(21)
     observed_mk.SetLineStyle(2)
+    observed_mk.SetLineWidth(504)
+
+    observed_p2l.SetLineColor(1)
+    observed_p2l.SetMarkerColor(1)
+    observed_p2l.SetMarkerStyle(20)
+    observed_p2l.SetLineWidth(-504)
+    observed_m2l.SetLineColor(1)
+    observed_m2l.SetMarkerColor(1)
+    observed_m2l.SetMarkerStyle(20)
+    observed_m2l.SetLineStyle(2)
+    observed_m2l.SetLineWidth(-504)
+    observed_pkl.SetLineColor(4)
+    observed_pkl.SetMarkerColor(4)
+    observed_pkl.SetMarkerStyle(21)
+    observed_pkl.SetLineWidth(-504)
+    observed_mkl.SetLineColor(4)
+    observed_mkl.SetMarkerColor(4)
+    observed_mkl.SetMarkerStyle(21)
+    observed_mkl.SetLineStyle(2)
+    observed_mkl.SetLineWidth(-504)
 
     observed_p2.Draw("LP")
     observed_m2.Draw("LP")
     observed_pk.Draw("LP")
     observed_mk.Draw("LP")
 
+    observed_p2l.Draw("LP")
+    observed_m2l.Draw("LP")
+    observed_pkl.Draw("LP")
+    observed_mkl.Draw("LP")
+
+                              
+
     # Legends
     legeX = 0.58
-    legeY = 0.76
-    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.27,legeY+0.14)
+    legeY = 0.26
+    pl2  = ROOT.TLegend(legeX,legeY,legeX+0.35,legeY+0.14)
     pl2.SetTextSize(0.03)
     pl2.SetFillStyle(4000)
     pl2.SetTextFont(132)
@@ -384,7 +422,7 @@ def main():
     pl2.Draw()
 
     writeTitleTexts(lumi)
-    top = 0.9
+    top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
     writeText("Fully hadronic final state",   top - lineSpace)
