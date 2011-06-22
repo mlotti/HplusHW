@@ -481,4 +481,15 @@ datasets = {
             },
         },
     },
+    "WJets_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 28000,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 1200, # Adjusted for PATtuple file size.
+                "use_server": 1,
+            },
+        },
+    },
 }
