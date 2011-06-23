@@ -269,8 +269,11 @@ def main():
     if showTeva:
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
-    LepCurve = getLepCurve()
-    LepCurve.Draw("F")
+
+    showLEP = 0
+    if showLEP:
+        LepCurve = getLepCurve()
+        LepCurve.Draw("F")
 
     if showLow:
         expected_2s_tanb_low.Draw("F")
@@ -288,7 +291,7 @@ def main():
     # Legends
     legeX = 0.60
     legeY = 0.28
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.34)
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.30)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
@@ -298,7 +301,8 @@ def main():
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
     pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
-    pl.AddEntry(LepCurve,  "LEP exclusion", "f")
+    if showLEP:
+        pl.AddEntry(LepCurve,  "LEP exclusion", "f")
     if showTeva:
         pl.AddEntry(TevaCurve,  "Tevatron exclusion", "f")
 #    if showLow:
