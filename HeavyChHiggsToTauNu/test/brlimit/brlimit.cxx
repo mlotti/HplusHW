@@ -111,7 +111,7 @@ int brlimit()
 
   // --- Plot LIP and Tevatron results, obs(black) ---
   if (0) plotLipResults(pl);
-  if (0) plotTevatronResults(pl);
+  if (1) plotTevatronResults(pl);
 
   // Save TGraphs and plots
   TFile myfi("brlimits.root","recreate");
