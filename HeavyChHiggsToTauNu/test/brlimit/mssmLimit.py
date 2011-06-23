@@ -52,7 +52,7 @@ def graphToTanBeta(graph, mymu, removeNotValid=True):
             tanb = statisticalFunctions.tanbForBR(yvalues[i], mass, tanbRef, mymu)
         else:
             tanb = -1
-        print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
+#        print "mass %d, BR %f, tanb %f, %d / %d" % (mass, yvalues[i], tanb, i, graph.GetN())
 #        if tanb < 0:
 #           print "No valid tanb for BR %f" % yvalues[i]
 
@@ -89,7 +89,7 @@ def graphToTanBetaLow(graph, mymu, removeNotValid=True):
 
     # Loop over the graph points
     yvalues = graph.GetY()
-    tanbRef = 10 # initial guess
+    tanbRef = 5 # initial guess
     for i in xrange(0, graph.GetN()):
         mass = graph.GetX()[i]
         # For some reason tanbForBR gets stuck for some large values; solution: do not
@@ -152,6 +152,14 @@ def keepOnlyMassPoints(graph, massPoints):
 def cleanGraph(graph):
     for i in xrange(0, graph.GetN()):
         if int(graph.GetX()[i])<100:
+            graph.RemovePoint(i)
+
+# Remove points with tanb value larger than 100, both upper and lower
+# (not necessary to show them for lower limit plot)
+def removeLargeValues(graph):
+    for i in xrange(0, graph.GetN()):
+        if int(graph.GetY()[i])>100:
+            graph.RemovePoint( graph.GetN()-1-i)
             graph.RemovePoint(i)
 
 # Draw Tevatron exclusion
@@ -248,6 +256,7 @@ def main():
         valid_mp_low.sort()
         keepOnlyMassPoints(expected_1s_tanb_low, valid_mp_low)
         keepOnlyMassPoints(expected_2s_tanb_low, valid_mp_low)
+        removeLargeValues(expected_2s_tanb_low)
 
     # Define the axis ranges
     massMin = valid_mp[0] - 5
