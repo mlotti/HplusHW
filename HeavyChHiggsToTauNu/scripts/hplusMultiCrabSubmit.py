@@ -47,7 +47,7 @@ def main(opts):
                 ret = subprocess.call(command)
                 if ret != 0:
                     raise Exception("Command '%s' failed with exit code %d" % (" ".join(command), ret))
-        if njobsSumitted < maxJobs:
+        if njobsSubmitted < maxJobs:
             print "Submitted, sleeping %f seconds" % opts.sleep
             time.sleep(opts.sleep)
         else:
