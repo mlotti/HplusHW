@@ -43,6 +43,8 @@ set -e
 # 27.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
 # 31.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated PAT tags
 # 10.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 
+# 22.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau and PAT tags
+# 25.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -59,15 +61,15 @@ eval $(scram runtime -sh)
 #cvs co -r V01-00-27      RecoTauTag/Configuration
 #cvs co -r V01-00-33-06   RecoTauTag/RecoTau
 #cvs co -r V01-00-12      RecoTauTag/TauTagTools
-cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/RecoTau 
-cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/TauTagTools
-cvs co -r RecoTauDAVerticesPatch_V5 RecoTauTag/Configuration
+addpkg RecoTauTag/Configuration   V01-02-02
+addpkg RecoTauTag/RecoTau         V01-02-06
+addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
-addpkg DataFormats/PatCandidates V06-04-15
-addpkg PhysicsTools/PatAlgos     V08-06-32
-addpkg PhysicsTools/PatExamples  V00-05-18
+addpkg DataFormats/PatCandidates  V06-04-17
+addpkg PhysicsTools/PatAlgos      V08-06-36
+addpkg PhysicsTools/SelectorUtils V00-03-17
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
-addpkg RecoJets/Configuration    V02-04-17
+addpkg RecoJets/Configuration     V02-04-17
 
 
 # Electron ID
