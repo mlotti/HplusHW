@@ -234,6 +234,58 @@ datasets = {
         }
     },
 
+    # Signal heavy
+    "HplusTB_M190_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M200_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M220_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-220_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M250_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-250_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M300_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-300_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
+
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
     "QCD_Pt15to30_TuneZ2_Summer11": {
@@ -424,5 +476,40 @@ datasets = {
                 "number_of_jobs": 100,
             },
         },
+    },
+
+
+    # EWK MadGraph
+    # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+    "TTJets_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "WJets_TuneZ2_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 28000,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 1200, # Adjusted for PATtuple file size.
+                "use_server": 1,
+            },
+        },
+    },
+    "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
+        "dataVersion": "42Xmc",
+        "crossSection": 2800,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        }
     },
 }
