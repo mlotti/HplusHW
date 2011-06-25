@@ -36,7 +36,7 @@ int brlimit()
   double valueLandS_exp[nData][5];
   cout << "----- reading values from LandS files -----" << endl;
   for (int i=0; i<nData; i++){
-    sprintf(temp,"output_LandS_%d",mH[i]);
+    sprintf(temp,"output_LandS_HPlusHadronic_%d",mH[i]);
     readValuesFromLandsFile(temp,valueLandS_obs[i],valueLandS_exp[i]);
   }
 

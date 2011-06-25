@@ -1,68 +1,54 @@
-#!/bin/sh
+#!/bin/tcsh
 
-#-- mH = 80
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_80.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_80_temp_obs
-head -3 output_LandS_80_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_80
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_80.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_80_temp_exp
-head -3 output_LandS_80_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_80
+set name = tanbmhplot
+set odir = `pwd`
 
-#-- mH = 100
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_100.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_100_temp_obs
-head -3 output_LandS_100_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_100
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_100.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_100_temp_exp
-head -3 output_LandS_100_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_100
+while (`bjobs -w |& grep $name` != "") # check if job name exists
+  echo Waiting for previous jobs to end.  You might want to bkill these jobs...
+  sleep 10
+end
 
-# -- mH = 120
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_120.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_120_temp_obs
-head -3 output_LandS_120_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_120
+# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
+bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_80.txt
+bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_100.txt
+bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_120.txt
+bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_140.txt
+bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_150.txt
+bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_155.txt
+bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_160.txt
 
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_120.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_120_temp_exp
-head -3 output_LandS_120_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_120
+# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
+bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_80.txt
+bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_100.txt
+bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_120.txt
+bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_140.txt
+bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_150.txt
+bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_155.txt
+bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_160.txt
 
-# -- mH = 140
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_140.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_140_temp_obs
-head -3 output_LandS_140_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_140
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_140.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_140_temp_exp
-head -3 output_LandS_140_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_140
+echo Checking jobs with name $name.
+while (`bjobs -w |& grep $name` != "") # check if job name exists
+  echo Waiting for jobs to end `date`
+  sleep 30
+end
 
-# -- mH = 150
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_150.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_150_temp_obs
-head -3 output_LandS_150_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_150
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_150.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_150_temp_exp
-head -3 output_LandS_150_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_150
+# collect observed values
+head -3 output_LandS_HPlusHadronic_80_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_80
+head -3 output_LandS_HPlusHadronic_100_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_100
+head -3 output_LandS_HPlusHadronic_120_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_120
+head -3 output_LandS_HPlusHadronic_140_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_140
+head -3 output_LandS_HPlusHadronic_150_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_150
+head -3 output_LandS_HPlusHadronic_155_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_155
+head -3 output_LandS_HPlusHadronic_160_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_160
 
-# -- mH = 155
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_155.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_155_temp_obs
-head -3 output_LandS_155_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_155
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_155.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_155_temp_exp
-head -3 output_LandS_155_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_155
+head -3 output_LandS_HPlusHadronic_80_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_80
+head -3 output_LandS_HPlusHadronic_100_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_100
+head -3 output_LandS_HPlusHadronic_120_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_120
+head -3 output_LandS_HPlusHadronic_140_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_140
+head -3 output_LandS_HPlusHadronic_150_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_150
+head -3 output_LandS_HPlusHadronic_155_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_155
+head -3 output_LandS_HPlusHadronic_160_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_160
 
-# -- mH = 160
-# observed limit
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_160.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 | tail -5 >& output_LandS_160_temp_obs
-head -3 output_LandS_160_temp_obs | tail -1 | awk '{print $12 }' >& output_LandS_160
-#
-# expected bands (ignore median)
-./LandS_AN/LandS/test/lands.exe -d HPlusHadronic_160.txt -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0  --initialRmin 0 --initialRmax 0.3 --doExpectation 1 -t  200 | tail -5 >& output_LandS_160_temp_exp
-head -3 output_LandS_160_temp_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_160
+ls ${odir}/output_LandS_*
 
-######
-#echo
-ls -al output_LandS*
+echo Ready!

@@ -227,14 +227,27 @@ class CrabJob:
         self.status = match.group("status")
         self.origStatus = self.status[:]
         self.action = match.group("action")
-        self.exeExitCode = _intIfNotNone(match.group("execode"))
-        self.jobExitCode = _intIfNotNone(match.group("jobcode"))
+
+        if self.status == "Cancelled":
+            self.exeExitCode = None
+            self.jobExitCode = None
+        else:
+            self.exeExitCode = intIfNotNone(match.group("execode"))
+            self.jobExitCode = intIfNotNone(match.group("jobcode"))
         self.host = match.group("host")
 
         if self.jobExitCode != None and self.jobExitCode != 0:
             self.status += " (%d)" % self.jobExitCode
         elif self.exeExitCode != None and self.exeExitCode != 0:
             self.status += " (exe %d)" % self.jobExitCode
+#        if self.status == "Retrieved":
+#            try:
+#                multicrab.assertJobSucceeded(self.stdoutFile())
+#            except multicrab.ExitCodeException:
+#                self.status += "(malformed stdout)"
+#                self.jobExitCode = -1
+#                self.exeExitCode = -1
+        
 
     def stdoutFile(self):
         return os.path.join(self.task, "res", "CMSSW_%d.stdout"%self.id)

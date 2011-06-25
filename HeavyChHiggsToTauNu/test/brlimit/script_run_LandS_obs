@@ -1,0 +1,16 @@
+#!/bin/tcsh
+
+set odir = $1
+set datacard = ${odir}/$2 
+set outputfile = output_LandS_`basename ${datacard} .txt`_obs
+
+echo "Calculating obs value with datacard ${datacard}, output file ${outputfile}"
+echo
+
+setenv ROOTSYS "/afs/cern.ch/sw/lcg/app/releases/ROOT/5.28.00/x86_64-slc5-gcc43-dbg/root"
+setenv PATH "$ROOTSYS/bin:$PATH"
+setenv LD_LIBRARY_PATH "$ROOTSYS/lib"
+
+${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.3 | tail -5 >& ${outputfile}
+
+cp ${outputfile} ${odir}
