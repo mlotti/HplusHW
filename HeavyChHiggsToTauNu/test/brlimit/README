@@ -31,20 +31,20 @@ Sidenote:
  http://cmsdoc.cern.ch/~anikiten/cms-higgs/LandsInstructions.txt
 
 
-2) run LandS (takes 20-30 min; you may skip this and directly make 
-the plots with the presaved values if you want don't want 
+2) run LandS (takes some time; you may skip this and directly make 
+the plots with the presaved values in output files if you want don't want 
 to run LandS again)
 -------------------------------------------------------------
 
 ./script_run_LandS
 
-*As a result, files output_LandS_xxx are (re)generated
+*As a result, files output_LandS_HPlusHadronic_* are (re)generated
 
 
 3) run the ROOT analysis to obtain Br limit (mH,Br)
 ---------------------------------------------------
 
-root -l -b -q brlimit.C
+root -l -b -q brlimit.cxx
 
 *As a result, the br limit plot brlimits.png/eps is generated
 
@@ -55,4 +55,4 @@ root -l -b -q brlimit.C
 cmsenv
 ./mssmLimit.py
 
-*As a result, the tanB limit plot mssmLimit.png is generated
+*As a result, the tanb limit plots mssmLimits.png/eps and mssmLimits_mus.png/eps are generated
