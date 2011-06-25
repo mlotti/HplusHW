@@ -263,9 +263,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # PAT Layer 0+1
     process.load("PhysicsTools.PatAlgos.patSequences_cff")
 
-    process.hplusPatSequence = cms.Sequence(
-        process.hplusPatTauSequence *
-        process.patDefaultSequence
+    sequence = cms.Sequence(
+        process.hplusPatTauSequence
     )
 
     # Restrict input to AOD
@@ -344,7 +343,6 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             'drop *_*Calo_pfCandidates_*',
             ])
 
-
     # Taus
 
     # Set default PATTauProducer options here, they should be
@@ -401,7 +399,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                 BosonID       = cms.untracked.vint32(23),
                 EtaMax         = cms.untracked.double(2.5)
             )
-            process.hplusPatSequence *= process.VisibleTaus
+            sequence *= process.VisibleTaus
             outputCommands.append("keep *_VisibleTaus_*_*")
 
     else:
@@ -446,7 +444,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Muons
     setPatLeptonDefaults(process.patMuons, includePFCands)
     if doPatMuonPFIsolation:
-        addPFMuonIsolation(process, process.patMuons, verbose=True)
+        addPFMuonIsolation(process, process.patMuons, sequence, verbose=True)
 
     outputCommands.extend([
             "keep *_selectedPatMuons_*_*"
@@ -500,15 +498,13 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         out.outputCommands.extend(outputCommands)
 
     # Build sequence
-    seq = cms.Sequence(
-        process.hplusPatSequence
-    )
+    sequence *= process.patDefaultSequence
 
     # Tau+HLT matching
     if doTauHLTMatching:
-        seq *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
+        sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
 
-    return seq
+    return sequence
 
 # Helper functions
 def fixFlightPath(process, prefix, postfix=""):
@@ -530,8 +526,8 @@ def addPatTauIsolationEmbedding(process, sequence, name):
         newName = "patTausWith%sEmbedded" % iso
         setattr(process, newName, module)
 
-        sequence.replace(getattr(process, prevName),
-                         getattr(process, prevName)*getattr(process, newName))
+        prevModule = getattr(process, prevName)
+        sequence.replace(prevModule, prevModule*module)
         prevName = newName
 
     getattr(process, "selectedPatTaus"+name).src = prevName
@@ -878,7 +874,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlow",
 ###################a#################################################
 from CommonTools.ParticleFlow.Isolation.tools_cfi import isoDepositReplace
 
-def addSelectedPFlowParticle(process,verbose=False):
+def addSelectedPFlowParticle(process, sequence, verbose=False):
     if verbose:
         print "[Info] Adding pf-particles (for pf-isolation and pf-seed pat-leptons)"
     process.load("CommonTools.ParticleFlow.ParticleSelectors.pfSortByType_cff")
@@ -915,18 +911,15 @@ def addSelectedPFlowParticle(process,verbose=False):
         #pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212)
     )
     process.pfCandidateSelectionByType *= process.pileUpHadrons
-
-    process.hplusPatSequence.replace(process.patDefaultSequence,
-                                     process.pfCandidateSelectionByType+
-                                     process.patDefaultSequence)
+    sequence *= process.pfCandidateSelectionByType
 
 # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
-def addPFMuonIsolation(process, module, verbose=False):
+def addPFMuonIsolation(process, module, sequence, verbose=False):
 #    if verbose:
 #        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
 
     if not hasattr(process, "pfCandidateSelectionByType"):
-        addSelectedPFlowParticle(process,verbose=verbose)
+        addSelectedPFlowParticle(process, sequence, verbose=verbose)
 
     process.muPFIsoDepositAll = isoDepositReplace('muons',"pfNoPileUp")
     process.muPFIsoDepositCharged = isoDepositReplace('muons',"pfAllChargedHadrons")

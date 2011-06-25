@@ -58,7 +58,7 @@ def customise(process):
                       VarParsing.VarParsing.varType.int,
                       "should I override beamspot in globaltag?")
 
-    options, dataVersion = getOptionsDataVersion("41Xdata", options)
+    options, dataVersion = getOptionsDataVersion("42Xmc", options)
 
     processName = process.name_()
 

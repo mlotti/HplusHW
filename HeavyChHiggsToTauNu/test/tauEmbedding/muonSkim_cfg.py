@@ -3,12 +3,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
-#dataVersion = "38X"
-#dataVersion = "39Xredigi"
-dataVersion = "311Xredigi"
+dataVersion = "42Xmc"
+#dataVersion = "42Xdata"
 
 options = getOptions()
 if options.dataVersion != "":
@@ -36,7 +32,7 @@ process.source = cms.Source('PoolSource',
 
 trigger = options.trigger
 if len(trigger) == 0:
-    trigger = "HLT_Mu9"
+    trigger = "HLT_Mu20_v1"
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
@@ -58,7 +54,7 @@ patArgs = {"doTauHLTMatching": False,
            "doPatTaus": True,
            "doPatMuonPFIsolation": True,
            }
-process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, patArgs=patArgs)
+process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doPlainPat=True)
 # In order to avoid transient references and generalTracks is available anyway
 if hasattr(process, "patMuons"):
     process.patMuons.embedTrack = False

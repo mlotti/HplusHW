@@ -275,6 +275,16 @@ datasets = {
             },
         }
     },
+    "HplusTB_M300_Summer11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-300_7TeV-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+            },
+        }
+    },
 
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
@@ -491,5 +501,15 @@ datasets = {
                 "use_server": 1,
             },
         },
+    },
+    "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
+        "dataVersion": "42Xmc",
+        "crossSection": 2800,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        }
     },
 }

@@ -13,6 +13,7 @@ set -e
 # 14.4.2011/M.Kortelainen CMSSW_4_1_4 Updated MCEmbeddingTools tag
 # 18.4.2011/M.Kortelainen CMSSW_4_1_4 Updated patMuonsWithTrigger_cff.py revision
 # 11.5.2011/M.Kortelainen CMSSW_4_1_4 Added AnalysisDataFormats/EWK for edm::PtrVector<pat::Muon>
+# 24.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 Removed AnalysisDataFormats/EWK
 
 cvs co -r V00-00-12 TauAnalysis/MCEmbeddingTools
 cvs co -r V01-13-00 MuonAnalysis/MuonAssociators
@@ -23,7 +24,7 @@ addpkg SimG4Core/Application
 patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/OscarProducer.patch
 
 
-addpkg AnalysisDataFormats/EWK
-cvs up -r1.7 AnalysisDataFormats/EWK/src/classes.h
-cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
-cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
+# addpkg AnalysisDataFormats/EWK
+# cvs up -r1.7 AnalysisDataFormats/EWK/src/classes.h
+# cvs up -r1.7 AnalysisDataFormats/EWK/src/classes_def.xml
+# cvs up -r1.3 AnalysisDataFormats/EWK/BuildFile.xml
