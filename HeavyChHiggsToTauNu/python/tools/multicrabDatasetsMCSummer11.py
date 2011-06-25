@@ -492,4 +492,14 @@ datasets = {
             },
         },
     },
+    "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
+        "dataVersion": "42Xmc",
+        "crossSection": 2800,
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        }
+    },
 }

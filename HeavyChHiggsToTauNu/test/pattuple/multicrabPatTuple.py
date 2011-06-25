@@ -71,11 +71,12 @@ multicrab.extendDatasets(
 #        "QCD_Pt300to470_TuneZ2_Summer11",
 #        "TTJets_TuneZ2_Summer11",
 #        "WJets_TuneZ2_Summer11",
-#        "DYToTauTau_TuneZ2_Summer11",
+#        "DYJetsToLL_M50_TuneZ2_Summer11",
 
         # Obsolete background MC (superseded by MadGraph sample)
 #        "TT_TuneZ2_Summer11",
 #        "WToTauNu_TuneZ2_Summer11",
+#        "DYToTauTau_TuneZ2_Summer11",
         ])
 
 # local_stage_out doesn't work due to denied permission because we're
