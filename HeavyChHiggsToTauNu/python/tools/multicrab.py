@@ -232,8 +232,8 @@ class CrabJob:
             self.exeExitCode = None
             self.jobExitCode = None
         else:
-            self.exeExitCode = intIfNotNone(match.group("execode"))
-            self.jobExitCode = intIfNotNone(match.group("jobcode"))
+            self.exeExitCode = _intIfNotNone(match.group("execode"))
+            self.jobExitCode = _intIfNotNone(match.group("jobcode"))
         self.host = match.group("host")
 
         if self.jobExitCode != None and self.jobExitCode != 0:
