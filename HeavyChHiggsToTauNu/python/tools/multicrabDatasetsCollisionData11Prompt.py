@@ -172,6 +172,12 @@ datasets = {
                 "luminosity": 4.153168,
                 "number_of_jobs": 1,
             },
+            "pattuple_v14": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166346_pattuple_v14-383e39d0fd87287f7fd6c942c83533fb/USER",
+                "luminosity": 4.153168,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_166374-166502_Prompt": {
@@ -211,6 +217,12 @@ datasets = {
                 "number_of_jobs": 12, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v14": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v14-1aa49c4e4d0a1cfb27954d622374591d/USER",
+                "luminosity": 21.185851,
+                "number_of_jobs": 1,
+            },
         }
     },
 
@@ -232,6 +244,12 @@ datasets = {
                 "luminosity": 79.108967,
                 "number_of_jobs": 1,
             },
+            "pattuple_v14": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_165970_pattuple_v14-f0a73be4cb4699609d9f94f502bf4dea/USER",
+                "luminosity": 94.672079,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_Single_166346-166346_Prompt": {
@@ -248,6 +266,12 @@ datasets = {
             "pattuple_v13": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v13b-e8d7a7609489cfdaf985d8a73d856392/USER",
+                "luminosity": 4.153168,
+                "number_of_jobs": 1,
+            },
+            "pattuple_v14": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v14-33be4f60aa43fea97c2cc02a29c6f5a0/USER",
                 "luminosity": 4.153168,
                 "number_of_jobs": 1,
             },
@@ -289,6 +313,12 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 12, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v14": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v14-448e8dce3b460118c93a9e3fff280ff2/USER",
+                "luminosity": 21.185851,
+                "number_of_jobs": 1,
             },
         }
     },
