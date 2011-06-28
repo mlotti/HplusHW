@@ -153,6 +153,12 @@ datasets = {
                 "luminosity": 79.108967,
                 "number_of_jobs": 1,
             },
+            "pattuple_v13": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v14-dec0cdd184da6e9880cb5fc1728a78b2/USER",
+                "luminosity": 94.672079,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_166346-166346_Prompt": {
