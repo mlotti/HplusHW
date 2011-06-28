@@ -26,7 +26,7 @@ rate		152.24	89.84	0.46	0	1.07	2.43	0.033	0.7	0	0.0023
 11	lnN	1	1	1	1	1	1	1	1.21	1.21	1.22	mis-btagging
 12	lnN	1	1	1	1	1.063	1	1	1	1	1	Hadr: QCD stat.
 13	lnN	1	1	1	1	1.385	1	1	1	1	1	Hadr: QCD syst.
-14	lnN	1	1	1	1	1	0.378	1	1	1	1	Hadr: Non-QCD Type I stat.
+14	lnN	1	1	1	1	1	1.378	1	1	1	1	Hadr: Non-QCD Type I stat.
 15	lnN	1	1	1	1	1	1.007	1	1	1	1	Hadr: Non-QCD Type II W->tau->mu
 16	lnN	1	1	1	1	1	1.002	1	1	1	1	Hadr: Non-QCD Type II muon selection
 17	lnN	1.034	1	1	1	1	1	1	1	1	1	HH MC stat
