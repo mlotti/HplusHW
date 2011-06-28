@@ -45,6 +45,7 @@ set -e
 # 10.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 
 # 22.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau and PAT tags
 # 25.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau tags
+# 28.6.2011/M.Kortelainen CMSSW_4_2_6 Updated tau and PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -58,14 +59,12 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 #
 # Tau
-#cvs co -r V01-00-27      RecoTauTag/Configuration
-#cvs co -r V01-00-33-06   RecoTauTag/RecoTau
-#cvs co -r V01-00-12      RecoTauTag/TauTagTools
-addpkg RecoTauTag/Configuration   V01-02-02
-addpkg RecoTauTag/RecoTau         V01-02-06
+addpkg RecoTauTag/Configuration   V01-02-03
+addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
+addpkg FWCore/GuiBrowsers         V00-00-56
 # PAT
-addpkg DataFormats/PatCandidates  V06-04-17
+addpkg DataFormats/PatCandidates  V06-04-18
 addpkg PhysicsTools/PatAlgos      V08-06-36
 addpkg PhysicsTools/SelectorUtils V00-03-17
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
