@@ -8,7 +8,7 @@ while (`bjobs -w |& grep $name` != "") # check if job name exists
   sleep 10
 end
 
-# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
+# generates the files output_LandS_HPlusHadronic_*_obs
 bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_80.txt
 bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_100.txt
 bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_120.txt
@@ -17,7 +17,7 @@ bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_obs ${odir} HPlusHadro
 bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_155.txt
 bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_160.txt
 
-# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
+# generates the files output_LandS_HPlusHadronic_*_obs
 bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_80.txt
 bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_100.txt
 bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_120.txt
