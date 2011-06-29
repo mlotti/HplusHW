@@ -116,8 +116,8 @@ param.overrideTriggerFromOptions(options)
 param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to trigger matched tau collections
-param.setAllTauSelectionSrcSelectedPatTaus()
-#param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
+#param.setAllTauSelectionSrcSelectedPatTaus()
+param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 if options.tauEmbeddingInput != 0:
     tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
