@@ -147,6 +147,9 @@ namespace HPlus {
     TH1 *hMCPurityOfCleanedTauCandidates;
     TH1 *hMCPurityOfSelectedTaus;
 
+    TH1 *hNTriggerMatchedTaus;
+    TH1 *hNTriggerMatchedSeparateTaus;
+
     // Selected tau
     edm::PtrVector<pat::Tau> fCleanedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;
