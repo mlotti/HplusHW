@@ -31,7 +31,8 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
-counters += "/weighted"
+countersWeighted = counters
+countersWeighted += "/weighted"
 
 # main function
 def main():
@@ -44,9 +45,22 @@ def main():
                     "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M160_Spring11",
                      "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",                       "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt",
                      "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
-                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11"])
+                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11"
+                     ])
     
     datasets.loadLuminosities()
+
+    # Take signals from 42X
+    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
+#Rtau =0
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
+    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
+    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
+                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
+    datasets.extend(datasetsSignal)
+    # Take signals from 42X ends
     plots.mergeRenameReorderForDataMC(datasets)
 
 
@@ -66,6 +80,10 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
+
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
+    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
+    
 #    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
@@ -166,7 +184,7 @@ def main():
     print eventCounter.getMainCounterTable().format()
 #    print eventCounter.getMainCounterTable().format()
 #    print eventCounter.getSubCounterTable("b-tagging").format()
-    print eventCounter.getSubCounterTable("tauID").format()
+#    print eventCounter.getSubCounterTable("tauID").format()
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
@@ -247,7 +265,47 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
 
+def vertexCount(h, prefix="", postfix=""):
+    xlabel = "Number of vertices"
+    ylabel = "A.u."
 
+    h.stackMCHistograms()
+
+    stack = h.histoMgr.getHisto("StackedMC")
+    hsum = stack.getSumRootHisto()
+    total = hsum.Integral(0, hsum.GetNbinsX()+1)
+    for rh in stack.getAllRootHistos():
+        dataset._normalizeToFactor(rh, 1/total)
+    dataset._normalizeToOne(h.histoMgr.getHisto("Data").getRootHisto())
+
+    h.addMCUncertainty()
+
+    opts = {"xmax": 16}
+    opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
+    opts_log.update(opts)
+
+    h.createFrame(prefix+"vertices"+postfix, opts=opts)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+#    h.histoMgr.addLuminosityText()
+    h.save()
+
+    h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log)
+    h.frame.GetXaxis().SetTitle(xlabel)
+    h.frame.GetYaxis().SetTitle(ylabel)
+    ROOT.gPad.SetLogy(True)
+    h.setLegend(histograms.createLegend())
+    h.draw()
+    histograms.addCmsPreliminaryText()
+    histograms.addEnergyText()
+    histograms.addLuminosityText(x=None, y=None, lumi=191.)
+#    h.histoMgr.addLuminosityText()
+    h.save()
 
 def rtauGen(h, name, rebin=5, ratio=False):
     #h.setDefaultStyles()
@@ -426,7 +484,7 @@ def tauPt(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
     
 def tauEta(h, name, rebin=5, ratio=False):
@@ -452,7 +510,7 @@ def tauEta(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
     
 def tauPhi(h, name, rebin=10, ratio=False):
@@ -553,7 +611,7 @@ def met(h, rebin=20, ratio=False):
 
 
     
-def met2(h, name, rebin=30, ratio=False):
+def met2(h, name, rebin=30, ratio=True):
 #    name = h.getRootHistoPath()
 #    name = "met"
 
@@ -564,7 +622,7 @@ def met2(h, name, rebin=30, ratio=False):
 #    elif "original" in name:
 #        xlabel = "Original "+xlabel
     ylabel = "Events / %.0f GeV" % h.binWidth()
-    xlabel = "MET (GeV)"
+    xlabel = "E_{T}^{miss} (GeV)"
     
     scaleMCfromWmunu(h)
     h.stackMCHistograms()
@@ -579,7 +637,7 @@ def met2(h, name, rebin=30, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.65, 0.55, 0.9, 0.9))
     common(h, xlabel, ylabel)
 
 
@@ -706,7 +764,7 @@ def jetPt(h, name, rebin=5, ratio=False):
     h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.001, "ymaxfactor": 2}
+    opts = {"ymin": 0.001,"xmax": 400.0, "ymaxfactor": 2}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -784,7 +842,7 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.05,"xmax": 8.0, "ymaxfactor": 2.0}
+    opts = {"ymin": 0.01,"xmax": 7.0, "ymaxfactor": 2.0}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
 #    name = name+"_log"
     if ratio:

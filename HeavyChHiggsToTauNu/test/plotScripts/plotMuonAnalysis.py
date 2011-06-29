@@ -235,7 +235,7 @@ def main():
         normalizeToLumi = 36
 
     def createPlot(name, **kwargs):
-        return Plot(datasets, name, normalizeToLumi=normalizeToLumi, **kwargs)
+        return plots.DataMCPlot(datasets, name, normalizeToLumi=normalizeToLumi, **kwargs)
 
     plotMet = PlotMet(datasets, rebin=10, normalizeToLumi=normalizeToLumi)
     
@@ -262,7 +262,7 @@ def main():
     
         printFraction = isel in [0, 2, 3]
     
-        muonPt(createPlot(sel+"/muon_pt"), prefix, rebin=10)
+        muonPt(createPlot(sel+"/muon_pt"), prefix, rebin=10, ratio=True)
         muonEta(createPlot(sel+"/muon_eta"), prefix, rebin=5)
         muonPhi(createPlot(sel+"/muon_phi"), prefix, rebin=1)
     
@@ -276,8 +276,7 @@ def main():
     
         plotMet.plotLog("met", selection=sel)
     
-        if isel > 0:
-            wTransMass(createPlot(sel+"/wmumet_tmass"), prefix)
+        wTransMass(createPlot(sel+"/wmumet_tmass"), prefix)
 
     jetMultiplicity(createPlot(selections.jetCleaningMultip+"/jets_multiplicity"), prefix)
     
@@ -329,21 +328,6 @@ class SetTH1Directory:
     def __exit__(self, type, value, traceback):
         ROOT.TH1.AddDirectory(self.backup)
         
-
-class Plot(plots.PlotSameBase):
-    def __init__(self, datasets, name, normalizeToLumi=None):
-        plots.PlotSameBase.__init__(self, datasets, name,
-#                                [".png"]
-                                )
-
-        if normalizeToLumi == None:
-            self.histoMgr.normalizeMCByLuminosity()
-        else:
-            self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
-
-        self._setLegendLabels()
-        self._setLegendStyles()
-        self._setPlotStyles()
 
 class PlotPassed(plots.PlotBase):
     def __init__(self, plot):
@@ -609,12 +593,14 @@ def vertexCount(h, prefix="", postfix=""):
     
 
 
-def muonPt(h, prefix="", plotAll=False, rebin=5):
+def muonPt(h, prefix="", plotAll=False, rebin=5, ratio=False):
     xlabel = "Muon p_{T} (GeV/c)"
     ylabel = "Number of muons / %.0f GeV/c"
     #ylabel = "Number of events / 5.0 GeV/c"
     ptcut = 40
-    xmax = 400
+
+    _opts  = {"xmax": 400, "ymin":0.1, "ymaxfactor": 2}
+    _opts2 = {"ymin": 0, "ymax": 2}
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 #    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().SetBarWidth(2))
@@ -623,8 +609,14 @@ def muonPt(h, prefix="", plotAll=False, rebin=5):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
+    tmp = h.histoMgr.getHisto("Data").getRootHisto()
+    dataEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
+    tmp = h.histoMgr.getHisto("StackedMC").getSumRootHisto()
+    mcEvents = tmp.Integral(0, tmp.GetNbinsX()+1)
+    print "Muon pt Data/MC = %f/%f = %f" % (dataEvents, mcEvents, dataEvents/mcEvents)
+
     if plotAll:
-        h.createFrame(prefix+"muon_pt", xmax=xmax)
+        h.createFrame(prefix+"muon_pt", opts=_opts)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(histograms.createLegend())
@@ -634,7 +626,7 @@ def muonPt(h, prefix="", plotAll=False, rebin=5):
         h.histoMgr.addLuminosityText()
         h.save()
 
-        h.createFrame(prefix+"muon_pt_log", ymin=0.01, yfactor=2, xmax=xmax)
+        h.createFrame(prefix+"muon_pt_log", ymin=0.01, yfactor=2, xmax=_opts["xmax"])
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         ROOT.gPad.SetLogy(True)
@@ -644,7 +636,7 @@ def muonPt(h, prefix="", plotAll=False, rebin=5):
         h.histoMgr.addLuminosityText()
         h.save()
 
-        h.createFrame(prefix+"muon_pt_cut%d"%ptcut, xmin=ptcut, xmax=xmax, ymax=200)
+        h.createFrame(prefix+"muon_pt_cut%d"%ptcut, xmin=ptcut, xmax=_opts["xmax"], ymax=200)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.draw()
@@ -653,7 +645,8 @@ def muonPt(h, prefix="", plotAll=False, rebin=5):
         h.histoMgr.addLuminosityText()
         h.save()
 
-    h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, xmin=ptcut, xmax=xmax, ymin=0.1, yfactor=2)
+    _opts["xmin"] =  ptcut
+    h.createFrame(prefix+"muon_pt_cut%d_log"%ptcut, createRatio=ratio, opts=_opts, opts2=_opts2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.moveLegend(histograms.createLegend()))
@@ -720,7 +713,7 @@ def muonPhi(h, prefix="", plotAll=False, rebin=1):
     h.histoMgr.addLuminosityText()
     h.save()
 
-def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False, rebin=5, opts={}):
+def muonIso(h, prefix="", q="reliso", plotAll=False, ratio=False, printFraction=False, rebin=5, opts={}, opts2={}):
     #dist2pass(h.histoMgr.getHisto("QCD_Pt20_MuEnriched").getRootHisto())
 
     passed = PlotPassed(h)
@@ -729,14 +722,16 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False, rebin=
               "sumIsoRelFull": "Muon rel. iso",
               "pfSumIsoRel": "Muon PF rel. iso",
               "pfSumIsoRelFull": "Muon PF rel. iso",
-              "tauTightIso": "N(PFCand) in isolation annulus",
-              "tauTightSc015Iso": "N(PFCand) in isolation annulus",
-              "tauTightSc02Iso": "N(PFCand) in isolation annulus",
-              "tauTightIc04Iso": "N(PFCand) in isolation annulus",
-              "tauTightIc04SumPtIso": "#Sigma p_{T} in isolation annulus (GeV/c)",
-              "tauTightIc04MaxPtIso": "max(p_{T}) in isolation annulus (GeV/c)",
-              "tauTightSc015Ic04Iso": "N(PFCand) in isolation annulus",
-              "tauTightSc02Ic04Iso": "N(PFCand) in isolation annulus",
+              "tauTightIso": "N(PFCand) in iso annulus",
+              "tauTightSc015Iso": "N(PFCand) in iso annulus",
+              "tauTightSc02Iso": "N(PFCand) in iso annulus",
+              "tauTightIc04Iso": "N(PFCand) in iso annulus",
+              "tauTightIc04ChargedIso": "N(PFChargedCand) in iso annulus",
+              "tauTightIc04GammaIso": "N(PFGammaCand) in iso annulus",
+              "tauTightIc04SumPtIso": "#Sigma p_{T} in iso annulus (GeV/c)",
+              "tauTightIc04MaxPtIso": "max(p_{T}) in iso annulus (GeV/c)",
+              "tauTightSc015Ic04Iso": "N(PFCand) in iso annulus",
+              "tauTightSc02Ic04Iso": "N(PFCand) in iso annulus",
               "tauMediumIso": "Tau-like medium occupancy",
               "tauLooseIso": "Tau-like loose occupancy",
               "tauVLooseIso": "Tau-like vloose occupancy",
@@ -752,7 +747,7 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False, rebin=
     h.stackMCHistograms()
 
     if plotAll:
-        h.createFrame(prefix+"muon_"+q)
+        h.createFrame(prefix+"muon_"+q, createRatio=ratio)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(histograms.createLegend())
@@ -762,10 +757,12 @@ def muonIso(h, prefix="", q="reliso", plotAll=False, printFraction=False, rebin=
         h.histoMgr.addLuminosityText()
         h.save()
 
-    args = {"ymin": 1e-2, "ymaxfactor": 10}
-    args.update(opts)
+    _opts = {"ymin": 1e-2, "ymaxfactor": 10}
+    _opts.update(opts)
+    _opts2 = {"ymin": 0, "ymax": 2}
+    _opts2.update(opts2)
 
-    h.createFrame(prefix+"muon_%s_log" % q, **args)
+    h.createFrame(prefix+"muon_%s_log" % q, createRatio=ratio, opts=_opts, opts2=_opts2)
     h.frame.GetXaxis().SetTitle(xlabel)
     h.frame.GetYaxis().SetTitle(ylabel)
     h.setLegend(histograms.createLegend())
@@ -936,7 +933,7 @@ class PlotMet:
         h.save()
 
     def _createPlot(self, met, selection, calcNumEvents=False):
-        h = Plot(self.datasets, selection+"/%s_et" % met, normalizeToLumi=self.normalizeToLumi)
+        h = plots.DataMCPlot(self.datasets, selection+"/%s_et" % met, normalizeToLumi=self.normalizeToLumi)
         h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(self.rebin))
         if calcNumEvents:
             self._calculateNumEvents(h)

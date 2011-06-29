@@ -6,7 +6,7 @@ void readValuesFromLandsFile(char * temp, double &my_obs,double * my_exp);
 
 int brlimit()
 {
-  gROOT->ProcessLine(".L tdrstyle_mod.C");
+  gROOT->ProcessLine(".L tdrstyle_mod.cxx");
   setTDRStyle();
 
   tdrStyle->SetTitleFillColor(0);
@@ -19,9 +19,10 @@ int brlimit()
   ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
 
   // --- Data: mass points and efficiencies  --- 
-   const int nData = 6; // 90 not yet ready
+   const int nData = 7; // 90 not yet ready
    double mH[nData]   = 
-     {100,     
+     {80,
+      100,     
       120,     
       140,         
       150,    

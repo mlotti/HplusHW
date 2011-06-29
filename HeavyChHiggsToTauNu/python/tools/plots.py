@@ -129,6 +129,8 @@ _datasetOrder = [
     "TTToHplusBWB_M100",
     "TTToHplusBWB_M120",
     "TTToHplusBWB_M140",
+    "TTToHplusBWB_M150",
+    "TTToHplusBWB_M155",
     "TTToHplusBWB_M160",
     "TTToHplusBHminusB_M80",
     "TTToHplusBHminusB_M100",
@@ -137,6 +139,13 @@ _datasetOrder = [
     "TTToHplusBHminusB_M150",
     "TTToHplusBHminusB_M155",
     "TTToHplusBHminusB_M160",
+    "TTToHplus_M80",
+    "TTToHplus_M100",
+    "TTToHplus_M120",
+    "TTToHplus_M140",
+    "TTToHplus_M150",
+    "TTToHplus_M155",
+    "TTToHplus_M160",
     "QCD",
     "QCD_Pt20_MuEnriched",
     "WJets",
@@ -150,24 +159,30 @@ _datasetOrder = [
 _legendLabels = {
     "Data":                  "Data",
 
-    "TTToHplusBWB_M80":  "W+H^{#pm} m=80", 
-    "TTToHplusBWB_M90":  "W+H^{#pm} m=90", 
-    "TTToHplusBWB_M100": "W+H^{#pm} m=100",
-    "TTToHplusBWB_M120": "W+H^{#pm} m=120",
-    "TTToHplusBWB_M140": "W+H^{#pm} m=140",
-    "TTToHplusBWB_M150": "W+H^{#pm} m=150",
-    "TTToHplusBWB_M155": "W+H^{#pm} m=155",
-    "TTToHplusBWB_M160": "W+H^{#pm} m=160",
+    "TTToHplusBWB_M80":  "H^{+}W^{-} m_{H^{#pm}}=80", 
+    "TTToHplusBWB_M90":  "H^{+}W^{-} m_{H^{#pm}}=90", 
+    "TTToHplusBWB_M100": "H^{+}W^{-} m_{H^{#pm}}=100",
+    "TTToHplusBWB_M120": "H^{+}W^{-} m_{H^{#pm}}=120",
+    "TTToHplusBWB_M140": "H^{+}W^{-} m_{H^{#pm}}=140",
+    "TTToHplusBWB_M150": "H^{+}W^{-} m_{H^{#pm}}=150",
+    "TTToHplusBWB_M155": "H^{+}W^{-} m_{H^{#pm}}=155",
+    "TTToHplusBWB_M160": "H^{+}W^{-} m_{H^{#pm}}=160",
 
-    "TTToHplusBHminusB_M80": "H^{+}H^{-} m=80",
-    "TTToHplusBHminusB_M100": "H^{+}H^{-} m=100",
-    "TTToHplusBHminusB_M120": "H^{+}H^{-} m=120",
-    "TTToHplusBHminusB_M140": "H^{+}H^{-} m=140",
-    "TTToHplusBHminusB_M150": "H^{+}H^{-} m=150",
-    "TTToHplusBHminusB_M155": "H^{+}H^{-} m=155",
-    "TTToHplusBHminusB_M160": "H^{+}H^{-} m=160",
+    "TTToHplusBHminusB_M80":  "H^{+}H^{-} m_{H^{#pm}}=80",
+    "TTToHplusBHminusB_M100": "H^{+}H^{-} m_{H^{#pm}}=100",
+    "TTToHplusBHminusB_M120": "H^{+}H^{-} m_{H^{#pm}}=120",
+    "TTToHplusBHminusB_M140": "H^{+}H^{-} m_{H^{#pm}}=140",
+    "TTToHplusBHminusB_M150": "H^{+}H^{-} m_{H^{#pm}}=150",
+    "TTToHplusBHminusB_M155": "H^{+}H^{-} m_{H^{#pm}}=155",
+    "TTToHplusBHminusB_M160": "H^{+}H^{-} m_{H^{#pm}}=160",
 
-    "TTToHplus_M120": "H^{#pm} m=120",
+    "TTToHplus_M80":  "H^{#pm} m_{H^{#pm}}=80",
+    "TTToHplus_M100": "H^{#pm} m_{H^{#pm}}=100",
+    "TTToHplus_M120": "H^{#pm} m_{H^{#pm}}=120",
+    "TTToHplus_M140": "H^{#pm} m_{H^{#pm}}=140",
+    "TTToHplus_M150": "H^{#pm} m_{H^{#pm}}=150",
+    "TTToHplus_M155": "H^{#pm} m_{H^{#pm}}=155",
+    "TTToHplus_M160": "H^{#pm} m_{H^{#pm}}=160",
 
     "TTJets":                "t#bar{t}+jets",
     "WJets":                 "W+jets",
@@ -201,15 +216,22 @@ _plotStyles = {
     "TTToHplusBWB_M155":          styles.signal155Style,
     "TTToHplusBWB_M160":          styles.signal160Style,
 
-    "TToHplusBHminusB_M80":       styles.signalHH80Style,
-    "TToHplusBHminusB_M100":      styles.signalHH100Style,
-    "TToHplusBHminusB_M120":      styles.signalHH120Style,
-    "TToHplusBHminusB_M140":      styles.signalHH140Style,
-    "TToHplusBHminusB_M150":      styles.signalHH150Style,
-    "TToHplusBHminusB_M155":      styles.signalHH155Style,
-    "TToHplusBHminusB_M160":      styles.signalHH160Style,
+    "TTToHplusBHminusB_M80":       styles.signalHH80Style,
+    "TTToHplusBHminusB_M100":      styles.signalHH100Style,
+    "TTToHplusBHminusB_M120":      styles.signalHH120Style,
+    "TTToHplusBHminusB_M140":      styles.signalHH140Style,
+    "TTToHplusBHminusB_M150":      styles.signalHH150Style,
+    "TTToHplusBHminusB_M155":      styles.signalHH155Style,
+    "TTToHplusBHminusB_M160":      styles.signalHH160Style,
 
-    "TTToHplus_M120":             styles.signal120Style,
+    "TTToHplus_M80":           styles.signal80Style,
+    "TTToHplus_M90":           styles.signal90Style,
+    "TTToHplus_M100":          styles.signal100Style,
+    "TTToHplus_M120":          styles.signal120Style,
+    "TTToHplus_M140":          styles.signal140Style,
+    "TTToHplus_M150":          styles.signal150Style,
+    "TTToHplus_M155":          styles.signal155Style,
+    "TTToHplus_M160":          styles.signal160Style,
 
     "TTJets":                styles.ttStyle,
     "WJets":                 styles.wStyle,
@@ -705,11 +727,14 @@ class DataMCPlot(PlotSameBase):
     # \param datasetMgr      DatasetManager for datasets
     # \param name            Path of the histogram in the ROOT files
     # \param kwargs          Keyword arguments, forwarded to PlotSameBase.__init__()
-    def __init__(self, datasetMgr, name, **kwargs):
+    def __init__(self, datasetMgr, name, normalizeToLumi=None, **kwargs):
         PlotSameBase.__init__(self, datasetMgr, name, **kwargs)
         
         # Normalize the MC histograms to the data luminosity
-        self.histoMgr.normalizeMCByLuminosity()
+        if normalizeToLumi == None:
+            self.histoMgr.normalizeMCByLuminosity()
+        else:
+            self.histoMgr.normalizeMCToLuminosity(normalizeToLumi)
 
         self._setLegendStyles()
         self._setLegendLabels()

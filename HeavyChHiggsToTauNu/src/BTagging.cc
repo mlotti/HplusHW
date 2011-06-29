@@ -84,8 +84,6 @@ namespace HPlus {
       if( bmatchedJet )   increment(fTaggedAllRealBJetsSubCount);
 
       float discr = iJet->bDiscriminator(fDiscriminator);
-      if (discr > fMaxDiscriminatorValue)
-        fMaxDiscriminatorValue = discr;
       if (bmatchedJet ) {
 	if(discr > fDiscrCut ) {
 	  hPtB->Fill(iJet->pt(), fEventWeight.getWeight());
@@ -105,6 +103,9 @@ namespace HPlus {
 
       if(fabs(iJet->eta()) > fEtaCut ) continue;
       increment(fTaggedEtaCutSubCount);
+      if (discr > fMaxDiscriminatorValue)
+        fMaxDiscriminatorValue = discr;
+
       ++passed;
       if( bmatchedJet )   increment(fTaggedTaggedRealBJetsSubCount);
 

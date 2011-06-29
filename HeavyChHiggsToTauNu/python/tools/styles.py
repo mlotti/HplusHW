@@ -86,6 +86,9 @@ mcStyle = Style(ROOT.kFullSquare, ROOT.kRed+1)
 signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
                              StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
                              ])
+signalHHStyle = StyleCompound([Style(34, ROOT.kRed-8), 
+                             StyleLine(lineStyle=8, lineWidth=6)
+                             ])
 signal80Style =  signalStyle
 signal90Style =  signalStyle
 signal100Style = signalStyle
@@ -95,14 +98,14 @@ signal150Style = signalStyle
 signal155Style = signalStyle
 signal160Style = signalStyle
 
-signalHH80Style =  signalStyle
-signalHH90Style =  signalStyle
-signalHH100Style = signalStyle
-signalHH120Style = signalStyle
-signalHH140Style = signalStyle
-signalHH150Style = signalStyle
-signalHH155Style = signalStyle
-signalHH160Style = signalStyle
+signalHH80Style =  signalHHStyle
+signalHH90Style =  signalHHStyle
+signalHH100Style = signalHHStyle
+signalHH120Style = signalHHStyle
+signalHH140Style = signalHHStyle
+signalHH150Style = signalHHStyle
+signalHH155Style = signalHHStyle
+signalHH160Style = signalHHStyle
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
@@ -112,7 +115,7 @@ wStyle = Style(ROOT.kFullTriangleDown, ROOT.kOrange+9)
 wwStyle = Style(ROOT.kMultiply, ROOT.kPink-9)
 wzStyle = Style(ROOT.kMultiply, ROOT.kPink-7)
 zzStyle = Style(ROOT.kMultiply, ROOT.kPink-5)
-dibStyle = Style(ROOT.kMultiply, ROOT.kBlue+1)
+dibStyle = Style(ROOT.kMultiply, ROOT.kBlue-4)
 
 stsStyle = Style(ROOT.kPlus, ROOT.kSpring-9)
 sttStyle = Style(ROOT.kPlus, ROOT.kSpring-7)

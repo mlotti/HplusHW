@@ -28,28 +28,37 @@ isolations["pfSumIso"] = "%s+%s+%s" % (isolations["pfChargedIso"], isolations["p
 for key, value in isolations.items():
     isolations[key+"Rel"] = "(%s)/pt" % value
 
+def _tauIso(name):
+    return "userInt('by%sChargedOccupancy')+userInt('by%sGammaOccupancy')" % (name, name)
+
 tauIsolations = {
-    "tauTightIso": "userInt('byTightOccupancy')",
-    "tauMediumIso": "userInt('byMediumOccupancy')",
-    "tauLooseIso": "userInt('byLooseOccupancy')",
-    "tauVLooseIso": "userInt('byVLooseOccupancy')",
+    "tauTightIso":  _tauIso("Tight"),
+    "tauMediumIso": _tauIso("Medium"),
+    "tauLooseIso":  _tauIso("Loose"),
+    "tauVLooseIso": _tauIso("VLoose"),
 
-    "tauTightSc015Iso": "userInt('byTightSc015Occupancy')",
-    "tauTightSc02Iso": "userInt('byTightSc02Occupancy')",
-    "tauTightIc04Iso": "userInt('byTightIc04Occupancy')",
-    "tauTightSc015Ic04Iso": "userInt('byTightSc015Ic04Occupancy')",
-    "tauTightSc02Ic04Iso": "userInt('byTightSc02Ic04Occupancy')",
+    "tauTightSc015Iso":     _tauIso("TightSc015"),
+#    "tauTightSc02Iso":      _tauIso("TightSc02"),
+    "tauTightIc04Iso":      _tauIso("TightIc04"),
+    "tauTightSc015Ic04Iso": _tauIso("TightSc015Ic04"),
+#    "tauTightSc02Ic04Iso":  _tauIso("TightSc02Ic04"),
 
-    "tauTightSc0Iso": "userInt('byTightSc0Occupancy')",
-    "tauTightSc0Ic04Iso": "userInt('byTightSc0Ic04Occupancy')",
-    "tauTightSc0Ic04NoqIso": "userInt('byTightSc0Ic04NoqOccupancy')",
+    "tauTightIc04ChargedIso": "userInt('byTightIc04ChargedOccupancy')",
+    "tauTightIc04GammaIso":   "userInt('byTightIc04GammaOccupancy')",
+
+#    "tauTightSc0Iso":        _tauIso("TightSc0"),
+#    "tauTightSc0Ic04Iso":    _tauIso("TightSc0Ic04"),
+#    "tauTightSc0Ic04NoqIso": _tauIso("TightSc0Ic04Noq"),
     }
 for key, value in tauIsolations.items():
     userFloat = value.replace("userInt", "userFloat")
     base = key.replace("Iso", "")
     tauIsolations[base+"SumPtIso"] = userFloat.replace("Occupancy", "SumPt")
     tauIsolations[base+"SumPtIsoRel"] = "(%s)/pt()" % userFloat.replace("Occupancy", "SumPt")
-    tauIsolations[base+"MaxPtIso"] = userFloat.replace("Occupancy", "MaxPt")
+    if "+" in userFloat:
+        tauIsolations[base+"MaxPtIso"] = "max(" + userFloat.replace("Occupancy", "MaxPt").replace("+", ", ") + ")"
+    else:
+        tauIsolations[base+"MaxPtIso"] = userFloat.replace("Occupancy", "MaxPt")
 isolations.update(tauIsolations)
 
 # Define the histograms

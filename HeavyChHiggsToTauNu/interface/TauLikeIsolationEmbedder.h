@@ -41,9 +41,13 @@ namespace HPlus {
       fMaxTransverseImpactParameter(iConfig.getParameter<double>("maxTransverseImpactParameter"))
     {
       std::string embedPrefix = iConfig.getParameter<std::string>("embedPrefix");
-      fOccupancyName = embedPrefix+"Occupancy";
-      fSumPtName = embedPrefix+"SumPt";
-      fMaxPtName = embedPrefix+"MaxPt";
+      fChOccupancyName = embedPrefix+"ChargedOccupancy";
+      fChSumPtName = embedPrefix+"ChargedSumPt";
+      fChMaxPtName = embedPrefix+"ChargedMaxPt";
+
+      fGamOccupancyName = embedPrefix+"GammaOccupancy";
+      fGamSumPtName = embedPrefix+"GammaSumPt";
+      fGamMaxPtName = embedPrefix+"GammaMaxPt";
 
       produces<OutputCollection>();
     }
@@ -94,27 +98,30 @@ namespace HPlus {
                                                                                           thePV->position().z());
         reco::PFCandidateRefVector gammaCands = TauTagTools::filteredPFGammaCands(pfgammacands, fMinGammaEt);
       
-
-        size_t occupancy = chargedCands.size() + gammaCands.size();
+        ValueType copy = hcand->at(iCand);
         double sumPt = 0;
         double maxPt = 0;
-        
+
         for(size_t i=0; i<chargedCands.size(); ++i) {
           double pt = chargedCands[i]->pt();
           sumPt += pt;
           maxPt = std::max(maxPt, pt);
         }
+        copy.addUserInt(fChOccupancyName, chargedCands.size());
+        copy.addUserFloat(fChMaxPtName, maxPt);
+        copy.addUserFloat(fChSumPtName, sumPt);
+        maxPt = 0;
+        sumPt = 0;
 
         for(size_t i=0; i<gammaCands.size(); ++i) {
           double pt = gammaCands[i]->pt();
           sumPt += pt;
           maxPt = std::max(maxPt, pt);
         }
+        copy.addUserInt(fGamOccupancyName, gammaCands.size());
+        copy.addUserFloat(fGamMaxPtName, maxPt);
+        copy.addUserFloat(fGamSumPtName, sumPt);
 
-        ValueType copy = hcand->at(iCand);
-        copy.addUserInt(fOccupancyName, occupancy);
-        copy.addUserFloat(fMaxPtName, maxPt);
-        copy.addUserFloat(fSumPtName, sumPt);
         output->push_back(copy);
 
         /*
@@ -134,9 +141,13 @@ namespace HPlus {
     edm::InputTag fPfCandSrc;
     edm::InputTag fVertexSrc;
     
-    std::string fOccupancyName;
-    std::string fSumPtName;
-    std::string fMaxPtName;
+    std::string fChOccupancyName;
+    std::string fChSumPtName;
+    std::string fChMaxPtName;
+
+    std::string fGamOccupancyName;
+    std::string fGamSumPtName;
+    std::string fGamMaxPtName;
 
     double fSignalCone;
     double fIsolationCone;
