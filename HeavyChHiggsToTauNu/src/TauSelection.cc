@@ -199,11 +199,11 @@ namespace HPlus {
     return Data(this, passEvent);
   }
 
-  TauSelection::Data TauSelection::analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  TauSelection::Data TauSelection::analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate) {
     // Initialize
     bool passEvent = false;
     fSelectedTaus.clear();
-    fSelectedTaus.reserve(fCleanedTauCandidates.size());
+    fSelectedTaus.reserve(1);
     fTauID->reset();
     // Document operation mode
     TauSelectionOperationMode fOriginalOperationMode = fOperationMode;
@@ -211,19 +211,16 @@ namespace HPlus {
     fillOperationModeHistogram();
     fOperationMode = fOriginalOperationMode;
     // Do selection
-    for(edm::PtrVector<pat::Tau>::const_iterator iter = fCleanedTauCandidates.begin();
-        iter != fCleanedTauCandidates.end(); ++iter) {
-      const edm::Ptr<pat::Tau> iTau = *iter;
-      if (!fTauID->passIsolation(iTau)) continue;
+    if (fTauID->passIsolation(tauCandidate)) {
       if (fProngNumber == 1) {
-        if (!fTauID->passOneProngCut(iTau)) continue;
-        if (!fTauID->passChargeCut(iTau)) continue;
-        // Apply Rtau through
-        // pass = data::selectedTauPassedRtau() || !data::shouldRtauBeAppliedOnSelectedTau()
+        if (fTauID->passOneProngCut(tauCandidate)) {
+          if (fTauID->passChargeCut(tauCandidate)) {
+            // All cuts have been passed, save tau
+            fillHistogramsForSelectedTaus(tauCandidate, iEvent);
+            fSelectedTaus.push_back(tauCandidate);
+          }
+        }
       }
-      // All cuts have been passed, save tau
-      fillHistogramsForSelectedTaus(iTau, iEvent);
-      fSelectedTaus.push_back(iTau);
     }
     // Handle counters
     fTauID->updatePassedCounters();
