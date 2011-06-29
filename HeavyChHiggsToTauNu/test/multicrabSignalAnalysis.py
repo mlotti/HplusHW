@@ -27,14 +27,14 @@ multicrab.extendDatasets(pattupleVersion,
 #        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
         
         # Data: single tau + MET
-        "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1  
-        "Tau_161217-163261_May10",  # HLT_IsoPFTau35_Trk20_MET45_v2
+#        "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1  
+#        "Tau_161217-163261_May10",  # HLT_IsoPFTau35_Trk20_MET45_v2
 #        "Tau_163270-163869_May10",  # HLT_IsoPFTau35_Trk20_MET45_v4
 #        "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
 #        "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
+#        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
 #        "Tau_166374-167043_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_167078-167151_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
+#        "Tau_167078-167151_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
 
         
         # MC Signal (WH)
@@ -59,11 +59,11 @@ multicrab.extendDatasets(pattupleVersion,
         # MC Background
 #        "QCD_Pt30to50_TuneZ2_Summer11",
 #        "QCD_Pt50to80_TuneZ2_Summer11",
-        "QCD_Pt80to120_TuneZ2_Summer11",
-        "QCD_Pt120to170_TuneZ2_Summer11",
+#        "QCD_Pt80to120_TuneZ2_Summer11",
+#        "QCD_Pt120to170_TuneZ2_Summer11",
 #        "QCD_Pt170to300_TuneZ2_Summer11",
 #        "QCD_Pt300to470_TuneZ2_Summer11",
-        "TTJets_TuneZ2_Summer11",
+#        "TTJets_TuneZ2_Summer11",
 #        "WJets_TuneZ2_Summer11",
 #        "DYJetsToLL_M50_TuneZ2_Summer11",
         ])
@@ -87,10 +87,10 @@ if runPatOnTheFly:
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
 # Generate configuration only
-multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(configOnly=True)
 
 # Genenerate configuration and create the crab tasks
-#multicrab.createTasks()
+multicrab.createTasks()
 
 # Create a custom multicrab task directory (SignalAnalysis_xxxxxx_yyyyyy)
 #multicrab.createTasks(prefix="SignalAnalysis")
