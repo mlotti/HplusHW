@@ -587,10 +587,21 @@ datasets = {
             },
         },
     },
+    # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+    "WW_TuneZ2_Spring11": {
+        "dataVersion": "42Xmc",
+        "crossSection": 43,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
+                "number_of_jobs": 250, # Adjusted for PATtuple file size
+            },
+        },
+    },
 
 
     # EWK MadGraph
-    # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+    # Cross sections from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "TTJets_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 165,
