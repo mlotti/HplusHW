@@ -7,7 +7,12 @@ _patTauCollectionsDefault = [
 #    "selectedPatTausCaloRecoTau"
     ] # add to the list new sources for patTauCollections, if necessary
 
-def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault):
+tauPathLastFilter = {
+    # /online/collisions/2011/5e32/v6.2/HLT/V3
+    "HLT_IsoPFTau35_Trk20_MET45_v2": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched"
+    }
+
+def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter):
     seq = cms.Sequence()
 
     if isinstance(trigger, basestring):
@@ -20,10 +25,21 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 #    setattr(process, postfix+"TriggerCheck", check)
 #    seq *= check
 
+    matched = []
+    matched2 = []
+    for path in trigger:
+        if path in pathFilterMap:
+            filt = pathFilterMap[path]
+            matched.append("filter('%s')" % filt)
+            matched2.append("!triggerObjectMatchesByFilter('%s').empty()" % filt)
+        else:
+            matched.append("path('%s', 1, 0)" % path)
+            matched2.append("!triggerObjectMatchesByPath('%s', 1, 0).empty()" % path)
+
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
-        matchedCuts           = cms.string(" || ".join([ "path('%s', 1, 0)"%path for path in trigger ]) ),
+        matchedCuts           = cms.string(" || ".join(matched)),
         maxDeltaR             = cms.double(0.4), # start with 0.4; patTrigger pages propose 0.1 or 0.2
         resolveAmbiguities    = cms.bool(True),
         resolveByMatchQuality = cms.bool(False)
@@ -31,7 +47,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     selectorPrototype = cms.EDFilter("PATTauSelector",
         src = cms.InputTag("dummy"),
-        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s', 1, 0).empty()"%t for t in trigger])),
+        cut = cms.string(" || ".join(matched2)),
     )
 
     for collection in collections:
