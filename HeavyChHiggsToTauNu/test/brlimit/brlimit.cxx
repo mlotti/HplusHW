@@ -131,8 +131,9 @@ int brlimit()
 void plotTevatronResults(TLegend * pl){
     TGraph * tevaGraph;
 
-    // Results fom arxiv:0908.181v2, table II, tauonic observed values
-    Double_t tevax[] =    {  80, 100, 120, 140, 150, 160};
+    // Results fom arxiv:0908.1811v2, table II, tauonic observed values
+    // FERMILAB-PUB-09/393-E
+    Double_t tevax[] =    {  80, 100, 120, 140, 150, 155};
     Double_t tevayObs[] = { .16, .15, .17, .18, .19, .18}; 
 
     tgObsTeva = new TGraph(6,tevax,tevayObs);
