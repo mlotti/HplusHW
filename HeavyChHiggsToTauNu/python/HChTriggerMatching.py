@@ -8,11 +8,25 @@ _patTauCollectionsDefault = [
     ] # add to the list new sources for patTauCollections, if necessary
 
 tauPathLastFilter = {
-    # /online/collisions/2011/5e32/v6.2/HLT/V3
-    "HLT_IsoPFTau35_Trk20_MET45_v2": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched"
+    "HLT_IsoPFTau35_Trk20_MET45_v1": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v2": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v4": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v6": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau35_Trk20_v2": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v3": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v4": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau35_Trk20_MET60_v2": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v3": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v4": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau45_Trk20_MET60_v2": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v3": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v4": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
     }
 
-def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter):
+def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter, throw=True):
     seq = cms.Sequence()
 
     if isinstance(trigger, basestring):
@@ -28,10 +42,12 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
     matched = []
     matched2 = []
     for path in trigger:
-        if path in pathFilterMap:
+        if pathFilterMap != None and path in pathFilterMap:
             filt = pathFilterMap[path]
             matched.append("filter('%s')" % filt)
             matched2.append("!triggerObjectMatchesByFilter('%s').empty()" % filt)
+        elif throw:
+            raise Exception("No filter found for path %s" % path)
         else:
             matched.append("path('%s', 1, 0)" % path)
             matched2.append("!triggerObjectMatchesByPath('%s', 1, 0).empty()" % path)
