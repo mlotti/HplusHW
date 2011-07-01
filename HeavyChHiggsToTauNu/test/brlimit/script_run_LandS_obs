@@ -11,6 +11,7 @@ setenv ROOTSYS "/afs/cern.ch/sw/lcg/app/releases/ROOT/5.28.00/x86_64-slc5-gcc43-
 setenv PATH "$ROOTSYS/bin:$PATH"
 setenv LD_LIBRARY_PATH "$ROOTSYS/lib"
 
-${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.3 | tail -5 >& ${outputfile}
+#${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.3 | tail -5 >& ${outputfile}
+${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.4 | tail -5 >& ${outputfile}
 
 cp ${outputfile} ${odir}
