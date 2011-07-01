@@ -133,7 +133,13 @@ namespace HPlus {
     Count fTopSelectionCounter;
     Count fForwardJetVetoCounter;
     Count fControlSignalLikeCounterAfterBTag;
-    
+    Count fSignalControlTauIDNoRtau;
+    Count fSignalControlRtau;
+    Count fSignalControlMET;
+    Count fSignalControlEVeto;
+    Count fSignalControlMuVeto;
+    Count fSignalControlJetSelection;
+    Count fSignalControlBTag;
     // Counters for propagating result into signal region from reversed rtau control region
 
     // The order here defines the order the subcounters are printed at the program termination

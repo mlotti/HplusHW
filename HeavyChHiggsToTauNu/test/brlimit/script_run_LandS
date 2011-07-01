@@ -8,23 +8,23 @@ while (`bjobs -w |& grep $name` != "") # check if job name exists
   sleep 10
 end
 
-# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
-bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_80.txt
-bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_100.txt
+# generates the files output_LandS_HPlusHadronic_*_obs
+# bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_80.txt
+# bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_100.txt
 bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_120.txt
-bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_140.txt
-bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_150.txt
-bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_155.txt
-bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_160.txt
+# bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_140.txt
+# bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_150.txt
+# bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_155.txt
+# bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_obs ${odir} HPlusHadronic_160.txt
 
-# tuottaa tiedostot output_LandS_HPlusHadronic_80_obs
-bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_80.txt
-bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_100.txt
+# generates the files output_LandS_HPlusHadronic_*_obs
+# bsub -q cmscaf1nh -J ${name}_80 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_80.txt
+# bsub -q cmscaf1nh -J ${name}_100 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_100.txt
 bsub -q cmscaf1nh -J ${name}_120 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_120.txt
-bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_140.txt
-bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_150.txt
-bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_155.txt
-bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_160.txt
+# bsub -q cmscaf1nh -J ${name}_140 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_140.txt
+# bsub -q cmscaf1nh -J ${name}_150 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_150.txt
+# bsub -q cmscaf1nh -J ${name}_155 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_155.txt
+# bsub -q cmscaf1nh -J ${name}_160 ${odir}/script_run_LandS_exp ${odir} HPlusHadronic_160.txt
 
 echo Checking jobs with name $name.
 while (`bjobs -w |& grep $name` != "") # check if job name exists
@@ -33,21 +33,21 @@ while (`bjobs -w |& grep $name` != "") # check if job name exists
 end
 
 # collect observed values
-head -3 output_LandS_HPlusHadronic_80_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_80
-head -3 output_LandS_HPlusHadronic_100_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_100
+# head -3 output_LandS_HPlusHadronic_80_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_80
+# head -3 output_LandS_HPlusHadronic_100_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_100
 head -3 output_LandS_HPlusHadronic_120_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_120
-head -3 output_LandS_HPlusHadronic_140_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_140
-head -3 output_LandS_HPlusHadronic_150_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_150
-head -3 output_LandS_HPlusHadronic_155_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_155
-head -3 output_LandS_HPlusHadronic_160_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_160
+# head -3 output_LandS_HPlusHadronic_140_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_140
+# head -3 output_LandS_HPlusHadronic_150_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_150
+# head -3 output_LandS_HPlusHadronic_155_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_155
+# head -3 output_LandS_HPlusHadronic_160_obs | tail -1 | awk '{print $12 }' >&! output_LandS_HPlusHadronic_160
 
-head -3 output_LandS_HPlusHadronic_80_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_80
-head -3 output_LandS_HPlusHadronic_100_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_100
+# head -3 output_LandS_HPlusHadronic_80_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_80
+# head -3 output_LandS_HPlusHadronic_100_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_100
 head -3 output_LandS_HPlusHadronic_120_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_120
-head -3 output_LandS_HPlusHadronic_140_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_140
-head -3 output_LandS_HPlusHadronic_150_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_150
-head -3 output_LandS_HPlusHadronic_155_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_155
-head -3 output_LandS_HPlusHadronic_160_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_160
+# head -3 output_LandS_HPlusHadronic_140_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_140
+# head -3 output_LandS_HPlusHadronic_150_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_150
+# head -3 output_LandS_HPlusHadronic_155_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_155
+# head -3 output_LandS_HPlusHadronic_160_exp | tail -1 | awk '{print $2 " " $3 " " $7 " " $5 " " $6}' >> output_LandS_HPlusHadronic_160
 
 ls ${odir}/output_LandS_*
 
