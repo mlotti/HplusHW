@@ -31,13 +31,13 @@ multicrab.extendDatasets(
 #        "Tau_165970-166164_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
 #        "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
 #        "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
-#        "Tau_167078-167151_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
+#        "Tau_167078-167784_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
 
 
 #        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
 #        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
 #        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
-#        "Tau_Single_167078-167151_Prompt",   # HLT_IsoPFTau35_Trk20_v4
+#        "Tau_Single_167078-167784_Prompt",   # HLT_IsoPFTau35_Trk20_v4
 
         # Signal MC (WH)
 #        "TTToHplusBWB_M80_Summer11",
