@@ -13,7 +13,7 @@ mu = 200
 #mu = 1000
 
 showTeva = 1
-showLEP = 0
+showLEP = 1
 useMA = 0
 
 # write text to plot
@@ -46,8 +46,9 @@ def graphToMa(graph):
         mH = graph.GetX()[i]
         tanb = graph.GetY()[i]
         mZ = 91.1876 #Z mass from PDG
+        mW = 80.398
         print mH, mZ, i, graph.GetN()
-        mA = sqrt(mH*mH - mZ*mZ)
+        mA = sqrt(mH*mH - mW*mW)
         graph.SetPoint(i, mA, tanb)
     return 0           
 
@@ -57,8 +58,9 @@ def graphToMh(graph):
         mA = graph.GetX()[i]
         tanb = graph.GetY()[i]
         mZ = 91.1876 #Z mass from PDG
+        mW = 80.398
         print mA, mZ, i, graph.GetN()
-        mH = sqrt(mA*mA + mZ*mZ)
+        mH = sqrt(mA*mA + mW*mW)
         graph.SetPoint(i, mH, tanb)
     return 0           
 
@@ -223,7 +225,8 @@ def getTevaCurve():
 def getLepCurve():
     curve = TGraph(42)
 #    curve.SetPoint(0,90.7,50.0)
-    curve.SetPoint(0,90.7,30.03)
+    curve.SetPoint(0,60,5000)
+#    curve.SetPoint(1,90.7,30.03)
     curve.SetPoint(1,90.7,30.03)
     curve.SetPoint(2,91.800,30.02624    )
     curve.SetPoint(3,91.845,22.07032    )
@@ -265,7 +268,8 @@ def getLepCurve():
     curve.SetPoint(39,452.3417,    2.421473    )
     curve.SetPoint(40,487.6996,    2.405361    )
     curve.SetPoint(41,487.6996,    0.0)
-    curve.SetPoint(42,90.7,    0.0)
+#    curve.SetPoint(42,90.7,    0.0)
+    curve.SetPoint(42,0.0,    0.0)
 ## made by eye
     # curve = TGraph(11)
     # curve.SetPoint(0,100,8.4)
@@ -364,13 +368,18 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
-    if showTeva:
-        TevaCurve = getTevaCurve()
-        TevaCurve.Draw("F")
-
     if showLEP:
         LepCurve = getLepCurve()
         LepCurve.Draw("FP")
+
+    if showTeva:
+        TevaCurve = getTevaCurve()
+        TevaCurve.Draw("F")
+            
+
+    #refresh
+    expected_tanb.Draw("LP")
+    observed_tanb.Draw("LP")
 
     if showLow:
         expected_2s_tanb_low.Draw("F")
