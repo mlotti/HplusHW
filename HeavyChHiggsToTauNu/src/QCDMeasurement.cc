@@ -32,6 +32,13 @@ namespace HPlus {
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
     fControlSignalLikeCounterAfterBTag(eventCounter.addCounter("Control: Signal-like cuts")),
+    fSignalControlTauIDNoRtau(eventCounter.addCounter("SignalControlTauIDNoRtau")),
+    fSignalControlRtau(eventCounter.addCounter("SignalControlRtau")),
+    fSignalControlMET(eventCounter.addCounter("SignalControlMET")),
+    fSignalControlEVeto(eventCounter.addCounter("SignalControlEVeto")),
+    fSignalControlMuVeto(eventCounter.addCounter("SignalControlMuVeto")),
+    fSignalControlJetSelection(eventCounter.addCounter("SignalControlJetSelection")),
+    fSignalControlBTag(eventCounter.addCounter("SignalControlBTag")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
@@ -316,12 +323,14 @@ namespace HPlus {
     fEventWeight.updatePrescale(iEvent);
     increment(fAllCounter);
 
+///////// Start vertex reweighting
     // Apply PU re-weighting (Vertex weight)
     std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
     if(!iEvent.isRealData()) fEventWeight.multiplyWeight(weightSize.first);
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
+///////// Start trigger
     // Trigger and HLT_MET cut; or trigger efficiency parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup); 
     if(!triggerData.passedEvent()) return;
@@ -331,7 +340,7 @@ namespace HPlus {
     // GenParticle analysis
     if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
-    
+///////// Start primary vertex
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
     if(!pvData.passedEvent()) return;
@@ -342,14 +351,15 @@ namespace HPlus {
     // Apply pre-MET cut to see if MC Normalization is better.
     //if(metData.getSelectedMET()->et() < 30 ) return;
 
+///////// Start tau candidate selection
     // Apply tau candidate selection (with or without Rtau control region)
     TauSelection::Data tauCandidateData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
     fPFTauIsolationCalculator.beginEvent(iEvent); // Set primary vertex to PF tau isolation calculation
+    // Choose tau to be used throughout the event as the selected tau jet
     edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
-    // Require that just one tau has been found
-    if (mySelectedTau.size() != 1) return;
+    // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection,fEventWeight.getWeight());
 
@@ -359,23 +369,56 @@ namespace HPlus {
     fMETHistogramsByTauPtAfterTauCandidateSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
 
-    // GlobalElectronVeto 
+    // Obtain data objects here for signalAnalysis type control counters
+    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    double myWeightWithBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (tauDataForTauID.passedEvent()) {
+      increment(fSignalControlTauIDNoRtau);
+      if (tauDataForTauID.selectedTauPassedRtau()) {
+        increment(fSignalControlRtau);
+        if (metData.passedEvent()) {
+          increment(fSignalControlMET);
+          if (electronVetoData.passedEvent()) {
+            increment(fSignalControlEVeto);
+            if (muonVetoData.passedEvent()) {
+              increment(fSignalControlMuVeto);
+              if (jetData.passedEvent()) {
+                increment(fSignalControlJetSelection);
+                if (btagData.passedEvent()) {
+                  increment(fSignalControlBTag);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // undo btag scale factor
+    fEventWeight.multiplyWeight(myWeightWithoutBTagScale / fEventWeight.getWeight()); // needed because of btag scale factor
+
+
+///////// Start global electron veto
+    // GlobalElectronVeto 
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
-
+///////// Start global muon veto
     // GlobalMuonVeto
-    GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
     
 
     // Factorized out Rtau (after full tauID, but without Njets; assume that Njets cut does not correlate with Rtau)
-    // Obtain tau ID data object
-    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup);
     if (tauDataForTauID.passedEvent()) {
       hStdNonWeightedTauPtAfterRtauWithoutNjetsBeforeCut->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
       if (tauDataForTauID.selectedTauPassedRtau()) {
@@ -386,7 +429,7 @@ namespace HPlus {
 
 
     // PAS Control Plots: After Tr, PV, e/mu veto (Before Jet Selection)
-    JetSelection::Data jetDataTmp = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    
     if( tauDataForTauID.passedEvent() ){
       double myTauPValue = tauDataForTauID.getSelectedTaus()[0]->p();
       double myTauPtValue = tauDataForTauID.getSelectedTaus()[0]->pt();
@@ -402,28 +445,28 @@ namespace HPlus {
       
       // After Tr, PV, e/mu veto (Before Jet Selection) with TauId
       if (tauDataForTauID.selectedTauPassedRtau()) {
-	hCtrlPlot_JetMultiplicity_AfterLeptonVeto_WithTauIdAndRtau->Fill(jetDataTmp.getHadronicJetCount(), fEventWeight.getWeight());
+	hCtrlPlot_JetMultiplicity_AfterLeptonVeto_WithTauIdAndRtau->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
 	hCtrlPlot_MET_AfterLeptonVeto_WithTauIdAndRtau->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       }
     }
     
     // PAS Control Plots: After Tr, PV, e/mu veto, MET and Full TauId  (no Jet Selection)
     if( tauDataForTauID.passedEvent() && tauDataForTauID.selectedTauPassedRtau() && metData.passedEvent()  ){
-    hCtrlPlot_JetMultiplicity_AfterMETNoJetSelection_WithTauIdAndRtau->Fill(jetDataTmp.getHadronicJetCount(), fEventWeight.getWeight());
+    hCtrlPlot_JetMultiplicity_AfterMETNoJetSelection_WithTauIdAndRtau->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
     }
 
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
     if (jetData.getHadronicJetCount() >= 2) {
       increment(fJetSelectionCounter2);
     }
     if (!jetData.passedEvent()) return;
-    
+
     ///////////////////////////////// After Jet Selection /////////////////////////////////
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hMETAfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
+///////// Start MET factorisation
     // Fill factorization info into histogram
     fMETHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     hMETFactorizationNJetsBefore->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
@@ -495,15 +538,14 @@ namespace HPlus {
 
     // Obtain btagging, fakeMETVeto, and forwardJetVeto data objects - internal plots will be wrong since they are not produced at the spot where the cut is applied
     
-    double myStoredWeight = fEventWeight.getWeight(); // needed because of btag scale factor 
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+///////// Start btagging factorisation
+    
+    // Reapply the btagging scale factor
+    fEventWeight.multiplyWeight(myWeightWithBTagScale / myWeightWithoutBTagScale);
+    
     fNBtagsHistogramsByTauPtAfterJetSelection[myFactorizationTableIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
     fNBtagsHistogramGroupByMET[myMetIndex]->Fill(btagData.getBJetCount(), fEventWeight.getWeight());
-      
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
-    TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-
+    
     // Save histograms to enable QCD purity evaluation
     analyzePurities( tauDataForTauID, jetData, metData, btagData, fakeMETData, myFactorizationTableIndex, fEventWeight.getWeight(), fPurityBeforeAfterJets, fPurityBeforeAfterJetsMet, fPurityBeforeAfterJetsMetBtag, fPurityBeforeAfterJetsFakeMet, fPurityBeforeAfterJetsTauIdNoRtau);
 
@@ -551,6 +593,11 @@ namespace HPlus {
       hMETFactorizationBJets->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), myEventWeightBeforeMetFactorization);
     }
 
+    // Undo the btagging scale factor
+    fEventWeight.multiplyWeight(myWeightWithoutBTagScale / myWeightWithBTagScale);
+
+///////// Start parallel paths after big box
+
     // Apply non-standard cut paths
     analyzeABCDByTauIsolationAndBTagging(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData,
                                          fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex, 
@@ -569,11 +616,8 @@ namespace HPlus {
 
     // FakeMETVeto and MET Correlations
     fFakeMETVetoHistogramGroupByMET[myMetIndex]->Fill(fakeMETData.closestDeltaPhi(), fEventWeight.getWeight() );
-    
-    // Continue best cut path
 
-    // undo btag scale factor
-    fEventWeight.multiplyWeight(myStoredWeight / fEventWeight.getWeight()); // needed because of btag scale factor
+///////// Continue cut path to tau isolation and rtau
 
     // Apply rest of tauID without Rtau
     if(!tauDataForTauID.passedEvent()) return;
@@ -681,15 +725,21 @@ namespace HPlus {
 
   edm::PtrVector<pat::Tau> QCDMeasurement::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
+
+    // TMP code starts - to be removed when all 42X pattuples are available
+    mySelectedTauCandidate.push_back(tauCandidates[0]); // take highest ET tau as the tau jet
+    return mySelectedTauCandidate;
+    // TMP code ends
+    
     edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
     double myBestPtMax = 9999.;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = tauCandidates.begin(); iter != tauCandidates.end(); ++iter) {
       if (!(*iter)->isPFTau()) continue;
-      //const edm::Ptr<pat::Tau> iTau = *iter;
+      const edm::Ptr<pat::Tau> iTau = *iter;
       double mySumPt = 999.;
       double myMaxPt = 999.;
       size_t myOccupancy = 999.;
-      // TMP //fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
+      fPFTauIsolationCalculator.calculateHpsTight(**iter, &mySumPt, &myMaxPt, &myOccupancy);
       myMaxPt = 0.; // TMP
       if (myMaxPt < myBestPtMax) {
         if (myMaxPt < 0.5) {

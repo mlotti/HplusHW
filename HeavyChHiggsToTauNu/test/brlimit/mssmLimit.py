@@ -163,16 +163,20 @@ def removeLargeValues(graph):
             graph.RemovePoint(i)
 
 # Draw Tevatron exclusion
-# picked from P-TDR2, page 369
+# picked from Physics Letters B
+# Volume 682, Issue 3, 7 December 2009, Pages 278-286 
+# fig 8
 def getTevaCurve():
     curve = TGraph(11)
     curve.Set(11)
-    curve.SetPoint(0,100,58)
-    curve.SetPoint(1,105,60)
-    curve.SetPoint(2,110,65)
-    curve.SetPoint(3,120,78)
-    curve.SetPoint(4,120,100)
-    curve.SetPoint(5,100,100)
+#    curve.SetPoint(0,88,30)
+    curve.SetPoint(0,100,33)
+    curve.SetPoint(1,110,39)
+    curve.SetPoint(2,120,50)
+    curve.SetPoint(3,130,68.5)
+    curve.SetPoint(4,140,103)
+    curve.SetPoint(5,140,110)
+    curve.SetPoint(6,100,110)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
     return curve
@@ -274,7 +278,7 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
-    showTeva = 0
+    showTeva = 1
     if showTeva:
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
