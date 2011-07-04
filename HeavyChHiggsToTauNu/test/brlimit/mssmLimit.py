@@ -387,19 +387,6 @@ def main():
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
 
-    if showLEP:
-        LepCurve = getLepCurve()
-        # fill with black "stripes" 
-        # and possibly small dots for data points
-        LepCurve.SetFillColor(1);
-        LepCurve.SetFillStyle(3004);
-#        LepCurve.Draw("FP")
-        LepCurve.Draw("F")
-
-    #refresh
-    expected_tanb.Draw("LP")
-    observed_tanb.Draw("LP")
-
     if showLow:
         expected_2s_tanb_low.Draw("F")
         expected_1s_tanb_low.Draw("F")
@@ -408,6 +395,16 @@ def main():
 #        observed_tanb_low.SetFillStyle(3006)
         observed_tanb_low.SetLineWidth(-804)
         observed_tanb_low.Draw("LP")
+
+    # LEP curve is transparent, so draw it last
+    if showLEP:
+        LepCurve = getLepCurve()
+        # fill with black "stripes" 
+        # and possibly small dots for data points
+        LepCurve.SetFillColor(1);
+        LepCurve.SetFillStyle(3004);
+#        LepCurve.Draw("FP")
+        LepCurve.Draw("F")
 
     # Axis labels
     if useMA:
