@@ -6,15 +6,19 @@ from ROOT import TLatex, TLegend, TLegendEntry, TGraph
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface as BRdataInterface
 
 from math import sqrt
 
 mu = 200
 #mu = 1000
 
+## NOTE Tevatron results cannot be shown in some values of mA, 
+# since the corresponding mH values have not been calculated
+# in Feynhiggs
+useMA = 0
 showTeva = 1
 showLEP = 1
-useMA = 0
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -47,9 +51,10 @@ def graphToMa(graph):
         tanb = graph.GetY()[i]
         mZ = 91.1876 #Z mass from PDG
         mW = 80.398
-        print mH, mZ, i, graph.GetN()
+        print mH, tanb, "BR: ", BRdataInterface.get_mA(mH,tanb,200)
         mA = sqrt(mH*mH - mW*mW)
         graph.SetPoint(i, mA, tanb)
+            
     return 0           
 
 # Convert from mA space to mH
@@ -203,20 +208,28 @@ def removeLargeValues(graph):
 # Volume 682, Issue 3, 7 December 2009, Pages 278-286 
 # fig 8
 def getTevaCurve():
-    curve = TGraph(6)
-#    curve.Set(6)
-#    curve.SetPoint(0,88,30)
-    curve.SetPoint(0,100,33)
-    curve.SetPoint(1,110,39)
-    curve.SetPoint(2,120,50)
-    curve.SetPoint(3,130,68.5)
-    curve.SetPoint(4,140,103)
-    curve.SetPoint(5,140,110)
-    curve.SetPoint(6,100,110)
+    curve = TGraph(5)
+    if useMA==0:
+        curve.Set(6)
+        curve.SetPoint(0,100,33)
+        curve.SetPoint(1,110,39)
+        curve.SetPoint(2,120,50)
+        curve.SetPoint(3,130,68.5)
+        curve.SetPoint(4,140,103)
+        curve.SetPoint(5,100,110)
+#        curve.SetPoint(6,100,110)
+    else:
+        curve.Set(5)
+        curve.SetPoint(0,100,33)
+#        curve.SetPoint(1,110,39)
+        curve.SetPoint(1,120,50)
+#        curve.SetPoint(3,130,68.5)
+        curve.SetPoint(2,140,103)
+        curve.SetPoint(3,140,110)
+        curve.SetPoint(4,100,110)
+        graphToMa(curve)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
-    if useMA:
-        graphToMa(curve)
     return curve
 
 # Draw LEP exclusion
@@ -224,10 +237,12 @@ def getTevaCurve():
 # this is originally in mA,tanb space
 def getLepCurve():
     curve = TGraph(42)
-#    curve.SetPoint(0,90.7,50.0)
-    curve.SetPoint(0,60,5000)
-#    curve.SetPoint(1,90.7,30.03)
-    curve.SetPoint(1,90.7,30.03)
+#orig    curve.SetPoint(0,90.7,50.0)
+#    curve.SetPoint(0,60,5000)
+#orig    curve.SetPoint(1,90.7,30.03)
+#orig    curve.SetPoint(1,90.7,30.03)
+    curve.SetPoint(0,50,100)
+    curve.SetPoint(1,91.0,100)
     curve.SetPoint(2,91.800,30.02624    )
     curve.SetPoint(3,91.845,22.07032    )
     curve.SetPoint(4,91.845,    17.12491    )
@@ -368,14 +383,18 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
-    if showLEP:
-        LepCurve = getLepCurve()
-        LepCurve.Draw("FP")
-
     if showTeva:
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
-            
+
+    if showLEP:
+        LepCurve = getLepCurve()
+        # fill with black "stripes" 
+        # and possibly small dots for data points
+        LepCurve.SetFillColor(1);
+        LepCurve.SetFillStyle(3004);
+#        LepCurve.Draw("FP")
+        LepCurve.Draw("F")
 
     #refresh
     expected_tanb.Draw("LP")
