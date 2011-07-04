@@ -176,6 +176,9 @@ namespace HPlus {
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(4, "tauCandidateSelectionOnly");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(5, "tauIDWithoutRtauOnly");
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(6, "tauIDWithRtauOnly");
+
+    hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
+    hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
   }
 
   TauSelection::~TauSelection() {
@@ -243,6 +246,19 @@ namespace HPlus {
     fCleanedTauCandidates.clear();
     fCleanedTauCandidates.reserve(taus.size());
     fTauID->reset();
+
+    // Analyze the separation of the trigger matched taus
+    if (taus.size() > 0) {
+      int mySeparateCounter = 0;
+      edm::Ptr<pat::Tau> myTau = taus[0];
+      for (int i = 1; i < (int)taus.size(); ++i) {
+        double myDeltaR = reco::deltaR(*myTau, *(taus[i]));
+        if (myDeltaR>0.5) ++mySeparateCounter;
+      }
+      if (mySeparateCounter)
+        hNTriggerMatchedSeparateTaus->Fill(taus.size(),fEventWeight.getWeight());
+    }
+    hNTriggerMatchedTaus->Fill(taus.size(),fEventWeight.getWeight());
 
     // Loop over the taus
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {

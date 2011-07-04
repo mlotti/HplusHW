@@ -56,3 +56,5 @@ cmsenv
 ./mssmLimit.py
 
 *As a result, the tanb limit plots mssmLimits.png/eps and mssmLimits_mus.png/eps are generated
+*you may want to toggle the setting "useMA" to show results in mA,tanb space, or the setting
+ "showTeva" and "showLEP" to show/hide Tevatron and LEP results
