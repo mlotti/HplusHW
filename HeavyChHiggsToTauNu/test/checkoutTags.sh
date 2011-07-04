@@ -47,6 +47,7 @@ set -e
 # 25.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau tags
 # 28.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau and PAT tags
 # 1.7.2011/M.Kortelainen CMSSW_4_2_5 Updated PAT tags
+# 4.7.2011/M.Kortelainen CMSSW_4_2_5 Reverted PAT tags (I accidentally launched the pattuple_v16 with an old version)
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -65,8 +66,7 @@ addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
 addpkg DataFormats/PatCandidates  V06-04-18
-addpkg PhysicsTools/PatAlgos      V08-06-38
-addpkg PhysicsTools/PatExamples   V00-05-21
+addpkg PhysicsTools/PatAlgos      V08-06-36
 addpkg PhysicsTools/SelectorUtils V00-03-17
 addpkg FWCore/GuiBrowsers         V00-00-56
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
