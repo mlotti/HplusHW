@@ -134,6 +134,12 @@ datasets = {
                 "luminosity": 133.269976,
                 "number_of_jobs": 6,
             },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v16-d672559c5740ffb0e5c435f08e770e97/USER",
+                "luminosity": 36.269379,
+                "number_of_jobs": 2,
+            },
         }
     },
     "Tau_165970-166164_Prompt": {
@@ -151,6 +157,12 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v13b-cd1d6a028c0df766eab2f022f5ff5ed1/USER",
                 "luminosity": 79.108967,
+                "number_of_jobs": 1,
+            },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v16-dec0cdd184da6e9880cb5fc1728a78b2/USER",
+                "luminosity": 84.108301,
                 "number_of_jobs": 1,
             },
         }
@@ -204,6 +216,12 @@ datasets = {
                 "number_of_jobs": 180, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v16-dec0cdd184da6e9880cb5fc1728a78b2/USER",
+                "luminosity": 123.367974,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_167078-167151_Prompt": {
@@ -229,6 +247,12 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v16-1aa49c4e4d0a1cfb27954d622374591d/USER",
+                "luminosity": 23.111230,
+                "number_of_jobs": 1,
             },
         }
     },
@@ -279,6 +303,12 @@ datasets = {
             "pattuple_v14": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v14-33be4f60aa43fea97c2cc02a29c6f5a0/USER",
+                "luminosity": 4.153168,
+                "number_of_jobs": 1,
+            },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v16-33be4f60aa43fea97c2cc02a29c6f5a0/USER",
                 "luminosity": 4.153168,
                 "number_of_jobs": 1,
             },
@@ -528,7 +558,7 @@ datasets = {
     },
     "SingleMu_167078-167151_Prompt": {
         "dataVersion": "42Xdata",
-        "trigger": "HLT_Mu40_v1",
+        "trigger": "HLT_Mu40_v3",
         "runs": (167078, 167151), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {

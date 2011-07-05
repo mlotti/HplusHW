@@ -5,7 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v14"
+pattupleVersion = "pattuple_v16"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -29,12 +29,12 @@ multicrab.extendDatasets(pattupleVersion,
         # Data: single tau + MET
         "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1  
         "Tau_161217-163261_May10",  # HLT_IsoPFTau35_Trk20_MET45_v2
-#        "Tau_163270-163869_May10",  # HLT_IsoPFTau35_Trk20_MET45_v4
-#        "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
-#        "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
-#        "Tau_166374-167043_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_167078-167151_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
+        "Tau_163270-163869_May10",  # HLT_IsoPFTau35_Trk20_MET45_v4
+        "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
+        "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
+#        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
+        "Tau_166374-167043_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
+        "Tau_167078-167784_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
 
         
         # MC Signal (WH)
@@ -57,15 +57,15 @@ multicrab.extendDatasets(pattupleVersion,
         "TTToHplusBHminusB_M160_Summer11",
 
         # MC Background
-#        "QCD_Pt30to50_TuneZ2_Summer11",
-#        "QCD_Pt50to80_TuneZ2_Summer11",
+        "QCD_Pt30to50_TuneZ2_Summer11",
+        "QCD_Pt50to80_TuneZ2_Summer11",
         "QCD_Pt80to120_TuneZ2_Summer11",
         "QCD_Pt120to170_TuneZ2_Summer11",
-#        "QCD_Pt170to300_TuneZ2_Summer11",
-#        "QCD_Pt300to470_TuneZ2_Summer11",
+        "QCD_Pt170to300_TuneZ2_Summer11",
+        "QCD_Pt300to470_TuneZ2_Summer11",
         "TTJets_TuneZ2_Summer11",
-#        "WJets_TuneZ2_Summer11",
-#        "DYJetsToLL_M50_TuneZ2_Summer11",
+        "WJets_TuneZ2_Summer11",
+        "DYJetsToLL_M50_TuneZ2_Summer11",
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
