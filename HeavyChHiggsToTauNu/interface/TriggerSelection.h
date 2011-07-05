@@ -47,6 +47,8 @@ namespace HPlus {
 
             bool analyze(const pat::TriggerEvent& trigger);
 
+      const std::string& getPathName() const { return fPath; }
+
         private:
             // Input parameters
             std::string fPath;

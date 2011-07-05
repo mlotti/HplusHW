@@ -20,8 +20,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
-weight = ""
-#weight = "VertexWeight"
+# No weighting to keep TEfficiency happy
+#weight = ""
+weight = "VertexWeight"
 #weight = "PileupWeight"
 
 analysis = "caloMetEfficiency%sh00_h01_All" % weight
@@ -41,23 +42,24 @@ def main():
 
     datasets.mergeData()
 
-    printEfficiencies(datasets, analysis+"/calomet_et")
+    printEfficienciesCalo(datasets, analysis+"/calomet_et")
+    printEfficienciesPF(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
     plotTurnOn(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
 
-#    plots.mergeRenameReorderForDataMC(datasets)
+    plots.mergeRenameReorderForDataMC(datasets)
+    datasets.remove("TTToHplusBWB_M120")
 
     # Set the signal cross sections to the ttbar
-    xsect.setHplusCrossSections(datasets, toTop=True)
+#    xsect.setHplusCrossSections(datasets, toTop=True)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 
-
-
-#    caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
+    caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
+    pfMet(plots.DataMCPlot(datasets, analysis+"/pfmet_et"))
 
 
 class Eff:
@@ -98,10 +100,37 @@ def combineHistoEffs(effList):
     gr = ROOT.TEfficiency.Combine(coll)
     return gr
 
-def printEfficiencies(datasets, path):
-    printEfficiency(datasets, path, 46)
+def getFromCalo(dataset, path, bin):
+    hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
+    all = hpass.GetBinContent(1)
+    passed = hpass.GetBinContent(bin)
+    cutvalue = hpass.GetBinCenter(bin)
+    return (all, passed, cutvalue)
 
-def printEfficiency(datasets, path, bin):
+def getFromPF(dataset, pathAll, pathPassed, bin):
+    hall = histograms.dist2pass(dataset.getDatasetRootHisto(pathAll).getHistogram(), greaterThan=True)
+    hpassed= histograms.dist2pass(dataset.getDatasetRootHisto(pathPassed).getHistogram(), greaterThan=True)
+    all = hall.GetBinContent(bin)
+    passed = hpassed.GetBinContent(bin)
+    cutvalue = hpassed.GetBinCenter(bin)
+    if abs(cutvalue-hall.GetBinCenter(bin)) > 1e-4:
+        raise Exception("Internal error, cutvalue %f, hall.GetBinCenter(bin) %f" % (cutvalue, hall.GetBinCenter(bin)))
+    return (all, passed, cutvalue)
+
+def printEfficienciesCalo(datasets, path):
+    print "Calo:"
+    printEfficiency(datasets, 46, lambda d, b: getFromCalo(d, path, b))
+    print
+
+def printEfficienciesPF(datasets, pathAll, pathPassed):
+    print "PF:"
+    printEfficiency(datasets, 71, lambda d, b: getFromPF(d, pathAll, pathPassed, b))
+    print
+
+def printEfficiency(datasets, bin, function):
+    backup = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kError
+
     mc_all = 0
     mc_passed = 0
     data_all = 0
@@ -112,10 +141,12 @@ def printEfficiency(datasets, path, bin):
     for dataset in datasets.getAllDatasets():
 #        print histo.getRootHisto().GetNbinsX(), histo.getXmin(), histo.getXmax()
 #        hpass = histograms.dist2pass(histo.getRootHisto(), greaterThan=True)
-        hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
-        all = hpass.GetBinContent(1)
-        passed = hpass.GetBinContent(bin)
-        cutvalue = hpass.GetBinCenter(bin)
+
+#        hpass = histograms.dist2pass(dataset.getDatasetRootHisto(path).getHistogram(), greaterThan=True)
+#        all = hpass.GetBinContent(1)
+#        passed = hpass.GetBinContent(bin)
+#        cutvalue = hpass.GetBinCenter(bin)
+        (all, passed, cutvalue) = function(dataset, bin)
         eff = Eff(all, passed, dataset)
         print "Dataset %s, eff %f + %f - %f" % (dataset.getName(), eff.eff, eff.eff_up, eff.eff_down)
 #        print all, passed, cutvalue
@@ -156,6 +187,8 @@ def printEfficiency(datasets, path, bin):
     print "  data %f/%f = %f + %f - %f" % (data_all, data_passed, data_eff, data_eff_up, data_eff_down)
     print "  rho = %f \\pm %f" % (rho, rho_err)
 
+    ROOT.gErrorIgnoreLevel = backup
+
 class PlotTurnOn(plots.PlotBase):
     def __init__(self):
         plots.PlotBase.__init__(self, [])
@@ -177,8 +210,9 @@ def plotTurnOn(datasets, pathAll, pathPassed, rebin=10):
         passed.Rebin(rebin)
         binWidth = all.GetBinWidth(1)
 
+        if dataset.isMC() and not "TTTo" in dataset.getName():
         #if dataset.isMC() and not "TTTo" in dataset.getName() and not "QCD" in dataset.getName():
-        if dataset.isMC() and "QCD" in dataset.getName():
+        #if dataset.isMC() and "QCD" in dataset.getName():
             mc_effs.append(HistoEff(all, passed, dataset))
 
         elif dataset.isData():
@@ -218,6 +252,24 @@ def caloMet(h, rebin=10):
     h.createFrame(name, opts=opts)
     ROOT.gPad.SetLogy(True)
     h.setLegend(histograms.createLegend())
+    common(h, xlabel, ylabel)
+
+def pfMet(h, rebin=10):
+    name = h.getRootHistoPath().replace("/", "_")
+
+    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    xlabel = "PF MET (GeV/c^{2})"
+    ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
+    
+    h.stackMCHistograms(stackSignal=False)
+    h.addMCUncertainty()
+
+    opts = {"xmax": 400, "ymin": 1e-2, "ymaxfactor": 10}
+
+    #h.createFrameFraction(name, opts=opts)
+    h.createFrame(name, opts=opts)
+    ROOT.gPad.SetLogy(True)
+    h.setLegend(histograms.moveLegend(histograms.createLegend(), dx=-0.12))
     common(h, xlabel, ylabel)
 
 def common(h, xlabel, ylabel, addLuminosityText=True, afterDraw=None):

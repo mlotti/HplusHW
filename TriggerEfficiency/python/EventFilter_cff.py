@@ -13,3 +13,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi import *
 metSelectionFilter = hPlusMETPtrSelectorFilter.clone()
 eventFilter *= metSelectionFilter
 
+# Jet selection
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi import *
+jetSelectionFilter = hPlusJetPtrSelectorFilter.clone()
+eventFilter *= jetSelectionFilter
+
+# BTagging
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChBTaggingFilter_cfi import *
+btagSelectionFilter = hPlusBTaggingPtrSelectorFilter.clone(
+    jetSrc = "jetSelectionFilter"
+)
+eventFilter *= btagSelectionFilter

@@ -169,6 +169,12 @@ namespace HPlus {
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(3, "Other #tau source");
     hMCPurityOfSelectedTaus->GetXaxis()->SetBinLabel(4, "No MC #tau match");
 
+    // Isolation variables
+    hVLooseIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_VLooseIsoNCands", "Number of isolation candidates in VLoose", 100, 0, 100);
+    hLooseIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_LooseIsoNCands", "Number of isolation candidates in Loose", 100, 0, 100);
+    hMediumIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_MediumIsoNCands", "Number of isolation candidates in Medium", 100, 0, 100);
+    hTightIsoNcands = makeTH<TH1F>(myDir, "TauSelection_all_tau_candidates_TightIsoNCands", "Number of isolation candidates in Tight", 100, 0, 100);
+
     // Operating mode of tau ID -- for quick validating that tau selection is doing what is expected 
     hTauIdOperatingMode = makeTH<TH1F>(myDir, "tauSelection_operating_mode", "tau_operating_mode;;N_{events}", 6, 0., 6.);
     hTauIdOperatingMode->GetXaxis()->SetBinLabel(1, "Control");
@@ -348,6 +354,11 @@ namespace HPlus {
     if (!iEvent.isRealData()) {
       ObtainMCPurity(tau, iEvent, hMCPurityOfTauCandidates); 
     }
+
+    hVLooseIsoNcands->Fill(tau->userInt("byVLooseOccupancy"), fEventWeight.getWeight());
+    hLooseIsoNcands->Fill(tau->userInt("byLooseOccupancy"), fEventWeight.getWeight());
+    hMediumIsoNcands->Fill(tau->userInt("byMediumOccupancy"), fEventWeight.getWeight());
+    hTightIsoNcands->Fill(tau->userInt("byTightOccupancy"), fEventWeight.getWeight());
   }
   
   void TauSelection::fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent) {

@@ -116,14 +116,29 @@ process.btaggingCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.btaggingCount
 additionalCounters.append("btaggingCount")
 
-addAnalysis(process, "caloMetEfficiency", createHistoAnalyzer(cms.InputTag("met"), [
-    Histo("caloMet", "et()", min=0, max=400, nbins=400)
-    ]),
-            preSequence=process.commonSequence,
-            additionalCounters = additionalCounters,
-            signalAnalysisCounters=False
-            )
+met = Histo("et", "et()", min=0, max=400, nbins=400)
 
-process.p = cms.Path(
-    process.commonSequence
-)
+histoList = [("calomet_", cms.InputTag("met"), [met]),
+             ("pfmet_", cms.InputTag("pfMet"), [met])]
+
+def createAnalysis(prefix, weightSrc=None):
+    wSrc = weightSrc
+    if dataVersion.isData():
+        wSrc = None
+
+    analysis = Analysis(process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=wSrc)
+    ha = analysis.addMultiHistoAnalyzer("h01_All", histoList)
+
+    analysis.addCut("CaloMet25", cms.InputTag("met"), "et() > 25")
+    ha = analysis.addCloneAnalyzer("h02_CaloMet25", ha)
+
+    analysis.addCut("CaloMet45", cms.InputTag("met"), "et() > 45")
+    ha = analysis.addCloneAnalyzer("h02_CaloMet45", ha)
+
+    p = cms.Path(process.commonSequence * analysis.getSequence())
+    setattr(process, prefix+"Path", p)
+
+name = "caloMetEfficiency"
+createAnalysis(name)
+createAnalysis(name+"VertexWeight", weightSrc="vertexWeight")
+createAnalysis(name+"PileupWeight", weightSrc="pileupWeight")

@@ -1,13 +1,32 @@
 import FWCore.ParameterSet.Config as cms
 
 _patTauCollectionsDefault = [
-    "selectedPatTausShrinkingConePFTau",
+#    "selectedPatTausShrinkingConePFTau",
     "selectedPatTausHpsPFTau",
     "selectedPatTausHpsTancPFTau",
-    "selectedPatTausCaloRecoTau"
+#    "selectedPatTausCaloRecoTau"
     ] # add to the list new sources for patTauCollections, if necessary
 
-def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault):
+tauPathLastFilter = {
+    "HLT_IsoPFTau35_Trk20_MET45_v1": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v2": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v4": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET45_v6": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau35_Trk20_v2": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v3": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v4": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau35_Trk20_MET60_v2": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v3": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v4": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau45_Trk20_MET60_v2": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v3": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v4": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    }
+
+def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter, throw=True):
     seq = cms.Sequence()
 
     if isinstance(trigger, basestring):
@@ -20,10 +39,23 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 #    setattr(process, postfix+"TriggerCheck", check)
 #    seq *= check
 
+    matched = []
+    matched2 = []
+    for path in trigger:
+        if pathFilterMap != None and path in pathFilterMap:
+            filt = pathFilterMap[path]
+            matched.append("filter('%s')" % filt)
+            matched2.append("!triggerObjectMatchesByFilter('%s').empty()" % filt)
+        elif throw:
+            raise Exception("No filter found for path %s" % path)
+        else:
+            matched.append("path('%s', 1, 0)" % path)
+            matched2.append("!triggerObjectMatchesByPath('%s', 1, 0).empty()" % path)
+
     matcherPrototype = cms.EDProducer("PATTriggerMatcherDRLessByR",
         src                   = cms.InputTag("dummy"),
         matched               = cms.InputTag("patTrigger"),
-        matchedCuts           = cms.string(" || ".join([ "path('%s')"%path for path in trigger ]) ),
+        matchedCuts           = cms.string(" || ".join(matched)),
         maxDeltaR             = cms.double(0.4), # start with 0.4; patTrigger pages propose 0.1 or 0.2
         resolveAmbiguities    = cms.bool(True),
         resolveByMatchQuality = cms.bool(False)
@@ -31,15 +63,18 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
     selectorPrototype = cms.EDFilter("PATTauSelector",
         src = cms.InputTag("dummy"),
-        cut = cms.string(" || ".join(["!triggerObjectMatchesByPath('%s').empty()"%t for t in trigger])),
+        cut = cms.string(" || ".join(matched2)),
     )
 
     for collection in collections:
-        print "Matching collection %s to trigger(s) %s" % (collection, ",".join(trigger))
+        name = collection
+        if "selectedPat" in name and hasattr(process, collection):
+            name = getattr(process, collection).src.getModuleLabel()
+        print "Matching collection %s to trigger(s) %s" % (name, ",".join(trigger))
 
         # DeltaR matching between the trigger object and the PAT objects
         matcher = matcherPrototype.clone(
-            src = cms.InputTag(collection)
+            src = cms.InputTag(name)
         )
         matcherName = collection+postfix+"TriggerMatcher"
         setattr(process, matcherName, matcher)
@@ -47,7 +82,7 @@ def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauColle
 
         # Embed the patTriggerObjectStandAloneedmAssociation to a tau collection
         embedder = cms.EDProducer("PATTriggerMatchTauEmbedder",
-            src     = cms.InputTag(collection),
+            src     = cms.InputTag(name),
             matches = cms.VInputTag(matcherName)
         )
         embedderName = collection+postfix+"TriggerEmbedder"

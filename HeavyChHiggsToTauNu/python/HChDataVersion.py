@@ -7,81 +7,22 @@
 # analysisCastor:    default file for analysis at castor
 # analysisMadhatter: default file for analysis at madhatter
 config = {
-    "35X": {
-        "triggerProcess": "HLT",
-        "signalTrigger": "HLT_SingleLooseIsoTau20",
-        "patMadhatter": "/store/mc/Spring10/TTToHpmToTauNu_M-90_7TeV-pythia6-tauola/GEN-SIM-RECO/START3X_V26-v1/0014/F6753C2F-0664-DF11-8236-001E688E628A.root",
-        "analysisCastor": "/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHpmToTauNu_M100/TTToHpmToTauNu_M-100_7TeV-pythia6-tauola/Spring10_START3X_V26_v1_GEN-SIM-RECO_pattuple_v6_1/94799423eedb9d1f02c6c0ed06eb3738/pattuple_4_1_pvI.root",
-    },
-    "35Xredigi": {
-        "triggerProcess": "REDIGI",
-        "signalTrigger": "HLT_SingleLooseIsoTau20",
-        "patCastor": "rfio:/castor/cern.ch/user/s/slehti/testData/Ztautau_Spring10-START3X_V26_S09-v1-RAW-RECO.root"
-    },
-    "36X": {
-        "triggerProcess": "REDIGI36X",
-        "signalTrigger": "HLT_SingleLooseIsoTau20",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data/WJets_7TeV-madgraph-tauola/Summer10-START36_V9_S09-v1/AODSIM/5874EB44-B175-DF11-9D04-002618943932.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/WJets/WJets_7TeV-madgraph-tauola/Summer10_START36_V9_S09_v1_GEN-SIM-RECO_pattuple_v6_1/2366fe480375ff6f751e0b7e8ec70b52/pattuple_93_1_xbp.root"
-    },
-    "36Xdata": {
-        "triggerProcess": "HLT",
-        "patCastor": "/store/data/Run2010A/JetMETTau/RECO/Jul16thReReco-v1/0049/FE36C9D8-3891-DF11-829E-00261894395F.root"
-    },
-    "36Xspring10": {
-        "triggerProcess": "REDIGI36",
-        "signalTrigger": "HLT_SingleLooseIsoTau20",
-    },
-    "37X": {"triggerProcess": "REDIGI37X"},
-    "38Xredigi": {
-        "triggerProcess": "REDIGI38X",
-        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "patCastor": "fio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/pattuple_1_1_AcP_TTToHplusBWB_M-100_7TeV-pythia6-tauola_Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b.root",
-        "patMadhatter": "/store/mc/Fall10/QCD_Pt_50to80_TuneZ2_7TeV_pythia6/AODSIM/START38_V12-v1/0033/FE2DEA23-15CA-DF11-B86C-0026189438BF.root",
-    },
-    "38XredigiPU": {
-        "triggerProcess": "REDIGI38XPU",
-        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
-    },
-    "38X": {
-        "triggerProcess": "HLT",
-        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
-        "patCastor": '/store/relval/CMSSW_3_8_4/RelValTTbar/GEN-SIM-RECO/START38_V12-v1/0025/34CD73F6-9AC2-DF11-9B42-002618943857.root',
-        "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola/local-Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v7_test2/pattuple_10_1_m2M.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/TTToHplusBWB_M120/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall10_START38_V12_v1_GEN-SIM-RECO_pattuple_v6_1b/78d4b6b79bb86567b5da3e176aad4eb3/pattuple_9_1_RL8.root"
-    },
-    "38Xdata": {
-        "triggerProcess": "HLT",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_8_X/BTau_146240-148107/BTau/Run2010B_PromptReco_v2_RECO_pattuple_v6_1/43c3132ebadd44967499e6cca288e3ab/pattuple_7_1_cJr.root"
-    },
-    "39Xredigi": {
-        "triggerProcess": "REDIGI39X",
-        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
-        "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTJets_TuneD6T_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/GEN-SIM-RECO/72A60727-0513-E011-92AF-0024E8768C30.root",
-        "analysisCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-90_7TeV-pythia6-tauola_Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9/pattuple_9_1_KJi.root",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Winter10-START39_V8-v1/AODSIM/AA75B86B-CB0E-E011-B7E2-001A92810AE4.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/TTToHplusBWB_M90_Winter10/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_pattuple_v9/c2f22ab9ac43296d989acccdef834e2a/pattuple_10_1_ZxQ.root",
-    },
-    "39Xdata": {
+    "42Xdata": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_3_9_X/BTau_148822-149182_Dec22/BTau/Run2010B_Dec22ReReco_v1_AOD_148822_pattuple_v9/9bdd93eeac3a09280bc73f406326390f/pattuple_102_1_kIm.root",
+#        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
+#        "patCastor": "",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/BTau/Run2010B-Apr21ReReco-v1/AOD/109B70F2-8471-E011-B3F1-001A64789D18.root",
+#        "analysisCastor": "",
+#        "analysisMadhatter": "",
     },
-    "311Xredigi": {
-        "triggerProcess": "REDIGI311X",
-        "recoProcess": "REDIGI311X",
-        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET25_v4",
-        "patCastor": "rfio:/castor/cern.ch/user/m/mkortela/hplus/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_1_X/TTToHplusBWB_M120_Spring11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_pattuple_v11b/8f83bb72c10133f1e52d950030b925c8/pattuple_15_5_MKl.root"
-    },
-    "41Xdata": {
+    "42Xmc": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
-        "patCastor": "/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root",
-        "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v1/AOD/84CA2525-5750-E011-AEC1-003048D375AA.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_1_X/Tau_163270-163757_Prompt/Tau/Run2011A_PromptReco_v2_AOD_163270_pattuple_v11b/0fbacf41641faa252a2bc6c4d4cd404b/pattuple_107_1_K3y.root",
+        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root",
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM/FE47C9F3-C97D-E011-B103-003048670B66.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v13/f4fa5e38ef8e2164af1f351b44ad93c5/pattuple_4_1_2ON.root"
     },
 }
 
@@ -106,12 +47,12 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_311_V2::All"
+            self.globalTag = "GR_R_42_V14::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START311_V2::All"
+            self.globalTag = "START42_V12::All"
 
             try:
                 self.signalTrigger = conf["signalTrigger"]
@@ -123,24 +64,6 @@ class DataVersion:
 
     def isMC(self):
         return not self.is_data
-
-    def is35X(self):
-        return "35X" in self.version
-
-    def is36X(self):
-        return "36X" in self.version
-
-    def is38X(self):
-        return "38X" in self.version
-
-    def is39X(self):
-        return "39X" in self.version
-
-    def is311X(self):
-        return "311X" in self.version
-
-    def is41X(self):
-        return "41X" in self.version
 
     def getTriggerProcess(self):
         return self.trigger

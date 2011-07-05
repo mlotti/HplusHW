@@ -37,12 +37,23 @@ set -e
 # 3.5.2011/M.Kortelainen CMSSW_4_1_5 Minor tau tag update thanks to Mike Bachtis
 # 4.5.2011/M.Kortelainen CMSSW_4_1_5 Checkout JEC sqlite file
 # 4.5.2011/M.Kortelainen CMSSW_4_1_5 Updated tau tags
+# 9.5.2011/M.Kortelainen CMSSW_4_2_2 Updated tags for the new release
+# 23.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
+# 25.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
+# 27.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated tau and PAT tags
+# 31.5.2011/M.Kortelainen CMSSW_4_2_3_patch2 Updated PAT tags
+# 10.6.2011/M.Kortelainen CMSSW_4_2_4_patch1 
+# 22.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau and PAT tags
+# 25.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau tags
+# 28.6.2011/M.Kortelainen CMSSW_4_2_5 Updated tau and PAT tags
+# 1.7.2011/M.Kortelainen CMSSW_4_2_5 Updated PAT tags
+# 4.7.2011/M.Kortelainen CMSSW_4_2_5 Reverted PAT tags (I accidentally launched the pattuple_v16 with an old version)
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
 
 # PAT
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes41X
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuidePATReleaseNotes42X
 
 # Tau+PAT
 # https://hypernews.cern.ch/HyperNews/CMS/get/tauid/83/1/1/1/1.html
@@ -50,23 +61,20 @@ eval $(scram runtime -sh)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideTauAnalysis#CMSSW_4_1_X_NOTE_Experimental_ve
 #
 # Tau
-cvs co -r V01-00-07-01   DataFormats/TauReco
-cvs co -r V01-00-27      RecoTauTag/Configuration
-cvs co -r V01-00-33-04   RecoTauTag/RecoTau
-cvs co -r V01-00-12      RecoTauTag/TauTagTools
+addpkg RecoTauTag/Configuration   V01-02-03
+addpkg RecoTauTag/RecoTau         V01-02-07
+addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
-# PAT taked form 42X (V08-06-21 [part of CMSSW_4_2_1]), 
-# PF2PAT from the 4_1_5 release
-cvs co -r V06-04-08      DataFormats/PatCandidates
-cvs co -r V04-07-02      PhysicsTools/PFCandProducer
-cvs co -r V08-06-21      PhysicsTools/PatAlgos
-# patches
-patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PatAlgos_V08-06-21.patch
-patch -p0 < HiggsAnalysis/HeavyChHiggsToTauNu/test/PhysicsTools_PFCandProducer_V04-07-02.patch
+addpkg DataFormats/PatCandidates  V06-04-18
+addpkg PhysicsTools/PatAlgos      V08-06-36
+addpkg PhysicsTools/SelectorUtils V00-03-17
+addpkg FWCore/GuiBrowsers         V00-00-56
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
+addpkg RecoJets/Configuration     V02-04-17
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
-cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
+#cvs co -r V00-03-01 ElectroWeakAnalysis/WENu
 
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
@@ -74,4 +82,4 @@ rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
 
 # JEC
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
-cvs co -r 1.3 -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db
+#cvs co -r 1.3 -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db
