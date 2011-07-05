@@ -150,6 +150,9 @@ namespace HPlus {
     TH1 *hNTriggerMatchedTaus;
     TH1 *hNTriggerMatchedSeparateTaus;
 
+    TH1 *hIsolationPFChargedHadrCandsPtSum;
+    TH1 *hIsolationPFGammaCandsEtSum;
+
     TH1 *hVLooseIsoNcands;
     TH1 *hLooseIsoNcands;
     TH1 *hMediumIsoNcands;

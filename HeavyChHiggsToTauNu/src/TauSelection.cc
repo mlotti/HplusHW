@@ -185,6 +185,9 @@ namespace HPlus {
 
     hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
     hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
+
+    hIsolationPFChargedHadrCandsPtSum = makeTH<TH1F>(myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFGammaCandsEtSum = makeTH<TH1F>(myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
   }
 
   TauSelection::~TauSelection() {
@@ -283,6 +286,9 @@ namespace HPlus {
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
         // Standard tau ID (necessary for the tau selection logic) 
+        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
+        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
+
         if (!fTauID->passIsolation(iTau)) continue;
 
         if (fProngNumber == 1) {
