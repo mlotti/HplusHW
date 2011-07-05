@@ -12,6 +12,6 @@ setenv PATH "$ROOTSYS/bin:$PATH"
 setenv LD_LIBRARY_PATH "$ROOTSYS/lib"
 
 #${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.3 | tail -5 >& ${outputfile}
-${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.4 | tail -5 >& ${outputfile}
+${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.1 | tail -5 >& ${outputfile}
 
 cp ${outputfile} ${odir}
