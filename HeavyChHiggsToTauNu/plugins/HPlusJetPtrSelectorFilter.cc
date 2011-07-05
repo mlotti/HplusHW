@@ -27,6 +27,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   HPlus::EventWeight eventWeight;
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
+  bool fFilter;
 
   // Let's use reco::Candidate as the output type, as the required
   // dictionaries for edm::PtrVector<pat:Jet> do not exist, and I
@@ -39,10 +40,12 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
   eventCounter(),
   eventWeight(iConfig),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
-  fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc"))
+  fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
+  fFilter(iConfig.getParameter<bool>("filter"))
 {
   eventCounter.produces(this);
   produces<Product>();
+  produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusJetPtrSelectorFilter::~HPlusJetPtrSelectorFilter() {}
@@ -54,14 +57,19 @@ bool HPlusJetPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  std::auto_ptr<bool> passed(new bool(false));
+
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
 
   HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrVector());
-  if(!jetData.passedEvent()) return false;
+  if(jetData.passedEvent()) {
+    *passed = true;
+    iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
+  }
+  iEvent.put(passed);
 
-  iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
-  return true;
+  return !fFilter || (fFilter && *passed);
 }
 
 bool HPlusJetPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {

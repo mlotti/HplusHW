@@ -6,10 +6,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-#dataVersion = "39Xredigi" # Winter10 MC
-#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-#dataVersion = "311Xredigi" # Spring11 MC
-dataVersion = "41Xdata"   # Run2011 PromptReco
+dataVersion = "42Xdata"
 
 
 ##########
@@ -45,7 +42,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 # These are needed for running against tau embedding samples, can be
 # given also from command line
-options.doPat=1
+#options.doPat=1
 #options.tauEmbeddingInput=1
 
 ################################################################################
@@ -57,21 +54,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#	"/store/data/Run2011A/Tau/AOD/PromptReco-v1/000/160/445/84CA2525-5750-E011-AEC1-003048D375AA.root"
-	"file:/tmp/slehti/84CA2525-5750-E011-AEC1-003048D375AA.root"
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
-    #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
-    # For testing in lxplus
-    #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     # dataVersion.getAnalysisDefaultFileCastor()
-    # For testing in jade
-    #        dataVersion.getAnalysisDefaultFileMadhatter()
-    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Control_165970-166164_DCS/Tau/Run2011A_PromptReco_v4_AOD_Control_165970_pattuple_v12_1/4f228cbdccbe253fb8fc10a07a3c6bf1/pattuple_3_1_LBC.root"
     )
 )
 
@@ -93,23 +77,24 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 options.trigger = "HLT_FOO"
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
-process.patDefaultSequence.remove(process.patElectrons)
-process.patDefaultSequence.remove(process.selectedPatElectrons)
-process.patDefaultSequence.remove(process.electronMatch)
-process.patDefaultSequence.remove(process.cleanPatElectrons)
-process.patDefaultSequence.remove(process.cleanPatPhotons)
-process.patDefaultSequence.remove(process.cleanPatTaus)
-process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
-process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
-process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
-process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
-process.patDefaultSequence.remove(process.cleanPatJets)
-process.patDefaultSequence.remove(process.countPatElectrons)
-process.patDefaultSequence.remove(process.countPatLeptons)
+if options.doPat != 0:
+    process.patDefaultSequence.remove(process.patElectrons)
+    process.patDefaultSequence.remove(process.selectedPatElectrons)
+    process.patDefaultSequence.remove(process.electronMatch)
+    process.patDefaultSequence.remove(process.cleanPatElectrons)
+    process.patDefaultSequence.remove(process.cleanPatPhotons)
+    process.patDefaultSequence.remove(process.cleanPatTaus)
+    process.patDefaultSequence.remove(process.cleanPatTausHpsTancPFTau)
+    process.patDefaultSequence.remove(process.cleanPatTausHpsPFTau)
+    process.patDefaultSequence.remove(process.cleanPatTausShrinkingConePFTau)
+    process.patDefaultSequence.remove(process.cleanPatTausCaloRecoTau)
+    process.patDefaultSequence.remove(process.cleanPatJets)
+    process.patDefaultSequence.remove(process.countPatElectrons)
+    process.patDefaultSequence.remove(process.countPatLeptons)
 
 
-process.commonSequence.remove(process.collisionDataSelection)
-del process.collisionDataSelection
+    process.commonSequence.remove(process.collisionDataSelection)
+    del process.collisionDataSelection
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -140,12 +125,25 @@ param.setAllTauSelectionSrcSelectedPatTaus()
 param.setTriggerVertexFor2011()
 
 process.load("HiggsAnalysis.TriggerEfficiency.EventFilter_cff")
+process.eventFilter.remove(process.tauSelectionFilter)
+process.eventFilter.remove(process.metSelectionFilter)
+
+process.jetSelectionFilter.jetSelection.ptCut = 30
+process.jetSelectionFilter.filter = False
+process.btagSelectionFilter.filter = False
+process.btagSelectionFilter.throw = False
 
 process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
-    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
-    tauSrc              = param.tauSelection.src,
-    metSrc              = param.MET.src
+#    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
+    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET60_v2"),
+#    tauSrc              = param.tauSelection.src,
+    tauSrc              = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched"),
+    metSrc              = param.MET.src,
+    bools = cms.PSet(
+        JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
+        BTaggingPassed = cms.InputTag("btagSelectionFilter"),
+    )
 )
 
 

@@ -121,13 +121,13 @@ if (doTriggerParametrisation and not dataVersion.isData()):
     param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+#param.setTriggerPileupFor2010()
+param.setTriggerPileupFor2011()
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
-#def setTriggerVertexFor2011(**kwargs):
+#def setTriggerPileupFor2011(**kwargs):
 #    setEfficiencyTriggersFor2011(**kwargs)
-#    setVertexWeightFor2011()
+#    setPileupWeightFor2011()
 
 # Overwrite necessary values here
 param.trigger.hltMetCut = 45.0 # note: 45 is the minimum possible value for which HLT_MET is saved (see histogram hlt_met) attikis
@@ -155,7 +155,7 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
-    pvSrc = cms.InputTag("offlinePrimaryVertices")
+    vertexSrc = cms.InputTag("offlinePrimaryVertices")
     ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
 )
 # Factorization (quick and dirty version)

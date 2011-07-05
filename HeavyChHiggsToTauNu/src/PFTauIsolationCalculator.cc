@@ -16,7 +16,7 @@
 
 namespace HPlus {
   PFTauIsolationCalculator::PFTauIsolationCalculator(const edm::ParameterSet& iConfig):
-    pvSrc_(iConfig.getParameter<edm::InputTag>("pvSrc"))
+    pvSrc_(iConfig.getParameter<edm::InputTag>("vertexSrc"))
   {}
   PFTauIsolationCalculator::~PFTauIsolationCalculator() {}
 

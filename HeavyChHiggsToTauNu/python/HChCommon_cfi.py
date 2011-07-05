@@ -7,7 +7,8 @@ MessageLogger.categories.append("hltPrescaleTable")
 MessageLogger.categories.append("EventCounts")  # HPlusEventCountAnalyzer
 MessageLogger.categories.append("HLTTableInfo") # HPlusHLTTableAnalyzer
 
-MessageLogger.cerr.FwkReport.reportEvery = 500
+# Do NOT lower this number (or the logs will eat all your quota)
+MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 MessageLogger.cerr.hltPrescaleTable = cms.untracked.PSet(reportEvery = MessageLogger.cerr.FwkReport.reportEvery)
 

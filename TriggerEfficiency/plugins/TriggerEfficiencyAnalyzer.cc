@@ -18,6 +18,21 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TTree.h"
 
+namespace {
+  struct EventVariableBase {
+    EventVariableBase(const edm::InputTag& t, const std::string& n): tag(t), name(n) {}
+    edm::InputTag tag;
+    std::string name;
+  };
+
+  template <typename T>
+  struct EventVariable: public EventVariableBase {
+    EventVariable(const edm::InputTag& t, const std::string& n): EventVariableBase(t, n) {}
+    T value;
+  };
+  typedef EventVariable<bool> BoolVariable;
+}
+
 class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
     public:
         TriggerEfficiencyAnalyzer(const edm::ParameterSet&);
@@ -37,8 +52,10 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
 	TTree* TriggerEfficiencyTree;
 
-	int triggerBit;
+	bool triggerBit;
+  int ntaus;
 	float taupt,taueta,met;
+  std::vector<BoolVariable> bools;
 };
 
 TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iConfig) :
@@ -47,6 +64,16 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
     metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc"))
 {
+  if(iConfig.exists("bools")) {
+    edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("bools");
+    std::vector<std::string> names = pset.getParameterNames();
+    bools.reserve(names.size());
+    for(size_t i=0; i<names.size(); ++i) {
+      bools.push_back(BoolVariable(pset.getParameter<edm::InputTag>(names[i]), names[i]));
+      
+    }
+  }
+
 	std::cout << "Trigger table : " << triggerResults.label() << std::endl;
 	std::cout << "          bit : " << triggerBitName << std::endl;
 	std::cout << "Tau src : " << tauSrc.label() << std::endl;
@@ -55,10 +82,15 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	edm::Service<TFileService> fs;
 	TriggerEfficiencyTree = fs->make<TTree>("TriggerEfficiencyTree", triggerBitName.c_str(),1);
 
-	TriggerEfficiencyTree->Branch("TriggerBit",&triggerBit,"triggerBit/I");
-	TriggerEfficiencyTree->Branch("TauPt",&taupt,"taupt/F");
-	TriggerEfficiencyTree->Branch("TauEta",&taueta,"taueta/F");
-	TriggerEfficiencyTree->Branch("MET",&met,"met/F");
+	TriggerEfficiencyTree->Branch("TriggerBit", &triggerBit);
+	TriggerEfficiencyTree->Branch("NTaus", &ntaus);
+	TriggerEfficiencyTree->Branch("TauPt", &taupt);
+	TriggerEfficiencyTree->Branch("TauEta", &taueta);
+	TriggerEfficiencyTree->Branch("MET", &met);
+
+        for(size_t i=0; i<bools.size(); ++i) {
+          TriggerEfficiencyTree->Branch(bools[i].name.c_str(), &bools[i].value);
+        }
 }
 
 TriggerEfficiencyAnalyzer::~TriggerEfficiencyAnalyzer(){}
@@ -69,10 +101,15 @@ void TriggerEfficiencyAnalyzer::beginJob(){}
 
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
-	triggerBit = 0;
+	triggerBit = false;
+        ntaus = 0;
 	taupt      = 0;
 	taueta     = 0;
 	met 	   = 0;
+
+        for(size_t i=0; i<bools.size(); ++i) {
+          bools[i].value = false;
+        }
 
 // Trigger bit
 	edm::Handle<edm::TriggerResults> hltHandle;
@@ -87,9 +124,18 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         	}
       	}
 
+        // Booleans
+        edm::Handle<bool> hbool;
+        for(size_t i=0; i<bools.size(); ++i) {
+          iEvent.getByLabel(bools[i].tag, hbool);
+          bools[i].value = *hbool;
+        }
+
 // Offline taus
 	edm::Handle<edm::View<pat::Tau> > htaus;
 	iEvent.getByLabel(tauSrc, htaus);
+
+        ntaus = htaus->size();
 
 	const edm::PtrVector<pat::Tau>& taus = htaus->ptrVector();
 //FIXME: what if we have more than 1 taus passing the selection? 25.5.2011/SL

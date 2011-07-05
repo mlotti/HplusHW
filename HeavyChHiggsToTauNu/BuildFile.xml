@@ -13,6 +13,7 @@
 <use name="DataFormats/WrappedStdDictionaries"/>
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use name="CommonTools/UtilAlgos"/>
+<use name="PhysicsTools/Utilities"/>
 <use name="RecoTauTag/TauTagTools"/>
 <export>
   <lib name="HiggsAnalysisHeavyChHiggsToTauNu"/>

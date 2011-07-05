@@ -13,6 +13,8 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET45_v1",
                                      "HLT_IsoPFTau35_Trk20_MET45_v2",
                                      "HLT_IsoPFTau35_Trk20_MET45_v4",
+                                     "HLT_IsoPFTau35_Trk20_MET45_v6",
+                                     "HLT_IsoPFTau35_Trk20_MET60_v2",
     ),
     hltMetCut = cms.untracked.double(45.0),
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
@@ -218,9 +220,8 @@ topSelection = cms.untracked.PSet(
 
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices10"),
-    pileupSrc = cms.InputTag("addPileupInfo"),
     useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
-    weights = cms.vdouble(1.0),
+    weights = cms.vdouble(0.0),
     enabled = cms.bool(False),
 )
 
@@ -264,15 +265,15 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-def setTriggerVertexFor2010(**kwargs):
+def setTriggerPileupFor2010(**kwargs):
     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
     setEfficiencyTriggersFor2010(**effargs)
-    setVertexWeightFor2010(**vargs)
+    setPileupWeightFor2010(**vargs)
 
-def setTriggerVertexFor2011(**kwargs):
+def setTriggerPileupFor2011(**kwargs):
     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
     setEfficiencyTriggersFor2011(**effargs)
-    setVertexWeightFor2011(**vargs)
+    setPileupWeightFor2011All(**vargs)
 
 # One trigger
 def setEfficiencyTrigger(trigger, pset=triggerEfficiency):
@@ -330,23 +331,47 @@ def formatEfficiencyTrigger(pset):
 
 # Weighting by instantaneous luminosity, and the number of true
 # simulated pile up interactions
+
+# Summer11
+# SimGeneral/MixingModule/python/mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT.py rev 1.2
+mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT = cms.vdouble(0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0630151648,0.0526654164,0.0402754482,0.0292988928,0.0194384503,0.0122016783,0.007207042,0.004003637,0.0020278322,0.0010739954,0.0004595759,0.0002229748,0.0001028162,4.58337152809607E-05)
+
 def setPileupWeightFor2010(pset=vertexWeight):
     # From Apr21 JSON
-    pset.weights = cms.vdouble(2.17905734, 3.57481462, 3.45593082, 2.45853780, 1.42664179, 0.71282896, 0.31676356, 0.12779020, 0.04743868, 0.01635333, 0.00526898, 0.00176643, 0.00060303, 0.00021282, 0.00007491, 0.00002750, 0.00001017, 0.00000382, 0.00000146, 0.00000059, 0.00000022, 0.00000010, 0.00000004, 0.00000001, 0.00000001, 0.00000000)
+    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    pset.dataDist = cms.vdouble()
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+    raise Exception("Data PU distribution for 2010 is not yet available")
+
+def setPileupWeightFor2011May10(pset=vertexWeight):
+    # From May10 JSON
+    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    pset.dataDist = cms.vdouble(3920760.80629436, 6081805.28281331, 13810357.99011321, 22505758.94021218, 28864043.83552697, 30917427.86233390, 28721324.56001887, 23746403.90406303, 17803439.77098848, 12274902.61013811, 7868110.47066589, 4729915.39947807, 2686011.14199905, 1449831.55635479, 747892.02788490, 370496.37848078, 177039.18864957, 81929.34806527, 36852.77647303, 16164.44620983, 6932.97050646, 2914.39317056, 1202.91639412, 488.15400922, 194.93432620)
     pset.enabled = True
     pset.useSimulatedPileup = True
 
-def setPileupWeightFor2011(pset=vertexWeight):
-    # From May10 JSON
-    pset.weights = cms.vdouble(0.35702197, 0.39872966, 0.93383097, 1.57574239, 2.06786668, 2.23237405, 2.05856116, 1.66571901, 1.20680394, 0.79514625, 0.48238646, 0.30154678, 0.19093225, 0.12479613, 0.08150170, 0.05577673, 0.03874763, 0.02759475, 0.02023368, 0.01580798, 0.01150307, 0.01010894, 0.00765439, 0.00596082, 0.00469376, 0.00000000)
+def setPileupWeightFor2011Prompt(pset=vertexWeight):
+    # From PromptReco JSON, excluding May10
+    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    pset.dataDist = cms.vdouble(3364411.22646056, 6507536.11599253, 15783688.78330901, 27546803.40290805, 37805440.04499011, 43130651.44049883, 42413959.59334268, 36886700.45408770, 28916975.43342970, 20735332.44659095, 13757174.49119082, 8522971.03806628, 4967396.75218076, 2740323.71571966, 1438216.13654605, 721205.63553246, 346808.38911421, 160424.48638762, 71576.36381337, 30874.28861973, 12901.20200799, 5231.57827249, 2061.90603311, 790.88902422, 295.57795295)
+    pset.enabled = True
+    pset.useSimulatedPileup = True
+
+def setPileupWeightFor2011All(pset=vertexWeight):
+    # From May10+PromptReco JSON
+    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    pset.dataDist = cms.vdouble(7285172.03275537, 12589341.39881099, 29594046.77342086, 50052562.34239509, 66669483.87818073, 74048079.30104686, 71135284.15336381, 60633104.35815605, 46720415.20442367, 33010235.05672242, 21625284.96185776, 13252886.43754622, 7653407.89417986, 4190155.27207472, 2186108.16443100, 1091702.01401312, 523847.57776371, 242353.83445289, 108429.14028640, 47038.73482953, 19834.17251443, 8145.97144305, 3264.82242723, 1279.04303343, 490.51227915)
     pset.enabled = True
     pset.useSimulatedPileup = True
 
 def setPileupWeightFor2010and2011(pset=vertexWeight):
-    # From Apr21 (2010) and May10 (2011) JSONs
-    pset.weights = cms.vdouble(0.55669307, 0.89223000, 1.33000619, 1.69326210, 1.91344756, 1.92774735, 1.73919965, 1.41792615, 1.05583012, 0.72551064, 0.46426616, 0.30894711, 0.20983226, 0.14807083, 0.10498652, 0.07838662, 0.05967027, 0.04674974, 0.03785193, 0.03277864, 0.02654201, 0.02607185, 0.02217936, 0.01951763, 0.01748345, 0.00000000)
+    # From Apr21 (2010) and May10+PromptReco (2011) JSONs
+    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    pset.dataDist = cms.vdouble()
     pset.enabled = True
     pset.useSimulatedPileup = True
+    raise Exception("Data PU distribution for 2010 and 2011 is not yet available")
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):

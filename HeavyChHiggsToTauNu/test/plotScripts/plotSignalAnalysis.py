@@ -31,7 +31,8 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
-counters += "/weighted"
+countersWeighted = counters
+countersWeighted += "/weighted"
 
 # main function
 def main():
@@ -162,7 +163,7 @@ def main():
 #    vertexComparison(datasets)
 
 
-    eventCounter = counter.EventCounter(datasets)
+    eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
     eventCounter.normalizeMCByLuminosity()
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"

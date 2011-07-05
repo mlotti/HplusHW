@@ -1,9 +1,8 @@
 
 files = {
-    "Nov4ReReco": "Cert_136033-149442_7TeV_Nov4ReReco_Collisions10_JSON.txt",
-    "Dec22ReReco": "Cert_136033-149442_7TeV_Dec22ReReco_Collisions10_JSON_v4.txt",
-    "PromptReco": "Cert_160404-163869_7TeV_PromptReco_Collisions11_JSON.txt",
-    "DCSOnly": "json_DCSONLY.txt_160404-161312",
+    "Apr21ReReco": "Cert_136033-149442_7TeV_Apr21ReReco_Collisions10_JSON.txt",
+    "May10ReReco": "Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON.txt",
+    "PromptReco": "Cert_160404-167784_7TeV_PromptReco_Collisions11_JSON.txt",
 }
 
 def getFile(name):

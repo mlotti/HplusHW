@@ -9,85 +9,8 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-status_re = re.compile("(?P<id>\d+)\s+(?P<end>\S)\s+(?P<status>\S+)(\s+\(.*?\))?\s+(?P<action>\S+)\s+(?P<execode>\S+)?\s+(?P<jobcode>\S+)?\s+(?P<host>\S+)?")
-
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
-
-def intIfNotNone(n):
-    if n == None:
-        return n
-    return int(n)
-
-class CrabJob:
-    def __init__(self, task, match):
-        self.task = task
-        self.id = int(match.group("id"))
-        self.end = match.group("end")
-        self.status = match.group("status")
-        self.origStatus = self.status[:]
-        self.action = match.group("action")
-        if self.status == "Cancelled":
-            self.exeExitCode = None
-            self.jobExitCode = None
-        else:
-            self.exeExitCode = intIfNotNone(match.group("execode"))
-            self.jobExitCode = intIfNotNone(match.group("jobcode"))
-        self.host = match.group("host")
-
-        if self.jobExitCode != None and self.jobExitCode != 0:
-            self.status += " (%d)" % self.jobExitCode
-        elif self.exeExitCode != None and self.exeExitCode != 0:
-            self.status += " (exe %d)" % self.exeExitCode
-        if self.status == "Retrieved":
-            try:
-                multicrab.assertJobSucceeded(self.stdoutFile())
-            except multicrab.ExitCodeException:
-                self.status += "(malformed stdout)"
-                self.jobExitCode = -1
-                self.exeExitCode = -1
-
-    def stdoutFile(self):
-        return os.path.join(self.task, "res", "CMSSW_%d.stdout"%self.id)
-
-    def failed(self, status):
-        if (status == "all" or status == "aborted") and self.origStatus == "Aborted":
-            return True
-        if self.origStatus != "Retrieved":
-            return False
-        if self.exeExitCode == 0 and self.jobExitCode == 0:
-            return False
-
-        if status == "all":
-            return True
-        if status == "aborted":
-            return False
-        if self.jobExitCode in status:
-            return True
-        return False
-
-def statusOutput(task):
-    command = ["crab", "-status", "-c", task]
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = p.communicate()[0]
-    if p.returncode != 0:
-        raise Exception("Command '%s' failed with exit code %d, output:\n%s" % (" ".join(command), p.returncode, output))
-    return output
-
-def addToDictList(d, name, item):
-    if name in d:
-        d[name].append(item)
-    else:
-        d[name] = [item]
-
-def outputToJobs(task, output):
-    jobs = {}
-    for line in output.split("\n"):
-        m = status_re.search(line)
-        if m:
-            job = CrabJob(task, m)
-            addToDictList(jobs, job.status, job)
-    return jobs
 
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
@@ -103,8 +26,7 @@ def main(opts):
                 print "%s: Task directory missing" % task
             continue
         
-        output = statusOutput(task)
-        jobs = outputToJobs(task, output)
+        jobs = multicrab.crabStatusToJobs(task)
 
         lens = {}
         njobs = 0
@@ -179,8 +101,9 @@ def main(opts):
     else:
         print "Following jobs failed/aborted, and can be resubmitted"
         print
-        for task, jobs in resubmitJobs.iteritems():
-            print "crab -c %s -resubmit %s" % (task, jobs)
+        for task in taskDirs:
+            if task in resubmitJobs:
+                print "crab -c %s -resubmit %s" % (task, resubmitJobs[task])
         print
     return 0
 

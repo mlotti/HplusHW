@@ -3,6 +3,7 @@
 #define HiggsAnalysis_HeavyChHiggsToTauNu_VertexWeight_h
 
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 
 #include<vector>
 
@@ -23,7 +24,7 @@ namespace HPlus {
 
   private:
     edm::InputTag fVertexSrc;
-    edm::InputTag fPileupSrc;
+    mutable edm::LumiReWeighting fLumiWeights; // the weight() methods are NOT const...
     std::vector<double> fWeights;
     bool fUseSimulatedPileup;
     bool fEnabled;

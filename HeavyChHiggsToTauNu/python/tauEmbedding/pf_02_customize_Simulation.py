@@ -58,7 +58,7 @@ def customise(process):
                       VarParsing.VarParsing.varType.int,
                       "should I override beamspot in globaltag?")
 
-    options, dataVersion = getOptionsDataVersion("41Xdata", options)
+    options, dataVersion = getOptionsDataVersion("42Xmc", options)
 
     processName = process.name_()
 
@@ -106,8 +106,8 @@ def customise(process):
 
     # it should be the best solution to take the original beam spot for the
     # reconstruction of the new primary vertex
-    process.offlinePrimaryVertices.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
-    process.offlinePrimaryVerticesWithBS.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
+    #process.offlinePrimaryVertices.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
+    #process.offlinePrimaryVerticesWithBS.beamSpotLabel = cms.InputTag("offlineBeamSpot", "", recoProcessName)
     try:
         process.metreco.remove(process.BeamHaloId)
     except:
@@ -179,23 +179,28 @@ def customise(process):
     # PFCandidate embedding
     process.particleFlowORG = process.particleFlow.clone()
     if hasattr(process,"famosParticleFlowSequence"):
+        process.famosParticleFlowSequence.remove(process.pfPhotonTranslatorSequence)
         process.famosParticleFlowSequence.remove(process.pfElectronTranslatorSequence)
         process.famosParticleFlowSequence.remove(process.particleFlow)
         process.famosParticleFlowSequence.__iadd__(process.particleFlowORG)
         process.famosParticleFlowSequence.__iadd__(process.particleFlow)
         process.famosParticleFlowSequence.__iadd__(process.pfElectronTranslatorSequence)
+        process.famosParticleFlowSequence.__iadd__(process.pfPhotonTranslatorSequence)
     elif hasattr(process,"particleFlowReco"):
+        process.particleFlowReco.remove(process.pfPhotonTranslatorSequence)
         process.particleFlowReco.remove(process.pfElectronTranslatorSequence)
         process.particleFlowReco.remove(process.particleFlow)
         process.particleFlowReco.__iadd__(process.particleFlowORG)
         process.particleFlowReco.__iadd__(process.particleFlow)
         process.particleFlowReco.__iadd__(process.pfElectronTranslatorSequence)
+        process.particleFlowReco.__iadd__(process.pfPhotonTranslatorSequence)
     else:
         raise "Cannot find tracking sequence"
 
     process.particleFlow =  cms.EDProducer('PFCandidateMixer',
         col1 = cms.untracked.InputTag("dimuonsGlobal","forMixing"),
-        col2 = cms.untracked.InputTag("particleFlowORG", "")
+        col2 = cms.untracked.InputTag("particleFlowORG", ""),
+        trackCol = cms.untracked.InputTag("tmfTracks")
     )
 
     pfInputNeeded = {}
@@ -244,9 +249,12 @@ def customise(process):
         pfOutputCommands.append("keep *_%s_*_%s" % (label, processName))
     outputModule.outputCommands.extend(pfOutputCommands)
 
+    process.pfSelectedElectrons.src = "particleFlowORG"
+    process.pfSelectedPhotons.src = "particleFlowORG"
 
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data gt
+        #bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
         #bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
         #bs = cms.string("BeamSpotObjects_2009_v14_offline") # 36x data gt
         #  tag = cms.string("Early10TeVCollision_3p8cm_31X_v1_mc_START"), # 35 default
@@ -261,6 +269,11 @@ def customise(process):
     else:
         print "BeamSpot in globaltag not changed"
 
+
+    # Remove beamspot producer in order to use the original beamspot always
+    for s in process.sequences:
+        seq =  getattr(process,s)
+        seq.remove(process.offlineBeamSpot)
 
     print "#############################################################"
     print " Warning! PFCandidates 'electron' collection is not mixed, "

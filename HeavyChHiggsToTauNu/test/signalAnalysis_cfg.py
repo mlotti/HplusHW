@@ -6,10 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-#dataVersion = "39Xredigi" # Winter10 MC
-#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-dataVersion = "311Xredigi" # Spring11 MC
-#dataVersion = "41Xdata"   # Run2011 PromptReco
+dataVersion="42Xmc"     # Summer11 MC
+#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
 
 
 ##########
@@ -49,6 +47,9 @@ doTriggerParametrisation = False
 filterGenTaus = False
 filterGenTausInaccessible = False
 
+# Re-run trigger matching
+doRerunTriggerMatching = False
+
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -65,29 +66,22 @@ process = cms.Process("HChSignalAnalysis")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-#   "file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
-#    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root"
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
-    #"file:/media/disk/attikis/PATTuples/3683D553-4C4E-E011-9504-E0CB4E19F9A6.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuplev9_signalM120.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_JetData_pattuplev9.root"
     # For testing in lxplus
-#    "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-            dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-    #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
+if doRerunTriggerMatching:
+    process.source.inputCommands = cms.untracked.vstring("keep *", "drop *_selectedPatTaus*TriggerMatched_*_*")
+
 if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_2_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_3_2_ymZ.root"
         ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -104,6 +98,14 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
+
+# Re-run trigger matching
+if doRerunTriggerMatching:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
+    process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
+                                                                    pathFilterMap={}
+                                                                    )
+    process.commonSequence *= process.triggerMatching
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
@@ -131,8 +133,6 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 if options.tauEmbeddingInput != 0:
-#    param.setPileupWeightFor2011
-#    param.setPileupWeightFor2011and2010()
     tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
@@ -150,15 +150,17 @@ param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
 if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddingInput != 0:
-    # 2010 and 2011 scenarios
-    #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
-    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerVertexFor2010()
-param.setTriggerVertexFor2011()
+param.setVertexWeightFor2011()
+#param.setPileupWeightFor2011May10() # Only May10ReReco part
+#param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
+#param.setPileupWeightFor2011All() # May10ReReco+PromptReco
+
+#param.trigger.selectionType = "disabled"
 
 if options.tauEmbeddingInput != 0:
     #param.trigger.selectionType = cms.untracked.string("disabled")

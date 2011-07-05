@@ -150,6 +150,11 @@ namespace HPlus {
     TH1 *hNTriggerMatchedTaus;
     TH1 *hNTriggerMatchedSeparateTaus;
 
+    TH1 *hVLooseIsoNcands;
+    TH1 *hLooseIsoNcands;
+    TH1 *hMediumIsoNcands;
+    TH1 *hTightIsoNcands;
+
     // Selected tau
     edm::PtrVector<pat::Tau> fCleanedTauCandidates;
     edm::PtrVector<pat::Tau> fSelectedTaus;

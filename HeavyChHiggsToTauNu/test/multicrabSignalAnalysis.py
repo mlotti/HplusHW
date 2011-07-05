@@ -5,9 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-#pattupleVersion = "pattuple_v9"
-#pattupleVersion = "pattuple_v10"
-pattupleVersion = "pattuple_v11"
+pattupleVersion = "pattuple_v16"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -16,119 +14,58 @@ pattupleVersion = "pattuple_v11"
 runPatOnTheFly = False
 #runPatOnTheFly = True
 if runPatOnTheFly:
-    # RECO is needed for pre-39X data, for 39X and beyond, AOD is enough
     pattupleVersion = "AOD"
-    #pattupleVersion = "RECO"
 
 
 # Uncomment below the datasets you want to process
 # The dataset definitions are in python/tools/multicrabDatasets.py
 multicrab.extendDatasets(pattupleVersion,
     [
-        #### 39X/41X data and 311X MC
+        #### 42X data and MC
+        # Data: single tau (control trigger)
+#        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
+#        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
+        
         # Data: single tau + MET
-        # 2010
-        "BTau_141956-144114_Dec22", # HLT_SingleIsoTau20_Trk5;           v9, v11 
-        "BTau_146428-148058_Dec22", # HLT_SingleIsoTau20_Trk15_MET20;    v9, v10, v11
-        "BTau_148822-149182_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v3; v9, v10, v11
-        "BTau_149291-149294_Dec22", # HLT_SingleIsoTau20_Trk15_MET25_v4; v9, v10, v11
-        # 2011
-        "Tau_160431-161016_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v1; v10, v11
-        "Tau_162803-163261_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v2; v10, v11
-        "Tau_163270-163757_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v11
-        "Tau_163758-163869_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v4; v11
+        "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1  
+        "Tau_161217-163261_May10",  # HLT_IsoPFTau35_Trk20_MET45_v2
+        "Tau_163270-163869_May10",  # HLT_IsoPFTau35_Trk20_MET45_v4
+        "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
+        "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
+#        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
+        "Tau_166374-167043_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
+        "Tau_167078-167784_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
 
-        # Data: quadjet
-#        "TauPlusX_160431-161016_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
-#        "TauPlusX_162803-163261_Prompt", # HLT_QuadJet40_IsoPFTau40_v1; v10
-#        "TauPlusX_163270-163369_Prompt", # HLT_QuadJet40_IsoPFTau40_v3; v10
+        
+        # MC Signal (WH)
+        "TTToHplusBWB_M80_Summer11",
+        "TTToHplusBWB_M90_Summer11",
+        "TTToHplusBWB_M100_Summer11",
+        "TTToHplusBWB_M120_Summer11",
+        "TTToHplusBWB_M140_Summer11",
+        "TTToHplusBWB_M150_Summer11",
+        "TTToHplusBWB_M155_Summer11",
+        "TTToHplusBWB_M160_Summer11",
 
-        # MC Signal WH Spring11
-        "TTToHplusBWB_M80_Spring11", # v11
-        "TTToHplusBWB_M90_Spring11", # v11
-        "TTToHplusBWB_M100_Spring11", # v10, v11
-        "TTToHplusBWB_M120_Spring11", # v10, v11
-        "TTToHplusBWB_M140_Spring11", # v10, v11
-        "TTToHplusBWB_M150_Spring11", # v10, v11
-        "TTToHplusBWB_M155_Spring11", # v10, v11
-        "TTToHplusBWB_M160_Spring11", # v10, v11
+        # MC Signal (HH)
+        "TTToHplusBHminusB_M80_Summer11",
+        "TTToHplusBHminusB_M100_Summer11",
+        "TTToHplusBHminusB_M120_Summer11",
+        "TTToHplusBHminusB_M140_Summer11",
+        "TTToHplusBHminusB_M150_Summer11",
+        "TTToHplusBHminusB_M155_Summer11",
+        "TTToHplusBHminusB_M160_Summer11",
 
-        # MC Signal HH Spring11
-        "TTToHplusBHminusB_M80_Spring11",  # v10, v11
-        "TTToHplusBHminusB_M100_Spring11", # v10, v11
-        "TTToHplusBHminusB_M120_Spring11", # v10, v11
-        "TTToHplusBHminusB_M140_Spring11", # v10, v11
-        "TTToHplusBHminusB_M150_Spring11", # v10, v11
-        "TTToHplusBHminusB_M155_Spring11", # v10, v11
-        "TTToHplusBHminusB_M160_Spring11", # v10, v11
-
-        # MC Background Spring11
-        "QCD_Pt30to50_TuneZ2_Spring11",       # v10, v11
-        "QCD_Pt50to80_TuneZ2_Spring11",       # v10, v11
-        "QCD_Pt80to120_TuneZ2_Spring11",      # v10, v11
-        "QCD_Pt120to170_TuneZ2_Spring11",     # v10, v11
-        "QCD_Pt170to300_TuneZ2_Spring11",     # v10, v11
-        "QCD_Pt300to470_TuneZ2_Spring11",     # v10, v11
-        "WJets_TuneZ2_Spring11",              # v10, v11
-        "TTJets_TuneZ2_Spring11",             # v10, v11
-        "TToBLNu_s-channel_TuneZ2_Spring11",  # v10, v11
-        "TToBLNu_t-channel_TuneZ2_Spring11",  # v10, v11
-        "TToBLNu_tW-channel_TuneZ2_Spring11", # v10, v11
-        "DYJetsToLL_M50_TuneZ2_Spring11",     # v10, v11
-        "WW_TuneZ2_Spring11",                 # v10, v11
-        "WZ_TuneZ2_Spring11",                 # v10, v11
-        "ZZ_TuneZ2_Spring11",                 # v10, v11
-
-        #### 39X data and MC
-        # Data
-#        "JetMETTau_Tau_136035-139975_Dec22", # v9
-#        "JetMETTau_Tau_140058-141881_Dec22", # v9
-#        "BTau_141956-144114_Dec22",          # v9
-#        "BTau_146428-148058_Dec22",          # v9
-#        "BTau_148822-149182_Dec22",          # v9
-#        "BTau_149291-149294_Dec22",          # v9
-        # Data for QCD
-#        "JetMETTau_Jet_136035-141881_Dec22", # v9
-#        "JetMET_141956-144114_Dec22",        # v9
-#        "Jet_146428-148058_Dec22",           # v9
-#        "Jet_148822-149294_Dec22",           # v9
-        # Data for signal QuadJet (no pattuples, needs runPatOnTheFly=True
-#        "JetMETTau_QuadJet_136035-141881_Dec22",
-#        "JetMET_QuadJet_141956-144114_Dec22",
-#        "Jet_QuadJet_146428-147116_Dec22",
-#        "MultiJet_QuadJet_147196-148058_Dec22",
-#        "MultiJet_QuadJet_148819-149442_Dec22",
-        # MC Signal 10
-#        "TTToHplusBWB_M90_Winter10",  # v9
-#        "TTToHplusBWB_M100_Winter10", # v9
-#        "TTToHplusBWB_M120_Winter10", # v9
-#        "TTToHplusBWB_M140_Winter10", # v9
-#        "TTToHplusBWB_M160_Winter10", # v9
-        # MC Background Winter10
-#        "QCD_Pt30to50_TuneZ2_Winter10",   # v9
-#        "QCD_Pt50to80_TuneZ2_Winter10",   # v9
-#        "QCD_Pt80to120_TuneZ2_Winter10",  # v9
-#        "QCD_Pt120to170_TuneZ2_Winter10", # v9
-#        "QCD_Pt170to300_TuneZ2_Winter10", # v9
-#        "QCD_Pt300to470_TuneZ2_Winter10", # v9
-#        "TTJets_TuneZ2_Winter10",         # v9
-#        "TTJets_TuneD6T_Winter10",        # v9 
-#        "WJets_TuneZ2_Winter10",          # v9
-#        "WJets_TuneZ2_Winter10_noPU",     # v9
-#        "WJets_TuneD6T_Winter10",         # v9
-#        "W2Jets_ptW0to100_TuneZ2_Winter10",   # v9
-#        "W2Jets_ptW100to300_TuneZ2_Winter10", # v9
-#        "W3Jets_ptW0to100_TuneZ2_Winter10",   # v9
-#        "W3Jets_ptW100to300_TuneZ2_Winter10", # v9
-#        "W4Jets_ptW0to100_TuneZ2_Winter10",   # v9
-#        "W4Jets_ptW100to300_TuneZ2_Winter10", # v9
-#        "WW_TuneZ2_Winter10", # v9
-#        "WZ_TuneZ2_Winter10", # v9
-#        "ZZ_TuneZ2_Winter10", # v9
-#        "TToBLNu_s-channel_TuneZ2_Winter10", # v9
-#        "TToBLNu_t-channel_TuneZ2_Winter10", # v9
-#        "TToBLNu_tW-channel_TuneZ2_Winter10", # v9
-#        "DYJetsToLL_M50_TuneZ2_Winter10", # v9
+        # MC Background
+        "QCD_Pt30to50_TuneZ2_Summer11",
+        "QCD_Pt50to80_TuneZ2_Summer11",
+        "QCD_Pt80to120_TuneZ2_Summer11",
+        "QCD_Pt120to170_TuneZ2_Summer11",
+        "QCD_Pt170to300_TuneZ2_Summer11",
+        "QCD_Pt300to470_TuneZ2_Summer11",
+        "TTJets_TuneZ2_Summer11",
+        "WJets_TuneZ2_Summer11",
+        "DYJetsToLL_M50_TuneZ2_Summer11",
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
@@ -150,10 +87,10 @@ if runPatOnTheFly:
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
 # Generate configuration only
-multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(configOnly=True)
 
 # Genenerate configuration and create the crab tasks
-#multicrab.createTasks()
+multicrab.createTasks()
 
 # Create a custom multicrab task directory (SignalAnalysis_xxxxxx_yyyyyy)
 #multicrab.createTasks(prefix="SignalAnalysis")

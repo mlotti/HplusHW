@@ -45,6 +45,14 @@ _physicalToLogical = {
     "TTToHplusBWB_M150_Spring11": "TTToHplusBWB_M150",
     "TTToHplusBWB_M155_Spring11": "TTToHplusBWB_M155",
     "TTToHplusBWB_M160_Spring11": "TTToHplusBWB_M160",
+    "TTToHplusBWB_M80_Summer11":  "TTToHplusBWB_M80",
+    "TTToHplusBWB_M90_Summer11":  "TTToHplusBWB_M90",
+    "TTToHplusBWB_M100_Summer11": "TTToHplusBWB_M100",
+    "TTToHplusBWB_M120_Summer11": "TTToHplusBWB_M120",
+    "TTToHplusBWB_M140_Summer11": "TTToHplusBWB_M140",
+    "TTToHplusBWB_M150_Summer11": "TTToHplusBWB_M150",
+    "TTToHplusBWB_M155_Summer11": "TTToHplusBWB_M155",
+    "TTToHplusBWB_M160_Summer11": "TTToHplusBWB_M160",
 
     "TTToHplusBHminusB_M80_Spring11": "TTToHplusBHminusB_M80",
     "TTToHplusBHminusB_M100_Spring11": "TTToHplusBHminusB_M100",
@@ -53,21 +61,33 @@ _physicalToLogical = {
     "TTToHplusBHminusB_M150_Spring11": "TTToHplusBHminusB_M150",
     "TTToHplusBHminusB_M155_Spring11": "TTToHplusBHminusB_M155",
     "TTToHplusBHminusB_M160_Spring11": "TTToHplusBHminusB_M160",
+    "TTToHplusBHminusB_M80_Summer11": "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M100_Summer11": "TTToHplusBHminusB_M100",
+    "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120",
+    "TTToHplusBHminusB_M140_Summer11": "TTToHplusBHminusB_M140",
+    "TTToHplusBHminusB_M150_Summer11": "TTToHplusBHminusB_M150",
+    "TTToHplusBHminusB_M155_Summer11": "TTToHplusBHminusB_M155",
+    "TTToHplusBHminusB_M160_Summer11": "TTToHplusBHminusB_M160",
 
     "TTJets_TuneD6T_Winter10": "TTJets",
     "TTJets_TuneZ2_Winter10": "TTJets",
     "TTJets_TuneZ2_Spring11": "TTJets",
+    "TTJets_TuneZ2_Summer11": "TTJets",
+    "TT_TuneZ2_Summer11": "TT",
 
     "WJets_TuneD6T_Winter10": "WJets",
     "WJets_TuneZ2_Winter10": "WJets",
     "WJets_TuneZ2_Winter10_noPU": "WJets",
     "WJets_TuneZ2_Spring11": "WJets",
+    "WJets_TuneZ2_Summer11": "WJets",
+    "WToTauNu_TuneZ2_Summer11": "WToTauNu",
 
     "DYJetsToLL_TuneZ2_Winter10":          "DYJetsToLL_M50",
     "DYJetsToLL_M50_TuneZ2_Winter10":      "DYJetsToLL_M50",
     "DYJetsToLL_M10to50_TuneD6T_Winter10": "DYJetsToLL_M10to50",
     "DYJetsToLL_M50_TuneD6T_Winter10":     "DYJetsToLL_M50",
     "DYJetsToLL_M50_TuneZ2_Spring11":      "DYJetsToLL_M50",
+    "DYJetsToLL_M50_TuneZ2_Summer11":      "DYJetsToLL_M50",
 
     "TToBLNu_s-channel_TuneZ2_Winter10": "TToBLNu_s-channel",
     "TToBLNu_t-channel_TuneZ2_Winter10": "TToBLNu_t-channel",
@@ -75,6 +95,9 @@ _physicalToLogical = {
     "TToBLNu_s-channel_TuneZ2_Spring11": "TToBLNu_s-channel",
     "TToBLNu_t-channel_TuneZ2_Spring11": "TToBLNu_t-channel",
     "TToBLNu_tW-channel_TuneZ2_Spring11": "TToBLNu_tW-channel",
+    "TToBLNu_s-channel_TuneZ2_Summer11": "TToBLNu_s-channel",
+    "TToBLNu_t-channel_TuneZ2_Summer11": "TToBLNu_t-channel",
+    "TToBLNu_tW-channel_TuneZ2_Summer11": "TToBLNu_tW-channel",
 
     "QCD_Pt30to50_TuneZ2_Winter10":   "QCD_Pt30to50",
     "QCD_Pt50to80_TuneZ2_Winter10":   "QCD_Pt50to80",
@@ -88,9 +111,16 @@ _physicalToLogical = {
     "QCD_Pt120to170_TuneZ2_Spring11": "QCD_Pt120to170",
     "QCD_Pt170to300_TuneZ2_Spring11": "QCD_Pt170to300",
     "QCD_Pt300to470_TuneZ2_Spring11": "QCD_Pt300to470",
+    "QCD_Pt30to50_TuneZ2_Summer11":   "QCD_Pt30to50",
+    "QCD_Pt50to80_TuneZ2_Summer11":   "QCD_Pt50to80",
+    "QCD_Pt80to120_TuneZ2_Summer11":  "QCD_Pt80to120",
+    "QCD_Pt120to170_TuneZ2_Summer11": "QCD_Pt120to170",
+    "QCD_Pt170to300_TuneZ2_Summer11": "QCD_Pt170to300",
+    "QCD_Pt300to470_TuneZ2_Summer11": "QCD_Pt300to470",
 
     "QCD_Pt20_MuEnriched_TuneZ2_Winter10": "QCD_Pt20_MuEnriched",
     "QCD_Pt20_MuEnriched_TuneZ2_Spring11": "QCD_Pt20_MuEnriched",
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": "QCD_Pt20_MuEnriched",
 
     "WW_TuneZ2_Winter10": "WW",
     "WZ_TuneZ2_Winter10": "WZ",
@@ -98,6 +128,9 @@ _physicalToLogical = {
     "WW_TuneZ2_Spring11": "WW",
     "WZ_TuneZ2_Spring11": "WZ",
     "ZZ_TuneZ2_Spring11": "ZZ",
+    "WW_TuneZ2_Summer11": "WW",
+    "WZ_TuneZ2_Summer11": "WZ",
+    "ZZ_TuneZ2_Summer11": "ZZ",
 }
 
 ## Map the datasets to be merged to the name of the merged dataset.
@@ -149,7 +182,9 @@ _datasetOrder = [
     "QCD",
     "QCD_Pt20_MuEnriched",
     "WJets",
+    "WToTauNu",
     "TTJets",
+    "TT",
     "DYJetsToLL",
     "SingleTop",
     "Diboson",
@@ -185,7 +220,10 @@ _legendLabels = {
     "TTToHplus_M160": "H^{#pm} m_{H^{#pm}}=160",
 
     "TTJets":                "t#bar{t}+jets",
+    "TT":                    "t#bar{t}",
+
     "WJets":                 "W+jets",
+    "WToTauNu":              "W#to#tau#nu",
 
     "QCD_Pt30to50":          "QCD, 30 < #hat{p}_{T} < 50",
     "QCD_Pt50to80":          "QCD, 50 < #hat{p}_{T} < 80",
@@ -234,7 +272,10 @@ _plotStyles = {
     "TTToHplus_M160":          styles.signal160Style,
 
     "TTJets":                styles.ttStyle,
+    "TT":                    styles.ttStyle,
+
     "WJets":                 styles.wStyle,
+    "WToTauNu":              styles.wStyle,
 
     "QCD":                   styles.qcdStyle,
 
