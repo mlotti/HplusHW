@@ -156,6 +156,8 @@ namespace HPlus {
     // Histograms
     TH1 *hVerticesBeforeWeight;
     TH1 *hVerticesAfterWeight;
+    TH1 *hVerticesTriggeredBeforeWeight;
+    TH1 *hVerticesTriggeredAfterWeight;
     TH1 *hTransverseMass;
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;

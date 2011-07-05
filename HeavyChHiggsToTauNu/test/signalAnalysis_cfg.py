@@ -125,6 +125,7 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
+param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
 

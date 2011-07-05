@@ -99,6 +99,8 @@ namespace HPlus {
     // Book histograms filled in the analysis body
     hVerticesBeforeWeight = makeTH<TH1F>(*fs, "verticesBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
     hVerticesAfterWeight = makeTH<TH1F>(*fs, "verticesAfterWeight", "Number of vertices with weighting", 30, 0, 30);
+    hVerticesTriggeredBeforeWeight = makeTH<TH1F>(*fs, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
+    hVerticesTriggeredAfterWeight = makeTH<TH1F>(*fs, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 30, 0, 30);
     //    hmetAfterTrigger = makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
     hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithTopCut = makeTH<TH1F>(*fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -164,9 +166,6 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
-  // GenParticle analysis
-    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
-
     //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
    
 
@@ -178,6 +177,10 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
+
+    hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
+    hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+
 /*
     // Tau+MET trigger emulation
     // HLT_MET cut is applied at trigger step
@@ -191,6 +194,9 @@ namespace HPlus {
     iEvent.getByLabel(myVertexInputTag, goodPrimaryVertices);
     //   if (goodPrimaryVertices->size() != 1) return false;
     */
+
+    // GenParticle analysis (must be done here when we effectively trigger all MC)
+    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);

@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
-    src = cms.untracked.InputTag("patTriggerEvent"),
+    triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
+    patSrc = cms.untracked.InputTag("patTriggerEvent"),
     triggers = cms.untracked.vstring("HLT_SingleLooseIsoTau20",
                                      "HLT_SingleLooseIsoTau20_Trk5",
                                      "HLT_SingleIsoTau20_Trk5",
