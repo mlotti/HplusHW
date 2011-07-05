@@ -103,7 +103,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 if doRerunTriggerMatching:
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
     process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
-                                                                    pathFilterMap={}
+                                                                    #pathFilterMap={} # by default, use filter name in trigger matching re-running
                                                                     )
     process.commonSequence *= process.triggerMatching
 
