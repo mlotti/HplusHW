@@ -125,6 +125,8 @@ namespace HPlus {
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;
+
+    bool fThrowIfNoMet;
   };
 }
 

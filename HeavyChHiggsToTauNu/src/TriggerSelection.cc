@@ -32,7 +32,8 @@ namespace HPlus {
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
     fTriggerParamAllCount(eventCounter.addSubCounter("Trigger parametrisation", "All events")),
     fTriggerParamTauCount(eventCounter.addSubCounter("Trigger parametrisation", "Tau passed")),
-    fTriggerParamMetCount(eventCounter.addSubCounter("Trigger parametrisation", "Met passed"))
+    fTriggerParamMetCount(eventCounter.addSubCounter("Trigger parametrisation", "Met passed")),
+    fThrowIfNoMet(iConfig.getUntrackedParameter<bool>("throwIfNoMet", true))
   {
     std::vector<std::string> paths = iConfig.getUntrackedParameter<std::vector<std::string> >("triggers");
     for(size_t i = 0; i < paths.size(); ++i){
@@ -141,9 +142,19 @@ namespace HPlus {
             }
           }
           if(selectedHltMet.size() == 0) {
-            throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() 
-                                               << ", tried to find a MET object used in path " << returnPath->getPathName()
-                                               << " but did not find one." << std::endl;
+            if(fThrowIfNoMet) {
+              std::stringstream ss;
+              for(size_t i=0; i<hltMets.size(); ++i) {
+                ss << hltMets[i]->collection() << " ";
+              }
+
+              throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() 
+                                                 << ", tried to find a MET object used in path " << returnPath->getPathName()
+                                                 << " but did not find one."
+                                                 << " HLT MET collections " << ss.str()
+                                                 << std::endl;
+            }
+            return false;
           }
           hltMets = selectedHltMet;
         }

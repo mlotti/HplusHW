@@ -17,6 +17,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET60_v2",
     ),
     hltMetCut = cms.untracked.double(60.0),
+    throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
     triggerTauSelection = cms.untracked.PSet(),
     triggerMETSelection = cms.untracked.PSet(),
