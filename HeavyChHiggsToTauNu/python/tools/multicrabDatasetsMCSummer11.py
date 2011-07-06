@@ -663,7 +663,7 @@ datasets = {
         },
     },
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
-    "WW_TuneZ2_Spring11": {
+    "WW_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
         "crossSection": 43,
         "data": {
