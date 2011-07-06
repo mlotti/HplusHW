@@ -239,7 +239,7 @@ class CrabJob:
         if self.jobExitCode != None and self.jobExitCode != 0:
             self.status += " (%d)" % self.jobExitCode
         elif self.exeExitCode != None and self.exeExitCode != 0:
-            self.status += " (exe %d)" % self.jobExitCode
+            self.status += " (exe %d)" % self.exeExitCode
 #        if self.status == "Retrieved":
 #            try:
 #                multicrab.assertJobSucceeded(self.stdoutFile())
