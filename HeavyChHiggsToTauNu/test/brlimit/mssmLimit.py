@@ -478,7 +478,7 @@ def main():
 
     # Axis labels
     if useMA:
-        frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+        frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
         frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame2.GetYaxis().SetTitle("tan(#beta)")

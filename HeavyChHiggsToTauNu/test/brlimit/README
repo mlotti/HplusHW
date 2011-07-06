@@ -1,5 +1,5 @@
-To run the analysis in lxplus:
-===============================
+To run the analysis in lxplus, afs-visible area (not tmp directory):
+====================================================================
 
 0) Modifications:
 ------------------
@@ -7,34 +7,44 @@ To run the analysis in lxplus:
 Modify the following files, if needed:
 
 * HPlusHadronic_x.txt	rates & uncertainties for mH=x
-* input_luminosity	luminosity
+* input_luminosity	luminosity shown in plots
 
+You may also want to use other datacards than HPlusHadronic_x.txt; in this 
+case copy them to the directory and write the names to script_run_LandS 
 
 1) compile the modified LandS software
 ------------------------------------------------------------------------
 
-NOTE: do not give "cmsenv" command before compiling LandS
+go to the current directory (test/brlimit)
 
-mkdir LandS_AN
-tar -xzf /afs/cern.ch/user/t/tlampen/public/LandS_AN_110610.tgz -C LandS_AN
-cd LandS_AN/LandS
-setenv ROOTSYS "/afs/cern.ch/sw/lcg/app/releases/ROOT/5.28.00/x86_64-slc5-gcc43-dbg/root"
-setenv PATH "$ROOTSYS/bin:$PATH"
-setenv LD_LIBRARY_PATH "$ROOTSYS/lib"
+cvs co UserCode/mschen/LandS
+cd UserCode/mschen/LandS
+cmsenv
 gmake clean; gmake all;
-cd ../..
+cd ../../..
 
 Sidenote:
- This LandS version is modified by Sasha, and copied from his directory 10.6.2011:
- cp /afs/cern.ch/user/a/anikiten/scratch0/LandS/LandSmod/LandS.tgz .
- Instructions of how to use LandS are here:
- http://cmsdoc.cern.ch/~anikiten/cms-higgs/LandsInstructions.txt
+ This LandS version is modified by Mingshui 5.7.2011
+ Suggested use:
+
+==
+lands.exe  --PhysicsModel ChargedHiggs  -M Hybrid
+--bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.05  -d
+HPlusHadronic_120.txt
+ 
+To calculate expectation bands:
+add option "--doExpectation 1 -t xxx"  where xxx is the number of toys
+(1000 recommended ).
+==
 
 
 2) run LandS (takes some time; you may skip this and directly make 
 the plots with the presaved values in output files if you want don't want 
-to run LandS again)
+to run LandS again).  Note that you can start one LandS job, then change
+the datacard name, and restart another job without waiting.
 -------------------------------------------------------------
+
+(Recommendation: "rm output*" before running the script)
 
 ./script_run_LandS
 
@@ -45,8 +55,13 @@ to run LandS again)
 ---------------------------------------------------
 
 root -l -b -q brlimit.cxx
+you have to insert by hand the name of the output files to use 
+(e.g. output_LandS_HPlusHadronic)
 
 *As a result, the br limit plot brlimits.png/eps is generated
+
+*if no appropriate data exists, a point in BR=0 is plotted; to remove this,
+hard-coded values of nData and mH
 
 
 4) run the python analysis to obtain MSSM limit (mH,tanB)
@@ -58,3 +73,11 @@ cmsenv
 *As a result, the tanb limit plots mssmLimits.png/eps and mssmLimits_mus.png/eps are generated
 *you may want to toggle the setting "useMA" to show results in mA,tanb space, or the setting
  "showTeva" and "showLEP" to show/hide Tevatron and LEP results
+
+
+Possible problems:
+------------------
+
+* no output files: 
+  -check that you are in lxplus, and your working area can be 
+   accessed by afs:  do not use a /tmp/ directory
