@@ -31,12 +31,19 @@ int brlimit()
 
   // --- Read values from LandS files ---
   // obs, exp, exp+-1sigma, exp+-2sigma
+  char fileName[500];   
   char temp[200];
   double valueLandS_obs[nData];
   double valueLandS_exp[nData][5];
-  cout << "----- reading values from LandS files -----" << endl;
+  cout << "----- give name of LandS files to be read -----" << endl;
+  cout << "e.g. output_LandS_HPlusHadronic will read the files" << endl;
+  cout << "     output_LandS_HPlusHadronic_80/100/120/etc." << endl;
+  cin >> fileName;
+  cout << endl << "File name is " << fileName << endl;
+
   for (int i=0; i<nData; i++){
-    sprintf(temp,"output_LandS_HPlusHadronic_%d",mH[i]);
+    //    sprintf(temp,"output_LandS_HPlusHadronic_%d",mH[i]);
+    sprintf(temp,"%s_%d",fileName,mH[i]);
     readValuesFromLandsFile(temp,valueLandS_obs[i],valueLandS_exp[i]);
   }
 
