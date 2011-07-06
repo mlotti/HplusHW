@@ -223,8 +223,8 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterTauId();
 
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
-    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    increment(fRtauAfterCutsCounter);
+    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    //    increment(fRtauAfterCutsCounter);
 
     /*
     // for plotting without tau isolation
