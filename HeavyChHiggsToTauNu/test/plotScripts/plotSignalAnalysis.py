@@ -31,7 +31,8 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters"
-counters += "/weighted"
+countersWeighted = counters
+countersWeighted += "/weighted"
 
 # main function
 def main():
@@ -42,10 +43,24 @@ def main():
                      "TTToHplusBWB_M140_Spring11","TTToHplusBWB_M80_Spring11","TTToHplusBWB_M90_Spring11",
                    "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M100_Spring11",
                     "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M160_Spring11",
-                     "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",
-                     "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
+                     "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",                       "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt",
+                     "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
+                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11"
+                     ])
     
     datasets.loadLuminosities()
+
+    # Take signals from 42X
+    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
+#Rtau =0
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
+    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
+    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
+                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
+    datasets.extend(datasetsSignal)
+    # Take signals from 42X ends
     plots.mergeRenameReorderForDataMC(datasets)
 
 
@@ -101,8 +116,8 @@ def main():
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 #    met2(plots.DataMCPlot(datasets, analysis+"/met"), "met", rebin=5)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=40)
-#    met2(plots.DataMCPlot(datasets, analysis+"/Met_AfterCuts"), "met_afterCuts", rebin=20)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=20)
+#    met2(plots.DataMCPlot(datasets, analysis+"/Met_BeforeTauId"), "met_beforeTauId", rebin=20)
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
@@ -122,14 +137,14 @@ def main():
 
 #    transverseMass(plots.DataMCPlot(datasets_tm, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMass"), "transverseMass")
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet")
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
 #    xsect.setHplusCrossSections(datasets, toTop=True)
 
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=10)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20)
     jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
     jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets")
@@ -168,7 +183,8 @@ def main():
     print "Main counter (MC normalized by collision data luminosity)"
     print eventCounter.getMainCounterTable().format()
 #    print eventCounter.getMainCounterTable().format()
-    print eventCounter.getSubCounterTable("b-tagging").format()
+#    print eventCounter.getSubCounterTable("b-tagging").format()
+#    print eventCounter.getSubCounterTable("tauID").format()
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
@@ -334,7 +350,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
-    opts = {"xmax": 8, "ymin": 0.01, "ymaxfactor": 2}
+    opts = {"xmax": 7, "ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 
     if ratio:
@@ -468,7 +484,7 @@ def tauPt(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
     
 def tauEta(h, name, rebin=5, ratio=False):
@@ -494,7 +510,7 @@ def tauEta(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
     
 def tauPhi(h, name, rebin=10, ratio=False):
@@ -533,7 +549,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
-    opts = {"ymin": 0.01, "ymaxfactor": 2}
+    opts = {"ymin": 0.001,"xmin": 10.0, "ymaxfactor": 5}
     name = "leadingTrackPt"
 #    name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
@@ -551,7 +567,7 @@ def rtau(h, name, rebin=15, ratio=False):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
-    opts = {"ymin": 0.01,"xmax": 1.1, "ymaxfactor": 4}
+    opts = {"ymin": 0.001,"xmax": 1.1, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -561,7 +577,7 @@ def rtau(h, name, rebin=15, ratio=False):
 #    h.createFrame(name, opts=opts)
     #h.createFrameFraction(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.7, 0.4, 0.95))
+    h.setLegend(histograms.createLegend(0.2, 0.68, 0.4, 0.93))
     common(h, xlabel, ylabel)
 
 
@@ -595,7 +611,7 @@ def met(h, rebin=20, ratio=False):
 
 
     
-def met2(h, name, rebin=30, ratio=False):
+def met2(h, name, rebin=30, ratio=True):
 #    name = h.getRootHistoPath()
 #    name = "met"
 
@@ -606,14 +622,14 @@ def met2(h, name, rebin=30, ratio=False):
 #    elif "original" in name:
 #        xlabel = "Original "+xlabel
     ylabel = "Events / %.0f GeV" % h.binWidth()
-    xlabel = "MET (GeV)"
+    xlabel = "E_{T}^{miss} (GeV)"
     
     scaleMCfromWmunu(h)
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.001, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.5, "ymax": 1.5}
+    opts = {"ymin": 0.01, "ymaxfactor": 2}
+    opts2 = {"ymin": 0.0, "ymax": 2.5}
 
     name = name+"_log"
     if ratio:
@@ -621,7 +637,7 @@ def met2(h, name, rebin=30, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.65, 0.55, 0.9, 0.9))
     common(h, xlabel, ylabel)
 
 
@@ -725,7 +741,7 @@ def transverseMass2(h,name, rebin=10):
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
+    h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
        
 def jetPt(h, name, rebin=5, ratio=False):
@@ -748,7 +764,7 @@ def jetPt(h, name, rebin=5, ratio=False):
     h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.0001, "ymaxfactor": 2}
+    opts = {"ymin": 0.001,"xmax": 400.0, "ymaxfactor": 2}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -758,7 +774,7 @@ def jetPt(h, name, rebin=5, ratio=False):
 #    h.createFrame(name, opts=opts)
     #h.createFrameFraction(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.7, 0.65, 0.9, 0.9))
     common(h, xlabel, ylabel)
 
     
@@ -779,7 +795,7 @@ def jetEta(h, name, rebin=5, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.05,"xmin": -3.5,"xmax": 3.5, "ymaxfactor": 2}
+    opts = {"ymin": 0.01,"xmin": -3.5,"xmax": 3.5, "ymaxfactor": 10}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -787,7 +803,7 @@ def jetEta(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
+    h.setLegend(histograms.createLegend(0.7, 0.7, 0.9, 0.95))
 #    h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
 
@@ -826,7 +842,7 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.05,"xmax": 11.0, "ymaxfactor": 1.2}
+    opts = {"ymin": 0.01,"xmax": 7.0, "ymaxfactor": 2.0}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
 #    name = name+"_log"
     if ratio:
