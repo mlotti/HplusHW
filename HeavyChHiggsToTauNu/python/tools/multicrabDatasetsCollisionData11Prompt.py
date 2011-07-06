@@ -557,20 +557,20 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 80, # Adjusted for PATtuple file size
+                "number_of_jobs": 100, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
     },
-    "SingleMu_167078-167151_Prompt": {
+    "SingleMu_167078-167784_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu40_v3",
-        "runs": (167078, 167151), # This is prompt RECO, so check the run range again when running!
+        "runs": (167078, 167784), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 4, # Adjusted for PATtuple file size
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }

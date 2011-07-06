@@ -4,9 +4,9 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
+step = "skim"
 #step = "generation"
-step = "embedding"
+#step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
@@ -47,39 +47,45 @@ if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis"]:
 multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
 datasetsData2010 = [
-    "Mu_136035-144114_Dec22", # HLT_Mu9
-    "Mu_146428-147116_Dec22", # HLT_Mu9
-    "Mu_147196-149294_Dec22", # HLT_Mu15_v1
+    "Mu_136035-144114_Apr21", # HLT_Mu9
+    "Mu_146428-147116_Apr21", # HLT_Mu9
+    "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
 datasetsData2011 = [
-    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
-    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
-    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
+#    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
+#    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
+#    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
+    "SingleMu_160431-163261_May10", # HLT_Mu20_v1
+    "SingleMu_163270-163869_May10", # HLT_Mu24_v2
+    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
+    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
+    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
+    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
 ]
 datasetsMCnoQCD = [
-    "TTJets_TuneZ2_Spring11",
-    "WJets_TuneZ2_Spring11",
-    "DYJetsToLL_M50_TuneZ2_Spring11",
-    "TToBLNu_s-channel_TuneZ2_Spring11",
-    "TToBLNu_t-channel_TuneZ2_Spring11",
-    "TToBLNu_tW-channel_TuneZ2_Spring11",
-    "WW_TuneZ2_Spring11",
-    "WZ_TuneZ2_Spring11",
-    "ZZ_TuneZ2_Spring11",
+    "TTJets_TuneZ2_Summer11",
+    "WJets_TuneZ2_Summer11",
+    "DYJetsToLL_M50_TuneZ2_Summer11",
+#    "TToBLNu_s-channel_TuneZ2_Summer11",
+#    "TToBLNu_t-channel_TuneZ2_Summer11",
+#    "TToBLNu_tW-channel_TuneZ2_Summer11",
+    "WW_TuneZ2_Summer11",
+#    "WZ_TuneZ2_Summer11",
+#    "ZZ_TuneZ2_Summer11",
 ]
 datasetsMCQCD = [
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11",
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
 datasetsTest = [
-    "TTToHplusBWB_M120_Spring11"
+    "TTToHplusBWB_M120_Summer11"
 ]
     
 datasets = []
 if step in ["analysis", "analysisTau"]:
     datasets.extend(datasetsMCnoQCD)
 else:
-    datasets.extend(datasetsData2010)
-    datasets.extend(datasetsData2011)
+#    datasets.extend(datasetsData2010)
+#    datasets.extend(datasetsData2011)
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
@@ -94,24 +100,23 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v10_2" % step
+tauname = "_tauembedding_%s_v11" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
 reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
 
 skimNjobs = {
-    "Mu_146428-147116_Dec22": 25,
-    "WJets_TuneZ2_Spring11": 400,
-    "TTJets_TuneZ2_Spring11": 400,
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 400,
-    "DYJetsToLL_M50_TuneZ2_Spring11": 150,
-    "TToBLNu_s-channel_TuneZ2_Spring11": 100,
-    "TToBLNu_t-channel_TuneZ2_Spring11": 100,
-    "TToBLNu_tW-channel_TuneZ2_Spring11": 100,
-    "WW_TuneZ2_Spring11": 100,
-    "WZ_TuneZ2_Spring11": 100,
-    "ZZ_TuneZ2_Spring11": 100,
+    "WJets_TuneZ2_Summer11": 490,
+    "TTJets_TuneZ2_Summer11": 490,
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 400,
+    "DYJetsToLL_M50_TuneZ2_Summer11": 150,
+    "TToBLNu_s-channel_TuneZ2_Summer11": 100,
+    "TToBLNu_t-channel_TuneZ2_Summer11": 100,
+    "TToBLNu_tW-channel_TuneZ2_Summer11": 100,
+    "WW_TuneZ2_Summer11": 100,
+    "WZ_TuneZ2_Summer11": 100,
+    "ZZ_TuneZ2_Summer11": 100,
     }
 
 muonAnalysisNjobs = { # goal: 30k events/job
@@ -191,7 +196,7 @@ elif step in ["muonAnalysis"]:
 else:
     multicrab.forEachDataset(modify)
 
-multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+#multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab_"+step+dirPrefix
 
