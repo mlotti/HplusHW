@@ -50,17 +50,17 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         counters.extend(PFEmbeddingSource.muonSelectionCounters)
     elif dataVersion.isData():
         counters = HChDataSelection.dataSelectionCounters[:]
-    #elif dataVersion.isMC() and doMcPreselection:
-    #    counters = HChMcSelection.mcSelectionCounters[:]
+    elif dataVersion.isMC() and doMcPreselection:
+        counters = HChMcSelection.mcSelectionCounters[:]
     
     if options.doPat == 0:
         process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
         seq = cms.Sequence(
 #            process.goodPrimaryVertices10
         )
-        #if dataVersion.isMC():
-        #    process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
-        #    seq *= process.eventPreSelection
+        if dataVersion.isMC() and doMcPreselection:
+            process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
+            seq *= process.eventPreSelection
         return (seq, counters)
 
     print "Running PAT on the fly"
@@ -523,7 +523,7 @@ def addPatTauIsolationEmbedding(process, sequence, name):
         )
         module.qualityCuts = getattr(RecoPFTauTag, "hpsPFTauDiscriminationBy%sIsolation"%iso).qualityCuts.clone()
 
-        newName = "patTausWith%sEmbedded" % iso
+        newName = "patTaus%sWith%sEmbedded" % (name, iso)
         setattr(process, newName, module)
 
         prevModule = getattr(process, prevName)
