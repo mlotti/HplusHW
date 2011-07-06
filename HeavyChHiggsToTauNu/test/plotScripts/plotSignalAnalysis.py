@@ -40,13 +40,28 @@ def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
     datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10",
-                     "TTToHplusBWB_M140_Spring11","TTToHplusBWB_M80_Spring11","TTToHplusBWB_M90_Spring11",
-                   "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M160_Spring11",
-                     "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",
+                     "TTToHplusBWB_M80_Summer11","TTToHplusBWB_M100_Summer11","TTToHplusBWB_M90_Summer11",
+                   "TTToHplusBWB_M155_Summer11","TTToHplusBWB_M140_Summer11","TTToHplusBWB_M150_Summer11",
+                     "TTToHplusBWB_M160_Summer11",
+                    "TTToHplusBHminusB_M100_Summer11","TTToHplusBHminusB_M160_Summer11","TTToHplusBHminusB_M150_Summer11",
+                     "TTToHplusBHminusB_M140_Summer11","TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M155_Summer11",
                      "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt"])
     
     datasets.loadLuminosities()
+
+
+ # Take signals from 42X
+    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110629_155900/multicrab.cfg", counters=counters)
+#Rtau =0
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
+    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
+    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
+                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
+    datasets.extend(datasetsSignal)
+
+    
     plots.mergeRenameReorderForDataMC(datasets)
 
 
@@ -66,10 +81,6 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-    
 #    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
@@ -101,8 +112,8 @@ def main():
    
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
 #   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
-#    met2(plots.DataMCPlot(datasets, analysis+"/met"), "met", rebin=5)
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=40)
+#    met2(plots.DataMCPlot(datasets, analysis+"/Met_BeforeTauId"), "MetBeforeTauId", rebin=40)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=20)
 #    met2(plots.DataMCPlot(datasets, analysis+"/Met_AfterCuts"), "met_afterCuts", rebin=20)
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
@@ -165,11 +176,17 @@ def main():
 
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
     eventCounter.normalizeMCByLuminosity()
+#    eventCounter.normalizeMCToLuminosity(191)
     print "============================================================"
     print "Main counter (MC normalized by collision data luminosity)"
     print eventCounter.getMainCounterTable().format()
-#    print eventCounter.getMainCounterTable().format()
+#    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
+
+    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
+    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
+#    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
     print eventCounter.getSubCounterTable("b-tagging").format()
+
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))
 #    print eventCounter.getMainCounterTable().format(latexFormat)
@@ -250,47 +267,7 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
 
-def vertexCount(h, prefix="", postfix=""):
-    xlabel = "Number of vertices"
-    ylabel = "A.u."
 
-    h.stackMCHistograms()
-
-    stack = h.histoMgr.getHisto("StackedMC")
-    hsum = stack.getSumRootHisto()
-    total = hsum.Integral(0, hsum.GetNbinsX()+1)
-    for rh in stack.getAllRootHistos():
-        dataset._normalizeToFactor(rh, 1/total)
-    dataset._normalizeToOne(h.histoMgr.getHisto("Data").getRootHisto())
-
-    h.addMCUncertainty()
-
-    opts = {"xmax": 16}
-    opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
-    opts_log.update(opts)
-
-    h.createFrame(prefix+"vertices"+postfix, opts=opts)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=191.)
-#    h.histoMgr.addLuminosityText()
-    h.save()
-
-    h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log)
-    h.frame.GetXaxis().SetTitle(xlabel)
-    h.frame.GetYaxis().SetTitle(ylabel)
-    ROOT.gPad.SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    h.draw()
-    histograms.addCmsPreliminaryText()
-    histograms.addEnergyText()
-    histograms.addLuminosityText(x=None, y=None, lumi=191.)
-#    h.histoMgr.addLuminosityText()
-    h.save()
 
 def rtauGen(h, name, rebin=5, ratio=False):
     #h.setDefaultStyles()

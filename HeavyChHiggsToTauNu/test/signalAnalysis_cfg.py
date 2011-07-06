@@ -126,7 +126,10 @@ addPrimaryVertexSelection(process, process.commonSequence)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
 # Set tau selection mode to 'standard'
-param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('standard')
+
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -155,8 +158,8 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-param.setVertexWeightFor2011()
-#param.setPileupWeightFor2011May10() # Only May10ReReco part
+#param.setVertexWeightFor2011()
+param.setPileupWeightFor2011May10() # Only May10ReReco part
 #param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
 #param.setPileupWeightFor2011All() # May10ReReco+PromptReco
 
