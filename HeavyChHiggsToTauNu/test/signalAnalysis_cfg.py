@@ -186,7 +186,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSLooseTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
