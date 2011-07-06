@@ -58,7 +58,7 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
         seq = cms.Sequence(
 #            process.goodPrimaryVertices10
         )
-        if dataVersion.isMC():
+        if dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
             seq *= process.eventPreSelection
         return (seq, counters)
@@ -523,7 +523,7 @@ def addPatTauIsolationEmbedding(process, sequence, name):
         )
         module.qualityCuts = getattr(RecoPFTauTag, "hpsPFTauDiscriminationBy%sIsolation"%iso).qualityCuts.clone()
 
-        newName = "patTausWith%sEmbedded" % iso
+        newName = "patTaus%sWith%sEmbedded" % (name, iso)
         setattr(process, newName, module)
 
         prevModule = getattr(process, prevName)

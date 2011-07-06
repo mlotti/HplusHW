@@ -2,10 +2,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 
@@ -19,7 +21,8 @@ namespace HPlus {
   TriggerSelection::Data::~Data() {}
   
   TriggerSelection::TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fTriggerSrc(iConfig.getUntrackedParameter<edm::InputTag>("triggerSrc")),
+    fPatSrc(iConfig.getUntrackedParameter<edm::InputTag>("patSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("hltMetCut")),
     fEventWeight(eventWeight),
     fTriggerTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerTauSelection"), eventCounter, eventWeight, 1, "triggerTau"),
@@ -32,7 +35,8 @@ namespace HPlus {
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
     fTriggerParamAllCount(eventCounter.addSubCounter("Trigger parametrisation", "All events")),
     fTriggerParamTauCount(eventCounter.addSubCounter("Trigger parametrisation", "Tau passed")),
-    fTriggerParamMetCount(eventCounter.addSubCounter("Trigger parametrisation", "Met passed"))
+    fTriggerParamMetCount(eventCounter.addSubCounter("Trigger parametrisation", "Met passed")),
+    fThrowIfNoMet(iConfig.getUntrackedParameter<bool>("throwIfNoMet", true))
   {
     std::vector<std::string> paths = iConfig.getUntrackedParameter<std::vector<std::string> >("triggers");
     for(size_t i = 0; i < paths.size(); ++i){
@@ -89,9 +93,24 @@ namespace HPlus {
   }
   
   bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath) {
-    edm::Handle<pat::TriggerEvent> trigger;
-    iEvent.getByLabel(fSrc, trigger);
     bool passEvent = false;
+    edm::Handle<edm::TriggerResults> htrigger;
+    iEvent.getByLabel(fTriggerSrc, htrigger);
+
+    // Do this first with plain edm::TriggerEvent because that we store for each event
+    const edm::TriggerNames& triggerNames = iEvent.triggerNames(*htrigger);
+    for(std::vector<TriggerPath *>::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i) {
+      if((*i)->analyze(*htrigger, triggerNames)) {
+        passEvent = true;
+        break;
+      }
+    }
+    if(!passEvent)
+      return false;
+    passEvent = false;
+
+    edm::Handle<pat::TriggerEvent> trigger;
+    iEvent.getByLabel(fPatSrc, trigger);
 
     for(std::vector<TriggerPath* >::const_iterator i = triggerPaths.begin(); i != triggerPaths.end(); ++i){
       if((*i)->analyze(*trigger)) {
@@ -141,9 +160,19 @@ namespace HPlus {
             }
           }
           if(selectedHltMet.size() == 0) {
-            throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() 
-                                               << ", tried to find a MET object used in path " << returnPath->getPathName()
-                                               << " but did not find one." << std::endl;
+            if(fThrowIfNoMet) {
+              std::stringstream ss;
+              for(size_t i=0; i<hltMets.size(); ++i) {
+                ss << hltMets[i]->collection() << " ";
+              }
+
+              throw cms::Exception("LogicError") << "Size of HLT MET collection is " << hltMets.size() 
+                                                 << ", tried to find a MET object used in path " << returnPath->getPathName()
+                                                 << " but did not find one."
+                                                 << " HLT MET collections " << ss.str()
+                                                 << std::endl;
+            }
+            return false;
           }
           hltMets = selectedHltMet;
         }
@@ -252,6 +281,15 @@ namespace HPlus {
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
 	//std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
         increment(fTriggerCount);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool TriggerSelection::TriggerPath::analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames) {
+    for(size_t i=0; i<triggerNames.size(); ++i) {
+      if(triggerNames.triggerName(i) == fPath && trigger.accept(i)) {
         return true;
       }
     }

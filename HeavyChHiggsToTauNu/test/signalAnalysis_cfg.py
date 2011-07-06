@@ -103,7 +103,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 if doRerunTriggerMatching:
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
     process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
-                                                                    pathFilterMap={}
+                                                                    #pathFilterMap={} # by default, use filter name in trigger matching re-running
                                                                     )
     process.commonSequence *= process.triggerMatching
 
@@ -125,8 +125,10 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
+param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
-param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -155,8 +157,8 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-param.setVertexWeightFor2011()
-#param.setPileupWeightFor2011May10() # Only May10ReReco part
+#param.setVertexWeightFor2011()
+param.setPileupWeightFor2011May10() # Only May10ReReco part
 #param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
 #param.setPileupWeightFor2011All() # May10ReReco+PromptReco
 
@@ -184,7 +186,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
+    tauSelection = param.tauSelectionHPSLooseTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,

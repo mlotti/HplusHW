@@ -156,6 +156,8 @@ namespace HPlus {
     // Histograms
     TH1 *hVerticesBeforeWeight;
     TH1 *hVerticesAfterWeight;
+    TH1 *hVerticesTriggeredBeforeWeight;
+    TH1 *hVerticesTriggeredAfterWeight;
     TH1 *hTransverseMass;
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;
@@ -170,6 +172,7 @@ namespace HPlus {
     TH1 *hMet_AfterBTagging;
     TH1 *hMet_AfterEvtTopology;
     TH1 *hMETBeforeMETCut;
+    TH1 *hMETBeforeTauId;
     TH1 *hSelectedTauEt;
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
@@ -179,7 +182,7 @@ namespace HPlus {
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
     TH1 *hSelectedTauPhiMetCut;
-
+    TH1 *hMETBeforeTauId;
     TH1 *hSelectedTauEtAfterCuts;
     TH1 *hSelectedTauEtaAfterCuts;
     TH1 *hMetAfterCuts;
