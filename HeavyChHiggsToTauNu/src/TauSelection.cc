@@ -188,6 +188,11 @@ namespace HPlus {
 
     hIsolationPFChargedHadrCandsPtSum = makeTH<TH1F>(myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
     hIsolationPFGammaCandsEtSum = makeTH<TH1F>(myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
+
+    hTightChargedMaxPt = makeTH<TH1F>(myDir, "TightChargedMaxPt", "TightChargedMaxPt;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPt = makeTH<TH1F>(myDir, "TightChargedSumPt", "TightChargedSumPt;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancy = makeTH<TH1F>(myDir, "TightChargedOccupancy", "TightChargedOccupancy;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaOccupancy = makeTH<TH1F>(myDir, "TightGammaOccupancy", "TightGammaOccupancy;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
   }
 
   TauSelection::~TauSelection() {
@@ -290,6 +295,12 @@ namespace HPlus {
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
 
         if (!fTauID->passIsolation(iTau)) continue;
+
+	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
+	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
+	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
+	hTightGammaOccupancy->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
+	
 
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;

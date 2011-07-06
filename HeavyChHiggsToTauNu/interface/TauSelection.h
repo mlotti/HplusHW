@@ -153,6 +153,12 @@ namespace HPlus {
     TH1 *hIsolationPFChargedHadrCandsPtSum;
     TH1 *hIsolationPFGammaCandsEtSum;
 
+    TH1 *hTightChargedMaxPt;
+    TH1 *hTightChargedSumPt;
+    TH1 *hTightChargedOccupancy;
+    TH1 *hTightGammaOccupancy;
+
+
     TH1 *hVLooseIsoNcands;
     TH1 *hLooseIsoNcands;
     TH1 *hMediumIsoNcands;
