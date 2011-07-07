@@ -30,6 +30,7 @@ mu15filter = "hltSingleMu15L3Filtered15"
 mu20filter = "hltSingleMu20L3Filtered20"
 mu24filter = "hltSingleMu24L3Filtered24"
 mu30filter = "hltSingleMu30L3Filtered30"
+mu40filter = "hltSingleMu40L3Filtered40"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -42,6 +43,9 @@ elif "HLT_Mu24" in trigger:
     triggerFilter = mu24filter
 elif "HLT_Mu30" in trigger:
     triggerFilter = mu30filter
+elif "HLT_Mu40" in trigger:
+    triggerFilter = mu40filter
+    
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
