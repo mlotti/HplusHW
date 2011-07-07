@@ -12,6 +12,14 @@ def customise(process):
                      "should I override beamspot in globaltag?")
     options = getOptions(options)
 
+    # Muon isolation
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+    process.muonIsolationSequence = cms.Sequence()
+    muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons=process.tightenedMuons.src.value())
+    process.tightenedMuons.src = muons
+    process.ProductionFilterSequence.replace(process.tightenedMuons, process.muonIsolationSequence*process.tightenedMuons)
+
+    # output
     outputModule = None
     outdict = process.outputModules_()
     if len(outdict) == 1:
