@@ -222,7 +222,7 @@ namespace HPlus {
     if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
     increment(fRtauAfterTauIDCounter);
 
-   
+  
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
