@@ -92,11 +92,15 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     )
     name = "patMuonsWithVLoose"+postfix
     setattr(process, name, vloose)
-    
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
-    HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
+
+    tight.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.clone()
+    medium.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.clone()
+    loose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.clone()
+    vloose.qualityCuts = RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.clone()
+    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByTightIsolation.qualityCuts.isolationQualityCuts, tight)
+    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByMediumIsolation.qualityCuts.isolationQualityCuts, medium)
+    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByLooseIsolation.qualityCuts.isolationQualityCuts, loose)
+    #HChTools.insertPSetContentsTo(RecoPFTauTag.hpsPFTauDiscriminationByVLooseIsolation.qualityCuts.isolationQualityCuts, vloose)
 
     sequence *= (tight * medium * loose *vloose)
 
@@ -168,13 +172,12 @@ def addMuonIsolationEmbedding(process, sequence, muons, pfcands="particleFlow", 
     m = m.clone(
         candSrc = name,
         embedPrefix = "byTightSc0Ic04Noq",
-        minTrackHits = 0,
-        minTrackPt = 0.0,
-        maxTrackChi2 = 9999.,
-        minTrackPixelHits = 0,
-        minGammaEt = 0.0,
-        maxDeltaZ = 9999.,
-        maxTransverseImpactParameter = 9999.,
+        #minTrackHits = 0,
+        #minTrackPt = 0.0,
+        #maxTrackChi2 = 9999.,
+        #minTrackPixelHits = 0,
+        #minGammaEt = 0.0,
+        #maxDeltaZ = 9999.,
     )
     name = "patMuonsWithTightSc0Ic04Noq"+postfix
     setattr(process, name, m)
