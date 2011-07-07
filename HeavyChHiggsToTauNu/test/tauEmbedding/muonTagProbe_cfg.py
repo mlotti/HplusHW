@@ -9,8 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-dataVersion = "42Xmc"
-#dataVersion = "42Xdata"
+#dataVersion = "42Xmc"
+dataVersion = "42Xdata"
 
 ################################################################################
 
@@ -57,7 +57,7 @@ print "Trigger %s, filter %s" % (trigger, triggerFilter)
 process = cms.Process("TagProbe")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -66,9 +66,9 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileMadhatter()
     #"file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM/E28BCD86-B311-E011-A953-E0CB4E19F95B.root"
-    "file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root"
-        #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
-    #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/071/0A0519A3-C37F-E011-ADC2-0030487CBD0A.root"
+    #"file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root"
+    #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
+    "/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/088/BC7C8339-E47F-E011-8FE0-003048F1C58C.root"
     )
 )
 
@@ -76,7 +76,7 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 ################################################################################
 
@@ -96,7 +96,7 @@ patArgs = {
     "doPatMuonPFIsolation": True,
     "doTauHLTMatching": False,
     }
-process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
+process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doMcPreselection=False)
 del process.out
 process.patDefaultSequence.remove(process.countPatTaus)
 
@@ -314,6 +314,8 @@ variables = cms.PSet(
     eta    = cms.string("eta"),
     abseta = cms.string("abs(eta)"),
 
+    HLTMuPt = cms.string("? triggerObjectMatchesByFilter('%s').empty() ? 0 : triggerObjectMatchByFilter('%s').pt()" % (triggerFilter, triggerFilter)),
+
     #
 #    sumIsoRel = cms.string(sumIsoRel),
 #    pfSumIsoRel = cms.string(pfSumIsoRel),
@@ -346,7 +348,6 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
         isHLTMu30    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu30filter),
         isHLTMu40    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu40filter),
-        HLTMuPt      = cms.string("? triggerObjectMatchesByFilter('%s').empty() ? 0 : triggerObjectMatchByFilter('%s').pt()" % (triggerFilter, triggerFilter)),
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
@@ -383,7 +384,8 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
 
 # Count analyzer
 process.tnpCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters])
+    counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]),
+#                                     printMainCounter = cms.untracked.bool(True),
 )
 
 # Path
