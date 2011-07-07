@@ -11,6 +11,7 @@ step = "embedding"
 #step = "analysisTau"
 #step = "signalAnalysis"
 #step = "muonAnalysis"
+#step = "caloMetEfficiency"
 
 dirPrefix = ""
 #dirPrefix = "_TauIdScan"
@@ -37,10 +38,11 @@ config = {"skim":           {"input": "AOD",                           "config":
           "analysisTau":    {"input": "pattuple_v11",                  "config": "tauAnalysis_cfg.py"},
           "signalAnalysis": {"input": "tauembedding_embedding_v10_1"+pt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v10",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v10",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
-if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis"]:
+if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis", "caloMetEfficiency"]:
     crabcfg = "../crab_analysis.cfg"
 
 
@@ -83,7 +85,7 @@ else:
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
-    if step in ["skim", "generation", "embedding"]:
+    if step in ["skim", "generation", "embedding", "caloMetEfficiency"]:
         datasets.extend(datasetsTest)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
@@ -185,7 +187,7 @@ def modifyMuonAnalysis(dataset):
 if step in ["analysis", "analysisTau","signalAnalysis"]:
     multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyAnalysis)
-elif step in ["muonAnalysis"]:
+elif step in ["muonAnalysis", "caloMetEfficiency"]:
     multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyMuonAnalysis)
 else:
