@@ -19,6 +19,7 @@ mu = 200
 useMA = 1
 showTeva = 1
 showLEP = 1
+plotTwoSigmaBands = 0
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -235,6 +236,8 @@ def getTevaCurve():
 # Draw LEP exclusion
 # picked from P-TDR2, page 369
 # this is originally in mA,tanb space
+#
+# quite similar (but not identical) results in arxiv:hep-ex/0602042
 def getLepCurve():
     curve = TGraph(42)
 #orig    curve.SetPoint(0,90.7,50.0)
@@ -380,7 +383,8 @@ def main():
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
-    expected_2s_tanb.Draw("F")
+    if plotTwoSigmaBands:
+        expected_2s_tanb.Draw("F")
     expected_1s_tanb.Draw("F")
     expected_tanb.Draw("LP")
     observed_tanb.SetLineWidth(804)
@@ -391,7 +395,8 @@ def main():
         TevaCurve.Draw("F")
 
     if showLow:
-        expected_2s_tanb_low.Draw("F")
+        if plotTwoSigmaBands:
+            expected_2s_tanb_low.Draw("F")
         expected_1s_tanb_low.Draw("F")
         expected_tanb_low.Draw("LP")
 #        observed_tanb_low.SetFillColor(1)
@@ -415,6 +420,7 @@ def main():
     else:
         frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame.GetYaxis().SetTitle("tan(#beta)")
+#    frame.GetXaxis().SetLimits(72,166)
 
     # Legends
     legeX = 0.60
@@ -428,7 +434,8 @@ def main():
     pl.AddEntry(observed_tanb,     "Observed", "lp")
     pl.AddEntry(expected_tanb,     "Expected median", "lp")
     pl.AddEntry(expected_1s_tanb,  "Expected median #pm1 #sigma", "f")
-    pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
+    if plotTwoSigmaBands:
+        pl.AddEntry(expected_2s_tanb,  "Expected median #pm2 #sigma", "f")
     if showLEP:
         pl.AddEntry(LepCurve,  "LEP exclusion", "f")
     if showTeva:
@@ -451,8 +458,8 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 #    writeText("Fully hadronic final state",   top - lineSpace)
-    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau final states",   top - lineSpace)
+    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
@@ -491,6 +498,7 @@ def main():
     else:
         frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame2.GetYaxis().SetTitle("tan(#beta)")
+#    frame2.GetXaxis().SetLimits(72,166)
 
     observed_p2 = graphToTanBeta(observed,200)
     observed_m2 = graphToTanBeta(observed,-200)
@@ -571,8 +579,8 @@ def main():
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
 #    writeText("Fully hadronic final state",   top - lineSpace)
-    writeText("hadr. + ltau final states",   top - lineSpace)
-#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+#    writeText("hadr. + ltau final states",   top - lineSpace)
+    writeText("hadr. + ltau + emu final states",   top - lineSpace)
 
 
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
