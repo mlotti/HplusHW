@@ -35,8 +35,12 @@ namespace HPlus {
     edm::Handle<edm::View<reco::Vertex> > hvertex;
     iEvent.getByLabel(fVertexSrc, hvertex);
 
+    size_t vertSize = 0;
+    if(hvertex.isValid())
+      vertSize = hvertex->size();
+
     if(!fEnabled || iEvent.isRealData())
-      return std::make_pair(1.0, hvertex->size());
+      return std::make_pair(1.0, vertSize);
 
     double weight = std::numeric_limits<double>::quiet_NaN();
     if(fUseSimulatedPileup)
@@ -46,14 +50,14 @@ namespace HPlus {
       // faulty OOTPU, and gives correct weight for that
       weight = fLumiWeights.weightOOT(iEvent);
     else {
-      size_t n = hvertex->size();
+      size_t n = vertSize;
       if(n >= fWeights.size())
         n = fWeights.size() - 1;
       weight = fWeights[n];
     }
 
     /// Return "Vertex Weight" according to the number of vertices found in Event
-    return std::make_pair(weight, hvertex->size());
+    return std::make_pair(weight, vertSize);
   }
 
 

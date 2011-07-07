@@ -16,7 +16,7 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 0
+useMA = 1
 showTeva = 1
 showLEP = 1
 
@@ -373,7 +373,10 @@ def main():
     tanbMax = 60#200
 
     # Create the TCanvas, frame, etc
-    canvas = ROOT.TCanvas("mssmLimits")
+    if useMA:
+        canvas = ROOT.TCanvas("mssmLimits_ma")
+    else:
+        canvas = ROOT.TCanvas("mssmLimits_mh")
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
@@ -447,7 +450,10 @@ def main():
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-    writeText("Fully hadronic final state",   top - lineSpace)
+#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("hadr. + ltau final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
@@ -473,12 +479,15 @@ def main():
 
 
     # Create the TCanvas, frame, etc
-    canvas2 = ROOT.TCanvas("mssmLimits_mus")
+    if useMA:
+        canvas2 = ROOT.TCanvas("mssmLimits_mus_ma")
+    else:
+        canvas2 = ROOT.TCanvas("mssmLimits_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Axis labels
     if useMA:
-        frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+        frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
     else:
         frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame2.GetYaxis().SetTitle("tan(#beta)")
@@ -561,7 +570,11 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-    writeText("Fully hadronic final state",   top - lineSpace)
+#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("hadr. + ltau final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+
+
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
     writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)

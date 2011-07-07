@@ -3,7 +3,8 @@ import FWCore.ParameterSet.Config as cms
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
-    src = cms.untracked.InputTag("patTriggerEvent"),
+    triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
+    patSrc = cms.untracked.InputTag("patTriggerEvent"),
     triggers = cms.untracked.vstring("HLT_SingleLooseIsoTau20",
                                      "HLT_SingleLooseIsoTau20_Trk5",
                                      "HLT_SingleIsoTau20_Trk5",
@@ -17,6 +18,7 @@ trigger = cms.untracked.PSet(
                                      "HLT_IsoPFTau35_Trk20_MET60_v2",
     ),
     hltMetCut = cms.untracked.double(60.0),
+    throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
     triggerTauSelection = cms.untracked.PSet(),
     triggerMETSelection = cms.untracked.PSet(),
@@ -43,8 +45,8 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    rtauCut = cms.untracked.double(0.8), # rtau > value
-    antiRtauCut = cms.untracked.double(0.8), # rtau < value
+    rtauCut = cms.untracked.double(0.0), # rtau > value
+    antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )

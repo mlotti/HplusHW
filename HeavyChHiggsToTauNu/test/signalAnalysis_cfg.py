@@ -103,7 +103,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 if doRerunTriggerMatching:
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
     process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
-                                                                    pathFilterMap={}
+                                                                    #pathFilterMap={} # by default, use filter name in trigger matching re-running
                                                                     )
     process.commonSequence *= process.triggerMatching
 
@@ -125,7 +125,9 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
+param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
+
 #param.setAllTauSelectionOperatingMode('standard')
 
 param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
@@ -187,7 +189,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSLooseTauBased,
+    tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,

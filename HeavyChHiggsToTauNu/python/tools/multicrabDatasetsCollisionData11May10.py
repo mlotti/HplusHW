@@ -34,7 +34,13 @@ datasets = {
             "pattuple_v16": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v16-60ad1d422c237e4c15799d8356989025/USER",
-                "luminosity": 2.881992,
+                "luminosity": 5.884518,
+                "number_of_jobs": 1
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
+                "luminosity": 2.296864,
                 "number_of_jobs": 1
             },
         }
@@ -65,7 +71,13 @@ datasets = {
             "pattuple_v16": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v16-fb5b0bd346d74abc5843ce0d92c2dbc7/USER",
-                "luminosity": 23.865309,
+                "luminosity": 38.518306,
+                "number_of_jobs": 2
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v17-e4cfe64c6b123ecde897f0b19cc05328/USER",
+                "luminosity": 25.267523,
                 "number_of_jobs": 2
             },
         },
@@ -90,8 +102,14 @@ datasets = {
             "pattuple_v16": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v16-8681d17f150ac7e8fcb47588faf5fa09/USER",
-                "luminosity": 80.760707,
-                "number_of_jobs": 3
+                "luminosity": 159.758105,
+                "number_of_jobs": 6
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v17-6d098da292fab19f3d03a84563841e91/USER",
+                "luminosity": 16.940907,
+                "number_of_jobs": 6
             },
         }
     },

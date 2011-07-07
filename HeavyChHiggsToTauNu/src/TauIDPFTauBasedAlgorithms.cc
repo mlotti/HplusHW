@@ -66,14 +66,14 @@ namespace HPlus {
   TauIDPFHPSTight::~TauIDPFHPSTight() { }
   
   bool TauIDPFHPSTight::passIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPStight") < 0.5) return false;
+    if (tau->tauID("byTightIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
   bool TauIDPFHPSTight::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSloose") > 0.5) return false;
+    if (tau->tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
@@ -94,14 +94,14 @@ namespace HPlus {
   TauIDPFHPSMedium::~TauIDPFHPSMedium() { }
   
   bool TauIDPFHPSMedium::passIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSmedium") < 0.5) return false;
+    if (tau->tauID("byMediumIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
   bool TauIDPFHPSMedium::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSmedium") > 0.5) return false;
+    if (tau->tauID("byMediumIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
@@ -122,14 +122,14 @@ namespace HPlus {
   TauIDPFHPSLoose::~TauIDPFHPSLoose() { }
   
   bool TauIDPFHPSLoose::passIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSloose") < 0.5) return false;
+    if (tau->tauID("byLooseIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
   bool TauIDPFHPSLoose::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSloose") > 0.5) return false;
+    if (tau->tauID("byLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
@@ -150,14 +150,14 @@ namespace HPlus {
   TauIDPFHPSVeryLoose::~TauIDPFHPSVeryLoose() { }
   
   bool TauIDPFHPSVeryLoose::passIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSvloose") < 0.5) return false;
+    if (tau->tauID("byVLooseIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
   }
 
   bool TauIDPFHPSVeryLoose::passAntiIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPSvloose") > 0.5) return false;
+    if (tau->tauID("byVLooseIsolation") > 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;

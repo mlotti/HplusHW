@@ -5,7 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v16"
+pattupleVersion = "pattuple_v17"
 
 
 # Change this to true if you want to run the PAT on the fly (for
