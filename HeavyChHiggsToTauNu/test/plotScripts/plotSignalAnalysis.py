@@ -51,15 +51,15 @@ def main():
 
 
  # Take signals from 42X
-    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
-    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110629_155900/multicrab.cfg", counters=counters)
+###    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+####    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110629_155900/multicrab.cfg", counters=counters)
 #Rtau =0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
-    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
-    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
-                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
-    datasets.extend(datasetsSignal)
+###    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
+###    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
+###                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
+###    datasets.extend(datasetsSignal)
 
     
     plots.mergeRenameReorderForDataMC(datasets)

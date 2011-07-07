@@ -44,6 +44,7 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fMETCounter(eventCounter.addCounter("MET")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
@@ -218,16 +219,10 @@ namespace HPlus {
     fTauEmbeddingAnalysis.fillAfterTauId();
 
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
-    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    //    increment(fRtauAfterCutsCounter);
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    increment(fRtauAfterTauIDCounter);
 
-    /*
-    // for plotting without tau isolation
-    TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-    if(!tauData.passedEvent()) return false;
-    // passed tau candidate selection
-    //    edm::PtrVector<pat::Tau> mySelectedTau = tauCandidateData.getSelectedTaus();
-    */
+   
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
@@ -310,13 +305,16 @@ namespace HPlus {
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    //   increment(fRtauAfterCutsCounter);
+
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    increment(fRtauAfterCutsCounter);
 
     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
 
-    if(transverseMass < 100 ) return false;
+    if(transverseMass < 100 ) return 
+
+false;
     increment(ftransverseMassCut100Counter);
 
     
@@ -364,9 +362,6 @@ namespace HPlus {
       //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
     //  hSelectedTauRtauAfterCuts->Fill(Rtau, fEventWeight.getWeight());
     // }
-
-
-
    
 
    // top mass
@@ -397,14 +392,6 @@ namespace HPlus {
     //    increment(fForwardJetVetoCounter);
     
 
-    // The following code is not correct, because there could be more than one tau jet
-    // passing the tau ID (and hence multiple values of Rtau
-    // Please access the selected tau jets via  tauData.getSelectedTaus()
-    //std::cout << "tauData.Rtau = " << tauData.Rtau << std::endl;
-    //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
-
-    //    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    //   for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
 
 //    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 

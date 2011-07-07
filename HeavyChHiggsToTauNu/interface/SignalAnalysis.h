@@ -123,7 +123,7 @@ namespace HPlus {
     Count fBTaggingCounter17;
     Count fBTaggingCounter33;
     Count fFakeMETVetoCounter;
-    
+    Count fRtauAfterTauIDCounter;    
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
