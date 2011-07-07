@@ -74,6 +74,8 @@ def customise(process):
         process.hltTrigReport.HLTriggerResults.setProcessName(processName)
     if hasattr(process, "DQM_FEDIntegrity_v2"):
         process.schedule.remove(process.DQM_FEDIntegrity_v2)
+    if hasattr(process, "DQM_FEDIntegrity_v3"):
+        process.schedule.remove(process.DQM_FEDIntegrity_v3)
     if hasattr(process, "HLTAnalyzerEndpath"):
         process.schedule.remove(process.HLTAnalyzerEndpath)
         del process.HLTAnalyzerEndpath
