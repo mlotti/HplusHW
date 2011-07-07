@@ -140,6 +140,12 @@ datasets = {
                 "luminosity": 36.269379,
                 "number_of_jobs": 2,
             },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v17-88e7da0ca8e64fa806b2941f116acbf5/USER",
+                "luminosity": 28.536365,
+                "number_of_jobs": 2,
+            },
         }
     },
     "Tau_165970-166164_Prompt": {
@@ -169,6 +175,12 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v16-dec0cdd184da6e9880cb5fc1728a78b2/USER",
                 "luminosity": 84.108301,
+                "number_of_jobs": 1,
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v17-b1b6e1ef7d022a15760998ee2f0cd38b/USER",
+                "luminosity": 63.869645,
                 "number_of_jobs": 1,
             },
         }
@@ -228,6 +240,12 @@ datasets = {
                 "luminosity": 123.367974,
                 "number_of_jobs": 1,
             },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v17-b1b6e1ef7d022a15760998ee2f0cd38b/USER",
+                "luminosity": 16.968824,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_167078-167151_Prompt": {
@@ -260,6 +278,12 @@ datasets = {
                 "luminosity": 23.111230,
                 "number_of_jobs": 1,
             },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v17-da16291615a20543c7b27d5bed242048/USER",
+                "luminosity": 1.377270,
+                "number_of_jobs": 1,
+            },
         }
     },
 
@@ -285,6 +309,12 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_165970_pattuple_v14-f0a73be4cb4699609d9f94f502bf4dea/USER",
                 "luminosity": 94.672079,
+                "number_of_jobs": 1,
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_165970_pattuple_v17-966d1f43c0a18025a0c612a0382d30e9/USER",
+                "luminosity": 67.226519,
                 "number_of_jobs": 1,
             },
         }
@@ -318,6 +348,12 @@ datasets = {
                 "luminosity": 4.153168,
                 "number_of_jobs": 1,
             },
+            "pattuple_v16": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v17-2356c1cf8147598f6ed0b1a5f80be4e2/USER",
+                "luminosity": 4.153168,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_Single_166374-166502_Prompt": {
@@ -344,6 +380,12 @@ datasets = {
                 "number_of_jobs": 180, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v17-966d1f43c0a18025a0c612a0382d30e9/USER",
+                "luminosity": 344.605659,
+                "number_of_jobs": 1,
+            },
         }
     },
     "Tau_Single_167078-167151_Prompt": {
@@ -369,6 +411,12 @@ datasets = {
                 "luminosity": 0,
                 "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17-5ac48e003cbdad1c6c78ae464438a5c1/USER",
+                "luminosity": 48.307527,
+                "number_of_jobs": 1,
             },
         }
     },
