@@ -4,9 +4,9 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
+#step = "skim"
 #step = "generation"
-#step = "embedding"
+step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
@@ -31,12 +31,12 @@ if step == "signalAnalysis":
     pass
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v10",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v10"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v10_1"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v11",                  "config": "tauAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v10_1"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v10",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "generation":     {"input": "tauembedding_skim_v11",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+          "embedding":      {"input": "tauembedding_generation_v11_2"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+#          "analysis":       {"input": "tauembedding_embedding_v10_1"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
+#          "signalAnalysis": {"input": "tauembedding_embedding_v10_1"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v11",          "config": "muonAnalysisFromSkim_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -52,29 +52,26 @@ datasetsData2010 = [
     "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
 datasetsData2011 = [
-#    "SingleMu_160431-161016_Prompt", # HLT_Mu20_v1
-#    "SingleMu_162803-163261_Prompt", # HLT_Mu20_v1 (new)
-#    "SingleMu_163270-163869_Prompt", # HLT_Mu24_v2
     "SingleMu_160431-163261_May10", # HLT_Mu20_v1
-    "SingleMu_163270-163869_May10", # HLT_Mu24_v2
-    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
+#    "SingleMu_163270-163869_May10", # HLT_Mu24_v2
+#    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
     "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
     "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
-    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
+#    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
 ]
 datasetsMCnoQCD = [
-    "TTJets_TuneZ2_Summer11",
-    "WJets_TuneZ2_Summer11",
-    "DYJetsToLL_M50_TuneZ2_Summer11",
+#    "TTJets_TuneZ2_Summer11",
+#    "WJets_TuneZ2_Summer11",
+#    "DYJetsToLL_M50_TuneZ2_Summer11",
 #    "TToBLNu_s-channel_TuneZ2_Summer11",
 #    "TToBLNu_t-channel_TuneZ2_Summer11",
 #    "TToBLNu_tW-channel_TuneZ2_Summer11",
-    "WW_TuneZ2_Summer11",
+#    "WW_TuneZ2_Summer11",
 #    "WZ_TuneZ2_Summer11",
 #    "ZZ_TuneZ2_Summer11",
 ]
 datasetsMCQCD = [
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
+#    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
 datasetsTest = [
     "TTToHplusBWB_M120_Summer11"
@@ -85,12 +82,12 @@ if step in ["analysis", "analysisTau"]:
     datasets.extend(datasetsMCnoQCD)
 else:
 #    datasets.extend(datasetsData2010)
-#    datasets.extend(datasetsData2011)
+    datasets.extend(datasetsData2011)
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
-    if step in ["skim", "generation", "embedding"]:
-        datasets.extend(datasetsTest)
+#    if step in ["skim", "generation", "embedding"]:
+#        datasets.extend(datasetsTest)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
 
@@ -100,7 +97,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v11" % step
+tauname = "_tauembedding_%s_v11_2" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
