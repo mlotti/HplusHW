@@ -852,6 +852,20 @@ def addTo(datasets):
                 "number_of_jobs": 40 # ~1 kev/job
             },
             })
+    datasets["SingleMu_163270-163869_May10"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_163270_tauembedding_skim_v11-70589c75c0f200e88d1c5de9db6d6775/USER",
+                "number_of_jobs": 140 # ~1 kev/job
+            },
+            })
+    datasets["SingleMu_165088-166150_Prompt"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165088_tauembedding_skim_v11-abfc57ac41b6cbeafd703784696c55e4/USER",
+                "number_of_jobs": 170 # ~1 kev/job
+            },
+            })
     datasets["SingleMu_166161-166164_Prompt"]["data"].update({
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
@@ -864,5 +878,19 @@ def addTo(datasets):
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166346_tauembedding_skim_v11-9736d74f55daa4ad8a2f5971d065efc8/USER",
                 "number_of_jobs": 2 # ~1 kev/job
+            },
+            })
+    datasets["SingleMu_166374-167043_Prompt"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166374_tauembedding_skim_v11-fd101d50b7132f2b7e5cdb84fbfeca3a/USER",
+                "number_of_jobs": 188 # ~1 kev/job
+            },
+            })
+    datasets["SingleMu_167078-167784_Prompt"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_167078_tauembedding_skim_v11_1-8f4b803c9184c7433c2172bc17a46dec/USER",
+                "number_of_jobs": 11 # ~1 kev/job
             },
             })
