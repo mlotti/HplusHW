@@ -30,9 +30,12 @@ tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 #    maxNumber = cms.uint32(1)
 #)
 tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuons"),
-    cut = cms.string("userInt('byTightIc04Occupancy') == 0")
+    src = cms.InputTag("tightenedMuons"),
+    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
+tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
+                                       src = cms.InputTag("tauEmbeddingMuons"),
+                                       minNumber = cms.uint32(1))
 tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
@@ -73,6 +76,8 @@ try:
         tightenedMuonsFilter *
         tightenedMuonsCount *
         tauEmbeddingMuons *
+        tauEmbeddingMuonsFilter *
+        tauEmbeddingMuonsCount *
         adaptedMuonsFromWmunu *
         dimuonsGlobal * 
         generator * 
