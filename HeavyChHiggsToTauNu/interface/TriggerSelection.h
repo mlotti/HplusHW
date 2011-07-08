@@ -108,8 +108,10 @@ namespace HPlus {
     TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
+    Count fTriggerAllCount;
     Count fTriggerPathCount;
-    Count fTriggerBitParamCount;
+    Count fTriggerBitCount;
+    Count fTriggerCaloMetCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;

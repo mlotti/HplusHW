@@ -145,7 +145,7 @@ def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
             "TightSc015Ic04",
 #            "TightSc02Ic04",
             ]:
-            create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=1.0, **kwargs)
+            create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=0.5, **kwargs)
 
 #         for iso in [
 #             "Tight",
