@@ -62,7 +62,8 @@ def main():
     datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     # no tau isolation, Rtau = 0
     datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters
+    # standard selection, Rtau=0
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
 
     datasetsSignal.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11","TToBLNu_tW-channel_TuneZ2_Spring11",
                                      "WW_TuneZ2_Spring11","WZ_TuneZ2_Spring11","ZZ_TuneZ2_Spring11"])
@@ -74,6 +75,9 @@ def main():
                                "ZZ_TuneZ2_Spring11":"ZZ_TuneZ2_Summer11"})
 
 
+    datasets.extend(datasetsSignal)
+
+    
         # Take signals from 42X
 #    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
@@ -85,8 +89,9 @@ def main():
 #    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
 #                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
     
-    #datasets.extend(datasetsSignal)
+#    datasets.extend(datasetsSignal)
 
+    
     plots.mergeRenameReorderForDataMC(datasets)
 
 
@@ -114,9 +119,9 @@ def main():
 
     vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
     vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="TriggeredBeforeWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="TriggeredAfterWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="TriggeredAfterWeightNotUnitArea")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="TriggeredBeforeWeight")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="TriggeredAfterWeight")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="TriggeredAfterWeightNotUnitArea")
 
     
     tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=10)
@@ -147,7 +152,7 @@ def main():
 
 #    met2(plots.DataMCPlot(datasets, analysis+"/Met_BeforeTauId"), "MetBeforeTauId", rebin=40)
 
-    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=20)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/Met_BeforeTauId"), "met_beforeTauId", rebin=20)
      
 #    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
@@ -525,7 +530,7 @@ def tauPt(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
+    h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
     
 def tauEta(h, name, rebin=5, ratio=False):
@@ -579,7 +584,7 @@ def tauPhi(h, name, rebin=10, ratio=False):
     h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
     common(h, xlabel, ylabel)
     
-def leadingTrack(h, rebin=5, ratio=True):
+def leadingTrack(h, rebin=10, ratio=True):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -596,7 +601,7 @@ def leadingTrack(h, rebin=5, ratio=True):
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.95))
     common(h, xlabel, ylabel)
 
 def rtau(h, name, rebin=15, ratio=False):
@@ -622,7 +627,7 @@ def rtau(h, name, rebin=15, ratio=False):
     common(h, xlabel, ylabel)
 
 
-def met(h, rebin=20, ratio=False):
+def met(h, rebin=10, ratio=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -652,7 +657,7 @@ def met(h, rebin=20, ratio=False):
 
 
     
-def met2(h, name, rebin=30, ratio=True):
+def met2(h, name, rebin=20, ratio=True):
 #    name = h.getRootHistoPath()
 #    name = "met"
 
@@ -775,13 +780,13 @@ def transverseMass2(h,name, rebin=10):
     h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
     
-#    name = name+"_log"
+    name = name+"_log"
     opts = {"ymin": 0.001, "ymaxfactor": 2.0,"xmax": 350 }
 #    opts = {"xmax": 200 }
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
-#    h.getPad().SetLogy(True)
+    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
        
