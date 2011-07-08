@@ -163,6 +163,8 @@ namespace HPlus {
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
     TH1 *hTransverseMassBeforeFakeMet;
+    TH1 *hTransverseMassWithRtauFakeMet;
+    TH1 *hTransverseMassWithRtau;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;

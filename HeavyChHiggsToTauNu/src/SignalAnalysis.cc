@@ -108,6 +108,8 @@ namespace HPlus {
     hTransverseMassAfterVeto = makeTH<TH1F>(*fs, "transverseMassAfterVeto", "transverseMassAfterVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBeforeVeto = makeTH<TH1F>(*fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBeforeFakeMet = makeTH<TH1F>(*fs, "transverseMassBeforeFakeMet", "transverseMassBeforeFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassWithRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassWithRtauFakeMet", "transverseMassWithRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassWithRtau = makeTH<TH1F>(*fs, "transverseMassWithRtau", "transverseMassWithRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.0, 5.0);
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
@@ -311,8 +313,28 @@ namespace HPlus {
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    increment(fRtauAfterCutsCounter);
+    if(tauData.getRtauOfSelectedTau() > 0.8 ) {
+      hTransverseMassWithRtau->Fill(transverseMass, fEventWeight.getWeight());
+      increment(fRtauAfterCutsCounter);
+    }
+
+    
+    // Fake MET veto a.k.a. further QCD suppression
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    if (fakeMETData.passedEvent()) {
+      increment(fFakeMETVetoCounter);
+      //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
+      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
+      fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
+      hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
+    if (fakeMETData.passedEvent() && tauData.getRtauOfSelectedTau() > 0.8 ) {
+      hTransverseMassWithRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
+    // Correlation analysis
+    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
@@ -321,23 +343,6 @@ namespace HPlus {
 
 false;
     increment(ftransverseMassCut100Counter);
-
-    
-    // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    if (!fakeMETData.passedEvent()) return false;
-    increment(fFakeMETVetoCounter);
-    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
-    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
-
-    // Correlation analysis
-    fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
-
-
-
-    //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
-    hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
 
 
     // Alpha T

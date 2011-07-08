@@ -39,12 +39,12 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-    datasets.remove(["TTToHplusBWB_M140_Summer11","TTToHplusBWB_M80_Summer11","TTToHplusBWB_M90_Summer11",
-                   "TTToHplusBWB_M155_Summer11","TTToHplusBWB_M150_Summer11","TTToHplusBWB_M160_Summer11","TTToHplusBWB_M100_Summer11",
-                    "TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M100_Summer11","TTToHplusBHminusB_M160_Summer11",
-                     "TTToHplusBHminusB_M150_Summer11","TTToHplusBHminusB_M140_Summer11","TTToHplusBHminusB_M155_Summer11",
-#                     "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
-#                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11"
+    datasets.remove(["TTToHplusBWB_M140_Summer11","TTToHplusBWB_M160_Summer11","TTToHplusBWB_M90_Summer11",
+                   "TTToHplusBWB_M150_Summer11","TTToHplusBWB_M80_Summer11","TTToHplusBWB_M155_Summer11","TTToHplusBWB_M80_Summer11",
+                    "TTToHplusBHminusB_M160_Summer11","TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M155_Summer11",
+                     "TTToHplusBHminusB_M140_Summer11","TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M150_Summer11",
+#                     "QCD_Pt30to50_TuneZ2_Summer11","QCD_Pt50to80_TuneZ2_Summer11","QCD_Pt80to120_TuneZ2_Summer11",
+#                     "QCD_Pt120to170_TuneZ2_Summer11","QCD_Pt170to300_TuneZ2_Summer11","QCD_Pt300to470_TuneZ2_Summer11"
                      ])
     
 #    datasets.remove(["TTToHplusBWB_M140_Spring11","TTToHplusBWB_M80_Spring11","TTToHplusBWB_M90_Spring11",
@@ -59,11 +59,11 @@ def main():
     datasets.loadLuminosities()
 
     # Take W+jets and WW/ZZfrom 41X
-    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+##    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     # no tau isolation, Rtau = 0
-    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
     # standard selection, Rtau=0
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
 
     datasetsSignal.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11","TToBLNu_tW-channel_TuneZ2_Spring11",
                                      "WW_TuneZ2_Spring11","WZ_TuneZ2_Spring11","ZZ_TuneZ2_Spring11"])
@@ -78,12 +78,12 @@ def main():
     datasets.extend(datasetsSignal)
 
     
-        # Take signals from 42X
+        # Take signals from 42X , needed only for multicrab_110708_102750!
 #    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
+    # no tau isolation, Rtau=0
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110708_133818/multicrab.cfg", counters=counters)
 #Rtau =0
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110708_135422/multicrab.cfg", counters=counters)
 
 #    datasetsSignal.selectAndReorder(["TTToHplusBWB_M120_Summer11", "TTToHplusBHminusB_M120_Summer11"])
 #    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
@@ -168,7 +168,7 @@ def main():
 ####################
     datasets_tm = datasets.deepCopy()
 #    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
-#    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.2, br_Htaunu=1)
+#    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.05, br_Htaunu=1)
     datasets_tm.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])
 
 #    transverseMass(plots.DataMCPlot(datasets_tm, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
@@ -180,20 +180,20 @@ def main():
 #    xsect.setHplusCrossSections(datasets, toTop=True)
 
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=5)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=5)
     jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJets")
 
-    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=30)
-    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=30)
+    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPt", rebin=10)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEta", rebin=5)
     numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJets")
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronEta"), "electronEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronPt"), "electronPt", rebin=2)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalElectronVeto/GlobalElectronEta"), "electronEta", rebin=2)
     
-    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonPt"), "muonPt")
-    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonEta"), "muonEta")
+    jetPt(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonPt"), "muonPt", rebin=2)
+    jetEta(plots.DataMCPlot(datasets, analysis+"/GlobalMuonVeto/GlobalMuonEta"), "muonEta", rebin=2)
     
     jetPt(plots.DataMCPlot(datasets, analysis+"/ForwardJetVeto/MaxForwJetEt"), "maxForwJetPt")
 
@@ -396,7 +396,7 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
-    opts = {"xmax": 7, "ymin": 0.01, "ymaxfactor": 2}
+    opts = {"xmax": 7, "ymin": 0.5, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
 
     if ratio:
@@ -781,7 +781,7 @@ def transverseMass2(h,name, rebin=10):
     h.addMCUncertainty()
     
     name = name+"_log"
-    opts = {"ymin": 0.001, "ymaxfactor": 2.0,"xmax": 350 }
+    opts = {"ymin": 0.001, "ymaxfactor": 2,"xmax": 350 }
 #    opts = {"xmax": 200 }
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
@@ -810,8 +810,8 @@ def jetPt(h, name, rebin=5, ratio=False):
     h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.001,"xmax": 400.0, "ymaxfactor": 2}
-    opts2 = {"ymin": 0.05, "ymax": 1.5}
+    opts = {"ymin": 0.01,"xmax": 400.0, "ymaxfactor": 10}
+    opts2 = {"ymin": 0.05, "ymax": 2.0}
     name = name+"_log"
     if ratio:
         h.createFrameFraction(name, opts=opts, opts2=opts2)
@@ -820,7 +820,7 @@ def jetPt(h, name, rebin=5, ratio=False):
 #    h.createFrame(name, opts=opts)
     #h.createFrameFraction(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.7, 0.65, 0.9, 0.9))
+    h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
 
     
@@ -841,7 +841,7 @@ def jetEta(h, name, rebin=5, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.01,"xmin": -3.5,"xmax": 3.5, "ymaxfactor": 10}
+    opts = {"ymin": 0.1,"xmin": -3.5,"xmax": 3.5, "ymaxfactor": 20}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -879,7 +879,7 @@ def jetPhi(h, name, rebin=5, ratio=False):
 def numberOfJets(h, name, rebin=1, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
-    if "Btagged" in name:
+    if "B" in name:
         particle = "b jet"
     xlabel = "Number of %ss" % particle
     ylabel = "Events / %.2f" % h.binWidth()
@@ -888,7 +888,7 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.01,"xmax": 7.0, "ymaxfactor": 2.0}
+    opts = {"ymin": 0.01,"xmax": 12.0, "ymaxfactor": 2.0}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
 #    name = name+"_log"
     if ratio:
@@ -896,7 +896,7 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend())
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
 
 def etSumRatio(h, name, rebin=1, ratio=False):
