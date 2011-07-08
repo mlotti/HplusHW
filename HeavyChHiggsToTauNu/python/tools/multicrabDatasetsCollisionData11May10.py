@@ -45,6 +45,19 @@ datasets = {
             },
         }
     },
+    "Tau_161119-161119_May10_Wed": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
+        "runs": (161119, 161119), #
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 10, # Adjusted for PATtuple file size
+                "lumiMask": "May10ReRecoWedDiff"
+            },
+        }
+    },        
     "Tau_161217-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
@@ -127,8 +140,21 @@ datasets = {
                 "lumiMask": "May10ReReco"
             },
         }
+    }, 
+    "SingleMu_161119-161119_May10_Wed": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_Mu20_v1",
+        "runs": (161119, 161119),
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "lumiMask": "May10ReRecoWedDiff"
+            },
+        }
     },
-    "SingleMu_163270-163869_May10": {
+   "SingleMu_163270-163869_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu24_v2",
         "runs": (163270, 163869),
