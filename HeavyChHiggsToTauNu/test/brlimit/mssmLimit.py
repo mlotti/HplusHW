@@ -210,24 +210,14 @@ def removeLargeValues(graph):
 # fig 8
 def getTevaCurve():
     curve = TGraph(5)
-    if useMA==0:
-        curve.Set(6)
-        curve.SetPoint(0,100,33)
-        curve.SetPoint(1,110,39)
-        curve.SetPoint(2,120,50)
-        curve.SetPoint(3,130,68.5)
-        curve.SetPoint(4,140,103)
-        curve.SetPoint(5,100,110)
-#        curve.SetPoint(6,100,110)
-    else:
-        curve.Set(5)
-        curve.SetPoint(0,100,33)
-#        curve.SetPoint(1,110,39)
-        curve.SetPoint(1,120,50)
-#        curve.SetPoint(3,130,68.5)
-        curve.SetPoint(2,140,103)
-        curve.SetPoint(3,140,110)
-        curve.SetPoint(4,100,110)
+    curve.Set(6)
+    curve.SetPoint(0,100,33)
+    curve.SetPoint(1,110,39)
+    curve.SetPoint(2,120,50)
+    curve.SetPoint(3,130,68.5)
+    curve.SetPoint(4,140,103)
+    curve.SetPoint(5,100,110)
+    if useMA==1:
         graphToMa(curve)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
