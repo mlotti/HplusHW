@@ -12,6 +12,14 @@ def customise(process):
                      "should I override beamspot in globaltag?")
     options = getOptions(options)
 
+    # Muon isolation
+    import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+    process.muonIsolationSequence = cms.Sequence()
+    muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons=process.tightenedMuons.src.value())
+    process.tightenedMuons.src = muons
+    process.ProductionFilterSequence.replace(process.tightenedMuons, process.muonIsolationSequence*process.tightenedMuons)
+
+    # output
     outputModule = None
     outdict = process.outputModules_()
     if len(outdict) == 1:
@@ -74,6 +82,8 @@ def customise(process):
         process.hltTrigReport.HLTriggerResults.setProcessName(processName)
     if hasattr(process, "DQM_FEDIntegrity_v2"):
         process.schedule.remove(process.DQM_FEDIntegrity_v2)
+    if hasattr(process, "DQM_FEDIntegrity_v3"):
+        process.schedule.remove(process.DQM_FEDIntegrity_v3)
     if hasattr(process, "HLTAnalyzerEndpath"):
         process.schedule.remove(process.HLTAnalyzerEndpath)
         del process.HLTAnalyzerEndpath
