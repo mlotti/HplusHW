@@ -180,7 +180,7 @@ datasets = {
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v17-b1b6e1ef7d022a15760998ee2f0cd38b/USER",
-                "luminosity": 94.672079,
+                "luminosity": 122.760038,
                 "number_of_jobs": 1,
             },
         }
@@ -572,7 +572,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
+                "number_of_jobs": 170, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -585,7 +585,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "number_of_jobs": 2, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -598,7 +598,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "number_of_jobs": 2, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -611,7 +611,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 80, # Adjusted for PATtuple file size
+                "number_of_jobs": 190, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -624,7 +624,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple file size
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
