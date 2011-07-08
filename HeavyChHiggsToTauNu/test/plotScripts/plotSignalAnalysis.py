@@ -39,10 +39,10 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-    datasets.remove(["TTToHplusBWB_M140_Summer11","TTToHplusBWB_M160_Summer11","TTToHplusBWB_M90_Summer11",
-                   "TTToHplusBWB_M150_Summer11","TTToHplusBWB_M80_Summer11","TTToHplusBWB_M155_Summer11","TTToHplusBWB_M80_Summer11",
+    datasets.remove(["TTToHplusBWB_M140_Summer11","TTToHplusBWB_M160_Summer11","TTToHplusBWB_M100_Summer11",
+                   "TTToHplusBWB_M150_Summer11","TTToHplusBWB_M80_Summer11","TTToHplusBWB_M155_Summer11","TTToHplusBWB_M90_Summer11",
                     "TTToHplusBHminusB_M160_Summer11","TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M155_Summer11",
-                     "TTToHplusBHminusB_M140_Summer11","TTToHplusBHminusB_M80_Summer11","TTToHplusBHminusB_M150_Summer11",
+                     "TTToHplusBHminusB_M140_Summer11","TTToHplusBHminusB_M100_Summer11","TTToHplusBHminusB_M150_Summer11",
 #                     "QCD_Pt30to50_TuneZ2_Summer11","QCD_Pt50to80_TuneZ2_Summer11","QCD_Pt80to120_TuneZ2_Summer11",
 #                     "QCD_Pt120to170_TuneZ2_Summer11","QCD_Pt170to300_TuneZ2_Summer11","QCD_Pt300to470_TuneZ2_Summer11"
                      ])
@@ -59,7 +59,7 @@ def main():
     datasets.loadLuminosities()
 
     # Take W+jets and WW/ZZfrom 41X
-##    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
+#    datasets.remove(filter(lambda name: "TTToHplus" in name, datasets.getAllDatasetNames()))
     # no tau isolation, Rtau = 0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
     # standard selection, Rtau=0
@@ -780,13 +780,13 @@ def transverseMass2(h,name, rebin=10):
     h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
     
-    name = name+"_log"
+#    name = name+"_log"
     opts = {"ymin": 0.001, "ymaxfactor": 2,"xmax": 350 }
 #    opts = {"xmax": 200 }
     #h.createFrameFraction(name, opts=opts)
 #    h.createFrame(name, opts=opts)
     h.createFrame(name, opts=opts)
-    h.getPad().SetLogy(True)
+#    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
        
