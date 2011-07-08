@@ -128,9 +128,9 @@ param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
 
-#param.setAllTauSelectionOperatingMode('standard')
+param.setAllTauSelectionOperatingMode('standard')
 
-param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 
 # Set tau sources to trigger matched tau collections
@@ -189,7 +189,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
-    tauSelection = param.tauSelectionHPSTightTauBased,
+#    tauSelection = param.tauSelectionHPSTightTauBased,
+    tauSelection = param.tauSelectionHPSLooseTauBased,                                      
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
