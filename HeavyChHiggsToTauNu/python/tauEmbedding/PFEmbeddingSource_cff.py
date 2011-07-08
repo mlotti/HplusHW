@@ -24,11 +24,19 @@ tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     minNumber = cms.uint32(1)
 )
 tightenedMuonsCount = cms.EDProducer("EventCountProducer")
-tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
+#tauEmbeddingMuons = cms.EDFilter("HPlusSmallestRelIsoPATMuonViewSelector",
+#    src = cms.InputTag("tightenedMuons"),
+#    filter = cms.bool(False),
+#    maxNumber = cms.uint32(1)
+#)
+tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuons"),
-    filter = cms.bool(False),
-    maxNumber = cms.uint32(1)
+    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
+tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
+                                       src = cms.InputTag("tauEmbeddingMuons"),
+                                       minNumber = cms.uint32(1))
+tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
    muonSrc = cms.untracked.InputTag("tauEmbeddingMuons"),
@@ -47,7 +55,7 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     src = cms.untracked.InputTag("generator")
 )
 
-muonSelectionCounters = [ "tightenedMuonsCount" ]
+muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount" ]
 
 # Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing
 try:
@@ -68,6 +76,8 @@ try:
         tightenedMuonsFilter *
         tightenedMuonsCount *
         tauEmbeddingMuons *
+        tauEmbeddingMuonsFilter *
+        tauEmbeddingMuonsCount *
         adaptedMuonsFromWmunu *
         dimuonsGlobal * 
         generator * 

@@ -147,6 +147,9 @@ namespace HPlus {
     TH1 *hMCPurityOfCleanedTauCandidates;
     TH1 *hMCPurityOfSelectedTaus;
 
+    TH1 *hNTriggerMatchedTaus;
+    TH1 *hNTriggerMatchedSeparateTaus;
+
     TH1 *hVLooseIsoNcands;
     TH1 *hLooseIsoNcands;
     TH1 *hMediumIsoNcands;

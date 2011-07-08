@@ -44,6 +44,7 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fMETCounter(eventCounter.addCounter("MET")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
@@ -99,6 +100,8 @@ namespace HPlus {
     // Book histograms filled in the analysis body
     hVerticesBeforeWeight = makeTH<TH1F>(*fs, "verticesBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
     hVerticesAfterWeight = makeTH<TH1F>(*fs, "verticesAfterWeight", "Number of vertices with weighting", 30, 0, 30);
+    hVerticesTriggeredBeforeWeight = makeTH<TH1F>(*fs, "verticesTriggeredBeforeWeight", "Number of vertices without weighting", 30, 0, 30);
+    hVerticesTriggeredAfterWeight = makeTH<TH1F>(*fs, "verticesTriggeredAfterWeight", "Number of vertices with weighting", 30, 0, 30);
     //    hmetAfterTrigger = makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
     hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithTopCut = makeTH<TH1F>(*fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -122,7 +125,11 @@ namespace HPlus {
     hSelectedTauRtau = makeTH<TH1F>(*fs, "SelectedTau_Rtau_AfterTauID", "SelectedTau_Rtau_AfterTauID;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
     hSelectedTauRtauAfterCuts = makeTH<TH1F>(*fs, "SelectedTau_Rtau_AfterCuts", "SelectedTau_Rtau_AfterCuts;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
     hSelectedTauLeadingTrackPt = makeTH<TH1F>(*fs, "SelectedTau_TauLeadingTrackPt", "SelectedTau_TauLeadingTrackPt;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
-    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
+
+    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
+    hMETBeforeTauId = makeTH<TH1F>(*fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
+
+    //    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
     hSelectedTauEtMetCut = makeTH<TH1F>(*fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
     hSelectedTauEtaMetCut = makeTH<TH1F>(*fs, "SelectedTau_eta_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.1", 300, -3.0, 3.0);
@@ -164,9 +171,6 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
-  // GenParticle analysis
-    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
-
     //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
    
 
@@ -178,19 +182,13 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
-/*
-    // Tau+MET trigger emulation
-    // HLT_MET cut is applied at trigger step
-    TriggerTauMETEmulation::Data triggerTauMETEmulationData = fTriggerTauMETEmulation.analyze(iEvent, iSetup);
-    if(!triggerTauMETEmulationData.passedEvent()) return false;
-    increment(fTriggerEmulationCounter);
-*/ 
-/*
-    edm::Handle <reco::VertexCollection> goodPrimaryVertices;
-    edm::InputTag myVertexInputTag("goodPrimaryVertices", "", "HChPatTuple");
-    iEvent.getByLabel(myVertexInputTag, goodPrimaryVertices);
-    //   if (goodPrimaryVertices->size() != 1) return false;
-    */
+
+    hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
+    hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+
+
+    // GenParticle analysis (must be done here when we effectively trigger all MC)
+    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
@@ -199,7 +197,17 @@ namespace HPlus {
     //hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
     
     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
-                                                                                                                                            
+
+
+  // Get MET object 
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    double Met = metData.getSelectedMET()->et();
+    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl; 
+ 
+    hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
+
+                                                                                                                                                                      
+                                                                                                    
     // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
@@ -215,15 +223,15 @@ namespace HPlus {
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
 
-    // Get MET object 
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    double Met = metData.getSelectedMET()->et();
-    //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl;  
- 
+    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
+    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    //    increment(fRtauAfterTauIDCounter);
+
+  
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
-    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
+    //    hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
   
 
     // Obtain MC matching
@@ -291,7 +299,10 @@ namespace HPlus {
     if(!btagData.passedEvent()) return false;
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     increment(fBTaggingCounter);
-    
+
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+    hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
+       
     fTauEmbeddingAnalysis.fillAfterBTagging();
 
     hTransverseMassBeforeFakeMet->Fill(transverseMass, fEventWeight.getWeight());
@@ -299,13 +310,16 @@ namespace HPlus {
     hSelectedTauEtAfterCuts->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
-    //    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
-    //   increment(fRtauAfterCutsCounter);
+
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    increment(fRtauAfterCutsCounter);
 
     if(transverseMass < 80 ) return false;
     increment(ftransverseMassCut80Counter);
 
-    if(transverseMass < 100 ) return false;
+    if(transverseMass < 100 ) return 
+
+false;
     increment(ftransverseMassCut100Counter);
 
     
@@ -320,9 +334,7 @@ namespace HPlus {
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
 
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
-    hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
-    hDeltaPhi->Fill(deltaPhi);
+
 
     //    double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
@@ -355,9 +367,6 @@ namespace HPlus {
       //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
     //  hSelectedTauRtauAfterCuts->Fill(Rtau, fEventWeight.getWeight());
     // }
-
-
-
    
 
    // top mass
@@ -388,14 +397,6 @@ namespace HPlus {
     //    increment(fForwardJetVetoCounter);
     
 
-    // The following code is not correct, because there could be more than one tau jet
-    // passing the tau ID (and hence multiple values of Rtau
-    // Please access the selected tau jets via  tauData.getSelectedTaus()
-    //std::cout << "tauData.Rtau = " << tauData.Rtau << std::endl;
-    //hAlphaTVsRtau->Fill(tauData.Rtau, sAlphaT.fAlphaT);
-
-    //    int diJetSize = sAlphaT.vDiJetMassesNoTau.size();
-    //   for(int i= 0; i < diJetSize; i++){ hAlphaTInvMass->Fill(sAlphaT.vDiJetMassesNoTau[i], fEventWeight.getWeight()); }
 
 //    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 

@@ -19,6 +19,8 @@ namespace edm {
   class ParameterSet;
   class Event;
   class EventSetup;
+  class TriggerResults;
+  class TriggerNames;
 }
 
 namespace pat {
@@ -46,6 +48,7 @@ namespace HPlus {
             ~TriggerPath();
 
             bool analyze(const pat::TriggerEvent& trigger);
+            bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
 
       const std::string& getPathName() const { return fPath; }
 
@@ -94,7 +97,8 @@ namespace HPlus {
 
   private:
     std::vector<TriggerPath* > triggerPaths;
-    const edm::InputTag fSrc;
+    const edm::InputTag fTriggerSrc;
+    const edm::InputTag fPatSrc;
     const double fMetCut;
 
     EventWeight& fEventWeight;
@@ -104,8 +108,10 @@ namespace HPlus {
     TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
+    Count fTriggerAllCount;
     Count fTriggerPathCount;
-    Count fTriggerBitParamCount;
+    Count fTriggerBitCount;
+    Count fTriggerCaloMetCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;
@@ -125,6 +131,8 @@ namespace HPlus {
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;
+
+    bool fThrowIfNoMet;
   };
 }
 

@@ -6,9 +6,19 @@ from ROOT import TLatex, TLegend, TLegendEntry, TGraph
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.tdrstyle as tdrstyle
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.statisticalFunctions as statisticalFunctions
+import HiggsAnalysis.HeavyChHiggsToTauNu.tools.BRdataInterface as BRdataInterface
+
+from math import sqrt
 
 mu = 200
 #mu = 1000
+
+## NOTE Tevatron results cannot be shown in some values of mA, 
+# since the corresponding mH values have not been calculated
+# in Feynhiggs
+useMA = 1
+showTeva = 1
+showLEP = 1
 
 # write text to plot
 def writeTitleTexts(lumi):
@@ -34,6 +44,31 @@ def writeText( myText, y ):
     text.DrawLatex(0.185,y,myText)
     return 0
 
+# Convert from mH space to mA
+def graphToMa(graph):
+    for i in xrange(0, graph.GetN()):
+        mH = graph.GetX()[i]
+        tanb = graph.GetY()[i]
+        mZ = 91.1876 #Z mass from PDG
+        mW = 80.398
+        print mH, tanb, "BR: ", BRdataInterface.get_mA(mH,tanb,200)
+        mA = sqrt(mH*mH - mW*mW)
+        graph.SetPoint(i, mA, tanb)
+            
+    return 0           
+
+# Convert from mA space to mH
+def graphToMh(graph):
+    for i in xrange(0, graph.GetN()):
+        mA = graph.GetX()[i]
+        tanb = graph.GetY()[i]
+        mZ = 91.1876 #Z mass from PDG
+        mW = 80.398
+        print mA, mZ, i, graph.GetN()
+        mH = sqrt(mA*mA + mW*mW)
+        graph.SetPoint(i, mH, tanb)
+    return 0           
+
 # Create a TGraph for upper limit tanb y values from a TGraph with BR y values
 # Convention: begin with low mH, lower limit for 1/2s band
 # then go counterclockwise: increase mH, then switch to upper limit, decrease mH
@@ -57,6 +92,9 @@ def graphToTanBeta(graph, mymu, removeNotValid=True):
 #           print "No valid tanb for BR %f" % yvalues[i]
 
         graph.SetPoint(i, mass, tanb)
+
+    if useMA:
+        graphToMa(graph)
 
     # For points for which a valid tanb value can not be obtained,
     # either remove the point, or set a huge value
@@ -103,6 +141,9 @@ def graphToTanBetaLow(graph, mymu, removeNotValid=True):
 #           print "No valid tanb for BR %f" % yvalues[i]
 
         graph.SetPoint(i, mass, tanb)
+
+    if useMA:
+        graphToMa(graph)
 
     # For points for which a valid tanb value can not be obtained,
     # either remove the point, or set a huge value
@@ -167,40 +208,104 @@ def removeLargeValues(graph):
 # Volume 682, Issue 3, 7 December 2009, Pages 278-286 
 # fig 8
 def getTevaCurve():
-    curve = TGraph(11)
-    curve.Set(11)
-#    curve.SetPoint(0,88,30)
-    curve.SetPoint(0,100,33)
-    curve.SetPoint(1,110,39)
-    curve.SetPoint(2,120,50)
-    curve.SetPoint(3,130,68.5)
-    curve.SetPoint(4,140,103)
-    curve.SetPoint(5,140,110)
-    curve.SetPoint(6,100,110)
+    curve = TGraph(5)
+    if useMA==0:
+        curve.Set(6)
+        curve.SetPoint(0,100,33)
+        curve.SetPoint(1,110,39)
+        curve.SetPoint(2,120,50)
+        curve.SetPoint(3,130,68.5)
+        curve.SetPoint(4,140,103)
+        curve.SetPoint(5,100,110)
+#        curve.SetPoint(6,100,110)
+    else:
+        curve.Set(5)
+        curve.SetPoint(0,100,33)
+#        curve.SetPoint(1,110,39)
+        curve.SetPoint(1,120,50)
+#        curve.SetPoint(3,130,68.5)
+        curve.SetPoint(2,140,103)
+        curve.SetPoint(3,140,110)
+        curve.SetPoint(4,100,110)
+        graphToMa(curve)
     curve.SetFillStyle(4)
     curve.SetFillColor(618)
     return curve
 
 # Draw LEP exclusion
 # picked from P-TDR2, page 369
+# this is originally in mA,tanb space
 def getLepCurve():
-    curve = TGraph(11)
-    curve.Set(11)
-    curve.SetPoint(0,100,8.4)
-    curve.SetPoint(1,105,9.0)
-    curve.SetPoint(2,110,9.2)
-    curve.SetPoint(3,115,9.1)
-    curve.SetPoint(4,120,8.5)
-    curve.SetPoint(5,130,7.7)
-    curve.SetPoint(6,140,7.4)
-    curve.SetPoint(7,150,6.9)
-    curve.SetPoint(8,160,6.8)
-    curve.SetPoint(9,160,0.0)
-    curve.SetPoint(10,100,0.0)
-#    curve.SetPoint(4,150,0.0)
-#    curve.SetPoint(5,100,0.0)
+    curve = TGraph(42)
+#orig    curve.SetPoint(0,90.7,50.0)
+#    curve.SetPoint(0,60,5000)
+#orig    curve.SetPoint(1,90.7,30.03)
+#orig    curve.SetPoint(1,90.7,30.03)
+    curve.SetPoint(0,50,100)
+    curve.SetPoint(1,91.0,100)
+    curve.SetPoint(2,91.800,30.02624    )
+    curve.SetPoint(3,91.845,22.07032    )
+    curve.SetPoint(4,91.845,    17.12491    )
+    curve.SetPoint(5,91.84523,    13.64727    )
+    curve.SetPoint(6,92.61388,    11.94143    )
+    curve.SetPoint(7,93.38253,    10.03852    )
+    curve.SetPoint(8,94.91982,    9.021481    )
+    curve.SetPoint(9,95.68846,    8.107481    )
+    curve.SetPoint(10,97.22578,    7.141608    )
+    curve.SetPoint(11,99.53170,    6.680381    )
+    curve.SetPoint(12,103.3750,    7.189448    )
+    curve.SetPoint(13,104.1436,    7.841313    )
+    curve.SetPoint(14,106.4496,    8.326916    )
+    curve.SetPoint(15,109.5242,    8.609568    )
+    curve.SetPoint(16,112.5988,    8.438845    )
+    curve.SetPoint(17,115.6733,    8.107481    )
+    curve.SetPoint(18,118.7480,    7.384029    )
+    curve.SetPoint(19,122.5912,    6.547911    )
+    curve.SetPoint(20,126.4344,    5.963618    )
+    curve.SetPoint(21,131.8150,    5.359424    )
+    curve.SetPoint(22,138.7328,    4.752558    )
+    curve.SetPoint(23,144.1134,    4.445624    )
+    curve.SetPoint(24,149.4939,    4.186368    )
+    curve.SetPoint(25,156.4118,    3.968637    )
+    curve.SetPoint(26,164.8669,    3.687628    )
+    curve.SetPoint(27,177.1653,    3.472575    )
+    curve.SetPoint(28,187.9264,    3.291970    )
+    curve.SetPoint(29,203.2994,    3.141663    )
+    curve.SetPoint(30,221.7469,    2.978266    )
+    curve.SetPoint(31,241.7318,    2.861322    )
+    curve.SetPoint(32,261.7167,    2.767383    )
+    curve.SetPoint(33,283.2388,    2.676528    )
+    curve.SetPoint(34,304.7610,    2.641027    )
+    curve.SetPoint(35,334.7383,    2.554322    )
+    curve.SetPoint(36,357.0292,    2.503670    )
+    curve.SetPoint(37,383.9319,    2.487010    )
+    curve.SetPoint(38,420.8271,    2.454023    )
+    curve.SetPoint(39,452.3417,    2.421473    )
+    curve.SetPoint(40,487.6996,    2.405361    )
+    curve.SetPoint(41,487.6996,    0.0)
+#    curve.SetPoint(42,90.7,    0.0)
+    curve.SetPoint(42,0.0,    0.0)
+## made by eye
+    # curve = TGraph(11)
+    # curve.SetPoint(0,100,8.4)
+    # curve.SetPoint(1,105,9.0)
+    # curve.SetPoint(2,110,9.2)
+    # curve.SetPoint(3,115,9.1)
+    # curve.SetPoint(4,120,8.5)
+    # curve.SetPoint(5,130,7.7)
+    # curve.SetPoint(6,140,7.4)
+    # curve.SetPoint(7,150,6.9)
+    # curve.SetPoint(8,160,6.8)
+    # curve.SetPoint(9,160,0.0)
+    # curve.SetPoint(10,100,0.0)
+##
     curve.SetFillStyle(4)
     curve.SetFillColor(407)
+#    curve.SetMarkerColor(407)
+    curve.SetMarkerColor(1)
+    curve.SetMarkerSize(0.4)
+    if useMA==0:
+        graphToMh(curve)
     return curve
     
 # Main function, called explicilty from the end of the script
@@ -268,7 +373,10 @@ def main():
     tanbMax = 60#200
 
     # Create the TCanvas, frame, etc
-    canvas = ROOT.TCanvas("mssmLimits")
+    if useMA:
+        canvas = ROOT.TCanvas("mssmLimits_ma")
+    else:
+        canvas = ROOT.TCanvas("mssmLimits_mh")
     frame = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Draw the graphs
@@ -278,15 +386,9 @@ def main():
     observed_tanb.SetLineWidth(804)
     observed_tanb.Draw("LP")
 
-    showTeva = 1
     if showTeva:
         TevaCurve = getTevaCurve()
         TevaCurve.Draw("F")
-
-    showLEP = 0
-    if showLEP:
-        LepCurve = getLepCurve()
-        LepCurve.Draw("F")
 
     if showLow:
         expected_2s_tanb_low.Draw("F")
@@ -297,8 +399,21 @@ def main():
         observed_tanb_low.SetLineWidth(-804)
         observed_tanb_low.Draw("LP")
 
+    # LEP curve is transparent, so draw it last
+    if showLEP:
+        LepCurve = getLepCurve()
+        # fill with black "stripes" 
+        # and possibly small dots for data points
+        LepCurve.SetFillColor(1);
+        LepCurve.SetFillStyle(3004);
+#        LepCurve.Draw("FP")
+        LepCurve.Draw("F")
+
     # Axis labels
-    frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+    if useMA:
+        frame.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+    else:
+        frame.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame.GetYaxis().SetTitle("tan(#beta)")
 
     # Legends
@@ -335,8 +450,12 @@ def main():
     top = 0.9
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-    writeText("Fully hadronic final state",   top - lineSpace)
+#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("hadr. + ltau final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
     writeText("#mu=%d GeV"%mu, top - 4*lineSpace)
 
@@ -360,11 +479,17 @@ def main():
 
 
     # Create the TCanvas, frame, etc
-    canvas2 = ROOT.TCanvas("mssmLimits_mus")
+    if useMA:
+        canvas2 = ROOT.TCanvas("mssmLimits_mus_ma")
+    else:
+        canvas2 = ROOT.TCanvas("mssmLimits_mus_mh")
     frame2 = canvas.DrawFrame(massMin, 0, massMax, tanbMax)
 
     # Axis labels
-    frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
+    if useMA:
+        frame2.GetXaxis().SetTitle("m_{A} (GeV/c^{2})")
+    else:
+        frame2.GetXaxis().SetTitle("m_{H^{#pm}} (GeV/c^{2})")
     frame2.GetYaxis().SetTitle("tan(#beta)")
 
     observed_p2 = graphToTanBeta(observed,200)
@@ -445,8 +570,13 @@ def main():
     top = 0.83
     lineSpace = 0.038
     writeText("t#rightarrowH^{#pm}b, H^{#pm}#rightarrow#tau#nu",top)
-    writeText("Fully hadronic final state",   top - lineSpace)
+#    writeText("Fully hadronic final state",   top - lineSpace)
+    writeText("hadr. + ltau final states",   top - lineSpace)
+#    writeText("hadr. + ltau + emu final states",   top - lineSpace)
+
+
 #    writeText("Bayesian CL limit",           top - 2*lineSpace)
+    writeText("MSSM m_{h}^{max}",           top - 2*lineSpace)
     writeText("Br(H^{#pm}#rightarrow#tau^{#pm} #nu) = 1", top - 3*lineSpace)
 
     # Save to file

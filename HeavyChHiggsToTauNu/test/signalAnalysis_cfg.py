@@ -18,9 +18,8 @@ doAllTauIds = False
 
 # Perform b tagging scanning
 doBTagScan = False
-doRtauScan = False
 
-# PerformRtau scanning
+# Perform Rtau scanning
 doRtauScan = False
 
 # Perform the signal analysis with the JES variations in addition to
@@ -103,7 +102,7 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 if doRerunTriggerMatching:
     import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
     process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
-                                                                    pathFilterMap={}
+                                                                    #pathFilterMap={} # by default, use filter name in trigger matching re-running
                                                                     )
     process.commonSequence *= process.triggerMatching
 
@@ -125,8 +124,11 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
+param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+
 
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
@@ -163,14 +165,32 @@ param.setVertexWeightFor2011()
 #param.trigger.selectionType = "disabled"
 
 if options.tauEmbeddingInput != 0:
-    #param.trigger.selectionType = cms.untracked.string("disabled")
+#    param.trigger.selectionType = cms.untracked.string("disabled")
     param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string("SIMPLE"), luminosity = cms.double(0)))
     param.trigger.triggerEfficiency.parameters = cms.PSet(
         SIMPLE = cms.PSet(
             tauPtBins = cms.VPSet(
                 cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.5)),
-                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(1.0)),
+                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.2424242)),
+                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.4848485)),
+                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.5357143)),
+                cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.75)),
+                cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(1)),
+
+        # pre-approval
+                #cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.3293233)),
+                #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.3693694)),
+                #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.25)),
+                #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.3529412)),
+
+                #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4210526)),
+                #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.4954955)),
+                #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.4166667)),
+                #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.5294118)),
+
+#                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.5)),
+#                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(1.0)),
 #                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7)),
 #                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(1.0)),
             )
@@ -239,15 +259,6 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
-# Rtau testing
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-if doRtauScan:
-    module = process.signalAnalysis.clone()
-    module.tauSelection.rtauCut = 0.0
-    addAnalysis(process, "signalAnalysisRtauTest", module,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
 
 # b tagging testing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
@@ -269,6 +280,7 @@ if doBTagScan:
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
+# Rtau testing
 if doRtauScan:
     for val in [0.0, 0.7, 0.8]:
         module = process.signalAnalysis.clone()
