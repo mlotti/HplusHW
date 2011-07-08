@@ -924,3 +924,32 @@ def addTo(datasets):
                 "number_of_jobs": 11 # ~1 kev/job
             },
             })
+
+    datasets["TTJets_TuneZ2_Summer11"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11-50e9a4e9bac98baa56423a829b7f0fda/USER",
+                "number_of_jobs": 490 # ~1 kev/job
+            },
+            })
+    datasets["WJets_TuneZ2_Summer11"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11-50e9a4e9bac98baa56423a829b7f0fda/USER",
+                "number_of_jobs": 206 # ~1 kev/job
+            },
+            })
+    datasets["DYJetsToLL_M50_TuneZ2_Summer11"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11_1-50e9a4e9bac98baa56423a829b7f0fda/USER",
+                "number_of_jobs": 240 # ~1 kev/job
+            },
+            })
+    datasets["QCD_Pt20_MuEnriched_TuneZ2_Summer11"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11-50e9a4e9bac98baa56423a829b7f0fda/USER",
+                "number_of_jobs": 150 # ~1 kev/job
+            },
+            })
