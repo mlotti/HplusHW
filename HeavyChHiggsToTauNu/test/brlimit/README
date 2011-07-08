@@ -17,8 +17,8 @@ case copy them to the directory and write the names to script_run_LandS
 
 go to the current directory (test/brlimit)
 
-cvs co UserCode/mschen/LandS
-cd UserCode/mschen/LandS
+cvs co UserCode/mschen/LandS OR cvs co -r t3-03-10_ChargedHiggs UserCode/mschen/LandS
+cd UserCode/mschen/LandS  
 cmsenv
 gmake clean; gmake all;
 cd ../../..
