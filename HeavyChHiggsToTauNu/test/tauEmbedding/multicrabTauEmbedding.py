@@ -5,8 +5,8 @@ import re
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
 #step = "skim"
-#step = "generation"
-step = "embedding"
+step = "generation"
+#step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
@@ -54,12 +54,13 @@ datasetsData2010 = [
     "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
 datasetsData2011 = [
-    "SingleMu_160431-163261_May10", # HLT_Mu20_v1
-#    "SingleMu_163270-163869_May10", # HLT_Mu24_v2
+#    "SingleMu_160431-163261_May10",  # HLT_Mu20_v1
+#    "SingleMu_163270-163869_May10",  # HLT_Mu24_v2
 #    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
-    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
-    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
+#    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
+#    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
 #    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
+#    "SingleMu_167078-167784_Prompt", # HLT_Mu40_v1
 ]
 datasetsMCnoQCD = [
 #    "TTJets_TuneZ2_Summer11",
@@ -88,7 +89,7 @@ else:
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
-    if step in ["skim", "generation", "embedding", "caloMetEfficiency"]:
+#    if step in ["skim", "generation", "embedding", "caloMetEfficiency"]:
 #        datasets.extend(datasetsTest)
 
 multicrab.extendDatasets(config[step]["input"], datasets)
