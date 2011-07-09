@@ -30,6 +30,7 @@ JESUnclusteredMETVariation = 0.10
 
 # Do trigger parametrisation for MC and tau embedding. If set to False trigger will be applied automatically
 doTriggerParametrisation = False
+applyTriggerScaleFactor = True
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
 # with Btau data where no prescale is needed at the moment) 
@@ -119,7 +120,11 @@ if (doTriggerParametrisation and not dataVersion.isData()):
     #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
-    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+
+# Trigger with scale factors (at the moment hard coded)
+if (applyTriggerScaleFactor and not dataVersion.isData()):
+    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 #param.setTriggerPileupFor2010()
