@@ -45,8 +45,8 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    rtauCut = cms.untracked.double(0.8), # rtau > value
-    antiRtauCut = cms.untracked.double(0.8), # rtau < value
+    rtauCut = cms.untracked.double(0.0), # rtau > value
+    antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )

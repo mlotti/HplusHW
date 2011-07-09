@@ -29,8 +29,10 @@ namespace HPlus {
     fTriggerMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerMETSelection"), eventCounter, eventWeight, "triggerMET"),
     fTriggerEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiency")),
     fTriggerCaloMet(iConfig.getUntrackedParameter<edm::ParameterSet>("caloMetSelection"), eventCounter, eventWeight),
-    fTriggerPathCount(eventCounter.addSubCounter("Trigger", "Path passed")),
-    fTriggerBitParamCount(eventCounter.addSubCounter("Trigger","Bit/parametrisation passed")), 
+    fTriggerAllCount(eventCounter.addSubCounter("Trigger", "All events")),
+    fTriggerPathCount(eventCounter.addSubCounter("Trigger debug", "Path passed")),
+    fTriggerBitCount(eventCounter.addSubCounter("Trigger","Bit passed")), 
+    fTriggerCaloMetCount(eventCounter.addSubCounter("Trigger","CaloMET cut passed")), 
     fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
     fTriggerParamAllCount(eventCounter.addSubCounter("Trigger parametrisation", "All events")),
@@ -72,22 +74,28 @@ namespace HPlus {
   }
 
   TriggerSelection::Data TriggerSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    bool passEvent = false;
+    bool passEvent = true;
     TriggerPath* returnPath = NULL;
+    increment(fTriggerAllCount);
+
     hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit)
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
-    else if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
-      passEvent = passedTriggerParametrisation(iEvent, iSetup);
-    else if(fTriggerSelectionType == kTriggerSelectionDisabled)
-      passEvent = true;
-    
+
     if(passEvent) {
-      increment(fTriggerBitParamCount);
+      increment(fTriggerBitCount);
       TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
       passEvent = ret.passedEvent();
     }
 
+    if(passEvent) {
+      increment(fTriggerCaloMetCount);
+      if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
+        passEvent = passedTriggerParametrisation(iEvent, iSetup);
+      else if(fTriggerSelectionType == kTriggerSelectionDisabled)
+        passEvent = true;
+    }
+    
     if(passEvent) increment(fTriggerCount);
     return Data(this, returnPath, passEvent);
   }
@@ -214,7 +222,7 @@ namespace HPlus {
 
   TriggerSelection::TriggerPath::TriggerPath(const std::string& path, EventCounter& eventCounter):
     fPath(path),
-    fTriggerCount(eventCounter.addSubCounter("Trigger","Triggered ("+fPath+")"))
+    fTriggerCount(eventCounter.addSubCounter("Trigger paths","Triggered ("+fPath+")"))
   {}
 
   TriggerSelection::TriggerPath::~TriggerPath() {}
