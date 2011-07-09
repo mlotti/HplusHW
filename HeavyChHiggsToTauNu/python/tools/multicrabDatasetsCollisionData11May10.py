@@ -56,6 +56,12 @@ datasets = {
                 "number_of_jobs": 10, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReRecoWedDiff"
             },
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161119_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
+                "luminosity": 0.490643,
+                "number_of_jobs": 1
+            },
         }
     },        
     "Tau_161217-163261_May10": {
@@ -121,7 +127,7 @@ datasets = {
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v17-6d098da292fab19f3d03a84563841e91/USER",
-                "luminosity": 158.405668,
+                "luminosity": 159.758105,
                 "number_of_jobs": 6
             },
         }
