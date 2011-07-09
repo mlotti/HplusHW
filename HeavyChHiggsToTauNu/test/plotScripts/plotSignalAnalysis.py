@@ -63,8 +63,9 @@ def main():
     # no tau isolation, Rtau = 0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
     # standard selection, Rtau=0
-    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
-
+ #   datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110709_084347/multicrab.cfg", counters=counters)
+ 
     datasetsSignal.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11","TToBLNu_tW-channel_TuneZ2_Spring11",
                                      "WW_TuneZ2_Spring11","WZ_TuneZ2_Spring11","ZZ_TuneZ2_Spring11"])
     datasetsSignal.renameMany({"TToBLNu_s-channel_TuneZ2_Spring11" :"TToBLNu_s-channel_TuneZ2_Summer11",
