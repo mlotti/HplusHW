@@ -29,10 +29,6 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# Perform the signal analysis with the btagging variations in addition to
-# the "golden" analysis
-doBTagVariation = False
-
 # With tau embedding input, tighten the muon selection
 tauEmbeddingFinalizeMuonSelection = True
 # With tau embedding input, do the muon selection scan
@@ -42,6 +38,7 @@ doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
 doTriggerParametrisation = False
+applyTriggerScaleFactor = True
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -157,6 +154,11 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+
+# Trigger with scale factors (at the moment hard coded)
+if (applyTriggerScaleFactor and not dataVersion.isData()):
+    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
+
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 param.setVertexWeightFor2011()
@@ -342,23 +344,6 @@ if doJESVariation:
     addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
     addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
     addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
-
-
-if doBTagVariation:
-    # Plus side variation
-    module = process.signalAnalysis.clone()
-    module.bTagging.variationMode = "plus"
-    addAnalysis(process, "signalAnalysisBtaggingVariationPlus", module,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
-    # Minus side variation
-    module = process.signalAnalysis.clone()
-    module.bTagging.variationMode = "minus"
-    addAnalysis(process, "signalAnalysisBtaggingVariationMinus", module,
-                preSequence=process.commonSequence,
-                additionalCounters=additionalCounters,
-                signalAnalysisCounters=True)
 
 
 # Signal analysis with various tightened muon selections for tau embedding

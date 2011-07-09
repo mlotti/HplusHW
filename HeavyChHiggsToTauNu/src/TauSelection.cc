@@ -185,6 +185,14 @@ namespace HPlus {
 
     hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
     hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
+
+    hIsolationPFChargedHadrCandsPtSum = makeTH<TH1F>(myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFGammaCandsEtSum = makeTH<TH1F>(myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
+
+    hTightChargedMaxPt = makeTH<TH1F>(myDir, "TightChargedMaxPt", "TightChargedMaxPt;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPt = makeTH<TH1F>(myDir, "TightChargedSumPt", "TightChargedSumPt;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancy = makeTH<TH1F>(myDir, "TightChargedOccupancy", "TightChargedOccupancy;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaOccupancy = makeTH<TH1F>(myDir, "TightGammaOccupancy", "TightGammaOccupancy;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
   }
 
   TauSelection::~TauSelection() {
@@ -206,6 +214,72 @@ namespace HPlus {
     // Do selection
     passEvent = doTauSelection(iEvent,iSetup,taus);
     return Data(this, passEvent);
+  }
+
+  TauSelection::Data TauSelection::analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    // Obtain tau collection from src specified in config
+    edm::Handle<edm::View<pat::Tau> > htaus;
+    iEvent.getByLabel(fSrc, htaus);
+    edm::PtrVector<pat::Tau> taus = htaus->ptrVector();
+
+    // Initialize
+    fSelectedTaus.clear();
+    fSelectedTaus.reserve(taus.size());
+    fCleanedTauCandidates.clear();
+    fCleanedTauCandidates.reserve(taus.size());
+    fTauID->reset();
+
+    // Require at least one tau in the trigger matched collection
+    if (!taus.size()) return Data(this, false);
+    increment(fTauFound);
+
+    edm::PtrVector<pat::Tau> myBestTau;
+    // Tau candidate selection
+    edm::PtrVector<pat::Tau> myTauCandidates;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter)
+      if (fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
+    if (myTauCandidates.size() <= 1) {
+      if (!myTauCandidates.size()) { // no taus left
+	findBestTau(myBestTau, taus);
+	fSelectedTaus.push_back(myBestTau[0]);
+      } else // just one tau left
+	fSelectedTaus.push_back(myTauCandidates[0]);
+      return Data(this, true);
+    }
+    // Leading track cut
+    edm::PtrVector<pat::Tau> myLdgTrackPassedTaus;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = myTauCandidates.begin(); iter != myTauCandidates.end(); ++iter)
+      if (fTauID->passLeadingTrackCuts(*iter)) myLdgTrackPassedTaus.push_back(*iter);
+    if (myLdgTrackPassedTaus.size() <= 1) {
+      if (!myLdgTrackPassedTaus.size()) {
+	findBestTau(myBestTau, myTauCandidates);
+	fSelectedTaus.push_back(myBestTau[0]);
+      } else
+	fSelectedTaus.push_back(myLdgTrackPassedTaus[0]);
+      return Data(this, true);
+    }
+    // Lepton vetoes and fiducial cuts
+    edm::PtrVector<pat::Tau> myLeptonVetoPassedTaus;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = myLdgTrackPassedTaus.begin(); iter != myLdgTrackPassedTaus.end(); ++iter)
+      if (fTauID->passECALFiducialCuts(*iter) && fTauID->passTauCandidateEAndMuVetoCuts(*iter)) myLeptonVetoPassedTaus.push_back(*iter);
+    if (myLeptonVetoPassedTaus.size() <= 1) {
+      if (!myLeptonVetoPassedTaus.size()) {
+	findBestTau(myBestTau, myLdgTrackPassedTaus);
+	fSelectedTaus.push_back(myBestTau[0]);
+      } else
+	fSelectedTaus.push_back(myLeptonVetoPassedTaus[0]);
+      return Data(this, true);
+    }
+    // Isolation
+    edm::PtrVector<pat::Tau> myIsolatedTaus;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = myLeptonVetoPassedTaus.begin(); iter != myLeptonVetoPassedTaus.end(); ++iter)
+      if (fTauID->passIsolation(*iter)) myIsolatedTaus.push_back(*iter);
+    if (!myIsolatedTaus.size()) {
+      findBestTau(myBestTau, myLeptonVetoPassedTaus);
+      fSelectedTaus.push_back(myBestTau[0]);
+    } else
+      fSelectedTaus.push_back(myIsolatedTaus[0]);
+    return Data(this, true);
   }
 
   TauSelection::Data TauSelection::analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate) {
@@ -283,7 +357,16 @@ namespace HPlus {
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
         // Standard tau ID (necessary for the tau selection logic) 
+        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
+        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
+
         if (!fTauID->passIsolation(iTau)) continue;
+
+	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
+	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
+	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
+	hTightGammaOccupancy->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
+	
 
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
@@ -430,4 +513,27 @@ namespace HPlus {
     histogram->Fill(3., fEventWeight.getWeight()); // No MC match found
   }
 
+  void TauSelection::findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus) {
+    double myBestValue = 1e99;
+    edm::Ptr<pat::Tau> myBestTau = taus[0];
+    edm::PtrVector<pat::Tau> myIsolatedTaus;
+    for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
+      double myValue = (*iter)->userFloat("byTightChargedMaxPt");
+      if (myValue < myBestValue) {
+	if (myValue < 0.5) {
+	  myIsolatedTaus.push_back(*iter);
+	  myBestValue = 0.5;
+	} else {
+	  myBestValue = myValue;
+	}
+	myBestTau = *iter;
+      }
+    }
+    // If there are isolated taus, return the one with highest pt
+    if (myIsolatedTaus.size())
+      bestTau.push_back(myIsolatedTaus[0]);
+    else
+      bestTau.push_back(myBestTau);
+  }
+  
 }
