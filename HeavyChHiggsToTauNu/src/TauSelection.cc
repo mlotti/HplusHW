@@ -185,6 +185,14 @@ namespace HPlus {
 
     hNTriggerMatchedTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedTaus", "NTriggerMatchedTaus;N(trigger matched taus);N_{events}", 10, 0., 10.);
     hNTriggerMatchedSeparateTaus = makeTH<TH1F>(myDir, "N_TriggerMatchedSeparateTaus", "NTriggerMatchedSeparateTaus;N(trigger matched separate taus);N_{events}", 10, 0., 10.);
+
+    hIsolationPFChargedHadrCandsPtSum = makeTH<TH1F>(myDir, "IsolationPFChargedHadrCandsPtSum", "IsolationPFChargedHadrCandsPtSum;IsolationPFChargedHadrCandsPtSum;N_{tau candidates}", 200, 0., 100.);
+    hIsolationPFGammaCandsEtSum = makeTH<TH1F>(myDir, "IsolationPFGammaCandEtSum", "IsolationPFGammaCandEtSum;IsolationPFGammaCandEtSum;N_{tau candidates}", 200, 0., 100.);
+
+    hTightChargedMaxPt = makeTH<TH1F>(myDir, "TightChargedMaxPt", "TightChargedMaxPt;TightChargedMaxPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedSumPt = makeTH<TH1F>(myDir, "TightChargedSumPt", "TightChargedSumPt;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
+    hTightChargedOccupancy = makeTH<TH1F>(myDir, "TightChargedOccupancy", "TightChargedOccupancy;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
+    hTightGammaOccupancy = makeTH<TH1F>(myDir, "TightGammaOccupancy", "TightGammaOccupancy;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
   }
 
   TauSelection::~TauSelection() {
@@ -283,7 +291,16 @@ namespace HPlus {
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
         // Standard tau ID (necessary for the tau selection logic) 
+        hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
+        hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
+
         if (!fTauID->passIsolation(iTau)) continue;
+
+	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
+	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
+	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
+	hTightGammaOccupancy->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
+	
 
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
