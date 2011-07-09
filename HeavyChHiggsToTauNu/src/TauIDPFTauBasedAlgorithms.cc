@@ -66,7 +66,7 @@ namespace HPlus {
   TauIDPFHPSTight::~TauIDPFHPSTight() { }
   
   bool TauIDPFHPSTight::passIsolation(const edm::Ptr<pat::Tau> tau) {
-    if (tau->tauID("byHPStight") < 0.5) return false;
+    if (tau->tauID("byTightIsolation") < 0.5) return false;
     fCounterPackager.incrementSubCount(fIDHPS);
     // All cuts passed, return true
     return true;
