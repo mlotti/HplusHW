@@ -48,11 +48,7 @@ namespace HPlus {
       void incrementMuonVetoCounter() { increment(fMuonVetoCounter); }
       void incrementMETCounter() { increment(fMETCounter); }
       void incrementNJetsCounter() { increment(fNJetsCounter); }
-      void incrementBTaggingCounter(double maxDiscr, bool passed) {
-        if (passed) increment(fBTaggingCounter);
-        if (maxDiscr > 1.7) increment(fBTaggingCounter17);
-        if (maxDiscr > 3.3) increment(fBTaggingCounter33);
-      }
+      void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
     private:
@@ -62,8 +58,6 @@ namespace HPlus {
       Count fMETCounter;
       Count fNJetsCounter;
       Count fBTaggingCounter;
-      Count fBTaggingCounter17;
-      Count fBTaggingCounter33;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
     };
@@ -115,15 +109,13 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
+    Count fRtauAfterTauIDCounter;    
     Count fMETCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
     Count fBTaggingCounter;
-    Count fBTaggingCounter17;
-    Count fBTaggingCounter33;
     Count fFakeMETVetoCounter;
-    Count fRtauAfterTauIDCounter;    
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
