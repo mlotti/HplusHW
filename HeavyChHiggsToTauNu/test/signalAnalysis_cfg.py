@@ -38,6 +38,7 @@ doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
 doTriggerParametrisation = False
+applyTriggerScaleFactor = True
 
 filterGenTaus = False
 filterGenTausInaccessible = False
@@ -151,6 +152,11 @@ if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddi
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+
+# Trigger with scale factors (at the moment hard coded)
+if (applyTriggerScaleFactor and not dataVersion.isData()):
+    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
+
 
 # Set the data scenario for trigger efficiencies and vertex weighting
 param.setVertexWeightFor2011()
