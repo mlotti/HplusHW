@@ -124,9 +124,9 @@ param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
 
-param.setAllTauSelectionOperatingMode('standard')
+#param.setAllTauSelectionOperatingMode('standard')
 
-#param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
+param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 
 # Set tau sources to trigger matched tau collections

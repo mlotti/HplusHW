@@ -172,6 +172,7 @@ namespace HPlus {
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
     TH1 *hSelectedTauLeadingTrackPt;
+    TH1 *hSelectedTauLeadingTrackPtMetCut;
     TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
