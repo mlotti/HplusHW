@@ -219,6 +219,8 @@ namespace HPlus {
   }
   
   bool TriggerSelection::passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    if (iEvent.isRealData()) return true;
+
     //increment(fTriggerParamAllCount);
     increment(fTriggerScaleFactorAllCount);
     // Get Tau object
@@ -226,16 +228,14 @@ namespace HPlus {
     if (!triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events
     //increment(fTriggerParamTauCount);
     // Do lookup of scale factor for MC
-    if (!iEvent.isRealData()) {
-      double myPt = (triggerTauData.getSelectedTaus()[0])->pt();
-      if (myPt > 40) {
-	fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
-	hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-	hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
-	// Apply scale factor
-	fEventWeight.multiplyWeight(fScaleFactor);
-	increment(fTriggerScaleFactorAllCount);
-      }
+    double myPt = (triggerTauData.getSelectedTaus()[0])->pt();
+    if (myPt > 40) {
+      fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
+      hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
+      hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      // Apply scale factor
+      fEventWeight.multiplyWeight(fScaleFactor);
+      increment(fTriggerScaleFactorAllCount);
     }
 
     // Get MET object 
