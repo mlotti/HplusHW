@@ -94,6 +94,8 @@ namespace HPlus {
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
+    std::vector<double> getWiderTauPtBins(void);
+    const int getWiderTauPtBinsIndex(double met);
     std::vector<double> getMetBins(void);
     const int getMetIndex(double met);
     const int getJetPtIndex(double JetPt);
@@ -291,6 +293,11 @@ namespace HPlus {
     std::vector<TH1*> fPurityBeforeAfterJetsMetBtag;
     std::vector<TH1*> fPurityBeforeAfterJetsFakeMet;
     std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau;
+    // MET-Tau Isolation Correlation check in tau pT bins
+    std::vector<TH1*> fMetInTauPtBins_AfterBigBox_withIsolation;
+    std::vector<TH1*> fMetInTauPtBins_AfterBigBox_withoutIsolation;
+    std::vector<TH1*> fMetInWiderTauPtBins_AfterBigBox_withIsolation;
+    std::vector<TH1*> fMetInWiderTauPtBins_AfterBigBox_withoutIsolation;
 
   };
 }

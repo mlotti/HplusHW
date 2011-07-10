@@ -111,10 +111,12 @@ namespace HPlus {
     ~TriggerSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
+    /// Call this function to set trigger scale factor
+    bool passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
   private:
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
-    bool passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
     //bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:

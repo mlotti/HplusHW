@@ -67,6 +67,12 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # For testing in lxplus
+    #"file:/media/disk/attikis/PATTuples/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"     
+    #"file:/media/disk/attikis/PATTuples/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
+    #
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
+    #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
     dataVersion.getAnalysisDefaultFileMadhatter()
@@ -160,7 +166,7 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
     param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
 
 
-# Set the data scenario for trigger efficiencies and vertex weighting
+# Set the data scenario for vertex/pileup weighting
 param.setVertexWeightFor2011() # Reweight by reconstructed vertices
 #param.setPileupWeightFor2011() # Reweight by true PU distribution 
 

@@ -42,7 +42,7 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate", &fTriggerSelection),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
@@ -107,6 +107,12 @@ namespace HPlus {
     createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsMetBtag_", fPurityBeforeAfterJetsMetBtag, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
     createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsFakeMet_", fPurityBeforeAfterJetsFakeMet, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
     createHistogramGroupByOtherVariableBins("QCD_Purity_BeforeAfterJetsTauIdNoRtau_", fPurityBeforeAfterJetsTauIdNoRtau, 2, -0.5, 1.5, fFactorizationTable.getBinLowEdges(), "TauPt", "GeV/c", "passCut");
+    // MET-Tau Isolation Correlation check in tau pT bins
+    createHistogramGroupByOtherVariableBins("QCD_MetInTauPtBins_AfterBigBox_withIsolation", fMetInTauPtBins_AfterBigBox_withIsolation, 20, 0.0, 100.0, fFactorizationTable.getBinLowEdges(), "TauPt", "E_{T}^{miss}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_MetInTauPtBins_AfterBigBox_withoutIsolation", fMetInTauPtBins_AfterBigBox_withoutIsolation, 20, 0.0, 100.0, fFactorizationTable.getBinLowEdges(), "TauPt", "E_{T}^{miss}", "GeV");
+    // do-over with wider bins
+    createHistogramGroupByOtherVariableBins("QCD_MetInWiderTauPtBins_AfterBigBox_withIsolation", fMetInWiderTauPtBins_AfterBigBox_withIsolation, 20, 0.0, 100.0, getWiderTauPtBins() , "TauPt", "E_{T}^{miss}", "GeV");
+    createHistogramGroupByOtherVariableBins("QCD_MetInWiderTauPtBins_AfterBigBox_withoutIsolation", fMetInWiderTauPtBins_AfterBigBox_withoutIsolation, 20, 0.0, 100.0, getWiderTauPtBins(), "TauPt", "E_{T}^{miss}", "GeV");
         
     // Histograms for later change of factorization map
     // MET factorization details
@@ -279,6 +285,30 @@ namespace HPlus {
     return fMetBinLowEdges;;
   }
 
+
+
+  const int QCDMeasurement::getWiderTauPtBinsIndex(double tauPt){
+    
+    if( (tauPt >= 40.0) && (tauPt < 60.0 ) )  return 1;
+    else if( (tauPt >= 60.0) && (tauPt < 80.0 ) )  return 2;
+    else if( (tauPt >= 80.0) && (tauPt < 100.0 ) )  return 3;
+    else if( (tauPt >= 100.0) ) return 4;
+    else throw cms::Exception("Configuration") << "QCDMeasruement: Cannot determine the index for MET factorization histograms for MET = " << tauPt << ". Please check the function getMETFactorizationindex(const double met)" << std::endl;
+  
+    return -1;
+  }
+
+
+  std::vector<double> QCDMeasurement::getWiderTauPtBins(void){
+
+    std::vector<double> fMetBinLowEdges;
+    fMetBinLowEdges.push_back(40);
+    fMetBinLowEdges.push_back(60);
+    fMetBinLowEdges.push_back(80);
+    fMetBinLowEdges.push_back(100);
+
+    return fMetBinLowEdges;;
+  }
 
 
   const int QCDMeasurement::getJetPtIndex(double JetPt){
@@ -473,6 +503,15 @@ namespace HPlus {
     if (metData.passedEvent())
       hMETFactorizationNJetsAfter->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     hMETFactorizationNJets->Fill(mySelectedTau[0]->pt(), metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+    // MET-Tau Isolation Correlation check in tau pT bins
+    const int myWiderTauPtIndex =  getWiderTauPtBinsIndex( mySelectedTau[0]->pt() );
+    fMetInTauPtBins_AfterBigBox_withoutIsolation[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if(tauDataForTauID.passedEvent()) {fMetInTauPtBins_AfterBigBox_withIsolation[myFactorizationTableIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());}
+    // do-over with wider bins
+    fMetInWiderTauPtBins_AfterBigBox_withoutIsolation[myWiderTauPtIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if(tauDataForTauID.passedEvent()) {fMetInWiderTauPtBins_AfterBigBox_withIsolation[myWiderTauPtIndex]->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());}
+
 
     // Check BTag-MET correlations
     edm::PtrVector<pat::Jet> selectedJets = jetData.getSelectedJets();

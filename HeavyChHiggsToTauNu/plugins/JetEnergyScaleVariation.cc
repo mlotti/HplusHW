@@ -79,6 +79,7 @@ private:
 
   JetCorrectionUncertainty* fJECUncertainty;
 
+  bool fThrow;
 };
 
 JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfig) :
@@ -88,7 +89,8 @@ JetEnergyScaleVariation::JetEnergyScaleVariation(const edm::ParameterSet& iConfi
 	JESVariation(iConfig.getParameter<double>("JESVariation")),
   JESEtaVariation(iConfig.getParameter<double>("JESEtaVariation")),
   unclusteredMETVariation(iConfig.getParameter<double>("unclusteredMETVariation")),
-        tauJetMatchingDR(iConfig.getParameter<double>("tauJetMatchingDR"))
+        tauJetMatchingDR(iConfig.getParameter<double>("tauJetMatchingDR")),
+        fThrow(iConfig.getUntrackedParameter<bool>("throw", true))
 {
 	produces<pat::TauCollection>();
 	produces<pat::JetCollection>();
@@ -136,7 +138,10 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	// Taus
   edm::Handle<edm::View<pat::Tau> > htaus;
   iEvent.getByLabel(tauSrc, htaus);
+  if(!fThrow && !htaus.isValid())
+    return;
   const edm::PtrVector<pat::Tau>& taus(htaus->ptrVector());
+
 
   for(edm::PtrVector<pat::Tau>::iterator iter = taus.begin(); iter != taus.end(); ++iter) {
     edm::Ptr<pat::Tau> iTau = *iter;
@@ -158,6 +163,9 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	// Jets
 	edm::Handle<edm::View<pat::Jet> > hjets;
   iEvent.getByLabel(jetSrc, hjets);
+  if(!fThrow && !hjets.isValid())
+    return;
+
 	const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
 
   LorentzVector myJetSum(0., 0., 0., 0.);
@@ -206,6 +214,8 @@ void JetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventSetup&
 	// MET
 	edm::Handle<edm::View<reco::MET> > hmet;
 	iEvent.getByLabel(metSrc, hmet);
+        if(!fThrow && !hmet.isValid())
+          return;
 	edm::Ptr<reco::MET> met = hmet->ptrAt(0);
 /*
 For the general case, you would basically do it in 3 steps (within a
