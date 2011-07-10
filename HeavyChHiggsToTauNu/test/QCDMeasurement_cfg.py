@@ -6,11 +6,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-#dataVersion = "39Xredigi" # Winter10 MC
-#dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-dataVersion = "311Xredigi" # Spring11 MC
-#dataVersion = "41Xdata"   # Run2011 PromptReco
-
+dataVersion="42Xmc"     # Summer11 MC
+#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
 
 ##########
 # Flags for additional signal analysis modules
