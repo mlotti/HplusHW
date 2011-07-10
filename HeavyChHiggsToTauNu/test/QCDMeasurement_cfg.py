@@ -100,8 +100,8 @@ param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Set the triggers for trigger efficiency parametrisation
-param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
-#param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
+#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
+param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
   rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
   )
 param.trigger.triggerMETSelection = param.MET.clone(
