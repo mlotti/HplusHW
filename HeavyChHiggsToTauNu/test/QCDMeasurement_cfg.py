@@ -118,9 +118,10 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 if (applyTriggerScaleFactor and not dataVersion.isData()):
     param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
 
-# Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerPileupFor2010()
-param.setTriggerPileupFor2011()
+
+# Set the data scenario for vertex/pileup weighting
+param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+#param.setPileupWeightFor2011() # Reweight by true PU distribution 
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
 #def setTriggerPileupFor2011(**kwargs):

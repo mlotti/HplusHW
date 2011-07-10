@@ -164,7 +164,7 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
     param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
 
 
-# Set the data scenario for trigger efficiencies and vertex weighting
+# Set the data scenario for vertex/pileup weighting
 param.setVertexWeightFor2011() # Reweight by reconstructed vertices
 #param.setPileupWeightFor2011() # Reweight by true PU distribution 
 
