@@ -302,7 +302,7 @@ namespace HPlus {
       if (fTriggerSelection == 0) {
         myPassStatus = true;
       } else {
-        if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) myPassStatus = true
+        if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) myPassStatus = true;
       }
       if (myPassStatus) {
         if (fProngNumber == 1) {
