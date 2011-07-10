@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     parser.add_option("-f", dest="file", type="string",
                       help="Input ROOT file produced with estimatePileup.py")
-    parser.add_option("-n", dest="max", default=25,
+    parser.add_option("-n", dest="max", default=25, type="int",
                       help="Print distibution up to N PU interactions (default: 25, i.e. Summer1; use -1 for all )")
 
     (opts, args) = parser.parse_args()

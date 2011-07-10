@@ -3,6 +3,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
 
@@ -28,6 +31,8 @@ namespace HPlus {
     else {
       fWeights = iConfig.getParameter<std::vector<double> >("weights");
     }
+    edm::Service<TFileService> fs;
+    hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
   }
   VertexWeight::~VertexWeight() {}
 
@@ -39,8 +44,10 @@ namespace HPlus {
     if(hvertex.isValid())
       vertSize = hvertex->size();
 
-    if(!fEnabled || iEvent.isRealData())
+    if(!fEnabled || iEvent.isRealData()) {
+      hWeights->Fill(1.0);
       return std::make_pair(1.0, vertSize);
+    }
 
     double weight = std::numeric_limits<double>::quiet_NaN();
     if(fUseSimulatedPileup)
@@ -57,6 +64,7 @@ namespace HPlus {
     }
 
     /// Return "Vertex Weight" according to the number of vertices found in Event
+    hWeights->Fill(weight);
     return std::make_pair(weight, vertSize);
   }
 
