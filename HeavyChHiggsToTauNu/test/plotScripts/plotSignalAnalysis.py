@@ -64,7 +64,7 @@ def main():
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110706_134706/multicrab.cfg", counters=counters)
     # standard selection, Rtau=0
  #   datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110614_135421/multicrab.cfg", counters=counters)
-    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/test/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110710_002341/multicrab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/test/CMSSW_4_1_5_lauri/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110710_002341/multicrab.cfg", counters=counters)
  
     datasetsSignal.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11","TToBLNu_tW-channel_TuneZ2_Spring11",
                                      "WW_TuneZ2_Spring11","WZ_TuneZ2_Spring11","ZZ_TuneZ2_Spring11"])
@@ -136,7 +136,7 @@ def main():
     tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterCuts"), "SelectedTau_Rtau_AfterCuts")
-    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
+    leadingTrack(plots.DataMCPlot(datasets, analysis+"/SelectedTau_TauLeadingTrackPt"), "SelectedTau_TauLeadingTrackPt")
     
     selectionFlow(plots.DataMCPlot(datasets, analysis+"/SignalSelectionFlow"), "SignalSelectionFlow")
     
@@ -585,7 +585,7 @@ def tauPhi(h, name, rebin=10, ratio=False):
     h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
     common(h, xlabel, ylabel)
     
-def leadingTrack(h, rebin=10, ratio=True):
+def leadingTrack(h, name, rebin=10, ratio=False):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -597,7 +597,7 @@ def leadingTrack(h, rebin=10, ratio=True):
     scaleMCfromWmunu(h)
     
     opts = {"ymin": 0.001,"xmin": 10.0, "ymaxfactor": 5}
-    name = "leadingTrackPt"
+#    name = "leadingTrackPt"
 #    name = name+"_log"
     #h.createFrameFraction(name, opts=opts)
     h.createFrame(name, opts=opts)
