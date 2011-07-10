@@ -76,11 +76,10 @@ namespace HPlus {
     hScaleFactorUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorUncertainty", "TriggerScaleFactorUncertainty;TriggerScaleFactorUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
     // Hard code trigger efficiency values for the scale factor
-    fTriggerScaleFactor.setValue(40, 0.2424242, 0.03837665, 0.2669323, 0.01631814);
-    fTriggerScaleFactor.setValue(50, 0.4848485, 0.08481292, 0.5345912, 0.03948019);
-    fTriggerScaleFactor.setValue(60, 0.5357143, 0.09190574, 0.6666667, 0.05219578);
-    fTriggerScaleFactor.setValue(80, 0.75,      0.2121077,  0.5714286, 0.1053641 ); // Matti: merge bins 80-100 and >100 to one bin
-    fTriggerScaleFactor.setValue(100, 1.00,     0.3181538,  0.6666667, 0.1214185 );
+    fTriggerScaleFactor.setValue(40, 0.2790698, 0.04958686, 0.2669323, 0.01631814);
+    fTriggerScaleFactor.setValue(50, 0.5,       0.1021036,  0.5345912, 0.03948019);
+    fTriggerScaleFactor.setValue(60, 0.5454545, 0.1029723,  0.6666667, 0.05219578);
+    fTriggerScaleFactor.setValue(80, 0.8,       0.1891604,  0.6129032, 0.0871989 );
   }
 
   TriggerSelection::~TriggerSelection() {
