@@ -15,6 +15,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 
 #include "TH1F.h"
 
@@ -23,7 +24,7 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fProngNumber(prongNumber),
@@ -31,6 +32,7 @@ namespace HPlus {
     fTauID(0),
     fOperationMode(kNormalTauID),
     fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
+    fTriggerSelection(triggerSelection),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -295,12 +297,21 @@ namespace HPlus {
     fOperationMode = fOriginalOperationMode;
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
-      if (fProngNumber == 1) {
-        if (fTauID->passOneProngCut(tauCandidate)) {
-          if (fTauID->passChargeCut(tauCandidate)) {
-            // All cuts have been passed, save tau
-            fillHistogramsForSelectedTaus(tauCandidate, iEvent);
-            fSelectedTaus.push_back(tauCandidate);
+      // Apply trigger scale factor
+      bool myPassStatus = false;
+      if (fTriggerSelection == 0) {
+        myPassStatus = true;
+      } else {
+        if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) myPassStatus = true;
+      }
+      if (myPassStatus) {
+        if (fProngNumber == 1) {
+          if (fTauID->passOneProngCut(tauCandidate)) {
+            if (fTauID->passChargeCut(tauCandidate)) {
+              // All cuts have been passed, save tau
+              fillHistogramsForSelectedTaus(tauCandidate, iEvent);
+              fSelectedTaus.push_back(tauCandidate);
+            }
           }
         }
       }
@@ -361,12 +372,16 @@ namespace HPlus {
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
 
         if (!fTauID->passIsolation(iTau)) continue;
-
+        // Apply trigger scale factor
+        if (fTriggerSelection == 0) {
+          if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        }
+        
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
 	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
 	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
 	hTightGammaOccupancy->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
-	
+
 
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
