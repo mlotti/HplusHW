@@ -298,7 +298,13 @@ namespace HPlus {
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
       // Apply trigger scale factor
-      if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) {
+      bool myPassStatus = false;
+      if (fTriggerSelection == 0) {
+        myPassStatus = true;
+      } else {
+        if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) myPassStatus = true
+      }
+      if (myPassStatus) {
         if (fProngNumber == 1) {
           if (fTauID->passOneProngCut(tauCandidate)) {
             if (fTauID->passChargeCut(tauCandidate)) {
@@ -367,7 +373,9 @@ namespace HPlus {
 
         if (!fTauID->passIsolation(iTau)) continue;
         // Apply trigger scale factor
-        if (!fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        if (fTriggerSelection == 0) {
+          if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        }
         
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
 	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
