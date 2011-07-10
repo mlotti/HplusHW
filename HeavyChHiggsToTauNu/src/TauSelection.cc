@@ -24,16 +24,16 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection = 0):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
-    fEventWeight(eventWeight),
     fProngNumber(prongNumber),
     fLabel(label),
     fTauID(0),
     fOperationMode(kNormalTauID),
     fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
-    fTriggerSelection(triggerSelection)
+    fTriggerSelection(triggerSelection),
+    fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
