@@ -34,7 +34,7 @@ tauPreSelection = "pt() > 10"
 def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
                    doPlainPat=True, doPF2PAT=False,
                    plainPatArgs={}, pf2patArgs={},
-                   doMcPreselection=True):
+                   doMcPreselection=False):
     def setPatArg(args, name, value):
         if name in args:
             print "Overriding PAT arg '%s' from '%s' to '%s'" % (name, str(args[name]), str(value))
