@@ -8,5 +8,6 @@ jesVariation = cms.EDProducer("JetEnergyScaleVariation",
     JESEtaVariation = cms.double(0.02), # takes the sign from JESVariation
     unclusteredMETVariation = cms.double(0.10), # use sign, +/-
     jetVariationMode = cms.string("all"), # all, onlyTauMatching, onlyNoTauMatching
-    tauJetMatchingDR = cms.double(0.5)
+    tauJetMatchingDR = cms.double(0.5),
+    throw = cms.untracked.bool(False)
 )
