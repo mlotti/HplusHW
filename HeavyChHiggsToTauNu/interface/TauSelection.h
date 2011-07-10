@@ -74,6 +74,8 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on a given sample of taus 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
+    /// Trigger tau selection - find best unique tau candidate 
+    Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on cleaned tau candidates
     Data analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate);
     /// tau ID on selected tau candidates - to be applied after analyzeTauIDWithoutRtauOnCleanedTauCandidates
@@ -96,6 +98,8 @@ namespace HPlus {
     void fillHistogramsForCleanedTauCandidates(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void fillHistogramsForSelectedTaus(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent);
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
+    void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
+
 
     double getSelectedRtauValue() const {
       if (fSelectedTaus.size())
@@ -149,6 +153,15 @@ namespace HPlus {
 
     TH1 *hNTriggerMatchedTaus;
     TH1 *hNTriggerMatchedSeparateTaus;
+
+    TH1 *hIsolationPFChargedHadrCandsPtSum;
+    TH1 *hIsolationPFGammaCandsEtSum;
+
+    TH1 *hTightChargedMaxPt;
+    TH1 *hTightChargedSumPt;
+    TH1 *hTightChargedOccupancy;
+    TH1 *hTightGammaOccupancy;
+
 
     TH1 *hVLooseIsoNcands;
     TH1 *hLooseIsoNcands;
