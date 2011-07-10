@@ -891,10 +891,17 @@ def addTo(datasets):
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_167078_tauembedding_skim_v11_1-8f4b803c9184c7433c2172bc17a46dec/USER",
-                "number_of_jobs": 30 # ~1 kev/job
+                "number_of_jobs": 37 # ~1 kev/job
             },
             })
 
+    datasets["SingleMu_161119-161119_May10_Wed"]["data"].update({
+            "tauembedding_skim_v11": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_161119_tauembedding_skim_v11_2-dd0ba640832535163e436f105f8c8a37/USER",
+                "number_of_jobs": 1 # ~1 kev/job
+            },
+            })
     datasets["SingleMu_165103-165103_Prompt_Wed"]["data"].update({
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
