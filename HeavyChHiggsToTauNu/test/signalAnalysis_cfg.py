@@ -161,10 +161,8 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
 
 
 # Set the data scenario for trigger efficiencies and vertex weighting
-param.setVertexWeightFor2011()
-#param.setPileupWeightFor2011May10() # Only May10ReReco part
-#param.setPileupWeightFor2011Prompt() # Only PromptReco part, excluding May10ReReco
-#param.setPileupWeightFor2011All() # May10ReReco+PromptReco
+param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+#param.setPileupWeightFor2011() # Reweight by true PU distribution 
 
 #param.trigger.selectionType = "disabled"
 
