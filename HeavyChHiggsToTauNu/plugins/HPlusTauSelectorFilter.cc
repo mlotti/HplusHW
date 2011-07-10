@@ -26,6 +26,7 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::TauSelection fOneProngTauSelection;
+  bool fFilter;
 
   // Let's use reco::Candidate as the output type, as the required
   // dictionaries for edm::PtrVector<pat:Tau> do not exist, and I
@@ -37,10 +38,12 @@ class HPlusTauPtrSelectorFilter: public edm::EDFilter {
 HPlusTauPtrSelectorFilter::HPlusTauPtrSelectorFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauFilter")
+  fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "TauFilter"),
+  fFilter(iConfig.getParameter<bool>("filter"))
 {
   eventCounter.produces(this);
   produces<Product>();
+  produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusTauPtrSelectorFilter::~HPlusTauPtrSelectorFilter() {}
@@ -52,14 +55,18 @@ bool HPlusTauPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-  if(!tauData.passedEvent()) return false;
+  std::auto_ptr<bool> passed(new bool(false));
 
-  //iEvent.put(std::auto_ptr<Product>(new Product(fOneProngTauSelection.getSelectedTaus())));
-  std::auto_ptr<Product> ret(new Product());
-  ret->push_back(tauData.getSelectedTaus()[0]);
-  iEvent.put(ret);
-  return true;
+  HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+  if(tauData.passedEvent()) {
+    *passed = true;
+
+    std::auto_ptr<Product> ret(new Product());
+    ret->push_back(tauData.getSelectedTaus()[0]);
+    iEvent.put(ret);
+  }
+  iEvent.put(passed);
+  return !fFilter || (fFilter && *passed);
 }
 
 bool HPlusTauPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
