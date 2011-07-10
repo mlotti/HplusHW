@@ -93,9 +93,11 @@ namespace HPlus {
     increment(fTriggerAllCount);
 
     hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
-    if (fTriggerSelectionType == kTriggerSelectionByTriggerBit)
+    if (fTriggerSelectionType == kTriggerSelectionByTriggerBit ||
+        fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor) {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
-
+    }
+    
     if(passEvent) {
       increment(fTriggerBitCount);
       TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
@@ -104,9 +106,9 @@ namespace HPlus {
 
     if(passEvent) {
       increment(fTriggerCaloMetCount);
-      if (fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor)
-        passEvent = passedTriggerScaleFactor(iEvent, iSetup);
-      else if(fTriggerSelectionType == kTriggerSelectionDisabled)
+      //if (fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor)
+      //passEvent = passedTriggerScaleFactor(iEvent, iSetup); // do not apply trigger scale factor here, instead call it after tau isolation
+      if(fTriggerSelectionType == kTriggerSelectionDisabled)
         passEvent = true;
     }
     

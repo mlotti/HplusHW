@@ -9,6 +9,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 
 namespace edm {
   class ParameterSet;
@@ -67,7 +68,7 @@ namespace HPlus {
       kTauIDWithRtauOnly // For QCD bkg measurement - set internally
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label);
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection& triggerSelection = 0);
     ~TauSelection();
 
     /// Default tauID
@@ -125,6 +126,9 @@ namespace HPlus {
     // Counters
     Count fTauFound;
 
+    // TriggerSelection object
+    TriggerSelection fTriggerSelection;
+    
     // EventWeight object
     EventWeight& fEventWeight;
 

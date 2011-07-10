@@ -23,15 +23,16 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection& triggerSelection = 0):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
+    fEventWeight(eventWeight),
     fProngNumber(prongNumber),
     fLabel(label),
     fTauID(0),
     fOperationMode(kNormalTauID),
     fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
-    fEventWeight(eventWeight)
+    fTriggerSelection(triggerSelection)
   {
     edm::Service<TFileService> fs;
     TFileDirectory myDir = fs->mkdir(label);
@@ -295,12 +296,15 @@ namespace HPlus {
     fOperationMode = fOriginalOperationMode;
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
-      if (fProngNumber == 1) {
-        if (fTauID->passOneProngCut(tauCandidate)) {
-          if (fTauID->passChargeCut(tauCandidate)) {
-            // All cuts have been passed, save tau
-            fillHistogramsForSelectedTaus(tauCandidate, iEvent);
-            fSelectedTaus.push_back(tauCandidate);
+      // Apply trigger scale factor
+      if (fTriggerSelection.passedTriggerScaleFactor(iEvent, iSetup)) {
+        if (fProngNumber == 1) {
+          if (fTauID->passOneProngCut(tauCandidate)) {
+            if (fTauID->passChargeCut(tauCandidate)) {
+              // All cuts have been passed, save tau
+              fillHistogramsForSelectedTaus(tauCandidate, iEvent);
+              fSelectedTaus.push_back(tauCandidate);
+            }
           }
         }
       }
@@ -361,12 +365,14 @@ namespace HPlus {
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
 
         if (!fTauID->passIsolation(iTau)) continue;
-
+        // Apply trigger scale factor
+        if (!fTriggerSelection.passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
 	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
 	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
 	hTightGammaOccupancy->Fill((float)iTau->userInt("byTightGammaOccupancy"), fEventWeight.getWeight());
-	
+
 
         if (fProngNumber == 1) {
           if (!fTauID->passOneProngCut(iTau)) continue;
