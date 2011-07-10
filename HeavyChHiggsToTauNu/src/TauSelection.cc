@@ -15,6 +15,7 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 
 #include "TH1F.h"
 
@@ -23,7 +24,7 @@ namespace HPlus {
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection& triggerSelection = 0):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection = 0):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fEventWeight(eventWeight),
@@ -297,7 +298,7 @@ namespace HPlus {
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
       // Apply trigger scale factor
-      if (fTriggerSelection.passedTriggerScaleFactor(iEvent, iSetup)) {
+      if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) {
         if (fProngNumber == 1) {
           if (fTauID->passOneProngCut(tauCandidate)) {
             if (fTauID->passChargeCut(tauCandidate)) {
@@ -366,7 +367,7 @@ namespace HPlus {
 
         if (!fTauID->passIsolation(iTau)) continue;
         // Apply trigger scale factor
-        if (!fTriggerSelection.passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        if (!fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
         
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
 	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
