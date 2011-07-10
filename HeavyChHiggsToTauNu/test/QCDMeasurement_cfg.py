@@ -30,6 +30,7 @@ JESUnclusteredMETVariation = 0.10
 
 # Do trigger parametrisation for MC and tau embedding. If set to False trigger will be applied automatically
 doTriggerParametrisation = False
+applyTriggerScaleFactor = True
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
 # with Btau data where no prescale is needed at the moment) 
@@ -51,21 +52,16 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     fileNames = cms.untracked.vstring(
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/ttjets_mc_pattuple_9_1_BRC.root"
-    #"file:/tmp/attikis/v11/pattuple_9_1_ZS7.root" 
-    #"file:/media/disk/attikis/PATTuples/v11/pattuple_9_1_ZS7.root"
-    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/pattuple_9_1_ZS7.root"
-    "rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v11/ttjets_mc_pattuple_9_1_BRC.root"
-    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v10/pattuple_5_1_g68.root" 
-    #"file:/afs/cern.ch/user/a/attikis/scratch0/CMSSW_4_1_4/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple_5_1_g68.root"
-    #"file:test_pattuple_v9_JetMet2010A_86.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk/attikis/PATTuples/v9_1/test_pattuple_v9_JetMet2010A_86.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_JetMet2010A_86.root"
-    #"file:/opt/data/TTJets_7TeV-pythia6-tauola_Spring11_311X_testsample.root"
-    #"rfio:/castor/cern.ch/user/w/wendland/test_pattuple_v9_qcd120170.root"
-    #"file:/media/disk/attikis/tmp/pattuple_19_1_3id.root"
-    #"file:/home/wendland/data/pattuple_176_1_ikP.root"
+    #"file:/media/disk/attikis/PATTuples/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"     
+    "file:/media/disk/attikis/PATTuples/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
+    #
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"
+    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
+    #
+    # dataVersion.getAnalysisDefaultFileCastor()
+    # For testing in jade
+    #dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
 
@@ -110,7 +106,7 @@ param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
 #param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
   rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
-)
+  )
 param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
@@ -119,11 +115,16 @@ if (doTriggerParametrisation and not dataVersion.isData()):
     #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
-    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
 
-# Set the data scenario for trigger efficiencies and vertex weighting
-#param.setTriggerPileupFor2010()
-param.setTriggerPileupFor2011()
+# Trigger with scale factors (at the moment hard coded)
+if (applyTriggerScaleFactor and not dataVersion.isData()):
+    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
+
+
+# Set the data scenario for vertex/pileup weighting
+param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+#param.setPileupWeightFor2011() # Reweight by true PU distribution 
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
 #def setTriggerPileupFor2011(**kwargs):
