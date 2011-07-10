@@ -93,9 +93,11 @@ namespace HPlus {
     increment(fTriggerAllCount);
 
     hControlSelectionType->Fill(fTriggerSelectionType, fEventWeight.getWeight());
-    if (fTriggerSelectionType == kTriggerSelectionByTriggerBit)
+    if (fTriggerSelectionType == kTriggerSelectionByTriggerBit ||
+        fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor) {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
-
+    }
+    
     if(passEvent) {
       increment(fTriggerBitCount);
       TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
@@ -104,9 +106,9 @@ namespace HPlus {
 
     if(passEvent) {
       increment(fTriggerCaloMetCount);
-      if (fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor)
-        passEvent = passedTriggerScaleFactor(iEvent, iSetup);
-      else if(fTriggerSelectionType == kTriggerSelectionDisabled)
+      //if (fTriggerSelectionType == kTriggerSelectionByTriggerBitApplyScaleFactor)
+      //passEvent = passedTriggerScaleFactor(iEvent, iSetup); // do not apply trigger scale factor here, instead call it after tau isolation
+      if(fTriggerSelectionType == kTriggerSelectionDisabled)
         passEvent = true;
     }
     
@@ -217,6 +219,8 @@ namespace HPlus {
   }
   
   bool TriggerSelection::passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    if (iEvent.isRealData()) return true;
+
     //increment(fTriggerParamAllCount);
     increment(fTriggerScaleFactorAllCount);
     // Get Tau object
@@ -224,16 +228,14 @@ namespace HPlus {
     if (!triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events
     //increment(fTriggerParamTauCount);
     // Do lookup of scale factor for MC
-    if (!iEvent.isRealData()) {
-      double myPt = (triggerTauData.getSelectedTaus()[0])->pt();
-      if (myPt > 40) {
-	fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
-	hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-	hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
-	// Apply scale factor
-	fEventWeight.multiplyWeight(fScaleFactor);
-	increment(fTriggerScaleFactorAllCount);
-      }
+    double myPt = (triggerTauData.getSelectedTaus()[0])->pt();
+    if (myPt > 40) {
+      fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
+      hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
+      hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      // Apply scale factor
+      fEventWeight.multiplyWeight(fScaleFactor);
+      increment(fTriggerScaleFactorAllCount);
     }
 
     // Get MET object 
