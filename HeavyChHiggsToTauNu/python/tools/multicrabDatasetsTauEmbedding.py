@@ -950,7 +950,7 @@ def addTo(datasets):
     datasets["SingleMu_167786-167913_Prompt_Wed"]["data"].update({
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165103_tauembedding_skim_v11_2-4315f4ee024065925a864d01ae9da7fa/USER",
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_167786_tauembedding_skim_v11_2-3025e13c2442dda4f3739b5f37145f27/USER",
                 "number_of_jobs": 42 # ~1 kev/job
             },
             })
