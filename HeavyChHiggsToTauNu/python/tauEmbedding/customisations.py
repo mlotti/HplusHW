@@ -44,8 +44,8 @@ def customiseParamForTauEmbedding(param, dataVersion):
 def setCaloMetSum(process, sequence, param, dataVersion):
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
-                       src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
-                                           cms.InputTag("met", "", "EMBEDDINGRECO")
+                       src = cms.VInputTag(cms.InputTag("metNoHF", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("metNoHF", "", "EMBEDDINGRECO")
                                            )
                        )
     setattr(process, name, m)
