@@ -1071,10 +1071,10 @@ def addTo(datasets):
                 "number_of_jobs": 65 # ~2 kev/job
             },
             "tauembedding_generation_v11_3_pt40": {
-                "fallback": "tauembedding_generation_V11_2_pt40"
+                "fallback": "tauembedding_generation_v11_2_pt40"
             },
             "tauembedding_embedding_v11_3_pt40": {
-                "fallback": "tauembedding_embedding_V11_2_pt40"
+                "fallback": "tauembedding_embedding_v11_2_pt40"
             },
             })
     datasets["WJets_TuneZ2_Summer11"]["data"].update({
@@ -1091,13 +1091,13 @@ def addTo(datasets):
             "tauembedding_embedding_v11_2_pt40": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v11_2_pt40-af0b4aa82477426f47ec012132b67081/USER",
-                "number_of_jobs": 30 # ~2 kev/job
+                "number_of_jobs": 35 # ~2 kev/job
             },
             "tauembedding_generation_v11_3_pt40": {
-                "fallback": "tauembedding_generation_V11_2_pt40"
+                "fallback": "tauembedding_generation_v11_2_pt40"
             },
             "tauembedding_embedding_v11_3_pt40": {
-                "fallback": "tauembedding_embedding_V11_2_pt40"
+                "fallback": "tauembedding_embedding_v11_2_pt40"
             },
             })
     datasets["DYJetsToLL_M50_TuneZ2_Summer11"]["data"].update({
@@ -1117,10 +1117,10 @@ def addTo(datasets):
                 "number_of_jobs": 55 # ~2 kev/job
             },
             "tauembedding_generation_v11_3_pt40": {
-                "fallback": "tauembedding_generation_V11_2_pt40"
+                "fallback": "tauembedding_generation_v11_2_pt40"
             },
             "tauembedding_embedding_v11_3_pt40": {
-                "fallback": "tauembedding_embedding_V11_2_pt40"
+                "fallback": "tauembedding_embedding_v11_2_pt40"
             },
             })
     datasets["QCD_Pt20_MuEnriched_TuneZ2_Summer11"]["data"].update({
@@ -1140,9 +1140,9 @@ def addTo(datasets):
                 "number_of_jobs": 1 # ~2 kev/job
             },
             "tauembedding_generation_v11_3_pt40": {
-                "fallback": "tauembedding_generation_V11_2_pt40"
+                "fallback": "tauembedding_generation_v11_2_pt40"
             },
             "tauembedding_embedding_v11_3_pt40": {
-                "fallback": "tauembedding_embedding_V11_2_pt40"
+                "fallback": "tauembedding_embedding_v11_2_pt40"
             },
             })
