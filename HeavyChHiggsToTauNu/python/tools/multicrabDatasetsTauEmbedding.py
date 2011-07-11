@@ -913,7 +913,7 @@ def addTo(datasets):
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165088_tauembedding_skim_v11-abfc57ac41b6cbeafd703784696c55e4/USER",
-                "number_of_jobs": 170 # ~1 kev/job
+                "number_of_jobs": 200 # ~1 kev/job
             },
             "tauembedding_generation_v11_pt40": {
                 "dbs_url": common.pattuple_dbs,
@@ -1164,7 +1164,7 @@ def addTo(datasets):
             "tauembedding_skim_v11": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11_1-50e9a4e9bac98baa56423a829b7f0fda/USER",
-                "number_of_jobs": 240 # ~1 kev/job
+                "number_of_jobs": 400 # ~1 kev/job
             },
             "tauembedding_generation_v11_2_pt40": {
                 "dbs_url": common.pattuple_dbs,
