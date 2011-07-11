@@ -176,13 +176,11 @@ if options.tauEmbeddingInput != 0:
     param.trigger.triggerEfficiency.parameters = cms.PSet(
         SIMPLE = cms.PSet(
             tauPtBins = cms.VPSet(
-                cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.2424242)),
-                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.4848485)),
-                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.5357143)),
-                cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.75)),
-                cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(1)),
-
+                        cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.2790698)),
+                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.5)),
+                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.5454545)),
+                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.8)),
         # pre-approval
                 #cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
                 #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.3293233)),
