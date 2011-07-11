@@ -29,6 +29,7 @@ namespace HPlus {
       
       double getWeight(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
       double getRelativeUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
+      double getAbsoluteUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
       
     private:
       size_t obtainIndex(std::vector<double>& table, double pt);
@@ -88,7 +89,8 @@ namespace HPlus {
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
-    TH1* hBTagUncertainty;
+    TH1* hBTagAbsoluteUncertainty;
+    TH1* hBTagRelativeUncertainty;
 
     // Counters
     Count fTaggedCount;
