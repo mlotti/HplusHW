@@ -18,5 +18,6 @@ HChEventContent = cms.PSet(
         "keep recoCaloMETs_*_*_*",
         "keep *_towerMaker_*_*",
         "keep *_electronGsfTracks_*_*",
+        "keep recoTracks_*_*_*",
     )
 )
