@@ -116,6 +116,7 @@ namespace HPlus {
     
   private:
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
+    bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
     //bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 

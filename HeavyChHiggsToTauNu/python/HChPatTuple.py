@@ -323,7 +323,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         setPatJetCorrDefaults(process.patJetCorrFactorsAK5PF, dataVersion, True)
 
     else:
-#        setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion, True)
+        setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion, True)
         switchJetCollection(process, cms.InputTag('ak5PFJets'),
                             doJTA        = True,
                             doBTagging   = doBTagging,

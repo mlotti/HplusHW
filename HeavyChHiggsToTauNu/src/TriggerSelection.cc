@@ -98,10 +98,18 @@ namespace HPlus {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     }
     
+    // Calo MET cut; needed for non QCD1, disabled for others
     if(passEvent) {
       increment(fTriggerBitCount);
       TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
       passEvent = ret.passedEvent();
+    }
+
+    // Trigger efficiency parametrisation, needed for non QCD1, disabled for others
+    if(passEvent) {
+      increment(fTriggerCaloMetCount);
+      if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
+        passEvent = passedTriggerParametrisation(iEvent, iSetup);
     }
 
     if(passEvent) {
@@ -247,6 +255,24 @@ namespace HPlus {
     hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
     fEventWeight.multiplyWeight(triggerEfficiency);*/
     
+    return true;
+  }
+
+  bool TriggerSelection::passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    increment(fTriggerParamAllCount);
+    // Get Tau object                                                                                                                                                                                                                                                          
+    TauSelection::Data triggerTauData = fTriggerTauSelection.analyze(iEvent, iSetup);
+    if (!triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events                                                                                                                                                   
+    increment(fTriggerParamTauCount);
+    // Get MET object                                                                                                                                                                                                                                                          
+    METSelection::Data triggerMetData = fTriggerMETSelection.analyze(iEvent, iSetup);
+    //if (!triggerMetData.passedEvent()) return false;                                                                                                                                                                                                                         
+    increment(fTriggerParamMetCount);
+    // Obtain trigger efficiency and apply it as a weight                                                                                                                                                                                                                      
+    double triggerEfficiency = fTriggerEfficiency.efficiency(*(triggerTauData.getSelectedTaus()[0]), *triggerMetData.getSelectedMET());
+    hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
+    fEventWeight.multiplyWeight(triggerEfficiency);
+
     return true;
   }
 
