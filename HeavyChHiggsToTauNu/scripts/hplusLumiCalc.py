@@ -44,6 +44,11 @@ def main(opts, args):
     #lumi_re = re.compile("\|\s(?P<recorded>\S+)\s")
 
     data = {}
+    if not opts.truncate and os.path.exists(opts.output):
+        f = open(opts.output, "r")
+        data = json.load(f)
+        f.close()
+    
     for d in crabdirs:
         if isMCTask(d):
             print "  Ignoring task directory '%s', it looks like MC" % d
@@ -110,6 +115,8 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
     parser.add_option("--output", "-o", dest="output", type="string", default="lumi.json",
                       help="Output file to write the dataset integrated luminosities")
+    parser.add_option("--truncate", dest="truncate", default=False, action="store_true",
+                      help="Truncate the output file before writing")
     parser.add_option("--noreport", dest="report", action="store_false", default=True,
                       help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,

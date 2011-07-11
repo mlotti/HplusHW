@@ -21,28 +21,45 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 # No weighting to keep TEfficiency happy
-#weight = ""
-weight = "VertexWeight"
+weight = ""
+#weight = "VertexWeight"
 #weight = "PileupWeight"
 
 analysis = "caloMetEfficiency%sh00_h01_All" % weight
-afterCut = "caloMetEfficiency%sh02_h02_CaloMet45" % weight
+#afterCut = "caloMetEfficiency%sh02_h02_CaloMet45" % weight
+afterCut = "caloMetEfficiency%sh03_h02_CaloMet60" % weight
 counters = "caloMetEfficiency%scountAnalyzer" % weight
+
+#cutText = "Calo E_{T}^{miss} > 45 GeV"
+cutText = "Calo E_{T}^{miss} > 60 GeV"
 
 plotStyles = [
     styles.dataStyle,
     styles.mcStyle
     ]
-
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    datasets.remove([
+#        "SingleMu_160431-163261_May10",
+#        "SingleMu_163270-163869_May10",
+#        "SingleMu_165088-166150_Prompt",
+#        "SingleMu_166161-166164_Prompt",
+#        "SingleMu_166346-166346_Prompt",
+#        "SingleMu_166374-167043_Prompt",
+#        "SingleMu_167078-167784_Prompt",
+#        "SingleMu_167786-167913_Prompt_Wed",
+#        "DYJetsToLL_M50_TuneZ2_Summer11",
+#        "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
+#        "TTJets_TuneZ2_Summer11",
+#        "WJets_TuneZ2_Summer11",
+        ])
     datasets.loadLuminosities()
 
     datasets.mergeData()
 
-    printEfficienciesCalo(datasets, analysis+"/calomet_et")
+    printEfficienciesCalo(datasets, analysis+"/calometNoHF_et")
     printEfficienciesPF(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
 
     # Apply TDR style
@@ -59,6 +76,7 @@ def main():
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 
     caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
+    caloMet(plots.DataMCPlot(datasets, analysis+"/calometNoHF_et"))
     pfMet(plots.DataMCPlot(datasets, analysis+"/pfmet_et"))
 
 
@@ -119,7 +137,7 @@ def getFromPF(dataset, pathAll, pathPassed, bin):
 
 def printEfficienciesCalo(datasets, path):
     print "Calo:"
-    printEfficiency(datasets, 46, lambda d, b: getFromCalo(d, path, b))
+    printEfficiency(datasets, 61, lambda d, b: getFromCalo(d, path, b))
     print
 
 def printEfficienciesPF(datasets, pathAll, pathPassed):
@@ -233,7 +251,7 @@ def plotTurnOn(datasets, pathAll, pathPassed, rebin=10):
         l.SetNDC()
 #        l.SetTextFont(l.GetTextFont()-20) # bold -> normal
         l.SetTextSize(l.GetTextSize()*0.8)
-        l.DrawLatex(0.4, 0.4, "Calo E_{T}^{miss} > 45 GeV")
+        l.DrawLatex(0.4, 0.4, cutText)
     common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%binWidth, False, afterDraw=text)
 
 def caloMet(h, rebin=10):

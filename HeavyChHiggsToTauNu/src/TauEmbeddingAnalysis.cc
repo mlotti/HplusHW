@@ -33,6 +33,7 @@ namespace HPlus {
     hOriginalMuonPhi = makeTH<TH1F>(fd, (prefix+"_originalMuonPhi").c_str(), "OriginalMuon Phi", 300, 0, 3.2);
 
     hSelectedTauPt = makeTH<TH1F>(fd, (prefix+"_selectedTauPt").c_str(), "SelectedTau Pt", 400, 0, 400);
+    hSelectedTauPtNoWeight = makeTH<TH1F>(fd, (prefix+"_selectedTauPtNoWeight").c_str(), "SelectedTau Pt", 400, 0, 400);
     hSelectedTauEta = makeTH<TH1F>(fd, (prefix+"_selectedTauEta").c_str(), "SelectedTau Eta", 300, -3, 3);
     hSelectedTauPhi = makeTH<TH1F>(fd, (prefix+"_selectedTauPhi").c_str(), "SelectedTau Phi", 300, 0, 3.2);
     hSelectedTauIsolation05 = makeTH<TH1F>(fd, (prefix+"_selectedTauIsolation05").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 0.5", 100, 0, 100);
@@ -71,6 +72,7 @@ namespace HPlus {
 
     if(selectedTau) {
       hSelectedTauPt->Fill(selectedTau->pt(), weight);
+      hSelectedTauPtNoWeight->Fill(selectedTau->pt());
       hSelectedTauEta->Fill(selectedTau->eta(), weight);
       hSelectedTauPhi->Fill(selectedTau->phi(), weight);
 
