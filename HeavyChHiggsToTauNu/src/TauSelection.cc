@@ -373,8 +373,8 @@ namespace HPlus {
 
         if (!fTauID->passIsolation(iTau)) continue;
         // Apply trigger scale factor
-        if (fTriggerSelection == 0) {
-          if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
+        if (fTriggerSelection != 0) {
+          if (!fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
         }
         
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
