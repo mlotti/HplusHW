@@ -383,8 +383,8 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
 
     // TMP code starts - to be removed when all 42X pattuples are available
-    mySelectedTauCandidate.push_back(tauCandidates[0]); // take highest ET tau as the tau jet
-    return mySelectedTauCandidate;
+    //mySelectedTauCandidate.push_back(tauCandidates[0]); // take highest ET tau as the tau jet
+    //return mySelectedTauCandidate;
     // TMP code ends
     
     edm::PtrVector<pat::Tau>::const_iterator myBestCandidate = tauCandidates.begin();
