@@ -56,7 +56,8 @@ process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # dataVersion.getAnalysisDefaultFileCastor()
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Control_165970-166164_DCS/Tau/Run2011A_PromptReco_v4_AOD_Control_165970_pattuple_v12_1/4f228cbdccbe253fb8fc10a07a3c6bf1/pattuple_3_1_LBC.root"
-    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_167078-167784_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17/5ac48e003cbdad1c6c78ae464438a5c1/pattuple_15_1_Gdh.root"
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_167078-167784_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17/5ac48e003cbdad1c6c78ae464438a5c1/pattuple_15_15D_Gdh.root"
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_167078-167784_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17_1/5ac48e003cbdad1c6c78ae464438a5c1/pattuple_13_1_Fem.root"
     )
 )
 
@@ -130,6 +131,8 @@ process.load("HiggsAnalysis.TriggerEfficiency.EventFilter_cff")
 process.eventFilter.remove(process.metSelectionFilter)
 
 process.tauSelectionFilter.filter = False
+process.eVetoFilter.filter = False
+process.muVetoFilter.filter = False
 process.jetSelectionFilter.jetSelection.ptCut = 30
 process.jetSelectionFilter.filter = False
 process.btagSelectionFilter.filter = False
@@ -153,6 +156,8 @@ process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
     caloMetNoHFSrc      = cms.untracked.InputTag("metNoHF"),
     bools = cms.PSet(
         TauIDPassed = cms.InputTag("tauSelectionFilter"),
+        ElectronVetoPassed = cms.InputTag("eVetoFilter"),
+        MuonVetoPassed = cms.InputTag("muVetoFilter"),
         JetSelectionPassed = cms.InputTag("jetSelectionFilter"),
         BTaggingPassed = cms.InputTag("btagSelectionFilter"),
     )
