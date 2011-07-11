@@ -15,7 +15,7 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.trigger.hltMetCut = -1 # disable
 #    param.trigger.caloMetSelection.src = cms.untracked.InputTag("met", "", dataVersion.getRecoProcess())
     param.trigger.caloMetSelection.src = "caloMetSum"
-    param.trigger.caloMetSelection.metEmulationCut = 45.0
+    param.trigger.caloMetSelection.metEmulationCut = -1#60.0
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF

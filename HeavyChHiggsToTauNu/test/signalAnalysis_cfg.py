@@ -171,7 +171,7 @@ param.setVertexWeightFor2011() # Reweight by reconstructed vertices
 #param.trigger.selectionType = "disabled"
 
 if options.tauEmbeddingInput != 0:
-#    param.trigger.selectionType = cms.untracked.string("disabled")
+    param.trigger.selectionType = cms.untracked.string("disabled")
     param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string("SIMPLE"), luminosity = cms.double(0)))
     param.trigger.triggerEfficiency.parameters = cms.PSet(
         SIMPLE = cms.PSet(
@@ -225,7 +225,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
 )
 
 # Prescale fetching done automatically for data
-if dataVersion.isData():
+if dataVersion.isData() and options.tauEmbeddingInput == 0:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
@@ -294,6 +294,21 @@ if doRtauScan:
                     additionalCounters=additionalCounters,
                     signalAnalysisCounters=True)
 
+if options.tauEmbeddingInput:
+    module = process.signalAnalysis.clone()
+    module.trigger.caloMetSelection.metEmulationCut = 60.0
+    addAnalysis(process, "signalAnalysisCaloMet60", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
+    module = module.clone()
+    module.trigger.selectionType = "byParametrisation"
+    addAnalysis(process, "signalAnalysisCaloMet60TEff", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
 
 ################################################################################
 # The signal analysis with different tau ID algorithms
@@ -332,17 +347,19 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVari
 if doJESVariation:
     # Exceptions for tau embedding
     jetVariationMode="all"
+    module = "signalAnalysis"
     if options.tauEmbeddingInput != 0:
         JESUnclusteredMETVariation=0
         jetVariationMode="onlyTauMatching"
+        module = "signalAnalysisCaloMet60TEff"
 
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, "signalAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, module, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, module, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, module, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, module, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
 
 
 # Signal analysis with various tightened muon selections for tau embedding
