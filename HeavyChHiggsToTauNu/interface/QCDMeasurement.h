@@ -150,8 +150,8 @@ namespace HPlus {
     TopSelection fTopSelection;
     ForwardJetVeto fForwardJetVeto;
     TransverseMass fTransverseMass;
-    SelectedEventsAnalyzer fWeightedSelectedEventsAnalyzer;
-    SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
+    //SelectedEventsAnalyzer fWeightedSelectedEventsAnalyzer;
+    //SelectedEventsAnalyzer fNonWeightedSelectedEventsAnalyzer;
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
@@ -194,6 +194,7 @@ namespace HPlus {
     TH1 *hStdAfterRtau;
     TH1 *hStdFakeMETVeto;
     TH1 *hStdTransverseMassAfterTauID;
+    TH1 *hStdTransverseMassAfterBTag;
     // Correlation of factorisation
     /*TH1 *hCorrelationMETAfterAllSelections;
     TH1 *hCorrelationBtagAfterAllSelections;
