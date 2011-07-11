@@ -516,7 +516,7 @@ def addTauEmbeddingMuonTaus(process):
         deltaR = cms.double(0.1),
     )
 
-    for tau in ["selectedPatTausShrinkingConePFTau", "selectedPatTausHpsPFTau", "selectedPatTausHpsTancPFTau"]:
+    for tau in ["selectedPatTausHpsPFTau", "selectedPatTausHpsTancPFTau"]:
         m = prototype.clone(
             src = tau
         )
