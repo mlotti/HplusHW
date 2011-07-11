@@ -233,7 +233,22 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     counter = prefix
 
     import muonSelectionPF_cff as muonSelection
-    m1 = muonSelection.goodJets.clone(src="selectedPatJets")
+    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
+    m1 = cleanPatJets.clone(
+        src = "selectedPatJets",
+        preselection = muonSelection.goodJets.cut,
+            checkOverlaps = cms.PSet(
+                muons = cms.PSet(
+                    src                 = cms.InputTag(tauEmbeddingMuons),
+                    algorithm           = cms.string("byDeltaR"),
+                    preselection        = cms.string(""),
+                    deltaR              = cms.double(0.1),
+                    checkRecoComponents = cms.bool(False),
+                    pairCut             = cms.string(""),
+                    requireNoOverlaps   = cms.bool(True),
+                )
+            )
+        )
     m2 = muonSelection.goodJetFilter.clone(src=selector, minNumber=3)
     m3 = cms.EDProducer("EventCountProducer")
 
