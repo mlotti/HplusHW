@@ -73,7 +73,8 @@ namespace HPlus {
     hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
     hControlSelectionType->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
     hScaleFactor = makeTH<TH1F>(myDir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
-    hScaleFactorUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorUncertainty", "TriggerScaleFactorUncertainty;TriggerScaleFactorUncertainty;N_{events}/0.001", 2000., 0., 2.0);
+    hScaleFactorRelativeUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorRelativeUncertainty", "TriggerScaleFactorRelativeUncertainty;TriggerScaleFactorRelativeUncertainty;N_{events}/0.001", 2000., 0., 2.0);
+    hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
     // Hard code trigger efficiency values for the scale factor
     fTriggerScaleFactor.setValue(40, 0.2790698, 0.04958686, 0.2669323, 0.01631814);
@@ -232,7 +233,8 @@ namespace HPlus {
     if (myPt > 40) {
       fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
       hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-      hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      hScaleFactorRelativeUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      hScaleFactorAbsoluteUncertainty->Fill(fTriggerScaleFactor.getScaleFactorAbsoluteUncertainty(myPt), fEventWeight.getWeight());
       // Apply scale factor
       fEventWeight.multiplyWeight(fScaleFactor);
       increment(fTriggerScaleFactorAllCount);
@@ -357,6 +359,9 @@ namespace HPlus {
     double myDataPart = fTriggerEffDataUncertainty[myIndex] / fTriggerEffDataValues[myIndex];
     double myMCPart = fTriggerEffMCUncertainty[myIndex] / fTriggerEffMCValues[myIndex];
     return (std::sqrt(myDataPart*myDataPart + myMCPart*myMCPart));
+  }
+  double TriggerSelection::TriggerScaleFactor::getScaleFactorAbsoluteUncertainty(double tauPt) const {
+    return getScaleFactor(tauPt) * getScaleFactorRelativeUncertainty(tauPt);
   }
 
   size_t TriggerSelection::TriggerScaleFactor::obtainIndex(double pt) const {

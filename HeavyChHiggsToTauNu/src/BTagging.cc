@@ -90,6 +90,10 @@ namespace HPlus {
     return std::sqrt(std::pow(myBTerm,2) + std::pow(myLTerm,2));
   }
 
+  double BTagging::BTaggingScaleFactor::getAbsoluteUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT) {
+    return getWeight(nPassedB, nPassedL, nFailedBpT, nFailedLpT) * getRelativeUncertainty(nPassedB, nPassedL, nFailedBpT, nFailedLpT);
+  }
+
   BTagging::BTagging(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
@@ -130,7 +134,8 @@ namespace HPlus {
     hMCMatchForPassedJets->GetXaxis()->SetBinLabel(2, "light jet");
     hMCMatchForPassedJets->GetXaxis()->SetBinLabel(3, "no match");
 
-    hBTagUncertainty = makeTH<TH1F>(myDir, "BTagUncertainty", "BTagUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagRelativeUncertainty = makeTH<TH1F>(myDir, "BTagRelativeUncertainty", "BTagRelativeUncertainty;Relative Uncertainty;N_{events}", 3000, 0., 3.);
+    hBTagAbsoluteUncertainty = makeTH<TH1F>(myDir, "BTagAbsoluteUncertainty", "BTagAbsoluteUncertainty;Absolute Uncertainty;N_{events}", 3000, 0., 3.);
 
     // BTagging scale factors for b-flavor jets (source: BTV-11-001)
     double fScaleFactorBFlavor = 0.95;
@@ -345,7 +350,8 @@ namespace HPlus {
     // Calculate scalefactor
     fScaleFactor = fBTaggingScaleFactor.getWeight(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt);
     hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-    hBTagUncertainty->Fill(fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt), fEventWeight.getWeight());
+    hBTagRelativeUncertainty->Fill(fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt), fEventWeight.getWeight());
+    hBTagAbsoluteUncertainty->Fill(fBTaggingScaleFactor.getAbsoluteUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt), fEventWeight.getWeight());
     /*std::cout << "btagSF debug: jets=" << jets.size() << " bjets=" << bjets.size() << " nb=" << nBJetsPassed << ", nbf pT=";
     for (std::vector<double>::iterator it = fBJetsFailedPt.begin(); it != fBJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
     std::cout << " nl=" << nLightJetsPassed << ", nlf pT=";
