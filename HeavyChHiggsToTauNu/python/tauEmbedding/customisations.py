@@ -254,7 +254,8 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
         vertexSrc = cms.InputTag("firstPrimaryVertex"),
         GlobalMuonVeto = param.GlobalMuonVeto.clone(
             src = cms.untracked.InputTag("selectedPatMuonsEmbeddingMuonCleaned")
-        )
+        ),
+        filter = cms.bool(True)              
     )
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -270,7 +271,8 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     counter = prefix
 
     m1 = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-        GlobalElectronVeto = param.GlobalElectronVeto.clone()
+        GlobalElectronVeto = param.GlobalElectronVeto.clone(),
+        filter = cms.bool(True)
     )
     m2 = cms.EDProducer("EventCountProducer")
 
