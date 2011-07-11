@@ -4,7 +4,8 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 
 #dataVersion = "39Xredigi"
 #dataVersion = "39Xdata"
-dataVersion = "311Xredigi"
+#dataVersion = "311Xredigi"
+dataVersion = "42Xmc"
 
 ################################################################################
 
@@ -36,7 +37,8 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10/b3c16f1ee121445edb6d9b12e0772d8e/skim_104_1_sYD.root"
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10/b3c16f1ee121445edb6d9b12e0772d8e/skim_104_1_sYD.root"
+    "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v11/50e9a4e9bac98baa56423a829b7f0fda/skim_113_1_B6e.root"
   )
 )
 
@@ -119,7 +121,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonAnalysis as muonAnalys
 trigger = options.trigger
 if len(trigger) == 0:
 #    trigger = "HLT_Mu9"
-    trigger = "HLT_Mu15_v1"
+    trigger = "HLT_Mu20_v1"
 
 def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
     wSrc = weightSrc

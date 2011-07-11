@@ -28,15 +28,17 @@ class HPlusGlobalElectronVetoFilter: public edm::EDFilter {
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
   HPlus::GlobalElectronVeto fGlobalElectronVeto;
-  edm::InputTag fVertexSrc;
+  bool fFilter;
 };
 
 HPlusGlobalElectronVetoFilter::HPlusGlobalElectronVetoFilter(const edm::ParameterSet& iConfig):
   eventCounter(),
   eventWeight(iConfig),
-  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight)
+  fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
+  fFilter(iConfig.getParameter<bool>("filter"))
 {
   eventCounter.produces(this);
+  produces<bool>();
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
 }
 HPlusGlobalElectronVetoFilter::~HPlusGlobalElectronVetoFilter() {}
@@ -48,10 +50,12 @@ bool HPlusGlobalElectronVetoFilter::beginLuminosityBlock(edm::LuminosityBlock& i
 }
 
 bool HPlusGlobalElectronVetoFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  HPlus::GlobalElectronVeto::Data muonVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-  if (!muonVetoData.passedEvent()) return false;
+  HPlus::GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
+  bool passed = electronVetoData.passedEvent();
+  std::auto_ptr<bool> p(new bool(passed));
+  iEvent.put(p);
 
-  return true;
+  return !fFilter || (fFilter && passed);
 }
 
 bool HPlusGlobalElectronVetoFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {

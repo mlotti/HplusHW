@@ -199,7 +199,7 @@ datasets = {
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v17-b1b6e1ef7d022a15760998ee2f0cd38b/USER",
-                "luminosity": 122.760038,
+                "luminosity": 94.672079,
                 "number_of_jobs": 1,
             },
         }

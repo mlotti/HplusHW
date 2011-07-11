@@ -57,19 +57,19 @@ bool HPlusJetPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  std::auto_ptr<bool> passed(new bool(false));
-
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
 
+  bool passed = false;
   HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrVector());
   if(jetData.passedEvent()) {
-    *passed = true;
+    passed = true;
     iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
   }
-  iEvent.put(passed);
+  std::auto_ptr<bool> p(new bool(passed));
+  iEvent.put(p);
 
-  return !fFilter || (fFilter && *passed);
+  return !fFilter || (fFilter && passed);
 }
 
 bool HPlusJetPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {

@@ -60,8 +60,7 @@ bool HPlusBTaggingPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& 
 }
 
 bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  std::auto_ptr<bool> passed(new bool(false));
-
+  bool passed = false;
   edm::Handle<edm::View<reco::Candidate> > hjets;
   if(iEvent.getByLabel(fJetSrc, hjets) || fThrow) {
     edm::PtrVector<pat::Jet> casted(hjets->id());
@@ -69,10 +68,10 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
       edm::Ptr<reco::Candidate> ptr = hjets->ptrAt(i);
       casted.push_back(edm::Ptr<pat::Jet>(ptr.id(), dynamic_cast<const pat::Jet *>(ptr.get()), ptr.key()));
     }
-  
+
     HPlus::BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, casted);
     if(btagData.passedEvent()) {
-      *passed = true;
+      passed = true;
       std::auto_ptr<Product> product(new Product(hjets->id()));
       edm::PtrVector<pat::Jet> selected = btagData.getSelectedJets();
       for(size_t i=0; i<selected.size(); ++i) {
@@ -81,8 +80,10 @@ bool HPlusBTaggingPtrSelectorFilter::filter(edm::Event& iEvent, const edm::Event
       iEvent.put(product);
     }
   }
-  iEvent.put(passed);
-  return !fFilter || (fFilter && *passed);
+  std::auto_ptr<bool> p(new bool(passed));
+  iEvent.put(p);
+
+  return !fFilter || (fFilter && passed);
 }
 
 bool HPlusBTaggingPtrSelectorFilter::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
