@@ -12,3 +12,11 @@ def addPrimaryVertexSelection(process, sequence):
         src = cms.InputTag("firstPrimaryVertex")
     )
     sequence *= process.selectedPrimaryVertex
+
+    process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
+                                                       src = cms.InputTag("selectedPrimaryVertex"),
+                                                       minNumber = cms.uint32(1),
+                                                       maxNumber = cms.uint32(999)
+                                                       )
+    sequence *= process.selectedPrimaryVertexFilter
+    
