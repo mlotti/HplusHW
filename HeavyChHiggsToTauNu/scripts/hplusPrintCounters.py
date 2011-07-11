@@ -22,7 +22,10 @@ def main(opts):
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
 
-    eventCounter = counter.EventCounter(datasets)
+    counters = opts.counterdir
+    if opts.weighted:
+        counters += "/weighted"
+    eventCounter = counter.EventCounter(datasets, counters=counters)
     
 
     print "============================================================"
@@ -75,6 +78,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
     dataset.addOptions(parser)
+    parser.add_option("--weighted", dest="weighted", default=False, action="store_true",
+                      help="Use weighted counters (i.e. adds '/weighted' to the counter directory patg)")
     parser.add_option("--mode", "-m", dest="mode", type="string", default="events",
                       help="Output mode; available: 'events', 'xsect', 'eff' (default: 'events')")
     parser.add_option("--csv", dest="csv", action="store_true", default=False,

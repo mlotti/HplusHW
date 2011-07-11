@@ -44,8 +44,8 @@ def customiseParamForTauEmbedding(param, dataVersion):
 def setCaloMetSum(process, sequence, param, dataVersion):
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
-                       src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
-                                           cms.InputTag("met", "", "EMBEDDINGRECO")
+                       src = cms.VInputTag(cms.InputTag("metNoHF", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("metNoHF", "", "EMBEDDINGRECO")
                                            )
                        )
     setattr(process, name, m)
@@ -254,7 +254,8 @@ def addMuonVeto(process, sequence, param, prefix="muonSelectionMuonVeto"):
         vertexSrc = cms.InputTag("firstPrimaryVertex"),
         GlobalMuonVeto = param.GlobalMuonVeto.clone(
             src = cms.untracked.InputTag("selectedPatMuonsEmbeddingMuonCleaned")
-        )
+        ),
+        filter = cms.bool(True)              
     )
     m2 = cms.EDProducer("EventCountProducer")
 
@@ -270,7 +271,8 @@ def addElectronVeto(process, sequence, param, prefix="muonSelectionElectronVeto"
     counter = prefix
 
     m1 = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-        GlobalElectronVeto = param.GlobalElectronVeto.clone()
+        GlobalElectronVeto = param.GlobalElectronVeto.clone(),
+        filter = cms.bool(True)
     )
     m2 = cms.EDProducer("EventCountProducer")
 

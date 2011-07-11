@@ -18,8 +18,6 @@ namespace HPlus {
     fMETCounter(eventCounter.addCounter("nonQCDType2:MET")),
     fNJetsCounter(eventCounter.addCounter("nonQCDType2:njets")),
     fBTaggingCounter(eventCounter.addCounter("nonQCDType2:btagging")),
-    fBTaggingCounter17(eventCounter.addCounter("nonQCDType2:btagging17")),
-    fBTaggingCounter33(eventCounter.addCounter("nonQCDType2:btagging33")),
     fFakeMETVetoCounter(eventCounter.addCounter("nonQCDType2:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("nonQCDType2:Top Selection cut")) { }
   SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
@@ -29,8 +27,6 @@ namespace HPlus {
     fMETCounter(eventCounter.addSubCounter(prefix,":MET")),
     fNJetsCounter(eventCounter.addSubCounter(prefix,":njets")),
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
-    fBTaggingCounter17(eventCounter.addSubCounter(prefix,":btagging17")),
-    fBTaggingCounter33(eventCounter.addSubCounter(prefix,":btagging33")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")) { }
   SignalAnalysis::CounterGroup::~CounterGroup() { }
@@ -50,8 +46,6 @@ namespace HPlus {
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
-    fBTaggingCounter17(eventCounter.addCounter("btagging17")),
-    fBTaggingCounter33(eventCounter.addCounter("btagging33")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
@@ -65,7 +59,7 @@ namespace HPlus {
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID"),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID", &fTriggerSelection),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -136,7 +130,7 @@ namespace HPlus {
     hSelectedTauPhiMetCut = makeTH<TH1F>(*fs, "SelectedTau_phi_AfterMetCut", "SelectedTau_eta_AfterMetCut;#tau #eta;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
     hSelectedTauRtauMetCut = makeTH<TH1F>(*fs, "SelectedTau_Rtau_AfterMetCut", "SelectedTau_Rtau_AfterMetCut;R_{#tau};N_{events} / 0.1", 360, 0., 1.2);
 
-    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 10, 0, 10);
+    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 7, 0, 7);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
@@ -293,12 +287,11 @@ namespace HPlus {
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
-    if (btagData.getMaxDiscriminatorValue() > 1.7) increment(fBTaggingCounter17);
-    if (btagData.getMaxDiscriminatorValue() > 5.3) increment(fBTaggingCounter33);
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagData.passedEvent()) return false;
-    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     increment(fBTaggingCounter);
+    hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
+    hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
@@ -481,12 +474,12 @@ false;
       getCounterGroupByTauMatch(tauMatch)->incrementNJetsCounter();
     } else if (selection == kSignalOrderBTagSelection) {
       if (myTypeIIStatus) {
-        fNonQCDTypeIIGroup.incrementBTaggingCounter(passedStatus, value);
+        fNonQCDTypeIIGroup.incrementBTaggingCounter();
         // Fill histograms
         hNonQCDTypeIISelectedTauEtAfterCuts->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
         hNonQCDTypeIISelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
       }
-      getCounterGroupByTauMatch(tauMatch)->incrementBTaggingCounter(passedStatus, value);
+      getCounterGroupByTauMatch(tauMatch)->incrementBTaggingCounter();
     } else if (selection == kSignalOrderFakeMETVeto) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementFakeMETVetoCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementFakeMETVetoCounter();
