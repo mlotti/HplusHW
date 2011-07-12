@@ -132,6 +132,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hMuonIso = HPlus::makeTH<TH1F>("Muon_IsoTotal", "Muon total isolation", 50, 0, 50);
       */
       hMuonRelIso = HPlus::makeTH<TH1F>(dir, "Muon_IsoTotalRel", "Muon total relative isolation", 100, 0, 1);
+      hMuonCharge= HPlus::makeTH<TH1F>(dir, "Muon_Charge", "Muon charge", 5, -2, 2);
 
       hTau.init(dir, "Tau", "Tau");
       hTauLead.init(dir, "Tau_LeadPFCand", "Tau leading cand");
@@ -140,6 +141,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
       hTauLeadChargedHadrExists = HPlus::makeTH<TH1F>(dir, "Tau_LeadPFChargedHadrCand_Exists", "Tau leading charged hadr cand exists", 2, 0, 2);
       hTauLeadTrackExists = HPlus::makeTH<TH1F>(dir, "Tau_LeadTrack_Exists", "Tau leading track exists", 2, 0, 2);
       hTauR = HPlus::makeTH<TH1F>(dir, "Tau_Rtau", "Rtau", 120, 0., 1.2);
+      hTauCharge= HPlus::makeTH<TH1F>(dir, "Tau_Charge", "Tau charge", 5, -2, 2); 
 
       hTauIsoShrinkingCone.init(dir, "Tau_IsoShrinkingCone");
       hTauIsoShrinkingCone05.init(dir, "Tau_IsoShrinkingCone05");
@@ -291,11 +293,13 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
 
 
       hMuon.fill(muon);
+      hMuonCharge->Fill(muon.charge());
       reco::TrackRef muonTrack= muon.globalTrack();
       if(muonTrack.isNonnull())
         hMuonTrack.fill(*muonTrack, vertex.position());
 
       hTau.fill(tau);
+      hTauCharge->Fill(tau.charge());
       hMuonTau.fill(muon, tau);
 
       const reco::PFCandidateRef leadCand = tau.leadPFCand();
@@ -376,6 +380,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     TH1 *hMuonIso;
     */
     TH1 *hMuonRelIso;
+    TH1 *hMuonCharge;
 
     Histo hTau;
     Histo hTauLead;
@@ -384,6 +389,7 @@ class HPlusTauEmbeddingAnalyzer: public edm::EDAnalyzer {
     TH1 *hTauLeadTrackExists;
     TH1 *hTauLeadChargedHadrExists;
     TH1 *hTauR;
+    TH1 *hTauCharge;
 
     HistoIso hTauIsoShrinkingCone;
     HistoIso hTauIsoShrinkingCone05;
