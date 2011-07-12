@@ -166,7 +166,7 @@ namespace HPlus {
     TH1 *hTightChargedSumPt;
     TH1 *hTightChargedOccupancy;
     TH1 *hTightGammaOccupancy;
-
+    TH1 *hHPSDecayMode;
 
     TH1 *hVLooseIsoNcands;
     TH1 *hLooseIsoNcands;
