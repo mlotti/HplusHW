@@ -44,12 +44,13 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
             setPatArg(args, name, value)
 
     counters = []
+    if dataVersion.isData():
+        counters.extend(HChDataSelection.dataSelectionCounters[:])
+    
     if options.tauEmbeddingInput != 0:
         import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.PFEmbeddingSource_cff as PFEmbeddingSource
-        counters = MuonSelection.muonSelectionCounters[:]
+        counters.extend(MuonSelection.muonSelectionCounters[:])
         counters.extend(PFEmbeddingSource.muonSelectionCounters)
-    elif dataVersion.isData():
-        counters = HChDataSelection.dataSelectionCounters[:]
     elif dataVersion.isMC() and doMcPreselection:
         counters = HChMcSelection.mcSelectionCounters[:]
     

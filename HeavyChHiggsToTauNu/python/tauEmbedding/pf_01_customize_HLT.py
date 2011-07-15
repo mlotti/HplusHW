@@ -66,7 +66,8 @@ def customise(process):
 
     # Do we have to override the beam spot for data?
     if options.overrideBeamSpot !=  0:
-        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
+        bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data gt
+        #bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 39x data gt
         #bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
         process.GlobalTag.toGet = cms.VPSet(
             cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
