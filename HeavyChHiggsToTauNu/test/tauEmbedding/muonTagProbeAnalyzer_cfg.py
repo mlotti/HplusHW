@@ -8,25 +8,55 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 #trigger = "isHLTMu9"
 #trigger = "isHLTMu15"
 #trigger = "isHLTMu20"
-trigger = "isHLTMu24"
+#trigger = "isHLTMu24"
+#trigger = "isHLTMu30"
+trigger = "isHLTMu40"
 
 input = cms.vstring("histograms.root")
+output = "tagprobe_output.root"
 if "Mu9" in trigger:
     # Run2010A
 #    input = cms.vstring("Mu_136035-144114_Dec22/res/histograms-Mu_136035-144114_Dec22.root")
     # Run2010B
 #    input = cms.vstring("Mu_146428-147116_Dec22/res/histograms-Mu_146428-147116_Dec22.root")
     # MC
-    input = cms.vstring("DYJetsToLL_M50_TuneZ2_Spring11/res/histograms-DYJetsToLL_M50_TuneZ2_Spring11.root")
+#    input = cms.vstring("DYJetsToLL_M50_TuneZ2_Spring11/res/histograms-DYJetsToLL_M50_TuneZ2_Spring11.root")
+    pass
 elif "Mu15" in trigger:
     # Run2010B
     input = cms.vstring("Mu_147196-149294_Dec22/res/histograms-Mu_147196-149294_Dec22.root")
 elif "Mu20" in trigger:
     # Run2011A
-    input = cms.vstring("SingleMu_160431-161016_Prompt/res/histograms-SingleMu_160431-161016_Prompt.root", "SingleMu_162803-163261_Prompt/res/histograms-SingleMu_162803-163261_Prompt.root")
+    #input = cms.vstring("SingleMu_160431-161016_Prompt/res/histograms-SingleMu_160431-161016_Prompt.root", "SingleMu_162803-163261_Prompt/res/histograms-SingleMu_162803-163261_Prompt.root")
+    input = cms.vstring(
+        "SingleMu_160431-163261_May10/res/histograms-SingleMu_160431-163261_May10.root",
+        "../multicrab_tagprobe_110708_153322/SingleMu_161119-161119_May10_Wed/res/histograms-SingleMu_161119-161119_May10_Wed.root"
+        )
+    output = "tagprobe_output_Run2011A_Mu20.root"
+    # MC
+    #input = cms.vstring("DYJetsToLL_M50_TuneZ2_Summer11/res/histograms-DYJetsToLL_M50_TuneZ2_Summer11.root")
+    #output = "tagprobe_output_DY_Mu20.root"
 elif "Mu24" in trigger:
     # Run2011A
-    input = cms.vstring("SingleMu_163270-163869_Prompt/res/histograms-SingleMu_163270-163869_Prompt.root")
+    input = cms.vstring("SingleMu_163270-163869_May10/res/histograms-SingleMu_163270-163869_May10.root")
+    output = "tagprobe_output_Run2011A_Mu24.root"
+elif "Mu30" in trigger:
+    input = cms.vstring(
+        "SingleMu_165088-166150_Prompt/res/histograms-SingleMu_165088-166150_Prompt.root",
+        "../multicrab_tagprobe_110708_153322/SingleMu_165103-165103_Prompt_Wed/res/histograms-SingleMu_165103-165103_Prompt_Wed.root",
+                        )
+    output = "tagprobe_output_Run2011A_Mu30.root"
+elif "Mu40" in trigger:
+    input = cms.vstring(
+        "SingleMu_166161-166164_Prompt/res/histograms-SingleMu_166161-166164_Prompt.root",
+        "SingleMu_166346-166346_Prompt/res/histograms-SingleMu_166346-166346_Prompt.root",
+        "SingleMu_166374-167043_Prompt/res/histograms-SingleMu_166374-167043_Prompt.root",
+        "SingleMu_167078-167784_Prompt/res/histograms-SingleMu_167078-167784_Prompt.root",
+        "../multicrab_tagprobe_110708_153322/SingleMu_167786-167913_Prompt_Wed/res/histograms-SingleMu_167786-167913_Prompt_Wed.root",
+        )
+    output = "tagprobe_output_Run2011A_Mu40.root"
+    
+
 
 process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
     "TagProbeFitTreeAnalyzer",
@@ -34,7 +64,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
     InputFileNames = input,
     InputDirectoryName = cms.string("tnpTree"),
     InputTreeName = cms.string("fitter_tree"),
-    OutputFileName = cms.string("tagprobe_output.root"),
+    OutputFileName = cms.string(output),
     #numbrer of CPUs to use for fitting
     NumCPU = cms.uint32(1),
     # specifies wether to save the RooWorkspace containing the data for each bin and
@@ -66,6 +96,8 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
         isHLTMu15 = cms.vstring("HLT_Mu15", "dummy[pass=1,fail=0]"), 
         isHLTMu20 = cms.vstring("HLT_Mu20", "dummy[pass=1,fail=0]"),
         isHLTMu24 = cms.vstring("HLT_Mu24", "dummy[pass=1,fail=0]"),
+        isHLTMu30 = cms.vstring("HLT_Mu30", "dummy[pass=1,fail=0]"),
+        isHLTMu40 = cms.vstring("HLT_Mu40", "dummy[pass=1,fail=0]"),
         hitQuality = cms.vstring("Hit quality", "dummy[pass=1,fail=0]"),
         dB = cms.vstring("IPxy,z", "dummy[pass=1,fail=0]"),
 #        sumIsoRel10 = cms.vstring("Rel sum iso < 0.1", "dummy[pass=1,fail=0]"),
@@ -124,44 +156,45 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
             UnbinnedVariables = cms.vstring("mass"),
             BinnedVariables = cms.PSet(
                 pt = cms.vdouble(0, 1000),
+#                pt = cms.vdouble(0, 20, 40, 45, 50, 60, 70, 80, 90, 100, 1000),
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
             #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
         ),
-        AllStdIso = cms.PSet(
-            EfficiencyCategoryAndState = cms.vstring(
-                 "isTrackerMuon", "pass",
-                 "isGlobalMuon", "pass",
-                 trigger, "pass",
-                 "hitQuality", "pass",
-                 "dB", "pass",
-                 "sumIsoRel10", "below",
-            ),
-            UnbinnedVariables = cms.vstring("mass"),
-            BinnedVariables = cms.PSet(
-                pt = cms.vdouble(0, 1000),
-            ),
-            #BinToPDFmap = cms.vstring("gaussPlusLinear")
-            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        ),
-        Iso = cms.PSet(
-            EfficiencyCategoryAndState = cms.vstring(
-                "countIso", "below",
-            ),
-            UnbinnedVariables = cms.vstring("mass"),
-            BinnedVariables = cms.PSet(
-                isTrackerMuon = cms.vstring("pass"),
-                isGlobalMuon = cms.vstring("pass"),
-                hitQuality = cms.vstring("pass"),
-                dB = cms.vstring("pass"),
-                pt = cms.vdouble(0, 1000),
-            ),
-            #BinToPDFmap = cms.vstring("gaussPlusLinear")
-            BinToPDFmap = cms.vstring("gaussPlusQuadratic")
-            #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
-        ),
+#         AllStdIso = cms.PSet(
+#             EfficiencyCategoryAndState = cms.vstring(
+#                  "isTrackerMuon", "pass",
+#                  "isGlobalMuon", "pass",
+#                  trigger, "pass",
+#                  "hitQuality", "pass",
+#                  "dB", "pass",
+#                  "sumIsoRel10", "below",
+#             ),
+#             UnbinnedVariables = cms.vstring("mass"),
+#             BinnedVariables = cms.PSet(
+#                 pt = cms.vdouble(0, 1000),
+#             ),
+#             #BinToPDFmap = cms.vstring("gaussPlusLinear")
+#             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+#             #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+#         ),
+#         Iso = cms.PSet(
+#             EfficiencyCategoryAndState = cms.vstring(
+#                 "countIso", "below",
+#             ),
+#             UnbinnedVariables = cms.vstring("mass"),
+#             BinnedVariables = cms.PSet(
+#                 isTrackerMuon = cms.vstring("pass"),
+#                 isGlobalMuon = cms.vstring("pass"),
+#                 hitQuality = cms.vstring("pass"),
+#                 dB = cms.vstring("pass"),
+#                 pt = cms.vdouble(0, 1000),
+#             ),
+#             #BinToPDFmap = cms.vstring("gaussPlusLinear")
+#             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
+#             #BinToPDFmap = cms.vstring("gaussPlusLinear", "*pt_bin0*", "gaussPlusQuadratic")
+#         ),
         Trigger = cms.PSet(
             EfficiencyCategoryAndState = cms.vstring(
                 trigger, "pass",
@@ -174,6 +207,7 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
                 tauTightIc04Iso = cms.vdouble(0, 0.1),
                 dB = cms.vstring("pass"),
                 pt = cms.vdouble(0, 1000),
+#                pt = cms.vdouble(40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 55, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 500, 600, 700, 800, 1000)
             ),
             #BinToPDFmap = cms.vstring("gaussPlusLinear")
             BinToPDFmap = cms.vstring("gaussPlusQuadratic")
@@ -181,15 +215,24 @@ process.TagProbeFitTreeAnalyzer = cms.EDAnalyzer(
         ),
     )
 )
-setattr(process.TagProbeFitTreeAnalyzer.Efficiencies.Iso.BinnedVariables, trigger, cms.vstring("pass"))
+#setattr(process.TagProbeFitTreeAnalyzer.Efficiencies.Iso.BinnedVariables, trigger, cms.vstring("pass"))
 ptbins = range(30, 410, 10)
 etabins = [x*0.21 for x in range(0, 11)] # 0.21 stepping [0, 2.1]
+ptbins = [40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 54, 56, 58, 60, 65, 70, 80, 90, 100]
+if "Mu20" in trigger:
+    ptbins += [150, 200, 400, 600, 1000]
+elif "Mu24" in trigger:
+    ptbins += [125, 150, 200, 300, 400, 600, 1000]
+elif "Mu30" in trigger or "Mu40" in trigger:
+    ptbins += [125, 150, 200, 250, 300, 400, 500, 600, 800, 1000]
+print ptbins
 
-#process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
-#    BinnedVariables = cms.PSet(
-#        pt = cms.vdouble(ptbins),
-#    ),
-#)
+process.TagProbeFitTreeAnalyzer.Efficiencies.All_pt = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
+    BinnedVariables = cms.PSet(
+        pt = cms.vdouble(ptbins),
+    ),
+)
+process.TagProbeFitTreeAnalyzer.Efficiencies.Trigger.BinnedVariables.pt = ptbins
 # process.TagProbeFitTreeAnalyzer.Efficiencies.All_abseta = process.TagProbeFitTreeAnalyzer.Efficiencies.All.clone(
 #     BinnedVariables = cms.PSet(
 #         abseta = cms.vdouble(etabins),
