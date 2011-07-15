@@ -308,15 +308,19 @@ class MulticrabDataset:
                 self.data[key] = value
 
         if "data" in config:
+            dataConf = None
             try:
                 dataConf = config["data"][dataInput]
-                if "fallback" in dataConf:
-                    dataConf = config["data"][dataConf["fallback"]]
-
-                for key, value in dataConf.iteritems():
-                    self.data[key] = value
             except KeyError:
-                raise Exception("No dataInput '%s' for datasets '%s'" % (dataInput, name))
+                raise Exception("No dataInput '%s' for datasets '%s'." % (dataInput, name))
+            if "fallback" in dataConf:
+                try:
+                    dataConf = config["data"][dataConf["fallback"]]
+                except KeyError:
+                    raise Exception("No dataInput '%s' (via '%s') for datasets '%s'."% (dataConf["fallback"], dataInput, name))
+
+            for key, value in dataConf.iteritems():
+                self.data[key] = value
 
         # Sanity checks
         if not "dataVersion" in self.data:
