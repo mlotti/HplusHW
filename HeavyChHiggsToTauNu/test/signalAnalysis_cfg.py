@@ -84,11 +84,16 @@ if doRerunTriggerMatching:
 
 if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v11_2_pt40/af0b4aa82477426f47ec012132b67081/embedded_RECO_12_1_lWy.root"
+        "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_embedding_v11_4_pt40/ac085343fdb44ba8377c1f709923eacd/embedded_RECO_1_1_kNE.root",
+        #"file:embedded_RECO.root"
         ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
-print "GlobalTag="+dataVersion.getGlobalTag()
+if options.tauEmbeddingInput != 0:
+    process.GlobalTag.globaltag = "START42_V12::All"
+print "GlobalTag="+process.GlobalTag.globaltag.value()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 
@@ -177,10 +182,10 @@ if options.tauEmbeddingInput != 0:
         SIMPLE = cms.PSet(
             tauPtBins = cms.VPSet(
                         cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.2790698)),
-                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.5)),
-                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.5454545)),
-                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.8)),
+                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4035088)),
+                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7857143)),
+                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.8)),
+                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(1)),
         # pre-approval
                 #cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
                 #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.3293233)),
@@ -347,19 +352,22 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVari
 if doJESVariation:
     # Exceptions for tau embedding
     jetVariationMode="all"
-    module = "signalAnalysis"
+    name = "signalAnalysis"
+    module = process.signalAnalysis
     if options.tauEmbeddingInput != 0:
         JESUnclusteredMETVariation=0
         jetVariationMode="onlyTauMatching"
-        module = "signalAnalysisCaloMet60TEff"
+        name = "signalAnalysisCaloMet60TEff"
+        module = process.signalAnalysisCaloMet60TEff
+        
 
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, module, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, module, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, module, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
-    addJESVariationAnalysis(process, module, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.signalAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+    addJESVariationAnalysis(process, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
 
 
 # Signal analysis with various tightened muon selections for tau embedding

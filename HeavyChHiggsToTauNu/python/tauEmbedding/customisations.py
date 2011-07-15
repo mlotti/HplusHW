@@ -25,9 +25,9 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
 
     # Use the taus matched to the original muon in tau selections
-    postfix = "TauEmbeddingMuonMatched"
+    #postfix = "TauEmbeddingMuonMatched"
     param.setAllTauSelectionSrcSelectedPatTaus()
-    param.forEachTauSelection(lambda x: x.src.setModuleLabel(x.src.getModuleLabel()+postfix))
+    #param.forEachTauSelection(lambda x: x.src.setModuleLabel(x.src.getModuleLabel()+postfix))
 
     # Remove TCTau
     i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)

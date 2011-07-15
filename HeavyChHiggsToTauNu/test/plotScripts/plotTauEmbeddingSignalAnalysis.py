@@ -32,6 +32,11 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisRtau70"
 #analysis = "signalAnalysisRtau80"
 
+#analysis = "signalAnalysisCaloMet60"
+#analysis = "signalAnalysisCaloMet60TEff"
+
+#analysis = "signalAnalysisCaloMet60TEffJESPlus03eta02METPlus00"
+#analysis = "signalAnalysisCaloMet60TEffJESMinus03eta02METPlus00"
 
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased"
 #analysis = "signalAnalysisRelIso50"
@@ -59,10 +64,11 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisJESMinus03eta02METMinus10"
 counters = analysis+"Counters"
 
-#normalize = True
-normalize = False
+normalize = True
+#normalize = False
 
 countersWeighted = counters
+#countersWeighted = counters+"/weighted"
 if normalize:
     countersWeighted = counters+"/weighted"
 
@@ -72,9 +78,37 @@ def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters,
 #                                                   weightedCounters=countersWeighted, firstWeightedCount="All events"
                                                    )
+
+    datasets.remove([
+#        "SingleMu_160431-163261_May10",
+#        "SingleMu_161119-161119_May10_Wed",
+#        "SingleMu_163270-163869_May10",
+#        "SingleMu_165088-166150_Prompt",
+#        "SingleMu_166161-166164_Prompt",
+#        "SingleMu_166346-166346_Prompt",
+#        "SingleMu_166374-167043_Prompt",
+#        "SingleMu_167078-167784_Prompt",
+#        "SingleMu_167786-167913_Prompt_Wed"
+        ])
     datasets.loadLuminosities()
 #    datasets.remove(["Mu_136035-144114_Dec22", "Mu_146428-147116_Dec22", "Mu_147196-149294_Dec22"]) 
+
+#    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_signalAnalysis_btag17_rtau0_caloMET60_taueff_pt40_110711_004336/multicrab.cfg", counters=counters)
+#    datasets.extend(datasets41x)
+
+#    datasetsDYQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="../multicrab_signalAnalysis_noEmuVetoEnd_MCGT_pt40_110714_111602/multicrab.cfg", counters=counters)
+#    datasets.extend(datasetsDYQCD)
+
+#    datasetsSignalAnalysis = dataset.getDatasetsFromMulticrabCfg(cfgfile="..//home/mkortela/hplus/norm/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110713_165352/multicrab.cfg")
+#    datasetsSignalAnalysis.remove(filter(lambda n: "Tau_" in n, datasetsSignalAnalysis.getAllDatasetNames()))
+#    datasets.extend(datasetsSignalAnalysis)
+    
     plots.mergeRenameReorderForDataMC(datasets)
+
+    mcOnly = not datasets.hasDataset("Data")
+    mcLumi = 1062
+#    mcLumi = 199.7
+                                     
 
 #    scaleLumi.signalLumi = 43.4024599650000037
 #    scaleLumi.ewkLumi = datasets.getDataset("Data").getLuminosity()
@@ -86,84 +120,104 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-    opts = {"xmin": 40, "xmax": 160, "ymaxfactor":10}
+    #opts = {"xmin": 40, "xmax": 200, "ymaxfactor":10, "ymin": 1e-1}
+    opts = {"xmin": 40, "xmax": 200, "ymaxfactor":2, "ymin": 1e-1}
     rebin = 10
-    
-#    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=True)
-    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterBTagging_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterFakeMetVeto_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-#    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
-#    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
-#    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-#    rtau(plots.DataMCPlot(datasets, analysis+"/tauID/TauID_RtauCut"), "TauIdRtau_afterTauId")
-    
-#    tauCandPt(plots.DataMCPlot(datasets, analysis+"/tauID/TauSelection_all_tau_candidates_pt"), "tauCandidatePt")
-#    tauCandEta(plots.DataMCPlot(datasets, analysis+"/tauID/TauSelection_all_tau_candidates_eta"), "tauCandidateEta" )
-#    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/tauID/TauSelection_all_tau_candidates_phi"), "tauCandidatePhi" )
-    
-#    muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
-#    muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMuonPt"), ratio=True)
-#    muonPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMuonPt"), ratio=True)
-    
-#    muonEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMuonEta"), ratio=True)
-#    muonEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMuonEta"), ratio=True)
-#    muonEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMuonEta"), ratio=True)
 
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_originalMet"), ratio=True)
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
+    def createPlot(name):
+        kwargs = {}
+        if mcOnly:
+            kwargs["normalizeToLumi"] = mcLumi
+        return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
+    
+    tauPt(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
+#    tauPt(createPlot("TauEmbeddingAnalysis_afterMetCut_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
+    tauPt(createPlot("TauEmbeddingAnalysis_afterBTagging_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
+    tauPt(createPlot("TauEmbeddingAnalysis_afterBTagging_selectedTauPtNoWeight"), opts=opts, rebin=10, ratio=False)
+#    tauPt(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
+#    tauEta(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
+#    tauPhi(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
+#    leadingTrack(createPlot("TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
+#    rtau(createPlot("tauID/TauID_RtauCut"), "TauIdRtau_afterTauId")
+   
+    tauCandPt(createPlot("tauID/TauSelection_all_tau_candidates_pt"), "tauCandidatePt", ratio=False)
+    tauCandEta(createPlot("tauID/TauSelection_all_tau_candidates_eta"), "tauCandidateEta" , ratio=False)
+    tauCandPhi(createPlot("tauID/TauSelection_all_tau_candidates_phi"), "tauCandidatePhi" , ratio=False)
+    
+#    muonPt(createPlot("TauEmbeddingAnalysis_begin_originalMuonPt"), ratio=True)
+#    muonPt(createPlot("TauEmbeddingAnalysis_afterTauId_originalMuonPt"), ratio=True)
+#    muonPt(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMuonPt"), ratio=True)
+    
+#    muonEta(createPlot("TauEmbeddingAnalysis_begin_originalMuonEta"), ratio=True)
+#    muonEta(createPlot("TauEmbeddingAnalysis_afterTauId_originalMuonEta"), ratio=True)
+#    muonEta(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMuonEta"), ratio=True)
+
+ #   met(createPlot("TauEmbeddingAnalysis_begin_originalMet"), ratio=True)
+ #   met(createPlot("TauEmbeddingAnalysis_afterTauId_originalMet"), ratio=True)
+ #   met(createPlot("TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
+ #   met(createPlot("TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 
     opts = {"xmin": 70, "ymaxfactor": 10}
     rebin = 10
 
-#    met(plots.DataMCPlot(datasets, analysis+"/MET/met"))
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_originalMet"))
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterBTagging_originalMet"))
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterFakeMetVeto_originalMet"))
-#    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterMetCut_embeddingMet"))
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterBTagging_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
-    met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterFakeMetVeto_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
+#    met(createPlot("MET/met"))
+#    met(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMet"))
+#    met(createPlot("TauEmbeddingAnalysis_afterBTagging_originalMet"))
+#    met(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_originalMet"))
+#    met(createPlot("TauEmbeddingAnalysis_afterMetCut_embeddingMet"))
+#    met(createPlot("TauEmbeddingAnalysis_afterBTagging_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
+#    met(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_embeddingMet"), opts=opts, rebin=rebin, ratio=False)
 
-#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
-#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
+#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
+#    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
-#    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-#    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
+    transverseMass(createPlot("TauEmbeddingAnalysis_begin_TransverseMass"))
+    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
+    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
 
     opts = {}
-    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
-    transverseMass(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
+    transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
+    transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
 
 
-#    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPtEmb")
-#    jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEtaEmb")
-#    jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhiEmb")
-#    numberOfJets(plots.DataMCPlot(datasets, analysis+"/JetSelection/NumberOfSelectedJets"), "NumberOfJetsEmb")
+#    jetPt(createPlot("JetSelection/jet_pt"), "jetPtEmb")
+#    jetEta(createPlot("JetSelection/jet_eta"), "jetEtaEmb")
+#    jetPhi(createPlot("JetSelection/jet_phi"), "jetPhiEmb")
+#    numberOfJets(createPlot("JetSelection/NumberOfSelectedJets"), "NumberOfJetsEmb")
 
-#    jetPt(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_pt"), "bjetPtEmb")
-#    jetEta(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_eta"), "bjetEtaEmb")
-#    jetPhi(plots.DataMCPlot(datasets, analysis+"/Btagging/bjet_phi"), "bjetPhiEmb")
-#    numberOfJets(plots.DataMCPlot(datasets, analysis+"/Btagging/NumberOfBtaggedJets"), "NumberOfBJetsEmb")
+#    jetPt(createPlot("Btagging/bjet1_pt"), "bjetPtEmb")
+#    jetEta(createPlot("Btagging/bjet1_eta"), "bjetEtaEmb")
+    #jetPhi(createPlot("Btagging/bjet_phi"), "bjetPhiEmb")
+#    numberOfJets(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJetsEmb")
 
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
-    eventCounter.normalizeMCByLuminosity()
-    #eventCounter.normalizeMCToLuminosity(45.6306421240000009)
+    if mcOnly:
+        eventCounter.normalizeMCToLuminosity(mcLumi)
+    else:
+        eventCounter.normalizeMCByLuminosity()
     scaleNormalization(eventCounter)
     table = eventCounter.getMainCounterTable()
 #    table = eventCounter.getSubCounterTable("Trigger")
     muonAnalysis.addSumColumn(table)
-    muonAnalysis.reorderCounterTable(table)
-    muonAnalysis.addDataMcRatioColumn(table)
+    #    muonAnalysis.reorderCounterTable(table)
+#    muonAnalysis.addDataMcRatioColumn(table)
     datasets.printInfo()
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    print table.format()
+    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%f'))
+    print table.format(cellFormat)
+
+    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format(cellFormat)
+    print eventCounter.getSubCounterTable("TauIDPassedEvt::triggerTau_HPSTight").format(cellFormat)
+#    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
+    table = eventCounter.getSubCounterTable("Trigger")
+    muonAnalysis.addSumColumn(table)
+    print table.format(cellFormat)
 
     #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True))
     #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f", ))
-    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.2f"))
-    print table.format(latexFormat)
+#    latexFormat = counter.TableFormatLaTeX(counter.CellFormatTeX(valueFormat="%.2f"))
+#    print table.format(latexFormat)
 
 def scaleMCHisto(histo, scale):
     if histo.isMC():
@@ -222,8 +276,12 @@ def scaleMuTriggerIdEff(obj):
     # From 2011A only
     #data = 0.508487
     #mc = 0.541083
-    data = 0.891379
-    mc = 0.931707
+    # May10 in 41X
+    #data = 0.891379
+    #mc = 0.931707
+    # 1fb in 42X
+    data = 0.884462
+    mc = 0.919829
 
     scaleHistosCounters(obj, scaleDataHisto, "scaleData", 1/data)
     scaleHistosCounters(obj, scaleMCHisto, "scaleMC", 1/mc)
@@ -249,7 +307,7 @@ scaleLumi = LumiScaler()
 def scaleNormalization(obj):
     if not normalize:
         return
-    
+
     #scaleMCfromWmunu(obj) # data/MC trigger correction
     scaleMuTriggerIdEff(obj)
     scaleWmuFraction(obj)
@@ -288,8 +346,8 @@ def tauPt(h, rebin=5, ratio=True, opts={}, opts2={}):
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
     
     scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.stackMCHistograms()
+#    h.addMCUncertainty()
 
     if h.histoMgr.hasHisto("Data"):
         th1 = h.histoMgr.getHisto("Data").getRootHisto()
@@ -321,8 +379,8 @@ def tauEta(h, rebin=5, ratio=True):
     xlabel = "#eta^{#tau jet}"
     ylabel = "Events"
     scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.stackMCHistograms()
+#    h.addMCUncertainty()
 
     opts = {"ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.05, "ymax": 2.5}
@@ -345,8 +403,8 @@ def tauPhi(h, rebin=5, ratio=True):
     xlabel = "#phi^{#tau jet}"
     ylabel = "Events"
     scaleNormalization(h)   
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.stackMCHistograms()
+#    h.addMCUncertainty()
 
     opts = {"ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -514,8 +572,8 @@ def transverseMass(h, rebin=10, opts={}, opts_log={}):
     ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
     
     scaleNormalization(h)   
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.stackMCHistograms()
+#    h.addMCUncertainty()
 
     _opts = {"xmax": 200, "ymaxfactor": 1.5}
     _opts.update(opts)
@@ -542,8 +600,17 @@ def tauCandPt(h, name, rebin=1, ratio=True):
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
     
     scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.stackMCHistograms()
+#    h.addMCUncertainty()
+
+#    for histo in h.histoMgr.getHistos():
+#        rh = histo.getRootHisto()
+#        bin = 9
+#        print "Bin %d, low edge %f" % (bin, rh.GetXaxis().GetBinLowEdge(bin))
+#        all = rh.Integral(0, rh.GetNbinsX()+1)
+#        passed = rh.Integral(bin, rh.GetNbinsX()+1)
+#        print "%s: all %f, passed %f" % (histo.getName(), all, passed)
+            
 
     opts = {"ymin": 0.01, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -566,8 +633,8 @@ def tauCandEta(h, name, rebin=1, ratio=True):
     ylabel = "Events / %.2f" % h.binWidth()
     
     scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+ #   h.stackMCHistograms()
+ #   h.addMCUncertainty()
 
     opts = {"ymin": 0.1, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -587,8 +654,8 @@ def tauCandPhi(h, name, rebin=1, ratio=True):
     ylabel = "Events / %.2f" % h.binWidth()
     
     scaleNormalization(h)
-    h.stackMCHistograms()
-    h.addMCUncertainty()
+ #   h.stackMCHistograms()
+ #   h.addMCUncertainty()
 
     opts = {"ymin": 1.0, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}

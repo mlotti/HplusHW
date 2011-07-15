@@ -137,14 +137,14 @@ def createAnalysis(name, postfix="", weightSrc=None, **kwargs):
     create(prefix=prefix, **kwargs)
     if not "doIsolationWithTau" in kwargs:
         for iso in [
-            "VLoose",
-            "Loose",
-            "Medium",
-            "Tight",
-            "TightSc015",
+#            "VLoose",
+#            "Loose",
+#            "Medium",
+#            "Tight",
+#            "TightSc015",
 #            "TightSc02",
             "TightIc04",
-            "TightSc015Ic04",
+#            "TightSc015Ic04",
 #            "TightSc02Ic04",
             ]:
             create(prefix=prefix+"IsoTauLike"+iso, doMuonIsolation=True, muonIsolation="tau%sIso"%iso, muonIsolationCut=0.5, **kwargs)
@@ -187,7 +187,7 @@ def createAnalysis2(**kwargs):
 
 createAnalysis2(muons=muons, allMuons=muons)
 createAnalysis2(muons=muons, allMuons=muons, weightSrc="vertexWeight", postfix="VertexWeight")
-createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
+#createAnalysis2(muons=muons, allMuons=muons, weightSrc="pileupWeight", postfix="PileupWeight")
 #createAnalysis2(muons="tightMuonsZ")
 
 # process.out = cms.OutputModule("PoolOutputModule",
