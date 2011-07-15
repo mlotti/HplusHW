@@ -3,6 +3,7 @@
 import os
 
 import ROOT
+ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -18,14 +19,16 @@ signalAnalysis = "../multicrab_110218_092432"
 #embedding = "multicrab_110228_091023"
 #embedding = "multicrab_110228_143151"
 #embedding = "multicrab_signalAnalysis_110405_093754"
-embedding = "multicrab_signalAnalysis_TauIdScan_110412_090749"
+#embedding = "multicrab_signalAnalysis_TauIdScan_110412_090749"
+embedding = "multicrab_signalAnalysis_caloMet60_pt40_110711_200735"
 embeddingData = embedding
 #signalAnalysis = "../multicrab_110228_085943"
 #signalAnalysis = "../multicrab_110404_134156"
-signalAnalysis = "../multicrab_signalAnalysis_tauIdScan_110411_165833"
+#signalAnalysis = "../multicrab_signalAnalysis_tauIdScan_110411_165833"
+signalAnalysis = "lauri/Signal_v2_h425_dataonly"
 
-#analysis = "signalAnalysis"
-analysis = "signalAnalysisTauSelectionHPSTightTauBased"
+analysis = "signalAnalysis"
+#analysis = "signalAnalysisTauSelectionHPSTightTauBased"
 #analysis = "signalAnalysisTauSelectionHPSTightTauNoRtauBased"
 #analysis = "signalAnalysisTauSelectionHPSMediumTauBased"
 #analysis = "signalAnalysisTauSelectionHPSMediumTauNoRtauBased"
@@ -44,6 +47,19 @@ else:
 
 # Datasets from the original signal analysis
 datasetsExpected = dataset.getDatasetsFromMulticrabCfg(cfgfile=os.path.join(signalAnalysis, "multicrab.cfg"), counters=counters)
+datasetsExpected.remove([
+#    "Tau_160431-161176_May10",
+    "Tau_161119-161119_May10_Wed",
+#    "Tau_161217-163261_May10",
+#    "Tau_163270-163869_May10",
+    "Tau_165088-165633_Prompt",
+    "Tau_165103-165103_Prompt_Wed",
+    "Tau_165970-166164_Prompt",
+    "Tau_166346-166346_Prompt",
+    "Tau_166374-167043_Prompt",
+    "Tau_167078-167784_Prompt",
+    "Tau_167786-167913_Prompt_Wed"
+    ])
 
 plots.mergeRenameReorderForDataMC(datasetsExpected)
 plots.mergeRenameReorderForDataMC(datasets)
@@ -56,7 +72,7 @@ lumi = datasetsExpected.getDataset("Data").getLuminosity()
 print "Embedded lumi %f" % datasets.getDataset("Data").getLuminosity()
 print "Expected lumi %f" % datasetsExpected.getDataset("Data").getLuminosity()
 
-datasets.remove("TToHplusBWB_M120")
+#datasets.remove("TToHplusBWB_M120")
 
 #datasets.selectAndReorder(["TTJets", "WJets", "QCD_Pt20_MuEnriched"])
 #datasetsExpected.selectAndReorder(["TTJets", "WJets"])
@@ -99,7 +115,8 @@ def integrate(th, firstBin, lastBin):
     return integral
 
 def normalizationFactor(embedded, expected):
-    mtRange = (30, 70)
+    #mtRange = (30, 70)
+    mtRange = (0, 70)
 
     lowBin = embedded.FindBin(mtRange[0])
     upBin = embedded.FindBin(mtRange[1])-1
@@ -112,7 +129,7 @@ def normalizationFactor(embedded, expected):
     embeddedCount = integrate(embedded, lowBin, upBin)
     expectedCount = integrate(expected, lowBin, upBin)
     normfactor = expectedCount.copy()
-    normfactor.divide(embeddedCount)
+    #normfactor.divide(embeddedCount)
 
     print "mT normalization range %.1f - %.1f GeV/c^2 (bins %d - %d)" % (mtRange[0], mtRange[1], lowBin, upBin)
     print "Embedded events %.1f +- %.1f" % (embeddedCount.value(), embeddedCount.uncertainty())
@@ -141,25 +158,27 @@ def signalAreaEvents(embedded, expected, normfactor):
     print "Predicted events %.2f +- %.2f" % (prediction.value(), prediction.uncertainty())
     print "Expected events %.2f" % expectedCount.value()
 
-mtEmbedded = plots.DataMCPlot(datasets, analysis+"/transverseMass")
-mtExpected = plots.DataMCPlot(datasetsExpected, analysis+"/transverseMass")
+#mtEmbedded = plots.DataMCPlot(datasets, analysis+"/transverseMass")
+#mtExpected = plots.DataMCPlot(datasetsExpected, analysis+"/transverseMass")
+mtEmbedded = plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterBTagging_TransverseMass")
+mtExpected = plots.DataMCPlot(datasetsExpected, analysis+"/TauEmbeddingAnalysis_afterBTagging_TransverseMass")
 
 def run(func, getter):
     return func(getter(mtEmbedded.histoMgr), getter(mtExpected.histoMgr))
 
 norms = {}
 
-for d in ["Data", "TTJets", "WJets"]:
+for d in ["Data"]:#, "TTJets", "WJets"]:
     print
     print "From %s" % d
     norms[d] = run(normalizationFactor, lambda h: h.getHisto(d).getRootHisto())
 
-mtEmbedded.stackMCHistograms()
-mtExpected.stackMCHistograms()
+#mtEmbedded.stackMCHistograms()
+#mtExpected.stackMCHistograms()
 
 print
-print "From all MC"
-norms["MCSum"] = run(normalizationFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+#print "From all MC"
+#norms["MCSum"] = run(normalizationFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
 
 # Scale
 #mtEmbedded.histoMgr.forEachHisto(lambda histo: histo.getRootHisto().Scale(0.406020))
@@ -167,7 +186,7 @@ norms["MCSum"] = run(normalizationFactor, lambda h: h.getHisto("StackedMC").getS
 normFactor = norms["Data"]
 #normFactor = dataset.Count(0.429, 0.296)
 #normFactor = dataset.Count(0.7, 0.345) # Data
-normFactor = dataset.Count(0.369, 0.042) # MC
+#normFactor = dataset.Count(0.369, 0.042) # MC
 def signalAreaEventsFactor(x, y):
     signalAreaEvents(x, y, normFactor)
 
@@ -176,9 +195,9 @@ print
 print "From Data"
 run(signalAreaEventsFactor, lambda h: h.getHisto("Data").getRootHisto())
 
-print
-print "From all MC"
-run(signalAreaEventsFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
+#print
+#print "From all MC"
+#run(signalAreaEventsFactor, lambda h: h.getHisto("StackedMC").getSumRootHisto())
 
 
 
