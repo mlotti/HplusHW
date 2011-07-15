@@ -8,7 +8,7 @@ import multicrabDatasetsCommon as common
 datasets = {
     # Signal WH
     "TTToHplusBWB_M80_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -43,7 +43,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M90_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -78,7 +78,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M100_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -113,7 +113,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M120_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -153,7 +153,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M140_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -188,7 +188,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M150_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -223,7 +223,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M155_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -258,7 +258,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M160_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -294,7 +294,7 @@ datasets = {
     },
     # Signal HH
     "TTToHplusBHminusB_M80_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -329,7 +329,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M100_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -364,7 +364,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M120_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -399,7 +399,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M140_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -434,7 +434,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M150_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -469,7 +469,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M155_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -504,7 +504,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M160_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -541,7 +541,7 @@ datasets = {
 
     # Signal heavy
     "HplusTB_M190_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -561,7 +561,7 @@ datasets = {
         }
     },
     "HplusTB_M200_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -581,7 +581,7 @@ datasets = {
         }
     },
     "HplusTB_M220_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -601,7 +601,7 @@ datasets = {
         }
     },
     "HplusTB_M250_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -621,7 +621,7 @@ datasets = {
         }
     },
     "HplusTB_M300_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -644,7 +644,7 @@ datasets = {
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
     "QCD_Pt15to30_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 8.159e+08,
         "data": {
            "AOD": {
@@ -654,7 +654,7 @@ datasets = {
         },
     },
     "QCD_Pt30to50_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 5.312e+07,
         "data": {
            "AOD": {
@@ -689,7 +689,7 @@ datasets = {
         },
     },
     "QCD_Pt50to80_TuneZ2_Summer11": {
-        "dataVersion":  "42Xmc",
+        "dataVersion":  "42XmcS3",
         "crossSection": 6.359e+06,
         "data": {
            "AOD": {
@@ -719,7 +719,7 @@ datasets = {
         },
     },
     "QCD_Pt80to120_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 7.843e+05,
         "data": {
            "AOD": {
@@ -749,7 +749,7 @@ datasets = {
         },
     },
     "QCD_Pt120to170_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 1.151e+05,
         "data": {
             "AOD": {
@@ -779,7 +779,7 @@ datasets = {
         },
     },
     "QCD_Pt170to300_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 2.426e+04,
         "data": {
             "AOD": {
@@ -809,7 +809,7 @@ datasets = {
         },
     },
     "QCD_Pt300to470_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 1.168e+03,
         "data": {
             "AOD": {
@@ -839,7 +839,7 @@ datasets = {
         }
     },
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 296600000.*0.0002855,
         "data": {
             "AOD": {
@@ -853,7 +853,7 @@ datasets = {
     # EWK pythia
     # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "TT_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -873,7 +873,7 @@ datasets = {
         },
     },
     "WToTauNu_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 7899,
         "data": {
             "AOD": {
@@ -888,7 +888,7 @@ datasets = {
         },
     },
     "WToMuNu_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 7899,
         "data": {
             "AOD": {
@@ -898,7 +898,7 @@ datasets = {
         },
     },
     "DYToTauTau_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 1300,
         "data": {
             "AOD": {
@@ -913,7 +913,7 @@ datasets = {
         },
     },
     "DYToMuMu_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS3",
         "crossSection": 1300,
         "data": {
             "AOD": {
@@ -924,7 +924,7 @@ datasets = {
     },
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "WW_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 43,
         "data": {
             "AOD": {
@@ -940,7 +940,7 @@ datasets = {
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     "TTJets_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 165, # [1,2], approx. NNLO
         "data": {
             "AOD": {
@@ -965,7 +965,7 @@ datasets = {
         },
     },
     "WJets_TuneZ2_Summer11": {
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 31314, # [2], NNLO
         "data": {
             "AOD": {
@@ -986,7 +986,7 @@ datasets = {
         },
     },
     "DYJetsToLL_M50_TuneZ2_Summer11": { # Z+jets
-        "dataVersion": "42Xmc",
+        "dataVersion": "42XmcS4",
         "crossSection": 3048, # [2], NNLO
         "data": {
             "AOD": {

@@ -217,8 +217,11 @@ topSelection = cms.untracked.PSet(
 )
 
 vertexWeight = cms.untracked.PSet(
-    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
+    vertexSrc = cms.InputTag("goodPrimaryVertices"),
+#    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
+    puSummarySrc = cms.InputTag("addPileupInfo"),
     useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
+    summer11S4Mode = cms.bool(False),
     weights = cms.vdouble(0.0),
     enabled = cms.bool(False),
 )
@@ -333,6 +336,8 @@ def formatEfficiencyTrigger(pset):
 # Summer11
 # SimGeneral/MixingModule/python/mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT.py rev 1.2
 mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT = cms.vdouble(0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0630151648,0.0526654164,0.0402754482,0.0292988928,0.0194384503,0.0122016783,0.007207042,0.004003637,0.0020278322,0.0010739954,0.0004595759,0.0002229748,0.0001028162,4.58337152809607E-05)
+Summer11_PU_S4 = cms.vdouble(0.104109, 0.0703573, 0.0698445, 0.0698254, 0.0697054, 0.0697907, 0.0696751, 0.0694486, 0.0680332, 0.0651044, 0.0598036, 0.0527395, 0.0439513, 0.0352202, 0.0266714, 0.019411, 0.0133974, 0.00898536, 0.0057516, 0.00351493, 0.00212087, 0.00122891, 0.00070592, 0.000384744, 0.000219377)
+
 
 def setPileupWeightFor2010(pset=vertexWeight):
     # From Apr21 JSON
@@ -342,9 +347,14 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(pset=vertexWeight):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight):
     # From May10 JSON
-    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+    if dataVersion.isS4():
+        pset.mcDist = Summer11_PU_S4
+        pset.summer11S4Mode = True
+    else:
+        pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+        pset.summer11S4Mode = False
     pset.dataDist = cms.vdouble(3920760.80629436, 6081805.28281331, 13810357.99011321, 22505758.94021218, 28864043.83552697, 30917427.86233390, 28721324.56001887, 23746403.90406303, 17803439.77098848, 12274902.61013811, 7868110.47066589, 4729915.39947807, 2686011.14199905, 1449831.55635479, 747892.02788490, 370496.37848078, 177039.18864957, 81929.34806527, 36852.77647303, 16164.44620983, 6932.97050646, 2914.39317056, 1202.91639412, 488.15400922, 194.93432620)
     pset.dataDist = cms.vdouble(14541678.75140152, 34774289.38286586, 78924690.82740858, 126467305.04758325, 159328519.15029529, 167603454.44535571, 152683760.94960380, 123793506.45609140, 90946208.64651683, 61397298.32203319, 38505025.66458631, 22628034.29716743, 12550315.25868838, 6610507.05491146, 3324027.56535537, 1602862.62059887, 743920.15564290, 333476.86203421, 144860.60591722, 61112.68817281, 25110.18359585, 10065.11629597, 3943.97900547, 1513.53535599, 896.16051321)
     pset.enabled = True

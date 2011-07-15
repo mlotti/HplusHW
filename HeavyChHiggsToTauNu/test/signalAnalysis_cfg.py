@@ -75,8 +75,31 @@ process.source = cms.Source('PoolSource',
     #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    dataVersion.getAnalysisDefaultFileMadhatter()
+    #dataVersion.getAnalysisDefaultFileMadhatter()
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_3_1_0gW.root"
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_10_1_HjE.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_11_1_eQp.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_12_1_0Vd.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_13_1_D2J.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_14_1_XHT.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_15_1_13s.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_16_1_O9y.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_17_1_X7v.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_18_1_six.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_19_1_XxR.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_1_1_OHQ.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_20_1_0Jb.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_21_1_pgo.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_2_1_WPq.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_3_1_0gW.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_4_1_x3j.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_5_1_rIB.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_6_1_DBK.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_7_1_SGV.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_8_1_stp.root",
+    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_9_2_AYc.root",
+    
     )
 )
 if doRerunTriggerMatching:
@@ -165,8 +188,8 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
 
 
 # Set the data scenario for vertex/pileup weighting
-param.setVertexWeightFor2011() # Reweight by reconstructed vertices
-#param.setPileupWeightFor2011() # Reweight by true PU distribution 
+#param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution 
 
 #param.trigger.selectionType = "disabled"
 
