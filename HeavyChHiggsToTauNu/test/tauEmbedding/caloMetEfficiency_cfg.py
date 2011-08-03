@@ -5,8 +5,8 @@ import FWCore.ParameterSet.VarParsing as VarParsing
 ################################################################################
 # Configuration
 
-dataVersion = "311Xredigi"
-#dataVersion = "41Xdata"
+dataVersion = "42Xmc"
+#dataVersion = "42Xdata"
 
 debug = False
 #debug = True
@@ -32,7 +32,7 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_skim_v10/b3c16f1ee121445edb6d9b12e0772d8e/skim_104_1_sYD.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_skim_v11/d2154bd8672d0356e956d91d6de8768f/skim_19_2_olM.root"
   )
 )
 ###############################################################################
@@ -102,6 +102,24 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
 )
 process.commonSequence *= process.firstPrimaryVertex
 
+process.tightenedMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("tightMuons"),
+    cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
+)
+process.tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
+    src = cms.InputTag("tightenedMuons"),
+    minNumber = cms.uint32(1)
+)
+process.tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("tightenedMuons"),
+    cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
+)
+process.tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
+                                       src = cms.InputTag("tauEmbeddingMuons"),
+                                       minNumber = cms.uint32(1))
+process.commonSequence *= (process.tightenedMuons * process.tightenedMuonsFilter * process.tauEmbeddingMuons * process.tauEmbeddingMuonsFilter)
+
+
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 additionalCounters.extend(customisations.addFinalMuonSelection(process, process.commonSequence, param))
@@ -110,7 +128,7 @@ process.muonFinalSelectionJetSelectionGoodJets.src = "goodJets"
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChBTaggingFilter_cfi")
 process.hPlusBTaggingPtrSelectorFilter.jetSrc = "muonFinalSelectionJetSelectionGoodJets"
 
-#process.commonSequence *= process.hPlusBTaggingPtrSelectorFilter
+process.commonSequence *= process.hPlusBTaggingPtrSelectorFilter
 
 process.btaggingCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.btaggingCount
@@ -119,6 +137,7 @@ additionalCounters.append("btaggingCount")
 met = Histo("et", "et()", min=0, max=400, nbins=400)
 
 histoList = [("calomet_", cms.InputTag("met"), [met]),
+             ("calometNoHF_", cms.InputTag("metNoHF"), [met]),
              ("pfmet_", cms.InputTag("pfMet"), [met])]
 
 def createAnalysis(prefix, weightSrc=None):
@@ -129,11 +148,14 @@ def createAnalysis(prefix, weightSrc=None):
     analysis = Analysis(process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=wSrc)
     ha = analysis.addMultiHistoAnalyzer("h01_All", histoList)
 
-    analysis.addCut("CaloMet25", cms.InputTag("met"), "et() > 25")
+    analysis.addCut("CaloMet25", cms.InputTag("metNoHF"), "et() > 25")
     ha = analysis.addCloneAnalyzer("h02_CaloMet25", ha)
 
-    analysis.addCut("CaloMet45", cms.InputTag("met"), "et() > 45")
+    analysis.addCut("CaloMet45", cms.InputTag("metNoHF"), "et() > 45")
     ha = analysis.addCloneAnalyzer("h02_CaloMet45", ha)
+
+    analysis.addCut("CaloMet60", cms.InputTag("metNoHF"), "et() > 60")
+    ha = analysis.addCloneAnalyzer("h02_CaloMet60", ha)
 
     p = cms.Path(process.commonSequence * analysis.getSequence())
     setattr(process, prefix+"Path", p)

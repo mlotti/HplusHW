@@ -95,6 +95,7 @@ namespace HPlus {
       void setValue(double ptLowEdge, double dataEff, double dataUncertainty, double MCEff, double MCUncertainty);
       double getScaleFactor(double tauPt) const;
       double getScaleFactorRelativeUncertainty(double tauPt) const;
+      double getScaleFactorAbsoluteUncertainty(double tauPt) const;
 
     private:
       size_t obtainIndex(double pt) const;
@@ -116,6 +117,7 @@ namespace HPlus {
     
   private:
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
+    bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
     //bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
@@ -158,7 +160,8 @@ namespace HPlus {
     TH1 *hControlSelectionType;
 
     TH1 *hScaleFactor;
-    TH1 *hScaleFactorUncertainty;
+    TH1 *hScaleFactorRelativeUncertainty;
+    TH1 *hScaleFactorAbsoluteUncertainty;
 
     // Analysis results
     pat::TriggerObjectRef fHltMet;

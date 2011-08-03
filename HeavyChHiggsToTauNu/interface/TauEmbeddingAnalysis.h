@@ -50,6 +50,7 @@ namespace HPlus {
       TH1 *hOriginalMuonEta;
       TH1 *hOriginalMuonPhi;
       TH1 *hSelectedTauPt;
+      TH1 *hSelectedTauPtNoWeight;
       TH1 *hSelectedTauEta;
       TH1 *hSelectedTauPhi;
       TH1 *hSelectedTauIsolation05;

@@ -73,13 +73,14 @@ namespace HPlus {
     hControlSelectionType->GetXaxis()->SetBinLabel(2, "byTriggerBit+ScaleFactor");
     hControlSelectionType->GetXaxis()->SetBinLabel(3, "byTriggerEffParam");
     hScaleFactor = makeTH<TH1F>(myDir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
-    hScaleFactorUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorUncertainty", "TriggerScaleFactorUncertainty;TriggerScaleFactorUncertainty;N_{events}/0.001", 2000., 0., 2.0);
+    hScaleFactorRelativeUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorRelativeUncertainty", "TriggerScaleFactorRelativeUncertainty;TriggerScaleFactorRelativeUncertainty;N_{events}/0.001", 2000., 0., 2.0);
+    hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
     // Hard code trigger efficiency values for the scale factor
-    fTriggerScaleFactor.setValue(40, 0.2790698, 0.04958686, 0.2669323, 0.01631814);
-    fTriggerScaleFactor.setValue(50, 0.5,       0.1021036,  0.5345912, 0.03948019);
-    fTriggerScaleFactor.setValue(60, 0.5454545, 0.1029723,  0.6666667, 0.05219578);
-    fTriggerScaleFactor.setValue(80, 0.8,       0.1891604,  0.6129032, 0.0871989 );
+    fTriggerScaleFactor.setValue(40, 0.4035088, 0.06502412, 0.406639,  0.02247143);
+    fTriggerScaleFactor.setValue(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523);
+    fTriggerScaleFactor.setValue(60, 0.8,       0.1108131,  0.8235294, 0.04892095);
+    fTriggerScaleFactor.setValue(80, 1,         0.2496484,  0.7916667, 0.08808045);
   }
 
   TriggerSelection::~TriggerSelection() {
@@ -98,10 +99,18 @@ namespace HPlus {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     }
     
+    // Calo MET cut; needed for non QCD1, disabled for others
     if(passEvent) {
       increment(fTriggerBitCount);
       TriggerMETEmulation::Data ret = fTriggerCaloMet.analyze(iEvent, iSetup);
       passEvent = ret.passedEvent();
+    }
+
+    // Trigger efficiency parametrisation, needed for non QCD1, disabled for others
+    if(passEvent) {
+      increment(fTriggerCaloMetCount);
+      if (fTriggerSelectionType == kTriggerSelectionByTriggerEfficiencyParametrisation)
+        passEvent = passedTriggerParametrisation(iEvent, iSetup);
     }
 
     if(passEvent) {
@@ -232,7 +241,8 @@ namespace HPlus {
     if (myPt > 40) {
       fScaleFactor = fTriggerScaleFactor.getScaleFactor(myPt);
       hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-      hScaleFactorUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      hScaleFactorRelativeUncertainty->Fill(fTriggerScaleFactor.getScaleFactorRelativeUncertainty(myPt), fEventWeight.getWeight());
+      hScaleFactorAbsoluteUncertainty->Fill(fTriggerScaleFactor.getScaleFactorAbsoluteUncertainty(myPt), fEventWeight.getWeight());
       // Apply scale factor
       fEventWeight.multiplyWeight(fScaleFactor);
       increment(fTriggerScaleFactorAllCount);
@@ -247,6 +257,24 @@ namespace HPlus {
     hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
     fEventWeight.multiplyWeight(triggerEfficiency);*/
     
+    return true;
+  }
+
+  bool TriggerSelection::passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+    increment(fTriggerParamAllCount);
+    // Get Tau object                                                                                                                                                                                                                                                          
+    TauSelection::Data triggerTauData = fTriggerTauSelection.analyze(iEvent, iSetup);
+    if (!triggerTauData.passedEvent()) return false; // Need to have at least (but preferably exactly) one tau in the events                                                                                                                                                   
+    increment(fTriggerParamTauCount);
+    // Get MET object                                                                                                                                                                                                                                                          
+    METSelection::Data triggerMetData = fTriggerMETSelection.analyze(iEvent, iSetup);
+    //if (!triggerMetData.passedEvent()) return false;                                                                                                                                                                                                                         
+    increment(fTriggerParamMetCount);
+    // Obtain trigger efficiency and apply it as a weight                                                                                                                                                                                                                      
+    double triggerEfficiency = fTriggerEfficiency.efficiency(*(triggerTauData.getSelectedTaus()[0]), *triggerMetData.getSelectedMET());
+    hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
+    fEventWeight.multiplyWeight(triggerEfficiency);
+
     return true;
   }
 
@@ -357,6 +385,9 @@ namespace HPlus {
     double myDataPart = fTriggerEffDataUncertainty[myIndex] / fTriggerEffDataValues[myIndex];
     double myMCPart = fTriggerEffMCUncertainty[myIndex] / fTriggerEffMCValues[myIndex];
     return (std::sqrt(myDataPart*myDataPart + myMCPart*myMCPart));
+  }
+  double TriggerSelection::TriggerScaleFactor::getScaleFactorAbsoluteUncertainty(double tauPt) const {
+    return getScaleFactor(tauPt) * getScaleFactorRelativeUncertainty(tauPt);
   }
 
   size_t TriggerSelection::TriggerScaleFactor::obtainIndex(double pt) const {

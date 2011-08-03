@@ -162,6 +162,9 @@ namespace hplus {
                                               "DPhi(muon, MET) vs. DPhi(tau, MET)",
                                               700,-3.5,3.5, 700,-3.5,3.5);
 
+      hMuonOrigMetMt = HPlus::makeTH<TH1F>(dir, ("Muon,"+name+"Original_Mt").c_str(), "Mt(muon, MET)", 200, 0, 200);
+      hTauMetMt = HPlus::makeTH<TH1F>(dir, ("Tau,"+name+"_Mt").c_str(), "Mt(tau, MET)", 200, 0, 200);
+
       hWTauNuMetDPhi = HPlus::makeTH<TH1F>(dir, ("GenWTauNu,"+name+"_DPhi").c_str(), "DPhi(nu_W+nu_tau, MET)", 700, -3.5, 3.5);
       hWNuOrigMetMuonTauNuMetDPhi = HPlus::makeTH<TH2F>(dir, ("GenWNu,"+name+"Original_GenWTauNu,"+name+"_DPhi").c_str(),
                                                       "DPhi(nu_muon, MET) vs. DPhi(nu_muon+nu_tau, MET)",
@@ -207,6 +210,11 @@ namespace hplus {
       hMuonMetDPhi->Fill(reco::deltaPhi(muon.phi(), met.phi()), fEventWeight.getWeight());
       hTauOrigMetDPhi->Fill(reco::deltaPhi(tau.phi(), metOrig.phi()), fEventWeight.getWeight());
 
+      double origMt = std::sqrt(2 * muon.pt() * metOrig.Et() * (1 - cos(muon.phi() - metOrig.phi())));
+      double embMt = std::sqrt(2 * tau.pt() * met.Et() * (1 - cos(tau.phi() - met.phi())));
+      hMuonOrigMetMt->Fill(origMt, fEventWeight.getWeight());
+      hTauMetMt->Fill(embMt, fEventWeight.getWeight());
+        
       double muonOrigMetDphi = reco::deltaPhi(muon.phi(), metOrig.phi());
       hMuonOrigMetTauMetDPhi->Fill(muonOrigMetDphi,
                                    reco::deltaPhi(tau.phi(), met.phi()), fEventWeight.getWeight());
