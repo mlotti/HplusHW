@@ -8,7 +8,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 #dataVersion = "39Xredigi" # Winter10 MC
 #dataVersion = "39Xdata"   # Run2010 Dec22 ReReco
-dataVersion = "311Xredigi" # Spring11 MC
+dataVersion="42Xmc"     # Summer11 MC
+#dataVersion = "311Xredigi" # Spring11 MC
 #dataVersion = "41Xdata"   # Run2011 PromptReco
 
 
@@ -37,6 +38,13 @@ doTauEmbeddingTauSelectionScan = False
 
 # Do trigger parametrisation for MC and tau embedding
 doTriggerParametrisation = False
+applyTriggerScaleFactor = True
+
+filterGenTaus = False
+filterGenTausInaccessible = False
+
+# Re-run trigger matching
+doRerunTriggerMatching = False
 
 ################################################################################
 
@@ -67,10 +75,10 @@ process.source = cms.Source('PoolSource',
     #       "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #        dataVersion.getAnalysisDefaultFileMadhatter()
+           dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
-    "file:/home/wendland/data/pattuple_176_1_ikP.root"
+#    "file:/home/wendland/data/pattuple_176_1_ikP.root"
     )
 )
 if options.tauEmbeddingInput != 0:
@@ -91,11 +99,26 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 
+
+# Re-run trigger matching
+if doRerunTriggerMatching:
+        import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
+        process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
+             #pathFilterMap={} # by default, use filter name in trigger matching re-running
+                                                                        )
+        process.commonSequence *= process.triggerMatching
+                
+
+
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
-
+# MC Filter
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
+if filterGenTaus:
+        additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
+        
 ################################################################################
 # The "golden" version of the signal analysis
 
@@ -106,12 +129,24 @@ addPrimaryVertexSelection(process, process.commonSequence)
 # Import Standard SignalAnalysis Parameters and change accordingly
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
+param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
+
 # Set tau selection mode to 'standard'
 param.setAllTauSelectionOperatingMode('standard')
 
 # Set tau sources to non-trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 #param.setAllTauSelectionSrcSelectedPatTaus()
+
+if options.tauEmbeddingInput != 0:
+        tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+        tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
+        tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
+        if tauEmbeddingFinalizeMuonSelection:
+            applyIsolation = not doTauEmbeddingMuonSelectionScan
+            additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                       enableIsolation=applyIsolation))
+                                    
 
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
@@ -121,20 +156,60 @@ param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # 
 param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
-if (doTriggerParametrisation and not dataVersion.isData()):
+if (doTriggerParametrisation and not dataVersion.isData())  or options.tauEmbeddingInput != 0:
     # 2010 and 2011 scenarios
     #param.setEfficiencyTriggersFor2010()
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
-    param.trigger.selectionType = cms.untracked.string("byParametrisation")
+#    param.trigger.selectionType = cms.untracked.string("byParametrization")                                                                                 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingTightenMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
-        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                   enableIsolation=applyIsolation))
+# Trigger with scale factors (at the moment hard coded)
+if (applyTriggerScaleFactor and not dataVersion.isData()):
+        param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
+
+
+        # Set the data scenario for vertex/pileup weighting
+        param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+        #param.setPileupWeightFor2011() # Reweight by true PU distribution
+
+
+
+        #param.trigger.selectionType = "disabled"
+
+        if options.tauEmbeddingInput != 0:
+                param.trigger.selectionType = cms.untracked.string("disabled")
+                param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string("SIMPLE"), luminosity = cms.double(0)))
+                param.trigger.triggerEfficiency.parameters = cms.PSet(
+                    SIMPLE = cms.PSet(
+                    tauPtBins = cms.VPSet(
+                    cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                    cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.2790698)),
+                    cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.5)),
+                    cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.5454545)),
+                    cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.8)),
+                    # pre-approval
+                    #cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                    #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.3293233)),
+                    #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.3693694)),
+                    #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.25)),
+                    #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.3529412)),
+                    
+                    #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4210526)),
+                    #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.4954955)),
+                    #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.4166667)),
+                    #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.5294118)),
+                    
+                    #                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.5)),
+                    #                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(1.0)),
+                    #                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7)),
+                    #                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(1.0)),
+                    )
+                    )
+                    )
+                
+
+
+
 
 # Signal analysis module for the "golden analysis"
 process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
@@ -160,7 +235,7 @@ process.signalOptimisation = cms.EDFilter("HPlusSignalOptimisationProducer",
 process.signalOptimisation.tauSelection.rtauCut = cms.untracked.double(0.0) #### tmp to be used for Rtau optimisation
 
 # Prescale fetching done automatically for data
-if dataVersion.isData():
+if dataVersion.isData()   and options.tauEmbeddingInput == 0:
     process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HPlusPrescaleWeightProducer_cfi")
     process.hplusPrescaleWeightProducer.prescaleWeightTriggerResults.setProcessName(dataVersion.getTriggerProcess())
     process.hplusPrescaleWeightProducer.prescaleWeightHltPaths = param.trigger.triggers.value()
