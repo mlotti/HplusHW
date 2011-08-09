@@ -77,10 +77,10 @@ namespace HPlus {
     hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(myDir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
     // Hard code trigger efficiency values for the scale factor
-    fTriggerScaleFactor.setValue(40, 0.2790698, 0.04958686, 0.2669323, 0.01631814);
-    fTriggerScaleFactor.setValue(50, 0.5,       0.1021036,  0.5345912, 0.03948019);
-    fTriggerScaleFactor.setValue(60, 0.5454545, 0.1029723,  0.6666667, 0.05219578);
-    fTriggerScaleFactor.setValue(80, 0.8,       0.1891604,  0.6129032, 0.0871989 );
+    fTriggerScaleFactor.setValue(40, 0.4035088, 0.06502412, 0.406639,  0.02247143);
+    fTriggerScaleFactor.setValue(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523);
+    fTriggerScaleFactor.setValue(60, 0.8,       0.1108131,  0.8235294, 0.04892095);
+    fTriggerScaleFactor.setValue(80, 1,         0.2496484,  0.7916667, 0.08808045);
   }
 
   TriggerSelection::~TriggerSelection() {

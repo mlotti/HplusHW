@@ -59,7 +59,6 @@ namespace hplus {
       for(edm::View<reco::Candidate>::const_iterator iRef = href->begin(); iRef != href->end(); ++iRef) {
         if(reco::deltaR(*iCand, *iRef) < maxDR_) {
           ret->push_back(*iCand);
-          break;
         }
       }
     }

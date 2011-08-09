@@ -94,7 +94,25 @@ def tanbForBR(brAtLimit, mHp, tanbRef, mu):
 #    return tanbForXsec(crosssection.whTauNuCrossSection(brAtLimit, 1), mHp, tanbRef, mu)
 
 def tanbForBRlow(brAtLimit, mHp, tanbRef, mu):
-    return tanbForXsecLow(crosssection.ttCrossSection*brAtLimit, mHp, tanbRef, mu)
+    tanb = tanbRef
+    
+    br = getBR_top2bHp(mHp, tanb, mu)
+    maxIter = 100
+    i = 0
+    while abs(br - brAtLimit)/brAtLimit > 0.01 and br > 0 and tanb > 1.1 and i < maxIter:
+        i += 1
+        tanb_delta = 0.1*(brAtLimit - br)/brAtLimit * tanb
+        tanb = tanb - tanb_delta
+        br = getBR_top2bHp(mHp, tanb, mu)
+#        print "       tanbForBR loop, tanb %f, tanb_delta %f, br %f" % (tanb, tanb_delta, br)
+#    print "check tanbForBR ",tanb
+    if i >= maxIter:
+        print "Maximum number of iterations reached (%d), difference in (br-limit)/limit = %f" % (maxIter, (br-brAtLimit)/brAtLimit)
+
+    if tanb < 1.1 or br <= 0:
+        return -1
+    return tanb
+#    return tanbForXsec(crosssection.whTauNuCrossSection(brAtLimit, 1), mHp, tanbRef, mu)
 
 def tanbForTheoryLimit(mHp,mu):
     nTanbs = 0

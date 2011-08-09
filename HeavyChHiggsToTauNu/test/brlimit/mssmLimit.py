@@ -16,7 +16,7 @@ mu = 200
 ## NOTE Tevatron results cannot be shown in some values of mA, 
 # since the corresponding mH values have not been calculated
 # in Feynhiggs
-useMA = 1
+useMA = 0
 showTeva = 1
 showLEP = 1
 
@@ -31,7 +31,7 @@ def writeTitleTexts(lumi):
     x = 0.2
     l.DrawLatex(x, y, "#sqrt{s} = 7 TeV")
     x = 0.45
-    l.DrawLatex(x, y, lumi + " pb^{-1}")
+    l.DrawLatex(x, y, lumi + " fb^{-1}")
     return 0
 
 def writeText( myText, y ):
@@ -340,6 +340,8 @@ def main():
     expected_1s_tanb = graphToTanBeta(expected_1s, mu, removeNotValid=False)
     print "Constructing expected 2 sigma"
     expected_2s_tanb = graphToTanBeta(expected_2s, mu, removeNotValid=False)
+
+ 
     showLow = 1
     if showLow:
         observed_tanb_low = graphToTanBetaLow(observed,mu)
@@ -371,6 +373,18 @@ def main():
     massMin = valid_mp[0] - 5
     massMax = valid_mp[-1] + 5
     tanbMax = 60#200
+
+    # Upper edges of the uncertainty bands to the plot edges
+    for gr in [expected_1s_tanb, expected_2s_tanb]:
+        for p in xrange(gr.GetN()/2, gr.GetN()):
+            gr.SetPoint(p, gr.GetX()[p], tanbMax)
+    if showLow:
+        # Lowed edges of the uncertainty bands to the plot edges
+        for gr in [expected_1s_tanb_low, expected_2s_tanb_low]:
+            for p in xrange(gr.GetN()/2, gr.GetN()):
+                gr.SetPoint(p, gr.GetX()[p], 0)
+        
+
 
     # Create the TCanvas, frame, etc
     if useMA:
@@ -418,8 +432,8 @@ def main():
 
     # Legends
     legeX = 0.60
-    legeY = 0.28
-    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.30)
+    legeY = 0.25
+    pl  = ROOT.TLegend(legeX,legeY,legeX+0.30,legeY+0.25)
     pl.SetTextSize(0.03)
     pl.SetFillStyle(4000)
     pl.SetTextFont(132)
