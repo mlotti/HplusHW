@@ -1,22 +1,27 @@
 import FWCore.ParameterSet.Config as cms
 
+singleTauMetTriggerPaths = [
+#    "HLT_SingleLooseIsoTau20",
+#    "HLT_SingleLooseIsoTau20_Trk5",
+#    "HLT_SingleIsoTau20_Trk5",
+#    "HLT_SingleIsoTau20_Trk15_MET20",
+#    "HLT_SingleIsoTau20_Trk15_MET25_v3",
+#    "HLT_SingleIsoTau20_Trk15_MET25_v4",
+    "HLT_IsoPFTau35_Trk20_MET45_v1",
+    "HLT_IsoPFTau35_Trk20_MET45_v2",
+    "HLT_IsoPFTau35_Trk20_MET45_v4",
+    "HLT_IsoPFTau35_Trk20_MET45_v6",
+    "HLT_IsoPFTau35_Trk20_MET60_v2",
+    "HLT_IsoPFTau35_Trk20_MET60_v3",
+    "HLT_IsoPFTau35_Trk20_MET60_v4",
+]
+
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
     triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
     patSrc = cms.untracked.InputTag("patTriggerEvent"),
-    triggers = cms.untracked.vstring("HLT_SingleLooseIsoTau20",
-                                     "HLT_SingleLooseIsoTau20_Trk5",
-                                     "HLT_SingleIsoTau20_Trk5",
-                                     "HLT_SingleIsoTau20_Trk15_MET20",
-                                     "HLT_SingleIsoTau20_Trk15_MET25_v3",
-                                     "HLT_SingleIsoTau20_Trk15_MET25_v4",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v1",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v2",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v4",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v6",
-                                     "HLT_IsoPFTau35_Trk20_MET60_v2",
-    ),
+    triggers = cms.untracked.vstring(singleTauMetTriggerPaths),
     hltMetCut = cms.untracked.double(60.0),
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
@@ -251,9 +256,10 @@ for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff
 
 # Functions
 def overrideTriggerFromOptions(options):
-    if options.trigger != "":
+    if isinstance(options.trigger, basestring) and options.trigger != "":
         trigger.triggers = [options.trigger]
-
+    elif len(options.trigger) > 0:
+        trigger.triggers = options.trigger
 
 def _getTriggerVertexArgs(kwargs):
     effargs = {}
