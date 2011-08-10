@@ -74,6 +74,8 @@ namespace HPlus {
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
+    const std::string getDiscriminator() const { return fDiscriminator; }
+
   private:
     void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
