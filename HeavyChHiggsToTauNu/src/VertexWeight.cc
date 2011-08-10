@@ -11,10 +11,14 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+
 namespace HPlus {
   VertexWeight::VertexWeight(const edm::ParameterSet& iConfig):
     fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
+    fPuSummarySrc(iConfig.getParameter<edm::InputTag>("puSummarySrc")),
     fUseSimulatedPileup(iConfig.getParameter<bool>("useSimulatedPileup")),
+    fSummer11S4Mode(iConfig.getParameter<bool>("summer11S4Mode")),
     fEnabled(iConfig.getParameter<bool>("enabled"))
   {
     if(fUseSimulatedPileup) {
@@ -50,12 +54,32 @@ namespace HPlus {
     }
 
     double weight = std::numeric_limits<double>::quiet_NaN();
-    if(fUseSimulatedPileup)
-      // According to
-      // https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
-      // this checks from the provenance if the MC was generated with
-      // faulty OOTPU, and gives correct weight for that
-      weight = fLumiWeights.weightOOT(iEvent);
+    if(fUseSimulatedPileup) {
+      // See https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
+      edm::Handle<std::vector<PileupSummaryInfo> >  hpu;
+      iEvent.getByLabel(fPuSummarySrc, hpu);
+      int npv = -1;
+
+      if(fSummer11S4Mode) {
+        npv = 0;
+        for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
+          npv += iPV->getPU_NumInteractions();
+        }
+        weight = fLumiWeights.weight3BX( npv/3. );
+      }
+      else {
+        for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
+          if(iPV->getBunchCrossing() == 0) {
+            npv = iPV->getPU_NumInteractions();
+            break;
+          }
+        }
+        if(npv < 0) {
+          throw cms::Exception("LogicError") << "Didn't find number of interactions for in-time BX" << std::endl;
+        }
+        weight = fLumiWeights.weight( npv );
+      }
+    }
     else {
       size_t n = vertSize;
       if(n >= fWeights.size())

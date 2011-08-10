@@ -26,10 +26,12 @@ namespace HPlus {
 
   private:
     edm::InputTag fVertexSrc;
+    edm::InputTag fPuSummarySrc;
     mutable edm::LumiReWeighting fLumiWeights; // the weight() methods are NOT const...
     std::vector<double> fWeights;
     TH1 *hWeights;
     bool fUseSimulatedPileup;
+    bool fSummer11S4Mode;
     bool fEnabled;
   };
 }

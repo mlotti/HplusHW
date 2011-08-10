@@ -74,6 +74,8 @@ addpkg CommonTools/RecoAlgos      V00-03-13
 addpkg FWCore/GuiBrowsers         V00-00-57
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
+# https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
+addpkg PhysicsTools/Utilities     V08-03-09
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID

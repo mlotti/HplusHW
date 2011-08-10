@@ -650,10 +650,14 @@ class HistoBase:
             h.SetLineWidth(1)
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
+
             legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
         else:
-            legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
+            labels = self.legendLabel.split("\n")
+            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
+            for lab in labels[1:]:
+                legend.AddEntry(None, lab, "")
 
     ## Call a function with self as an argument.
     #
