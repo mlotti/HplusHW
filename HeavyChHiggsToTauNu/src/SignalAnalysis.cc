@@ -4,11 +4,22 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TH1F.h"
 #include "TNamed.h"
+
+namespace {
+  template <typename T>
+  void copyPtrToVector(const edm::PtrVector<T>& src, std::vector<T>& dst) {
+    dst.reserve(src.size());
+    for(typename edm::PtrVector<T>::const_iterator i = src.begin(); i != src.end(); ++i) {
+      dst.push_back(**i);
+    }
+  }
+}
 
 namespace HPlus {
   SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter) :
@@ -151,11 +162,14 @@ namespace HPlus {
 
   SignalAnalysis::~SignalAnalysis() { }
 
-  bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-    return analyze(iEvent, iSetup);
+  void SignalAnalysis::produces(edm::EDFilter *producer) const {
+    producer->produces<std::vector<pat::Tau> >();
+    producer->produces<std::vector<pat::Jet> >("jets");
+    producer->produces<std::vector<pat::Jet> >("bjets");
   }
 
-  bool SignalAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+  bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.updatePrescale(iEvent); // set prescale
 
     // Vertex weight
@@ -213,6 +227,9 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
+    std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
+    copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
+    iEvent.put(saveTaus);
     
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
@@ -283,6 +300,9 @@ namespace HPlus {
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
+    std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
+    copyPtrToVector(jetData.getSelectedJets(), *saveJets);
+    iEvent.put(saveJets, "jets");
     
 
     // b tagging
@@ -292,6 +312,11 @@ namespace HPlus {
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+
+    std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
+    copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
+    iEvent.put(saveBJets, "bjets");
+
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
@@ -304,21 +329,19 @@ namespace HPlus {
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    if(tauData.getRtauOfSelectedTau() < 0.8 ) return false;
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
     increment(fRtauAfterCutsCounter);
 
-    if(transverseMass < 80 ) return false;
+    if(transverseMass < 80 ) return true;
     increment(ftransverseMassCut80Counter);
 
-    if(transverseMass < 100 ) return 
-
-false;
+    if(transverseMass < 100 ) return true;
     increment(ftransverseMassCut100Counter);
 
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    if (!fakeMETData.passedEvent()) return false;
+    if (!fakeMETData.passedEvent()) return true;
     increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);

@@ -28,6 +28,7 @@ namespace edm {
   class ParameterSet;
   class Event;
   class EventSetup;
+  class EDFilter;
 }
 
 class TH1;
@@ -88,11 +89,12 @@ namespace HPlus {
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalAnalysis();
 
+    void produces(edm::EDFilter *producer) const;
+
     // Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau);
     CounterGroup* getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch);
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);

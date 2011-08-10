@@ -30,6 +30,7 @@ HPlusSignalAnalysisProducer::HPlusSignalAnalysisProducer(const edm::ParameterSet
 {
   eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
+  analysis.produces(this);
 }
 HPlusSignalAnalysisProducer::~HPlusSignalAnalysisProducer() {}
 void HPlusSignalAnalysisProducer::beginJob() {}
