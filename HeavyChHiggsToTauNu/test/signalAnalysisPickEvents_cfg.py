@@ -91,7 +91,7 @@ param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution
 
    
 # Signal analysis module for the "golden analysis"
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilterNew",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,

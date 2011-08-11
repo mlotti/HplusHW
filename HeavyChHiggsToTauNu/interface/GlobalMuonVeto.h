@@ -41,6 +41,9 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
+
+      const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fGlobalMuonVeto->fSelectedMuons; }
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolation; }
     
     private:
       const GlobalMuonVeto *fGlobalMuonVeto;
@@ -146,7 +149,9 @@ namespace HPlus {
     bool bMuonGoodPVCut;
     bool bMuonMatchingMCmuon;
     bool bMuonMatchingMCmuonFromW;
-    
+
+    edm::PtrVector<pat::Muon> fSelectedMuons;
+    edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
   };
 }
 

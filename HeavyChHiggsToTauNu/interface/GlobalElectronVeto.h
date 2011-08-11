@@ -49,6 +49,8 @@ namespace HPlus {
       const float getSelectedElectronPt() const { return fGlobalElectronVeto->fSelectedElectronPt; }
       const float getSelectedElectronEta() const { return fGlobalElectronVeto->fSelectedElectronEta; }
 
+      const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fGlobalElectronVeto->fSelectedElectrons; }
+
     private:
       const GlobalElectronVeto *fGlobalElectronVeto;
       const bool fPassedEvent;
@@ -139,7 +141,9 @@ namespace HPlus {
     bool bUseSimpleEleId70relIsoID;
     bool bUseSimpleEleId60relIsoID;
     bool bUseCustomElectronID;
- 
+
+    // Selected electrons
+    edm::PtrVector<pat::Electron> fSelectedElectrons;
   };
 }
 
