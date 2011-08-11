@@ -77,6 +77,10 @@ addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
 addpkg PhysicsTools/Utilities     V08-03-09
 
+# Luminosity
+# https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
+addpkg RecoLuminosity/LumiDB      V03-00-00
+
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
 #cvs co -r V00-03-01 ElectroWeakAnalysis/WENu

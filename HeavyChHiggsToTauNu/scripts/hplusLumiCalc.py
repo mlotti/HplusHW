@@ -72,7 +72,8 @@ def main(opts, args):
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
-        cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
+        cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
+        #cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
         if opts.verbose:
@@ -81,7 +82,8 @@ def main(opts, args):
         output = p.communicate()[0]
         ret = p.returncode
         if ret != 0:
-            print "Call to lumiCalc.py failed with return value %d" % ret
+            print "Call to lumiCalc.py failed with return value %d with command" % ret
+            print " ".join(cmd)
             print output
             return 1
         if opts.verbose:
@@ -93,7 +95,8 @@ def main(opts, args):
         for line in lines:
             m = lumi_re.search(line)
             if m:
-                lumi = float(m.group("recorded"))/1e6 # ub^-1 -> pb^-1
+                lumi = float(m.group("recorded"))/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
+                #lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
                 break
 
         print "Task %s recorded luminosity %f pb^-1" % (d, lumi)
