@@ -183,6 +183,19 @@ datasets = {
             },
         }
     },
+    "Tau_172620-172802_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET60_v4",
+        "runs": (172620, 172802), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
 
     # Single tau (control)
     "Tau_Single_165970-166164_Prompt": {
@@ -277,6 +290,19 @@ datasets = {
                 "datasetpath": "/Tau/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
                 "number_of_jobs": 60, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "Tau_Single_172620-172802_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_v6",
+        "runs": (172620, 172802), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -452,6 +478,19 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
                 "number_of_jobs": 26, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "SingleMu_172620-172802_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_Mu40_v5",
+        "runs": (172620, 172802), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 20, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
