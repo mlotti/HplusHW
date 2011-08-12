@@ -26,12 +26,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
         "runs": (161119, 161119), #
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 10, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReRecoWedDiff"
-            },
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161119_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
@@ -98,12 +92,6 @@ datasets = {
         "trigger": "HLT_Mu20_v1",
         "runs": (161119, 161119),
         "data": {
-            "AOD": {
-                "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReRecoWedDiff"
-            },
         }
     },
    "SingleMu_163270-163869_May10": {
