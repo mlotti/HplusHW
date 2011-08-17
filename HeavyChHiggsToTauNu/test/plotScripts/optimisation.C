@@ -1,0 +1,215 @@
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TH1F.h"
+#include "TAxis.h"
+#include "TTree.h"
+#include "TCut.h"
+#include "TString.h"
+
+#include<iostream>
+#include<cmath>
+#include<limits>
+
+const double luminosity = 1080; // in pb^-1
+
+
+TH1 *dist2pass(TH1 *hdist, bool lessThan) {
+  // bin 0              underflow bin
+  // bin 1              first bin
+  // bin GetNbinsX()    last bin
+  // bin GetNbinsX()+1  overflow bin
+
+  // Here we assume that the all the bins in hdist have equal
+  // widths. If this doesn't hold, the output must be TGraph.
+  double bw = hdist->GetBinWidth(1);
+  for(int bin=1; bin <= hdist->GetNbinsX(); ++bin) {
+    if(std::abs(bw - hdist->GetBinWidth(bin))/bw > 0.01) {
+      std::cout << "dist2pass: input histogram with variable bin width is not supported (yet)" << std::endl;
+      return 0;
+    }
+  }
+
+  // Construct the low edges of the passed histogram. Set the low
+  // edges such that the bin centers correspond to the edges of the
+  // distribution histogram. This makes sense because the only
+  // sensible cut points in the distribution histogram are the bin
+  // edges, and if one draws the passed histogram with points, the
+  // points are placed to bin centers.
+  int nbins = hdist->GetNbinsX()+1;
+  double firstLowEdge = hdist->GetXaxis()->GetBinLowEdge(1) - bw/2;
+  double lastUpEdge = hdist->GetXaxis()->GetBinUpEdge(hdist->GetNbinsX()) + bw/2;
+  TH1 *hpass = new TH1F(TString("passed_")+hdist->GetName(),
+                        TString("Passed ")+hdist->GetTitle(),
+                        nbins, firstLowEdge, lastUpEdge);
+
+  /*
+  for(int bin=1; bin <= hpass->GetNbinsX(); ++bin) {
+    std::cout << "Bin " << bin 
+              << " hpass.center " << hpass->GetXaxis()->GetBinCenter(bin)
+              << " hdist.low " << hdist->GetXaxis()->GetBinLowEdge(bin)
+              << std::endl;
+  }
+  */
+
+  // Fill the passed histogram
+  if(lessThan) {
+    // The overflow bin will contain the number of all events
+    double passedCumulative = 0;
+    for(int bin=0; bin <= hdist->GetNbinsX()+1; ++bin) {
+      passedCumulative += hdist->GetBinContent(bin);
+      hpass->SetBinContent(bin+1, passedCumulative);
+    }
+  }
+  else {
+    // The underflow bin will contain the number of all events
+    double passedCumulative = 0;
+    for(int bin=hdist->GetNbinsX()+1; bin >= 0; --bin) {
+      passedCumulative += hdist->GetBinContent(bin);
+      hpass->SetBinContent(bin, passedCumulative);
+    }
+  }
+
+  return hpass;
+}
+
+void test_dist2pass() {
+  TH1F *hdist = new TH1F("foo", "foo", 10, 0, 10);
+  hdist->SetBinContent(2, 5); // 1-2
+  hdist->SetBinContent(6, 2); // 5-6
+  TH1 *d1 = dist2pass(hdist, true);
+  TH1 *d2 = dist2pass(hdist, false);
+
+  for(int bin=0; bin <= d1->GetNbinsX()+1; ++bin) {
+    std::cout << "Bin " << bin << " center " << d1->GetXaxis()->GetBinCenter(bin)
+              << " less " << d1->GetBinContent(bin) << " greater " << d2->GetBinContent(bin) << std::endl;
+  }
+}
+
+struct DistPass {
+  DistPass(): dist(0), pass(0) {}
+  DistPass(TH1 *d, TH1 *p): dist(d), pass(p) {}
+  TH1 *dist;
+  TH1 *pass;
+};
+
+DistPass createDistPass(const char *file, const char *expr, const char *cut, bool lessThan,
+                        double crossSection=std::numeric_limits<double>::quiet_NaN()) {
+  // Open file
+  TFile *f = TFile::Open(file);
+  if(!f) {
+    std::cout << "Unable to open file " << file << std::endl;
+    return DistPass();
+  }
+
+  // Read metadata to calculate the weight of one MC event
+  TH1 *counter = dynamic_cast<TH1 *>(f->Get("signalAnalysisCounters/counter"));
+  if(!counter) {
+    std::cout << "Unable to find counters from " << file << std::endl;
+    return DistPass();
+  }
+
+  if(std::isnan(crossSection)) {
+    TH1 *configInfo = dynamic_cast<TH1 *>(f->Get("configInfo/configinfo"));
+    if(!configInfo) {
+      std::cout << "Unable to find configInfo from " << file << std::endl;
+      return DistPass();
+    }
+
+    double control = 0;
+    for(int bin=1; bin <= configInfo->GetNbinsX(); ++bin) {
+      if(TString(configInfo->GetXaxis()->GetBinLabel(bin)) == "control")
+        control = configInfo->GetBinContent(bin);
+      else if(TString(configInfo->GetXaxis()->GetBinLabel(bin)) == "crossSection")
+        crossSection = configInfo->GetBinContent(bin);
+    }
+    // control holds the number of original files the file has been
+    // merged from; thus the cross section must be divided with it.
+    crossSection = crossSection / control;
+  }
+  // The first bin in counter holds the number of all events.
+  double mcWeight = crossSection / counter->GetBinContent(1) * luminosity;
+
+  // Get the tree, and draw the distribution
+  TTree *tree = dynamic_cast<TTree *>(f->Get("signalAnalysis/tree"));
+  if(!tree) {
+    std::cout << "Unable to find tree from " << file << std::endl;
+    return DistPass();
+  }
+    
+  Long64_t ret = tree->Draw(expr, cut);
+  if(ret < 0) {
+    std::cout << "Error in processing tree from file " << file << std::endl;
+    return DistPass();
+  }
+  if(ret == 0) {
+    std::cout << "No entries from file " << file << std::endl;
+    return DistPass();
+  }
+
+  TH1 *dist = tree->GetHistogram();
+  if(!dist) {
+    std::cout << "No histogram from tree?" << std::endl;
+    return DistPass();
+  }
+  dist = dynamic_cast<TH1 *>(dist->Clone(TString(dist->GetName())+"_cloned"));
+  if(!dist) {
+    std::cout << "No histogram from clone?" << std::endl;
+    return DistPass();
+  }
+
+  // Normalize the distribution
+  dist->Scale(mcWeight);
+
+  // Construct the "number of passed events as a function of cut value" histogram
+  TH1 *pass = dist2pass(dist, lessThan);
+  if(!pass) {
+    std::cout << "No histogram from dist2pass?" << std::endl;
+  }
+
+  return DistPass(dist, pass);
+}
+
+struct Result {
+  // Signals
+  DistPass HplusTB_M190;
+
+  // Backgrounds
+  DistPass QCD_Pt30to50;
+  DistPass TTJets;
+};
+
+Result createResult(const char *expr, const char *cut, bool lessThan) {
+  Result res;
+
+  // FIXME: change cross section to correct one!
+  res.HplusTB_M190 = createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159);
+  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
+  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
+
+  return res;
+}
+
+void optimisation() {
+  TH1::AddDirectory(kFALSE);
+
+  // Cuts on preselection, which can be tightened
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
+  TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
+  TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
+
+  // Cuts to be applied on top of preselection
+  TString met("met_p4.Et()"); TCut metCut(met+" > 70");
+  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
+
+  // Optional cuts
+  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
+  TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
+
+  Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
+
+  TCanvas *c = new TCanvas("rtau");
+  //rtauRes.HplusTB_M190.pass->Draw();
+  rtauRes.TTJets.pass->Draw();
+  std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
+  c->SaveAs(".png");
+}
