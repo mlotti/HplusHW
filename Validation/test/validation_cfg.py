@@ -2,22 +2,24 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Validation")
 
-#dataTier = "PATTuple"
-dataTier = "AOD"
+dataTier = "PATTuple"
+#dataTier = "AOD"
 
 #dataVersion = "39Xredigi"
-dataVersion = "311Xredigi"
+#dataVersion = "311Xredigi"
 #dataVersion = "39Xdata"
 #dataVersion = "38XredigiPU"
+dataVersion = "42Xmc"
 
-trigger = "HLT_SingleIsoTau20_Trk15_MET25_v4"
+#trigger = "HLT_SingleIsoTau20_Trk15_MET25_v4"
+trigger = "HLT_IsoPFTau35_Trk20_MET45"
 
 # Command line arguments (options) and DataVersion object
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 options, dataVersion = getOptionsDataVersion(dataVersion)
 print dataVersion.getTriggerProcess()
 
-if options.trigger != "":
+if len(options.trigger) > 0:
     trigger = options.trigger
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -28,7 +30,8 @@ process.source = cms.Source("PoolSource",
 #        'rfio:/castor/cern.ch/user/s/slehti/HiggsAnalysisData/test_H120_100_1_08t_RAW_RECO.root'
 #	'file:/tmp/slehti/test_H120_100_1_08t_RAW_RECO.root'
 #	dataVersion.getAnalysisDefaultFileCastor()
-	dataVersion.getPatDefaultFileCastor()
+#	dataVersion.getPatDefaultFileCastor()
+	'file:/tmp/slehti/TTJets_TuneZ2_Summer11_pattuple_266_1_at8.root'
     )
 )
 
@@ -112,9 +115,9 @@ process.endPath = cms.EndPath(
 
 if dataTier == "PATTuple":
     process.p = cms.Path(
-        process.TauMomentumValidation+
+####        process.TauMomentumValidation+
         process.GeneratorValidation+
-        process.TriggerValidation+
+#### FIXME        process.TriggerValidation+
         process.endOfProcess
     )
 
