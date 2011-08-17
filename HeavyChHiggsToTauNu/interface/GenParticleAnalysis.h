@@ -32,6 +32,13 @@ namespace HPlus {
 
   private:
     void init();
+    std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
+    bool hasMother(const reco::Candidate&, int);
+    void printMothers(const reco::Candidate& );
+    std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate&);
+    bool hasDaughter(const reco::Candidate&, int);
+    void printDaughters(const reco::Candidate& );
+    
     // EventWeight object
     EventWeight& fEventWeight;
     //    edm::InputTag fSrc;
@@ -66,8 +73,14 @@ namespace HPlus {
     TH1 *hBquarkMultiplicity;
     TH1 *hBquarkStatus2Multiplicity;
     TH1 *hBquarkStatus3Multiplicity;
-
-
+    TH1 *hBquarkFromTopEta;
+    TH1 *hBquarkNotFromTopEta;
+    TH1 *hBquarkFromTopPt;
+    TH1 *hBquarkNotFromTopPt;
+    TH1 *hBquarkFromTopDeltaRTau;
+    TH1 *hBquarkNotFromTopDeltaRTau;
+    TH1 *hTopPt;
+    TH1 *hTopPt_wrongB;
   };
 }
 
