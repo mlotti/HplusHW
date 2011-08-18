@@ -49,7 +49,8 @@ def embeddingPlots():
         datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
         datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
-        datasets.selectAndReorder(["TTJets_TuneZ2_Spring11"])
+        datasets.selectAndReorder(["TTJets_TuneZ2_Summer11"])
+#        datasets.selectAndReorder(["WJets_TuneZ2_Summer11"])
 #        datasets.selectAndReorder(["WJets_TuneZ2_Spring11"])
 #        datasets.selectAndReorder(["QCD_Pt20_MuEnriched_TuneZ2_Winter10"])
 
@@ -57,6 +58,7 @@ def embeddingPlots():
     isoAnalyses = ["EmbeddingAnalyzer"]
 
     muonTau = PlotMuonTau()
+    muonTauPFCand = PlotMuonPFCand()
     genTauNu = PlotGenTauNu()
     met = PlotMet()
     muonTauMetDeltaPhi = PlotMuonTauMetDeltaPhi()
@@ -69,15 +71,17 @@ def embeddingPlots():
         "EmbeddingAnalyzer",
     #    "tauIdEmbeddingAnalyzer",
     #    "tauPtIdEmbeddingAnalyzer"
-        "EmbeddingAnalyzer/matched",
+    #    "EmbeddingAnalyzer/matched",
     #    "tauIdEmbeddingAnalyzer/matched",
     #    "tauPtIdEmbeddingAnalyzer/matched"
         ]:
         for q in ["Pt", "Eta", "Phi"]:
             muonTau.plot(datasets, analysis, q)
-#            genTauNu.plot(datasets, analysis, q)
+            #genTauNu.plot(datasets, analysis, q)
+        for q in ["TrackDxy", "TrackDz"]:
+            muonTauPFCand.plot(datasets, analysis, q)
         muonTauDR(datasets, analysis)
-#        muonTauIso2(datasets, analysis)
+        muonTauIso2(datasets, analysis)
 #        tauGenMass(datasets, analysis)
     
 #        muonTauMetDeltaPhi.plot(datasets, analysis, "Met")
@@ -274,6 +278,42 @@ class PlotMuonTau:
         drawSave(h, updatePaletteStyle=True)
         style.setWide(False)
 
+
+class PlotMuonPFCand:
+    def __init__(self, rebin={}):
+        self.rebin = {"TrackDxy": 10,
+                      "TrackDz": 10,
+                      }
+        self.rebin.update(rebin)
+
+    def plot(self, datasets, an, q):
+        rebin = self.rebin[q]
+        xlabel = {"TrackDxy": "d_{xy} (cm)",
+                  "TrackDz": "d_{z} (cm)"}[q]
+    
+        name = "Muon_TauPFCand_"+q
+        h = Plot(datasets, an, ["PFCand_LeadingHadr_"+q, "Muon_"+q])
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+
+        ylabel = "Number of MC events / %.1f " % h.binWidth()
+        ylabel += " cm"
+
+        h.histoMgr.setHistoLegendLabelMany({"Muon_"+q: "Original muon",
+                                            "Tau_"+q: "Embedded tau",
+                                            })
+        h.createFrame(name, yfactor=1.2)
+        h.frame.GetXaxis().SetTitle(xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(createLegend2())
+        drawSave(h)
+    
+        h.createFrame(name+"_log", ymin=0.1, yfactor=2)
+        h.frame.GetXaxis().SetTitle(xlabel)
+        h.frame.GetYaxis().SetTitle(ylabel)
+        h.setLegend(createLegend2())
+        ROOT.gPad.SetLogy(True)
+        drawSave(h)
+    
 class PlotGenTauNu:
     def __init__(self, rebin={}):
         self.rebin = {"Pt": 2,
@@ -433,15 +473,15 @@ class PlotMuonTauIso:
 
 
 def muonTauIso2(datasets, an):
-    style.setWide(True)
-    name = "Muon_IsoTrk_Tau_IsoChargedHadrPtSum"
-    h = Plot(datasets, an, [name])
-    h.createFrame(name, xmax=25, ymax=80)
-    h.frame.GetXaxis().SetTitle("#mu tracker isolation #Sigma p_{T} (GeV/c)")
-    h.frame.GetYaxis().SetTitle("#tau isolation charged cand #Sigma p_{T} (GeV/c)")
-    h.histoMgr.setHistoDrawStyleAll("COLZ")
-    drawSave(h)
-    style.setWide(False)
+#     style.setWide(True)
+#     name = "Muon_IsoTrk_Tau_IsoChargedHadrPtSum"
+#     h = Plot(datasets, an, [name])
+#     h.createFrame(name, xmax=25, ymax=80)
+#     h.frame.GetXaxis().SetTitle("#mu tracker isolation #Sigma p_{T} (GeV/c)")
+#     h.frame.GetYaxis().SetTitle("#tau isolation charged cand #Sigma p_{T} (GeV/c)")
+#     h.histoMgr.setHistoDrawStyleAll("COLZ")
+#     drawSave(h)
+#     style.setWide(False)
 
     #style.setWide(True)
     #h = Plot(datasets, an, ["muonIsoTrkTauPtSumRel"])
@@ -454,7 +494,8 @@ def muonTauIso2(datasets, an):
     #style.setWide(False)
 
     style.setWide(True)
-    name = "Muon_IsoTotal_Tau_IsoChargedHadrPtSumRel"
+#    name = "Muon_IsoTotal_Tau_IsoChargedHadrPtSumRel"
+    name = "Muon_IsoTotalRel_Tau_IsoHpsTightOccupancy"
     h = Plot(datasets, an, [name])
     h.createFrame(name, xmax=0.5, ymax=10)
     h.frame.GetXaxis().SetTitle("#mu rel. iso")

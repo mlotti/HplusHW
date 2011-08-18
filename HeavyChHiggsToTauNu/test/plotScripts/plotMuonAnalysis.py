@@ -192,7 +192,23 @@ def main():
 #                                                   weightedCounters=counters+"/weighted", firstWeightedCount=analysisPrefix+"countAll"
                                                    )
 #    datasets.remove(["Mu_136035-144114_Dec22", "Mu_147196-149294_Dec22", "SingleMu_160431-161016_Prompt", "SingleMu_160431-161016_Prompt"])
+    datasets.remove([
+#        "SingleMu_160431-163261_May10",
+#        "SingleMu_161119-161119_May10_Wed",
+#        "SingleMu_163270-163869_May10",
+#        "SingleMu_165088-166150_Prompt",
+#        "SingleMu_166161-166164_Prompt",
+#        "SingleMu_166346-166346_Prompt",
+#        "SingleMu_166374-167043_Prompt",
+#        "SingleMu_167078-167784_Prompt",
+#        "SingleMu_167786-167913_Prompt_Wed"
+        ])
     datasets.loadLuminosities()
+
+    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_chargedGamma_110617_002143/multicrab.cfg", counters=counters)
+    datasets41x.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11", "TToBLNu_tW-channel_TuneZ2_Spring11",
+                                  "WW_TuneZ2_Spring11", "WZ_TuneZ2_Spring11", "ZZ_TuneZ2_Spring11"])
+    datasets.extend(datasets41x)
     
     datasetsMC = datasets.deepCopy()
     datasetsMC.remove(datasets.getDataDatasetNames())
@@ -262,7 +278,7 @@ def main():
     
         printFraction = isel in [0, 2, 3]
     
-        muonPt(createPlot(sel+"/muon_pt"), prefix, rebin=10, ratio=True)
+        muonPt(createPlot(sel+"/muon_pt"), prefix, rebin=10, ratio=False)
         muonEta(createPlot(sel+"/muon_eta"), prefix, rebin=5)
         muonPhi(createPlot(sel+"/muon_phi"), prefix, rebin=1)
     
@@ -1113,17 +1129,17 @@ def printCounters(datasets, datasetsMC, analysisPrefix, normalizeToLumi=None):
     #eventCounter.getMainCounter().printCounter()
     table = eventCounter.getMainCounterTable()
 
-    addSumColumn(table)
+#    addSumColumn(table)
 #    addTtwFractionColumn(table)
 #    addPurityColumn(table)
 #    addDyFractionColumn(table)
 #    addQcdFractionColumn(table)
 
-    reorderCounterTable(table)
+#    reorderCounterTable(table)
 
-    print table.format()
+#    print table.format()
     print table.format(latexFormat)
-    print table.format(latexFormat2)
+#    print table.format(latexFormat2)
     return
     
     #print "------------------------------------------------------------"

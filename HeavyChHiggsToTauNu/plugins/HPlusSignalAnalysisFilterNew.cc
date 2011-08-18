@@ -4,13 +4,13 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisNew.h"
 
-class HPlusSignalAnalysisProducer: public edm::EDFilter {
+class HPlusSignalAnalysisFilterNew: public edm::EDFilter {
  public:
 
-  explicit HPlusSignalAnalysisProducer(const edm::ParameterSet&);
-  ~HPlusSignalAnalysisProducer();
+  explicit HPlusSignalAnalysisFilterNew(const edm::ParameterSet&);
+  ~HPlusSignalAnalysisFilterNew();
 
  private:
   virtual void beginJob();
@@ -22,35 +22,35 @@ class HPlusSignalAnalysisProducer: public edm::EDFilter {
 
   HPlus::EventCounter eventCounter;
   HPlus::EventWeight eventWeight;
-  HPlus::SignalAnalysis analysis;
+  HPlus::SignalAnalysisNew analysis;
 };
 
-HPlusSignalAnalysisProducer::HPlusSignalAnalysisProducer(const edm::ParameterSet& pset):
+HPlusSignalAnalysisFilterNew::HPlusSignalAnalysisFilterNew(const edm::ParameterSet& pset):
   eventCounter(), eventWeight(pset), analysis(pset, eventCounter, eventWeight)
 {
   eventCounter.produces(this);
   eventCounter.setWeightPointer(eventWeight.getWeightPtr());
   analysis.produces(this);
 }
-HPlusSignalAnalysisProducer::~HPlusSignalAnalysisProducer() {}
-void HPlusSignalAnalysisProducer::beginJob() {}
+HPlusSignalAnalysisFilterNew::~HPlusSignalAnalysisFilterNew() {}
+void HPlusSignalAnalysisFilterNew::beginJob() {}
 
-bool HPlusSignalAnalysisProducer::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
+bool HPlusSignalAnalysisFilterNew::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
   eventCounter.beginLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
-bool HPlusSignalAnalysisProducer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool HPlusSignalAnalysisFilterNew::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   return analysis.filter(iEvent, iSetup);
 }
 
-bool HPlusSignalAnalysisProducer::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
+bool HPlusSignalAnalysisFilterNew::endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup& iSetup) {
   eventCounter.endLuminosityBlock(iBlock, iSetup);
   return true;
 }
 
-void HPlusSignalAnalysisProducer::endJob() {
+void HPlusSignalAnalysisFilterNew::endJob() {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HPlusSignalAnalysisProducer);
+DEFINE_FWK_MODULE(HPlusSignalAnalysisFilterNew);

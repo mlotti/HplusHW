@@ -513,6 +513,23 @@ void HPlusTauEmbeddingAnalyzer::analyze(const edm::Event& iEvent, const edm::Eve
     }
   }
 
+  /*
+  for(size_t iCand=0; iCand < hpfCands->size(); ++iCand) {
+    double dR = reco::deltaR(*muon, hpfCands->at(iCand));
+    if(dR < 0.2) {
+      std::cout << "Muon pt " << muon->pt() << " eta " << muon->eta() << " phi " << muon->phi()
+                << " DR " << dR
+                << " pfcand pt " << hpfCands->at(iCand).pt() 
+                << " eta " << hpfCands->at(iCand).eta()
+                << " phi " << hpfCands->at(iCand).phi()
+                << " particleId " << hpfCands->at(iCand).particleId()
+                << " pdg " << hpfCands->at(iCand).pdgId()
+                << std::endl;
+    }
+  }
+  */
+
+
   eventWeight_.updatePrescale(iEvent); // set prescale
   tauIsolationCalculator_.beginEvent(iEvent);
 

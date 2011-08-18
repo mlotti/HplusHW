@@ -37,7 +37,7 @@ namespace HPlus {
       Histograms();
       ~Histograms();
 
-      void book(TFileDirectory& fd, const std::string& prefix);
+      void book(TFileDirectory& fd, const std::string& prefix, const std::string& label);
 
       // Fill the histograms (add more objects to arguments if necessary)
       void fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon* originalMuon, const pat::Tau* selectedTau);

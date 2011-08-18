@@ -4,16 +4,27 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
-step = "generation"
+#step = "skim"
+#step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 #step = "muonAnalysis"
 #step = "caloMetEfficiency"
 
 dirPrefix = ""
+#dirPrefix += "_caloMet45"
+#dirPrefix += "_caloMet60"
+#dirPrefix += "_taueff"
+#dirPrefix += "_noTauMatching"
+#dirPrefix += "_noTauPtCut"
+#dirPrefix += "_tauPt50"
+#dirPrefix += "_nJet40"
+#dirPrefix += "_noEmuVeto"
+#dirPrefix += "_noEmuVetoEnd"
+dirPrefix += "_MCGT"
+#dirPrefix += "_forClosureTest"
 #dirPrefix = "_TauIdScan"
 #dirPrefix = "_iso05"
 #dirPrefix = "_test"
@@ -33,12 +44,13 @@ if step == "signalAnalysis":
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "generation":     {"input": "tauembedding_skim_v11",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v11_2"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-#          "analysis":       {"input": "tauembedding_embedding_v10_1"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
-#          "signalAnalysis": {"input": "tauembedding_embedding_v10_1"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "embedding":      {"input": "tauembedding_generation_v11_8"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "analysis":       {"input": "tauembedding_embedding_v11_8"+pt,  "config": "embeddingAnalysis_cfg.py"},
+#          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
+#          "signalAnalysis": {"input": "tauembedding_embedding_v11_6"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v11_8"+pt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v11",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v10",         "config": "caloMetEfficiency_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v11",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -54,21 +66,21 @@ datasetsData2010 = [
     "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
 datasetsData2011 = [
-#    "SingleMu_160431-163261_May10",  # HLT_Mu20_v1
-#    "SingleMu_161119-161119_May10_Wed", # HLT_Mu20_v1
-#    "SingleMu_163270-163869_May10",  # HLT_Mu24_v2
-#    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
-#    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
-#    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
-#    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
-#    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
-#    "SingleMu_167078-167784_Prompt", # HLT_Mu40_v1
-#    "SingleMu_167786-167913_Prompt_Wed", # HLT_Mu40_v1
+    "SingleMu_160431-163261_May10",  # HLT_Mu20_v1
+    "SingleMu_163270-163869_May10",  # HLT_Mu24_v2
+    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
+    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
+    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
+    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
+    "SingleMu_167078-167784_Prompt", # HLT_Mu40_v1
+
+    "SingleMu_161119-161119_May10_Wed", # HLT_Mu20_v1
+    "SingleMu_167786-167913_Prompt_Wed", # HLT_Mu40_v1
 ]
 datasetsMCnoQCD = [
-#    "TTJets_TuneZ2_Summer11",
-#    "WJets_TuneZ2_Summer11",
-#    "DYJetsToLL_M50_TuneZ2_Summer11",
+    "TTJets_TuneZ2_Summer11",
+    "WJets_TuneZ2_Summer11",
+    "DYJetsToLL_M50_TuneZ2_Summer11",
 #    "TToBLNu_s-channel_TuneZ2_Summer11",
 #    "TToBLNu_t-channel_TuneZ2_Summer11",
 #    "TToBLNu_tW-channel_TuneZ2_Summer11",
@@ -77,7 +89,7 @@ datasetsMCnoQCD = [
 #    "ZZ_TuneZ2_Summer11",
 ]
 datasetsMCQCD = [
-#    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
 ]
 datasetsTest = [
     "TTToHplusBWB_M120_Summer11"
@@ -103,7 +115,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v11_2" % step
+tauname = "_tauembedding_%s_v11_8" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
@@ -123,15 +135,19 @@ skimNjobs = {
     }
 
 muonAnalysisNjobs = { # goal: 30k events/job
-    "Mu_136035-144114_Dec22": 1,
-    "Mu_146428-147116_Dec22": 1,
-    "Mu_147196-149294_Dec22": 1,
-    "SingleMu_160431-161016_Prompt": 1,
-    "SingleMu_162803-162828_Prompt": 1,
-    "WJets_TuneZ2_Spring11": 4,
-    "TTJets_TuneZ2_Spring11": 10,
-    "QCD_Pt20_MuEnriched_TuneZ2_Spring11": 20, #?
-    "DYJetsToLL_M50_TuneZ2_Spring11": 8,
+    "SingleMu_160431-163261_May10": 2,
+    "SingleMu_163270-163869_May10": 5,
+    "SingleMu_165088-166150_Prompt": 7,
+    "SingleMu_166161-166164_Prompt": 1,
+    "SingleMu_166346-166346_Prompt": 1,
+    "SingleMu_166374-167043_Prompt": 7,
+    "SingleMu_167078-167784_Prompt": 2,
+    "SingleMu_161119-161119_May10_Wed": 1,
+    "SingleMu_167786-167913_Prompt_Wed": 2,
+    "WJets_TuneZ2_Summer11": 7,
+    "TTJets_TuneZ2_Summer11": 17,
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 5,
+    "DYJetsToLL_M50_TuneZ2_Summer11": 14,
     "TToBLNu_s-channel_TuneZ2_Spring11": 4,
     "TToBLNu_t-channel_TuneZ2_Spring11": 4,
     "TToBLNu_tW-channel_TuneZ2_Spring11": 4,

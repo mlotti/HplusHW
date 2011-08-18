@@ -273,7 +273,9 @@ namespace HPlus {
     // Obtain trigger efficiency and apply it as a weight                                                                                                                                                                                                                      
     double triggerEfficiency = fTriggerEfficiency.efficiency(*(triggerTauData.getSelectedTaus()[0]), *triggerMetData.getSelectedMET());
     hTriggerParametrisationWeight->Fill(triggerEfficiency, fEventWeight.getWeight());
-    fEventWeight.multiplyWeight(triggerEfficiency);
+    // abuse fScaleFactor to store the efficiency from parametrisation, as the variable is not used when parametrisation is
+    fScaleFactor = triggerEfficiency;
+    fEventWeight.multiplyWeight(fScaleFactor);
 
     return true;
   }

@@ -67,7 +67,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep PileupSummaryInfos_*_*_*", # only in MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-    ),
+        "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)                                                             |        conf = config[dataVersion]
+        ),
     dropMetaData = cms.untracked.string("ALL")
 )
 # For MC we apply the trigger filter, but save all events in order to

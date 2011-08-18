@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisNew_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisNew_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
@@ -23,6 +23,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 
 namespace edm {
   class ParameterSet;
@@ -33,9 +34,10 @@ namespace edm {
 
 class TH1;
 class TH2;
+class TTree;
 
 namespace HPlus {
-  class SignalAnalysis {
+  class SignalAnalysisNew {
     class CounterGroup {
     public:
       /// Constructor for subcounters
@@ -66,10 +68,10 @@ namespace HPlus {
     kSignalOrderTrigger,
     //kSignalOrderVertexSelection,
     kSignalOrderTauID,
-    kSignalOrderMETSelection,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderJetSelection,
+    kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection
@@ -86,8 +88,8 @@ namespace HPlus {
     kkJetToTauAndTauOutsideAcceptance
   };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~SignalAnalysis();
+    explicit SignalAnalysisNew(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~SignalAnalysisNew();
 
     void produces(edm::EDFilter *producer) const;
 
@@ -100,7 +102,7 @@ namespace HPlus {
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     // We need a reference in order to use the same object (and not a
-    // copied one) given in HPlusSignalAnalysisProducer
+    // copied one) given in HPlusSignalAnalysisNewProducer
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;
@@ -112,10 +114,10 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fRtauAfterTauIDCounter;    
-    Count fMETCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fMETCounter;
     Count fBTaggingCounter;
     Count fFakeMETVetoCounter;
     Count fRtauAfterCutsCounter;
@@ -147,6 +149,8 @@ namespace HPlus {
     VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
+    SignalAnalysisTree fTree;
+
     // Histograms
     TH1 *hVerticesBeforeWeight;
     TH1 *hVerticesAfterWeight;
@@ -157,8 +161,6 @@ namespace HPlus {
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
     TH1 *hTransverseMassBeforeFakeMet;
-    TH1 *hTransverseMassWithRtauFakeMet;
-    TH1 *hTransverseMassWithRtau;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
@@ -174,7 +176,6 @@ namespace HPlus {
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
     TH1 *hSelectedTauLeadingTrackPt;
-    TH1 *hSelectedTauLeadingTrackPtMetCut;
     TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
