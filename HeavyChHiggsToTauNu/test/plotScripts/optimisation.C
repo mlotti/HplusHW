@@ -5,6 +5,7 @@
 #include "TTree.h"
 #include "TCut.h"
 #include "TString.h"
+#include "TLegend.h"
 
 #include<iostream>
 #include<cmath>
@@ -12,6 +13,15 @@
 
 const double luminosity = 1080; // in pb^-1
 
+double signif(double nSignal,double nBackgr){
+  double significance = 0;
+  if(nBackgr > 0){
+//  significance = nSignal/sqrt(nSignal+nBackgr);
+//  significance = nSignal/sqrt(nBackgr);
+    significance = sqrt(2*((nSignal+nBackgr)*log(1+nSignal/nBackgr)-nSignal));
+  }
+  return significance;
+}
 
 TH1 *dist2pass(TH1 *hdist, bool lessThan) {
   // bin 0              underflow bin
@@ -166,25 +176,120 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
     std::cout << "No histogram from dist2pass?" << std::endl;
   }
 
+  TString name(file);
+  name.Remove(name.First('/'),name.Length()-name.First('/'));
+  pass->SetName(name);
+
   return DistPass(dist, pass);
 }
 
-struct Result {
-  // Signals
-  DistPass HplusTB_M190;
+class Result {
+  public:
+    void setXLabel(TString label){xlabel = label;}
+    void addSignal(DistPass d){signals.push_back(d);}
+    void addBackgr(DistPass d){backgrounds.push_back(d);}
 
-  // Backgrounds
-  DistPass QCD_Pt30to50;
-  DistPass TTJets;
+    void Significance();
+
+    // Signals
+    std::vector<DistPass> signals;
+
+    // Backgrounds
+    std::vector<DistPass> backgrounds;
+
+  private:
+    TH1* Significance(TH1*,TH1*);
+    DistPass SumBackgrounds();
+    TString xlabel;
 };
+
+void Result::Significance(){
+    TCanvas* canvas = new TCanvas("signif","",500,700);
+    canvas->Divide(1,2);
+
+    DistPass background = SumBackgrounds();
+
+    TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
+
+    TH1 *firstSB, *firstSignif;
+    int color = 1;
+    for(size_t i = 0; i < signals.size(); ++i){
+	canvas->cd(1);
+        TH1* S2B = (TH1*)signals[i].pass->Clone();
+	S2B->SetName("S/B");
+	S2B->GetXaxis()->SetTitle(xlabel);
+        S2B->Divide(background.pass);
+        S2B->SetLineColor(color);
+	if(i==0) {
+	  S2B->Draw();
+	  firstSB = S2B;
+	}
+	else S2B->Draw("same");
+	if(S2B->GetMaximum() > firstSB->GetYaxis()->GetXmax() ) firstSB->GetYaxis()->SetRangeUser(0,1.1*S2B->GetMaximum());
+	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
+
+	canvas->cd(2);
+	TH1* SSignif = Significance(signals[i].pass,background.pass);
+	SSignif->GetXaxis()->SetTitle(xlabel);
+	SSignif->SetLineColor(color);
+	if(i==0) {
+	  SSignif->Draw();
+	  firstSignif = SSignif;
+	}
+	else SSignif->Draw("same");
+	if(SSignif->GetMaximum() > firstSignif->GetYaxis()->GetXmax() ) firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+
+	color++;
+	if(color == 3 || color == 5) color++;
+    }
+    leg->Draw();
+    
+}
+
+TH1* Result::Significance(TH1* hs,TH1* hb){
+    TH1* hSignif = (TH1*)hs->Clone();
+    hSignif->Reset();
+    hSignif->SetName("significance");
+
+    for(int i = 0; i < hSignif->GetNbinsX(); ++i){
+        hSignif->SetBinContent(i,signif(hs->GetBinContent(i),hb->GetBinContent(i)));
+    }
+    return hSignif;
+}
+
+DistPass Result::SumBackgrounds(){
+    TH1 *dist = backgrounds[0].dist;
+    TH1 *pass = backgrounds[0].pass;
+    for(size_t i = 1; i < backgrounds.size();++i){
+	dist->Add(backgrounds[i].dist);
+	pass->Add(backgrounds[i].pass);
+    }
+    return DistPass(dist,pass);
+}
 
 Result createResult(const char *expr, const char *cut, bool lessThan) {
   Result res;
 
   // FIXME: change cross section to correct one!
-  res.HplusTB_M190 = createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159);
-  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
-  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
+//  res.HplusTB_M190 = createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159);
+//  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
+//  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
+
+  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159));
+  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 3.14159));
+  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 3.14159));
+  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 3.14159));
+  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 3.14159));
+
+  res.addBackgr(createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt80to120_TuneZ2_Summer11/res/histograms-QCD_Pt80to120_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt120to170_TuneZ2_Summer11/res/histograms-QCD_Pt120to170_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt170to300_TuneZ2_Summer11/res/histograms-QCD_Pt170to300_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPass("QCD_Pt300to470_TuneZ2_Summer11/res/histograms-QCD_Pt300to470_TuneZ2_Summer11.root", expr, cut, lessThan));
 
   return res;
 }
@@ -206,10 +311,14 @@ void optimisation() {
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
 
   Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
-
+  rtauRes.setXLabel("rtau");
+/*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
   rtauRes.TTJets.pass->Draw();
+  rtauRes.HplusTB_M190.pass->Draw("same");
   std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
   c->SaveAs(".png");
+*/
+  rtauRes.Significance();
 }
