@@ -146,7 +146,7 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
     return DistPass();
   }
     
-  Long64_t ret = tree->Draw(expr, cut);
+  Long64_t ret = tree->Draw(expr, cut, "goff");
   if(ret < 0) {
     std::cout << "Error in processing tree from file " << file << std::endl;
     return DistPass();
@@ -204,7 +204,7 @@ class Result {
 };
 
 void Result::Significance(){
-    TCanvas* canvas = new TCanvas("signif","",500,700);
+    TCanvas* canvas = new TCanvas("signif_"+xlabel,"",500,700);
     canvas->Divide(1,2);
 
     DistPass background = SumBackgrounds();
@@ -212,6 +212,7 @@ void Result::Significance(){
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
     TH1 *firstSB, *firstSignif;
+    double xMaxSB,xMaxSignif;
     int color = 1;
     for(size_t i = 0; i < signals.size(); ++i){
 	canvas->cd(1);
@@ -223,9 +224,13 @@ void Result::Significance(){
 	if(i==0) {
 	  S2B->Draw();
 	  firstSB = S2B;
+	  xMaxSB = S2B->GetMaximum();
 	}
 	else S2B->Draw("same");
-	if(S2B->GetMaximum() > firstSB->GetYaxis()->GetXmax() ) firstSB->GetYaxis()->SetRangeUser(0,1.1*S2B->GetMaximum());
+	if(S2B->GetMaximum() > xMaxSB ) {
+	  firstSB->GetYaxis()->SetRangeUser(0,1.1*S2B->GetMaximum());
+	  xMaxSB = S2B->GetMaximum();
+	}
 	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
 
 	canvas->cd(2);
@@ -235,15 +240,19 @@ void Result::Significance(){
 	if(i==0) {
 	  SSignif->Draw();
 	  firstSignif = SSignif;
+	  xMaxSignif = SSignif->GetMaximum();
 	}
 	else SSignif->Draw("same");
-	if(SSignif->GetMaximum() > firstSignif->GetYaxis()->GetXmax() ) firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+	if(SSignif->GetMaximum() > xMaxSignif ) {
+	  firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+	  xMaxSignif = SSignif->GetMaximum();
+	}
 
 	color++;
 	if(color == 3 || color == 5) color++;
     }
     leg->Draw();
-    
+    canvas->SaveAs(".png");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
@@ -310,8 +319,14 @@ void optimisation() {
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
 
+  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
+  tauPtRes.setXLabel("tau pt");
+  tauPtRes.Significance();
+
   Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
   rtauRes.setXLabel("rtau");
+  rtauRes.Significance();
+
 /*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
@@ -320,5 +335,4 @@ void optimisation() {
   std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
   c->SaveAs(".png");
 */
-  rtauRes.Significance();
 }
