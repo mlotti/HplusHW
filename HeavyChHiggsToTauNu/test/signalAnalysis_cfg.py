@@ -22,6 +22,9 @@ doBTagScan = False
 # Perform Rtau scanning
 doRtauScan = False
 
+# Make MET resolution histograms
+doMETResolution = False
+
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
@@ -291,6 +294,10 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
+if doMETResolution:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
+    process.signalAnalysisPath += process.metResolutionAnalysis
 
 # b tagging testing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
