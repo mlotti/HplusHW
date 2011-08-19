@@ -298,7 +298,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 50");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -312,6 +312,12 @@ void optimisation() {
 
   Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
   rtauRes.setXLabel("rtau");
+
+  Result metRes = createResult(met, TString(tauPtCut && btagCut), false);
+  metRes.setXLabel("met");
+
+  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
+  tauPtRes.setXLabel("tauPt");
 /*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
@@ -321,4 +327,8 @@ void optimisation() {
   c->SaveAs(".png");
 */
   rtauRes.Significance();
+  metRes.Significance();
+  tauPtRes.Significance();
 }
+
+
