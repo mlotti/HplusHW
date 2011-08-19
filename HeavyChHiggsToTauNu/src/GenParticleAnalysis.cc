@@ -63,8 +63,8 @@ namespace HPlus {
     hBquarkMultiplicity = makeTH<TH1F>(myDir, "genBquark_Multiplicity", "genBquark_Multiplicity", 20, -0.5, 19.5);
     hBquarkStatus2Multiplicity = makeTH<TH1F>(myDir, "genBquark_Status2_Multiplicity", "genBquark_Status2_Multiplicity", 20, -0.5, 19.5);
     hBquarkStatus3Multiplicity = makeTH<TH1F>(myDir, "genBquark_Status3_Multiplicity", "genBquark_Status3_Multiplicity", 20, -0.5, 19.5);
-    hBquarkFromTopEta = makeTH<TH1F>(myDir, "genBquark_FromTop_Eta", "genBquark_FromTop_Eta", 300, -5.0, 5.0);
-    hBquarkNotFromTopEta = makeTH<TH1F>(myDir, "genBquark_NotFromTop_Eta", "genBquark_NotFromTop_Eta", 300, -5.0, 5.0);
+    hBquarkFromTopEta = makeTH<TH1F>(myDir, "genBquark_FromTop_Eta", "genBquark_FromTop_Eta", 300, -6.0, 6.0);
+    hBquarkNotFromTopEta = makeTH<TH1F>(myDir, "genBquark_NotFromTop_Eta", "genBquark_NotFromTop_Eta", 300, -6.0, 6.0);
     hBquarkFromTopPt = makeTH<TH1F>(myDir, "genBquark_FromTop_Pt", "genBquark_FromTop_Pt", 400, 0., 800.);
     hBquarkNotFromTopPt = makeTH<TH1F>(myDir, "genBquark_NotFromTop_Pt", "genBquark_NotFromTop_Pt", 400, 0., 800.);
     hBquarkFromTopDeltaRTau = makeTH<TH1F>(myDir, "genBquark_FromTop_DeltaRTau", "genBquark_FromTop_DeltaRTau", 300, 0., 8.);
@@ -305,11 +305,11 @@ namespace HPlus {
       bool bHasBquarkDaughter = false;
       // Check whether the genParticle decays to itself. If yes do not consider in counting
       if ( p.numberOfDaughters() != 0 ){
-	// Loop over all 1st daughters of genParticle    
-	for(size_t j = 0; j < p.numberOfDaughters() ; ++ j) {
-	  const reco::Candidate *d = p.daughter( j );
-	  if( p.pdgId() == d->pdgId() ) bHasBquarkDaughter = true; 
-	}
+      	// Loop over all 1st daughters of genParticle    
+      	for(size_t j = 0; j < p.numberOfDaughters() ; ++ j) {
+      	  const reco::Candidate *d = p.daughter( j );
+      	  if( p.pdgId() == d->pdgId() ) bHasBquarkDaughter = true; 
+      	}
       }
       if(bHasBquarkDaughter) continue;
       nBquarks++;      
@@ -339,18 +339,18 @@ namespace HPlus {
       int motherId = 99999;
       // loop over mother particles
       for (size_t im=0; im < p.numberOfMothers(); ++im){
-	const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-	if ( !mparticle) continue;
-	motherId = mparticle->pdgId();
-	if( id == motherId ) bHasBquarkMother = true; 
-	if (abs(motherId) == 6 ) bHasTopMother = true;
+      	const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+      	if ( !mparticle) continue;
+      	motherId = mparticle->pdgId();
+      	if( id == motherId ) bHasBquarkMother = true; 
+      	if (abs(motherId) == 6 ) bHasTopMother = true;
       }      
       // Make sure the b doesn't have b as mother
       if(bHasBquarkMother) continue;
       // Plot eta, pt and deltaR in different histos based on whether there was a t mother or not
       if(bHasTopMother) {
         hBquarkFromTopEta->Fill(bEta, fEventWeight.getWeight());
-  	hBquarkFromTopPt->Fill(bPt, fEventWeight.getWeight());
+      	hBquarkFromTopPt->Fill(bPt, fEventWeight.getWeight());
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -367,8 +367,8 @@ namespace HPlus {
         }
       }
       else {
-	hBquarkNotFromTopEta->Fill(bEta, fEventWeight.getWeight());
-  	hBquarkNotFromTopPt->Fill(bPt, fEventWeight.getWeight());
+    	hBquarkNotFromTopEta->Fill(bEta, fEventWeight.getWeight());
+    	hBquarkNotFromTopPt->Fill(bPt, fEventWeight.getWeight());
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -393,7 +393,7 @@ namespace HPlus {
     for (size_t i=0; i < genParticles->size(); ++i){
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
-      if ( abs(id) != 6 || hasDaughter(p,id)) continue;//TODO: use mother
+      if ( abs(id) != 6 || hasDaughter(p,id)) continue;
       std::vector<const reco::GenParticle*> daughters = getDaughters(p);
       int daughterId=9999;
       double px = 0, py = 0;
@@ -403,17 +403,17 @@ namespace HPlus {
         const reco::GenParticle dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
         if(abs(daughterId) < 5) {
-	  decaysHadronically = true;
+      	  decaysHadronically = true;
         }
         if( abs(daughterId) == 24 && !hasMother(dparticle, daughterId)) {
-          px += daughters[d]->px();
-          py += daughters[d]->py();
-          px_wrong += daughters[d]->px();
-          py_wrong += daughters[d]->py();
+          px += dparticle.px();
+          py += dparticle.py();
+          px_wrong += dparticle.px();
+          py_wrong += dparticle.py();
         }
         if( abs(daughterId) == 5  && !hasMother(dparticle, daughterId)) {
-          px += daughters[d]->px();
-          py += daughters[d]->py();
+          px += dparticle.px();
+          py += dparticle.py();
         }
         // Look for other b quarks
         for (size_t j=0; j < genParticles->size(); ++j){
@@ -430,24 +430,7 @@ namespace HPlus {
         hTopPt->Fill(sqrt(px*px+py*py), fEventWeight.getWeight());
         hTopPt_wrongB->Fill(sqrt(px_wrong*px_wrong+py_wrong*py_wrong), fEventWeight.getWeight());
       }
-    }
-
-
-
-
-    //TODO: REMOVE THIS, JUST FOR TESTING
-/*    bool hasTau = false;
-    for (size_t i=0; i < genParticles->size(); ++i){
-      const reco::Candidate & p = (*genParticles)[i];
-      if(abs(p.pdgId())==15 && (hasMother(p,37) || hasMother(p,-37))) { 
-        hasTau=true;
-      }
-    }
-    if(oneAndThreeProngTaus->size()==0) std::cout<<"No visible tau!"<<std::endl;
-    if(!hasTau) std::cout<<"No tau!"<<std::endl;
-*/
-
-    
+    }    
   }
    //eof: void GenParticleAnalysis::analyze()
 
