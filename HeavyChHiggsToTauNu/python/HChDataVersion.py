@@ -27,6 +27,8 @@ config = {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
+#        "patMadhatter": "/store/mc/Summer11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/0428EC7E-F199-E011-B474-002618943861.root",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data//TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/F498AD1D-8298-E011-BFB9-003048678F92.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M120_Summer11/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_28_1_jNa.root"
     },
 }
@@ -55,12 +57,12 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_42_V14::All"
+            self.globalTag = "GR_R_42_V20::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START42_V12::All"
+            self.globalTag = "START42_V13::All"
 
             try:
                 self.signalTrigger = conf["signalTrigger"]
