@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="42Xmc"
+dataVersion="42XmcS4"
 #dataVersion="42Xdata"
 
 # Command line arguments (options) and DataVersion object
@@ -58,6 +58,7 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('pattuple.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
+        "keep *_genParticles_*_*",
         "keep edmTriggerResults_*_*_*",
         "keep triggerTriggerEvent_*_*_*",
         "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
@@ -67,7 +68,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep PileupSummaryInfos_*_*_*", # only in MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-        "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)                                                             |        conf = config[dataVersion]
+        "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
         ),
     dropMetaData = cms.untracked.string("ALL")
 )
@@ -87,23 +88,30 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   doPlainPat=True, doPF2PAT=True,
+                                   doPlainPat=True, doPF2PAT=False,
                                    plainPatArgs={"matchingTauTrigger": myTrigger,
                                                  "doPatMuonPFIsolation": True},
                                    pf2patArgs={"matchingTauTrigger": myTrigger},
                                    )
-# Redo the
-if dataVersion.isMC():
-    process.genParticles = cms.EDProducer("GenParticlePruner",
-        src = cms.InputTag("genParticles"),
-        select = cms.vstring("keep *")
-    )
-    process.out.outputCommands.extend([
-        "drop *_genParticles_*_*",
-        "keep *_genParticles_*_"+process.name_(),
+
+process.out.outputCommands.extend([
+        "drop *_selectedPatTausHpsTancPFTau_*_*",
+        "drop *_selectedPatTausHpsTancPFTauTauTriggerMatched_*_*",
+        "drop *_selectedPatJets_*_*",
         ])
 
-    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
+# Redo the
+#if dataVersion.isMC():
+#    process.genParticles = cms.EDProducer("GenParticlePruner",
+#        src = cms.InputTag("genParticles"),
+#        select = cms.vstring("keep *")
+#    )
+#    process.out.outputCommands.extend([
+#        "drop *_genParticles_*_*",
+#        "keep *_genParticles_*_"+process.name_(),
+#        ])
+#
+#    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
 
 
 if dataVersion.isData():
