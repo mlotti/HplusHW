@@ -117,7 +117,7 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
     std::cout << "Unable to find counters from " << file << std::endl;
     return DistPass();
   }
-
+ 
   if(std::isnan(crossSection)) {
     TH1 *configInfo = dynamic_cast<TH1 *>(f->Get("configInfo/configinfo"));
     if(!configInfo) {
@@ -211,11 +211,11 @@ void Result::Significance(){
     DistPass background = SumBackgrounds();
 
     canvas0->cd();
-    background.pass->GetXaxis()->SetTitle(xlabel);
-    background.pass->SetName("N events");
-    background.pass->SetLineWidth(3);
-    background.pass->SetLineStyle(2);
-    background.pass->Draw();
+    background.dist->GetXaxis()->SetTitle(xlabel);
+    background.dist->SetName("N events");
+    background.dist->SetLineWidth(3);
+    background.dist->SetLineStyle(2);
+    background.dist->Draw();
 
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
@@ -225,8 +225,8 @@ void Result::Significance(){
     for(size_t i = 0; i < signals.size(); ++i){
 
 	canvas0->cd();
-	signals[i].pass->Draw("same");
-	signals[i].pass->SetLineColor(color);
+	signals[i].dist->Draw("same");
+	signals[i].dist->SetLineColor(color);
 
 	canvas1->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
@@ -333,11 +333,12 @@ void optimisation() {
   // Optional cuts
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
-
+/*
   Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
   tauPtRes.setXLabel("tau pt");
   tauPtRes.Significance();
-
+*/
+  rtau += ">>dist(110,0.,1.1)";
   Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
   rtauRes.setXLabel("rtau");
   rtauRes.Significance();
