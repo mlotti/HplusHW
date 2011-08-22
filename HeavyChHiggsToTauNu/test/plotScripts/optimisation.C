@@ -204,10 +204,18 @@ class Result {
 };
 
 void Result::Significance(){
-    TCanvas* canvas = new TCanvas("signif_"+xlabel,"",500,700);
-    canvas->Divide(1,2);
+    TCanvas* canvas0 = new TCanvas("Variable_"+xlabel,"",500,500);
+    TCanvas* canvas1 = new TCanvas("signif_"+xlabel,"",500,500);
+    TCanvas* canvas2 = new TCanvas("SoverB_"+xlabel,"",500,500);
 
     DistPass background = SumBackgrounds();
+
+    canvas0->cd();
+    background.pass->GetXaxis()->SetTitle(xlabel);
+    background.pass->SetName("N events");
+    background.pass->SetLineWidth(3);
+    background.pass->SetLineStyle(2);
+    background.pass->Draw();
 
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
@@ -215,7 +223,12 @@ void Result::Significance(){
     double xMaxSB,xMaxSignif;
     int color = 1;
     for(size_t i = 0; i < signals.size(); ++i){
-	canvas->cd(1);
+
+	canvas0->cd();
+	signals[i].pass->Draw("same");
+	signals[i].pass->SetLineColor(color);
+
+	canvas1->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
 	S2B->SetName("S/B");
 	S2B->GetXaxis()->SetTitle(xlabel);
@@ -233,7 +246,7 @@ void Result::Significance(){
 	}
 	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
 
-	canvas->cd(2);
+	canvas2->cd();
 	TH1* SSignif = Significance(signals[i].pass,background.pass);
 	SSignif->GetXaxis()->SetTitle(xlabel);
 	SSignif->SetLineColor(color);
@@ -252,7 +265,9 @@ void Result::Significance(){
 	if(color == 3 || color == 5) color++;
     }
     leg->Draw();
-    canvas->SaveAs(".png");
+    canvas0->SaveAs(".png");
+    canvas1->SaveAs(".png");
+    canvas2->SaveAs(".png");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
