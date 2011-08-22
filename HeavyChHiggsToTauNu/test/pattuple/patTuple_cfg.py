@@ -60,7 +60,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "drop *",
         "keep *_genParticles_*_*",
         "keep edmTriggerResults_*_*_*",
-        "keep triggerTriggerEvent_*_*_*",
+#        "keep triggerTriggerEvent_*_*_*", # the information is alread in full PAT trigger
         "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
         "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
         "keep *_conditionsInEdm_*_*",
@@ -98,6 +98,7 @@ process.out.outputCommands.extend([
         "drop *_selectedPatTausHpsTancPFTau_*_*",
         "drop *_patTausHpsTancPFTauTauTriggerMatched_*_*",
         "drop *_selectedPatJets_*_*",
+        "drop patTriggerObjectStandAlones_patTrigger_*_*",
         ])
 
 # Redo the
