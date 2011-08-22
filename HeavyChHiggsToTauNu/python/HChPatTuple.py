@@ -23,9 +23,11 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
-tauPreSelection = "pt() > 10"
+tauPreSelection = "pt() > 15"
 #tauPreSelection = ""
 
+jetPreSelection = "pt() > 10"
+#jetPreSelection = ""
 
 ##################################################
 #
@@ -287,6 +289,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion)
     process.patDefaultSequence.replace(process.patJetCorrFactors,
                                        process.ak5PFJetSequence*process.patJetCorrFactors)
+    process.selectedPatJets.cut = jetPreSelection
 
     # The default JEC to be embedded to pat::Jets are L2Relative,
     # L3Absolute, L5Flavor and L7Parton. The default JEC to be applied
