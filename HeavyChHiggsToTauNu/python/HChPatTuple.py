@@ -187,7 +187,7 @@ def addPat(process, dataVersion,
     if outdict.has_key("out"):
         out = outdict["out"]
         out.outputCommands.extend([
-                "keep *_goodPrimaryVertices*_*_*",
+ #               "keep *_goodPrimaryVertices*_*_*",
                 "keep *_offlinePrimaryVerticesSumPt_*_*",
                 "keep *_offlineBeamSpot_*_*",
                 ])
@@ -202,8 +202,8 @@ def addPat(process, dataVersion,
     # patDefaultSequence), but run first (we use some stuff produced
     # with plain PAT in PF2PAT)
     sequence = cms.Sequence(
-        process.goodPrimaryVertices *
-        process.goodPrimaryVertices10 *
+#        process.goodPrimaryVertices *
+#        process.goodPrimaryVertices10 *
         process.offlinePrimaryVerticesSumPt *
         process.plainPatSequence *
         process.pf2patSequence
@@ -728,7 +728,7 @@ def addPF2PAT(process, dataVersion, postfix="PFlow",
     # Enable PFnoPU
     getattr(process, "pfPileUp"+postfix).Enable = True
     getattr(process, "pfPileUp"+postfix).checkClosestZVertex = False
-    getattr(process, "pfPileUp"+postfix).Vertices = "goodPrimaryVertices"
+    getattr(process, "pfPileUp"+postfix).Vertices = "offlinePrimaryVertices"
 
     # Jet modifications
     # L1FastJet
