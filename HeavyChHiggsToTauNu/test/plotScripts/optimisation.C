@@ -146,7 +146,7 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
     return DistPass();
   }
     
-  Long64_t ret = tree->Draw(expr, cut);
+  Long64_t ret = tree->Draw(expr, cut, "goff");
   if(ret < 0) {
     std::cout << "Error in processing tree from file " << file << std::endl;
     return DistPass();
@@ -204,7 +204,7 @@ class Result {
 };
 
 void Result::Significance(){
-    TCanvas* canvas = new TCanvas("signif","",500,700);
+    TCanvas* canvas = new TCanvas("signif_"+xlabel,"",500,700);
     canvas->Divide(1,2);
 
     DistPass background = SumBackgrounds();
@@ -212,38 +212,50 @@ void Result::Significance(){
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
     TH1 *firstSB, *firstSignif;
+    double xMaxSB,xMaxSignif;
     int color = 1;
     for(size_t i = 0; i < signals.size(); ++i){
 	canvas->cd(1);
         TH1* S2B = (TH1*)signals[i].pass->Clone();
 	S2B->SetName("S/B");
 	S2B->GetXaxis()->SetTitle(xlabel);
+	S2B->GetYaxis()->SetTitle("Signal / Background");
         S2B->Divide(background.pass);
         S2B->SetLineColor(color);
 	if(i==0) {
 	  S2B->Draw();
 	  firstSB = S2B;
+	  xMaxSB = S2B->GetMaximum();
 	}
 	else S2B->Draw("same");
-	if(S2B->GetMaximum() > firstSB->GetYaxis()->GetXmax() ) firstSB->GetYaxis()->SetRangeUser(0,1.1*S2B->GetMaximum());
+	if(S2B->GetMaximum() > xMaxSB ) {
+	  firstSB->GetYaxis()->SetRangeUser(0,1.1*S2B->GetMaximum());
+	  xMaxSB = S2B->GetMaximum();
+	}
 	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
 
 	canvas->cd(2);
 	TH1* SSignif = Significance(signals[i].pass,background.pass);
 	SSignif->GetXaxis()->SetTitle(xlabel);
+	SSignif->GetYaxis()->SetTitle("Significance");
 	SSignif->SetLineColor(color);
 	if(i==0) {
 	  SSignif->Draw();
 	  firstSignif = SSignif;
+	  xMaxSignif = SSignif->GetMaximum();
 	}
 	else SSignif->Draw("same");
-	if(SSignif->GetMaximum() > firstSignif->GetYaxis()->GetXmax() ) firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+	if(SSignif->GetMaximum() > xMaxSignif ) {
+	  firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+	  xMaxSignif = SSignif->GetMaximum();
+	}
 
 	color++;
 	if(color == 3 || color == 5) color++;
     }
     leg->Draw();
-    
+    canvas->SaveAs(".png");
+    canvas->SaveAs(".C");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
@@ -275,11 +287,20 @@ Result createResult(const char *expr, const char *cut, bool lessThan) {
 //  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
 //  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
 
-  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159));
-  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 3.14159));
-  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 3.14159));
-  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 3.14159));
-  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 3.14159));
+//  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 0.35));
+//  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 0.32));
+//  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
+//  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
+//  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
+
+  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan));
+  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan));
+  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan));
+  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan));
+  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan));
+  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan));
+
+
 
   res.addBackgr(createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
   res.addBackgr(createDistPass("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
@@ -298,7 +319,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 50");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -310,14 +331,28 @@ void optimisation() {
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
 
-  Result rtauRes = createResult(rtau, TString(metCut && btagCut), false);
+  //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
+  //  tauPtRes.setXLabel("tau pt");
+  //  tauPtRes.Significance();
+
+  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
   rtauRes.setXLabel("rtau");
 
-  Result metRes = createResult(met, TString(tauPtCut && btagCut), false);
+  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
   metRes.setXLabel("met");
 
   Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
   tauPtRes.setXLabel("tauPt");
+
+  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
+  mtRes.setXLabel("mt");
+
+
+  //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
+  //  tauPtRes.setXLabel("tauPt");
+
+  //  rtauRes.Significance();
+
 /*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
@@ -329,6 +364,7 @@ void optimisation() {
   rtauRes.Significance();
   metRes.Significance();
   tauPtRes.Significance();
+  mtRes.Significance();
 }
 
 
