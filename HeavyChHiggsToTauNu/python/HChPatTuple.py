@@ -23,15 +23,15 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
-tauPreSelection = "pt() > 10"
-#tauPreSelection = ""
+#tauPreSelection = "pt() > 10"
+tauPreSelection = ""
 
 
 ##################################################
 #
 # PAT on the fly
 #
-def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
+def addPatOnTheFly(process, options, dataVersion,
                    doPlainPat=True, doPF2PAT=False,
                    plainPatArgs={}, pf2patArgs={},
                    doMcPreselection=False):
@@ -136,14 +136,11 @@ def addPatOnTheFly(process, options, dataVersion, jetTrigger=None,
 
         for args in argsList:
             if args.get("doTauHLTMatching", True):
-                if options.trigger == "":
-                    raise Exception("Command line argument 'trigger' is missing")
-    
-                print "Trigger used for tau matching:", options.trigger
-                args["matchingTauTrigger"] = options.trigger
-                if jetTrigger != None:
-                    print "Trigger used for jet matching:", jetTrigger
-                    args["matchingJetTrigger"] = jetTrigger
+                if not "matchingTauTrigger" in args:
+                    if options.trigger == "":
+                        raise Exception("Command line argument 'trigger' is missing")
+                    args["matchingTauTrigger"] = options.trigger
+                print "Trigger used for tau matching:", args["matchingTauTrigger"]
 
         process.patSequence = addPat(process, dataVersion,
                                      doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
@@ -297,17 +294,18 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     if doPatCalo:
         # Add JPT jets
-        addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
-                         'AK5', 'JPT',
-                         doJTA        = True,
-                         doBTagging   = doBTagging,
-                         jetCorrLabel = ('AK5JPT', process.patJetCorrFactors.levels),
-                         doType1MET   = False,
-                         doL1Cleaning = False,
-                         doL1Counters = True,
-                         genJetCollection = cms.InputTag("ak5GenJets"),
-                         doJetID      = True
-        )
+        # FIXME: Disabled for now until the JEC for JPT works again (with the latest JEC)
+#        addJetCollection(process, cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
+#                         'AK5', 'JPT',
+#                         doJTA        = True,
+#                         doBTagging   = doBTagging,
+#                         jetCorrLabel = ('AK5JPT', process.patJetCorrFactors.levels),
+#                         doType1MET   = False,
+#                         doL1Cleaning = False,
+#                         doL1Counters = True,
+#                         genJetCollection = cms.InputTag("ak5GenJets"),
+#                         doJetID      = True
+#        )
     
         # Add PF jets
         addJetCollection(process, cms.InputTag('ak5PFJets'),
@@ -607,8 +605,8 @@ def patJetCorrLevels(dataVersion, L1FastJet=False):
     else:
         levels.append("L1Offset")
     levels.extend(["L2Relative", "L3Absolute"])
-#    if dataVersion.isData():
-#        module.levels.append("L2L3Residual")
+    if dataVersion.isData():
+        module.levels.append("L2L3Residual")
     levels.extend(["L5Flavor", "L7Parton"])
     return levels
 
