@@ -32,11 +32,17 @@ namespace HPlus {
 
   private:
     void init();
+    std::vector<const reco::GenParticle*> getImmediateMothers(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getMothers(const reco::Candidate&);
+    bool hasImmediateMother(const reco::Candidate&, int);
     bool hasMother(const reco::Candidate&, int);
+    void printImmediateMothers(const reco::Candidate& );
     void printMothers(const reco::Candidate& );
+    std::vector<const reco::GenParticle*> getImmediateDaughters(const reco::Candidate&);
     std::vector<const reco::GenParticle*> getDaughters(const reco::Candidate&);
+    bool hasImmediateDaughter(const reco::Candidate&, int);
     bool hasDaughter(const reco::Candidate&, int);
+    void printImmediateDaughters(const reco::Candidate& );
     void printDaughters(const reco::Candidate& );
     
     // EventWeight object

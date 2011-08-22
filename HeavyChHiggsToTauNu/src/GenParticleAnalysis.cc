@@ -323,34 +323,20 @@ namespace HPlus {
     for (size_t i=0; i < genParticles->size(); ++i){
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
-      if(abs(id) == 15 && (hasMother(p,37) || hasMother(p,-37))) tausFromHp.push_back(p.p4());
+      if(abs(id) == 15 && (hasImmediateMother(p,37) || hasImmediateMother(p,-37))) tausFromHp.push_back(p.p4());
     }
     // loop over all genParticles
     for (size_t i=0; i < genParticles->size(); ++i){
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
       // Only choose beauties
-      if ( abs(id) != 5 ) continue;
+      if ( abs(id) != 5 || hasImmediateMother(p,5) || hasImmediateMother(p,-5) )continue;
       bEta = p.eta();
       bPt = p.pt();
-      
-      bool bHasBquarkMother = false;
-      bool bHasTopMother = false;
-      int motherId = 99999;
-      // loop over mother particles
-      for (size_t im=0; im < p.numberOfMothers(); ++im){
-      	const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
-      	if ( !mparticle) continue;
-      	motherId = mparticle->pdgId();
-      	if( id == motherId ) bHasBquarkMother = true; 
-      	if (abs(motherId) == 6 ) bHasTopMother = true;
-      }      
-      // Make sure the b doesn't have b as mother
-      if(bHasBquarkMother) continue;
       // Plot eta, pt and deltaR in different histos based on whether there was a t mother or not
-      if(bHasTopMother) {
+      if(hasImmediateMother(p,6) || hasImmediateMother(p,-6)) {
         hBquarkFromTopEta->Fill(bEta, fEventWeight.getWeight());
-      	hBquarkFromTopPt->Fill(bPt, fEventWeight.getWeight());
+        hBquarkFromTopPt->Fill(bPt, fEventWeight.getWeight());
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -367,8 +353,8 @@ namespace HPlus {
         }
       }
       else {
-    	hBquarkNotFromTopEta->Fill(bEta, fEventWeight.getWeight());
-    	hBquarkNotFromTopPt->Fill(bPt, fEventWeight.getWeight());
+        hBquarkNotFromTopEta->Fill(bEta, fEventWeight.getWeight());
+        hBquarkNotFromTopPt->Fill(bPt, fEventWeight.getWeight());
         for( LorentzVectorCollection::const_iterator tau = oneAndThreeProngTaus->begin();tau!=oneAndThreeProngTaus->end();++tau) {
           // Check that the tau comes from H+
           bool tauFromHp = false;
@@ -393,8 +379,8 @@ namespace HPlus {
     for (size_t i=0; i < genParticles->size(); ++i){
       const reco::Candidate & p = (*genParticles)[i];
       int id = p.pdgId();
-      if ( abs(id) != 6 || hasDaughter(p,id)) continue;
-      std::vector<const reco::GenParticle*> daughters = getDaughters(p);
+      if ( abs(id) != 6 || hasImmediateMother(p,id)) continue;
+      std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
       int daughterId=9999;
       double px = 0, py = 0;
       double px_wrong = 0, py_wrong = 0;
@@ -402,29 +388,34 @@ namespace HPlus {
       for(size_t d=0; d<daughters.size(); ++d) {
         const reco::GenParticle dparticle = *daughters[d];
         daughterId = dparticle.pdgId();
-        if(abs(daughterId) < 5) {
-      	  decaysHadronically = true;
-        }
-        if( abs(daughterId) == 24 && !hasMother(dparticle, daughterId)) {
+        if( abs(daughterId) == 24 ) {
           px += dparticle.px();
           py += dparticle.py();
           px_wrong += dparticle.px();
           py_wrong += dparticle.py();
+          if(hasDaughter(dparticle,1) || hasDaughter(dparticle,-1) || 
+               hasDaughter(dparticle,2) || hasDaughter(dparticle,-2) || 
+               hasDaughter(dparticle,3) || hasDaughter(dparticle,-3) || 
+               hasDaughter(dparticle,4) || hasDaughter(dparticle,-4) )
+          {
+      	    decaysHadronically = true;
+          }
         }
-        if( abs(daughterId) == 5  && !hasMother(dparticle, daughterId)) {
+        if( abs(daughterId) == 5 ) {
           px += dparticle.px();
           py += dparticle.py();
         }
-        // Look for other b quarks
-        for (size_t j=0; j < genParticles->size(); ++j){
-          const reco::Candidate & b = (*genParticles)[i];
-          int bId = b.pdgId();
-          if ( abs(bId) != 5 || hasMother(p,bId) || hasMother(p,6) || hasMother(p,-6)) continue;
-          px_wrong += b.px();
-          py_wrong += b.py();
-          // Stop at the first found b quark that does not come from top
-          break;
-        }
+      }
+      // Look for other b quarks
+      for (size_t j=0; j < genParticles->size(); ++j){
+        const reco::Candidate & b = (*genParticles)[j];
+        int bId = b.pdgId();
+        if ( abs(bId) != 5 || hasImmediateMother(b,bId)) continue;
+        if ( hasImmediateMother(b,6) || hasImmediateMother(b,-6)) continue;
+        px_wrong += b.px();
+        py_wrong += b.py();
+        // Stop at the first found b quark that does not come from top
+        break;
       }
       if(decaysHadronically) {
         hTopPt->Fill(sqrt(px*px+py*py), fEventWeight.getWeight());
@@ -434,6 +425,15 @@ namespace HPlus {
   }
    //eof: void GenParticleAnalysis::analyze()
 
+
+  std::vector<const reco::GenParticle*> GenParticleAnalysis::getImmediateMothers(const reco::Candidate& p){ 
+    std::vector<const reco::GenParticle*> mothers;
+    for (size_t im=0; im < p.numberOfMothers(); ++im){
+      const reco::GenParticle* mparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
+      if (mparticle) mothers.push_back(mparticle);
+    }
+    return mothers;
+  }
 
   std::vector<const reco::GenParticle*> GenParticleAnalysis::getMothers(const reco::Candidate& p){ 
     std::vector<const reco::GenParticle*> mothers;
@@ -448,12 +448,29 @@ namespace HPlus {
     return mothers;
   }
   
+  bool GenParticleAnalysis::hasImmediateMother(const reco::Candidate& p, int id){
+    std::vector<const reco::GenParticle*> mothers = getImmediateMothers(p);
+    for (size_t im=0; im < mothers.size(); ++im){
+      if (mothers[im]->pdgId() == id) return true;
+    }
+    return false;
+  }  
+  
   bool GenParticleAnalysis::hasMother(const reco::Candidate& p, int id){
     std::vector<const reco::GenParticle*> mothers = getMothers(p);
     for (size_t im=0; im < mothers.size(); ++im){
       if (mothers[im]->pdgId() == id) return true;
     }
     return false;
+  }  
+
+  void GenParticleAnalysis::printImmediateMothers(const reco::Candidate& p){
+    std::vector<const reco::GenParticle*> mothers = getImmediateMothers(p);
+    std::cout << "Immediate mothers of " << p.pdgId() << ":" << std::endl;
+    for (size_t im=0; im < mothers.size(); ++im){
+      std::cout << "  " << mothers[im]->pdgId() << std::endl;
+    }
+    std::cout << std::endl;
   }  
 
   void GenParticleAnalysis::printMothers(const reco::Candidate& p){
@@ -464,6 +481,15 @@ namespace HPlus {
     }
     std::cout << std::endl;
   }  
+
+  std::vector<const reco::GenParticle*> GenParticleAnalysis::getImmediateDaughters(const reco::Candidate& p){ 
+    std::vector<const reco::GenParticle*> daughters;
+    for (size_t im=0; im < p.numberOfDaughters(); ++im){
+      const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.daughter(im));
+      if (dparticle) daughters.push_back(dparticle);
+    }
+    return daughters;
+  }
 
   std::vector<const reco::GenParticle*> GenParticleAnalysis::getDaughters(const reco::Candidate& p){ 
     std::vector<const reco::GenParticle*> daughters;
@@ -478,6 +504,14 @@ namespace HPlus {
     return daughters;
   }
   
+    bool GenParticleAnalysis::hasImmediateDaughter(const reco::Candidate& p, int id){
+    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+    for (size_t im=0; im < daughters.size(); ++im){
+      if (daughters[im]->pdgId() == id) return true;
+    }
+    return false;
+  }
+  
   bool GenParticleAnalysis::hasDaughter(const reco::Candidate& p, int id){
     std::vector<const reco::GenParticle*> daughters = getDaughters(p);
     for (size_t im=0; im < daughters.size(); ++im){
@@ -485,6 +519,15 @@ namespace HPlus {
     }
     return false;
   }
+  
+  void GenParticleAnalysis::printImmediateDaughters(const reco::Candidate& p){
+    std::vector<const reco::GenParticle*> daughters = getImmediateDaughters(p);
+    std::cout << "Immediate daughters of " << p.pdgId() << ":" << std::endl;
+    for (size_t im=0; im < daughters.size(); ++im){
+      std::cout << "  " << daughters[im]->pdgId() << std::endl;
+    }
+    std::cout << std::endl;
+  }  
   
   void GenParticleAnalysis::printDaughters(const reco::Candidate& p){
     std::vector<const reco::GenParticle*> daughters = getDaughters(p);
