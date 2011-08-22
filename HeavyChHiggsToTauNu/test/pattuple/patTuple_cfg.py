@@ -96,7 +96,7 @@ options.doPat=1
 
 process.out.outputCommands.extend([
         "drop *_selectedPatTausHpsTancPFTau_*_*",
-        "drop *_selectedPatTausHpsTancPFTauTauTriggerMatched_*_*",
+        "drop *_patTausHpsTancPFTauTauTriggerMatched_*_*",
         "drop *_selectedPatJets_*_*",
         ])
 

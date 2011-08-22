@@ -403,14 +403,14 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTauTauTriggerMatched"
-    tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "selectedPatTausHpsPFTauTauTriggerMatched"#for QCD control plots
-    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
+    tauSelectionCaloTauCutBased.src         = "patTausCaloRecoTauTauTriggerMatched"
+    tauSelectionShrinkingConeTaNCBased.src  = "patTausShrinkingConePFTauTauTriggerMatched"
+    tauSelectionShrinkingConeCutBased.src   = "patTausShrinkingConePFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "patTausHpsPFTauTauTriggerMatched"#for QCD control plots
+    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):
