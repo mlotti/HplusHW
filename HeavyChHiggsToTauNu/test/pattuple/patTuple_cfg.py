@@ -101,7 +101,27 @@ process.out.outputCommands.extend([
         "drop patTriggerObjectStandAlones_patTrigger_*_*",
         ])
 
-# Redo the
+# Prune GenParticles
+if dataVersion.isMC():
+    process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+    process.genParticles = cms.EDProducer("GenParticlePruner",
+        src = cms.InputTag("genParticles"),
+        select = cms.vstring(
+            "keep *",
+            # Remove the soft photons from fragmentations (we have not needed them)
+            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
+            )
+    )
+    process.out.outputCommands.extend([
+        "drop *_genParticles_*_*",
+        "keep *_genParticles_*_"+process.name_(),
+        ])
+
+    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
+
+#    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
+#    process.sPAT *= process.printGenParticles
+
 #if dataVersion.isMC():
 #    process.genParticles = cms.EDProducer("GenParticlePruner",
 #        src = cms.InputTag("genParticles"),
