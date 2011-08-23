@@ -22,6 +22,9 @@ doBTagScan = False
 # Perform Rtau scanning
 doRtauScan = False
 
+# Make MET resolution histograms
+doMETResolution = False
+
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
 doJESVariation = False
@@ -157,7 +160,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode to 'standard'
+
 param.setAllTauSelectionOperatingMode('standard')
+
 #param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
 
@@ -237,6 +242,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
     GlobalMuonVeto = param.GlobalMuonVeto,
     # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTightTauBased,
+#    tauSelection = param.tauSelectionHPSLooseTauBased,                                      
     jetSelection = param.jetSelection,
     MET = param.MET,
     bTagging = param.bTagging,
@@ -291,6 +297,10 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
+if doMETResolution:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
+    process.signalAnalysisPath += process.metResolutionAnalysis
 
 # b tagging testing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis

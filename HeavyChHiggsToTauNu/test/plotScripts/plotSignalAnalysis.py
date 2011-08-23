@@ -46,7 +46,8 @@ def main():
                     "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M160_Spring11",
                      "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",                       "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt",
                      "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
-                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11"
+                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11",
+                     "HplusTB_M190_Summer11","HplusTB_M250_Summer11","HplusTB_M300_Summer11","HplusTB_M220_Summer11","HplusTB_M200_Summer11",
 #                     "Tau_165970-166164_Prompt", "Tau_166374-167043_Prompt", "Tau_167078-167784_Prompt", "Tau_165088-165633_Prompt"
 #                     "Tau_163270-163869_May10","Tau_161217-163261_May10", "Tau_160431-161176_May10"
                      ])
@@ -57,6 +58,16 @@ def main():
     datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
 #Rtau =0
+<<<<<<< HEAD:HeavyChHiggsToTauNu/test/plotScripts/plotSignalAnalysis.py
+#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multi
+#crab.cfg", counters=counters)
+    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
+
+    datasetsSignal.selectAndReorder(["HplusTB_M200_Summer11"])
+#    datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
+#                               "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
+    datasets.extend(datasetsSignal)
+=======
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110622_112321/multicrab.cfg", counters=counters)
     #datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/Signal_v11f_scaledb_424/multicrab.cfg", counters=counters)
 
@@ -64,6 +75,7 @@ def main():
     #datasetsSignal.renameMany({"TTToHplusBWB_M120_Summer11" :"TTToHplusBWB_M120_Spring11",
     #                           "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120_Spring11"})
     #datasets.extend(datasetsSignal)
+>>>>>>> matti/master:HeavyChHiggsToTauNu/test/plotScripts/plotSignalAnalysis.py
 
     plots.mergeRenameReorderForDataMC(datasets)
     datasets.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])

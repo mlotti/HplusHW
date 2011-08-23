@@ -29,12 +29,12 @@ namespace HPlus {
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
 
     fTree->Branch("tau_p4", &fTau);
-    fTree->Branch("tau_leadPFCnargedHadrCand_p4", &fTauLeadingChCand);
+    fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
 
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
 
-    fTree->Branch("met_p3", &fMet);
+    fTree->Branch("met_p4", &fMet);
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
