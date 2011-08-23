@@ -14,6 +14,8 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v2",
     "HLT_IsoPFTau35_Trk20_MET60_v3",
     "HLT_IsoPFTau35_Trk20_MET60_v4",
+    "HLT_IsoPFTau35_Trk20_MET60_v6",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
 ]
 
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
