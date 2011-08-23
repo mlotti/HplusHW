@@ -43,9 +43,6 @@ applyTriggerScaleFactor = True
 filterGenTaus = False
 filterGenTausInaccessible = False
 
-# Re-run trigger matching
-doRerunTriggerMatching = False
-
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -81,8 +78,6 @@ process.source = cms.Source('PoolSource',
     "file:pattuple_28_1_jNa.root"
     )
 )
-if doRerunTriggerMatching:
-    process.source.inputCommands = cms.untracked.vstring("keep *", "drop *_selectedPatTaus*TriggerMatched_*_*")
 
 if options.tauEmbeddingInput != 0:
     process.source.fileNames = [
@@ -107,14 +102,6 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
-
-# Re-run trigger matching
-if doRerunTriggerMatching:
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as TriggerMatching
-    process.triggerMatching = TriggerMatching.addTauTriggerMatching(process, options.trigger, "Tau",
-                                                                    #pathFilterMap={} # by default, use filter name in trigger matching re-running
-                                                                    )
-    process.commonSequence *= process.triggerMatching
 
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
