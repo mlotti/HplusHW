@@ -3,14 +3,12 @@ from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
 def addConfigInfo(process, options, dataVersion):
     process.configInfo = cms.EDAnalyzer("HPlusConfigInfoAnalyzer",
-        dataVersion = cms.untracked.string(dataVersion.version)
+        dataVersion = cms.untracked.string(dataVersion.version),
+        isData = cms.untracked.bool(dataVersion.isData())
     )
     if options.crossSection >= 0.:
         process.configInfo.crossSection = cms.untracked.double(options.crossSection)
         print "Dataset cross section has been set to %g pb" % options.crossSection
-    if options.luminosity >= 0:
-        process.configInfo.luminosity = cms.untracked.double(options.luminosity)
-        print "Dataset integrated luminosity has been set to %g pb^-1" % options.luminosity
     return cms.Path(process.configInfo)
 
 def insertPSetContentsTo(src, dst):
