@@ -60,8 +60,10 @@ namespace HPlus {
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
-    ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 80")),
-    ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 100")),
+    ftransverseMassCut80NoRtauCounter(eventCounter.addCounter("transverseMass > 60 no Rtau")),
+    ftransverseMassCut100NoRtauCounter(eventCounter.addCounter("transverseMass > 80 no Rtau")),
+    ftransverseMassCut80Counter(eventCounter.addCounter("transverseMass > 60")),
+    ftransverseMassCut100Counter(eventCounter.addCounter("transverseMass > 80")),
     fZmassVetoCounter(eventCounter.addCounter("ZmassVetoCounter")),
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     ftransverseMassCut100TopCounter(eventCounter.addCounter("transverseMass > 100 top cut")),
@@ -224,7 +226,7 @@ namespace HPlus {
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // plot leading track without pt cut
-    //    hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
+    hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     //    if (tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt() < 20.0) return false;
 
     increment(fTausExistCounter);
@@ -338,37 +340,36 @@ namespace HPlus {
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    //<<<<<<< HEAD:HeavyChHiggsToTauNu/src/SignalAnalysis.cc
-    //    if(tauData.getRtauOfSelectedTau() > 0.8 ) {
-    //      hTransverseMassWithRtau->Fill(transverseMass, fEventWeight.getWeight());
-    //      increment(fRtauAfterCutsCounter);
-    //    }
-    //=======
-    if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
-    increment(fRtauAfterCutsCounter);
+    if(transverseMass < 60 ) return true;
+    increment(ftransverseMassCut80NoRtauCounter);
 
     if(transverseMass < 80 ) return true;
+    increment(ftransverseMassCut100NoRtauCounter);
+
+ 
+    if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
+    increment(fRtauAfterCutsCounter);
+    hTransverseMassWithRtau->Fill(transverseMass, fEventWeight.getWeight());
+
+   // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (TopSelectionData.passedEvent()) {
+      increment(fTopSelectionCounter);
+      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+      hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
+    } 
+
+
+    if(transverseMass < 60 ) return true;
     increment(ftransverseMassCut80Counter);
 
-    if(transverseMass < 100 ) return true;
+    if(transverseMass < 80 ) return true;
     increment(ftransverseMassCut100Counter);
 
     
     // Fake MET veto a.k.a. further QCD suppression
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    //<<<<<<< HEAD:HeavyChHiggsToTauNu/src/SignalAnalysis.cc
-    //    if (fakeMETData.passedEvent()) {
-    //  increment(fFakeMETVetoCounter);
-      //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
-    //  fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
-    //   fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
-    //  hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
-    // }
-
-    // if (fakeMETData.passedEvent() && tauData.getRtauOfSelectedTau() > 0.8 ) {
-    //  hTransverseMassWithRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
-    // }
-    //=======
     if (!fakeMETData.passedEvent()) return true;
     increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
@@ -377,16 +378,6 @@ namespace HPlus {
 
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
-
-    if(transverseMass < 80 ) return false;
-    increment(ftransverseMassCut80Counter);
-
-    if(transverseMass < 100 ) return 
-
-false;
-    increment(ftransverseMassCut100Counter);
-
-
     // Alpha T
     //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
     //if(!evtTopologyData.passedEvent()) return false;
@@ -394,49 +385,10 @@ false;
     //    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology
 
 
-    
-    // top mass
-    //    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    //   if (!TopSelectionData.passedEvent()) return false;
-    // increment(fTopSelectionCounter);
-    //hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());
+   
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderTopSelection, tauData);
 
-
-    // hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
-
-
-    //   hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
-   
-    // double LdgTrackPt = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p();
-    //   double Rtau = -9999;  
-    //if (tauData.getSelectedTaus()[0]->energy() > 0) {
-      //  Rtau = tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p()/tauData.getSelectedTaus()[0]->energy();
-    //  hSelectedTauRtauAfterCuts->Fill(Rtau, fEventWeight.getWeight());
-    // }
-   
-
-   // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (TopSelectionData.passedEvent()) {
-      increment(fTopSelectionCounter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
-      if(transverseMass > 100 ) increment(ftransverseMassCut100TopCounter);   
-    } 
-
-
-
-    //    if(transverseMass < 80 ) return false;
-    //    increment(ftransverseMassCut80Counter);
-
-    //    if(transverseMass < 100 ) return false;
-    //    increment(ftransverseMassCut100Counter);
-                                     
-    //Z mass veto
-    //    JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
-    //    if (!jetTauInvMassData.passedEvent()) return false;
-    //    increment(fZmassVetoCounter);
+ 
                                
     // Forward jet veto                                                                                                                                                                                                           
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);

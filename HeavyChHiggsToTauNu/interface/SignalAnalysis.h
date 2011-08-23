@@ -122,6 +122,8 @@ namespace HPlus {
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
+    Count ftransverseMassCut80NoRtauCounter;
+    Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count ftransverseMassCut100TopCounter;

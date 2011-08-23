@@ -117,7 +117,7 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
     std::cout << "Unable to find counters from " << file << std::endl;
     return DistPass();
   }
-
+ 
   if(std::isnan(crossSection)) {
     TH1 *configInfo = dynamic_cast<TH1 *>(f->Get("configInfo/configinfo"));
     if(!configInfo) {
@@ -210,12 +210,15 @@ void Result::Significance(){
 
     DistPass background = SumBackgrounds();
 
-    canvas0->cd();
-    background.pass->GetXaxis()->SetTitle(xlabel);
-    background.pass->SetName("N events");
-    background.pass->SetLineWidth(3);
-    background.pass->SetLineStyle(2);
-    background.pass->Draw();
+     canvas0->cd();
+     canvas0->SetLogy();   
+  
+    background.dist->GetXaxis()->SetTitle(xlabel);
+    background.dist->GetYaxis()->SetTitle("Events");
+    background.dist->SetName("N events");
+    background.dist->SetLineWidth(3);
+    background.dist->SetLineStyle(2);
+    background.dist->Draw();
 
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
@@ -225,8 +228,8 @@ void Result::Significance(){
     for(size_t i = 0; i < signals.size(); ++i){
 
 	canvas0->cd();
-	signals[i].pass->Draw("same");
-	signals[i].pass->SetLineColor(color);
+	signals[i].dist->Draw("same");
+	signals[i].dist->SetLineColor(color);
 
 	canvas1->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
@@ -307,13 +310,13 @@ Result createResult(const char *expr, const char *cut, bool lessThan) {
 //  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
 //  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
 //  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
-
-  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan));
-  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan));
-  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan));
-  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan));
-  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan));
-  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan));
+// normalisation at tanbeta=20
+  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan,7.50));
+  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan,4.707));
+  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan,2.1747));
+  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan,1.163));
+  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan,0.751));
+  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan,0.417));
 
 
 
@@ -346,11 +349,13 @@ void optimisation() {
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
 
+
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
   //  tauPtRes.setXLabel("tau pt");
   //  tauPtRes.Significance();
 
   Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
+  rtau += ">>dist(110,0.,1.1)";
   rtauRes.setXLabel("rtau");
 
   Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
