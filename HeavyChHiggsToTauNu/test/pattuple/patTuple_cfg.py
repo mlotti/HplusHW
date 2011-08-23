@@ -109,7 +109,9 @@ if dataVersion.isMC():
         select = cms.vstring(
             "keep *",
             # Remove the soft photons from fragmentations (we have not needed them)
-            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
+#            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
+            "drop++ pdgId() = {string}",
+            "keep pdgId() = {string}"
             )
     )
     process.out.outputCommands.extend([
