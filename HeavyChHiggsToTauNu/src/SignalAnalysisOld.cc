@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisOld.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
@@ -22,7 +22,7 @@ namespace {
 }
 
 namespace HPlus {
-  SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter) :
+  SignalAnalysisOld::CounterGroup::CounterGroup(EventCounter& eventCounter) :
     fOneTauCounter(eventCounter.addCounter("nonQCDType2:taus == 1")),
     fElectronVetoCounter(eventCounter.addCounter("nonQCDType2:electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("nonQCDType2:muon veto")),
@@ -31,7 +31,7 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addCounter("nonQCDType2:btagging")),
     fFakeMETVetoCounter(eventCounter.addCounter("nonQCDType2:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("nonQCDType2:Top Selection cut")) { }
-  SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
+  SignalAnalysisOld::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
     fOneTauCounter(eventCounter.addSubCounter(prefix,":taus == 1")),
     fElectronVetoCounter(eventCounter.addSubCounter(prefix,":electron veto")),
     fMuonVetoCounter(eventCounter.addSubCounter(prefix,":muon veto")),
@@ -40,9 +40,9 @@ namespace HPlus {
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")) { }
-  SignalAnalysis::CounterGroup::~CounterGroup() { }
+  SignalAnalysisOld::CounterGroup::~CounterGroup() { }
 
-  SignalAnalysis::SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  SignalAnalysisOld::SignalAnalysisOld(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
@@ -166,16 +166,16 @@ namespace HPlus {
     hNonQCDTypeIISelectedTauEtaAfterCuts = makeTH<TH1F>(*fs, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
   }
 
-  SignalAnalysis::~SignalAnalysis() { }
+  SignalAnalysisOld::~SignalAnalysisOld() { }
 
-  void SignalAnalysis::produces(edm::EDFilter *producer) const {
+  void SignalAnalysisOld::produces(edm::EDFilter *producer) const {
     producer->produces<std::vector<pat::Tau> >();
     producer->produces<std::vector<pat::Jet> >("jets");
     producer->produces<std::vector<pat::Jet> >("bjets");
   }
 
 
-  bool SignalAnalysis::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  bool SignalAnalysisOld::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     fEventWeight.updatePrescale(iEvent); // set prescale
 
     // Vertex weight
@@ -402,7 +402,7 @@ namespace HPlus {
     return true;
   }
 
-  SignalAnalysis::MCSelectedTauMatchType SignalAnalysis::matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau) {
+  SignalAnalysisOld::MCSelectedTauMatchType SignalAnalysisOld::matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau) {
     if (iEvent.isRealData()) return kkNoMC;
     bool foundMCTauOutsideAcceptanceStatus = false;
     bool isMCTau = false;
@@ -443,7 +443,7 @@ namespace HPlus {
     return kkJetToTauAndTauOutsideAcceptance;
   }
 
-  SignalAnalysis::CounterGroup* SignalAnalysis::getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch) {
+  SignalAnalysisOld::CounterGroup* SignalAnalysisOld::getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch) {
     if (tauMatch == kkElectronToTau) return &fElectronToTausCounterGroup;
     else if (tauMatch == kkMuonToTau) return &fMuonToTausCounterGroup;
     else if (tauMatch == kkTauToTau) return &fGenuineToTausCounterGroup;
@@ -455,7 +455,7 @@ namespace HPlus {
     return 0;
   }
   
-  void SignalAnalysis::fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus, double value) {
+  void SignalAnalysisOld::fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus, double value) {
     // Get out if no match has been found
     if (tauMatch == kkNoMC) return;
     // Obtain status for main counter

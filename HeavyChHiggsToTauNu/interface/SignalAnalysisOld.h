@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisOld_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisOld_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
@@ -35,7 +35,7 @@ class TH1;
 class TH2;
 
 namespace HPlus {
-  class SignalAnalysis {
+  class SignalAnalysisOld {
     class CounterGroup {
     public:
       /// Constructor for subcounters
@@ -86,8 +86,8 @@ namespace HPlus {
     kkJetToTauAndTauOutsideAcceptance
   };
   public:
-    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~SignalAnalysis();
+    explicit SignalAnalysisOld(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~SignalAnalysisOld();
 
     void produces(edm::EDFilter *producer) const;
 
@@ -100,7 +100,7 @@ namespace HPlus {
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     // We need a reference in order to use the same object (and not a
-    // copied one) given in HPlusSignalAnalysisProducer
+    // copied one) given in HPlusSignalAnalysisProducerOld
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;

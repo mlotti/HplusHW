@@ -235,7 +235,7 @@ if options.tauEmbeddingInput != 0:
     )
     
 # Signal analysis module for the "golden analysis"
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducer",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisProducerOld",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
