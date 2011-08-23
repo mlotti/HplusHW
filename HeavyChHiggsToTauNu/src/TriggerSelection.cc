@@ -35,6 +35,7 @@ namespace HPlus {
     fTriggerCaloMetCount(eventCounter.addSubCounter("Trigger","CaloMET cut passed")), 
     fTriggerCount(eventCounter.addSubCounter("Trigger","Passed")),
     fTriggerHltMetExistsCount(eventCounter.addSubCounter("Trigger debug", "HLT MET object exists")),
+    fTriggerHltMetPassedCount(eventCounter.addSubCounter("Trigger debug", "HLT MET passed")),
     fTriggerScaleFactorAllCount(eventCounter.addSubCounter("Trigger scale factor", "All events")),
     fTriggerScaleFactorAppliedCount(eventCounter.addSubCounter("Trigger scale factor", "Has tau pt>40")),
     fTriggerParamAllCount(eventCounter.addSubCounter("Trigger parametrisation", "All events")),
@@ -127,6 +128,7 @@ namespace HPlus {
   
   bool TriggerSelection::passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath) {
     bool passEvent = false;
+    /*
     edm::Handle<edm::TriggerResults> htrigger;
     iEvent.getByLabel(fTriggerSrc, htrigger);
 
@@ -141,6 +143,7 @@ namespace HPlus {
     if(!passEvent)
       return false;
     passEvent = false;
+    */
 
     edm::Handle<pat::TriggerEvent> trigger;
     iEvent.getByLabel(fPatSrc, trigger);
@@ -222,6 +225,8 @@ namespace HPlus {
         } else if (passEvent) {
           hHltMetSelected->Fill(fHltMet->et(), fEventWeight.getWeight());
         }
+        if(passEvent)
+          increment(fTriggerHltMetPassedCount);
       }
     }
     return passEvent;

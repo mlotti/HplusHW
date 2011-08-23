@@ -141,6 +141,7 @@ namespace HPlus {
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;
+    Count fTriggerHltMetPassedCount;
 
     Count fTriggerScaleFactorAllCount;
     Count fTriggerScaleFactorAppliedCount;
