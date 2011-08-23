@@ -6,7 +6,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
 # Select the version of the data (needed only for interactice running,
 # overridden automatically from multicrab
-dataVersion="42Xmc"     # Summer11 MC
+dataVersion="42XmcS4"     # Summer11 MC
 #dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
 
 
@@ -21,6 +21,10 @@ doBTagScan = False
 
 # Perform Rtau scanning
 doRtauScan = False
+
+# Make MET resolution histograms
+doMETResolution = False
+
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -75,7 +79,7 @@ process.source = cms.Source('PoolSource',
     #dataVersion.getAnalysisDefaultFileMadhatter()
     #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_3_1_0gW.root"
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-    "file:pattuple_28_1_jNa.root"
+    "file:pattuple.root"
     )
 )
 
@@ -196,7 +200,7 @@ if options.tauEmbeddingInput != 0:
     )
     
 # Signal analysis module for the "golden analysis"
-process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilterNew",
+process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     trigger = param.trigger,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
@@ -257,6 +261,10 @@ process.signalAnalysisPath = cms.Path(
     process.signalAnalysisCounters *
     process.PickEvents
 )
+
+if doMETResolution:
+    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.METResolutionAnalysis_cfi")
+    process.signalAnalysisPath += process.metResolutionAnalysis
 
 # b tagging testing
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis

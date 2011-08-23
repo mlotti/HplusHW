@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisNew_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisNew_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysis_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
@@ -37,7 +37,7 @@ class TH2;
 class TTree;
 
 namespace HPlus {
-  class SignalAnalysisNew {
+  class SignalAnalysis {
     class CounterGroup {
     public:
       /// Constructor for subcounters
@@ -88,8 +88,8 @@ namespace HPlus {
     kkJetToTauAndTauOutsideAcceptance
   };
   public:
-    explicit SignalAnalysisNew(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~SignalAnalysisNew();
+    explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~SignalAnalysis();
 
     void produces(edm::EDFilter *producer) const;
 
@@ -102,7 +102,7 @@ namespace HPlus {
     void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData, bool passedStatus = true, double value = 0);
 
     // We need a reference in order to use the same object (and not a
-    // copied one) given in HPlusSignalAnalysisNewProducer
+    // copied one) given in HPlusSignalAnalysisProducer
     EventWeight& fEventWeight;
 
     //    const double ftransverseMassCut;
@@ -124,6 +124,8 @@ namespace HPlus {
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
+    Count ftransverseMassCut80NoRtauCounter;
+    Count ftransverseMassCut100NoRtauCounter;
     Count fZmassVetoCounter;
     Count fTopSelectionCounter;
     Count ftransverseMassCut100TopCounter;
@@ -161,6 +163,8 @@ namespace HPlus {
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
     TH1 *hTransverseMassBeforeFakeMet;
+    TH1 *hTransverseMassWithRtauFakeMet;
+    TH1 *hTransverseMassWithRtau;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
@@ -176,6 +180,7 @@ namespace HPlus {
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;
     TH1 *hSelectedTauLeadingTrackPt;
+    TH1 *hSelectedTauLeadingTrackPtMetCut;
     TH1 *hSelectedTauRtauAfterCuts;
     TH1 *hSelectedTauEtMetCut;
     TH1 *hSelectedTauEtaMetCut;
