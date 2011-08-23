@@ -369,20 +369,20 @@ void optimisation() {
   //  tauPtRes.setXLabel("tau pt");
   //  tauPtRes.Significance();
 
-  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
   rtau += ">>dist(110,0.,1.1)";
+  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
   rtauRes.setXLabel("rtau");
 
-  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
   met += ">>dist(100,0.,200.)";
+  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
   metRes.setXLabel("met");
 
-  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
   tauPt += ">>dist(100,0.,100.)";
+  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
   tauPtRes.setXLabel("tauPt");
 
-  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
   mt += ">>dist(50,0.,200.)";
+  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
   mtRes.setXLabel("mt");
 
 
