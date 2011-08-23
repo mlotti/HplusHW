@@ -205,8 +205,9 @@ class Result {
 
 void Result::Significance(){
     TCanvas* canvas0 = new TCanvas("Variable_"+xlabel,"",500,500);
-    TCanvas* canvas1 = new TCanvas("signif_"+xlabel,"",500,500);
-    TCanvas* canvas2 = new TCanvas("SoverB_"+xlabel,"",500,500);
+    TCanvas* canvas1 = new TCanvas("Integral_"+xlabel,"",500,500);
+    TCanvas* canvas2 = new TCanvas("signif_"+xlabel,"",500,500);
+    TCanvas* canvas3 = new TCanvas("SoverB_"+xlabel,"",500,500);
 
     DistPass background = SumBackgrounds();
 
@@ -220,6 +221,15 @@ void Result::Significance(){
     background.dist->SetLineStyle(2);
     background.dist->Draw();
 
+     canvas1->cd();
+
+    background.pass->GetXaxis()->SetTitle(xlabel);
+    background.pass->GetYaxis()->SetTitle("Sum Events");
+    background.pass->SetName("N events");
+    background.pass->SetLineWidth(3);
+    background.pass->SetLineStyle(2);
+    background.pass->Draw();
+
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
     TH1 *firstSB, *firstSignif;
@@ -231,7 +241,11 @@ void Result::Significance(){
 	signals[i].dist->Draw("same");
 	signals[i].dist->SetLineColor(color);
 
-	canvas1->cd();
+        canvas1->cd();
+        signals[i].pass->Draw("same");
+        signals[i].pass->SetLineColor(color);
+
+	canvas2->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
 	S2B->SetName("S/B");
 	S2B->GetXaxis()->SetTitle(xlabel);
@@ -250,7 +264,7 @@ void Result::Significance(){
 	}
 	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
 
-	canvas2->cd();
+	canvas3->cd();
 	TH1* SSignif = Significance(signals[i].pass,background.pass);
 	SSignif->GetXaxis()->SetTitle(xlabel);
 	SSignif->GetYaxis()->SetTitle("Significance");
@@ -274,6 +288,7 @@ void Result::Significance(){
     canvas0->SaveAs(".png");
     canvas1->SaveAs(".png");
     canvas2->SaveAs(".png");
+    canvas3->SaveAs(".png");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
@@ -359,13 +374,17 @@ void optimisation() {
   rtauRes.setXLabel("rtau");
 
   Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
+  met += ">>dist(100,0.,200.)";
   metRes.setXLabel("met");
 
   Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
+  tauPt += ">>dist(100,0.,100.)";
   tauPtRes.setXLabel("tauPt");
 
   Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
+  mt += ">>dist(50,0.,200.)";
   mtRes.setXLabel("mt");
+
 
 
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
