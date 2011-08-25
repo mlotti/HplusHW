@@ -12,6 +12,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
 
+class JobSummary:
+    def __init__(self, njobs, hosts):
+        self.njobs = njobs
+        self.hosts = hosts
+
+def formatSummaries(opts, line, key, summary):
+    sum = " %s %d" % (key, summary.njobs)
+    if opts.showHosts:
+        line += "\n "+sum
+        if len(summary.hosts) > 0:
+            line += " (%s)" % ",".join(summary.hosts)
+    else:
+        line += sum+","
+    return line
+
 def main(opts):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
@@ -28,11 +43,15 @@ def main(opts):
         
         jobs = multicrab.crabStatusToJobs(task)
 
-        lens = {}
+        jobSummaries = {}
         njobs = 0
         for key, item in jobs.iteritems():
+            hosts = {}
+            for job in item:
+                if job.host != None:
+                    hosts[job.host] = 1
             l = len(item)
-            lens[key] = l
+            jobSummaries[key] = JobSummary(l, hosts)
             njobs += l
             allJobs += l
             if key in stats:
@@ -43,22 +62,22 @@ def main(opts):
         # First the succesfully done
         line = "%s (%d jobs):" % (task, njobs)
         for s in order_done:
-            if s in lens:
-                line += " %s %d," %(s, lens[s])
-                del lens[s]
+            if s in jobSummaries:
+                line = formatSummaries(opts, line, s, jobSummaries[s])
+                del jobSummaries[s]
 
         # Then the aborted-submitted to the end of the line
         line_end = ""
         for s in order_run:
-            if s in lens:
-                line_end += " %s %d,"%(s, lens[s])
-                del lens[s]
+            if s in jobSummaries:
+                line_end = formatSummaries(opts, line_end, s, jobSummaries[s])
+                del jobSummaries[s]
 
         # Then the failed ones to the middle
-        keys = lens.keys()
+        keys = jobSummaries.keys()
         keys.sort()
         for key in keys:
-            line += " %s %d," % (key, lens[key])
+            line = formatSummaries(opts, line, key, jobSummaries[key])
         line += line_end
         if line[-1] == ",":
             line = line[0:-1]
@@ -114,6 +133,8 @@ if __name__ == "__main__":
                       help="Provide the resubmit list for these jobs ('all', 'Aborted', comma separated list of exit codes; default 'all'")
     parser.add_option("--showMissing", dest="showMissing", action="store_true", default=False,
                       help="Show also the missing task directories")
+    parser.add_option("--showHosts", dest="showHosts", action="store_true", default=False,
+                      help="Show summary of hosts where the jobs are running")
     (opts, args) = parser.parse_args()
 
     opts.status = opts.status.lower()
