@@ -5,7 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v17"
+pattupleVersion = "pattuple_v18"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -42,40 +42,40 @@ multicrab.extendDatasets(pattupleVersion,
         
         # MC Signal (WH)
         "TTToHplusBWB_M80_Summer11",
-        "TTToHplusBWB_M90_Summer11",
-        "TTToHplusBWB_M100_Summer11",
-        "TTToHplusBWB_M120_Summer11",
-        "TTToHplusBWB_M140_Summer11",
-        "TTToHplusBWB_M150_Summer11",
-        "TTToHplusBWB_M155_Summer11",
-        "TTToHplusBWB_M160_Summer11",
+#        "TTToHplusBWB_M90_Summer11",
+#        "TTToHplusBWB_M100_Summer11",
+#        "TTToHplusBWB_M120_Summer11",
+#        "TTToHplusBWB_M140_Summer11",
+#        "TTToHplusBWB_M150_Summer11",
+#        "TTToHplusBWB_M155_Summer11",
+#        "TTToHplusBWB_M160_Summer11",
 
         # MC Signal (HH)
         "TTToHplusBHminusB_M80_Summer11",
-        "TTToHplusBHminusB_M100_Summer11",
-        "TTToHplusBHminusB_M120_Summer11",
-        "TTToHplusBHminusB_M140_Summer11",
-        "TTToHplusBHminusB_M150_Summer11",
-        "TTToHplusBHminusB_M155_Summer11",
-        "TTToHplusBHminusB_M160_Summer11",
+#        "TTToHplusBHminusB_M100_Summer11",
+#        "TTToHplusBHminusB_M120_Summer11",
+#        "TTToHplusBHminusB_M140_Summer11",
+#        "TTToHplusBHminusB_M150_Summer11",
+#        "TTToHplusBHminusB_M155_Summer11",
+#        "TTToHplusBHminusB_M160_Summer11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-	"HplusTB_M190_Summer11",
-	"HplusTB_M200_Summer11",
-	"HplusTB_M220_Summer11",
-	"HplusTB_M250_Summer11",
-	"HplusTB_M300_Summer11",
+#	"HplusTB_M190_Summer11",
+#	"HplusTB_M200_Summer11",
+#	"HplusTB_M220_Summer11",
+#	"HplusTB_M250_Summer11",
+#	"HplusTB_M300_Summer11",
 
         # MC Background
-        "QCD_Pt30to50_TuneZ2_Summer11",
-        "QCD_Pt50to80_TuneZ2_Summer11",
-        "QCD_Pt80to120_TuneZ2_Summer11",
-        "QCD_Pt120to170_TuneZ2_Summer11",
-        "QCD_Pt170to300_TuneZ2_Summer11",
-        "QCD_Pt300to470_TuneZ2_Summer11",
-        "TTJets_TuneZ2_Summer11",
-        "WJets_TuneZ2_Summer11",
-        "DYJetsToLL_M50_TuneZ2_Summer11",
+#        "QCD_Pt30to50_TuneZ2_Summer11",
+#        "QCD_Pt50to80_TuneZ2_Summer11",
+#        "QCD_Pt80to120_TuneZ2_Summer11",
+#        "QCD_Pt120to170_TuneZ2_Summer11",
+#        "QCD_Pt170to300_TuneZ2_Summer11",
+#        "QCD_Pt300to470_TuneZ2_Summer11",
+#        "TTJets_TuneZ2_Summer11",
+#        "WJets_TuneZ2_Summer11",
+#        "DYJetsToLL_M50_TuneZ2_Summer11",
         ])
 
 # Force all jobs go to jade, in some situations this might speed up
