@@ -110,7 +110,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilterNew",
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
-    GenParticleAnalysis = param.GenParticleAnalysis
+    GenParticleAnalysis = param.GenParticleAnalysis,
+    produceCollections = cms.untracked.bool(True)
 )
 
 # Prescale fetching done automatically for data

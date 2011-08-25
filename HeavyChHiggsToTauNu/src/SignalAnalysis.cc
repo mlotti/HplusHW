@@ -99,7 +99,8 @@ namespace HPlus {
     fElectronToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "e->tau with tau outside acceptance"),
     fMuonToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "mu->tau with tau outside acceptance"),
     fGenuineToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "tau->tau with tau outside acceptance"),
-    fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance")
+    fJetToTausAndTauOutsideAcceptanceCounterGroup(eventCounter, "jet->tau with tau outside acceptance"),
+    fProduce(iConfig.getUntrackedParameter<bool>("produceCollections", false))
   {
     edm::Service<TFileService> fs;
     // Save the module configuration to the output ROOT file as a TNamed object
@@ -172,12 +173,14 @@ namespace HPlus {
   SignalAnalysis::~SignalAnalysis() { }
 
   void SignalAnalysis::produces(edm::EDFilter *producer) const {
-    producer->produces<std::vector<pat::Tau> >("selectedTaus");
-    producer->produces<std::vector<pat::Jet> >("selectedJets");
-    producer->produces<std::vector<pat::Jet> >("selectedBJets");
-    producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
-    producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolation");
-    producer->produces<std::vector<pat::Muon> >("selectedVetoMuons");
+    if(fProduce) {
+      producer->produces<std::vector<pat::Tau> >("selectedTaus");
+      producer->produces<std::vector<pat::Jet> >("selectedJets");
+      producer->produces<std::vector<pat::Jet> >("selectedBJets");
+      producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
+      producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolation");
+      producer->produces<std::vector<pat::Muon> >("selectedVetoMuons");
+    }
   }
 
 
@@ -244,9 +247,11 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
-    std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
-    copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
-    iEvent.put(saveTaus, "selectedTaus");
+    if(fProduce) {
+      std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
+      copyPtrToVector(tauData.getSelectedTaus(), *saveTaus);
+      iEvent.put(saveTaus, "selectedTaus");
+    }
     
     fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
     fTauEmbeddingAnalysis.fillAfterTauId();
@@ -290,9 +295,11 @@ namespace HPlus {
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderElectronVeto, tauData);
-    std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
-    copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
-    iEvent.put(saveElectrons, "selectedVetoElectrons");
+    if(fProduce) {
+      std::auto_ptr<std::vector<pat::Electron> > saveElectrons(new std::vector<pat::Electron>());
+      copyPtrToVector(electronVetoData.getSelectedElectrons(), *saveElectrons);
+      iEvent.put(saveElectrons, "selectedVetoElectrons");
+    }
 
 
     // Global muon veto
@@ -302,12 +309,14 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderMuonVeto, fEventWeight.getWeight());
     hTransverseMassAfterVeto->Fill(transverseMass, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
-    std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
-    copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolation(), *saveMuons);
-    iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolation");
-    saveMuons.reset(new std::vector<pat::Muon>());
-    copyPtrToVector(muonVetoData.getSelectedMuons(), *saveMuons);
-    iEvent.put(saveMuons, "selectedVetoMuons");
+    if(fProduce) {
+      std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
+      copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolation(), *saveMuons);
+      iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolation");
+      saveMuons.reset(new std::vector<pat::Muon>());
+      copyPtrToVector(muonVetoData.getSelectedMuons(), *saveMuons);
+      iEvent.put(saveMuons, "selectedVetoMuons");
+    }
 
 
     // Hadronic jet selection
@@ -316,10 +325,11 @@ namespace HPlus {
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderJetSelection, tauData);
-    std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
-    copyPtrToVector(jetData.getSelectedJets(), *saveJets);
-    iEvent.put(saveJets, "selectedJets");
-
+    if(fProduce) {
+      std::auto_ptr<std::vector<pat::Jet> > saveJets(new std::vector<pat::Jet>());
+      copyPtrToVector(jetData.getSelectedJets(), *saveJets);
+      iEvent.put(saveJets, "selectedJets");
+    }
 
     // Write the stuff to the tree
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
@@ -347,10 +357,11 @@ namespace HPlus {
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
-    copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
-    iEvent.put(saveBJets, "selectedBJets");
-
+    if(fProduce) {
+      std::auto_ptr<std::vector<pat::Jet> > saveBJets(new std::vector<pat::Jet>());
+      copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
+      iEvent.put(saveBJets, "selectedBJets");
+    }
 
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
