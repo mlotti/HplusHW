@@ -205,6 +205,7 @@ namespace HPlus {
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
 
+    bool fProduce;
   };
 }
 
