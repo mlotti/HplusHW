@@ -17,10 +17,16 @@ namespace HPlus {
   VertexWeight::VertexWeight(const edm::ParameterSet& iConfig):
     fVertexSrc(iConfig.getParameter<edm::InputTag>("vertexSrc")),
     fPuSummarySrc(iConfig.getParameter<edm::InputTag>("puSummarySrc")),
+    fMeanShifter(iConfig.getParameter<double>("shiftMeanAmount")),
     fUseSimulatedPileup(iConfig.getParameter<bool>("useSimulatedPileup")),
     fSummer11S4Mode(iConfig.getParameter<bool>("summer11S4Mode")),
-    fEnabled(iConfig.getParameter<bool>("enabled"))
+    fEnabled(iConfig.getParameter<bool>("enabled")),
+    fShiftMean(iConfig.getParameter<bool>("shiftMean"))
   {
+    if(fShiftMean && (!fSummer11S4Mode || !fUseSimulatedPileup)) {
+      throw cms::Exception("Configuration") << "shiftMean can be used only with the reweighting by simulated PU interactions (not reconstructed vertices), and with Summer11S4 samples" << std::endl;
+    }
+
     if(fUseSimulatedPileup) {
       std::vector<double> mcDist = iConfig.getParameter<std::vector<double> >("mcDist");
       std::vector<double> dataDist = iConfig.getParameter<std::vector<double> >("dataDist");
@@ -65,7 +71,14 @@ namespace HPlus {
         for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {
           npv += iPV->getPU_NumInteractions();
         }
-        weight = fLumiWeights.weight3BX( npv/3. );
+        float ave_nvtx = npv/3.;
+
+        weight = fLumiWeights.weight3BX( ave_nvtx );
+
+        // See https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
+        if(fShiftMean) {
+          weight = weight*fMeanShifter.ShiftWeight( ave_nvtx );
+        }
       }
       else {
         for(std::vector<PileupSummaryInfo>::const_iterator iPV = hpu->begin(); iPV != hpu->end(); ++iPV) {

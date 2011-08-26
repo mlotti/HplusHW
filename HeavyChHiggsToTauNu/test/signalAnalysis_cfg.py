@@ -33,6 +33,11 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
+# Perform the signal analysis with the PU weight variations
+# https://twiki.cern.ch/twiki/bin/view/CMS/PileupSystematicErrors
+doPUWeightVariation = False
+PUWeightVariation = 0.6
+
 # With tau embedding input, tighten the muon selection
 tauEmbeddingFinalizeMuonSelection = True
 # With tau embedding input, do the muon selection scan
@@ -68,18 +73,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # For testing in lxplus
-    #"file:/media/disk/attikis/PATTuples/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"     
-    #"file:/media/disk/attikis/PATTuples/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
-    #
-    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_Run2011A_May10ReReco_9_1_ZS7.root"
-    #"rfio:/castor/cern.ch/user/a/attikis/pattuples/testing/v17/pattuple_v17_QCD_Pt170to300_TuneZ2_Summer11_9_1_tKm.root"
-    #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
-    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v17/99aef5cefaa1c50bd821f91d13a3f4ca/pattuple_3_1_0gW.root"
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
-    "file:pattuple.root"
     )
 )
 
@@ -365,6 +362,22 @@ if doJESVariation:
     addJESVariationAnalysis(process, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation, jetVariationMode)
     addJESVariationAnalysis(process, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
     addJESVariationAnalysis(process, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
+
+if doPUWeightVariation:
+    module = process.signalAnalysis.clone()
+    module.vertexWeight.shiftMean = True
+    module.vertexWeight.shiftMeanAmount = PUWeightVariation
+    addAnalysis(process, "signalAnalysisPUWeightPlus", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
+
+    module = module.clone()
+    module.vertexWeight.shiftMeanAmount = -PUWeightVariation
+    addAnalysis(process, "signalAnalysisPUWeightMinus", module,
+                preSequence=process.commonSequence,
+                additionalCounters=additionalCounters,
+                signalAnalysisCounters=True)
 
 
 # Signal analysis with various tightened muon selections for tau embedding

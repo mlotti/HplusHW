@@ -231,6 +231,8 @@ vertexWeight = cms.untracked.PSet(
     summer11S4Mode = cms.bool(False),
     weights = cms.vdouble(0.0),
     enabled = cms.bool(False),
+    shiftMean = cms.bool(False),
+    shiftMeanAmount = cms.double(0),    
 )
 
 triggerEfficiency = cms.untracked.PSet(
