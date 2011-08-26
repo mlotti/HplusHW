@@ -22,7 +22,7 @@ def formatSummaries(opts, line, key, summary):
     if opts.showHosts:
         line += "\n "+sum
         if len(summary.hosts) > 0:
-            line += " (%s)" % ",".join(summary.hosts)
+            line += " (%s)" % ", ".join(summary.hosts)
     else:
         line += sum+","
     return line
