@@ -43,8 +43,9 @@ if step == "signalAnalysis":
     pass
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "generation":     {"input": "tauembedding_skim_v11",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-          "embedding":      {"input": "tauembedding_generation_v11_8"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
+          "embedding":      {"input": "tauembedding_skim_v11", "config": "embed.py",   "output": "embedded.root"},
+#          "generationOld":     {"input": "tauembedding_skim_v11",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
+#          "embeddingOld":      {"input": "tauembedding_generation_v11_8"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
           "analysis":       {"input": "tauembedding_embedding_v11_8"+pt,  "config": "embeddingAnalysis_cfg.py"},
 #          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
 #          "signalAnalysis": {"input": "tauembedding_embedding_v11_6"+pt,  "config": "../signalAnalysis_cfg.py"},
