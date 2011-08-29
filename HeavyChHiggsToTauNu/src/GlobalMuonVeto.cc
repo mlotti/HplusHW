@@ -116,6 +116,9 @@ namespace HPlus {
     // Reset data variables
     fSelectedMuonPt = -1.0;
     fSelectedMuonEta = -999.99;
+    fSelectedMuons.clear();
+    fSelectedMuonsBeforeIsolation.clear();
+
     // Get result
     bool passEvent = MuonSelection(iEvent,iSetup, primaryVertex);
     return Data(this, passEvent);
@@ -193,10 +196,6 @@ namespace HPlus {
     bool bMuonMatchingMCmuon = false;
     bool bMuonMatchingMCmuonFromW = false;
     
-
-    fSelectedMuons.clear();
-    fSelectedMuonsBeforeIsolation.clear();
-
     // Loop over all Muons
     for(edm::PtrVector<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
 
