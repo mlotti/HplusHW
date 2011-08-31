@@ -39,7 +39,7 @@ multicrab.extendDatasets(
 #        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
 #        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
 #        "Tau_Single_167078-167913_Prompt",   # HLT_IsoPFTau35_Trk20_v4
-#        "Tau_Single_172620-173243_Prompt",   # HLT_IsoPFTau35_Trk20_v6
+#        "Tau_Single_172620-173198_Prompt",   # HLT_IsoPFTau35_Trk20_v6
 #        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
 
         # Signal MC (WH)
