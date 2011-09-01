@@ -72,8 +72,9 @@ def main(opts, args):
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
-        cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
-        #cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
+        cmd = ["lumiCalc2.py", "-i", jsonfile, "--nowarning", "overview", "-b", "stable"]
+        if opts.lumicalc1:
+            cmd = ["lumiCalc.py", "-i", jsonfile, "--with-correction", "--nowarning", "overview", "-b", "stable"]
         #cmd = ["lumiCalc.py", "-c", "frontier://LumiCalc/CMS_LUMI_PROD", "-r", "132440", "--nowarning", "overview"]
         #ret = subprocess.call(cmd)
         if opts.verbose:
@@ -95,8 +96,9 @@ def main(opts, args):
         for line in lines:
             m = lumi_re.search(line)
             if m:
-                lumi = float(m.group("recorded"))/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
-                #lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
+                lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
+                if opts.lumicalc1:
+                    lumi = lumi/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
                 break
 
         print "Task %s recorded luminosity %f pb^-1" % (d, lumi)
@@ -124,6 +126,8 @@ if __name__ == "__main__":
                       help="Do not run 'crab -report', i.e. you guarantee that the lumiSummary.json contains already all jobs.")
     parser.add_option("--verbose", dest="verbose", action="store_true", default=False,
                       help="Print outputs of the commands which are executed")
+    parser.add_option("--lumicalc1", dest="lumicalc1", action="store_true", default=False,
+                      help="Use lumiCalc.py instead of lumiCalc2.py (default is to use lumiCalc2.py")
     
     (opts, args) = parser.parse_args()
 
