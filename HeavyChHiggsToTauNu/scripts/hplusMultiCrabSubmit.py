@@ -9,7 +9,7 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
-def main(opts):
+def main(opts, args):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
 
@@ -40,7 +40,7 @@ def main(opts):
 
         for task, jobs in jobsToSubmit.iteritems():
             pretty = multicrab.prettyJobnums(jobs)
-            command = ["crab", "-c", task, "-submit", pretty]
+            command = ["crab", "-c", task, "-submit", pretty] + args
             print "Submitting %d jobs from task %s" % (len(jobs), task)
             print "Command", " ".join(command)
             if not opts.test:
@@ -56,7 +56,7 @@ def main(opts):
     return 0
 
 if __name__ == "__main__":
-    parser = OptionParser(usage="Usage: %prog [options]")
+    parser = OptionParser(usage="Usage: %prog [options] [-- crab-options]")
     multicrab.addOptions(parser)
     parser.add_option("--jobs", dest="jobs", type="int", default=50, 
                       help="Number of jobs to submit at a time (default: 50)")
@@ -68,5 +68,5 @@ if __name__ == "__main__":
                       help="Test only, do not submit anything")
     (opts, args) = parser.parse_args()
 
-    sys.exit(main(opts))
+    sys.exit(main(opts, args))
 

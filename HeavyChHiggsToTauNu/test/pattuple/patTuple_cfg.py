@@ -50,7 +50,7 @@ if len(myTrigger) == 0:
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
-print "Trigger used for tau matching: "+myTrigger
+print "Trigger used for tau matching: "+str(myTrigger)
 
 ################################################################################
 # Output module
@@ -153,7 +153,9 @@ else:
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
-process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
+if isinstance(myTrigger, basestring):
+    myTrigger = [myTrigger]
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 #process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])

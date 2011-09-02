@@ -609,7 +609,7 @@ def patJetCorrLevels(dataVersion, L1FastJet=False):
         levels.append("L1Offset")
     levels.extend(["L2Relative", "L3Absolute"])
     if dataVersion.isData():
-        module.levels.append("L2L3Residual")
+        levels.append("L2L3Residual")
     levels.extend(["L5Flavor", "L7Parton"])
     return levels
 
