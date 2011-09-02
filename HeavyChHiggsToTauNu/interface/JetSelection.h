@@ -90,6 +90,10 @@ namespace HPlus {
     TH1 *hPhi;
     TH1 *hNumberOfSelectedJets;
     TH1 *hDeltaPhiJetMet;
+    TH1 *hchargedEmEnergyFraction;
+    TH1 *hneutralHadronEnergyFraction;
+    TH1 *hchargedHadronEnergyFraction;
+
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
     // Not Selected jets

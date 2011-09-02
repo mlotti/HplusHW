@@ -340,25 +340,37 @@ namespace HPlus {
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-    if(transverseMass < 60 ) return true;
-    increment(ftransverseMassCut80NoRtauCounter);
+   // top mass
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    if (TopSelectionData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
+      increment(fTopSelectionCounter);
+      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
+      hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
+      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
+    } 
 
-    if(transverseMass < 80 ) return true;
-    increment(ftransverseMassCut100NoRtauCounter);
+  // Fake MET veto a.k.a. further QCD suppression
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    if (fakeMETData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
+      hTransverseMassWithRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+    }
+    if (fakeMETData.passedEvent() ) {
+      increment(fFakeMETVetoCounter);
+      hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
+    }
+    //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
+    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
+    fTauEmbeddingAnalysis.fillAfterFakeMetVeto();
+
+
+    if(transverseMass > 60 ) increment(ftransverseMassCut80NoRtauCounter);
+    if(transverseMass > 80 ) increment(ftransverseMassCut100NoRtauCounter);
 
  
     if(tauData.getRtauOfSelectedTau() < 0.8 ) return true;
     increment(fRtauAfterCutsCounter);
     hTransverseMassWithRtau->Fill(transverseMass, fEventWeight.getWeight());
 
-   // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
-    if (TopSelectionData.passedEvent()) {
-      increment(fTopSelectionCounter);
-      //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      hTransverseMassWithTopCut->Fill(transverseMass, fEventWeight.getWeight());
-      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
-    } 
 
 
     if(transverseMass < 60 ) return true;
@@ -369,9 +381,9 @@ namespace HPlus {
 
     
     // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    if (!fakeMETData.passedEvent()) return true;
-    increment(fFakeMETVetoCounter);
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    //    if (!fakeMETData.passedEvent()) return true;
+    //    increment(fFakeMETVetoCounter);
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
     fTauEmbeddingAnalysis.fillAfterFakeMetVeto();

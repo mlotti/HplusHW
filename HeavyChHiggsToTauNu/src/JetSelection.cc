@@ -49,6 +49,9 @@ namespace HPlus {
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2); 
+    hchargedEmEnergyFraction = makeTH<TH1F>(myDir, "chargedEmEnergyFraction", "chargedEmEnergyFraction", 400, 0., 1.0);
+    hneutralHadronEnergyFraction = makeTH<TH1F>(myDir, "neutralHadronEnergyFraction", "neutralHadronEnergyFraction", 400, 0., 1.0); 
+    hchargedHadronEnergyFraction = makeTH<TH1F>(myDir, "chargedHadronEnergyFraction", "chargedHadronEnergyFraction", 400, 0., 1.0);  
  }
 
   JetSelection::~JetSelection() {}
@@ -113,15 +116,18 @@ namespace HPlus {
       if(!(iJet->numberOfDaughters() > 1)) continue;
       increment(fnumberOfDaughtersCutSubCount);
 
+      hchargedEmEnergyFraction->Fill(iJet->chargedEmEnergyFraction(), fEventWeight.getWeight());
       if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
       increment(fchargedEmEnergyFractionCutSubCount);
 
+      hneutralHadronEnergyFraction->Fill(iJet->neutralHadronEnergyFraction(), fEventWeight.getWeight());
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
       if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
 
+      hchargedHadronEnergyFraction->Fill(iJet->chargedHadronEnergyFraction(), fEventWeight.getWeight());
       if(fabs(iJet->eta()) < 2.4) {
 	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
 	  increment(fchargedHadronEnergyFractionCutSubCount);

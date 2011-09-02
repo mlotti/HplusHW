@@ -206,8 +206,8 @@ class Result {
 void Result::Significance(){
     TCanvas* canvas0 = new TCanvas("Variable_"+xlabel,"",500,500);
     TCanvas* canvas1 = new TCanvas("Integral_"+xlabel,"",500,500);
-    TCanvas* canvas2 = new TCanvas("signif_"+xlabel,"",500,500);
-    TCanvas* canvas3 = new TCanvas("SoverB_"+xlabel,"",500,500);
+    TCanvas* canvas2 = new TCanvas("SoverB_"+xlabel,"",500,500);
+    TCanvas* canvas3 = new TCanvas("Signif_"+xlabel,"",500,500);
 
     DistPass background = SumBackgrounds();
 
@@ -247,7 +247,7 @@ void Result::Significance(){
 
 	canvas2->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
-	S2B->SetName("S/B");
+	S2B->SetName("SoverB");
 	S2B->GetXaxis()->SetTitle(xlabel);
 	S2B->GetYaxis()->SetTitle("Signal / Background");
         S2B->Divide(background.pass);
@@ -289,6 +289,10 @@ void Result::Significance(){
     canvas1->SaveAs(".png");
     canvas2->SaveAs(".png");
     canvas3->SaveAs(".png");
+    canvas0->SaveAs(".C");
+    canvas1->SaveAs(".C");
+    canvas2->SaveAs(".C");
+    canvas3->SaveAs(".C");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
@@ -358,39 +362,38 @@ void optimisation() {
 
   // Cuts to be applied on top of preselection
   TString met("met_p4.Et()"); TCut metCut(met+" > 70");
-  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
+  TString btagMax("Max$(jets_btag)"); TCut btagCut(btagMax+" > 1.7");
 
   // Optional cuts
-  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
-  TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
+  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.65");
+  TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
 
+  //TString btag("Sum$(jets_btag > 1.7)");  
+  //  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1"; 
 
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
   //  tauPtRes.setXLabel("tau pt");
   //  tauPtRes.Significance();
 
   rtau += ">>dist(110,0.,1.1)";
-  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
+  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut ), false);
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
-  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
+  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtaCut && mtCut), false);
   metRes.setXLabel("met");
 
   tauPt += ">>dist(100,0.,100.)";
-  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
+  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut && mtCut), false);
   tauPtRes.setXLabel("tauPt");
 
   mt += ">>dist(50,0.,200.)";
-  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
+  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut ), false);
   mtRes.setXLabel("mt");
 
-
-
-  //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
-  //  tauPtRes.setXLabel("tauPt");
-
-  //  rtauRes.Significance();
+  btagMax += ">>dist(80,0.,8.)";
+  Result btagRes = createResult(btagMax, TString(tauPtCut && metCut && rtauCut && mtCut), false);
+  btagRes.setXLabel("btag");
 
 /*
   TCanvas *c = new TCanvas("rtau");
@@ -400,10 +403,12 @@ void optimisation() {
   std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
   c->SaveAs(".png");
 */
-  rtauRes.Significance();
-  metRes.Significance();
-  tauPtRes.Significance();
+//  rtauRes.Significance();
+  //  metRes.Significance();
+  //  tauPtRes.Significance();
   mtRes.Significance();
+  // btagRes.Significance();
+  
 }
 
 
