@@ -138,6 +138,13 @@ namespace HPlus {
 	  if(!(iJet->chargedMultiplicity() > 0)) continue;
 	  increment(fchargedMultiplicityCutSubCount);
 	}
+
+      double EMfrac = (iJet->chargedEmEnergy() +
+                       iJet->neutralEmEnergy())/(
+                       iJet->chargedHadronEnergy() +
+                       iJet->neutralHadronEnergy() +
+                       iJet->chargedEmEnergy() +
+                       iJet->neutralEmEnergy());
      
       // plot deltaPhi(jet,met)
       double deltaPhi = -999;
