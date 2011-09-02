@@ -11,6 +11,14 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 
+#include<algorithm>
+
+namespace {
+  bool ptGreaterThan(const edm::Ptr<pat::Jet>& a, const edm::Ptr<pat::Jet>& b) {
+    return a->pt() > b->pt();
+  }
+}
+
 namespace HPlus {
   JetSelection::Data::Data(const JetSelection *jetSelection, bool passedEvent):
     fJetSelection(jetSelection), fPassedEvent(passedEvent) {}
@@ -68,7 +76,6 @@ namespace HPlus {
     const edm::PtrVector<pat::Jet>& jets(hjets->ptrVector());
 
     fSelectedJets.clear();
-    fSelectedJets.reserve(jets.size());
     fNotSelectedJets.clear();
     fNotSelectedJets.reserve(jets.size());
 
@@ -76,6 +83,9 @@ namespace HPlus {
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
     
+    std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
+    tmpSelectedJets.reserve(jets.size());
+
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
 
@@ -134,6 +144,13 @@ namespace HPlus {
 	  if(!(iJet->chargedMultiplicity() > 0)) continue;
 	  increment(fchargedMultiplicityCutSubCount);
 	}
+
+      double EMfrac = (iJet->chargedEmEnergy() +
+                       iJet->neutralEmEnergy())/(
+                       iJet->chargedHadronEnergy() +
+                       iJet->neutralHadronEnergy() +
+                       iJet->chargedEmEnergy() +
+                       iJet->neutralEmEnergy());
      
       // plot deltaPhi(jet,met)
       double deltaPhi = -999;
@@ -150,8 +167,14 @@ namespace HPlus {
       }
 
 
-      fSelectedJets.push_back(iJet);
+      tmpSelectedJets.push_back(iJet);
     }
+
+    // Sort the selected jets in the (corrected) pt
+    std::sort(tmpSelectedJets.begin(), tmpSelectedJets.end(), ptGreaterThan);
+    fSelectedJets.reserve(tmpSelectedJets.size());
+    for(size_t i=0; i<tmpSelectedJets.size(); ++i)
+      fSelectedJets.push_back(tmpSelectedJets[i]);
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
