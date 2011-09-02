@@ -48,6 +48,7 @@ namespace HPlus {
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fTree(fBTagging.getDiscriminator()),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -181,6 +182,8 @@ namespace HPlus {
     fAnalyses.push_back(AnalysisVariation(60., 10., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));*/
+
+    fTree.init(*fs);
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -192,14 +195,19 @@ namespace HPlus {
   void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
+    fTree.setPrescaleWeight(fEventWeight.getWeight());
     increment(fAllCounter);
 
 ///////// Start vertex reweighting
     // Apply PU re-weighting (Vertex weight)
     std::pair<double, size_t> weightSize = fVertexWeight.getWeightAndSize(iEvent, iSetup);
-    if(!iEvent.isRealData()) fEventWeight.multiplyWeight(weightSize.first);
+    if(!iEvent.isRealData()) { 
+      fEventWeight.multiplyWeight(weightSize.first);
+      fTree.setPileupWeight(weightSize.first);
+    }
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
+    fTree.setNvertices(weightSize.second);
 
 ///////// Start trigger
     // Trigger and HLT_MET cut; or trigger efficiency parametrisation
@@ -207,6 +215,7 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
+    fTree.setTriggerWeight(triggerData.getScaleFactor());
 
     // GenParticle analysis
     if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
@@ -258,9 +267,12 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hStdAfterNjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
 
+    ///// This position is after the Big Box
+    // get the MET, but cut on it later
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    fTree.fill(iEvent, mySelectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
 
 ///////// MET selection (factorise out)
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     if (metData.passedEvent()) {
       increment(fMETCounter);
       hSelectionFlow->Fill(kQCDOrderMETFactorized, fEventWeight.getWeight());
