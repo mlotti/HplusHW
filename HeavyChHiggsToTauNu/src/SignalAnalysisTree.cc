@@ -33,6 +33,7 @@ namespace HPlus {
 
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
+    fTree->Branch("jets_EMfrac", &fJetsEMfracs);
 
     fTree->Branch("met_p4", &fMet);
   }
@@ -52,6 +53,13 @@ namespace HPlus {
     for(size_t i=0; i<jets.size(); ++i) {
       fJets.push_back(jets[i]->p4());
       fJetsBtags.push_back(jets[i]->bDiscriminator(fBdiscriminator));
+      double EMfrac = (jets[i]->chargedEmEnergy() + 
+                       jets[i]->neutralEmEnergy())/(
+                       jets[i]->chargedHadronEnergy() + 
+                       jets[i]->neutralHadronEnergy() + 
+                       jets[i]->chargedEmEnergy() + 
+                       jets[i]->neutralEmEnergy());
+      fJetsEMfracs.push_back(EMfrac);
     }
 
     fMet = met->p4();
@@ -76,6 +84,7 @@ namespace HPlus {
 
     fJets.clear();
     fJetsBtags.clear();
+    fJetsEMfracs.clear();
 
     fMet.SetXYZT(0, 0, 0, 0);
   }

@@ -108,6 +108,8 @@ namespace HPlus {
     // Reset data variables
     fSelectedElectronPt = -1.0;
     fSelectedElectronEta = -999.99;
+    fSelectedElectrons.clear();
+
     if(!bUseCustomElectronID) return Data(this, ElectronSelection(iEvent,iSetup));
     else{
       throw cms::Exception("Error") << "The ElectronSelection \"" << fElecSelection << "\" cannot be called with the function:\n\"GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"\nFor this selection you must call the function:\n\"GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup)\"" << std::endl;      
@@ -119,6 +121,7 @@ namespace HPlus {
     // Reset data variables
     fSelectedElectronPt = -1.0;
     fSelectedElectronEta = -999.99;
+    fSelectedElectrons.clear();
     
     if(bUseCustomElectronID) return Data(this, CustomElectronSelection(iEvent,iSetup));
     else{
@@ -151,8 +154,6 @@ namespace HPlus {
     bool bElecMatchingMCelectron = false;
     bool bElecMatchingMCelectronFromW = false;
 
-    fSelectedElectrons.clear();
-   
     // Loop over all Electrons
     for(edm::PtrVector<pat::Electron>::const_iterator iElectron = electrons.begin(); iElectron != electrons.end(); ++iElectron) {
 

@@ -52,10 +52,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion)
 process.commonSequence.remove(process.eventPreSelection)
 
-# Add configuration information to histograms.root
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
-process.infoPath = addConfigInfo(process, options, dataVersion)
-
 ################################################################################
 # The "golden" version of the signal analysis
 # Primary vertex selection
