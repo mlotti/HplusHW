@@ -84,6 +84,7 @@ namespace HPlus {
 
     fJets.clear();
     fJetsBtags.clear();
+    fJetsEMfracs.clear();
 
     fMet.SetXYZT(0, 0, 0, 0);
   }
