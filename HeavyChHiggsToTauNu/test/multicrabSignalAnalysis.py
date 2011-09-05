@@ -32,17 +32,20 @@ multicrab.extendDatasets(pattupleVersion,
 #        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
 
         # Data: single tau + MET
-#        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
-#        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
-#        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
+        # This is the "EPS" dataset
+        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
+        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
+        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
         "Tau_165088-165633_Prompt",          # HLT_IsoPFTau35_Trk20_MET45_v6
         "Tau_165970-166164_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
         "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
+
+        # This is beyond EPS
 #        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
-        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
-        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
+#        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
+#        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
 
 
         # MC Signal (WH)
@@ -66,12 +69,12 @@ multicrab.extendDatasets(pattupleVersion,
         "TTToHplusBHminusB_M160_Summer11",
 
 	# MC Signal (heavy H+ from process pp->tbH+)
-	"HplusTB_M180_Summer11",
-	"HplusTB_M190_Summer11",
-	"HplusTB_M200_Summer11",
-	"HplusTB_M220_Summer11",
-	"HplusTB_M250_Summer11",
-	"HplusTB_M300_Summer11",
+#        "HplusTB_M180_Summer11",
+#        "HplusTB_M190_Summer11",
+#        "HplusTB_M200_Summer11",
+#        "HplusTB_M220_Summer11",
+#        "HplusTB_M250_Summer11",
+#        "HplusTB_M300_Summer11",
 
         # MC Background
         "QCD_Pt30to50_TuneZ2_Summer11",
