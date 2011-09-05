@@ -24,6 +24,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SelectedEventsAnalyzer.h"
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
 
@@ -156,6 +157,8 @@ namespace HPlus {
     //
     VertexWeight fVertexWeight;
     // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+
+    SignalAnalysisTree fTree;
     
     // Factorization table
     FactorizationTable fFactorizationTable;
