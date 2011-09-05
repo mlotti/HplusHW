@@ -76,7 +76,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v18-68faa0f802ec7fdcb65798edde8320e0/USER",
                 "luminosity": 138.377000,
-                "number_of_jobs": 4,
+                "number_of_jobs": 3,
             },
         }
     },
@@ -247,7 +247,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_173236_pattuple_v18-6c282a9b564868ab3377c4686ed3334d/USER",
                 "luminosity": 253.263000,
-                "number_of_jobs": 2,
+                "number_of_jobs": 1,
             },
         }
     },
