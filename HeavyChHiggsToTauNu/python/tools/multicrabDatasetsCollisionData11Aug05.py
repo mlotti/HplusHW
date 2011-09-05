@@ -46,7 +46,7 @@ datasets = {
     # Single Mu
     "SingleMu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
-        "trigger": "HLT_Mu40_v3",
+        "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),
         "data": {
             "AOD": {

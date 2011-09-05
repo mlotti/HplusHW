@@ -72,10 +72,10 @@ datasetsData2011 = [
     "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
     "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
     "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
-    "SingleMu_167078-167784_Prompt", # HLT_Mu40_v1
-
-    "SingleMu_161119-161119_May10_Wed", # HLT_Mu20_v1
-    "SingleMu_167786-167913_Prompt_Wed", # HLT_Mu40_v1
+    "SingleMu_167078-167913_Prompt", # HLT_Mu40_v3
+    "SingleMu_170722-172619_Aug05",  # HLT_Mu40_v5
+    "SingleMu_172620-173198_Prompt", # HLT_Mu40_v5
+    "SingleMu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
 ]
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Summer11",
@@ -119,7 +119,7 @@ tauname = "_tauembedding_%s_v11_8" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
-reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
+reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
 skimNjobs = {
     "WJets_TuneZ2_Summer11": 490,
