@@ -86,7 +86,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_163270_pattuple_v18-62e2e156bbf332fdc6c67ab8a6d7a4f0/USER",
                 "luminosity": 167.786000,
-                "number_of_jobs": 6
+                "number_of_jobs": 3
             },
         }
     },
