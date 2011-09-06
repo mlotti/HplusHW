@@ -76,7 +76,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v18-68faa0f802ec7fdcb65798edde8320e0/USER",
                 "luminosity": 138.377000,
-                "number_of_jobs": 3,
+                "number_of_jobs": 2,
             },
         }
     },
@@ -164,7 +164,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v18-76121191f925a13de2aa415b27ca9123/USER",
                 "luminosity": 445.101000,
-                "number_of_jobs": 3,
+                "number_of_jobs": 2,
             },
         }
     },
@@ -209,7 +209,7 @@ datasets = {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v18-15a242972125149d3b1ef8cac53549e8/USER",
                 "luminosity": 244.913000,
-                "number_of_jobs": 2,
+                "number_of_jobs": 1,
             },
         }
     },
