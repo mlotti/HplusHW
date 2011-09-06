@@ -95,9 +95,12 @@ _physicalToLogical = {
     "TToBLNu_s-channel_TuneZ2_Spring11": "TToBLNu_s-channel",
     "TToBLNu_t-channel_TuneZ2_Spring11": "TToBLNu_t-channel",
     "TToBLNu_tW-channel_TuneZ2_Spring11": "TToBLNu_tW-channel",
-    "TToBLNu_s-channel_TuneZ2_Summer11": "TToBLNu_s-channel",
-    "TToBLNu_t-channel_TuneZ2_Summer11": "TToBLNu_t-channel",
-    "TToBLNu_tW-channel_TuneZ2_Summer11": "TToBLNu_tW-channel",
+    "T_t-channel_TuneZ2_Summer11":     "T_t-channel",
+    "Tbar_t-channel_TuneZ2_Summer11":  "Tbar_t-channel",
+    "T_tW-channel_TuneZ2_Summer11":    "T_tW-channel",
+    "Tbar_tW-channel_TuneZ2_Summer11": "Tbar_tW-channel",
+    "T_s-channel_TuneZ2_Summer11":     "T_s-channel",
+    "Tbar_s-channel_TuneZ2_Summer11":  "Tbar_s-channel",
 
     "QCD_Pt30to50_TuneZ2_Winter10":   "QCD_Pt30to50",
     "QCD_Pt50to80_TuneZ2_Winter10":   "QCD_Pt50to80",
@@ -145,6 +148,12 @@ _datasetMerge = {
     "TToBLNu_s-channel": "SingleTop",
     "TToBLNu_t-channel": "SingleTop",
     "TToBLNu_tW-channel": "SingleTop",
+    "T_t-channel":     "SingleTop",
+    "Tbar_t-channel":  "SingleTop",
+    "T_tW-channel":    "SingleTop",
+    "Tbar_tW-channel": "SingleTop",
+    "T_s-channel":     "SingleTop",
+    "Tbar_s-channel":  "SingleTop",
 
     "DYJetsToLL_M10to50": "DYJetsToLL",
     "DYJetsToLL_M50": "DYJetsToLL",
@@ -239,6 +248,12 @@ _legendLabels = {
     "TToBLNu_s-channel":     "Single t (s channel)",
     "TToBLNu_t-channel":     "Single t (t channel)",
     "TToBLNu_tW-channel":    "Single t (tW channel)",
+    "T_t-channel":           "Single t (t channel)",
+    "Tbar_t-channel":        "Single #bar{t} (t channel)",
+    "T_tW-channel":          "Single t (tW channel)",
+    "Tbar_tW-channel":       "Single #bar{t} (tW channel)",
+    "T_s-channel":           "Single t (s channel)",
+    "Tbar_s-channel":        "Single #bar{t} (s channel)",
 }
 
 ## Map the logical dataset names to plot styles
