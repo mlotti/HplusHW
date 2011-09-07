@@ -62,6 +62,7 @@ _physicalToLogical = {
     "TTToHplusBHminusB_M155_Spring11": "TTToHplusBHminusB_M155",
     "TTToHplusBHminusB_M160_Spring11": "TTToHplusBHminusB_M160",
     "TTToHplusBHminusB_M80_Summer11": "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M90_Summer11": "TTToHplusBHminusB_M90",
     "TTToHplusBHminusB_M100_Summer11": "TTToHplusBHminusB_M100",
     "TTToHplusBHminusB_M120_Summer11": "TTToHplusBHminusB_M120",
     "TTToHplusBHminusB_M140_Summer11": "TTToHplusBHminusB_M140",
@@ -175,6 +176,7 @@ _datasetOrder = [
     "TTToHplusBWB_M155",
     "TTToHplusBWB_M160",
     "TTToHplusBHminusB_M80",
+    "TTToHplusBHminusB_M90",
     "TTToHplusBHminusB_M100",
     "TTToHplusBHminusB_M120",
     "TTToHplusBHminusB_M140",
@@ -182,6 +184,7 @@ _datasetOrder = [
     "TTToHplusBHminusB_M155",
     "TTToHplusBHminusB_M160",
     "TTToHplus_M80",
+    "TTToHplus_M90",
     "TTToHplus_M100",
     "TTToHplus_M120",
     "TTToHplus_M140",
@@ -213,6 +216,7 @@ _legendLabels = {
     "TTToHplusBWB_M160": "H^{+}W^{-} m_{H^{#pm}}=160",
 
     "TTToHplusBHminusB_M80":  "H^{+}H^{-} m_{H^{#pm}}=80",
+    "TTToHplusBHminusB_M90":  "H^{+}H^{-} m_{H^{#pm}}=90",
     "TTToHplusBHminusB_M100": "H^{+}H^{-} m_{H^{#pm}}=100",
     "TTToHplusBHminusB_M120": "H^{+}H^{-} m_{H^{#pm}}=120",
     "TTToHplusBHminusB_M140": "H^{+}H^{-} m_{H^{#pm}}=140",
@@ -221,6 +225,7 @@ _legendLabels = {
     "TTToHplusBHminusB_M160": "H^{+}H^{-} m_{H^{#pm}}=160",
 
     "TTToHplus_M80":  "H^{#pm} m_{H^{#pm}}=80",
+    "TTToHplus_M90":  "H^{#pm} m_{H^{#pm}}=90",
     "TTToHplus_M100": "H^{#pm} m_{H^{#pm}}=100",
     "TTToHplus_M120": "H^{#pm} m_{H^{#pm}}=120",
     "TTToHplus_M140": "H^{#pm} m_{H^{#pm}}=140",
@@ -270,6 +275,7 @@ _plotStyles = {
     "TTToHplusBWB_M160":          styles.signal160Style,
 
     "TTToHplusBHminusB_M80":       styles.signalHH80Style,
+    "TTToHplusBHminusB_M90":       styles.signalHH90Style,
     "TTToHplusBHminusB_M100":      styles.signalHH100Style,
     "TTToHplusBHminusB_M120":      styles.signalHH120Style,
     "TTToHplusBHminusB_M140":      styles.signalHH140Style,
