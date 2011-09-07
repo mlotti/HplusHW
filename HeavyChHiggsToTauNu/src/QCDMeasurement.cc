@@ -270,7 +270,15 @@ namespace HPlus {
     ///// This position is after the Big Box
     // get the MET, but cut on it later
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    fTree.fill(iEvent, mySelectedTau, jetData.getSelectedJets(), metData.getSelectedMET());
+    // It can happen (and happens) that mySelectedTau has more than 1
+    // tau candidate, here we explicitly select only the first one
+    // (with the hope that it is the correct one), because
+    // SignalAnalysisTree accepts only one tau in the input container.
+    // FIXME: how is jet selection affected by this? Sometimes there
+    // is effectively a requirement of 5 jets?
+    edm::PtrVector<pat::Tau> mySelectedTauFirst;
+    mySelectedTauFirst.push_back(mySelectedTau[0]);
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET());
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {
