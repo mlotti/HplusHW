@@ -2,7 +2,10 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
+
+cfg = "signalAnalysis_cfg.py"
+#cfg = "QCDMeasurement_cfg.py"
+multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
 pattupleVersion = "pattuple_v18"
@@ -42,7 +45,7 @@ multicrab.extendDatasets(pattupleVersion,
         "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
 
-        # This is beyond EPS
+        # These are beyond EPS
 #        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
 #        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
 #        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
@@ -97,6 +100,12 @@ multicrab.extendDatasets(pattupleVersion,
         "ZZ_TuneZ2_Summer11",
         ])
 
+
+output = ["histograms.root"]
+if "signalAnalysis" in cfg:
+    output.append("pickEvents.txt")
+multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
+
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
 # CMS jobs typically go to korundi).
@@ -115,11 +124,12 @@ if runPatOnTheFly:
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
+prefix = "multicrab"
+if "QCD" in cfg:
+    prefix += "_QCD"
+
 # Generate configuration only
-#multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(prefix=prefix, configOnly=True)
 
 # Genenerate configuration and create the crab tasks
-multicrab.createTasks()
-
-# Create a custom multicrab task directory (SignalAnalysis_xxxxxx_yyyyyy)
-#multicrab.createTasks(prefix="SignalAnalysis")
+multicrab.createTasks(prefix=prefix)
