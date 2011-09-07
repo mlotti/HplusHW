@@ -68,7 +68,8 @@ namespace HPlus {
     Count fCleanCutCount;
     Count fPtCutCount;
     Count fEtaCutCount;
-
+    Count fEMfraction08CutCount;
+    Count fEMfraction07CutCount;
     Count fAllSubCount;
     Count fCleanCutSubCount;
     Count fPtCutSubCount;
@@ -90,9 +91,8 @@ namespace HPlus {
     TH1 *hPhi;
     TH1 *hNumberOfSelectedJets;
     TH1 *hDeltaPhiJetMet;
-    TH1 *hchargedEmEnergyFraction;
-    TH1 *hneutralHadronEnergyFraction;
-    TH1 *hchargedHadronEnergyFraction;
+    TH1 *hjetEMFraction;
+    TH1 *hjetMaxEMFraction;
 
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;

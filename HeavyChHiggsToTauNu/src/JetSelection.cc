@@ -36,6 +36,8 @@ namespace HPlus {
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
     fPtCutCount(eventCounter.addSubCounter("Jet main","Jet pt cut")),
     fEtaCutCount(eventCounter.addSubCounter("Jet main","Jet eta cut")),
+    fEMfraction08CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.8")),
+    fEMfraction07CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.7")),
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
@@ -56,10 +58,9 @@ namespace HPlus {
     hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 400, -5., 5.);
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2); 
-    hchargedEmEnergyFraction = makeTH<TH1F>(myDir, "chargedEmEnergyFraction", "chargedEmEnergyFraction", 400, 0., 1.0);
-    hneutralHadronEnergyFraction = makeTH<TH1F>(myDir, "neutralHadronEnergyFraction", "neutralHadronEnergyFraction", 400, 0., 1.0); 
-    hchargedHadronEnergyFraction = makeTH<TH1F>(myDir, "chargedHadronEnergyFraction", "chargedHadronEnergyFraction", 400, 0., 1.0);  
+    hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
+    hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
  }
 
   JetSelection::~JetSelection() {}
@@ -82,6 +83,7 @@ namespace HPlus {
     size_t cleanPassed = 0;
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
+    double maxEMfraction = 0;
     
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
@@ -126,18 +128,18 @@ namespace HPlus {
       if(!(iJet->numberOfDaughters() > 1)) continue;
       increment(fnumberOfDaughtersCutSubCount);
 
-      hchargedEmEnergyFraction->Fill(iJet->chargedEmEnergyFraction(), fEventWeight.getWeight());
+    
       if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
       increment(fchargedEmEnergyFractionCutSubCount);
 
-      hneutralHadronEnergyFraction->Fill(iJet->neutralHadronEnergyFraction(), fEventWeight.getWeight());
+   
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
       if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
 
-      hchargedHadronEnergyFraction->Fill(iJet->chargedHadronEnergyFraction(), fEventWeight.getWeight());
+    
       if(fabs(iJet->eta()) < 2.4) {
 	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
 	  increment(fchargedHadronEnergyFractionCutSubCount);
@@ -151,7 +153,9 @@ namespace HPlus {
                        iJet->neutralHadronEnergy() +
                        iJet->chargedEmEnergy() +
                        iJet->neutralEmEnergy());
-     
+      hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
+      if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
+    
       // plot deltaPhi(jet,met)
       double deltaPhi = -999;
 
@@ -177,6 +181,8 @@ namespace HPlus {
       fSelectedJets.push_back(tmpSelectedJets[i]);
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
+    hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
+
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
     passEvent = true;
@@ -184,10 +190,16 @@ namespace HPlus {
     increment(fCleanCutCount);
 
     if(ptCutPassed < fMin) passEvent = false;
-    increment(fPtCutCount);
+    if(ptCutPassed > fMin)    increment(fPtCutCount);
 
     if(etaCutPassed < fMin) passEvent = false;
-    increment(fEtaCutCount);
+    if(etaCutPassed > fMin)    increment(fEtaCutCount);
+
+    if(maxEMfraction > 0.8 ) passEvent = false;
+    if(maxEMfraction < 0.8 )increment(fEMfraction08CutCount);
+
+    if(maxEMfraction > 0.7 ) passEvent = false;
+    if(maxEMfraction < 0.7 )increment(fEMfraction07CutCount);
 
     return Data(this, passEvent);
   }

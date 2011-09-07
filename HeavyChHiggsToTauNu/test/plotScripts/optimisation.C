@@ -324,18 +324,18 @@ Result createResult(const char *expr, const char *cut, bool lessThan) {
 //  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
 //  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
 
-//  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 0.35));
-//  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 0.32));
-//  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
-//  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
-//  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
+  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 0.35));
+  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 0.32));
+  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
+  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
+  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
 // normalisation at tanbeta=20
-  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan,7.50));
-  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan,4.707));
-  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan,2.1747));
-  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan,1.163));
-  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan,0.751));
-  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan,0.417));
+//  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan,7.50));
+//  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan,4.707));
+//  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan,2.1747));
+//  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan,1.163));
+//  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan,0.751));
+//  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan,0.417));
 
 
 
@@ -356,7 +356,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 80");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -380,7 +380,7 @@ void optimisation() {
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
-  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtaCut && mtCut), false);
+  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut && mtCut), false);
   metRes.setXLabel("met");
 
   tauPt += ">>dist(100,0.,100.)";
@@ -403,7 +403,7 @@ void optimisation() {
   std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
   c->SaveAs(".png");
 */
-//  rtauRes.Significance();
+  rtauRes.Significance();
   //  metRes.Significance();
   //  tauPtRes.Significance();
   mtRes.Significance();
