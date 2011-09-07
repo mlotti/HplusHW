@@ -953,7 +953,7 @@ class DatasetMerged:
         """Set cross section of MC dataset (in pb)."""
         if self.isData():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
-        self.info["crossSection"] = value
+        raise Exception("Setting cross section for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     def getCrossSection(self):
         """Get cross section of MC dataset (in pb)."""
@@ -965,7 +965,7 @@ class DatasetMerged:
         """Set the integrated luminosity of data dataset (in pb^-1)."""
         if self.isMC():
             raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
-        self.info["luminosity"] = value
+        raise Exception("Setting luminosity for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     def getLuminosity(self):
         """Get the integrated luminosity of data dataset (in pb^-1)."""
