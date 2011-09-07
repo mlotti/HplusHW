@@ -357,7 +357,7 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS"):
     # From May10 JSON
     if dataVersion.isS4():
         pset.mcDist = Summer11_PU_S4
@@ -365,10 +365,18 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight):
     else:
         pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
         pset.summer11S4Mode = False
-    # from /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_to_172802_LP_LumiScale.root
-    pset.dataDist = cms.vdouble(13577061.34960927, 36988195.79256942, 87784462.15955786, 148782145.82866752, 200194824.54279479, 227349906.22656760, 226472477.30015501, 203175245.93433914, 167317368.02201021, 128301353.72262345, 92616728.24257115, 63470211.62257222, 41558646.73644819, 26124508.46311678, 15821365.84873490, 9253707.52579752, 5235996.37046473, 2869480.81515694, 1524386.71200273, 785535.62462179, 392893.09321437, 190841.97559003, 90079.33573278, 41342.87414307, 32218.24625225)
     pset.enabled = True
     pset.useSimulatedPileup = True
+
+    if era == "EPS":
+        # from /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_EPS_8_jul.root
+        pset.dataDist = cms.vdouble(14541678.75140152, 34774289.38286586, 78924690.82740858, 126467305.04758325, 159328519.15029529, 167603454.44535571, 152683760.94960380, 123793506.45609140, 90946208.64651683, 61397298.32203319, 38505025.66458631, 22628034.29716743, 12550315.25868838, 6610507.05491146, 3324027.56535537, 1602862.62059887, 743920.15564290, 333476.86203421, 144860.60591722, 61112.68817281, 25110.18359585, 10065.11629597, 3943.97900547, 1513.53535599, 896.16051321)
+    elif era == "all":
+        # from /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_to_172802_LP_LumiScale.root
+        pset.dataDist = cms.vdouble(13577061.34960927, 36988195.79256942, 87784462.15955786, 148782145.82866752, 200194824.54279479, 227349906.22656760, 226472477.30015501, 203175245.93433914, 167317368.02201021, 128301353.72262345, 92616728.24257115, 63470211.62257222, 41558646.73644819, 26124508.46311678, 15821365.84873490, 9253707.52579752, 5235996.37046473, 2869480.81515694, 1524386.71200273, 785535.62462179, 392893.09321437, 190841.97559003, 90079.33573278, 41342.87414307, 32218.24625225)
+    else:
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS' and 'all'" % era)
+
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
