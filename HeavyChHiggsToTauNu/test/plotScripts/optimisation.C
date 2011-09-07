@@ -11,7 +11,8 @@
 #include<cmath>
 #include<limits>
 
-const double luminosity = 1080; // in pb^-1
+const double luminosity = 1145; // in pb^-1
+const double qcdEvents = 7.5; // from QCD measurement, must correspond to the luminosity above!
 
 double signif(double nSignal,double nBackgr){
   double significance = 0;
@@ -102,8 +103,69 @@ struct DistPass {
   TH1 *pass;
 };
 
-DistPass createDistPass(const char *file, const char *expr, const char *cut, bool lessThan,
-                        double crossSection=std::numeric_limits<double>::quiet_NaN()) {
+DistPass createDistPassHelper(const char *file, TTree *tree, const char *expr, const char *cut, bool lessThan, double scale) {
+  Long64_t ret = tree->Draw(expr, cut, "goff");
+  if(ret < 0) {
+    std::cout << "Error in processing tree from file " << file << std::endl;
+    return DistPass();
+  }
+  if(ret == 0) {
+    std::cout << "No entries from file " << file << std::endl;
+    return DistPass();
+  }
+
+  TH1 *dist = tree->GetHistogram();
+  if(!dist) {
+    std::cout << "No histogram from tree?" << std::endl;
+    return DistPass();
+  }
+  dist = dynamic_cast<TH1 *>(dist->Clone(TString(dist->GetName())+"_cloned"));
+  if(!dist) {
+    std::cout << "No histogram from clone?" << std::endl;
+    return DistPass();
+  }
+
+  // Normalize the distribution
+  dist->Scale(scale);
+
+  // Construct the "number of passed events as a function of cut value" histogram
+  TH1 *pass = dist2pass(dist, lessThan);
+  if(!pass) {
+    std::cout << "No histogram from dist2pass?" << std::endl;
+  }
+
+  TString name(file);
+  name.Remove(name.First('/'),name.Length()-name.First('/'));
+  pass->SetName(name);
+
+  return DistPass(dist, pass);
+}
+
+
+DistPass createDistPassQCDdata(const char *file, const char *expr, const char *cut, bool lessThan) {
+  // Open file
+  TFile *f = TFile::Open(file);
+  if(!f) {
+    std::cout << "Unable to open file " << file << std::endl;
+    return DistPass();
+  }
+
+  // Get the tree
+  TTree *tree = dynamic_cast<TTree *>(f->Get("QCDMeasurement/tree"));
+  if(!tree) {
+    std::cout << "Unable to find tree from " << file << std::endl;
+    return DistPass();
+  }
+
+  // Get the number of all non-normalized events which pass the MET cut
+  Long64_t nentries = tree->GetEntries("met_p4.Et() > 70");
+  double scale = qcdEvents/nentries;
+
+  return createDistPassHelper(file, tree, expr, cut, lessThan, scale);
+}
+
+DistPass createDistPassMC(const char *file, const char *expr, const char *cut, bool lessThan,
+                          double crossSection=std::numeric_limits<double>::quiet_NaN()) {
   // Open file
   TFile *f = TFile::Open(file);
   if(!f) {
@@ -139,48 +201,14 @@ DistPass createDistPass(const char *file, const char *expr, const char *cut, boo
   // The first bin in counter holds the number of all events.
   double mcWeight = crossSection / counter->GetBinContent(1) * luminosity;
 
-  // Get the tree, and draw the distribution
+  // Get the tree
   TTree *tree = dynamic_cast<TTree *>(f->Get("signalAnalysis/tree"));
   if(!tree) {
     std::cout << "Unable to find tree from " << file << std::endl;
     return DistPass();
   }
-    
-  Long64_t ret = tree->Draw(expr, cut, "goff");
-  if(ret < 0) {
-    std::cout << "Error in processing tree from file " << file << std::endl;
-    return DistPass();
-  }
-  if(ret == 0) {
-    std::cout << "No entries from file " << file << std::endl;
-    return DistPass();
-  }
 
-  TH1 *dist = tree->GetHistogram();
-  if(!dist) {
-    std::cout << "No histogram from tree?" << std::endl;
-    return DistPass();
-  }
-  dist = dynamic_cast<TH1 *>(dist->Clone(TString(dist->GetName())+"_cloned"));
-  if(!dist) {
-    std::cout << "No histogram from clone?" << std::endl;
-    return DistPass();
-  }
-
-  // Normalize the distribution
-  dist->Scale(mcWeight);
-
-  // Construct the "number of passed events as a function of cut value" histogram
-  TH1 *pass = dist2pass(dist, lessThan);
-  if(!pass) {
-    std::cout << "No histogram from dist2pass?" << std::endl;
-  }
-
-  TString name(file);
-  name.Remove(name.First('/'),name.Length()-name.First('/'));
-  pass->SetName(name);
-
-  return DistPass(dist, pass);
+  return createDistPassHelper(file, tree, expr, cut, lessThan, mcWeight);
 }
 
 class Result {
@@ -232,8 +260,8 @@ void Result::Significance(){
 
     TLegend* leg = new TLegend(0.135,0.15,0.5,0.35);
 
-    TH1 *firstSB, *firstSignif;
-    double xMaxSB,xMaxSignif;
+    TH1 *firstSB=0, *firstSignif=0;
+    double xMaxSB=0,xMaxSignif=0;
     int color = 1;
     for(size_t i = 0; i < signals.size(); ++i){
 
@@ -312,40 +340,54 @@ DistPass Result::SumBackgrounds(){
     return DistPass(dist,pass);
 }
 
-Result createResult(const char *expr, const char *cut, bool lessThan) {
+Result createResult(const char *expr, const char *cut, const char *cutQCD, bool lessThan) {
   Result res;
 
   // FIXME: change cross section to correct one!
-//  res.HplusTB_M190 = createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159);
-//  res.QCD_Pt30to50 = createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
-//  res.TTJets = createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
+//  res.HplusTB_M190 = createDistPassMC("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 3.14159);
+//  res.QCD_Pt30to50 = createDistPassMC("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan);
+//  res.TTJets = createDistPassMC("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan);
 
-//  res.addSignal(createDistPass("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 0.35));
-//  res.addSignal(createDistPass("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 0.32));
-//  res.addSignal(createDistPass("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
-//  res.addSignal(createDistPass("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
-//  res.addSignal(createDistPass("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
+//  res.addSignal(createDistPassMC("HplusTB_M190_Summer11/res/histograms-HplusTB_M190_Summer11.root", expr, cut, lessThan, 0.35));
+//  res.addSignal(createDistPassMC("HplusTB_M200_Summer11/res/histograms-HplusTB_M200_Summer11.root", expr, cut, lessThan, 0.32));
+//  res.addSignal(createDistPassMC("HplusTB_M220_Summer11/res/histograms-HplusTB_M220_Summer11.root", expr, cut, lessThan, 0.267));
+//  res.addSignal(createDistPassMC("HplusTB_M250_Summer11/res/histograms-HplusTB_M250_Summer11.root", expr, cut, lessThan, 0.2067));
+//  res.addSignal(createDistPassMC("HplusTB_M300_Summer11/res/histograms-HplusTB_M300_Summer11.root", expr, cut, lessThan, 0.1368));
 // normalisation at tanbeta=20
-  res.addSignal(createDistPass("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan,7.50));
-  res.addSignal(createDistPass("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan,4.707));
-  res.addSignal(createDistPass("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan,2.1747));
-  res.addSignal(createDistPass("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan,1.163));
-  res.addSignal(createDistPass("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan,0.751));
-  res.addSignal(createDistPass("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan,0.417));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M100_Summer11/res/histograms-TTToHplusBWB_M100_Summer11.root", expr, cut, lessThan,7.50));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M120_Summer11/res/histograms-TTToHplusBWB_M120_Summer11.root", expr, cut, lessThan,4.707));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M140_Summer11/res/histograms-TTToHplusBWB_M140_Summer11.root", expr, cut, lessThan,2.1747));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M150_Summer11/res/histograms-TTToHplusBWB_M150_Summer11.root", expr, cut, lessThan,1.163));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M155_Summer11/res/histograms-TTToHplusBWB_M155_Summer11.root", expr, cut, lessThan,0.751));
+  res.addSignal(createDistPassMC("TTToHplusBWB_M160_Summer11/res/histograms-TTToHplusBWB_M160_Summer11.root", expr, cut, lessThan,0.417));
 
 
 
-  res.addBackgr(createDistPass("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt80to120_TuneZ2_Summer11/res/histograms-QCD_Pt80to120_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt120to170_TuneZ2_Summer11/res/histograms-QCD_Pt120to170_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt170to300_TuneZ2_Summer11/res/histograms-QCD_Pt170to300_TuneZ2_Summer11.root", expr, cut, lessThan));
-  res.addBackgr(createDistPass("QCD_Pt300to470_TuneZ2_Summer11/res/histograms-QCD_Pt300to470_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPassMC("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
+  res.addBackgr(createDistPassMC("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
+
+  bool qcdFromData = true;
+  if(qcdFromData) {
+    res.addBackgr(createDistPassQCDdata("histograms-QCD-Tau_160431-167913.root", expr, cutQCD, lessThan));
+  }
+  else {
+    res.addBackgr(createDistPassMC("QCD_Pt30to50_TuneZ2_Summer11/res/histograms-QCD_Pt30to50_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt50to80_TuneZ2_Summer11/res/histograms-QCD_Pt50to80_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt80to120_TuneZ2_Summer11/res/histograms-QCD_Pt80to120_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt120to170_TuneZ2_Summer11/res/histograms-QCD_Pt120to170_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt170to300_TuneZ2_Summer11/res/histograms-QCD_Pt170to300_TuneZ2_Summer11.root", expr, cut, lessThan));
+    res.addBackgr(createDistPassMC("QCD_Pt300to470_TuneZ2_Summer11/res/histograms-QCD_Pt300to470_TuneZ2_Summer11.root", expr, cut, lessThan));
+  }
 
   return res;
+}
+
+TString mcWeight(TCut cut) {
+  TString expr(cut);
+  TString weight = "weightPrescale*weightTrigger*weightPileup";
+  
+  return TString( "("+weight+")*("+expr+")");
 }
 
 void optimisation() {
@@ -368,23 +410,27 @@ void optimisation() {
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
   //  tauPtRes.setXLabel("tau pt");
   //  tauPtRes.Significance();
+  TCut cut;
 
   rtau += ">>dist(110,0.,1.1)";
-  Result rtauRes = createResult(rtau, TString(tauPtCut && metCut && btagCut), false);
+  cut = tauPtCut && metCut;
+  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut), cut, false);
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
-  Result metRes = createResult(met, TString(tauPtCut && btagCut && rtauCut), false);
+  cut = tauPtCut && rtauCut;
+  Result metRes = createResult(met, mcWeight(cut && btagCut), cut, false);
   metRes.setXLabel("met");
 
   tauPt += ">>dist(100,0.,100.)";
-  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
+  cut = metCut && rtauCut;
+  Result tauPtRes = createResult(tauPt, mcWeight(cut && btagCut), cut, false);
   tauPtRes.setXLabel("tauPt");
 
   mt += ">>dist(50,0.,200.)";
-  Result mtRes = createResult(mt, TString(tauPtCut && metCut && btagCut && rtauCut), false);
+  cut = tauPtCut && metCut && rtauCut;
+  Result mtRes = createResult(mt, mcWeight(cut && btagCut), cut, false);
   mtRes.setXLabel("mt");
-
 
 
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
