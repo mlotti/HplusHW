@@ -119,6 +119,8 @@ namespace HPlus {
     Count fNJetsCounter;
     Count fMETCounter;
     Count fBTaggingCounter;
+    Count fdeltaPhiTauMET10Counter;
+    Count fdeltaPhiTauMET160Counter;
     Count fFakeMETVetoCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
@@ -163,6 +165,7 @@ namespace HPlus {
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
     TH1 *hTransverseMassBeforeFakeMet;
+    TH1 *hTransverseMassDeltaPhiUpperCut;
     TH1 *hTransverseMassWithRtauFakeMet;
     TH1 *hTransverseMassWithRtau;
     TH1 *hDeltaPhi;

@@ -258,8 +258,8 @@ Result Result::clone() const {
 void Result::Significance(){
     TCanvas* canvas0 = new TCanvas("Variable_"+xlabel,"",500,500);
     TCanvas* canvas1 = new TCanvas("Integral_"+xlabel,"",500,500);
-    TCanvas* canvas2 = new TCanvas("signif_"+xlabel,"",500,500);
-    TCanvas* canvas3 = new TCanvas("SoverB_"+xlabel,"",500,500);
+    TCanvas* canvas2 = new TCanvas("SoverB_"+xlabel,"",500,500);
+    TCanvas* canvas3 = new TCanvas("Signif_"+xlabel,"",500,500);
 
     DistPass background = SumBackgrounds();
 
@@ -299,7 +299,7 @@ void Result::Significance(){
 
 	canvas2->cd();
         TH1* S2B = (TH1*)signals[i].pass->Clone();
-	S2B->SetName("S/B");
+	S2B->SetName("SoverB");
 	S2B->GetXaxis()->SetTitle(xlabel);
 	S2B->GetYaxis()->SetTitle("Signal / Background");
         S2B->Divide(background.pass);
@@ -342,6 +342,10 @@ void Result::Significance(){
     canvas1->SaveAs(".png");
     canvas2->SaveAs(".png");
     canvas3->SaveAs(".png");
+    canvas0->SaveAs(".C");
+    canvas1->SaveAs(".C");
+    canvas2->SaveAs(".C");
+    canvas3->SaveAs(".C");
 }
 
 TH1* Result::Significance(TH1* hs,TH1* hb){
@@ -439,7 +443,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 80");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -453,7 +457,7 @@ void optimisation() {
 
 
   // Optional cuts
-  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
+  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.65");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
 
   TString deltaPhi("acos((tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/tau_p4.Pt()/met_p4.Et())*57.2958"); TCut deltaPhiCut(deltaPhi+" < 160");
@@ -493,16 +497,10 @@ void optimisation() {
 
   Result btagExactlyOneRes = subtractResults(btagRes, btag2ndMaxRes);
   btagExactlyOneRes.setXLabel("btag exactly one");
-
   deltaPhi += ">>dist(90.,0.,180.)";
   cut = tauPtCut && metCut && rtauCut && mtCut;
   Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut), cut, false);
   deltaPhiRes.setXLabel("deltaPhi");
-
-  //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
-  //  tauPtRes.setXLabel("tauPt");
-
-  //  rtauRes.Significance();
 
 /*
   TCanvas *c = new TCanvas("rtau");
