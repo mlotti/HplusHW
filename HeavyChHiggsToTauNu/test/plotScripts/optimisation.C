@@ -13,6 +13,7 @@
 
 const double luminosity = 1145; // in pb^-1
 const double qcdEvents = 7.5; // from QCD measurement, must correspond to the luminosity above!
+const bool qcdFromData = false;
 
 double signif(double nSignal,double nBackgr){
   double significance = 0;
@@ -99,9 +100,19 @@ void test_dist2pass() {
 struct DistPass {
   DistPass(): dist(0), pass(0) {}
   DistPass(TH1 *d, TH1 *p): dist(d), pass(p) {}
+  DistPass clone() const;
   TH1 *dist;
   TH1 *pass;
 };
+
+DistPass DistPass::clone() const {
+  TH1 *d = 0;
+  TH1 *p = 0;
+  if(dist) d = dynamic_cast<TH1 *>(dist->Clone(dist->GetName()+TString("_cloned")));
+  if(pass) p = dynamic_cast<TH1 *>(pass->Clone(pass->GetName()+TString("_cloned")));
+
+  return DistPass(d, p);
+}
 
 DistPass createDistPassHelper(const char *file, TTree *tree, const char *expr, const char *cut, bool lessThan, double scale) {
   Long64_t ret = tree->Draw(expr, cut, "goff");
@@ -111,7 +122,7 @@ DistPass createDistPassHelper(const char *file, TTree *tree, const char *expr, c
   }
   if(ret == 0) {
     std::cout << "No entries from file " << file << std::endl;
-    return DistPass();
+    //return DistPass();
   }
 
   TH1 *dist = tree->GetHistogram();
@@ -213,6 +224,8 @@ DistPass createDistPassMC(const char *file, const char *expr, const char *cut, b
 
 class Result {
   public:
+  Result clone() const;
+
     void setXLabel(TString label){xlabel = label;}
     void addSignal(DistPass d){signals.push_back(d);}
     void addBackgr(DistPass d){backgrounds.push_back(d);}
@@ -230,6 +243,17 @@ class Result {
     DistPass SumBackgrounds();
     TString xlabel;
 };
+
+Result Result::clone() const {
+  Result res;
+  for(size_t i=0; i<signals.size(); ++i) {
+    res.signals.push_back(signals[i].clone());
+  }
+  for(size_t i=0; i<backgrounds.size(); ++i) {
+    res.backgrounds.push_back(backgrounds[i].clone());
+  }
+  return res;
+}
 
 void Result::Significance(){
     TCanvas* canvas0 = new TCanvas("Variable_"+xlabel,"",500,500);
@@ -293,6 +317,7 @@ void Result::Significance(){
 	leg->AddEntry(S2B,signals[i].pass->GetName(),"l");
 
 	canvas3->cd();
+	//	canvas3->SetLogy();   
 	TH1* SSignif = Significance(signals[i].pass,background.pass);
 	SSignif->GetXaxis()->SetTitle(xlabel);
 	SSignif->GetYaxis()->SetTitle("Significance");
@@ -304,7 +329,7 @@ void Result::Significance(){
 	}
 	else SSignif->Draw("same");
 	if(SSignif->GetMaximum() > xMaxSignif ) {
-	  firstSignif->GetYaxis()->SetRangeUser(0,1.1*SSignif->GetMaximum());
+	  firstSignif->GetYaxis()->SetRangeUser(0.01,1.1*SSignif->GetMaximum());
 	  xMaxSignif = SSignif->GetMaximum();
 	}
 
@@ -366,7 +391,7 @@ Result createResult(const char *expr, const char *cut, const char *cutQCD, bool 
   res.addBackgr(createDistPassMC("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
   res.addBackgr(createDistPassMC("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
 
-  bool qcdFromData = true;
+  /*
   if(qcdFromData) {
     res.addBackgr(createDistPassQCDdata("histograms-QCD-Tau_160431-167913.root", expr, cutQCD, lessThan));
   }
@@ -379,7 +404,27 @@ Result createResult(const char *expr, const char *cut, const char *cutQCD, bool 
     res.addBackgr(createDistPassMC("QCD_Pt170to300_TuneZ2_Summer11/res/histograms-QCD_Pt170to300_TuneZ2_Summer11.root", expr, cut, lessThan));
     res.addBackgr(createDistPassMC("QCD_Pt300to470_TuneZ2_Summer11/res/histograms-QCD_Pt300to470_TuneZ2_Summer11.root", expr, cut, lessThan));
   }
+  */
 
+  return res;
+}
+
+Result subtractResults(const Result& a, const Result& b) {
+  Result res = a.clone();
+  assert(a.signals.size() == b.signals.size());
+  assert(a.backgrounds.size() == b.backgrounds.size());
+  for(size_t i=0; i<res.signals.size(); ++i) {
+    if(res.signals[i].dist && b.signals[i].dist)
+      res.signals[i].dist->Add(b.signals[i].dist, -1);
+    if(res.signals[i].pass && b.signals[i].pass)
+      res.signals[i].pass->Add(b.signals[i].pass, -1);
+  }
+  for(size_t i=0; i<res.backgrounds.size(); ++i) {
+    if(res.backgrounds[i].dist && b.backgrounds[i].dist)
+      res.backgrounds[i].dist->Add(b.backgrounds[i].dist, -1);
+    if(res.backgrounds[i].pass && b.backgrounds[i].pass)
+      res.backgrounds[i].pass->Add(b.backgrounds[i].pass, -1);
+  }
   return res;
 }
 
@@ -400,21 +445,25 @@ void optimisation() {
 
   // Cuts to be applied on top of preselection
   TString met("met_p4.Et()"); TCut metCut(met+" > 70");
-  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
+  //  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
+
+  TString btagMax("Max$(jets_btag)"); TCut btagCut(btagMax+" > 1.7");
+  TString btagJetNum17("Sum$(jets_btag > 1.7)"); 
+  TString btag2ndMax("MaxIf$(jets_btag, jets_btag<Max$(jets_btag))");
+
 
   // Optional cuts
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
-  TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 100");
+  TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
 
+  TString deltaPhi("acos((tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/tau_p4.Pt()/met_p4.Et())*57.2958"); TCut deltaPhiCut(deltaPhi+" < 160");
+  //  TString deltaPhi("tau_p4.DeltaPhi(met_p4)*57.2958"); TCut deltaPhiCut(deltaPhi+" < 160");
 
-  //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut), false);
-  //  tauPtRes.setXLabel("tau pt");
-  //  tauPtRes.Significance();
   TCut cut;
 
   rtau += ">>dist(110,0.,1.1)";
   cut = tauPtCut && metCut;
-  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut), cut, false);
+  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut && mtCut), cut, false);
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
@@ -432,6 +481,23 @@ void optimisation() {
   Result mtRes = createResult(mt, mcWeight(cut && btagCut), cut, false);
   mtRes.setXLabel("mt");
 
+  btagMax += ">>dist(80,0.,8.)";
+  cut = tauPtCut && metCut && rtauCut;
+  Result btagRes = createResult(btagMax, mcWeight(cut), cut, false);
+  btagRes.setXLabel("btag");
+
+  btag2ndMax += ">>dist(80,0.,8.)";
+  cut = tauPtCut && metCut && rtauCut;
+  Result btag2ndMaxRes = createResult(btag2ndMax, mcWeight(cut), cut, false);
+  btag2ndMaxRes.setXLabel("btag 2nd max");
+
+  Result btagExactlyOneRes = subtractResults(btagRes, btag2ndMaxRes);
+  btagExactlyOneRes.setXLabel("btag exactly one");
+
+  deltaPhi += ">>dist(90.,0.,180.)";
+  cut = tauPtCut && metCut && rtauCut && mtCut;
+  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut), cut, false);
+  deltaPhiRes.setXLabel("deltaPhi");
 
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
   //  tauPtRes.setXLabel("tauPt");
@@ -446,10 +512,15 @@ void optimisation() {
   std::cout << rtauRes.TTJets.pass->GetBinContent(0) << std::endl;
   c->SaveAs(".png");
 */
-  rtauRes.Significance();
-  metRes.Significance();
-  tauPtRes.Significance();
-  mtRes.Significance();
+//  rtauRes.Significance();
+  //  metRes.Significance();
+  //  tauPtRes.Significance();
+  //  mtRes.Significance();
+  btagRes.Significance();
+  btag2ndMaxRes.Significance();
+  btagExactlyOneRes.Significance();
+  //deltaPhiRes.Significance();
+
 }
 
 
