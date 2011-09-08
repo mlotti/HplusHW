@@ -27,8 +27,8 @@ def getOptions(options=None):
                      options.varType.int,
                      "Run PAT on the fly (needed for RECO/AOD samples)")
     options.register("trigger",
-                     "",
-                     options.multiplicity.singleton, options.varType.string,
+                     [],
+                     options.multiplicity.list, options.varType.string,
                      "Trigger to use")
     options.register("tauEmbeddingInput",
                      0,

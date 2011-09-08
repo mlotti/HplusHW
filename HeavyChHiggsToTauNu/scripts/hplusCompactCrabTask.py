@@ -11,7 +11,9 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
 def main(opts, args):
     workdir = os.getcwd()
-    for d in opts.dirs:
+
+    crabdirs = multicrab.getTaskDirectories(opts)
+    for d in crabdirs:
         # Go to task directory (in order to get the paths in the archive correctly easily)
         os.chdir(d)
 
@@ -45,6 +47,7 @@ def main(opts, args):
                 shutil.rmtree(f)
             else:
                 print "Not removing "+f
+        print "Compacted", d
 
         os.chdir(workdir)
 
@@ -53,8 +56,5 @@ if __name__ == "__main__":
     multicrab.addOptions(parser)
 
     (opts, args) = parser.parse_args()
-    if len(opts.dirs) == 0:
-        parser.error("No directories given (-d option)")
-
     sys.exit(main(opts, args))
 

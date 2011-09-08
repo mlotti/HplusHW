@@ -42,8 +42,8 @@ plotStyles = [
 
 def main():
 #    weight = ""
-#    weight = "VertexWeight"
-    weight = "PileupWeight"
+    weight = "VertexWeight"
+#    weight = "PileupWeight"
 
 #    mainAnalysis = "muonSelectionPFPt40Met20NJets3"
     mainAnalysis = "muonSelectionPFPt40Met20NJets3%s" % weight
@@ -52,20 +52,21 @@ def main():
 #        "muonSelectionPFPt40Met20NJets3%sIsoTauLoose" % weight,
 #        "muonSelectionPFPt40Met20NJets3%sIsoTauMedium" % weight,
 #        "muonSelectionPFPt40Met20NJets3%sIsoTauTight" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTight" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTight" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015" % weight,
 #        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc02" % weight,
         "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightIc04" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015Ic04" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc015Ic04" % weight,
 #        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeTightSc02Ic04" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeMedium" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeLoose" % weight,
-        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeVLoose" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeMedium" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeLoose" % weight,
+#        "muonSelectionPFPt40Met20NJets3%sIsoTauLikeVLoose" % weight,
         ]
 
     signals = ["TTJets",
-               "WJets", "SingleTop",
-               "DYJetsToLL", "Diboson"
+               "WJets",
+#               "SingleTop",
+#               "DYJetsToLL", "Diboson"
                ]
     backgrounds = ["QCD_Pt20_MuEnriched",
 #                   "DYJetsToLL", "Diboson"
@@ -77,6 +78,12 @@ def main():
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=mainAnalysis+"countAnalyzer")
     datasets.loadLuminosities()
 #    datasets.remove(["SingleMu_163270-163869_Prompt", "SingleMu_162803-163261_Prompt", "SingleMu_160431-161016_Prompt"])
+
+    datasets41x = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/mkortela/hplus/CMSSW_4_1_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/tauEmbedding/multicrab_muonAnalysis_chargedGamma_110617_002143/multicrab.cfg", counters=mainAnalysis+"countAnalyzer")
+    datasets41x.selectAndReorder(["TToBLNu_s-channel_TuneZ2_Spring11", "TToBLNu_t-channel_TuneZ2_Spring11", "TToBLNu_tW-channel_TuneZ2_Spring11",
+                                  "WW_TuneZ2_Spring11", "WZ_TuneZ2_Spring11", "ZZ_TuneZ2_Spring11"])
+    datasets.extend(datasets41x)
+
     plots.mergeRenameReorderForDataMC(datasets)
 
     style = tdrstyle.TDRStyle()
@@ -86,31 +93,36 @@ def main():
     # QCD fraction for the continuous isolation variables
     prefix = selection+"_"
     isoPassed = []
-#    isoNames = ["sumIsoRel", "pfSumIsoRel"]
-    isoNames = ["sumIsoRelFull", "pfSumIsoRelFull"]
+    isoNames = ["sumIsoRel", "pfSumIsoRel"]
+    #isoNames = ["sumIsoRelFull", "pfSumIsoRelFull"]
     additionalIsoNames = ["tauTightIso", "tauMediumIso", "tauLooseIso", "tauVLooseIso",
                           "tauTightSc015Iso",# "tauTightSc02Iso",
                           "tauTightIc04Iso", "tauTightSc015Ic04Iso",# "tauTightSc02Ic04Iso",
                           "tauTightIc04SumPtIso", "tauTightIc04MaxPtIso",
                           "tauTightIc04ChargedIso", "tauTightIc04GammaIso",
                           ]
-#    for iso in isoNames+additionalIsoNames:
-#        isoPassed.append(muonAnalysis.muonIso(muonAnalysis.Plot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=5))
+    for iso in isoNames+additionalIsoNames:
+        isoPassed.append(muonAnalysis.muonIso(plots.DataMCPlot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=5, opts={"ymin": 1e-1}))
 
-#        for tauIso in tauIsoAnalyses:
-#            tmp = muonAnalysis.Selections(tauIso).selectionJet
-#            muonAnalysis.muonIso(muonAnalysis.Plot(datasets, tmp+"/muon_"+iso), tmp+"_", iso)
+        for tauIso in tauIsoAnalyses:
+            tmp = muonAnalysis.Selections(tauIso).selectionJet
+            muonAnalysis.muonIso(plots.DataMCPlot(datasets, tmp+"/muon_"+iso), tmp+"_", iso)
 
     for iso in additionalIsoNames:
         opts = {"ymin": 1e-1}
         rebin = 1
-        if iso in ["tauTightIc04Iso", "tauTightIc04ChargedIso", "tauTightIc04GammaIso"]:
+        ratio = False
+        if iso in ["tauTightIc04Iso", "tauTightIso"]:
+            opts["xmax"] = 50
+            opts["ymax"] = 5e4
+            ratio = True
+        elif iso in ["tauTightIc04ChargedIso", "tauTightIc04GammaIso"]:
             opts["xmax"] = 30
-            opts["ymax"] = 1e4
+            opts["ymax"] = 5e4
+            ratio = True
         elif "Pt" in iso:
             rebin = 5
-        muonAnalysis.muonIso(plots.DataMCPlot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=rebin, opts=opts, ratio=True)
-    return
+        muonAnalysis.muonIso(plots.DataMCPlot(datasets, selection+"/muon_"+iso), prefix, iso, rebin=rebin, opts=opts, ratio=ratio)
 
     isoPlot = muonAnalysis.PlotIso(isoPassed, isoNames)
     muonAnalysis.muonIsoQcd(isoPlot, prefix)

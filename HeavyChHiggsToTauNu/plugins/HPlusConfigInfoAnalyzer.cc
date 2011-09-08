@@ -31,24 +31,24 @@ class HPlusConfigInfoAnalyzer: public edm::EDAnalyzer {
 private:
   std::string dataVersion;
   double crossSection;
-  double luminosity;
+  bool isData;
   bool hasCrossSection;
-  bool hasLuminosity;
+  bool hasIsData;
 };
 
 HPlusConfigInfoAnalyzer::HPlusConfigInfoAnalyzer(const edm::ParameterSet& pset): 
   dataVersion(pset.getUntrackedParameter<std::string>("dataVersion", "")),
   crossSection(std::numeric_limits<double>::quiet_NaN()),
-  luminosity(std::numeric_limits<double>::quiet_NaN()),
-  hasCrossSection(false), hasLuminosity(false)
+  isData(false),
+  hasCrossSection(false), hasIsData(false)
 {
   if(pset.exists("crossSection")) {
     crossSection = pset.getUntrackedParameter<double>("crossSection");
     hasCrossSection = true;
   }
-  if(pset.exists("luminosity")) {
-    luminosity = pset.getUntrackedParameter<double>("luminosity");
-    hasLuminosity = true;
+  if(pset.exists("isData")) {
+    isData = pset.getUntrackedParameter<bool>("isData");
+    hasIsData = true;
   }
 }
 
@@ -63,7 +63,7 @@ void HPlusConfigInfoAnalyzer::analyze(const edm::Event& iEvent, const edm::Event
 void HPlusConfigInfoAnalyzer::endJob() {
   edm::Service<TFileService> fs;
 
-  int nbins = 1+hasCrossSection+hasLuminosity;
+  int nbins = 1+hasCrossSection+hasIsData;
   TH1F *info = fs->make<TH1F>("configinfo", "configinfo", nbins, 0, nbins);
 
   int bin = 1;
@@ -76,9 +76,9 @@ void HPlusConfigInfoAnalyzer::endJob() {
     info->AddBinContent(bin, crossSection);
     ++bin;
   }
-  if(hasLuminosity) {
-    info->GetXaxis()->SetBinLabel(bin, "luminosity");
-    info->AddBinContent(bin, luminosity);
+  if(hasIsData) {
+    info->GetXaxis()->SetBinLabel(bin, "isData");
+    info->AddBinContent(bin, isData);
     ++bin;
   }
 

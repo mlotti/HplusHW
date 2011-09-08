@@ -36,6 +36,7 @@ namespace HPlus {
   class TriggerSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
+    kTriggerSelectionByTriggerBitApplyScaleFactor,
     kTriggerSelectionByTriggerEfficiencyParametrisation,
     kTriggerSelectionDisabled
   };
@@ -74,6 +75,7 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
+      double getScaleFactor() const { return fTriggerSelection->fScaleFactor; }
 
       pat::TriggerObjectRef getHltMetObject() const {
         return fTriggerSelection->fHltMet;
@@ -85,15 +87,39 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
+    class TriggerScaleFactor {
+    public:
+      TriggerScaleFactor();
+      ~TriggerScaleFactor();
+
+      void setValue(double ptLowEdge, double dataEff, double dataUncertainty, double MCEff, double MCUncertainty);
+      double getScaleFactor(double tauPt) const;
+      double getScaleFactorRelativeUncertainty(double tauPt) const;
+      double getScaleFactorAbsoluteUncertainty(double tauPt) const;
+
+    private:
+      size_t obtainIndex(double pt) const;
+
+      std::vector<double> fTriggerEffPtBinEdge;
+      std::vector<double> fTriggerEffDataValues;
+      std::vector<double> fTriggerEffDataUncertainty;
+      std::vector<double> fTriggerEffMCValues;
+      std::vector<double> fTriggerEffMCUncertainty;
+    };
+
 
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TriggerSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-
+    /// Call this function to set trigger scale factor
+    bool passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
   private:
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
     bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    
+    //bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
     std::vector<TriggerPath* > triggerPaths;
@@ -108,17 +134,24 @@ namespace HPlus {
     TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
+    Count fTriggerAllCount;
     Count fTriggerPathCount;
-    Count fTriggerBitParamCount;
+    Count fTriggerBitCount;
+    Count fTriggerCaloMetCount;
     Count fTriggerCount;
 
     Count fTriggerHltMetExistsCount;
+    Count fTriggerHltMetPassedCount;
+
+    Count fTriggerScaleFactorAllCount;
+    Count fTriggerScaleFactorAppliedCount;
 
     Count fTriggerParamAllCount;
     Count fTriggerParamTauCount;
     Count fTriggerParamMetCount;
 
     TriggerSelectionType fTriggerSelectionType;
+    TriggerScaleFactor fTriggerScaleFactor;
     
     // Histograms
     TH1 *hHltMetBeforeTrigger;
@@ -127,10 +160,15 @@ namespace HPlus {
     TH1 *hTriggerParametrisationWeight;
     TH1 *hControlSelectionType;
 
+    TH1 *hScaleFactor;
+    TH1 *hScaleFactorRelativeUncertainty;
+    TH1 *hScaleFactorAbsoluteUncertainty;
+
     // Analysis results
     pat::TriggerObjectRef fHltMet;
 
     bool fThrowIfNoMet;
+    double fScaleFactor;
   };
 }
 

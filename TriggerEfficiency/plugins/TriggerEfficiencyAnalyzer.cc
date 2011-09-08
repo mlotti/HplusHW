@@ -49,12 +49,15 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 	std::string   triggerBitName;
 	edm::InputTag tauSrc;
 	edm::InputTag metSrc;
+  edm::InputTag caloMetSrc;
+  edm::InputTag caloMetNoHFSrc;
 
 	TTree* TriggerEfficiencyTree;
 
 	bool triggerBit;
   int ntaus;
 	float taupt,taueta,met;
+  float caloMet, caloMetNoHF;
   std::vector<BoolVariable> bools;
 };
 
@@ -62,7 +65,9 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
-    metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc"))
+    metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
+    caloMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetSrc")),
+    caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc"))
 {
   if(iConfig.exists("bools")) {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("bools");
@@ -87,6 +92,8 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	TriggerEfficiencyTree->Branch("TauPt", &taupt);
 	TriggerEfficiencyTree->Branch("TauEta", &taueta);
 	TriggerEfficiencyTree->Branch("MET", &met);
+	TriggerEfficiencyTree->Branch("CaloMET", &caloMet);
+	TriggerEfficiencyTree->Branch("CaloMETnoHF", &caloMetNoHF);
 
         for(size_t i=0; i<bools.size(); ++i) {
           TriggerEfficiencyTree->Branch(bools[i].name.c_str(), &bools[i].value);
@@ -106,6 +113,8 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
 	taupt      = 0;
 	taueta     = 0;
 	met 	   = 0;
+        caloMet = 0;
+        caloMetNoHF = 0;
 
         for(size_t i=0; i<bools.size(); ++i) {
           bools[i].value = false;
@@ -149,10 +158,15 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
 // Offline MET
 	edm::Handle<edm::View<reco::MET> > hmet;
 	iEvent.getByLabel(metSrc, hmet);
+        met = hmet->at(0).et();
 
-	edm::Ptr<reco::MET> metptr = hmet->ptrAt(0);
-	met = metptr->et();
+	edm::Handle<edm::View<reco::MET> > hmet2;
+	iEvent.getByLabel(caloMetSrc, hmet2);
+        caloMet = hmet2->at(0).et();
 
+	edm::Handle<edm::View<reco::MET> > hmet3;
+	iEvent.getByLabel(caloMetNoHFSrc, hmet3);
+        caloMetNoHF = hmet3->at(0).et();
 
 // Filling..
 	TriggerEfficiencyTree->Fill();

@@ -9,9 +9,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-dataVersion = "39Xredigi"
-#dataVersion = "311Xredigi"
-#dataVersion = "41Xdata"
+#dataVersion = "42Xmc"
+dataVersion = "42Xdata"
 
 ################################################################################
 
@@ -20,7 +19,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion, useDefaultSignalTrigge
 options.doPat=1
 
 if len(options.trigger) == 0:
-    options.trigger = "HLT_Mu9"
+    #options.trigger = "HLT_Mu9"
+    options.trigger = "HLT_Mu20_v1"
 trigger = options.trigger
 
 #mu9filter = "hltSingleL3MuonPre9"
@@ -30,6 +30,7 @@ mu15filter = "hltSingleMu15L3Filtered15"
 mu20filter = "hltSingleMu20L3Filtered20"
 mu24filter = "hltSingleMu24L3Filtered24"
 mu30filter = "hltSingleMu30L3Filtered30"
+mu40filter = "hltSingleMu40L3Filtered40"
 
 triggerFilter = ""
 if "HLT_Mu9" in trigger:
@@ -42,6 +43,9 @@ elif "HLT_Mu24" in trigger:
     triggerFilter = mu24filter
 elif "HLT_Mu30" in trigger:
     triggerFilter = mu30filter
+elif "HLT_Mu40" in trigger:
+    triggerFilter = mu40filter
+    
 else:
     raise Exception("Trigger '%s' not recognized" % trigger)
 
@@ -53,7 +57,7 @@ print "Trigger %s, filter %s" % (trigger, triggerFilter)
 process = cms.Process("TagProbe")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -61,8 +65,10 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         #dataVersion.getPatDefaultFileMadhatter()
-        "file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM/E28BCD86-B311-E011-A953-E0CB4E19F95B.root"
-        #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
+    #"file:/mnt/flustre/mkortela/data/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Winter10-E7TeV_ProbDist_2010Data_BX156_START39_V8-v1/AODSIM/E28BCD86-B311-E011-A953-E0CB4E19F95B.root"
+    #"file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root"
+    #"/store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/431/7A229484-EB4F-E011-B173-0030487CD7B4.root"
+    "/store/data/Run2011A/SingleMu/AOD/PromptReco-v4/000/165/088/BC7C8339-E47F-E011-8FE0-003048F1C58C.root"
     )
 )
 
@@ -70,7 +76,7 @@ process.source = cms.Source('PoolSource',
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 ################################################################################
 
@@ -90,7 +96,7 @@ patArgs = {
     "doPatMuonPFIsolation": True,
     "doTauHLTMatching": False,
     }
-process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs)
+process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doMcPreselection=False)
 del process.out
 process.patDefaultSequence.remove(process.countPatTaus)
 
@@ -153,21 +159,21 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
     alias = cms.string("pileupWeight"),
 )
-param.setPileupWeightFor2011()
+param.setPileupWeightFor2011May10()
 insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
 
 # Vertex weighting
-process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-    alias = cms.string("vertexWeight"),
-)
-param.setVertexWeightFor2011()
-insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
+#process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
+#    alias = cms.string("vertexWeight"),
+#)
+#param.setVertexWeightFor2011()
+#insertPSetContentsTo(param.vertexWeight, process.vertexWeight)
 
-process.commonSequence *= (process.pileupWeight*process.vertexWeight)
+process.commonSequence *= process.pileupWeight#*process.vertexWeight)
 
 if dataVersion.isData():
     process.pileupWeight.enabled = False
-    process.vertexWeight.enabled = False
+#    process.vertexWeight.enabled = False
 
 
 
@@ -308,6 +314,8 @@ variables = cms.PSet(
     eta    = cms.string("eta"),
     abseta = cms.string("abs(eta)"),
 
+    HLTMuPt = cms.string("? triggerObjectMatchesByFilter('%s').empty() ? 0 : triggerObjectMatchByFilter('%s').pt()" % (triggerFilter, triggerFilter)),
+
     #
 #    sumIsoRel = cms.string(sumIsoRel),
 #    pfSumIsoRel = cms.string(pfSumIsoRel),
@@ -339,6 +347,7 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
         isHLTMu20    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu20filter),
         isHLTMu24    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu24filter),
         isHLTMu30    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu30filter),
+        isHLTMu40    = cms.string("!triggerObjectMatchesByFilter('%s').empty()" % mu40filter),
         isID         = cms.string("muonID('GlobalMuonPromptTight')"),
         hitQuality   = cms.string("innerTrack().numberOfValidHits() > 10 && innerTrack().hitPattern.pixelLayersWithMeasurement() >= 1 && numberOfMatches() > 1"),
         dB           = cms.string("abs(dB()) < 0.02"),
@@ -369,13 +378,14 @@ process.tnpTree = cms.EDAnalyzer("TagProbeFitTreeProducer",
     ## MC-related info
     isMC = cms.bool(False), ## on MC you can set this to true, add some parameters and get extra info in the tree.
 #    isMC = cms.bool(dataVersion.isMC()), ## on MC you can set this to true, add some parameters and get extra info in the tree.
-    eventWeight = cms.InputTag("vertexWeight"),
-#    eventWeight = cms.InputTag("pileupWeight"),
+#    eventWeight = cms.InputTag("vertexWeight"),
+    eventWeight = cms.InputTag("pileupWeight"),
 )
 
 # Count analyzer
 process.tnpCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
-    counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters])
+    counters = cms.untracked.VInputTag([cms.InputTag(c) for c in counters]),
+#                                     printMainCounter = cms.untracked.bool(True),
 )
 
 # Path

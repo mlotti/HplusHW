@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion="42Xmc"
+dataVersion="42XmcS4"
 #dataVersion="42Xdata"
 
 # Command line arguments (options) and DataVersion object
@@ -50,7 +50,7 @@ if len(myTrigger) == 0:
 
 #myTrigger = "HLT_Jet30U" # use only for debugging
 
-print "Trigger used for tau matching: "+myTrigger
+print "Trigger used for tau matching: "+str(myTrigger)
 
 ################################################################################
 # Output module
@@ -58,8 +58,9 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('pattuple.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
+        "keep *_genParticles_*_*",
         "keep edmTriggerResults_*_*_*",
-        "keep triggerTriggerEvent_*_*_*",
+#        "keep triggerTriggerEvent_*_*_*", # the information is alread in full PAT trigger
         "keep L1GlobalTriggerReadoutRecord_*_*_*",   # needed for prescale provider
         "keep L1GlobalTriggerObjectMapRecord_*_*_*", # needed for prescale provider
         "keep *_conditionsInEdm_*_*",
@@ -67,7 +68,8 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep PileupSummaryInfos_*_*_*", # only in MC
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
-    ),
+        "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
+        ),
     dropMetaData = cms.untracked.string("ALL")
 )
 # For MC we apply the trigger filter, but save all events in order to
@@ -86,16 +88,31 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
-                                   doPlainPat=True, doPF2PAT=True,
+                                   doPlainPat=True, doPF2PAT=False,
                                    plainPatArgs={"matchingTauTrigger": myTrigger,
                                                  "doPatMuonPFIsolation": True},
                                    pf2patArgs={"matchingTauTrigger": myTrigger},
                                    )
-# Redo the
+
+process.out.outputCommands.extend([
+        "drop *_selectedPatTausHpsTancPFTau_*_*",
+        "drop *_patTausHpsTancPFTauTauTriggerMatched_*_*",
+        "drop *_selectedPatJets_*_*",
+        "drop patTriggerObjectStandAlones_patTrigger_*_*",
+        ])
+
+# Prune GenParticles
 if dataVersion.isMC():
+    process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
     process.genParticles = cms.EDProducer("GenParticlePruner",
         src = cms.InputTag("genParticles"),
-        select = cms.vstring("keep *")
+        select = cms.vstring(
+            "keep *",
+            # Remove the soft photons from fragmentations (we have not needed them)
+#            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
+            "drop++ pdgId() = {string}",
+            "keep pdgId() = {string}"
+            )
     )
     process.out.outputCommands.extend([
         "drop *_genParticles_*_*",
@@ -103,6 +120,21 @@ if dataVersion.isMC():
         ])
 
     process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
+
+#    process.load("HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.printGenParticles_cff")
+#    process.sPAT *= process.printGenParticles
+
+#if dataVersion.isMC():
+#    process.genParticles = cms.EDProducer("GenParticlePruner",
+#        src = cms.InputTag("genParticles"),
+#        select = cms.vstring("keep *")
+#    )
+#    process.out.outputCommands.extend([
+#        "drop *_genParticles_*_*",
+#        "keep *_genParticles_*_"+process.name_(),
+#        ])
+#
+#    process.sPAT.replace(process.patSequence, process.genParticles*process.patSequence)
 
 
 if dataVersion.isData():
@@ -121,7 +153,9 @@ else:
 process.load("HiggsAnalysis.Skimming.heavyChHiggsToTauNu_Sequences_cff")
 process.heavyChHiggsToTauNuHLTFilter.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
 process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigReport)
-process.heavyChHiggsToTauNuHLTFilter.HLTPaths = [myTrigger]
+if isinstance(myTrigger, basestring):
+    myTrigger = [myTrigger]
+process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
 
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 #process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])

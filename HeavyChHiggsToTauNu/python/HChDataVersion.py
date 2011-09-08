@@ -14,21 +14,31 @@ config = {
 #        "patCastor": "",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/BTau/Run2010B-Apr21ReReco-v1/AOD/109B70F2-8471-E011-B3F1-001A64789D18.root",
 #        "analysisCastor": "",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_160431-161176_May10/Tau/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v16/60ad1d422c237e4c15799d8356989025/pattuple_2_1_cdU.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_160431-161176_May10/Tau/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17/377a23a99017553e73fe517f9c607b59/pattuple_2_3_rLl.root",
     },
-    "42Xmc": {
+    "42XmcS3": {
         "triggerProcess": "HLT",
         "recoProcess": "RECO",
         "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v1/AODSIM/84A5EB09-0A77-E011-A8C3-00266CF252D4.root",
 #        "patMadhatter": "file:/mnt/flustre/mkortela/data/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM/FE47C9F3-C97D-E011-B103-003048670B66.root",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBHminusB_M120_Summer11/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v16/3eca50c0a05d6d3a2c9d62e23e42ac29/pattuple_16_1_mCh.root"
+    },
+    "42XmcS4": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "signalTrigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
+#        "patMadhatter": "/store/mc/Summer11/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S4_START42_V11-v1/0000/0428EC7E-F199-E011-B474-002618943861.root",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data//TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/F498AD1D-8298-E011-BFB9-003048678F92.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18/8eea754df021b160abed50fa738aa521/pattuple_19_2_514.root"
     },
 }
 
 
 class DataVersion:
     def __init__(self, dataVersion):
+        if dataVersion == "42Xmc":
+            dataVersion = "42XmcS4"
+        
         if not dataVersion in config:
             names = config.keys()
             names.sort()
@@ -47,12 +57,12 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_42_V14::All"
+            self.globalTag = "GR_R_42_V20::All"
 
         # MC
         else:
             self.is_data = False
-            self.globalTag = "START42_V12::All"
+            self.globalTag = "START42_V13::All"
 
             try:
                 self.signalTrigger = conf["signalTrigger"]
@@ -64,6 +74,9 @@ class DataVersion:
 
     def isMC(self):
         return not self.is_data
+
+    def isS4(self):
+        return self.isMC() and "S4" in self.version
 
     def getTriggerProcess(self):
         return self.trigger

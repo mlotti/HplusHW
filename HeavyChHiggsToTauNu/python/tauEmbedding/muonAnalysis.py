@@ -521,7 +521,8 @@ class MuonAnalysis:
             selector = m,
             filter = cms.EDFilter("HPlusGlobalMuonVetoFilter",
                 vertexSrc = cms.InputTag("firstPrimaryVertex"),
-                GlobalMuonVeto=GlobalMuonVeto.clone()
+                GlobalMuonVeto=GlobalMuonVeto.clone(),
+                filter = cms.bool(True)                  
             ),
             counter=True)
         am.setFilterSrcToSelector(lambda f: f.GlobalMuonVeto.MuonCollectionName)
@@ -534,7 +535,8 @@ class MuonAnalysis:
         from HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff import GlobalElectronVeto
         self.analysis.addAnalysisModule(name,
             filter = cms.EDFilter("HPlusGlobalElectronVetoFilter",
-                GlobalElectronVeto=GlobalElectronVeto.clone()
+                GlobalElectronVeto=GlobalElectronVeto.clone(),
+                filter = cms.bool(True)                  
             ),
             counter=True)
         self.cloneAnalyzers(name)

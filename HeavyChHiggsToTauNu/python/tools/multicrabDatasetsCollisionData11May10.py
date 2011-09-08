@@ -13,32 +13,33 @@ datasets = {
                 "number_of_jobs": 15, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
-            "pattuple_v13_test1": {
+            "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v13_test1-4b4a75d9ac041a0a4d66f94ae4d63d28/USER",
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
                 "luminosity": 5.884518,
                 "number_of_jobs": 1
             },
-            "pattuple_v13": {
+            "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v13-4b4a75d9ac041a0a4d66f94ae4d63d28/USER",
-                "luminosity": 5.884518,
-                "number_of_jobs": 1
-            },
-            "pattuple_v14": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v14-60ad1d422c237e4c15799d8356989025/USER",
-                "luminosity": 5.884518,
-                "number_of_jobs": 1
-            },
-            "pattuple_v16": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v16-60ad1d422c237e4c15799d8356989025/USER",
-                "luminosity": 5.884518,
+                "datasetpath": "/Tau/local-May10ReReco_v1_AOD_160431_pattuple_v18-344241722cb53b6dc9e6433dfd125850/USER",
+                "luminosity": 6.625000,
                 "number_of_jobs": 1
             },
         }
     },
+    "Tau_161119-161119_May10_Wed": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
+        "runs": (161119, 161119), #
+        "data": {
+            "pattuple_v17": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161119_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
+                "luminosity": 0.490643,
+                "number_of_jobs": 1
+            },
+        }
+    },        
     "Tau_161217-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
@@ -50,23 +51,17 @@ datasets = {
                 "number_of_jobs": 100, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
-            "pattuple_v13": {
+            "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v13-612b93c0d939e947e4b67c54ba0c3c1c/USER",
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v17-e4cfe64c6b123ecde897f0b19cc05328/USER",
                 "luminosity": 38.518306,
                 "number_of_jobs": 2
             },
-            "pattuple_v14": {
+            "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v14-fb5b0bd346d74abc5843ce0d92c2dbc7/USER",
-                "luminosity": 38.518306,
-                "number_of_jobs": 2
-            },
-            "pattuple_v16": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v16-fb5b0bd346d74abc5843ce0d92c2dbc7/USER",
-                "luminosity": 38.518306,
-                "number_of_jobs": 2
+                "datasetpath": "/Tau/local-May10ReReco_v1_AOD_161217_pattuple_v18-69a11d04d01ec96141c740547251864b/USER",
+                "luminosity": 40.762000,
+                "number_of_jobs": 1
             },
         },
     },
@@ -81,17 +76,17 @@ datasets = {
                 "number_of_jobs": 220,
                 "lumiMask": "May10ReReco"
             },
-            "pattuple_v13": {
+            "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v13-e8dac75be42860b9ddfa13bd162b3b7f/USER",
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v17-6d098da292fab19f3d03a84563841e91/USER",
                 "luminosity": 159.758105,
                 "number_of_jobs": 6
             },
-            "pattuple_v16": {
+            "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v16-8681d17f150ac7e8fcb47588faf5fa09/USER",
-                "luminosity": 159.758105,
-                "number_of_jobs": 6
+                "datasetpath": "/Tau/local-May10ReReco_v1_AOD_163270_pattuple_v18-62e2e156bbf332fdc6c67ab8a6d7a4f0/USER",
+                "luminosity": 167.786000,
+                "number_of_jobs": 2
             },
         }
     },
@@ -105,12 +100,19 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 60, # Adjusted for PATtuple file size
+                "number_of_jobs": 40, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         }
+    }, 
+    "SingleMu_161119-161119_May10_Wed": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_Mu20_v1",
+        "runs": (161119, 161119),
+        "data": {
+        }
     },
-    "SingleMu_163270-163869_May10": {
+   "SingleMu_163270-163869_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu24_v2",
         "runs": (163270, 163869),
@@ -118,7 +120,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 40, # Adjusted for PATtuple file size
+                "number_of_jobs": 140, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         },

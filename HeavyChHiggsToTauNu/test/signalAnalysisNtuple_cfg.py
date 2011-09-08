@@ -1,18 +1,13 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptions
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataVersion import DataVersion
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
-dataVersion = "35X"
-#dataVersion = "35Xredigi"
-#dataVersion = "36X"
-#dataVersion = "36Xspring10"
-#dataVersion = "37X"
+################################################################################
 
-options = getOptions()
-if options.dataVersion != "":
-    dataVersion = options.dataVersion
-print "Assuming data is ", dataVersion
-dataVersion = DataVersion(dataVersion) # convert string to object
+dataVersion="42XmcS4"     # Summer11 MC
+#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
+
+# Command line arguments (options) and DataVersion object
+options, dataVersion = getOptionsDataVersion(dataVersion)
 
 process = cms.Process("HChSignalAnalysis")
 
@@ -26,9 +21,9 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
         # For testing in lxplus
-        dataVersion.getAnalysisDefaultFileCastor()
+        #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
-        #dataVersion.getAnalysisDefaultFileMadhatter()
+        dataVersion.getAnalysisDefaultFileMadhatter()
         #dataVersion.getAnalysisDefaultFileMadhatterDcap()
   )
 )
@@ -36,99 +31,84 @@ process.source = cms.Source('PoolSource',
 ################################################################################
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.MessageLogger.categories.append("EventCounts")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.TFileService.fileName = "histograms.root"
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+# Counter of all events
+process.allEvents = cms.EDProducer("EventCountProducer")
+process.ntupleSequence = cms.Sequence(process.allEvents)
 
-# Tau ID and jet selection
-process.tauSelection = cms.EDFilter("HPlusTauPtrSelectorFilter",
-    tauSelection = param.tauSelection.clone()
+# Object selections
+process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
+process.ntupleSequence *= process.goodPrimaryVertices
+
+process.jetSelection = cms.EDFilter("HPlusCandViewLazyPtrSelector",
+    src = cms.InputTag("selectedPatJetsAK5PF"),
+    cut = cms.string("pt() > 20 && abs(eta()) < 2.4 && numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99 && neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99 && chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0")
 )
-process.tauSelection.tauSelection.ptCut = 20.
-process.jetSelection = cms.EDFilter("HPlusJetPtrSelectorFilter",
-    tauSrc = cms.untracked.InputTag("tauSelection"),
-    jetSelection = param.jetSelection.clone()
-)
+process.ntupleSequence *= process.jetSelection
 
 # Add trigger bits to the ntuple
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
-HChTrigger.customise(process, dataVersion)
+#import HiggsAnalysis.HeavyChHiggsToTauNu.HChTrigger_cfi as HChTrigger
+#HChTrigger.customise(process, dataVersion)
 
-# Tau and jet ntuple producers
+
+
+# Ntuple producers
+process.pileupNtuple = cms.EDProducer("HPlusPileupNtupleProducer",
+    alias = cms.string("pileup_ave_nvtx"),
+    src = cms.InputTag("addPileupInfo")
+)
+process.ntupleSequence *= process.pileupNtuple
+process.vertexNtuple = cms.EDProducer("HPlusVertexNtupleProducer",
+    prefix = cms.string("vertex_"),
+    src = cms.InputTag("offlinePrimaryVertices"),
+    goodSrc = cms.InputTag("goodPrimaryVertices"),
+    maxDelta = cms.double(0.001),
+    sumPtSrc = cms.InputTag("offlinePrimaryVerticesSumPt", "sumPt"),
+    sumPt2Src = cms.InputTag("offlinePrimaryVerticesSumPt", "sumPt2"),
+)
+process.ntupleSequence *= process.vertexNtuple
+
 process.tauNtuple = cms.EDProducer("HPlusTauNtupleProducer",
-    src = cms.InputTag("tauSelection"),
+    src = cms.InputTag("patTausHpsPFTauTauTriggerMatched"),
     prefix = cms.string("tau_"),
-    tauDiscriminators = cms.VPSet(
-        cms.PSet(
-            discriminator = cms.string("HChTauIDtauPolarizationCont"),
-            branch = cms.string("discrHChTauIDtauPolarizationCont")
-        )
-    )
+    tauDiscriminators = cms.vstring(
+        "decayModeFinding",
+        "byVLooseIsolation",
+        "byLooseIsolation",
+        "byMediumIsolation",
+        "byTightIsolation",
+        "againstMuonLoose",
+        "againstMuonTight",
+        "againstElectronLoose",
+        "againstElectronMedium",
+        "againstElectronTight",
+    ),
+    vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+    vertexMaxDelta = cms.double(0.001)
 )    
+process.ntupleSequence *= process.tauNtuple
+
 process.jetNtuple = cms.EDProducer("HPlusJetNtupleProducer",
     src = cms.InputTag("jetSelection"),
     prefix = cms.string("jet_"),
     # The module takes the *maximum* value of the b-discriminators
     # from the input jets, and stores that to the event
-    bDiscriminators = cms.VPSet(
-        cms.PSet(
-            discriminator = cms.string("trackCountingHighEffBJetTags"),
-            branch = cms.string("maxBtrackCountingHighEffBJetTags")
-        )
-    )
+    bDiscriminators = cms.vstring("trackCountingHighEffBJetTags")
 )
+process.ntupleSequence *= process.jetNtuple
 
-# All and ntuplized event counters
-process.allEvents = cms.EDProducer("EventCountProducer")
-process.ntupleEvents = cms.EDProducer("EventCountProducer")
+process.pfMETNtuple = cms.EDProducer("HPlusMETNtupleProducer",
+    src = cms.InputTag("patMETsPF"),
+    alias = cms.string("pfMET")
+)
+process.ntupleSequence *= process.pfMETNtuple
 
-# Path without MET data, they come below
+
 process.ntuplePath = cms.Path(
-    process.allEvents *
-    process.HChTriggers *
-    process.tauSelection *
-    process.jetSelection *
-    process.ntupleEvents *
-    process.tauNtuple *
-    process.jetNtuple
+    process.ntupleSequence
 )
-
-# Helper function for MET producers to decrease the mount of typing
-def addMet(process, src, alias):
-    metNtuple = cms.EDProducer("HPlusMETNtupleProducer",
-        src = cms.InputTag(src),
-        alias = cms.string(alias)
-    )
-    transverseMass = cms.EDProducer("HPlusTransverseMassProducer",
-        tauSrc = cms.InputTag("tauSelection"),
-        metSrc = cms.InputTag(src)
-    )
-    transverseMassNtuple = cms.EDProducer("HPlusMassNtupleProducer",
-        src = cms.InputTag(alias+"TransverseMass"),
-        alias = cms.string(alias+"_transverseMass")
-    )
-    deltaPhiNtuple = cms.EDProducer("HPlusDeltaPhiNtupleProducer",
-        src1 = cms.InputTag("tauSelection"),
-        src2 = cms.InputTag(src),
-        alias = cms.string(alias+"_deltaPhi")
-    )
-
-    process.__setattr__(alias+"Ntuple", metNtuple)
-    process.__setattr__(alias+"TransverseMass", transverseMass)
-    process.__setattr__(alias+"TransverseMassNtuple", transverseMassNtuple)
-    process.__setattr__(alias+"DeltaPhiNtuple", deltaPhiNtuple)
-    process.ntuplePath *= metNtuple
-    process.ntuplePath *= transverseMass
-    process.ntuplePath *= transverseMassNtuple
-    process.ntuplePath *= deltaPhiNtuple
-
-# Add the METs with the helper function
-addMet(process, "patMETs", "caloMET")
-addMet(process, "patMETsPF", "pfMET")
-addMet(process, "patMETsTC", "tcMET")
-
 
 ################################################################################
 
@@ -139,9 +119,11 @@ process.out = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string('output.root'),
     outputCommands = cms.untracked.vstring(
         "drop *",
-        "keep double_*_*_HChSignalAnalysis",
-        "keep float_*_*_HChSignalAnalysis",
-        "keep int_*_*_HChSignalAnalysis",
+        "keep *_pileupNtuple_*_HChSignalAnalysis",
+        "keep *_vertexNtuple_*_HChSignalAnalysis",
+        "keep *_tauNtuple_*_HChSignalAnalysis",
+        "keep *_jetNtuple_*_HChSignalAnalysis",
+        "keep *_pfMETNtuple_*_HChSignalAnalysis",
         "keep edmMergeableCounter_*_*_*",
         "drop edmMergeableCounter_*_subcount*_HChSignalAnalysis"
     )

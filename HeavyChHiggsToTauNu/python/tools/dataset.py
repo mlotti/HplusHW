@@ -497,7 +497,7 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
         self.normalization = "none"
         for h in self.histoWrappers:
             if not h.isData():
-                raise Exception("Histograms to be merged must come from data")
+                raise Exception("Histograms to be merged must come from data (%s is not data)" % h.getDataset().getName())
             if h.normalization != "none":
                 raise Exception("Histograms to be merged must not be normalized at this stage")
             if h.multiplication != None:
@@ -686,18 +686,16 @@ class Dataset:
         if self.file == None:
             raise Exception("Unable to open ROOT file '%s'"%fname)
 
-        self.info = {}
-        self.dataVersion = ""
         configInfo = self.file.Get("configInfo")
-        if configInfo != None:
-            self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
+        if configInfo == None:
+            raise Exception("configInfo directory is missing from file %s" % fname)
 
-            dataVersion = configInfo.Get("dataVersion")
+        self.info = _rescaleInfo(_histoToDict(self.file.Get("configInfo").Get("configinfo")))
 
-            if dataVersion != None:
-                self.dataVersion = dataVersion.GetTitle()
-            elif "luminosity" in self.info:
-                self.dataVersion = "data"
+        dataVersion = configInfo.Get("dataVersion")
+        if dataVersion == None:
+            raise Exception("Unable to determine dataVersion for dataset %s from file %s" % (name, fname))
+        self.dataVersion = dataVersion.GetTitle()
 
         self._isData = "data" in self.dataVersion
 
@@ -791,7 +789,7 @@ class Dataset:
         try:
             return self.info["luminosity"]
         except KeyError:
-            raise Exception("Dataset %s is data, but 'luminosity' is missing from configInfo/configInfo histogram. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
+            raise Exception("Dataset %s is data, but luminosity has not been set yet. You have to explicitly set the luminosity with setLuminosity() method." % self.name)
 
     def isData(self):
         return self._isData
@@ -955,7 +953,7 @@ class DatasetMerged:
         """Set cross section of MC dataset (in pb)."""
         if self.isData():
             raise Exception("Should not set cross section for data dataset %s (has luminosity)" % self.name)
-        self.info["crossSection"] = value
+        raise Exception("Setting cross section for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     def getCrossSection(self):
         """Get cross section of MC dataset (in pb)."""
@@ -967,7 +965,7 @@ class DatasetMerged:
         """Set the integrated luminosity of data dataset (in pb^-1)."""
         if self.isMC():
             raise Exception("Should not set luminosity for MC dataset %s (has crossSection)" % self.name)
-        self.info["luminosity"] = value
+        raise Exception("Setting luminosity for merged dataset is meaningless (it has no real effect, and hence is misleading")
 
     def getLuminosity(self):
         """Get the integrated luminosity of data dataset (in pb^-1)."""
@@ -976,10 +974,10 @@ class DatasetMerged:
         return self.info["luminosity"]
 
     def isData(self):
-        return "luminosity" in self.info
+        return self.datasets[0].isData()
 
     def isMC(self):
-        return "crossSection" in self.info
+        return self.datasets[0].isMC()
 
     def getCounterDirectory(self):
         countDir = self.datasets[0].getCounterDirectory()

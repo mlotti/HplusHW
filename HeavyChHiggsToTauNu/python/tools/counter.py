@@ -855,7 +855,10 @@ class EventCounter:
         self.mainCounter = Counter(datasets.getDatasetRootHistos(counterDir+"/counter"), countNameFunction)
         self.subCounters = {}
         for subname in counterNames.keys():
-            self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
+            try:
+                self.subCounters[subname] = Counter(datasets.getDatasetRootHistos(counterDir+"/"+subname), countNameFunction)
+            except:
+                pass
 
         self.normalization = "None"
 

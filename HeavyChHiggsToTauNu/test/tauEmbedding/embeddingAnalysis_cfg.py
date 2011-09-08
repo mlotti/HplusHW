@@ -4,8 +4,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 ################################################################################
 # Configuration
 
-dataVersion = "311Xredigi"
-#dataVersion = "41Xdata"
+#dataVersion = "42Xdata"
+dataVersion = "42Xmc"
 
 debug = False
 #debug = True
@@ -28,19 +28,20 @@ if debug:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 else:
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_1_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_16_1_JtV.root"
+    #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v10_1_pt40/ac95b0c9ecfd651039bbe079053aed03/embedded_RECO_16_1_JtV.root"
+    "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v11_6_pt40/af0b4aa82477426f47ec012132b67081/embedded_RECO_3_1_58j.root"
   )
 )
 if dataVersion.isData():
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_163270-163869_Prompt/SingleMu/Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_1_pt40/cee94be795a40bbb5b546b09a0917318/embedded_RECO_2_1_5GD.root"
+        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_163270-163869_Prompt/SingleMu/Run2011A_PromptReco_v2_AOD_163270_tauembedding_embedding_v10_1_pt40/cee94be795a40bbb5b546b09a0917318/embedded_RECO_2_1_5GD.root"
         ]
 
 ################################################################################
@@ -68,12 +69,13 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 #recoProcess = "REDIGI39X"
 #recoProcess = "REDIGI311X"
 #recoProcess = "REDIGI311X"
-recoProcess = dataVersion.getTriggerProcess()
+recoProcess = dataVersion.getRecoProcess()
+hltProcess = dataVersion.getTriggerProcess()
 if dataVersion.isData():
     recoProcess = "RECO"
 
 # Calculate PF MET for 
-from PhysicsTools.PFCandProducer.pfMET_cfi import pfMET
+from CommonTools.ParticleFlow.pfMET_cfi import pfMET
 process.pfMETOriginalNoMuon = pfMET.clone(
     src = cms.InputTag("dimuonsGlobal", "forMixing"),
     jets = cms.InputTag("ak5PFJets")
@@ -105,7 +107,7 @@ process.genMetTrueEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
 #from RecoMET.METProducers.genMetCalo_cfi import genMetCalo
 #process.genMetCaloOriginal = genMetCalo.clone(src=cms.InputTag("genCandidatesForMETOriginalSelected"))
 process.genMetCaloEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
-    src = cms.VInputTag(cms.InputTag("genMetCalo", "", recoProcess), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
+    src = cms.VInputTag(cms.InputTag("genMetCalo", "", hltProcess), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
 #    src = cms.VInputTag(cms.InputTag("genMetCaloOriginal"), cms.InputTag("genMetCalo", "", "EMBEDDINGHLT"))
 )                                            
 
@@ -118,7 +120,7 @@ process.genMetCaloEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
 #from RecoMET.METProducers.genMetCaloAndNonPrompt_cfi import genMetCaloAndNonPrompt
 #process.genMetCaloAndNonPromptOriginal = genMetCaloAndNonPrompt.clone(src=cms.InputTag("genParticlesForJetsNoMuNoNuOriginalSelected"))
 process.genMetCaloAndNonPromptEmbedded = cms.EDProducer("HPlusGenMETSumProducer",
-    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPrompt", "", recoProcess), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
+    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPrompt", "", hltProcess), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
 #    src = cms.VInputTag(cms.InputTag("genMetCaloAndNonPromptOriginal"), cms.InputTag("genMetCaloAndNonPrompt", "", "EMBEDDINGHLT"))
 )
 
@@ -311,9 +313,9 @@ process.tauPtIdEmbeddingAnalyzer = process.EmbeddingAnalyzer.clone(
 #process.analysisSequence = 
 process.analysisPath = cms.Path(
     process.commonSequence *
-    process.EmbeddingAnalyzer *
-    process.tauIdEmbeddingAnalyzer *
-    process.tauPtIdEmbeddingAnalyzer
+    process.EmbeddingAnalyzer# *
+#    process.tauIdEmbeddingAnalyzer *
+#    process.tauPtIdEmbeddingAnalyzer
 )
 
 # def _setMuon(module, muonSrc):

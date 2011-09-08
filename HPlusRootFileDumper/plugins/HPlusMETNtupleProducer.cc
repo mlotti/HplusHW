@@ -25,15 +25,16 @@ class HPlusMETNtupleProducer: public edm::EDProducer {
   virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
+  typedef math::XYZTLorentzVector XYZTLorentzVector;
+
   edm::InputTag fSrc;
-  std::string fAlias;
 };
 
 HPlusMETNtupleProducer::HPlusMETNtupleProducer(const edm::ParameterSet& iConfig):
-  fSrc(iConfig.getParameter<edm::InputTag>("src")),
-  fAlias(iConfig.getParameter<std::string>("alias"))
+  fSrc(iConfig.getParameter<edm::InputTag>("src"))
 {
-  produces<double>().setBranchAlias(fAlias);
+  std::string alias(iConfig.getParameter<std::string>("alias"));
+  produces<XYZTLorentzVector>().setBranchAlias(alias);
 }
 HPlusMETNtupleProducer::~HPlusMETNtupleProducer() {}
 void HPlusMETNtupleProducer::beginJob() {}
@@ -42,7 +43,7 @@ void HPlusMETNtupleProducer::produce(edm::Event& iEvent, const edm::EventSetup& 
   edm::Handle<edm::View<reco::MET> > hcands;
   iEvent.getByLabel(fSrc, hcands);
 
-  iEvent.put(std::auto_ptr<double>(new double((*hcands)[0].et())));
+  iEvent.put(std::auto_ptr<XYZTLorentzVector>(new XYZTLorentzVector((*hcands)[0].p4())));
 }
 
 void HPlusMETNtupleProducer::endJob() {
