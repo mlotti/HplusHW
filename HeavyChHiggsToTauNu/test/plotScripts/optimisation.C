@@ -13,7 +13,7 @@
 
 const double luminosity = 1145; // in pb^-1
 const double qcdEvents = 7.5; // from QCD measurement, must correspond to the luminosity above!
-const bool qcdFromData = false;
+const bool qcdFromData = true;
 
 double signif(double nSignal,double nBackgr){
   double significance = 0;
@@ -395,7 +395,7 @@ Result createResult(const char *expr, const char *cut, const char *cutQCD, bool 
   res.addBackgr(createDistPassMC("TTJets_TuneZ2_Summer11/res/histograms-TTJets_TuneZ2_Summer11.root", expr, cut, lessThan));
   res.addBackgr(createDistPassMC("WJets_TuneZ2_Summer11/res/histograms-WJets_TuneZ2_Summer11.root", expr, cut, lessThan));
 
-  /*
+ 
   if(qcdFromData) {
     res.addBackgr(createDistPassQCDdata("histograms-QCD-Tau_160431-167913.root", expr, cutQCD, lessThan));
   }
@@ -408,7 +408,7 @@ Result createResult(const char *expr, const char *cut, const char *cutQCD, bool 
     res.addBackgr(createDistPassMC("QCD_Pt170to300_TuneZ2_Summer11/res/histograms-QCD_Pt170to300_TuneZ2_Summer11.root", expr, cut, lessThan));
     res.addBackgr(createDistPassMC("QCD_Pt300to470_TuneZ2_Summer11/res/histograms-QCD_Pt300to470_TuneZ2_Summer11.root", expr, cut, lessThan));
   }
-  */
+ 
 
   return res;
 }
@@ -491,15 +491,18 @@ void optimisation() {
   btagRes.setXLabel("btag");
 
   btag2ndMax += ">>dist(80,0.,8.)";
-  cut = tauPtCut && metCut && rtauCut;
   Result btag2ndMaxRes = createResult(btag2ndMax, mcWeight(cut), cut, false);
   btag2ndMaxRes.setXLabel("btag 2nd max");
 
   Result btagExactlyOneRes = subtractResults(btagRes, btag2ndMaxRes);
   btagExactlyOneRes.setXLabel("btag exactly one");
+  btagJetNum17 += ">>dist(6,0.,6.)";
+  Result btagJetNum17Res = createResult(btagJetNum17, mcWeight(cut), cut, false);
+  btagJetNum17Res.setXLabel("N(bjets>1.7)");
+
   deltaPhi += ">>dist(90.,0.,180.)";
-  cut = tauPtCut && metCut && rtauCut && mtCut;
-  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut), cut, false);
+  cut = tauPtCut && metCut && rtauCut;
+  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, false);
   deltaPhiRes.setXLabel("deltaPhi");
 
 /*
@@ -516,8 +519,9 @@ void optimisation() {
   //  mtRes.Significance();
   btagRes.Significance();
   btag2ndMaxRes.Significance();
-  btagExactlyOneRes.Significance();
-  //deltaPhiRes.Significance();
+  //  btagExactlyOneRes.Significance();
+  btagJetNum17Res.Significance();
+  //  deltaPhiRes.Significance();
 
 }
 

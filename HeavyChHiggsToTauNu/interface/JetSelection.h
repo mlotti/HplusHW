@@ -61,6 +61,7 @@ namespace HPlus {
     const double fMetCut;
     const double fPtCut;
     const double fEtaCut;
+    const double fEMfractionCut;
     const double fMaxDR;
     const uint32_t fMin;
 
@@ -70,10 +71,12 @@ namespace HPlus {
     Count fEtaCutCount;
     Count fEMfraction08CutCount;
     Count fEMfraction07CutCount;
+    Count fEMfractionCutCount;
     Count fAllSubCount;
     Count fCleanCutSubCount;
     Count fPtCutSubCount;
     Count fEtaCutSubCount;
+    Count fEMfractionCutSubCount;
     Count fnumberOfDaughtersCutSubCount;
     Count fchargedEmEnergyFractionCutSubCount;
     Count fneutralHadronEnergyFractionCutSubCount;

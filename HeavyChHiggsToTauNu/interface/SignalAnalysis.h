@@ -23,7 +23,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 
 namespace edm {
   class ParameterSet;
@@ -34,7 +33,6 @@ namespace edm {
 
 class TH1;
 class TH2;
-class TTree;
 
 namespace HPlus {
   class SignalAnalysis {
@@ -68,10 +66,10 @@ namespace HPlus {
     kSignalOrderTrigger,
     //kSignalOrderVertexSelection,
     kSignalOrderTauID,
+    kSignalOrderMETSelection,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
     kSignalOrderJetSelection,
-    kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection
@@ -114,16 +112,17 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fRtauAfterTauIDCounter;    
+    Count fMETCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
-    Count fMETCounter;
     Count fBTaggingCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fFakeMETVetoCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
+    Count fdeltaPhiTauMET160FakeMetCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
     Count ftransverseMassCut80NoRtauCounter;
@@ -152,8 +151,6 @@ namespace HPlus {
 
     VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
-
-    SignalAnalysisTree fTree;
 
     // Histograms
     TH1 *hVerticesBeforeWeight;
@@ -193,7 +190,7 @@ namespace HPlus {
     TH1 *hMetAfterCuts;
     TH1 *hNonQCDTypeIISelectedTauEtAfterCuts;
     TH1 *hNonQCDTypeIISelectedTauEtaAfterCuts;
-
+    TH1 *hTransverseMassDeltaPhiUpperCutFakeMet; 
     TH1 *hSelectedTauRtauMetCut;
 
     TH1 *hSelectionFlow;
@@ -213,7 +210,6 @@ namespace HPlus {
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
 
-    bool fProduce;
   };
 }
 

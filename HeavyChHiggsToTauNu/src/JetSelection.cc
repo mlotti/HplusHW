@@ -31,6 +31,7 @@ namespace HPlus {
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
+    fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
     fMaxDR(iConfig.getUntrackedParameter<double>("cleanTauDR")),
     fMin(iConfig.getUntrackedParameter<uint32_t>("minNumber")),
     fCleanCutCount(eventCounter.addSubCounter("Jet main","Jet cleaning")),
@@ -38,10 +39,12 @@ namespace HPlus {
     fEtaCutCount(eventCounter.addSubCounter("Jet main","Jet eta cut")),
     fEMfraction08CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.8")),
     fEMfraction07CutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac < 0.7")),
+    fEMfractionCutCount(eventCounter.addSubCounter("Jet main","Jet EMfrac ")),
     fAllSubCount(eventCounter.addSubCounter("Jet selection", "all jets")),
     fCleanCutSubCount(eventCounter.addSubCounter("Jet selection", "cleaning")),
     fPtCutSubCount(eventCounter.addSubCounter("Jet selection", "pt cut")),
     fEtaCutSubCount(eventCounter.addSubCounter("Jet selection", "eta cut")),
+    fEMfractionCutSubCount(eventCounter.addSubCounter("Jet selection", "EMfraction")),
     fnumberOfDaughtersCutSubCount(eventCounter.addSubCounter("Jet selection", "numberOfDaughtersCut")),
     fchargedEmEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "chargedEmEnergyFractionCut")),
     fneutralHadronEnergyFractionCutSubCount(eventCounter.addSubCounter("Jet selection", "neutralHadronEnergyFractionCut")),
@@ -84,6 +87,7 @@ namespace HPlus {
     size_t ptCutPassed = 0;
     size_t etaCutPassed = 0;
     double maxEMfraction = 0;
+    size_t EMfractionCutPassed = 0;
     
     std::vector<edm::Ptr<pat::Jet> > tmpSelectedJets;
     tmpSelectedJets.reserve(jets.size());
@@ -155,6 +159,10 @@ namespace HPlus {
                        iJet->neutralEmEnergy());
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
+
+      if (EMfrac > fEMfractionCut) continue;
+      ++EMfractionCutPassed;
+      increment(fEMfractionCutSubCount);
     
       // plot deltaPhi(jet,met)
       double deltaPhi = -999;
@@ -195,11 +203,14 @@ namespace HPlus {
     if(etaCutPassed < fMin) passEvent = false;
     if(etaCutPassed > fMin)    increment(fEtaCutCount);
 
-    if(maxEMfraction > 0.8 ) passEvent = false;
+    //    if(maxEMfraction > 0.8 ) passEvent = false;
     if(maxEMfraction < 0.8 )increment(fEMfraction08CutCount);
 
-    if(maxEMfraction > 0.7 ) passEvent = false;
+    //    if(maxEMfraction > 0.7 ) passEvent = false;
     if(maxEMfraction < 0.7 )increment(fEMfraction07CutCount);
+
+    if(EMfractionCutPassed < fMin) passEvent = false;
+    if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);
 
     return Data(this, passEvent);
   }
