@@ -499,7 +499,7 @@ void optimisation() {
 
   deltaPhi += ">>dist(90.,0.,180.)";
   cut = tauPtCut && metCut && rtauCut;
-  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, false);
+  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, true);
   deltaPhiRes.setXLabel("deltaPhi");
 
   //  Result tauPtRes = createResult(tauPt, TString(metCut && btagCut && rtauCut), false);
@@ -523,7 +523,7 @@ void optimisation() {
   btag2ndMaxRes.Significance();
   //  btagExactlyOneRes.Significance();
   btagJetNum17Res.Significance();
-  //  deltaPhiRes.Significance();
+  deltaPhiRes.Significance();
 
 }
 
