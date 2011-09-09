@@ -34,6 +34,8 @@ namespace HPlus {
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
     fTree->Branch("jets_EMfrac", &fJetsEMfracs);
+    fTree->Branch("jets_chEMfrac", &fJetsChEMfracs);
+    fTree->Branch("jets_eCand", &fJetsECands);
 
     fTree->Branch("met_p4", &fMet);
   }
@@ -60,6 +62,16 @@ namespace HPlus {
                        jets[i]->chargedEmEnergy() + 
                        jets[i]->neutralEmEnergy());
       fJetsEMfracs.push_back(EMfrac);
+      double chEMfrac = jets[i]->chargedEmEnergy() /(
+                        jets[i]->chargedHadronEnergy() +
+                        jets[i]->chargedEmEnergy());
+      fJetsChEMfracs.push_back(chEMfrac);
+      int eCand = 0;
+      std::vector< reco::PFCandidatePtr > const & pfconsts = jets[i]->getPFConstituents();
+      for(size_t itr = 0; itr < pfconsts.size(); ++itr){
+          if(pfconsts[itr]->particleId() == 2) eCand = 1;
+      }
+      fJetsECands.push_back(eCand);
     }
 
     fMet = met->p4();
@@ -85,6 +97,8 @@ namespace HPlus {
     fJets.clear();
     fJetsBtags.clear();
     fJetsEMfracs.clear();
+    fJetsChEMfracs.clear();
+    fJetsECands.clear();
 
     fMet.SetXYZT(0, 0, 0, 0);
   }
