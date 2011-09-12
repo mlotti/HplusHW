@@ -23,6 +23,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 
 namespace edm {
   class ParameterSet;
@@ -33,6 +34,7 @@ namespace edm {
 
 class TH1;
 class TH2;
+class TTree;
 
 namespace HPlus {
   class SignalAnalysis {
@@ -111,11 +113,11 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
-    Count fRtauAfterTauIDCounter;    
-    Count fMETCounter;
+    Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
+    Count fMETCounter;
     Count fBTaggingCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
@@ -137,8 +139,8 @@ namespace HPlus {
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
     TauSelection fOneProngTauSelection;
-    JetSelection fJetSelection;
     METSelection fMETSelection;
+    JetSelection fJetSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
@@ -151,6 +153,8 @@ namespace HPlus {
 
     VertexWeight fVertexWeight;
     TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+
+    SignalAnalysisTree fTree;
 
     // Histograms
     TH1 *hVerticesBeforeWeight;
@@ -210,6 +214,7 @@ namespace HPlus {
     TH1 *hEMFractionAll;
     TH1 *hEMFractionElectrons;
 
+    bool fProduce;
   };
 }
 
