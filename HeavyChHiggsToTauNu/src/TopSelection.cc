@@ -7,6 +7,8 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 
+#include <limits>
+
 namespace HPlus {
   TopSelection::Data::Data(const TopSelection *topSelection, bool passedEvent):
     fTopSelection(topSelection), fPassedEvent(passedEvent) {}
@@ -40,7 +42,8 @@ namespace HPlus {
   TopSelection::Data TopSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     // Reset variables
     topMass = -1;
-    top.SetXYZT(0, 0, 0, 0);
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    top.SetXYZT(nan, nan, nan, nan);
 
     bool passEvent = false;
     size_t passed = 0;

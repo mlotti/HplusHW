@@ -7,6 +7,8 @@
 
 #include "TTree.h"
 
+#include <limits>
+
 namespace HPlus {
   SignalAnalysisTree::SignalAnalysisTree(const std::string& bDiscriminator):
     fBdiscriminator(bDiscriminator), fTree(0)
@@ -58,7 +60,7 @@ namespace HPlus {
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
                                 const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
-                                const XYZTLorentzVector& top, double alphaT) {
+                                double alphaT) {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
@@ -116,8 +118,6 @@ namespace HPlus {
     fMet = met->p4();
     fMetSumEt = met->sumEt();
 
-    fTop = top;
-
     fAlphaT = alphaT;
 
     fTree->Fill();
@@ -135,8 +135,10 @@ namespace HPlus {
 
     fNVertices = 0;
 
-    fTau.SetXYZT(0, 0, 0, 0);
-    fTauLeadingChCand.SetXYZT(0, 0, 0, 0);
+    double nan = std::numeric_limits<double>::quiet_NaN();
+
+    fTau.SetXYZT(nan, nan, nan, nan);
+    fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
 
     fJets.clear();
     fJetsBtags.clear();
@@ -159,11 +161,11 @@ namespace HPlus {
     fJetsLooseId.clear();
     fJetsTightId.clear();
 
-    fMet.SetXYZT(0, 0, 0, 0);
-    fMetSumEt = 0.0;
+    fMet.SetXYZT(nan, nan, nan, nan);
+    fMetSumEt = nan;
 
-    fTop.SetXYZT(0, 0, 0, 0);
+    fTop.SetXYZT(nan, nan, nan, nan);
 
-    fAlphaT = 0;
+    fAlphaT = nan;
   }
 }

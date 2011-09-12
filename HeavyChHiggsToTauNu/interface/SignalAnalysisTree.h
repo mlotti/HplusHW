@@ -37,10 +37,11 @@ namespace HPlus {
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
+    void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
               const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
-              const XYZTLorentzVector& top, double alphaT);
+              double alphaT);
 
   private:
     void reset();

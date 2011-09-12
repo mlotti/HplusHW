@@ -283,10 +283,9 @@ namespace HPlus {
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
     mySelectedTauFirst.push_back(mySelectedTau[0]);
+    // FIXME: how to handle the top reco in QCD measurement?
     fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
-               math::XYZTLorentzVector(), // FIXME: how to handle the top reco in QCD measurement?
-               evtTopologyData.alphaT().fAlphaT
-               );
+               evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

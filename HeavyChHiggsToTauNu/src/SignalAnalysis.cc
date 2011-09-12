@@ -344,8 +344,9 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
     // Write the stuff to the tree
+    fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
-               TopSelectionData.getTopP4(), evtTopologyData.alphaT().fAlphaT);
+               evtTopologyData.alphaT().fAlphaT);
 
 
     // MET cut
