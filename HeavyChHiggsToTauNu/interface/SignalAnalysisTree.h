@@ -25,6 +25,8 @@ class TTree;
 namespace HPlus {
   class SignalAnalysisTree {
   public:
+    typedef math::XYZTLorentzVector XYZTLorentzVector;
+
     explicit SignalAnalysisTree(const std::string& bDiscriminator);
     ~SignalAnalysisTree();
 
@@ -37,7 +39,8 @@ namespace HPlus {
     void setNvertices(unsigned int n) { fNVertices = n; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-              const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
+              const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+              const XYZTLorentzVector& top);
 
   private:
     void reset();
@@ -56,10 +59,10 @@ namespace HPlus {
 
     unsigned int fNVertices;
 
-    math::XYZTLorentzVector fTau;
-    math::XYZTLorentzVector fTauLeadingChCand;
+    XYZTLorentzVector fTau;
+    XYZTLorentzVector fTauLeadingChCand;
 
-    std::vector<math::XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fJets;
     std::vector<double> fJetsBtags;
     std::vector<double> fJetsChf;
     std::vector<double> fJetsNhf;
@@ -77,8 +80,10 @@ namespace HPlus {
     std::vector<bool> fJetsTightId;
 
     // MET is really 2-vector, but let's just use this for consistency
-    math::XYZTLorentzVector fMet;
+    XYZTLorentzVector fMet;
     double fMetSumEt;
+
+    XYZTLorentzVector fTop;
   };
 }
 

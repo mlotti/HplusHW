@@ -336,8 +336,13 @@ namespace HPlus {
       iEvent.put(saveJets, "selectedJets");
     }
 
+    // b tagging, no event cut
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    // Top reco, no event cut
+    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+
     // Write the stuff to the tree
-    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
+    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(), TopSelectionData.getTopP4());
 
 
     // MET cut
@@ -352,8 +357,7 @@ namespace HPlus {
     hSelectedTauPhiMetCut->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hSelectedTauRtauMetCut->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());   
 
-    // b tagging
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
+    // b tagging cut
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);
@@ -382,8 +386,7 @@ namespace HPlus {
     hSelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
-   // top mass
-    TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+   // top mass with possible event cuts
     if (TopSelectionData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
       increment(fTopSelectionCounter);
       //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
