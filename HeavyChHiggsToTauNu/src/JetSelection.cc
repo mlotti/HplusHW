@@ -189,7 +189,7 @@ namespace HPlus {
       fSelectedJets.push_back(tmpSelectedJets[i]);
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
-    hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
+    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
 
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();

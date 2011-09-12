@@ -13,7 +13,7 @@
 
 const double luminosity = 1145; // in pb^-1
 const double qcdEvents = 7.5; // from QCD measurement, must correspond to the luminosity above!
-const bool qcdFromData = true;
+const bool qcdFromData = false;
 
 double signif(double nSignal,double nBackgr){
   double significance = 0;
@@ -443,7 +443,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 80");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -451,13 +451,14 @@ void optimisation() {
   TString met("met_p4.Et()"); TCut metCut(met+" > 70");
   //  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
 
-  TString btagMax("Max$(jets_btag)"); TCut btagCut(btagMax+" > 1.7");
-  TString btagJetNum17("Sum$(jets_btag > 1.7)"); 
+  TString btagMax("Max$(jets_btag)"); TCut btagCut(btagMax+" > 3.3");
+  TString btagJetNum17("Sum$(jets_btag > 3.3)"); 
   TString btag2ndMax("MaxIf$(jets_btag, jets_btag<Max$(jets_btag))");
 
+  TString emFraction("Max$(jets_EMfrac)"); TCut emFractionCut(emFraction+" < 0.7");
 
   // Optional cuts
-  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.65");
+  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.7");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
 
   TString deltaPhi("acos((tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/tau_p4.Pt()/met_p4.Et())*57.2958"); TCut deltaPhiCut(deltaPhi+" < 160");
@@ -466,8 +467,8 @@ void optimisation() {
   TCut cut;
 
   rtau += ">>dist(110,0.,1.1)";
-  cut = tauPtCut && metCut;
-  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut && mtCut), cut, false);
+  cut = tauPtCut && metCut && mtCut;
+  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut), cut, false);
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
@@ -481,9 +482,14 @@ void optimisation() {
   tauPtRes.setXLabel("tauPt");
 
   mt += ">>dist(50,0.,200.)";
-  cut = tauPtCut && metCut && rtauCut;
+  cut = tauPtCut && metCut  && rtauCut && deltaPhiCut;
   Result mtRes = createResult(mt, mcWeight(cut && btagCut), cut, false);
   mtRes.setXLabel("mt");
+
+  emFraction += ">>dist(100,0.,1.)";
+  cut = tauPtCut && metCut && rtauCut && mtCut;
+  Result emFractionRes = createResult(emFraction, mcWeight(cut && btagCut), cut, true);
+  emFractionRes.setXLabel("emFraction");
 
   btagMax += ">>dist(80,0.,8.)";
   cut = tauPtCut && metCut && rtauCut;
@@ -498,10 +504,10 @@ void optimisation() {
   btagExactlyOneRes.setXLabel("btag exactly one");
   btagJetNum17 += ">>dist(6,0.,6.)";
   Result btagJetNum17Res = createResult(btagJetNum17, mcWeight(cut), cut, false);
-  btagJetNum17Res.setXLabel("N(bjets>1.7)");
+  btagJetNum17Res.setXLabel("N(bjets> 3.3)");
 
   deltaPhi += ">>dist(90.,0.,180.)";
-  cut = tauPtCut && metCut && rtauCut;
+  cut = tauPtCut && metCut && rtauCut && mtCut;
   Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, true);
   deltaPhiRes.setXLabel("deltaPhi");
 
@@ -516,12 +522,13 @@ void optimisation() {
 //  rtauRes.Significance();
   //  metRes.Significance();
   //  tauPtRes.Significance();
-  //  mtRes.Significance();
-  btagRes.Significance();
-  btag2ndMaxRes.Significance();
+  mtRes.Significance();
+  //  btagRes.Significance();
+  //  btag2ndMaxRes.Significance();
   //  btagExactlyOneRes.Significance();
-  btagJetNum17Res.Significance();
-  deltaPhiRes.Significance();
+  //  btagJetNum17Res.Significance();
+  //  deltaPhiRes.Significance();
+  //  emFractionRes.Significance();
 
 }
 
