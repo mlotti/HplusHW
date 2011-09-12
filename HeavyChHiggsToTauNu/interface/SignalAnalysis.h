@@ -122,9 +122,9 @@ namespace HPlus {
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fFakeMETVetoCounter;
+    Count fdeltaPhiTauMET160FakeMetCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
-    Count fdeltaPhiTauMET160FakeMetCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
     Count ftransverseMassCut80NoRtauCounter;
@@ -139,8 +139,8 @@ namespace HPlus {
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
     TauSelection fOneProngTauSelection;
-    METSelection fMETSelection;
     JetSelection fJetSelection;
+    METSelection fMETSelection;
     BTagging fBTagging;
     FakeMETVeto fFakeMETVeto;
     JetTauInvMass fJetTauInvMass;
