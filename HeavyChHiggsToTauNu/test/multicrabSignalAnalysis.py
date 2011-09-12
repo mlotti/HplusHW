@@ -2,10 +2,13 @@
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-multicrab = Multicrab("crab_analysis.cfg", "signalAnalysis_cfg.py")
+
+cfg = "signalAnalysis_cfg.py"
+#cfg = "QCDMeasurement_cfg.py"
+multicrab = Multicrab("crab_analysis.cfg", cfg)
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v17"
+pattupleVersion = "pattuple_v18"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -25,21 +28,29 @@ multicrab.extendDatasets(pattupleVersion,
         # Data: single tau (control trigger)
 #        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
 #        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
-        
-        # Data: single tau + MET
-        "Tau_160431-161176_May10",  # HLT_IsoPFTau35_Trk20_MET45_v1
-        "Tau_161217-163261_May10",  # HLT_IsoPFTau35_Trk20_MET45_v2
-        "Tau_163270-163869_May10",  # HLT_IsoPFTau35_Trk20_MET45_v4
-        "Tau_165088-165633_Prompt", # HLT_IsoPFTau35_Trk20_MET45_v6
-        "Tau_165970-166164_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_166346-166346_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v3
-        "Tau_166374-167043_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v2
-        "Tau_167078-167784_Prompt", # HLT_IsoPFTau35_Trk20_MET60_v4
+#        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
+#        "Tau_Single_167078-167913_Prompt",   # HLT_IsoPFTau35_Trk20_v4
+#        "Tau_Single_170722-172619_Aug05",    # HLT_IsoPFTau35_Trk20_v6
+#        "Tau_Single_172620-173198_Prompt",   # HLT_IsoPFTau35_Trk20_v6
+#        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
 
-        "Tau_161119-161119_May10_Wed", # HLT_IsoPFTau35_Trk20_MET45_v1
-        "Tau_165103-165103_Prompt_Wed", # HLT_IsoPFTau35_Trk20_MET45_v6
-        "Tau_167786-167913_Prompt_Wed", # HLT_IsoPFTau35_Trk20_MET60_v4
-        
+        # Data: single tau + MET
+        # This is the "EPS" dataset
+        "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
+        "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
+        "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
+        "Tau_165088-165633_Prompt",          # HLT_IsoPFTau35_Trk20_MET45_v6
+        "Tau_165970-166164_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
+        "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
+        "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
+        "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
+
+        # These are beyond EPS
+#        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
+#        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
+#        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
+
+
         # MC Signal (WH)
         "TTToHplusBWB_M80_Summer11",
         "TTToHplusBWB_M90_Summer11",
@@ -52,12 +63,21 @@ multicrab.extendDatasets(pattupleVersion,
 
         # MC Signal (HH)
         "TTToHplusBHminusB_M80_Summer11",
+        "TTToHplusBHminusB_M90_Summer11",
         "TTToHplusBHminusB_M100_Summer11",
         "TTToHplusBHminusB_M120_Summer11",
         "TTToHplusBHminusB_M140_Summer11",
         "TTToHplusBHminusB_M150_Summer11",
         "TTToHplusBHminusB_M155_Summer11",
         "TTToHplusBHminusB_M160_Summer11",
+
+	# MC Signal (heavy H+ from process pp->tbH+)
+#        "HplusTB_M180_Summer11",
+#        "HplusTB_M190_Summer11",
+#        "HplusTB_M200_Summer11",
+#        "HplusTB_M220_Summer11",
+#        "HplusTB_M250_Summer11",
+#        "HplusTB_M300_Summer11",
 
         # MC Background
         "QCD_Pt30to50_TuneZ2_Summer11",
@@ -69,7 +89,22 @@ multicrab.extendDatasets(pattupleVersion,
         "TTJets_TuneZ2_Summer11",
         "WJets_TuneZ2_Summer11",
         "DYJetsToLL_M50_TuneZ2_Summer11",
+        "T_t-channel_TuneZ2_Summer11",
+        "Tbar_t-channel_TuneZ2_Summer11",
+        "T_tW-channel_TuneZ2_Summer11",
+        "Tbar_tW-channel_TuneZ2_Summer11",
+        "T_s-channel_TuneZ2_Summer11",
+        "Tbar_s-channel_TuneZ2_Summer11",
+        "WW_TuneZ2_Summer11",
+        "WZ_TuneZ2_Summer11",
+        "ZZ_TuneZ2_Summer11",
         ])
+
+
+output = ["histograms.root"]
+if "signalAnalysis" in cfg:
+    output.append("pickEvents.txt")
+multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
 
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
@@ -89,11 +124,12 @@ if runPatOnTheFly:
     #multicrab.modifyLumisPerJobAll(lambda nlumis: nlumis*2)
     #multicrab.modifyNumberOfJobsAll(lambda njobs: njobs*0.5)
 
+prefix = "multicrab"
+if "QCD" in cfg:
+    prefix += "_QCD"
+
 # Generate configuration only
-multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(prefix=prefix, configOnly=True)
 
 # Genenerate configuration and create the crab tasks
-#multicrab.createTasks()
-
-# Create a custom multicrab task directory (SignalAnalysis_xxxxxx_yyyyyy)
-#multicrab.createTasks(prefix="SignalAnalysis")
+multicrab.createTasks(prefix=prefix)

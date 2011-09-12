@@ -195,6 +195,8 @@ namespace HPlus {
     hTightChargedSumPt = makeTH<TH1F>(myDir, "TightChargedSumPt", "TightChargedSumPt;TightChargedSumPt;N_{tau candidates}", 200, 0., 100.);
     hTightChargedOccupancy = makeTH<TH1F>(myDir, "TightChargedOccupancy", "TightChargedOccupancy;TightChargedOccupancy;N_{tau candidates}", 100, 0., 100.);
     hTightGammaOccupancy = makeTH<TH1F>(myDir, "TightGammaOccupancy", "TightGammaOccupancy;TightGammaOccupancy;N_{tau candidates}", 100, 0., 100.); 
+
+    hHPSDecayMode = makeTH<TH1F>(myDir, "HPSDecayMode", "HPSDecayMode;HPSDecayMode;N_{tau candidates}",100,0,100);
   }
 
   TauSelection::~TauSelection() {
@@ -206,6 +208,39 @@ namespace HPlus {
     // Obtain tau collection from src specified in config
     edm::Handle<edm::View<pat::Tau> > htaus;
     iEvent.getByLabel(fSrc, htaus);
+
+    bool myRemoveFakeStatus = false;
+    if (myRemoveFakeStatus && !iEvent.isRealData()) {
+      edm::PtrVector<pat::Tau> myFilteredTaus;
+      edm::Handle <reco::GenParticleCollection> genParticles;
+      iEvent.getByLabel("genParticles", genParticles);
+      for (edm::PtrVector<pat::Tau>::iterator it = htaus->ptrVector().begin(); it != htaus->ptrVector().end(); ++it) {
+        // Remove fake taus from list
+        bool myTauFoundStatus = false;
+        bool myLeptonVetoStatus = false;
+        for (size_t i=0; i < genParticles->size(); ++i) {
+          const reco::Candidate & p = (*genParticles)[i];
+          if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15) {
+            // Check match with tau
+            if (reco::deltaR(p, (*it)->p4()) < 0.2) {
+              if (p.pt() > 5.) {
+              // match found
+                if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13) {
+                  myLeptonVetoStatus = true;
+                  i = genParticles->size(); // finish loop
+                }
+                if (std::abs(p.pdgId()) == 15) myTauFoundStatus = true;
+              }
+            }
+          }
+        }
+        if (myTauFoundStatus && !myLeptonVetoStatus)
+          myFilteredTaus.push_back(*it);
+      } // end of tau loop
+      passEvent = doTauSelection(iEvent,iSetup,myFilteredTaus);
+      return Data(this, passEvent);
+    }
+
     // Do selection
     passEvent = doTauSelection(iEvent,iSetup,htaus->ptrVector());
     return Data(this, passEvent);
@@ -371,10 +406,12 @@ namespace HPlus {
         hIsolationPFChargedHadrCandsPtSum->Fill(iTau->isolationPFChargedHadrCandsPtSum(), fEventWeight.getWeight());
         hIsolationPFGammaCandsEtSum->Fill(iTau->isolationPFGammaCandsEtSum(), fEventWeight.getWeight());
 
+        hHPSDecayMode->Fill(iTau->tauID("decayModeFinding"), fEventWeight.getWeight());
+
         if (!fTauID->passIsolation(iTau)) continue;
         // Apply trigger scale factor
         if (fTriggerSelection != 0) {
-          if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
+          if (!fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
         }
         
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());

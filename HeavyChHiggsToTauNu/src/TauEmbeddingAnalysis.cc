@@ -23,29 +23,32 @@ namespace HPlus {
   {}
   TauEmbeddingAnalysis::Histograms::~Histograms() {}
 
-  void TauEmbeddingAnalysis::Histograms::book(TFileDirectory& fd, const std::string& prefix) {
-    hOriginalMet = makeTH<TH1F>(fd, (prefix+"_originalMet").c_str(), "Original MET", 400, 0, 400);
-    hEmbeddingMet = makeTH<TH1F>(fd, (prefix+"_embeddingMet").c_str(), "Embedding MET", 400, 0, 400);
-    hEmbVSOrigMet = makeTH<TH2F>(fd, (prefix+"_embVSOrigMet").c_str(), "EmbeddingVSoriginal MET", 100, 0, 400, 100, 0, 400);
+  void TauEmbeddingAnalysis::Histograms::book(TFileDirectory& fd, const std::string& prefix, const std::string& label) {
+    TFileDirectory dir = fd.mkdir(label);
 
-    hOriginalMuonPt = makeTH<TH1F>(fd, (prefix+"_originalMuonPt").c_str(), "OriginalMuon Pt", 400, 0, 400);
-    hOriginalMuonEta = makeTH<TH1F>(fd, (prefix+"_originalMuonEta").c_str(), "OriginalMuon Eta", 300, -3,3);
-    hOriginalMuonPhi = makeTH<TH1F>(fd, (prefix+"_originalMuonPhi").c_str(), "OriginalMuon Phi", 300, 0, 3.2);
+    hOriginalMet = makeTH<TH1F>(dir, (prefix+"_originalMet").c_str(), "Original MET", 400, 0, 400);
+    hEmbeddingMet = makeTH<TH1F>(dir, (prefix+"_embeddingMet").c_str(), "Embedding MET", 400, 0, 400);
+    hEmbVSOrigMet = makeTH<TH2F>(dir, (prefix+"_embVSOrigMet").c_str(), "EmbeddingVSoriginal MET", 100, 0, 400, 100, 0, 400);
 
-    hSelectedTauPt = makeTH<TH1F>(fd, (prefix+"_selectedTauPt").c_str(), "SelectedTau Pt", 400, 0, 400);
-    hSelectedTauEta = makeTH<TH1F>(fd, (prefix+"_selectedTauEta").c_str(), "SelectedTau Eta", 300, -3, 3);
-    hSelectedTauPhi = makeTH<TH1F>(fd, (prefix+"_selectedTauPhi").c_str(), "SelectedTau Phi", 300, 0, 3.2);
-    hSelectedTauIsolation05 = makeTH<TH1F>(fd, (prefix+"_selectedTauIsolation05").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 0.5", 100, 0, 100);
-    hSelectedTauIsolation10 = makeTH<TH1F>(fd, (prefix+"_selectedTauIsolation10").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 1.0", 100, 0, 100);
-    hleadPFChargedHadrPt = makeTH<TH1F>(fd, (prefix+"_leadPFChargedHadrPt").c_str(), "LeadPFChargedHadr Pt", 400, 0, 200);
-    hRtau = makeTH<TH1F>(fd, (prefix+"_Rtau").c_str(), "Rtau", 400, 0, 1.2);
+    hOriginalMuonPt = makeTH<TH1F>(dir, (prefix+"_originalMuonPt").c_str(), "OriginalMuon Pt", 400, 0, 400);
+    hOriginalMuonEta = makeTH<TH1F>(dir, (prefix+"_originalMuonEta").c_str(), "OriginalMuon Eta", 300, -3,3);
+    hOriginalMuonPhi = makeTH<TH1F>(dir, (prefix+"_originalMuonPhi").c_str(), "OriginalMuon Phi", 300, 0, 3.2);
 
-    hDeltaPhi = makeTH<TH1F>(fd, (prefix+"_DeltaPhi").c_str(), "DeltaPhi", 400, 0, 3.2);
-    hDeltaPhiEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_DeltaPhiEmbVSOrig").c_str(), "DeltaPhiEmbVSOrig", 100, 0, 3.2, 100, 0, 3.2);
-    hTransverseMass = makeTH<TH1F>(fd, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
-    hDeltaPhiOriginal = makeTH<TH1F>(fd, (prefix+"_DeltaPhiOriginal").c_str(), "DeltaPhiOriginal", 400, 0, 3.2);
-    hTransverseMassOriginal = makeTH<TH1F>(fd, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
-    hMTEmbVSOrig = makeTH<TH2F>(fd, (prefix+"_MTEmbVSOrig").c_str(), "MTEmbVSOrig", 100, 0, 400, 100, 0, 400);
+    hSelectedTauPt = makeTH<TH1F>(dir, (prefix+"_selectedTauPt").c_str(), "SelectedTau Pt", 400, 0, 400);
+    hSelectedTauPtNoWeight = makeTH<TH1F>(dir, (prefix+"_selectedTauPtNoWeight").c_str(), "SelectedTau Pt", 400, 0, 400);
+    hSelectedTauEta = makeTH<TH1F>(dir, (prefix+"_selectedTauEta").c_str(), "SelectedTau Eta", 300, -3, 3);
+    hSelectedTauPhi = makeTH<TH1F>(dir, (prefix+"_selectedTauPhi").c_str(), "SelectedTau Phi", 300, 0, 3.2);
+    hSelectedTauIsolation05 = makeTH<TH1F>(dir, (prefix+"_selectedTauIsolation05").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 0.5", 100, 0, 100);
+    hSelectedTauIsolation10 = makeTH<TH1F>(dir, (prefix+"_selectedTauIsolation10").c_str(), "Selected tau sum(iso_cand_pt) for iso_cand_pt > 1.0", 100, 0, 100);
+    hleadPFChargedHadrPt = makeTH<TH1F>(dir, (prefix+"_leadPFChargedHadrPt").c_str(), "LeadPFChargedHadr Pt", 400, 0, 200);
+    hRtau = makeTH<TH1F>(dir, (prefix+"_Rtau").c_str(), "Rtau", 400, 0, 1.2);
+
+    hDeltaPhi = makeTH<TH1F>(dir, (prefix+"_DeltaPhi").c_str(), "DeltaPhi", 400, 0, 3.2);
+    hDeltaPhiEmbVSOrig = makeTH<TH2F>(dir, (prefix+"_DeltaPhiEmbVSOrig").c_str(), "DeltaPhiEmbVSOrig", 100, 0, 3.2, 100, 0, 3.2);
+    hTransverseMass = makeTH<TH1F>(dir, (prefix+"_TransverseMass").c_str(), "TransverseMass", 400, 0, 400);
+    hDeltaPhiOriginal = makeTH<TH1F>(dir, (prefix+"_DeltaPhiOriginal").c_str(), "DeltaPhiOriginal", 400, 0, 3.2);
+    hTransverseMassOriginal = makeTH<TH1F>(dir, (prefix+"_TransverseMassOriginal").c_str(), "TransverseMassOriginal", 400, 0, 400);
+    hMTEmbVSOrig = makeTH<TH2F>(dir, (prefix+"_MTEmbVSOrig").c_str(), "MTEmbVSOrig", 100, 0, 400, 100, 0, 400);
   }
 
   void TauEmbeddingAnalysis::Histograms::fill(double weight, const reco::MET *originalMet, const reco::MET *embeddingMet, const reco::Muon *originalMuon, const pat::Tau *selectedTau) {
@@ -71,6 +74,7 @@ namespace HPlus {
 
     if(selectedTau) {
       hSelectedTauPt->Fill(selectedTau->pt(), weight);
+      hSelectedTauPtNoWeight->Fill(selectedTau->pt());
       hSelectedTauEta->Fill(selectedTau->eta(), weight);
       hSelectedTauPhi->Fill(selectedTau->phi(), weight);
 
@@ -136,13 +140,13 @@ namespace HPlus {
     }
 
     edm::Service<TFileService> fs;
-    std::string prefix("TauEmbeddingAnalysis_");
+    std::string label("TauEmbeddingAnalysis");
 
-    fBegin.book(*fs, prefix+"begin");
-    fAfterTauId.book(*fs, prefix+"afterTauId");
-    fAfterMetCut.book(*fs, prefix+"afterMetCut");
-    fAfterBTagging.book(*fs, prefix+"afterBTagging");
-    fAfterFakeMetVeto.book(*fs, prefix+"afterFakeMetVeto");
+    fBegin.book(*fs, "begin", label);
+    fAfterTauId.book(*fs, "afterTauId", label);
+    fAfterMetCut.book(*fs, "afterMetCut", label);
+    fAfterBTagging.book(*fs, "afterBTagging", label);
+    fAfterFakeMetVeto.book(*fs, "afterFakeMetVeto", label);
   }
   TauEmbeddingAnalysis::~TauEmbeddingAnalysis() {}
 

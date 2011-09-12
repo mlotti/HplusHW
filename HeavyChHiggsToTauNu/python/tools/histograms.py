@@ -22,7 +22,7 @@ class TextDefaults:
     def __init__(self):
         self._setDefaults("cmsPreliminary", x=0.62, y=0.96)
         self._setDefaults("energy", x=0.2, y=0.96)
-        self._setDefaults("lumi", x=0.45, y=0.96)
+        self._setDefaults("lumi", x=0.43, y=0.96)
 
     ## Modify the default values
     # 
@@ -117,7 +117,7 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
 # \param y     Y coordinate of the text (None for default value)
 # \param lumi  Value of the integrated luminosity
 # \param unit  Unit of the integrated luminosity value
-def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
+def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
     l = ROOT.TLatex()
     l.SetNDC()
@@ -125,7 +125,7 @@ def addLuminosityText(x, y, lumi, unit="pb^{-1}"):
     l.SetTextSize(textDefaults.getSize("lumi"))
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
-    l.DrawLatex(x, y, "%.0f %s" % (lumi, unit))
+    l.DrawLatex(x, y, "%.2f %s" % (lumi/1000., unit))
 
 ## Class for generating legend creation functions with default positions.
 #
@@ -650,10 +650,14 @@ class HistoBase:
             h.SetLineWidth(1)
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
+
             legend.AddEntry(h, self.legendLabel, self.legendStyle)
             self.rootHistoForLegend = h # keep the reference in order to avoid segfault
         else:
-            legend.AddEntry(self.rootHisto, self.legendLabel, self.legendStyle)
+            labels = self.legendLabel.split("\n")
+            legend.AddEntry(self.rootHisto, labels[0], self.legendStyle)
+            for lab in labels[1:]:
+                legend.AddEntry(None, lab, "")
 
     ## Call a function with self as an argument.
     #
@@ -1255,7 +1259,7 @@ class HistoManager:
     # \param x   X coordinate of the text (\a None for default)
     # \param y   Y coordinate of the text (\a None for default)
     def addLuminosityText(self, x=None, y=None):
-        addLuminosityText(x, y, self.getLuminosity(), "pb^{-1}")
+        addLuminosityText(x, y, self.getLuminosity())
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):

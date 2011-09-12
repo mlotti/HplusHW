@@ -5,9 +5,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data (needed only for interactice running,
-# overridden automatically from multicrab
-dataVersion="42Xmc"     # Summer11 MC
-#dataVersion="42Xdata" # Run2010 Apr21 ReReco, Run2011 May10 ReReco, Run2011 PromptReco
+dataVersion = "42Xmc"
+#dataVersion = "42Xdata"   # Run2011 data
+
 
 ##########
 # Flags for additional signal analysis modules
@@ -57,7 +57,7 @@ process.source = cms.Source('PoolSource',
     #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )
@@ -211,8 +211,8 @@ process.QCDMeasurementCounters = cms.EDAnalyzer("HPlusEventCountAnalyzer",
     counterNames = cms.untracked.InputTag("QCDMeasurement", "counterNames"),
     counterInstances = cms.untracked.InputTag("QCDMeasurement", "counterInstances"),
     printMainCounter = cms.untracked.bool(True),
-    printSubCounters = cms.untracked.bool(True),
-    printAvailableCounters = cms.untracked.bool(False),
+#    printSubCounters = cms.untracked.bool(True),
+#    printAvailableCounters = cms.untracked.bool(False),
 )
 if len(additionalCounters) > 0:
     process.QCDMeasurementCounters.counters = cms.untracked.VInputTag([cms.InputTag(c) for c in additionalCounters])

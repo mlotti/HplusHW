@@ -29,6 +29,7 @@ namespace HPlus {
       
       double getWeight(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
       double getRelativeUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
+      double getAbsoluteUncertainty(int nPassedB, int nPassedL, std::vector<double>& nFailedBpT, std::vector<double>& nFailedLpT);
       
     private:
       size_t obtainIndex(std::vector<double>& table, double pt);
@@ -73,6 +74,8 @@ namespace HPlus {
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets);
 
+    const std::string getDiscriminator() const { return fDiscriminator; }
+
   private:
     void applyScaleFactor(const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets);
 
@@ -88,7 +91,8 @@ namespace HPlus {
 
     // Lookup tables for scale factors
     BTaggingScaleFactor fBTaggingScaleFactor;
-    TH1* hBTagUncertainty;
+    TH1* hBTagAbsoluteUncertainty;
+    TH1* hBTagRelativeUncertainty;
 
     // Counters
     Count fTaggedCount;

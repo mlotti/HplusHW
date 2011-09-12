@@ -1,22 +1,29 @@
 import FWCore.ParameterSet.Config as cms
 
+singleTauMetTriggerPaths = [
+#    "HLT_SingleLooseIsoTau20",
+#    "HLT_SingleLooseIsoTau20_Trk5",
+#    "HLT_SingleIsoTau20_Trk5",
+#    "HLT_SingleIsoTau20_Trk15_MET20",
+#    "HLT_SingleIsoTau20_Trk15_MET25_v3",
+#    "HLT_SingleIsoTau20_Trk15_MET25_v4",
+    "HLT_IsoPFTau35_Trk20_MET45_v1",
+    "HLT_IsoPFTau35_Trk20_MET45_v2",
+    "HLT_IsoPFTau35_Trk20_MET45_v4",
+    "HLT_IsoPFTau35_Trk20_MET45_v6",
+    "HLT_IsoPFTau35_Trk20_MET60_v2",
+    "HLT_IsoPFTau35_Trk20_MET60_v3",
+    "HLT_IsoPFTau35_Trk20_MET60_v4",
+    "HLT_IsoPFTau35_Trk20_MET60_v6",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+]
+
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
     triggerSrc = cms.untracked.InputTag("TriggerResults", "", "INSERT_HLT_PROCESS_HERE"),
     patSrc = cms.untracked.InputTag("patTriggerEvent"),
-    triggers = cms.untracked.vstring("HLT_SingleLooseIsoTau20",
-                                     "HLT_SingleLooseIsoTau20_Trk5",
-                                     "HLT_SingleIsoTau20_Trk5",
-                                     "HLT_SingleIsoTau20_Trk15_MET20",
-                                     "HLT_SingleIsoTau20_Trk15_MET25_v3",
-                                     "HLT_SingleIsoTau20_Trk15_MET25_v4",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v1",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v2",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v4",
-                                     "HLT_IsoPFTau35_Trk20_MET45_v6",
-                                     "HLT_IsoPFTau35_Trk20_MET60_v2",
-    ),
+    triggers = cms.untracked.vstring(singleTauMetTriggerPaths),
     hltMetCut = cms.untracked.double(60.0),
     throwIfNoMet = cms.untracked.bool(False), # to prevent jobs from failing, FIXME: must be investigated later
     selectionType = cms.untracked.string("byTriggerBit"), # Default byTriggerBit, other options byParametrisation, disabled
@@ -134,7 +141,8 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
-    METCut = cms.untracked.double(60.0)
+    METCut = cms.untracked.double(60.0),
+    EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
 MET = cms.untracked.PSet(
@@ -172,7 +180,7 @@ GlobalMuonVeto = cms.untracked.PSet(
     MuonCollectionName = cms.untracked.InputTag("selectedPatMuons"),
     MuonSelection = cms.untracked.string("GlobalMuonPromptTight"),
     MuonPtCut = cms.untracked.double(15.0),
-    MuonEtaCut = cms.untracked.double(2.5),
+    MuonEtaCut = cms.untracked.double(2.5),  
     MuonApplyIpz = cms.untracked.bool(False) # Apply IP-z cut
 )
 
@@ -217,10 +225,15 @@ topSelection = cms.untracked.PSet(
 )
 
 vertexWeight = cms.untracked.PSet(
-    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
+    vertexSrc = cms.InputTag("goodPrimaryVertices"),
+#    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
+    puSummarySrc = cms.InputTag("addPileupInfo"),
     useSimulatedPileup = cms.bool(False), # reweight by PileupSummaryInfo (True) or vertices (False)
+    summer11S4Mode = cms.bool(False),
     weights = cms.vdouble(0.0),
     enabled = cms.bool(False),
+    shiftMean = cms.bool(False),
+    shiftMeanAmount = cms.double(0),    
 )
 
 triggerEfficiency = cms.untracked.PSet(
@@ -248,9 +261,10 @@ for triggerName in filter(lambda n: len(n) > 4 and n[0:4] == "HLT_", dir(trigEff
 
 # Functions
 def overrideTriggerFromOptions(options):
-    if options.trigger != "":
+    if isinstance(options.trigger, basestring) and options.trigger != "":
         trigger.triggers = [options.trigger]
-
+    elif len(options.trigger) > 0:
+        trigger.triggers = options.trigger
 
 def _getTriggerVertexArgs(kwargs):
     effargs = {}
@@ -333,6 +347,8 @@ def formatEfficiencyTrigger(pset):
 # Summer11
 # SimGeneral/MixingModule/python/mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT.py rev 1.2
 mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT = cms.vdouble(0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0698146584,0.0630151648,0.0526654164,0.0402754482,0.0292988928,0.0194384503,0.0122016783,0.007207042,0.004003637,0.0020278322,0.0010739954,0.0004595759,0.0002229748,0.0001028162,4.58337152809607E-05)
+Summer11_PU_S4 = cms.vdouble(0.104109, 0.0703573, 0.0698445, 0.0698254, 0.0697054, 0.0697907, 0.0696751, 0.0694486, 0.0680332, 0.0651044, 0.0598036, 0.0527395, 0.0439513, 0.0352202, 0.0266714, 0.019411, 0.0133974, 0.00898536, 0.0057516, 0.00351493, 0.00212087, 0.00122891, 0.00070592, 0.000384744, 0.000219377)
+
 
 def setPileupWeightFor2010(pset=vertexWeight):
     # From Apr21 JSON
@@ -342,13 +358,26 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(pset=vertexWeight):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS"):
     # From May10 JSON
-    pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
-    pset.dataDist = cms.vdouble(3920760.80629436, 6081805.28281331, 13810357.99011321, 22505758.94021218, 28864043.83552697, 30917427.86233390, 28721324.56001887, 23746403.90406303, 17803439.77098848, 12274902.61013811, 7868110.47066589, 4729915.39947807, 2686011.14199905, 1449831.55635479, 747892.02788490, 370496.37848078, 177039.18864957, 81929.34806527, 36852.77647303, 16164.44620983, 6932.97050646, 2914.39317056, 1202.91639412, 488.15400922, 194.93432620)
-    pset.dataDist = cms.vdouble(14541678.75140152, 34774289.38286586, 78924690.82740858, 126467305.04758325, 159328519.15029529, 167603454.44535571, 152683760.94960380, 123793506.45609140, 90946208.64651683, 61397298.32203319, 38505025.66458631, 22628034.29716743, 12550315.25868838, 6610507.05491146, 3324027.56535537, 1602862.62059887, 743920.15564290, 333476.86203421, 144860.60591722, 61112.68817281, 25110.18359585, 10065.11629597, 3943.97900547, 1513.53535599, 896.16051321)
+    if dataVersion.isS4():
+        pset.mcDist = Summer11_PU_S4
+        pset.summer11S4Mode = True
+    else:
+        pset.mcDist = mix_E7TeV_FlatDist10_2011EarlyData_50ns_PoissonOOT
+        pset.summer11S4Mode = False
     pset.enabled = True
     pset.useSimulatedPileup = True
+
+    if era == "EPS":
+        # from /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_EPS_8_jul.root
+        pset.dataDist = cms.vdouble(14541678.75140152, 34774289.38286586, 78924690.82740858, 126467305.04758325, 159328519.15029529, 167603454.44535571, 152683760.94960380, 123793506.45609140, 90946208.64651683, 61397298.32203319, 38505025.66458631, 22628034.29716743, 12550315.25868838, 6610507.05491146, 3324027.56535537, 1602862.62059887, 743920.15564290, 333476.86203421, 144860.60591722, 61112.68817281, 25110.18359585, 10065.11629597, 3943.97900547, 1513.53535599, 896.16051321)
+    elif era == "all":
+        # from /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_to_172802_LP_LumiScale.root
+        pset.dataDist = cms.vdouble(13577061.34960927, 36988195.79256942, 87784462.15955786, 148782145.82866752, 200194824.54279479, 227349906.22656760, 226472477.30015501, 203175245.93433914, 167317368.02201021, 128301353.72262345, 92616728.24257115, 63470211.62257222, 41558646.73644819, 26124508.46311678, 15821365.84873490, 9253707.52579752, 5235996.37046473, 2869480.81515694, 1524386.71200273, 785535.62462179, 392893.09321437, 190841.97559003, 90079.33573278, 41342.87414307, 32218.24625225)
+    else:
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS' and 'all'" % era)
+
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
@@ -387,14 +416,14 @@ def setAllTauSelectionSrcSelectedPatTaus():
     tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTau"
 
 def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
-    tauSelectionCaloTauCutBased.src         = "selectedPatTausCaloRecoTauTauTriggerMatched"
-    tauSelectionShrinkingConeTaNCBased.src  = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionShrinkingConeCutBased.src   = "selectedPatTausShrinkingConePFTauTauTriggerMatched"
-    tauSelectionHPSTightTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "selectedPatTausHpsPFTauTauTriggerMatched"#for QCD control plots
-    tauSelectionHPSMediumTauBased.src       = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionHPSLooseTauBased.src        = "selectedPatTausHpsPFTauTauTriggerMatched"
-    tauSelectionCombinedHPSTaNCTauBased.src = "selectedPatTausHpsTancPFTauTauTriggerMatched"
+    tauSelectionCaloTauCutBased.src         = "patTausCaloRecoTauTauTriggerMatched"
+    tauSelectionShrinkingConeTaNCBased.src  = "patTausShrinkingConePFTauTauTriggerMatched"
+    tauSelectionShrinkingConeCutBased.src   = "patTausShrinkingConePFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSTightTauBasedNoLdgPtOrRtauCut.src = "patTausHpsPFTauTauTriggerMatched"#for QCD control plots
+    tauSelectionHPSMediumTauBased.src       = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
+    tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
 def setTauSelection(module, val):

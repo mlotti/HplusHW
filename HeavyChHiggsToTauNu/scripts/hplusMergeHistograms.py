@@ -76,8 +76,8 @@ def main(opts, args):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
-    parser.add_option("-i", dest="input", type="string", default="histograms_.*\.root",
-                      help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_\.*\.root')")
+    parser.add_option("-i", dest="input", type="string", default="histograms_.*?\.root",
+                      help="Regex for input root files (note: remember to escape * and ? !) (default: 'histograms_.*?\.root')")
     parser.add_option("-o", dest="output", type="string", default="histograms-%s.root",
                       help="Pattern for merged output root files (use '%s' for crab directory name) (default: 'histograms-%s.root')")
     

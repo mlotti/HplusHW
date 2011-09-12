@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 _patTauCollectionsDefault = [
-#    "selectedPatTausShrinkingConePFTau",
-    "selectedPatTausHpsPFTau",
-    "selectedPatTausHpsTancPFTau",
-#    "selectedPatTausCaloRecoTau"
+#    "patTausShrinkingConePFTau",
+    "patTausHpsPFTau",
+    "patTausHpsTancPFTau",
+#    "patTausCaloRecoTau"
     ] # add to the list new sources for patTauCollections, if necessary
 
 tauPathLastFilter = {
@@ -13,17 +13,24 @@ tauPathLastFilter = {
     "HLT_IsoPFTau35_Trk20_MET45_v4": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
     "HLT_IsoPFTau35_Trk20_MET45_v6": "hltFilterSingleIsoPFTau35Trk20MET45LeadTrack20MET45IsolationL1HLTMatched",
 
-    "HLT_IsoPFTau35_Trk20_v2": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau35_Trk20_v3": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau35_Trk20_v4": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v2":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v3":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v4":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_v6":       "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_v1": "hltFilterSingleIsoPFTau35Trk20LeadTrack20IsolationL1HLTMatched",
 
-    "HLT_IsoPFTau35_Trk20_MET60_v2": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau35_Trk20_MET60_v3": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau35_Trk20_MET60_v4": "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v2":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v3":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v4":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau35_Trk20_MET60_v6":        "hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET60_v1": " hltFilterSingleIsoPFTau35Trk20MET60LeadTrack20IsolationL1HLTMatched",
 
-    "HLT_IsoPFTau45_Trk20_MET60_v2": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau45_Trk20_MET60_v3": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
-    "HLT_IsoPFTau45_Trk20_MET60_v4": "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v2":       "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v3":       "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+    "HLT_IsoPFTau45_Trk20_MET60_v4":       "hltFilterSingleIsoPFTau45Trk20MET60LeadTrack20IsolationL1HLTMatched",
+
+    "HLT_IsoPFTau35_Trk20_MET70_v2":       "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
+    "HLT_MediumIsoPFTau35_Trk20_MET70_v1": "hltFilterSingleIsoPFTau35Trk20MET70LeadTrack20IsolationL1HLTMatched",
     }
 
 def addTauTriggerMatching(process, trigger, postfix="", collections=_patTauCollectionsDefault, pathFilterMap=tauPathLastFilter, throw=True):

@@ -213,6 +213,9 @@ namespace hplus {
       TH1 *hTauOrigMetDPhi;
       TH2 *hMuonOrigMetTauMetDPhi;
 
+      TH1 *hMuonOrigMetMt;
+      TH1 *hTauMetMt;
+
       TH1 *hWTauNuMetDPhi;
       TH2 *hWNuOrigMetMuonTauNuMetDPhi;
 

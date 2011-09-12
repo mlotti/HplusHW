@@ -46,9 +46,6 @@ namespace HPlus {
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
-    // Variables
-    float fMet;
-
   private:
     // Input parameters
     edm::InputTag fSrc;

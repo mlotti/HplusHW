@@ -49,6 +49,7 @@ set -e
 # 1.7.2011/M.Kortelainen CMSSW_4_2_5 Updated PAT tags
 # 4.7.2011/M.Kortelainen CMSSW_4_2_5 Reverted PAT tags (I accidentally launched the pattuple_v16 with an old version)
 # 6.7.2011/M.Kortelainen CMSSW_4_2_5 Updated PAT tags back
+# 12.8.2011/M.Kortelainen CMSSW_4_2_8_patch1 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -66,14 +67,19 @@ addpkg RecoTauTag/Configuration   V01-02-03
 addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
-addpkg DataFormats/PatCandidates  V06-04-18
-addpkg PhysicsTools/PatAlgos      V08-06-38
-addpkg PhysicsTools/PatExamples   V00-05-21
+addpkg DataFormats/PatCandidates  V06-04-19-01
+addpkg PhysicsTools/PatAlgos      V08-06-41
+addpkg PhysicsTools/PatExamples   V00-05-22
 addpkg PhysicsTools/SelectorUtils V00-03-17
-addpkg CommonTools/RecoAlgos      V00-03-13
-addpkg FWCore/GuiBrowsers         V00-00-57
+
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
+# https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
+addpkg PhysicsTools/Utilities     V08-03-09
+
+# Luminosity
+# https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
+addpkg RecoLuminosity/LumiDB      V03-00-00
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID

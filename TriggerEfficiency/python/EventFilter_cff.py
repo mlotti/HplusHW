@@ -13,6 +13,14 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChMETFilter_cfi import *
 metSelectionFilter = hPlusMETPtrSelectorFilter.clone()
 eventFilter *= metSelectionFilter
 
+# Lepton vetoes
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi import *
+eVetoFilter = hPlusGlobalElectronVetoFilter.clone()
+eventFilter *= eVetoFilter
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi import *
+muVetoFilter = hPlusGlobalMuonVetoFilter.clone()
+eventFilter *= muVetoFilter
+
 # Jet selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi import *
 jetSelectionFilter = hPlusJetPtrSelectorFilter.clone()
