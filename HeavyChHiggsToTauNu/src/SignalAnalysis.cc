@@ -340,9 +340,12 @@ namespace HPlus {
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Top reco, no event cut
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
+    // Calculate alphaT
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
     // Write the stuff to the tree
-    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(), TopSelectionData.getTopP4());
+    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
+               TopSelectionData.getTopP4(), evtTopologyData.alphaT().fAlphaT);
 
 
     // MET cut
@@ -440,7 +443,6 @@ namespace HPlus {
     // Correlation analysis
     fCorrelationAnalysis.analyze(tauData.getSelectedTaus(), btagData.getSelectedJets());
     // Alpha T
-    //    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
     //if(!evtTopologyData.passedEvent()) return false;
     //    EvtTopology::AlphaStruc sAlphaT = evtTopologyData.alphaT();
     //    hAlphaT->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight()); // FIXME: move this histogramming to evt topology

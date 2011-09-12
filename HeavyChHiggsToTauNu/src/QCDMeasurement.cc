@@ -270,6 +270,11 @@ namespace HPlus {
     ///// This position is after the Big Box
     // get the MET, but cut on it later
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+
+    // alphaT - No cuts applied! Only produces plots
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
+    // increment(fEvtTopologyCounter);
+
     // It can happen (and happens) that mySelectedTau has more than 1
     // tau candidate, here we explicitly select only the first one
     // (with the hope that it is the correct one), because
@@ -278,8 +283,10 @@ namespace HPlus {
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
     mySelectedTauFirst.push_back(mySelectedTau[0]);
-    // FIXME: how to handle the top reco in QCD measurement?
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(), math::XYZTLorentzVector());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
+               math::XYZTLorentzVector(), // FIXME: how to handle the top reco in QCD measurement?
+               evtTopologyData.alphaT().fAlphaT
+               );
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {
@@ -299,11 +306,6 @@ namespace HPlus {
         fEventWeight.multiplyWeight(myWeightWithoutBTagScale / fEventWeight.getWeight()); // needed because of btag scale factor
       }
     }
-
-
-    // alphaT - No cuts applied! Only produces plots
-//    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
-    // increment(fEvtTopologyCounter);
 
 
     // InvMassVeto - No cuts applied! Only produces plots 
