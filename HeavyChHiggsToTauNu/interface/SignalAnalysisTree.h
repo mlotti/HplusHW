@@ -61,10 +61,24 @@ namespace HPlus {
 
     std::vector<math::XYZTLorentzVector> fJets;
     std::vector<double> fJetsBtags;
-    std::vector<double> fJetsEMfracs;
+    std::vector<double> fJetsChf;
+    std::vector<double> fJetsNhf;
+    std::vector<double> fJetsElf;
+    std::vector<double> fJetsPhf;
+    std::vector<double> fJetsMuf;
+    std::vector<int> fJetsChm;
+    std::vector<int> fJetsNhm;
+    std::vector<int> fJetsElm;
+    std::vector<int> fJetsPhm;
+    std::vector<int> fJetsMum;
+    std::vector<double> fJetsJec;
+    std::vector<double> fJetsArea;
+    std::vector<bool> fJetsLooseId;
+    std::vector<bool> fJetsTightId;
 
     // MET is really 2-vector, but let's just use this for consistency
     math::XYZTLorentzVector fMet;
+    double fMetSumEt;
   };
 }
 

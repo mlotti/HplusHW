@@ -33,9 +33,23 @@ namespace HPlus {
 
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
-    fTree->Branch("jets_EMfrac", &fJetsEMfracs);
+    fTree->Branch("jets_chf", &fJetsChf); // charged hadron
+    fTree->Branch("jets_nhf", &fJetsNhf); // neutral hadron
+    fTree->Branch("jets_elf", &fJetsElf);  // electron
+    fTree->Branch("jets_phf", &fJetsPhf);  // photon
+    fTree->Branch("jets_muf", &fJetsMuf);   // muon
+    fTree->Branch("jets_chm", &fJetsChm);
+    fTree->Branch("jets_nhm", &fJetsNhm);
+    fTree->Branch("jets_elm", &fJetsElm);
+    fTree->Branch("jets_phm", &fJetsPhm);
+    fTree->Branch("jets_mum", &fJetsMum);
+    fTree->Branch("jets_jecToRaw", &fJetsJec);
+    fTree->Branch("jets_area", &fJetsArea);
+    fTree->Branch("jets_looseId", &fJetsLooseId);
+    fTree->Branch("jets_tightId", &fJetsTightId);
 
     fTree->Branch("met_p4", &fMet);
+    fTree->Branch("met_sumet", &fMetSumEt);
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -53,15 +67,47 @@ namespace HPlus {
     for(size_t i=0; i<jets.size(); ++i) {
       fJets.push_back(jets[i]->p4());
       fJetsBtags.push_back(jets[i]->bDiscriminator(fBdiscriminator));
-      double EMfrac = (jets[i]->chargedEmEnergy() + 
-                       jets[i]->neutralEmEnergy())/(
-                       jets[i]->chargedHadronEnergy() + 
-                       jets[i]->neutralHadronEnergy() + 
-                       jets[i]->chargedEmEnergy() + 
-                       jets[i]->neutralEmEnergy());
-      fJetsEMfracs.push_back(EMfrac);
-    }
 
+      double eta = jets[i]->eta();
+
+      double chf = jets[i]->chargedHadronEnergyFraction();
+      double nhf = jets[i]->neutralHadronEnergyFraction();
+      double elf = jets[i]->chargedEmEnergyFraction();
+      double phf = jets[i]->neutralEmEnergyFraction();
+      // for some reason the muonEnergyFraction is calculated w.r.t. *corrected* energy in pat::Jet
+      double muf = jets[i]->muonEnergy() / (jets[i]->jecFactor(0) * jets[i]->energy());
+
+      double sum = chf+nhf+elf+phf+muf;
+      if(std::abs(sum - 1.0) > 0.000001) {
+        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
+                                       << " the sum-1 was " << (sum-1.0)
+                                       << std::endl;
+      }
+
+      fJetsChf.push_back(chf);
+      fJetsNhf.push_back(nhf);
+      fJetsElf.push_back(elf);
+      fJetsPhf.push_back(phf);
+      fJetsMuf.push_back(muf);
+
+      int chm = jets[i]->chargedHadronMultiplicity();
+      fJetsChm.push_back(chm);
+      fJetsNhm.push_back(jets[i]->neutralHadronMultiplicity());
+      fJetsElm.push_back(jets[i]->electronMultiplicity());
+      fJetsPhm.push_back(jets[i]->photonMultiplicity());
+      fJetsMum.push_back(jets[i]->muonMultiplicity());
+
+      fJetsJec.push_back(jets[i]->jecFactor(0));
+
+      int npr = jets[i]->chargedMultiplicity() + jets[i]->neutralMultiplicity();
+
+      fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
+                                                                      std::abs(eta) > 2.4) );
+      fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
+                                                                      std::abs(eta) > 2.4) );
+
+      fJetsArea.push_back(jets[i]->jetArea());
+    }
     fMet = met->p4();
 
     fTree->Fill();
@@ -84,8 +130,26 @@ namespace HPlus {
 
     fJets.clear();
     fJetsBtags.clear();
-    fJetsEMfracs.clear();
+
+    fJetsChf.clear();
+    fJetsNhf.clear();
+    fJetsElf.clear();
+    fJetsPhf.clear();
+    fJetsMuf.clear();
+
+    fJetsChm.clear();
+    fJetsNhm.clear();
+    fJetsElm.clear();
+    fJetsPhm.clear();
+    fJetsMum.clear();
+
+    fJetsJec.clear();
+    fJetsArea.clear();
+
+    fJetsLooseId.clear();
+    fJetsTightId.clear();
 
     fMet.SetXYZT(0, 0, 0, 0);
+    fMetSumEt = 0.0;
   }
 }
