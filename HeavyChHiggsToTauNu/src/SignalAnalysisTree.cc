@@ -83,6 +83,8 @@ namespace HPlus {
                                        << " the sum-1 was " << (sum-1.0)
                                        << std::endl;
       }
+      fJetsECands.push_back(eCand);
+      }
 
       fJetsChf.push_back(chf);
       fJetsNhf.push_back(nhf);
