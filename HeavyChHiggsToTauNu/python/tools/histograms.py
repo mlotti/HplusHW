@@ -6,6 +6,7 @@
 import os, sys
 import glob
 import array
+
 from optparse import OptionParser
 
 import ROOT
@@ -300,25 +301,30 @@ def dist2pass(hdist, **kwargs):
     # bin GetNbinsX()   last bin
     # bin GetNbinsX()+1 overflow bin
 
-    # Construct the passed histogram such that the bin low edges in
-    # the distribution histogram become the bin centers
-    binLowEdges = []
-    for bin in xrange(1, hdist.GetNbinsX()+3):
-        prevBin = bin-1
-        prevLowEdge = hdist.GetBinLowEdge(prevBin)
-        thisLowEdge = hdist.GetBinLowEdge(bin)
-        binLowEdges.append( (prevLowEdge+thisLowEdge)/2 )
+    # Here we assume that all the bins in hdist have equal widths. If
+    # this doesn't hold, the output must be TGraph
+    bw = hdist.GetBinWidth(1);
+    for bin in xrange(2, hdist.GetNbinsX()+1):
+        if abs(bw - hdist.GetBinWidth(bin))/bw > 0.01:
+            raise Exception("Input histogram with variable bin width is not supported (yet). The bin width of bin1 was %f, and bin width of bin %d was %f" % (bw, bin, hdist.GetBinWidth(bin)))
 
+    # Construct the low edges of the passed histogram. Set the low
+    # edges such that the bin centers correspond to the edges of the
+    # distribution histogram. This makes sense because the only
+    # sensible cut points in the distribution histogram are the bin
+    # edges, and if one draws the passed histogram with points, the
+    # points are placed to bin centers.
+    nbins = hdist.GetNbinsX()+1
+    firstLowEdge = hdist.GetXaxis().GetBinLowEdge(1) - bw/2
+    lastUpEdge = hdist.GetXaxis().GetBinUpEdge(hdist.GetNbinsX()) + bw/2
     name = "passed_"+hdist.GetName()
-    hpass = ROOT.TH1F(name, name, len(binLowEdges)-1, array.array("d", binLowEdges))
+    hpass = ROOT.TH1F("cumulative_"+hdist.GetName(), "Cumulative "+hdist.GetTitle(),
+                      nbins, firstLowEdge, lastUpEdge)
 
     #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
 
-    #print ["%.4f" % i for i in binLowEdges]
-    #print ["%.3f" % hdist.GetBinLowEdge(bin) for bin in xrange(1, hdist.GetNbinsX()+2)]
-    #print ["%.3f" % hpass.GetBinCenter(bin) for bin in xrange(1, hpass.GetNbinsX()+1)]
     #for bin in xrange(1, hpass.GetNbinsX()):
-    total = hdist.Integral(0, hdist.GetNbinsX()+1)
+    #total = hdist.Integral(0, hdist.GetNbinsX()+1)
     #print "total %f" % total
     for bin in xrange(0, hdist.GetNbinsX()+2):
         passed = integral(hdist, bin)
@@ -327,20 +333,23 @@ def dist2pass(hdist, **kwargs):
     #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
     return hpass
 
+
+def th1ApplyBin(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
+
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, hpass.GetBinContent(bin)/total)
+    th1ApplyBin(hdist, lambda value: value/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
 def dist2rej(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, 1-hpass.GetBinContent(bin)/total)
+    th1ApplyBin(hdist, lambda value: 1-value/total)
     return hpass
 
 
