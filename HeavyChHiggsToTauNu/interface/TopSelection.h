@@ -20,6 +20,7 @@ namespace HPlus {
 
   class TopSelection {
   public:
+    typedef math::XYZTLorentzVector XYZTLorentzVector;
     /**
      * Class to encapsulate the access to the data members of
      * TauSelection. If you want to add a new accessor, add it here
@@ -34,9 +35,8 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      const float getTopMass() const { return fTopSelection->topMass; }
-      //      const edm::PtrVector<pat::Jet>& getSelectedJets() const { return fTopSelection->fSelectedJets; }
-      //      const int getBJetCount() const { return fTopSelection->iNBtags; }
+      const double getTopMass() const { return fTopSelection->topMass; }
+      const XYZTLorentzVector& getTopP4() const { return fTopSelection->top; }
 
     private:
       const TopSelection *fTopSelection;
@@ -74,10 +74,7 @@ namespace HPlus {
 
     // Variables
     double topMass;
-
-
-    // Selected jets
-    //    edm::PtrVector<pat::Jet> fSelectedJets;
+    XYZTLorentzVector top;
   };
 }
 

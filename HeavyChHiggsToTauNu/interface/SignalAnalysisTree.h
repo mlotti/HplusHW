@@ -25,6 +25,8 @@ class TTree;
 namespace HPlus {
   class SignalAnalysisTree {
   public:
+    typedef math::XYZTLorentzVector XYZTLorentzVector;
+
     explicit SignalAnalysisTree(const std::string& bDiscriminator);
     ~SignalAnalysisTree();
 
@@ -35,9 +37,11 @@ namespace HPlus {
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
+    void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-              const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
+              const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+              double alphaT);
 
   private:
     void reset();
@@ -56,15 +60,33 @@ namespace HPlus {
 
     unsigned int fNVertices;
 
-    math::XYZTLorentzVector fTau;
-    math::XYZTLorentzVector fTauLeadingChCand;
+    XYZTLorentzVector fTau;
+    XYZTLorentzVector fTauLeadingChCand;
 
-    std::vector<math::XYZTLorentzVector> fJets;
+    std::vector<XYZTLorentzVector> fJets;
     std::vector<double> fJetsBtags;
-    std::vector<double> fJetsEMfracs;
+    std::vector<double> fJetsChf;
+    std::vector<double> fJetsNhf;
+    std::vector<double> fJetsElf;
+    std::vector<double> fJetsPhf;
+    std::vector<double> fJetsMuf;
+    std::vector<int> fJetsChm;
+    std::vector<int> fJetsNhm;
+    std::vector<int> fJetsElm;
+    std::vector<int> fJetsPhm;
+    std::vector<int> fJetsMum;
+    std::vector<double> fJetsJec;
+    std::vector<double> fJetsArea;
+    std::vector<bool> fJetsLooseId;
+    std::vector<bool> fJetsTightId;
 
     // MET is really 2-vector, but let's just use this for consistency
-    math::XYZTLorentzVector fMet;
+    XYZTLorentzVector fMet;
+    double fMetSumEt;
+
+    XYZTLorentzVector fTop;
+
+    double fAlphaT;
   };
 }
 

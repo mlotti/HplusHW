@@ -151,12 +151,9 @@ namespace HPlus {
 	  increment(fchargedMultiplicityCutSubCount);
 	}
 
-      double EMfrac = (iJet->chargedEmEnergy() +
-                       iJet->neutralEmEnergy())/(
-                       iJet->chargedHadronEnergy() +
-                       iJet->neutralHadronEnergy() +
-                       iJet->chargedEmEnergy() +
-                       iJet->neutralEmEnergy());
+      // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
+      //      double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
+      double EMfrac = iJet->chargedEmEnergyFraction();
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 

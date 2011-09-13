@@ -457,6 +457,8 @@ void optimisation() {
 
   TString emFraction("Max$(jets_EMfrac)"); TCut emFractionCut(emFraction+" < 0.7");
 
+  TString topMass("topreco_p4.M()"); TCut topMassCut(topMass+" < 230");
+
   // Optional cuts
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.7");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
@@ -482,7 +484,7 @@ void optimisation() {
   tauPtRes.setXLabel("tauPt");
 
   mt += ">>dist(50,0.,200.)";
-  cut = tauPtCut && metCut  && rtauCut && deltaPhiCut;
+  cut = tauPtCut && metCut  && rtauCut && deltaPhiCut && topMassCut;
   Result mtRes = createResult(mt, mcWeight(cut && btagCut), cut, false);
   mtRes.setXLabel("mt");
 
@@ -511,6 +513,10 @@ void optimisation() {
   Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, true);
   deltaPhiRes.setXLabel("deltaPhi");
 
+  topMass += ">>dist(100.,0.,400.)";
+  cut = tauPtCut && metCut && rtauCut && mtCut;
+  Result topMassRes = createResult(topMass, mcWeight(cut && btagCut), cut, true);
+  topMassRes.setXLabel("topMass");
 /*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
@@ -523,6 +529,7 @@ void optimisation() {
   //  metRes.Significance();
   //  tauPtRes.Significance();
   mtRes.Significance();
+  topMassRes.Significance();
   //  btagRes.Significance();
   //  btag2ndMaxRes.Significance();
   //  btagExactlyOneRes.Significance();
