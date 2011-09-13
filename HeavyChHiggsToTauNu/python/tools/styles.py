@@ -113,6 +113,13 @@ signalHH150Style = signalHHStyle
 signalHH155Style = signalHHStyle
 signalHH160Style = signalHHStyle
 
+signal180Style = signalStyle
+signal190Style = signalStyle
+signal200Style = signalStyle
+signal220Style = signalStyle
+signal250Style = signalStyle
+signal300Style = signalStyle
+
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)
 ttStyle = Style(ROOT.kFullSquare, ROOT.kMagenta-2)
