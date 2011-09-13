@@ -451,17 +451,11 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # Finally orders the datasets as specified in plots._datasetOrder. The
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
-def mergeRenameReorderForDataMC(datasetMgr, mergeWHandHH=True):
+def mergeRenameReorderForDataMC(datasetMgr):
     datasetMgr.mergeData()
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
     datasetMgr.mergeMany(_datasetMerge)
-
-    if mergeWHandHH:
-        names = datasetMgr.getAllDatasetNames()
-        for signalWH, signalHH, target in _signalMerge:
-            if signalWH in names and signalHH in names:
-                datasetMgr.merge(target, [signalWH, signalHH])
 
     mcNames = datasetMgr.getAllDatasetNames()
     newOrder = []
@@ -474,6 +468,12 @@ def mergeRenameReorderForDataMC(datasetMgr, mergeWHandHH=True):
             pass
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
+
+def mergeWHandHH(datasetMgr):
+    names = datasetMgr.getAllDatasetNames()
+    for signalWH, signalHH, target in _signalMerge:
+        if signalWH in names and signalHH in names:
+            datasetMgr.merge(target, [signalWH, signalHH])
 
 ## Creates a ratio histogram
 #

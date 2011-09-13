@@ -80,6 +80,8 @@ def main():
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
+    plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
