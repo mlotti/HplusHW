@@ -352,7 +352,7 @@ class TreeDraw:
 
     def draw(self, rootFile):
         if not ">>" in self.varexp:
-            raise Exception("varexp should include explicitly the histogram binning (%s)"%varexp)
+            raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
         selection = self.selection
         if len(self.weight) > 0:

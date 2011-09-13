@@ -145,6 +145,16 @@ _physicalToLogical = {
 }
 
 ## Map the datasets to be merged to the name of the merged dataset.
+_signalMerge = [
+    ("TTToHplusBWB_M80",  "TTToHplusBHminusB_M80",  "TTToHplus_M80"),
+    ("TTToHplusBWB_M90",  "TTToHplusBHminusB_M90",  "TTToHplus_M90"),
+    ("TTToHplusBWB_M100", "TTToHplusBHminusB_M100", "TTToHplus_M100"),
+    ("TTToHplusBWB_M120", "TTToHplusBHminusB_M120", "TTToHplus_M120"),
+    ("TTToHplusBWB_M140", "TTToHplusBHminusB_M140", "TTToHplus_M140"),
+    ("TTToHplusBWB_M150", "TTToHplusBHminusB_M150", "TTToHplus_M150"),
+    ("TTToHplusBWB_M155", "TTToHplusBHminusB_M155", "TTToHplus_M155"),
+    ("TTToHplusBWB_M160", "TTToHplusBHminusB_M160", "TTToHplus_M160"),
+]
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -333,6 +343,10 @@ _plotStyles = {
     "Diboson":               styles.dibStyle,
 }
 
+def isSignal(name):
+    return "TTToHplus" in name or "HplusTB" in name
+
+
 ## Update the default legend labels
 def updateLegendLabel(datasetName, legendLabel):
     _legendLabels[datasetName] = legendLabel
@@ -437,11 +451,17 @@ def UpdatePlotStyleFill(styleMap, namesToFilled):
 # Finally orders the datasets as specified in plots._datasetOrder. The
 # datasets not in the plots._datasetOrder list are left at the end in
 # the same order they were originally.
-def mergeRenameReorderForDataMC(datasetMgr):
+def mergeRenameReorderForDataMC(datasetMgr, mergeWHandHH=True):
     datasetMgr.mergeData()
     datasetMgr.renameMany(_physicalToLogical, silent=True)
 
     datasetMgr.mergeMany(_datasetMerge)
+
+    if mergeWHandHH:
+        names = datasetMgr.getAllDatasetNames()
+        for signalWH, signalHH, target in _signalMerge:
+            if signalWH in names and signalHH in names:
+                datasetMgr.merge(target, [signalWH, signalHH])
 
     mcNames = datasetMgr.getAllDatasetNames()
     newOrder = []
@@ -517,7 +537,7 @@ class PlotBase:
     #
     # \param datasetRootHistos  dataset.DatasetRootHistoBase objects to plot
     # \param saveFormats        List of suffixes for formats for which to save the plot
-    def __init__(self, datasetRootHistos, saveFormats=[".png", ".eps", ".C"]):
+    def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
         self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
 
@@ -663,9 +683,6 @@ class PlotSameBase(PlotBase):
         self.rootHistoPath = name
         self.normalizeToOne = normalizeToOne
 
-    def _isSignal(self, name):
-        return "TTToHplus" in name
-
     ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
@@ -677,7 +694,7 @@ class PlotSameBase(PlotBase):
     # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
         mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(lambda n: not self._isSignal(n), mcNames)
+        mcNamesNoSignal = filter(lambda n: not isSignal(n), mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
 
@@ -686,7 +703,7 @@ class PlotSameBase(PlotBase):
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
     def stackMCSignalHistograms(self):
-        mcSignal = filter(lambda n: self._isSignal(n), self.datasetMgr.getMCDatasetNames())
+        mcSignal = filter(lambda n: isSignal(n), self.datasetMgr.getMCDatasetNames())
         self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band
