@@ -47,7 +47,7 @@ def main():
                      "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",                       "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt",
                      "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
                      "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11",
-                     "HplusTB_M190_Summer11","HplusTB_M250_Summer11","HplusTB_M300_Summer11","HplusTB_M220_Summer11","HplusTB_M200_Summer11",
+                     "HplusTB_M180_Summer11", "HplusTB_M190_Summer11","HplusTB_M250_Summer11","HplusTB_M300_Summer11","HplusTB_M220_Summer11","HplusTB_M200_Summer11",
 #                     "Tau_165970-166164_Prompt", "Tau_166374-167043_Prompt", "Tau_167078-167784_Prompt", "Tau_165088-165633_Prompt"
 #                     "Tau_163270-163869_May10","Tau_161217-163261_May10", "Tau_160431-161176_May10"
                      ])
