@@ -50,9 +50,7 @@ namespace HPlus {
     edm::Handle<edm::View<reco::Vertex> > hvertex;
     iEvent.getByLabel(fVertexSrc, hvertex);
 
-    size_t vertSize = 0;
-    if(hvertex.isValid())
-      vertSize = hvertex->size();
+    size_t vertSize = vertSize = hvertex->size();
 
     if(!fEnabled || iEvent.isRealData()) {
       hWeights->Fill(1.0);

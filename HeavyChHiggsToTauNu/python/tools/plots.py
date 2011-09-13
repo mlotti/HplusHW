@@ -70,6 +70,13 @@ _physicalToLogical = {
     "TTToHplusBHminusB_M155_Summer11": "TTToHplusBHminusB_M155",
     "TTToHplusBHminusB_M160_Summer11": "TTToHplusBHminusB_M160",
 
+    "HplusTB_M180_Summer11": "HplusTB_M180",
+    "HplusTB_M190_Summer11": "HplusTB_M190",
+    "HplusTB_M200_Summer11": "HplusTB_M200",
+    "HplusTB_M220_Summer11": "HplusTB_M220",
+    "HplusTB_M250_Summer11": "HplusTB_M250",
+    "HplusTB_M300_Summer11": "HplusTB_M300",
+
     "TTJets_TuneD6T_Winter10": "TTJets",
     "TTJets_TuneZ2_Winter10": "TTJets",
     "TTJets_TuneZ2_Spring11": "TTJets",
@@ -138,6 +145,16 @@ _physicalToLogical = {
 }
 
 ## Map the datasets to be merged to the name of the merged dataset.
+_signalMerge = [
+    ("TTToHplusBWB_M80",  "TTToHplusBHminusB_M80",  "TTToHplus_M80"),
+    ("TTToHplusBWB_M90",  "TTToHplusBHminusB_M90",  "TTToHplus_M90"),
+    ("TTToHplusBWB_M100", "TTToHplusBHminusB_M100", "TTToHplus_M100"),
+    ("TTToHplusBWB_M120", "TTToHplusBHminusB_M120", "TTToHplus_M120"),
+    ("TTToHplusBWB_M140", "TTToHplusBHminusB_M140", "TTToHplus_M140"),
+    ("TTToHplusBWB_M150", "TTToHplusBHminusB_M150", "TTToHplus_M150"),
+    ("TTToHplusBWB_M155", "TTToHplusBHminusB_M155", "TTToHplus_M155"),
+    ("TTToHplusBWB_M160", "TTToHplusBHminusB_M160", "TTToHplus_M160"),
+]
 _datasetMerge = {
     "QCD_Pt30to50":   "QCD",
     "QCD_Pt50to80":   "QCD",
@@ -191,6 +208,12 @@ _datasetOrder = [
     "TTToHplus_M150",
     "TTToHplus_M155",
     "TTToHplus_M160",
+    "HplusTB_M180",
+    "HplusTB_M190",
+    "HplusTB_M290",
+    "HplusTB_M220",
+    "HplusTB_M250",
+    "HplusTB_M300",
     "QCD",
     "QCD_Pt20_MuEnriched",
     "WJets",
@@ -232,6 +255,13 @@ _legendLabels = {
     "TTToHplus_M150": "H^{#pm} m_{H^{#pm}}=150",
     "TTToHplus_M155": "H^{#pm} m_{H^{#pm}}=155",
     "TTToHplus_M160": "H^{#pm} m_{H^{#pm}}=160",
+
+    "HplusTB_M180": "H^{#pm} m_{H^{#pm}}=180",
+    "HplusTB_M190": "H^{#pm} m_{H^{#pm}}=190",
+    "HplusTB_M200": "H^{#pm} m_{H^{#pm}}=200",
+    "HplusTB_M220": "H^{#pm} m_{H^{#pm}}=220",
+    "HplusTB_M250": "H^{#pm} m_{H^{#pm}}=250",
+    "HplusTB_M300": "H^{#pm} m_{H^{#pm}}=300",
 
     "TTJets":                "t#bar{t}+jets",
     "TT":                    "t#bar{t}",
@@ -292,6 +322,13 @@ _plotStyles = {
     "TTToHplus_M155":          styles.signal155Style,
     "TTToHplus_M160":          styles.signal160Style,
 
+    "HplusTB_M180": styles.signal180Style,
+    "HplusTB_M190": styles.signal190Style,
+    "HplusTB_M200": styles.signal200Style,
+    "HplusTB_M220": styles.signal220Style,
+    "HplusTB_M250": styles.signal250Style,
+    "HplusTB_M300": styles.signal300Style,
+
     "TTJets":                styles.ttStyle,
     "TT":                    styles.ttStyle,
 
@@ -305,6 +342,10 @@ _plotStyles = {
     "SingleTop":             styles.stStyle,
     "Diboson":               styles.dibStyle,
 }
+
+def isSignal(name):
+    return "TTToHplus" in name or "HplusTB" in name
+
 
 ## Update the default legend labels
 def updateLegendLabel(datasetName, legendLabel):
@@ -428,6 +469,12 @@ def mergeRenameReorderForDataMC(datasetMgr):
     newOrder.extend(mcNames)
     datasetMgr.selectAndReorder(newOrder)
 
+def mergeWHandHH(datasetMgr):
+    names = datasetMgr.getAllDatasetNames()
+    for signalWH, signalHH, target in _signalMerge:
+        if signalWH in names and signalHH in names:
+            datasetMgr.merge(target, [signalWH, signalHH])
+
 ## Creates a ratio histogram
 #
 # \param rootHisto1  TH1 dividend
@@ -490,7 +537,7 @@ class PlotBase:
     #
     # \param datasetRootHistos  dataset.DatasetRootHistoBase objects to plot
     # \param saveFormats        List of suffixes for formats for which to save the plot
-    def __init__(self, datasetRootHistos, saveFormats=[".png", ".eps", ".C"]):
+    def __init__(self, datasetRootHistos=[], saveFormats=[".png", ".eps", ".C"]):
         # Create the histogram manager
         self.histoMgr = histograms.HistoManager(datasetRootHistos = datasetRootHistos)
 
@@ -636,9 +683,6 @@ class PlotSameBase(PlotBase):
         self.rootHistoPath = name
         self.normalizeToOne = normalizeToOne
 
-    def _isSignal(self, name):
-        return "TTToHplus" in name
-
     ## Get the path of the histograms in the ROOT files
     def getRootHistoPath(self):
         return self.rootHistoPath
@@ -650,7 +694,7 @@ class PlotSameBase(PlotBase):
     # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
         mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(lambda n: not self._isSignal(n), mcNames)
+        mcNamesNoSignal = filter(lambda n: not isSignal(n), mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
 
@@ -659,7 +703,7 @@ class PlotSameBase(PlotBase):
         self.histoMgr.stackHistograms("StackedMC", mcNames)
 
     def stackMCSignalHistograms(self):
-        mcSignal = filter(lambda n: self._isSignal(n), self.datasetMgr.getMCDatasetNames())
+        mcSignal = filter(lambda n: isSignal(n), self.datasetMgr.getMCDatasetNames())
         self.histoMgr.stackHistograms("StackedMCSignal", mcSignal)
 
     ## Add MC uncertainty band

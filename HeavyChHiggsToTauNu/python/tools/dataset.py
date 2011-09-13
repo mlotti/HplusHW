@@ -1,4 +1,4 @@
-import glob, os, sys
+import glob, os, sys, re
 import json
 from optparse import OptionParser
 import math
@@ -332,6 +332,47 @@ def _mergeStackHelper(datasetList, nameList, task):
         print >> sys.stderr, "WARNING: Tried to %s '"%task + ", ".join(dlist) +"' which don't exist"
 
     return (selected, notSelected, firstIndex)
+
+
+th1_re = re.compile(">>\s*\S+\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+class TreeDraw:
+    def __init__(self, tree, varexp="", selection="", weight=""):
+        self.tree = tree
+        self.varexp = varexp
+        self.selection = selection
+        self.weight = weight
+
+    def clone(self, **kwargs):
+        args = {"tree": self.tree,
+                "varexp": self.varexp,
+                "selection": self.selection,
+                "weight": self.weight}
+        args.update(kwargs)
+        return TreeDraw(**args)
+
+    def draw(self, rootFile):
+        if not ">>" in self.varexp:
+            raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
+
+        selection = self.selection
+        if len(self.weight) > 0:
+            if len(selection) > 0:
+                selection = "%s * (%s)" % (self.weight, selection)
+            else:
+                selection = self.weight
+
+        tree = rootFile.Get(self.tree)
+        nentries = tree.Draw(self.varexp, self.selection, "goff")
+        h = tree.GetHistogram()
+        if h != None:
+            h = h.Clone(h.GetName()+"_cloned")
+        else:
+            m = th1_re.search(self.varexp)
+            if not m:
+                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % self.varexp)
+            h = ROOT.TH1F("tmp", self.varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+        h.SetDirectory(0)
+        return h
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
@@ -832,13 +873,17 @@ class Dataset:
         the name before TFile.Get() call.
         """
 
-        pname = self.prefix+name
-        h = self.file.Get(pname)
-        if h == None:
-            raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
+        h = None
+        if isinstance(name, TreeDraw):
+            h = name.draw(self.file)
+        else:
+            pname = self.prefix+name
+            h = self.file.Get(pname)
+            if h == None:
+                raise Exception("Unable to find histogram '%s' from file '%s'" % (pname, self.file.GetName()))
 
-        name = h.GetName()+"_"+self.name
-        h.SetName(name.translate(None, "-+.:;"))
+            name = h.GetName()+"_"+self.name
+            h.SetName(name.translate(None, "-+.:;"))
         return DatasetRootHisto(h, self)
 
     def getDirectoryContent(self, directory, predicate=lambda x: True):
