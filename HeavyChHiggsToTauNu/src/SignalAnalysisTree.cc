@@ -27,6 +27,7 @@ namespace HPlus {
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightTrigger", &fTriggerWeight);
+    fTree->Branch("weightBTagging", &fBTaggingWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
 
@@ -56,6 +57,8 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
+
+    fTree->Branch("passedBTagging", &fPassedBTagging);
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -132,6 +135,7 @@ namespace HPlus {
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
     fTriggerWeight = 1.0;
+    fBTaggingWeight = 1.0;
 
     fNVertices = 0;
 
@@ -167,5 +171,7 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+
+    fPassedBTagging = false;
   }
 }

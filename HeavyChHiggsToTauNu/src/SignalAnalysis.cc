@@ -344,6 +344,7 @@ namespace HPlus {
 
     // Write the stuff to the tree
     fTree.setTriggerWeight(triggerData.getScaleFactor()); // trigger scale factor is actually valid only after tau ID
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT);

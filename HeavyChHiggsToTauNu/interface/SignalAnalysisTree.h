@@ -37,6 +37,11 @@ namespace HPlus {
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
+    void setBTagging(bool passed, double scaleFactor) {
+      fPassedBTagging = passed;
+      if(passed)
+        fBTaggingWeight = scaleFactor;
+    }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -57,6 +62,7 @@ namespace HPlus {
     double fPrescaleWeight;
     double fPileupWeight;
     double fTriggerWeight;
+    double fBTaggingWeight;
 
     unsigned int fNVertices;
 
@@ -87,6 +93,8 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
+
+    bool fPassedBTagging;
   };
 }
 
