@@ -215,7 +215,6 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
-    fTree.setTriggerWeight(triggerData.getScaleFactor());
 
     hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
     hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
@@ -344,6 +343,7 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
     // Write the stuff to the tree
+    fTree.setTriggerWeight(triggerData.getScaleFactor()); // trigger scale factor is actually valid only after tau ID
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT);

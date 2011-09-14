@@ -215,7 +215,6 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
-    fTree.setTriggerWeight(triggerData.getScaleFactor());
 
     // GenParticle analysis
     if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
@@ -284,6 +283,7 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
     mySelectedTauFirst.push_back(mySelectedTau[0]);
     // FIXME: how to handle the top reco in QCD measurement?
+    fTree.setTriggerWeight(triggerData.getScaleFactor());  // trigger scale factor is actually valid only after tau ID
     fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT);
 
