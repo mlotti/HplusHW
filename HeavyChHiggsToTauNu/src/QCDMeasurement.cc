@@ -296,6 +296,8 @@ namespace HPlus {
 ///////// btag selection (factorise out)
       double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
       BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      // Apply scale factor as weight to event
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
       if (btagData.passedEvent()) {
         increment(fMETCounter);
         hSelectionFlow->Fill(kQCDOrderBTagFactorized, fEventWeight.getWeight());
