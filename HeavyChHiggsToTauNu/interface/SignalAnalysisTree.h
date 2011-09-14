@@ -14,6 +14,7 @@
 #include<vector>
 
 namespace edm {
+  class ParameterSet;
   class Event;
 }
 
@@ -27,7 +28,7 @@ namespace HPlus {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
 
-    explicit SignalAnalysisTree(const std::string& bDiscriminator);
+    explicit SignalAnalysisTree(const edm::ParameterSet& iConfig, const std::string& bDiscriminator);
     ~SignalAnalysisTree();
 
     void init(TFileDirectory& dir);
@@ -48,6 +49,7 @@ namespace HPlus {
     void reset();
 
     const std::string fBdiscriminator;
+    const bool fDoFill;
 
     TTree *fTree;
 

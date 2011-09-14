@@ -216,7 +216,8 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     vertexWeight = param.vertexWeight,
     tauEmbedding = param.TauEmbeddingAnalysis,
-    GenParticleAnalysis = param.GenParticleAnalysis
+    GenParticleAnalysis = param.GenParticleAnalysis,
+    Tree = cms.untracked.PSet(fill = cms.untracked.bool(True)),
 )
 
 # Prescale fetching done automatically for data
@@ -269,13 +270,14 @@ if doBTagScan:
     module = process.signalAnalysis.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
     module.bTagging.discriminatorCut = 2.0
+    module.Tree.fill = False
     addAnalysis(process, "signalAnalysisBtaggingTest", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
                 signalAnalysisCounters=True)
 
     from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-    module = process.signalAnalysis.clone()
+    module = module.clone()
 #    module.bTagging.discriminator = "trackCountingHighPurBJetTags"
     module.bTagging.discriminatorCut = 3.3
     addAnalysis(process, "signalAnalysisBtaggingTest2", module,
@@ -285,8 +287,10 @@ if doBTagScan:
 
 # Rtau testing
 if doRtauScan:
+    prototype = process.signalAnalysis.clone()
+    prototype.Tree.fill = False
     for val in [0.0, 0.7, 0.8]:
-        module = process.signalAnalysis.clone()
+        module = prototype.clone()
         module.tauSelection.rtauCut = val
         addAnalysis(process, "signalAnalysisRtau%d"%int(val*100), module,
                     preSequence=process.commonSequence,
@@ -295,6 +299,7 @@ if doRtauScan:
 
 if options.tauEmbeddingInput:
     module = process.signalAnalysis.clone()
+    module.Tree.fill = False
     module.trigger.caloMetSelection.metEmulationCut = 60.0
     addAnalysis(process, "signalAnalysisCaloMet60", module,
                 preSequence=process.commonSequence,
@@ -330,7 +335,9 @@ if options.tauEmbeddingInput:
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
-    param.addTauIdAnalyses(process, "signalAnalysis", process.signalAnalysis, process.commonSequence, additionalCounters)
+    module = process.signalAnalysis()
+    module.Tree.fill = False
+    param.addTauIdAnalyses(process, "signalAnalysis", module, process.commonSequence, additionalCounters)
 
 ################################################################################
 # The signal analysis with jet energy scale variation
@@ -353,7 +360,8 @@ if doJESVariation:
         jetVariationMode="onlyTauMatching"
         name = "signalAnalysisCaloMet60TEff"
         module = process.signalAnalysisCaloMet60TEff
-        
+    module = module.clone()
+    module.Tree.fill = False        
 
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)

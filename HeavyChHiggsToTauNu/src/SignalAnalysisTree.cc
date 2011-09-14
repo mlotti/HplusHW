@@ -2,6 +2,7 @@
 
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
@@ -10,14 +11,19 @@
 #include <limits>
 
 namespace HPlus {
-  SignalAnalysisTree::SignalAnalysisTree(const std::string& bDiscriminator):
-    fBdiscriminator(bDiscriminator), fTree(0)
+  SignalAnalysisTree::SignalAnalysisTree(const edm::ParameterSet& iConfig, const std::string& bDiscriminator):
+    fBdiscriminator(bDiscriminator), 
+    fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
+    fTree(0)
   {
     reset();
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
 
   void SignalAnalysisTree::init(TFileDirectory& dir) {
+    if(!fDoFill)
+      return;
+
     fTree = dir.make<TTree>("tree", "Tree");
 
     fTree->Branch("event", &fEvent);
@@ -64,6 +70,9 @@ namespace HPlus {
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
                                 const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
                                 double alphaT) {
+    if(!fDoFill)
+      return;
+
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
