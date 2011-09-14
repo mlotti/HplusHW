@@ -362,7 +362,16 @@ class TreeDraw:
                 selection = self.weight
 
         tree = rootFile.Get(self.tree)
-        nentries = tree.Draw(self.varexp, self.selection, "goff")
+        if self.varexp == "":
+            nentries = tree.GetEntries(selection)
+            h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
+            h.SetDirectory(0)
+            h.Sumw2()
+            h.SetBinContent(1, nentries)
+            h.SetBinError(1, math.sqrt(nentries))
+            return h
+
+        nentries = tree.Draw(self.varexp, selection, "goff")
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
@@ -459,6 +468,12 @@ class DatasetRootHisto(DatasetRootHistoBase):
         """Get list of the bin labels of the histogram."""
         return [x[0] for x in _histoToCounter(self.histo)]
 
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHisto):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
+
+        self.histo = function(self.histo, newDatasetRootHisto.histo)
+
     def _normalizedHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
@@ -550,6 +565,15 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     def isMC(self):
         return False
 
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
+        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+        for i, drh in enumerate(self.histoWrappers):
+            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
         return self.histoWrappers[0].getBinLabels()
@@ -614,6 +638,15 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
     def isMC(self):
         return True
+
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
+        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+        for i, drh in enumerate(self.histoWrappers):
+            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
