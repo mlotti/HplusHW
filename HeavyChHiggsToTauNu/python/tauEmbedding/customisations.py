@@ -5,7 +5,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChS
 
 tauEmbeddingMuons = "tauEmbeddingMuons"
 
-def customiseParamForTauEmbedding(param, dataVersion):
+def customiseParamForTauEmbedding(param, options, dataVersion):
     # Change the triggers to muon
     param.trigger.triggers = [
         "HLT_Mu9",
@@ -17,6 +17,26 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.trigger.caloMetSelection.src = "caloMetSum"
     param.trigger.caloMetSelection.metEmulationCut = -1#60.0
 
+    tauTrigger = options.tauEmbeddingTauTrigger
+    if len(tauTrigger) == 0:
+        tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
+
+    param.trigger.selectionType = cms.untracked.string("disabled")
+    param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string(tauTrigger), luminosity = cms.double(0)))
+    param.trigger.triggerEfficiency.parameters = cms.PSet(
+        HLT_IsoPFTau35_Trk20_EPS = cms.PSet(
+            tauPtBins = cms.VPSet(
+                        cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
+                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4035088)),
+                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7857143)),
+                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.8)),
+                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(1)),
+            )
+        )
+    )
+ 
+
+
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
     param.changeMetCollection(moduleLabel="pfMet") # no PAT object at the moment
@@ -25,9 +45,12 @@ def customiseParamForTauEmbedding(param, dataVersion):
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
 
     # Use the taus matched to the original muon in tau selections
-    #postfix = "TauEmbeddingMuonMatched"
-    param.setAllTauSelectionSrcSelectedPatTaus()
-    #param.forEachTauSelection(lambda x: x.src.setModuleLabel(x.src.getModuleLabel()+postfix))
+    postfix = "TauEmbeddingMuonMatched"
+    #param.setAllTauSelectionSrcSelectedPatTaus()
+    def replaceTauSrc(mod):
+        mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TauTriggerMatched", postfix))
+    param.forEachTauSelection(replaceTauSrc)
+    replaceTauSrc(param.trigger.triggerTauSelection)
 
     # Remove TCTau
     i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)
@@ -36,21 +59,20 @@ def customiseParamForTauEmbedding(param, dataVersion):
     del param.tauSelectionNames[i]
 
     # Set the analyzer
-    param.tree.tauEmbeddingInput = True
+    param.tree.tauEmbeddingInput = cms.untracked.bool(True)
     param.tree.tauEmbeddingMuonSource = cms.untracked.InputTag(tauEmbeddingMuons)
     param.tree.tauEmbeddingMetSource = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
     param.tree.tauEmbeddingCaloMetSource = cms.untracked.InputTag("caloMetSum")
 
-def setCaloMetSum(process, sequence, param, dataVersion):
+def setCaloMetSum(process, sequence, options, dataVersion):
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
-                       src = cms.VInputTag(cms.InputTag("metNoHF", "", dataVersion.getRecoProcess()),
-                                           cms.InputTag("metNoHF", "", "EMBEDDINGRECO")
+                       src = cms.VInputTag(cms.InputTag(options.tauEmbeddingCaloMet, "", dataVersion.getRecoProcess()),
+                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDINGRECO")
                                            )
                        )
     setattr(process, name, m)
     sequence *= m
-    # param.trigger.caloMet = name    
 
 def addMuonIsolationEmbeddingForSignalAnalysis(process, sequence, **kwargs):
     global tauEmbeddingMuons
@@ -233,7 +255,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     counter = prefix
 
     import muonSelectionPF_cff as muonSelection
-    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import *
+    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
         src = "selectedPatJets",
         preselection = muonSelection.goodJets.cut,
@@ -343,7 +365,7 @@ def addMuonTauIsolation(process, postfix="", discriminator="byTightIsolation"):
 
     muons = cms.EDProducer("HPlusTauIsolationPATMuonRefSelector",
         candSrc = cms.InputTag(tauEmbeddingMuons),
-        tauSrc = cms.InputTag("selectedPatTausHpsPFTau", "", "MUONSKIM"),
+        tauSrc = cms.InputTag("patTausHpsPFTau", "", "MUONSKIM"),
         isolationDiscriminator = cms.string(discriminator),
         againstMuonDiscriminator = cms.string("againstMuonLoose"),
         deltaR = cms.double(0.15),
@@ -531,7 +553,7 @@ def addTauEmbeddingMuonTaus(process):
         deltaR = cms.double(0.1),
     )
 
-    for tau in ["selectedPatTausHpsPFTau", "selectedPatTausHpsTancPFTau"]:
+    for tau in ["patTausHpsPFTau", "patTausHpsTancPFTau"]:
         m = prototype.clone(
             src = tau
         )

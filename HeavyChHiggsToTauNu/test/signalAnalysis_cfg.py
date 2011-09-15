@@ -81,16 +81,18 @@ process.source = cms.Source('PoolSource',
 )
 
 if options.tauEmbeddingInput != 0:
+    if  options.doPat == 0:
+        raise Exception("In tau embedding input mode, set also doPat=1")
+
     process.source.fileNames = [
-        #"/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Summer11/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_embedding_v11_2_pt40/af0b4aa82477426f47ec012132b67081/embedded_RECO_12_1_lWy.root"
-        "root://madhatter.csc.fi:1094/pnfs/csc.fi/data/cms/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_embedding_v11_4_pt40/ac085343fdb44ba8377c1f709923eacd/embedded_RECO_1_1_kNE.root",
-        #"file:embedded_RECO.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_embedding_v11_8_pt40/ac085343fdb44ba8377c1f709923eacd/embedded_RECO_2_1_Jik.root"
         ]
+    process.maxEvents.input = 10
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 if options.tauEmbeddingInput != 0:
-    process.GlobalTag.globaltag = "START42_V12::All"
+    process.GlobalTag.globaltag = "START42_V13::All"
 print "GlobalTag="+process.GlobalTag.globaltag.value()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
@@ -132,15 +134,6 @@ param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
-    tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, param, dataVersion)
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
-        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                   enableIsolation=applyIsolation))
-
 # Set the triggers for trigger efficiency parametrisation
 #param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
 param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
@@ -149,7 +142,7 @@ param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # 
 param.trigger.triggerMETSelection = param.MET.clone(
   METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
 )
-if (doTriggerParametrisation and not dataVersion.isData()) or options.tauEmbeddingInput != 0:
+if (doTriggerParametrisation and not dataVersion.isData()):
     param.setEfficiencyTriggersFor2011()
     # Settings for the configuration
 #    param.trigger.selectionType = cms.untracked.string("byParametrisation")
@@ -166,36 +159,14 @@ param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution
 #param.trigger.selectionType = "disabled"
 
 if options.tauEmbeddingInput != 0:
-    param.trigger.selectionType = cms.untracked.string("disabled")
-    param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string("SIMPLE"), luminosity = cms.double(0)))
-    param.trigger.triggerEfficiency.parameters = cms.PSet(
-        SIMPLE = cms.PSet(
-            tauPtBins = cms.VPSet(
-                        cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4035088)),
-                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7857143)),
-                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.8)),
-                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(1)),
-        # pre-approval
-                #cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.3293233)),
-                #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.3693694)),
-                #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.25)),
-                #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.3529412)),
+    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
+    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
+    if tauEmbeddingFinalizeMuonSelection:
+        applyIsolation = not doTauEmbeddingMuonSelectionScan
+        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
+                                                                                   enableIsolation=applyIsolation))
 
-                #cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4210526)),
-                #cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.4954955)),
-                #cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(0.4166667)),
-                #cms.PSet(lowEdge = cms.double(100), efficiency = cms.double(0.5294118)),
-
-#                cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.5)),
-#                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(1.0)),
-#                cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7)),
-#                cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(1.0)),
-            )
-        )
-    )
-    
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     trigger = param.trigger,
