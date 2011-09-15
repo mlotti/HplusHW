@@ -163,7 +163,7 @@ namespace HPlus {
         throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
       edm::Handle<edm::View<reco::MET> > hcalomet;
-      iEvent.getByLabel(fTauEmbeddingCaloMetSource, hmet);
+      iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
         throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
 
