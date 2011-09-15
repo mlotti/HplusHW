@@ -6,6 +6,12 @@
 
 #include "CommonTools/Utils/interface/TFileDirectory.h"
 
+#include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/Common/interface/View.h"
+#include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+
+
 #include "TTree.h"
 
 #include <limits>
@@ -14,8 +20,15 @@ namespace HPlus {
   SignalAnalysisTree::SignalAnalysisTree(const edm::ParameterSet& iConfig, const std::string& bDiscriminator):
     fBdiscriminator(bDiscriminator), 
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
+    fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
     fTree(0)
   {
+    if(fTauEmbeddingInput) {
+      fTauEmbeddingMuonSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMuonSource");
+      fTauEmbeddingMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMetSource");
+      fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
+    }
+
     reset();
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
@@ -65,6 +78,12 @@ namespace HPlus {
     fTree->Branch("alphaT", &fAlphaT);
 
     fTree->Branch("passedBTagging", &fPassedBTagging);
+
+    if(fTauEmbeddingInput) {
+      fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
+      fTree->Branch("temet_p4", &fTauEmbeddingMet);
+      fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
+    }
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -132,6 +151,27 @@ namespace HPlus {
 
     fAlphaT = alphaT;
 
+    if(fTauEmbeddingInput) {
+      edm::Handle<edm::View<pat::Muon> > hmuon;
+      iEvent.getByLabel(fTauEmbeddingMuonSource, hmuon);
+      if(hmuon->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
+
+      edm::Handle<edm::View<reco::MET> > hmet;
+      iEvent.getByLabel(fTauEmbeddingMetSource, hmet);
+      if(hmet->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
+
+      edm::Handle<edm::View<reco::MET> > hcalomet;
+      iEvent.getByLabel(fTauEmbeddingCaloMetSource, hmet);
+      if(hcalomet->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
+
+      fTauEmbeddingMuon = hmuon->at(0).p4();
+      fTauEmbeddingMet = hmet->at(0).p4();
+      fTauEmbeddingCaloMet = hcalomet->at(0).p4();
+    }
+
     fTree->Fill();
     reset();
   }
@@ -182,5 +222,9 @@ namespace HPlus {
     fAlphaT = nan;
 
     fPassedBTagging = false;
+
+    fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
+    fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
+    fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
   }
 }

@@ -20,7 +20,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 
 namespace edm {
   class ParameterSet;
@@ -118,7 +117,6 @@ namespace HPlus {
     TopSelection fTopSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
-    TauEmbeddingAnalysis fTauEmbeddingAnalysis;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
 

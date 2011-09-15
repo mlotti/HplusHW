@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisTree_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisTree_h
 
+#include "FWCore/Utilities/interface/InputTag.h"
+
 #include "DataFormats/Common/interface/Ptr.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
@@ -9,7 +11,6 @@
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-
 
 #include<vector>
 
@@ -50,6 +51,11 @@ namespace HPlus {
 
     const std::string fBdiscriminator;
     const bool fDoFill;
+    const bool fTauEmbeddingInput;
+
+    edm::InputTag fTauEmbeddingMuonSource;
+    edm::InputTag fTauEmbeddingMetSource;
+    edm::InputTag fTauEmbeddingCaloMetSource;
 
     TTree *fTree;
 
@@ -93,6 +99,11 @@ namespace HPlus {
     double fAlphaT;
 
     bool fPassedBTagging;
+
+    // Tau embedding stuff
+    XYZTLorentzVector fTauEmbeddingMuon;
+    XYZTLorentzVector fTauEmbeddingMet;
+    XYZTLorentzVector fTauEmbeddingCaloMet;
   };
 }
 

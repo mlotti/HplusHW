@@ -36,10 +36,10 @@ def customiseParamForTauEmbedding(param, dataVersion):
     del param.tauSelectionNames[i]
 
     # Set the analyzer
-    param.TauEmbeddingAnalysis.embeddingMode = True
-    param.TauEmbeddingAnalysis.originalMetSrc = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
-    param.TauEmbeddingAnalysis.originalMuon = cms.untracked.InputTag(tauEmbeddingMuons)
-    param.TauEmbeddingAnalysis.embeddingMetSrc = param.MET.src
+    param.tree.tauEmbeddingInput = True
+    param.tree.tauEmbeddingMuonSource = cms.untracked.InputTag(tauEmbeddingMuons)
+    param.tree.tauEmbeddingMetSource = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
+    param.tree.tauEmbeddingCaloMetSource = cms.untracked.InputTag("caloMetSum")
 
 def setCaloMetSum(process, sequence, param, dataVersion):
     name = "caloMetSum"

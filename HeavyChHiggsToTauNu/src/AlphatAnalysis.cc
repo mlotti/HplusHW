@@ -45,7 +45,6 @@ namespace HPlus {
     // ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
@@ -259,7 +258,6 @@ namespace HPlus {
 
     // Last but NOT least: Save the event weight!
     fEvtWeight = fEventWeight.getWeight();
-    // fTauEmbeddingAnalysis.fillEnd(); attikis
 
     // Fill TTree before any cut
     myTree->Fill();    

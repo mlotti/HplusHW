@@ -156,7 +156,7 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     tauIsolationCalculator = cms.untracked.PSet(
     vertexSrc = cms.InputTag("offlinePrimaryVertices")
     ), # needed for calculating isolation on the fly to determine which tau jet is most isolated
-    Tree = cms.untracked.PSet(fill = cms.untracked.bool(True)),
+    Tree = param.tree,
 )
 # Factorization (quick and dirty version)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables

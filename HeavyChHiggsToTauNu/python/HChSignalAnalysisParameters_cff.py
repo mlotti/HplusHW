@@ -224,6 +224,10 @@ topSelection = cms.untracked.PSet(
   TopMassHigh = cms.untracked.double(300.0)
 )
 
+tree = cms.untracked.PSet(
+    fill = cms.untracked.bool(True)
+)
+
 vertexWeight = cms.untracked.PSet(
     vertexSrc = cms.InputTag("goodPrimaryVertices"),
 #    vertexSrc = cms.InputTag("goodPrimaryVertices10"),
