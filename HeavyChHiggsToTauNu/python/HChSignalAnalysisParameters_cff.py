@@ -326,12 +326,14 @@ def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_
     setEfficiencyTriggers(triggers, **kwargs)
 
 def setEfficiencyTriggersFor2010(datasetType="pattuple_v10", **kwargs):
+    raise Exception("This function is not supported at the moment")
     setEfficiencyTriggersFromMulticrabDatasets([
             "BTau_146428-148058_Dec22",
             "BTau_148822-149182_Dec22",
             "BTau_149291-149294_Dec22",
             ], datasetType, **kwargs)
 def setEfficiencyTriggersFor2011(datasetType="pattuple_v10", **kwargs):
+    raise Exception("This function is not supported at the moment")
     setEfficiencyTriggersFromMulticrabDatasets([
             "Tau_160431-161016_Prompt",
             "Tau_162803-163261_Prompt",
