@@ -176,6 +176,7 @@ namespace HPlus {
     TH1 *hTransverseMassTopDeltaPhiFakeMET;
     TH1 *hTransverseMassRtauDeltaPhiFakeMET;
     TH1 *hTransverseMassBtag33RtauDeltaPhiFakeMET;
+    TH1 *hTransverseMassBtag33;
     TH1 *hDeltaPhi;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;

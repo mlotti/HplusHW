@@ -63,6 +63,7 @@ namespace HPlus {
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetChargedEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
  }
 
@@ -152,9 +153,10 @@ namespace HPlus {
 	}
 
       // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
-      //      double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
-      double EMfrac = iJet->chargedEmEnergyFraction();
+      double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
+      double chargedEMfrac = iJet->chargedEmEnergyFraction();
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
+      hjetChargedEMFraction->Fill(chargedEMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 
       if (EMfrac > fEMfractionCut) continue;
@@ -200,11 +202,8 @@ namespace HPlus {
     if(etaCutPassed < fMin) passEvent = false;
     if(etaCutPassed > fMin)    increment(fEtaCutCount);
 
-    //    if(maxEMfraction > 0.8 ) passEvent = false;
-    if(maxEMfraction < 0.2 )increment(fEMfraction08CutCount);
-
-    //    if(maxEMfraction > 0.7 ) passEvent = false;
-    if(maxEMfraction < 0.05 )increment(fEMfraction07CutCount);
+    if(maxEMfraction < fEMfractionCut+ 0.1 )increment(fEMfraction08CutCount);
+    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
 
     if(EMfractionCutPassed < fMin) passEvent = false;
     if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);

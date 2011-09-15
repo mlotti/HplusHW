@@ -95,6 +95,7 @@ namespace HPlus {
     TH1 *hNumberOfSelectedJets;
     TH1 *hDeltaPhiJetMet;
     TH1 *hjetEMFraction;
+    TH1 *hjetChargedEMFraction;
     TH1 *hjetMaxEMFraction;
 
     // Selected jets
