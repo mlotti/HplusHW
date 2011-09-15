@@ -164,7 +164,10 @@ def main():
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithRtauFakeMet"), "transverseMassWithRtauFakeMet", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassDeltaPhiUpperCut"), "transverseMassDeltaPhiUpperCut", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassDeltaPhiUpperCutFakeMet"), "transverseMassDeltaPhiUpperCutFakeMet", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassTopRtauDeltaPhiFakeMET"), "transverseMassTopRtauDeltaPhiFakeMET", rebin=20)
+#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassTopRtauDeltaPhiFakeMET"), "transverseMassTopRtauDeltaPhiFakeMET", rebin=20)
+#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassTopDeltaPhiFakeMET"), "transverseMassTopDeltaPhiFakeMET", rebin=20)
+#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassRtauDeltaPhiFakeMET"), "transverseMassRtauDeltaPhiFakeMET", rebin=20)
+#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBtag33RtauDeltaPhiFakeMET"), "transverseMassBtag33RtauDeltaPhiFakeMET", rebin=20)
 #    xsect.setHplusCrossSections(datasets, toTop=True)
 
 
@@ -876,7 +879,7 @@ def jetPhi(h, name, rebin=5, ratio=False):
 def jetEMFraction(h, name, rebin=5, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
 
-    xlabel = "EMfraction in jets" 
+    xlabel = "charged EMfraction in jets" 
     ylabel = "Events / %.2f" % h.binWidth()
     
     scaleMCfromWmunu(h)  
@@ -891,7 +894,7 @@ def jetEMFraction(h, name, rebin=5, ratio=False):
     else:
         h.createFrame(name, opts=opts)
     h.getPad().SetLogy(True)
-    h.setLegend(histograms.createLegend(0.2, 0.2, 0.4, 0.5))
+    h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
 
 def numberOfJets(h, name, rebin=1, ratio=False):

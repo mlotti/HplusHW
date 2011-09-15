@@ -61,6 +61,8 @@ namespace HPlus {
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
+    fRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("RtauDeltaPhiFakeMET cuts")),
+    fBtag33RtauDeltaPhiFakeMETCounter(eventCounter.addCounter("Btag33RtauDeltaPhiFakeMET cuts")),
     fTopRtauDeltaPhiFakeMETCounter(eventCounter.addCounter("TopRtauDeltaPhiFakeMET cuts")),
     fRtauAfterCutsCounter(eventCounter.addCounter("RtauAfterCuts")),
     fForwardJetVetoCounter(eventCounter.addCounter("forward jet veto")),
@@ -127,6 +129,8 @@ namespace HPlus {
     hTransverseMassDeltaPhiUpperCutFakeMet =  makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCutFakeMet", "transverseMassDeltaPhiUpperCutFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.); 
     hTransverseMassTopRtauDeltaPhiFakeMET =  makeTH<TH1F>(*fs, "transverseMassTopRtauDeltaPhiFakeMET", "transverseMassTopRtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopDeltaPhiFakeMET =  makeTH<TH1F>(*fs, "transverseMassTopDeltaPhiFakeMET", "transverseMassTopDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassRtauDeltaPhiFakeMET = makeTH<TH1F>(*fs, "transverseMassRtauDeltaPhiFakeMET", "transverseMassRtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassBtag33RtauDeltaPhiFakeMET = makeTH<TH1F>(*fs, "transverseMassBtag33RtauDeltaPhiFakeMET", "transverseMassBtag33RtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.0, 5.0);
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
@@ -420,13 +424,21 @@ namespace HPlus {
 
    
     if (TopSelectionData.passedEvent() && deltaPhi*57.3 < 160 && fakeMETData.passedEvent()) {
-      increment(fTopRtauDeltaPhiFakeMETCounter);
       hTransverseMassTopDeltaPhiFakeMET->Fill(transverseMass, fEventWeight.getWeight());
     }
 
     if (TopSelectionData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 && deltaPhi*57.3 < 160 && fakeMETData.passedEvent()) {
       increment(fTopRtauDeltaPhiFakeMETCounter);
       hTransverseMassTopRtauDeltaPhiFakeMET->Fill(transverseMass, fEventWeight.getWeight());
+    }
+    if (tauData.getRtauOfSelectedTau() > 0.8 && deltaPhi*57.3 < 160 && fakeMETData.passedEvent()) {
+      increment(fRtauDeltaPhiFakeMETCounter);
+      hTransverseMassRtauDeltaPhiFakeMET->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
+    if ( btagData.getMaxDiscriminatorValue()> 3.3 && tauData.getRtauOfSelectedTau() > 0.8 && deltaPhi*57.3 < 160 && fakeMETData.passedEvent()) {
+      increment(fBtag33RtauDeltaPhiFakeMETCounter);
+      hTransverseMassBtag33RtauDeltaPhiFakeMET->Fill(transverseMass, fEventWeight.getWeight());
     }
 
     if(transverseMass > 60 ) increment(ftransverseMassCut80NoRtauCounter);

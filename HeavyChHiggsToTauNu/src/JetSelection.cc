@@ -201,10 +201,10 @@ namespace HPlus {
     if(etaCutPassed > fMin)    increment(fEtaCutCount);
 
     //    if(maxEMfraction > 0.8 ) passEvent = false;
-    if(maxEMfraction < 0.8 )increment(fEMfraction08CutCount);
+    if(maxEMfraction < 0.2 )increment(fEMfraction08CutCount);
 
     //    if(maxEMfraction > 0.7 ) passEvent = false;
-    if(maxEMfraction < 0.7 )increment(fEMfraction07CutCount);
+    if(maxEMfraction < 0.05 )increment(fEMfraction07CutCount);
 
     if(EMfractionCutPassed < fMin) passEvent = false;
     if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);
