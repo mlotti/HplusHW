@@ -182,6 +182,7 @@ namespace HPlus {
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     fAllTausCounterGroup.incrementBTaggingCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementBTaggingCounter();

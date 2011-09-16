@@ -225,6 +225,8 @@ namespace HPlus {
     // 8) Btagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(btagData.passedEvent())  iNBtags = btagData.getBJetCount();
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
+
 
     // 9) AlphaT 
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
@@ -336,6 +338,7 @@ namespace HPlus {
     // 8) B-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     increment(fBTaggingCounter);
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     // hAlphatAfterBtagging->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
