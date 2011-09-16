@@ -455,7 +455,7 @@ void optimisation() {
   TString btagJetNum17("Sum$(jets_btag > 3.3)"); 
   TString btag2ndMax("MaxIf$(jets_btag, jets_btag<Max$(jets_btag))");
 
-  TString emFraction("Max$(jets_EMfrac)"); TCut emFractionCut(emFraction+" < 0.7");
+  TString emFraction("Max$(jets_elf)"); TCut emFractionCut(emFraction+" < 0.7");
 
   TString topMass("topreco_p4.M()"); TCut topMassCut(topMass+" < 230");
 
@@ -528,14 +528,14 @@ void optimisation() {
 //  rtauRes.Significance();
   //  metRes.Significance();
   //  tauPtRes.Significance();
-  mtRes.Significance();
+  //  mtRes.Significance();
   //  topMassRes.Significance();
   //  btagRes.Significance();
   //  btag2ndMaxRes.Significance();
   //  btagExactlyOneRes.Significance();
   //  btagJetNum17Res.Significance();
   //  deltaPhiRes.Significance();
-  //  emFractionRes.Significance();
+  emFractionRes.Significance();
 
 }
 
