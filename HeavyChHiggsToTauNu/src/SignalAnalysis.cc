@@ -154,6 +154,8 @@ namespace HPlus {
 
     hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
     hMETBeforeTauId = makeTH<TH1F>(*fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
+    hMETBaselineTauId = makeTH<TH1F>(*fs, "MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauId = makeTH<TH1F>(*fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
 
     //    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
@@ -242,7 +244,7 @@ namespace HPlus {
 
   // Get MET object 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    double Met = metData.getSelectedMET()->et();
+    //double Met = metData.getSelectedMET()->et();
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl; 
  
     hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
@@ -251,6 +253,13 @@ namespace HPlus {
                                                                                                     
     // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
+
+    if(!tauData.passedEvent()){
+        hMETInvertedTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    }else{
+        hMETBaselineTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    }
+
     if(!tauData.passedEvent()) return false; // Require at least one tau
     // plot leading track without pt cut
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());

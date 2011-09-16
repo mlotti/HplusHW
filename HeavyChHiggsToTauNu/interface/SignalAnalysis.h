@@ -187,6 +187,8 @@ namespace HPlus {
     TH1 *hMet_AfterEvtTopology;
     TH1 *hMETBeforeMETCut;
     TH1 *hMETBeforeTauId;
+    TH1 *hMETBaselineTauId;
+    TH1 *hMETInvertedTauId;
     TH1 *hSelectedTauEt;
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
