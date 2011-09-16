@@ -91,6 +91,7 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
 # other options (use not recommended here): 'standard'
@@ -133,7 +134,6 @@ param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution
 #param.trigger.hltMetCut = 0.0 
 print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
-# param.overrideTriggerFromOptions(options) => obsolete
 
 ##############################################################################
 process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
