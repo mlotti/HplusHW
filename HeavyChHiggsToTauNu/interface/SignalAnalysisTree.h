@@ -49,6 +49,13 @@ namespace HPlus {
   private:
     void reset();
 
+    struct TauId {
+      TauId(const std::string& n): name(n), value(false) {}
+      void reset() { value = false; }
+      std::string name;
+      bool value;
+    };
+
     const std::string fBdiscriminator;
     const bool fDoFill;
     const bool fTauEmbeddingInput;
@@ -72,6 +79,8 @@ namespace HPlus {
 
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
+    unsigned int fTauSignalChCands;
+    std::vector<TauId> fTauIds;
 
     std::vector<XYZTLorentzVector> fJets;
     std::vector<double> fJetsBtags;

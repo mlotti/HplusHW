@@ -29,6 +29,12 @@ namespace HPlus {
       fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
     }
 
+    std::vector<std::string> tauIds = iConfig.getUntrackedParameter<std::vector<std::string> >("tauIDs");
+    fTauIds.reserve(tauIds.size());
+    for(size_t i=0; i<tauIds.size(); ++i) {
+      fTauIds.push_back(TauId(tauIds[i]));
+    }
+
     reset();
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
@@ -52,6 +58,10 @@ namespace HPlus {
 
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
+    fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
+    for(size_t i=0; i<fTauIds.size(); ++i) {
+      fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
+    }
 
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
@@ -101,6 +111,10 @@ namespace HPlus {
 
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
+    fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
+    for(size_t i=0; i<fTauIds.size(); ++i) {
+      fTauIds[i].value = taus[i]->tauID(fTauIds[i].name) > 0.5;
+    }
 
     for(size_t i=0; i<jets.size(); ++i) {
       fJets.push_back(jets[i]->p4());
@@ -192,6 +206,9 @@ namespace HPlus {
 
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
+    fTauSignalChCands = 0;
+    for(size_t i=0; i<fTauIds.size(); ++i)
+      fTauIds[i].reset();
 
     fJets.clear();
     fJetsBtags.clear();

@@ -225,7 +225,10 @@ topSelection = cms.untracked.PSet(
 )
 
 tree = cms.untracked.PSet(
-    fill = cms.untracked.bool(True)
+    fill = cms.untracked.bool(True),
+    tauIDs = cms.untracked.vstring(
+        "byTightIsolation"
+    )
 )
 
 vertexWeight = cms.untracked.PSet(
