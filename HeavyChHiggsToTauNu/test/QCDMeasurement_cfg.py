@@ -250,7 +250,7 @@ process.QCDMeasurementPath = cms.Path(
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
     module = process.QCDMeasurement.clone()
-    module.Tree.fill = False
+    module.Tree.fill = True #attikis (default is False)
     param.addTauIdAnalyses(process, "QCDMeasurement", module, process.commonSequence, additionalCounters)
 
 

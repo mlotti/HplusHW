@@ -35,7 +35,7 @@ namespace HPlus {
       std::copy(mcDist.begin(), mcDist.end(), std::back_inserter(mcDistF));
       std::copy(dataDist.begin(), dataDist.end(), std::back_inserter(dataDistF));
 
-      std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
+      // std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
       fLumiWeights = edm::LumiReWeighting(mcDistF, dataDistF);
     }
     else {

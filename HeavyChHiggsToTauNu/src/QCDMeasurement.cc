@@ -126,19 +126,20 @@ namespace HPlus {
 
     // Other histograms
     //hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
-    hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
-    hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
-    hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
-    hTransverseMass_AfterBigBoxAndTauID = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndTauID", "QCD_TransverseMass_AfterBigBoxAndTauID; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
+    hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndTauID = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndTauID", "QCD_TransverseMass_AfterBigBoxAndTauID; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
 
 
-    hDeltaPhiMetTauCand_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBox", "hDeltaPhiMetTauCand_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-    hDeltaPhiMetTauCand_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBoxAndMet", "hDeltaPhiMetTauCand_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-    hDeltaPhiMetFirstLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBox", "hDeltaPhiMetFirstLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-    hDeltaPhiMetSecondLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBox", "hDeltaPhiMetSecondLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-    hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-    hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); // 14 Aug 2011
-
+    hDeltaPhiMetTauCand_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBox", "hDeltaPhiMetTauCand_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetTauCand_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBoxAndMet", "hDeltaPhiMetTauCand_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetFirstLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBox", "hDeltaPhiMetFirstLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetSecondLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBox", "hDeltaPhiMetSecondLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hRtau_AfterBigBox  = makeTH<TH1F>(*fs, "hRtau_AfterBigBox", "hRtau_AfterBigBox; R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{Events} / 0.02", 60, 0., 1.2);
+    hRtauEfficiency_AfterBigBoxTauID = makeTH<TH1F>(*fs, "hRtauEfficiency_AfterBigBoxTauID", "hRtauEfficiency_AfterBigBoxTauID; pass;N_{Events}", 2, -0.5, 1.5);
 
     // Standard cut path
     TFileDirectory myDir = fs->mkdir("StdCutPath");
@@ -307,7 +308,9 @@ namespace HPlus {
     
       ///////// btag selection (factorise out)
       double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+      double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
       BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
       // Apply scale factor as weight to event
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
       if (btagData.passedEvent()) {
@@ -320,6 +323,16 @@ namespace HPlus {
       }
     }
     
+    /////////////////////    /////////////////////    /////////////////////
+    /// BIG BOX: Produce plots
+    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup);
+    double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
+    BTagging::Data btagDataBB = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
+    TauSelection::Data tauDataForTauIDBB = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
+    AfterBigBox(EventWeightWithBTag, EventWeightWithoutBTag, tauCandidateData, jetData, metDataBB, btagDataBB, tauDataForTauIDBB);
+    /////////////////////    /////////////////////    /////////////////////
+
     // InvMassVeto - No cuts applied! Only produces plots 
 //    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
     // if(!invMassVetoOnJetsData.passedEvent()) return; 
@@ -410,10 +423,6 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     
     */
-    
-    ///// This position is after the Big Box
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    AfterBigBox(tauCandidateData, jetData, metData, btagData, tauDataForTauID);
 
   }
 
@@ -454,18 +463,21 @@ namespace HPlus {
   }
   
   
-  void QCDMeasurement::AfterBigBox(const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const TauSelection::Data& tauDataForTauID){
-  
-    double mt_TauCandAndMet = TransverseMass::reconstruct(*(tauDataForTauID.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()) );
-    double deltaPhiMetTauCand = reco::deltaPhi( *(tauDataForTauID.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()) ) * 180./3.14159; 
-    double deltaPhiMetFirstLdgJet = reco::deltaPhi( *(jetData.getSelectedJets()[0]), *(metData.getSelectedMET()) ) * 180./3.14159; 
-    double deltaPhiMetSecondLdgJet = reco::deltaPhi( *(jetData.getSelectedJets()[1]), *(metData.getSelectedMET()) ) * 180./3.14159; 
+  void QCDMeasurement::AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateDataBB, JetSelection::Data& jetDataBB, const METSelection::Data& metDataBB, const BTagging::Data& btagDataBB, const TauSelection::Data& tauDataForTauIDBB){
+    
+    double mt_TauCandAndMet = TransverseMass::reconstruct(*(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) );
+    double deltaPhiMetTauCand = reco::deltaPhi( *(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double deltaPhiMetFirstLdgJet = reco::deltaPhi( *(jetDataBB.getSelectedJets()[0]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double deltaPhiMetSecondLdgJet = reco::deltaPhi( *(jetDataBB.getSelectedJets()[1]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double BtagEventWeight = (EventWeightWithBtag)/(EventWeightWithoutBtag);
+    fEventWeight.multiplyWeight( 1/BtagEventWeight); // undo btag scale factor, automaticall applied by  fBTagging.analyze(..);
 
     // Fill histograms: DeltaPhi(tauCand,MET)
     hDeltaPhiMetTauCand_AfterBigBox->Fill(deltaPhiMetTauCand, fEventWeight.getWeight());
     hDeltaPhiMetFirstLdgJet_AfterBigBox->Fill(deltaPhiMetFirstLdgJet, fEventWeight.getWeight());
     hDeltaPhiMetSecondLdgJet_AfterBigBox->Fill(deltaPhiMetSecondLdgJet, fEventWeight.getWeight());
-    if(metData.passedEvent() ){
+
+    if(metDataBB.passedEvent() ){
       hDeltaPhiMetTauCand_AfterBigBoxAndMet->Fill(deltaPhiMetTauCand, fEventWeight.getWeight());
       hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet->Fill(deltaPhiMetFirstLdgJet, fEventWeight.getWeight());
       hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet->Fill(deltaPhiMetSecondLdgJet, fEventWeight.getWeight());
@@ -473,18 +485,31 @@ namespace HPlus {
 
     // Fill histograms: Transverse Mass
     hTransverseMass_AfterBigBox->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
-    if(metData.passedEvent() ){
+
+    // Standalone MET
+    if(metDataBB.passedEvent() ){
       hTransverseMass_AfterBigBoxAndMet->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
     }
-    if(btagData.passedEvent() ){
-      hTransverseMass_AfterBigBoxAndBtag->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
-    }
-    if(tauDataForTauID.passedEvent() ){
-      hTransverseMass_AfterBigBoxAndTauID->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
-    }
-    
 
-  return;
+    // Standalone Btaggig
+    if(btagDataBB.passedEvent() ){
+      fEventWeight.multiplyWeight(BtagEventWeight); // re-do btag scale factor
+      hTransverseMass_AfterBigBoxAndBtag->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+      fEventWeight.multiplyWeight( 1/BtagEventWeight); // re-undo btag scale factor
+    }
+
+    // Standalone TauID & Rtau
+    if(tauDataForTauIDBB.passedEvent() ){
+      hTransverseMass_AfterBigBoxAndTauID->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+    
+      // Rtau: If TauCandidate passes TauID (Loose) measure Rtau efficiency from data
+      if (tauDataForTauIDBB.selectedTauPassedRtau()) {
+	hRtau_AfterBigBox->Fill(tauDataForTauIDBB.getRtauOfSelectedTau() , fEventWeight.getWeight());
+	hRtauEfficiency_AfterBigBoxTauID->Fill( 1.0, fEventWeight.getWeight());
+      }else hRtauEfficiency_AfterBigBoxTauID->Fill( 0.0, fEventWeight.getWeight());
+    }
+
+    return;
 }
 
 
