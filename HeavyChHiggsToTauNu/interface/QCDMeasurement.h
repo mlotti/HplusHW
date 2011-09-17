@@ -103,7 +103,7 @@ namespace HPlus {
     std::vector<double> getJetPtBins(void);
     void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    void AfterBigBox(const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const TauSelection::Data& tauData);
+    void AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const TauSelection::Data& tauData); 
       
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
     edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
@@ -212,16 +212,18 @@ namespace HPlus {
     // Other histograms
     //TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
-    TH1 *hTransverseMass_AfterBigBox; // 14 Aug 2011
-    TH1 *hTransverseMass_AfterBigBoxAndMet; // 14 Aug 2011
-    TH1 *hTransverseMass_AfterBigBoxAndBtag; // 14 Aug 2011
-    TH1 *hTransverseMass_AfterBigBoxAndTauID; // 14 Aug 2011
-    TH1 *hDeltaPhiMetTauCand_AfterBigBox; // 14 Aug 2011
-    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet; // 14 Aug 2011
-    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox; // 14 Aug 2011
-    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox; // 14 Aug 2011
-    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet; // 14 Aug 2011
-    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterBigBox;
+    TH1 *hTransverseMass_AfterBigBoxAndMet;
+    TH1 *hTransverseMass_AfterBigBoxAndBtag;
+    TH1 *hTransverseMass_AfterBigBoxAndTauID;
+    TH1 *hDeltaPhiMetTauCand_AfterBigBox;
+    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet;
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox;
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox;
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet;
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet;
+    TH1 *hRtau_AfterBigBox;
+    TH1 *hRtauEfficiency_AfterBigBoxTauID;
 
     // PAS Control Plots
     /*

@@ -933,6 +933,17 @@ class HistoManagerImpl:
         self.legendList.insert(legendIndex, histo)
         self._populateMap()
 
+    def removeHisto(self, name):
+        del self.nameHistoMap[name]
+        for i, h in enumerate(self.drawList):
+            if h.getName() == name:
+                del self.drawList[i]
+                break
+        for i, h in enumerate(self.legendList):
+            if h.getName() == name:
+                del self.legendList[i]
+                break
+
     ## Call a function for a named histograms.HistoBase object.
     #
     # \param name   Name of histogram

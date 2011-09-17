@@ -56,7 +56,6 @@ namespace HPlus {
     //    ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("ftransverseMassCut"), eventCounter, eventWeight),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -98,9 +97,6 @@ namespace HPlus {
   // GenParticle analysis
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
-    //    fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
-   
-
     increment(fAllCounter);
 //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     // Apply trigger and HLT_MET cut
@@ -137,8 +133,6 @@ namespace HPlus {
     //    increment(fNJetsCounter);
     
 
-     fTauEmbeddingAnalysis.beginEvent(iEvent, iSetup);
-                                                                                                                                            
     // TauID (with optional factorization)
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return; // Require at least one tau
@@ -151,9 +145,6 @@ namespace HPlus {
     fAllTausCounterGroup.incrementOneTauCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementOneTauCounter();
     
-    fTauEmbeddingAnalysis.setSelectedTau(tauData.getSelectedTaus()[0]);
-    fTauEmbeddingAnalysis.fillAfterTauId();
-
     if (myTauMatch == kElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
@@ -181,7 +172,6 @@ namespace HPlus {
     if(!metData.passedEvent()) return;
     fAllTausCounterGroup.incrementMETCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMETCounter();
-    fTauEmbeddingAnalysis.fillAfterMetCut();
    
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
@@ -192,6 +182,7 @@ namespace HPlus {
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     fAllTausCounterGroup.incrementBTaggingCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementBTaggingCounter();
@@ -234,7 +225,6 @@ namespace HPlus {
     //    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //    if (!forwardJetData.passedEvent()) return;
     //    increment(fForwardJetVetoCounter);
-    //    fTauEmbeddingAnalysis.fillEnd();
 
 
     // The following code is not correct, because there could be more than one tau jet

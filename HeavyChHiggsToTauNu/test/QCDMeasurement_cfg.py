@@ -91,6 +91,7 @@ addPrimaryVertexSelection(process, process.commonSequence)
 
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+param.overrideTriggerFromOptions(options)
 param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 # Set tau selection mode (options: 'tauCandidateSelectionOnly', 'tauCandidateSelectionOnlyReversedRtau')
 # other options (use not recommended here): 'standard'
@@ -120,8 +121,8 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
 
 
 # Set the data scenario for vertex/pileup weighting
-param.setVertexWeightFor2011() # Reweight by reconstructed vertices
-#param.setPileupWeightFor2011() # Reweight by true PU distribution 
+#param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution 
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
 #def setTriggerPileupFor2011(**kwargs):
@@ -133,7 +134,6 @@ param.setVertexWeightFor2011() # Reweight by reconstructed vertices
 #param.trigger.hltMetCut = 0.0 
 print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
-# param.overrideTriggerFromOptions(options) => obsolete
 
 ##############################################################################
 process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
@@ -155,7 +155,8 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
     vertexSrc = cms.InputTag("offlinePrimaryVertices")
-    ) # needed for calculating isolation on the fly to determine which tau jet is most isolated
+    ), # needed for calculating isolation on the fly to determine which tau jet is most isolated
+    Tree = param.tree,
 )
 # Factorization (quick and dirty version)
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetTableFactorization_cfi as mettables
@@ -248,7 +249,9 @@ process.QCDMeasurementPath = cms.Path(
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
-    param.addTauIdAnalyses(process, "QCDMeasurement", process.QCDMeasurement, process.commonSequence, additionalCounters)
+    module = process.QCDMeasurement.clone()
+    module.Tree.fill = True #attikis (default is False)
+    param.addTauIdAnalyses(process, "QCDMeasurement", module, process.commonSequence, additionalCounters)
 
 
 ################################################################################
@@ -267,10 +270,13 @@ if doJESVariation:
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, process.QCDMeasurement, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.QCDMeasurement, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.QCDMeasurement, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.QCDMeasurement, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    module = process.QCDMeasurement.clone()
+    module.Tree.fill = False
+
+    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

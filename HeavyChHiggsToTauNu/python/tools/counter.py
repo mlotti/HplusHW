@@ -5,6 +5,29 @@ import ROOT
 
 import dataset
 
+def _counterTh1AddBinFromTh1(counter, name, th1):
+    new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), counter.GetNbinsX()+1, 0, counter.GetNbinsX()+1)
+    new.SetDirectory(0)
+    new.Sumw2()
+    
+    # Copy the existing bins
+    for bin in xrange(1, counter.GetNbinsX()+1):
+        new.SetBinContent(bin, counter.GetBinContent(bin))
+        new.SetBinError(bin, counter.GetBinError(bin))
+        new.GetXaxis().SetBinLabel(bin, counter.GetXaxis().GetBinLabel(bin))
+
+    # Calculate the integral of the new histogram with the uncertainty
+    count = dataset.Count(0, 0)
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        count.add(dataset.Count(th1.GetBinContent(bin), th1.GetBinError(bin)))
+
+    # Add the new count to the new counter
+    new.SetBinContent(counter.GetNbinsX()+1, count.value())
+    new.SetBinError(counter.GetNbinsX()+1, count.uncertainty())
+    new.GetXaxis().SetBinLabel(counter.GetNbinsX()+1, name)
+
+    return new
+
 class CellFormatBase:
     """Base class for cell formats.
 
@@ -723,6 +746,20 @@ class SimpleCounter:
         else:
             self.countNames = datasetRootHisto.getBinLabels()
 
+    def appendRow(self, rowName, treeDraw):
+        if self.counter != None:
+            raise Exception("Can't add row after the counters have been created!")
+        var = treeDraw.weight
+        if var == "":
+            var = treeDraw.selection
+        if var != "":
+            var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
+        # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
+        td = treeDraw.clone(varexp=var)
+        drh = self.datasetRootHisto.getDataset().getDatasetRootHisto(td)
+        self.datasetRootHisto.modifyRootHisto(lambda oldHisto, newHisto: _counterTh1AddBinFromTh1(oldHisto, rowName, newHisto), drh)
+        self.countNames.append(rowName)
+
     def normalizeToOne(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
@@ -781,6 +818,9 @@ class Counter:
     def forEachDataset(self, func):
         for c in self.counters:
             func(c)
+
+    def appendRow(self, rowName, treeDraw):
+        self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
 
     def normalizeToOne(self):
         self.forEachDataset(lambda x: x.normalizeToOne())

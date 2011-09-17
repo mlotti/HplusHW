@@ -21,7 +21,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ForwardJetVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauEmbeddingAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "TTree.h"
 
@@ -84,7 +83,6 @@ namespace HPlus {
     TopSelection fTopSelection;
     GenParticleAnalysis fGenparticleAnalysis;
     ForwardJetVeto fForwardJetVeto;
-    TauEmbeddingAnalysis fTauEmbeddingAnalysis;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
     VertexWeight fVertexWeight;

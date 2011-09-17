@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisTree_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_SignalAnalysisTree_h
 
+#include "FWCore/Utilities/interface/InputTag.h"
+
 #include "DataFormats/Common/interface/Ptr.h"
 
 #include "DataFormats/Math/interface/LorentzVector.h"
@@ -10,10 +12,10 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
-
 #include<vector>
 
 namespace edm {
+  class ParameterSet;
   class Event;
 }
 
@@ -27,7 +29,7 @@ namespace HPlus {
   public:
     typedef math::XYZTLorentzVector XYZTLorentzVector;
 
-    explicit SignalAnalysisTree(const std::string& bDiscriminator);
+    explicit SignalAnalysisTree(const edm::ParameterSet& iConfig, const std::string& bDiscriminator);
     ~SignalAnalysisTree();
 
     void init(TFileDirectory& dir);
@@ -37,6 +39,7 @@ namespace HPlus {
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
+    void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
@@ -46,7 +49,20 @@ namespace HPlus {
   private:
     void reset();
 
+    struct TauId {
+      TauId(const std::string& n): name(n), value(false) {}
+      void reset() { value = false; }
+      std::string name;
+      bool value;
+    };
+
     const std::string fBdiscriminator;
+    const bool fDoFill;
+    const bool fTauEmbeddingInput;
+
+    edm::InputTag fTauEmbeddingMuonSource;
+    edm::InputTag fTauEmbeddingMetSource;
+    edm::InputTag fTauEmbeddingCaloMetSource;
 
     TTree *fTree;
 
@@ -57,11 +73,14 @@ namespace HPlus {
     double fPrescaleWeight;
     double fPileupWeight;
     double fTriggerWeight;
+    double fBTaggingWeight;
 
     unsigned int fNVertices;
 
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
+    unsigned int fTauSignalChCands;
+    std::vector<TauId> fTauIds;
 
     std::vector<XYZTLorentzVector> fJets;
     std::vector<double> fJetsBtags;
@@ -87,6 +106,13 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
+
+    bool fPassedBTagging;
+
+    // Tau embedding stuff
+    XYZTLorentzVector fTauEmbeddingMuon;
+    XYZTLorentzVector fTauEmbeddingMet;
+    XYZTLorentzVector fTauEmbeddingCaloMet;
   };
 }
 

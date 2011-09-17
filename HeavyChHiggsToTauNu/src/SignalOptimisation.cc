@@ -208,6 +208,7 @@ namespace HPlus {
 
     // b-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     // if(!btagData.passedEvent()) return false;
     // increment(fBTaggingCounter);    
     iNBtags = btagData.getBJetCount();

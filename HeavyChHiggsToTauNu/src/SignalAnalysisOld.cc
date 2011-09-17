@@ -318,6 +318,7 @@ namespace HPlus {
 
     // b tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData, btagData.passedEvent(),btagData.getMaxDiscriminatorValue());
     if(!btagData.passedEvent()) return false;
     increment(fBTaggingCounter);

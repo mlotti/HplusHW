@@ -45,7 +45,6 @@ namespace HPlus {
     // ftransverseMassCut(iConfig.getUntrackedParameter<edm::ParameterSet>("transverseMassCut")),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
-    fTauEmbeddingAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("tauEmbedding"), eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
@@ -226,6 +225,8 @@ namespace HPlus {
     // 8) Btagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(btagData.passedEvent())  iNBtags = btagData.getBJetCount();
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
+
 
     // 9) AlphaT 
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
@@ -259,7 +260,6 @@ namespace HPlus {
 
     // Last but NOT least: Save the event weight!
     fEvtWeight = fEventWeight.getWeight();
-    // fTauEmbeddingAnalysis.fillEnd(); attikis
 
     // Fill TTree before any cut
     myTree->Fill();    
@@ -338,6 +338,7 @@ namespace HPlus {
     // 8) B-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
     if(!btagData.passedEvent()) return;
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     increment(fBTaggingCounter);
     hMet_AfterBTagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     // hAlphatAfterBtagging->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());
