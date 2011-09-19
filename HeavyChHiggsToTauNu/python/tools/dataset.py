@@ -226,6 +226,12 @@ def _histoToDict(histo):
 
     return ret
 
+def histoIntegrateToCount(histo):
+    count = Count(0, 0)
+    for bin in xrange(0, histo.GetNbinsX()+2):
+        count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
+    return count
+
 def _rescaleInfo(d):
     """Rescales info dictionary.
 
@@ -350,7 +356,7 @@ class TreeDraw:
         args.update(kwargs)
         return TreeDraw(**args)
 
-    def draw(self, rootFile):
+    def draw(self, rootFile, datasetName):
         if not ">>" in self.varexp:
             raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
@@ -382,6 +388,29 @@ class TreeDraw:
             h = ROOT.TH1F("tmp", self.varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         h.SetDirectory(0)
         return h
+
+class TreeDrawCompound:
+    def __init__(self, default, datasetMap={}):
+        self.default = default
+        self.datasetMap = datasetMap
+
+    def add(self, datasetName, treeDraw):
+        self.datasetMap[datasetName] = treeDraw
+
+    def draw(self, rootFile, datasetName):
+        if datasetName in self.datasetMap:
+            self.datasetMap[datasetName].draw(rootFile, datasetName)
+        else:
+            self.default.draw(rootFile, datasetName)
+
+def treeDrawToNumEntries(treeDraw):
+    var = treeDraw.weight
+    if var == "":
+        var = treeDraw.selection
+    if var != "":
+        var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
+    # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
+    return treeDraw.clone(varexp=var)
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
@@ -907,8 +936,8 @@ class Dataset:
         """
 
         h = None
-        if isinstance(name, TreeDraw):
-            h = name.draw(self.file)
+        if hasattr(name, "draw"):
+            h = name.draw(self.file, self.getName())
         else:
             pname = self.prefix+name
             h = self.file.Get(pname)

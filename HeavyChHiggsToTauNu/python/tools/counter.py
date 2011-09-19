@@ -17,9 +17,7 @@ def _counterTh1AddBinFromTh1(counter, name, th1):
         new.GetXaxis().SetBinLabel(bin, counter.GetXaxis().GetBinLabel(bin))
 
     # Calculate the integral of the new histogram with the uncertainty
-    count = dataset.Count(0, 0)
-    for bin in xrange(0, th1.GetNbinsX()+2):
-        count.add(dataset.Count(th1.GetBinContent(bin), th1.GetBinError(bin)))
+    count = dataset.histoIntegrateToCount(th1)
 
     # Add the new count to the new counter
     new.SetBinContent(counter.GetNbinsX()+1, count.value())
@@ -749,13 +747,7 @@ class SimpleCounter:
     def appendRow(self, rowName, treeDraw):
         if self.counter != None:
             raise Exception("Can't add row after the counters have been created!")
-        var = treeDraw.weight
-        if var == "":
-            var = treeDraw.selection
-        if var != "":
-            var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
-        # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
-        td = treeDraw.clone(varexp=var)
+        td = dataset.treeDrawToNumEntries(treeDraw) # get a clone suitable to calculate number of entries from
         drh = self.datasetRootHisto.getDataset().getDatasetRootHisto(td)
         self.datasetRootHisto.modifyRootHisto(lambda oldHisto, newHisto: _counterTh1AddBinFromTh1(oldHisto, rowName, newHisto), drh)
         self.countNames.append(rowName)
