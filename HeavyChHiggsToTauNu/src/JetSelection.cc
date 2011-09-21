@@ -63,7 +63,7 @@ namespace HPlus {
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
-    hjetChargedEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
  }
 

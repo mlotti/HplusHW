@@ -154,8 +154,10 @@ namespace HPlus {
 
     hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
     hMETBeforeTauId = makeTH<TH1F>(*fs, "Met_BeforeTauId", "Met_BeforeTauId", 500, 0.0, 500.0);
-    hMETBaselineTauId = makeTH<TH1F>(*fs, "MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauId = makeTH<TH1F>(*fs,"MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauId = makeTH<TH1F>(*fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauIdAllCuts = makeTH<TH1F>(*fs, "MET_BaseLineTauIdAllCuts", "MET_BaseLineTauIdAllCuts;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdAllCuts = makeTH<TH1F>(*fs, "MET_InvertedTauIdAllCuts", "MET_InvertedTauIdAllCuts;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
 
     //    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
@@ -363,6 +365,16 @@ namespace HPlus {
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT);
+
+
+    //    if(btagData.passedEvent()) {
+      if(!tauData.passedEvent()){
+        hMETInvertedTauIdAllCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }else{
+        hMETBaselineTauIdAllCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      //    }
+
 
 
     // MET cut

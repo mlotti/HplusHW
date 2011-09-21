@@ -198,8 +198,12 @@ def main():
     topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_bFromTop"), "topMass_bFromTop") 
     ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjb"), "pt_jjb")
     ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjbmax"), "ptTop")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_top"), "ptTop_realTop") 
-    
+    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_top"), "ptTop_realTop")
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauId"), "MET_BaseLineTauId", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauId"), "MET_InvertedTauId", rebin=10)
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)   
+    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdAllCuts"), "MET_BaseLineTauIdAllCuts", rebin=10)
+#    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)    
     
     td = dataset.TreeDraw("signalAnalysis/tree", weight="weightPileup*weightTrigger*weightPrescale")
     pasJuly = "met_p4.Et() > 70 && Max$(jets_btag) > 1.7"
@@ -210,7 +214,7 @@ def main():
 #    zMassComparison(datasets)
 #    topMassComparison(datasets)
 #    topPtComparison(datasets) 
-#    vertexComparison(datasets)
+    vertexComparison(datasets)
 
 
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
@@ -235,12 +239,12 @@ def main():
 #    print eventCounter.getMainCounterTable().format(latexFormat)
 
 
-#def vertexComparison(datasets):
-#    signal = "TTToHplusBWB_M120"
-#    background = "TTToHplusBWB_M120"
-#    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
-#                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
-#            "vertices_H120")
+def vertexComparison(datasets):
+    signal = "TTToHplusBWB_M120_Summer11"
+    background = "TTToHplusBWB_M120_Summer11"
+    rtauGen(plots.ComparisonPlot(datasets.getDataset(signal).getDatasetRootHisto(analysis+"/verticesBeforeWeight"),
+                                 datasets.getDataset(background).getDatasetRootHisto(analysis+"/verticesAfterWeight")),
+            "vertices_H120")
 
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
