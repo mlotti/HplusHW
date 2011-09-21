@@ -9,7 +9,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
@@ -23,6 +22,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
 namespace edm {
   class ParameterSet;
@@ -108,7 +108,6 @@ namespace HPlus {
 
     Count fAllCounter;
     Count fTriggerCounter;
-    //Count fTriggerEmulationCounter;
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
@@ -133,7 +132,6 @@ namespace HPlus {
     Count ftransverseMassCut100TopCounter;
 
     TriggerSelection fTriggerSelection;
-    TriggerTauMETEmulation  fTriggerTauMETEmulation;
     VertexSelection fPrimaryVertexSelection;
     GlobalElectronVeto fGlobalElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
@@ -148,9 +146,9 @@ namespace HPlus {
     ForwardJetVeto fForwardJetVeto;
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
+    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     VertexWeight fVertexWeight;
-    TriggerEmulationEfficiency fTriggerEmulationEfficiency;
 
     SignalAnalysisTree fTree;
 

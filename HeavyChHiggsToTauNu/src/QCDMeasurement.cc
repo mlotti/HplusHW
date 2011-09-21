@@ -33,7 +33,7 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate", &fTriggerSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
@@ -48,6 +48,7 @@ namespace HPlus {
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fGenparticleAnalysis(eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -252,6 +253,15 @@ namespace HPlus {
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection,fEventWeight.getWeight());
 
+    // FIXME (MK 20110921): not sure if this is the correct place to
+    // apply the scale factor, but it is the same as if the scale
+    // factor would be applied inside fOneProngTauSelection as before.
+    // The offline tau which is used to derive the trigger scale
+    // factor is required to pass the full tau ID, including isolation
+    // etc, but the tau object here is not (yet) isolated.
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(mySelectedTau[0]));
+    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
 
@@ -296,7 +306,7 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
     mySelectedTauFirst.push_back(mySelectedTau[0]);
     // FIXME: how to handle the top reco in QCD measurement?
-    fTree.setTriggerWeight(triggerData.getScaleFactor());  // trigger scale factor is actually valid only after tau ID
+    fTree.setFillWeight(fEventWeight.getWeight());
     fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT);
 

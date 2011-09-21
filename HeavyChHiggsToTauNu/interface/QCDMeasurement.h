@@ -11,7 +11,6 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
@@ -25,6 +24,7 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
 
@@ -138,7 +138,6 @@ namespace HPlus {
 
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
-    //TriggerTauMETEmulation  fTriggerTauMETEmulation;
     VertexSelection fPrimaryVertexSelection;
     TauSelection fOneProngTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
@@ -158,7 +157,7 @@ namespace HPlus {
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
-    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
     

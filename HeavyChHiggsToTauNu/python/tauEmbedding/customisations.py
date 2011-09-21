@@ -21,21 +21,8 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     if len(tauTrigger) == 0:
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
-    param.trigger.selectionType = cms.untracked.string("disabled")
-    param.trigger.triggerEfficiency.selectTriggers = cms.VPSet(cms.PSet(trigger = cms.string(tauTrigger), luminosity = cms.double(0)))
-    param.trigger.triggerEfficiency.parameters = cms.PSet(
-        HLT_IsoPFTau35_Trk20_EPS = cms.PSet(
-            tauPtBins = cms.VPSet(
-                        cms.PSet(lowEdge = cms.double(0), efficiency = cms.double(0)),
-                        cms.PSet(lowEdge = cms.double(40), efficiency = cms.double(0.4035088)),
-                        cms.PSet(lowEdge = cms.double(50), efficiency = cms.double(0.7857143)),
-                        cms.PSet(lowEdge = cms.double(60), efficiency = cms.double(0.8)),
-                        cms.PSet(lowEdge = cms.double(80), efficiency = cms.double(1)),
-            )
-        )
-    )
- 
-
+    param.trigger.selectionType = "disabled"
+    param.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF

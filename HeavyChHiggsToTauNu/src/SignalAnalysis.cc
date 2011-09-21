@@ -47,7 +47,6 @@ namespace HPlus {
     //    fmetEmulationCut(iConfig.getUntrackedParameter<double>("metEmulationCut")),
     fAllCounter(eventCounter.addCounter("All events")),
     fTriggerCounter(eventCounter.addCounter("Trigger and HLT_MET cut")),
-    //fTriggerEmulationCounter(eventCounter.addCounter("trigger emulation")),
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
@@ -72,11 +71,10 @@ namespace HPlus {
     fTopSelectionCounter(eventCounter.addCounter("Top Selection cut")),
     ftransverseMassCut100TopCounter(eventCounter.addCounter("transverseMass > 100 top cut")),
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
-    fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID", &fTriggerSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauID"),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fBTagging(iConfig.getUntrackedParameter<edm::ParameterSet>("bTagging"), eventCounter, eventWeight),
@@ -88,8 +86,8 @@ namespace HPlus {
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     fCorrelationAnalysis(eventCounter, eventWeight),
     fEvtTopology(iConfig.getUntrackedParameter<edm::ParameterSet>("EvtTopology"), eventCounter, eventWeight),
+    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
-    fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency")),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
@@ -206,7 +204,6 @@ namespace HPlus {
     fTree.setNvertices(weightSize.second);
 
     increment(fAllCounter);
-    //fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
     
     // Apply trigger and HLT_MET cut or trigger parametrisation
     TriggerSelection::Data triggerData = fTriggerSelection.analyze(iEvent, iSetup);
@@ -217,7 +214,6 @@ namespace HPlus {
     hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
     hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
-
     // GenParticle analysis (must be done here when we effectively trigger all MC)
     if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
 
@@ -226,19 +222,16 @@ namespace HPlus {
     if(!pvData.passedEvent()) return false;
     increment(fPrimaryVertexCounter);
     //hSelectionFlow->Fill(kSignalOrderVertexSelection, fEventWeight.getWeight());
-    
+
   // Get MET object 
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     //double Met = metData.getSelectedMET()->et();
     //    std::cout << " weight before  = " << fEventWeight.getWeight() << " met " << Met <<  std::endl; 
  
     hMETBeforeTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());    
-
-                                                                                                                                                                      
                                                                                                     
     // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-
     if(!tauData.passedEvent()){
         hMETInvertedTauId->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     }else{
@@ -252,6 +245,9 @@ namespace HPlus {
 
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    // Apply trigger scale factor here, because it depends only on tau
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTaus()[0]));
+    fTree.setTriggerWeight(triggerWeight.getEventWeight());
     increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     if(fProduce) {
@@ -342,7 +338,7 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
     // Write the stuff to the tree
-    fTree.setTriggerWeight(triggerData.getScaleFactor()); // trigger scale factor is actually valid only after tau ID
+    fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
@@ -458,8 +454,6 @@ namespace HPlus {
     //    increment(fForwardJetVetoCounter);
     
 
-
-//    fTriggerEmulationEfficiency.analyse(iEvent,iSetup);
 
     return true;
   }

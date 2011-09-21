@@ -45,8 +45,6 @@ doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
 
-# Do trigger parametrisation for MC and tau embedding
-doTriggerParametrisation = False
 applyTriggerScaleFactor = True
 
 filterGenTaus = False
@@ -129,28 +127,13 @@ param.trigger.triggerSrc.setProcessName(dataVersion.getTriggerProcess())
 param.setAllTauSelectionOperatingMode('standard')
 #param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 
-
 # Set tau sources to trigger matched tau collections
 #param.setAllTauSelectionSrcSelectedPatTaus()
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
-# Set the triggers for trigger efficiency parametrisation
-#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
-param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
-  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
-)
-param.trigger.triggerMETSelection = param.MET.clone(
-  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
-)
-if (doTriggerParametrisation and not dataVersion.isData()):
-    param.setEfficiencyTriggersFor2011()
-    # Settings for the configuration
-#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
-
 # Trigger with scale factors (at the moment hard coded)
-if (applyTriggerScaleFactor and not dataVersion.isData()):
-    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
-
+if (applyTriggerScaleFactor and dataVersion.isMC()):
+    param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
 #param.setVertexWeightFor2011() # Reweight by reconstructed vertices
@@ -170,6 +153,7 @@ if options.tauEmbeddingInput != 0:
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     trigger = param.trigger,
+    triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
@@ -184,7 +168,6 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     forwardJetVeto = param.forwardJetVeto,
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     vertexWeight = param.vertexWeight,
     GenParticleAnalysis = param.GenParticleAnalysis,
     Tree = param.tree,
@@ -200,9 +183,9 @@ if dataVersion.isData() and options.tauEmbeddingInput == 0:
 
 # Print output
 print "Trigger:", process.signalAnalysis.trigger
+print "Trigger scale factor mode:", process.signalAnalysis.triggerEfficiencyScaleFactor.mode
 print "VertexWeight:",process.signalAnalysis.vertexWeight
 print "Cut on HLT MET (check histogram Trigger_HLT_MET for minimum value): ", process.signalAnalysis.trigger.hltMetCut
-print "Trigger efficiencies by: ", ", ".join([param.formatEfficiencyTrigger(x) for x in process.signalAnalysis.trigger.triggerEfficiency.selectTriggers])
 #print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection algorithm:", process.signalAnalysis.tauSelection.selection
 print "TauSelection src:", process.signalAnalysis.tauSelection.src
