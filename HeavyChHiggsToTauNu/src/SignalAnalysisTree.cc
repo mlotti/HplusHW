@@ -53,6 +53,7 @@ namespace HPlus {
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightTrigger", &fTriggerWeight);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
+    fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
 
@@ -199,6 +200,7 @@ namespace HPlus {
     fPileupWeight = 1.0;
     fTriggerWeight = 1.0;
     fBTaggingWeight = 1.0;
+    fFillWeight = 1.0;
 
     fNVertices = 0;
 

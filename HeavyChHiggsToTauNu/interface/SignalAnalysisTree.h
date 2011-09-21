@@ -37,6 +37,7 @@ namespace HPlus {
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
+    void setFillWeight(double w)  { fFillWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
@@ -74,6 +75,7 @@ namespace HPlus {
     double fPileupWeight;
     double fTriggerWeight;
     double fBTaggingWeight;
+    double fFillWeight;
 
     unsigned int fNVertices;
 
