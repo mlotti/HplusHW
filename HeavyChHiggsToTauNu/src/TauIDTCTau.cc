@@ -26,6 +26,12 @@ namespace HPlus {
 
   TauIDTCTau::~TauIDTCTau() { }
 
+  bool TauIDTCTau::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    fCounterPackager.incrementSubCount(fIDDecayModeFinding);
+    // No decay mode finding equivalent in TCTau, always pass true
+    return true;
+  }
+
   bool TauIDTCTau::passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) {
     // Check that leading track exists
     if (tau->leadTrack().isNull()) return false;

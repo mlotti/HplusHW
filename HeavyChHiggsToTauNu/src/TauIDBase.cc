@@ -26,6 +26,7 @@ namespace HPlus {
     
     // Initialize counter objects for tau candidate selection
     fIDAllTauCandidates = fCounterPackager.addSubCounter(baseLabel, "AllTauCandidates", 0);
+    fIDDecayModeFinding = fCounterPackager.addSubCounter(baseLabel, "DecayModeFinding", 0);
     fIDJetPtCut = fCounterPackager.addSubCounter(baseLabel, "TauJetPt",
       makeTH<TH1F>(fMyDir, "TauCand_JetPt", "TauJetPt;#tau jet p_{T}, GeV/c;N_{jets} / 2 GeV/c", 100, 0., 200.));
     fIDJetEtaCut = fCounterPackager.addSubCounter(baseLabel, "TauJetEta",

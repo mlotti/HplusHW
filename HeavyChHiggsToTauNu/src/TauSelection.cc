@@ -272,7 +272,7 @@ namespace HPlus {
     // Tau candidate selection
     edm::PtrVector<pat::Tau> myTauCandidates;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter)
-      if (fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
+      if (fTauID->passDecayModeFinding(*iter) && fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
     if (myTauCandidates.size() <= 1) {
       if (!myTauCandidates.size()) { // no taus left
 	findBestTau(myBestTau, taus);
@@ -382,7 +382,7 @@ namespace HPlus {
       fillHistogramsForTauCandidates(iTau, iEvent);
       
       // Tau candidate selections
-      // FIXME: add decay mode finding
+      if (!fTauID->passDecayModeFinding(iTau)) continue;
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
