@@ -118,26 +118,27 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v13" % step
+tauname = "_tauembedding_%s_v13_2" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
 reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
+# Goal: ~5 hour jobs
 skimNjobs = {
-    "WJets_TuneZ2_Summer11": 490,
+    "WJets_TuneZ2_Summer11": 1000, # ~10 hours
     "TTJets_TuneZ2_Summer11": 1000,
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 490,
     "DYJetsToLL_M50_TuneZ2_Summer11": 1000,
     "T_t-channel_TuneZ2_Summer11": 490,
-    "Tbar_t-channel_TuneZ2_Summer11": 400,
-    "T_tW-channel_TuneZ2_Summer11": 300,
-    "Tbar_tW-channel_TuneZ2_Summer11": 300,
+    "Tbar_t-channel_TuneZ2_Summer11": 160,
+    "T_tW-channel_TuneZ2_Summer11": 90,
+    "Tbar_tW-channel_TuneZ2_Summer11": 90,
     "T_s-channel_TuneZ2_Summer11": 50,
-    "Tbar_s-channel_TuneZ2_Summer11": 30,
+    "Tbar_s-channel_TuneZ2_Summer11": 10,
     "WW_TuneZ2_Summer11": 200,
     "WZ_TuneZ2_Summer11": 200,
-    "ZZ_TuneZ2_Summer11": 200,
+    "ZZ_TuneZ2_Summer11": 350,
     }
 
 muonAnalysisNjobs = { # goal: 30k events/job
@@ -176,7 +177,20 @@ def modify(dataset):
             frun = dataset.getName().split("_")[1].split("-")[0]
             m = reco_re.search(name)
             name = reco_re.sub(m.group("reco")+frun+"_", name)
+            dataset.appendLine("CMSSW.total_number_of_lumis = -1")
+        else:
+            dataset.appendLine("CMSSW.total_number_of_events = -1")
+
         dataset.useServer(False)
+
+        try:
+            njobs = skimNjobs[dataset.getName()]
+            dataset.setNumberOfJobs(njobs)
+#            if njobs > 490:
+#                dataset.useServer(True)
+        except KeyError:
+            pass
+
 
     else:
         name = path_re.sub(tauname, path[2])
@@ -184,19 +198,6 @@ def modify(dataset):
 
     if dataset.isData() and step in ["generation", "embedding"]:
         dataset.appendArg("overrideBeamSpot=1")
-
-    if step == "skim":
-        try:
-            njobs = skimNjobs[dataset.getName()]
-            dataset.setNumberOfJobs(njobs)
-            if njobs > 490:
-                dataset.useServer(True)
-
-        except KeyError:
-            pass
-
-        #if config[step]["input"] == "AOD":
-        #    dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
 
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
@@ -225,7 +226,7 @@ elif step in ["muonAnalysis", "caloMetEfficiency"]:
 else:
     multicrab.forEachDataset(modify)
 
-#multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab_"+step+dirPrefix
 
