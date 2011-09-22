@@ -544,6 +544,9 @@ class PlotBase:
         # Save the format
         self.saveFormats = saveFormats
 
+        self.plotObjectsBefore = []
+        self.plotObjectsAfter = []
+
     ## Set the default legend styles
     #
     # Intended to be called from the deriving classes
@@ -602,6 +605,35 @@ class PlotBase:
     def removeLegend(self):
         delattr(self, "legend")
 
+    def prependPlotObject(self, obj):
+        self.plotObjectsBefore.append(obj)
+
+    def appendPlotObject(self, obj):
+        self.plotObjectsAfter.append(obj)
+
+    def addCutBoxAndLine(self, cutValue, fillColor=18, box=True, line=True, **kwargs):
+        xmin = self.getFrame().GetXaxis().GetXmin()
+        xmax = self.getFrame().GetXaxis().GetXmax()
+        ymin = self.getFrame().GetYaxis().GetXmin()
+        ymax = self.getFrame().GetYaxis().GetXmax()
+
+        if histograms.isLessThan(**kwargs):
+            xmin = cutValue
+        else:
+            xmax = cutValue
+    
+        if box:
+            b = ROOT.TBox(xmin, ymin, xmax, ymax)
+            b.SetFillColor(fillColor)
+            self.prependPlotObject(b)
+
+        if line:
+            l = ROOT.TLine(cutValue, ymin, cutValue, ymax)
+            l.SetLineWidth(3)
+            l.SetLineStyle(ROOT.kDashed)
+            l.SetLineColor(ROOT.kBlack)
+            self.appendPlotObject(l)
+
     ## Add MC uncertainty histogram
     def addMCUncertainty(self):
         self.histoMgr.addMCUncertainty(styles.getErrorStyle())
@@ -616,7 +648,7 @@ class PlotBase:
 
     ## Get the frame TH1
     def getFrame(self):
-        return frame
+        return self.frame
 
     ## Get the TPad
     def getPad(self):
@@ -626,9 +658,16 @@ class PlotBase:
     #
     # Draw also the legend if one has been associated
     def draw(self):
+        for obj in self.plotObjectsBefore:
+            obj.Draw("same")
+
         self.histoMgr.draw()
         if hasattr(self, "legend"):
             self.legend.Draw()
+
+        for obj in self.plotObjectsAfter:
+            obj.Draw("same")
+
         # Redraw the axes in order to get the tick marks on top of the
         # histogram
         self.getPad().RedrawAxis()

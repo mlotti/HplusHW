@@ -277,17 +277,19 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
-## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
-def dist2pass(hdist, **kwargs):
-    lessThan = True
+def isLessThan(**kwargs):
     if len(kwargs) != 1:
         raise Exception("Should give only either 'lessThan' or 'greaterThan' as a keyword argument")
     elif "lessThan" in kwargs:
-        lessThan = kwargs["lessThan"]
+        return kwargs["lessThan"]
     elif "greaterThan" in kwargs:
-        lessThan = not kwargs["greaterThan"]
+        return not kwargs["greaterThan"]
     else:
         raise Exception("Must give either 'lessThan' or 'greaterThan' as a keyword argument")
+
+## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
+def dist2pass(hdist, **kwargs):
+    lessThan = isLessThan(**kwargs)
 
     # for less than
     integral = None
