@@ -132,7 +132,7 @@ param.setAllTauSelectionOperatingMode('standard')
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
 # Trigger with scale factors (at the moment hard coded)
-if (applyTriggerScaleFactor and dataVersion.isMC()):
+if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting

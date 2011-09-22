@@ -25,8 +25,6 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# Do trigger parametrisation for MC and tau embedding. If set to False trigger will be applied automatically
-doTriggerParametrisation = False
 applyTriggerScaleFactor = True
 
 # Temporary switch for disabling prescales (produces tons of unnecessary output
@@ -100,24 +98,9 @@ param.setAllTauSelectionOperatingMode('tauCandidateSelectionOnly')
 # Set tau sources to trigger matched tau collections
 param.setAllTauSelectionSrcSelectedPatTausTriggerMatched()
 
-# Set the triggers for trigger efficiency parametrisation
-#param.trigger.triggerTauSelection = param.tauSelectionHPSVeryLooseTauBased.clone( # VeryLoose
-param.trigger.triggerTauSelection = param.tauSelectionHPSTightTauBased.clone( # Tight
-  rtauCut = cms.untracked.double(0.0) # No rtau cut for trigger tau
-  )
-param.trigger.triggerMETSelection = param.MET.clone(
-  METCut = cms.untracked.double(0.0) # No MET cut for trigger MET
-)
-if (doTriggerParametrisation and not dataVersion.isData()):
-    # 2010 and 2011 scenarios
-    #param.setEfficiencyTriggersFor2010()
-    param.setEfficiencyTriggersFor2011()
-    # Settings for the configuration
-#    param.trigger.selectionType = cms.untracked.string("byParametrisation")
-
 # Trigger with scale factors (at the moment hard coded)
-if (applyTriggerScaleFactor and not dataVersion.isData()):
-    param.trigger.selectionType = cms.untracked.string("byTriggerBitApplyScaleFactor")
+if applyTriggerScaleFactor and dataVersion.isMC():
+    param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 
 # Set the data scenario for vertex/pileup weighting
@@ -138,6 +121,7 @@ param.InvMassVetoOnJets.setTrueToUseModule = False
 ##############################################################################
 process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     trigger = param.trigger,
+    triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,
     tauSelection = param.tauSelectionHPSTightTauBased,
     GlobalElectronVeto = param.GlobalElectronVeto,
@@ -150,7 +134,6 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     fakeMETVeto = param.fakeMETVeto,
     topSelection = param.topSelection,
     forwardJetVeto = param.forwardJetVeto,
-    TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     GenParticleAnalysis = param.GenParticleAnalysis,
     vertexWeight = param.vertexWeight,
     tauIsolationCalculator = cms.untracked.PSet(
@@ -179,7 +162,6 @@ if dataVersion.isData() and not disablePrescales:
     process.QCDMeasurement.prescaleSource = cms.untracked.InputTag("hplusPrescaleWeightProducer")
 
 # Print output
-print "\ndoTriggerParametrisation:", doTriggerParametrisation
 print "\nVertexWeight:", process.QCDMeasurement.vertexWeight
 print "\nTrigger:", process.QCDMeasurement.trigger
 print "\nPV Selection:", process.QCDMeasurement.primaryVertexSelection
