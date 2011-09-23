@@ -215,6 +215,7 @@ _datasetOrder = [
     "HplusTB_M250",
     "HplusTB_M300",
     "QCD",
+    "QCDdata",
     "QCD_Pt20_MuEnriched",
     "WJets",
     "WToTauNu",
@@ -276,6 +277,8 @@ _legendLabels = {
     "QCD_Pt170to300":        "QCD, 170 < #hat{p}_{T} < 300",
     "QCD_Pt300to470":        "QCD, 300 < #hat{p}_{T} < 470",
 
+    "QCDdata": "QCD (data driven)",
+
     "DYJetsToLL":            "DY+jets",
     "QCD_Pt20_MuEnriched":   "QCD (#mu enr.), #hat{p}_{T} > 20",
 
@@ -336,6 +339,7 @@ _plotStyles = {
     "WToTauNu":              styles.wStyle,
 
     "QCD":                   styles.qcdStyle,
+    "QCDdata":               styles.qcdStyle,
 
     "DYJetsToLL":            styles.dyStyle,
     "QCD_Pt20_MuEnriched":   styles.qcdStyle,
@@ -475,6 +479,15 @@ def mergeWHandHH(datasetMgr):
         if signalWH in names and signalHH in names:
             datasetMgr.merge(target, [signalWH, signalHH])
 
+def replaceQCDFromData(datasetMgr, datasetQCDdata):
+    names = datasetMgr.getAllDatasetNames()
+    index = names.index("QCD")
+    names.pop(index)
+    names.insert(index, datasetQCDdata.getName())
+    datasetMgr.remove("QCD")
+    datasetMgr.append(datasetQCDdata)
+    datasetMgr.selectAndReorder(names)
+
 ## Creates a ratio histogram
 #
 # \param rootHisto1  TH1 dividend
@@ -530,7 +543,6 @@ def _createCoverPad(xmin=0.065, ymin=0.285, xmax=0.165, ymax=0.33):
     coverPad.SetBorderMode(0)
     return coverPad
  
-
 ## Base class for plots
 class PlotBase:
     ## Construct plot from DatasetManager and histogram name

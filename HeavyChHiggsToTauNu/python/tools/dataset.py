@@ -982,6 +982,29 @@ class Dataset:
             key = diriter.Next()
         return ret
 
+class DatasetQCDData(Dataset):
+    def __init__(self, name, fname, counterDir, normfactor=1.0):
+        Dataset.__init__(self, name, fname, counterDir)
+        self.normfactor = normfactor
+
+    def deepCopy(self):
+        d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
+        d.info.update(self.info)
+        return d
+
+    def getDatasetRootHisto(self, name):
+        drh = Dataset.getDatasetRootHisto(self, name)
+        drh.scale(self.normfactor)
+        return drh
+
+    def setNormFactor(self, normfactor):
+        self.normfactor = normfactor
+
+    def setNormFactorFromTree(self, treeDraw, targetNumEvents):
+        drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
+        nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
+        self.setNormFactor(targetNumEvents/nevents)
+        
 
 class DatasetMerged:
     """Dataset class for histogram access for a dataset merged from Dataset objects.
