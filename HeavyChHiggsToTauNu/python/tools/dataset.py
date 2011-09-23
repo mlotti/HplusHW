@@ -340,7 +340,7 @@ def _mergeStackHelper(datasetList, nameList, task):
     return (selected, notSelected, firstIndex)
 
 
-th1_re = re.compile(">>\s*\S+\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
 class TreeDraw:
     def __init__(self, tree, varexp="", selection="", weight=""):
         self.tree = tree
@@ -357,7 +357,7 @@ class TreeDraw:
         return TreeDraw(**args)
 
     def draw(self, rootFile, datasetName):
-        if not ">>" in self.varexp:
+        if self.varexp != "" and not ">>" in self.varexp:
             raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
         selection = self.selection
@@ -377,15 +377,25 @@ class TreeDraw:
             h.SetBinError(1, math.sqrt(nentries))
             return h
 
-        nentries = tree.Draw(self.varexp, selection, "goff")
-        h = tree.GetHistogram()
+        varexp = self.varexp
+        m = th1_re.search(varexp)
+        h = None
+        if m:
+            varexp = th1_re.sub(">>"+m.group("name"), varexp)
+            h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            
+        
+        # e to have TH1.Sumw2() to be called before filling the histogram
+        # goff to not to draw anything on the screen
+        nentries = tree.Draw(varexp, selection, "e goff")
+        #h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
         else:
-            m = th1_re.search(self.varexp)
+            m = th1_re.search(varexp)
             if not m:
-                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % self.varexp)
-            h = ROOT.TH1F("tmp", self.varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % varexp)
+            h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         h.SetDirectory(0)
         return h
 

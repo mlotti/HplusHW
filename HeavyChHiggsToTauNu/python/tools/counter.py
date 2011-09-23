@@ -52,7 +52,7 @@ class CellFormatBase:
                               equal (default: 4)
         valueOnly             Boolean, format the value only? (default: False)
         """
-        self._valueFormat = kwargs.get("valueFormat", "%.4g")
+        self._valueFormat = kwargs.get("valueFormat", "%.6g")
         self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
         self._valueOnly = kwargs.get("valueOnly", False)
 
