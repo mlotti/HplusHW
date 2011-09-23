@@ -212,7 +212,12 @@ namespace HPlus {
     // Other histograms
     //TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
+    TH1 *hMET_AfterBigBox; // 22 Sep 2011
     TH1 *hTransverseMass_AfterBigBox; // 14 Aug 2011
+    TH1 *hMET_AfterJetSelection; // 22 Sep 2011
+    TH1 *hMET_AfterJetSelMt80; // 22 Sep 2011
+    TH1 *hTransverseMass_AfterJetSelection; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterJetSelMetCut; // 14 Aug 2011
     TH1 *hTransverseMass_AfterBigBoxAndMet; // 14 Aug 2011
     TH1 *hTransverseMass_AfterBigBoxAndBtag; // 14 Aug 2011
     TH1 *hTransverseMass_AfterBigBoxAndTauID; // 14 Aug 2011

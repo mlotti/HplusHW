@@ -168,6 +168,7 @@ namespace HPlus {
     TH1 *hTransverseMassWithTopCut;
     TH1 *hTransverseMassAfterVeto;
     TH1 *hTransverseMassBeforeVeto;
+    TH1 *hTransverseMassBeforeMetCut;
     TH1 *hTransverseMassBeforeFakeMet;
     TH1 *hTransverseMassDeltaPhiUpperCut;
     TH1 *hTransverseMassWithRtauFakeMet;

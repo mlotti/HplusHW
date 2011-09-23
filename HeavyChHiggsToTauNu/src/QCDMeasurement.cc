@@ -126,6 +126,11 @@ namespace HPlus {
 
     // Other histograms
     //hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
+    hMET_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelection", "QCD_MET_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
+    hMET_AfterJetSelMt80 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelectionMt80", "QCD_MET_AfterJetSelectionMt80; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
+    hMET_AfterBigBox = makeTH<TH1F>(*fs, "QCD_MET_AfterBigBox", "QCD_MET_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
+    hTransverseMass_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelection", "QCD_TransverseMass_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
+   hTransverseMass_AfterJetSelMetCut = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelectionMetCut", "QCD_TransverseMass_AfterJetSelectionMetCut; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
@@ -282,6 +287,12 @@ namespace HPlus {
     
     // get the MET, but cut on it later
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    hMET_AfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+    hTransverseMass_AfterJetSelection->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
+    if (TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())) > 80.) {
+	  hMET_AfterJetSelMt80->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+	} 
+    if (metData.passedEvent()) hTransverseMass_AfterJetSelMetCut->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
 
     // alphaT - No cuts applied! Only produces plots
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
@@ -343,7 +354,7 @@ namespace HPlus {
 
     // Apply rest of tauID without Rtau
     TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
-    if(!tauDataForTauID.passedEvent()) return;
+     if(!tauDataForTauID.passedEvent()) return;
     increment(fOneProngTauIDWithoutRtauCounter);
     hSelectionFlow->Fill(kQCDOrderTauID, fEventWeight.getWeight());
     hStdAfterTauIDNoRtau->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
@@ -460,6 +471,7 @@ namespace HPlus {
     double deltaPhiMetSecondLdgJet = reco::deltaPhi( *(jetData.getSelectedJets()[1]), *(metData.getSelectedMET()) ) * 180./3.14159; 
 
     // Fill histograms: DeltaPhi(tauCand,MET)
+    hMET_AfterBigBox->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
     hDeltaPhiMetTauCand_AfterBigBox->Fill(deltaPhiMetTauCand, fEventWeight.getWeight());
     hDeltaPhiMetFirstLdgJet_AfterBigBox->Fill(deltaPhiMetFirstLdgJet, fEventWeight.getWeight());
     hDeltaPhiMetSecondLdgJet_AfterBigBox->Fill(deltaPhiMetSecondLdgJet, fEventWeight.getWeight());
