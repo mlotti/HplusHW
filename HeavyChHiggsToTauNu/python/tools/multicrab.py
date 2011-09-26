@@ -491,12 +491,15 @@ class MulticrabDataset:
 
         args = ["dataVersion=%s" % self.data["dataVersion"]]
         del dataKeys[dataKeys.index("dataVersion")]
-        for argName in ["trigger", "crossSection", "luminosity", "tauIDFactorizationMap"]:
+        for argName in ["trigger", "crossSection", "luminosity"]:
             try:
                 args.append("%s=%s" % (argName, self.data[argName]))
                 del dataKeys[dataKeys.index(argName)]
             except KeyError:
                 pass
+        if "args" in self.data:
+            for key, value in self.data["args"].iteritems():
+                args.append("%s=%s" % (key, value))
 
         args += self.args
         try:
