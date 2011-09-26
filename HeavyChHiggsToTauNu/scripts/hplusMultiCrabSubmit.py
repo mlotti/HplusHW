@@ -9,6 +9,13 @@ import re
 from optparse import OptionParser
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 
+def isInRange(opts, j):
+    if opts.firstJob >= 0 and j.id < opts.firstJob:
+        return False
+    if opts.lastJob >= 0 and j.id > opts.lastJob:
+        return False
+    return True
+
 def main(opts, args):
     taskDirs = multicrab.getTaskDirectories(opts)
     multicrab.checkCrabInPath()
@@ -23,7 +30,7 @@ def main(opts, args):
         if not "Created" in jobs:
             print "%s: no 'Created' jobs to submit" % task
             continue
-        allJobs.extend(jobs["Created"])
+        allJobs.extend(filter(lambda j: isInRange(opts, j), jobs["Created"]))
 
     maxJobs = len(allJobs)
     if opts.maxJobs >= 0 and int(opts.maxJobs) < int(maxJobs):
@@ -62,6 +69,10 @@ if __name__ == "__main__":
                       help="Number of jobs to submit at a time (default: 50)")
     parser.add_option("--maxJobs", dest="maxJobs", type="int", default=-1,
                       help="Maximum number of jobs to submit (default: -1, i.e. all)")
+    parser.add_option("--firstJob", dest="firstJob", type="int", default=-1,
+                      help="First job to submit (default: -1, i.e. first which exists)")
+    parser.add_option("--lastJob", dest="lastJob", type="int", default=-1,
+                      help="Last job to submit (default: -1, i.e. last which exists)")
     parser.add_option("--sleep", dest="sleep", type="float", default=900.0,
                       help="Number of seconds to sleep between submissions (default: 900 s= 15 min)")
     parser.add_option("--test", dest="test", default=False, action="store_true",
