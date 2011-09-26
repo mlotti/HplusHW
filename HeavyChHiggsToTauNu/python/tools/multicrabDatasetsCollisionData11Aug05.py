@@ -46,13 +46,13 @@ datasets = {
     # Single Mu
     "SingleMu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
-        "trigger": "HLT_Mu40_v3",
+        "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-05Aug2011-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 110,
+                "number_of_jobs": 200,
                 "lumiMask": "Aug05ReReco"
             },
         }

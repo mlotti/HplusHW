@@ -73,7 +73,7 @@ goodJets = cms.EDFilter("PATJetSelector",
     src = cms.InputTag("selectedPatJetsAK5PF"),
 #    preselection =
     cut = cms.string(
-    "pt() > 30 && abs(eta()) < 2.4"
+    "pt() > 25 && abs(eta()) < 2.4"
     "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
     "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
     "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0" # eta < 2.4, so don't need the requirement here

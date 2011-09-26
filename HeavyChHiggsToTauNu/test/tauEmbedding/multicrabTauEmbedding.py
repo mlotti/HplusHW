@@ -4,12 +4,12 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-#step = "skim"
+step = "skim"
 #step = "generation"
 #step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-step = "signalAnalysis"
+#step = "signalAnalysis"
 #step = "muonAnalysis"
 #step = "caloMetEfficiency"
 
@@ -23,7 +23,7 @@ dirPrefix = ""
 #dirPrefix += "_nJet40"
 #dirPrefix += "_noEmuVeto"
 #dirPrefix += "_noEmuVetoEnd"
-dirPrefix += "_MCGT"
+#dirPrefix += "_MCGT"
 #dirPrefix += "_forClosureTest"
 #dirPrefix = "_TauIdScan"
 #dirPrefix = "_iso05"
@@ -72,21 +72,24 @@ datasetsData2011 = [
     "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
     "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
     "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
-    "SingleMu_167078-167784_Prompt", # HLT_Mu40_v1
-
-    "SingleMu_161119-161119_May10_Wed", # HLT_Mu20_v1
-    "SingleMu_167786-167913_Prompt_Wed", # HLT_Mu40_v1
+    "SingleMu_167078-167913_Prompt", # HLT_Mu40_v3
+    "SingleMu_170722-172619_Aug05",  # HLT_Mu40_v5
+    "SingleMu_172620-173198_Prompt", # HLT_Mu40_v5
+    "SingleMu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
 ]
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Summer11",
     "WJets_TuneZ2_Summer11",
     "DYJetsToLL_M50_TuneZ2_Summer11",
-#    "TToBLNu_s-channel_TuneZ2_Summer11",
-#    "TToBLNu_t-channel_TuneZ2_Summer11",
-#    "TToBLNu_tW-channel_TuneZ2_Summer11",
-#    "WW_TuneZ2_Summer11",
-#    "WZ_TuneZ2_Summer11",
-#    "ZZ_TuneZ2_Summer11",
+    "T_t-channel_TuneZ2_Summer11",
+    "Tbar_t-channel_TuneZ2_Summer11",
+    "T_tW-channel_TuneZ2_Summer11",
+    "Tbar_tW-channel_TuneZ2_Summer11",
+    "T_s-channel_TuneZ2_Summer11",
+    "Tbar_s-channel_TuneZ2_Summer11",
+    "WW_TuneZ2_Summer11",
+    "WZ_TuneZ2_Summer11",
+    "ZZ_TuneZ2_Summer11",
 ]
 datasetsMCQCD = [
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11",
@@ -115,23 +118,27 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v11_8" % step
+tauname = "_tauembedding_%s_v13_2" % step
 if step in ["generation", "embedding"]:
     tauname += pt
 
-reco_re = re.compile("(?P<reco>Reco_v\d+_[^_]+_)")
+reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
+# Goal: ~5 hour jobs
 skimNjobs = {
-    "WJets_TuneZ2_Summer11": 490,
-    "TTJets_TuneZ2_Summer11": 490,
-    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 400,
-    "DYJetsToLL_M50_TuneZ2_Summer11": 490,
-    "TToBLNu_s-channel_TuneZ2_Summer11": 100,
-    "TToBLNu_t-channel_TuneZ2_Summer11": 100,
-    "TToBLNu_tW-channel_TuneZ2_Summer11": 100,
-    "WW_TuneZ2_Summer11": 100,
-    "WZ_TuneZ2_Summer11": 100,
-    "ZZ_TuneZ2_Summer11": 100,
+    "WJets_TuneZ2_Summer11": 1000, # ~10 hours
+    "TTJets_TuneZ2_Summer11": 500,
+    "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 490,
+    "DYJetsToLL_M50_TuneZ2_Summer11": 1000,
+    "T_t-channel_TuneZ2_Summer11": 490,
+    "Tbar_t-channel_TuneZ2_Summer11": 160,
+    "T_tW-channel_TuneZ2_Summer11": 90,
+    "Tbar_tW-channel_TuneZ2_Summer11": 90,
+    "T_s-channel_TuneZ2_Summer11": 50,
+    "Tbar_s-channel_TuneZ2_Summer11": 10,
+    "WW_TuneZ2_Summer11": 200,
+    "WZ_TuneZ2_Summer11": 200,
+    "ZZ_TuneZ2_Summer11": 350,
     }
 
 muonAnalysisNjobs = { # goal: 30k events/job
@@ -170,6 +177,20 @@ def modify(dataset):
             frun = dataset.getName().split("_")[1].split("-")[0]
             m = reco_re.search(name)
             name = reco_re.sub(m.group("reco")+frun+"_", name)
+            dataset.appendLine("CMSSW.total_number_of_lumis = -1")
+        else:
+            dataset.appendLine("CMSSW.total_number_of_events = -1")
+
+        dataset.useServer(False)
+
+        try:
+            njobs = skimNjobs[dataset.getName()]
+            dataset.setNumberOfJobs(njobs)
+#            if njobs > 490:
+#                dataset.useServer(True)
+        except KeyError:
+            pass
+
 
     else:
         name = path_re.sub(tauname, path[2])
@@ -177,16 +198,6 @@ def modify(dataset):
 
     if dataset.isData() and step in ["generation", "embedding"]:
         dataset.appendArg("overrideBeamSpot=1")
-
-    if step == "skim":
-        try:
-            dataset.setNumberOfJobs(skimNjobs[dataset.getName()])
-        except KeyError:
-            pass
-
-        #if config[step]["input"] == "AOD":
-        #    dataset.extendBlackWhiteList("se_white_list", ["T2_FI_HIP"])
-        dataset.useServer(False)
 
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
@@ -215,7 +226,7 @@ elif step in ["muonAnalysis", "caloMetEfficiency"]:
 else:
     multicrab.forEachDataset(modify)
 
-#multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
+multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
 prefix = "multicrab_"+step+dirPrefix
 
