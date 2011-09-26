@@ -127,7 +127,7 @@ reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 # Goal: ~5 hour jobs
 skimNjobs = {
     "WJets_TuneZ2_Summer11": 1000, # ~10 hours
-    "TTJets_TuneZ2_Summer11": 1000,
+    "TTJets_TuneZ2_Summer11": 500,
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 490,
     "DYJetsToLL_M50_TuneZ2_Summer11": 1000,
     "T_t-channel_TuneZ2_Summer11": 490,
