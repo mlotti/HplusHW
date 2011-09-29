@@ -50,6 +50,7 @@ set -e
 # 4.7.2011/M.Kortelainen CMSSW_4_2_5 Reverted PAT tags (I accidentally launched the pattuple_v16 with an old version)
 # 6.7.2011/M.Kortelainen CMSSW_4_2_5 Updated PAT tags back
 # 12.8.2011/M.Kortelainen CMSSW_4_2_8_patch1 Updated PAT tags
+# 28.9.2011/M.Kortelainen CMSSW_4_2_8_patch2 Added tags for calculating type I/II MET from PAT objects
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -76,6 +77,23 @@ addpkg PhysicsTools/SelectorUtils V00-03-17
 addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
 addpkg PhysicsTools/Utilities     V08-03-09
+
+# Type I/II MET
+# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
+addpkg JetMETCorrections/Type1MET V04-05-03
+addpkg PhysicsTools/PatUtils      V03-09-19
+
+addpkg DataFormats/METReco
+cvs up -r 1.28 DataFormats/METReco/src/classes.h
+cvs up -r 1.25 DataFormats/METReco/src/classes_def.xml
+
+addpkg JetMETCorrections/Algorithms V02-03-00
+rm -f JetMETCorrections/Algorithms/interface/L1JPTOffsetCorrector.h
+rm -f JetMETCorrections/Algorithms/src/L1JPTOffsetCorrector.cc
+addpkg JetMETCorrections/Objects V03-01-00
+addpkg JetMETCorrections/Modules
+cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
+cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc

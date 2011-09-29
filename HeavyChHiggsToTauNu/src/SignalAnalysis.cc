@@ -338,11 +338,18 @@ namespace HPlus {
     // Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
+    if(metData.getRawMET().isNonnull())
+      fTree.setRawMET(metData.getRawMET());
+    if(metData.getType1MET().isNonnull())
+      fTree.setType1MET(metData.getType1MET());
+    if(metData.getType2MET().isNonnull())
+      fTree.setType2MET(metData.getType2MET());
+
     // Write the stuff to the tree
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
-    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
+    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(),
                evtTopologyData.alphaT().fAlphaT);
 
 

@@ -43,8 +43,12 @@ namespace HPlus {
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
+    void setRawMET(const edm::Ptr<reco::MET>& met) { fRawMet = met->p4(); fRawMetSumEt = met->sumEt(); }
+    void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
+    void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
+
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-              const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+              const edm::PtrVector<pat::Jet>& jets,
               double alphaT);
 
   private:
@@ -102,8 +106,10 @@ namespace HPlus {
     std::vector<bool> fJetsTightId;
 
     // MET is really 2-vector, but let's just use this for consistency
-    XYZTLorentzVector fMet;
-    double fMetSumEt;
+    XYZTLorentzVector fRawMet;
+    double fRawMetSumEt;
+    XYZTLorentzVector fType1Met;
+    XYZTLorentzVector fType2Met;
 
     XYZTLorentzVector fTop;
 

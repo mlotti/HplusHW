@@ -81,8 +81,11 @@ namespace HPlus {
     fTree->Branch("jets_looseId", &fJetsLooseId);
     fTree->Branch("jets_tightId", &fJetsTightId);
 
-    fTree->Branch("met_p4", &fMet);
-    fTree->Branch("met_sumet", &fMetSumEt);
+    fTree->Branch("met_p4", &fRawMet);
+    fTree->Branch("met_sumet", &fRawMetSumEt);
+
+    fTree->Branch("metType1_p4", &fType1Met);
+    fTree->Branch("metType2_p4", &fType2Met);
 
     fTree->Branch("topreco_p4", &fTop);
 
@@ -98,7 +101,7 @@ namespace HPlus {
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+                                const edm::PtrVector<pat::Jet>& jets,
                                 double alphaT) {
     if(!fDoFill)
       return;
@@ -161,9 +164,6 @@ namespace HPlus {
 
       fJetsArea.push_back(jets[i]->jetArea());
     }
-    fMet = met->p4();
-    fMetSumEt = met->sumEt();
-
     fAlphaT = alphaT;
 
     if(fTauEmbeddingInput) {
@@ -203,6 +203,7 @@ namespace HPlus {
     fFillWeight = 1.0;
 
     fNVertices = 0;
+    fNHltTaus = 0;
 
     double nan = std::numeric_limits<double>::quiet_NaN();
 
@@ -233,8 +234,11 @@ namespace HPlus {
     fJetsLooseId.clear();
     fJetsTightId.clear();
 
-    fMet.SetXYZT(nan, nan, nan, nan);
-    fMetSumEt = nan;
+    fRawMet.SetXYZT(nan, nan, nan, nan);
+    fRawMetSumEt = nan;
+
+    fType1Met.SetXYZT(nan, nan, nan, nan);
+    fType2Met.SetXYZT(nan, nan, nan, nan);
 
     fTop.SetXYZT(nan, nan, nan, nan);
 

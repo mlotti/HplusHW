@@ -20,5 +20,6 @@
   <use   name="HiggsAnalysis/HeavyChHiggsToTauNu"/>
   <use   name="PhysicsTools/PatUtils"/>
   <use   name="CondFormats/JetMETObjects"/>
+  <use   name="JetMETCorrections/Objects"/>
 </library>
 

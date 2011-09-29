@@ -133,7 +133,6 @@ jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
@@ -144,8 +143,11 @@ jetSelection = cms.untracked.PSet(
 
 MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
+    type1Src = cms.untracked.InputTag("dummy"),
+    type2Src = cms.untracked.InputTag("dummy"),
+    select = cms.untracked.string("raw"), # raw, type1, type2
     METCut = cms.untracked.double(70.0)
 )
 
@@ -189,7 +191,7 @@ InvMassVetoOnJets = cms.untracked.PSet(
 )
 
 fakeMETVeto = cms.untracked.PSet(
-  src = MET.src,
+  src = MET.rawSrc,
   minDeltaPhi = cms.untracked.double(10.) # in degrees
 )
 
@@ -197,14 +199,9 @@ jetTauInvMass = cms.untracked.PSet(
   ZmassResolution = cms.untracked.double(5.0),
 )
 
-TauEmbeddingAnalysis = cms.untracked.PSet(
-  embeddingMetSrc = MET.src,
-  embeddingMode = cms.untracked.bool(False)
-)
-
 forwardJetVeto = cms.untracked.PSet(
   src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-  src_met = MET.src,
+  src_met = MET.rawSrc,
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),
@@ -500,7 +497,7 @@ def changeJetCollection(**kwargs):
 def changeMetCollection(**kwargs):
     _changeCollection([
             jetSelection.src_met,
-            MET.src,
+            MET.rawSrc,
             fakeMETVeto.src,
             TauEmbeddingAnalysis.embeddingMetSrc,
             forwardJetVeto.src_met

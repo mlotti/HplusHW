@@ -25,6 +25,22 @@ doRtauScan = False
 # Make MET resolution histograms
 doMETResolution = False
 
+# With tau embedding input, tighten the muon selection
+tauEmbeddingFinalizeMuonSelection = True
+# With tau embedding input, do the muon selection scan
+doTauEmbeddingMuonSelectionScan = False
+# Do tau id scan for tau embedding normalisation (no tau embedding input required)
+doTauEmbeddingTauSelectionScan = False
+
+applyTriggerScaleFactor = True
+
+filterGenTaus = False
+filterGenTausInaccessible = False
+
+### Systematic uncertainty flags ###
+# Running of systematic variations is controlled by the global flag
+# (below), or the individual flags
+doSystematics = True
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -38,17 +54,6 @@ JESUnclusteredMETVariation = 0.10
 doPUWeightVariation = False
 PUWeightVariation = 0.6
 
-# With tau embedding input, tighten the muon selection
-tauEmbeddingFinalizeMuonSelection = True
-# With tau embedding input, do the muon selection scan
-doTauEmbeddingMuonSelectionScan = False
-# Do tau id scan for tau embedding normalisation (no tau embedding input required)
-doTauEmbeddingTauSelectionScan = False
-
-applyTriggerScaleFactor = True
-
-filterGenTaus = False
-filterGenTausInaccessible = False
 
 ################################################################################
 
@@ -172,6 +177,10 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     GenParticleAnalysis = param.GenParticleAnalysis,
     Tree = param.tree,
 )
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+process.patMetCorrSequence = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+process.commonSequence *= process.patMetCorrSequence
+process.signalAnalysis.MET.type1Src = MetCorrection.METType1Name
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0:
@@ -260,7 +269,7 @@ if options.tauEmbeddingInput:
                 signalAnalysisCounters=True)
 
     module = module.clone()
-    module.trigger.selectionType = "byParametrisation"
+    module.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
     addAnalysis(process, "signalAnalysisCaloMet60TEff", module,
                 preSequence=process.commonSequence,
                 additionalCounters=additionalCounters,
@@ -303,7 +312,7 @@ if doAllTauIds:
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-if doJESVariation:
+if doJESVariation or doSystematics:
     # Exceptions for tau embedding
     jetVariationMode="all"
     name = "signalAnalysis"
@@ -324,8 +333,9 @@ if doJESVariation:
     addJESVariationAnalysis(process, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
     addJESVariationAnalysis(process, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation, jetVariationMode)
 
-if doPUWeightVariation:
+if doPUWeightVariation or doSystematics:
     module = process.signalAnalysis.clone()
+    module.Tree.fill = False
     module.vertexWeight.shiftMean = True
     module.vertexWeight.shiftMeanAmount = PUWeightVariation
     addAnalysis(process, "signalAnalysisPUWeightPlus", module,

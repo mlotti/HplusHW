@@ -297,6 +297,13 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
     // increment(fEvtTopologyCounter);
 
+    if(metData.getRawMET().isNonnull())
+      fTree.setRawMET(metData.getRawMET());
+    if(metData.getType1MET().isNonnull())
+      fTree.setType1MET(metData.getType1MET());
+    if(metData.getType2MET().isNonnull())
+      fTree.setType2MET(metData.getType2MET());
+
     // It can happen (and happens) that mySelectedTau has more than 1
     // tau candidate, here we explicitly select only the first one
     // (with the hope that it is the correct one), because
@@ -307,7 +314,7 @@ namespace HPlus {
     mySelectedTauFirst.push_back(mySelectedTau[0]);
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(),
                evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
