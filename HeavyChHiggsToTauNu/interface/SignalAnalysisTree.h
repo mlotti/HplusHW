@@ -40,6 +40,7 @@ namespace HPlus {
     void setFillWeight(double w)  { fFillWeight = w; }
 
     void setNvertices(unsigned int n) { fNVertices = n; }
+    void setNHltTaus(unsigned int n) { fNHltTaus = n; }
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
@@ -82,6 +83,7 @@ namespace HPlus {
     double fFillWeight;
 
     unsigned int fNVertices;
+    unsigned int fNHltTaus;
 
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;

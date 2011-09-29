@@ -56,6 +56,7 @@ namespace HPlus {
     fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
+    fTree->Branch("hltTaus_n", &fNHltTaus);
 
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
