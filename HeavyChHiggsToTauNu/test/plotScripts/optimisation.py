@@ -55,28 +55,34 @@ def main():
     mt = "sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"; mtCut = mt+" > 80"
     deltaPhi = "acos((tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/tau_p4.Pt()/met_p4.Et())*57.2958"; deltaPhiCut = deltaPhi+" < 160"
 
+    npv = "goodPrimaryVertices_n";
 
     td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
     lumi = 1145
 
-    def createResult(varexp, selection, **kwargs):
-        return Result(datasets, td.clone(varexp=varexp, selection=selection), normalizeToLumi=lumi, **kwargs)
+    def createResult(varexp, selection, weight=None, **kwargs):
+        args = {"varexp": varexp, "selection": selection}
+        if weight != None:
+            args["weight"] = weight
+        return Result(datasets, td.clone(**args), normalizeToLumi=lumi, **kwargs)
 
-    metRes = createResult(met+">>dist(100,0,200)", btagCut, greaterThan=True)
-    metRes.save("met", "MET (GeV)", rebin=10, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
+    # metRes = createResult(met+">>dist(100,0,200)", btagCut, greaterThan=True)
+    # metRes.save("met", "MET (GeV)", rebin=10, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
 
-    btagRes = createResult(btagMax+">>dist(80, 0, 8)", metCut, greaterThan=True)
-    btagRes.save("btag", "TCHE", rebin=5, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
+    # btagRes = createResult(btagMax+">>dist(80, 0, 8)", metCut, greaterThan=True)
+    # btagRes.save("btag", "TCHE", rebin=5, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
 
-    rtauRes = createResult(rtau+">>dist(110,0,1.1)", metCut+"&&"+btagCut, greaterThan=True)
-    rtauRes.save("rtau", "R_{#tau}", rebin=10, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
+    # rtauRes = createResult(rtau+">>dist(110,0,1.1)", metCut+"&&"+btagCut, greaterThan=True)
+    # rtauRes.save("rtau", "R_{#tau}", rebin=10, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
 
-    mtRes = createResult(mt+">>dist(50,0,200)", metCut+"&&"+btagCut, greaterThan=True)
-    mtRes.save("mt", "M_{T}(#tau, MET) (GeV)", rebin=2, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
+    # mtRes = createResult(mt+">>dist(50,0,200)", metCut+"&&"+btagCut, greaterThan=True)
+    # mtRes.save("mt", "M_{T}(#tau, MET) (GeV)", rebin=2, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
 
-    deltaPhiRes = createResult(deltaPhi+">>dist(90,0,180)", metCut+"&&"+btagCut, lessThan=True)
-    deltaPhiRes.save("deltaPhi", "#Delta#Phi(#tau, MET) (#circ)", rebin=5, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
+    # deltaPhiRes = createResult(deltaPhi+">>dist(90,0,180)", metCut+"&&"+btagCut, lessThan=True)
+    # deltaPhiRes.save("deltaPhi", "#Delta#Phi(#tau, MET) (#circ)", rebin=5, logy=True, opts={"ymin": 0.01, "ymaxfactor": 10})
 
+    pileupRes = createResult(npv+">>dist(4,1,17)", metCut+"&&"+btagCut, weight="", doPassed=False, lessThan=True)
+    pileupRes.save("goodPV", "N(good primary vertices)")
 
 def significancePoisson(signal, background):
     s = 0
@@ -85,7 +91,7 @@ def significancePoisson(signal, background):
     return s
 
 class Result:
-    def __init__(self, datasets, treeDraw, **kwargs):
+    def __init__(self, datasets, treeDraw, doPassed=True, **kwargs):
         argsPlot = {}
         argsPass = {}
         for key in kwargs.keys():
@@ -96,6 +102,7 @@ class Result:
             else:
                 raise Exception("Unsupported keyword argument %s" % key)
 
+        self.doPassed = doPassed
         self.dist = plots.MCPlot(datasets, treeDraw, **argsPlot)
         self.passed = plots.PlotBase()
         self.sOverB = plots.PlotBase()
@@ -104,30 +111,40 @@ class Result:
         signalsToRemove = filter(lambda name: plots.isSignal(name) and not "_M120" in name, datasets.getMCDatasetNames())
 
         # Create the passed (cumulative) histogram
-        sumBkg = None
+        sumBkgDist = None
+        sumBkgPassed = None
         for histo in self.dist.histoMgr.getHistos():
-            passed = histograms.dist2pass(histo.getRootHisto(), **argsPass)
-            self.passed.histoMgr.appendHisto(histograms.Histo(histo.getDataset(),
+            dist = histo.getRootHisto()
+            passed = histograms.dist2pass(dist, **argsPass)
+            self.passed.histoMgr.appendHisto(histograms.HistoWithDataset(histo.getDataset(),
                                                               passed,
                                                               histo.getName()))
             if not plots.isSignal(histo.getDataset().getName()):
-                if sumBkg == None:
-                    sumBkg = passed.Clone("bkgsum")
+                if sumBkgDist == None:
+                    sumBkgDist = dist.Clone("bkgsum")
+                    sumBkgPassed = passed.Clone("bkgsum")
                 else:
-                    sumBkg.Add(passed)
+                    sumBkgDist.Add(dist)
+                    sumBkgPassed.Add(passed)
+
+        sumBkg = sumBkgDist
+        histos = self.dist.histoMgr.getHistos()
+        if doPassed:
+            histos = self.passed.histoMgr.getHistos()
+            symBkg = symBkgPassed
 
         # Create S/B histogram
-        for histo in self.passed.histoMgr.getHistos():
+        for histo in histos:
             if plots.isSignal(histo.getDataset().getName()):
                 signal = histo.getRootHisto()
                 sOverB = signal.Clone("sOverB_"+histo.getName())
                 sOverB.Divide(sumBkg)
-                self.sOverB.histoMgr.appendHisto(histograms.Histo(histo.getDataset(), sOverB, histo.getName()))
+                self.sOverB.histoMgr.appendHisto(histograms.HistoWithDataset(histo.getDataset(), sOverB, histo.getName()))
 
                 signif = signal.Clone("significance_"+histo.getName())
                 for bin in xrange(0, signif.GetNbinsX()+2):
                     signif.SetBinContent(bin, significancePoisson(signif.GetBinContent(bin), sumBkg.GetBinContent(bin)))
-                self.significance.histoMgr.appendHisto(histograms.Histo(histo.getDataset(), signif, histo.getName()))
+                self.significance.histoMgr.appendHisto(histograms.HistoWithDataset(histo.getDataset(), signif, histo.getName()))
 
         # Format passed and dist
         self.passed.setDefaultStyles()
@@ -163,9 +180,13 @@ class Result:
 
         self._common(self.passed, name+"_cumulative", "Cut on "+xlabel, "Passed events", logy, opts)
 
-        self._common(self.sOverB, name+"_sOverB", "Cut on "+xlabel, "Signal / Background")
+        xlab = xlabel
+        if self.doPassed:
+            xlab = "Cut on "+xlabel
 
-        self._common(self.significance, name+"_significance", "Cut on "+xlabel, "Significance")
+        self._common(self.sOverB, name+"_sOverB", xlab, "Signal / Background")
+
+        self._common(self.significance, name+"_significance", xlab, "Significance")
 
 if __name__ == "__main__":
     main()
