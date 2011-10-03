@@ -64,7 +64,7 @@ namespace HPlus {
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
-
+      
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
     fTree->Branch("jets_chf", &fJetsChf); // charged hadron
@@ -155,7 +155,6 @@ namespace HPlus {
     fTree->Branch("nonIsoElectrons_DistanceOSTrk" , & fNonIsoElectrons_DistanceOSTrk);
     fTree->Branch("nonIsoElectrons_IPwrtBeamSpot" , & fNonIsoElectrons_IPwrtBeamSpot);
     fTree->Branch("nonIsoElectrons_ElectronMuonDeltaR" , & fNonIsoElectrons_ElectronMuonDeltaR);
-    
   }
 
  
@@ -175,8 +174,10 @@ namespace HPlus {
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
+
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
+
     }
 
     for(size_t i=0; i<jets.size(); ++i) {
@@ -271,7 +272,7 @@ namespace HPlus {
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
     for(size_t i=0; i<fTauIds.size(); ++i) {
-      fTauIds[i].value = taus[i]->tauID(fTauIds[i].name) > 0.5;
+      fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
 
     for(size_t i=0; i<jets.size(); ++i) {
