@@ -442,10 +442,8 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-def setTauSelection(module, val):
-    module.tauSelection = val
-def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
+from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+def addTauIdAnalyses(process, prefix, prototype, commonSequence, additionalCounters):
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     # Remove TCTau from list
@@ -476,11 +474,12 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]
 
-    addAnalysisArray(process, prefix, module, setTauSelection,
-                     values = selections, names = names,
-                     preSequence = commonSequence,
-                     additionalCounters = additionalCounters)
-
+    for selection, name in zip(selections, names):
+        module = prototype.clone()
+        module.tauSelection = selection.clone()
+        addAnalysis(process, prefix+name, module,
+                    preSequence=commonSequence,
+                    additionalCounters=additionalCounters)
 
 def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):
     for tag in inputTags:
