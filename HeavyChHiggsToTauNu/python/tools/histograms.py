@@ -722,13 +722,24 @@ class HistoBase:
 class Histo(HistoBase):
     ## Constructor
     #
+    # \param rootHisto  TH1 object
+    # \param name       Name of the Histo
+    #
+    #    The default legend label is the dataset name
+    def __init__(self, rootHisto, name):
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+
+## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+class HistoWithDataset(Histo):
+    ## Constructor
+    #
     # \param dataset    dataset.Dataset object
     # \param rootHisto  TH1 object
     # \param name       Name of the Histo
     #
     #    The default legend label is the dataset name
     def __init__(self, dataset, rootHisto, name):
-        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+        Histo.__init__(self, rootHisto, name)
         self.dataset = dataset
 
     ## Is the histogram from MC?
@@ -1285,7 +1296,7 @@ class HistoManager:
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([HistoWithDataset(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
