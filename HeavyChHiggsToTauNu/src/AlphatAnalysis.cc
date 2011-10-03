@@ -236,7 +236,7 @@ namespace HPlus {
     fJt = sAlphaT.fJt;
 
     // 10) Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
                                 
     // DeltaPhi(tau,MET)
@@ -353,7 +353,7 @@ namespace HPlus {
     increment(fAlphaTCounter);
 
     // 10) Fake MET
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
     if(!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);

@@ -191,7 +191,6 @@ InvMassVetoOnJets = cms.untracked.PSet(
 )
 
 fakeMETVeto = cms.untracked.PSet(
-  src = MET.rawSrc,
   minDeltaPhi = cms.untracked.double(10.) # in degrees
 )
 
@@ -507,9 +506,6 @@ def changeJetCollection(**kwargs):
 
 def changeMetCollection(**kwargs):
     _changeCollection([
-            jetSelection.src_met,
             MET.rawSrc,
-            fakeMETVeto.src,
-            TauEmbeddingAnalysis.embeddingMetSrc,
             forwardJetVeto.src_met
             ], **kwargs)
