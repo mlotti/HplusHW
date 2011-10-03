@@ -255,8 +255,8 @@ namespace HPlus {
     JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
                                
     // 14) Forward jet veto
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
-    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();    
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, metData.getSelectedMET());
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
 
     // Last but NOT least: Save the event weight!
     fEvtWeight = fEventWeight.getWeight();
@@ -380,7 +380,7 @@ namespace HPlus {
     increment(fZmassVetoCounter);
     
     // 14) Forward jet veto here
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, metData.getSelectedMET());
     if (!forwardJetData.passedEvent()) return;
     increment(fForwardJetVetoCounter);
 

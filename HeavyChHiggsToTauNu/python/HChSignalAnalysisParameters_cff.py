@@ -137,7 +137,6 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
-    METCut = cms.untracked.double(60.0),
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
@@ -200,7 +199,6 @@ jetTauInvMass = cms.untracked.PSet(
 
 forwardJetVeto = cms.untracked.PSet(
   src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-  src_met = MET.rawSrc,
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),
