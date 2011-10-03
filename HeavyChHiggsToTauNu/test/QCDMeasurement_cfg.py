@@ -152,6 +152,11 @@ mettableCoeff.METTableFactorizationCoefficients.factorizationSourceName = cms.un
 
 process.QCDMeasurement.factorization = mettables.METTableParameters
 process.QCDMeasurement.factorization.factorizationTables = mettableCoeff.METTableFactorizationCoefficients
+# Type 1 MET
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.QCDMeasurement.tauSelection, process.QCDMeasurement.jetSelection)
+process.commonSequence *= sequence
+process.QCDMeasurement.MET.type1Src = type1Met
         
 # Prescale fetching done automatically for data
 if dataVersion.isData() and not disablePrescales:
@@ -233,7 +238,7 @@ process.QCDMeasurementPath = cms.Path(
 if doAllTauIds:
     module = process.QCDMeasurement.clone()
     module.Tree.fill = True #attikis (default is False)
-    param.addTauIdAnalyses(process, "QCDMeasurement", module, process.commonSequence, additionalCounters)
+    param.addTauIdAnalyses(process, dataVersion, "QCDMeasurement", module, process.commonSequence, additionalCounters)
 
 
 ################################################################################
@@ -255,10 +260,10 @@ if doJESVariation:
     module = process.QCDMeasurement.clone()
     module.Tree.fill = False
 
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-    addJESVariationAnalysis(process, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
+    addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.
