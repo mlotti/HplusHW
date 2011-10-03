@@ -443,7 +443,8 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-def addTauIdAnalyses(process, prefix, prototype, commonSequence, additionalCounters):
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     # Remove TCTau from list
@@ -477,8 +478,19 @@ def addTauIdAnalyses(process, prefix, prototype, commonSequence, additionalCount
     for selection, name in zip(selections, names):
         module = prototype.clone()
         module.tauSelection = selection.clone()
+
+        # Calculate type 1 MET
+        (type1Sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
+        module.MET.type1Src = type1Met
+
+        seq = cms.Sequence(
+            commonSequence *
+            type1Sequence
+        )
+        setattr(process, "commonSequence"+name, seq)
+
         addAnalysis(process, prefix+name, module,
-                    preSequence=commonSequence,
+                    preSequence=seq,
                     additionalCounters=additionalCounters)
 
 def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):

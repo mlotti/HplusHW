@@ -297,9 +297,9 @@ if options.tauEmbeddingInput:
 # Path. Then, in case PAT is run on the fly, the framework runs the
 # analysis module after PAT (and runs PAT only once).
 if doAllTauIds:
-    module = process.signalAnalysis()
+    module = process.signalAnalysis.clone()
     module.Tree.fill = False
-    param.addTauIdAnalyses(process, "signalAnalysis", module, process.commonSequence, additionalCounters)
+    param.addTauIdAnalyses(process, dataVersion, "signalAnalysis", module, process.commonSequence, additionalCounters)
 
 ################################################################################
 # The signal analysis with jet energy scale variation
