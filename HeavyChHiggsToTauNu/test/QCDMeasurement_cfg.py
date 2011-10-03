@@ -125,7 +125,9 @@ process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
     primaryVertexSelection = param.primaryVertexSelection,
     tauSelection = param.tauSelectionHPSTightTauBased,
     GlobalElectronVeto = param.GlobalElectronVeto,
+    NonIsolatedElectronVeto = param.NonIsolatedElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+    NonIsolatedMuonVeto = param.NonIsolatedMuonVeto,
     jetSelection = param.jetSelection,
     EvtTopology = param.EvtTopology,              ### only for histogramming reasons - does not affect analysis
     InvMassVetoOnJets = param.InvMassVetoOnJets,  ### only for histogramming reasons - does not affect analysis
@@ -177,7 +179,9 @@ print "TauSelection invMassCut:", process.QCDMeasurement.tauSelection.invMassCut
 print "TauSelection nprongs:", process.QCDMeasurement.tauSelection.nprongs
 print "\nMET:", process.QCDMeasurement.MET
 print "\nGlobalElectronVeto:", process.QCDMeasurement.GlobalElectronVeto
+print "\nNonIsolatedElectronVeto:", process.QCDMeasurement.NonIsolatedElectronVeto
 print "\nGlobalMuonVeto:", process.QCDMeasurement.GlobalMuonVeto
+print "\nNonIsolatedMuonVeto:", process.QCDMeasurement.NonIsolatedMuonVeto
 print "\nJetSelection:", process.QCDMeasurement.jetSelection
 print "\nbTagging: ", process.QCDMeasurement.bTagging
 print "\nFakeMETVeto:", process.QCDMeasurement.fakeMETVeto
