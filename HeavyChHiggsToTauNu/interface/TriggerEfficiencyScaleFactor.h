@@ -51,7 +51,15 @@ namespace HPlus {
     Data applyEventWeight(const pat::Tau& tau);
 
   private:
+    size_t index(const pat::Tau& tau) const;
     size_t index(double pt) const;
+
+    double dataEfficiency(size_t i) const;
+    double dataEfficiencyAbsoluteUncertainty(size_t i) const;
+
+    double scaleFactor(size_t i) const;
+    double scaleFactorRelativeUncertainty(size_t i) const;
+    double scaleFactorAbsoluteUncertainty(size_t i) const;
 
     std::vector<double> fPtBinLowEdges;
     std::vector<double> fEffDataValues;

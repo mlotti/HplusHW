@@ -9,7 +9,6 @@
 
 #include "TH1F.h"
 
-
 #include<cmath>
 #include<algorithm>
 
@@ -50,9 +49,37 @@ namespace HPlus {
     hScaleFactorRelativeUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorRelativeUncertainty", "TriggerScaleFactorRelativeUncertainty;TriggerScaleFactorRelativeUncertainty;N_{events}/0.001", 2000., 0., 2.0);
     hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
 
+
+    const size_t NBUF = 10;
+    char buf[NBUF];
+    TH1 *hsf = makeTH<TH1F>(dir, "ScaleFactor", "Scale factor;Tau p_{T} bin;Scale factor", bins.size()+1, 0, bins.size()+1);
+    TH1 *hsfu = makeTH<TH1F>(dir, "ScaleFactorUncertainty", "Scale factor;Tau p_{T} bin;Scale factor uncertainty", bins.size()+1, 0, bins.size()+1);
+    TH1 *hde = makeTH<TH1F>(dir, "DataEfficiency", "Efficiency from data;Tau p_{T} bin;Efficiency", bins.size()+1, 0, bins.size()+1);
+    TH1 *hdeu = makeTH<TH1F>(dir, "DataEfficiencyUncertainty", "Efficiency from data;Tau p_{T} bin;Efficiency uncertainty", bins.size()+1, 0, bins.size()+1);
+    hsf->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    hsfu->SetBinContent(1, 1); hsf->GetXaxis()->SetBinLabel(1, "control");
+    hde->SetBinContent(1, 1); hde->GetXaxis()->SetBinLabel(1, "control");
+    hdeu->SetBinContent(1, 1); hde->GetXaxis()->SetBinLabel(1, "control");
+    for(size_t i=0; i<bins.size(); ++i) {
+      size_t bin = i+2;
+      snprintf(buf, NBUF, "%.0f", fPtBinLowEdges[i]);
+
+      hsf->SetBinContent(bin, scaleFactor(i));
+      hsfu->SetBinContent(bin, scaleFactorAbsoluteUncertainty(i));
+      hsf->GetXaxis()->SetBinLabel(bin, buf);
+      hsfu->GetXaxis()->SetBinLabel(bin, buf);
+
+      hde->SetBinContent(bin, dataEfficiency(i));
+      hdeu->SetBinContent(bin, dataEfficiencyAbsoluteUncertainty(i));
+      hde->GetXaxis()->SetBinLabel(bin, buf);
+      hdeu->GetXaxis()->SetBinLabel(bin, buf);
+    }
   }
   TriggerEfficiencyScaleFactor::~TriggerEfficiencyScaleFactor() {}
 
+  size_t TriggerEfficiencyScaleFactor::index(const pat::Tau& tau) const {
+    return index(tau.pt());
+  }
   size_t TriggerEfficiencyScaleFactor::index(double pt) const {
     // find the first bin for which fPtBinLowEdges[bin] >= pt
     std::vector<double>::const_iterator found = std::lower_bound(fPtBinLowEdges.begin(), fPtBinLowEdges.end(), pt);
@@ -64,29 +91,42 @@ namespace HPlus {
   }
 
   double TriggerEfficiencyScaleFactor::dataEfficiency(const pat::Tau& tau) const {
-    return fEffDataValues[index(tau.pt())];
+    return dataEfficiency(index(tau));
+  }
+  double TriggerEfficiencyScaleFactor::dataEfficiency(size_t i) const {
+    return fEffDataValues[i];
   }
 
   double TriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    size_t i = index(tau.pt());
+    size_t i = index(tau);
     return fEffDataUncertainties[i] / fEffDataValues[i];
   }
   double TriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(const pat::Tau& tau) const {
-    return fEffDataUncertainties[index(tau.pt())];
+    return dataEfficiencyAbsoluteUncertainty(index(tau.pt()));
+  }
+  double TriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(size_t i) const {
+    return fEffDataUncertainties[i];
   }
 
   double TriggerEfficiencyScaleFactor::scaleFactor(const pat::Tau& tau) const {
-    size_t i = index(tau.pt());
+    return scaleFactor(index(tau));
+  }
+  double TriggerEfficiencyScaleFactor::scaleFactor(size_t i) const {
     return fEffDataValues[i] / fEffMCValues[i];
   }
   double TriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(const pat::Tau& tau) const {
-    size_t i = index(tau.pt());
+    return scaleFactorRelativeUncertainty(index(tau));
+  }
+  double TriggerEfficiencyScaleFactor::scaleFactorRelativeUncertainty(size_t i) const {
     double data = fEffDataUncertainties[i] / fEffDataValues[i];
     double mc = fEffMCUncertainties[i] / fEffMCValues[i];
     return std::sqrt(data*data + mc*mc);
   }
   double TriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(const pat::Tau& tau) const {
     return scaleFactor(tau) * scaleFactorRelativeUncertainty(tau);
+  }
+  double TriggerEfficiencyScaleFactor::scaleFactorAbsoluteUncertainty(size_t i) const {
+    return scaleFactor(i) * scaleFactorRelativeUncertainty(i);
   }
 
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau) {

@@ -26,8 +26,6 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
     analysis.tauSelection.src = variationName
     analysis.jetSelection.src = variationName
     analysis.MET.src = variationName
-    analysis.trigger.triggerTauSelection.src = variationName
-    analysis.trigger.triggerMETSelection.src = variationName
     setattr(process, analysisName, analysis)
     
     # Construct the counters module
