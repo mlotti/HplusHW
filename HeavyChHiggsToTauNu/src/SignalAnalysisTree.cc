@@ -118,7 +118,7 @@ namespace HPlus {
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
     for(size_t i=0; i<fTauIds.size(); ++i) {
-      fTauIds[i].value = taus[i]->tauID(fTauIds[i].name) > 0.5;
+      fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
 
     for(size_t i=0; i<jets.size(); ++i) {
