@@ -3,9 +3,7 @@ import FWCore.ParameterSet.Config as cms
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as tauFilter
 import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
 
-METType1Name = "patType1CorrectedPFMet"
-
-def addCorrectedMet(process, dataVersion, tauSelection, jetSelection):
+def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "patMETsPF", postfix=""):
     sequence = cms.Sequence()
 
     # First re-do the tau selection
@@ -14,15 +12,16 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection):
     # This way we can produce the type I MET only once for the
     # variations, and just take later into account the variation
     # (instead of doing the tau ID and jet cleaning for each variation)
-    process.selectedPatTausForMetCorr = tauFilter.hPlusTauPtrSelectorFilter.clone(
+    m = tauFilter.hPlusTauPtrSelectorFilter.clone(
         tauSelection = tauSelection.clone(),
         filter = cms.bool(False)
     )
-    process.selectedPatTausForMetCorr.tauSelection.ptCut = tauSelection.ptCut.value()*0.9
-    tauName = "selectedPatTausForMetCorr"
+    tauName = "selectedPatTausForMetCorr"+postfix
+    setattr(process, tauName, m)
+    sequence *= m
 
     # Then clean jet collection from the selected tau
-    process.selectedPatJetsTauCleaned = cms.EDFilter("PATJetSelector",
+    m = cms.EDFilter("PATJetSelector",
         src = cms.InputTag(jetSelection.src.value()),
         cut = cms.string(""),
         checkOverlaps = cms.PSet(
@@ -37,32 +36,53 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection):
             )
         )
     )
-    jetName = "selectedPatJetsTauCleaned"
-    metName = "patMETsPF"
+    jetName = "selectedPatJetsTauCleaned"+postfix
+    setattr(process, jetName, m)
+    sequence *= m
 
     # Then compute the type I correction for MET with the cleaned jets
-    process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
-    process.selectedPatJetsForMETtype1p2Corr.src = jetName
-    process.selectedPatJetsForMETtype2Corr.src = jetName
-
-    process.patType1CorrectedPFMet.src = metName
-    process.patPFJetMETtype1p2Corr.skipMuons = False
-    process.patPFJetMETtype2Corr.skipMuons = False
-    if dataVersion.isData():
-        process.patPFJetMETtype1p2Corr.jetCorrLabel = "L2L3Residual"
-        process.patPFJetMETtype2Corr.jetCorrLabel = "L2L3Residual"
-
-    process.patType1p2CorrectedPFMet.src = metName
-
-    sequence = cms.Sequence(
-        process.selectedPatTausForMetCorr
-        * process.selectedPatJetsTauCleaned
-        * process.selectedPatJetsForMETtype1p2Corr
-        * process.selectedPatJetsForMETtype2Corr 
-        * process.patPFJetMETtype1p2Corr
-        * process.patPFJetMETtype2Corr 
-        * process.patType1CorrectedPFMet
-        # * process.patType1p2CorrectedPFMet # we need more stuff in event in order to calculate type II MET
+    m = patPFMETCorrections.selectedPatJetsForMETtype1p2Corr.clone(
+        src = jetName
     )
+    setattr(process, "selectedPatJetsForMETtype1p2Corr"+postfix, m)
+    sequence *= m
 
-    return sequence
+    m = patPFMETCorrections.selectedPatJetsForMETtype2Corr.clone(
+        src = jetName
+    )
+    setattr(process, "selectedPatJetsForMETtype2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patPFJetMETtype1p2Corr.clone(
+        skipMuons = False
+    )
+    if dataVersion.isData():
+        m.jetCorrLabel = "L2L3Residual"
+    setattr(process, "patPFJetMETtype1p2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patPFJetMETtype2Corr.clone(
+        skipMuons = False
+    )
+    if dataVersion.isData():
+        m.jetCorrLabel = "L2L3Residual"
+    setattr(process, "patPFJetMETtype2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patType1CorrectedPFMet.clone(
+        src = metRaw
+    )
+    type1Name = "patType1CorrectedPFMet"+postfix
+    setattr(process, type1Name, m)
+    sequence *= m
+
+    #m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
+    #    src = metRaw
+    #)
+    #type1p2Name = "patType1p2CorrectedPFMet"+postfix
+    #setattr(process, type1p2Name, m)
+    #sequence *= m
+
+    setattr(process, "patMetCorrSequence"+postfix, sequence)
+
+    return (sequence, type1Name)

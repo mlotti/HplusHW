@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 
 tauVariation = cms.EDProducer("HPlusTauEnergyScaleVariation",
     src = cms.InputTag("selectedPatTaus"),
@@ -23,7 +23,7 @@ metVariation = cms.EDProducer("HPlusMetEnergyScaleVariation",
     unclusteredVariation = cms.double(0.1)
 )
 
-def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, jetVariationMode="all"):
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, jetVariationMode="all"):
     variationName = name
     tauVariationName = name+"TauVariation"
     jetVariationName = name+"JetVariation"
@@ -34,19 +34,6 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
     countersName = analysisName+"Counters"
     pathName = analysisName+"Path"
 
-    # Construct the JES variation module
-    v = jesVariation.clone(
-        tauSrc = cms.InputTag(prototype.tauSelection.src.value()), # from untracked to tracked
-        jetSrc = cms.InputTag(prototype.jetSelection.src.value()),
-        metSrc = cms.InputTag(prototype.MET.rawSrc.value()),
-        JESVariation = cms.double(variation),
-        JESEtaVariation = cms.double(etaVariation),
-        unclusteredMETVariation = cms.double(unclusteredEnergyVariationForMET),
-        jetVariationMode = jetVariationMode,
-    )
-    setattr(process, variationName, v)
-    #"JES"+variation+"eta"+etaVariation+"unclusted"+unclusteredEnergyVariationForMET)
-
     # Tau variation
     tauv = tauVariation.clone(
         src = prototype.tauSelection.src.value(),
@@ -54,6 +41,15 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
         energyEtaVariation = etaVariation,
     )
     setattr(process, tauVariationName, tauv)
+
+    # Recompute type 1 MET on the basis of variated tau. However, use
+    # the non-variated jets, because the jet variation is taken into
+    # account in the MET variation. The tau variation is taken into
+    # account here, because the variation can change the decision of
+    # which tau to select, and that tau is needed for the jet cleaning
+    # in the type 1 MET calculation.
+    tauSelection = prototype.tauSelection.clone(src=tauVariationName)
+    (type1sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, tauSelection, prototype.jetSelection, postfix=name)
 
     # Jet variation
     jetv = jetVariation.clone(
@@ -81,7 +77,7 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
     setattr(process, rawMetVariationName, metrawv)
 
     mettype1v = metVariation.clone(
-        metSrc = prototype.MET.type1Src.value(),
+        metSrc = type1Met,
         tauSrc = tauVariationName,
         jetSrc = jetsForMetVariation,
         unclusteredVariation = unclusteredEnergyVariationForMET
@@ -109,8 +105,8 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
     # Construct the path
     path = cms.Path(
         process.commonSequence
-        * v
         * tauv
+        * type1sequence
         * jetv
         * jetsForMetv
         * metrawv
