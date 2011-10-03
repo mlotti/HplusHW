@@ -122,7 +122,11 @@ namespace HPlus {
     hTransverseMassWithTopCut = makeTH<TH1F>(*fs, "transverseMassWithTopCut", "transverseMassWithTopCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterVeto = makeTH<TH1F>(*fs, "transverseMassAfterVeto", "transverseMassAfterVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBeforeVeto = makeTH<TH1F>(*fs, "transverseMassBeforeVeto", "transverseMassBeforeVeto;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassBeforeMetCut = makeTH<TH1F>(*fs, "transverseMassBeforeMetCut", "transverseMassBeforeMetCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMet = makeTH<TH1F>(*fs, "transverseMassNoMet", "transverseMassNoMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtag = makeTH<TH1F>(*fs, "transverseMassNoMetBtag", "transverseMassNoMetBtag;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtagRtau = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtau", "transverseMassNoMetBtagRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtagRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtauFakeMet", "transverseMassNoMetBtagRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassNoMetBtagRtauFakeMetPhi = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtauFakeMetPhi", "transverseMassNoMetBtagRtauFakeMetPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBeforeFakeMet = makeTH<TH1F>(*fs, "transverseMassBeforeFakeMet", "transverseMassBeforeFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassDeltaPhiUpperCut = makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCut", "transverseMassDeltaPhiUpperCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassWithRtauFakeMet", "transverseMassWithRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
@@ -362,10 +366,13 @@ namespace HPlus {
     // Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     // Write the stuff to the tree
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
-               evtTopologyData.alphaT().fAlphaT);
+               evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi() );
+
 
 
     //    if(btagData.passedEvent()) {
@@ -377,7 +384,17 @@ namespace HPlus {
   
 
 
-    hTransverseMassBeforeMetCut->Fill(transverseMass, fEventWeight.getWeight());
+    hTransverseMassNoMet->Fill(transverseMass, fEventWeight.getWeight());
+    if(btagData.passedEvent())   {
+      hTransverseMassNoMetBtag->Fill(transverseMass, fEventWeight.getWeight());
+      if (tauData.getRtauOfSelectedTau() > 0.8 ) {
+	hTransverseMassNoMetBtagRtau->Fill(transverseMass, fEventWeight.getWeight());
+	if(fakeMETData.passedEvent()) {
+	  hTransverseMassNoMetBtagRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
+	  if(deltaPhi*57.3 < 160 ) hTransverseMassNoMetBtagRtauFakeMetPhi->Fill(transverseMass, fEventWeight.getWeight());
+	}
+      }
+    } 
 
     // MET cut
     hMETBeforeMETCut->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
@@ -405,7 +422,7 @@ namespace HPlus {
     }
 
 
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+    //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
     if ( deltaPhi*57.3 < 160) {
@@ -429,7 +446,7 @@ namespace HPlus {
     } 
 
   // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
     if (fakeMETData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
       hTransverseMassWithRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
     }

@@ -56,11 +56,13 @@ namespace HPlus {
     fTree->Branch("topreco_p4", &fTop);
 
     fTree->Branch("alphaT", &fAlphaT);
+
+    fTree->Branch("deltaPhi", &fDeltaPhi);
   }
 
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
                                 const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
-                                double alphaT) {
+                                double alphaT, double deltaPhi) {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
@@ -119,6 +121,8 @@ namespace HPlus {
     fMetSumEt = met->sumEt();
 
     fAlphaT = alphaT;
+
+    fDeltaPhi = deltaPhi;
 
     fTree->Fill();
     reset();

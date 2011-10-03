@@ -41,7 +41,7 @@ namespace HPlus {
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
               const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
-              double alphaT);
+              double alphaT, double deltaPhi = 0);
 
   private:
     void reset();
@@ -87,6 +87,8 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
+
+    double fDeltaPhi;
   };
 }
 

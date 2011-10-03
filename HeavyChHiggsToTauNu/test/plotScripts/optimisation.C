@@ -459,6 +459,8 @@ void optimisation() {
 
   TString topMass("topreco_p4.M()"); TCut topMassCut(topMass+" < 230");
 
+  TString fakeMet("deltaPhi"); TCut fakeMetCut(fakeMet+" > 10");
+
   // Optional cuts
   TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
@@ -474,7 +476,7 @@ void optimisation() {
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
-  cut = tauPtCut && rtauCut;
+  cut = tauPtCut && rtauCut && mtCut;
   Result metRes = createResult(met, mcWeight(cut && btagCut), cut, false);
   metRes.setXLabel("met");
 
@@ -482,6 +484,11 @@ void optimisation() {
   cut = metCut && rtauCut;
   Result tauPtRes = createResult(tauPt, mcWeight(cut && btagCut), cut, false);
   tauPtRes.setXLabel("tauPt");
+
+  fakeMet += ">>dist(100,0.,180.)";
+  cut = tauPtCut && metCut && rtauCut;
+  Result fakeMetRes = createResult(fakeMet, mcWeight(cut && btagCut), cut, false);
+  fakeMetRes.setXLabel("fakeMet");
 
   mt += ">>dist(50,0.,200.)";
   cut = tauPtCut && metCut && topMassCut  ;
@@ -526,7 +533,8 @@ void optimisation() {
   c->SaveAs(".png");
 */
 //  rtauRes.Significance();
-  //  metRes.Significance();
+//  metRes.Significance();
+  fakeMetRes.Significance();
   //  tauPtRes.Significance();
   //  mtRes.Significance();
   //  topMassRes.Significance();
@@ -535,7 +543,7 @@ void optimisation() {
   //  btagExactlyOneRes.Significance();
   //  btagJetNum17Res.Significance();
   //  deltaPhiRes.Significance();
-  emFractionRes.Significance();
+  //  emFractionRes.Significance();
 
 }
 
