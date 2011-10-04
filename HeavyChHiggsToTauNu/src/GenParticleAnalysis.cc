@@ -16,20 +16,15 @@
 
 namespace HPlus {
 
-  GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight)
-    : fEventWeight(eventWeight)
-      //    fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
-      //    fEtaCut(iConfig.getUntrackedParameter<double>("etaCut"))
+  GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+    fEventWeight(eventWeight),
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
+    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc"))
   {
     init();
   }
-  GenParticleAnalysis::GenParticleAnalysis(EventCounter& eventCounter, EventWeight& eventWeight)
-    : fEventWeight(eventWeight) {
-      init();
-    }
-/*  GenParticleAnalysis::GenParticleAnalysis(){
-    init();
-  }*/
 
   GenParticleAnalysis::~GenParticleAnalysis() {}
 
@@ -76,21 +71,20 @@ namespace HPlus {
   void GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
   
     edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
+    iEvent.getByLabel(fSrc, genParticles);
 
     typedef math::XYZTLorentzVectorD LorentzVector;
     typedef std::vector<LorentzVector> LorentzVectorCollection;
 
 
     edm::Handle <std::vector<LorentzVector> > oneProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauOneProng"),oneProngTaus);
+    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
 
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),oneAndThreeProngTaus);	  
-
+    iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
 
     edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauThreeProng"),threeProngTaus);	  
+    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);	  
 
 
     // One-prong tau jets

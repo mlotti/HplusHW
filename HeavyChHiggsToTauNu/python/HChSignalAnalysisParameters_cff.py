@@ -207,8 +207,10 @@ forwardJetVeto = cms.untracked.PSet(
  )
 
 GenParticleAnalysis = cms.untracked.PSet(
-  ptCut = cms.untracked.double(40),
-  etaCut = cms.untracked.double(2.3)
+  src = cms.untracked.InputTag("genParticles"),
+  oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
+  oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
+  threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
 )
 topSelection = cms.untracked.PSet(
   TopMassLow = cms.untracked.double(100.0),
