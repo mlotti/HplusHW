@@ -202,7 +202,7 @@ namespace HPlus {
     fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));*/
 
-    fTree.enableNonIsoLeptons(true);
+    //    fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
 
    }
@@ -323,7 +323,7 @@ namespace HPlus {
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(), evtTopologyData.alphaT().fAlphaT);
-    fTree.fillNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    // fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

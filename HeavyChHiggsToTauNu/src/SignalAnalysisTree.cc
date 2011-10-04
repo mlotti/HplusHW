@@ -258,7 +258,7 @@ namespace HPlus {
   }
 
 
-  void SignalAnalysisTree::fillNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
+  void SignalAnalysisTree::setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
 
@@ -266,7 +266,6 @@ namespace HPlus {
     fLumi = iEvent.id().luminosityBlock();
     fRun = iEvent.id().run();
 
-    /// nonIsoMuons & nonIsoElectrons - start
     if(nonIsoMuons.size() >= 1){
       // throw cms::Exception("LogicError") << "Expected nonIsoMuon collection size to be >=1, but  was " << nonIsoMuons.size() << " instead at " << __FILE__ << ":" << __LINE__ << std::endl;
       // loop over all muons
@@ -344,7 +343,6 @@ namespace HPlus {
 	if( (*iMuon)->muonID("TMLastStationOptimizedBarrelLowPtTight") ) fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight.push_back(true);
 	else fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight.push_back(false);
 
-     
 	// 3) Store NHits (Trk, Pixel, Muon). There has to be at LEAST greater than 10 track hits.
 	int myInnerTrackNTrkHits   = myInnerTrackRef->hitPattern().numberOfValidTrackerHits();
 	int myInnerTrackNPixelHits = myInnerTrackRef->hitPattern().numberOfValidPixelHits();
@@ -524,10 +522,7 @@ namespace HPlus {
       }//eof: for (nonIsoElectrons)
     }//eof: if
     
-    ///  nonIsoMuons & nonIsoElectrons - finish
-    
-    fTree->Fill();
-    reset();
+    return;
   }
 
 

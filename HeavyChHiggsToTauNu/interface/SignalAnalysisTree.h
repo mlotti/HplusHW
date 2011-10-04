@@ -54,7 +54,7 @@ namespace HPlus {
               const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
 	      double alphaT);
 
-    void fillNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
   private:
     void reset();
