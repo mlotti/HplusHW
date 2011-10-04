@@ -255,95 +255,13 @@ namespace HPlus {
   }
 
 
-  void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
-				double alphaT, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
+  void SignalAnalysisTree::fillNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
-
-    if(taus.size() != 1)
-      throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
     fEvent = iEvent.id().event();
     fLumi = iEvent.id().luminosityBlock();
     fRun = iEvent.id().run();
-
-    fTau = taus[0]->p4();
-    fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
-    fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
-    for(size_t i=0; i<fTauIds.size(); ++i) {
-      fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
-    }
-
-    for(size_t i=0; i<jets.size(); ++i) {
-      fJets.push_back(jets[i]->p4());
-      fJetsBtags.push_back(jets[i]->bDiscriminator(fBdiscriminator));
-
-      double eta = jets[i]->eta();
-
-      double chf = jets[i]->chargedHadronEnergyFraction();
-      double nhf = jets[i]->neutralHadronEnergyFraction();
-      double elf = jets[i]->chargedEmEnergyFraction();
-      double phf = jets[i]->neutralEmEnergyFraction();
-      // for some reason the muonEnergyFraction is calculated w.r.t. *corrected* energy in pat::Jet
-      double muf = jets[i]->muonEnergy() / (jets[i]->jecFactor(0) * jets[i]->energy());
-
-      double sum = chf+nhf+elf+phf+muf;
-      if(std::abs(sum - 1.0) > 0.000001) {
-        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
-                                       << " the sum-1 was " << (sum-1.0)
-                                       << std::endl;
-      }
-
-      fJetsChf.push_back(chf);
-      fJetsNhf.push_back(nhf);
-      fJetsElf.push_back(elf);
-      fJetsPhf.push_back(phf);
-      fJetsMuf.push_back(muf);
-
-      int chm = jets[i]->chargedHadronMultiplicity();
-      fJetsChm.push_back(chm);
-      fJetsNhm.push_back(jets[i]->neutralHadronMultiplicity());
-      fJetsElm.push_back(jets[i]->electronMultiplicity());
-      fJetsPhm.push_back(jets[i]->photonMultiplicity());
-      fJetsMum.push_back(jets[i]->muonMultiplicity());
-
-      fJetsJec.push_back(jets[i]->jecFactor(0));
-
-      int npr = jets[i]->chargedMultiplicity() + jets[i]->neutralMultiplicity();
-
-      fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
-      fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
-
-      fJetsArea.push_back(jets[i]->jetArea());
-    }
-    fMet = met->p4();
-    fMetSumEt = met->sumEt();
-
-    fAlphaT = alphaT;
-
-    if(fTauEmbeddingInput) {
-      edm::Handle<edm::View<pat::Muon> > hmuon;
-      iEvent.getByLabel(fTauEmbeddingMuonSource, hmuon);
-      if(hmuon->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
-
-      edm::Handle<edm::View<reco::MET> > hmet;
-      iEvent.getByLabel(fTauEmbeddingMetSource, hmet);
-      if(hmet->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
-
-      edm::Handle<edm::View<reco::MET> > hcalomet;
-      iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
-      if(hcalomet->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
-
-      fTauEmbeddingMuon = hmuon->at(0).p4();
-      fTauEmbeddingMet = hmet->at(0).p4();
-      fTauEmbeddingCaloMet = hcalomet->at(0).p4();
-    }
 
     /// nonIsoMuons & nonIsoElectrons - start
     if(nonIsoMuons.size() >= 1){
