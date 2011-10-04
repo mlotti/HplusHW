@@ -18,6 +18,47 @@
 
 #include "TH1F.h"
 
+namespace {
+  bool isolationLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
+    // Return true if a becomes before b, false if b becomes before a
+    
+    // Do first comparisons of the isolation discriminators, because
+    // they are bullet proof way of using exactly the same isolation
+    // defitions as in the discriminators
+
+    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+      return true;
+
+    if(a->tauID("byMediumIsolation") > 0.5) {
+      if(b->tauID("byTightIsolation") > 0.5)
+        return false;
+      if(b->tauID("byMediumIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byLooseIsolation") > 0.5) {
+      // assume that if tau is medium isolated, it is also tight isolated
+      if(b->tauID("byMediumIsolation") > 0.5)
+        return false;
+      if(b->tauID("byLooseIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byVLooseIsolation") > 0.5) {
+      if(b->tauID("byLooseIsolation") > 0.5)
+        return false;
+      if(b->tauID("byVLooseIsolation") < 0.5)
+        return true;
+    }
+
+    // At this point both a and b are in the same isolation class, and
+    // we need a continous isolation variable. This is calculated by
+    // us, it should be more or less the same as the official
+    // discriminators, but it's possible that it's not.
+    return a->userFloat("byTightChargedMaxPt") < b->userFloat("byTightChargedMaxPt");
+  }
+}
+
 namespace HPlus {
   TauSelection::Data::Data(const TauSelection *tauSelection, bool passedEvent):
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
@@ -375,6 +416,10 @@ namespace HPlus {
     }
     hNTriggerMatchedTaus->Fill(taus.size(),fEventWeight.getWeight());
 
+    // Need std:vector in order to be able to use std::sort
+    std::vector<edm::Ptr<pat::Tau> > tmpCleanedTauCandidates;
+    std::vector<edm::Ptr<pat::Tau> > tmpSelectedTaus;
+
     // Loop over the taus
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
@@ -388,7 +433,7 @@ namespace HPlus {
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
       if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;      
       fillHistogramsForCleanedTauCandidates(iTau, iEvent);
-      fCleanedTauCandidates.push_back(iTau);
+      tmpCleanedTauCandidates.push_back(iTau);
       
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
@@ -420,8 +465,16 @@ namespace HPlus {
       }
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
-      fSelectedTaus.push_back(iTau);
+      tmpSelectedTaus.push_back(iTau);
     }
+    // Sort taus in an order of isolation, most isolated first
+    //std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationLessThan);
+    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
+    for(size_t i=0; i<tmpCleanedTauCandidates.size(); ++i)
+      fCleanedTauCandidates.push_back(tmpCleanedTauCandidates[i]);
+    for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
+      fSelectedTaus.push_back(tmpSelectedTaus[i]);
+
     // Handle counters
     fTauID->updatePassedCounters();
     // Fill number of taus histograms
