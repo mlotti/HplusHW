@@ -6,7 +6,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
@@ -22,7 +22,6 @@ namespace HPlus {
   class   GenParticleAnalysis {
   public:
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    GenParticleAnalysis(EventCounter& eventCounter, EventWeight& eventWeight);
     ~GenParticleAnalysis();
 
     void analyze(const edm::Event&, const edm::EventSetup&);
@@ -47,9 +46,10 @@ namespace HPlus {
     
     // EventWeight object
     EventWeight& fEventWeight;
-    //    edm::InputTag fSrc;
-    //   const double fPtCut;
-    //   const double fEtaCut;
+    edm::InputTag fSrc;
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
     
     // Histograms
     TH1 *hHpMass;
