@@ -45,7 +45,7 @@ namespace HPlus {
     void setPileupWeight(double w)   { fPileupWeight = w; }
     void setTriggerWeight(double w)  { fTriggerWeight = w; }
     void setFillWeight(double w)  { fFillWeight = w; }
-
+    void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
@@ -76,6 +76,7 @@ namespace HPlus {
 
     TTree *fTree;
 
+    bool fillNonIsoLeptonVars;
     unsigned int fEvent;
     unsigned int fLumi;
     unsigned int fRun;

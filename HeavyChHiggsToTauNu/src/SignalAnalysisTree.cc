@@ -35,8 +35,8 @@ namespace HPlus {
     for(size_t i=0; i<tauIds.size(); ++i) {
       fTauIds.push_back(TauId(tauIds[i]));
     }
-
-    reset();
+    fillNonIsoLeptonVars = false;
+    reset();    
   }
   SignalAnalysisTree::~SignalAnalysisTree() {}
 
@@ -97,69 +97,72 @@ namespace HPlus {
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
     }
 
-    // nonIsoMuons
-    fTree->Branch("nonIsoMuons_p4", &fNonIsoMuons);
-    fTree->Branch("nonIsoMuons_IsGlobalMuon", &fNonIsoMuons_IsGlobalMuon);
-    fTree->Branch("nonIsoMuons_IsTrackerMuon", &fNonIsoMuons_IsTrackerMuon);
-    fTree->Branch("nonIsoMuons_ID_AllMuons", &fNonIsoMuons_AllMuons);
-    fTree->Branch("nonIsoMuons_ID_AllGlobalMuons", & fNonIsoMuons_AllGlobalMuons);
-    fTree->Branch("nonIsoMuons_ID_AllStandAloneMuons", & fNonIsoMuons_AllStandAloneMuons);
-    fTree->Branch("nonIsoMuons_ID_AllTrackerMuons", & fNonIsoMuons_AllTrackerMuons);
-    fTree->Branch("nonIsoMuons_ID_TrackerMuonArbitrated", & fNonIsoMuons_TrackerMuonArbitrated);
-    fTree->Branch("nonIsoMuons_ID_AllArbitrated", & fNonIsoMuons_AllArbitrated);
-    fTree->Branch("nonIsoMuons_ID_GlobalMuonPromptTight", & fNonIsoMuons_GlobalMuonPromptTight);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationLoose", & fNonIsoMuons_TMLastStationLoose);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationTight", & fNonIsoMuons_TMLastStationTight);
-    fTree->Branch("nonIsoMuons_ID_TMOneStationLoose", & fNonIsoMuons_TMOneStationLoose);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedLowPtLoose", & fNonIsoMuons_TMLastStationOptimizedLowPtLoose);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedLowPtTight", & fNonIsoMuons_TMLastStationOptimizedLowPtTight);
-    fTree->Branch("nonIsoMuons_ID_GMTkChiCompatibility", & fNonIsoMuons_GMTkChiCompatibility);
-    fTree->Branch("nonIsoMuons_ID_GMTkKinkTight", & fNonIsoMuons_GMTkKinkTight);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationAngLoose", & fNonIsoMuons_TMLastStationAngLoose);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationAngTight", & fNonIsoMuons_TMLastStationAngTight);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedBarrelLowPtLoose", & fNonIsoMuons_TMLastStationOptimizedBarrelLowPtLoose);
-    fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedBarrelLowPtTight", & fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight);
-    fTree->Branch("nonIsoMuons_InnerTrackNTrkHits", & fNonIsoMuons_InnerTrackNTrkHits);
-    fTree->Branch("nonIsoMuons_InnerTrackNPixelHits", & fNonIsoMuons_InnerTrackNPixelHits);
-    fTree->Branch("nonIsoMuons_GlobalTrackNMuonHits", & fNonIsoMuons_GlobalTrackNMuonHits);
-    fTree->Branch("nonIsoMuons_NormChiSquare", & fNonIsoMuons_NormChiSquare);
-    fTree->Branch("nonIsoMuons_IPTwrtBeamLine", & fNonIsoMuons_IPTwrtBeamLine); 
-    fTree->Branch("nonIsoMuons_IPZwrtPV", & fNonIsoMuons_IPZwrtPV);
-    fTree->Branch("nonIsoMuons_TrackIso", & fNonIsoMuons_TrackIso);
-    fTree->Branch("nonIsoMuons_EcalIso", & fNonIsoMuons_EcalIso);
-    fTree->Branch("nonIsoMuons_HcalIso", & fNonIsoMuons_HcalIso);
-    fTree->Branch("nonIsoMuons_RelIso", & fNonIsoMuons_RelIso);
-    // nonIsoElectrons
-    fTree->Branch("nonIsoElectrons_p4", & fNonIsoElectrons);
-    fTree->Branch("nonIsoElectrons_GsfTrkRefIsNull", & fNonIsoElectrons_GsfTrkRefIsNull);
-    fTree->Branch("nonIsoElectrons_SuperClusterRefIsNull" , & fNonIsoElectrons_SuperClusterRefIsNull);
-    fTree->Branch("nonIsoElectrons_SuperClusterRefEta" , & fNonIsoElectrons_SuperClusterRefEta);
-    fTree->Branch("nonIsoElectrons_SuperClusterRefPhi" , & fNonIsoElectrons_SuperClusterRefPhi);
-    fTree->Branch("nonIsoElectrons_SimpleId_Loose" , & fNonIsoElectrons_SimpleId_Loose);
-    fTree->Branch("nonIsoElectrons_SimpleId_RobustLoose" , & fNonIsoElectrons_SimpleId_RobustLoose);
-    fTree->Branch("nonIsoElectrons_SimpleId_Tight" , & fNonIsoElectrons_SimpleId_Tight);
-    fTree->Branch("nonIsoElectrons_SimpleId_RobustTight" , & fNonIsoElectrons_SimpleId_RobustTight);
-    fTree->Branch("nonIsoElectrons_SimpleId_RobustHighEnergy" , & fNonIsoElectrons_SimpleId_RobustHighEnergy);
-    fTree->Branch("nonIsoElectrons_EleId95relIso" , & fNonIsoElectrons_ID_EleId95relIso);
-    fTree->Branch("nonIsoElectrons_EleId90relIso" , & fNonIsoElectrons_ID_EleId90relIso);
-    fTree->Branch("nonIsoElectrons_EleId85relIso" , & fNonIsoElectrons_ID_EleId85relIso); 
-    fTree->Branch("nonIsoElectrons_EleId80relIso" , & fNonIsoElectrons_ID_EleId80relIso);
-    fTree->Branch("nonIsoElectrons_EleId70relIso" , & fNonIsoElectrons_ID_EleId70relIso);
-    fTree->Branch("nonIsoElectrons_EleId60relIso" , & fNonIsoElectrons_ID_EleId60relIso);
-    fTree->Branch("nonIsoElectrons_TrackIso" , & fNonIsoElectrons_TrackIso);
-    fTree->Branch("nonIsoElectrons_EcalIso" , & fNonIsoElectrons_EcalIso);
-    fTree->Branch("nonIsoElectrons_HcalIso" , & fNonIsoElectrons_HcalIso);
-    fTree->Branch("nonIsoElectrons_NLostHitsInTrker" , & fNonIsoElectrons_NLostHitsInTrker);
-    fTree->Branch("nonIsoElectrons_RelIso" , & fNonIsoElectrons_RelIso);
-    fTree->Branch("nonIsoElectrons_DeltaCotTheta" , & fNonIsoElectrons_DeltaCotTheta);
-    fTree->Branch("nonIsoElectrons_DistanceOSTrk" , & fNonIsoElectrons_DistanceOSTrk);
-    fTree->Branch("nonIsoElectrons_IPwrtBeamSpot" , & fNonIsoElectrons_IPwrtBeamSpot);
-    fTree->Branch("nonIsoElectrons_ElectronMuonDeltaR" , & fNonIsoElectrons_ElectronMuonDeltaR);
+    if(fillNonIsoLeptonVars){
+      // nonIsoMuons
+      fTree->Branch("nonIsoMuons_p4", &fNonIsoMuons);
+      fTree->Branch("nonIsoMuons_IsGlobalMuon", &fNonIsoMuons_IsGlobalMuon);
+      fTree->Branch("nonIsoMuons_IsTrackerMuon", &fNonIsoMuons_IsTrackerMuon);
+      fTree->Branch("nonIsoMuons_ID_AllMuons", &fNonIsoMuons_AllMuons);
+      fTree->Branch("nonIsoMuons_ID_AllGlobalMuons", & fNonIsoMuons_AllGlobalMuons);
+      fTree->Branch("nonIsoMuons_ID_AllStandAloneMuons", & fNonIsoMuons_AllStandAloneMuons);
+      fTree->Branch("nonIsoMuons_ID_AllTrackerMuons", & fNonIsoMuons_AllTrackerMuons);
+      fTree->Branch("nonIsoMuons_ID_TrackerMuonArbitrated", & fNonIsoMuons_TrackerMuonArbitrated);
+      fTree->Branch("nonIsoMuons_ID_AllArbitrated", & fNonIsoMuons_AllArbitrated);
+      fTree->Branch("nonIsoMuons_ID_GlobalMuonPromptTight", & fNonIsoMuons_GlobalMuonPromptTight);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationLoose", & fNonIsoMuons_TMLastStationLoose);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationTight", & fNonIsoMuons_TMLastStationTight);
+      fTree->Branch("nonIsoMuons_ID_TMOneStationLoose", & fNonIsoMuons_TMOneStationLoose);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedLowPtLoose", & fNonIsoMuons_TMLastStationOptimizedLowPtLoose);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedLowPtTight", & fNonIsoMuons_TMLastStationOptimizedLowPtTight);
+      fTree->Branch("nonIsoMuons_ID_GMTkChiCompatibility", & fNonIsoMuons_GMTkChiCompatibility);
+      fTree->Branch("nonIsoMuons_ID_GMTkKinkTight", & fNonIsoMuons_GMTkKinkTight);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationAngLoose", & fNonIsoMuons_TMLastStationAngLoose);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationAngTight", & fNonIsoMuons_TMLastStationAngTight);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedBarrelLowPtLoose", & fNonIsoMuons_TMLastStationOptimizedBarrelLowPtLoose);
+      fTree->Branch("nonIsoMuons_ID_TMLastStationOptimizedBarrelLowPtTight", & fNonIsoMuons_TMLastStationOptimizedBarrelLowPtTight);
+      fTree->Branch("nonIsoMuons_InnerTrackNTrkHits", & fNonIsoMuons_InnerTrackNTrkHits);
+      fTree->Branch("nonIsoMuons_InnerTrackNPixelHits", & fNonIsoMuons_InnerTrackNPixelHits);
+      fTree->Branch("nonIsoMuons_GlobalTrackNMuonHits", & fNonIsoMuons_GlobalTrackNMuonHits);
+      fTree->Branch("nonIsoMuons_NormChiSquare", & fNonIsoMuons_NormChiSquare);
+      fTree->Branch("nonIsoMuons_IPTwrtBeamLine", & fNonIsoMuons_IPTwrtBeamLine); 
+      fTree->Branch("nonIsoMuons_IPZwrtPV", & fNonIsoMuons_IPZwrtPV);
+      fTree->Branch("nonIsoMuons_TrackIso", & fNonIsoMuons_TrackIso);
+      fTree->Branch("nonIsoMuons_EcalIso", & fNonIsoMuons_EcalIso);
+      fTree->Branch("nonIsoMuons_HcalIso", & fNonIsoMuons_HcalIso);
+      fTree->Branch("nonIsoMuons_RelIso", & fNonIsoMuons_RelIso);
+      // nonIsoElectrons
+      fTree->Branch("nonIsoElectrons_p4", & fNonIsoElectrons);
+      fTree->Branch("nonIsoElectrons_GsfTrkRefIsNull", & fNonIsoElectrons_GsfTrkRefIsNull);
+      fTree->Branch("nonIsoElectrons_SuperClusterRefIsNull" , & fNonIsoElectrons_SuperClusterRefIsNull);
+      fTree->Branch("nonIsoElectrons_SuperClusterRefEta" , & fNonIsoElectrons_SuperClusterRefEta);
+      fTree->Branch("nonIsoElectrons_SuperClusterRefPhi" , & fNonIsoElectrons_SuperClusterRefPhi);
+      fTree->Branch("nonIsoElectrons_SimpleId_Loose" , & fNonIsoElectrons_SimpleId_Loose);
+      fTree->Branch("nonIsoElectrons_SimpleId_RobustLoose" , & fNonIsoElectrons_SimpleId_RobustLoose);
+      fTree->Branch("nonIsoElectrons_SimpleId_Tight" , & fNonIsoElectrons_SimpleId_Tight);
+      fTree->Branch("nonIsoElectrons_SimpleId_RobustTight" , & fNonIsoElectrons_SimpleId_RobustTight);
+      fTree->Branch("nonIsoElectrons_SimpleId_RobustHighEnergy" , & fNonIsoElectrons_SimpleId_RobustHighEnergy);
+      fTree->Branch("nonIsoElectrons_EleId95relIso" , & fNonIsoElectrons_ID_EleId95relIso);
+      fTree->Branch("nonIsoElectrons_EleId90relIso" , & fNonIsoElectrons_ID_EleId90relIso);
+      fTree->Branch("nonIsoElectrons_EleId85relIso" , & fNonIsoElectrons_ID_EleId85relIso); 
+      fTree->Branch("nonIsoElectrons_EleId80relIso" , & fNonIsoElectrons_ID_EleId80relIso);
+      fTree->Branch("nonIsoElectrons_EleId70relIso" , & fNonIsoElectrons_ID_EleId70relIso);
+      fTree->Branch("nonIsoElectrons_EleId60relIso" , & fNonIsoElectrons_ID_EleId60relIso);
+      fTree->Branch("nonIsoElectrons_TrackIso" , & fNonIsoElectrons_TrackIso);
+      fTree->Branch("nonIsoElectrons_EcalIso" , & fNonIsoElectrons_EcalIso);
+      fTree->Branch("nonIsoElectrons_HcalIso" , & fNonIsoElectrons_HcalIso);
+      fTree->Branch("nonIsoElectrons_NLostHitsInTrker" , & fNonIsoElectrons_NLostHitsInTrker);
+      fTree->Branch("nonIsoElectrons_RelIso" , & fNonIsoElectrons_RelIso);
+      fTree->Branch("nonIsoElectrons_DeltaCotTheta" , & fNonIsoElectrons_DeltaCotTheta);
+      fTree->Branch("nonIsoElectrons_DistanceOSTrk" , & fNonIsoElectrons_DistanceOSTrk);
+      fTree->Branch("nonIsoElectrons_IPwrtBeamSpot" , & fNonIsoElectrons_IPwrtBeamSpot);
+      fTree->Branch("nonIsoElectrons_ElectronMuonDeltaR" , & fNonIsoElectrons_ElectronMuonDeltaR);
+    }
+  
   }
 
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+				const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
 				double alphaT) {
     if(!fDoFill)
       return;
@@ -195,9 +198,9 @@ namespace HPlus {
 
       double sum = chf+nhf+elf+phf+muf;
       if(std::abs(sum - 1.0) > 0.000001) {
-        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
-                                       << " the sum-1 was " << (sum-1.0)
-                                       << std::endl;
+	throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
+				       << " the sum-1 was " << (sum-1.0)
+				       << std::endl;
       }
 
       fJetsChf.push_back(chf);
@@ -218,9 +221,9 @@ namespace HPlus {
       int npr = jets[i]->chargedMultiplicity() + jets[i]->neutralMultiplicity();
 
       fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
+								      std::abs(eta) > 2.4) );
       fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
-                                                                      std::abs(eta) > 2.4) );
+								      std::abs(eta) > 2.4) );
 
       fJetsArea.push_back(jets[i]->jetArea());
     }
@@ -233,17 +236,17 @@ namespace HPlus {
       edm::Handle<edm::View<pat::Muon> > hmuon;
       iEvent.getByLabel(fTauEmbeddingMuonSource, hmuon);
       if(hmuon->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
+	throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
 
       edm::Handle<edm::View<reco::MET> > hmet;
       iEvent.getByLabel(fTauEmbeddingMetSource, hmet);
       if(hmet->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
+	throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
       edm::Handle<edm::View<reco::MET> > hcalomet;
       iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
-        throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
+	throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
 
       fTauEmbeddingMuon = hmuon->at(0).p4();
       fTauEmbeddingMet = hmet->at(0).p4();
@@ -467,9 +470,9 @@ namespace HPlus {
 	float myEcalIso  =  (*iElectron)->dr03EcalRecHitSumEt();
 	float myHcalIso  =  (*iElectron)->dr03HcalTowerSumEt();
 
-// 	float myTrackIso =  (*iElectron)->trackIso();
-// 	float myEcalIso  =  (*iElectron)->ecalIso();
-// 	float myHcalIso  =  (*iElectron)->hcalIso();
+	// 	float myTrackIso =  (*iElectron)->trackIso();
+	// 	float myEcalIso  =  (*iElectron)->ecalIso();
+	// 	float myHcalIso  =  (*iElectron)->hcalIso();
 	float myRelativeIsolation = (myTrackIso + myEcalIso + myHcalIso)/(myElectronPt); // isolation cones are dR=0.3 
 	
 	fNonIsoElectrons_TrackIso.push_back( myTrackIso );
@@ -584,7 +587,7 @@ namespace HPlus {
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
 
-       // nonIsoMuons
+    // nonIsoMuons
     fNonIsoMuons.clear();
     fNonIsoMuons_IsGlobalMuon.clear();
     fNonIsoMuons_IsTrackerMuon.clear();

@@ -202,7 +202,9 @@ namespace HPlus {
     fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));*/
 
+    fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
+
    }
 
   QCDMeasurement::~QCDMeasurement() {}
