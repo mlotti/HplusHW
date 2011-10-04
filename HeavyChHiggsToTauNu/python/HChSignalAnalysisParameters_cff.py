@@ -439,9 +439,10 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     # Remove TCTau from list

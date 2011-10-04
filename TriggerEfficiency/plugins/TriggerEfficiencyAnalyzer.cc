@@ -49,6 +49,7 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 	std::string   triggerBitName;
 	edm::InputTag tauSrc;
 	edm::InputTag metSrc;
+  edm::InputTag metType1Src;
   edm::InputTag caloMetSrc;
   edm::InputTag caloMetNoHFSrc;
 
@@ -56,7 +57,7 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
 	bool triggerBit;
   int ntaus;
-	float taupt,taueta,met;
+  float taupt,taueta,met,metType1;
   float caloMet, caloMetNoHF;
   std::vector<BoolVariable> bools;
 };
@@ -65,7 +66,8 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
-    metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
+    metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metRawSrc")),
+    metType1Src(iConfig.getUntrackedParameter<edm::InputTag>("metType1Src")),
     caloMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetSrc")),
     caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc"))
 {
@@ -92,6 +94,7 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	TriggerEfficiencyTree->Branch("TauPt", &taupt);
 	TriggerEfficiencyTree->Branch("TauEta", &taueta);
 	TriggerEfficiencyTree->Branch("MET", &met);
+	TriggerEfficiencyTree->Branch("METType1", &metType1);
 	TriggerEfficiencyTree->Branch("CaloMET", &caloMet);
 	TriggerEfficiencyTree->Branch("CaloMETnoHF", &caloMetNoHF);
 
@@ -141,24 +144,27 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         }
 
 // Offline taus
-	edm::Handle<edm::View<pat::Tau> > htaus;
+	edm::Handle<edm::View<reco::Candidate> > htaus;
 	iEvent.getByLabel(tauSrc, htaus);
 
         ntaus = htaus->size();
 
-	const edm::PtrVector<pat::Tau>& taus = htaus->ptrVector();
 //FIXME: what if we have more than 1 taus passing the selection? 25.5.2011/SL
-	for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin();
-                                                     iter!= taus.end(); ++iter) {
-      		const edm::Ptr<pat::Tau> iTau = *iter;
-		taupt  = iTau->pt();
-		taueta = iTau->eta();
+	for(size_t i=0; i<htaus->size(); ++i) {
+          edm::Ptr<reco::Candidate> ptr = htaus->ptrAt(i);
+          edm::Ptr<pat::Tau> iTau(ptr.id(), dynamic_cast<const pat::Tau *>(ptr.get()), ptr.key());
+          taupt  = iTau->pt();
+          taueta = iTau->eta();
 	}
 
 // Offline MET
 	edm::Handle<edm::View<reco::MET> > hmet;
 	iEvent.getByLabel(metSrc, hmet);
         met = hmet->at(0).et();
+
+        edm::Handle<edm::View<reco::MET> > hmetType1;
+        iEvent.getByLabel(metType1Src, hmetType1);
+        metType1 = hmet->at(0).et();
 
 	edm::Handle<edm::View<reco::MET> > hmet2;
 	iEvent.getByLabel(caloMetSrc, hmet2);
