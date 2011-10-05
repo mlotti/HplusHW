@@ -215,6 +215,16 @@ namespace HPlus {
     TH1 *hMET_AfterBigBox; // 22 Sep 2011
     TH1 *hTransverseMass_AfterBigBox; // 14 Aug 2011
     TH1 *hMET_AfterJetSelection; // 22 Sep 2011
+    TH1 *hMET_AfterJetsBtagging;
+    TH1 *hMET_AfterJetsBtagging4050;
+    TH1 *hMET_AfterJetsBtagging5060;
+    TH1 *hMET_AfterJetsBtagging6070;
+    TH1 *hMET_AfterJetsBtagging7080;
+    TH1 *hMET_AfterJetsBtagging80100;
+    TH1 *hMET_AfterJetsBtagging100120;
+    TH1 *hMET_AfterJetsBtagging120150;
+    TH1 *hMET_AfterJetsBtagging150;
+    TH1 *hTransverseMass_AfterJetsBtagging;  
     TH1 *hMET_AfterJetSelMt80; // 22 Sep 2011
     TH1 *hTransverseMass_AfterJetSelection; // 14 Aug 2011
     TH1 *hTransverseMass_AfterJetSelMetCut; // 14 Aug 2011

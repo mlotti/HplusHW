@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+.#!/usr/bin/env python
 
 ###########################################################################
 #
@@ -127,24 +127,11 @@ def distComparison(datasets):
     # Set the names of DatasetRootHisto objects in order to be able easily reference them later
     drh1 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_BaseLineTauId")
     drh1.setName("Base")
-#    drh1.normalizeToOne()
+    drh1.normalizeToOne()
     drh2 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauId")
     drh2.setName("Inv")
-#    drh2.normalizeToOne()
-#    plot = plots.ComparisonPlot(drh1, drh2)
-
-#TEST
-    drh3 = dataset.getDatasetsFromCrabDirs(["TTJets_TuneZ2_Summer11", "T_tW-channel_TuneZ2_Summer11", "WJets_TuneZ2_Summer11"])
-    drh3.histoMgr.normalizeMCByLuminosity()
-    drh3.mergeMC()
-    drh3.setName("EWK")
-
-#subtract EWK MC (drh3) from baseline data (drh1)
-#END TEST
-
-    drh1.normalizeToOne()
-    drh2.normalizeToOne()   
-    plot = plots.ComparisonPlot(drh1, drh2)   
+    drh2.normalizeToOne()
+    plot = plots.ComparisonPlot(drh1, drh2)
 
     # Set the styles
     st1 = styles.getDataStyle().clone()
@@ -152,6 +139,7 @@ def distComparison(datasets):
     st2.append(styles.StyleLine(lineColor=ROOT.kRed))
     plot.histoMgr.forHisto("Base", st1)
     plot.histoMgr.forHisto("Inv", st2)
+    
 
     # Set the legend labels
     plot.histoMgr.setHistoLegendLabelMany({"Base": "Baseline Tau ID",

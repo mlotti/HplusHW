@@ -126,14 +126,25 @@ namespace HPlus {
 
     // Other histograms
     //hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
-    hMET_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelection", "QCD_MET_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
-    hMET_AfterJetSelMt80 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelectionMt80", "QCD_MET_AfterJetSelectionMt80; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
-    hMET_AfterBigBox = makeTH<TH1F>(*fs, "QCD_MET_AfterBigBox", "QCD_MET_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 22 Sep 2011
-    hTransverseMass_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelection", "QCD_TransverseMass_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
+    hMET_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelection", "QCD_MET_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 22 Sep 2011
+    hMET_AfterJetsBtagging = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging", "QCD_MET_AfterJetsBtagging; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); 
+    hMET_AfterJetsBtagging4050 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging4050", "QCD_MET_AfterJetsBtagging4050; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+
+    hMET_AfterJetsBtagging5060 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging5060", "QCD_MET_AfterJetsBtagging5060; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging6070 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging6070", "QCD_MET_AfterJetsBtagging6070; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging7080 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging7080", "QCD_MET_AfterJetsBtagging7080; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging80100 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging80100", "QCD_MET_AfterJetsBtagging80100; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging100120 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging100120", "QCD_MET_AfterJetsBtagging100120; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging120150 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging120150", "QCD_MET_AfterJetsBtagging120150; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetsBtagging150 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging150", "QCD_MET_AfterJetsBtagging150; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hMET_AfterJetSelMt80 = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelectionMt80", "QCD_MET_AfterJetSelectionMt80; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 22 Sep 2011
+    hMET_AfterBigBox = makeTH<TH1F>(*fs, "QCD_MET_AfterBigBox", "QCD_MET_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 22 Sep 2011
+    hTransverseMass_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelection", "QCD_TransverseMass_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
    hTransverseMass_AfterJetSelMetCut = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelectionMetCut", "QCD_TransverseMass_AfterJetSelectionMetCut; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
+   hTransverseMass_AfterJetsBtagging = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetsBtagging", "QCD_TransverseMass_AfterJetsBtagging; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); 
     hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
-    hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
-    hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
+    hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
+    hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBoxAndTauID = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndTauID", "QCD_TransverseMass_AfterBigBoxAndTauID; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
 
 
@@ -284,11 +295,48 @@ namespace HPlus {
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hStdAfterNjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
+
+    // get b tagging
+    double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     
     // get the MET, but cut on it later
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     hMET_AfterJetSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
     hTransverseMass_AfterJetSelection->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
+
+
+    if (btagData.passedEvent()) {
+      hMET_AfterJetsBtagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+      hTransverseMass_AfterJetsBtagging->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+ 
+      if (mySelectedTauPt > 40 && mySelectedTauPt < 50 ) {
+	hMET_AfterJetsBtagging4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 50 && mySelectedTauPt < 60) {
+	hMET_AfterJetsBtagging5060->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 60 && mySelectedTauPt < 70) {
+	hMET_AfterJetsBtagging6070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 70 && mySelectedTauPt < 80) {
+	hMET_AfterJetsBtagging7080->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 80 && mySelectedTauPt < 100) {
+	hMET_AfterJetsBtagging80100->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 100 && mySelectedTauPt < 120) {
+	hMET_AfterJetsBtagging4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 120 && mySelectedTauPt < 150) {
+	hMET_AfterJetsBtagging120150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+      if (mySelectedTauPt > 150 ) {
+	hMET_AfterJetsBtagging150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      }
+    }
+
+
     if (TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())) > 80.) {
 	  hMET_AfterJetSelMt80->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	} 
@@ -317,8 +365,8 @@ namespace HPlus {
       hStdAfterMET->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     
       ///////// btag selection (factorise out)
-      double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
-      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      //      double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+      //   BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       if (btagData.passedEvent()) {
         increment(fMETCounter);
         hSelectionFlow->Fill(kQCDOrderBTagFactorized, fEventWeight.getWeight());
@@ -421,7 +469,7 @@ namespace HPlus {
     */
     
     ///// This position is after the Big Box
-    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    //    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     AfterBigBox(tauCandidateData, jetData, metData, btagData, tauDataForTauID);
 
   }
