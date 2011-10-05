@@ -40,7 +40,7 @@ filterGenTausInaccessible = False
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
 # (below), or the individual flags
-doSystematics = True
+doSystematics = False
 
 # Perform the signal analysis with the JES variations in addition to
 # the "golden" analysis
@@ -104,6 +104,8 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 # the job (note that if many other modules are being run in the same
 # job, their INFO messages are printed too)
 #process.MessageLogger.cerr.threshold = cms.untracked.string("INFO")
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+#process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
