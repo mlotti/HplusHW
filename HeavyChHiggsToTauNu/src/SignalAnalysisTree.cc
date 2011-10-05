@@ -94,6 +94,8 @@ namespace HPlus {
 
     fTree->Branch("passedBTagging", &fPassedBTagging);
 
+    fTree->Branch("genMet_p4", &fGenMet);
+
     if(fTauEmbeddingInput) {
       fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
       fTree->Branch("temet_p4", &fTauEmbeddingMet);
@@ -246,6 +248,8 @@ namespace HPlus {
     fAlphaT = nan;
 
     fPassedBTagging = false;
+
+    fGenMet.SetXYZT(nan, nan, nan, nan);
 
     fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);

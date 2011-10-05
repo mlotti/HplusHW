@@ -208,6 +208,7 @@ forwardJetVeto = cms.untracked.PSet(
 
 GenParticleAnalysis = cms.untracked.PSet(
   src = cms.untracked.InputTag("genParticles"),
+  metSrc = cms.untracked.InputTag("genMetTrue"),
   oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),

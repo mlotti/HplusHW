@@ -9,6 +9,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 
@@ -47,6 +48,7 @@ namespace HPlus {
     void setRawMET(const edm::Ptr<reco::MET>& met) { fRawMet = met->p4(); fRawMetSumEt = met->sumEt(); }
     void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
+    void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
               const edm::PtrVector<pat::Jet>& jets,
@@ -118,6 +120,9 @@ namespace HPlus {
     double fAlphaT;
 
     bool fPassedBTagging;
+
+    // Gen level stuff
+    XYZTLorentzVector fGenMet;
 
     // Tau embedding stuff
     XYZTLorentzVector fTauEmbeddingMuon;
