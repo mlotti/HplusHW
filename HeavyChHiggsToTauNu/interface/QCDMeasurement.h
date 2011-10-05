@@ -14,7 +14,9 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -123,7 +125,9 @@ namespace HPlus {
     Count fOneProngTauSelectionCounter;
     Count fOneSelectedTauCounter;
     Count fGlobalElectronVetoCounter;
+    Count fNonIsolatedElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
+    Count fNonIsolatedMuonVetoCounter;
     Count fJetSelectionCounter;
     Count fMETCounter;
     Count fOneProngTauIDWithoutRtauCounter;
@@ -141,7 +145,9 @@ namespace HPlus {
     VertexSelection fPrimaryVertexSelection;
     TauSelection fOneProngTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
+    NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
+    NonIsolatedMuonVeto fNonIsolatedMuonVeto;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     InvMassVetoOnJets fInvMassVetoOnJets;
