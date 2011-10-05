@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_PASJuly11_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_PASJuly11_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -11,11 +11,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -25,6 +26,7 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
 
@@ -43,7 +45,7 @@ class TH2;
 
 
 namespace HPlus { 
-  class QCDMeasurement {  
+  class QCDMeasurement_PASJuly11 {  
     class AnalysisVariation {
     public:
       AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins);
@@ -88,8 +90,8 @@ namespace HPlus {
   };
   
   public:
-    explicit QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~QCDMeasurement();
+    explicit QCDMeasurement_PASJuly11(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~QCDMeasurement_PASJuly11();
 
     // Interface towards the EDProducer
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -123,7 +125,9 @@ namespace HPlus {
     Count fOneProngTauSelectionCounter;
     Count fOneSelectedTauCounter;
     Count fGlobalElectronVetoCounter;
+    Count fNonIsolatedElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
+    Count fNonIsolatedMuonVetoCounter;
     Count fJetSelectionCounter;
     Count fMETCounter;
     Count fOneProngTauIDWithoutRtauCounter;
@@ -138,11 +142,12 @@ namespace HPlus {
 
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
-    //TriggerTauMETEmulation  fTriggerTauMETEmulation;
     VertexSelection fPrimaryVertexSelection;
     TauSelection fOneProngTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
+    NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
+    NonIsolatedMuonVeto fNonIsolatedMuonVeto;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     InvMassVetoOnJets fInvMassVetoOnJets;
@@ -158,7 +163,7 @@ namespace HPlus {
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
-    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
     
