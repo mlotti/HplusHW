@@ -591,7 +591,7 @@ namespace HPlus {
     if (btagData.passedEvent()) {
       //hCorrelationBtagAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
     }
-    if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+    if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
       //hCorrelationRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
       if (btagData.passedEvent()) {
         //hCorrelationBtagAndRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
@@ -682,7 +682,7 @@ namespace HPlus {
     if (tauData.passedEvent()) {
       hAfterBigBoxAndTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
       // Leg2
-      if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+      if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
         hLeg2AfterRtau->Fill(tauPtBin, weightWithoutMET);
       }
       // Leg3

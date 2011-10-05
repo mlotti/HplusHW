@@ -51,11 +51,25 @@ namespace HPlus {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
       }
-      bool selectedTauCandidatePassedRtau() const {
+      bool getBestTauCandidatePassedRtauStatus() const {
         if (!fTauSelection->fCleanedTauCandidates.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
       }
-
+      /// Returns true if no candidates passed asked discriminator
+      bool applyVetoOnTauCandidates(std::string discr) const {
+        for(edm::PtrVector<pat::Tau>::const_iterator iter = fTauSelection->fCleanedTauCandidates.begin(); iter != fTauSelection->fCleanedTauCandidates.end(); ++iter)
+          if ((*iter)->tauID(discr) > 0.5) return false;
+        return true;
+      }
+      int getBestTauCandidateProngCount() const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
+        return fTauSelection->fCleanedTauCandidates[0]->signalPFChargedHadrCands().size();
+      }
+      bool applyDiscriminatorOnBestTauCandidate(std::string discr) const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
+        return fTauSelection->fCleanedTauCandidates[0]->tauID(discr) > 0.5;
+      }
+      
     private:
       const TauSelection *fTauSelection;
       bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
