@@ -19,7 +19,9 @@ namespace HPlus {
     fOneProngTauSelectionCounter(eventCounter.addCounter("TauCandSelection")),
     fOneSelectedTauCounter(eventCounter.addCounter("TauCands==1")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
+    fNonIsolatedElectronVetoCounter(eventCounter.addCounter("NonIsolatedElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
+    fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fJetSelectionCounter(eventCounter.addCounter("JetSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
@@ -33,9 +35,11 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate", &fTriggerSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
+    fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
+    fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
@@ -46,8 +50,9 @@ namespace HPlus {
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     //fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
-    fGenparticleAnalysis(eventCounter, eventWeight),
+    fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -197,7 +202,9 @@ namespace HPlus {
     fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));*/
 
+    fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
+
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -252,24 +259,42 @@ namespace HPlus {
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection,fEventWeight.getWeight());
 
+    // FIXME (MK 20110921): not sure if this is the correct place to
+    // apply the scale factor, but it is the same as if the scale
+    // factor would be applied inside fOneProngTauSelection as before.
+    // The offline tau which is used to derive the trigger scale
+    // factor is required to pass the full tau ID, including isolation
+    // etc, but the tau object here is not (yet) isolated.
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(mySelectedTau[0]));
+    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
 
 
 ///////// Start global electron veto
-    // GlobalElectronVeto 
+    // ElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
+    // std::cout << "*** nonIsolatedElectronVetoData" << std::endl;
+    NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
+    if (!nonIsolatedElectronVetoData.passedEvent())  return;
+    increment(fNonIsolatedElectronVetoCounter);
+    // std::cout << "*** nonIsolatedElectronVetoData called" << std::endl;
 
 ///////// Start global muon veto
-    // GlobalMuonVeto
+    // MuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
+
+    NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    if (!nonIsolatedMuonVetoData.passedEvent()) return; 
+    increment(fNonIsolatedMuonVetoCounter);
 
 
 ///////// Jet selection
@@ -296,9 +321,9 @@ namespace HPlus {
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
     mySelectedTauFirst.push_back(mySelectedTau[0]);
     // FIXME: how to handle the top reco in QCD measurement?
-    fTree.setTriggerWeight(triggerData.getScaleFactor());  // trigger scale factor is actually valid only after tau ID
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(),
-               evtTopologyData.alphaT().fAlphaT);
+    fTree.setFillWeight(fEventWeight.getWeight());
+    fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(), evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

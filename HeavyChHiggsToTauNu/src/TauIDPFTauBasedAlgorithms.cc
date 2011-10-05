@@ -20,6 +20,13 @@ namespace HPlus {
 
   TauIDPFShrinkingCone::~TauIDPFShrinkingCone() { }
   
+
+  bool TauIDPFShrinkingCone::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    fCounterPackager.incrementSubCount(fIDDecayModeFinding);
+    // No decay mode finding equivalent in TCTau, always pass true
+    return true;
+  }
+
   bool TauIDPFShrinkingCone::passIsolation(const edm::Ptr<pat::Tau> tau) {
     if (tau->tauID("byIsolation05") < 0.5) return false; // 05 points to minimum track pt
     fCounterPackager.incrementSubCount(fIDIsolation);
@@ -39,6 +46,12 @@ namespace HPlus {
     TauIDPFTauBase(iConfig, eventCounter, eventWeight, baseLabel, myDir)
   {}
   TauIDPFHPSBase::~TauIDPFHPSBase() {}
+
+  bool TauIDPFHPSBase::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    if(tau->tauID("decayModeFinding") < 0.5) return false;
+    fCounterPackager.incrementSubCount(fIDDecayModeFinding);
+    return true;
+  }
 
   bool TauIDPFHPSBase::passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau) {
     // Electron veto
@@ -178,6 +191,12 @@ namespace HPlus {
 
   TauIDPFShrinkingConeTaNC::~TauIDPFShrinkingConeTaNC() { }
   
+  bool TauIDPFShrinkingConeTaNC::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    fCounterPackager.incrementSubCount(fIDDecayModeFinding);
+    // No decay mode finding equivalent in TCTau, always pass true
+    return true;
+  }
+
   bool TauIDPFShrinkingConeTaNC::passIsolation(const edm::Ptr<pat::Tau> tau) {
     fCounterPackager.fill(fIDTaNC, tau->tauID("byTaNC"));
     if (tau->tauID("byTaNCfrTenthPercent") < 0.5) return false;
@@ -209,6 +228,12 @@ namespace HPlus {
   }
 
   TauIDPFShrinkingConeCombinedHPSTaNC::~TauIDPFShrinkingConeCombinedHPSTaNC() { }
+
+  bool TauIDPFShrinkingConeCombinedHPSTaNC::passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) {
+    fCounterPackager.incrementSubCount(fIDDecayModeFinding);
+    // No decay mode finding equivalent in TCTau, always pass true
+    return true;
+  }
   
   bool TauIDPFShrinkingConeCombinedHPSTaNC::passIsolation(const edm::Ptr<pat::Tau> tau) {
     // Apply HPS

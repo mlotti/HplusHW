@@ -9,9 +9,12 @@
 #
 ###########################################################################
 
+drawToScreen = True
+drawToScreen = False
 
 import ROOT
-ROOT.gROOT.SetBatch(True)
+if not drawToScreen:
+    ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -25,13 +28,6 @@ analysis = "signalAnalysis"
 counters = analysis+"Counters"
 
 def main():
-    interactive = True
-    interactive = False
-
-    # Disable batch mode here to have the interactivity (see also the line with 'raw_input') below
-    if interactive:
-        ROOT.gROOT.SetBatch(False)
-
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
@@ -63,7 +59,7 @@ def main():
 
     # Script execution can be paused like this, it will continue after
     # user has given some input (which must include enter)
-    if interactive:
+    if drawToScreen:
         raw_input("Hit enter to continue")
 
 

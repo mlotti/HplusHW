@@ -15,16 +15,56 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerSelection.h"
 
 #include "TH1F.h"
+
+namespace {
+  bool isolationLessThan(const edm::Ptr<pat::Tau>& a, const edm::Ptr<pat::Tau>& b) {
+    // Return true if a becomes before b, false if b becomes before a
+    
+    // Do first comparisons of the isolation discriminators, because
+    // they are bullet proof way of using exactly the same isolation
+    // defitions as in the discriminators
+
+    if(a->tauID("byTightIsolation") > 0.5 && b->tauID("byTightIsolation") < 0.5)
+      return true;
+
+    if(a->tauID("byMediumIsolation") > 0.5) {
+      if(b->tauID("byTightIsolation") > 0.5)
+        return false;
+      if(b->tauID("byMediumIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byLooseIsolation") > 0.5) {
+      // assume that if tau is medium isolated, it is also tight isolated
+      if(b->tauID("byMediumIsolation") > 0.5)
+        return false;
+      if(b->tauID("byLooseIsolation") < 0.5)
+        return true;
+    }
+
+    if(a->tauID("byVLooseIsolation") > 0.5) {
+      if(b->tauID("byLooseIsolation") > 0.5)
+        return false;
+      if(b->tauID("byVLooseIsolation") < 0.5)
+        return true;
+    }
+
+    // At this point both a and b are in the same isolation class, and
+    // we need a continous isolation variable. This is calculated by
+    // us, it should be more or less the same as the official
+    // discriminators, but it's possible that it's not.
+    return a->userFloat("byTightChargedMaxPt") < b->userFloat("byTightChargedMaxPt");
+  }
+}
 
 namespace HPlus {
   TauSelection::Data::Data(const TauSelection *tauSelection, bool passedEvent):
     fTauSelection(tauSelection), fPassedEvent(passedEvent) {}
   TauSelection::Data::~Data() {}
 
-  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection):
+  TauSelection::TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fSelection(iConfig.getUntrackedParameter<std::string>("selection")),
     fProngNumber(prongNumber),
@@ -32,7 +72,6 @@ namespace HPlus {
     fTauID(0),
     fOperationMode(kNormalTauID),
     fTauFound(eventCounter.addSubCounter(label+"TauSelection","Tau found")),
-    fTriggerSelection(triggerSelection),
     fEventWeight(eventWeight)
   {
     edm::Service<TFileService> fs;
@@ -274,7 +313,7 @@ namespace HPlus {
     // Tau candidate selection
     edm::PtrVector<pat::Tau> myTauCandidates;
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter)
-      if (fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
+      if (fTauID->passDecayModeFinding(*iter) && fTauID->passTauCandidateSelection(*iter)) myTauCandidates.push_back(*iter);
     if (myTauCandidates.size() <= 1) {
       if (!myTauCandidates.size()) { // no taus left
 	findBestTau(myBestTau, taus);
@@ -332,21 +371,12 @@ namespace HPlus {
     fOperationMode = fOriginalOperationMode;
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
-      // Apply trigger scale factor
-      bool myPassStatus = false;
-      if (fTriggerSelection == 0) {
-        myPassStatus = true;
-      } else {
-        if (fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) myPassStatus = true;
-      }
-      if (myPassStatus) {
-        if (fProngNumber == 1) {
-          if (fTauID->passOneProngCut(tauCandidate)) {
-            if (fTauID->passChargeCut(tauCandidate)) {
-              // All cuts have been passed, save tau
-              fillHistogramsForSelectedTaus(tauCandidate, iEvent);
-              fSelectedTaus.push_back(tauCandidate);
-            }
+      if (fProngNumber == 1) {
+        if (fTauID->passOneProngCut(tauCandidate)) {
+          if (fTauID->passChargeCut(tauCandidate)) {
+            // All cuts have been passed, save tau
+            fillHistogramsForSelectedTaus(tauCandidate, iEvent);
+            fSelectedTaus.push_back(tauCandidate);
           }
         }
       }
@@ -386,6 +416,10 @@ namespace HPlus {
     }
     hNTriggerMatchedTaus->Fill(taus.size(),fEventWeight.getWeight());
 
+    // Need std:vector in order to be able to use std::sort
+    std::vector<edm::Ptr<pat::Tau> > tmpCleanedTauCandidates;
+    std::vector<edm::Ptr<pat::Tau> > tmpSelectedTaus;
+
     // Loop over the taus
     for(edm::PtrVector<pat::Tau>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
       const edm::Ptr<pat::Tau> iTau = *iter;
@@ -393,12 +427,13 @@ namespace HPlus {
       fillHistogramsForTauCandidates(iTau, iEvent);
       
       // Tau candidate selections
+      if (!fTauID->passDecayModeFinding(iTau)) continue;
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
       if (!fTauID->passECALFiducialCuts(iTau)) continue;
       if (!fTauID->passTauCandidateEAndMuVetoCuts(iTau)) continue;      
       fillHistogramsForCleanedTauCandidates(iTau, iEvent);
-      fCleanedTauCandidates.push_back(iTau);
+      tmpCleanedTauCandidates.push_back(iTau);
       
       // Tau ID selections
       if (fOperationMode == kNormalTauID) {
@@ -409,11 +444,6 @@ namespace HPlus {
         hHPSDecayMode->Fill(iTau->tauID("decayModeFinding"), fEventWeight.getWeight());
 
         if (!fTauID->passIsolation(iTau)) continue;
-        // Apply trigger scale factor
-        if (fTriggerSelection != 0) {
-          if (!fTriggerSelection->passedTriggerScaleFactor(iEvent, iSetup)) continue;
-        }
-        
 	hTightChargedMaxPt->Fill(iTau->userFloat("byTightChargedMaxPt"), fEventWeight.getWeight());
 	hTightChargedSumPt->Fill(iTau->userFloat("byTightChargedSumPt"), fEventWeight.getWeight());
 	hTightChargedOccupancy->Fill((float)iTau->userInt("byTightChargedOccupancy"), fEventWeight.getWeight());
@@ -435,8 +465,16 @@ namespace HPlus {
       }
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
-      fSelectedTaus.push_back(iTau);
+      tmpSelectedTaus.push_back(iTau);
     }
+    // Sort taus in an order of isolation, most isolated first
+    //std::sort(tmpCleanedTauCandidates.begin(), tmpCleanedTauCandidates.end(), isolationLessThan);
+    //std::sort(tmpSelectedTaus.begin(), tmpSelectedTaus.end(), isolationLessThan);
+    for(size_t i=0; i<tmpCleanedTauCandidates.size(); ++i)
+      fCleanedTauCandidates.push_back(tmpCleanedTauCandidates[i]);
+    for(size_t i=0; i<tmpSelectedTaus.size(); ++i)
+      fSelectedTaus.push_back(tmpSelectedTaus[i]);
+
     // Handle counters
     fTauID->updatePassedCounters();
     // Fill number of taus histograms
