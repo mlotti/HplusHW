@@ -52,6 +52,7 @@ set -e
 # 12.8.2011/M.Kortelainen CMSSW_4_2_8_patch1 Updated PAT tags
 # 28.9.2011/M.Kortelainen CMSSW_4_2_8_patch2 Added tags for calculating type I/II MET from PAT objects
 # 3.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Bugfix from Chrisian for type I/II MET
+# 5.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated LumiDB tag (bugfix)
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -98,7 +99,7 @@ cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-00-00
+addpkg RecoLuminosity/LumiDB      V03-03-00 
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
