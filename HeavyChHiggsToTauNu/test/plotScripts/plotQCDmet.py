@@ -152,12 +152,40 @@ def main():
 
 #    print eventCounter.getSubCounterTable("GlobalMuon_ID").format()
 
-    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
+#    print eventCounter.getSubCounterTable("tauIDTauSelection").format()
+#    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format()
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
     print eventCounter.getSubCounterTable("b-tagging").format()
     print eventCounter.getSubCounterTable("Jet selection").format()
     print eventCounter.getSubCounterTable("Jet main").format()    
+
+
+    datasets = getDatasetsFromRootFiles([("TTToHplusBWB_M120_Summer11", "TTToHplusBWB_M120_Summer11/res/histograms_1_1_FON.root")]) ## comment me
+    tmas = HistoManager(datasets, "QCDMeasurement/QCD_TransverseMass_AfterJetSelection")
+    tmas.normalizeMCByLuminosity()
+    cf = CanvasFrame(tmas, "transverseMass", ymin=0.01, ymax=None, xmin=0.0, xmax=15.0)
+    tmas.draw()
+    cf.canvas.SaveAs(".png")
+
+    drh1 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/QCD_MET_AfterJetSelection")
+    drh1.setName("Base")
+    drh1.normalizeToOne()
+#    drh1.normalizeMCByLuminosity()
+    plot = plots.ComparisonPlot(drh1, drh1)
+#    plot = plots.PlotBase(drh1)
+#    plot = plots.MCPlot(drh1)
+    # Rebin, if necessary
+    plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(1))
+    
+    # Create frame with a ratio pad
+    plot.createFrame("distribution", opts={"ymin":1e-5, "ymaxfactor": 1.5})
+#                     createRatio=True, opts2={"ymin": -10, "ymax": 50}, # bounds of the ratio plot
+#                     )
+
+    plot.draw()
+    plot.save()
+
+
 
     
 #    latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f"))

@@ -170,6 +170,22 @@ def main():
 #    xsect.setHplusCrossSections(datasets, toTop=True)
 
 
+
+# write histograms to file
+    mt = plots.DataMCPlot(datasets_lands, analysis+"/transverseMassBeforeFakeMet")
+    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    f = ROOT.TFile.Open(output, "RECREATE")
+    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
+    mt_data.SetDirectory(f)
+    mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
+    mt_hw.SetDirectory(f)
+    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
+    mt_hh.SetDirectory(f)
+    f.Write()
+    f.Close()
+    
+
+
     jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20)
     jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
     jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
