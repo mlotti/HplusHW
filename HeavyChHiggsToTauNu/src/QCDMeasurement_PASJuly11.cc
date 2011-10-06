@@ -1,4 +1,4 @@
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurement.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/QCDMeasurement_PASJuly11.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
@@ -11,7 +11,7 @@
 #include "TNamed.h"
 
 namespace HPlus {
-  QCDMeasurement::QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+  QCDMeasurement_PASJuly11::QCDMeasurement_PASJuly11(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fEventWeight(eventWeight),
     fAllCounter(eventCounter.addCounter("allEvents")),
     fTriggerAndHLTMetCutCounter(eventCounter.addCounter("Trigger_and_HLT_MET")),
@@ -207,13 +207,13 @@ namespace HPlus {
 
    }
 
-  QCDMeasurement::~QCDMeasurement() {}
+  QCDMeasurement_PASJuly11::~QCDMeasurement_PASJuly11() {}
 
-  void QCDMeasurement::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurement_PASJuly11::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     analyze(iEvent, iSetup);
   }
 
-  void QCDMeasurement::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  void QCDMeasurement_PASJuly11::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Read the prescale for the event and set the event weight as the prescale
     fEventWeight.updatePrescale(iEvent);
     fTree.setPrescaleWeight(fEventWeight.getWeight());
@@ -453,7 +453,7 @@ namespace HPlus {
 
 
 
-  edm::PtrVector<pat::Tau> QCDMeasurement::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
+  edm::PtrVector<pat::Tau> QCDMeasurement_PASJuly11::chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates) {
     edm::PtrVector<pat::Tau> mySelectedTauCandidate;
 
     // TMP code starts - to be removed when all 42X pattuples are available
@@ -488,7 +488,7 @@ namespace HPlus {
   }
   
   
-  void QCDMeasurement::AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateDataBB, JetSelection::Data& jetDataBB, const METSelection::Data& metDataBB, const BTagging::Data& btagDataBB, const TauSelection::Data& tauDataForTauIDBB){
+  void QCDMeasurement_PASJuly11::AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateDataBB, JetSelection::Data& jetDataBB, const METSelection::Data& metDataBB, const BTagging::Data& btagDataBB, const TauSelection::Data& tauDataForTauIDBB){
     
     double mt_TauCandAndMet = TransverseMass::reconstruct(*(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) );
     double deltaPhiMetTauCand = reco::deltaPhi( *(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
@@ -538,7 +538,7 @@ namespace HPlus {
 }
 
 
-  void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits ){
+  void QCDMeasurement_PASJuly11::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits ){
 
     // Make histograms
     edm::Service<TFileService> fs;
@@ -578,7 +578,7 @@ namespace HPlus {
     return;
 }
 
-  void QCDMeasurement::analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
+  void QCDMeasurement_PASJuly11::analyzeCorrelation(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
     // Apply all selections of the standard cut path
     if (!tauData.passedEvent() || // Tau ID without Rtau
         !fakeMETData.passedEvent() || // fake MET veto
@@ -600,7 +600,7 @@ namespace HPlus {
     return;
   }
 
-  void QCDMeasurement::analyzePurities(const TauSelection::Data& tauDataForTauID, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau){
+  void QCDMeasurement_PASJuly11::analyzePurities(const TauSelection::Data& tauDataForTauID, const JetSelection::Data &jetData, const METSelection::Data& METData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const int myTauPtIndex, double EventWeight, std::vector<TH1*> fPurityBeforeAfterJets, std::vector<TH1*> fPurityBeforeAfterJetsMet, std::vector<TH1*> fPurityBeforeAfterJetsMetBtag, std::vector<TH1*> fPurityBeforeAfterJetsFakeMet, std::vector<TH1*> fPurityBeforeAfterJetsTauIdNoRtau){
     
     
     // Purity histograms
@@ -631,7 +631,7 @@ namespace HPlus {
   }
   
 
-  QCDMeasurement::AnalysisVariation::AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins)
+  QCDMeasurement_PASJuly11::AnalysisVariation::AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins)
     : fMETCut(METcut),
       fFakeMETVetoCut(fakeMETVetoCut) {
     std::stringstream myName;
@@ -654,8 +654,8 @@ namespace HPlus {
     hLeg3FakeMetVetoDistribution = makeTH<TH1F>(myDir, "Leg3_Closest_DeltaPhi_of_MET_and_selected_jets_or_taus", "min DeltaPhi(MET,selected jets or taus);min(#Delta#phi(MET,jets)), degrees;N / 5", 36, 0., 180.);
     hTopMassDistribution = makeTH<TH1F>(myDir, "TopMass_jjbMax", "Mass_jjbMax;;N_{Events} / 5 GeV/c^{2}", 160, 0., 800.);
   }
-  QCDMeasurement::AnalysisVariation::~AnalysisVariation() { }
-  void QCDMeasurement::AnalysisVariation::analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
+  QCDMeasurement_PASJuly11::AnalysisVariation::~AnalysisVariation() { }
+  void QCDMeasurement_PASJuly11::AnalysisVariation::analyse(const METSelection::Data& METData, edm::PtrVector<pat::Tau>& selectedTau, const TauSelection::Data& tauCandidateData, const TauSelection::Data& tauData, const BTagging::Data& btagData, const FakeMETVeto::Data& fakeMETData, const ForwardJetVeto::Data& forwardData, const TopSelection::Data& topSelectionData, int tauPtBin, double weightWithoutMET) {
     hAfterBigBox->Fill(tauPtBin, weightWithoutMET);
     // Leg 1
     if (METData.getSelectedMET()->et() > fMETCut) {
