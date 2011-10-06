@@ -50,8 +50,8 @@ namespace HPlus {
       bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
 
       const std::string& getPathName() const { return fPath; }
-      const pat::TriggerObjectRefVector getTauObjects() const { return fTaus; }
-      const pat::TriggerObjectRefVector getMetObjects() const { return fMets; }
+      const pat::TriggerObjectRefVector& getTauObjects() const { return fTaus; }
+      const pat::TriggerObjectRefVector& getMetObjects() const { return fMets; }
 
     private:
       // Input parameters
@@ -86,6 +86,8 @@ namespace HPlus {
       size_t getTriggerTauSize() const {
         return fTriggerPath->getTauObjects().size();
       }
+
+      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
 
     private:
       const TriggerSelection *fTriggerSelection;

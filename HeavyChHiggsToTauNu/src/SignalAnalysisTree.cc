@@ -57,7 +57,8 @@ namespace HPlus {
     fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
-    fTree->Branch("hltTaus_n", &fNHltTaus);
+
+    fTree->Branch("hltTau_p4", &fHltTaus);
 
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
@@ -166,6 +167,14 @@ namespace HPlus {
   
   }
 
+
+  void SignalAnalysisTree::setHltTaus(const pat::TriggerObjectRefVector& hltTaus) {
+    fHltTaus.clear();
+    fHltTaus.reserve(hltTaus.size());
+    for(size_t i=0; i<hltTaus.size(); ++i) {
+      fHltTaus.push_back(hltTaus[i]->p4());
+    }
+  }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
                                 const edm::PtrVector<pat::Jet>& jets,
@@ -540,9 +549,10 @@ namespace HPlus {
     fFillWeight = 1.0;
 
     fNVertices = 0;
-    fNHltTaus = 0;
 
     double nan = std::numeric_limits<double>::quiet_NaN();
+
+    fHltTaus.clear();
 
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);

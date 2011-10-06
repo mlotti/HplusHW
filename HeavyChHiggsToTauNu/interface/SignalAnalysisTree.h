@@ -13,6 +13,7 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
@@ -48,7 +49,6 @@ namespace HPlus {
     void setFillWeight(double w)  { fFillWeight = w; }
     void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
-    void setNHltTaus(unsigned int n) { fNHltTaus = n; }
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
@@ -57,11 +57,13 @@ namespace HPlus {
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
     void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
 
+    void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
+    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
               const edm::PtrVector<pat::Jet>& jets,
 	      double alphaT);
 
-    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
   private:
     void reset();
@@ -95,7 +97,8 @@ namespace HPlus {
     double fFillWeight;
 
     unsigned int fNVertices;
-    unsigned int fNHltTaus;
+
+    std::vector<XYZTLorentzVector> fHltTaus;
 
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
