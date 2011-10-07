@@ -174,7 +174,7 @@ namespace HPlus {
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementMETCounter();
    
     // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     if(!jetData.passedEvent()) return;
     fAllTausCounterGroup.incrementNJetsCounter();
     if (myTauMatch != kNoMC) getCounterGroupByTauMatch(myTauMatch)->incrementNJetsCounter();

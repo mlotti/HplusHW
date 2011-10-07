@@ -211,7 +211,7 @@ namespace HPlus {
     fMET = metData.getSelectedMET()->et();
     
     // 7) Selected Jets
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     edm::PtrVector<pat::Jet> selectedJets = jetData.getSelectedJets();
     iNHadronicJets = selectedJets.size();
     if(iNHadronicJets > 0) fLdgJetEt = selectedJets[0]->et();
@@ -330,7 +330,7 @@ namespace HPlus {
     hMet_BeforeTauSelection->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     
     // 7) Selected Jets
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     if(!jetData.passedEvent()) return;
     increment(fNJetsCounter);
     // hAlphatAfterJetSelection->Fill(sAlphaT.fAlphaT, fEventWeight.getWeight());

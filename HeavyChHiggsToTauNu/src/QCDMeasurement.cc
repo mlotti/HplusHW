@@ -253,7 +253,7 @@ namespace HPlus {
     if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
     // Choose tau to be used throughout the event as the selected tau jet
-    edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
+    //edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
     // note: do not require here that only one tau has been found;
     // instead take first item from mySelectedTau as the tau in the event
     increment(fOneSelectedTauCounter);
@@ -265,10 +265,10 @@ namespace HPlus {
     // The offline tau which is used to derive the trigger scale
     // factor is required to pass the full tau ID, including isolation
     // etc, but the tau object here is not (yet) isolated.
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(mySelectedTau[0]));
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
     fTree.setTriggerWeight(triggerWeight.getEventWeight());
 
-    double mySelectedTauPt = mySelectedTau[0]->pt();
+    double mySelectedTauPt = tauCandidateData.getCleanedTauCandidates()[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
 
 
@@ -299,7 +299,7 @@ namespace HPlus {
 
 ///////// Jet selection
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
     if (!jetData.passedEvent()) return;
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
@@ -309,7 +309,7 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
 
     // alphaT - No cuts applied! Only produces plots
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
     // increment(fEvtTopologyCounter);
 
     // It can happen (and happens) that mySelectedTau has more than 1
@@ -319,7 +319,7 @@ namespace HPlus {
     // FIXME: how is jet selection affected by this? Sometimes there
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
-    mySelectedTauFirst.push_back(mySelectedTau[0]);
+    mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
@@ -342,7 +342,7 @@ namespace HPlus {
         increment(fMETCounter);
         hSelectionFlow->Fill(kQCDOrderBTagFactorized, fEventWeight.getWeight());
         hStdAfterBjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
-        hStdTransverseMassAfterBTag->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+        hStdTransverseMassAfterBTag->Fill(TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
         // undo btag scale factor
         fEventWeight.multiplyWeight(myWeightWithoutBTagScale / fEventWeight.getWeight()); // needed because of btag scale factor
       }
@@ -354,7 +354,7 @@ namespace HPlus {
     double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
     BTagging::Data btagDataBB = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
-    TauSelection::Data tauDataForTauIDBB = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
+    TauSelection::Data tauDataForTauIDBB = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
     AfterBigBox(EventWeightWithBTag, EventWeightWithoutBTag, tauCandidateData, jetData, metDataBB, btagDataBB, tauDataForTauIDBB);
     /////////////////////    /////////////////////    /////////////////////
 
@@ -367,14 +367,14 @@ namespace HPlus {
 ///////// Start parallel paths after big box
 
     // Apply non-standard cut paths
-/*    analyzeCorrelation(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+/*    analyzeCorrelation(metData, tauCandidateData.getCleanedTauCandidates()[0], tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
 */
 
     /* analysis variations cannot be done like this because of trigger scale factor!!!
       for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+      (*it).analyse(metData, tauCandidateData.getCleanedTauCandidates()[0], tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
     }*/
@@ -382,22 +382,22 @@ namespace HPlus {
 ///////// Continue cut path to tau isolation and rtau
 
     // Apply rest of tauID without Rtau
-    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
+    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
     if(!tauDataForTauID.passedEvent()) return;
     increment(fOneProngTauIDWithoutRtauCounter);
     hSelectionFlow->Fill(kQCDOrderTauID, fEventWeight.getWeight());
     hStdAfterTauIDNoRtau->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
 
-    hStdTransverseMassAfterTauID->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+    hStdTransverseMassAfterTauID->Fill(TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
 
     // Factorize out Rtau
-    if (tauDataForTauID.selectedTauPassedRtau()) {
+    if (tauDataForTauID.getBestTauCandidatePassedRtauStatus()) {
       increment(fOneProngTauIDWithRtauCounter);
       hSelectionFlow->Fill(kQCDOrderRtauFactorized, fEventWeight.getWeight());
       hStdAfterRtau->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     }
 
-    // FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
+    // FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0], jetData.getSelectedJets());
     // ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
 

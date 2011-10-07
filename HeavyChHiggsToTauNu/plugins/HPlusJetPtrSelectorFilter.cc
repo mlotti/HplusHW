@@ -1,6 +1,7 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/Utilities/interface/Exception.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/View.h"
@@ -60,8 +61,12 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
 
+  if (hcand->size() != 1) {
+    throw cms::Exception("LogicError") << "HPlusJetPtrSelectorFilter: Tried to make jet selection with tau collection size <> 1!" << std::endl;
+  }
+
   bool passed = false;
-  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrVector());
+  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
   if(jetData.passedEvent()) {
     passed = true;
     iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
