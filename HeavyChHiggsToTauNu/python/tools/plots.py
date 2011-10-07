@@ -988,7 +988,17 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
+        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetrootHisto2, dataset.DatasetRootHistoBase):
+            PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
+        else:
+            # assume datasetRootHisto* arguments are HistoBase objects instead
+            if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase):
+                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto2 is %s" % type(datasetRootHisto2).__name__)
+            if isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
+                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto1 is %s" % type(datasetRootHisto1).__name__)
+            PlotBase.__init__(self, **kwargs)
+            self.histoMgr.appendHisto(datasetRootHisto1)
+            self.histoMgr.appendHisto(datasetRootHisto2)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #
