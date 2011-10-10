@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 ###########################################################################
@@ -10,9 +9,12 @@
 #
 ###########################################################################
 
+drawToScreen = True
+drawToScreen = False
 
 import ROOT
-ROOT.gROOT.SetBatch(True)
+if not drawToScreen:
+    ROOT.gROOT.SetBatch(True)
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.dataset as dataset
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.histograms as histograms
@@ -26,13 +28,6 @@ analysis = "signalAnalysis"
 counters = analysis+"Counters"
 
 def main():
-    interactive = True
-    interactive = False
-
-    # Disable batch mode here to have the interactivity (see also the line with 'raw_input') below
-    if interactive:
-        ROOT.gROOT.SetBatch(False)
-
     # Create all datasets from a multicrab task
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
@@ -59,12 +54,12 @@ def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
-    #dataMCExample(datasets)
+    dataMCExample(datasets)
     distComparison(datasets)
 
     # Script execution can be paused like this, it will continue after
     # user has given some input (which must include enter)
-    if interactive:
+    if drawToScreen:
         raw_input("Hit enter to continue")
 
 
@@ -126,40 +121,36 @@ def setName(drh, name):
 def distComparison(datasets):
     # Create a comparison plot of two distributions (must have the same binning)
     # Set the names of DatasetRootHisto objects in order to be able easily reference them later
-    drh1 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_BaseLineTauId")
-    drh1.setName("Base")
-    drh1.normalizeToOne()
-    drh2 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauId")
-    drh2.setName("Inv")
-    drh2.normalizeToOne()
+    drh1 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterTauID")
+    drh1.setName("afterTauID")
+    drh2 = datasets.getDataset("Data").getDatasetRootHisto(analysis+"/SelectedTau_pT_AfterMetCut")
+    drh2.setName("afterMet")
     plot = plots.ComparisonPlot(drh1, drh2)
 
     # Set the styles
     st1 = styles.getDataStyle().clone()
     st2 = st1.clone()
     st2.append(styles.StyleLine(lineColor=ROOT.kRed))
-    plot.histoMgr.forHisto("Base", st1)
-    plot.histoMgr.forHisto("Inv", st2)
-
+    plot.histoMgr.forHisto("afterTauID", st1)
+    plot.histoMgr.forHisto("afterMet", st2)
 
     # Set the legend labels
-    plot.histoMgr.setHistoLegendLabelMany({"Base": "Baseline Tau ID",
-                                           "Inv": "Inverted Tau ID"})
+    plot.histoMgr.setHistoLegendLabelMany({"afterTauID": "After tau ID",
+                                           "afterMet": "After MET cut"})
     # Set the legend styles
     plot.histoMgr.setHistoLegendStyleAll("L")
-
-    plot.histoMgr.setHistoLegendStyle("Base", "P") # exception to the general rule
+    #plot.histoMgr.setHistoLegendStyle("afterTauID", "P") # exception to the general rule
 
     # Set the drawing styles
     plot.histoMgr.setHistoDrawStyleAll("HIST")
-    plot.histoMgr.setHistoDrawStyle("Base", "EP") # exception to the general rule
+    #plot.histoMgr.setHistoDrawStyleAll("afterTauID", "EP") # exception to the general rule
 
     # Rebin, if necessary
     plot.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
 
     # Create frame with a ratio pad
-    plot.createFrame("METbaseVSinvertedTauID", opts={"ymin":1e-5, "ymaxfactor": 1.5},
-                     createRatio=True, opts2={"ymin": -10, "ymax": 50}, # bounds of the ratio plot
+    plot.createFrame("tauPtComparison", opts={"ymin":1e-1, "ymaxfactor": 10},
+                     createRatio=True, opts2={"ymin": 0, "ymax": 150}, # bounds of the ratio plot
                      )
 
     # Set Y axis of the upper pad to logarithmic
@@ -169,8 +160,8 @@ def distComparison(datasets):
     plot.setLegend(histograms.createLegend())
 
     # Set the X/Y axis labels
-    plot.frame.GetXaxis().SetTitle("MET (GeV)")
-    plot.frame.GetYaxis().SetTitle("Arbitrary units")
+    plot.frame.GetXaxis().SetTitle("Tau p_{T} (GeV/c)")
+    plot.frame.GetYaxis().SetTitle("Number of events")
 
     # Draw the plot
     plot.draw()

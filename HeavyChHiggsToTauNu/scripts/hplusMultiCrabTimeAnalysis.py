@@ -22,6 +22,9 @@ def main(opts):
     for task in taskDirs:
         files = glob.glob(os.path.join(task, "res", "CMSSW_*.stdout"))
 
+        if len(files) == 0:
+            continue
+
         exe_times = []
         user_times = []
         sys_times = []

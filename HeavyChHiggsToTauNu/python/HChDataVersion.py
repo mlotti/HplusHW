@@ -14,7 +14,7 @@ config = {
 #        "patCastor": "",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/BTau/Run2010B-Apr21ReReco-v1/AOD/109B70F2-8471-E011-B3F1-001A64789D18.root",
 #        "analysisCastor": "",
-        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_160431-161176_May10/Tau/Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17/377a23a99017553e73fe517f9c607b59/pattuple_2_3_rLl.root",
+        "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_166374_pattuple_v18/76121191f925a13de2aa415b27ca9123/pattuple_48_1_C3w.root",
     },
     "42XmcS3": {
         "triggerProcess": "HLT",

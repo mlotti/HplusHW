@@ -6,9 +6,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/METReco/interface/MET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
@@ -56,9 +54,6 @@ namespace HPlus {
   private:
     // Input parameters
     edm::InputTag fSrc;
-    edm::InputTag fSrc_met;
-    //    METSelection fMETSelection;
-    const double fMetCut;
     const double fPtCut;
     const double fEtaCut;
     const double fEMfractionCut;
@@ -93,7 +88,6 @@ namespace HPlus {
     TH1 *hEta;
     TH1 *hPhi;
     TH1 *hNumberOfSelectedJets;
-    TH1 *hDeltaPhiJetMet;
     TH1 *hjetEMFraction;
     TH1 *hjetChargedEMFraction;
     TH1 *hjetMaxEMFraction;

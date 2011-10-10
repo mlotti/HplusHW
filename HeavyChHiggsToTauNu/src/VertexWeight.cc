@@ -35,7 +35,7 @@ namespace HPlus {
       std::copy(mcDist.begin(), mcDist.end(), std::back_inserter(mcDistF));
       std::copy(dataDist.begin(), dataDist.end(), std::back_inserter(dataDistF));
 
-      std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
+      // std::cout << "mcDistF.size() " << mcDistF.size() << " dataDistF.size() " << dataDistF.size() << std::endl;
       fLumiWeights = edm::LumiReWeighting(mcDistF, dataDistF);
     }
     else {
@@ -50,7 +50,7 @@ namespace HPlus {
     edm::Handle<edm::View<reco::Vertex> > hvertex;
     iEvent.getByLabel(fVertexSrc, hvertex);
 
-    size_t vertSize = vertSize = hvertex->size();
+    size_t vertSize = hvertex->size();
 
     if(!fEnabled || iEvent.isRealData()) {
       hWeights->Fill(1.0);

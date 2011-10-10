@@ -69,8 +69,8 @@ def main():
 #    mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))
     
 #    met = plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(400, 0, 400)"))
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauId")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauId")  
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")  
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
@@ -87,8 +87,8 @@ def main():
     transverseMass(metInver,"MET_inverted")
     
     # Set the styles
-    #dataset._normalizeToOne(diffBase)
-    #dataset._normalizeToOne(diffInverted)
+    dataset._normalizeToOne(diffBase)
+    dataset._normalizeToOne(diffInverted)
     plot = plots.PlotBase()
     plot.histoMgr.appendHisto(histograms.Histo(diffBase, "Baseline"))
     plot.histoMgr.appendHisto(histograms.Histo(diffInverted, "Inverted"))
@@ -99,9 +99,11 @@ def main():
     plot.histoMgr.forHisto("Baseline", st1)
     plot.histoMgr.forHisto("Inverted", st2)
     
+
     plot.createFrame("METbaseVSinverted-ewk", opts={"ymin":1e-5, "ymaxfactor": 1.5},
-#                     createRatio=True, opts2={"ymin": -10, "ymax": 50}, # bounds of the ratio plot
+                     createRatio=True, opts2={"ymin": -10, "ymax": 50}, # bounds of the ratio plot
                      )
+
     plot.getPad().SetLogy(True)    
     plot.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     plot.frame.GetXaxis().SetTitle("MET (GeV)")
@@ -110,6 +112,39 @@ def main():
 # Draw the plot
     plot.draw()
     plot.save()
+
+
+#########################################
+# plot before substraction
+
+   # Draw the MET distribution
+    transverseMass(metBase,"MET_base")
+    transverseMass(metInver,"MET_inverted")
+    
+    plot2 = plots.ComparisonPlot(metBase , metInver )
+#    plot2.histoMgr.appendHisto(histograms.Histo(metBase, "Baseline"))
+#    plot2.histoMgr.appendHisto(histograms.Histo(metInver, "Inverted"))
+   
+#    st1 = styles.getDataStyle().clone()
+#    st2 = st1.clone()
+#    st2.append(styles.StyleLine(lineColor=ROOT.kRed))
+#    plot2.histoMgr.forHisto("Baseline", st1)
+#    plot2.histoMgr.forHisto("Inverted", st2)
+    
+
+#    plot2.createFrame("METbaseVSinverted", opts={"ymin":1e-5, "ymaxfactor": 1.5},
+#                     createRatio=True, opts2={"ymin": -10, "ymax": 50}, # bounds of the ratio plot
+#                     )
+
+#    plot2.getPad().SetLogy(True)    
+#    plot2.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
+#    plot2.frame.GetXaxis().SetTitle("MET (GeV)")
+#    plot2.frame.GetYaxis().SetTitle("Data")
+ 
+# Draw the plot
+#    plot2.draw()
+#    plot2.save()
+#######################################
 
    
 def dataEwkDiff(mT,name):

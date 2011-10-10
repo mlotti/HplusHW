@@ -226,6 +226,12 @@ def _histoToDict(histo):
 
     return ret
 
+def histoIntegrateToCount(histo):
+    count = Count(0, 0)
+    for bin in xrange(0, histo.GetNbinsX()+2):
+        count.add(Count(histo.GetBinContent(bin), histo.GetBinError(bin)))
+    return count
+
 def _rescaleInfo(d):
     """Rescales info dictionary.
 
@@ -334,7 +340,7 @@ def _mergeStackHelper(datasetList, nameList, task):
     return (selected, notSelected, firstIndex)
 
 
-th1_re = re.compile(">>\s*\S+\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
 class TreeDraw:
     def __init__(self, tree, varexp="", selection="", weight=""):
         self.tree = tree
@@ -350,8 +356,8 @@ class TreeDraw:
         args.update(kwargs)
         return TreeDraw(**args)
 
-    def draw(self, rootFile):
-        if not ">>" in self.varexp:
+    def draw(self, rootFile, datasetName):
+        if self.varexp != "" and not ">>" in self.varexp:
             raise Exception("varexp should include explicitly the histogram binning (%s)"%self.varexp)
 
         selection = self.selection
@@ -362,17 +368,59 @@ class TreeDraw:
                 selection = self.weight
 
         tree = rootFile.Get(self.tree)
-        nentries = tree.Draw(self.varexp, self.selection, "goff")
-        h = tree.GetHistogram()
+        if self.varexp == "":
+            nentries = tree.GetEntries(selection)
+            h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
+            h.SetDirectory(0)
+            h.Sumw2()
+            h.SetBinContent(1, nentries)
+            h.SetBinError(1, math.sqrt(nentries))
+            return h
+
+        varexp = self.varexp
+        m = th1_re.search(varexp)
+        h = None
+        if m:
+            varexp = th1_re.sub(">>"+m.group("name"), varexp)
+            h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            
+        
+        # e to have TH1.Sumw2() to be called before filling the histogram
+        # goff to not to draw anything on the screen
+        nentries = tree.Draw(varexp, selection, "e goff")
+        #h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
         else:
-            m = th1_re.search(self.varexp)
+            m = th1_re.search(varexp)
             if not m:
-                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % self.varexp)
-            h = ROOT.TH1F("tmp", self.varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % varexp)
+            h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         h.SetDirectory(0)
         return h
+
+class TreeDrawCompound:
+    def __init__(self, default, datasetMap={}):
+        self.default = default
+        self.datasetMap = datasetMap
+
+    def add(self, datasetName, treeDraw):
+        self.datasetMap[datasetName] = treeDraw
+
+    def draw(self, rootFile, datasetName):
+        if datasetName in self.datasetMap:
+            self.datasetMap[datasetName].draw(rootFile, datasetName)
+        else:
+            self.default.draw(rootFile, datasetName)
+
+def treeDrawToNumEntries(treeDraw):
+    var = treeDraw.weight
+    if var == "":
+        var = treeDraw.selection
+    if var != "":
+        var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
+    # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
+    return treeDraw.clone(varexp=var)
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
@@ -458,6 +506,12 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def getBinLabels(self):
         """Get list of the bin labels of the histogram."""
         return [x[0] for x in _histoToCounter(self.histo)]
+
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHisto):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHisto")
+
+        self.histo = function(self.histo, newDatasetRootHisto.histo)
 
     def _normalizedHistogram(self):
         # Always return a clone of the original
@@ -550,6 +604,15 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
     def isMC(self):
         return False
 
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedData):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedData")
+        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+        for i, drh in enumerate(self.histoWrappers):
+            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
+
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
         return self.histoWrappers[0].getBinLabels()
@@ -614,6 +677,15 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
     def isMC(self):
         return True
+
+    def modifyRootHisto(self, function, newDatasetRootHisto):
+        if not isinstance(newDatasetRootHisto, DatasetRootHistoMergedMC):
+            raise Exception("newDatasetRootHisto must be of the type DatasetRootHistoMergedMC")
+        if not len(self.histoWrappers) == len(newDatasetRootHisto.histoWrappers):
+            raise Exception("len(self.histoWrappers) != len(newDatasetrootHisto.histoWrappers), %d != %d" % len(self.histoWrappers), len(newDatasetRootHisto.histoWrappers))
+            
+        for i, drh in enumerate(self.histoWrappers):
+            drh.modifyRootHisto(function, newDatasetRootHisto.histoWrappers[i])
 
     def getBinLabels(self):
         """Get list of the bin labels of the first of the merged histogram."""
@@ -874,8 +946,8 @@ class Dataset:
         """
 
         h = None
-        if isinstance(name, TreeDraw):
-            h = name.draw(self.file)
+        if hasattr(name, "draw"):
+            h = name.draw(self.file, self.getName())
         else:
             pname = self.prefix+name
             h = self.file.Get(pname)
@@ -920,6 +992,29 @@ class Dataset:
             key = diriter.Next()
         return ret
 
+class DatasetQCDData(Dataset):
+    def __init__(self, name, fname, counterDir, normfactor=1.0):
+        Dataset.__init__(self, name, fname, counterDir)
+        self.normfactor = normfactor
+
+    def deepCopy(self):
+        d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
+        d.info.update(self.info)
+        return d
+
+    def getDatasetRootHisto(self, name):
+        drh = Dataset.getDatasetRootHisto(self, name)
+        drh.scale(self.normfactor)
+        return drh
+
+    def setNormFactor(self, normfactor):
+        self.normfactor = normfactor
+
+    def setNormFactorFromTree(self, treeDraw, targetNumEvents):
+        drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
+        nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
+        self.setNormFactor(targetNumEvents/nevents)
+        
 
 class DatasetMerged:
     """Dataset class for histogram access for a dataset merged from Dataset objects.

@@ -21,7 +21,6 @@ class TH1;
 #include "TH2.h"
 
 namespace HPlus {
-  class TriggerSelection;
   class TauSelection {
   public:
     /**
@@ -48,15 +47,32 @@ namespace HPlus {
       double getRtauOfSelectedTau() const {
         return fTauSelection->getSelectedRtauValue();
       }
+      double getRtauOfBestTauCandidate() const {
+	return fTauSelection->getBestCandidateRtauValue();
+      }
       bool selectedTauPassedRtau() const {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
       }
-      bool selectedTauCandidatePassedRtau() const {
+      bool getBestTauCandidatePassedRtauStatus() const {
         if (!fTauSelection->fCleanedTauCandidates.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
       }
-
+      /// Returns true if no candidates passed asked discriminator
+      bool applyVetoOnTauCandidates(std::string discr) const {
+        for(edm::PtrVector<pat::Tau>::const_iterator iter = fTauSelection->fCleanedTauCandidates.begin(); iter != fTauSelection->fCleanedTauCandidates.end(); ++iter)
+          if ((*iter)->tauID(discr) > 0.5) return false;
+        return true;
+      }
+      int getBestTauCandidateProngCount() const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
+        return fTauSelection->fCleanedTauCandidates[0]->signalPFChargedHadrCands().size();
+      }
+      bool applyDiscriminatorOnBestTauCandidate(std::string discr) const {
+        if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
+        return fTauSelection->fCleanedTauCandidates[0]->tauID(discr) > 0.5;
+      }
+      
     private:
       const TauSelection *fTauSelection;
       bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
@@ -69,7 +85,7 @@ namespace HPlus {
       kTauIDWithRtauOnly // For QCD bkg measurement - set internally
     };
 
-    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label, TriggerSelection* triggerSelection = 0);
+    TauSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongNumber, std::string label);
     ~TauSelection();
 
     /// Default tauID
@@ -110,6 +126,13 @@ namespace HPlus {
         return -1.0; // safety
     }
 
+    double getBestCandidateRtauValue() const {
+      if (fCleanedTauCandidates.size())
+	return fTauID->getRtauValue(fCleanedTauCandidates[0]);
+      else
+        return -1.0; // safety      
+    }
+
   private:
     // Input parameters
     edm::InputTag fSrc;
@@ -127,9 +150,6 @@ namespace HPlus {
     // Counters
     Count fTauFound;
 
-    // TriggerSelection object
-    TriggerSelection* fTriggerSelection;
-    
     // EventWeight object
     EventWeight& fEventWeight;
 

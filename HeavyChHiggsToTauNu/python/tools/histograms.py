@@ -277,17 +277,19 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
-## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
-def dist2pass(hdist, **kwargs):
-    lessThan = True
+def isLessThan(**kwargs):
     if len(kwargs) != 1:
         raise Exception("Should give only either 'lessThan' or 'greaterThan' as a keyword argument")
     elif "lessThan" in kwargs:
-        lessThan = kwargs["lessThan"]
+        return kwargs["lessThan"]
     elif "greaterThan" in kwargs:
-        lessThan = not kwargs["greaterThan"]
+        return not kwargs["greaterThan"]
     else:
         raise Exception("Must give either 'lessThan' or 'greaterThan' as a keyword argument")
+
+## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
+def dist2pass(hdist, **kwargs):
+    lessThan = isLessThan(**kwargs)
 
     # for less than
     integral = None
@@ -720,13 +722,24 @@ class HistoBase:
 class Histo(HistoBase):
     ## Constructor
     #
+    # \param rootHisto  TH1 object
+    # \param name       Name of the Histo
+    #
+    #    The default legend label is the dataset name
+    def __init__(self, rootHisto, name):
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+
+## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+class HistoWithDataset(Histo):
+    ## Constructor
+    #
     # \param dataset    dataset.Dataset object
     # \param rootHisto  TH1 object
     # \param name       Name of the Histo
     #
     #    The default legend label is the dataset name
     def __init__(self, dataset, rootHisto, name):
-        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+        Histo.__init__(self, rootHisto, name)
         self.dataset = dataset
 
     ## Is the histogram from MC?
@@ -932,6 +945,17 @@ class HistoManagerImpl:
         self.drawList.insert(drawIndex, histo)
         self.legendList.insert(legendIndex, histo)
         self._populateMap()
+
+    def removeHisto(self, name):
+        del self.nameHistoMap[name]
+        for i, h in enumerate(self.drawList):
+            if h.getName() == name:
+                del self.drawList[i]
+                break
+        for i, h in enumerate(self.legendList):
+            if h.getName() == name:
+                del self.legendList[i]
+                break
 
     ## Call a function for a named histograms.HistoBase object.
     #
@@ -1272,7 +1296,7 @@ class HistoManager:
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([HistoWithDataset(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):

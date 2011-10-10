@@ -27,8 +27,6 @@ namespace HPlus {
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fSrc_met(iConfig.getUntrackedParameter<edm::InputTag>("src_met")),
-    fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
@@ -61,7 +59,6 @@ namespace HPlus {
     hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 400, -5., 5.);
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
     hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
@@ -163,21 +160,6 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
     
-      // plot deltaPhi(jet,met)
-      double deltaPhi = -999;
-
-      edm::Handle<edm::View<reco::MET> > hmet;
-      iEvent.getByLabel(fSrc_met, hmet);
-      edm::Ptr<reco::MET> met = hmet->ptrAt(0);
-
-      if ( met->et()>  fMetCut) {
-	//	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(fMETSelection.getSelectedMET()));
-	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
-	  hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
-	  //	  hDeltaPhiJetMet->Fill(deltaPhi, fEventWeight.getWeight());
-      }
-
-
       tmpSelectedJets.push_back(iJet);
     }
 

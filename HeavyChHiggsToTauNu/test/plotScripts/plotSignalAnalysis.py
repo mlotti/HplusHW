@@ -39,22 +39,14 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-    datasets.remove(["WJets_TuneD6T_Winter10", "TTJets_TuneD6T_Winter10",
-                     "TTToHplusBWB_M140_Spring11","TTToHplusBWB_M80_Spring11","TTToHplusBWB_M90_Spring11",
-                   "TTToHplusBWB_M155_Spring11","TTToHplusBWB_M150_Spring11","TTToHplusBWB_M160_Spring11","TTToHplusBWB_M100_Spring11",
-                    "TTToHplusBHminusB_M80_Spring11","TTToHplusBHminusB_M100_Spring11","TTToHplusBHminusB_M160_Spring11",
-                     "TTToHplusBHminusB_M150_Spring11","TTToHplusBHminusB_M140_Spring11","TTToHplusBHminusB_M155_Spring11",                       "TauPlusX_160431-161016_Prompt","TauPlusX_162803-162828_Prompt",
-                     "QCD_Pt30to50_TuneZ2_Spring11","QCD_Pt50to80_TuneZ2_Spring11","QCD_Pt80to120_TuneZ2_Spring11",
-                     "QCD_Pt120to170_TuneZ2_Spring11","QCD_Pt170to300_TuneZ2_Spring11","QCD_Pt300to470_TuneZ2_Spring11",
-                     "HplusTB_M180_Summer11", "HplusTB_M190_Summer11","HplusTB_M250_Summer11","HplusTB_M300_Summer11","HplusTB_M220_Summer11","HplusTB_M200_Summer11",
-#                     "Tau_165970-166164_Prompt", "Tau_166374-167043_Prompt", "Tau_167078-167784_Prompt", "Tau_165088-165633_Prompt"
-#                     "Tau_163270-163869_May10","Tau_161217-163261_May10", "Tau_160431-161176_May10"
-                     ])
+
+    # Remove signals other than M120
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
     
     datasets.loadLuminosities()
 
     # Take signals from 42X
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
 #Rtau =0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
@@ -80,6 +72,8 @@ def main():
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
 
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
+
+    datasets_lands = datasets.deepCopy()
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -174,15 +168,15 @@ def main():
 # write histograms to file
     mt = plots.DataMCPlot(datasets_lands, analysis+"/transverseMassBeforeFakeMet")
     mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    f = ROOT.TFile.Open(output, "RECREATE")
-    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
-    mt_data.SetDirectory(f)
-    mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
-    mt_hw.SetDirectory(f)
-    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
-    mt_hh.SetDirectory(f)
-    f.Write()
-    f.Close()
+#    f = ROOT.TFile.Open(output, "RECREATE")
+#    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_data")
+#    mt_data.SetDirectory(f)
+#    mt_hw = mt.histoMgr.getHisto("TTToHplusBWB_M120").getRootHisto().Clone("mt_hw")
+#    mt_hw.SetDirectory(f)
+#    mt_hh = mt.histoMgr.getHisto("TTToHplusBHminusB_M120").getRootHisto().Clone("mt_hh")
+#    mt_hh.SetDirectory(f)
+#    f.Write()
+#    f.Close()
     
 
 
@@ -235,6 +229,9 @@ def main():
 
 
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
+
+    # append row from the tree to the main counter
+    eventCounter.getMainCounter().appendRow("MET > 70", td.clone(selection="met_p4.Et() > 70"))
 
     eventCounter.normalizeMCByLuminosity()
 #    eventCounter.normalizeMCToLuminosity(73)
