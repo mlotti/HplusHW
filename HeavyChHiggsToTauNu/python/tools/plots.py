@@ -496,11 +496,25 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 #
 # \return TH1 of rootHisto1/rootHisto2
 def _createRatio(rootHisto1, rootHisto2, ytitle):
-    ratio = rootHisto1.Clone()
-    ratio.Divide(rootHisto2)
-    styles.getDataStyle().apply(ratio)
-    ratio.GetYaxis().SetTitle(ytitle)
-    return ratio
+    if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
+        ratio = rootHisto1.Clone()
+        ratio.Divide(rootHisto2)
+        styles.getDataStyle().apply(ratio)
+        ratio.GetYaxis().SetTitle(ytitle)
+        return ratio
+    elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
+        xvalues = []
+        yvalues = []
+        for i in xrange(0, rootHisto1.GetN()):
+            yval = rootHisto2.GetY()[i]
+            if yval == 0:
+                continue
+            xvalues.append(rootHisto1.GetX()[i])
+            yvalues.append(rootHisto1.GetY()[i] / yval)
+        
+        return ROOT.TGraph(len(xvalues), array.array("d", xvalues), array.array("d", yvalues))
+    else:
+        raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
 
 ## Creates a 1-line for ratio plots
 #
@@ -988,7 +1002,17 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
+        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetrootHisto2, dataset.DatasetRootHistoBase):
+            PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
+        else:
+            # assume datasetRootHisto* arguments are HistoBase objects instead
+            if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase):
+                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto2 is %s" % type(datasetRootHisto2).__name__)
+            if isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
+                raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, datasetRootHisto1 is %s" % type(datasetRootHisto1).__name__)
+            PlotBase.__init__(self, **kwargs)
+            self.histoMgr.appendHisto(datasetRootHisto1)
+            self.histoMgr.appendHisto(datasetRootHisto2)
 
     ## Create TCanvas and frames for the histogram and a data/MC ratio
     #

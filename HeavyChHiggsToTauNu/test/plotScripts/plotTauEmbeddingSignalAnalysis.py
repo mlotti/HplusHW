@@ -72,6 +72,8 @@ countersWeighted = counters
 if normalize:
     countersWeighted = counters+"/weighted"
 
+output = "mt_ewk_lands.root"
+
 # main function
 def main():
     # Read the datasets
@@ -179,6 +181,15 @@ def main():
     transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
     transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
 
+    mt = createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass")
+    scaleNormalization(mt)
+    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    f = ROOT.TFile.Open(output, "RECREATE")
+    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_ewk")
+    mt_data.SetDirectory(f)
+    f.Write()
+    f.Close()
+    
 
 #    jetPt(createPlot("JetSelection/jet_pt"), "jetPtEmb")
 #    jetEta(createPlot("JetSelection/jet_eta"), "jetEtaEmb")
