@@ -22,13 +22,15 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChTriggerEfficiency")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # dataVersion.getAnalysisDefaultFileCastor()
-    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
+        #dataVersion.getAnalysisDefaultFileMadhatter()
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_51_1_qZs.root"
     )
 )
 
@@ -37,8 +39,6 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.TFileService.fileName = cms.string("efficiencyTree.root")
-
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
@@ -81,6 +81,12 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
 addPrimaryVertexSelection(process, process.commonSequence)
+process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
+    src = cms.InputTag("selectedPrimaryVertex"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999)
+)
+process.commonSequence *= process.selectedPrimaryVertexFilter
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
@@ -116,14 +122,21 @@ trigger = options.trigger[0]
 triggerBit = {
     "HLT_IsoPFTau35_Trk20_v2": "HLT_IsoPFTau35_Trk20_MET60_v2",
     "HLT_IsoPFTau35_Trk20_v3": "HLT_IsoPFTau35_Trk20_MET60_v3",
-    "HLT_IsoPFTau35_Trk20_v4": "HLT_IsoPFTau35_Trk20_MET60_v4"
+    "HLT_IsoPFTau35_Trk20_v4": "HLT_IsoPFTau35_Trk20_MET60_v4",
+    "HLT_IsoPFTau35_Trk20_v6": "HLT_IsoPFTau35_Trk20_MET60_v6",
+    "HLT_MediumIsoPFTau35_Trk20_v1": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
     }
 
-process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
+# We can't use the control trigger to measure the data/MC scale
+# factor, because the control trigger is not in the Summer11 MC!
+
+process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
+    patTriggerEvent     = cms.InputTag("patTriggerEvent"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET60_v2"),
     triggerBit		= cms.string(triggerBit[trigger]),
+    hltPath             = cms.string(trigger),
 #    tauSrc              = param.tauSelection.src,
     tauSrc              = cms.untracked.InputTag("tauSelectionFilter"),
     metRawSrc           = param.MET.rawSrc,
@@ -140,12 +153,12 @@ process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 (sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.tauSelectionFilter.tauSelection, process.jetSelectionFilter.jetSelection)
 process.commonSequence *= sequence
-process.triggerEfficiencyAnalyzer.metType1Src = cms.untracked.InputTag(type1Met)
+process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.eventFilter *
-    process.triggerEfficiencyAnalyzer
+    process.triggerEfficiency
 )
 
 
