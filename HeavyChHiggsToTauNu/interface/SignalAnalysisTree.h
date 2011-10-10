@@ -52,7 +52,11 @@ namespace HPlus {
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
-    void setRawMET(const edm::Ptr<reco::MET>& met) { fRawMet = met->p4(); fRawMetSumEt = met->sumEt(); }
+    void setRawMET(const edm::Ptr<reco::MET>& met) {
+      fRawMet = met->p4();
+      fRawMetSumEt = met->sumEt();
+      fRawMetSignificance = met->significance();
+    }
     void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
     void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
@@ -187,6 +191,7 @@ namespace HPlus {
     // MET is really 2-vector, but let's just use this for consistency
     XYZTLorentzVector fRawMet;
     double fRawMetSumEt;
+    double fRawMetSignificance;
     XYZTLorentzVector fType1Met;
     XYZTLorentzVector fType2Met;
     XYZTLorentzVector fCaloMet;

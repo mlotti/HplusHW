@@ -86,6 +86,7 @@ namespace HPlus {
 
     fTree->Branch("met_p4", &fRawMet);
     fTree->Branch("met_sumet", &fRawMetSumEt);
+    fTree->Branch("met_significance", &fRawMetSignificance);
 
     fTree->Branch("metType1_p4", &fType1Met);
     fTree->Branch("metType2_p4", &fType2Met);
@@ -585,6 +586,7 @@ namespace HPlus {
 
     fRawMet.SetXYZT(nan, nan, nan, nan);
     fRawMetSumEt = nan;
+    fRawMetSignificance = nan;
 
     fType1Met.SetXYZT(nan, nan, nan, nan);
     fType2Met.SetXYZT(nan, nan, nan, nan);
