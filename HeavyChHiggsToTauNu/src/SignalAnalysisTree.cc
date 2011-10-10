@@ -89,6 +89,8 @@ namespace HPlus {
 
     fTree->Branch("metType1_p4", &fType1Met);
     fTree->Branch("metType2_p4", &fType2Met);
+    fTree->Branch("caloMet_p4", &fCaloMet);
+    fTree->Branch("tcMet_p4", &fTcMet);
 
     fTree->Branch("topreco_p4", &fTop);
 
@@ -586,6 +588,8 @@ namespace HPlus {
 
     fType1Met.SetXYZT(nan, nan, nan, nan);
     fType2Met.SetXYZT(nan, nan, nan, nan);
+    fCaloMet.SetXYZT(nan, nan, nan, nan);
+    fTcMet.SetXYZT(nan, nan, nan, nan);
 
     fTop.SetXYZT(nan, nan, nan, nan);
 

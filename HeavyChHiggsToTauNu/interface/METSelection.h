@@ -38,6 +38,9 @@ namespace HPlus {
       const edm::Ptr<reco::MET> getRawMET() const { return fMETSelection->fRawMET; }
       const edm::Ptr<reco::MET> getType1MET() const { return fMETSelection->fType1MET; }
       const edm::Ptr<reco::MET> getType2MET() const { return fMETSelection->fType2MET; }
+
+      const edm::Ptr<reco::MET> getCaloMET() const { return fMETSelection->fCaloMET; }
+      const edm::Ptr<reco::MET> getTcMET() const { return fMETSelection->fTcMET; }
     
     private:
       const METSelection *fMETSelection;
@@ -56,6 +59,8 @@ namespace HPlus {
     edm::InputTag fRawSrc;
     edm::InputTag fType1Src;
     edm::InputTag fType2Src;
+    edm::InputTag fCaloSrc;
+    edm::InputTag fTcSrc;
     Select fSelect;
     double fMetCut;
 
@@ -77,6 +82,8 @@ namespace HPlus {
     edm::Ptr<reco::MET> fRawMET;
     edm::Ptr<reco::MET> fType1MET;
     edm::Ptr<reco::MET> fType2MET;
+    edm::Ptr<reco::MET> fCaloMET;
+    edm::Ptr<reco::MET> fTcMET;
   };
 }
 

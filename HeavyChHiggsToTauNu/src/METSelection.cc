@@ -19,6 +19,8 @@ namespace HPlus {
     fRawSrc(iConfig.getUntrackedParameter<edm::InputTag>("rawSrc")),
     fType1Src(iConfig.getUntrackedParameter<edm::InputTag>("type1Src")),
     fType2Src(iConfig.getUntrackedParameter<edm::InputTag>("type2Src")),
+    fCaloSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloSrc")),
+    fTcSrc(iConfig.getUntrackedParameter<edm::InputTag>("tcSrc")),
     fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fMetCutCount(eventCounter.addSubCounter(label+"_MET","MET cut")),
     fEventWeight(eventWeight)
@@ -56,10 +58,18 @@ namespace HPlus {
     edm::Handle<edm::View<reco::MET> > htype2met;
     iEvent.getByLabel(fType2Src, htype2met);
 
+    edm::Handle<edm::View<reco::MET> > hcalomet;
+    iEvent.getByLabel(fCaloSrc, hcalomet);
+
+    edm::Handle<edm::View<reco::MET> > htcmet;
+    iEvent.getByLabel(fTcSrc, htcmet);
+
     // Reset then handles
     fRawMET = edm::Ptr<reco::MET>();
     fType1MET = edm::Ptr<reco::MET>();
     fType2MET = edm::Ptr<reco::MET>();
+    fCaloMET = edm::Ptr<reco::MET>();
+    fTcMET = edm::Ptr<reco::MET>();
 
     // Set the handles, if object available
     if(hrawmet.isValid())
@@ -68,6 +78,10 @@ namespace HPlus {
       fType1MET = htype1met->ptrAt(0);
     if(htype2met.isValid())
       fType2MET = htype2met->ptrAt(0);
+    if(hcalomet.isValid())
+      fCaloMET = hcalomet->ptrAt(0);
+    if(htcmet.isValid())
+      fTcMET = htcmet->ptrAt(0);
 
     // Do the selection
     edm::Ptr<reco::MET> met;

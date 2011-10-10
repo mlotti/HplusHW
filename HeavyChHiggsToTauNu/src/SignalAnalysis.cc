@@ -348,6 +348,10 @@ namespace HPlus {
       fTree.setType1MET(metData.getType1MET());
     if(metData.getType2MET().isNonnull())
       fTree.setType2MET(metData.getType2MET());
+    if(metData.getCaloMET().isNonnull())
+      fTree.setCaloMET(metData.getCaloMET());
+    if(metData.getTcMET().isNonnull())
+      fTree.setTcMET(metData.getTcMET());
 
     // Write the stuff to the tree
     fTree.setFillWeight(fEventWeight.getWeight());

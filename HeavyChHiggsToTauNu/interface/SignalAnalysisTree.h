@@ -56,6 +56,8 @@ namespace HPlus {
     void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
     void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
     void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
+    void setCaloMET(const edm::Ptr<reco::MET>& met) { fCaloMet = met->p4(); }
+    void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
     void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
@@ -187,6 +189,8 @@ namespace HPlus {
     double fRawMetSumEt;
     XYZTLorentzVector fType1Met;
     XYZTLorentzVector fType2Met;
+    XYZTLorentzVector fCaloMet;
+    XYZTLorentzVector fTcMet;
 
     XYZTLorentzVector fTop;
 

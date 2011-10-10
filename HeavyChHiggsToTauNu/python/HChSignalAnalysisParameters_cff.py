@@ -146,6 +146,8 @@ MET = cms.untracked.PSet(
     rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
     type1Src = cms.untracked.InputTag("dummy"),
     type2Src = cms.untracked.InputTag("dummy"),
+    caloSrc = cms.untracked.InputTag("patMETs"),
+    tcSrc = cms.untracked.InputTag("patMETsTC"),
     select = cms.untracked.string("raw"), # raw, type1, type2
     METCut = cms.untracked.double(70.0)
 )
