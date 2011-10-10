@@ -863,21 +863,20 @@ class HistoGraph(HistoBase):
     def getRootGraph(self):
         return self.getRootHisto()
 
+    def _values(self, values, func):
+        return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
+
     def getXmin(self):
-        values = self.getRootGraph().GetX()
-        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return min(self._values(self.getRootGraph().GetX(), lambda val, i: val-self.getRootGraph().GetErrorXlow(i)))
 
     def getXmax(self):
-        values = self.getRootGraph().GetX()
-        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return max(self._values(self.getRootGraph().GetX(), lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)))
 
     def getYmin(self):
-        values = self.getRootGraph().GetY()
-        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return min(self._values(self.getRootGraph().GetY(), lambda val, i: val-self.getRootGraph().GetErrorYlow(i)))
 
     def getYmax(self):
-        values = self.getRootGraph().GetY()
-        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return max(self._values(self.getRootGraph().GetY(), lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)))
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
