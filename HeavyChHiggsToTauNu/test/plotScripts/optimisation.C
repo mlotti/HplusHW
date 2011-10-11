@@ -47,6 +47,22 @@ TH1 *dist2pass(TH1 *hdist, bool lessThan) {
   // sensible cut points in the distribution histogram are the bin
   // edges, and if one draws the passed histogram with points, the
   // points are placed to bin centers.
+  //
+  // dist  pass
+  //  bin  bin
+  //       0    underflow (pass)
+  //    0       underflow (dist)
+  //    -  1
+  //    1
+  //    -  2
+  //    2
+  //    -  n
+  //    n
+  //    -  N
+  //    N
+  //    -  N+1
+  //  N+1       overflow (dist)
+  //       N+2  overflow (pass)
   int nbins = hdist->GetNbinsX()+1;
   double firstLowEdge = hdist->GetXaxis()->GetBinLowEdge(1) - bw/2;
   double lastUpEdge = hdist->GetXaxis()->GetBinUpEdge(hdist->GetNbinsX()) + bw/2;
@@ -67,17 +83,25 @@ TH1 *dist2pass(TH1 *hdist, bool lessThan) {
   if(lessThan) {
     // The overflow bin will contain the number of all events
     double passedCumulative = 0;
+    double passedCumulativeErrSq = 0;
     for(int bin=0; bin <= hdist->GetNbinsX()+1; ++bin) {
       passedCumulative += hdist->GetBinContent(bin);
+      double err = hdist->GetBinError(bin);
+      passedCumulativeErrSq += err*err;
       hpass->SetBinContent(bin+1, passedCumulative);
+      hpass->SetBinError(bin+1, std::sqrt(passedCumulativeErrSq));
     }
   }
   else {
     // The underflow bin will contain the number of all events
     double passedCumulative = 0;
+    double passedCumulativeErrSq = 0;
     for(int bin=hdist->GetNbinsX()+1; bin >= 0; --bin) {
       passedCumulative += hdist->GetBinContent(bin);
+      double err = hdist->GetBinError(bin);
+      passedCumulativeErrSq += err*err;
       hpass->SetBinContent(bin, passedCumulative);
+      hpass->SetBinError(bin, std::sqrt(passedCumulativeErrSq));
     }
   }
 
