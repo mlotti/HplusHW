@@ -1,6 +1,6 @@
 // -*- c++ -*-
-#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
-#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurement_h
+#ifndef HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementMETfit_h
+#define HiggsAnalysis_HeavyChHiggsToTauNu_QCDMeasurementMETfit_h
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
@@ -45,7 +45,7 @@ class TH2;
 
 
 namespace HPlus { 
-  class QCDMeasurement {  
+  class QCDMeasurementMETfit {  
     class AnalysisVariation {
     public:
       AnalysisVariation(double METcut, double fakeMETVetoCut, int nTauPtBins);
@@ -90,8 +90,8 @@ namespace HPlus {
   };
   
   public:
-    explicit QCDMeasurement(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    ~QCDMeasurement();
+    explicit QCDMeasurementMETfit(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
+    ~QCDMeasurementMETfit();
 
     // Interface towards the EDProducer
     void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -217,18 +217,46 @@ namespace HPlus {
     // Other histograms
     //TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
-    TH1 *hTransverseMass_AfterBigBox;
-    TH1 *hTransverseMass_AfterBigBoxAndMet;
-    TH1 *hTransverseMass_AfterBigBoxAndBtag;
-    TH1 *hTransverseMass_AfterBigBoxAndTauID;
-    TH1 *hDeltaPhiMetTauCand_AfterBigBox;
-    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet;
-    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox;
-    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox;
-    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet;
-    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet;
+
+    TH1 *hMET_AfterBigBox; // 22 Sep 2011
+    TH1 *hTransverseMass_AfterBigBox; // 14 Aug 2011
+    TH1 *hMET_AfterJetSelection; // 22 Sep 2011
+    TH1 *hMET_AfterJetsBtagging;
+    TH1 *hMET_AfterJetsBtagging4050;
+    TH1 *hMET_AfterJetsBtagging5060;
+    TH1 *hMET_AfterJetsBtagging6070;
+    TH1 *hMET_AfterJetsBtagging7080;
+    TH1 *hMET_AfterJetsBtagging80100;
+    TH1 *hMET_AfterJetsBtagging100120;
+    TH1 *hMET_AfterJetsBtagging120150;
+    TH1 *hMET_AfterJetsBtagging150;
+    TH1 *hTransverseMass_AfterJetsBtagging;  
+    TH1 *hMET_AfterJetSelMt80; // 22 Sep 2011
+    TH1 *hTransverseMass_AfterJetSelection; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterJetSelMetCut; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterBigBoxAndMet; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterBigBoxAndBtag; // 14 Aug 2011
+    TH1 *hTransverseMass_AfterBigBoxAndTauID; // 14 Aug 2011
+    TH1 *hDeltaPhiMetTauCand_AfterBigBox; // 14 Aug 2011
+    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet; // 14 Aug 2011
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox; // 14 Aug 2011
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox; // 14 Aug 2011
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet; // 14 Aug 2011
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet; // 14 Aug 2011
+
+    //    TH1 *hTransverseMass_AfterBigBox;
+    //    TH1 *hTransverseMass_AfterBigBoxAndMet;
+    //    TH1 *hTransverseMass_AfterBigBoxAndBtag;
+    //    TH1 *hTransverseMass_AfterBigBoxAndTauID;
+    //    TH1 *hDeltaPhiMetTauCand_AfterBigBox;
+    //    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet;
+    //    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox;
+    //    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox;
+    //    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet;
+    //    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet;
     TH1 *hRtau_AfterBigBox;
     TH1 *hRtauEfficiency_AfterBigBoxTauID;
+
 
     // PAS Control Plots
     /*
