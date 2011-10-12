@@ -27,7 +27,9 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    # LandS assumes ttbar cross section  for both HW and HH
+    xsect.setHplusCrossSectionsToTop(datasets)
 
     # Create data-MC comparison plot to get the proper normalization
     # easily
@@ -42,7 +44,7 @@ def main():
     # Add the histograms of the wanted datasets to the tree
     for datasetName, outputName in [("Data", "data"),
                                     ("TTToHplusBWB_M120", "hw"),
-                                    ("TTToHplusBHminusB_M120", "ww")]:
+                                    ("TTToHplusBHminusB_M120", "hh")]:
         th1 = mt.histoMgr.getHisto(datasetName).getRootHisto().Clone("mt_"+outputName)
         th1.SetDirectory(f)
         th1.Write()
