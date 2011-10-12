@@ -23,7 +23,9 @@ eventFilter *= muVetoFilter
 
 # Jet selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi import *
-jetSelectionFilter = hPlusJetPtrSelectorFilter.clone()
+jetSelectionFilter = hPlusJetPtrSelectorFilter.clone(
+    tauSrc = "tauSelectionFilter"
+)
 eventFilter *= jetSelectionFilter
 
 # BTagging

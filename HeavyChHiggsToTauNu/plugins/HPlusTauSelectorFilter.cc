@@ -55,16 +55,14 @@ bool HPlusTauPtrSelectorFilter::beginLuminosityBlock(edm::LuminosityBlock& iBloc
 }
 
 bool HPlusTauPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  bool passed = false;
+  std::auto_ptr<Product> ret(new Product());
   HPlus::TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
-  if(tauData.passedEvent()) {
-    passed = true;
-
-    std::auto_ptr<Product> ret(new Product());
+  bool passed = tauData.passedEvent();
+  if(passed)
     ret->push_back(tauData.getSelectedTaus()[0]);
-    iEvent.put(ret);
-  }
   std::auto_ptr<bool> p(new bool(passed));
+
+  iEvent.put(ret);
   iEvent.put(p);
 
   return !fFilter || (fFilter && passed);

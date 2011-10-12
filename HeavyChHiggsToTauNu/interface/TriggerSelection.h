@@ -42,21 +42,26 @@ namespace HPlus {
   public:
     class Data;
     class TriggerPath {
-        public:
+    public:
       TriggerPath(const std::string& path, EventCounter& eventCounter);
-            ~TriggerPath();
+      ~TriggerPath();
 
-            bool analyze(const pat::TriggerEvent& trigger);
-            bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
+      bool analyze(const pat::TriggerEvent& trigger);
+      bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
 
       const std::string& getPathName() const { return fPath; }
+      const pat::TriggerObjectRefVector& getTauObjects() const { return fTaus; }
+      const pat::TriggerObjectRefVector& getMetObjects() const { return fMets; }
 
-        private:
-            // Input parameters
-            std::string fPath;
+    private:
+      // Input parameters
+      std::string fPath;
 
-            // Counters
-            Count fTriggerCount;
+      // Counters
+      Count fTriggerCount;
+
+      pat::TriggerObjectRefVector fMets;
+      pat::TriggerObjectRefVector fTaus;
     };
 
       /**
@@ -77,6 +82,12 @@ namespace HPlus {
       pat::TriggerObjectRef getHltMetObject() const {
         return fTriggerSelection->fHltMet;
       }
+
+      size_t getTriggerTauSize() const {
+        return fTriggerPath->getTauObjects().size();
+      }
+
+      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
 
     private:
       const TriggerSelection *fTriggerSelection;

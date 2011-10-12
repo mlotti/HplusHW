@@ -6,6 +6,7 @@
 import os, sys
 import glob
 import array
+import math
 
 from optparse import OptionParser
 
@@ -323,18 +324,28 @@ def dist2pass(hdist, **kwargs):
     hpass = ROOT.TH1F("cumulative_"+hdist.GetName(), "Cumulative "+hdist.GetTitle(),
                       nbins, firstLowEdge, lastUpEdge)
 
-    #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
+    if lessThan:
+        passedCumulative = 0
+        passedCumulativeErrSq = 0
+        for bin in xrange(0, hdist.GetNbinsX()+2):
+            passedCumulative += hdist.GetBinContent(bin)
+            err = hdist.GetBinError(bin)
+            passedCumulativeErrSq += err*err
 
-    #for bin in xrange(1, hpass.GetNbinsX()):
-    #total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    #print "total %f" % total
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        passed = integral(hdist, bin)
-        #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
-        hpass.SetBinContent(bin+1, passed)
-    #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
+            hpass.SetBinContent(bin+1, passedCumulative)
+            hpass.SetBinError(bin+1, math.sqrt(passedCumulativeErrSq))
+    else:
+        passedCumulative = 0
+        passedCumulativeErrSq = 0
+        for bin in xrange(hdist.GetNbinsX()+1, -1, -1):
+            passedCumulative += hdist.GetBinContent(bin)
+            err = hdist.GetBinError(bin)
+            passedCumulativeErrSq += err*err
+
+            hpass.SetBinContent(bin, passedCumulative)
+            hpass.SetBinError(bin, math.sqrt(passedCumulativeErrSq))
+
     return hpass
-
 
 def th1ApplyBin(th1, function):
     for bin in xrange(0, th1.GetNbinsX()+2):
@@ -344,14 +355,14 @@ def th1ApplyBin(th1, function):
 def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    th1ApplyBin(hdist, lambda value: value/total)
+    th1ApplyBin(hpass, lambda value: value/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
 def dist2rej(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    th1ApplyBin(hdist, lambda value: 1-value/total)
+    th1ApplyBin(hpass, lambda value: 1-value/total)
     return hpass
 
 
@@ -880,6 +891,20 @@ class HistoGraph(HistoBase):
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
+
+class HistoGraphWithDataset(HistoGraph):
+    def __init__(self, dataset, *args, **kwargs):
+        HistoGraph.__init__(self, *args, **kwargs)
+        self.dataset = dataset
+
+    def isMC(self):
+        return self.dataset.isMC()
+
+    def isData(self):
+        return self.dataset.isData()
+
+    def getDataset(self):
+        return self.dataset
 
 ## Implementation of HistoManager.
 #

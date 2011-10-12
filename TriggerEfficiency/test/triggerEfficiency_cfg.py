@@ -8,33 +8,6 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # overridden automatically from multicrab
 dataVersion = "42Xdata"
 
-
-##########
-# Flags for additional signal analysis modules
-# Perform the signal analysis with all tau ID algorithms in addition
-# to the "golden" analysis
-doAllTauIds = True
-
-# Perform b tagging scanning
-doBTagScan = False
-
-# Perform the signal analysis with the JES variations in addition to
-# the "golden" analysis
-doJESVariation = False
-JESVariation = 0.03
-JESEtaVariation = 0.02
-JESUnclusteredMETVariation = 0.10
-
-# With tau embedding input, tighten the muon selection
-tauEmbeddingFinalizeMuonSelection = True
-# With tau embedding input, do the muon selection scan
-doTauEmbeddingMuonSelectionScan = False
-# Do tau id scan for tau embedding normalisation (no tau embedding input required)
-doTauEmbeddingTauSelectionScan = False
-
-filterGenTaus = False
-filterGenTausInaccessible = False
-
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
@@ -49,15 +22,15 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 # Define the process
 process = cms.Process("HChTriggerEfficiency")
 
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source('PoolSource',
     fileNames = cms.untracked.vstring(
     # dataVersion.getAnalysisDefaultFileCastor()
-    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Control_165970-166164_DCS/Tau/Run2011A_PromptReco_v4_AOD_Control_165970_pattuple_v12_1/4f228cbdccbe253fb8fc10a07a3c6bf1/pattuple_3_1_LBC.root"
-    #"/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_167078-167784_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17/5ac48e003cbdad1c6c78ae464438a5c1/pattuple_15_15D_Gdh.root"
-    "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_167078-167784_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v17_1/5ac48e003cbdad1c6c78ae464438a5c1/pattuple_13_1_Fem.root"
+        #dataVersion.getAnalysisDefaultFileMadhatter()
+#        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_51_1_qZs.root"
     )
 )
 
@@ -66,8 +39,6 @@ process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
 
 process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
-process.TFileService.fileName = cms.string("efficiencyTree.root")
-
 
 # Uncomment the following in order to print the counters at the end of
 # the job (note that if many other modules are being run in the same
@@ -76,8 +47,8 @@ process.TFileService.fileName = cms.string("efficiencyTree.root")
 
 # Fragment to run PAT on the fly if requested from command line
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
-if options.trigger == "": 
-    options.trigger = "HLT_IsoPFTau35_Trk20_v4"
+if len(options.trigger) == 0: 
+    options.trigger = ["HLT_IsoPFTau35_Trk20_v2"]
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
 if options.doPat != 0:
@@ -110,6 +81,12 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 # Primary vertex selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
 addPrimaryVertexSelection(process, process.commonSequence)
+process.selectedPrimaryVertexFilter = cms.EDFilter("VertexCountFilter",
+    src = cms.InputTag("selectedPrimaryVertex"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(999)
+)
+process.commonSequence *= process.selectedPrimaryVertexFilter
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)
@@ -138,20 +115,31 @@ process.jetSelectionFilter.filter = False
 process.btagSelectionFilter.filter = False
 process.btagSelectionFilter.throw = False
 
+if len(options.trigger) != 1:
+    raise Exception("Expecting exactly one trigger bit, got %s" % ", ".join(options.trigger))
+trigger = options.trigger[0]
+
 triggerBit = {
     "HLT_IsoPFTau35_Trk20_v2": "HLT_IsoPFTau35_Trk20_MET60_v2",
     "HLT_IsoPFTau35_Trk20_v3": "HLT_IsoPFTau35_Trk20_MET60_v3",
-    "HLT_IsoPFTau35_Trk20_v4": "HLT_IsoPFTau35_Trk20_MET60_v4"
+    "HLT_IsoPFTau35_Trk20_v4": "HLT_IsoPFTau35_Trk20_MET60_v4",
+    "HLT_IsoPFTau35_Trk20_v6": "HLT_IsoPFTau35_Trk20_MET60_v6",
+    "HLT_MediumIsoPFTau35_Trk20_v1": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
     }
 
-process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
+# We can't use the control trigger to measure the data/MC scale
+# factor, because the control trigger is not in the Summer11 MC!
+
+process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
+    patTriggerEvent     = cms.InputTag("patTriggerEvent"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET60_v2"),
-    triggerBit		= cms.string(triggerBit[options.trigger]),
+    triggerBit		= cms.string(triggerBit[trigger]),
+    hltPath             = cms.string(trigger),
 #    tauSrc              = param.tauSelection.src,
-    tauSrc              = cms.untracked.InputTag("selectedPatTausHpsPFTauTauTriggerMatched"),
-    metSrc              = param.MET.src,
+    tauSrc              = cms.untracked.InputTag("tauSelectionFilter"),
+    metRawSrc           = param.MET.rawSrc,
     caloMetSrc          = cms.untracked.InputTag("patMETs"),
     caloMetNoHFSrc      = cms.untracked.InputTag("metNoHF"),
     bools = cms.PSet(
@@ -162,12 +150,15 @@ process.triggerEfficiencyAnalyzer = cms.EDAnalyzer("TriggerEfficiencyAnalyzer",
         BTaggingPassed = cms.InputTag("btagSelectionFilter"),
     )
 )
-
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.tauSelectionFilter.tauSelection, process.jetSelectionFilter.jetSelection)
+process.commonSequence *= sequence
+process.triggerEfficiency.metType1Src = cms.untracked.InputTag(type1Met)
 
 process.triggerEfficiencyPath = cms.Path(
     process.commonSequence * # supposed to be empty, unless "doPat=1" command line argument is given
     process.eventFilter *
-    process.triggerEfficiencyAnalyzer
+    process.triggerEfficiency
 )
 
 

@@ -35,6 +35,12 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
       const edm::Ptr<reco::MET> getSelectedMET() const { return fMETSelection->fSelectedMET; }
+      const edm::Ptr<reco::MET> getRawMET() const { return fMETSelection->fRawMET; }
+      const edm::Ptr<reco::MET> getType1MET() const { return fMETSelection->fType1MET; }
+      const edm::Ptr<reco::MET> getType2MET() const { return fMETSelection->fType2MET; }
+
+      const edm::Ptr<reco::MET> getCaloMET() const { return fMETSelection->fCaloMET; }
+      const edm::Ptr<reco::MET> getTcMET() const { return fMETSelection->fTcMET; }
     
     private:
       const METSelection *fMETSelection;
@@ -47,8 +53,15 @@ namespace HPlus {
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
   private:
+    enum Select {kRaw, kType1, kType2};
+
     // Input parameters
-    edm::InputTag fSrc;
+    edm::InputTag fRawSrc;
+    edm::InputTag fType1Src;
+    edm::InputTag fType2Src;
+    edm::InputTag fCaloSrc;
+    edm::InputTag fTcSrc;
+    Select fSelect;
     double fMetCut;
 
     // Counters
@@ -66,6 +79,11 @@ namespace HPlus {
 
     // Selected jets
     edm::Ptr<reco::MET> fSelectedMET;
+    edm::Ptr<reco::MET> fRawMET;
+    edm::Ptr<reco::MET> fType1MET;
+    edm::Ptr<reco::MET> fType2MET;
+    edm::Ptr<reco::MET> fCaloMET;
+    edm::Ptr<reco::MET> fTcMET;
   };
 }
 

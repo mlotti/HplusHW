@@ -51,11 +51,10 @@ namespace HPlus {
     FakeMETVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~FakeMETVeto();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<pat::Jet>& jets);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met);
 
   private:
     // Input parameters
-    edm::InputTag fSrc;
     const double fMinDeltaPhi;
 
     // Counters

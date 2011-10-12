@@ -133,19 +133,22 @@ jetSelection = cms.untracked.PSet(
     #src = cms.untracked.InputTag("selectedPatJets"),       # Calo jets
     #src = cms.untracked.InputTag("selectedPatJetsAK5JPT"), # JPT jets 
     src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-    src_met = cms.untracked.InputTag("patMETsPF"), # calo MET 
     cleanTauDR = cms.untracked.double(0.5), #no change
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
-    METCut = cms.untracked.double(60.0),
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
 MET = cms.untracked.PSet(
     # src = cms.untracked.InputTag("patMETs"), # calo MET
-    src = cms.untracked.InputTag("patMETsPF"), # PF MET
     #src = cms.untracked.InputTag("patMETsTC"), # tc MET
+    rawSrc = cms.untracked.InputTag("patMETsPF"), # PF MET
+    type1Src = cms.untracked.InputTag("dummy"),
+    type2Src = cms.untracked.InputTag("dummy"),
+    caloSrc = cms.untracked.InputTag("patMETs"),
+    tcSrc = cms.untracked.InputTag("patMETsTC"),
+    select = cms.untracked.string("raw"), # raw, type1, type2
     METCut = cms.untracked.double(70.0)
 )
 
@@ -205,7 +208,6 @@ InvMassVetoOnJets = cms.untracked.PSet(
 )
 
 fakeMETVeto = cms.untracked.PSet(
-  src = MET.src,
   minDeltaPhi = cms.untracked.double(10.) # in degrees
 )
 
@@ -213,14 +215,8 @@ jetTauInvMass = cms.untracked.PSet(
   ZmassResolution = cms.untracked.double(5.0),
 )
 
-TauEmbeddingAnalysis = cms.untracked.PSet(
-  embeddingMetSrc = MET.src,
-  embeddingMode = cms.untracked.bool(False)
-)
-
 forwardJetVeto = cms.untracked.PSet(
   src = cms.untracked.InputTag("selectedPatJetsAK5PF"),  # PF jets
-  src_met = MET.src,
   ptCut = cms.untracked.double(30),
   etaCut = cms.untracked.double(2.4),
   ForwJetEtCut = cms.untracked.double(10.0),
@@ -230,6 +226,7 @@ forwardJetVeto = cms.untracked.PSet(
 
 GenParticleAnalysis = cms.untracked.PSet(
   src = cms.untracked.InputTag("genParticles"),
+  metSrc = cms.untracked.InputTag("genMetTrue"),
   oneProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneProng"),
   oneAndThreeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauOneAndThreeProng"),
   threeProngTauSrc = cms.untracked.InputTag("VisibleTaus", "HadronicTauThreeProng"),
@@ -465,10 +462,10 @@ def setAllTauSelectionSrcSelectedPatTausTriggerMatched():
     tauSelectionHPSLooseTauBased.src        = "patTausHpsPFTauTauTriggerMatched"
     tauSelectionCombinedHPSTaNCTauBased.src = "patTausHpsTancPFTauTauTriggerMatched"
     
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysisArray
-def setTauSelection(module, val):
-    module.tauSelection = val
-def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters):
+def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, additionalCounters):
+    from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addAnalysis
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+
     selections = tauSelections[:]
     names = tauSelectionNames[:]
     # Remove TCTau from list
@@ -499,11 +496,23 @@ def addTauIdAnalyses(process, prefix, module, commonSequence, additionalCounters
     del selections[combinedHPSTaNCIndex]
     del names[combinedHPSTaNCIndex]
 
-    addAnalysisArray(process, prefix, module, setTauSelection,
-                     values = selections, names = names,
-                     preSequence = commonSequence,
-                     additionalCounters = additionalCounters)
+    for selection, name in zip(selections, names):
+        module = prototype.clone()
+        module.tauSelection = selection.clone()
 
+        # Calculate type 1 MET
+        (type1Sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
+        module.MET.type1Src = type1Met
+
+        seq = cms.Sequence(
+            commonSequence *
+            type1Sequence
+        )
+        setattr(process, "commonSequence"+name, seq)
+
+        addAnalysis(process, prefix+name, module,
+                    preSequence=seq,
+                    additionalCounters=additionalCounters)
 
 def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processName=None):
     for tag in inputTags:
@@ -519,9 +528,6 @@ def changeJetCollection(**kwargs):
 
 def changeMetCollection(**kwargs):
     _changeCollection([
-            jetSelection.src_met,
-            MET.src,
-            fakeMETVeto.src,
-            TauEmbeddingAnalysis.embeddingMetSrc,
+            MET.rawSrc,
             forwardJetVeto.src_met
             ], **kwargs)

@@ -236,7 +236,7 @@ namespace HPlus {
     fJt = sAlphaT.fJt;
 
     // 10) Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
                                 
     // DeltaPhi(tau,MET)
@@ -255,8 +255,8 @@ namespace HPlus {
     JetTauInvMass::Data jetTauInvMassData = fJetTauInvMass.analyze(tauData.getSelectedTaus(), jetData.getSelectedJets());
                                
     // 14) Forward jet veto
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
-    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();    
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, metData.getSelectedMET());
+    iNHadronicJetsInFwdDir = jetData.getHadronicJetCountInFwdDir();
 
     // Last but NOT least: Save the event weight!
     fEvtWeight = fEventWeight.getWeight();
@@ -353,7 +353,7 @@ namespace HPlus {
     increment(fAlphaTCounter);
 
     // 10) Fake MET
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();
     if(!fakeMETData.passedEvent()) return;
     increment(fFakeMETVetoCounter);
@@ -380,7 +380,7 @@ namespace HPlus {
     increment(fZmassVetoCounter);
     
     // 14) Forward jet veto here
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup, metData.getSelectedMET());
     if (!forwardJetData.passedEvent()) return;
     increment(fForwardJetVetoCounter);
 

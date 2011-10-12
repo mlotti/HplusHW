@@ -189,6 +189,12 @@ def main():
     pasJuly = "met_p4.Et() > 70 && Max$(jets_btag) > 1.7"
     topMass(plots.DataMCPlot(datasets, td.clone(varexp="topreco_p4.M()>>dist(20,0,800)", selection=pasJuly)), "topMass", rebin=1)
 
+    met2(plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(40,0,400)")), "metRaw", rebin=1)
+    met2(plots.DataMCPlot(datasets, td.clone(varexp="metType1_p4.Et()>>dist(40,0,400)")), "metType1", rebin=1)
+
+    mt = "sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"
+    transverseMass2(plots.DataMCPlot(datasets, td.clone(varexp=mt+">>dist(40,0,400)", selection=pasJuly)), "transverseMass_metRaw", rebin=1)
+    transverseMass2(plots.DataMCPlot(datasets, td.clone(varexp=mt.replace("met", "metType1")+">>dist(40,0,400)", selection=pasJuly.replace("met", "metType1"))), "transverseMass_metType1", rebin=1)
 
 #    genComparison(datasets)
 #    zMassComparison(datasets)
