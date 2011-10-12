@@ -478,6 +478,14 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         if out != None:
             outMod  = 'out'
         switchOnTrigger(process, hltProcess=dataVersion.getTriggerProcess(), outputModule=outMod)
+        process.patTrigger.addL1Algos = cms.bool(True)
+        process.patTrigger.l1ExtraMu = cms.InputTag("l1extraParticles")
+        process.patTrigger.l1ExtraCenJet = cms.InputTag("l1extraParticles", "Central")
+        process.patTrigger.l1ExtraTauJet = cms.InputTag("l1extraParticles", "Tau")
+        process.patTrigger.l1ExtraForJet = cms.InputTag("l1extraParticles", "Forward")
+        process.patTrigger.l1ExtraETM = cms.InputTag("l1extraParticles", "MET")
+        process.patTrigger.l1ExtraHTM = cms.InputTag("l1extraParticles", "MHT")
+
 
         # Keep StandAlone trigger objects for enabling trigger
         # matching in the analysis phase with PAT tools
