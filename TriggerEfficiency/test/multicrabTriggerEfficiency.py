@@ -5,7 +5,7 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 multicrab = Multicrab("crab.cfg", "triggerEfficiency_cfg.py")
 
 # Select the pattuple version to use as an input
-pattupleVersion = "pattuple_v17_1"
+pattupleVersion = "pattuple_v18"
 
 
 # Change this to true if you want to run the PAT on the fly (for
@@ -25,11 +25,13 @@ multicrab.extendDatasets(pattupleVersion,
     [
         #### 42X data and MC
         # Data: single tau (control trigger)
-    "Tau_Single_165970-166164_Prompt",
-    "Tau_Single_166346-166346_Prompt",
-    "Tau_Single_166374-167043_Prompt",
-    "Tau_Single_167078-167784_Prompt",
-    "Tau_Single_167786-167913_Prompt_Wed",
+        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
+        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
+        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
+        "Tau_Single_167078-167913_Prompt",   # HLT_IsoPFTau35_Trk20_v4
+        "Tau_Single_170722-172619_Aug05",    # HLT_IsoPFTau35_Trk20_v6
+        "Tau_Single_172620-173198_Prompt",   # HLT_IsoPFTau35_Trk20_v6
+        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
         # Data: single tau + MET
         ])
 

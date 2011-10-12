@@ -51,12 +51,11 @@ namespace HPlus {
     ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~ForwardJetVeto();
 
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met);
 
   private:
     // Input parameters
     edm::InputTag fSrc;
-    edm::InputTag fSrc_met;
     const double  fForwJetEtaCut;
     const double  fForwJetEtCut;
     const double  fEtSumRatioCut;

@@ -215,7 +215,7 @@ namespace HPlus {
     
     
     // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     // if (!fakeMETData.passedEvent()) return false;
     // increment(fFakeMETVetoCounter);
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();

@@ -9,9 +9,11 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
@@ -50,12 +52,25 @@ namespace HPlus {
     void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
+    void setRawMET(const edm::Ptr<reco::MET>& met) {
+      fRawMet = met->p4();
+      fRawMetSumEt = met->sumEt();
+      fRawMetSignificance = met->significance();
+    }
+    void setType1MET(const edm::Ptr<reco::MET>& met) { fType1Met = met->p4(); }
+    void setType2MET(const edm::Ptr<reco::MET>& met) { fType2Met = met->p4(); }
+    void setGenMET(const edm::Ptr<reco::GenMET>& met) { fGenMet = met->p4(); }
+    void setCaloMET(const edm::Ptr<reco::MET>& met) { fCaloMet = met->p4(); }
+    void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
+
+    void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
+    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
               const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
               double alphaT, double deltaPhi = 0);
-    //	      double alphaT);
+    //	      double alphaT)
 
-    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
   private:
     void reset();
@@ -89,6 +104,8 @@ namespace HPlus {
     double fFillWeight;
 
     unsigned int fNVertices;
+
+    std::vector<XYZTLorentzVector> fHltTaus;
 
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
@@ -173,8 +190,13 @@ namespace HPlus {
     std::vector<float> fNonIsoElectrons_ElectronMuonDeltaR;
     
     // MET is really 2-vector, but let's just use this for consistency
-    XYZTLorentzVector fMet;
-    double fMetSumEt;
+    XYZTLorentzVector fRawMet;
+    double fRawMetSumEt;
+    double fRawMetSignificance;
+    XYZTLorentzVector fType1Met;
+    XYZTLorentzVector fType2Met;
+    XYZTLorentzVector fCaloMet;
+    XYZTLorentzVector fTcMet;
 
     XYZTLorentzVector fTop;
 
@@ -183,6 +205,9 @@ namespace HPlus {
     double fDeltaPhi;
 
     bool fPassedBTagging;
+
+    // Gen level stuff
+    XYZTLorentzVector fGenMet;
 
     // Tau embedding stuff
     XYZTLorentzVector fTauEmbeddingMuon;

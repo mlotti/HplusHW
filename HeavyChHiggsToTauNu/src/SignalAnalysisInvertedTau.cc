@@ -387,7 +387,7 @@ namespace HPlus {
     // Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getCleanedTauCandidates()[0]), jetData.getSelectedJets()); 
 
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getCleanedTauCandidates(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getCleanedTauCandidates(), jetData.getSelectedJets(),  metData.getSelectedMET());
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     // Write the stuff to the tree
     fTree.setFillWeight(fEventWeight.getWeight());

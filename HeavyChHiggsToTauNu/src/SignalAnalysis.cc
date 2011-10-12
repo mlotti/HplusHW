@@ -222,12 +222,16 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
+    fTree.setHltTaus(triggerData.getTriggerTaus());
 
     hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
     hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
 
     // GenParticle analysis (must be done here when we effectively trigger all MC)
-    if (!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
+    if (!iEvent.isRealData()) {
+      GenParticleAnalysis::Data genData = fGenparticleAnalysis.analyze(iEvent, iSetup);
+      fTree.setGenMET(genData.getGenMET());
+    }
 
     // Primary vertex
     VertexSelection::Data pvData = fPrimaryVertexSelection.analyze(iEvent, iSetup);
@@ -344,12 +348,31 @@ namespace HPlus {
     // Calculate alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
 
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
-    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+    
+
+
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+
+    if(metData.getRawMET().isNonnull())
+      fTree.setRawMET(metData.getRawMET());
+    if(metData.getType1MET().isNonnull())
+      fTree.setType1MET(metData.getType1MET());
+    if(metData.getType2MET().isNonnull())
+      fTree.setType2MET(metData.getType2MET());
+    if(metData.getCaloMET().isNonnull())
+      fTree.setCaloMET(metData.getCaloMET());
+    if(metData.getTcMET().isNonnull())
+      fTree.setTcMET(metData.getTcMET());
+
     // Write the stuff to the tree
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
+
+
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
+   double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi() );
 
@@ -362,6 +385,9 @@ namespace HPlus {
     //        hMETBaselineTauIdAllCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     //      }
   
+
+	  //    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(),
+	  //               evtTopologyData.alphaT().fAlphaT);
 
 
     hTransverseMassNoMet->Fill(transverseMass, fEventWeight.getWeight());
@@ -432,7 +458,7 @@ namespace HPlus {
     } 
 
   // Fake MET veto a.k.a. further QCD suppression
-    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+      //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     if (fakeMETData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
       hTransverseMassWithRtauFakeMet->Fill(transverseMass, fEventWeight.getWeight());
     }

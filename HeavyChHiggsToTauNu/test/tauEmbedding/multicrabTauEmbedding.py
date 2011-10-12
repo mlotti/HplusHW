@@ -4,9 +4,8 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
-step = "skim"
-#step = "generation"
-#step = "embedding"
+#step = "skim"
+step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
 #step = "signalAnalysis"
@@ -30,10 +29,9 @@ dirPrefix = ""
 #dirPrefix = "_test"
 
 #pt = "_pt30"
-pt = "_pt40"
-
-if step in ["generation", "embedding", "analysis", "signalAnalysis"]:
-    dirPrefix += pt
+#pt = "_pt40"
+#if step in ["generation", "embedding", "analysis", "signalAnalysis"]:
+#    dirPrefix += pt
 
 if step == "signalAnalysis":
     #dirPrefix += "_triggerVertex2010"
@@ -43,15 +41,14 @@ if step == "signalAnalysis":
     pass
 
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
-          "embedding":      {"input": "tauembedding_skim_v11", "config": "embed.py",   "output": "embedded.root"},
-#          "generationOld":     {"input": "tauembedding_skim_v11",          "config": "embed_HLT.py",    "output": "embedded_HLT.root"},
-#          "embeddingOld":      {"input": "tauembedding_generation_v11_8"+pt, "config": "embed_RECO.py",   "output": "embedded_RECO.root"},
-          "analysis":       {"input": "tauembedding_embedding_v11_8"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
+#          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
+          "analysis":       {"input": "tauembedding_embedding_v13",  "config": "embeddingAnalysis_cfg.py"},
 #          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
-#          "signalAnalysis": {"input": "tauembedding_embedding_v11_6"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v11_8"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "muonAnalysis":   {"input": "tauembedding_skim_v11",          "config": "muonAnalysisFromSkim_cfg.py"},
-          "caloMetEfficiency": {"input": "tauembedding_skim_v11",         "config": "caloMetEfficiency_cfg.py"},
+#          "signalAnalysis": {"input": "tauembedding_embedding_v13"+pt,  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v13",  "config": "../signalAnalysis_cfg.py"},
+          "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
+          "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
           }
 
 crabcfg = "crab.cfg"
@@ -119,9 +116,9 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v13_2" % step
-if step in ["generation", "embedding"]:
-    tauname += pt
+tauname = "_tauembedding_%s_v13" % step
+#if step in ["generation", "embedding"]:
+#    tauname += pt
 
 reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
@@ -168,6 +165,11 @@ muonAnalysisNjobs = { # goal: 30k events/job
 def modify(dataset):
     name = ""
 
+    if dataset.isData():
+        dataset.appendLine("CMSSW.total_number_of_lumis = -1")
+    else:
+        dataset.appendLine("CMSSW.total_number_of_events = -1")
+
     path = dataset.getDatasetPath().split("/")
     if step == "skim":
         name = path[2].replace("-", "_")
@@ -178,9 +180,6 @@ def modify(dataset):
             frun = dataset.getName().split("_")[1].split("-")[0]
             m = reco_re.search(name)
             name = reco_re.sub(m.group("reco")+frun+"_", name)
-            dataset.appendLine("CMSSW.total_number_of_lumis = -1")
-        else:
-            dataset.appendLine("CMSSW.total_number_of_events = -1")
 
         dataset.useServer(False)
 

@@ -1,0 +1,88 @@
+import FWCore.ParameterSet.Config as cms
+
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChTauFilter_cfi as tauFilter
+import PhysicsTools.PatUtils.patPFMETCorrections_cff as patPFMETCorrections
+
+def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "patMETsPF", postfix=""):
+    sequence = cms.Sequence()
+
+    # First re-do the tau selection
+    #
+    # Apply a bit looser pt cut here for tau energy scale variation.
+    # This way we can produce the type I MET only once for the
+    # variations, and just take later into account the variation
+    # (instead of doing the tau ID and jet cleaning for each variation)
+    m = tauFilter.hPlusTauPtrSelectorFilter.clone(
+        tauSelection = tauSelection.clone(),
+        filter = cms.bool(False)
+    )
+    tauName = "selectedPatTausForMetCorr"+postfix
+    setattr(process, tauName, m)
+    sequence *= m
+
+    # Then clean jet collection from the selected tau
+    m = cms.EDFilter("PATJetSelector",
+        src = cms.InputTag(jetSelection.src.value()),
+        cut = cms.string(""),
+        checkOverlaps = cms.PSet(
+            taus = cms.PSet(
+                src                 = cms.InputTag(tauName),
+                algorithm           = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            )
+        )
+    )
+    jetName = "selectedPatJetsTauCleaned"+postfix
+    setattr(process, jetName, m)
+    sequence *= m
+
+    # Then compute the type I correction for MET with the cleaned jets
+    m = patPFMETCorrections.selectedPatJetsForMETtype1p2Corr.clone(
+        src = jetName
+    )
+    setattr(process, "selectedPatJetsForMETtype1p2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.selectedPatJetsForMETtype2Corr.clone(
+        src = jetName
+    )
+    setattr(process, "selectedPatJetsForMETtype2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patPFJetMETtype1p2Corr.clone(
+        skipMuons = False
+    )
+    if dataVersion.isData():
+        m.jetCorrLabel = "L2L3Residual"
+    setattr(process, "patPFJetMETtype1p2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patPFJetMETtype2Corr.clone(
+        skipMuons = False
+    )
+    if dataVersion.isData():
+        m.jetCorrLabel = "L2L3Residual"
+    setattr(process, "patPFJetMETtype2Corr"+postfix, m)
+    sequence *= m
+
+    m = patPFMETCorrections.patType1CorrectedPFMet.clone(
+        src = metRaw
+    )
+    type1Name = "patType1CorrectedPFMet"+postfix
+    setattr(process, type1Name, m)
+    sequence *= m
+
+    #m = patPFMETCorrections.patType1p2CorrectedPFMet.clone(
+    #    src = metRaw
+    #)
+    #type1p2Name = "patType1p2CorrectedPFMet"+postfix
+    #setattr(process, type1p2Name, m)
+    #sequence *= m
+
+    setattr(process, "patMetCorrSequence"+postfix, sequence)
+
+    return (sequence, type1Name)

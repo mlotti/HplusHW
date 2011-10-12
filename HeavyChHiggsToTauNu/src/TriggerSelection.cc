@@ -210,6 +210,9 @@ namespace HPlus {
   TriggerSelection::TriggerPath::~TriggerPath() {}
 
   bool TriggerSelection::TriggerPath::analyze(const pat::TriggerEvent& trigger) {
+    fTaus.clear();
+    fMets.clear();
+
     /*
     //pat::TriggerObjectRefVector coll = trigger.pathObjects(fPath);
     pat::TriggerObjectRefVector coll = trigger.objects(trigger::TriggerTau);
@@ -270,6 +273,18 @@ namespace HPlus {
 
       if((*iter)->name() == fPath && (*iter)->wasAccept()) {
 	//std::cout << "*** (*iter)->name() = " << (*iter)->name() << std::endl;
+        pat::TriggerFilterRefVector filters = trigger.pathFilters(fPath, false);
+        if(filters.size() == 0)
+          throw cms::Exception("LogicError") << "No filters for fired path " << fPath << std::endl;
+        pat::TriggerObjectRefVector objs = trigger.filterObjects(filters[filters.size()-1]->label());
+        for(pat::TriggerObjectRefVector::const_iterator iObj = objs.begin(); iObj != objs.end(); ++iObj) {
+          if((*iObj)->id(trigger::TriggerTau))
+            fTaus.push_back(*iObj);
+          else if((*iObj)->id(trigger::TriggerMET))
+            fMets.push_back(*iObj);
+        }
+
+        //std::cout << "Trigger " << fPath << " fired, number of taus " << fTaus.size() << " number of mets " << fMets.size() << std::endl;
         increment(fTriggerCount);
         return true;
       }
@@ -278,6 +293,8 @@ namespace HPlus {
   }
 
   bool TriggerSelection::TriggerPath::analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames) {
+    fTaus.clear();
+    fMets.clear();
     for(size_t i=0; i<triggerNames.size(); ++i) {
       if(triggerNames.triggerName(i) == fPath && trigger.accept(i)) {
         return true;

@@ -1,31 +1,112 @@
 import FWCore.ParameterSet.Config as cms
-from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation_cfi import jesVariation
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
 
-def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEneryVariationForMET, jetVariationMode="all"):
+tauVariation = cms.EDProducer("HPlusTauEnergyScaleVariation",
+    src = cms.InputTag("selectedPatTaus"),
+    energyVariation = cms.double(0.03),
+    energyEtaVariation = cms.double(0)
+)
+
+jetVariation = cms.EDProducer("HPlusJetEnergyScaleVariation",
+    src = cms.InputTag("selectedPatJetsAK5PF"),
+    payloadName = cms.string("AK5PF"),
+    uncertaintyTag = cms.string("Uncertainty"),
+    defaultPlusVariation = cms.bool(True),
+    etaBins = cms.VPSet(
+    )
+)
+
+metVariation = cms.EDProducer("HPlusMetEnergyScaleVariation",
+    metSrc = cms.InputTag("patMETsPF"),
+    tauSrc = cms.InputTag("tauVariation"),
+    jetSrc = cms.InputTag("jetVariation"),
+    unclusteredVariation = cms.double(0.1)
+)
+
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, jetVariationMode="all"):
     variationName = name
+    tauVariationName = name+"TauVariation"
+    jetVariationName = name+"JetVariation"
+    jetsForMetVariation = name+"JetsForMetVariation"
+    rawMetVariationName = name+"RawMetVariation"
+    type1MetVariationName = name+"Type1MetVariation"
     analysisName = prefix+name
     countersName = analysisName+"Counters"
     pathName = analysisName+"Path"
 
-    # Construct the JES variation module
-    variation = jesVariation.clone(
-        tauSrc = cms.InputTag(prototype.tauSelection.src.value()), # from untracked to tracked
-        jetSrc = cms.InputTag(prototype.jetSelection.src.value()),
-        metSrc = cms.InputTag(prototype.MET.src.value()),
-        JESVariation = cms.double(variation),
-        JESEtaVariation = cms.double(etaVariation),
-        unclusteredMETVariation = cms.double(unclusteredEneryVariationForMET),
-        jetVariationMode = jetVariationMode,
+    # Tau variation
+    tauv = tauVariation.clone(
+        src = prototype.tauSelection.src.value(),
+        energyVariation = variation,
+        energyEtaVariation = etaVariation,
     )
-    setattr(process, variationName, variation)
-    #"JES"+variation+"eta"+etaVariation+"unclusted"+unclusteredEneryVariationForMET)
+    setattr(process, tauVariationName, tauv)
+
+    # Recompute type 1 MET on the basis of variated tau. However, use
+    # the non-variated jets, because the jet variation is taken into
+    # account in the MET variation. The tau variation is taken into
+    # account here, because the variation can change the decision of
+    # which tau to select, and that tau is needed for the jet cleaning
+    # in the type 1 MET calculation.
+    tauSelection = prototype.tauSelection.clone(src=tauVariationName)
+    (type1sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, tauSelection, prototype.jetSelection, postfix=name)
+    tauForMetVariation = "selectedPatTausForMetCorr"+name
+
+    # Jet variation
+    jetv = jetVariation.clone(
+        src = prototype.jetSelection.src.value(),
+        defaultPlusVariation = variation > 0,
+    )
+    setattr(process, jetVariationName, jetv)
+
+    # Select (type I like) jets for MET variation, clean the selected tau from these
+    cutstr = process.selectedPatJetsForMETtype1p2Corr.cut.value()
+    cutstr += "&& pt() > %f" % process.patPFJetMETtype1p2Corr.type1JetPtThreshold.value()
+    jetsForMetv = cms.EDFilter("PATJetSelector",
+        src = cms.InputTag(jetVariationName),
+        cut = cms.string(cutstr),
+        checkOverlaps = cms.PSet(
+            taus = cms.PSet(
+                src                 = cms.InputTag(tauForMetVariation),
+                algorithm           = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            )
+        )
+    )
+    setattr(process, jetsForMetVariation, jetsForMetv)
+
+    # MET variation
+    # Use the same code for now (although this is not according to the
+    # latest recipe for raw). Use the selected tau, and cleaned jets
+    # passing the type1 selection (both tau and jet inputs should be
+    # the variated ones)
+    metrawv = metVariation.clone(
+        metSrc = prototype.MET.rawSrc.value(),
+        tauSrc = tauForMetVariation,
+        jetSrc = jetsForMetVariation,
+        unclusteredVariation = unclusteredEnergyVariationForMET
+    )
+    setattr(process, rawMetVariationName, metrawv)
+
+    mettype1v = metVariation.clone(
+        metSrc = type1Met,
+        tauSrc = tauForMetVariation,
+        jetSrc = jetsForMetVariation,
+        unclusteredVariation = unclusteredEnergyVariationForMET
+    )
+    setattr(process, type1MetVariationName, mettype1v)
 
     # Construct the signal analysis module for this variation
     # Use variated taus, jets and MET
     analysis = prototype.clone()
-    analysis.tauSelection.src = variationName
-    analysis.jetSelection.src = variationName
-    analysis.MET.src = variationName
+    analysis.tauSelection.src = tauVariationName
+    analysis.jetSelection.src = jetVariationName
+    analysis.MET.rawSrc = rawMetVariationName
+    analysis.MET.type1Src = type1MetVariationName
     setattr(process, analysisName, analysis)
     
     # Construct the counters module
@@ -39,9 +120,14 @@ def addJESVariationAnalysis(process, prefix, name, prototype, additionalCounters
 
     # Construct the path
     path = cms.Path(
-        process.commonSequence *
-        variation *
-        analysis *
-        counters
+        process.commonSequence
+        * tauv
+        * type1sequence
+        * jetv
+        * jetsForMetv
+        * metrawv
+        * mettype1v
+        * analysis
+        * counters
     )
     setattr(process, pathName, path)

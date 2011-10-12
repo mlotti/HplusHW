@@ -58,6 +58,8 @@ namespace HPlus {
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
 
+    fTree->Branch("hltTau_p4", &fHltTaus);
+
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
     fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
@@ -82,8 +84,14 @@ namespace HPlus {
     fTree->Branch("jets_looseId", &fJetsLooseId);
     fTree->Branch("jets_tightId", &fJetsTightId);
 
-    fTree->Branch("met_p4", &fMet);
-    fTree->Branch("met_sumet", &fMetSumEt);
+    fTree->Branch("met_p4", &fRawMet);
+    fTree->Branch("met_sumet", &fRawMetSumEt);
+    fTree->Branch("met_significance", &fRawMetSignificance);
+
+    fTree->Branch("metType1_p4", &fType1Met);
+    fTree->Branch("metType2_p4", &fType2Met);
+    fTree->Branch("caloMet_p4", &fCaloMet);
+    fTree->Branch("tcMet_p4", &fTcMet);
 
     fTree->Branch("topreco_p4", &fTop);
 
@@ -92,6 +100,8 @@ namespace HPlus {
 
     fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
+
+    fTree->Branch("genMet_p4", &fGenMet);
 
     if(fTauEmbeddingInput) {
       fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
@@ -162,10 +172,21 @@ namespace HPlus {
   
   }
 
+
+  void SignalAnalysisTree::setHltTaus(const pat::TriggerObjectRefVector& hltTaus) {
+    fHltTaus.clear();
+    fHltTaus.reserve(hltTaus.size());
+    for(size_t i=0; i<hltTaus.size(); ++i) {
+      fHltTaus.push_back(hltTaus[i]->p4());
+    }
+  }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
                                 const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
                                 double alphaT, double deltaPhi) {
+
+    //                                const edm::PtrVector<pat::Jet>& jets,
+    //				double alphaT) {
     if(!fDoFill)
       return;
 
@@ -180,10 +201,8 @@ namespace HPlus {
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
-
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
-
     }
 
     for(size_t i=0; i<jets.size(); ++i) {
@@ -201,9 +220,9 @@ namespace HPlus {
 
       double sum = chf+nhf+elf+phf+muf;
       if(std::abs(sum - 1.0) > 0.000001) {
-	throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
-				       << " the sum-1 was " << (sum-1.0)
-				       << std::endl;
+        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
+                                       << " the sum-1 was " << (sum-1.0)
+                                       << std::endl;
       }
 
       fJetsChf.push_back(chf);
@@ -224,15 +243,12 @@ namespace HPlus {
       int npr = jets[i]->chargedMultiplicity() + jets[i]->neutralMultiplicity();
 
       fJetsLooseId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && elf < 0.99 && chf > 0 && chm > 0) ||
-								      std::abs(eta) > 2.4) );
+                                                                      std::abs(eta) > 2.4) );
       fJetsTightId.push_back( npr > 1 && phf < 0.99 && nhf < 0.99 && ((std::abs(eta) <= 2.4 && nhf < 0.9 && phf < 0.9 && elf < 0.99 && chf > 0 && chm > 0) ||
-								      std::abs(eta) > 2.4) );
+                                                                      std::abs(eta) > 2.4) );
 
       fJetsArea.push_back(jets[i]->jetArea());
     }
-    fMet = met->p4();
-    fMetSumEt = met->sumEt();
-
     fAlphaT = alphaT;
 
     fDeltaPhi = deltaPhi;
@@ -241,17 +257,17 @@ namespace HPlus {
       edm::Handle<edm::View<pat::Muon> > hmuon;
       iEvent.getByLabel(fTauEmbeddingMuonSource, hmuon);
       if(hmuon->size() != 1)
-	throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
+        throw cms::Exception("Assert") << "The assumption that tau embedding muon collection size is 1 failed, the size was " << hmuon->size() << std::endl;
 
       edm::Handle<edm::View<reco::MET> > hmet;
       iEvent.getByLabel(fTauEmbeddingMetSource, hmet);
       if(hmet->size() != 1)
-	throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
+        throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
       edm::Handle<edm::View<reco::MET> > hcalomet;
       iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
-	throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
+        throw cms::Exception("Assert") << "The assumption that tau embedding calomet collection size is 1 failed, the size was " << hcalomet->size() << std::endl;
 
       fTauEmbeddingMuon = hmuon->at(0).p4();
       fTauEmbeddingMet = hmet->at(0).p4();
@@ -547,6 +563,8 @@ namespace HPlus {
 
     double nan = std::numeric_limits<double>::quiet_NaN();
 
+    fHltTaus.clear();
+
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
     fTauSignalChCands = 0;
@@ -574,14 +592,22 @@ namespace HPlus {
     fJetsLooseId.clear();
     fJetsTightId.clear();
 
-    fMet.SetXYZT(nan, nan, nan, nan);
-    fMetSumEt = nan;
+    fRawMet.SetXYZT(nan, nan, nan, nan);
+    fRawMetSumEt = nan;
+    fRawMetSignificance = nan;
+
+    fType1Met.SetXYZT(nan, nan, nan, nan);
+    fType2Met.SetXYZT(nan, nan, nan, nan);
+    fCaloMet.SetXYZT(nan, nan, nan, nan);
+    fTcMet.SetXYZT(nan, nan, nan, nan);
 
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
 
     fPassedBTagging = false;
+
+    fGenMet.SetXYZT(nan, nan, nan, nan);
 
     fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
