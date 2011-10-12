@@ -50,6 +50,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     # in the type 1 MET calculation.
     tauSelection = prototype.tauSelection.clone(src=tauVariationName)
     (type1sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, tauSelection, prototype.jetSelection, postfix=name)
+    tauForMetVariation = "selectedPatTausForMetCorr"+name
 
     # Jet variation
     jetv = jetVariation.clone(
@@ -58,19 +59,34 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
     )
     setattr(process, jetVariationName, jetv)
 
-    # Select (type I like) jets for MET variation
+    # Select (type I like) jets for MET variation, clean the selected tau from these
     cutstr = process.selectedPatJetsForMETtype1p2Corr.cut.value()
     cutstr += "&& pt() > %f" % process.patPFJetMETtype1p2Corr.type1JetPtThreshold.value()
     jetsForMetv = cms.EDFilter("PATJetSelector",
         src = cms.InputTag(jetVariationName),
-        cut = cms.string(cutstr)
+        cut = cms.string(cutstr),
+        checkOverlaps = cms.PSet(
+            taus = cms.PSet(
+                src                 = cms.InputTag(tauForMetVariation),
+                algorithm           = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            )
+        )
     )
     setattr(process, jetsForMetVariation, jetsForMetv)
 
     # MET variation
+    # Use the same code for now (although this is not according to the
+    # latest recipe for raw). Use the selected tau, and cleaned jets
+    # passing the type1 selection (both tau and jet inputs should be
+    # the variated ones)
     metrawv = metVariation.clone(
         metSrc = prototype.MET.rawSrc.value(),
-        tauSrc = tauVariationName,
+        tauSrc = tauForMetVariation,
         jetSrc = jetsForMetVariation,
         unclusteredVariation = unclusteredEnergyVariationForMET
     )
@@ -78,7 +94,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
 
     mettype1v = metVariation.clone(
         metSrc = type1Met,
-        tauSrc = tauVariationName,
+        tauSrc = tauForMetVariation,
         jetSrc = jetsForMetVariation,
         unclusteredVariation = unclusteredEnergyVariationForMET
     )
@@ -110,6 +126,7 @@ def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, addit
         * jetv
         * jetsForMetv
         * metrawv
+        * mettype1v
         * analysis
         * counters
     )

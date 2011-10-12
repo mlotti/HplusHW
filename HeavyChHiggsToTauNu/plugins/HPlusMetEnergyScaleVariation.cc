@@ -18,10 +18,10 @@ namespace {
                       reco::Candidate::LorentzVector& clusteredP4Variated,
                       T begin, T end) {
     for(T iObj = begin; iObj != end; ++iObj) {
-      double origX = iObj->userFloat("originalPx");
-      double origY = iObj->userFloat("originalPy");
+      double origX = (*iObj)->userFloat("originalPx");
+      double origY = (*iObj)->userFloat("originalPy");
       clusteredP4 += reco::Candidate::LorentzVector(origX, origY, 0, std::sqrt(origX*origX + origY*origY));
-      clusteredP4Variated += iObj->p4();
+      clusteredP4Variated += (*iObj)->p4();
     }
   }
 }
@@ -58,18 +58,25 @@ void HPlusMetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
   edm::Handle<edm::View<pat::MET> > hmets;
   iEvent.getByLabel(metSrc, hmets);
 
-  edm::Handle<edm::View<pat::Tau> > htaus;
+  edm::Handle<edm::View<reco::Candidate> > htaus;
   iEvent.getByLabel(tauSrc, htaus);
 
   edm::Handle<edm::View<pat::Jet> > hjets;
   iEvent.getByLabel(jetSrc, hjets);
 
+  edm::PtrVector<pat::Tau> taus;
+  for(size_t i=0; i<htaus->size(); ++i) {
+    edm::Ptr<reco::Candidate> ptr = htaus->ptrAt(i);
+    taus.push_back(edm::Ptr<pat::Tau>(ptr.id(), dynamic_cast<const pat::Tau *>(ptr.get()), ptr.key()));
+  }
+  edm::PtrVector<pat::Jet> jets = hjets->ptrVector();
+
   for(edm::View<pat::MET>::const_iterator iMet = hmets->begin(); iMet != hmets->end(); ++iMet) {
     reco::Candidate::LorentzVector clusteredP4;
     reco::Candidate::LorentzVector clusteredP4Variated;
 
-    addClusteredP4(clusteredP4, clusteredP4Variated, htaus->begin(), htaus->end());
-    addClusteredP4(clusteredP4, clusteredP4Variated, hjets->begin(), hjets->end());
+    addClusteredP4(clusteredP4, clusteredP4Variated, taus.begin(), taus.end());
+    addClusteredP4(clusteredP4, clusteredP4Variated, jets.begin(), jets.end());
 
     reco::Candidate::LorentzVector p4 = iMet->p4();
     p4 -= clusteredP4;
