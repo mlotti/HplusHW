@@ -426,88 +426,8 @@ datasets = {
         }
     },
 
-    
-    # Tau + jets
-    # FIXME: this is wrong, we shoud use MultiJet PD!
-    "TauPlusX_160431-161016_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
-        "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "TauPlusX_162803-162828_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
-        "runs": (162803, 162828), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "TauPlusX_162803-163261_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v1",
-        "runs": (162803, 163261), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "TauPlusX_163270-163369_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v3",
-        "runs": (163270, 163369), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "TauPlusX_163270-163869_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_QuadJet40_IsoPFTau40_v3",
-        "runs": (163270, 163869), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-
+   
     # Single Mu
-    "SingleMu_160431-161016_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_Mu20_v1",
-        "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
-        "data": {
-            "AOD": {
-                "datasetpath": "/SingleMu/Run2011A-PromptReco-v1/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 20, # Adjusted for PATtuple file size
-                "lumiMask": "PromptReco"
-            },
-        }
-    },
-    "SingleMu_162803-162828_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_Mu20_v1",
-        "runs": (162803, 162828), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-    "SingleMu_162803-163261_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_Mu20_v1",
-        "runs": (162803, 163261), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-    "SingleMu_163270-163369_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_Mu24_v2",
-        "runs": (163270, 163369), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-    "SingleMu_163270-163869_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_Mu24_v2",
-        "runs": (163270, 163869), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-
     ### 42X starts here
     "SingleMu_165088-166150_Prompt": {
         "dataVersion": "42Xdata",
