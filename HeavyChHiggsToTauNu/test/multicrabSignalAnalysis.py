@@ -22,8 +22,7 @@ if runPatOnTheFly:
 
 # Uncomment below the datasets you want to process
 # The dataset definitions are in python/tools/multicrabDatasets.py
-multicrab.extendDatasets(pattupleVersion,
-    [
+datasets = [
         #### 42X data and MC
         # Data: single tau (control trigger)
 #        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
@@ -98,8 +97,8 @@ multicrab.extendDatasets(pattupleVersion,
         "WW_TuneZ2_Summer11",
         "WZ_TuneZ2_Summer11",
         "ZZ_TuneZ2_Summer11",
-        ])
-
+        ]
+multicrab.extendDatasets(pattupleVersion, datasets)
 
 output = ["histograms.root"]
 if "signalAnalysis" in cfg:

@@ -7,6 +7,8 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "TH1F.h"
 
+#include <limits>
+
 namespace HPlus {
   TopSelection::Data::Data(const TopSelection *topSelection, bool passedEvent):
     fTopSelection(topSelection), fPassedEvent(passedEvent) {}
@@ -39,18 +41,15 @@ namespace HPlus {
 
   TopSelection::Data TopSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Jet>& jets, const edm::PtrVector<pat::Jet>& bjets) {
     // Reset variables
+    topMass = -1;
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    top.SetXYZT(nan, nan, nan, nan);
 
     bool passEvent = false;
-
-    //    fSelectedJets.clear();
-    //    fSelectedJets.reserve(jets.size());
-
     size_t passed = 0;
+
     double ptmax = 0;
     double ptjjb = 0;
-    double jjbMass = -999; 
-    // double topMass = -999;
-    topMass = -1;
     bool correctCombination = false;
     edm::Ptr<pat::Jet> Jet1;
     edm::Ptr<pat::Jet> Jet2;
@@ -66,31 +65,22 @@ namespace HPlus {
 	if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJet2->p4()) < 0.4) continue;
 
 	for(edm::PtrVector<pat::Jet>::const_iterator iterb = bjets.begin(); iterb != bjets.end(); ++iterb) {
-
-
-
 	  edm::Ptr<pat::Jet> iJetb = *iterb;
 	  if (ROOT::Math::VectorUtil::DeltaR(iJet1->p4(), iJetb->p4()) < 0.4) continue;
 	  if (ROOT::Math::VectorUtil::DeltaR(iJet2->p4(), iJetb->p4()) < 0.4) continue;	  
+
+          XYZTLorentzVector cand = iJet1->p4() + iJet2->p4() + iJetb->p4();
 	
-	  double jjbMass2 = (iJet1->p() + iJet2->p() + iJetb->p())*(iJet1->p() + iJet2->p() + iJetb->p())
-	    -(iJet1->px() + iJet2->px() + iJetb->px())*(iJet1->px() + iJet2->px() + iJetb->px())
-	    -(iJet1->py() + iJet2->py() + iJetb->py())*(iJet1->py() + iJet2->py() + iJetb->py())
-	    -(iJet1->pz() + iJet2->pz() + iJetb->pz())*(iJet1->pz() + iJet2->pz() + iJetb->pz());
-	  ptjjb = sqrt((iJet1->px() + iJet2->px() + iJetb->px())*(iJet1->px() + iJet2->px() + iJetb->px())
-			      +(iJet1->py() + iJet2->py() + iJetb->py())*(iJet1->py() + iJet2->py() + iJetb->py()));
+	  hPtjjb->Fill(cand.Pt(), fEventWeight.getWeight());
+	  hjjbMass->Fill(cand.M(), fEventWeight.getWeight());
 
-	  //  double jjbMass = -999; 	  
-	  if ( jjbMass2 > 0)  jjbMass = sqrt(jjbMass2);
-	  hPtjjb->Fill(ptjjb, fEventWeight.getWeight());
-	  hjjbMass->Fill(jjbMass, fEventWeight.getWeight());
-
-	  if (ptjjb > ptmax ) {
+	  if (cand.Pt() > ptmax ) {
 	    Jet1 = iJet1;
 	    Jet2 = iJet2;
 	    Jetb = iJetb;
-	    ptmax = ptjjb;
-	    topMass = jjbMass;
+	    ptmax = cand.Pt();
+            topMass = cand.M();
+            top = cand;
 	  }
 	}
       }
@@ -180,14 +170,14 @@ namespace HPlus {
 	if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop) > 0  ) {
 	  correctCombination = true;
 	  hPtmaxTop->Fill(ptjjb, fEventWeight.getWeight());
-	  htopMassReal->Fill(jjbMass, fEventWeight.getWeight());
+	  htopMassReal->Fill(topMass, fEventWeight.getWeight());
 	}
 	//	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
 	if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop)<0  ) {
 	  hPtmaxTopHplus->Fill(ptjjb, fEventWeight.getWeight());
-	  htopMassRealHplus->Fill(jjbMass, fEventWeight.getWeight());
+	  htopMassRealHplus->Fill(topMass, fEventWeight.getWeight());
 	}
-	if (bFromTop ) htopMassRealb->Fill(jjbMass, fEventWeight.getWeight());
+	if (bFromTop ) htopMassRealb->Fill(topMass, fEventWeight.getWeight());
       }
       
   

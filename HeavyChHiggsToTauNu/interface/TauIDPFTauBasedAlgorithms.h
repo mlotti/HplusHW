@@ -14,6 +14,7 @@ namespace HPlus {
     TauIDPFShrinkingCone(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingCone();
 
+    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
@@ -28,6 +29,7 @@ namespace HPlus {
     TauIDPFHPSBase(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, const std::string& baseLabel, TFileDirectory& myDir);
     virtual ~TauIDPFHPSBase();
 
+    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
   };
 
@@ -112,6 +114,7 @@ namespace HPlus {
     TauIDPFShrinkingConeTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeTaNC();
 
+    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 
@@ -131,6 +134,7 @@ namespace HPlus {
     TauIDPFShrinkingConeCombinedHPSTaNC(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight, int prongCount, std::string label, TFileDirectory& myDir);
     ~TauIDPFShrinkingConeCombinedHPSTaNC();
 
+    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
 

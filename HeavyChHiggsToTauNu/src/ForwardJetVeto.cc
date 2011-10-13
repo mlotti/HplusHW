@@ -17,7 +17,6 @@ namespace HPlus {
   
   ForwardJetVeto::ForwardJetVeto(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fSrc_met(iConfig.getUntrackedParameter<edm::InputTag>("src_met")),
     fForwJetEtaCut(iConfig.getUntrackedParameter<double>("ForwJetEtaCut")),
     fForwJetEtCut(iConfig.getUntrackedParameter<double>("ForwJetEtCut")),
     fEtSumRatioCut(iConfig.getUntrackedParameter<double>("EtSumRatioCut")),
@@ -42,12 +41,8 @@ namespace HPlus {
 
   ForwardJetVeto::~ForwardJetVeto() {}
 
-  ForwardJetVeto::Data ForwardJetVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  ForwardJetVeto::Data ForwardJetVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::MET>& met) {
     bool passEvent = false;
-   
-    edm::Handle<edm::View<reco::MET> > metHandle;
-    iEvent.getByLabel(fSrc_met, metHandle);
-    edm::Ptr<reco::MET> met = metHandle->ptrAt(0);
    
     edm::Handle<edm::View<pat::Jet> > hjets;
     iEvent.getByLabel(fSrc, hjets);

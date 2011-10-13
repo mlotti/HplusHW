@@ -11,11 +11,12 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/BTagging.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/METSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/InvMassVetoOnJets.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerTauMETEmulation.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GenParticleAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalElectronVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedElectronVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/GlobalMuonVeto.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/NonIsolatedMuonVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeMETVeto.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
@@ -25,6 +26,7 @@
 //#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/PFTauIsolationCalculator.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TopSelection.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
 
@@ -103,6 +105,8 @@ namespace HPlus {
     std::vector<double> getJetPtBins(void);
     void createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits);
     void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+    void AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateData, JetSelection::Data& jetData, const METSelection::Data& metData, const BTagging::Data& btagData, const TauSelection::Data& tauData); 
+      
     /// Chooses the most isolated of the tau candidates and returns a vector with just that candidate
     edm::PtrVector<pat::Tau> chooseMostIsolatedTauCandidate(edm::PtrVector<pat::Tau> tauCandidates);
 
@@ -121,7 +125,9 @@ namespace HPlus {
     Count fOneProngTauSelectionCounter;
     Count fOneSelectedTauCounter;
     Count fGlobalElectronVetoCounter;
+    Count fNonIsolatedElectronVetoCounter;
     Count fGlobalMuonVetoCounter;
+    Count fNonIsolatedMuonVetoCounter;
     Count fJetSelectionCounter;
     Count fMETCounter;
     Count fOneProngTauIDWithoutRtauCounter;
@@ -136,11 +142,12 @@ namespace HPlus {
 
     // The order here defines the order the subcounters are printed at the program termination
     TriggerSelection fTriggerSelection;
-    //TriggerTauMETEmulation  fTriggerTauMETEmulation;
     VertexSelection fPrimaryVertexSelection;
     TauSelection fOneProngTauSelection;
     GlobalElectronVeto fGlobalElectronVeto;
+    NonIsolatedElectronVeto fNonIsolatedElectronVeto;
     GlobalMuonVeto fGlobalMuonVeto;
+    NonIsolatedMuonVeto fNonIsolatedMuonVeto;
     JetSelection fJetSelection;
     METSelection fMETSelection;
     InvMassVetoOnJets fInvMassVetoOnJets;
@@ -156,7 +163,7 @@ namespace HPlus {
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
-    // TriggerEmulationEfficiency fTriggerEmulationEfficiency;
+    TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
     
@@ -206,10 +213,22 @@ namespace HPlus {
 
     // Other control histograms
     TH1 *hTauCandidateSelectionIsolatedPtMax;
-
+    
     // Other histograms
     //TH1 *hAlphaTAfterTauID;
     TH1 *hSelectionFlow;
+    TH1 *hTransverseMass_AfterBigBox;
+    TH1 *hTransverseMass_AfterBigBoxAndMet;
+    TH1 *hTransverseMass_AfterBigBoxAndBtag;
+    TH1 *hTransverseMass_AfterBigBoxAndTauID;
+    TH1 *hDeltaPhiMetTauCand_AfterBigBox;
+    TH1 *hDeltaPhiMetTauCand_AfterBigBoxAndMet;
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBox;
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBox;
+    TH1 *hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet;
+    TH1 *hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet;
+    TH1 *hRtau_AfterBigBox;
+    TH1 *hRtauEfficiency_AfterBigBoxTauID;
 
     // PAS Control Plots
     /*

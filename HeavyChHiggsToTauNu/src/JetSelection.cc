@@ -27,8 +27,6 @@ namespace HPlus {
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
     //    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
-    fSrc_met(iConfig.getUntrackedParameter<edm::InputTag>("src_met")),
-    fMetCut(iConfig.getUntrackedParameter<double>("METCut")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
     fEMfractionCut(iConfig.getUntrackedParameter<double>("EMfractionCut")),
@@ -61,14 +59,13 @@ namespace HPlus {
     hEta = makeTH<TH1F>(myDir, "jet_eta", "jet_eta", 400, -5., 5.);
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
-    hDeltaPhiJetMet = makeTH<TH1F>(myDir, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
  }
 
   JetSelection::~JetSelection() {}
 
-  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
+  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
@@ -94,17 +91,12 @@ namespace HPlus {
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-
       increment(fAllSubCount);
 
-      // remove tau jet
+      // remove jets too close to tau jet
       bool match = false;
-      for(edm::PtrVector<reco::Candidate>::const_iterator itertau = taus.begin(); itertau != taus.end(); ++itertau) {
-        edm::Ptr<reco::Candidate> iTau = *itertau;
-        if(!(ROOT::Math::VectorUtil::DeltaR(iTau->p4(), iJet->p4()) > fMaxDR)) {
-          match = true;
-          break;
-        }
+      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
+	match = true;
       }
       if(match) continue;
       increment(fCleanCutSubCount);
@@ -151,12 +143,8 @@ namespace HPlus {
 	  increment(fchargedMultiplicityCutSubCount);
 	}
 
-      double EMfrac = (iJet->chargedEmEnergy() +
-                       iJet->neutralEmEnergy())/(
-                       iJet->chargedHadronEnergy() +
-                       iJet->neutralHadronEnergy() +
-                       iJet->chargedEmEnergy() +
-                       iJet->neutralEmEnergy());
+      // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
+      double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 
@@ -164,21 +152,6 @@ namespace HPlus {
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
     
-      // plot deltaPhi(jet,met)
-      double deltaPhi = -999;
-
-      edm::Handle<edm::View<reco::MET> > hmet;
-      iEvent.getByLabel(fSrc_met, hmet);
-      edm::Ptr<reco::MET> met = hmet->ptrAt(0);
-
-      if ( met->et()>  fMetCut) {
-	//	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(fMETSelection.getSelectedMET()));
-	  deltaPhi = DeltaPhi::reconstruct(*(iJet), *(met));
-	  hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
-	  //	  hDeltaPhiJetMet->Fill(deltaPhi, fEventWeight.getWeight());
-      }
-
-
       tmpSelectedJets.push_back(iJet);
     }
 

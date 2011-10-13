@@ -28,29 +28,14 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# With tau embedding input, tighten the muon selection
-tauEmbeddingFinalizeMuonSelection = False
-# With tau embedding input, do the muon selection scan
-doTauEmbeddingMuonSelectionScan = False
-# Do tau id scan for tau embedding normalisation (no tau embedding input required)
-doTauEmbeddingTauSelectionScan = False
-
 # Do trigger parametrisation for MC and tau embedding? Do NOT switch this on for alphaT
 print "Do Not apply trigger parametrization. Prefer to uset the triggers, especially if TriJet/QuadJet are available"
 doTriggerParametrisation = False
-
-filterGenTaus = False
-filterGenTausInaccessible = False
 
 ################################################################################
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
-
-# These are needed for running against tau embedding samples, can be
-# given also from command line
-#options.doPat=1
-#options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
@@ -72,10 +57,6 @@ process.source = cms.Source('PoolSource',
     #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
-if options.tauEmbeddingInput != 0:
-    process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/TTJets_TuneZ2_Spring11/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11_PU_S1_START311_V1G1_v1_AODSIM_tauembedding_embedding_v9_pt40/9fa4df4950a5013c36bb04ce6d0a226a/embedded_RECO_23_1_YLm.root"
-        ]
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
@@ -95,12 +76,6 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 # Add configuration information to histograms.root
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
-
-###
-# MC Filter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-if filterGenTaus:
-    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
 
 ################################################################################
 # The "golden" version of the alphat analysis
@@ -137,14 +112,6 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 #param.setTriggerVertexFor2010()
 param.setTriggerVertexFor2011()
 
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForAlphatAnalysis(process, process.commonSequence)
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, dataVersion)
-    if tauEmbeddingFinalizeMuonSelection:
-        applyIsolation = not doTauEmbeddingMuonSelectionScan
-        additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
-                                                                                   enableIsolation=applyIsolation))
-
 # alphat analysis module for the "golden analysis"
 process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     trigger = param.trigger,
@@ -165,7 +132,6 @@ process.alphatAnalysis = cms.EDFilter("HPlusAlphatAnalysisProducer",
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
     vertexWeight = param.vertexWeight,
-    tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis
 )
 
@@ -292,13 +258,6 @@ if doJESVariation:
     addJESVariationAnalysis(process, "alphatAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.alphatAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "alphatAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.alphatAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "alphatAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.alphatAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-
-# alphat analysis with various tightened muon selections for tau embedding
-if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
-    tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "alphatAnalysis", process.alphatAnalysis, process.commonSequence, additionalCounters)
-
-if doTauEmbeddingTauSelectionScan:
-    tauEmbeddingCustomisations.addTauAnalyses(process, "alphatAnalysis", process.alphatAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

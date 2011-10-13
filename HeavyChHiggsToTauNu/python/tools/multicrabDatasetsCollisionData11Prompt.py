@@ -237,17 +237,24 @@ datasets = {
         "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 90, # Adjusted for PATtuple file size
-                "lumiMask": "PromptReco"
-            },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_173236_pattuple_v18-6c282a9b564868ab3377c4686ed3334d/USER",
                 "luminosity": 253.263000,
                 "number_of_jobs": 1,
+            },
+        }
+    },
+    "Tau_173236-176023_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+        "runs": (173236, 176023), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 130, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
             },
         }
     },
@@ -397,12 +404,6 @@ datasets = {
         "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
-                "luminosity": 0,
-                "number_of_jobs": 90, # Adjusted for PATtuple file size
-                "lumiMask": "PromptReco"
-            },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_Single_173236_pattuple_v18-8175a7a03b92bf75b3dce339fc4f2ac3/USER",
@@ -411,6 +412,20 @@ datasets = {
             },
         }
     },
+    "Tau_Single_173236-176023_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
+        "runs": (173236, 176023), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-PromptReco-v6/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 130, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+
     
     # Tau + jets
     # FIXME: this is wrong, we shoud use MultiJet PD!
@@ -502,7 +517,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 170, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -515,7 +530,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 1, # Adjusted for PATtuple file size
+                "number_of_jobs": 1, # Adjusted for skim file size
                 "lumiMask": "PromptRecoWedDiff"
             },
         }
@@ -528,7 +543,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 2, # Adjusted for PATtuple file size
+                "number_of_jobs": 2, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -541,7 +556,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 2, # Adjusted for PATtuple file size
+                "number_of_jobs": 2, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -554,7 +569,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 190, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -581,7 +596,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 26, # Adjusted for PATtuple file size
+                "number_of_jobs": 230, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -594,7 +609,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 110, # Adjusted for PATtuple file size
+                "number_of_jobs": 230, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -604,10 +619,17 @@ datasets = {
         "trigger": "HLT_Mu40_eta2p1_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
+        }
+    },
+    "SingleMu_173236-176023_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_Mu40_eta2p1_v1",
+        "runs": (173236, 176023), # This is prompt RECO, so check the run range again when running!
+        "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 90, # Adjusted for PATtuple file size
+                "number_of_jobs": 230, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }

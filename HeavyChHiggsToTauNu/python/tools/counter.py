@@ -5,6 +5,27 @@ import ROOT
 
 import dataset
 
+def _counterTh1AddBinFromTh1(counter, name, th1):
+    new = ROOT.TH1F(counter.GetName(), counter.GetTitle(), counter.GetNbinsX()+1, 0, counter.GetNbinsX()+1)
+    new.SetDirectory(0)
+    new.Sumw2()
+    
+    # Copy the existing bins
+    for bin in xrange(1, counter.GetNbinsX()+1):
+        new.SetBinContent(bin, counter.GetBinContent(bin))
+        new.SetBinError(bin, counter.GetBinError(bin))
+        new.GetXaxis().SetBinLabel(bin, counter.GetXaxis().GetBinLabel(bin))
+
+    # Calculate the integral of the new histogram with the uncertainty
+    count = dataset.histoIntegrateToCount(th1)
+
+    # Add the new count to the new counter
+    new.SetBinContent(counter.GetNbinsX()+1, count.value())
+    new.SetBinError(counter.GetNbinsX()+1, count.uncertainty())
+    new.GetXaxis().SetBinLabel(counter.GetNbinsX()+1, name)
+
+    return new
+
 class CellFormatBase:
     """Base class for cell formats.
 
@@ -31,7 +52,7 @@ class CellFormatBase:
                               equal (default: 4)
         valueOnly             Boolean, format the value only? (default: False)
         """
-        self._valueFormat = kwargs.get("valueFormat", "%.4g")
+        self._valueFormat = kwargs.get("valueFormat", "%.6g")
         self._uncertaintyFormat = kwargs.get("uncertaintyFormat", self._valueFormat)
         self._valueOnly = kwargs.get("valueOnly", False)
 
@@ -723,6 +744,14 @@ class SimpleCounter:
         else:
             self.countNames = datasetRootHisto.getBinLabels()
 
+    def appendRow(self, rowName, treeDraw):
+        if self.counter != None:
+            raise Exception("Can't add row after the counters have been created!")
+        td = dataset.treeDrawToNumEntries(treeDraw) # get a clone suitable to calculate number of entries from
+        drh = self.datasetRootHisto.getDataset().getDatasetRootHisto(td)
+        self.datasetRootHisto.modifyRootHisto(lambda oldHisto, newHisto: _counterTh1AddBinFromTh1(oldHisto, rowName, newHisto), drh)
+        self.countNames.append(rowName)
+
     def normalizeToOne(self):
         if self.counter != None:
             raise Exception("Can't normalize after the counters have been created!")
@@ -781,6 +810,9 @@ class Counter:
     def forEachDataset(self, func):
         for c in self.counters:
             func(c)
+
+    def appendRow(self, rowName, treeDraw):
+        self.forEachDataset(lambda x: x.appendRow(rowName, treeDraw))
 
     def normalizeToOne(self):
         self.forEachDataset(lambda x: x.normalizeToOne())

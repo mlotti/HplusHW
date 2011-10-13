@@ -6,7 +6,8 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Ptr.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/METReco/interface/GenMET.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventCounter.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
@@ -21,11 +22,23 @@ class TH1;
 namespace HPlus {
   class   GenParticleAnalysis {
   public:
+    class Data {
+    public:
+      
+      Data(const GenParticleAnalysis *analysis);
+      ~Data();
+
+      const edm::Ptr<reco::GenMET>& getGenMET() const {
+        return fAnalysis->fGenMet;
+      }
+    private:
+      const GenParticleAnalysis *fAnalysis;
+    };
+
     GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
-    GenParticleAnalysis(EventCounter& eventCounter, EventWeight& eventWeight);
     ~GenParticleAnalysis();
 
-    void analyze(const edm::Event&, const edm::EventSetup&);
+    Data analyze(const edm::Event&, const edm::EventSetup&);
     // edm::PtrVector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); //doesn't work
     std::vector<const reco::Candidate*> doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
     // double doQCDmAnalysis(const edm::Event&, const edm::EventSetup&); // works
@@ -47,9 +60,11 @@ namespace HPlus {
     
     // EventWeight object
     EventWeight& fEventWeight;
-    //    edm::InputTag fSrc;
-    //   const double fPtCut;
-    //   const double fEtaCut;
+    edm::InputTag fSrc;
+    edm::InputTag fMetSrc;
+    edm::InputTag fOneProngTauSrc;
+    edm::InputTag fOneAndThreeProngTauSrc;
+    edm::InputTag fThreeProngTauSrc;
     
     // Histograms
     TH1 *hHpMass;
@@ -87,6 +102,8 @@ namespace HPlus {
     TH1 *hBquarkNotFromTopDeltaRTau;
     TH1 *hTopPt;
     TH1 *hTopPt_wrongB;
+
+    edm::Ptr<reco::GenMET> fGenMet;
   };
 }
 

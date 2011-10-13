@@ -35,6 +35,7 @@ namespace HPlus {
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
+    virtual bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) = 0;
     bool passTauCandidateSelection(const edm::Ptr<pat::Tau> tau);
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passTauCandidateEAndMuVetoCuts(const edm::Ptr<pat::Tau> tau);
@@ -74,6 +75,7 @@ namespace HPlus {
     SelectionCounterPackager fCounterPackager;
     // Tau-jet candidate selections (same for all tau ID algorithms)
     size_t fIDAllTauCandidates;
+    size_t fIDDecayModeFinding;
     size_t fIDJetPtCut;
     size_t fIDJetEtaCut;
     size_t fIDLdgTrackExistsCut;

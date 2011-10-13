@@ -19,7 +19,9 @@ namespace HPlus {
     fOneProngTauSelectionCounter(eventCounter.addCounter("TauCandSelection")),
     fOneSelectedTauCounter(eventCounter.addCounter("TauCands==1")),
     fGlobalElectronVetoCounter(eventCounter.addCounter("GlobalElectronVeto")),
+    fNonIsolatedElectronVetoCounter(eventCounter.addCounter("NonIsolatedElectronVeto")),
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
+    fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fJetSelectionCounter(eventCounter.addCounter("JetSelection")),
     fMETCounter(eventCounter.addCounter("MET")),
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
@@ -33,9 +35,11 @@ namespace HPlus {
     fTriggerSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("trigger"), eventCounter, eventWeight),
     //fTriggerTauMETEmulation(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"), eventCounter, eventWeight),
     fPrimaryVertexSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("primaryVertexSelection"), eventCounter, eventWeight),
-    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate", &fTriggerSelection),
+    fOneProngTauSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("tauSelection"), eventCounter, eventWeight, 1, "tauCandidate"),
     fGlobalElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalElectronVeto"), eventCounter, eventWeight),
+    fNonIsolatedElectronVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedElectronVeto"), eventCounter, eventWeight),
     fGlobalMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("GlobalMuonVeto"), eventCounter, eventWeight),
+    fNonIsolatedMuonVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("NonIsolatedMuonVeto"), eventCounter, eventWeight),
     fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
     fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter, eventWeight, "MET"),
     fInvMassVetoOnJets(iConfig.getUntrackedParameter<edm::ParameterSet>("InvMassVetoOnJets"), eventCounter, eventWeight),
@@ -46,9 +50,10 @@ namespace HPlus {
     fForwardJetVeto(iConfig.getUntrackedParameter<edm::ParameterSet>("forwardJetVeto"), eventCounter, eventWeight),
     //fWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_weighted"),
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
-    fGenparticleAnalysis(eventCounter, eventWeight),
+    fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
-    fTree(fBTagging.getDiscriminator()),
+    fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
+    fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
     fFactorizationTable(iConfig, "METTables")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
@@ -126,6 +131,20 @@ namespace HPlus {
 
     // Other histograms
     //hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
+    hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+    hTransverseMass_AfterBigBoxAndTauID = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndTauID", "QCD_TransverseMass_AfterBigBoxAndTauID; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); 
+
+
+    hDeltaPhiMetTauCand_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBox", "hDeltaPhiMetTauCand_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetTauCand_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetTauCand_AfterBigBoxAndMet", "hDeltaPhiMetTauCand_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetFirstLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBox", "hDeltaPhiMetFirstLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetSecondLdgJet_AfterBigBox = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBox", "hDeltaPhiMetSecondLdgJet_AfterBigBox; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet", "hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet; #Delta#phi(#tau-cand, E_{T}^{miss}); N_{Events} / 5", 36, 0., 180.); 
+    hRtau_AfterBigBox  = makeTH<TH1F>(*fs, "hRtau_AfterBigBox", "hRtau_AfterBigBox; R_{#tau}=p^{ldg.track}/E^{vis.#tau jet};N_{Events} / 0.02", 60, 0., 1.2);
+    hRtauEfficiency_AfterBigBoxTauID = makeTH<TH1F>(*fs, "hRtauEfficiency_AfterBigBoxTauID", "hRtauEfficiency_AfterBigBoxTauID; pass;N_{Events}", 2, -0.5, 1.5);
 
     // Standard cut path
     TFileDirectory myDir = fs->mkdir("StdCutPath");
@@ -183,7 +202,9 @@ namespace HPlus {
     fAnalyses.push_back(AnalysisVariation(60., 20., myCoefficientBinCount));
     fAnalyses.push_back(AnalysisVariation(60., 30., myCoefficientBinCount));*/
 
+    fTree.enableNonIsoLeptons(true);
     fTree.init(*fs);
+
    }
 
   QCDMeasurement::~QCDMeasurement() {}
@@ -215,7 +236,6 @@ namespace HPlus {
     if(!triggerData.passedEvent()) return;
     increment(fTriggerAndHLTMetCutCounter);
     hSelectionFlow->Fill(kQCDOrderTrigger, fEventWeight.getWeight());
-    fTree.setTriggerWeight(triggerData.getScaleFactor());
 
     // GenParticle analysis
     if(!iEvent.isRealData()) fGenparticleAnalysis.analyze(iEvent, iSetup);
@@ -233,43 +253,72 @@ namespace HPlus {
     if(!tauCandidateData.passedEvent()) return;
     increment(fOneProngTauSelectionCounter);
     // Choose tau to be used throughout the event as the selected tau jet
-    edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
+    //edm::PtrVector<pat::Tau> mySelectedTau = chooseMostIsolatedTauCandidate(tauCandidateData.getSelectedTaus());
     // note: do not require here that only one tau has been found;
     // instead take first item from mySelectedTau as the tau in the event
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection,fEventWeight.getWeight());
 
-    double mySelectedTauPt = mySelectedTau[0]->pt();
+    // FIXME (MK 20110921): not sure if this is the correct place to
+    // apply the scale factor, but it is the same as if the scale
+    // factor would be applied inside fOneProngTauSelection as before.
+    // The offline tau which is used to derive the trigger scale
+    // factor is required to pass the full tau ID, including isolation
+    // etc, but the tau object here is not (yet) isolated.
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
+    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+
+    double mySelectedTauPt = tauCandidateData.getCleanedTauCandidates()[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
 
 
 ///////// Start global electron veto
-    // GlobalElectronVeto 
+    // ElectronVeto 
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return; 
     increment(fGlobalElectronVetoCounter);
     hSelectionFlow->Fill(kQCDOrderElectronVeto, fEventWeight.getWeight());
 
+    // std::cout << "*** nonIsolatedElectronVetoData" << std::endl;
+    NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
+    if (!nonIsolatedElectronVetoData.passedEvent())  return;
+    increment(fNonIsolatedElectronVetoCounter);
+    // std::cout << "*** nonIsolatedElectronVetoData called" << std::endl;
 
 ///////// Start global muon veto
-    // GlobalMuonVeto
+    // MuonVeto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!muonVetoData.passedEvent()) return; 
     increment(fGlobalMuonVetoCounter);
     hSelectionFlow->Fill(kQCDOrderMuonVeto, fEventWeight.getWeight());
 
+    NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
+    if (!nonIsolatedMuonVetoData.passedEvent()) return; 
+    increment(fNonIsolatedMuonVetoCounter);
+
 
 ///////// Jet selection
     // Clean jet collection from selected tau and apply NJets>=3 cut
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, mySelectedTau);
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
     if (!jetData.passedEvent()) return;
     increment(fJetSelectionCounter);
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hStdAfterNjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
-
-    ///// This position is after the Big Box
+    
     // get the MET, but cut on it later
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+
+    // alphaT - No cuts applied! Only produces plots
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
+    // increment(fEvtTopologyCounter);
+
+    if(metData.getRawMET().isNonnull())
+      fTree.setRawMET(metData.getRawMET());
+    if(metData.getType1MET().isNonnull())
+      fTree.setType1MET(metData.getType1MET());
+    if(metData.getType2MET().isNonnull())
+      fTree.setType2MET(metData.getType2MET());
+
     // It can happen (and happens) that mySelectedTau has more than 1
     // tau candidate, here we explicitly select only the first one
     // (with the hope that it is the correct one), because
@@ -277,33 +326,44 @@ namespace HPlus {
     // FIXME: how is jet selection affected by this? Sometimes there
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
-    mySelectedTauFirst.push_back(mySelectedTau[0]);
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET());
+    mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+    // FIXME: how to handle the top reco in QCD measurement?
+    fTree.setFillWeight(fEventWeight.getWeight());
+    fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {
       increment(fMETCounter);
       hSelectionFlow->Fill(kQCDOrderMETFactorized, fEventWeight.getWeight());
       hStdAfterMET->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
-
-///////// btag selection (factorise out)
+    
+      ///////// btag selection (factorise out)
       double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
+      double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
       BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
+      // Apply scale factor as weight to event
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
       if (btagData.passedEvent()) {
         increment(fMETCounter);
         hSelectionFlow->Fill(kQCDOrderBTagFactorized, fEventWeight.getWeight());
         hStdAfterBjets->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
-        hStdTransverseMassAfterBTag->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+        hStdTransverseMassAfterBTag->Fill(TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
         // undo btag scale factor
         fEventWeight.multiplyWeight(myWeightWithoutBTagScale / fEventWeight.getWeight()); // needed because of btag scale factor
       }
     }
-
-
-    // alphaT - No cuts applied! Only produces plots
-//    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(mySelectedTau[0]), jetData.getSelectedJets());
-    // increment(fEvtTopologyCounter);
-
+    
+    /////////////////////    /////////////////////    /////////////////////
+    /// BIG BOX: Produce plots
+    METSelection::Data metDataBB  = fMETSelection.analyze(iEvent, iSetup);
+    double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
+    BTagging::Data btagDataBB = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor 
+    TauSelection::Data tauDataForTauIDBB = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
+    AfterBigBox(EventWeightWithBTag, EventWeightWithoutBTag, tauCandidateData, jetData, metDataBB, btagDataBB, tauDataForTauIDBB);
+    /////////////////////    /////////////////////    /////////////////////
 
     // InvMassVeto - No cuts applied! Only produces plots 
 //    InvMassVetoOnJets::Data invMassVetoOnJetsData =  fInvMassVetoOnJets.analyze( jetData.getSelectedJets() ); 
@@ -314,14 +374,14 @@ namespace HPlus {
 ///////// Start parallel paths after big box
 
     // Apply non-standard cut paths
-/*    analyzeCorrelation(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+/*    analyzeCorrelation(metData, tauCandidateData.getCleanedTauCandidates()[0], tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
 */
 
     /* analysis variations cannot be done like this because of trigger scale factor!!!
       for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(metData, mySelectedTau, tauCandidateData, tauDataForTauID, btagData, 
+      (*it).analyse(metData, tauCandidateData.getCleanedTauCandidates()[0], tauCandidateData, tauDataForTauID, btagData, 
                        fakeMETData, forwardJetData, topSelectionData, myFactorizationTableIndex,
                        myEventWeightBeforeMetFactorization);
     }*/
@@ -329,23 +389,23 @@ namespace HPlus {
 ///////// Continue cut path to tau isolation and rtau
 
     // Apply rest of tauID without Rtau
-    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, mySelectedTau[0]);
+    TauSelection::Data tauDataForTauID = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
     if(!tauDataForTauID.passedEvent()) return;
     increment(fOneProngTauIDWithoutRtauCounter);
     hSelectionFlow->Fill(kQCDOrderTauID, fEventWeight.getWeight());
     hStdAfterTauIDNoRtau->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
 
-    hStdTransverseMassAfterTauID->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+    hStdTransverseMassAfterTauID->Fill(TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
 
     // Factorize out Rtau
-    if (tauDataForTauID.selectedTauPassedRtau()) {
+    if (tauDataForTauID.getBestTauCandidatePassedRtauStatus()) {
       increment(fOneProngTauIDWithRtauCounter);
       hSelectionFlow->Fill(kQCDOrderRtauFactorized, fEventWeight.getWeight());
       hStdAfterRtau->Fill(myFactorizationTableIndex, fEventWeight.getWeight());
     }
 
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTau, jetData.getSelectedJets());
-    ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
+    // FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0], jetData.getSelectedJets());
+    // ForwardJetVeto::Data forwardJetData = fForwardJetVeto.analyze(iEvent, iSetup);
     //TopSelection::Data topSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
 
 
@@ -395,6 +455,7 @@ namespace HPlus {
       hMETPassProbabilityAfterForwardJetVeto->Fill(myFactorizationTableIndex, myEventWeightBeforeMetFactorization);
     
     */
+
   }
 
 
@@ -433,6 +494,55 @@ namespace HPlus {
     return mySelectedTauCandidate;
   }
   
+  
+  void QCDMeasurement::AfterBigBox(double EventWeightWithBtag, double EventWeightWithoutBtag, const TauSelection::Data& tauCandidateDataBB, JetSelection::Data& jetDataBB, const METSelection::Data& metDataBB, const BTagging::Data& btagDataBB, const TauSelection::Data& tauDataForTauIDBB){
+    
+    double mt_TauCandAndMet = TransverseMass::reconstruct(*(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) );
+    double deltaPhiMetTauCand = reco::deltaPhi( *(tauDataForTauIDBB.getCleanedTauCandidates()[0]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double deltaPhiMetFirstLdgJet = reco::deltaPhi( *(jetDataBB.getSelectedJets()[0]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double deltaPhiMetSecondLdgJet = reco::deltaPhi( *(jetDataBB.getSelectedJets()[1]), *(metDataBB.getSelectedMET()) ) * 180./3.14159; 
+    double BtagEventWeight = (EventWeightWithBtag)/(EventWeightWithoutBtag);
+    fEventWeight.multiplyWeight( 1/BtagEventWeight); // undo btag scale factor, automaticall applied by  fBTagging.analyze(..);
+
+    // Fill histograms: DeltaPhi(tauCand,MET)
+    hDeltaPhiMetTauCand_AfterBigBox->Fill(deltaPhiMetTauCand, fEventWeight.getWeight());
+    hDeltaPhiMetFirstLdgJet_AfterBigBox->Fill(deltaPhiMetFirstLdgJet, fEventWeight.getWeight());
+    hDeltaPhiMetSecondLdgJet_AfterBigBox->Fill(deltaPhiMetSecondLdgJet, fEventWeight.getWeight());
+
+    if(metDataBB.passedEvent() ){
+      hDeltaPhiMetTauCand_AfterBigBoxAndMet->Fill(deltaPhiMetTauCand, fEventWeight.getWeight());
+      hDeltaPhiMetFirstLdgJet_AfterBigBoxAndMet->Fill(deltaPhiMetFirstLdgJet, fEventWeight.getWeight());
+      hDeltaPhiMetSecondLdgJet_AfterBigBoxAndMet->Fill(deltaPhiMetSecondLdgJet, fEventWeight.getWeight());
+    }
+
+    // Fill histograms: Transverse Mass
+    hTransverseMass_AfterBigBox->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+
+    // Standalone MET
+    if(metDataBB.passedEvent() ){
+      hTransverseMass_AfterBigBoxAndMet->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+    }
+
+    // Standalone Btaggig
+    if(btagDataBB.passedEvent() ){
+      fEventWeight.multiplyWeight(BtagEventWeight); // re-do btag scale factor
+      hTransverseMass_AfterBigBoxAndBtag->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+      fEventWeight.multiplyWeight( 1/BtagEventWeight); // re-undo btag scale factor
+    }
+
+    // Standalone TauID & Rtau
+    if(tauDataForTauIDBB.passedEvent() ){
+      hTransverseMass_AfterBigBoxAndTauID->Fill(mt_TauCandAndMet, fEventWeight.getWeight());
+    
+      // Rtau: If TauCandidate passes TauID (Loose) measure Rtau efficiency from data
+      if (tauDataForTauIDBB.selectedTauPassedRtau()) {
+	hRtau_AfterBigBox->Fill(tauDataForTauIDBB.getRtauOfSelectedTau() , fEventWeight.getWeight());
+	hRtauEfficiency_AfterBigBoxTauID->Fill( 1.0, fEventWeight.getWeight());
+      }else hRtauEfficiency_AfterBigBoxTauID->Fill( 0.0, fEventWeight.getWeight());
+    }
+
+    return;
+}
 
 
   void QCDMeasurement::createHistogramGroupByOtherVariableBins(std::string name, std::vector<TH1*>& histograms, const int nBins, double xMin, double xMax, std::vector<double> BinVariableBins, const TString BinVariableName, const TString VariableName, const TString VariableUnits ){
@@ -488,7 +598,7 @@ namespace HPlus {
     if (btagData.passedEvent()) {
       //hCorrelationBtagAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
     }
-    if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+    if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
       //hCorrelationRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
       if (btagData.passedEvent()) {
         //hCorrelationBtagAndRtauAfterAllSelections->Fill(tauPtBin, weightWithoutMET);
@@ -579,7 +689,7 @@ namespace HPlus {
     if (tauData.passedEvent()) {
       hAfterBigBoxAndTauIDNoRtau->Fill(tauPtBin, weightWithoutMET);
       // Leg2
-      if (tauCandidateData.selectedTauCandidatePassedRtau()) {
+      if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
         hLeg2AfterRtau->Fill(tauPtBin, weightWithoutMET);
       }
       // Leg3

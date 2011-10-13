@@ -199,7 +199,7 @@ namespace HPlus {
  
 
     // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     // if(!jetData.passedEvent()) return false;
     // increment(fNJetsCounter);
     iNHadronicJets = jetData.getHadronicJetCount();   
@@ -208,13 +208,14 @@ namespace HPlus {
 
     // b-tagging
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets()); 
+    fEventWeight.multiplyWeight(btagData.getScaleFactor());
     // if(!btagData.passedEvent()) return false;
     // increment(fBTaggingCounter);    
     iNBtags = btagData.getBJetCount();
     
     
     // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
     // if (!fakeMETData.passedEvent()) return false;
     // increment(fFakeMETVetoCounter);
     fFakeMETDeltaPhi = fakeMETData.closestDeltaPhi();

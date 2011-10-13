@@ -14,6 +14,7 @@ namespace HPlus {
     ~TauIDTCTau();
 
 //    /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
+    bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau);
     bool passOneProngCut(const edm::Ptr<pat::Tau> tau);
     bool passThreeProngCut(const edm::Ptr<pat::Tau> tau);

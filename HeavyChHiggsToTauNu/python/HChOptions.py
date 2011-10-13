@@ -35,6 +35,14 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Input is from tau embedding (default: 0)")
+    options.register("tauEmbeddingCaloMet",
+                     "metNoHF",
+                     options.multiplicity.singleton, options.varType.string,
+                     "What calo MET object to use in signal analysis of tau embedded samples")
+    options.register("tauEmbeddingTauTrigger",
+                     "",
+                     options.multiplicity.singleton, options.varType.string,
+                     "What tau trigger efficiency to use for tau embedding normalisation")
     options.register("tauIDFactorizationMap",
                      "FactorizationMap_NoFactorization_cfi",
                      options.multiplicity.singleton,
@@ -69,8 +77,8 @@ def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=Tru
 
     dataVersion = DataVersion(dataVersion)
 
-    if useDefaultSignalTrigger and options.trigger == "" and dataVersion.isMC():
-        options.trigger = dataVersion.getDefaultSignalTrigger()
+    if useDefaultSignalTrigger and len(options.trigger) == 0 and dataVersion.isMC():
+        options.trigger = [dataVersion.getDefaultSignalTrigger()]
 
     return (options, dataVersion)
 

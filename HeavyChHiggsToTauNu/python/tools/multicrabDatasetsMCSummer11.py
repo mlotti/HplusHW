@@ -691,7 +691,7 @@ datasets = {
     },
     "WZ_TuneZ2_Summer11": {
         "dataVersion": "42Xmc",
-        "crossSection": 18,
+        "crossSection": 18.2,
         "data": {
             "AOD": {
                 "datasetpath": "/WZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",

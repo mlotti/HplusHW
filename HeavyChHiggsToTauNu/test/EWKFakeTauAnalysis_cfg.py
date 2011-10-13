@@ -26,13 +26,6 @@ JESVariation = 0.03
 JESEtaVariation = 0.02
 JESUnclusteredMETVariation = 0.10
 
-# With tau embedding input, tighten the muon selection
-tauEmbeddingTightenMuonSelection = True
-# With tau embedding input, do the muon selection scan
-doTauEmbeddingMuonSelectionScan = False
-# Do tau id scan for tau embedding normalisation (no tau embedding input required)
-doTauEmbeddingTauSelectionScan = False
-
 # Do trigger parametrisation for MC and tau embedding
 doTriggerParametrisation = False
 
@@ -40,11 +33,6 @@ doTriggerParametrisation = False
 
 # Command line arguments (options) and DataVersion object
 options, dataVersion = getOptionsDataVersion(dataVersion)
-
-# These are needed for running against tau embedding samples, can be
-# given also from command line
-#options.doPat=1
-#options.tauEmbeddingInput=1
 
 ################################################################################
 # Define the process
@@ -68,9 +56,6 @@ process.source = cms.Source('PoolSource',
 #      "file:/tmp/kinnunen/pattuple_9_1_KJi.root"
     )
 )
-if options.tauEmbeddingInput != 0:
-    process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_3_9_X/TTJets_TuneZ2_Winter10/TTJets_TuneZ2_7TeV-madgraph-tauola/Winter10_E7TeV_ProbDist_2010Data_BX156_START39_V8_v1_AODSIM_tauembedding_embedding_v6_1/105b277d7ebabf8cba6c221de6c7ed8a/embedded_RECO_29_1_C97.root"]
-
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())
 print "GlobalTag="+dataVersion.getGlobalTag()
@@ -138,13 +123,6 @@ if (doTriggerParametrisation and not dataVersion.isData()):
 #    ])
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.customiseParamForTauEmbedding(param)
-    if tauEmbeddingTightenMuonSelection:
-        counters = tauEmbeddingCustomisations.addMuonRelativeIsolation(process, process.commonSequence, cut=0.1)
-        additionalCounters.extend(counters)
-
 # Signal analysis module for the "golden analysis"
 process.EWKFakeTauAnalysis = cms.EDProducer("HPlusEWKFakeTauAnalysisProducer",
     trigger = param.trigger,
@@ -162,7 +140,6 @@ process.EWKFakeTauAnalysis = cms.EDProducer("HPlusEWKFakeTauAnalysisProducer",
     transverseMassCut = param.transverseMassCut,
     EvtTopology = param.EvtTopology,
     TriggerEmulationEfficiency = param.TriggerEmulationEfficiency,
-    tauEmbedding = param.TauEmbeddingAnalysis,
     GenParticleAnalysis = param.GenParticleAnalysis                                     
 )
 
@@ -248,13 +225,6 @@ if doJESVariation:
     addJESVariationAnalysis(process, "EWKFakeTauAnalysis", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, process.EWKFakeTauAnalysis, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "EWKFakeTauAnalysis", "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm, process.EWKFakeTauAnalysis, additionalCounters, JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, "EWKFakeTauAnalysis", "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, process.EWKFakeTauAnalysis, additionalCounters, -JESVariation, JESEtaVariation, -JESUnclusteredMETVariation)
-
-# Signal analysis with various tightened muon selections for tau embedding
-if options.tauEmbeddingInput != 0 and doTauEmbeddingMuonSelectionScan:
-    tauEmbeddingCustomisations.addMuonIsolationAnalyses(process, "EWKFakeTauAnalysis", process.EWKFakeTauAnalysis, process.commonSequence, additionalCounters)
-
-if doTauEmbeddingTauSelectionScan:
-    tauEmbeddingCustomisations.addTauAnalyses(process, "EWKFakeTauAnalysis", process.EWKFakeTauAnalysis, process.commonSequence, additionalCounters)
 
 # Print tau discriminators from one tau from one event. Note that if
 # the path below is commented, the discriminators are not printed.

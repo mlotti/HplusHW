@@ -6,6 +6,8 @@
 import os, sys
 import glob
 import array
+import math
+
 from optparse import OptionParser
 
 import ROOT
@@ -276,17 +278,19 @@ def sumRootHistos(rootHistos, postfix="_sum"):
         h.Add(a)
     return h
 
-## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
-def dist2pass(hdist, **kwargs):
-    lessThan = True
+def isLessThan(**kwargs):
     if len(kwargs) != 1:
         raise Exception("Should give only either 'lessThan' or 'greaterThan' as a keyword argument")
     elif "lessThan" in kwargs:
-        lessThan = kwargs["lessThan"]
+        return kwargs["lessThan"]
     elif "greaterThan" in kwargs:
-        lessThan = not kwargs["greaterThan"]
+        return not kwargs["greaterThan"]
     else:
         raise Exception("Must give either 'lessThan' or 'greaterThan' as a keyword argument")
+
+## Convert TH1 distribution to TH1 of number of passed events as a function of cut value
+def dist2pass(hdist, **kwargs):
+    lessThan = isLessThan(**kwargs)
 
     # for less than
     integral = None
@@ -300,47 +304,65 @@ def dist2pass(hdist, **kwargs):
     # bin GetNbinsX()   last bin
     # bin GetNbinsX()+1 overflow bin
 
-    # Construct the passed histogram such that the bin low edges in
-    # the distribution histogram become the bin centers
-    binLowEdges = []
-    for bin in xrange(1, hdist.GetNbinsX()+3):
-        prevBin = bin-1
-        prevLowEdge = hdist.GetBinLowEdge(prevBin)
-        thisLowEdge = hdist.GetBinLowEdge(bin)
-        binLowEdges.append( (prevLowEdge+thisLowEdge)/2 )
+    # Here we assume that all the bins in hdist have equal widths. If
+    # this doesn't hold, the output must be TGraph
+    bw = hdist.GetBinWidth(1);
+    for bin in xrange(2, hdist.GetNbinsX()+1):
+        if abs(bw - hdist.GetBinWidth(bin))/bw > 0.01:
+            raise Exception("Input histogram with variable bin width is not supported (yet). The bin width of bin1 was %f, and bin width of bin %d was %f" % (bw, bin, hdist.GetBinWidth(bin)))
 
+    # Construct the low edges of the passed histogram. Set the low
+    # edges such that the bin centers correspond to the edges of the
+    # distribution histogram. This makes sense because the only
+    # sensible cut points in the distribution histogram are the bin
+    # edges, and if one draws the passed histogram with points, the
+    # points are placed to bin centers.
+    nbins = hdist.GetNbinsX()+1
+    firstLowEdge = hdist.GetXaxis().GetBinLowEdge(1) - bw/2
+    lastUpEdge = hdist.GetXaxis().GetBinUpEdge(hdist.GetNbinsX()) + bw/2
     name = "passed_"+hdist.GetName()
-    hpass = ROOT.TH1F(name, name, len(binLowEdges)-1, array.array("d", binLowEdges))
+    hpass = ROOT.TH1F("cumulative_"+hdist.GetName(), "Cumulative "+hdist.GetTitle(),
+                      nbins, firstLowEdge, lastUpEdge)
 
-    #print "dist bins %d, pass bins %d" % (hdist.GetNbinsX(), hpass.GetNbinsX())
+    if lessThan:
+        passedCumulative = 0
+        passedCumulativeErrSq = 0
+        for bin in xrange(0, hdist.GetNbinsX()+2):
+            passedCumulative += hdist.GetBinContent(bin)
+            err = hdist.GetBinError(bin)
+            passedCumulativeErrSq += err*err
 
-    #print ["%.4f" % i for i in binLowEdges]
-    #print ["%.3f" % hdist.GetBinLowEdge(bin) for bin in xrange(1, hdist.GetNbinsX()+2)]
-    #print ["%.3f" % hpass.GetBinCenter(bin) for bin in xrange(1, hpass.GetNbinsX()+1)]
-    #for bin in xrange(1, hpass.GetNbinsX()):
-    total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    #print "total %f" % total
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        passed = integral(hdist, bin)
-        #print "bin %d content %f, passed/total = %f/%f = %f" % (bin, hdist.GetBinContent(bin), passed, total, passed/total)
-        hpass.SetBinContent(bin+1, passed)
-    #print "bin N, N+1 %f, %f" % (hpass.GetBinContent(hpass.GetNbinsX()), hpass.GetBinContent(hpass.GetNbinsX()+1))
+            hpass.SetBinContent(bin+1, passedCumulative)
+            hpass.SetBinError(bin+1, math.sqrt(passedCumulativeErrSq))
+    else:
+        passedCumulative = 0
+        passedCumulativeErrSq = 0
+        for bin in xrange(hdist.GetNbinsX()+1, -1, -1):
+            passedCumulative += hdist.GetBinContent(bin)
+            err = hdist.GetBinError(bin)
+            passedCumulativeErrSq += err*err
+
+            hpass.SetBinContent(bin, passedCumulative)
+            hpass.SetBinError(bin, math.sqrt(passedCumulativeErrSq))
+
     return hpass
+
+def th1ApplyBin(th1, function):
+    for bin in xrange(0, th1.GetNbinsX()+2):
+        th1.SetBinContent(bin, function(th1.GetBinContent(bin)))
 
 ## Convert TH1 distribution to TH1 of efficiency as a function of cut value
 def dist2eff(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, hpass.GetBinContent(bin)/total)
+    th1ApplyBin(hpass, lambda value: value/total)
     return hpass
 
 ## Convert TH1 distribution to TH1 of 1-efficiency as a function of cut value
 def dist2rej(hdist, **kwargs):
     hpass = dist2pass(hdist, **kwargs)
     total = hdist.Integral(0, hdist.GetNbinsX()+1)
-    for bin in xrange(0, hdist.GetNbinsX()+2):
-        hpass.SetBinContent(bin, 1-hpass.GetBinContent(bin)/total)
+    th1ApplyBin(hpass, lambda value: 1-value/total)
     return hpass
 
 
@@ -711,13 +733,24 @@ class HistoBase:
 class Histo(HistoBase):
     ## Constructor
     #
+    # \param rootHisto  TH1 object
+    # \param name       Name of the Histo
+    #
+    #    The default legend label is the dataset name
+    def __init__(self, rootHisto, name):
+        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+
+## Represents one (TH1/TH2) histogram associated with a dataset.Dataset object
+class HistoWithDataset(Histo):
+    ## Constructor
+    #
     # \param dataset    dataset.Dataset object
     # \param rootHisto  TH1 object
     # \param name       Name of the Histo
     #
     #    The default legend label is the dataset name
     def __init__(self, dataset, rootHisto, name):
-        HistoBase.__init__(self, rootHisto, name, "l", "HIST")
+        Histo.__init__(self, rootHisto, name)
         self.dataset = dataset
 
     ## Is the histogram from MC?
@@ -841,24 +874,37 @@ class HistoGraph(HistoBase):
     def getRootGraph(self):
         return self.getRootHisto()
 
+    def _values(self, values, func):
+        return [func(values[i], i) for i in xrange(0, self.getRootGraph().GetN())]
+
     def getXmin(self):
-        values = self.getRootGraph().GetX()
-        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return min(self._values(self.getRootGraph().GetX(), lambda val, i: val-self.getRootGraph().GetErrorXlow(i)))
 
     def getXmax(self):
-        values = self.getRootGraph().GetX()
-        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return max(self._values(self.getRootGraph().GetX(), lambda val, i: val+self.getRootGraph().GetErrorXhigh(i)))
 
     def getYmin(self):
-        values = self.getRootGraph().GetY()
-        return min([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return min(self._values(self.getRootGraph().GetY(), lambda val, i: val-self.getRootGraph().GetErrorYlow(i)))
 
     def getYmax(self):
-        values = self.getRootGraph().GetY()
-        return max([values[i] for i in xrange(0, self.getRootGraph().GetN())])
+        return max(self._values(self.getRootGraph().GetY(), lambda val, i: val+self.getRootGraph().GetErrorYhigh(i)))
 
     def getBinWidth(self, bin):
         raise Exception("getBinWidth() is meaningless for HistoGraph (name %s)" % self.getName())
+
+class HistoGraphWithDataset(HistoGraph):
+    def __init__(self, dataset, *args, **kwargs):
+        HistoGraph.__init__(self, *args, **kwargs)
+        self.dataset = dataset
+
+    def isMC(self):
+        return self.dataset.isMC()
+
+    def isData(self):
+        return self.dataset.isData()
+
+    def getDataset(self):
+        return self.dataset
 
 ## Implementation of HistoManager.
 #
@@ -923,6 +969,17 @@ class HistoManagerImpl:
         self.drawList.insert(drawIndex, histo)
         self.legendList.insert(legendIndex, histo)
         self._populateMap()
+
+    def removeHisto(self, name):
+        del self.nameHistoMap[name]
+        for i, h in enumerate(self.drawList):
+            if h.getName() == name:
+                del self.drawList[i]
+                break
+        for i, h in enumerate(self.legendList):
+            if h.getName() == name:
+                del self.legendList[i]
+                break
 
     ## Call a function for a named histograms.HistoBase object.
     #
@@ -1263,7 +1320,7 @@ class HistoManager:
 
     ## Create the HistoManagerImpl object.
     def _createImplementation(self):
-        self.impl = HistoManagerImpl([Histo(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
+        self.impl = HistoManagerImpl([HistoWithDataset(h.getDataset(), h.getHistogram(), h.getName()) for h in self.datasetRootHistos])
 
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):

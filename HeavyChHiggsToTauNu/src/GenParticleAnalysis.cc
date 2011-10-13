@@ -15,21 +15,19 @@
 #include "TVector3.h"
 
 namespace HPlus {
+  GenParticleAnalysis::Data::Data(const GenParticleAnalysis *analysis): fAnalysis(analysis) {}
+  GenParticleAnalysis::Data::~Data() {}
 
-  GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight)
-    : fEventWeight(eventWeight)
-      //    fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
-      //    fEtaCut(iConfig.getUntrackedParameter<double>("etaCut"))
+  GenParticleAnalysis::GenParticleAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
+    fEventWeight(eventWeight),
+    fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
+    fMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("metSrc")),
+    fOneProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneProngTauSrc")),
+    fOneAndThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("oneAndThreeProngTauSrc")),
+    fThreeProngTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("threeProngTauSrc"))
   {
     init();
   }
-  GenParticleAnalysis::GenParticleAnalysis(EventCounter& eventCounter, EventWeight& eventWeight)
-    : fEventWeight(eventWeight) {
-      init();
-    }
-/*  GenParticleAnalysis::GenParticleAnalysis(){
-    init();
-  }*/
 
   GenParticleAnalysis::~GenParticleAnalysis() {}
 
@@ -73,25 +71,27 @@ namespace HPlus {
     hTopPt_wrongB = makeTH<TH1F>(myDir, "genTopPt_wrongB", "genTopPt_wrongB", 300, 0., 600);
   }
 
-  void GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
+  GenParticleAnalysis::Data GenParticleAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup ){
   
     edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
+    iEvent.getByLabel(fSrc, genParticles);
 
     typedef math::XYZTLorentzVectorD LorentzVector;
     typedef std::vector<LorentzVector> LorentzVectorCollection;
 
 
     edm::Handle <std::vector<LorentzVector> > oneProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauOneProng"),oneProngTaus);
+    iEvent.getByLabel(fOneProngTauSrc, oneProngTaus);
 
     edm::Handle <std::vector<LorentzVector> > oneAndThreeProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauOneAndThreeProng"),oneAndThreeProngTaus);	  
-
+    iEvent.getByLabel(fOneAndThreeProngTauSrc,oneAndThreeProngTaus);	  
 
     edm::Handle <std::vector<LorentzVector> > threeProngTaus;
-    iEvent.getByLabel(edm::InputTag("VisibleTaus","HadronicTauThreeProng"),threeProngTaus);	  
+    iEvent.getByLabel(fThreeProngTauSrc, threeProngTaus);	  
 
+    edm::Handle<edm::View<reco::GenMET> > hmet;
+    iEvent.getByLabel(fMetSrc, hmet);
+    fGenMet = hmet->ptrAt(0);
 
     // One-prong tau jets
     double Rtau = -1;
@@ -116,7 +116,6 @@ namespace HPlus {
 	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
 	    if ( !dparticle) continue;
 	    int idmother = dparticle->pdgId();
-	    int status = dparticle->status();
 	    if ( abs(idmother) == 37 ) {
 	      tauFromHiggs = true;
 	    }
@@ -190,7 +189,6 @@ namespace HPlus {
 	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
 	    if ( !dparticle) continue;
 	    int idmother = dparticle->pdgId();
-	    int status = dparticle->status();
 	    if ( abs(idmother) == 37 ) {
 	      tauFromHiggs = true;
 	    }
@@ -250,7 +248,6 @@ namespace HPlus {
 	    const reco::GenParticle* dparticle = dynamic_cast<const reco::GenParticle*>(p.mother(im));
 	    if ( !dparticle) continue;
 	    int idmother = dparticle->pdgId();
-	    int status = dparticle->status();
 	    if ( abs(idmother) == 37  ) {
 	      tauFromHiggs = true;
 	    }
@@ -421,7 +418,9 @@ namespace HPlus {
         hTopPt->Fill(sqrt(px*px+py*py), fEventWeight.getWeight());
         hTopPt_wrongB->Fill(sqrt(px_wrong*px_wrong+py_wrong*py_wrong), fEventWeight.getWeight());
       }
-    }    
+    }
+
+    return Data(this);
   }
    //eof: void GenParticleAnalysis::analyze()
 

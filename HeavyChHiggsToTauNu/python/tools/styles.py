@@ -22,11 +22,14 @@ class StyleCompound(StyleBase):
         self.styles = styles
 
     def append(self, style):
-        self.styles = style
+        self.styles.append(style)
 
     def apply(self, h):
         for s in self.styles:
             s.apply(h)
+
+    def clone(self):
+        return StyleCompound(self.styles[:])
 
 class StyleFill(StyleBase):
     def __init__(self, style, fillStyle=1001):
@@ -40,13 +43,18 @@ class StyleFill(StyleBase):
         h.SetFillStyle(self.fillStyle)
 
 class StyleLine(StyleBase):
-    def __init__(self, lineStyle=1, lineWidth=2):
+    def __init__(self, lineStyle=None, lineWidth=None, lineColor=None):
         self.lineStyle = lineStyle
         self.lineWidth = lineWidth
+        self.lineColor = lineColor
 
     def apply(self, h):
-        h.SetLineStyle(self.lineStyle)
-        h.SetLineWidth(self.lineWidth)
+        if self.lineStyle != None:
+            h.SetLineStyle(self.lineStyle)
+        if self.lineWidth != None:
+            h.SetLineWidth(self.lineWidth)
+        if self.lineColor != None:
+            h.SetLineColor(self.lineColor)
 
 class StyleMarker(StyleBase):
     def __init__(self, markerSize=1.2, markerColor=None, markerSizes=None):
@@ -81,37 +89,44 @@ class StyleError(StyleBase):
             h.SetLineWidth(0)
             h.SetLineColor(ROOT.kWhite)
 
-dataStyle = Style(ROOT.kFullCircle, ROOT.kBlack)
-dataMcStyle = dataStyle
-errorStyle = StyleError(ROOT.kBlack, 3354)
-errorStyle2 = StyleError(ROOT.kGray+2, 3354)
-errorStyle3 = StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)
+dataStyle = StyleCompound([Style(ROOT.kFullCircle, ROOT.kBlack)])
+dataMcStyle = dataStyle.clone()
+errorStyle = StyleCompound([StyleError(ROOT.kBlack, 3354)])
+errorStyle2 = StyleCompound([StyleError(ROOT.kGray+2, 3354)])
+errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-10)])
 
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
-mcStyle = Style(ROOT.kFullSquare, ROOT.kRed+1)
+mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])
 signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
                              StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
                              ])
 signalHHStyle = StyleCompound([Style(34, ROOT.kRed-8), 
                              StyleLine(lineStyle=8, lineWidth=6)
                              ])
-signal80Style =  signalStyle
-signal90Style =  signalStyle
-signal100Style = signalStyle
-signal120Style = signalStyle
-signal140Style = signalStyle
-signal150Style = signalStyle
-signal155Style = signalStyle
-signal160Style = signalStyle
+signal80Style =  signalStyle.clone()
+signal90Style =  signalStyle.clone()
+signal100Style = signalStyle.clone()
+signal120Style = signalStyle.clone()
+signal140Style = signalStyle.clone()
+signal150Style = signalStyle.clone()
+signal155Style = signalStyle.clone()
+signal160Style = signalStyle.clone()
 
-signalHH80Style =  signalHHStyle
-signalHH90Style =  signalHHStyle
-signalHH100Style = signalHHStyle
-signalHH120Style = signalHHStyle
-signalHH140Style = signalHHStyle
-signalHH150Style = signalHHStyle
-signalHH155Style = signalHHStyle
-signalHH160Style = signalHHStyle
+signalHH80Style =  signalHHStyle.clone()
+signalHH90Style =  signalHHStyle.clone()
+signalHH100Style = signalHHStyle.clone()
+signalHH120Style = signalHHStyle.clone()
+signalHH140Style = signalHHStyle.clone()
+signalHH150Style = signalHHStyle.clone()
+signalHH155Style = signalHHStyle.clone()
+signalHH160Style = signalHHStyle.clone()
+
+signal180Style = signalStyle.clone()
+signal190Style = signalStyle.clone()
+signal200Style = signalStyle.clone()
+signal220Style = signalStyle.clone()
+signal250Style = signalStyle.clone()
+signal300Style = signalStyle.clone()
 
 qcdStyle = Style(ROOT.kFullTriangleUp, ROOT.kOrange-2)
 ewkStyle = Style(ROOT.kFullTriangleDown, ROOT.kRed-4)

@@ -36,29 +36,32 @@ namespace HPlus {
   class TriggerSelection {
   enum TriggerSelectionType {
     kTriggerSelectionByTriggerBit,
-    kTriggerSelectionByTriggerBitApplyScaleFactor,
-    kTriggerSelectionByTriggerEfficiencyParametrisation,
     kTriggerSelectionDisabled
   };
   
   public:
     class Data;
     class TriggerPath {
-        public:
+    public:
       TriggerPath(const std::string& path, EventCounter& eventCounter);
-            ~TriggerPath();
+      ~TriggerPath();
 
-            bool analyze(const pat::TriggerEvent& trigger);
-            bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
+      bool analyze(const pat::TriggerEvent& trigger);
+      bool analyze(const edm::TriggerResults& trigger, const edm::TriggerNames& triggerNames);
 
       const std::string& getPathName() const { return fPath; }
+      const pat::TriggerObjectRefVector& getTauObjects() const { return fTaus; }
+      const pat::TriggerObjectRefVector& getMetObjects() const { return fMets; }
 
-        private:
-            // Input parameters
-            std::string fPath;
+    private:
+      // Input parameters
+      std::string fPath;
 
-            // Counters
-            Count fTriggerCount;
+      // Counters
+      Count fTriggerCount;
+
+      pat::TriggerObjectRefVector fMets;
+      pat::TriggerObjectRefVector fTaus;
     };
 
       /**
@@ -75,11 +78,16 @@ namespace HPlus {
       ~Data();
 
       bool passedEvent() const { return fPassedEvent; }
-      double getScaleFactor() const { return fTriggerSelection->fScaleFactor; }
 
       pat::TriggerObjectRef getHltMetObject() const {
         return fTriggerSelection->fHltMet;
       }
+
+      size_t getTriggerTauSize() const {
+        return fTriggerPath->getTauObjects().size();
+      }
+
+      const pat::TriggerObjectRefVector& getTriggerTaus() const { return fTriggerPath->getTauObjects(); }
 
     private:
       const TriggerSelection *fTriggerSelection;
@@ -87,39 +95,13 @@ namespace HPlus {
       const bool fPassedEvent;
     };
 
-    class TriggerScaleFactor {
-    public:
-      TriggerScaleFactor();
-      ~TriggerScaleFactor();
-
-      void setValue(double ptLowEdge, double dataEff, double dataUncertainty, double MCEff, double MCUncertainty);
-      double getScaleFactor(double tauPt) const;
-      double getScaleFactorRelativeUncertainty(double tauPt) const;
-      double getScaleFactorAbsoluteUncertainty(double tauPt) const;
-
-    private:
-      size_t obtainIndex(double pt) const;
-
-      std::vector<double> fTriggerEffPtBinEdge;
-      std::vector<double> fTriggerEffDataValues;
-      std::vector<double> fTriggerEffDataUncertainty;
-      std::vector<double> fTriggerEffMCValues;
-      std::vector<double> fTriggerEffMCUncertainty;
-    };
-
-
     TriggerSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~TriggerSelection();
 
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    /// Call this function to set trigger scale factor
-    bool passedTriggerScaleFactor(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     
   private:
     bool passedTriggerBit(const edm::Event& iEvent, const edm::EventSetup& iSetup, TriggerPath*& returnPath);
-    bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    
-    //bool passedTriggerParametrisation(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
     std::vector<TriggerPath* > triggerPaths;
@@ -128,9 +110,6 @@ namespace HPlus {
     const double fMetCut;
 
     EventWeight& fEventWeight;
-    TauSelection fTriggerTauSelection;
-    METSelection fTriggerMETSelection;
-    TriggerEfficiency fTriggerEfficiency;
     TriggerMETEmulation fTriggerCaloMet;
     
     // Counters
@@ -143,15 +122,7 @@ namespace HPlus {
     Count fTriggerHltMetExistsCount;
     Count fTriggerHltMetPassedCount;
 
-    Count fTriggerScaleFactorAllCount;
-    Count fTriggerScaleFactorAppliedCount;
-
-    Count fTriggerParamAllCount;
-    Count fTriggerParamTauCount;
-    Count fTriggerParamMetCount;
-
     TriggerSelectionType fTriggerSelectionType;
-    TriggerScaleFactor fTriggerScaleFactor;
     
     // Histograms
     TH1 *hHltMetBeforeTrigger;
@@ -160,15 +131,10 @@ namespace HPlus {
     TH1 *hTriggerParametrisationWeight;
     TH1 *hControlSelectionType;
 
-    TH1 *hScaleFactor;
-    TH1 *hScaleFactorRelativeUncertainty;
-    TH1 *hScaleFactorAbsoluteUncertainty;
-
     // Analysis results
     pat::TriggerObjectRef fHltMet;
 
     bool fThrowIfNoMet;
-    double fScaleFactor;
   };
 }
 
