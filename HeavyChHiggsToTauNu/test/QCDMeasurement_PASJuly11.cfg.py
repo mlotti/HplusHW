@@ -38,8 +38,7 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 
 ################################################################################
 # Define the process
-#process = cms.Process("HChQCDMeasurement_PASJuly11Method3Part2")
-process = cms.Process("HChQCDMeasurement_PASJuly11Method3")
+process = cms.Process("HChQCDMeasurement_PASJuly11")
 
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
