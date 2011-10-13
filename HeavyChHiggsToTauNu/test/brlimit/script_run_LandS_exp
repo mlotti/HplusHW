@@ -18,7 +18,7 @@ cmsenv
 
 #${odir}/LandS_AN/LandS/test/lands.exe -d ${datacard} -M Hybrid  -v 1 --bQuickEstimateInitialLimit 0 --initialRmin 0 --initialRmax 0.1 --doExpectation 1 -t 1000 | tail -5 >& ${outputfile}
 
-${odir}/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.05  -d ${datacard1} --doExpectation 1 -t 1000 | tail -5 >& ${outputfile}
+${odir}/UserCode/mschen/LandS/test/lands.exe --PhysicsModel ChargedHiggs  -M Hybrid --bQuickEstimateInitialLimit 0 --initialRmin 0. --initialRmax 0.09  -d ${datacard1} --doExpectation 1 -t 1000 | tail -5 >& ${outputfile}
 
 #cp ${outputfile} ${odir}
 
