@@ -306,6 +306,12 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # L3Absolute, L5Flavor and L7Parton. The default JEC to be applied
     # is L2L3Residual, or L3Absolute, or Uncorrected (in this order).
 
+    betaPrototype = cms.EDProducer("HPlusPATJetViewBetaEmbedder",
+        jetSrc = cms.InputTag("patJetsAK5PF"),
+        vertexSrc = cms.InputTag("offlinePrimaryVertices"),
+        embedPrefix = cms.string("")
+    )
+
     if doPatCalo:
         # Add JPT jets
         # FIXME: Disabled for now until the JEC for JPT works again (with the latest JEC)
@@ -334,6 +340,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
                          doJetID      = True
         )
         setPatJetCorrDefaults(process.patJetCorrFactorsAK5PF, dataVersion, True)
+        process.patJetsAK5PFBetaEmbedded = betaPrototype.clone()
+        process.selectedPatJetsAK5PF.src = "patJetsAK5PFBetaEmbedded"
+        process.patDefaultSequence.replace(process.selectedPatJetsAK5PF,
+                                           process.patJetsAK5PFBetaEmbedded*process.selectedPatJetsAK5PF)
 
     else:
         setPatJetCorrDefaults(process.patJetCorrFactors, dataVersion, True)
@@ -501,7 +511,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         # Keep StandAlone trigger objects for enabling trigger
         # matching in the analysis phase with PAT tools
         outputCommands.extend(patTriggerStandAloneEventContent)
-
+        outputCommands.extend([
+                "keep patTriggerAlgorithms_patTrigger_*_*", # for L1
+                "keep patTriggerConditions_patTrigger_*_*",
+                ])
 
     # Remove cleaning step and set the event content
     if out == None:
