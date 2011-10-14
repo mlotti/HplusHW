@@ -73,7 +73,7 @@ addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
 addpkg DataFormats/PatCandidates  V06-04-19-02
-addpkg PhysicsTools/PatAlgos      V08-06-45
+addpkg PhysicsTools/PatAlgos      V08-06-46
 addpkg PhysicsTools/PatExamples   V00-05-24
 addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
 addpkg PhysicsTools/SelectorUtils V00-03-24
