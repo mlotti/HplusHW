@@ -21,10 +21,16 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi import *
 muVetoFilter = hPlusGlobalMuonVetoFilter.clone()
 eventFilter *= muVetoFilter
 
+# Select first trigger matched tau object for the cleaning
+triggerMatchedTauCandidate = cms.EDProducer("HPlusFirstCandidateSelector",
+    src = cms.InputTag("patTausHpsPFTauTauTriggerMatched"),
+)
+eventFilter *= triggerMatchedTauCandidate
+
 # Jet selection
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChJetFilter_cfi import *
 jetSelectionFilter = hPlusJetPtrSelectorFilter.clone(
-    tauSrc = "tauSelectionFilter"
+    tauSrc = "triggerMatchedTauCandidate"
 )
 eventFilter *= jetSelectionFilter
 

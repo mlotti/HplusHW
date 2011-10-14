@@ -109,8 +109,10 @@ process.load("HiggsAnalysis.TriggerEfficiency.EventFilter_cff")
 process.eventFilter.remove(process.metSelectionFilter)
 
 process.tauSelectionFilter.filter = False
+#process.tauSelectionFilter.tauSelection.operatingMode = "tauCandidateSelectionOnly"
 process.eVetoFilter.filter = False
 process.muVetoFilter.filter = False
+process.triggerMatchedTauCandidate.throw = cms.untracked.bool(False)
 process.jetSelectionFilter.jetSelection.ptCut = 30
 process.jetSelectionFilter.filter = False
 process.jetSelectionFilter.throw = False
