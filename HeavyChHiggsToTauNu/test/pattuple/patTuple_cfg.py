@@ -69,6 +69,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_offlinePrimaryVertices_*_*",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
+        "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
         ),
     dropMetaData = cms.untracked.string("ALL")
 )
