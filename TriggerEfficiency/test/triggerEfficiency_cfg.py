@@ -30,7 +30,8 @@ process.source = cms.Source('PoolSource',
     # dataVersion.getAnalysisDefaultFileCastor()
         #dataVersion.getAnalysisDefaultFileMadhatter()
 #        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_5_1_Med.root"
-        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18/a074e5725328b3ec89273a9ce844bc40/pattuple_51_1_qZs.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_166374-167043_Prompt/Tau/PromptReco_v4_AOD_Single_166374_pattuple_v18_1/fdd51a0468635b24b4e8e11496951f46/pattuple_58_3_tsm.root"
+        #"file:/home/mkortela/hplus/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/pattuple/pattuple.root"
     )
 )
 
@@ -112,6 +113,7 @@ process.eVetoFilter.filter = False
 process.muVetoFilter.filter = False
 process.jetSelectionFilter.jetSelection.ptCut = 30
 process.jetSelectionFilter.filter = False
+process.jetSelectionFilter.throw = False
 process.btagSelectionFilter.filter = False
 process.btagSelectionFilter.throw = False
 

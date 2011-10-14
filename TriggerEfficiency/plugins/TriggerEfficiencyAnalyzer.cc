@@ -65,6 +65,11 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
   edm::InputTag caloMetSrc;
   edm::InputTag caloMetNoHFSrc;
 
+  std::string l1MetCollection;
+  std::string l1CenJetCollection;
+  std::string l1TauJetCollection;
+  std::string l1ForJetCollection;
+
   TTree* tree;
 
   typedef math::XYZTLorentzVector LorentzVector;
@@ -91,7 +96,11 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
     metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metRawSrc")),
     metType1Src(iConfig.getUntrackedParameter<edm::InputTag>("metType1Src")),
     caloMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetSrc")),
-    caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc"))
+    caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc")),
+    l1MetCollection("l1extraParticles:MET"),
+    l1CenJetCollection("l1extraParticles:Central"),
+    l1TauJetCollection("l1extraParticles:Tau"),
+    l1ForJetCollection("l1extraParticles:Forward")
 {
   if(iConfig.exists("bools")) {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("bools");
@@ -177,21 +186,41 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         // L1 MET
         pat::TriggerObjectRefVector l1mets = htrigger->objects(trigger::TriggerL1ETM);
         if(!l1mets.empty()) {
-          if(l1mets.size() != 1)
-            throw cms::Exception("Assert") << "L1 MET exists, but l1mets.size() = " << l1mets.size() << " != 1 at " << __FILE__ << ":" << __LINE__ << std::endl;
+          if(l1mets.size() != 1) {
+            bool found = false;
+            for(size_t i=0; i<l1mets.size(); ++i) {
+              if(l1mets[i]->coll(l1MetCollection)) {
+                l1Met = l1mets[i]->et();
+                found = true;
+                break;
+              }
+            }
+            if(!found) {
+              std::stringstream ss;
+              for(size_t i=0; i<l1mets.size(); ++i) {
+                ss << l1mets[i]->collection() << " " << l1mets[i]->et() << " ";
+              }
+              throw cms::Exception("Assert") << "No L1 MET from collection " << l1MetCollection 
+                                             << ", have " << l1mets.size() << " L1 MET objects: " << ss.str()
+                                             << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+            }
+          }
           l1Met = l1mets[0]->et();
         }
 
         // L1 jets
         pat::TriggerObjectRefVector l1cenjets = htrigger->objects(trigger::TriggerL1CenJet);
         for(size_t i=0; i<l1cenjets.size(); ++i)
-          l1CenJets.push_back(l1cenjets[i]->p4());
+          if(l1cenjets[i]->coll(l1CenJetCollection))
+             l1CenJets.push_back(l1cenjets[i]->p4());
         pat::TriggerObjectRefVector l1taujets = htrigger->objects(trigger::TriggerL1TauJet);
         for(size_t i=0; i<l1taujets.size(); ++i)
-          l1TauJets.push_back(l1taujets[i]->p4());
+          if(l1taujets[i]->coll(l1TauJetCollection))
+             l1TauJets.push_back(l1taujets[i]->p4());
         pat::TriggerObjectRefVector l1forjets = htrigger->objects(trigger::TriggerL1ForJet);
         for(size_t i=0; i<l1forjets.size(); ++i)
-          l1ForJets.push_back(l1forjets[i]->p4());
+          if(l1forjets[i]->coll(l1ForJetCollection))
+            l1ForJets.push_back(l1forjets[i]->p4());
 
         // HLT MET
         pat::TriggerObjectRefVector hltmets = htrigger->objects(trigger::TriggerMET);
