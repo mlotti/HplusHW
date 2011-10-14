@@ -10,6 +10,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import restrictInputToAOD, removeSpec
 import PhysicsTools.PatAlgos.tools.helpers as patHelpers
 import PhysicsTools.PatAlgos.tools.pfTools as pfTools
 from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerStandAloneEventContent
+import CommonTools.ParticleFlow.TopProjectors.pfNoJet_cfi as pfNoJet
 import HiggsAnalysis.HeavyChHiggsToTauNu.PFRecoTauDiscriminationForChargedHiggsContinuous as HChPFTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.CaloRecoTauDiscriminationForChargedHiggsContinuous as HChCaloTauDiscriminatorsCont
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTaus_cfi as HChTaus
@@ -281,7 +282,17 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     process.kt6PFJets.doRhoFastjet = True
     process.ak5PFJets.doAreaFastjet = True
     process.ak5PFJetSequence = cms.Sequence(process.kt6PFJets * process.ak5PFJets)
-   
+
+    # Produce Type 2 MET correction from unclustered PFCandidates
+    process.pfCandsNotInJet = pfNoJet.pfNoJet.clone(
+        topCollection = cms.InputTag("ak5PFJets"),
+        bottomCollection = cms.InputTag("particleFlow")
+    )
+    process.pfCandMETcorr = cms.EDProducer("PFCandMETcorrInputProducer",
+        src = cms.InputTag('pfCandsNotInJet')
+    )  
+    process.ak5PFJetSequence *= (process.pfCandsNotInJet*process.pfCandMETcorr)
+
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
     process.patJets.trackAssociationSource = cms.InputTag("ak5JetTracksAssociatorAtVertex")
