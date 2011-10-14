@@ -121,7 +121,7 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 
-process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 process.commonSequence *= process.firstPrimaryVertex
