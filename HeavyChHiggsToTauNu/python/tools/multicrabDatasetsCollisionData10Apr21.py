@@ -12,7 +12,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
@@ -25,7 +24,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/JetMETTau/Run2010A-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
@@ -38,7 +36,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010A-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 800, # Adjusted for PATtuple file size
                 "use_server": 1,
                 "lumiMask": "Apr21ReReco"
@@ -52,7 +49,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
-                "luminosity": 0,
                 "number_of_jobs": 360, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
@@ -65,7 +61,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
-                "luminosity": 0,
                 "number_of_jobs": 220, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
@@ -78,7 +73,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/BTau/Run2010B-Apr21ReReco-v1/AOD ",
-                "luminosity": 0,
                 "number_of_jobs": 35, # Adjusted for PATtuple file size
                 "lumiMask": "Apr21ReReco"
             },
@@ -95,7 +89,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010A-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 80, # Adjusted for PAT on the fly
                 "lumiMask": "Apr21ReReco"
             },
@@ -108,7 +101,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Apr21ReReco"
             },
@@ -121,7 +113,6 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Mu/Run2010B-Apr21ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 50, # Adjusted for PAT on the fly
                 "lumiMask": "Apr21ReReco"
             },
