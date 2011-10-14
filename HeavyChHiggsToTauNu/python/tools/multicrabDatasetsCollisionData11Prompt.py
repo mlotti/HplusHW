@@ -256,6 +256,18 @@ datasets = {
             },
         }
     },
+    "Tau_1777180-177452_Prompt": { # this split is only to have less than 500 jobs
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011B-PromptReco-v1/AOD",
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
 
     # Single tau (control)
     "Tau_Single_165970-166164_Prompt": {
@@ -470,6 +482,18 @@ datasets = {
             },
         }
     },
+    "Tau_Single_1777180-177452_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
+        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011B-PromptReco-v1/AOD",
+                "number_of_jobs": 120, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
 
    
     # Single Mu
@@ -592,6 +616,18 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
                 "number_of_jobs": 480, # Adjusted for skim file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "SingleMu_1777180-177452_Prompt": {
+        "dataVersion": "42Xdata",
+        "trigger": "HLT_Mu40_eta2p1_v1",
+        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
+                "number_of_jobs": 150, # Adjusted for skim file size
                 "lumiMask": "PromptReco"
             },
         }
