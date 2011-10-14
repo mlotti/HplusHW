@@ -26,8 +26,8 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as R
 tauPreSelection = "pt() > 15"
 #tauPreSelection = ""
 
-jetPreSelection = "pt() > 10"
-#jetPreSelection = ""
+#jetPreSelection = "pt() > 10"
+jetPreSelection = ""
 
 ##################################################
 #
