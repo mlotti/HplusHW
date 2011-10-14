@@ -71,10 +71,12 @@ addpkg RecoTauTag/Configuration   V01-02-03
 addpkg RecoTauTag/RecoTau         V01-02-07
 addpkg RecoTauTag/TauTagTools     V01-02-00
 # PAT
-addpkg DataFormats/PatCandidates  V06-04-19-01
-addpkg PhysicsTools/PatAlgos      V08-06-41
-addpkg PhysicsTools/PatExamples   V00-05-22
-addpkg PhysicsTools/SelectorUtils V00-03-17
+addpkg DataFormats/PatCandidates  V06-04-19-02
+addpkg PhysicsTools/PatAlgos      V08-06-45
+addpkg PhysicsTools/PatExamples   V00-05-24
+addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
+addpkg PhysicsTools/SelectorUtils V00-03-24
+addpkg PhysicsTools/UtilAlgos     V08-02-14
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
