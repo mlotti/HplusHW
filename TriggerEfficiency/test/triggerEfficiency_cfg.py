@@ -50,6 +50,11 @@ process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChCommon_cfi")
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import addPatOnTheFly
 if len(options.trigger) == 0: 
     options.trigger = ["HLT_IsoPFTau35_Trk20_v2"]
+
+#process.source.fileNames = ["/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_Single_172620-173198_Prompt/Tau/Run2011A_PromptReco_v6_AOD_Single_172620_pattuple_v18_1/94011b60044d698fe5dbd6fe93c7d90b/pattuple_43_3_FJq.root"]
+#options.clearList("trigger")
+#options.trigger = ["HLT_IsoPFTau35_Trk20_v6"]
+
 process.commonSequence, additionalCounters = addPatOnTheFly(process, options, dataVersion, plainPatArgs={"doTauHLTMatching":False})
 
 if options.doPat != 0:
@@ -136,10 +141,13 @@ triggerBit = {
 
 process.triggerEfficiency = cms.EDAnalyzer("TriggerEfficiencyAnalyzer", 
     triggerResults      = cms.InputTag("TriggerResults","","HLT"),
+    l1ReadoutSrc        = cms.InputTag("gtDigis"),
+    l1ObjectSrc         = cms.InputTag("hltL1GtObjectMap"),
     patTriggerEvent     = cms.InputTag("patTriggerEvent"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET45_v4"),
 #    triggerBit		= cms.string("HLT_IsoPFTau35_Trk20_MET60_v2"),
     triggerBit		= cms.string(triggerBit[trigger]),
+    l1Bit               = cms.string("L1_Jet52_Central_ETM30"),
     hltPath             = cms.string(trigger),
 #    tauSrc              = param.tauSelection.src,
     tauSrc              = cms.untracked.InputTag("tauSelectionFilter"),

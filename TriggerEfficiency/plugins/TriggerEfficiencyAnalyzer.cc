@@ -15,6 +15,9 @@
 #include "DataFormats/METReco/interface/MET.h"
 
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMap.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
@@ -56,8 +59,11 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
         virtual void endRun(const edm::Run&,const edm::EventSetup&);
 
   edm::InputTag triggerResults;
+  edm::InputTag l1ReadoutSrc;
+  edm::InputTag l1ObjectSrc;
   edm::InputTag patTriggerEventSrc;
   std::string   triggerBitName;
+  std::string   l1BitName;
   std::string hltPath;
   edm::InputTag tauSrc;
   edm::InputTag metSrc;
@@ -75,6 +81,7 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
   typedef math::XYZTLorentzVector LorentzVector;
 
   bool triggerBit;
+  bool l1Bit;
   int ntaus;
   float taupt,taueta,met,metType1;
   float caloMet, caloMetNoHF;
@@ -89,8 +96,11 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
 TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iConfig) :
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
+    l1ReadoutSrc(iConfig.getParameter<edm::InputTag>("l1ReadoutSrc")),
+    l1ObjectSrc(iConfig.getParameter<edm::InputTag>("l1ObjectSrc")),
     patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
+    l1BitName(iConfig.getParameter<std::string>("l1Bit")),
     hltPath(iConfig.getParameter<std::string>("hltPath")),
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
     metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metRawSrc")),
@@ -121,6 +131,7 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	tree = fs->make<TTree>("tree", triggerBitName.c_str(),1);
 
 	tree->Branch("TriggerBit", &triggerBit);
+        tree->Branch("L1Bit", &l1Bit);
 	tree->Branch("NTaus", &ntaus);
 	tree->Branch("TauPt", &taupt);
 	tree->Branch("TauEta", &taueta);
@@ -149,6 +160,7 @@ void TriggerEfficiencyAnalyzer::beginJob(){}
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	triggerBit = false;
+        l1Bit = false;
         ntaus = 0;
 	taupt      = 0;
 	taueta     = 0;
@@ -182,6 +194,31 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         // Trigger objects from pat trigger event
         edm::Handle<pat::TriggerEvent> htrigger;
         iEvent.getByLabel(patTriggerEventSrc, htrigger);
+
+        // L1 bit
+        // Simplify to use PAT trigger when we have the algorithms available
+        edm::Handle<L1GlobalTriggerReadoutRecord> l1Readout;
+        iEvent.getByLabel(l1ReadoutSrc, l1Readout);
+
+        edm::Handle<L1GlobalTriggerObjectMapRecord> l1Objects;
+        iEvent.getByLabel(l1ObjectSrc, l1Objects);
+
+        const DecisionWord& gtDecisionWord = l1Readout->decisionWord();
+        const std::vector<L1GlobalTriggerObjectMap>& objMapVec = l1Objects->gtObjectMap();
+        for (std::vector<L1GlobalTriggerObjectMap>::const_iterator itMap = objMapVec.begin();
+             itMap != objMapVec.end(); ++itMap) {
+          if(itMap->algoName() == l1BitName) {
+            l1Bit = gtDecisionWord[itMap->algoBitNumber()];
+            break;
+          }
+        }
+
+        /*
+        const pat::TriggerAlgorithmRefVector& l1algos = htrigger->algorithmRefs();
+        for(size_t i=0; i<l1algos.size(); ++i) {
+          std::cout << l1algos[i]->name() << std::endl;
+        }
+        */
 
         // L1 MET
         pat::TriggerObjectRefVector l1mets = htrigger->objects(trigger::TriggerL1ETM);
