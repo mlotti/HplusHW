@@ -54,6 +54,7 @@ set -e
 # 3.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Bugfix from Christian for type I/II MET
 # 5.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated LumiDB tag (bugfix)
 # 6.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Another bugfix from Christian for type I/II MEt
+# 14.10.2011/M.Kortelainen CMSSW_4_2_8_patch6 Updated PAT tags
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -77,6 +78,9 @@ addpkg PhysicsTools/PatExamples   V00-05-24
 addpkg CommonTools/ParticleFlow   B4_2_X_V00-03-00
 addpkg PhysicsTools/SelectorUtils V00-03-24
 addpkg PhysicsTools/UtilAlgos     V08-02-14
+# New tau discriminators
+# https://hypernews.cern.ch/HyperNews/CMS/get/tauid/164/1.html
+cvs co -r 1.43 PhysicsTools/PatAlgos/python/tools/tauTools.py
 
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
