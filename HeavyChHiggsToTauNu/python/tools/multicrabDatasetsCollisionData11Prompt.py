@@ -277,11 +277,19 @@ datasets = {
                 "luminosity": 94.672079,
                 "number_of_jobs": 1,
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_165970_pattuple_v18-a074e5725328b3ec89273a9ce844bc40/USER",
                 "luminosity": 97.575000,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v4_AOD_Single_165970_pattuple_v18_1-fdd51a0468635b24b4e8e11496951f46/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
@@ -302,11 +310,19 @@ datasets = {
                 "luminosity": 4.153168,
                 "number_of_jobs": 1,
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166346_pattuple_v18-b8f5408188cfaed2b0815a31b0c35328/USER",
                 "luminosity": 4.263000,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v4_AOD_Single_166346_pattuple_v18_1-143d19c22e1dc04bd1dce09508880f26/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
@@ -327,11 +343,19 @@ datasets = {
                 "luminosity": 424.330775,
                 "number_of_jobs": 2,
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_166374_pattuple_v18-a074e5725328b3ec89273a9ce844bc40/USER",
                 "luminosity": 445.101000,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v4_AOD_Single_166374_pattuple_v18_1-fdd51a0468635b24b4e8e11496951f46/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
@@ -372,11 +396,19 @@ datasets = {
                 "number_of_jobs": 60, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v4_AOD_Single_167078_pattuple_v18-cfa6d85277f38798ba0a058732e0532a/USER",
                 "luminosity": 244.913000,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v4_AOD_Single_167078_pattuple_v18_1-b9d72f7d08ce2bde010f2a599c37f83b/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
@@ -391,11 +423,19 @@ datasets = {
                 "number_of_jobs": 110, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_Single_172620_pattuple_v18_1-94011b60044d698fe5dbd6fe93c7d90b/USER",
                 "luminosity": 409.704146,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v6_AOD_Single_172620_pattuple_v18_1-e7ac736350b7c673637ba90e811c1fee/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
@@ -404,11 +444,19 @@ datasets = {
         "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
         "runs": (173236, 173692), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_PromptReco_v6_AOD_Single_173236_pattuple_v18-8175a7a03b92bf75b3dce339fc4f2ac3/USER",
                 "luminosity": 253.263000,
                 "number_of_jobs": 1,
+            },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-PromptReco_v6_AOD_Single_173236_pattuple_v18_1-0a73f291926323f98d8a274907cf7f3e/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
             },
         }
     },
