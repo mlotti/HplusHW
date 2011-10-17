@@ -165,6 +165,10 @@ process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
 #process.out.outputCommands.extend(["keep recoTracks_generalTracks_*_*"])
 #process.out.outputCommands.extend(["keep recoCaloJets_ak5CaloJets_*_*"])
 
+process.triggerObjects = cms.EDAnalyzer("HPlusPATTriggerPrinter",
+    src = cms.InputTag("patTriggerEvent")
+)
+
 # Create paths
 process.path    = cms.Path(
 #    process.collisionDataSelection * # this is supposed to be empty for MC
@@ -172,6 +176,7 @@ process.path    = cms.Path(
     process.sPAT
 #    process.sPF2PAT *
 #    process.sPF2PATnoPU
+    * process.triggerObjects
 )
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence

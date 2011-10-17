@@ -506,6 +506,25 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         process.patTrigger.l1ExtraForJet = cms.InputTag("l1extraParticles", "Forward")
         process.patTrigger.l1ExtraETM = cms.InputTag("l1extraParticles", "MET")
         process.patTrigger.l1ExtraHTM = cms.InputTag("l1extraParticles", "MHT")
+        # This is the only way for now to reduce the size of PAT trigger objects
+        # And yes, there is a typo in the parameter name
+        process.patTrigger.exludeCollections = cms.vstring(
+            "hltAntiKT5*",
+            "hltBLifetime*",
+            "hltBSoft*",
+            "hltCleanEle*",
+            "hltHITIPT*",
+            "hltIsolPixelTrack*",
+            "hltJet*",
+            "hltL1HLTDouble*",
+            "hltL1IsoRecoEcal*",
+            "hltL1NonIsoRecoEcal*",
+            "hltL2Muon*",
+            "hltL3Muon*",
+            "hltMuTrack*",
+            "hltPixel*",
+            "hltRecoEcal*",
+        )
 
 
         # Keep StandAlone trigger objects for enabling trigger
