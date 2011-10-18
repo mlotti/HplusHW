@@ -1,13 +1,17 @@
 To run the analysis in lxplus, afs-visible area (not tmp directory):
 ====================================================================
 
+*****  These lines give additional instructions for running the "shapes" version
+
 0) Modifications:
 ------------------
 
 Modify the following files, if needed:
 
-* HPlusHadronic_x.txt	rates & uncertainties for mH=x
+* HPlusHadronic_x.txt	rates & uncertainties for mH=x for studies without shapes
 * input_luminosity	luminosity shown in plots
+***** HPlusHadronicShapes_x.txt	rates & uncertainties for mH=x for studies with shapes
+***** These files: fromAlexandros.root, mt_ewk_lands.root, mt_lands_ritva3.root, mt_matti.root
 
 You may also want to use other datacards than HPlusHadronic_x.txt; in this 
 case copy them to the directory and write the names to script_run_LandS 
@@ -16,15 +20,15 @@ case copy them to the directory and write the names to script_run_LandS
 ------------------------------------------------------------------------
 
 go to the current directory (test/brlimit)
-
-cvs co UserCode/mschen/LandS
-cd UserCode/mschen/LandS
+cvs co UserCode/mschen/LandS OR cvs co -r t3-03-10_ChargedHiggs UserCode/mschen/LandS
+****** check out instead the version V3-04-01_eps
+cd UserCode/mschen/LandS  
 cmsenv
 gmake clean; gmake all;
 cd ../../..
 
 Sidenote:
- This LandS version is modified by Mingshui 5.7.2011
+ LandS version t3-03-10_ChargedHiggs is modified by Mingshui 5.7.2011
  Suggested use:
 
 ==
@@ -35,6 +39,7 @@ HPlusHadronic_120.txt
 To calculate expectation bands:
 add option "--doExpectation 1 -t xxx"  where xxx is the number of toys
 (1000 recommended ).
+***** use initialRmax of 0.09 instead
 ==
 
 
@@ -56,7 +61,7 @@ the datacard name, and restart another job without waiting.
 
 root -l -b -q brlimit.cxx
 you have to insert by hand the name of the output files to use 
-(e.g. output_LandS_HPlusHadronic)
+(e.g. output_LandS_HPlusHadronicShapes)
 
 *As a result, the br limit plot brlimits.png/eps is generated
 

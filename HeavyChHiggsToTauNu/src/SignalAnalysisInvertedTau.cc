@@ -369,7 +369,7 @@ namespace HPlus {
 
 
     // Hadronic jet selection
-    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, myBestTauCandidate); 
+    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getCleanedTauCandidates()[0]); 
     if(!jetData.passedEvent()) return false;
     increment(fNJetsCounter);
     hSelectionFlow->Fill(kSignalOrderJetSelection, fEventWeight.getWeight());

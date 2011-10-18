@@ -3,10 +3,12 @@
 # write name of datacard here
 # remove .txt
 #---set filename = HPlusHadronic_120
+#---set filename = HPlusHadronicShapes_120
 #HPlusHadronic
 #HPlus_hadronic_ltau
 #HPlus_hadronic_ltau_emu
-set name = HPlus_hadronic_ltau
+#HPlusHadronicShapes
+set name = HPlusHadronicShapes
 
 # check if jobs producing same output files are running
 # NOTE: a job with longer name containing the name of this job might block this 

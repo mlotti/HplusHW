@@ -38,11 +38,9 @@ namespace HPlus {
 
       bool passedEvent() const { return fPassedEvent; }
 
+      // Getters for selected taus (i.e. taus after full tau ID) 
       const edm::PtrVector<pat::Tau>& getSelectedTaus() const {
         return fTauSelection->fSelectedTaus;
-      }
-      const edm::PtrVector<pat::Tau>& getCleanedTauCandidates() const {
-        return fTauSelection->fCleanedTauCandidates;
       }
       double getRtauOfSelectedTau() const {
         return fTauSelection->getSelectedRtauValue();
@@ -54,10 +52,17 @@ namespace HPlus {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
       }
+      // Getters for best tau candidate and operations on tau candidates
+      const edm::PtrVector<pat::Tau>& getCleanedTauCandidates() const {
+        return fTauSelection->fCleanedTauCandidates;
+      }
       bool getBestTauCandidatePassedRtauStatus() const {
         if (!fTauSelection->fCleanedTauCandidates.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
       }
+      //      double getRtauOfBestTauCandidate() const {
+      //        return fTauSelection->getBestCandidateRtauValue();
+      //}
       /// Returns true if no candidates passed asked discriminator
       bool applyVetoOnTauCandidates(std::string discr) const {
         for(edm::PtrVector<pat::Tau>::const_iterator iter = fTauSelection->fCleanedTauCandidates.begin(); iter != fTauSelection->fCleanedTauCandidates.end(); ++iter)
@@ -72,7 +77,7 @@ namespace HPlus {
         if (!fTauSelection->fCleanedTauCandidates.size()) return 0;
         return fTauSelection->fCleanedTauCandidates[0]->tauID(discr) > 0.5;
       }
-      
+
     private:
       const TauSelection *fTauSelection;
       bool fPassedEvent; // non-const because need to be set from TauSelectionFactorized via setSelectedTau(...)
@@ -90,9 +95,9 @@ namespace HPlus {
 
     /// Default tauID
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-    /// tau ID on a given sample of taus 
+    /// tau ID on a given sample of taus
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    /// Trigger tau selection - find best unique tau candidate 
+    /// Trigger tau selection - find best unique tau candidate
     Data analyzeTriggerTau(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// tau ID on cleaned tau candidates
     Data analyzeTauIDWithoutRtauOnCleanedTauCandidates(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<pat::Tau> tauCandidate);
@@ -106,7 +111,7 @@ namespace HPlus {
   private:
     /// Method for doing tau selection
     bool doTauSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<pat::Tau>& taus);
-    /// Method for handling the result of tauID factorization 
+    /// Method for handling the result of tauID factorization
     bool doFactorizationLookup();
     // Internal histogramming routines
     /// Fills the histogram that describes the mode in which the tau selection was run
@@ -118,20 +123,25 @@ namespace HPlus {
     void ObtainMCPurity(const edm::Ptr<pat::Tau> tau, const edm::Event& iEvent, TH1* histogram);
     void findBestTau(edm::PtrVector<pat::Tau>& bestTau, edm::PtrVector<pat::Tau>& taus);
 
-
     double getSelectedRtauValue() const {
       if (fSelectedTaus.size())
         return fTauID->getRtauValue(fSelectedTaus[0]);
       else
         return -1.0; // safety
     }
-
     double getBestCandidateRtauValue() const {
       if (fCleanedTauCandidates.size())
-	return fTauID->getRtauValue(fCleanedTauCandidates[0]);
+        return fTauID->getRtauValue(fCleanedTauCandidates[0]);
       else
-        return -1.0; // safety      
+        return -1.0; // safety
     }
+
+    //   double getBestCandidateRtauValue() const {
+    //  if (fCleanedTauCandidates.size())
+    //	return fTauID->getRtauValue(fCleanedTauCandidates[0]);
+    // else
+    //    return -1.0; // safety      
+    // }
 
   private:
     // Input parameters
