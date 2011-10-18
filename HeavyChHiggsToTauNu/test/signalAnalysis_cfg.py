@@ -180,9 +180,10 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     Tree = param.tree,
 )
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+(sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
 process.commonSequence *= sequence
 process.signalAnalysis.MET.type1Src = type1Met
+process.signalAnalysis.MET.type2Src = type1p2Met
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0:

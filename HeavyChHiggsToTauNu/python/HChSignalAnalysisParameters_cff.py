@@ -501,8 +501,9 @@ def addTauIdAnalyses(process, dataVersion, prefix, prototype, commonSequence, ad
         module.tauSelection = selection.clone()
 
         # Calculate type 1 MET
-        (type1Sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
+        (type1Sequence, type1Met, type1p2Met) = MetCorrection.addCorrectedMet(process, dataVersion, module.tauSelection, module.jetSelection, postfix=name)
         module.MET.type1Src = type1Met
+        module.MET.type2Src = type1p2Met
 
         seq = cms.Sequence(
             commonSequence *
