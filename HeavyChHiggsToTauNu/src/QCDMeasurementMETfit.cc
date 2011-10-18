@@ -23,6 +23,10 @@ namespace HPlus {
     fGlobalMuonVetoCounter(eventCounter.addCounter("GlobalMuonVeto")),
     fNonIsolatedMuonVetoCounter(eventCounter.addCounter("NonIsolatedMuonVeto")),
     fJetSelectionCounter(eventCounter.addCounter("JetSelection")),
+    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET160Cut")),
+    fdeltaPhiTauMET135Counter(eventCounter.addCounter("deltaPhiTauMET135Cut")),
+    fdeltaPhiJetMET10Counter(eventCounter.addCounter("deltaPhiJetMET10Cut")),
+    fdeltaPhiTauMETJetMETCutsCounter(eventCounter.addCounter("deltaPhiTauMETJetMETCuts")),
     fMETCounter(eventCounter.addCounter("MET")),
     fOneProngTauIDWithoutRtauCounter(eventCounter.addCounter("TauID_noRtau")),
     fOneProngTauIDWithRtauCounter(eventCounter.addCounter("TauID_withRtau")),
@@ -131,6 +135,18 @@ namespace HPlus {
 
     // Other histograms
     //hAlphaTAfterTauID = makeTH<TH1F>(*fs, "QCD_AlphaTAfterTauID", "QCD_hAlphaTAfterTauID;#alpha_{T};N_{events} / 0.1", 50, 0.0, 5.0);
+
+    hDeltaPhiTauMet= makeTH<TH1F>(*fs, "QCD_DeltaPhiTauMet", "QCD_DeltaPhiTauMet", 360, 0.0, 180.0);
+    hDeltaPhiJetMet= makeTH<TH1F>(*fs, "QCD_DeltaPhiJetMet", "QCD_DeltaPhiJetMet", 360, 0.0, 180.0); 
+    hPhiTauJet135 = makeTH<TH1F>(*fs, "QCD_PhiTauJet135", "QCD_PhiTauJet135", 360, -180.0, 180.0); 
+    hPhiJet10 = makeTH<TH1F>(*fs, "QCD_PhiJet10", "QCD_PhiJet10", 360.0, -180, 180.0); 
+    hEtaTauJet135 = makeTH<TH1F>(*fs, "QCD_EtaTauJet135", "QCD_EtaTauJet135", 300, -3.0, 3.0); 
+    hEtaJet10 = makeTH<TH1F>(*fs, "QCD_EtaJet10", "QCD_EtaJet10", 300, -3.0, 3.0); 
+
+    hTransverseMassDeltaPhiUpperCut= makeTH<TH1F>(*fs, "QCD_transverseMassDeltaPhiUpperCut", "QCD_ransverseMassDeltaPhiUpperCut; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hTransverseMassDeltaPhiJetMet10= makeTH<TH1F>(*fs, "QCD_transverseMassDeltaPhiJetMet10", "QCD_ransverseMassDeltaPhiJetMet10; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+    hTransverseMassDeltaPhiCuts = makeTH<TH1F>(*fs, "QCD_transverseMassDeltaPhiCuts", "QCD_ransverseMassDeltaPhiCuts; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0);
+
 
     hMET_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_MET_AfterJetSelection", "QCD_MET_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 22 Sep 2011
     hMET_AfterJetsBtagging = makeTH<TH1F>(*fs, "QCD_MET_AfterJetsBtagging", "QCD_MET_AfterJetsBtagging; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); 
@@ -346,7 +362,51 @@ namespace HPlus {
     hTransverseMass_AfterJetSelection->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
 
 
+
+
     if (btagData.passedEvent()) {
+
+      bool smallDeltaPhiJet = false;
+      bool largeDeltaPhiTau = false;
+
+      // plot delta phi
+      double deltaPhiTauMet = DeltaPhi::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+      hDeltaPhiTauMet->Fill(deltaPhiTauMet*57.3, fEventWeight.getWeight());
+      if ( deltaPhiTauMet*57.3 < 160) increment(fdeltaPhiTauMET160Counter); 
+      if ( deltaPhiTauMet*57.3 > 135) {
+	hPhiTauJet135->Fill(tauCandidateData.getSelectedTaus()[0]->phi()*57.3, fEventWeight.getWeight());
+	hEtaTauJet135->Fill(tauCandidateData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight()); 
+	largeDeltaPhiTau = true;
+      }
+      if ( deltaPhiTauMet*57.3 < 135) {
+	increment(fdeltaPhiTauMET135Counter);
+	hTransverseMassDeltaPhiUpperCut->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());  
+      }     
+      
+      // plot deltaPhi(jet,met)
+      for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
+	double deltaPhiJetMet = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
+	hDeltaPhiJetMet->Fill(deltaPhiJetMet*57.3, fEventWeight.getWeight());
+	edm::Ptr<pat::Jet> ijet = *iJet;
+
+	if ( deltaPhiJetMet*57.3 < 10) {
+	  hPhiJet10->Fill(ijet->phi()*57.3, fEventWeight.getWeight());
+	  hEtaJet10->Fill(ijet->eta(), fEventWeight.getWeight());
+	  smallDeltaPhiJet = true;
+	}  
+      }
+
+      if (!smallDeltaPhiJet) {
+	increment(fdeltaPhiJetMET10Counter);
+	hTransverseMassDeltaPhiJetMet10->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+	if (!largeDeltaPhiTau) {
+	  increment(fdeltaPhiTauMETJetMETCutsCounter);
+	  hTransverseMassDeltaPhiCuts->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight()); 
+	}
+      }
+
+
+
       hMET_AfterJetsBtagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
       hTransverseMass_AfterJetsBtagging->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
  

@@ -111,6 +111,8 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
+    Count fTauVetoAfterTauIDCounter;
+    Count fNprongsAfterTauIDCounter;
     Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;

@@ -129,6 +129,10 @@ namespace HPlus {
     Count fGlobalMuonVetoCounter;
     Count fNonIsolatedMuonVetoCounter;
     Count fJetSelectionCounter;
+    Count fdeltaPhiTauMET160Counter;
+    Count fdeltaPhiTauMET135Counter;
+    Count fdeltaPhiJetMET10Counter;
+    Count fdeltaPhiTauMETJetMETCutsCounter;
     Count fMETCounter;
     Count fOneProngTauIDWithoutRtauCounter;
     Count fOneProngTauIDWithRtauCounter;
@@ -221,6 +225,15 @@ namespace HPlus {
     TH1 *hMET_AfterBigBox; // 22 Sep 2011
     TH1 *hTransverseMass_AfterBigBox; // 14 Aug 2011
     TH1 *hMET_AfterJetSelection; // 22 Sep 2011
+    TH1 *hDeltaPhiTauMet;
+    TH1 *hDeltaPhiJetMet;
+    TH1 *hPhiTauJet135;
+    TH1 *hPhiJet10;
+    TH1 *hEtaTauJet135;
+    TH1 *hEtaJet10;
+    TH1 *hTransverseMassDeltaPhiUpperCut;
+    TH1 *hTransverseMassDeltaPhiJetMet10;
+    TH1 *hTransverseMassDeltaPhiCuts;
     TH1 *hMET_AfterJetsBtagging;
     TH1 *hMET_AfterJetsBtagging4050;
     TH1 *hMET_AfterJetsBtagging5060;
