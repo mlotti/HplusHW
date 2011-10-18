@@ -199,7 +199,7 @@ class InvertedTauID:
 
         texq = TLatex(0.4,0.3,"QCD")
         texq.SetNDC() 
-#	texq.SetTextSize(0.03)
+	texq.SetTextSize(15)
         texq.Draw()
 
         c.Print("combinedfit.eps")
