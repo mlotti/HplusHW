@@ -615,7 +615,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Summer11-PU_S4_START42_V11-v1/AODSIM",
-                "number_of_jobs": 200,  # Adjusted for PAT on the fly (NOT for PATtuple processing)
+                "number_of_jobs": 1500,  # Adjusted for PATtuple file size
             }
         },
     },
