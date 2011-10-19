@@ -7,7 +7,7 @@ import multicrabDatasetsCommon as common
 datasets = {
     # Signal WH
     "TTToHplusBWB_M90_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -17,7 +17,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M120_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -27,7 +27,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M140_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -37,7 +37,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M155_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -47,7 +47,7 @@ datasets = {
         }
     },
     "TTToHplusBWB_M160_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -58,7 +58,7 @@ datasets = {
     },
     # Signal HH
     "TTToHplusBHminusB_M80_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -68,7 +68,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M140_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -78,7 +78,7 @@ datasets = {
         }
     },
     "TTToHplusBHminusB_M160_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -90,7 +90,7 @@ datasets = {
 
     # Signal heavy
     "HplusTB_M180_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -100,7 +100,7 @@ datasets = {
         }
     },
     "HplusTB_M190_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -110,7 +110,7 @@ datasets = {
         }
     },
     "HplusTB_M250_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -120,7 +120,7 @@ datasets = {
         }
     },
     "HplusTB_M300_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
@@ -133,7 +133,7 @@ datasets = {
     # QCD backgrounds
     # Cross sections are from https://twiki.cern.ch/twiki/bin/view/CMS/ReProcessingSummer2011
     "QCD_Pt120to170_TuneZ2_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 1.151e+05,
         "data": {
             "AOD": {
@@ -143,7 +143,7 @@ datasets = {
         },
     },
     "QCD_Pt300to470_TuneZ2_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 1.168e+03,
         "data": {
             "AOD": {
@@ -157,7 +157,7 @@ datasets = {
     # EWK pythia
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "WZ_TuneZ2_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 18.2,
         "data": {
             "AOD": {
@@ -167,7 +167,7 @@ datasets = {
         },
     },
     "ZZ_TuneZ2_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 5.9,
         "data": {
             "AOD": {
@@ -182,7 +182,7 @@ datasets = {
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
     "WJets_TuneZ2_Fall11": {
-        "dataVersion": "dont_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 31314, # [2], NNLO
         "data": {
             "AOD": {
@@ -200,7 +200,7 @@ datasets = {
     # https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
     # https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
     "T_tW-channel_TuneZ2_Fall11": {
-        "dataVersion": "done_know_yet",
+        "dataVersion": "42XmcS6",
         "crossSection": 7.87,
         "data": {
             "AOD": {

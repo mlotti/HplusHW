@@ -31,6 +31,12 @@ config = {
         "patMadhatter": "file:/mnt/flustre/mkortela/data//TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/F498AD1D-8298-E011-BFB9-003048678F92.root",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/TTToHplusBWB_M80_Summer11/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18/8eea754df021b160abed50fa738aa521/pattuple_19_2_514.root"
     },
+    "42XmcS6": {
+        "triggerProcess": "HLT",
+        "recoProcess": "RECO",
+        "signalTrigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
+        "patMadhatter": "file:/mnt/flustre/mkortela/data/TTToHplusBWB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/A87958F4-92F3-E011-9CBC-0018F3D0966C.root",
+    }
 }
 
 
@@ -76,7 +82,7 @@ class DataVersion:
         return not self.is_data
 
     def isS4(self):
-        return self.isMC() and "S4" in self.version
+        return self.isMC() and ("S4" in self.version or "S6" in self.version)
 
     def getTriggerProcess(self):
         return self.trigger
