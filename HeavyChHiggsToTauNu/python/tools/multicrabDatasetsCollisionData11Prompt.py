@@ -256,10 +256,10 @@ datasets = {
             },
         }
     },
-    "Tau_1777180-177452_Prompt": { # this split is only to have less than 500 jobs
+    "Tau_177718-177878_Prompt": { # this split is only to have less than 500 jobs
         "dataVersion": "42Xdata",
         "trigger": "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
-        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (177718, 177878), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011B-PromptReco-v1/AOD",
@@ -482,10 +482,10 @@ datasets = {
             },
         }
     },
-    "Tau_Single_1777180-177452_Prompt": {
+    "Tau_Single_1777180-177878_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_MediumIsoPFTau35_Trk20_v1",
-        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (177718, 177878), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011B-PromptReco-v1/AOD",
@@ -620,10 +620,10 @@ datasets = {
             },
         }
     },
-    "SingleMu_1777180-177452_Prompt": {
+    "SingleMu_1777180-177878_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu40_eta2p1_v1",
-        "runs": (177718, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (177718, 177878), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
