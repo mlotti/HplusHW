@@ -92,7 +92,7 @@ datasets = {
     },
 
     # Single Mu
-    "SingleMu_160431-163261_May10": {
+    "SingleMu_Mu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",
         "runs": (160431, 163261),
@@ -105,14 +105,14 @@ datasets = {
             },
         }
     }, 
-    "SingleMu_161119-161119_May10_Wed": {
+    "SingleMu_Mu_161119-161119_May10_Wed": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",
         "runs": (161119, 161119),
         "data": {
         }
     },
-   "SingleMu_163270-163869_May10": {
+   "SingleMu_Mu_163270-163869_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu24_v2",
         "runs": (163270, 163869),

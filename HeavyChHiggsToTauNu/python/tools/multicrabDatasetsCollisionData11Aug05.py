@@ -52,7 +52,7 @@ datasets = {
     },
 
     # Single Mu
-    "SingleMu_170722-172619_Aug05": {
+    "SingleMu_Mu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),
