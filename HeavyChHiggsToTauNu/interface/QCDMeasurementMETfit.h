@@ -244,6 +244,7 @@ namespace HPlus {
     TH1 *hMET_AfterJetsBtagging120150;
     TH1 *hMET_AfterJetsBtagging150;
     TH1 *hTransverseMass_AfterJetsBtagging;  
+    TH1 *hTransverseMass_AfterJetsBtagMet;
     TH1 *hMET_AfterJetSelMt80; // 22 Sep 2011
     TH1 *hTransverseMass_AfterJetSelection; // 14 Aug 2011
     TH1 *hTransverseMass_AfterJetSelMetCut; // 14 Aug 2011

@@ -39,15 +39,16 @@ def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
 
-
-    # Remove signals other than M120
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
-    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
-    
+   
     datasets.loadLuminosities()
 
-    # Take signals from 42X
-#    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_4_patch1/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110621_150040/multicrab.cfg", counters=counters)
+    # Take QCD from data
+    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111018_145546/multicrab.cfg", counters=counters)
+    datasetsQCD.loadLuminosities()
+    datasetsQCD.mergeData()
+    datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
+    datasetsQCD.rename("Data", "QCD")
+    
 #Rtau =0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
 
@@ -61,6 +62,10 @@ def main():
     #datasets.extend(datasetsSignal)
 
     plots.mergeRenameReorderForDataMC(datasets)
+
+    # Remove signals other than M120
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
     # Set the signal cross sections to the ttbar
 #    xsect.setHplusCrossSectionsToTop(datasets)
@@ -81,12 +86,12 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
-    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
+#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
 #    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
 #    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
 #    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
@@ -149,7 +154,10 @@ def main():
 #    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
 
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet", rebin=20)
+    path = analysis+"/transverseMassBeforeFakeMet"
+    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassBeforeFakeMet", rebin=20)
+    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
+    transverseMass2(plot, "transverseMassBeforeFakeMetQCDFromData", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut", rebin=20)
@@ -310,9 +318,16 @@ def scaleMCfromWmunu(h):
 #    scaleMCHistos(h, 1.736)
     scaleMCHistos(h, 1.0)
 
+def replaceQCDfromData(plot, datasetsQCD, path):
+    normalization = 0.015
+    drh = datasetsQCD.getDatasetRootHistos(path)
+    if len(drh) != 1:
+        raise Exception("There should only one DatasetRootHisto, got %d", len(drh))
+    histo = histograms.HistoWithDatasetFakeMC(drh[0].getDataset(), drh[0].getHistogram(), drh[0].getName())
+    histo.getRootHisto().Scale(normalization)
+    plot.histoMgr.replaceHisto("QCD", histo)
+    return plot
 
-
-    
 # Helper function to flip the last two parts of the histogram name
 # e.g. ..._afterTauId_DeltaPhi -> DeltaPhi_afterTauId
 def flipName(name):
@@ -539,7 +554,7 @@ def tauPt(h, name, rebin=5, ratio=False):
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
 
     h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
     opts = {"ymin": 0.0001, "ymaxfactor": 2}
@@ -564,7 +579,7 @@ def tauEta(h, name, rebin=5, ratio=False):
     ylabel = "Events"
 
     h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.addMCUncertainty()
     scaleMCfromWmunu(h)
 
     
@@ -590,7 +605,7 @@ def tauPhi(h, name, rebin=10, ratio=False):
     ylabel = "Events"
 
     h.stackMCHistograms()
-    h.addMCUncertainty()
+#    h.addMCUncertainty()
     scaleMCfromWmunu(h)
     
     opts = {"ymin": 0.01, "ymaxfactor": 2}
@@ -799,7 +814,7 @@ def transverseMass2(h,name, rebin=10):
     ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
     
     scaleMCfromWmunu(h)    
-    h.stackMCSignalHistograms()
+    #h.stackMCSignalHistograms()
     h.stackMCHistograms(stackSignal=False)#stackSignal=True)
     h.addMCUncertainty()
     

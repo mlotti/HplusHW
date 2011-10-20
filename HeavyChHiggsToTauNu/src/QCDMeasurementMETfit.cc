@@ -164,6 +164,7 @@ namespace HPlus {
     hTransverseMass_AfterJetSelection = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelection", "QCD_TransverseMass_AfterJetSelection; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
    hTransverseMass_AfterJetSelMetCut = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetSelectionMetCut", "QCD_TransverseMass_AfterJetSelectionMetCut; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
    hTransverseMass_AfterJetsBtagging = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetsBtagging", "QCD_TransverseMass_AfterJetsBtagging; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); 
+   hTransverseMass_AfterJetsBtagMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterJetsBtagMet", "QCD_TransverseMass_AfterJetsBtagMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); 
     hTransverseMass_AfterBigBox = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBox", "QCD_TransverseMass_AfterBigBox; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 40, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBoxAndMet = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndMet", "QCD_TransverseMass_AfterBigBoxAndMet; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
     hTransverseMass_AfterBigBoxAndBtag = makeTH<TH1F>(*fs, "QCD_TransverseMass_AfterBigBoxAndBtag", "QCD_TransverseMass_AfterBigBoxAndBtag; m_{T}(#tau-cand, E_{T}^{miss}); N_{Events} / 10", 400, 0.0, 400.0); // 14 Aug 2011
@@ -409,7 +410,9 @@ namespace HPlus {
 
       hMET_AfterJetsBtagging->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
       hTransverseMass_AfterJetsBtagging->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
- 
+       hTransverseMass_AfterJetsBtagMet->Fill(TransverseMass::reconstruct(*(tauCandidateData.getSelectedTaus()[0]), *(metData.getSelectedMET())), fEventWeight.getWeight());
+
+
       if (mySelectedTauPt > 40 && mySelectedTauPt < 50 ) {
 	hMET_AfterJetsBtagging4050->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       }

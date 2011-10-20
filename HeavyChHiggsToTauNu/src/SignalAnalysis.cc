@@ -1,6 +1,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysis.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TransverseMass.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhiJets.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaRTauJets.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EvtTopology.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
@@ -56,6 +58,8 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fdeltaPhiTauJets160Counter(eventCounter.addCounter("deltaPhiTauJets upper limit")),
+    fmaxDeltaRTauJetsCounter(eventCounter.addCounter("deltaRtauJets upper limit")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
@@ -126,6 +130,8 @@ namespace HPlus {
     hTransverseMassNoMetBtagRtauFakeMetPhi = makeTH<TH1F>(*fs, "transverseMassNoMetBtagRtauFakeMetPhi", "transverseMassNoMetBtagRtauFakeMetPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBeforeFakeMet = makeTH<TH1F>(*fs, "transverseMassBeforeFakeMet", "transverseMassBeforeFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassDeltaPhiUpperCut = makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCut", "transverseMassDeltaPhiUpperCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassDeltaPhiTauJetsCut = makeTH<TH1F>(*fs, "transverseMassDeltaPhiTauJetsCut", "transverseMassDeltaPhiTauJetsCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassDeltaRTauJets= makeTH<TH1F>(*fs, "transverseMassDeltaRTauJetsCut", "transverseMassDeltaRTauJetsCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithRtauFakeMet = makeTH<TH1F>(*fs, "transverseMassWithRtauFakeMet", "transverseMassWithRtauFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassWithRtau = makeTH<TH1F>(*fs, "transverseMassWithRtau", "transverseMassWithRtau;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassDeltaPhiUpperCutFakeMet =  makeTH<TH1F>(*fs, "transverseMassDeltaPhiUpperCutFakeMet", "transverseMassDeltaPhiUpperCutFakeMet;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.); 
@@ -135,6 +141,8 @@ namespace HPlus {
     hTransverseMassBtag33RtauDeltaPhiFakeMET = makeTH<TH1F>(*fs, "transverseMassBtag33RtauDeltaPhiFakeMET", "transverseMassBtag33RtauDeltaPhiFakeMET;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassBtag33 = makeTH<TH1F>(*fs, "transverseMassBtag33", "transverseMassBtag33;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
+    hDeltaPhiTauJetMax = makeTH<TH1F>(*fs, "deltaPhiTauJetMax", "max(deltaPhi;#Delta#phi(tau,jet));N_{events} / 10 degrees", 360, 0., 180.);
+    hDeltaRTauJetMax = makeTH<TH1F>(*fs, "deltaRTauJetMax", "max(deltaR(tau,jet));N_{events} / 10 degrees", 300, 0., 6.);
     hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
     hAlphaT = makeTH<TH1F>(*fs, "alphaT", "alphaT", 100, 0.0, 5.0);
     hAlphaTInvMass = makeTH<TH1F>(*fs, "alphaT-InvMass", "alphaT-InvMass", 100, 0.0, 1000.0);    
@@ -373,6 +381,10 @@ namespace HPlus {
     FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, *(tauData.getSelectedTaus()[0]), jetData.getSelectedJets(), metData.getSelectedMET());
    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
 
+
+   double deltaPhiTauJets = DeltaPhiJets::reconstruct(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
+   double maxDeltaRTauJets = DeltaRTauJets::reconstruct(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());
+
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET(),
                evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi() );
 
@@ -430,6 +442,18 @@ namespace HPlus {
 
 
     //    double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()));
+    hDeltaRTauJetMax->Fill(maxDeltaRTauJets, fEventWeight.getWeight());
+    if ( maxDeltaRTauJets < 4 ) {
+      increment(fmaxDeltaRTauJetsCounter);
+      hTransverseMassDeltaRTauJets->Fill(transverseMass, fEventWeight.getWeight());  
+    }  
+
+    hDeltaPhiTauJetMax->Fill(deltaPhiTauJets*57.3, fEventWeight.getWeight());
+    if ( deltaPhiTauJets*57.3 < 170) {
+      increment(fdeltaPhiTauJets160Counter);
+      hTransverseMassDeltaPhiTauJetsCut->Fill(transverseMass, fEventWeight.getWeight());  
+    }     
+
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
     if ( deltaPhi*57.3 < 160) {

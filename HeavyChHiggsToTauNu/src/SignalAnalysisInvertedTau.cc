@@ -221,11 +221,11 @@ namespace HPlus {
     hVerticesBeforeWeight->Fill(weightSize.second);
     hVerticesAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
     fTree.setNvertices(weightSize.second);
-
+    //    std::cout << " weight before  = " << fEventWeight.getWeight() << std::endl;
     // QCD fraction from fit
     double QCDfraction = 0.8;
     fEventWeight.multiplyWeight(QCDfraction);
-
+    //     std::cout << " weight after  = " << fEventWeight.getWeight() <<  std::endl;
     increment(fAllCounter);
     
     // Apply trigger and HLT_MET cut or trigger parametrisation

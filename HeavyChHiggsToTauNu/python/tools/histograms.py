@@ -768,6 +768,16 @@ class HistoWithDataset(Histo):
     ## \var dataset
     # The histogram is from this dataset.Dataset object
 
+class HistoWithDatasetFakeMC(HistoWithDataset):
+    def __init__(self, dataset, rootHisto, name):
+        HistoWithDataset.__init__(self, dataset, rootHisto, name)
+
+    def isMC(self):
+        return True
+
+    def isData(self):
+        return False
+
 ## Represents combined (statistical) uncertainties of multiple histograms.
 class HistoTotalUncertainty(HistoBase):
     ## Constructor
@@ -979,6 +989,19 @@ class HistoManagerImpl:
         for i, h in enumerate(self.legendList):
             if h.getName() == name:
                 del self.legendList[i]
+                break
+
+    def replaceHisto(self, name, histo):
+        if not name in self.nameHistoMap:
+            raise Exception("Histogram %s doesn't exist" % name)
+        self.nameHistoMap[name] = histo
+        for i, h in enumerate(self.drawList):
+            if h.getName() == name:
+                self.drawList[i] = histo
+                break
+        for i, h in enumerate(self.legendList):
+            if h.getName() == name:
+                self.legendList[i] = histo
                 break
 
     ## Call a function for a named histograms.HistoBase object.
@@ -1325,7 +1348,7 @@ class HistoManager:
     ## Stack all MC histograms to one named <i>StackedMC</i>.
     def stackMCHistograms(self):
         histos = self.getHistos()
-        
+
         self.stackHistograms("StackedMC", [h.getName() for h in filter(lambda h: h.isMC(), self.getHistos())])
 
     ## \var datasetRootHistos
