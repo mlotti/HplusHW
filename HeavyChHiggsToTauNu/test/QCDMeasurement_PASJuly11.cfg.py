@@ -82,10 +82,6 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 ################################################################################
 # qcdMeasurementMethod3 module
 
-# Primary vertex selection
-from HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex import addPrimaryVertexSelection
-addPrimaryVertexSelection(process, process.commonSequence)
-
 # Import default parameter set and make necessary tweaks
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 param.overrideTriggerFromOptions(options)

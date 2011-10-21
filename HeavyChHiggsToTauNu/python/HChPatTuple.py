@@ -21,6 +21,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTriggerMatching as HChTriggerMatchin
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection as HChDataSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChMcSelection as HChMcSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex as HChPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
 
@@ -58,13 +59,11 @@ def addPatOnTheFly(process, options, dataVersion,
         counters = HChMcSelection.mcSelectionCounters[:]
     
     if options.doPat == 0:
-        process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex_cfi")
-        seq = cms.Sequence(
-#            process.goodPrimaryVertices10
-        )
+        seq = cms.Sequence()
         if dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
             seq *= process.eventPreSelection
+        HChPrimaryVertex.addPrimaryVertexSelection(process, seq)
         return (seq, counters)
 
     print "Running PAT on the fly"
@@ -149,9 +148,7 @@ def addPatOnTheFly(process, options, dataVersion,
                                      doPlainPat=doPlainPat, doPF2PAT=doPF2PAT,
                                      plainPatArgs=pargs, pf2patArgs=pargs2,)
     
-    # Add selection of PVs with sumPt > 10
-#    process.patSequence *= process.goodPrimaryVertices10
-
+    HChPrimaryVertex.addPrimaryVertexSelection(process, process.eventPreSelection)
     dataPatSequence = cms.Sequence(
         process.eventPreSelection *
         process.patSequence
