@@ -66,6 +66,7 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
         "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
         "keep *_kt6PFJetsNeutrals_rho_HChPatTuple", # keep the rho from neutrals
+        "keep *_HBHENoiseFilterResultProducer_*_*", # keep the resulf of HBHENoiseFilterResultProducer
         ),
     dropMetaData = cms.untracked.string("ALL")
 )

@@ -45,13 +45,13 @@ def addDataSelection(process, dataVersion, trigger):
     seq *= process.passedScrapingVeto
 
     # Reject events with anomalous HCAL noise, see
-    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Anomalous_Signals_treatment_reco
-    # https://twiki.cern.ch/twiki/bin/view/CMS/HcalDPGAnomalousSignals
-    # https://twiki.cern.ch/twiki/bin/viewauth/CMS/HcalNoiseInfoLibrary#How_do_I_reject_events_with_anom
-    process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-    process.passedHBHENoiseFilter = cms.EDProducer("EventCountProducer")
-    seq *= process.HBHENoiseFilter
-    seq *= process.passedHBHENoiseFilter
+    # https://twiki.cern.ch/twiki/bin/view/CMS/HBHEAnomalousSignals2011
+    # https://hypernews.cern.ch/HyperNews/CMS/get/hcal-noise/93.html
+    process.load('CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi')
+    process.HBHENoiseFilterResultProducer.minNumIsolatedNoiseChannels = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumE = 9999
+    process.HBHENoiseFilterResultProducer.minIsolatedNoiseSumEt = 9999
+    seq *= process.HBHENoiseFilterResultProducer
 
     # Require a good primary vertex (we might want to do this for MC too), see
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/Collisions2010Recipes#Good_Vertex_selection
@@ -71,6 +71,6 @@ def addDataSelection(process, dataVersion, trigger):
     return seq
 
 dataSelectionCounters = [
-    "allEvents", "passedTrigger", "passedScrapingVeto", "passedHBHENoiseFilter",
+    "allEvents", "passedPhysicsDeclared", "passedTrigger", "passedScrapingVeto"
 #    "passedPrimaryVertexFilter"
     ]
