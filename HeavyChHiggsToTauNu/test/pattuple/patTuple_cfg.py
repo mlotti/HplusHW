@@ -155,6 +155,15 @@ if isinstance(myTrigger, basestring):
     myTrigger = [myTrigger]
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
 
+# TotalKinematicsFilter for managing with buggy LHE+Pythia samples
+# https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
+if dataVersion.isMC():
+    process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+    process.totalKinematicsFilter.src.setProcessName(dataVersion.getTriggerProcess())
+    process.totalKinematicsFilterPath = cms.Path(
+        process.totalKinematicsFilter
+    )
+
 #process.load("HiggsAnalysis.HeavyChHiggsToTauNu.HLTTauEmulation_cff")
 #process.out.outputCommands.extend(["keep recoCaloTaus_caloTauHLTTauEmu_*_*"])
 #process.out.outputCommands.extend(["keep *_l1extraParticles_*_*"])
