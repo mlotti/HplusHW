@@ -113,7 +113,7 @@ if dataVersion.isMC():
             # Remove the soft photons from fragmentations (we have not needed them)
 #            "drop pdgId() = {gamma} && mother().pdgId() = {pi0}"
             "drop++ pdgId() = {string}",
-            "keep pdgId() = {string}"
+            "keep pdgId() = {string}",
             )
     )
     process.out.outputCommands.extend([
@@ -143,6 +143,7 @@ if dataVersion.isData():
     process.out.outputCommands.extend(["drop recoGenJets_*_*_*"])
 else:
     process.out.outputCommands.extend([
+            "keep LHEEventProduct_*_*_*",
             "keep GenEventInfoProduct_*_*_*",
             "keep GenRunInfoProduct_*_*_*",
             ])
