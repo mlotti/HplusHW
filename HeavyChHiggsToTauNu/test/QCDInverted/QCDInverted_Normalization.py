@@ -74,15 +74,22 @@ class InvertedTauID:
         theFit.SetParLimits(6,1000,20000)                                                                                                                                                                
         theFit.SetParLimits(7,0.001,0.05)
 
-        c = TCanvas("c","",500,500)                                                                                                                                                                      
-        c.cd()                                                                                                                                                                                           
-        c.SetLogy()                                                                                                                                                                                      
+        cqcd = TCanvas("c","",500,500)                                                                                                                                                                      
+        cqcd.cd()                                                                                                                                                                                           
+        cqcd.SetLogy()
+	gStyle.SetOptFit(0)
         histo.Fit(theFit,"R")                                                                                                                                                                            
                                                                                                                                                                                                      
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())                                                                                                                           
         theFit.SetLineStyle(2)                                                                                                                                                                           
-        theFit.Draw("same")                                                                                                                                                                              
-        c.Print("qcdfit.eps")                                                                                                                                                                            
+        theFit.Draw("same")
+
+        tex = TLatex(0.4,0.8,"Inverted TauID")
+	tex.SetNDC()
+	tex.Draw()
+
+        cqcd.Print("qcdfit.eps")
+
                                                                                                                                                                                                      
         self.parInvQCD = theFit.GetParameters()                                                                                                                                                                     
                                                                                                                                                                                                      
@@ -113,10 +120,12 @@ class InvertedTauID:
     	theFit.SetParLimits(0,1000,10000)
     	theFit.SetParLimits(1,80,120)
     	theFit.SetParLimits(2,40,100)
-    	theFit.SetParLimits(3,400,600)
+    	theFit.SetParLimits(3,100,600)
+	theFit.SetParLimits(4,140,500)
+	theFit.SetParLimits(5,30,80)
 
-    	theFit.FixParameter(4,148.123806861)
-    	theFit.FixParameter(5,71.6160638087)
+#    	theFit.FixParameter(4,148.123806861)
+#    	theFit.FixParameter(5,71.6160638087)
         
         cewk = TCanvas("cewk","",500,500)
         cewk.cd()
@@ -126,6 +135,11 @@ class InvertedTauID:
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
         theFit.Draw("same")
+
+        tex = TLatex(0.2,0.2,"EWK MC, baseline TauID")
+        tex.SetNDC()
+        tex.Draw()
+
         cewk.Print("ewkfit.eps")
         
         self.parMCEWK = theFit.GetParameters()
@@ -150,6 +164,10 @@ class InvertedTauID:
             def __call__( self, x, par ):
                 return par[0]*(par[1] * QCDFunction(x,parInvQCD,1/nInvQCD) + ( 1 - par[1] ) * EWKFunction(x,parMCEWK,1/nMCEWK))
 
+	class QCDOnly:
+	    def __call__( self, x, par ):
+		return par[0]*par[1] * QCDFunction(x,parInvQCD,1/nInvQCD)
+
         rangeMin = histo.GetXaxis().GetXmin()
         rangeMax = histo.GetXaxis().GetXmax()
         numberOfParameters = 2
@@ -166,9 +184,25 @@ class InvertedTauID:
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
         theFit.SetLineStyle(2)
         theFit.Draw("same")
-        c.Print("combinedfit.eps")
 
-        par = theFit.GetParameters()
+	par = theFit.GetParameters()
+
+	qcdOnly = TF1("qcdOnly",QCDOnly(),rangeMin,rangeMax,numberOfParameters)
+	qcdOnly.FixParameter(0,par[0])
+	qcdOnly.FixParameter(1,par[1])
+	qcdOnly.SetLineStyle(2)
+	qcdOnly.Draw("same")
+
+        tex = TLatex(0.35,0.8,"Data, Baseline TauID")
+        tex.SetNDC()
+        tex.Draw()
+
+        texq = TLatex(0.4,0.3,"QCD")
+        texq.SetNDC() 
+	texq.SetTextSize(15)
+        texq.Draw()
+
+        c.Print("combinedfit.eps")
         
         fitPars = "fit parameters "
         i = 0
