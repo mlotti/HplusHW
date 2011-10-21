@@ -246,7 +246,7 @@ def myRemoveCleaning(process, postfix=""):
 # process      cms.Process object
 # dataVersion  Version of the input data (needed for the trigger info process name) 
 def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
-                doPatCalo=True, doBTagging=True, doPatMuonPFIsolation=False, doPatTauIsoDeposits=False,
+                doPatCalo=True, doBTagging=True, doPatTauIsoDeposits=False,
                 doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
                 includePFCands=False):
     out = None
@@ -466,8 +466,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # Muons
     setPatLeptonDefaults(process.patMuons, includePFCands)
-    if doPatMuonPFIsolation:
-        addPFMuonIsolation(process, process.patMuons, sequence, verbose=True)
+    addPFMuonIsolation(process, process.patMuons, sequence, verbose=True)
 
     outputCommands.extend([
             "keep *_selectedPatMuons_*_*"

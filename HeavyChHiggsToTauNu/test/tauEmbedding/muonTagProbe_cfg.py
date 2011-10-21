@@ -93,7 +93,6 @@ patArgs = {
     "doPatElectronID": False,
     "doPatCalo": False,
     "doBTagging": False,
-    "doPatMuonPFIsolation": True,
     "doTauHLTMatching": False,
     }
 process.commonSequence, counters = addPatOnTheFly(process, options, dataVersion, plainPatArgs=patArgs, doMcPreselection=False)

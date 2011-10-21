@@ -86,9 +86,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
                                    doPlainPat=True, doPF2PAT=False,
-                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching
-                                                 "matchingTauTrigger": myTrigger,
-                                                 "doPatMuonPFIsolation": True},
+                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching,
+                                                 "matchingTauTrigger": myTrigger},
                                    )
 
 process.out.outputCommands.extend([
