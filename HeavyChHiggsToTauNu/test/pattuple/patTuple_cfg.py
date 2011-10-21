@@ -40,17 +40,12 @@ del process.TFileService
 ################################################################################
 # In case of data, add trigger
 myTrigger = options.trigger
-if len(myTrigger) == 0:
-    myTrigger = dataVersion.getDefaultSignalTrigger()
 
-#from HiggsAnalysis.HeavyChHiggsToTauNu.HChDataSelection import addDataSelection
-#process.collisionDataSelection = cms.Sequence()
-#if dataVersion.isData():
-#    process.collisionDataSelection = addDataSelection(process, dataVersion, myTrigger)
-
-#myTrigger = "HLT_Jet30U" # use only for debugging
-
-print "Trigger used for tau matching: "+str(myTrigger)
+doTauHLTMatching = options.doTauHLTMatching != 0
+if doTauHLTMatching:
+    if len(myTrigger) == 0:
+        myTrigger = dataVersion.getDefaultSignalTrigger()
+    print "Trigger used for tau matching: "+str(myTrigger)
 
 ################################################################################
 # Output module
@@ -89,9 +84,9 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChPatTuple import *
 options.doPat=1
 (process.sPAT, c) = addPatOnTheFly(process, options, dataVersion,
                                    doPlainPat=True, doPF2PAT=False,
-                                   plainPatArgs={"matchingTauTrigger": myTrigger,
+                                   plainPatArgs={"doTauHLTMatching": doTauHLTMatching
+                                                 "matchingTauTrigger": myTrigger,
                                                  "doPatMuonPFIsolation": True},
-                                   pf2patArgs={"matchingTauTrigger": myTrigger},
                                    )
 
 process.out.outputCommands.extend([

@@ -318,7 +318,7 @@ def vertexCount(h, prefix="", postfix=""):
 
         h.addMCUncertainty()
 
-        opts = {"xmax": 16}
+        opts = {}
         opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
         opts_log.update(opts)
         

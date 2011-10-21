@@ -64,16 +64,16 @@ datasetsData2010 = [
     "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
 datasetsData2011 = [
-    "SingleMu_160431-163261_May10",  # HLT_Mu20_v1
-    "SingleMu_163270-163869_May10",  # HLT_Mu24_v2
-    "SingleMu_165088-166150_Prompt", # HLT_Mu30_v3
-    "SingleMu_166161-166164_Prompt", # HLT_Mu40_v1
-    "SingleMu_166346-166346_Prompt", # HLT_Mu40_v2
-    "SingleMu_166374-167043_Prompt", # HLT_Mu40_v1
-    "SingleMu_167078-167913_Prompt", # HLT_Mu40_v3
-    "SingleMu_170722-172619_Aug05",  # HLT_Mu40_v5
-    "SingleMu_172620-173198_Prompt", # HLT_Mu40_v5
-    "SingleMu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
+    "SingleMu_Mu_160431-163261_May10",  # HLT_Mu20_v1
+    "SingleMu_Mu_163270-163869_May10",  # HLT_Mu24_v2
+    "SingleMu_Mu_165088-166150_Prompt", # HLT_Mu30_v3
+    "SingleMu_Mu_166161-166164_Prompt", # HLT_Mu40_v1
+    "SingleMu_Mu_166346-166346_Prompt", # HLT_Mu40_v2
+    "SingleMu_Mu_166374-167043_Prompt", # HLT_Mu40_v1
+    "SingleMu_Mu_167078-167913_Prompt", # HLT_Mu40_v3
+    "SingleMu_Mu_170722-172619_Aug05",  # HLT_Mu40_v5
+    "SingleMu_Mu_172620-173198_Prompt", # HLT_Mu40_v5
+    "SingleMu_Mu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
 ]
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Summer11",
@@ -140,15 +140,15 @@ skimNjobs = {
     }
 
 muonAnalysisNjobs = { # goal: 30k events/job
-    "SingleMu_160431-163261_May10": 2,
-    "SingleMu_163270-163869_May10": 5,
-    "SingleMu_165088-166150_Prompt": 7,
-    "SingleMu_166161-166164_Prompt": 1,
-    "SingleMu_166346-166346_Prompt": 1,
-    "SingleMu_166374-167043_Prompt": 7,
-    "SingleMu_167078-167784_Prompt": 2,
-    "SingleMu_161119-161119_May10_Wed": 1,
-    "SingleMu_167786-167913_Prompt_Wed": 2,
+    "SingleMu_Mu_160431-163261_May10": 2,
+    "SingleMu_Mu_163270-163869_May10": 5,
+    "SingleMu_Mu_165088-166150_Prompt": 7,
+    "SingleMu_Mu_166161-166164_Prompt": 1,
+    "SingleMu_Mu_166346-166346_Prompt": 1,
+    "SingleMu_Mu_166374-167043_Prompt": 7,
+    "SingleMu_Mu_167078-167784_Prompt": 2,
+    "SingleMu_Mu_161119-161119_May10_Wed": 1,
+    "SingleMu_Mu_167786-167913_Prompt_Wed": 2,
     "WJets_TuneZ2_Summer11": 7,
     "TTJets_TuneZ2_Summer11": 17,
     "QCD_Pt20_MuEnriched_TuneZ2_Summer11": 5,
