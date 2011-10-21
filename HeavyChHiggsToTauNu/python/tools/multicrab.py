@@ -508,15 +508,10 @@ class MulticrabDataset:
 
         if "args" in self.data:
             for key, value in self.data["args"].iteritems():
-                print key, value
                 args.append("%s=%s" % (key, str(value)))
+            del dataKeys[dataKeys.index("args")]
 
         args += self.args
-        try:
-            args.extend(self.data["args"])
-            del dataKeys[dataKeys.index("args")]
-        except KeyError:
-            pass           
 
         ret = "[%s]\n" % self.name
         ret += "CMSSW.datasetpath = %s\n" % self.data["datasetpath"]
