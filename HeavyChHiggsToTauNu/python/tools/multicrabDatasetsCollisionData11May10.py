@@ -88,22 +88,43 @@ datasets = {
         }
     },
 
-    # Single Mu without trigger
+    # Single Mu
     "SingleMu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "args": {"doTauHLTMatching": 0},
+        "triggerOR": [
+            "HLT_Mu20_v1", "HLT_IsoMu12_v1" # not prescaled
+            "HLT_Mu15_v2", # prescaled
+            ],
         "runs": (160431, 163261),
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 120, # Adjusted for skim file size
+                "number_of_jobs": 0, # To be adjusted for skim file size
                 "lumiMask": "May10ReReco"
             },
         }
     }, 
+   "SingleMu_163270-163869_May10": {
+        "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
+        "triggerOR": [
+            "HLT_Mu24_v2", "HLT_IsoMu17_v6", # not prescaled
+            "HLT_Mu15_v3", "HLT_Mu20_v2", "HLT_IsoMu15_v6", # prescaled
+            ],
+        "runs": (163270, 163869),
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
+                "number_of_jobs": 0, # To be adjusted for skim file size
+                "lumiMask": "May10ReReco"
+            },
+        },
+    },
 
-    # Single Mu with Mu trigger
+
+    # Single Mu for tau embedding skims
     "SingleMu_Mu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",

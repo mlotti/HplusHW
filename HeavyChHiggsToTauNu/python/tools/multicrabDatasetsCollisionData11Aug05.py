@@ -52,6 +52,23 @@ datasets = {
     # Single Mu
     "SingleMu_Mu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
+        "triggerOR": [
+            "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
+            "HLT_Mu15_v8", "HLT_Mu20_v7", "HLT_Mu24_v7", "HLT_Mu30_v7", "HLT_IsoMu15_v13", "HLT_IsoMu17_v13", # prescaled
+            ],
+        "runs": (170722, 172619),
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-05Aug2011-v1/AOD",
+                "number_of_jobs": 0,
+                "lumiMask": "Aug05ReReco"
+            },
+        }
+    },
+
+    # Single Mu for tau embedding skims
+    "SingleMu_Mu_170722-172619_Aug05": {
+        "dataVersion": "42Xdata",
         "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),
         "data": {
