@@ -22,6 +22,7 @@ def addDataSelection(process, dataVersion, trigger):
     
     # Trigger
     if len(trigger) > 0:
+        print "Triggering with", " OR ".join(trigger)
         process.TriggerFilter = triggerResultsFilter.clone()
         process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
         process.TriggerFilter.l1tResults = cms.InputTag("")
