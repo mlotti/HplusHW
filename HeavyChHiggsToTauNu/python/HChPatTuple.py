@@ -24,6 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChPrimaryVertex as HChPrimaryVertex
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.RemoveSoftMuonVisitor as RemoveSoftMuonVisitor
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 
 tauPreSelection = "pt() > 15"
 #tauPreSelection = ""
@@ -464,6 +465,11 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Muons
     setPatLeptonDefaults(process.patMuons, includePFCands)
     addPFMuonIsolation(process, process.patMuons, sequence, verbose=True)
+    process.muonIsolationEmbeddingSequence = cms.Sequence()
+    muons = tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.muonIsolationEmbeddingSequence, "patMuons")
+    process.patDefaultSequence.replace(process.selectedPatMuons,
+                                       process.muonIsolationEmbeddingSequence*process.selectedPatMuons)
+    process.selectedPatMuons.src = muons
 
     outputCommands.extend([
             "keep *_selectedPatMuons_*_*"
