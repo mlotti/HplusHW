@@ -186,5 +186,13 @@ process.path    = cms.Path(
 process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
 )
+
+# If there is a need to apply some skim
+if options.skimConfig != "":
+    print "Skimming with configuration ", options.skimConfig
+    process.load(options.skimConfig)
+    process.path *= process.skimSequence
+
+# Output module in EndPath
 process.outpath = cms.EndPath(process.out)
 

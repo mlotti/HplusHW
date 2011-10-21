@@ -35,6 +35,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Do tau trigger mathching? (default: 1")
+    options.register("skimConfig",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Configuration fragment for a skim to be done during pattuplization")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,
