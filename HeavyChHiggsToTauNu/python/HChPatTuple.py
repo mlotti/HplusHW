@@ -272,7 +272,10 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Remove MC stuff if we have collision data (has to be done any add*Collection!)
     # This also adds the L2L3Residual JEC correction to the process.patJetCorrFactors
     if dataVersion.isData():
-        runOnData(process, outputInProcess = out!=None)
+        o = []
+        if out != None:
+            o = ["out"]
+        runOnData(process, outputModules=o)
 
     # PF particle selectors
     addSelectedPFlowParticle(process, sequence)
