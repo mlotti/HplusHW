@@ -29,6 +29,7 @@ class HPlusJetPtrSelectorFilter: public edm::EDFilter {
   HPlus::JetSelection fJetSelection;
   edm::InputTag fTauSrc;
   bool fFilter;
+  bool fThrow;
 
   // Let's use reco::Candidate as the output type, as the required
   // dictionaries for edm::PtrVector<pat:Jet> do not exist, and I
@@ -42,7 +43,8 @@ HPlusJetPtrSelectorFilter::HPlusJetPtrSelectorFilter(const edm::ParameterSet& iC
   eventWeight(iConfig),
   fJetSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("jetSelection"), eventCounter, eventWeight),
   fTauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
-  fFilter(iConfig.getParameter<bool>("filter"))
+  fFilter(iConfig.getParameter<bool>("filter")),
+  fThrow(iConfig.getParameter<bool>("throw"))
 {
   eventCounter.produces(this);
   produces<Product>();
@@ -61,15 +63,19 @@ bool HPlusJetPtrSelectorFilter::filter(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<edm::View<reco::Candidate> > hcand;
   iEvent.getByLabel(fTauSrc, hcand);
 
-  if (hcand->size() != 1) {
-    throw cms::Exception("LogicError") << "HPlusJetPtrSelectorFilter: Tried to make jet selection with tau collection size <> 1!" << std::endl;
-  }
-
   bool passed = false;
-  HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
-  if(jetData.passedEvent()) {
-    passed = true;
-    iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
+  if (hcand->size() != 1) {
+    if(fThrow || hcand->size() != 0)
+      throw cms::Exception("LogicError") << "Tried to make jet selection with tau collection size " 
+                                         << hcand->size() << " != 1!"
+                                         << std::endl;
+  }
+  else {
+    HPlus::JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, hcand->ptrAt(0));
+    if(jetData.passedEvent()) {
+      passed = true;
+      iEvent.put(std::auto_ptr<Product>(new Product(jetData.getSelectedJets())));
+    }
   }
   std::auto_ptr<bool> p(new bool(passed));
   iEvent.put(p);

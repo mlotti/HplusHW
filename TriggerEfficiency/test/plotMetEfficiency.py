@@ -28,7 +28,7 @@ plotStyles = [
     styles.mcStyle
     ]
 
-#l1met = False # for runs 165970-167913
+l1met = False # for runs 165970-167913
 l1met = True # for runs 170722-173692
 
 runs = "165970-167913"
@@ -38,11 +38,11 @@ if l1met:
 # main function
 def main():
     file = ROOT.TFile.Open("histograms-%s.root"%runs)
-    tree = file.Get("triggerEfficiencyAnalyzer/tree")
+    tree = file.Get("triggerEfficiency/tree")
 
     l1metsel = ""
-    if l1met:
-        l1metsel = "&& L1MET > 29"
+#    if l1met:
+#        l1metsel = "&& L1MET > 30"
 
     offlineSelection = "MET >= 0"
     #offlineSelection += "&& MET > 70"
@@ -52,7 +52,7 @@ def main():
         # Handle the bug in the L1 seed of HLT_PFTau35_Trk20, it was
         # supposed to be OR, but it was AND
         offlineSelection += "&& Max$(L1TauJet_p4.Et()) > 51 && Max$(L1CenJet_p4.Et()) > 51"
-        caloMet = "CaloMET"
+#        caloMet = "CaloMET"
 
 
     #binning = "(40,0,200)"

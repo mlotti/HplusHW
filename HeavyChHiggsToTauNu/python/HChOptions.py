@@ -29,7 +29,12 @@ def getOptions(options=None):
     options.register("trigger",
                      [],
                      options.multiplicity.list, options.varType.string,
-                     "Trigger to use")
+                     "Triggers to use (logical OR if multiple given")
+    options.register("doTauHLTMatching",
+                     1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Do tau trigger mathching? (default: 1")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,

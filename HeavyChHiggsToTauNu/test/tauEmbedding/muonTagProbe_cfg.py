@@ -116,7 +116,7 @@ process.commonSequence *= process.triggeredCount
 counters.append("triggeredCount")
 
 # Primary vertex
-process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 process.goodPrimaryVertex = cms.EDFilter("VertexSelector",

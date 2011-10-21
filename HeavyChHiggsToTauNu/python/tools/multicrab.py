@@ -488,6 +488,9 @@ class MulticrabDataset:
         The method was intended to be called from Multicrab class.
         """
 
+        if "trigger" in self.data and "triggerOR" in self.data:
+            raise Exception("May not have both 'trigger' and 'triggerOR', in task %s" % self.name)
+
         dataKeys = self.data.keys()
 
         args = ["dataVersion=%s" % self.data["dataVersion"]]
@@ -498,9 +501,15 @@ class MulticrabDataset:
                 del dataKeys[dataKeys.index(argName)]
             except KeyError:
                 pass
+        try:
+            args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
+        except KeyError:
+            pass
+
         if "args" in self.data:
             for key, value in self.data["args"].iteritems():
-                args.append("%s=%s" % (key, value))
+                print key, value
+                args.append("%s=%s" % (key, str(value)))
 
         args += self.args
         try:

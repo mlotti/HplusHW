@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 def addPrimaryVertexSelection(process, sequence):
-    process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+    process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
         src = cms.InputTag("offlinePrimaryVertices")
     )
     sequence *= process.firstPrimaryVertex

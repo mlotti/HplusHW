@@ -21,14 +21,15 @@ def addDataSelection(process, dataVersion, trigger):
     seq *= process.passedPhysicsDeclared
     
     # Trigger
-    process.TriggerFilter = triggerResultsFilter.clone()
-    process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
-    process.TriggerFilter.l1tResults = cms.InputTag("")
-    #process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-    process.TriggerFilter.triggerConditions = cms.vstring(trigger)
+    if len(trigger) > 0:
+        process.TriggerFilter = triggerResultsFilter.clone()
+        process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
+        process.TriggerFilter.l1tResults = cms.InputTag("")
+        # process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
+        process.TriggerFilter.triggerConditions = cms.vstring(trigger)
+        seq *= process.TriggerFilter
 
     process.passedTrigger = cms.EDProducer("EventCountProducer")
-    seq *= process.TriggerFilter
     seq *= process.passedTrigger
 
     # Filter out Beam Scraping events, see
