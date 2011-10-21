@@ -503,6 +503,7 @@ class MulticrabDataset:
                 pass
         try:
             args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
+            del dataKeys[dataKeys.index("triggerOR")]
         except KeyError:
             pass
 
