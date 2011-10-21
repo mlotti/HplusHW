@@ -536,9 +536,9 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             "hltL1HLTDouble*",
             "hltL1IsoRecoEcal*",
             "hltL1NonIsoRecoEcal*",
-            "hltL2Muon*",
-            "hltL3Muon*",
-            "hltMuTrack*",
+            #"hltL2Muon*",
+            #"hltL3Muon*",
+            #"hltMuTrack*",
             "hltPixel*",
             "hltRecoEcal*",
         )
