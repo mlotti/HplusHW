@@ -274,12 +274,23 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     if dataVersion.isData():
         runOnData(process, outputInProcess = out!=None)
 
+    # PF particle selectors
+    addSelectedPFlowParticle(process, sequence)
+    addPFCandidatePtSums(process, sequence)
+    outputCommands.append("keep double_pf*SumPt_*_*")
+
     # Jets
     # Produce kt6 rho for L1Fastjet
     process.load('RecoJets.Configuration.RecoPFJets_cff')
     process.kt6PFJets.doRhoFastjet = True
     process.ak5PFJets.doAreaFastjet = True
     process.ak5PFJetSequence = cms.Sequence(process.kt6PFJets * process.ak5PFJets)
+
+    # Calculate kt6 from neutrals
+    process.kt6PFJetsNeutrals = process.kt6PFJets.clone(
+        src = "pfAllNeutralCandidates"
+    )
+    sequence *= process.kt6PFJetsNeutrals
 
     # Produce Type 2 MET correction from unclustered PFCandidates
     process.pfCandsNotInJet = pfNoJet.pfNoJet.clone(
@@ -290,6 +301,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         src = cms.InputTag('pfCandsNotInJet')
     )  
     process.ak5PFJetSequence *= (process.pfCandsNotInJet*process.pfCandMETcorr)
+    outputCommands.append("keep *_pfCandMETcorr_*_*")
 
     # Set defaults
     process.patJets.jetSource = cms.InputTag("ak5CaloJets")
@@ -464,7 +476,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # Muons
     setPatLeptonDefaults(process.patMuons, includePFCands)
-    addPFMuonIsolation(process, process.patMuons, sequence, verbose=True)
+    addPFMuonIsolation(process, process.patMuons, sequence)
     process.muonIsolationEmbeddingSequence = cms.Sequence()
     muons = tauEmbeddingCustomisations.addMuonIsolationEmbedding(process, process.muonIsolationEmbeddingSequence, "patMuons")
     process.patDefaultSequence.replace(process.selectedPatMuons,
@@ -955,9 +967,8 @@ def addSelectedPFlowParticle(process, sequence, verbose=False):
         )
     process.pfPileUp.Enable = True # enable pile-up filtering
     process.pfPileUp.Vertices = "offlinePrimaryVertices" # use vertices w/o BS
-    process.pfAllMuons.src = "particleFlow"
-    process.pfAllElectrons.src = "particleFlow"
-    
+    process.pfAllElectrons.src = "pfNoPileUp"
+
     # From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
     process.pileUpHadrons = cms.EDFilter("PdgIdPFCandidateSelector",
         src = cms.InputTag("pfPileUpCandidates"),
@@ -966,21 +977,48 @@ def addSelectedPFlowParticle(process, sequence, verbose=False):
         #pdgId = cms.vint32(211,-211,321,-321,999211,2212,-2212)
     )
     process.pfCandidateSelectionByType *= process.pileUpHadrons
+
+    # Add all neutral candidates (for rho-neutral)
+    process.pfAllNeutralCandidates = process.pfAllNeutralHadrons.clone(
+        pdgId = process.pfAllNeutralHadrons.pdgId.value() + process.pfAllPhotons.pdgId.value()
+    )
+    process.pfCandidateSelectionByType *= process.pfAllNeutralCandidates
+
+    # Add also the versions without CHS
+    for particle in ["NeutralHadrons", "ChargedHadrons", "Photons", "Electrons", "Muons", "NeutralCandidates"]:
+        m = getattr(process, "pfAll"+particle).clone(
+            src = "particleFlow"
+        )
+        setattr(process, "pfAll"+particle+"NoChs", m)
+        process.pfCandidateSelectionByType *= m
+
     sequence *= process.pfCandidateSelectionByType
 
-# From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
-def addPFMuonIsolation(process, module, sequence, verbose=False):
-#    if verbose:
-#        print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
-
+def addPFCandidatePtSums(process, sequence):
     if not hasattr(process, "pfCandidateSelectionByType"):
-        addSelectedPFlowParticle(process, sequence, verbose=verbose)
+        raise Exception("addSelectedPFlowParticle() must be called before this one")
+
+    prototype = cms.EDProducer("HPlusCandViewSumPtComputer",
+        src = cms.InputTag("")
+    )
+    colls = ["pfAll" + p for p in ["NeutralHadrons", "ChargedHadrons", "Photons", "Muons", "Electrons", "NeutralCandidates"]]
+    colls.extend([p+"NoChs" for p in colls])
+    colls.append("pfPileUpCandidates")
+    for collection in colls:
+        m = prototype.clone(src = collection)
+        setattr(process, collection+"SumPt", m)
+        sequence *= m
+
+# From https://hypernews.cern.ch/HyperNews/CMS/get/muon/638.html
+def addPFMuonIsolation(process, module, sequence):
+    if not hasattr(process, "pfCandidateSelectionByType"):
+        raise Exception("addSelectedPFlowParticle() must be called before this one")
 
     process.muPFIsoDepositAll = isoDepositReplace('muons',"pfNoPileUp")
     process.muPFIsoDepositCharged = isoDepositReplace('muons',"pfAllChargedHadrons")
     process.muPFIsoDepositNeutral = isoDepositReplace('muons',"pfAllNeutralHadrons")
     process.muPFIsoDepositGamma = isoDepositReplace('muons',"pfAllPhotons")
-    #For Delta beta methos create an additional one fot charged particles from PV
+    #For Delta beta method create an additional one for charged particles from PV
     process.muPFIsoDepositPU = isoDepositReplace('muons',"pileUpHadrons")
 
     prototype = cms.EDProducer("CandIsolatorFromDeposits",
@@ -1049,7 +1087,7 @@ def addPFMuonIsolationOld(process,module,postfix="",verbose=False):
         print "[Info] Adding particle isolation to muon with postfix '"+postfix+"'"
 
     if not hasattr(process, "pfCandidateSelectionByType"):
-        addSelectedPFlowParticle(process,verbose=verbose)
+        addSelectedPFlowParticle(process, verbose)
         
     #setup correct src of isolated object
     setattr(process,"isoDepMuonWithCharged"+postfix,
