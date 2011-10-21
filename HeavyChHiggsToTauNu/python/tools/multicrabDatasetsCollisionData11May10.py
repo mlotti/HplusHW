@@ -91,7 +91,22 @@ datasets = {
         }
     },
 
-    # Single Mu
+    # Single Mu without trigger
+    "SingleMu_160431-163261_May10": {
+        "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
+        "runs": (160431, 163261),
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
+                "luminosity": 0,
+                "number_of_jobs": 120, # Adjusted for skim file size
+                "lumiMask": "May10ReReco"
+            },
+        }
+    }, 
+
+    # Single Mu with Mu trigger
     "SingleMu_Mu_160431-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu20_v1",
