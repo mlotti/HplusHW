@@ -48,11 +48,6 @@ def getOptions(options=None):
                      "",
                      options.multiplicity.singleton, options.varType.string,
                      "What tau trigger efficiency to use for tau embedding normalisation")
-    options.register("tauIDFactorizationMap",
-                     "FactorizationMap_NoFactorization_cfi",
-                     options.multiplicity.singleton,
-                     options.varType.string,
-                     "Factorization map config file")
     options.register("runOnCrab",
                      0,
                      options.multiplicity.singleton,
@@ -86,12 +81,3 @@ def getOptionsDataVersion(dataVersion, options=None, useDefaultSignalTrigger=Tru
         options.trigger = [dataVersion.getDefaultSignalTrigger()]
 
     return (options, dataVersion)
-
-
-def getTauIDFactorizationMap(options):
-    if options.tauIDFactorizationMap != "":
-        myFactorizationMapName = "HiggsAnalysis.HeavyChHiggsToTauNu."+options.tauIDFactorizationMap
-    else:
-        raise RuntimeError, "HChOptions::getTauIDFactorizationMap: Check default parameter value!"
-    print "tauID factorization map is:", myFactorizationMapName
-    return myFactorizationMapName
