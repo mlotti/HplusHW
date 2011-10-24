@@ -246,6 +246,7 @@ def myRemoveCleaning(process, postfix=""):
 def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTauDiscriminators=True, doPatMET=True, doPatElectronID=True,
                 doPatCalo=True, doBTagging=True, doPatTauIsoDeposits=False,
                 doTauHLTMatching=True, matchingTauTrigger=None, matchingJetTrigger=None,
+                doMuonHLTMatching=True,
                 includePFCands=False):
     out = None
     outdict = process.outputModules_()
@@ -573,6 +574,16 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     # Tau+HLT matching
     if doTauHLTMatching:
         sequence *= HChTriggerMatching.addTauHLTMatching(process, matchingTauTrigger, matchingJetTrigger)
+    # Muon+HLT matching
+    if doMuonHLTMatching:
+        (process.muonTriggerMatchingSequence, muonsWithTrigger) = HChTriggerMatching.addMuonTriggerMatching(process, muons=process.selectedPatMuons.src.value())
+        process.selectedPatMuons.src = muonsWithTrigger
+        process.patDefaultSequence.remove(process.selectedPatMuons)
+        process.patDefaultSequence *= (
+            process.muonTriggerMatchingSequence *
+            process.selectedPatMuons
+        )
+        out.outputCommands.append("drop patTriggerObjectStandAlonesedmAssociation_*_*_*")
 
     return sequence
 
