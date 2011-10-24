@@ -22,6 +22,7 @@ namespace HPlus {
     fBdiscriminator(bDiscriminator), 
     fDoFill(iConfig.getUntrackedParameter<bool>("fill")),
     fTauEmbeddingInput(iConfig.getUntrackedParameter<bool>("tauEmbeddingInput", false)),
+    fFillJetEnergyFractions(iConfig.getUntrackedParameter<bool>("fillJetEnergyFractions", true)),
     fTree(0)
   {
     if(fTauEmbeddingInput) {
@@ -69,11 +70,13 @@ namespace HPlus {
       
     fTree->Branch("jets_p4", &fJets);
     fTree->Branch("jets_btag", &fJetsBtags);
-    fTree->Branch("jets_chf", &fJetsChf); // charged hadron
-    fTree->Branch("jets_nhf", &fJetsNhf); // neutral hadron
-    fTree->Branch("jets_elf", &fJetsElf);  // electron
-    fTree->Branch("jets_phf", &fJetsPhf);  // photon
-    fTree->Branch("jets_muf", &fJetsMuf);   // muon
+    if(fFillJetEnergyFractions) {
+      fTree->Branch("jets_chf", &fJetsChf); // charged hadron
+      fTree->Branch("jets_nhf", &fJetsNhf); // neutral hadron
+      fTree->Branch("jets_elf", &fJetsElf);  // electron
+      fTree->Branch("jets_phf", &fJetsPhf);  // photon
+      fTree->Branch("jets_muf", &fJetsMuf);   // muon
+    }
     fTree->Branch("jets_chm", &fJetsChm);
     fTree->Branch("jets_nhm", &fJetsNhm);
     fTree->Branch("jets_elm", &fJetsElm);
@@ -212,18 +215,19 @@ namespace HPlus {
       // for some reason the muonEnergyFraction is calculated w.r.t. *corrected* energy in pat::Jet
       double muf = jets[i]->muonEnergy() / (jets[i]->jecFactor(0) * jets[i]->energy());
 
-      double sum = chf+nhf+elf+phf+muf;
-      if(std::abs(sum - 1.0) > 0.000001) {
-        throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
-                                       << " the sum-1 was " << (sum-1.0)
-                                       << std::endl;
+      if(fFillJetEnergyFractions) {
+        double sum = chf+nhf+elf+phf+muf;
+        if(std::abs(sum - 1.0) > 0.000001) {
+          throw cms::Exception("Assert") << "The assumption that chf+nhf+elf+phf+muf=1 failed, the sum was " << (chf+nhf+elf+phf+muf) 
+                                         << " the sum-1 was " << (sum-1.0)
+                                         << std::endl;
+        }
+        fJetsChf.push_back(chf);
+        fJetsNhf.push_back(nhf);
+        fJetsElf.push_back(elf);
+        fJetsPhf.push_back(phf);
+        fJetsMuf.push_back(muf);
       }
-
-      fJetsChf.push_back(chf);
-      fJetsNhf.push_back(nhf);
-      fJetsElf.push_back(elf);
-      fJetsPhf.push_back(phf);
-      fJetsMuf.push_back(muf);
 
       int chm = jets[i]->chargedHadronMultiplicity();
       fJetsChm.push_back(chm);
@@ -566,11 +570,13 @@ namespace HPlus {
     fJets.clear();
     fJetsBtags.clear();
 
-    fJetsChf.clear();
-    fJetsNhf.clear();
-    fJetsElf.clear();
-    fJetsPhf.clear();
-    fJetsMuf.clear();
+    if(fFillJetEnergyFractions) {
+      fJetsChf.clear();
+      fJetsNhf.clear();
+      fJetsElf.clear();
+      fJetsPhf.clear();
+      fJetsMuf.clear();
+    }
 
     fJetsChm.clear();
     fJetsNhm.clear();
