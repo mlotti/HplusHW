@@ -83,7 +83,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "number_of_jobs": 350,
+                "number_of_jobs": 350, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         }
@@ -102,7 +102,7 @@ datasets = {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
                 "luminosity": 0,
-                "number_of_jobs": 0, # To be adjusted for skim file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         }
@@ -118,7 +118,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "number_of_jobs": 0, # To be adjusted for skim file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
         },

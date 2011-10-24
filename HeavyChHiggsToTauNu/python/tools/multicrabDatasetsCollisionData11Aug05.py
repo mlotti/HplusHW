@@ -50,7 +50,7 @@ datasets = {
     },
 
     # Single Mu
-    "SingleMu_Mu_170722-172619_Aug05": {
+    "SingleMu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
         "triggerOR": [
             "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
@@ -60,7 +60,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-05Aug2011-v1/AOD",
-                "number_of_jobs": 0,
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "Aug05ReReco"
             },
         }

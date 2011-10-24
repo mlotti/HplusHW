@@ -523,7 +523,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -539,7 +539,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 230, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -554,7 +554,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 10, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -569,7 +569,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 10, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -584,7 +584,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -599,7 +599,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -614,7 +614,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 460, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -629,14 +629,14 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
     },
-    "SingleMu_175860-177452_Prompt": {
+    "SingleMu_175860-176469_Prompt": {
         "dataVersion": "42Xdata",
-        "runs": (175860, 177452), # This is prompt RECO, so check the run range again when running!
+        "runs": (175860, 176469), # This is prompt RECO, so check the run range again when running!
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
             "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
@@ -645,7 +645,39 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "SingleMu_176545-177053_Prompt": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v2.3/HLT/V2 and /cdaq/physics/Run2011/3e33/v3.0/HLT/V2)
+        "dataVersion": "42Xdata",
+        "runs": (176545, 177053), # This is prompt RECO, so check the run range again when running!
+        "triggerOR": [
+            "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
+            "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
+            "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
+            ],
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
+                "lumiMask": "PromptReco"
+            },
+        }
+    },
+    "SingleMu_177074-177452_Prompt": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v3.1/HLT/V1 and /cdaq/physics/Run2011/3e33/v4.0/HLT/V2)
+        "dataVersion": "42Xdata",
+        "runs": (177074, 177452), # This is prompt RECO, so check the run range again when running!
+        "triggerOR": [
+            "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
+            "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
+            "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
+            ],
+        "data": {
+            "AOD": {
+                "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
+                "number_of_jobs": 440, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -661,7 +693,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -677,12 +709,11 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
-                "number_of_jobs": 0, # To be adjusted for PATtuple file size
+                "number_of_jobs": 240,  # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
     },
-
 
 
     # Single Mu for tau embedding skims
