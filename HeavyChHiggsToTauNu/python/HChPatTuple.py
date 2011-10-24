@@ -278,6 +278,16 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             o = ["out"]
         runOnData(process, outputModules=o)
 
+    # Tracks (mainly needed for muon efficiency tag&probe studies
+    process.generalTracks20eta2p5 = cms.EDFilter(
+        "TrackSelector",
+        src = cms.InputTag("generalTracks"),
+        cut = cms.string("pt > 20 && abs(eta) < 2.5"),
+        filter = cms.bool(False)
+    )
+    sequence *= process.generalTracks20eta2p5
+    outputCommands.append("keep *_generalTracks20eta2p5_*_*")
+
     # PF particle selectors
     addSelectedPFlowParticle(process, sequence)
     addPFCandidatePtSums(process, sequence)
