@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from HLTrigger.HLTfilters.triggerResultsFilter_cfi import triggerResultsFilter
 
-def addDataSelection(process, dataVersion, trigger):
+def addDataSelection(process, dataVersion, options):
     if not dataVersion.isData():
         raise Exception("Data version is not data!")
 
@@ -21,13 +21,16 @@ def addDataSelection(process, dataVersion, trigger):
     seq *= process.passedPhysicsDeclared
     
     # Trigger
-    if len(trigger) > 0:
-        print "Triggering with", " OR ".join(trigger)
+    if len(options.trigger) > 0:
+        print "Triggering with", " OR ".join(options.trigger)
         process.TriggerFilter = triggerResultsFilter.clone()
         process.TriggerFilter.hltResults = cms.InputTag("TriggerResults", "", dataVersion.getTriggerProcess())
         process.TriggerFilter.l1tResults = cms.InputTag("")
-        # process.TriggerFilter.throw = cms.bool(False) # Should it throw an exception if the trigger product is not found
-        process.TriggerFilter.triggerConditions = cms.vstring(trigger)
+        process.TriggerFilter.triggerConditions = cms.vstring(options.trigger)
+        if options.triggerThrow == 0:
+            # Should it throw an exception if the trigger product is not found
+            process.TriggerFilter.throw = False
+
         seq *= process.TriggerFilter
 
     process.passedTrigger = cms.EDProducer("EventCountProducer")

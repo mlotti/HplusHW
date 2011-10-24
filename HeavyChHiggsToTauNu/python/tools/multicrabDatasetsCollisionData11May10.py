@@ -74,6 +74,7 @@ datasets = {
     },
     "Tau_160431-163869_May10": {
         "dataVersion": "42Xdata",
+        "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
             "HLT_IsoPFTau35_Trk20_MET45_v2", # 161217-163261

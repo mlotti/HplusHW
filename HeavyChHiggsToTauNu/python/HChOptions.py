@@ -34,7 +34,12 @@ def getOptions(options=None):
                      1,
                      options.multiplicity.singleton,
                      options.varType.int,
-                     "Do tau trigger mathching? (default: 1")
+                     "Do tau trigger matching? (default: 1)")
+    options.register("triggerThrow",
+                     1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Should the TriggerFilter for data throw if trigger path is not found? (default: 1)")
     options.register("skimConfig",
                      "",
                      options.multiplicity.singleton,

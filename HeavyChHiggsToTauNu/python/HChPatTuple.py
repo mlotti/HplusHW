@@ -124,7 +124,7 @@ def addPatOnTheFly(process, options, dataVersion,
 #            process.patSequence *= process.goodPrimaryVertices
     else:
         if dataVersion.isData():
-            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options.trigger)
+            process.eventPreSelection = HChDataSelection.addDataSelection(process, dataVersion, options)
         elif dataVersion.isMC() and doMcPreselection:
             process.eventPreSelection = HChMcSelection.addMcSelection(process, dataVersion, options.trigger)
 

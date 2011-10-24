@@ -190,6 +190,7 @@ datasets = {
     },
     "Tau_165970-167913_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_MET60_v2", # 165970-166164, 166374-167043
             "HLT_IsoPFTau35_Trk20_MET60_v3", # 166346
@@ -408,6 +409,7 @@ datasets = {
     },
     "Tau_Single_165970-167913_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"triggerThrow": 0}, # needed for OR of triggers in separate run ranges
         "triggerOR": [
             "HLT_IsoPFTau35_Trk20_v2", # 165970-166164, 166374-167043
             "HLT_IsoPFTau35_Trk20_v3", # 166346-166346
