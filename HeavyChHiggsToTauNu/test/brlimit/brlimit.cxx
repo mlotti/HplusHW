@@ -19,14 +19,14 @@ int brlimit()
   ifstream fileLumi(  "input_luminosity",ios::in); fileLumi   >> L;
 
   // --- Data: mass points and efficiencies  --- 
-   const int nData = 7; // 90 not yet ready
+   const int nData = 3; // 90 not yet ready
    double mH[nData]   = 
-     {80,
+     {//80,
       100,     
       120,     
-      140,         
-      150,    
-      155, 
+      //      140,         
+      //      150,    
+      //      155, 
       160};
 
   // --- Read values from LandS files ---
@@ -118,7 +118,7 @@ int brlimit()
 
   // --- Plot LIP and Tevatron results, obs(black) ---
   if (0) plotLipResults(pl);
-  if (1) plotTevatronResults(pl);
+  if (0) plotTevatronResults(pl);
 
   // Save TGraphs and plots
   TFile myfi("brlimits.root","recreate");
@@ -227,7 +227,7 @@ void plotTxt(double lumi) {
   l.DrawLatex(x,y,"CMS Preliminary");
 
   x = 0.45;
-  sprintf(temp,"%.0f pb^{-1}",lumi);
+  sprintf(temp,"%.1f fb^{-1}",lumi);
   l.DrawLatex(x, y, temp);
 
   x = 0.2;

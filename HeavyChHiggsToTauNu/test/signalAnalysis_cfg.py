@@ -326,6 +326,7 @@ if doJESVariation or doSystematics:
         module = process.signalAnalysisCaloMet60TEff
     module = module.clone()
     module.Tree.fill = False        
+    module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
