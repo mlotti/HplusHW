@@ -7,11 +7,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
         "runs": (160431, 161176), #
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "number_of_jobs": 15, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReReco"
-            },
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v17-377a23a99017553e73fe517f9c607b59/USER",
@@ -44,11 +39,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
         "runs": (161217, 163261),
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "number_of_jobs": 100, # Adjusted for PATtuple file size
-                "lumiMask": "May10ReReco"
-            },
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_161217_pattuple_v17-e4cfe64c6b123ecde897f0b19cc05328/USER",
@@ -68,11 +58,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
         "runs": (163270, 163869),
         "data": {
-            "AOD": {
-                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
-                "number_of_jobs": 220,
-                "lumiMask": "May10ReReco"
-            },
             "pattuple_v17": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v17-6d098da292fab19f3d03a84563841e91/USER",
@@ -84,6 +69,22 @@ datasets = {
                 "datasetpath": "/Tau/local-May10ReReco_v1_AOD_163270_pattuple_v18-62e2e156bbf332fdc6c67ab8a6d7a4f0/USER",
                 "luminosity": 167.786000,
                 "number_of_jobs": 2
+            },
+        }
+    },
+    "Tau_160431-163869_May10": {
+        "dataVersion": "42Xdata",
+        "triggerOR": [
+            "HLT_IsoPFTau35_Trk20_MET45_v1", # 160431-161176
+            "HLT_IsoPFTau35_Trk20_MET45_v2", # 161217-163261
+            "HLT_IsoPFTau35_Trk20_MET45_v4", # 163270-163869
+        ],
+        "runs": (160431, 163869),
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tau/Run2011A-May10ReReco-v1/AOD",
+                "number_of_jobs": 350,
+                "lumiMask": "May10ReReco"
             },
         }
     },
