@@ -13,6 +13,7 @@ config = {
 #        "signalTrigger": "HLT_SingleIsoTau20_Trk15_MET20",
 #        "patCastor": "",
         "patMadhatter": "file:/mnt/flustre/mkortela/data/Tau/Run2011A-PromptReco-v4/AOD/FCF1CBDD-878F-E011-885B-003048F118D4.root",
+#        "patMadhatter": "file:/mnt/flustre/mkortela/data/SingleMu/PromptReco-v4/AOD/F2B6FB32-7AA3-E011-BCAF-BCAEC5329710.root",
 #        "analysisCastor": "",
         "analysisMadhatter": "/store/group/local/HiggsChToTauNuFullyHadronic/pattuples/CMSSW_4_2_X/Tau_166374-167043_Prompt/Tau/Run2011A_PromptReco_v4_AOD_166374_pattuple_v18/76121191f925a13de2aa415b27ca9123/pattuple_48_1_C3w.root",
     },
