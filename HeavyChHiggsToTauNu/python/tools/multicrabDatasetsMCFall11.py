@@ -6,12 +6,32 @@ import multicrabDatasetsCommon as common
 # Default signal cross section taken the same as ttbar
 datasets = {
     # Signal WH
+    "TTToHplusBWB_M80_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-80_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
     "TTToHplusBWB_M90_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M100_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
                 "number_of_jobs": 25, # Adjusted for PATtuple file size
             },
         }
@@ -32,6 +52,16 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBWB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBWB_M150_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBWB_M-150_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
                 "number_of_jobs": 25, # Adjusted for PATtuple file size
             },
         }
@@ -67,12 +97,52 @@ datasets = {
             },
         }
     },
+    "TTToHplusBHminusB_M90_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBHminusB_M-90_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBHminusB_M100_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBHminusB_M-100_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBHminusB_M120_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBHminusB_M-120_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
     "TTToHplusBHminusB_M140_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 165,
         "data": {
             "AOD": {
                 "datasetpath": "/TTToHplusBHminusB_M-140_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 25, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "TTToHplusBHminusB_M155_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTToHplusBHminusB_M-155_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
                 "number_of_jobs": 25, # Adjusted for PATtuple file size
             },
         }
@@ -181,6 +251,16 @@ datasets = {
     # Cross sections from
     # [1] https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     # [2] https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSections
+    "TTJets_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165, # [1,2], approx. NNLO
+        "data": {
+            "AOD": {
+                "datasetpath": "/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 400, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "WJets_TuneZ2_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 31314, # [2], NNLO
@@ -193,12 +273,42 @@ datasets = {
             },
         },
     },
+    "DYJetsToLL_M50_TuneZ2_Fall11": { # Z+jets
+        "dataVersion": "42XmcS6",
+        "crossSection": 3048, # [2], NNLO
+        "data": {
+            "AOD": {
+                "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 2000, # Adjusted for PATtuple file size
+            },
+        }
+    },
 
 
     # SingleTop Powheg
     # Cross sections from
     # https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopMC2011
     # https://twiki.cern.ch/twiki/bin/view/CMS/SingleTopSigma
+    "T_t-channel_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 41.92,
+        "data": {
+            "AOD": {
+                "datasetpath": "/T_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 400, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "Tbar_t-channel_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 22.65,
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 200, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "T_tW-channel_TuneZ2_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 7.87,
@@ -206,6 +316,26 @@ datasets = {
             "AOD": {
                 "datasetpath": "/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
                 "number_of_jobs": 80, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "T_s-channel_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 3.19,
+        "data": {
+            "AOD": {
+                "datasetpath": "/T_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 30, # Adjusted for PATtuple file size
+            },
+        },
+    },
+    "Tbar_s-channel_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 1.44,
+        "data": {
+            "AOD": {
+                "datasetpath": "/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 15, # Adjusted for PATtuple file size
             },
         },
     },
