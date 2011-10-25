@@ -65,7 +65,6 @@ process.out = cms.OutputModule("PoolOutputModule",
         "keep *_l1GtTriggerMenuLite_*_*", # in run block, needed for prescale provider
         "keep recoCaloMETs_*_*_*", # keep all calo METs (metNoHF is needed!)
         "keep *_kt6PFJets_rho_HChPatTuple", # keep the rho of the event
-        "keep *_kt6PFJetsNeutrals_rho_HChPatTuple", # keep the rho from neutrals
         "keep *_HBHENoiseFilterResultProducer_*_*", # keep the resulf of HBHENoiseFilterResultProducer
         ),
     dropMetaData = cms.untracked.string("ALL")
@@ -154,6 +153,7 @@ process.heavyChHiggsToTauNuSequence.remove(process.heavyChHiggsToTauNuHLTrigRepo
 if isinstance(myTrigger, basestring):
     myTrigger = [myTrigger]
 process.heavyChHiggsToTauNuHLTFilter.HLTPaths = myTrigger
+process.heavyChHiggsToTauNuHLTFilter.throw = False
 
 # TotalKinematicsFilter for managing with buggy LHE+Pythia samples
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html
