@@ -88,17 +88,22 @@ class TextDefaults:
 # histograms.addEnergyText(), histograms.addLuminosityText().
 textDefaults = TextDefaults()
 
+def addText(x, y, text, size=None, bold=True):
+    l = ROOT.TLatex()
+    l.SetNDC()
+    if not bold:
+        l.SetTextFont(l.GetTextFont()-20) # bold -> normal
+    if size != None:
+        l.SetTextSize(size)
+    l.DrawLatex(x, y, text)
+
 ## Add the "CMS Preliminary" text to the pad
 #
 # \param x   X coordinate of the text (None for default value)
 # \param y   Y coordinate of the text (None for default value)
 def addCmsPreliminaryText(x=None, y=None):
     (x, y) = textDefaults.getValues("cmsPreliminary", x, y)
-    l = ROOT.TLatex()
-    l.SetNDC()
-    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    l.SetTextSize(textDefaults.getSize("cmsPreliminary"))
-    l.DrawLatex(x, y, "CMS Preliminary")
+    addText(x, y, "CMS Preliminary", textDefaults.getSize("cmsPreliminary"), bold=False)
 
 ## Add the center-of-mass energy text to the pad
 #
@@ -107,11 +112,7 @@ def addCmsPreliminaryText(x=None, y=None):
 # \param s   Center-of-mass energy text with the unit
 def addEnergyText(x=None, y=None, s="7 TeV"):
     (x, y) = textDefaults.getValues("energy", x, y)
-    l = ROOT.TLatex()
-    l.SetNDC()
-    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    l.SetTextSize(textDefaults.getSize("energy"))
-    l.DrawLatex(x, y, "#sqrt{s} = "+s)
+    addText(x, y, "#sqrt{s} = "+s, textDefaults.getSize("energy"), bold=False)
 
 ## Add the integrated luminosity text to the pad
 #
@@ -121,13 +122,9 @@ def addEnergyText(x=None, y=None, s="7 TeV"):
 # \param unit  Unit of the integrated luminosity value
 def addLuminosityText(x, y, lumi, unit="fb^{-1}"):
     (x, y) = textDefaults.getValues("lumi", x, y)
-    l = ROOT.TLatex()
-    l.SetNDC()
-    l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-    l.SetTextSize(textDefaults.getSize("lumi"))
+    addText(x, y, "%.2f %s" % (lumi/1000., unit), textDefaults.getSize("lumi"), bold=False)
 #    l.DrawLatex(x, y, "#intL=%.0f %s" % (lumi, unit))
 #    l.DrawLatex(x, y, "L=%.0f %s" % (lumi, unit))
-    l.DrawLatex(x, y, "%.2f %s" % (lumi/1000., unit))
 
 ## Class for generating legend creation functions with default positions.
 #

@@ -152,7 +152,7 @@ multicrab.extendDatasets(
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
 multicrab.appendArgAll("runOnCrab=1")
 
-reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
+reco_re = re.compile("^(?P<reco>Run[^_]+_[^_]+_v\d+_[^_]+_)")
 run_re = re.compile("^(?P<pd>[^_]+?)_((?P<trig>[^_]+?)_)?(?P<frun>\d+)-(?P<lrun>\d+)_")
 
 def addOutputName(dataset):
@@ -194,8 +194,10 @@ multicrab.forEachDataset(addSplitMode)
 # pattuple_v6_1 while the similar jobs stageout fine in other T2s
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
+prefix = "multicrab"
+
 # Create multicrab task configuration and run 'multicrab -create'
-multicrab.createTasks()
+multicrab.createTasks(prefix=prefix)
 
 # Create task configuration only
-#multicrab.createTasks(configOnly=True)
+#multicrab.createTasks(prefix=prefix, configOnly=True)

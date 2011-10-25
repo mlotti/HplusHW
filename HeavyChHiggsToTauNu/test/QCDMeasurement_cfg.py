@@ -260,6 +260,7 @@ if doJESVariation:
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
     module = process.QCDMeasurement.clone()
     module.Tree.fill = False
+    module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)

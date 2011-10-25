@@ -616,7 +616,15 @@ datasets = {
             "AOD": {
                 "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/Summer11-PU_S4_START42_V11-v1/AODSIM",
                 "number_of_jobs": 1500,  # Adjusted for PATtuple file size
-            }
+            },
+           "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/QCD_Pt-20_MuEnrichedPt-15_TuneZ2_7TeV-pythia6/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18_1-5c1fe2e0ac511ee6db9df3b7fb33ca32/USER",
+                "number_of_jobs": 50
+            },
+           "pattuple_v18_1": {
+              "fallback": "pattuplev18_1"
+           }
         },
     },
     
