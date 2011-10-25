@@ -44,6 +44,8 @@ class InvertedTauID:
 	self.nMCEWK   = 0
 	self.nBaseQCD = 0
 
+	self.normInvQCD  = 1
+
 	self.QCDfraction = 0
 	return
 
@@ -63,21 +65,25 @@ class InvertedTauID:
 
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)                                                                                                                        
 
-        theFit.SetParLimits(0,100000,10000000)
-        theFit.SetParLimits(1,20,400)
-        theFit.SetParLimits(2,10,25)
+        theFit.SetParLimits(0,1,20)
+        theFit.SetParLimits(1,20,30)
+        theFit.SetParLimits(2,5,25)
 
-        theFit.SetParLimits(3,30000,1000000)                                                                                                                                                             
-        theFit.SetParLimits(4,20,100)                                                                                                                                                                    
-        theFit.SetParLimits(5,10,40)                                                                                                                                                                     
+        theFit.SetParLimits(3,0.1,10)
+        theFit.SetParLimits(4,30,150)
+        theFit.SetParLimits(5,10,100)
                                                                                                                                                                                                      
-        theFit.SetParLimits(6,1000,20000)                                                                                                                                                                
+        theFit.SetParLimits(6,0.001,1)
         theFit.SetParLimits(7,0.001,0.05)
 
         cqcd = TCanvas("c","",500,500)                                                                                                                                                                      
         cqcd.cd()                                                                                                                                                                                           
         cqcd.SetLogy()
 	gStyle.SetOptFit(0)
+
+	self.normInvQCD = histo.Integral()
+
+	histo.Scale(1/self.normInvQCD)
         histo.Fit(theFit,"R")                                                                                                                                                                            
                                                                                                                                                                                                      
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())                                                                                                                           
@@ -100,7 +106,7 @@ class InvertedTauID:
             i = i + 1
         print fitPars
 	self.nInvQCD = theFit.Integral(0,1000,self.parInvQCD)
-        print "Integral ",self.nInvQCD
+        print "Integral ",self.normInvQCD*self.nInvQCD
 
     def fitEWK(self,histo):
 
@@ -117,12 +123,12 @@ class InvertedTauID:
 
         theFit = TF1('theFit',FitFunction(),rangeMin,rangeMax,numberOfParameters)
 
-    	theFit.SetParLimits(0,1000,10000)
+    	theFit.SetParLimits(0,1,10)
     	theFit.SetParLimits(1,80,120)
-    	theFit.SetParLimits(2,40,100)
-    	theFit.SetParLimits(3,100,600)
-	theFit.SetParLimits(4,140,500)
-	theFit.SetParLimits(5,30,80)
+    	theFit.SetParLimits(2,20,60)
+    	theFit.SetParLimits(3,0.01,1.)
+	theFit.SetParLimits(4,50,250)
+	theFit.SetParLimits(5,80,200)
 
 #    	theFit.FixParameter(4,148.123806861)
 #    	theFit.FixParameter(5,71.6160638087)
@@ -130,6 +136,10 @@ class InvertedTauID:
         cewk = TCanvas("cewk","",500,500)
         cewk.cd()
         cewk.SetLogy()
+
+	norm = histo.Integral()
+
+	histo.Scale(1/norm)
         histo.Fit(theFit,"R")
         
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
@@ -151,7 +161,7 @@ class InvertedTauID:
             i = i + 1
         print fitPars
         self.nMCEWK = theFit.Integral(0,1000,self.parMCEWK)
-        print "Integral ",self.nMCEWK
+        print "Integral ",norm*self.nMCEWK
 
     def fitData(self,histo):
 
@@ -179,6 +189,8 @@ class InvertedTauID:
         c = TCanvas("c","",500,500)
         c.cd()
         c.SetLogy()
+	print "data events ",histo.Integral()
+
         histo.Fit(theFit,"R")
 
         theFit.SetRange(histo.GetXaxis().GetXmin(),histo.GetXaxis().GetXmax())
@@ -220,7 +232,7 @@ class InvertedTauID:
 
     def getNormalization(self):
 	nQCDbaseline = self.nBaseQCD
-	nQCDinverted = self.nInvQCD
+	nQCDinverted = self.normInvQCD*self.nInvQCD
 	QCDfractionInBaseLineEvents = self.QCDfraction
 	normalizationForInvertedEvents = nQCDbaseline*QCDfractionInBaseLineEvents/nQCDinverted
 
