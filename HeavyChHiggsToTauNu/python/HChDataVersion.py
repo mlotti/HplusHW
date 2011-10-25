@@ -64,7 +64,7 @@ class DataVersion:
         # Collision data
         if "data" in dataVersion:
             self.is_data = True
-            self.globalTag = "GR_R_42_V20::All"
+            self.globalTag = "GR_R_42_V21::All"
 
         # MC
         else:
