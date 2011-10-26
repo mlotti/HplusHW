@@ -548,6 +548,7 @@ datasets = {
     },
     "SingleMu_166161-166164_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", # not prescaled
             "HLT_Mu15_v4", "HLT_Mu20_v3", "HLT_Mu24_v3", "HLT_Mu30_v3", "HLT_IsoMu15_v9", "HLT_IsoMu17_v9", # prescaled
@@ -563,6 +564,7 @@ datasets = {
     },
     "SingleMu_166346-166346_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v2", "HLT_IsoMu24_v6", # not prescaled
             "HLT_Mu15_v5", "HLT_Mu20_v4", "HLT_Mu24_v3", "HLT_Mu30_v4", "HLT_IsoMu15_v10", "HLT_IsoMu17_v10", # prescaled
@@ -578,6 +580,7 @@ datasets = {
     },
     "SingleMu_166374-166967_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", # not prescaled
             "HLT_Mu15_v4", "HLT_Mu20_v3", "HLT_Mu24_v3", "HLT_Mu30_v3", "HLT_IsoMu15_v9", "HLT_IsoMu17_v9", # prescaled
@@ -593,6 +596,7 @@ datasets = {
     },
     "SingleMu_167039-167043_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v1", "HLT_IsoMu24_v5", "HLT_IsoMu20_eta2p1_v1", # not prescaled
             "HLT_Mu15_v4", "HLT_Mu20_v3", "HLT_Mu24_v3", "HLT_Mu30_v3", "HLT_IsoMu15_v9", "HLT_IsoMu17_v9", "HLT_IsoMu17_eta2p1_v1", # prescaled
@@ -608,6 +612,7 @@ datasets = {
     },
     "SingleMu_167078-167913_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v3", "HLT_IsoMu24_v7", "HLT_IsoMu20_eta2p1_v1", # not prescaled
             "HLT_Mu15_v6", "HLT_Mu20_v5", "HLT_Mu24_v5", "HLT_Mu30_v5", "HLT_IsoMu15_v11", "HLT_IsoMu17_v11", "HLT_IsoMu17_eta2p1_v1", # prescaled
@@ -623,6 +628,7 @@ datasets = {
     },
     "SingleMu_172620-173198_Prompt": {
         "dataVersion": "42Xdata",
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v5", "HLT_IsoMu24_v8", # not prescaled
             "HLT_Mu15_v8", "HLT_Mu20_v7", "HLT_Mu24_v7", "HLT_Mu30_v7", "HLT_IsoMu15_v13", "HLT_IsoMu17_v13", # prescaled
@@ -638,12 +644,13 @@ datasets = {
     },
     "SingleMu_175860-176469_Prompt": {
         "dataVersion": "42Xdata",
-        "runs": (175860, 176469), # This is prompt RECO, so check the run range again when running!
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
             "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
             "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
             ],
+        "runs": (175860, 176469), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
@@ -654,12 +661,13 @@ datasets = {
     },
     "SingleMu_176545-177053_Prompt": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v2.3/HLT/V2 and /cdaq/physics/Run2011/3e33/v3.0/HLT/V2)
         "dataVersion": "42Xdata",
-        "runs": (176545, 177053), # This is prompt RECO, so check the run range again when running!
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
             "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
             "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
             ],
+        "runs": (176545, 177053), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
@@ -670,12 +678,13 @@ datasets = {
     },
     "SingleMu_177074-177452_Prompt": { # split because of much data (in the boundary of /cdaq/physics/Run2011/3e33/v3.1/HLT/V1 and /cdaq/physics/Run2011/3e33/v4.0/HLT/V2)
         "dataVersion": "42Xdata",
-        "runs": (177074, 177452), # This is prompt RECO, so check the run range again when running!
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
             "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
             "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
             ],
+        "runs": (177074, 177452), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
@@ -686,12 +695,13 @@ datasets = {
     },
     "SingleMu_177718-178380_Prompt": {
         "dataVersion": "42Xdata",
-        "runs": (177718, 178380), # This is prompt RECO, so check the run range again when running!
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v1", "HLT_IsoMu30_eta2p1_v3", # not prescaled
             "HLT_Mu15_v9", "HLT_Mu20_v8", "HLT_Mu24_v8", "HLT_Mu30_v8", "HLT_Mu40_v6", "HLT_Mu24_eta2p1_v1", "HLT_Mu30_eta2p1_v1",
             "HLT_IsoMu15_v14", "HLT_IsoMu17_v14", "HLT_IsoMu20_v9", "HLT_IsoMu24_v9", "HLT_IsoMu15_eta2p1_v1", "HLT_IsoMu24_eta2p1_v3", # prescaled
             ],
+        "runs": (177718, 178380), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
@@ -702,12 +712,13 @@ datasets = {
     },
     "SingleMu_178420-178479_Prompt": {
         "dataVersion": "42Xdata",
-        "runs": (178420, 178479), # This is prompt RECO, so check the run range again when running!
+        "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_eta2p1_v4", "HLT_IsoMu30_eta2p1_v6", # not prescaled
             "HLT_Mu15_v12", "HLT_Mu20_v11", "HLT_Mu24_v11", "HLT_Mu30_v11", "HLT_Mu40_v9", 
             "HLT_IsoMu15_v17", "HLT_IsoMu20_v12", "HLT_IsoMu24_v12", "HLT_IsoMu15_eta2p1_v4", "HLT_IsoMu24_eta2p1_v6", # prescaled
             ],
+        "runs": (178420, 178479), # This is prompt RECO, so check the run range again when running!
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011B-PromptReco-v1/AOD",
