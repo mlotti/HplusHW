@@ -191,7 +191,8 @@ process.skimPath = cms.Path(
 if options.skimConfig != "":
     print "Skimming with configuration ", options.skimConfig
     process.load(options.skimConfig)
-    process.path *= process.skimSequence
+    process.plainPatSequence.replace(process.plainPatEndSequence,
+                                     process.skimSequence*process.plainPatEndSequence)
 
 # Output module in EndPath
 process.outpath = cms.EndPath(process.out)

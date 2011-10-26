@@ -267,6 +267,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
         process.hplusPatTauSequence
     )
 
+    process.plainPatEndSequence = cms.Sequence()
+
     # Restrict input to AOD
     restrictInputToAOD(process, ["All"])
 
@@ -290,7 +292,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
 
     # PF particle selectors
     addSelectedPFlowParticle(process, sequence)
-    addPFCandidatePtSums(process, sequence)
+    addPFCandidatePtSums(process, process.plainPatEndSequence)
     outputCommands.append("keep double_pf*SumPt_*_*")
 
     # Jets
@@ -310,7 +312,7 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             src = "pf"+particle
         )
         setattr(process, "kt6PFJets"+particle, m)
-        sequence *= m
+        process.plainPatEndSequence *= m
         outputCommands.append("keep *_kt6PFJets%s_rho_*" % particle)
 
     # Produce Type 2 MET correction from unclustered PFCandidates
@@ -320,8 +322,8 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
     )
     process.pfCandMETcorr = cms.EDProducer("PFCandMETcorrInputProducer",
         src = cms.InputTag('pfCandsNotInJet')
-    )  
-    process.ak5PFJetSequence *= (process.pfCandsNotInJet*process.pfCandMETcorr)
+    )
+    process.plainPatEndSequence *= (process.pfCandsNotInJet*process.pfCandMETcorr)
     outputCommands.append("keep *_pfCandMETcorr_*_*")
 
     # Set defaults
@@ -601,6 +603,9 @@ def addPlainPat(process, dataVersion, doPatTrigger=True, doPatTaus=True, doHChTa
             process.selectedPatMuons
         )
         out.outputCommands.append("drop patTriggerObjectStandAlonesedmAssociation_*_*_*")
+
+    # Add the end sequence (to be able to add possible skim sequence between other pat sequences and it
+    sequence *= process.plainPatEndSequence
 
     return sequence
 
