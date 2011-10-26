@@ -472,7 +472,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 210, # Adjusted for PATtuple file size
+                "number_of_jobs": 300, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -488,7 +488,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 180, # Adjusted for PATtuple file size
+                "number_of_jobs": 230, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -536,7 +536,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 400, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -568,7 +568,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
-                "number_of_jobs": 350, # Adjusted for PATtuple file size
+                "number_of_jobs": 460, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
@@ -584,7 +584,7 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
-                "number_of_jobs": 350, # Adjusted for PATtuple file size
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
                 "lumiMask": "PromptReco"
             },
         }
