@@ -85,6 +85,7 @@ namespace HPlus {
     const std::string fBdiscriminator;
     const bool fDoFill;
     const bool fTauEmbeddingInput;
+    const bool fFillJetEnergyFractions;
 
     edm::InputTag fTauEmbeddingMuonSource;
     edm::InputTag fTauEmbeddingMetSource;
