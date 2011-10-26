@@ -95,7 +95,7 @@ datasets = {
         "dataVersion": "42Xdata",
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
-            "HLT_Mu20_v1", "HLT_IsoMu12_v1" # not prescaled
+            "HLT_Mu20_v1", "HLT_IsoMu12_v1", # not prescaled
             "HLT_Mu15_v2", # prescaled
             ],
         "runs": (160431, 163261),

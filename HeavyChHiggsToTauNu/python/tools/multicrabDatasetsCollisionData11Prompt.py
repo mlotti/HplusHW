@@ -514,7 +514,7 @@ datasets = {
         "args": {"doTauHLTMatching": 0},
         "triggerOR": [
             "HLT_Mu40_v2", "HLT_IsoMu24_v6", # not prescaled
-            "HLT_Mu15_v5", "HLT_Mu20_v4", "HLT_Mu24_v3", "HLT_Mu30_v4", "HLT_IsoMu15_v10", "HLT_IsoMu17_v10", # prescaled
+            "HLT_Mu15_v5", "HLT_Mu20_v4", "HLT_Mu24_v4", "HLT_Mu30_v4", "HLT_IsoMu15_v10", "HLT_IsoMu17_v10", # prescaled
             ],
         "runs": (166346, 166346), # This is prompt RECO, so check the run range again when running!
         "data": {
