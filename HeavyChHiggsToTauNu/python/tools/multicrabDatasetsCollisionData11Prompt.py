@@ -7,12 +7,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
         "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "pattuple_v11": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": " /Tau/local-Run2011A_PromptReco_v1_AOD_160431_pattuple_v11b-30bec5347ffdac4381c1a8c0982c0f67/USER",
-                "luminosity": 5.064475,
-                "number_of_jobs": 1
-            },
         }
     },
     "Tau_162803-163261_Prompt": {
@@ -20,12 +14,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
         "runs": (162803, 163261), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "pattuple_v11": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_162803_pattuple_v11b-3fa3be0859a4d6ac95290d7925e5b48e/USER",
-                "luminosity": 26.220099,
-                "number_of_jobs": 2,
-            },
         },
     },
     "Tau_163270-163757_Prompt": {
@@ -33,12 +21,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
         "runs": (163270, 163757), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "pattuple_v11": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_163270_pattuple_v11b-0fbacf41641faa252a2bc6c4d4cd404b/USER",
-                "luminosity": 121.519197,
-                "number_of_jobs": 7,
-            },
         },
     },
     "Tau_163758-163869_Prompt": {
@@ -46,12 +28,6 @@ datasets = {
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
         "runs": (163758, 163869), # This is prompt RECO, so check the run range again when running!
         "data": {
-            "pattuple_v11": {
-                "dbs_url": common.pattuple_dbs,
-                "datasetpath": "/Tau/local-Run2011A_PromptReco_v2_AOD_163758_pattuple_v11b-0fbacf41641faa252a2bc6c4d4cd404b/USER",
-                "luminosity": 38.238908,
-                "number_of_jobs": 2,
-            },
         }
     },
     ##### 42X starts here
