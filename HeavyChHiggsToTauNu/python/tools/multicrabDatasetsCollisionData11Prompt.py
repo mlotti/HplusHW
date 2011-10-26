@@ -20,13 +20,6 @@ datasets = {
             },
         }
     },
-    "Tau_165103-165103_Prompt_Wed": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v6",
-        "runs": (165103, 165103), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
     "Tau_165970-166164_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET60_v2",
@@ -64,20 +57,6 @@ datasets = {
                 "luminosity": 445.101000,
                 "number_of_jobs": 2,
             },
-        }
-    },
-    "Tau_167078-167784_Prompt": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET60_v4",
-        "runs": (167078, 167784), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "Tau_167786-167913_Prompt_Wed": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET60_v4",
-        "runs": (167786, 167913), # This is prompt RECO, so check the run range again when running!
-        "data": {
         }
     },
     "Tau_167078-167913_Prompt": {
@@ -227,20 +206,6 @@ datasets = {
             "pattuple_v18": {
                 "fallback": "pattuple_v18_1"
             },
-        }
-    },
-    "Tau_Single_167078-167784_Prompt": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_v4",
-        "runs": (167078, 167784), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "Tau_Single_167786-167913_Prompt_Wed": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_v4",
-        "runs": (167786, 167913), # This is prompt RECO, so check the run range again when running!
-        "data": {
         }
     },
     "Tau_Single_167078-167913_Prompt": {

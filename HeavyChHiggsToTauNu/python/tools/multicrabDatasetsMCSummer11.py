@@ -353,12 +353,6 @@ datasets = {
            },
         },
     },
-    "QCD_Pt30to50_TuneZ2_Summer11_S3": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 5.312e+07,
-        "data": {
-        },
-    },
     "QCD_Pt30to50_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",
         "crossSection": 5.312e+07,
@@ -372,12 +366,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt-30to50_TuneZ2_7TeV_pythia6/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18-8eea754df021b160abed50fa738aa521/USER",
                 "number_of_jobs": 5
             },
-        },
-    },
-    "QCD_Pt50to80_TuneZ2_Summer11_S3": {
-        "dataVersion":  "42XmcS3",
-        "crossSection": 6.359e+06,
-        "data": {
         },
     },
     "QCD_Pt50to80_TuneZ2_Summer11": {
@@ -395,12 +383,6 @@ datasets = {
             },
         },
     },
-    "QCD_Pt80to120_TuneZ2_Summer11_S3": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 7.843e+05,
-        "data": {
-        },
-    },
     "QCD_Pt80to120_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",
         "crossSection": 7.843e+05,
@@ -414,12 +396,6 @@ datasets = {
                 "datasetpath": "/QCD_Pt-80to120_TuneZ2_7TeV_pythia6/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v18-8eea754df021b160abed50fa738aa521/USER",
                 "number_of_jobs": 5
             },
-        },
-    },
-    "QCD_Pt120to170_TuneZ2_Summer11_S3": {
-        "dataVersion": "42XmcS4",
-        "crossSection": 1.151e+05,
-        "data": {
         },
     },
     "QCD_Pt120to170_TuneZ2_Summer11": {
@@ -437,12 +413,6 @@ datasets = {
             },
         },
     },
-    "QCD_Pt170to300_TuneZ2_Summer11_S3": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 2.426e+04,
-        "data": {
-        },
-    },
     "QCD_Pt170to300_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",
         "crossSection": 2.426e+04,
@@ -457,12 +427,6 @@ datasets = {
                 "number_of_jobs": 5
             },
         },
-    },
-    "QCD_Pt300to470_TuneZ2_Summer11_S3": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 1.168e+03,
-        "data": {
-        }
     },
     "QCD_Pt300to470_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",
@@ -500,57 +464,6 @@ datasets = {
     
 
     # EWK pythia
-    # Cross sections (not yet) from https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
-    "TT_TuneZ2_Summer11": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 165,
-        "data": {
-            "AOD": {
-                "datasetpath": "/TT_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 80, # Adjusted for PATtuple file size
-            },
-        },
-    },
-    "WToTauNu_TuneZ2_Summer11": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 7899,
-        "data": {
-            "AOD": {
-                "datasetpath": "/WToTauNu_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 150, # Adjusted for PATtuple file size
-            },
-        },
-    },
-    "WToMuNu_TuneZ2_Summer11": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 7899,
-        "data": {
-            "AOD": {
-                "datasetpath": "/WToMuNu_TuneZ2_7TeV-pythia6/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 150,
-            },
-        },
-    },
-    "DYToTauTau_TuneZ2_Summer11": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 1300,
-        "data": {
-            "AOD": {
-                "datasetpath": "/DYToTauTau_M-20_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 50, # Adjusted for PATtuple file size
-            },
-        },
-    },
-    "DYToMuMu_TuneZ2_Summer11": {
-        "dataVersion": "42XmcS3",
-        "crossSection": 1300,
-        "data": {
-            "AOD": {
-                "datasetpath": "/DYToMuMu_M-20_TuneZ2_7TeV-pythia6-tauola/Summer11-PU_S3_START42_V11-v2/AODSIM",
-                "number_of_jobs": 100,
-            },
-        },
-    },
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
     "WW_TuneZ2_Summer11": {
         "dataVersion": "42XmcS4",

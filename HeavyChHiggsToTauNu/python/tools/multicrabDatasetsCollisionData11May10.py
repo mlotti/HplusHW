@@ -15,13 +15,6 @@ datasets = {
             },
         }
     },
-    "Tau_161119-161119_May10_Wed": {
-        "dataVersion": "42Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
-        "runs": (161119, 161119), #
-        "data": {
-        }
-    },        
     "Tau_161217-163261_May10": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
