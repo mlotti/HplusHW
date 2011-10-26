@@ -43,7 +43,7 @@ def main():
     datasets.loadLuminosities()
 
     # Take QCD from data
-    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111018_145546/multicrab.cfg", counters=counters)
+    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111024_175451/multicrab.cfg", counters=counters)
     datasetsQCD.loadLuminosities()
     datasetsQCD.mergeData()
     datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
@@ -158,6 +158,17 @@ def main():
     transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassBeforeFakeMet", rebin=20)
     plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
     transverseMass2(plot, "transverseMassBeforeFakeMetQCDFromData", rebin=20)
+
+    path = analysis+"/transverseMassWithRtauFakeMet"
+    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassWithRtauFakeMet", rebin=20)
+    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
+    transverseMass2(plot, "transverseMassWithRtauFakeMetQCDFromData", rebin=20)
+    
+    path = analysis+"/transverseMassDeltaPhiUpperCut"
+    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassDeltaPhiUpperCut", rebin=20)
+    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
+    transverseMass2(plot, "transverseMassDeltaPhiUpperCutQCDFromData", rebin=20)
+
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut", rebin=20)
@@ -319,7 +330,7 @@ def scaleMCfromWmunu(h):
     scaleMCHistos(h, 1.0)
 
 def replaceQCDfromData(plot, datasetsQCD, path):
-    normalization = 0.015
+    normalization = 0.00606 * 0.86
     drh = datasetsQCD.getDatasetRootHistos(path)
     if len(drh) != 1:
         raise Exception("There should only one DatasetRootHisto, got %d", len(drh))

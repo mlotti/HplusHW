@@ -69,8 +69,8 @@ def main():
 #    mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))
     
 #    met = plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(400, 0, 400)"))
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")  
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
@@ -81,7 +81,8 @@ def main():
 
     # Create the data-EWK histogram and draw it
     diffBase = dataEwkDiff(metBase, "MET_base_data-ewk")
-    diffInverted = dataEwkDiff(metInver,"MET_inverted_data-ewk")
+#    diffInverted = dataEwkDiff(metInver,"MET_inverted_data-ewk")
+    diffInverted = dataEwkNoDiff(metInver,"MET_inverted_data-ewk")
 
     # Draw the MET distribution
     transverseMass(metBase,"MET_base")
@@ -118,7 +119,16 @@ def main():
     plot.save()
 
 
+def dataEwkNoDiff(mT,name):
+    # Get the normalized TH1 histograms
+    # Clone the data one, because we subtract the EWK from it
+    data = mT.histoMgr.getHisto("Data").getRootHisto().Clone("Data")
+    ewk = mT.histoMgr.getHisto("EWK").getRootHisto()
 
+    # Subtract ewk from data
+#    data.Add(ewk, -1)
+
+    return data
 
    
 def dataEwkDiff(mT,name):

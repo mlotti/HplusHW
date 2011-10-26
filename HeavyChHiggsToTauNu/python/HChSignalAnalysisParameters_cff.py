@@ -17,7 +17,6 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v6",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
 ]
-
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
@@ -49,7 +48,7 @@ tauSelectionBase = cms.untracked.PSet(
     ptCut = cms.untracked.double(40), # jet pt > value
     etaCut = cms.untracked.double(2.1), # jet |eta| < value
     leadingTrackPtCut = cms.untracked.double(20.0), # ldg. track > value
-    rtauCut = cms.untracked.double(0.0), # rtau > value
+    rtauCut = cms.untracked.double(0.7), # rtau > value
     antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc

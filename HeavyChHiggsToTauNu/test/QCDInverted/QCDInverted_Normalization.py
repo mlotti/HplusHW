@@ -281,8 +281,8 @@ def main():
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
     metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")  
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
     
     metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
     metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")

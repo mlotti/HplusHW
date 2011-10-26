@@ -197,6 +197,8 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdJets;
     TH1 *hMETBaselineTauIdBtag;
     TH1 *hMETInvertedTauIdBtag;
+    TH1 *hMETBaselineTauIdBtagDphi;
+    TH1 *hMETInvertedTauIdBtagDphi;
     TH1 *hSelectedTauEt;
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
