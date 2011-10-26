@@ -61,14 +61,74 @@ namespace HPlus {
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
+    hMinDeltaRToOppositeDirectionOfTau = makeTH<TH1F>(myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
+
+    hFirstJetPt = makeTH<TH1F>(myDir, "firstJet_pt", "firstJet_pt", 400, 0., 400.);
+    hFirstJetEta = makeTH<TH1F>(myDir, "firstJet_eta", "firstJet_eta", 60, -3., 3.); 
+    hFirstJetPhi = makeTH<TH1F>(myDir, "firstJet_phi", "firstJet_phi", 72, -3.14159, 3.14159); 
+    hSecondJetPt = makeTH<TH1F>(myDir, "secondJet_pt", "secondJet_pt", 400, 0., 400.);
+    hSecondJetEta = makeTH<TH1F>(myDir, "secondJet_eta", "secondJet_eta", 60, -3., 3.); 
+    hSecondJetPhi = makeTH<TH1F>(myDir, "secondJet_phi", "secondJet_phi", 72, -3.14159, 3.14159); 
+    hThirdJetPt = makeTH<TH1F>(myDir, "thirdJet_pt", "thirdJet_pt", 400, 0., 400.);
+    hThirdJetEta = makeTH<TH1F>(myDir, "thirdJet_eta", "thirdJet_eta", 60, -3., 3.); 
+    hThirdJetPhi = makeTH<TH1F>(myDir, "thirdJet_phi", "thirdJet_phi", 72, -3.14159, 3.14159); 
+
+    // Histograms for excluded jets (i.e. matching in DeltaR to tau jet)
+    TFileDirectory myExcludedJetsDir = myDir.mkdir("ExcludedJets");
+    hPtExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
+    hEtaExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
+    hPhiExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
+    hNeutralEmEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
+    hNeutralMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
+    hNeutralHadronEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
+    hNeutralHadronMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hPhotonEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
+    hPhotonMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
+    hMuonEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
+    hMuonMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hChargedHadronEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
+    hChargedEmEnergyFractionExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
+    hChargedMultiplicityExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
+    hPartonFlavourExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
+    hJECFactorExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
+    hN60ExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
+    hTowersAreaExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
+    hJetChargeExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
+    hPtDiffToGenJetExcludedJets = makeTH<TH1F>(myExcludedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
+
+    // Histograms for selected jets
+    TFileDirectory mySelectedJetsDir = myDir.mkdir("SelectedJets");
+    hPtSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_pt", "jet_pt", 40, 0., 400.);
+    hEtaSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_eta", "jet_eta", 50, -2.5, 2.5);
+    hPhiSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_phi", "jet_phi", 72, -3.14159, 3.41459);
+    hNeutralEmEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralEmEnergyFraction", "jet_NeutralEmEnergyFraction", 100, 0., 1.);
+    hNeutralMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_EmEnergyFraction", "jet_EmEnergyFraction", 100, 0., 1.);
+    hNeutralHadronEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronFraction", "jet_NeutralHadronEnergyFraction", 100, 0., 1.);
+    hNeutralHadronMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hPhotonEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PhotonEnergyFraction", "jet_PhotonEnergyFraction", 100, 0., 1.);
+    hPhotonMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PhotonMultiplicity", "jet_PhotonMultiplicity", 100, 0., 100.);
+    hMuonEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_MuonEnergyFraction", "jet_MuonEnergyFraction", 100, 0., 1.);
+    hMuonMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_NeutralHadronMultiplicity", "jet_NeutralHadronMultiplicity", 100, 0., 100.);
+    hChargedHadronEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedHadronEnergyFraction", "jet_ChargedHadronEnergyFraction", 100, 0., 1.);
+    hChargedEmEnergyFractionSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedEmEnergyFraction", "jet_ChargedEmEnergyFraction", 100, 0., 1.);
+    hChargedMultiplicitySelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_ChargedMultiplicity", "jet_ChargedMultiplicity", 100, 0., 100.);
+    hPartonFlavourSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PartonFlavour", "jet_PartonFlavour", 30, 0., 30.);
+    hJECFactorSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 100, 0., 10.);
+    hN60SelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_N60", "jet_MultiplicityCarrying60PercentOfEnergy", 100, 0., 100.);
+    hTowersAreaSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_TowersArea", "jet_TowersArea", 100, 0., 10.);
+    hJetChargeSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_JECFactor", "jet_JECFactor", 10, -5., 5.);
+    hPtDiffToGenJetSelectedJets = makeTH<TH1F>(mySelectedJetsDir, "jet_PtDiffToGenJet", "jet_PtDiffToGenJet", 100, 0., 10.);
+
+    fMinDeltaRToOppositeDirectionOfTau = 999.;
  }
 
   JetSelection::~JetSelection() {}
 
-  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus) {
+  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
+    fMinDeltaRToOppositeDirectionOfTau = 999.;
     bool passEvent = false;
   
     edm::Handle<edm::View<pat::Jet> > hjets;
@@ -91,19 +151,44 @@ namespace HPlus {
 
     for(edm::PtrVector<pat::Jet>::const_iterator iter = jets.begin(); iter != jets.end(); ++iter) {
       edm::Ptr<pat::Jet> iJet = *iter;
-
       increment(fAllSubCount);
 
-      // remove tau jet
+      // remove jets too close to tau jet
       bool match = false;
-      for(edm::PtrVector<reco::Candidate>::const_iterator itertau = taus.begin(); itertau != taus.end(); ++itertau) {
-        edm::Ptr<reco::Candidate> iTau = *itertau;
-        if(!(ROOT::Math::VectorUtil::DeltaR(iTau->p4(), iJet->p4()) > fMaxDR)) {
-          match = true;
-          break;
-        }
+      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
+	match = true;
       }
-      if(match) continue;
+      if(match) {
+	if (iJet->pt() > fPtCut && (std::abs(iJet->eta()) < fEtaCut)) {
+	  // Fill histograms for excluded jets
+	  hPtExcludedJets->Fill(iJet->pt());
+	  hEtaExcludedJets->Fill(iJet->eta());
+	  hPhiExcludedJets->Fill(iJet->phi());
+	  hNeutralEmEnergyFractionExcludedJets->Fill(iJet->neutralEmEnergyFraction());
+	  hNeutralMultiplicityExcludedJets->Fill(iJet->neutralMultiplicity());
+	  hNeutralHadronEnergyFractionExcludedJets->Fill(iJet->neutralHadronEnergyFraction());
+	  hNeutralHadronMultiplicityExcludedJets->Fill(iJet->neutralHadronMultiplicity());
+	  hPhotonEnergyFractionExcludedJets->Fill(iJet->photonEnergyFraction());
+	  hPhotonMultiplicityExcludedJets->Fill(iJet->photonMultiplicity());
+	  hMuonEnergyFractionExcludedJets->Fill(iJet->muonEnergyFraction());
+	  hMuonMultiplicityExcludedJets->Fill(iJet->muonMultiplicity());
+	  hChargedHadronEnergyFractionExcludedJets->Fill(iJet->chargedHadronEnergyFraction());
+	  hChargedEmEnergyFractionExcludedJets->Fill(iJet->chargedEmEnergyFraction());
+	  hChargedMultiplicityExcludedJets->Fill(iJet->chargedMultiplicity());
+	  //hJECFactorExcludedJets->Fill(iJet->jecFactor());
+	  hN60ExcludedJets->Fill(iJet->n60());
+	  hTowersAreaExcludedJets->Fill(iJet->towersArea());
+	  hJetChargeExcludedJets->Fill(iJet->jetCharge());
+	  if (iEvent.isRealData()) {
+	    hPartonFlavourExcludedJets->Fill(iJet->partonFlavour());
+	    if (iJet->genJet())
+	      hPtDiffToGenJetExcludedJets->Fill(iJet->pt() / iJet->genJet()->pt());
+	    else
+	      hPtDiffToGenJetExcludedJets->Fill(0.);
+	  }
+	}
+	continue;
+      }
       increment(fCleanCutSubCount);
       ++cleanPassed;
 
@@ -156,7 +241,40 @@ namespace HPlus {
       if (EMfrac > fEMfractionCut) continue;
       ++EMfractionCutPassed;
       increment(fEMfractionCutSubCount);
-    
+
+      // Fill histograms for selected jets
+      hPtSelectedJets->Fill(iJet->pt());
+      hEtaSelectedJets->Fill(iJet->eta());
+      hPhiSelectedJets->Fill(iJet->phi());
+      hNeutralEmEnergyFractionSelectedJets->Fill(iJet->neutralEmEnergyFraction());
+      hNeutralMultiplicitySelectedJets->Fill(iJet->neutralMultiplicity());
+      hNeutralHadronEnergyFractionSelectedJets->Fill(iJet->neutralHadronEnergyFraction());
+      hNeutralHadronMultiplicitySelectedJets->Fill(iJet->neutralHadronMultiplicity());
+      hPhotonEnergyFractionSelectedJets->Fill(iJet->photonEnergyFraction());
+      hPhotonMultiplicitySelectedJets->Fill(iJet->photonMultiplicity());
+      hMuonEnergyFractionSelectedJets->Fill(iJet->muonEnergyFraction());
+      hMuonMultiplicitySelectedJets->Fill(iJet->muonMultiplicity());
+      hChargedHadronEnergyFractionSelectedJets->Fill(iJet->chargedHadronEnergyFraction());
+      hChargedEmEnergyFractionSelectedJets->Fill(iJet->chargedEmEnergyFraction());
+      hChargedMultiplicitySelectedJets->Fill(iJet->chargedMultiplicity());
+      //hJECFactorSelectedJets->Fill(iJet->jecFactor());
+      hN60SelectedJets->Fill(iJet->n60());
+      hTowersAreaSelectedJets->Fill(iJet->towersArea());
+      hJetChargeSelectedJets->Fill(iJet->jetCharge());
+      if (iEvent.isRealData()) {
+	hPartonFlavourSelectedJets->Fill(iJet->partonFlavour());
+	if (iJet->genJet())
+	  hPtDiffToGenJetSelectedJets->Fill(iJet->pt() / iJet->genJet()->pt());
+	else
+	  hPtDiffToGenJetSelectedJets->Fill(0.);
+      }
+
+      // Min DeltaR reversed to tau
+      math::XYZTLorentzVectorD myReversedTau = -iTau->p4();
+      double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
+      if (myDeltaR < fMinDeltaRToOppositeDirectionOfTau)
+	fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
+
       tmpSelectedJets.push_back(iJet);
     }
 
@@ -189,6 +307,20 @@ namespace HPlus {
 
     if(EMfractionCutPassed < fMin) passEvent = false;
     if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);
+
+    // Plot pt, eta, and phi of jets if jet selection has been passed
+    if (passEvent && fSelectedJets.size() >= 3) {
+      hFirstJetPt->Fill(fSelectedJets[0]->pt());
+      hFirstJetEta->Fill(fSelectedJets[0]->eta());
+      hFirstJetPhi->Fill(fSelectedJets[0]->phi());
+      hSecondJetPt->Fill(fSelectedJets[1]->pt());
+      hSecondJetEta->Fill(fSelectedJets[1]->eta());
+      hSecondJetPhi->Fill(fSelectedJets[1]->phi());
+      hThirdJetPt->Fill(fSelectedJets[2]->pt());
+      hThirdJetEta->Fill(fSelectedJets[2]->eta());
+      hThirdJetPhi->Fill(fSelectedJets[2]->phi());
+    }
+    hMinDeltaRToOppositeDirectionOfTau->Fill(fMinDeltaRToOppositeDirectionOfTau);
 
     return Data(this, passEvent);
   }

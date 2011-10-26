@@ -49,7 +49,8 @@ namespace HPlus {
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
+    //Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
+    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
 
   private:
     // Input parameters
@@ -90,6 +91,59 @@ namespace HPlus {
     TH1 *hNumberOfSelectedJets;
     TH1 *hjetEMFraction;
     TH1 *hjetMaxEMFraction;
+    TH1 *hMinDeltaRToOppositeDirectionOfTau;
+    TH1 *hFirstJetPt;
+    TH1 *hSecondJetPt;
+    TH1 *hThirdJetPt;
+    TH1 *hFirstJetEta;
+    TH1 *hSecondJetEta;
+    TH1 *hThirdJetEta;
+    TH1 *hFirstJetPhi;
+    TH1 *hSecondJetPhi;
+    TH1 *hThirdJetPhi;
+
+    // Histograms for jet composition
+    TH1 *hPtExcludedJets;
+    TH1 *hEtaExcludedJets;
+    TH1 *hPhiExcludedJets;
+    TH1 *hNeutralEmEnergyFractionExcludedJets;
+    TH1 *hNeutralMultiplicityExcludedJets;
+    TH1 *hNeutralHadronEnergyFractionExcludedJets;
+    TH1 *hNeutralHadronMultiplicityExcludedJets;
+    TH1 *hPhotonEnergyFractionExcludedJets;
+    TH1 *hPhotonMultiplicityExcludedJets;
+    TH1 *hMuonEnergyFractionExcludedJets;
+    TH1 *hMuonMultiplicityExcludedJets;
+    TH1 *hChargedHadronEnergyFractionExcludedJets;
+    TH1 *hChargedEmEnergyFractionExcludedJets;
+    TH1 *hChargedMultiplicityExcludedJets;
+    TH1 *hPartonFlavourExcludedJets;
+    TH1 *hJECFactorExcludedJets;
+    TH1 *hN60ExcludedJets;
+    TH1 *hTowersAreaExcludedJets;
+    TH1 *hJetChargeExcludedJets;
+    TH1 *hPtDiffToGenJetExcludedJets;
+
+    TH1 *hPtSelectedJets;
+    TH1 *hEtaSelectedJets;
+    TH1 *hPhiSelectedJets;
+    TH1 *hNeutralEmEnergyFractionSelectedJets;
+    TH1 *hNeutralMultiplicitySelectedJets;
+    TH1 *hNeutralHadronEnergyFractionSelectedJets;
+    TH1 *hNeutralHadronMultiplicitySelectedJets;
+    TH1 *hPhotonEnergyFractionSelectedJets;
+    TH1 *hPhotonMultiplicitySelectedJets;
+    TH1 *hMuonEnergyFractionSelectedJets;
+    TH1 *hMuonMultiplicitySelectedJets;
+    TH1 *hChargedHadronEnergyFractionSelectedJets;
+    TH1 *hChargedEmEnergyFractionSelectedJets;
+    TH1 *hChargedMultiplicitySelectedJets;
+    TH1 *hPartonFlavourSelectedJets;
+    TH1 *hJECFactorSelectedJets;
+    TH1 *hN60SelectedJets;
+    TH1 *hTowersAreaSelectedJets;
+    TH1 *hJetChargeSelectedJets;
+    TH1 *hPtDiffToGenJetSelectedJets;
 
     // Selected jets
     edm::PtrVector<pat::Jet> fSelectedJets;
@@ -97,6 +151,7 @@ namespace HPlus {
     edm::PtrVector<pat::Jet> fNotSelectedJets;
     int iNHadronicJets;
     int iNHadronicJetsInFwdDir;
+    float fMinDeltaRToOppositeDirectionOfTau;
   };
 }
 
