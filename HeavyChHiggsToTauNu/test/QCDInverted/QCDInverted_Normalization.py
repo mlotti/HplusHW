@@ -49,6 +49,47 @@ class InvertedTauID:
 	self.QCDfraction = 0
 	return
 
+    def comparison(self,histo1,histo2):
+
+        comp = TCanvas("comp","",500,500)
+        comp.cd()
+        comp.SetLogy()
+
+	h1 = histo1.Clone("h1")
+	h2 = histo2.Clone("h2")
+	h1.Scale(1/h1.GetMaximum())
+	h2.Scale(1/h2.GetMaximum())
+
+	h1.GetYaxis().SetTitle("Arbitrary units")
+	h1.GetYaxis().SetTitleOffset(1.5)
+        h1.Draw()
+	h2.SetMarkerColor(2)
+	h2.Draw("same")
+
+        tex1 = TLatex(0.6,0.9,"Inverted TauID")
+        tex1.SetNDC()
+	tex1.SetTextSize(20)
+        tex1.Draw()
+
+	marker1 = TMarker(0.58,0.915,h1.GetMarkerStyle())
+	marker1.SetNDC()
+	marker1.SetMarkerColor(h1.GetMarkerColor())
+	marker1.SetMarkerSize(0.5*h1.GetMarkerSize())
+	marker1.Draw()
+
+	tex2 = TLatex(0.6,0.85,"Baseline TauID")
+        tex2.SetNDC()
+	tex2.SetTextSize(20)
+        tex2.Draw()
+
+        marker2 = TMarker(0.58,0.865,h2.GetMarkerStyle())
+        marker2.SetNDC()
+        marker2.SetMarkerColor(h2.GetMarkerColor())
+        marker2.SetMarkerSize(0.5*h2.GetMarkerSize())
+        marker2.Draw()
+
+        comp.Print("comparison.eps")
+
 
     def fitQCD(self,histo): 
 
@@ -301,8 +342,11 @@ def main():
     metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
     metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
 
+    metBase_QCD = metBase_data.Clone("QCD")
+    metBase_QCD.Add(metBase_EWK,-1)
 
     invertedQCD = InvertedTauID()
+    invertedQCD.comparison(metInverted_data,metBase_QCD)
     invertedQCD.fitQCD(metInverted_data)
     invertedQCD.fitEWK(metBase_EWK)
     invertedQCD.fitData(metBase_data)
