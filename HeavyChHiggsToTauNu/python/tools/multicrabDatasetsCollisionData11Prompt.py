@@ -2,35 +2,6 @@ import multicrabDatasetsCommon as common
 
 datasets = {
     # Single tau + MET
-    "Tau_160431-161016_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v1",
-        "runs": (160431, 161016), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    "Tau_162803-163261_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v2",
-        "runs": (162803, 163261), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-    "Tau_163270-163757_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
-        "runs": (163270, 163757), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        },
-    },
-    "Tau_163758-163869_Prompt": {
-        "dataVersion": "41Xdata",
-        "trigger": "HLT_IsoPFTau35_Trk20_MET45_v4",
-        "runs": (163758, 163869), # This is prompt RECO, so check the run range again when running!
-        "data": {
-        }
-    },
-    ##### 42X starts here
     "Tau_165088-165633_Prompt": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_IsoPFTau35_Trk20_MET45_v6",
