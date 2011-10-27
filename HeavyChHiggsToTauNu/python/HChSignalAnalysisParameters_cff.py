@@ -400,7 +400,7 @@ def setPileupWeightFor2010(pset=vertexWeight):
     pset.useSimulatedPileup = True
     raise Exception("Data PU distribution for 2010 is not yet available")
 
-def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="intime"):
+def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", method="3D"):
     if dataVersion.isData():
         return
 
@@ -409,8 +409,6 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         pset.mcDist3D = Summer11_PU_S4_3D
         pset.weightFile3D = cms.string("")
         pset.method = method
-        if method != "intime":
-            raise Exception("For the moment only 'intime' PU weighting is supported (it gives the best data/MC matching)")
     else:
         raise Exception("No PU reweighting support for anything else than Summer11 S4 scenario at the moment")
     pset.enabled = True
@@ -437,6 +435,7 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
         # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
         pset.dataDist3D = cms.vdouble(0.00000000, 252573.03125000, 5738606.50000000, 50564120.00000000, 268197264.00000000, 512976800.00000000, 521465600.00000000, 375661280.00000000, 241466880.00000000, 143150480.00000000, 53831752.00000000, 11812459.00000000, 1290734.00000000, 111569.03125000, 6537.93310547, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
+        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-173692.root"
 
     elif era == "Run2011B":
         # Cert_175832-177515_PromptReco_JSON.pileup_v2.root
@@ -444,9 +443,11 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         pset.dataDistIntime = cms.vdouble(288839.53915556, 1944213.26515934, 7048893.23414854, 17866609.95292950, 35426386.30411588, 58569220.47460749, 84109732.81887844, 107913437.32744664, 126207015.92123026, 136532056.99027678, 138111301.86270767, 131696668.90145068, 119102716.65215862, 102637515.42847806, 84591412.32094480, 66875650.26462977, 50838721.28147475, 37240033.46912239, 26333217.71488850, 18004589.36255783, 11920512.70239508, 7653181.43074327, 4770835.32761546, 2891324.00292016, 1705583.78483189, 980459.54751395, 549865.64067858, 301180.84548916, 161286.57232955, 84529.11170115, 43397.75678300, 21846.03128374, 10791.61205329, 5235.31386353, 4645.12031734)
         # Cert_175832-177515_PromptReco_JSON.pileupTruth_v2.root
         # Cert_177718_178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root
-        pset.dataDist3D = ms.vdouble(0.00000000, 27267.43951180, 35590.01162089, 74493.32615900, 574589.87278601, 2906478.58801937, 33631126.33142464, 93666084.68744215, 138283180.67404377, 187623897.42037976, 215647291.26482403, 211729949.14499977, 187001951.98512825, 146693123.78931406, 94437211.96536994, 46031697.28833491, 16923096.85784976, 5181606.42557313, 1428052.42465751, 437008.14233306, 102694.05116599, 6516.19593707, 0.00000000, 0.00000000, 0.00000000)
+        pset.dataDist3D = cms.vdouble(0.00000000, 27267.43951180, 35590.01162089, 74493.32615900, 574589.87278601, 2906478.58801937, 33631126.33142464, 93666084.68744215, 138283180.67404377, 187623897.42037976, 215647291.26482403, 211729949.14499977, 187001951.98512825, 146693123.78931406, 94437211.96536994, 46031697.28833491, 16923096.85784976, 5181606.42557313, 1428052.42465751, 437008.14233306, 102694.05116599, 6516.19593707, 0.00000000, 0.00000000, 0.00000000)
+        if method == "3D":
+            raise Exception("No 3D weight file yet for Run2011B")
 
-    elif era == "all":
+    elif era == "Run2011A+B":
         # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
         # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
@@ -459,9 +460,11 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="EPS", method="in
         # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth.root
         # Cert_172620-173692_PromptReco_JSON.pileupTruth.root
         pset.dataDist3D = cms.vdouble(0.00000000, 279840.46875000, 5774196.50000000, 50638612.00000000, 268771872.00000000, 515883296.00000000, 555096704.00000000, 469327360.00000000, 379750048.00000000, 330774368.00000000, 269479040.00000000, 223542416.00000000, 188292688.00000000, 146804688.00000000, 94443744.00000000, 46031696.00000000, 16923096.00000000, 5181606.50000000, 1428052.50000000, 437008.12500000, 102694.04687500, 6516.19580078, 0.00000000, 0.00000000, 0.00000000)
+        if method == "3D":
+            raise Exception("No 3D weight file yet for Run2011A+B")
 
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A', 'Run2011B', 'all'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
