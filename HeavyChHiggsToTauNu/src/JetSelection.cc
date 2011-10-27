@@ -129,6 +129,9 @@ namespace HPlus {
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
     fMinDeltaRToOppositeDirectionOfTau = 999.;
+    bEMFraction08Veto = false;
+    bEMFraction07Veto = false;
+
     bool passEvent = false;
   
     edm::Handle<edm::View<pat::Jet> > hjets;
@@ -214,17 +217,14 @@ namespace HPlus {
       if(!(iJet->numberOfDaughters() > 1)) continue;
       increment(fnumberOfDaughtersCutSubCount);
 
-    
-      if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
-      increment(fchargedEmEnergyFractionCutSubCount);
+      //if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
+      //increment(fchargedEmEnergyFractionCutSubCount);
 
-   
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
-      if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
-      increment(fneutralEmEnergyFractionCutSubCount);
-
+      //if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
+      //increment(fneutralEmEnergyFractionCutSubCount);
     
       if(fabs(iJet->eta()) < 2.4) {
 	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
@@ -270,7 +270,7 @@ namespace HPlus {
       }
 
       // Min DeltaR reversed to tau
-      math::XYZTLorentzVectorD myReversedTau = -iTau->p4();
+      math::XYZTLorentzVectorD myReversedTau = -tau->p4();
       double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
       if (myDeltaR < fMinDeltaRToOppositeDirectionOfTau)
 	fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
@@ -299,11 +299,15 @@ namespace HPlus {
     if(etaCutPassed < fMin) passEvent = false;
     if(etaCutPassed > fMin)    increment(fEtaCutCount);
 
-    //    if(maxEMfraction > 0.8 ) passEvent = false;
-    if(maxEMfraction < 0.8 )increment(fEMfraction08CutCount);
-
-    //    if(maxEMfraction > 0.7 ) passEvent = false;
-    if(maxEMfraction < 0.7 )increment(fEMfraction07CutCount);
+    // Set veto flags for event with high EM fraction of a selected jet
+    if(maxEMfraction < 0.8 ) 
+      increment(fEMfraction08CutCount);
+    else
+      bEMFraction08Veto = true;
+    if(maxEMfraction < 0.7 )
+      increment(fEMfraction07CutCount);
+    else
+      bEMFraction07Veto = true;
 
     if(EMfractionCutPassed < fMin) passEvent = false;
     if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);

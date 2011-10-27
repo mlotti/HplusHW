@@ -39,6 +39,8 @@ namespace HPlus {
       const uint32_t getMinNumber() const { return fJetSelection->fMin; }
       const int getHadronicJetCount() const { return fJetSelection->iNHadronicJets; }
       const int getHadronicJetCountInFwdDir() const { return fJetSelection->iNHadronicJetsInFwdDir; }
+      const bool eventHasJetWithEMFraction07() const { return fJetSelection->bEMFraction07Veto; }
+      const bool eventHasJetWithEMFraction08() const { return fJetSelection->bEMFraction08Veto; }
       
     private:
       const JetSelection *fJetSelection;
@@ -151,6 +153,8 @@ namespace HPlus {
     edm::PtrVector<pat::Jet> fNotSelectedJets;
     int iNHadronicJets;
     int iNHadronicJetsInFwdDir;
+    bool bEMFraction08Veto;
+    bool bEMFraction07Veto;
     float fMinDeltaRToOppositeDirectionOfTau;
   };
 }
