@@ -24,9 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
+counters = analysis+"Counters/weighted"
 
 # main function
 def main():

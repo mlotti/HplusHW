@@ -30,9 +30,7 @@ analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
+counters = analysis+"Counters/weighted"
 
 # main function
 def main():
@@ -203,7 +201,7 @@ def main():
 #    vertexComparison(datasets)
 
 
-    eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
+    eventCounter = counter.EventCounter(datasets)
 
     # append row from the tree to the main counter
     eventCounter.getMainCounter().appendRow("MET > 70", td.clone(selection="met_p4.Et() > 70"))

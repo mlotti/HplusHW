@@ -48,7 +48,7 @@ def embeddingPlots():
     if os.path.exists("histograms.root"):
         datasets = dataset.getDatasetsFromRootFiles([("Test", "histograms.root")], counters=None)
     else:
-        datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer")
+        datasets = dataset.getDatasetsFromMulticrabCfg(counters="countAnalyzer/weighted")
         datasets.selectAndReorder(["TTJets_TuneZ2_Summer11"])
 #        datasets.selectAndReorder(["WJets_TuneZ2_Summer11"])
 #        datasets.selectAndReorder(["WJets_TuneZ2_Spring11"])
