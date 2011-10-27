@@ -159,7 +159,10 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as para
 process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
     alias = cms.string("pileupWeight"),
 )
-param.setPileupWeightFor2011May10()
+puweight = "Run2011A"
+if len(options.puWeightEra) > 0:
+        puweight = options.puWeightEra
+param.setPileupWeightFor2011(dataVersion, era="puweight")
 insertPSetContentsTo(param.vertexWeight, process.pileupWeight)
 
 # Vertex weighting

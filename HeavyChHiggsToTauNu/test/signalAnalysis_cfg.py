@@ -143,8 +143,10 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-#param.setVertexWeightFor2011() # Reweight by reconstructed vertices
-param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution 
+puweight = "Run2011A"
+if len(options.puWeightEra) > 0:
+    puweight = options.puWeightEra
+param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
 
 #param.trigger.selectionType = "disabled"
 
