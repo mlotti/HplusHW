@@ -38,6 +38,8 @@ namespace HPlus {
     fIDECALFiducialCut = fCounterPackager.addSubCounter(baseLabel, "TauECALFiducialCutsCracksAndGap", 0);
     fIDAgainstElectronCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstElectronCut", 0);
     fIDAgainstMuonCut = fCounterPackager.addSubCounter(baseLabel, "TauAgainstMuonCut", 0);
+    fIDEMFractionCut = fCounterPackager.addSubCounter(baseLabel, "EMFractionCut", 
+      makeTH<TH1F>(fMyDir, "TauCand_EMFractionCut", "TauCandEMFractionCut;#tau EM fraction; N_{jets} / 0.01", 100, 0., 1.));
     // Initialize counter objects for tau identification
     fIDOneProngNumberCut = -1;
     fIDThreeProngNumberCut = -1;

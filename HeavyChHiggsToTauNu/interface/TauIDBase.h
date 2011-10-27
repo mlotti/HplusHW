@@ -84,6 +84,7 @@ namespace HPlus {
     size_t fIDECALFiducialCut;
     size_t fIDAgainstElectronCut;
     size_t fIDAgainstMuonCut;
+    size_t fIDEMFractionCut;
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes
     // Tau ID selections common to all tau ID classes
     size_t fIDOneProngNumberCut;
