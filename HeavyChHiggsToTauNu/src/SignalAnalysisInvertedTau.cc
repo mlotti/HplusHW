@@ -162,12 +162,23 @@ namespace HPlus {
     hMETBaselineTauId = makeTH<TH1F>(*fs,"MET_BaseLineTauId", "MET_BaseLineTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauId = makeTH<TH1F>(*fs, "MET_InvertedTauId", "MET_InvertedTauId;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETBaselineTauIdJets = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets", "MET_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets150", "MET_BaseLineTauIdJets150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets4070 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets4070", "MET_BaseLineTauIdJets4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETBaselineTauIdJets70150 = makeTH<TH1F>(*fs, "MET_BaseLineTauIdJets70150", "MET_BaseLineTauIdJets70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdJets = makeTH<TH1F>(*fs, "MT_BaseLineTauIdJets", "MT_BaseLineTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdJets = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets", "MET_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets150", "MET_InvertedTauIdJets150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets4070 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets4070", "MET_InvertedTauIdJets4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdJets70150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets70150", "MET_InvertedTauIdJets70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0); 
+    hMTInvertedTauIdJets = makeTH<TH1F>(*fs, "MT_InvertedTauIdJets", "MT_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag", "MET_BaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTBaselineTauIdBtag = makeTH<TH1F>(*fs, "MT_BaseLineTauIdBtag", "MT_BaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdBtag = makeTH<TH1F>(*fs, "MET_InvertedTauIdBtag", "MET_InvertedTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTInvertedTauIdBtag = makeTH<TH1F>(*fs, "MT_InvertedTauIdBtag", "MT_InvertedTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdBtagDphi = makeTH<TH1F>(*fs, "MET_InvertedTauIdBtagDphi", "MET_InvertedTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETBaselineTauIdBtagDphi = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtagDphi", "MET_BaseLineTauIdBtagDphi;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
-
+    hMETInvertedTauInvertedBtag = makeTH<TH1F>(*fs, "MET_InvertedTauInvertedBtag", "MET_InvertedTauInvertedBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMTInvertedTauInvertedBtag = makeTH<TH1F>(*fs, "MT_InvertedTauInvertedBtag", "MT_InvertedTauInvertedBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     //    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
     hSelectedTauEtMetCut = makeTH<TH1F>(*fs, "SelectedTau_pT_AfterMetCut", "SelectedTau_pT_AfterMetCut;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 400, 0.0, 400.0);
@@ -284,7 +295,6 @@ namespace HPlus {
 
     std::string myTauIsolation = "byTightIsolation";
 
-
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     // Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
@@ -292,6 +302,9 @@ namespace HPlus {
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup,  tauData.getCleanedTauCandidates()[0]); 
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
+    double transverseMass = TransverseMass::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()) );
+   
+    
 
   // baseline tau-id
     if (tauData.applyDiscriminatorOnBestTauCandidate(myTauIsolation)) {
@@ -302,9 +315,14 @@ namespace HPlus {
 	      if ( deltaPhi*57.3 < 135) {
 		hMETBaselineTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 	      
 	      }
-	      hMETBaselineTauIdBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());  
+	      hMETBaselineTauIdBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+	      hMTBaselineTauIdBtag->Fill(transverseMass, fEventWeight.getWeight());   
 	    }
 	    hMETBaselineTauIdJets->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+	    hMTBaselineTauIdJets->Fill(transverseMass, fEventWeight.getWeight()); 
+	    if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMETBaselineTauIdJets150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+	    if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETBaselineTauIdJets4070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+	    if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMETBaselineTauIdJets70150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 	  }
 	}
       }
@@ -362,7 +380,7 @@ namespace HPlus {
     hEMFractionAll->Fill(tauData.getCleanedTauCandidates()[0]->emFraction());
 
 
-    double transverseMass = TransverseMass::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()) );
+    //    double transverseMass = TransverseMass::reconstruct(*(tauData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()) );
     // hTransverseMassBeforeVeto->Fill(transverseMass);
     // Hadronic jet selection                                                                                                                                      
     //    JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getCleanedTauCandidates());
@@ -419,20 +437,28 @@ namespace HPlus {
   // b tagging, no event cut
     //   BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
 
-
+   
 // plots for inverted isolation
 
 //    if(tauData.applyVetoOnTauCandidates(myTauIsolation)) {
       // veto was successfull
     hMETInvertedTauIdJets->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMETInvertedTauIdJets150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdJets4070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMETInvertedTauIdJets70150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+    hMTInvertedTauIdJets->Fill(transverseMass, fEventWeight.getWeight());
     if(btagData.passedEvent()) {
       hMETInvertedTauIdBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 
+      hMTInvertedTauIdBtag->Fill(transverseMass, fEventWeight.getWeight());
       if ( deltaPhi*57.3 < 135) {
 	hMETInvertedTauIdBtagDphi->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight()); 	      
       }  
     }
 
-
+    if(!btagData.passedEvent()) {
+      hMETInvertedTauInvertedBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      hMTInvertedTauInvertedBtag->Fill(transverseMass, fEventWeight.getWeight());
+    }
   
  
     // b tagging, no event cut
@@ -500,7 +526,7 @@ namespace HPlus {
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
  
-   if ( deltaPhi*57.3 < 135) {
+    if ( deltaPhi*57.3 < 135) {
       increment(fdeltaPhiTauMET160Counter);
       hTransverseMassDeltaPhiUpperCut->Fill(transverseMass, fEventWeight.getWeight());  
     }     

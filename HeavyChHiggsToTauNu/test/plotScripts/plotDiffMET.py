@@ -70,12 +70,14 @@ def main():
     
 #    met = plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(400, 0, 400)"))
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
+    
+#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_BaselineTauInvertedBtag")  
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
     print "print inverted met"
     print metInverted_data.GetEntries()
 

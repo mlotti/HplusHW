@@ -331,16 +331,16 @@ def main():
     td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale",
                              selection="met_p4.Et() > 70 && Max$(jets_btag) > 1.7")
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")  
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
 
     metBase_QCD = metBase_data.Clone("QCD")
     metBase_QCD.Add(metBase_EWK,-1)
