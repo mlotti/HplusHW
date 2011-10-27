@@ -10,6 +10,8 @@ multicrab = Multicrab("crab_analysis.cfg", cfg)
 # Select the pattuple version to use as an input
 pattupleVersion = "pattuple_v18"
 
+#era = "EPS"
+era = "Run2011A"
 
 # Change this to true if you want to run the PAT on the fly (for
 # datasets where no pattuples are produced, or for testing something
@@ -22,19 +24,9 @@ if runPatOnTheFly:
 
 # Uncomment below the datasets you want to process
 # The dataset definitions are in python/tools/multicrabDatasets.py
-datasets = [
-        #### 42X data and MC
-        # Data: single tau (control trigger)
-#        "Tau_Single_165970-166164_Prompt",   # HLT_IsoPFTau35_Trk20_v2
-#        "Tau_Single_166346-166346_Prompt",   # HLT_IsoPFTau35_Trk20_v3
-#        "Tau_Single_166374-167043_Prompt",   # HLT_IsoPFTau35_Trk20_v2
-#        "Tau_Single_167078-167913_Prompt",   # HLT_IsoPFTau35_Trk20_v4
-#        "Tau_Single_170722-172619_Aug05",    # HLT_IsoPFTau35_Trk20_v6
-#        "Tau_Single_172620-173198_Prompt",   # HLT_IsoPFTau35_Trk20_v6
-#        "Tau_Single_173236-173692_Prompt",   # HLT_MediumIsoPFTau35_Trk20_v1
 
-        # Data: single tau + MET
-        # This is the "EPS" dataset
+# Data: single tau + MET
+datasetsEPS = [
         "Tau_160431-161176_May10",           # HLT_IsoPFTau35_Trk20_MET45_v1
         "Tau_161217-163261_May10",           # HLT_IsoPFTau35_Trk20_MET45_v2
         "Tau_163270-163869_May10",           # HLT_IsoPFTau35_Trk20_MET45_v4
@@ -43,13 +35,14 @@ datasets = [
         "Tau_166346-166346_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v3
         "Tau_166374-167043_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v2
         "Tau_167078-167913_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v4
+]
+datasetsRun2011A = datasetsEPS + [
+        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
+        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
+        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
+]
 
-        # These are beyond EPS
-#        "Tau_170722-172619_Aug05",           # HLT_IsoPFTau35_Trk20_MET60_v6
-#        "Tau_172620-173198_Prompt",          # HLT_IsoPFTau35_Trk20_MET60_v6
-#        "Tau_173236-173692_Prompt",          # HLT_MediumIsoPFTau35_Trk20_MET60_v1
-
-
+datasetsMC = [
         # MC Signal (WH)
         "TTToHplusBWB_M80_Summer11",
         "TTToHplusBWB_M90_Summer11",
@@ -98,12 +91,29 @@ datasets = [
         "WZ_TuneZ2_Summer11",
         "ZZ_TuneZ2_Summer11",
         ]
+
+datasets = []
+if era == "EPS":
+    datasets += datasetsEPS
+elif era == "Run2011A":
+    datasets += datasetsRun2011A
+else:
+    raise Exception("Wrong value for 'era' %s, supported are 'EPS', 'Run2011A'" % era)
+datasets += datasetsMC
+
+# Add the datasest to the multicrab system
 multicrab.extendDatasets(pattupleVersion, datasets)
 
 output = ["histograms.root"]
 if "signalAnalysis" in cfg:
     output.append("pickEvents.txt")
 multicrab.addCommonLine("CMSSW.output_file = %s" % ",".join(output))
+
+# Set the era to MC datasets
+def setPuEra(dataset):
+    if dataset.isMC():
+        dataset.appendArg("puWeightEra="+era)
+multicrab.forEachDataset(setPuEra)
 
 # Force all jobs go to jade, in some situations this might speed up
 # the analysis (e.g. when there are O(1000) Alice jobs queueing, all
