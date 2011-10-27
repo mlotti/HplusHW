@@ -187,6 +187,33 @@ process.skimPath = cms.Path(
     process.heavyChHiggsToTauNuSequence
 )
 
+# In case of OR of many triggers, add event counts for each trigger separately
+if dataVersion.isData() and len(options.trigger) > 1:
+    import HLTrigger.HLTfilters.hltHighLevel_cfi as hltHighLevel
+    for trig in options.trigger:
+        name = trig.replace("_", "")
+
+        mt = hltHighLevel.hltHighLevel.clone(
+            HLTPaths = cms.vstring(trig)
+        )
+        mt.TriggerResultsTag.setProcessName(dataVersion.getTriggerProcess())
+        setattr(process, "Trigger"+name, mt)
+
+        mc1 = cms.EDProducer("EventCountProducer")
+        setattr(process, "Counter"+name, mc1)
+
+        mc2 = cms.EDProducer("EventCountProducer")
+        setattr(process, "CounterScraping"+name, mc2)
+
+        path = cms.Path(
+            process.hltPhysicsDeclared *
+            mt * 
+            mc1 *
+            process.scrapingVeto *
+            mc2
+        )
+        setattr(process, "Path"+name, path)
+
 # If there is a need to apply some skim
 if options.skimConfig != "":
     print "Skimming with configuration ", options.skimConfig
