@@ -63,7 +63,7 @@ def main():
 #    xsect.setHplusCrossSectionsToTop(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)

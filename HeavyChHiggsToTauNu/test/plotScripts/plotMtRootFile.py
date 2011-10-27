@@ -27,7 +27,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
     # LandS expects that HW and HH are normalized to top cross section
     xsect.setHplusCrossSectionsToTop(datasets)
 
