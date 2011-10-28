@@ -28,7 +28,7 @@ weight = ""
 analysis = "caloMetEfficiency%sh00_h01_All" % weight
 #afterCut = "caloMetEfficiency%sh02_h02_CaloMet45" % weight
 afterCut = "caloMetEfficiency%sh03_h02_CaloMet60" % weight
-counters = "caloMetEfficiency%scountAnalyzer" % weight
+counters = "caloMetEfficiency%scountAnalyzer/weighted" % weight
 
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
 cutText = "Calo E_{T}^{miss} > 60 GeV"

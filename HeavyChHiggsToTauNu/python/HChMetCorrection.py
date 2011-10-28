@@ -41,35 +41,47 @@ def addCorrectedMet(process, dataVersion, tauSelection, jetSelection, metRaw = "
     sequence *= m
 
     # Then compute the type I correction for MET with the cleaned jets
+    # Select jets with |eta| < 4.7
     m = patPFMETCorrections.selectedPatJetsForMETtype1p2Corr.clone(
         src = jetName
     )
-    setattr(process, "selectedPatJetsForMETtype1p2Corr"+postfix, m)
+    jetsForMETtype1p2 = "selectedPatJetsForMETtype1p2Corr"+postfix
+    setattr(process, jetsForMETtype1p2, m)
     sequence *= m
 
+    # Select jets with |eta| > 4.7
     m = patPFMETCorrections.selectedPatJetsForMETtype2Corr.clone(
         src = jetName
     )
-    setattr(process, "selectedPatJetsForMETtype2Corr"+postfix, m)
+    jetsForMETtype2 = "selectedPatJetsForMETtype2Corr"+postfix
+    setattr(process, jetsForMETtype2, m)
     sequence *= m
 
+    # Calculate corrections for type 1 and 2 from jets |eta| < 4.7
     m = patPFMETCorrections.patPFJetMETtype1p2Corr.clone(
+        src = jetsForMETtype1p2,
         skipMuons = False
     )
     if dataVersion.isData():
         m.jetCorrLabel = "L2L3Residual"
-    setattr(process, "patPFJetMETtype1p2Corr"+postfix, m)
+    type1p2Corr = "patPFJetMETtype1p2Corr"+postfix
+    setattr(process, type1p2Corr, m)
     sequence *= m
 
+    # Calculate correction for type 2 from jets |eta| > 4.7
     m = patPFMETCorrections.patPFJetMETtype2Corr.clone(
+        src = jetsForMETtype2,
         skipMuons = False
     )
     if dataVersion.isData():
         m.jetCorrLabel = "L2L3Residual"
-    setattr(process, "patPFJetMETtype2Corr"+postfix, m)
+    type2Corr = "patPFJetMETtype2Corr"+postfix
+    setattr(process, type2Corr, m)
     sequence *= m
 
+    # Apply type 1 corrections to raw PF MET in PAT
     m = patPFMETCorrections.patType1CorrectedPFMet.clone(
+        srcType1Corrections = [cms.InputTag(type1p2Corr, "type1")],
         src = metRaw
     )
     type1Name = "patType1CorrectedPFMet"+postfix

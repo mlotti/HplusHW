@@ -5,4 +5,5 @@ hPlusJetPtrSelectorFilter = cms.EDFilter("HPlusJetPtrSelectorFilter",
 	jetSelection = jetSelection.clone(),
         tauSrc = cms.untracked.InputTag("patTausHpsPFTauTauTriggerMatched"),
         filter = cms.bool(True),
+        throw = cms.bool(True),
 )

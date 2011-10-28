@@ -83,7 +83,10 @@ if dataVersion.isMC():
     process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
         alias = cms.string("pileupWeight"),
     )
-    param.setPileupWeightFor2011()
+    puweight = "Run2011A"
+    if len(options.puWeightEra) > 0:
+        puweight = options.puWeightEra
+    param.setPileupWeightFor2011(dataVersion, era=puweight)
     insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeight)
 
     # Vertex weighting
@@ -104,7 +107,7 @@ process.infoPath = addConfigInfo(process, options, dataVersion)
 
 ################################################################################
 
-process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 process.commonSequence *= process.firstPrimaryVertex

@@ -47,7 +47,7 @@ style = TDRStyle()
 ############################### DATASETS ###############################
 ### Construct datasets as stated in the multicrab.cfg of the execution
 ### directory. The returned object is of type DatasetManager.
-datasets = getDatasetsFromMulticrabCfg() ## uncomment me
+datasets = getDatasetsFromMulticrabCfg(counters="signalAnalysisCounters/weighted") ## uncomment me
 
 ### Construct datasets from the given list of CRAB task directories
 #datasets = getDatasetsFromCrabDirs(["TTToHpmToTauNu_M100"]) ### example: single dataset

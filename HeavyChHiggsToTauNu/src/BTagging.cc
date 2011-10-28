@@ -349,9 +349,8 @@ namespace HPlus {
     }
     // Calculate scalefactor
     fScaleFactor = fBTaggingScaleFactor.getWeight(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt);
-    hScaleFactor->Fill(fScaleFactor, fEventWeight.getWeight());
-    hBTagRelativeUncertainty->Fill(fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt), fEventWeight.getWeight());
-    hBTagAbsoluteUncertainty->Fill(fBTaggingScaleFactor.getAbsoluteUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt), fEventWeight.getWeight());
+    fScaleFactorRelativeUncertainty = fBTaggingScaleFactor.getRelativeUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt);
+    fScaleFactorAbsoluteUncertainty = fBTaggingScaleFactor.getAbsoluteUncertainty(nBJetsPassed, nLightJetsPassed, fBJetsFailedPt, fLightJetsFailedPt);
     /*std::cout << "btagSF debug: jets=" << jets.size() << " bjets=" << bjets.size() << " nb=" << nBJetsPassed << ", nbf pT=";
     for (std::vector<double>::iterator it = fBJetsFailedPt.begin(); it != fBJetsFailedPt.end(); ++it) { std::cout << " " << *it; }
     std::cout << " nl=" << nLightJetsPassed << ", nlf pT=";
@@ -360,4 +359,11 @@ namespace HPlus {
 
     //std::cout << "bjets=" << nBJets << ", light jets=" << nLightJets << ", scale factor=" << fScaleFactor << std::endl;
   }
+  
+  void BTagging::Data::fillScaleFactorHistograms() {
+    fBTagging->hScaleFactor->Fill(fBTagging->fScaleFactor, fBTagging->fEventWeight.getWeight());
+    fBTagging->hBTagAbsoluteUncertainty->Fill(fBTagging->fScaleFactorAbsoluteUncertainty, fBTagging->fEventWeight.getWeight());
+    fBTagging->hBTagRelativeUncertainty->Fill(fBTagging->fScaleFactorRelativeUncertainty, fBTagging->fEventWeight.getWeight());
+  }
+
 }

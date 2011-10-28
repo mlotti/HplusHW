@@ -29,7 +29,12 @@ def getOptions(options=None):
     options.register("trigger",
                      [],
                      options.multiplicity.list, options.varType.string,
-                     "Trigger to use")
+                     "Triggers to use (logical OR if multiple given")
+    options.register("doTauHLTMatching",
+                     1,
+                     options.multiplicity.singleton,
+                     options.varType.int,
+                     "Do tau trigger mathching? (default: 1")
     options.register("tauEmbeddingInput",
                      0,
                      options.multiplicity.singleton,
@@ -53,6 +58,11 @@ def getOptions(options=None):
                      options.multiplicity.singleton,
                      options.varType.int,
                      "Set to 1 if job will be run with crab. Typically you don't have to set it by yourself, since it is set in crab.cfg/multicrab.cfg")
+    options.register("puWeightEra",
+                     "",
+                     options.multiplicity.singleton,
+                     options.varType.string,
+                     "Select specific PU reweighting era (Default: use the one in configuration)")
 
     # Protection in case sys.argv is missing due to various edm tools
     if not hasattr(sys, "argv"):

@@ -66,18 +66,24 @@ def main():
     # Create the histogram from the tree (and see the selections explicitly)
     td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale",
                              selection="met_p4.Et() > 70 && Max$(jets_btag) > 1.7")
-#    mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))
-    
+#    mT = plots.DataMCPlot(datasets, td.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))>>dist(400, 0, 400)"))    
 #    met = plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(400, 0, 400)"))
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdLoose")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
+
+    metBase4070 = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets4070")
+    metInver4070 = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets4070")
+#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdLoose")
       
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metBase4070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver4070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdLoose")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    metInverted_data4070 = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4070")
     print "print inverted met"
     print metInverted_data.GetEntries()
 
@@ -85,11 +91,17 @@ def main():
     diffBase = dataEwkDiff(metBase, "MET_base_data-ewk")
 #    diffInverted = dataEwkDiff(metInver,"MET_inverted_data-ewk")
     diffInverted = dataEwkNoDiff(metInver,"MET_inverted_data-ewk")
+    
+    diffBase4070 = dataEwkDiff(metBase, "MET_base_data-ewk-4070")
+#    diffInverted4070 = dataEwkDiff(metInver,"MET_inverted_data-ewk-4070")
+    diffInverted4070 = dataEwkNoDiff(metInver,"MET_inverted_data-ewk-4070")
 
     # Draw the MET distribution
     transverseMass(metBase,"MET_base")
     transverseMass(metInver,"MET_inverted")
-
+    # Draw the MET distribution
+    transverseMass(metBase4070,"MET_base4070")
+    transverseMass(metInver4070,"MET_inverted4070")
   
     # Set the styles
     dataset._normalizeToOne(diffBase)
@@ -98,6 +110,11 @@ def main():
         histograms.Histo(diffBase, "Baseline"),
         histograms.Histo(diffInverted, "Inverted"))
 
+    dataset._normalizeToOne(diffBase4070)
+    dataset._normalizeToOne(diffInverted4070)
+    plot2 = plots.ComparisonPlot(
+        histograms.Histo(diffBase4070, "Baseline4070"),
+        histograms.Histo(diffInverted4070, "Inverted4070"))
 
     
     st1 = styles.getDataStyle().clone()
@@ -107,7 +124,7 @@ def main():
     plot.histoMgr.forHisto("Inverted", st2)
     
 
-    plot.createFrame("METbaseVSinverted-ewk_loose", opts={"xmax": 400, "ymin":1e-5, "ymaxfactor": 1.5},
+    plot.createFrame("METbaseVSinverted-ewk", opts={"xmax": 400, "ymin":1e-5, "ymaxfactor": 1.5},
                      createRatio=True, opts2={"ymin": -5 , "ymax": 6 }, # bounds of the ratio plot
                      )
 
@@ -120,6 +137,18 @@ def main():
     plot.draw()
     plot.save()
 
+    plot2.createFrame("METbaseVSinverted-ewk-4070", opts={"xmax": 400, "ymin":1e-5, "ymaxfactor": 1.5},
+                     createRatio=True, opts2={"ymin": -5 , "ymax": 6 }, # bounds of the ratio plot
+                     )
+
+    plot2.getPad().SetLogy(True)    
+    plot2.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
+    plot2.frame.GetXaxis().SetTitle("MET (GeV)")
+    plot2.frame.GetYaxis().SetTitle("Data - EWK")
+ 
+# Draw the plot
+    plot2.draw()
+    plot2.save()
 
 def dataEwkNoDiff(mT,name):
     # Get the normalized TH1 histograms

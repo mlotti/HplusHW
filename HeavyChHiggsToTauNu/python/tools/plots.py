@@ -21,6 +21,7 @@
 
 import ROOT
 import array
+import math
 
 import dataset
 import histograms
@@ -505,14 +506,24 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
     elif isinstance(rootHisto1, ROOT.TGraph) and isinstance(rootHisto2, ROOT.TGraph):
         xvalues = []
         yvalues = []
+        yerrs = []
         for i in xrange(0, rootHisto1.GetN()):
             yval = rootHisto2.GetY()[i]
             if yval == 0:
                 continue
             xvalues.append(rootHisto1.GetX()[i])
             yvalues.append(rootHisto1.GetY()[i] / yval)
-        
-        return ROOT.TGraph(len(xvalues), array.array("d", xvalues), array.array("d", yvalues))
+            err1 = max(rootHisto1.GetErrorYhigh(i), rootHisto1.GetErrorYlow(i))
+            err2 = max(rootHisto2.GetErrorYhigh(i), rootHisto2.GetErrorYlow(i))
+            yerrs.append( yvalues[i]* math.sqrt( (err1/rootHisto1.GetY()[i])**2 +
+                                                 (err2/rootHisto2.GetY()[i])**2 ) )
+
+        gr = ROOT.TGraphAsymmErrors()
+        if len(xvalues) > 0:
+            gr = ROOT.TGraphAsymmErrors(len(xvalues), array.array("d", xvalues), array.array("d", yvalues),
+                                        rootHisto1.GetEXlow(), rootHisto1.GetEXhigh(),
+                                        array.array("d", yerrs), array.array("d", yerrs))
+        return gr
     else:
         raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
 

@@ -17,10 +17,13 @@ defaultSeBlacklist = [
 
     # blacklist after v13
     "colorado.edu", # Ultraslow bandwidth, no chance to get even the smaller pattuples through
+    "T3_*", # Don't submit to T3's  
     "T2_UK_London_Brunel", # Noticeable fraction of submitted jobs fail due to stageout errors
     "ucl.ac.be", # Jobs end up in queuing, lot's of file open errors
     "iihe.ac.be", # Problematic site with server
     "T2_US_Florida", # In practice gives low bandwidth to T2_FI_HIP => stageouts timeout, also jobs can queue long times
+    "unl.edu", # Jobs can wait in queues for a looong time
+    "wisc.edu", # Stageout failures
     ]
 
 def getTaskDirectories(opts, filename="multicrab.cfg"):
@@ -488,6 +491,9 @@ class MulticrabDataset:
         The method was intended to be called from Multicrab class.
         """
 
+        if "trigger" in self.data and "triggerOR" in self.data:
+            raise Exception("May not have both 'trigger' and 'triggerOR', in task %s" % self.name)
+
         dataKeys = self.data.keys()
 
         args = ["dataVersion=%s" % self.data["dataVersion"]]
@@ -498,9 +504,15 @@ class MulticrabDataset:
                 del dataKeys[dataKeys.index(argName)]
             except KeyError:
                 pass
+        try:
+            args.extend(["trigger=%s" % trigger for trigger in self.data["triggerOR"]])
+        except KeyError:
+            pass
+
         if "args" in self.data:
             for key, value in self.data["args"].iteritems():
-                args.append("%s=%s" % (key, value))
+                print key, value
+                args.append("%s=%s" % (key, str(value)))
 
         args += self.args
         try:
