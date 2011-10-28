@@ -171,6 +171,11 @@ namespace HPlus {
     hMETInvertedTauIdJets4070 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets4070", "MET_InvertedTauIdJets4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdJets70150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJets70150", "MET_InvertedTauIdJets70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0); 
     hMTInvertedTauIdJets = makeTH<TH1F>(*fs, "MT_InvertedTauIdJets", "MT_InvertedTauIdJets;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdLoose = makeTH<TH1F>(*fs, "MET_InvertedTauIdLoose", "MET_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdLoose150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdLoose150", "MET_InvertedTauIdLoose150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdLoose4070 = makeTH<TH1F>(*fs, "MET_InvertedTauIdJLoose4070", "MET_InvertedTauIdLoose4070;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
+    hMETInvertedTauIdLoose70150 = makeTH<TH1F>(*fs, "MET_InvertedTauIdLoose70150", "MET_InvertedTauIdLoose70150;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0); 
+    hMTInvertedTauIdLoose = makeTH<TH1F>(*fs, "MT_InvertedTauIdLoose", "MT_InvertedTauIdLoose;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETBaselineTauIdBtag = makeTH<TH1F>(*fs, "MET_BaseLineTauIdBtag", "MET_BaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMTBaselineTauIdBtag = makeTH<TH1F>(*fs, "MT_BaseLineTauIdBtag", "MT_BaseLineTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
     hMETInvertedTauIdBtag = makeTH<TH1F>(*fs, "MET_InvertedTauIdBtag", "MET_InvertedTauIdBtag;PF MET, GeV;N_{events} / 10 GeV", 400, 0.0, 400.0);
@@ -455,6 +460,16 @@ namespace HPlus {
       }  
     }
 
+    // Inverted MET with loose isolation
+    if (tauData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation")) {
+      hMETInvertedTauIdLoose->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMETInvertedTauIdLoose150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMETInvertedTauIdLoose4070->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMETInvertedTauIdLoose70150->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
+      hMTInvertedTauIdLoose->Fill(transverseMass, fEventWeight.getWeight());
+    }
+    
+  
     if(!btagData.passedEvent()) {
       hMETInvertedTauInvertedBtag->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
       hMTInvertedTauInvertedBtag->Fill(transverseMass, fEventWeight.getWeight());

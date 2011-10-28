@@ -201,9 +201,14 @@ namespace HPlus {
     TH1 *hMETInvertedTauIdJets150;
     TH1 *hMETInvertedTauIdJets4070;
     TH1 *hMETInvertedTauIdJets70150;
+    TH1 *hMETInvertedTauIdLoose;
+    TH1 *hMETInvertedTauIdLoose150;
+    TH1 *hMETInvertedTauIdLoose4070;
+    TH1 *hMETInvertedTauIdLoose70150;
     TH1 *hMETBaselineTauIdBtag;
     TH1 *hMETInvertedTauIdBtag;
     TH1 *hMTBaselineTauIdJets;
+    TH1 *hMTInvertedTauIdLoose;
     TH1 *hMTInvertedTauIdJets;
     TH1 *hMTBaselineTauIdBtag;
     TH1 *hMTInvertedTauIdBtag;

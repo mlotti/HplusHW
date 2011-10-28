@@ -70,14 +70,14 @@ def main():
     
 #    met = plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(400, 0, 400)"))
     metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
-    
-#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_BaselineTauInvertedBtag")  
+#    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdLoose")
+      
     # Rebin before subtracting
     metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdLoose")
     print "print inverted met"
     print metInverted_data.GetEntries()
 
@@ -107,7 +107,7 @@ def main():
     plot.histoMgr.forHisto("Inverted", st2)
     
 
-    plot.createFrame("METbaseVSinverted-ewk", opts={"xmax": 400, "ymin":1e-5, "ymaxfactor": 1.5},
+    plot.createFrame("METbaseVSinverted-ewk_loose", opts={"xmax": 400, "ymin":1e-5, "ymaxfactor": 1.5},
                      createRatio=True, opts2={"ymin": -5 , "ymax": 6 }, # bounds of the ratio plot
                      )
 
