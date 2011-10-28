@@ -179,10 +179,10 @@ namespace HPlus {
 	  hChargedEmEnergyFractionExcludedJets->Fill(iJet->chargedEmEnergyFraction());
 	  hChargedMultiplicityExcludedJets->Fill(iJet->chargedMultiplicity());
 	  //hJECFactorExcludedJets->Fill(iJet->jecFactor());
-	  hN60ExcludedJets->Fill(iJet->n60());
-	  hTowersAreaExcludedJets->Fill(iJet->towersArea());
+	  //hN60ExcludedJets->Fill(iJet->n60());
+	  //hTowersAreaExcludedJets->Fill(iJet->towersArea());
 	  hJetChargeExcludedJets->Fill(iJet->jetCharge());
-	  if (iEvent.isRealData()) {
+	  if (!iEvent.isRealData()) {
 	    hPartonFlavourExcludedJets->Fill(iJet->partonFlavour());
 	    if (iJet->genJet())
 	      hPtDiffToGenJetExcludedJets->Fill(iJet->pt() / iJet->genJet()->pt());
@@ -258,10 +258,10 @@ namespace HPlus {
       hChargedEmEnergyFractionSelectedJets->Fill(iJet->chargedEmEnergyFraction());
       hChargedMultiplicitySelectedJets->Fill(iJet->chargedMultiplicity());
       //hJECFactorSelectedJets->Fill(iJet->jecFactor());
-      hN60SelectedJets->Fill(iJet->n60());
-      hTowersAreaSelectedJets->Fill(iJet->towersArea());
+      //hN60SelectedJets->Fill(iJet->n60());
+      //hTowersAreaSelectedJets->Fill(iJet->towersArea());
       hJetChargeSelectedJets->Fill(iJet->jetCharge());
-      if (iEvent.isRealData()) {
+      if (!iEvent.isRealData()) {
 	hPartonFlavourSelectedJets->Fill(iJet->partonFlavour());
 	if (iJet->genJet())
 	  hPtDiffToGenJetSelectedJets->Fill(iJet->pt() / iJet->genJet()->pt());
