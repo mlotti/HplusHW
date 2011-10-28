@@ -117,7 +117,7 @@ namespace HPlus {
     MuonSelection(iEvent,iSetup, primaryVertex);
     if (fSelectedMuons.size())
       increment(fGlobalMuonVetoCounter);
-    return Data(this, fSelectedMuons.size() > 0);
+    return Data(this, fSelectedMuons.size() == 0);
   }
 
   GlobalMuonVeto::Data GlobalMuonVeto::analyzeWithoutIsolation(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex) {
@@ -125,7 +125,7 @@ namespace HPlus {
     MuonSelection(iEvent,iSetup, primaryVertex);
     if (fSelectedMuonsBeforeIsolation.size())
       increment(fGlobalMuonVetoCounter);
-    return Data(this, fSelectedMuonsBeforeIsolation.size() > 0);
+    return Data(this, fSelectedMuonsBeforeIsolation.size() == 0);
   }
 
 
