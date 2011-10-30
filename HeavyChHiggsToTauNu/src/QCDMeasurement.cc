@@ -312,6 +312,8 @@ namespace HPlus {
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
     // increment(fEvtTopologyCounter);
 
+    BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+    
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
     if(metData.getType1MET().isNonnull())
@@ -330,6 +332,7 @@ namespace HPlus {
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
 
 ///////// MET selection (factorise out)
@@ -341,7 +344,7 @@ namespace HPlus {
       ///////// btag selection (factorise out)
       double myWeightWithoutBTagScale = fEventWeight.getWeight(); // needed because of btag scale factor 
       double EventWeightWithoutBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
-      BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
+      // BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
       double EventWeightWithBTag = fEventWeight.getWeight(); // needed because of btag scale factor //attikis
       // Apply scale factor as weight to event
       fEventWeight.multiplyWeight(btagData.getScaleFactor());
