@@ -24,9 +24,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 # Configuration
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
+counters = analysis+"Counters/weighted"
 
 # main function
 def main():
@@ -62,7 +60,7 @@ def main():
                      ])
     datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="multicrab.cfg", counters=counters)
 
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()

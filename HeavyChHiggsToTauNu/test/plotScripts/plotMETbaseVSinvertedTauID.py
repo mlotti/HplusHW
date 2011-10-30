@@ -22,7 +22,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 
 def main():
     interactive = True
@@ -49,7 +49,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Set BR(t->H) to 0.2, keep BR(H->tau) in 1
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 
     # Merge WH and HH datasets to one (for each mass bin)
     # TTToHplusBWB_MXXX and TTToHplusBHminusB_MXXX to "TTToHplus_MXXX"

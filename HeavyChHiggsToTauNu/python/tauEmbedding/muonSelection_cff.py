@@ -12,7 +12,7 @@ muonSelectionTriggered = cms.EDProducer("EventCountProducer")
 
 
 muonFirstPrimaryVertex = cms.EDProducer(
-    "HPlusSelectFirstVertex",
+    "HPlusFirstVertexSelector",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 muonGoodPrimaryVertex = cms.EDFilter("VertexSelector",

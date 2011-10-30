@@ -213,7 +213,7 @@ pfMET = cms.InputTag("pfMet")
 pfMETOriginal = cms.InputTag("pfMet", "", recoProcess)
 
 # Finalise muon selection
-process.firstPrimaryVertex = cms.EDProducer("HPlusSelectFirstVertex",
+process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
     src = cms.InputTag("offlinePrimaryVertices")
 )
 process.commonSequence *= process.firstPrimaryVertex

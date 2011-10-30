@@ -187,7 +187,7 @@ def main():
     WdecaySeparate = False
     #WdecaySeparate = True
 
-    counters=analysisPrefix+"countAnalyzer"
+    counters=analysisPrefix+"countAnalyzer/weighted"
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters,
 #                                                   weightedCounters=counters+"/weighted", firstWeightedCount=analysisPrefix+"countAll"
                                                    )

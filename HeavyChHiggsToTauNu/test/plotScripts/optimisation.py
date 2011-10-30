@@ -14,9 +14,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
+counters = analysis+"Counters/weighted"
 
 styles.signal80Style.append(styles.StyleLine(lineColor=ROOT.kRed+2))
 styles.signal90Style.append(styles.StyleLine(lineColor=ROOT.kGreen+2))

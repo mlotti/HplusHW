@@ -34,17 +34,25 @@ datasets = {
                 "number_of_jobs": 110, # Adjusted for PATtuple file size
                 "lumiMask": "Aug05ReReco"
             },
-            "pattuple_v18": {
+            "pattuple_v18_0": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/Tau/local-05Aug2011_v1_AOD_Single_170722_pattuple_v18-94011b60044d698fe5dbd6fe93c7d90b/USER",
                 "luminosity": 370.826000,
                 "number_of_jobs": 1,
             },
+            "pattuple_v18_1": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-05Aug2011_v1_AOD_Single_170722_pattuple_v18_1-e7ac736350b7c673637ba90e811c1fee/USER",
+                "number_of_jobs": 1,
+            },
+            "pattuple_v18": {
+                "fallback": "pattuple_v18_1"
+            },
         }
     },
 
     # Single Mu
-    "SingleMu_170722-172619_Aug05": {
+    "SingleMu_Mu_170722-172619_Aug05": {
         "dataVersion": "42Xdata",
         "trigger": "HLT_Mu40_v5",
         "runs": (170722, 172619),

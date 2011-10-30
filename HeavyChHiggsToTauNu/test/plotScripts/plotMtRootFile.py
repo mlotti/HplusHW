@@ -9,7 +9,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.plots as plots
 import HiggsAnalysis.HeavyChHiggsToTauNu.tools.crosssection as xsect
 
 analysis = "signalAnalysis"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 outputFile = "lands.root"
 
 def main():
@@ -27,7 +27,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    #xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
     # LandS expects that HW and HH are normalized to top cross section
     xsect.setHplusCrossSectionsToTop(datasets)
 
@@ -42,9 +42,15 @@ def main():
     f = ROOT.TFile.Open(outputFile, "RECREATE")
     
     # Add the histograms of the wanted datasets to the tree
-    for datasetName, outputName in [("Data", "data"),
-                                    ("TTToHplusBWB_M120", "hw"),
-                                    ("TTToHplusBHminusB_M120", "hh")]:
+    for datasetName, outputName in [
+        ("Data", "data"),
+        ("TTToHplusBWB_M100", "hw_100"),
+        ("TTToHplusBHminusB_M100", "hh_100"),
+        ("TTToHplusBWB_M120", "hw_120"),
+        ("TTToHplusBHminusB_M120", "hh_120"),
+        ("TTToHplusBWB_M160", "hw_160"),
+        ("TTToHplusBHminusB_M160", "hh_160")
+        ]:
         th1 = mt.histoMgr.getHisto(datasetName).getRootHisto().Clone("mt_"+outputName)
         th1.SetDirectory(f)
         th1.Write()

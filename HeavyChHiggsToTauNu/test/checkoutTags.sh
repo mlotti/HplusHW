@@ -54,6 +54,7 @@ set -e
 # 3.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Bugfix from Christian for type I/II MET
 # 5.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated LumiDB tag (bugfix)
 # 6.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Another bugfix from Christian for type I/II MEt
+# 17.10.2011/M.Kortelainen CMSSW_4_2_8_patch2 Updated PU reweight tag for the updated recipe, lumi tag for minor bugfix (which is probably not relevant to us)
 
 # addpkg requires cmsenv
 eval $(scram runtime -sh)
@@ -79,7 +80,7 @@ addpkg PhysicsTools/SelectorUtils V00-03-17
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections
 addpkg RecoJets/Configuration     V02-04-17
 # https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities
-addpkg PhysicsTools/Utilities     V08-03-09
+addpkg PhysicsTools/Utilities     V08-03-10
 
 # Type I/II MET
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMetAnalysis#HeadingFive
@@ -100,7 +101,7 @@ cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 
 # Luminosity
 # https://twiki.cern.ch/twiki/bin/view/CMS/LumiCalc
-addpkg RecoLuminosity/LumiDB      V03-03-00 
+addpkg RecoLuminosity/LumiDB      V03-03-02
 
 # Electron ID
 # https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
@@ -109,7 +110,3 @@ addpkg RecoLuminosity/LumiDB      V03-03-00
 # Higgs skimms
 cvs co HiggsAnalysis/Skimming
 rm HiggsAnalysis/Skimming/python/earlyDataInterestingEvents_cff.py
-
-# JEC
-# https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetEnCor2010
-#cvs co -r 1.3 -d HiggsAnalysis/HeavyChHiggsToTauNu/data UserCode/KKousour/data/Jec10V3.db

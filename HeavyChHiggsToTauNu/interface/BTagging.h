@@ -63,6 +63,9 @@ namespace HPlus {
       const int getBJetCount() const { return fBTagging->iNBtags; }
       const double getMaxDiscriminatorValue() const { return fBTagging->fMaxDiscriminatorValue; }
       const double getScaleFactor() const { return fBTagging->fScaleFactor; }
+      const double getScaleFactorAbsoluteUncertainty() const { return fBTagging->fScaleFactorAbsoluteUncertainty; }
+      const double getScaleFactorRelativeUncertainty() const { return fBTagging->fScaleFactorRelativeUncertainty; }
+      void fillScaleFactorHistograms();
 
     private:
       const BTagging *fBTagging;
@@ -129,6 +132,8 @@ namespace HPlus {
     int iNBtags;
     double fMaxDiscriminatorValue;
     double fScaleFactor;
+    double fScaleFactorAbsoluteUncertainty;
+    double fScaleFactorRelativeUncertainty;
   };
 }
 

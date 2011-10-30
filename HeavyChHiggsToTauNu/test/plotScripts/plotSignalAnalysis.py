@@ -30,9 +30,7 @@ analysis = "signalAnalysis"
 #analysis = "signalOptimisation/QCDAnalysisVariation_tauPt40_rtau0_btag2_METcut60_FakeMETCut0"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased2"
 #analysis = "signalAnalysisBtaggingTest2"
-counters = analysis+"Counters"
-countersWeighted = counters
-countersWeighted += "/weighted"
+counters = analysis+"Counters/weighted"
 
 # main function
 def main():
@@ -65,7 +63,7 @@ def main():
 #    xsect.setHplusCrossSectionsToTop(datasets)
 
     # Set the signal cross sections to a given BR(t->H), BR(h->taunu)
-    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.2, br_Htaunu=1)
+    xsect.setHplusCrossSectionsToBR(datasets, br_tH=0.05, br_Htaunu=1)
 
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSectionsToMSSM(datasets, tanbeta=20, mu=200)
@@ -203,7 +201,7 @@ def main():
 #    vertexComparison(datasets)
 
 
-    eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
+    eventCounter = counter.EventCounter(datasets)
 
     # append row from the tree to the main counter
     eventCounter.getMainCounter().appendRow("MET > 70", td.clone(selection="met_p4.Et() > 70"))
@@ -318,7 +316,7 @@ def vertexCount(h, prefix="", postfix=""):
 
         h.addMCUncertainty()
 
-        opts = {"xmax": 16}
+        opts = {}
         opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
         opts_log.update(opts)
         

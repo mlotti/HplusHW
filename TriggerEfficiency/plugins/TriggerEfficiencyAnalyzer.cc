@@ -15,6 +15,9 @@
 #include "DataFormats/METReco/interface/MET.h"
 
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMapRecord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerObjectMap.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
@@ -56,8 +59,11 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
         virtual void endRun(const edm::Run&,const edm::EventSetup&);
 
   edm::InputTag triggerResults;
+  edm::InputTag l1ReadoutSrc;
+  edm::InputTag l1ObjectSrc;
   edm::InputTag patTriggerEventSrc;
   std::string   triggerBitName;
+  std::string   l1BitName;
   std::string hltPath;
   edm::InputTag tauSrc;
   edm::InputTag metSrc;
@@ -65,11 +71,17 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
   edm::InputTag caloMetSrc;
   edm::InputTag caloMetNoHFSrc;
 
+  std::string l1MetCollection;
+  std::string l1CenJetCollection;
+  std::string l1TauJetCollection;
+  std::string l1ForJetCollection;
+
   TTree* tree;
 
   typedef math::XYZTLorentzVector LorentzVector;
 
   bool triggerBit;
+  bool l1Bit;
   int ntaus;
   float taupt,taueta,met,metType1;
   float caloMet, caloMetNoHF;
@@ -84,14 +96,21 @@ class TriggerEfficiencyAnalyzer : public edm::EDAnalyzer {
 
 TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iConfig) :
     triggerResults(iConfig.getParameter<edm::InputTag>("triggerResults")),
+    l1ReadoutSrc(iConfig.getParameter<edm::InputTag>("l1ReadoutSrc")),
+    l1ObjectSrc(iConfig.getParameter<edm::InputTag>("l1ObjectSrc")),
     patTriggerEventSrc(iConfig.getParameter<edm::InputTag>("patTriggerEvent")),
     triggerBitName(iConfig.getParameter<std::string>("triggerBit")),
+    l1BitName(iConfig.getParameter<std::string>("l1Bit")),
     hltPath(iConfig.getParameter<std::string>("hltPath")),
     tauSrc(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc")),
     metSrc(iConfig.getUntrackedParameter<edm::InputTag>("metRawSrc")),
     metType1Src(iConfig.getUntrackedParameter<edm::InputTag>("metType1Src")),
     caloMetSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetSrc")),
-    caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc"))
+    caloMetNoHFSrc(iConfig.getUntrackedParameter<edm::InputTag>("caloMetNoHFSrc")),
+    l1MetCollection("l1extraParticles:MET"),
+    l1CenJetCollection("l1extraParticles:Central"),
+    l1TauJetCollection("l1extraParticles:Tau"),
+    l1ForJetCollection("l1extraParticles:Forward")
 {
   if(iConfig.exists("bools")) {
     edm::ParameterSet pset = iConfig.getParameter<edm::ParameterSet>("bools");
@@ -112,6 +131,7 @@ TriggerEfficiencyAnalyzer::TriggerEfficiencyAnalyzer(const edm::ParameterSet& iC
 	tree = fs->make<TTree>("tree", triggerBitName.c_str(),1);
 
 	tree->Branch("TriggerBit", &triggerBit);
+        tree->Branch("L1Bit", &l1Bit);
 	tree->Branch("NTaus", &ntaus);
 	tree->Branch("TauPt", &taupt);
 	tree->Branch("TauEta", &taueta);
@@ -140,6 +160,7 @@ void TriggerEfficiencyAnalyzer::beginJob(){}
 void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 	triggerBit = false;
+        l1Bit = false;
         ntaus = 0;
 	taupt      = 0;
 	taueta     = 0;
@@ -174,24 +195,69 @@ void TriggerEfficiencyAnalyzer::analyze( const edm::Event& iEvent, const edm::Ev
         edm::Handle<pat::TriggerEvent> htrigger;
         iEvent.getByLabel(patTriggerEventSrc, htrigger);
 
+        // L1 bit
+        // Simplify to use PAT trigger when we have the algorithms available
+        edm::Handle<L1GlobalTriggerReadoutRecord> l1Readout;
+        iEvent.getByLabel(l1ReadoutSrc, l1Readout);
+
+        edm::Handle<L1GlobalTriggerObjectMapRecord> l1Objects;
+        iEvent.getByLabel(l1ObjectSrc, l1Objects);
+
+        const DecisionWord& gtDecisionWord = l1Readout->decisionWord();
+        const std::vector<L1GlobalTriggerObjectMap>& objMapVec = l1Objects->gtObjectMap();
+        for (std::vector<L1GlobalTriggerObjectMap>::const_iterator itMap = objMapVec.begin();
+             itMap != objMapVec.end(); ++itMap) {
+          if(itMap->algoName() == l1BitName) {
+            l1Bit = gtDecisionWord[itMap->algoBitNumber()];
+            break;
+          }
+        }
+
+        /*
+        const pat::TriggerAlgorithmRefVector& l1algos = htrigger->algorithmRefs();
+        for(size_t i=0; i<l1algos.size(); ++i) {
+          std::cout << l1algos[i]->name() << std::endl;
+        }
+        */
+
         // L1 MET
         pat::TriggerObjectRefVector l1mets = htrigger->objects(trigger::TriggerL1ETM);
         if(!l1mets.empty()) {
-          if(l1mets.size() != 1)
-            throw cms::Exception("Assert") << "L1 MET exists, but l1mets.size() = " << l1mets.size() << " != 1 at " << __FILE__ << ":" << __LINE__ << std::endl;
+          if(l1mets.size() != 1) {
+            bool found = false;
+            for(size_t i=0; i<l1mets.size(); ++i) {
+              if(l1mets[i]->coll(l1MetCollection)) {
+                l1Met = l1mets[i]->et();
+                found = true;
+                break;
+              }
+            }
+            if(!found) {
+              std::stringstream ss;
+              for(size_t i=0; i<l1mets.size(); ++i) {
+                ss << l1mets[i]->collection() << " " << l1mets[i]->et() << " ";
+              }
+              throw cms::Exception("Assert") << "No L1 MET from collection " << l1MetCollection 
+                                             << ", have " << l1mets.size() << " L1 MET objects: " << ss.str()
+                                             << " at " << __FILE__ << ":" << __LINE__ << std::endl;
+            }
+          }
           l1Met = l1mets[0]->et();
         }
 
         // L1 jets
         pat::TriggerObjectRefVector l1cenjets = htrigger->objects(trigger::TriggerL1CenJet);
         for(size_t i=0; i<l1cenjets.size(); ++i)
-          l1CenJets.push_back(l1cenjets[i]->p4());
+          if(l1cenjets[i]->coll(l1CenJetCollection))
+             l1CenJets.push_back(l1cenjets[i]->p4());
         pat::TriggerObjectRefVector l1taujets = htrigger->objects(trigger::TriggerL1TauJet);
         for(size_t i=0; i<l1taujets.size(); ++i)
-          l1TauJets.push_back(l1taujets[i]->p4());
+          if(l1taujets[i]->coll(l1TauJetCollection))
+             l1TauJets.push_back(l1taujets[i]->p4());
         pat::TriggerObjectRefVector l1forjets = htrigger->objects(trigger::TriggerL1ForJet);
         for(size_t i=0; i<l1forjets.size(); ++i)
-          l1ForJets.push_back(l1forjets[i]->p4());
+          if(l1forjets[i]->coll(l1ForJetCollection))
+            l1ForJets.push_back(l1forjets[i]->p4());
 
         // HLT MET
         pat::TriggerObjectRefVector hltmets = htrigger->objects(trigger::TriggerMET);

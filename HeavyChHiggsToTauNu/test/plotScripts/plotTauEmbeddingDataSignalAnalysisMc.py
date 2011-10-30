@@ -26,7 +26,7 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 # Configuration
 analysis = "signalAnalysis"
 #analysis = "signalAnalysisTauSelectionHPSTightTauBased"
-counters = analysis+"Counters"
+counters = analysis+"Counters/weighted"
 
 embeddingSignalAnalysis = "."
 #signalAnalysis = "../../multicrab_110307_141642"

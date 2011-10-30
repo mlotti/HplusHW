@@ -4,6 +4,8 @@
 
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TauIDBase.h"
 
+#include "TH1F.h"
+
 namespace HPlus {
   class TauIDPFTauBase : public TauIDBase {
   public:
@@ -26,6 +28,14 @@ namespace HPlus {
   protected:
     // Tau ID selections concerning isolation (track, ECAL) are implemented in the specific tau ID classes
 
+  private:
+    TH1F* hRtauOneProngZeroPiZero;
+    TH1F* hRtauOneProngOnePiZero;
+    TH1F* hRtauOneProngTwoPiZero;
+    TH1F* hRtauOneProngOther;
+    TH1F* hRtauThreeProngZeroPiZero;
+    TH1F* hRtauThreeProngOnePiZero;
+    TH1F* hRtauThreeProngOther;
   };
 }
 
