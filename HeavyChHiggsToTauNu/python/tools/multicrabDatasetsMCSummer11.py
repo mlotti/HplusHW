@@ -543,7 +543,6 @@ datasets = {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
                 "number_of_jobs": 1500, # Adjusted for PATtuple file size.
-                "use_server": 1,
                 "se_white_list": ["T2_FI_HIP"],
             },
             "pattuple_v18": {
@@ -560,7 +559,6 @@ datasets = {
             "AOD": {
                 "datasetpath": "/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM",
                 "number_of_jobs": 2000, # Adjusted for PATtuple file size
-                "use_server": 1,
             },
             "pattuple_v18": {
                 "dbs_url": common.pattuple_dbs,

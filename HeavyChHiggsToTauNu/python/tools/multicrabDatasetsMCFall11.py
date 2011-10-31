@@ -268,7 +268,6 @@ datasets = {
             "AOD": {
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
                 "number_of_jobs": None, # Adjusted for PATtuple file size. FIXME: check the number of jobs
-                #"use_server": 1,
                 #"se_white_list": ["T2_FI_HIP"],
             },
         },
