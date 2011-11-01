@@ -185,11 +185,8 @@ namespace HPlus {
   }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+                                const edm::PtrVector<pat::Jet>& jets,
                                 double alphaT, double deltaPhi) {
-
-    //                                const edm::PtrVector<pat::Jet>& jets,
-    //				double alphaT) {
     if(!fDoFill)
       return;
 
