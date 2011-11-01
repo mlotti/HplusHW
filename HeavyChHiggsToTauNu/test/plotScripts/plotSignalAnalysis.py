@@ -239,8 +239,8 @@ def main():
     pasJuly = "met_p4.Et() > 70 && Max$(jets_btag) > 1.7"
     topMass(plots.DataMCPlot(datasets, td.clone(varexp="topreco_p4.M()>>dist(20,0,800)", selection=pasJuly)), "topMass", rebin=1)
 
-    met2(plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(40,0,400)")), "metRaw", rebin=1)
-    met2(plots.DataMCPlot(datasets, td.clone(varexp="metType1_p4.Et()>>dist(40,0,400)")), "metType1", rebin=1)
+    met2(plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(20,0,400)")), "metRaw", rebin=1)
+    met2(plots.DataMCPlot(datasets, td.clone(varexp="metType1_p4.Et()>>dist(20,0,400)")), "metType1", rebin=1)
 
     mt = "sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"
     transverseMass2(plots.DataMCPlot(datasets, td.clone(varexp=mt+">>dist(40,0,400)", selection=pasJuly)), "transverseMass_metRaw", rebin=1)
@@ -360,9 +360,13 @@ def common(h, xlabel, ylabel, addLuminosityText=True):
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
 
-def vertexCount(h, prefix="", postfix=""):
-        xlabel = "Number of vertices"
-        ylabel = "A.u."
+def vertexCount(h, prefix="", postfix="", ratio=True):
+        xlabel = "Number of good vertices"
+        ylabel = "Number of events"
+
+        if h.normalizeToOne:
+            ylabel = "A.u."
+        
 
         h.stackMCHistograms()
 
@@ -378,8 +382,11 @@ def vertexCount(h, prefix="", postfix=""):
         opts = {}
         opts_log = {"ymin": 1e-10, "ymaxfactor": 10}
         opts_log.update(opts)
+
+        opts2 = {"ymin": 0.5, "ymax": 3}
+        opts2_log = {"ymin": 5e-2, "ymax": 5e2}
         
-        h.createFrame(prefix+"vertices"+postfix, opts=opts)
+        h.createFrame(prefix+"vertices"+postfix, opts=opts, createRatio=ratio, opts2=opts2)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
         h.setLegend(histograms.createLegend())
@@ -388,18 +395,23 @@ def vertexCount(h, prefix="", postfix=""):
         histograms.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         h.histoMgr.addLuminosityText()
+        if h.normalizeToOne:
+            histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
         h.save()
 
-        h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log)
+        h.createFrame(prefix+"vertices"+postfix+"_log", opts=opts_log, createRatio=ratio, opts2=opts2_log)
         h.frame.GetXaxis().SetTitle(xlabel)
         h.frame.GetYaxis().SetTitle(ylabel)
-        ROOT.gPad.SetLogy(True)
+        h.getPad1().SetLogy(True)
+        h.getPad2().SetLogy(True)
         h.setLegend(histograms.createLegend())
         h.draw()
         histograms.addCmsPreliminaryText()
         histograms.addEnergyText()
         #    histograms.addLuminosityText(x=None, y=None, lumi=191.)
         h.histoMgr.addLuminosityText()
+        if h.normalizeToOne:
+            histograms.addText(0.35, 0.9, "Normalized to unit area", 17)
         h.save()
 
 def rtauGen(h, name, rebin=5, ratio=False):
@@ -818,11 +830,11 @@ def transverseMass(h, rebin=20):
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
     
-def transverseMass2(h,name, rebin=10):
+def transverseMass2(h,name, rebin=10, ratio=False):
 #    name = flipName(h.getRootHistoPath())
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "m_{T}(#tau jet, MET) (GeV/c^{2})" 
-    ylabel = "Events / %.2f GeV/c^{2}" % h.binWidth()
+    ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
     
     scaleMCfromWmunu(h)    
     #h.stackMCSignalHistograms()
@@ -832,9 +844,8 @@ def transverseMass2(h,name, rebin=10):
 #    name = name+"_log"
     opts = {"ymin": 0.001, "ymaxfactor": 2.0,"xmax": 350 }
 #    opts = {"xmax": 200 }
-    #h.createFrameFraction(name, opts=opts)
-#    h.createFrame(name, opts=opts)
-    h.createFrame(name, opts=opts)
+    opts2 = {"ymin": 0, "ymax": 3}
+    h.createFrame(name, opts=opts, createRatio=ratio, opts2=opts2)
     h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.68, 0.9, 0.93))
     common(h, xlabel, ylabel)
