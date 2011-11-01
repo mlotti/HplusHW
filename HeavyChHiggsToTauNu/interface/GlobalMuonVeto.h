@@ -42,9 +42,15 @@ namespace HPlus {
       const float getSelectedMuonPt() const { return fGlobalMuonVeto->fSelectedMuonPt; }
       const float getSelectedMuonEta() const { return fGlobalMuonVeto->fSelectedMuonEta; }
 
+      /// Muon collection after all selections - size should be zero if veto condition is passed
       const edm::PtrVector<pat::Muon>& getSelectedMuons() { return fGlobalMuonVeto->fSelectedMuons; }
+      /// Muon collection after all selections except pt and eta cuts
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforePtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforePtAndEtaCuts; }
+      /// Muon collection after all selections except isolation and pt and eta cuts
+      const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolationAndPtAndEtaCuts() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolationAndPtAndEtaCuts; }
+      /// Muon collection after all selections except isolation
       const edm::PtrVector<pat::Muon>& getSelectedMuonsBeforeIsolation() { return fGlobalMuonVeto->fSelectedMuonsBeforeIsolation; }
-    
+
     private:
       const GlobalMuonVeto *fGlobalMuonVeto;
       const bool fPassedEvent;
@@ -151,7 +157,13 @@ namespace HPlus {
     bool bMuonMatchingMCmuon;
     bool bMuonMatchingMCmuonFromW;
 
+    /// Muon collection after all selections
     edm::PtrVector<pat::Muon> fSelectedMuons;
+    /// Muon collection after all selections except pt and eta cuts
+    edm::PtrVector<pat::Muon> fSelectedMuonsBeforePtAndEtaCuts;
+    /// Muon collection after all selections except isolation and pt and eta cuts
+    edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolationAndPtAndEtaCuts;
+    /// Muon collection after all selections except isolation
     edm::PtrVector<pat::Muon> fSelectedMuonsBeforeIsolation;
   };
 }

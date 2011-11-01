@@ -218,13 +218,13 @@ namespace HPlus {
       increment(fnumberOfDaughtersCutSubCount);
 
       //if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
-      //increment(fchargedEmEnergyFractionCutSubCount);
+      increment(fchargedEmEnergyFractionCutSubCount);
 
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
       //if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
-      //increment(fneutralEmEnergyFractionCutSubCount);
+      increment(fneutralEmEnergyFractionCutSubCount);
     
       if(fabs(iJet->eta()) < 2.4) {
 	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
