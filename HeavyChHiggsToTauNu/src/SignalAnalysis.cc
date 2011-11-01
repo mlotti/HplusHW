@@ -204,7 +204,8 @@ namespace HPlus {
     if (!triggerData.passedEvent()) return false;
     increment(fTriggerCounter);
     hSelectionFlow->Fill(kSignalOrderTrigger, fEventWeight.getWeight());
-    fTree.setHltTaus(triggerData.getTriggerTaus());
+    if(triggerData.hasTriggerPath()) // protection if TriggerSelection is disabled
+      fTree.setHltTaus(triggerData.getTriggerTaus());
 
     hVerticesTriggeredBeforeWeight->Fill(weightSize.second);
     hVerticesTriggeredAfterWeight->Fill(weightSize.second, fEventWeight.getWeight());
