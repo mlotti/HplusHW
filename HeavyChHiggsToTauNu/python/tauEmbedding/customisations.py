@@ -22,11 +22,11 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
     param.trigger.selectionType = "disabled"
-    param.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
+    param.triggerEfficiencyScaleFactor.mode = "disabled"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
-    param.changeMetCollection(moduleLabel="pfMet") # no PAT object at the moment
+    param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
@@ -37,7 +37,6 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     def replaceTauSrc(mod):
         mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TauTriggerMatched", postfix))
     param.forEachTauSelection(replaceTauSrc)
-    replaceTauSrc(param.trigger.triggerTauSelection)
 
     # Remove TCTau
     i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)
@@ -55,7 +54,7 @@ def setCaloMetSum(process, sequence, options, dataVersion):
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
                        src = cms.VInputTag(cms.InputTag(options.tauEmbeddingCaloMet, "", dataVersion.getRecoProcess()),
-                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDINGRECO")
+                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDING")
                                            )
                        )
     setattr(process, name, m)

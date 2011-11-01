@@ -582,8 +582,3 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeMetCollection(**kwargs):
-    _changeCollection([
-            MET.rawSrc,
-            forwardJetVeto.src_met
-            ], **kwargs)
