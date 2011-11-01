@@ -286,18 +286,19 @@ namespace HPlus {
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
     hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
-
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
-    passEvent = true;
-    if(cleanPassed < fMin) passEvent = false;
-    increment(fCleanCutCount);
+    
+    passEvent = fSelectedJets.size() >= fMin;
+    
+    if (cleanPassed >= fMin) 
+      increment(fCleanCutCount);
 
-    if(ptCutPassed < fMin) passEvent = false;
-    if(ptCutPassed > fMin)    increment(fPtCutCount);
+    if (ptCutPassed >= fMin)
+      increment(fPtCutCount);
 
-    if(etaCutPassed < fMin) passEvent = false;
-    if(etaCutPassed > fMin)    increment(fEtaCutCount);
+    if (etaCutPassed >= fMin)
+      increment(fEtaCutCount);
 
     // Set veto flags for event with high EM fraction of a selected jet
     if(maxEMfraction < 0.8 ) 
@@ -309,8 +310,8 @@ namespace HPlus {
     else
       bEMFraction07Veto = true;
 
-    if(EMfractionCutPassed < fMin) passEvent = false;
-    if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);
+    if(EMfractionCutPassed >= fMin)
+      increment(fEMfractionCutCount);
 
     // Plot pt, eta, and phi of jets if jet selection has been passed
     if (passEvent && fSelectedJets.size() >= 3) {
