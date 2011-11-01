@@ -213,17 +213,19 @@ namespace HPlus {
       ++etaCutPassed;
 
       
-    // jetID cuts 
+      // jetID cuts 
+      // This is loose jet ID. Even though the EM fraction can be
+      // tightened later, we have here baseline cuts.
       if(!(iJet->numberOfDaughters() > 1)) continue;
       increment(fnumberOfDaughtersCutSubCount);
 
-      //if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
+      if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
       increment(fchargedEmEnergyFractionCutSubCount);
 
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
-      //if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
+      if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
       increment(fneutralEmEnergyFractionCutSubCount);
     
       if(fabs(iJet->eta()) < 2.4) {
@@ -231,7 +233,8 @@ namespace HPlus {
 	  increment(fchargedHadronEnergyFractionCutSubCount);
 	  if(!(iJet->chargedMultiplicity() > 0)) continue;
 	  increment(fchargedMultiplicityCutSubCount);
-	}
+      }
+      // jetID cuts end
 
       // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
       double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
