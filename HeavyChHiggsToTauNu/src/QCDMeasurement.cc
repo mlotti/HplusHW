@@ -334,7 +334,9 @@ namespace HPlus {
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(), evtTopologyData.alphaT().fAlphaT,  fakeMETData.closestDeltaPhi() );
+    fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets());
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

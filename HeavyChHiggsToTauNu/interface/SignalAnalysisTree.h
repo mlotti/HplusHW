@@ -66,10 +66,11 @@ namespace HPlus {
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
     void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
-    void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-              const edm::PtrVector<pat::Jet>& jets,
-              double alphaT, double deltaPhi = 0);
+    void setAlphaT(double alphaT) { fAlphaT = alphaT; }
+    void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
 
+    void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
+              const edm::PtrVector<pat::Jet>& jets);
 
   private:
     void reset();

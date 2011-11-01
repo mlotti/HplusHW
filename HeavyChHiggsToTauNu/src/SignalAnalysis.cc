@@ -342,9 +342,9 @@ namespace HPlus {
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
-    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(),
-    	       metData.getSelectedMET(),   evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi()  );
-
+    fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+    fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
 
     // b tagging cut
     if(!btagData.passedEvent()) return false;
