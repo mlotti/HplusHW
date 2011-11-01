@@ -22,11 +22,11 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
         tauTrigger = "HLT_IsoPFTau35_Trk20_EPS"
 
     param.trigger.selectionType = "disabled"
-    param.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
+    param.triggerEfficiencyScaleFactor.mode = "disabled"
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
-    param.changeMetCollection(moduleLabel="pfMet") # no PAT object at the moment
+    param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
@@ -37,7 +37,6 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     def replaceTauSrc(mod):
         mod.src.setModuleLabel(mod.src.getModuleLabel().replace("TauTriggerMatched", postfix))
     param.forEachTauSelection(replaceTauSrc)
-    replaceTauSrc(param.trigger.triggerTauSelection)
 
     # Remove TCTau
     i = param.tauSelections.index(param.tauSelectionCaloTauCutBased)
@@ -55,7 +54,7 @@ def setCaloMetSum(process, sequence, options, dataVersion):
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
                        src = cms.VInputTag(cms.InputTag(options.tauEmbeddingCaloMet, "", dataVersion.getRecoProcess()),
-                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDINGRECO")
+                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDING")
                                            )
                        )
     setattr(process, name, m)
@@ -245,19 +244,24 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
         src = "selectedPatJets",
-        preselection = muonSelection.goodJets.cut,
-            checkOverlaps = cms.PSet(
-                muons = cms.PSet(
-                    src                 = cms.InputTag(tauEmbeddingMuons),
-                    algorithm           = cms.string("byDeltaR"),
-                    preselection        = cms.string(""),
-                    deltaR              = cms.double(0.1),
-                    checkRecoComponents = cms.bool(False),
-                    pairCut             = cms.string(""),
-                    requireNoOverlaps   = cms.bool(True),
-                )
+        preselection = cms.string(
+            "pt() > 30 && abs(eta()) < 2.4"
+            "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
+            "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
+            "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
+        ),
+        checkOverlaps = cms.PSet(
+            muons = cms.PSet(
+                src                 = cms.InputTag(tauEmbeddingMuons),
+                algorithm           = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.1),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
             )
         )
+    )
     m2 = muonSelection.goodJetFilter.clone(src=selector, minNumber=3)
     m3 = cms.EDProducer("EventCountProducer")
 

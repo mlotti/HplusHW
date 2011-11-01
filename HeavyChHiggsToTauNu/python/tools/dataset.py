@@ -137,9 +137,16 @@ def getDatasetsFromRootFiles(rootFileList, **kwargs):
                   event counter histograms (default: 'signalAnalysisCounters').
     """
     counters = kwargs.get("counters", "signalAnalysisCounters")
+    dataQcd = kwargs.get("dataQcdMode", False)
+    dataQcdNorm = kwargs.get("dataQcdNormalization", 1.0)
     datasets = DatasetManager()
     for name, f in rootFileList:
-        datasets.append(Dataset(name, f, counters))
+        dset = None
+        if dataQcd:
+            dset = DatasetQCDData(name, f, counters, dataQcdNorm)
+        else:
+            dset = Dataset(name, f, counters)
+        datasets.append(dset)
     return datasets
 
 def addOptions(parser):
@@ -1000,7 +1007,11 @@ class DatasetQCDData(Dataset):
     def deepCopy(self):
         d = DatasetQCDData(self.name, self.file.GetName(), self.counterDir, self.normfactor)
         d.info.update(self.info)
+        d._isData = self._isData
         return d
+
+    def changeTypeToMC(self):
+        self._isData = False
 
     def getDatasetRootHisto(self, name):
         drh = Dataset.getDatasetRootHisto(self, name)
@@ -1014,6 +1025,13 @@ class DatasetQCDData(Dataset):
         drh = Dataset.getDatasetRootHisto(self, treeDrawToNumEntries(treeDraw))
         nevents = drh.histo.Integral(0, drh.histo.GetNbinsX()+1)
         self.setNormFactor(targetNumEvents/nevents)
+
+    # Overloads needed for this ugly hack
+    def getCrossSection(self):
+        return 0
+
+    def setCrossSection(self):
+        raise Exception("Assert that this is not called for DatasetQCDData")
         
 
 class DatasetMerged:

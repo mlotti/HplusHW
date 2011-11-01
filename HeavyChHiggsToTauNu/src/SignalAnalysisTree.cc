@@ -100,6 +100,7 @@ namespace HPlus {
 
     fTree->Branch("alphaT", &fAlphaT);
 
+    fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
 
     fTree->Branch("genMet_p4", &fGenMet);
@@ -183,8 +184,7 @@ namespace HPlus {
   }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets,
-				double alphaT) {
+                                const edm::PtrVector<pat::Jet>& jets) {
     if(!fDoFill)
       return;
 
@@ -247,7 +247,6 @@ namespace HPlus {
 
       fJetsArea.push_back(jets[i]->jetArea());
     }
-    fAlphaT = alphaT;
 
     if(fTauEmbeddingInput) {
       edm::Handle<edm::View<pat::Muon> > hmuon;
@@ -275,13 +274,9 @@ namespace HPlus {
   }
 
 
-  void SignalAnalysisTree::setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
+  void SignalAnalysisTree::setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
-
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
 
     if(nonIsoMuons.size() >= 1){
       // throw cms::Exception("LogicError") << "Expected nonIsoMuon collection size to be >=1, but  was " << nonIsoMuons.size() << " instead at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -602,6 +597,7 @@ namespace HPlus {
     fTop.SetXYZT(nan, nan, nan, nan);
 
     fAlphaT = nan;
+    fDeltaPhi = nan;
 
     fPassedBTagging = false;
 

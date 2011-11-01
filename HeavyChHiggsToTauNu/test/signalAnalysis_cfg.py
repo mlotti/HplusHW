@@ -88,7 +88,7 @@ if options.tauEmbeddingInput != 0:
         raise Exception("In tau embedding input mode, set also doPat=1")
 
     process.source.fileNames = [
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_embedding_v11_8_pt40/ac085343fdb44ba8377c1f709923eacd/embedded_RECO_2_1_Jik.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/SingleMu_165088-166150_Prompt/SingleMu/PromptReco_v4_AOD_165088_tauembedding_embedding_v13/9a509078f648b588515c15f2e17e813c/embedded_19_1_YAU.root"
         ]
     process.maxEvents.input = 10
 
@@ -151,7 +151,7 @@ param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU di
 #param.trigger.selectionType = "disabled"
 
 if options.tauEmbeddingInput != 0:
-    tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
+    #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
     tauEmbeddingCustomisations.customiseParamForTauEmbedding(param, options, dataVersion)
     if tauEmbeddingFinalizeMuonSelection:
@@ -166,6 +166,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+#    GlobalMuonVeto = param.NonIsolatedMuonVeto,
     # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,
@@ -181,10 +182,11 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     GenParticleAnalysis = param.GenParticleAnalysis,
     Tree = param.tree,
 )
-import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
-(sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
-process.commonSequence *= sequence
-process.signalAnalysis.MET.type1Src = type1Met
+if options.tauEmbeddingInput == 0:
+    import HiggsAnalysis.HeavyChHiggsToTauNu.HChMetCorrection as MetCorrection
+    (sequence, type1Met) = MetCorrection.addCorrectedMet(process, dataVersion, process.signalAnalysis.tauSelection, process.signalAnalysis.jetSelection)
+    process.commonSequence *= sequence
+    process.signalAnalysis.MET.type1Src = type1Met
 
 # Prescale fetching done automatically for data
 if dataVersion.isData() and options.tauEmbeddingInput == 0:

@@ -51,8 +51,12 @@ namespace HPlus {
     ~JetSelection();
 
     // PtrVector has implicit conversion from PtrVector of anything deriving from reco::Candidate
-    //Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
+    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
     Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
+
+    //    Data  analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau);
+    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau);
+    //    Data analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus);
 
   private:
     // Input parameters
@@ -92,6 +96,7 @@ namespace HPlus {
     TH1 *hPhi;
     TH1 *hNumberOfSelectedJets;
     TH1 *hjetEMFraction;
+    TH1 *hjetChargedEMFraction;
     TH1 *hjetMaxEMFraction;
     TH1 *hMinDeltaRToOppositeDirectionOfTau;
     TH1 *hFirstJetPt;

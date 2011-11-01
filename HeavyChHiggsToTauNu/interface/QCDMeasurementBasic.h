@@ -67,7 +67,18 @@ namespace HPlus {
       TH1F* hMtLegAfterMETAndTauIDWithRtau;
       std::vector<TH1F*> hMtShapesAfterMET;
 
-      // FIXME add histograms for type II 
+      // Fake tau histograms (type II)
+      TH1F* hFakeTauLeg1AfterDeltaPhiTauMET;
+      TH1F* hFakeTauLeg1AfterMET;
+      TH1F* hFakeTauLeg1AfterBTagging;
+      TH1F* hFakeTauLeg2AfterTauIDNoRtau;
+      TH1F* hFakeTauLeg2AfterTauIDWithRtau;
+      // Transverse mass histograms
+      TH1F* hFakeTauMtLegAfterDeltaPhiTauMET;
+      TH1F* hFakeTauMtLegAfterMET;
+      TH1F* hFakeTauMtLegAfterMETAndTauIDNoRtau;
+      TH1F* hFakeTauMtLegAfterMETAndTauIDWithRtau;
+      std::vector<TH1F*> hFakeTauMtShapesAfterMET;
       
       // FIXME add TTree's for trigger and btag scalefactor uncertainties
     };
@@ -160,6 +171,11 @@ namespace HPlus {
     TH1F* hAfterIsolatedElectronVeto;
     TH1F* hAfterIsolatedMuonVeto;
     TH1F* hAfterJetSelection;
+    // Fake tau counts (type II)
+    TH1F* hFakeTauAfterTauCandidateSelection;
+    TH1F* hFakeTauAfterIsolatedElectronVeto;
+    TH1F* hFakeTauAfterIsolatedMuonVeto;
+    TH1F* hFakeTauAfterJetSelection;
 
     // Other control histograms
     //TH1 *hTauCandidateSelectionIsolatedPtMax;

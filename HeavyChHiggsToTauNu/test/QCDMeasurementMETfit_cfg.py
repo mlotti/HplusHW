@@ -104,10 +104,8 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 
 
 # Set the data scenario for vertex/pileup weighting
-puweight = "Run2011A"
-if len(options.puWeightEra) > 0:
-    puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+#param.setVertexWeightFor2011() # Reweight by reconstructed vertices
+param.setPileupWeightFor2011(dataVersion) # Reweight by true PU distribution 
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
 #def setTriggerPileupFor2011(**kwargs):
@@ -121,7 +119,7 @@ print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
 
 ##############################################################################
-process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementProducer",
+process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementMETfitProducer",
     trigger = param.trigger,
     triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,
@@ -265,7 +263,6 @@ if doJESVariation:
     JESm = "%02d" % int(JESUnclusteredMETVariation*100)
     module = process.QCDMeasurement.clone()
     module.Tree.fill = False
-    module.Tree.fillJetEnergyFractions = False # JES variation will make the fractions invalid
 
     addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
     addJESVariationAnalysis(process, dataVersion, "QCDMeasurement", "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, JESUnclusteredMETVariation)
@@ -289,7 +286,7 @@ if doAllTauIds:
     process.out = cms.OutputModule("PoolOutputModule",
                                    fileName = cms.untracked.string('output.root'),
                                    outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChQCDMeasurement_*_*_*",
+        "keep *_*_*_HChQCDMeasurementMETfit_*_*_*",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
         #	"drop *",
@@ -301,7 +298,7 @@ else:
     process.out = cms.OutputModule("PoolOutputModule",
                                    fileName = cms.untracked.string('output.root'),
                                    outputCommands = cms.untracked.vstring(
-        "keep *_*_*_HChQCDMeasurement",
+        "keep *_*_*_HChQCDMeasurementMETfit",
         "drop *_*_counterNames_*",
         "drop *_*_counterInstances_*"
         #	"drop *",

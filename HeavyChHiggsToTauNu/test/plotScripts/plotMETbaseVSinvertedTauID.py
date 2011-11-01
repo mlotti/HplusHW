@@ -9,7 +9,6 @@
 #
 ###########################################################################
 
-
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -139,6 +138,7 @@ def distComparison(datasets):
     st2.append(styles.StyleLine(lineColor=ROOT.kRed))
     plot.histoMgr.forHisto("Base", st1)
     plot.histoMgr.forHisto("Inv", st2)
+
 
     # Set the legend labels
     plot.histoMgr.setHistoLegendLabelMany({"Base": "Baseline Tau ID",

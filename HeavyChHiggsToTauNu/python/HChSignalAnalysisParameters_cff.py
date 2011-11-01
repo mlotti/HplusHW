@@ -17,7 +17,6 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v6",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
 ]
-
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
@@ -137,6 +136,7 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
+#    EMfractionCut = cms.untracked.double(0.6)
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
@@ -282,10 +282,16 @@ triggerEfficiencyScaleFactor = cms.untracked.PSet(
     # The parameters of the trigger efficiency parametrizations,
     # looked dynamically from TriggerEfficiency_cff.py
     parameters = cms.untracked.VPSet(
-        triggerBin(40, 0.4035088, 0.06502412, 0.406639,  0.02247143),
-        triggerBin(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523),
-        triggerBin(60, 0.8,       0.1108131,  0.8235294, 0.04892095),
-        triggerBin(80, 1,         0.2496484,  0.7916667, 0.08808045),
+        # For EPS piece only
+        triggerBin(40, 0.515873,  0.04844569, 0.6168224, 0.03608822),
+        triggerBin(50, 0.8571429, 0.1583514,  0.8809524, 0.07255525),
+        triggerBin(60, 0.8571429, 0.2572427,  0.8125,    0.1494758),
+        triggerBin(80, 0.8571429, 0.2572427,  1,         0.1682306),
+        # PAS HIG-11-008
+        #triggerBin(40, 0.4035088, 0.06502412, 0.406639,  0.02247143),
+        #triggerBin(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523),
+        #triggerBin(60, 0.8,       0.1108131,  0.8235294, 0.04892095),
+        #triggerBin(80, 1,         0.2496484,  0.7916667, 0.08808045),
     ),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
@@ -576,8 +582,3 @@ def _changeCollection(inputTags, moduleLabel=None, instanceLabel=None, processNa
 def changeJetCollection(**kwargs):
     _changeCollection([jetSelection.src, forwardJetVeto.src], **kwargs)
 
-def changeMetCollection(**kwargs):
-    _changeCollection([
-            MET.rawSrc,
-            forwardJetVeto.src_met
-            ], **kwargs)

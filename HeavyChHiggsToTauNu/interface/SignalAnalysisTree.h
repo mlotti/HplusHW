@@ -64,12 +64,13 @@ namespace HPlus {
     void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
-    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+    void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+
+    void setAlphaT(double alphaT) { fAlphaT = alphaT; }
+    void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
 
     void fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-              const edm::PtrVector<pat::Jet>& jets,
-	      double alphaT);
-
+              const edm::PtrVector<pat::Jet>& jets);
 
   private:
     void reset();
@@ -201,6 +202,8 @@ namespace HPlus {
     XYZTLorentzVector fTop;
 
     double fAlphaT;
+
+    double fDeltaPhi;
 
     bool fPassedBTagging;
 

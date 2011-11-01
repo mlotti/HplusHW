@@ -39,7 +39,7 @@ namespace HPlus {
       throw cms::Exception("Configuration") << "Invalid value for select '" << select << "', valid values are raw, type1, type2" << std::endl;
     
     hMet = makeTH<TH1F>(myDir, "met", "met", 400, 0., 400.);
-    hMetSignif = makeTH<TH1F>(myDir, "metSignif", "metSignif", 50, 0., 500.);
+    hMetSignif = makeTH<TH1F>(myDir, "metSignif", "metSignif", 100, 0., 50.);
     hMetSumEt  = makeTH<TH1F>(myDir, "metSumEt", "metSumEt", 50, 0., 1500.);
     hMetDivSumEt = makeTH<TH1F>(myDir, "hMetDivSumEt", "hMetDivSumEt", 50, 0., 1.);
     hMetDivSqrSumEt = makeTH<TH1F>(myDir, "hMetDivSqrSumEt", "hMetDivSqrSumEt", 50, 0., 1.);
