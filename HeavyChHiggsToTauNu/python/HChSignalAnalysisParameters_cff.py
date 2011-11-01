@@ -17,7 +17,6 @@ singleTauMetTriggerPaths = [
     "HLT_IsoPFTau35_Trk20_MET60_v6",
     "HLT_MediumIsoPFTau35_Trk20_MET60_v1",
 ]
-
 # WARNING: the trigger path is modified in signalAnalysis_cfg.py depending on
 # the data version
 trigger = cms.untracked.PSet(
@@ -137,6 +136,8 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
+    METCut = cms.untracked.double(60.0),
+#    EMfractionCut = cms.untracked.double(0.6)
     EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 

@@ -13,7 +13,7 @@
 
 const double luminosity = 1145; // in pb^-1
 const double qcdEvents = 7.5; // from QCD measurement, must correspond to the luminosity above!
-const bool qcdFromData = true;
+const bool qcdFromData = false;
 
 double signif(double nSignal,double nBackgr){
   double significance = 0;
@@ -467,7 +467,7 @@ void optimisation() {
   TH1::AddDirectory(kFALSE);
 
   // Cuts on preselection, which can be tightened
-  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 80");
+  TString tauPt("tau_p4.Pt()"); TCut tauPtCut(tauPt+" > 40");
   TString tauLeadingCandPt("tau_leadPFChargedHadrCand_p4.Pt()"); TCut tauLeadingCandPtCut(tauLeadingCandPt+" > 20");
   TCut jetPtNumCut = "Sum$(jets_p4.Pt() > 30) >= 3";
 
@@ -476,12 +476,17 @@ void optimisation() {
   //  TCut btagCut = "Sum$(jets_btag > 1.7) >= 1";
 
   TString btagMax("Max$(jets_btag)"); TCut btagCut(btagMax+" > 1.7");
-  TString btagJetNum17("Sum$(jets_btag > 1.7)"); 
+  TString btagJetNum17("Sum$(jets_btag > 3.3)"); 
   TString btag2ndMax("MaxIf$(jets_btag, jets_btag<Max$(jets_btag))");
 
+  TString emFraction("Max$(jets_elf)"); TCut emFractionCut(emFraction+" < 0.7");
+
+  TString topMass("topreco_p4.M()"); TCut topMassCut(topMass+" < 230");
+
+  TString fakeMet("deltaPhi"); TCut fakeMetCut(fakeMet+" > 10");
 
   // Optional cuts
-  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.65");
+  TString rtau("tau_leadPFChargedHadrCand_p4.P()/tau_p4.P()"); TCut rtauCut(rtau+" > 0.8");
   TString mt("sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"); TCut mtCut(mt+" > 80");
 
   TString deltaPhi("acos((tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/tau_p4.Pt()/met_p4.Et())*57.2958"); TCut deltaPhiCut(deltaPhi+" < 160");
@@ -490,12 +495,12 @@ void optimisation() {
   TCut cut;
 
   rtau += ">>dist(110,0.,1.1)";
-  cut = tauPtCut && metCut;
-  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut && mtCut), cut, false);
+  cut = tauPtCut && metCut && mtCut;
+  Result rtauRes = createResult(rtau, mcWeight(cut && btagCut), cut, false);
   rtauRes.setXLabel("rtau");
 
   met += ">>dist(100,0.,200.)";
-  cut = tauPtCut && rtauCut;
+  cut = tauPtCut && rtauCut && mtCut;
   Result metRes = createResult(met, mcWeight(cut && btagCut), cut, false);
   metRes.setXLabel("met");
 
@@ -504,10 +509,20 @@ void optimisation() {
   Result tauPtRes = createResult(tauPt, mcWeight(cut && btagCut), cut, false);
   tauPtRes.setXLabel("tauPt");
 
-  mt += ">>dist(50,0.,200.)";
+  fakeMet += ">>dist(100,0.,180.)";
   cut = tauPtCut && metCut && rtauCut;
+  Result fakeMetRes = createResult(fakeMet, mcWeight(cut && btagCut), cut, false);
+  fakeMetRes.setXLabel("fakeMet");
+
+  mt += ">>dist(50,0.,200.)";
+  cut = tauPtCut && metCut && topMassCut  ;
   Result mtRes = createResult(mt, mcWeight(cut && btagCut), cut, false);
   mtRes.setXLabel("mt");
+
+  emFraction += ">>dist(100,0.,1.)";
+  cut = tauPtCut && metCut && rtauCut ;
+  Result emFractionRes = createResult(emFraction, mcWeight(cut && btagCut), cut, true);
+  emFractionRes.setXLabel("emFraction");
 
   btagMax += ">>dist(80,0.,8.)";
   cut = tauPtCut && metCut && rtauCut;
@@ -522,13 +537,17 @@ void optimisation() {
   btagExactlyOneRes.setXLabel("btag exactly one");
   btagJetNum17 += ">>dist(6,0.,6.)";
   Result btagJetNum17Res = createResult(btagJetNum17, mcWeight(cut), cut, false);
-  btagJetNum17Res.setXLabel("N(bjets>1.7)");
+  btagJetNum17Res.setXLabel("N(bjets> 3.3)");
 
   deltaPhi += ">>dist(90.,0.,180.)";
-  cut = tauPtCut && metCut && rtauCut;
-  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, false);
+  cut = tauPtCut && metCut && rtauCut && mtCut;
+  Result deltaPhiRes = createResult(deltaPhi, mcWeight(cut && btagCut), cut, true);
   deltaPhiRes.setXLabel("deltaPhi");
 
+  topMass += ">>dist(100.,0.,400.)";
+  cut = tauPtCut && metCut && rtauCut && mtCut;
+  Result topMassRes = createResult(topMass, mcWeight(cut && btagCut), cut, true);
+  topMassRes.setXLabel("topMass");
 /*
   TCanvas *c = new TCanvas("rtau");
   //rtauRes.HplusTB_M190.pass->Draw();
@@ -538,14 +557,17 @@ void optimisation() {
   c->SaveAs(".png");
 */
 //  rtauRes.Significance();
-  //  metRes.Significance();
+//  metRes.Significance();
+  fakeMetRes.Significance();
   //  tauPtRes.Significance();
   //  mtRes.Significance();
-  btagRes.Significance();
-  btag2ndMaxRes.Significance();
+  //  topMassRes.Significance();
+  //  btagRes.Significance();
+  //  btag2ndMaxRes.Significance();
   //  btagExactlyOneRes.Significance();
-  btagJetNum17Res.Significance();
+  //  btagJetNum17Res.Significance();
   //  deltaPhiRes.Significance();
+  //  emFractionRes.Significance();
 
 }
 

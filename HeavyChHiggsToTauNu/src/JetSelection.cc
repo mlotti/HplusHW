@@ -60,6 +60,7 @@ namespace HPlus {
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
     hMinDeltaRToOppositeDirectionOfTau = makeTH<TH1F>(myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
 
@@ -124,7 +125,8 @@ namespace HPlus {
 
   JetSelection::~JetSelection() {}
 
-  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
+   JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau) {
+  //  JetSelection::Data JetSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau) {
     // Reset variables
     iNHadronicJets = -1;
     iNHadronicJetsInFwdDir = -1;
@@ -158,6 +160,7 @@ namespace HPlus {
 
       // remove jets too close to tau jet
       bool match = false;
+      //      if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
       if(!(ROOT::Math::VectorUtil::DeltaR((tau)->p4(), iJet->p4()) > fMaxDR)) {
 	match = true;
       }
@@ -235,7 +238,9 @@ namespace HPlus {
 
       // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
       double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
+      double chargedEMfrac = iJet->chargedEmEnergyFraction();
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
+      hjetChargedEMFraction->Fill(chargedEMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 
       if (EMfrac > fEMfractionCut) continue;
@@ -271,6 +276,7 @@ namespace HPlus {
 
       // Min DeltaR reversed to tau
       math::XYZTLorentzVectorD myReversedTau = -tau->p4();
+      //     math::XYZTLorentzVectorD myReversedTau = -tau.p4();
       double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
       if (myDeltaR < fMinDeltaRToOppositeDirectionOfTau)
 	fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
@@ -285,7 +291,7 @@ namespace HPlus {
       fSelectedJets.push_back(tmpSelectedJets[i]);
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
-    hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
+    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
 
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
@@ -299,6 +305,10 @@ namespace HPlus {
     if(etaCutPassed < fMin) passEvent = false;
     if(etaCutPassed > fMin)    increment(fEtaCutCount);
 
+
+	  //    if(maxEMfraction < fEMfractionCut+ 0.1 )increment(fEMfraction08CutCount);
+    //    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
+
     // Set veto flags for event with high EM fraction of a selected jet
     if(maxEMfraction < 0.8 ) 
       increment(fEMfraction08CutCount);
@@ -308,6 +318,7 @@ namespace HPlus {
       increment(fEMfraction07CutCount);
     else
       bEMFraction07Veto = true;
+
 
     if(EMfractionCutPassed < fMin) passEvent = false;
     if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);

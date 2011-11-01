@@ -55,8 +55,8 @@ namespace HPlus {
     fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
-    fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
+    fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
@@ -121,9 +121,12 @@ namespace HPlus {
     //    hmetAfterTrigger = makeTH<TH1F>(*fs, "metAfterTrigger", "metAfterTrigger", 50, 0., 200.);
     
     hTransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hTransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hNonQCDTypeIITransverseMass = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
-    hNonQCDTypeIITransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMass", "transverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassMET70 = makeTH<TH1F>(*fs, "transverseMassMET70", "transverseMassMET70;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi", "transverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassTopSelection = makeTH<TH1F>(*fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassJetMetCut= makeTH<TH1F>(*fs, "transverseMassJetMetCut", "transverseMassJetMetCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hNonQCDTypeIITransverseMass = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMass", "NonQCDTypeIITransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hNonQCDTypeIITransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi", "NonQCDTypeIITransverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
@@ -146,9 +149,9 @@ namespace HPlus {
     hNonQCDTypeIISelectedTauEtAfterCuts = makeTH<TH1F>(mySelectedTauDir, "NonQCDTypeII_SelectedTau_pT_AfterCuts", "SelectedTau_pT_AfterCuts;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 40, 0.0, 400.0);
     hNonQCDTypeIISelectedTauEtaAfterCuts = makeTH<TH1F>(mySelectedTauDir, "NonQCDTypeII_SelectedTau_eta_AfterCuts", "SelectedTau_eta_AfterCuts;#tau #eta;N_{events} / 0.1", 30, -3.0, 3.0);
 
-    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 500, 0.0, 500.0);
+     hMet = makeTH<TH1F>(*fs, "Met", "Met", 500, 0.0, 500.0);
 
-    //    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
+    hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
     hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 8, 0, 8);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
@@ -255,11 +258,24 @@ namespace HPlus {
     fAllTausCounterGroup.incrementOneTauCounter();
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderTauID, tauData);
     if (myTauMatch == kkElectronToTau)
-      hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
-    hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
+      hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction(), fEventWeight.getWeight());
+    hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction(), fEventWeight.getWeight());
 
-    
-    // Global electron veto
+
+
+
+   // MET, no event cut
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+   
+    // MET cut
+    if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
+    hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());
+    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
+
+
+  // Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
@@ -286,8 +302,7 @@ namespace HPlus {
       copyPtrToVector(muonVetoData.getSelectedMuons(), *saveMuons);
       iEvent.put(saveMuons, "selectedVetoMuons");
     }
-
-
+  
     // Hadronic jet selection
     JetSelection::Data jetData = fJetSelection.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0]); 
     if(!jetData.passedEvent()) return false;
@@ -300,17 +315,20 @@ namespace HPlus {
       iEvent.put(saveJets, "selectedJets");
     }
 
+      
 
-    // MET, no event cut
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     // b tagging, no event cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
     // Top reco, no event cut
     TopSelection::Data TopSelectionData = fTopSelection.analyze(iEvent, iSetup, jetData.getSelectedJets(), btagData.getSelectedJets());
     // Calculate alphaT
-    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets()); 
+    EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauData.getSelectedTaus()[0]), jetData.getSelectedJets());   
+    
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus()[0], jetData.getSelectedJets(), metData.getSelectedMET());
 
+ 
+    // Write the stuff to the tree
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
     if(metData.getType1MET().isNonnull())
@@ -321,20 +339,11 @@ namespace HPlus {
       fTree.setCaloMET(metData.getCaloMET());
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
-
-    // Write the stuff to the tree
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     fTree.setTop(TopSelectionData.getTopP4());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets(),
-               evtTopologyData.alphaT().fAlphaT);
-
-
-    // MET cut
-    if(!metData.passedEvent()) return false;
-    increment(fMETCounter);
-    hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
+    	       metData.getSelectedMET(),   evtTopologyData.alphaT().fAlphaT, fakeMETData.closestDeltaPhi()  );
 
 
     // b tagging cut
@@ -355,7 +364,10 @@ namespace HPlus {
     hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
     if (myTypeIIStatus) hNonQCDTypeIITransverseMass->Fill(transverseMass, fEventWeight.getWeight());
 
-    
+     // with MET > 70 GeV    
+    if(  metData.getSelectedMET()->et() > 70 ) hTransverseMassMET70->Fill(transverseMass, fEventWeight.getWeight());
+
+   
     // Delta phi(tau,MET) cut
     double deltaPhi = DeltaPhi::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET())) * 57.3; // converted to degrees
     hDeltaPhi->Fill(deltaPhi, fEventWeight.getWeight());
@@ -363,15 +375,19 @@ namespace HPlus {
       increment(fdeltaPhiTauMET10Counter); 
     if ( deltaPhi < 160)
       increment(fdeltaPhiTauMET160Counter);
-    if (deltaPhi > 150) return false;
+
+
+    if (deltaPhi > 160) return false;
     increment(fDeltaPhiTauMETCounter);
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
  
     // Fill transverse mass histograms after Deltaphi cut
+  
     hTransverseMassAfterDeltaPhi->Fill(transverseMass, fEventWeight.getWeight());
     if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi->Fill(transverseMass, fEventWeight.getWeight());
+   
 
-    
+
     
     // -------------------------------------------
     // Experimental cuts, counters, and histograms
@@ -380,6 +396,7 @@ namespace HPlus {
     for(edm::PtrVector<pat::Jet>::const_iterator iJet = jetData.getSelectedJets().begin(); iJet != jetData.getSelectedJets().end(); ++iJet) {
       deltaPhi = DeltaPhi::reconstruct(**iJet, *(metData.getSelectedMET()));
       hDeltaPhiJetMet->Fill(deltaPhi*57.3, fEventWeight.getWeight());
+      if (deltaPhi*57.3 > 10) hTransverseMassJetMetCut->Fill(transverseMass, fEventWeight.getWeight());     
     }
 
     hSelectedTauRtauAfterCuts->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());
@@ -388,14 +405,16 @@ namespace HPlus {
     hMetAfterCuts->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
 
    // top mass with possible event cuts
-    if (TopSelectionData.passedEvent()&& tauData.getRtauOfSelectedTau() > 0.8 ) {
+    if (TopSelectionData.passedEvent() ) {
       increment(fTopSelectionCounter);
       //      hSelectionFlow->Fill(kSignalOrderTopSelection, fEventWeight.getWeight());      
-      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);   
+      if(transverseMass > 80 ) increment(ftransverseMassCut100TopCounter);
+       hTransverseMassTopSelection->Fill(transverseMass, fEventWeight.getWeight());     
     } 
 
+    /*   
     // Fake MET veto a.k.a. further QCD suppression
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, tauData.getSelectedTaus(), jetData.getSelectedJets(), metData.getSelectedMET());
+    //    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup,  tauData.getSelectedTaus()[0], jetData.getSelectedJets(), metData.getSelectedMET());
     if (fakeMETData.passedEvent() ) {
       increment(fFakeMETVetoCounter);
       
@@ -404,6 +423,10 @@ namespace HPlus {
         hTransverseMassDeltaPhiUpperCutFakeMet->Fill(transverseMass, fEventWeight.getWeight());  
       } 
     }
+    */
+      
+
+
     //hSelectionFlow->Fill(kSignalOrderFakeMETVeto, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderFakeMETVeto, tauData);
 

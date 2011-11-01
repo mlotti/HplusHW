@@ -92,11 +92,11 @@ namespace HPlus {
     if (!iEvent.isRealData()) {
       
       bool bFromTop = false;
-      bool q1FromTop = false;
-      bool q2FromTop = false;
-      int q1Top = 0;
-      int q2Top = 0;
-      int bTop = 0;
+      bool q1FromW = false;
+      bool q2FromW = false;
+      int q1Mother = 0;
+      int q2Mother = 0;
+      int bMother = 0;
       
       int q1mother = 999999;
       if( ptmax > 0 ) {
@@ -112,8 +112,8 @@ namespace HPlus {
 	      q1mother = m1particle->pdgId();
 	      //		if (abs(q1mother) == 24 ) q1FromTop = true;
 	      if (abs(q1mother) == 24 ) {
-		q1FromTop = true;
-		q1Top = q1mother;
+		q1FromW = true;
+		q1Mother = q1mother;
 	      }
 	    }
 	  }
@@ -132,8 +132,8 @@ namespace HPlus {
 	      q2mother = m2particle->pdgId();
 	      //		if (abs(q1mother) == 24 ) q2FromTop = true;
 	      if (abs(q2mother) == 24 ) {
-		q2FromTop = true;
-		q2Top = q2mother;
+		q2FromW = true;
+		q2Mother = q2mother;
 	      }
 	    }												 
 	  }
@@ -157,7 +157,7 @@ namespace HPlus {
 	      //		if ( abs(bmother) == 6 ) bFromTop = true;
 	      if (abs(bmother) == 6 ) {
 		bFromTop = true;
-		bTop = bmother;
+		bMother = bmother;
 	      }
 	    }
 	  }
@@ -167,13 +167,13 @@ namespace HPlus {
 	//	  if( abs(bmother) == 6 &&  (q1mother * bmother) > 0 ) {	    
 	//  bFromTop = true;
 	// }
-	if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop) > 0  ) {
+	if (bFromTop && q1FromW  && q2FromW && (q1Mother == q2Mother)  && (q1Mother * bMother) > 0  ) {
 	  correctCombination = true;
 	  hPtmaxTop->Fill(ptjjb, fEventWeight.getWeight());
 	  htopMassReal->Fill(topMass, fEventWeight.getWeight());
 	}
 	//	  if (q1FromTop && q2FromTop && abs(bmother) == 6 && (q1mother * bmother) < 0 ) {
-	if (bFromTop && q1FromTop  && q2FromTop && (q1Top == q2Top)  && (q1Top * bTop)<0  ) {
+	if (bFromTop && q1FromW  && q2FromW && (q1Mother == q2Mother)  && (q1Mother * bMother)<0  ) {
 	  hPtmaxTopHplus->Fill(ptjjb, fEventWeight.getWeight());
 	  htopMassRealHplus->Fill(topMass, fEventWeight.getWeight());
 	}

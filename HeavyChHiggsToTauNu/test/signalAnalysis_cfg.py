@@ -1,3 +1,4 @@
+
 import FWCore.ParameterSet.Config as cms
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 
@@ -166,6 +167,7 @@ process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
     primaryVertexSelection = param.primaryVertexSelection,
     GlobalElectronVeto = param.GlobalElectronVeto,
     GlobalMuonVeto = param.GlobalMuonVeto,
+#    GlobalMuonVeto = param.NonIsolatedMuonVeto,
     # Change default tau algorithm here as needed
     tauSelection = param.tauSelectionHPSTightTauBased,
     jetSelection = param.jetSelection,

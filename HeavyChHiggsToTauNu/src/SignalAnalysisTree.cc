@@ -100,6 +100,8 @@ namespace HPlus {
 
     fTree->Branch("alphaT", &fAlphaT);
 
+
+    fTree->Branch("deltaPhi", &fDeltaPhi);
     fTree->Branch("passedBTagging", &fPassedBTagging);
 
     fTree->Branch("genMet_p4", &fGenMet);
@@ -183,10 +185,14 @@ namespace HPlus {
   }
  
   void SignalAnalysisTree::fill(const edm::Event& iEvent, const edm::PtrVector<pat::Tau>& taus,
-                                const edm::PtrVector<pat::Jet>& jets,
-				double alphaT) {
+                                const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met,
+                                double alphaT, double deltaPhi) {
+
+    //                                const edm::PtrVector<pat::Jet>& jets,
+    //				double alphaT) {
     if(!fDoFill)
       return;
+
 
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
@@ -248,6 +254,8 @@ namespace HPlus {
       fJetsArea.push_back(jets[i]->jetArea());
     }
     fAlphaT = alphaT;
+
+    fDeltaPhi = deltaPhi;
 
     if(fTauEmbeddingInput) {
       edm::Handle<edm::View<pat::Muon> > hmuon;

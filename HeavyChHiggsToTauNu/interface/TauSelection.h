@@ -45,6 +45,9 @@ namespace HPlus {
       double getRtauOfSelectedTau() const {
         return fTauSelection->getSelectedRtauValue();
       }
+      double getRtauOfBestTauCandidate() const {
+	return fTauSelection->getBestCandidateRtauValue();
+      }
       bool selectedTauPassedRtau() const {
         if (!fTauSelection->fSelectedTaus.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fSelectedTaus[0]);
@@ -57,9 +60,9 @@ namespace HPlus {
         if (!fTauSelection->fCleanedTauCandidates.size()) return false;
         return fTauSelection->fTauID->passRTauCut(fTauSelection->fCleanedTauCandidates[0]);
       }
-      double getRtauOfBestTauCandidate() const {
-        return fTauSelection->getBestCandidateRtauValue();
-      }
+      //      double getRtauOfBestTauCandidate() const {
+      //        return fTauSelection->getBestCandidateRtauValue();
+      //}
       /// Returns true if no candidates passed asked discriminator
       bool applyVetoOnTauCandidates(std::string discr) const {
         for(edm::PtrVector<pat::Tau>::const_iterator iter = fTauSelection->fCleanedTauCandidates.begin(); iter != fTauSelection->fCleanedTauCandidates.end(); ++iter)
@@ -132,6 +135,13 @@ namespace HPlus {
       else
         return -1.0; // safety
     }
+
+    //   double getBestCandidateRtauValue() const {
+    //  if (fCleanedTauCandidates.size())
+    //	return fTauID->getRtauValue(fCleanedTauCandidates[0]);
+    // else
+    //    return -1.0; // safety      
+    // }
 
   private:
     // Input parameters

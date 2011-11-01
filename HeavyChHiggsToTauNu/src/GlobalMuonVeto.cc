@@ -324,6 +324,8 @@ namespace HPlus {
       float relIsol = ( myTrackIso + myEcalIso + myHcalIso )/(myMuonPt);
       // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
       if( relIsol > 0.15 ) continue; 
+      // No muon isolation
+      //      if( relIsol > 99999. ) continue;
       bMuonRelIsolationR03Cut = true;
 
       fSelectedMuons.push_back(*iMuon);

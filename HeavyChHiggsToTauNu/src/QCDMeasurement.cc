@@ -326,11 +326,18 @@ namespace HPlus {
     // FIXME: how is jet selection affected by this? Sometimes there
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
+
+    //    mySelectedTauFirst.push_back(mySelectedTau[0]);
     mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTauFirst[0], jetData.getSelectedJets(), metData.getSelectedMET());
+
+    //    mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
     fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), metData.getSelectedMET(), evtTopologyData.alphaT().fAlphaT,  fakeMETData.closestDeltaPhi() );
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {
