@@ -321,7 +321,7 @@ namespace HPlus {
     // DeltaPhi(tau,MET) cut
     if (myDeltaPhi < fDeltaPhiTauMETCut) {
       hLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+      if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
       // MET cut
       if (METData.getSelectedMET()->et() > fMETCut) {
         hLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
