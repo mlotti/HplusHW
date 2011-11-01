@@ -23,6 +23,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 
 namespace edm {
   class ParameterSet;
@@ -78,17 +79,6 @@ namespace HPlus {
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection
   };
-  enum MCSelectedTauMatchType {
-    kkElectronToTau,
-    kkMuonToTau,
-    kkTauToTau,
-    kkJetToTau,
-    kkNoMC,
-    kkElectronToTauAndTauOutsideAcceptance,
-    kkMuonToTauAndTauOutsideAcceptance,
-    kkTauToTauAndTauOutsideAcceptance,
-    kkJetToTauAndTauOutsideAcceptance
-  };
   public:
     explicit SignalAnalysis(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight);
     ~SignalAnalysis();
@@ -99,9 +89,8 @@ namespace HPlus {
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   private:
-    MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau);
-    CounterGroup* getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch);
-    void fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
+    CounterGroup* getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
+    void fillNonQCDTypeIICounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData);
 
     // We need a reference in order to use the same object (and not a
     // copied one) given in HPlusSignalAnalysisProducer
@@ -151,7 +140,6 @@ namespace HPlus {
     CorrelationAnalysis fCorrelationAnalysis;
     EvtTopology fEvtTopology;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
-
     VertexWeight fVertexWeight;
 
     SignalAnalysisTree fTree;

@@ -177,8 +177,8 @@ namespace HPlus {
       producer->produces<std::vector<pat::Jet> >("selectedJets");
       producer->produces<std::vector<pat::Jet> >("selectedBJets");
       producer->produces<std::vector<pat::Electron> >("selectedVetoElectrons");
-      producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolation");
-      producer->produces<std::vector<pat::Muon> >("selectedVetoMuons");
+      producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
+      producer->produces<std::vector<pat::Muon> >("selectedVetoMuonsBeforePtAndEtaCuts");
     }
   }
 
@@ -244,16 +244,11 @@ namespace HPlus {
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hSelectedTauPhi->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
-    MCSelectedTauMatchType myTauMatch = matchTauToMC(iEvent, tauData.getSelectedTaus()[0]);
-    bool myTypeIIStatus = false; // True if the selected tau is a fake
-    if (myTauMatch == kkNoMC) {
-      if (!(myTauMatch == kkTauToTau || myTauMatch == kkTauToTauAndTauOutsideAcceptance)) {
-        myTypeIIStatus = true;
-      }
-    }
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = FakeTauIdentifier::matchTauToMC(iEvent, *(tauData.getSelectedTaus()[0]));
+    bool myTypeIIStatus = FakeTauIdentifier::isFakeTau(myTauMatch); // True if the selected tau is a fake
     fAllTausCounterGroup.incrementOneTauCounter();
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderTauID, tauData);
-    if (myTauMatch == kkElectronToTau)
+    if (myTauMatch == FakeTauIdentifier::kkElectronToTau)
       hEMFractionElectrons->Fill(tauData.getSelectedTaus()[0]->emFraction());
     hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction());
 
@@ -279,11 +274,11 @@ namespace HPlus {
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMuonVeto, tauData);
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Muon> > saveMuons(new std::vector<pat::Muon>());
-      copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolation(), *saveMuons);
-      iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolation");
+      copyPtrToVector(muonVetoData.getSelectedMuonsBeforeIsolationAndPtAndEtaCuts(), *saveMuons);
+      iEvent.put(saveMuons, "selectedVetoMuonsBeforeIsolationAndPtAndEtaCuts");
       saveMuons.reset(new std::vector<pat::Muon>());
-      copyPtrToVector(muonVetoData.getSelectedMuons(), *saveMuons);
-      iEvent.put(saveMuons, "selectedVetoMuons");
+      copyPtrToVector(muonVetoData.getSelectedMuonsBeforePtAndEtaCuts(), *saveMuons);
+      iEvent.put(saveMuons, "selectedVetoMuonsBeforePtAndEtaCuts");
     }
 
 
@@ -429,67 +424,24 @@ namespace HPlus {
     return true;
   }
 
-  SignalAnalysis::MCSelectedTauMatchType SignalAnalysis::matchTauToMC(const edm::Event& iEvent, const edm::Ptr<pat::Tau> tau) {
-    if (iEvent.isRealData()) return kkNoMC;
-    bool foundMCTauOutsideAcceptanceStatus = false;
-    bool isMCTau = false;
-    bool isMCElectron = false;
-    bool isMCMuon = false;
-
-    edm::Handle <reco::GenParticleCollection> genParticles;
-    iEvent.getByLabel("genParticles", genParticles);
-    //std::cout << "matchfinding:" << std::endl;
-    for (size_t i=0; i < genParticles->size(); ++i) {
-      const reco::Candidate & p = (*genParticles)[i];
-      if (std::abs(p.pdgId()) == 11 || std::abs(p.pdgId()) == 13 || std::abs(p.pdgId()) == 15) {
-        // Check match with tau
-        if (reco::deltaR(p, tau->p4()) < 0.1) {
-          if (p.pt() > 10.) {
-            //std::cout << "  match found, pid=" << p.pdgId() << " eta=" << std::abs(p.eta()) << " pt=" << p.pt() << std::endl;
-            if (std::abs(p.pdgId()) == 11) isMCElectron = true;
-            if (std::abs(p.pdgId()) == 13) isMCMuon = true;
-            if (std::abs(p.pdgId()) == 15) isMCTau = true;
-          }
-        }
-        // Check if there is a tau outside the acceptance in the event
-        if (!foundMCTauOutsideAcceptanceStatus && std::abs(p.pdgId()) == 15) {
-          if (p.pt() < 40 || abs(p.eta()) > 2.1)
-            foundMCTauOutsideAcceptanceStatus = true;
-        }
-      }
-    }
-    if (!foundMCTauOutsideAcceptanceStatus) {
-      if (isMCElectron) return kkElectronToTau;
-      if (isMCMuon) return kkMuonToTau;
-      if (isMCTau) return kkTauToTau;
-      return kkJetToTau;
-    }
-    if (isMCElectron) return kkElectronToTauAndTauOutsideAcceptance;
-    if (isMCMuon) return kkMuonToTauAndTauOutsideAcceptance;
-    if (isMCTau) return kkTauToTauAndTauOutsideAcceptance;
-    return kkJetToTauAndTauOutsideAcceptance;
-  }
-
-  SignalAnalysis::CounterGroup* SignalAnalysis::getCounterGroupByTauMatch(MCSelectedTauMatchType tauMatch) {
-    if (tauMatch == kkElectronToTau) return &fElectronToTausCounterGroup;
-    else if (tauMatch == kkMuonToTau) return &fMuonToTausCounterGroup;
-    else if (tauMatch == kkTauToTau) return &fGenuineToTausCounterGroup;
-    else if (tauMatch == kkJetToTau) return &fJetToTausCounterGroup;
-    else if (tauMatch == kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
-    else if (tauMatch == kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
+  SignalAnalysis::CounterGroup* SignalAnalysis::getCounterGroupByTauMatch(FakeTauIdentifier::MCSelectedTauMatchType tauMatch) {
+    if (tauMatch == FakeTauIdentifier::kkElectronToTau) return &fElectronToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkMuonToTau) return &fMuonToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkTauToTau) return &fGenuineToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkJetToTau) return &fJetToTausCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkElectronToTauAndTauOutsideAcceptance) return &fElectronToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkMuonToTauAndTauOutsideAcceptance) return &fMuonToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance) return &fGenuineToTausAndTauOutsideAcceptanceCounterGroup;
+    else if (tauMatch == FakeTauIdentifier::kkJetToTauAndTauOutsideAcceptance) return &fJetToTausAndTauOutsideAcceptanceCounterGroup;
     return 0;
   }
   
-  void SignalAnalysis::fillNonQCDTypeIICounters(MCSelectedTauMatchType tauMatch, SignalSelectionOrder selection, const TauSelection::Data& tauData) {
+  void SignalAnalysis::fillNonQCDTypeIICounters(FakeTauIdentifier::MCSelectedTauMatchType tauMatch, HPlus::SignalAnalysis::SignalSelectionOrder selection, const HPlus::TauSelection::Data& tauData) {
     // Get out if no match has been found
-    if (tauMatch == kkNoMC) return;
+    if (tauMatch == FakeTauIdentifier::kkNoMC) return;
     // Obtain status for main counter
-    bool myTypeIIStatus = true;
     // Define event as type II if no genuine tau was identified as the selected tau
-    if (tauMatch == kkTauToTau || tauMatch == kkTauToTauAndTauOutsideAcceptance)
-        myTypeIIStatus = false;
+    bool myTypeIIStatus = FakeTauIdentifier::isFakeTau(tauMatch);
     // Fill main and subcounter for the selection
     if (selection == kSignalOrderTauID) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementOneTauCounter();
