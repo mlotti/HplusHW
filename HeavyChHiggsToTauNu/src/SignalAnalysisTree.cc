@@ -274,13 +274,9 @@ namespace HPlus {
   }
 
 
-  void SignalAnalysisTree::setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
+  void SignalAnalysisTree::setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons) {
     if(!fDoFill)
       return;
-
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
 
     if(nonIsoMuons.size() >= 1){
       // throw cms::Exception("LogicError") << "Expected nonIsoMuon collection size to be >=1, but  was " << nonIsoMuons.size() << " instead at " << __FILE__ << ":" << __LINE__ << std::endl;

@@ -64,7 +64,7 @@ namespace HPlus {
     void setTcMET(const edm::Ptr<reco::MET>& met) { fTcMet = met->p4(); }
 
     void setHltTaus(const pat::TriggerObjectRefVector& hltTaus);
-    void setNonIsoLeptons(const edm::Event& iEvent, edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
+    void setNonIsoLeptons(edm::PtrVector<pat::Muon> nonIsoMuons, edm::PtrVector<pat::Electron> nonIsoElectrons);
 
     void setAlphaT(double alphaT) { fAlphaT = alphaT; }
     void setDeltaPhi(double deltaPhi) { fDeltaPhi = deltaPhi; }
