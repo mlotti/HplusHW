@@ -71,8 +71,8 @@ namespace HPlus {
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
-    kSignalOrderJetSelection,
     kSignalOrderMETSelection,
+    kSignalOrderJetSelection,
     kSignalOrderBTagSelection,
     kSignalOrderDeltaPhiSelection,
     kSignalOrderFakeMETVeto,
@@ -117,11 +117,9 @@ namespace HPlus {
     Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
-    Count fNJetsCounter;
     Count fMETCounter;
+    Count fNJetsCounter;
     Count fBTaggingCounter;
-	//    Count fmaxDeltaRTauJetsCounter;
-    //    Count fdeltaPhiTauJets160Counter;
     Count fDeltaPhiTauMETCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
@@ -129,9 +127,6 @@ namespace HPlus {
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
-    Count fTopRtauDeltaPhiFakeMETCounter;
-    Count fRtauDeltaPhiFakeMETCounter;
-    Count fBtag33RtauDeltaPhiFakeMETCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
     Count ftransverseMassCut80NoRtauCounter;
@@ -171,41 +166,20 @@ namespace HPlus {
     
     // Transverse mass histograms
     TH1 *hTransverseMass;
-
-    TH1 *hTransverseMassWithTopCut;
-    TH1 *hTransverseMassWithFakeMet;
-    //    TH1 *hTransverseMassBeforeVeto;
-    //    TH1 *hTransverseMassNoMet;
-    //    TH1 *hTransverseMassNoMetBtag;
-    //    TH1 *hTransverseMassNoMetBtagRtau;
-    //    TH1 *hTransverseMassNoMetBtagRtauFakeMet;
-    //    TH1 *hTransverseMassNoMetBtagRtauFakeMetPhi;
-    //    TH1 *hTransverseMassDeltaRTauJets;
-    //    TH1 *hTransverseMassBeforeFakeMet;
-    //    TH1 *hTransverseMassDeltaPhiUpperCut;
-    //    TH1 *hTransverseMassDeltaPhiTauJetsCut;
-    //    TH1 *hTransverseMassWithRtauFakeMet;
-   
-    //    TH1 *hTransverseMassTopRtauDeltaPhiFakeMET;
-    TH1 *hTransverseMassTopDeltaPhiFakeMET;
-    TH1 *hTransverseMassRtauDeltaPhiFakeMET;
-    //    TH1 *hTransverseMassBtag33RtauDeltaPhiFakeMET;
-    //    TH1 *hTransverseMassBtag33;
-    //    TH1 *hDeltaPhiTauJetMax;
-    //    TH1 *hDeltaRTauJetMax;
-
+    TH1 *hTransverseMassJetMetCut;
+    TH1 *hTransverseMassTopSelection;
+    TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hNonQCDTypeIITransverseMass;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi;
-
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;
     TH1 *hAlphaTInvMass;
     TH2 *hAlphaTVsRtau;
     // Histograms for validation at every Selection Cut step
-
     TH1 *hSelectedTauEt;
+    TH1 *hMet;
     TH1 *hSelectedTauEta;
     TH1 *hSelectedTauPhi;
     TH1 *hSelectedTauRtau;

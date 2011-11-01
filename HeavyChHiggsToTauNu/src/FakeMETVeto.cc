@@ -4,10 +4,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
-#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/DeltaPhi.h"
+
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "TLorentzVector.h"
 
 #include "TH1F.h"
 
@@ -34,20 +33,16 @@ namespace HPlus {
 
   FakeMETVeto::~FakeMETVeto() {}
 
-  //  FakeMETVeto::Data FakeMETVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::PtrVector<reco::Candidate>& taus, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
-  FakeMETVeto::Data FakeMETVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const reco::Candidate& tau, const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
+  FakeMETVeto::Data FakeMETVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Candidate>& tau , const edm::PtrVector<pat::Jet>& jets, const edm::Ptr<reco::MET>& met) {
     bool passEvent = false;
- 
 
     // Loop over selected taus
     fClosestDeltaPhiToTaus = 999.;
-    double fClosestDeltaPhiToTaus = reco::deltaPhi(*met, tau) * 180./3.14159;
-
     //    for(edm::PtrVector<reco::Candidate>::const_iterator iter = taus.begin(); iter != taus.end(); ++iter) {
-    //      double myDeltaPhi = reco::deltaPhi(*met, **iter) * 180./3.14159;
-    //      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToTaus)
-    //        fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
-    //    }
+    double fClosestDeltaPhiToTaus  = reco::deltaPhi(*met, *tau ) * 180./3.14159;
+      //      if ( fabs(myDeltaPhi) < fClosestDeltaPhiToTaus)
+      //        fClosestDeltaPhiToTaus = fabs(myDeltaPhi);
+   
     hClosestDeltaPhiToTaus->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
     hClosestDeltaPhiToTausZoom->Fill(fClosestDeltaPhiToTaus, fEventWeight.getWeight());
     
@@ -57,7 +52,8 @@ namespace HPlus {
       double myDeltaPhi = reco::deltaPhi(*met, **iter) * 180./3.14159;
       if ( fabs(myDeltaPhi) < fClosestDeltaPhiToJets)
         fClosestDeltaPhiToJets = fabs(myDeltaPhi);
-    }    hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
+    }
+    hClosestDeltaPhiToJets->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
     hClosestDeltaPhiToJetsZoom->Fill(fClosestDeltaPhiToJets, fEventWeight.getWeight());
 
     // Combine results - for now take just DeltaPhi(MET,jet) into account 

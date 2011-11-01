@@ -330,7 +330,7 @@ namespace HPlus {
     //    mySelectedTauFirst.push_back(mySelectedTau[0]);
     mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
 
-    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, *(mySelectedTauFirst[0]), jetData.getSelectedJets(), metData.getSelectedMET());
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTauFirst[0], jetData.getSelectedJets(), metData.getSelectedMET());
 
     //    mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
 
