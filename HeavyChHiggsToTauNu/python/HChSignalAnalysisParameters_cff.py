@@ -136,8 +136,8 @@ jetSelection = cms.untracked.PSet(
     ptCut = cms.untracked.double(30.0),
     etaCut = cms.untracked.double(2.4),
     minNumber = cms.untracked.uint32(3),
-#    EMfractionCut = cms.untracked.double(0.6)
-    EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
+    EMfractionCut = cms.untracked.double(0.8)
+#    EMfractionCut = cms.untracked.double(999), # large number to effectively disable the cut
 )
 
 MET = cms.untracked.PSet(
