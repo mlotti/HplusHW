@@ -311,14 +311,15 @@ namespace HPlus {
     //    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
 
     // Set veto flags for event with high EM fraction of a selected jet
-    if(maxEMfraction < 0.8 ) 
+    if (passEvent && maxEMfraction >= 0.8 ) {
       increment(fEMfraction08CutCount);
-    else
       bEMFraction08Veto = true;
-    if(maxEMfraction < 0.7 )
+    }
+      
+    if (passEvent && maxEMfraction < 0.7 ) {
       increment(fEMfraction07CutCount);
-    else
       bEMFraction07Veto = true;
+    }
 
     if(EMfractionCutPassed >= fMin)
       increment(fEMfractionCutCount);
