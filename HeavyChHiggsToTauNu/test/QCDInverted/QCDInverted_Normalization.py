@@ -89,7 +89,7 @@ class InvertedTauID:
         marker2.Draw()
 
         comp.Print("comparison.eps")
-
+	comp.Print("comparison.C")
 
     def fitQCD(self,histo): 
 
@@ -331,22 +331,28 @@ def main():
     td = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale",
                              selection="met_p4.Et() > 70 && Max$(jets_btag) > 1.7")
 
-    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdJets")
-    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdJets")  
+    metBase = plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdBtag")
+    metInver = plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdBtag")  
     # Rebin before subtracting
-    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
-    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(20))
+    metBase.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    metInver.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
-    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
-    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets")
-    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
-    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdJets")
+    metInverted_data = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
+    metInverted_EWK = metInver.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_InvertedTauIdBtag")
+    metBase_data = metBase.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
+    metBase_EWK = metBase.histoMgr.getHisto("EWK").getRootHisto().Clone(analysis+"/MET_BaselineTauIdBtag")
 
     metBase_QCD = metBase_data.Clone("QCD")
     metBase_QCD.Add(metBase_EWK,-1)
 
+#    metInverted_data_bin40_70  = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4070")
+#    metInverted_data_bin70_150 = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets70150")
+#    metInverted_data_bin150    = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets150")
+
     invertedQCD = InvertedTauID()
     invertedQCD.comparison(metInverted_data,metBase_QCD)
+#    invertedQCD.comparison(metInverted_data_bin40_70,metInverted_data_bin70_150)
+#    invertedQCD.comparison(metInverted_data_bin40_70,metInverted_data_bin150)
     invertedQCD.fitQCD(metInverted_data)
     invertedQCD.fitEWK(metBase_EWK)
     invertedQCD.fitData(metBase_data)
