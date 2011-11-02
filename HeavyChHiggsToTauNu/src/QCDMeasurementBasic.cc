@@ -248,7 +248,9 @@ namespace HPlus {
     //fTree.setTop(TopSelectionData.getTopP4());
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
     //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
-    fTree.fill(iEvent, tauCandidateData.getSelectedTaus(), jetData.getSelectedJets());
+    edm::PtrVector<pat::Tau> mySelectedTaus;
+    mySelectedTaus.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+    fTree.fill(iEvent, mySelectedTaus, jetData.getSelectedJets());
 
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
@@ -303,6 +305,9 @@ namespace HPlus {
     hFakeTauMtLegAfterMETAndTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDNoRtau", "FakeTauMtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hFakeTauMtLegAfterMETAndTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDWithRtau", "MFakeTautLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
     for (int i = 0; i < nTauPtBins; ++i) {
+      myName.str("");
+      myName << "MtShapeAfterMET_bin" << i;
+      hMtShapesAfterMET.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
       myName << "FakeTauMtShapeAfterMET_bin" << i;
       hFakeTauMtShapesAfterMET.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
