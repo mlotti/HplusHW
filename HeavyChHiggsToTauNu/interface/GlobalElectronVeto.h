@@ -127,8 +127,6 @@ namespace HPlus {
     float fSelectedElectronEta;
 
     // for Electron-ID Selection
-    bool bDecision;
-    bool bPassedElecID;
     bool bUseLooseID;
     bool bUseRobustLooseID;
     bool bUseTightID;
