@@ -47,6 +47,7 @@ namespace HPlus {
     virtual bool passRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual double getRtauValue(const edm::Ptr<pat::Tau> tau) const = 0;
+    bool passEMFractionCut(const edm::Ptr<pat::Tau> tau);
     bool passInvMassCut(const edm::Ptr<pat::Tau> tau);
     bool passDeltaECut(const edm::Ptr<pat::Tau> tau);
     bool passFlightpathCut(const edm::Ptr<pat::Tau> tau);
@@ -70,6 +71,7 @@ namespace HPlus {
     const double fRtauCut;
     const double fAntiRtauCut;
     const double fInvMassCut;
+    const double fEMFractionCutValue;
 
     // Counters packaged in one object
     SelectionCounterPackager fCounterPackager;

@@ -463,6 +463,9 @@ namespace HPlus {
           if (!fTauID->passRTauCut(iTau)) continue;
 	}
       }
+      // Further cleaning cuts
+      if (!fTauID->passEMFractionCut(iTau)) continue;
+
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
       tmpSelectedTaus.push_back(iTau);
