@@ -35,6 +35,7 @@ namespace HPlus {
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
+    void incrementAllCandidates();
     virtual bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) = 0;
     bool passTauCandidateSelection(const edm::Ptr<pat::Tau> tau);
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
