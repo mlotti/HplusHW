@@ -34,9 +34,16 @@ tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
-                                       src = cms.InputTag("tauEmbeddingMuons"),
-                                       minNumber = cms.uint32(1))
+    src = cms.InputTag("tauEmbeddingMuons"),
+    minNumber = cms.uint32(1),
+)
 tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
+tauEmbeddingMuonsOneFilter = cms.EDFilter("PATCandViewCountFilter",
+    src = cms.InputTag("tauEmbeddingMuons"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(1),
+)
+tauEmbeddingMuonsOneCount = cms.EDProducer("EventCountProducer")
 # tightenedJets = cms.EDFilter("PATJetSelector",
 #     src = cms.InputTag("selectedPatJets"),
 #     cut = cms.string(
@@ -81,7 +88,7 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     src = cms.untracked.InputTag("generator")
 )
 
-muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount",
+muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount", "tauEmbeddingMuonsOneCount",
 #                          "tightenedJetsCount"
                           ]
 
@@ -106,6 +113,8 @@ try:
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *
+        tauEmbeddingMuonsOneFilter *
+        tauEmbeddingMuonsOneCount *
 #        tightenedJets *
 #        tightenedJetsFilter *
 #        tightenedJetsCount *
