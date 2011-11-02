@@ -116,7 +116,7 @@ multicrab.appendLineAll("GRID.maxtarballsize = 15")
 
 
 path_re = re.compile("_tauembedding_.*")
-tauname = "_tauembedding_%s_v13" % step
+tauname = "_tauembedding_%s_v13_1" % step
 #if step in ["generation", "embedding"]:
 #    tauname += pt
 
