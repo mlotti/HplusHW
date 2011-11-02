@@ -52,7 +52,7 @@ tauSelectionBase = cms.untracked.PSet(
     antiRtauCut = cms.untracked.double(0.0), # rtau < value
     invMassCut = cms.untracked.double(999.), # m(vis.tau) < value; FIXME has no effect in TauSelection.cc 
     maximumEMFractionCut = cms.untracked.double(999.), # disable cut
-    #maximumEMFractionCut = cms.untracked.double(0.2), # emfraction > value
+    #maximumEMFractionCut = cms.untracked.double(0.8), # emfraction < value
     nprongs = cms.untracked.uint32(1) # not used at the moment FIXME: has no effect in TauSelection.cc
 )
 
