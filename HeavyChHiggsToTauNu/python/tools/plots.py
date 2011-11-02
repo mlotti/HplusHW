@@ -1014,7 +1014,7 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetrootHisto2, dataset.DatasetRootHistoBase):
+        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
             PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
         else:
             # assume datasetRootHisto* arguments are HistoBase objects instead
