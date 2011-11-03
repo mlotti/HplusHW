@@ -111,6 +111,7 @@ namespace HPlus {
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
     unsigned int fTauSignalChCands;
+    double fTauEmFraction;
     std::vector<TauId> fTauIds;
 
     std::vector<XYZTLorentzVector> fJets;
