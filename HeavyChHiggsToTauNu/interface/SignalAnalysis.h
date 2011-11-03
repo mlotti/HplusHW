@@ -141,7 +141,8 @@ namespace HPlus {
     EvtTopology fEvtTopology;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
     VertexWeight fVertexWeight;
-
+    FakeTauIdentifier fFakeTauIdentifier;
+    
     SignalAnalysisTree fTree;
 
     // Histograms
