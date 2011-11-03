@@ -47,6 +47,7 @@ namespace HPlus {
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fFakeTauIdentifier(fEventWeight),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator())
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
@@ -183,8 +184,8 @@ namespace HPlus {
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = FakeTauIdentifier::matchTauToMC(iEvent, *(tauCandidateData.getCleanedTauCandidates()[0]));
-    bool myTypeIIStatus = FakeTauIdentifier::isFakeTau(myTauMatch); // True if the selected tau is a fake
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getCleanedTauCandidates()[0]));
+    bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     // Obtain tau pT bin index
     int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getCleanedTauCandidates()[0]->pt());
     hAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
@@ -318,7 +319,7 @@ namespace HPlus {
   
   void QCDMeasurementBasic::AnalysisVariation::analyse(const HPlus::METSelection::Data& METData, const HPlus::TauSelection::Data& tauCandidateData, const HPlus::BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, double triggerSF, HPlus::FakeTauIdentifier::MCSelectedTauMatchType tauMatch) {
     // Big box i.e. standard selections have been passed, now look at the rest of the selections
-    bool myFakeTauStatus = FakeTauIdentifier::isFakeTau(tauMatch);
+    bool myFakeTauStatus = !(tauMatch == FakeTauIdentifier::kkTauToTau || tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
     double myDeltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET())) * 57.29578; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET()));
     

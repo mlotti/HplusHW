@@ -156,6 +156,7 @@ namespace HPlus {
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
+    FakeTauIdentifier fFakeTauIdentifier;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
