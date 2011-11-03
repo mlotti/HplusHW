@@ -32,7 +32,7 @@ multicrab.extendDatasets(
 #       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_178420-178479_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
+#       "Tau_178420-179411_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
 
 #       "Tau_Single_165970-167913_Prompt",   # 2011A HLT_IsoPFTau35_Trk20_v{2,3,4}
 #       "Tau_Single_170722-172619_Aug05",    # 2011A HLT_IsoPFTau35_Trk20_v6
@@ -40,24 +40,25 @@ multicrab.extendDatasets(
 #       "Tau_Single_173236-173692_Prompt",   # 2011A HLT_MediumIsoPFTau35_Trk20_v1
 #       "Tau_Single_175860-177452_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
 #       "Tau_Single_177718-178380_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
-#       "Tau_Single_178420-178479_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v5
+#       "Tau_Single_178420-179411_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v5
 #
         # Muon data samples
-#        "SingleMu_160431-163261_May10",      # 2011A
-#        "SingleMu_163270-163869_May10",      # 2011A
-#        "SingleMu_165088-165633_Prompt",     # 2011A
-#        "SingleMu_165970-166150_Prompt",     # 2011A
-#        "SingleMu_166161-166164_Prompt",     # 2011A
-#        "SingleMu_166346-166346_Prompt",     # 2011A
-#        "SingleMu_166374-166967_Prompt",     # 2011A
-#        "SingleMu_167039-167043_Prompt",     # 2011A
-#        "SingleMu_167078-167913_Prompt",     # 2011A
-#        "SingleMu_172620-173198_Prompt",     # 2011A
-#        "SingleMu_175860-176469_Prompt",     # 2011B
-#        "SingleMu_176545-177053_Prompt",     # 2011B
-#        "SingleMu_177074-177452_Prompt",     # 2011B
-#        "SingleMu_177718-178380_Prompt",     # 2011B
-#        "SingleMu_178420-178479_Prompt",     # 2011B
+#       "SingleMu_160431-163261_May10",      # 2011A
+#       "SingleMu_163270-163869_May10",      # 2011A
+#       "SingleMu_165088-165633_Prompt",     # 2011A
+#       "SingleMu_165970-166150_Prompt",     # 2011A
+#       "SingleMu_166161-166164_Prompt",     # 2011A
+#       "SingleMu_166346-166346_Prompt",     # 2011A
+#       "SingleMu_166374-166967_Prompt",     # 2011A
+#       "SingleMu_167039-167043_Prompt",     # 2011A
+#       "SingleMu_167078-167913_Prompt",     # 2011A
+#       "SingleMu_172620-173198_Prompt",     # 2011A
+#       "SingleMu_173236-173692_Prompt",     # 2011A
+#       "SingleMu_175860-176469_Prompt",     # 2011B
+#       "SingleMu_176545-177053_Prompt",     # 2011B
+#       "SingleMu_177074-177452_Prompt",     # 2011B
+#       "SingleMu_177718-178380_Prompt",     # 2011B
+#       "SingleMu_178420-179411_Prompt",     # 2011B
 
         # Summer11
         # Signal MC (WH)
