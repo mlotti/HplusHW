@@ -27,7 +27,7 @@ namespace HPlus {
     hTauMatchType->GetXaxis()->SetBinLabel(1+kkMuonToTauAndTauOutsideAcceptance, "#mu#rightarrow#tau, #tau outside");
     hTauMatchType->GetXaxis()->SetBinLabel(1+kkTauToTauAndTauOutsideAcceptance, "genuine #tau, #tau outside");
     hTauMatchType->GetXaxis()->SetBinLabel(1+kkJetToTauAndTauOutsideAcceptance, "jet#rightarrow#tau, #tau outside");
-    hTauOrigin = makeTH<TH1F>(myDir, "TauOrigin", "TauOrigin", 4, 0, 4);
+    hTauOrigin = makeTH<TH1F>(myDir, "TauOrigin", "TauOrigin", 7, 0, 7);
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
@@ -35,7 +35,7 @@ namespace HPlus {
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
     hTauOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
-    hMuOrigin = makeTH<TH1F>(myDir, "MuOrigin", "MuOrigin", 4, 0, 4);
+    hMuOrigin = makeTH<TH1F>(myDir, "MuOrigin", "MuOrigin", 7, 0, 7);
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
@@ -43,7 +43,7 @@ namespace HPlus {
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromWTau, "from W#rightarrow#tau");
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromZTauTau, "from Z#rightarrow#tautau");
     hMuOrigin->GetXaxis()->SetBinLabel(1+kkFromHplusTau, "from H+#rightarrow#tau");
-    hElectronOrigin = makeTH<TH1F>(myDir, "ElectronOrigin", "ElectronOrigin", 4, 0, 4);
+    hElectronOrigin = makeTH<TH1F>(myDir, "ElectronOrigin", "ElectronOrigin", 7, 0, 7);
     hElectronOrigin->GetXaxis()->SetBinLabel(1+kkUnknownOrigin, "unknown");
     hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromW, "from W");
     hElectronOrigin->GetXaxis()->SetBinLabel(1+kkFromZ, "from Z");
