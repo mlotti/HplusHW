@@ -261,17 +261,6 @@ namespace HPlus {
     hEMFractionAll->Fill(tauData.getSelectedTaus()[0]->emFraction(), fEventWeight.getWeight());
 
 
-//------ MET (temporarily at this location; FIXME: move after jet selection once signal analysis results agree with PAS results)
-    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
-    hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
-   
-    // MET cut
-    if(!metData.passedEvent()) return false;
-    increment(fMETCounter);
-    hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
-
-
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
     if (!electronVetoData.passedEvent()) return false;
@@ -313,6 +302,9 @@ namespace HPlus {
     }
 
 //------ Obtain rest of data objects      
+    // MET
+    METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
+    // transverse mass
     double transverseMass = TransverseMass::reconstruct(*(tauData.getSelectedTaus()[0]), *(metData.getSelectedMET()) );
     // b tagging, no event cut
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
@@ -341,6 +333,16 @@ namespace HPlus {
     fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
     fTree.fill(iEvent, tauData.getSelectedTaus(), jetData.getSelectedJets());
 
+//------ MET cut
+    hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
+   
+    // MET cut
+    if(!metData.passedEvent()) return false;
+    increment(fMETCounter);
+    hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());
+    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderMETSelection, tauData);
+
+    
 //------ b tagging cut
     if(!btagData.passedEvent()) return false;
     // Apply scale factor as weight to event
