@@ -94,8 +94,11 @@ namespace HPlus {
       makeTH<TH1F>(fMyDir, "TauCand_EMFractionCut", "TauCandEMFractionCut;#tau EM fraction; N_{jets} / 0.01", 100, 0., 1.));
   }
 
-  bool TauIDBase::passTauCandidateSelection(const edm::Ptr<pat::Tau> tau) {
+  void TauIDBase::incrementAllCandidates() {
     fCounterPackager.incrementSubCount(fIDAllTauCandidates);
+  }
+
+  bool TauIDBase::passTauCandidateSelection(const edm::Ptr<pat::Tau> tau) {
     // Jet pt cut
     double myJetPt = tau->pt();
     double myJetEta = tau->eta();

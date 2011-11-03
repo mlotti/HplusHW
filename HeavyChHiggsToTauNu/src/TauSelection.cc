@@ -427,6 +427,7 @@ namespace HPlus {
       fillHistogramsForTauCandidates(iTau, iEvent);
       
       // Tau candidate selections
+      fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
