@@ -357,8 +357,10 @@ namespace HPlus {
 //------ b tagging cut
     if(!btagData.passedEvent()) return false;
     // Apply scale factor as weight to event
-    btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
-    fEventWeight.multiplyWeight(btagData.getScaleFactor());
+    if (!iEvent.isRealData()) {
+      btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
+      fEventWeight.multiplyWeight(btagData.getScaleFactor());
+    }
     increment(fBTaggingCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData);
