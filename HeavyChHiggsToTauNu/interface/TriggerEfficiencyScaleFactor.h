@@ -32,6 +32,8 @@ namespace HPlus {
       double getEventWeight() const {
         return fTesf->fWeight;
       }
+      double getEventRelativeUncertainty() const { return fTesf->fRelativeUncertainty; }
+      double getEventAbsoluteUncertainty() const { return fTesf->fAbsoluteUncertainty; }
 
     private:
       const TriggerEfficiencyScaleFactor *fTesf;
@@ -69,12 +71,10 @@ namespace HPlus {
 
     EventWeight& fEventWeight;
 
-    TH1 *hScaleFactor;
-    TH1 *hScaleFactorRelativeUncertainty;
-    TH1 *hScaleFactorAbsoluteUncertainty;
-
     Mode fMode;
     double fWeight;
+    double fAbsoluteUncertainty;
+    double fRelativeUncertainty;
   };
 }
 

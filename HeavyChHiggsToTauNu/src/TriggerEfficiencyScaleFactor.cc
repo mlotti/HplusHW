@@ -45,10 +45,6 @@ namespace HPlus {
 
     edm::Service<TFileService> fs;
     TFileDirectory dir = fs->mkdir("TriggerScaleFactor");
-    hScaleFactor = makeTH<TH1F>(dir, "TriggerScaleFactor", "TriggerScaleFactor;TriggerScaleFactor;N_{events}/0.01", 200., 0., 2.0);
-    hScaleFactorRelativeUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorRelativeUncertainty", "TriggerScaleFactorRelativeUncertainty;TriggerScaleFactorRelativeUncertainty;N_{events}/0.001", 2000., 0., 2.0);
-    hScaleFactorAbsoluteUncertainty = makeTH<TH1F>(dir, "TriggerScaleFactorAbsoluteUncertainty", "TriggerScaleFactorAbsoluteUncertainty;TriggerScaleFactorAbsoluteUncertainty;N_{events}/0.001", 2000., 0., 2.0);
-
 
     const size_t NBUF = 10;
     char buf[NBUF];
@@ -133,9 +129,8 @@ namespace HPlus {
     fWeight = 1.0;
     if(fMode == kScaleFactor) {
       fWeight = scaleFactor(tau);
-      hScaleFactor->Fill(fWeight, fEventWeight.getWeight());
-      hScaleFactorRelativeUncertainty->Fill(scaleFactorRelativeUncertainty(tau), fEventWeight.getWeight());
-      hScaleFactorAbsoluteUncertainty->Fill(scaleFactorAbsoluteUncertainty(tau), fEventWeight.getWeight());
+      fRelativeUncertainty = scaleFactorRelativeUncertainty(tau);
+      fAbsoluteUncertainty = scaleFactorAbsoluteUncertainty(tau);
 
       fEventWeight.multiplyWeight(fWeight);
     }

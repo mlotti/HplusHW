@@ -30,6 +30,8 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addCounter("nonQCDType2:njets")),
     fBTaggingCounter(eventCounter.addCounter("nonQCDType2:btagging")),
     fDeltaPhiCounter(eventCounter.addCounter("nonQCDType2:deltaphi")),
+    fDeltaPhi160Counter(eventCounter.addCounter("nonQCDType2:deltaphi160")),
+    fDeltaPhi130Counter(eventCounter.addCounter("nonQCDType2:deltaphi130")),
     fFakeMETVetoCounter(eventCounter.addCounter("nonQCDType2:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("nonQCDType2:Top Selection cut")) { }
   SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
@@ -40,6 +42,8 @@ namespace HPlus {
     fNJetsCounter(eventCounter.addSubCounter(prefix,":njets")),
     fBTaggingCounter(eventCounter.addSubCounter(prefix,":btagging")),
     fDeltaPhiCounter(eventCounter.addSubCounter(prefix,":deltaphi")),
+    fDeltaPhi160Counter(eventCounter.addSubCounter(prefix,":deltaphi160")),
+    fDeltaPhi130Counter(eventCounter.addSubCounter(prefix,":deltaphi130")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")) { }
   SignalAnalysis::CounterGroup::~CounterGroup() { }
@@ -52,15 +56,14 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
-    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fMETCounter(eventCounter.addCounter("MET")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
-    fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
-    fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
-    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
+    fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET>10")),
+    fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET<160")),
+    fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET<130")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
 
@@ -93,6 +96,10 @@ namespace HPlus {
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
     fFakeTauIdentifier(fEventWeight),
     fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
+    // Scale factor uncertainties
+    fSFUncertaintiesAfterBTagging("AfterBTagging"),
+    fSFUncertaintiesAfterDeltaPhi160("AfterDeltaPhi160"),
+    fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi130"),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -154,7 +161,7 @@ namespace HPlus {
 
     hMetAfterCuts = makeTH<TH1F>(*fs, "Met_AfterCuts", "Met_AfterCuts", 400, 0.0, 400.0);
     
-    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 8, 0, 8);
+    hSelectionFlow = makeTH<TH1F>(*fs, "SignalSelectionFlow", "SignalSelectionFlow;;N_{events}", 9, 0, 9);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderVertexSelection,"Vertex");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTauID,"#tau ID");
@@ -163,7 +170,8 @@ namespace HPlus {
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderMETSelection,"MET");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderJetSelection,"#geq 3 jets");
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderBTagSelection,"#geq 1 b jet");
-    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderDeltaPhiSelection,"#Delta#phi(#tau,MET) cut");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderDeltaPhi160Selection,"#Delta#phi(#tau,MET)>160");
+    hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderDeltaPhi130Selection,"#Delta#phi(#tau,MET)>130");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderFakeMETVeto,"Further QCD rej.");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kSignalOrderTopSelection,"Top mass");
 
@@ -228,7 +236,6 @@ namespace HPlus {
 
 //------ TauID
     // Store weight of event
-    double myWeightBeforeTauID = fEventWeight.getWeight();
     // TauID
     TauSelection::Data tauData = fOneProngTauSelection.analyze(iEvent, iSetup);
     if(!tauData.passedEvent()) return false; // Require at least one tau
@@ -238,7 +245,6 @@ namespace HPlus {
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTaus()[0]));
-    double myTauTriggerWeight = fEventWeight.getWeight() / myWeightBeforeTauID;
     fTree.setTriggerWeight(triggerWeight.getEventWeight());
     increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
@@ -357,6 +363,9 @@ namespace HPlus {
       copyPtrToVector(btagData.getSelectedJets(), *saveBJets);
       iEvent.put(saveBJets, "selectedBJets");
     }
+    fSFUncertaintiesAfterBTagging.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                              triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                              btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
 
 //------ Fill transverse mass histograms    
     hTransverseMass->Fill(transverseMass, fEventWeight.getWeight());
@@ -370,22 +379,31 @@ namespace HPlus {
     hDeltaPhi->Fill(deltaPhi, fEventWeight.getWeight());
     if (deltaPhi > 10) 
       increment(fdeltaPhiTauMET10Counter); 
-    if (deltaPhi < 160)
+    if (deltaPhi < 160) {
       increment(fdeltaPhiTauMET160Counter);
-    if (deltaPhi > 160) return false;
-    increment(fDeltaPhiTauMETCounter);
-    fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhiSelection, tauData);
- 
-    // Fill transverse mass histograms after Deltaphi cut
-    hTransverseMassAfterDeltaPhi->Fill(transverseMass, fEventWeight.getWeight());
-    if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi->Fill(transverseMass, fEventWeight.getWeight());
-   
+      hSelectionFlow->Fill(kSignalOrderDeltaPhi160Selection, fEventWeight.getWeight());
+      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi160Selection, tauData);
+      fSFUncertaintiesAfterDeltaPhi160.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+      // Fill transverse mass histograms after Deltaphi cut
+      hTransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
+      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi160->Fill(transverseMass, fEventWeight.getWeight());
+    }
 
-//------ Systematics treatment of vertex reweighting and of scale factors
-    // FIXME: code to be added
-    
-    
-    
+    if (deltaPhi < 130) {
+      increment(fdeltaPhiTauMET130Counter);
+      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi130Selection, tauData);
+      hSelectionFlow->Fill(kSignalOrderDeltaPhi130Selection, fEventWeight.getWeight());
+      fSFUncertaintiesAfterDeltaPhi130.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+      // Fill transverse mass histograms after Deltaphi cut
+      hTransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
+      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
+
 //------Experimental cuts, counters, and histograms
     
     // plot deltaPhi(jet,met)
@@ -489,9 +507,15 @@ namespace HPlus {
         hNonQCDTypeIISelectedTauEtaAfterCuts->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
       }
       getCounterGroupByTauMatch(tauMatch)->incrementBTaggingCounter();
-    } else if (selection == kSignalOrderDeltaPhiSelection) {
+/*    } else if (selection == kSignalOrderDeltaPhiSelection) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhiCounter();
-      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();
+      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhiCounter();*/
+    } else if (selection == kSignalOrderDeltaPhi160Selection) {
+      if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi160Counter();
+      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi160Counter();
+    } else if (selection == kSignalOrderDeltaPhi130Selection) {
+      if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi130Counter();
+      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi130Counter();
     } else if (selection == kSignalOrderFakeMETVeto) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementFakeMETVetoCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementFakeMETVetoCounter();
