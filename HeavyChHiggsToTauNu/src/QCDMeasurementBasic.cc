@@ -261,6 +261,9 @@ namespace HPlus {
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
+    if (!iEvent.isRealData()) {
+      fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
+    }
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
     //fTree.setTop(TopSelectionData.getTopP4());
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
