@@ -2,6 +2,8 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_ScaleFactorUncertaintyManager_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_ScaleFactorUncertaintyManager_h
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include <string>
 
 class TH1F;
@@ -19,7 +21,7 @@ namespace HPlus {
       kSFOrderTriggerSF,
       kSFOrderBtagSF
     };
-    explicit ScaleFactorUncertaintyManager(const std::string& sName);
+    explicit ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory = "");
     ~ScaleFactorUncertaintyManager();
 
     void setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty);

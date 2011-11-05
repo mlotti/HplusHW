@@ -27,6 +27,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 
 #include "TTree.h"
 #include "TH2F.h"
@@ -48,7 +49,7 @@ namespace HPlus {
       AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins);
       ~AnalysisVariation();
       
-      void analyse(const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, double triggerSF, FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
+      void analyse(bool isRealData, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
 
     private:
       double fMETCut;
@@ -58,13 +59,20 @@ namespace HPlus {
       TH1F* hLeg1AfterDeltaPhiTauMET;
       TH1F* hLeg1AfterMET;
       TH1F* hLeg1AfterBTagging;
+      ScaleFactorUncertaintyManager* fSFUncertaintyAfterMetLeg;
       TH1F* hLeg2AfterTauIDNoRtau;
       TH1F* hLeg2AfterTauIDWithRtau;
+      ScaleFactorUncertaintyManager* fSFUncertaintyAfterTauLeg;
       // Transverse mass histograms
-      TH1F* hMtLegAfterDeltaPhiTauMET;
       TH1F* hMtLegAfterMET;
+      TH1F* hMtLegAfterDeltaPhiTauMET;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterDeltaPhi;
       TH1F* hMtLegAfterMETAndTauIDNoRtau;
       TH1F* hMtLegAfterMETAndTauIDWithRtau;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterTauID;
+      TH1F* hMtLegAfterMETAndInvertedTauIDNoRtau;
+      TH1F* hMtLegAfterMETAndInvertedTauIDWithRtau;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterInvertedTauID;
       std::vector<TH1F*> hMtShapesAfterMET;
 
       // Fake tau histograms (type II)
@@ -78,6 +86,8 @@ namespace HPlus {
       TH1F* hFakeTauMtLegAfterMET;
       TH1F* hFakeTauMtLegAfterMETAndTauIDNoRtau;
       TH1F* hFakeTauMtLegAfterMETAndTauIDWithRtau;
+      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau;
+      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau;
       std::vector<TH1F*> hFakeTauMtShapesAfterMET;
       
       // FIXME add TTree's for trigger and btag scalefactor uncertainties
@@ -160,7 +170,8 @@ namespace HPlus {
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
-
+    ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
+    
     std::vector<double> fTauPtBinLowEdges;
     
     // Histograms
@@ -177,6 +188,11 @@ namespace HPlus {
     TH1F* hFakeTauAfterIsolatedElectronVeto;
     TH1F* hFakeTauAfterIsolatedMuonVeto;
     TH1F* hFakeTauAfterJetSelection;
+    // Histograms for obtaining control plots
+    TH1F* hAfterTauCandidateSelectionAndTauID;
+    TH1F* hAfterIsolatedElectronVetoAndTauID;
+    TH1F* hAfterIsolatedMuonVetoAndTauID;
+    TH1F* hAfterJetSelectionAndTauID;
 
     // Other control histograms
     //TH1 *hTauCandidateSelectionIsolatedPtMax;

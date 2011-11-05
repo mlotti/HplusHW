@@ -2,20 +2,24 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/MakeTH.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TH1F.h"
 
 #include <sstream>
 
 namespace HPlus {
-  ScaleFactorUncertaintyManager::ScaleFactorUncertaintyManager(const std::string& sName) {
+  ScaleFactorUncertaintyManager::ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory) {
     edm::Service<TFileService> fs;
 
     // Book histograms
-    TFileDirectory myDir = fs->mkdir("ScaleFactorUncertainties");
     std::stringstream s;
-    s << "AbsoluteUncertainty_" << sName;
+    if (directory.size())
+      s << directory <<"/";
+    s << "ScaleFactorUncertainties";
+    TFileDirectory myDir = fs->mkdir(s.str().c_str());
+
+    s.str("");
+    s << "AbsoluteUncertainty_" << name;
     hCumulativeUncertainties = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 3, 0, 3);
     hCumulativeUncertainties->GetXaxis()->SetBinLabel(1+kSFOrderTotalCount,"TotalCount"); // cumulative weight
     hCumulativeUncertainties->GetXaxis()->SetBinLabel(1+kSFOrderTriggerSF,"abs. #delta_{TriggerSF}^{2}"); // cumulative absolute uncertainty squared
@@ -24,11 +28,11 @@ namespace HPlus {
     
     // Trigger SF
     s.str("");
-    s << "TriggerScaleFactor_" << sName;
+    s << "TriggerScaleFactor_" << name;
     hTriggerSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
     // btag SF
     s.str("");
-    s << "BtagScaleFactor_" << sName;
+    s << "BtagScaleFactor_" << name;
     hBtagSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
 
   }
