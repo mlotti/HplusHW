@@ -123,7 +123,7 @@ print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
 
 ##############################################################################
-process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementBasicFilter",
+process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     trigger = param.trigger,
     triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,
