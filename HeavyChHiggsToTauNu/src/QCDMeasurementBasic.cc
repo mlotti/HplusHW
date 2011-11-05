@@ -105,6 +105,7 @@ namespace HPlus {
     myMETVariation.push_back(40);
     myMETVariation.push_back(70);
     std::vector<double> myDeltaPhiTauMETVariation;
+    myDeltaPhiTauMETVariation.push_back(130);
     myDeltaPhiTauMETVariation.push_back(150);
     myDeltaPhiTauMETVariation.push_back(160);
     myDeltaPhiTauMETVariation.push_back(180);
@@ -310,16 +311,16 @@ namespace HPlus {
     hAfterElectronLeptonVeto= makeTH<TH1F>(myDir, "AfterElectronLeptonVeto", "AfterElectronLeptonVeto", nTauPtBins, 0, nTauPtBins);
     hAfterMuonLeptonVeto = makeTH<TH1F>(myDir, "AfterMuonLeptonVeto", "AfterMuonLeptonVeto", nTauPtBins, 0, nTauPtBins);
     hAfterJetSelection = makeTH<TH1F>(myDir, "AfterJetSelection", "AfterJetSelection", nTauPtBins, 0, nTauPtBins);*/
-    hLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     fSFUncertaintyAfterMetLeg = new ScaleFactorUncertaintyManager("AfterMETLeg", myName.str());
     hLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDNoRtau", "Leg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDWithRtau", "Leg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
     fSFUncertaintyAfterTauLeg = new ScaleFactorUncertaintyManager("AfterTauLeg", myName.str());
-    hFakeTauLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg1AfterMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterMET", "FakeTauLeg1AfterMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg1AfterBTagging = makeTH<TH1F>(myDir, "FakeTauLeg1AfterBTagging", "FakeTauLeg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDNoRtau", "FakeTauLeg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDWithRtau", "FakeTauLeg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
     // Transverse mass histograms
@@ -378,14 +379,14 @@ namespace HPlus {
     // inverted tau isolation and prongs (assuming HPS tau)
     bool myPassedInvertedTauIsol = false;
     if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
-      myPassedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
         tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
     else if (iTauIsolation == 11 || iTauIsolation == 13) // Medium isolation + 1/3 prong
-      myPassedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byMediumIsolation") &&
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byMediumIsolation") &&
         tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
     else if (iTauIsolation == 21 || iTauIsolation == 23) // Loose isolation + 1/3 prong
-      myPassedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
-        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;    
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
+        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
     bool myPassedRtau = tauCandidateData.getBestTauCandidatePassedRtauStatus();
 
     // MET leg ---------------------------------------------------------------
