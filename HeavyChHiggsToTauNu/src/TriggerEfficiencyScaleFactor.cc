@@ -127,6 +127,8 @@ namespace HPlus {
 
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau) {
     fWeight = 1.0;
+    fRelativeUncertainty = 0.0;
+    fAbsoluteUncertainty = 0.0;
     if(fMode == kScaleFactor) {
       fWeight = scaleFactor(tau);
       fRelativeUncertainty = scaleFactorRelativeUncertainty(tau);
