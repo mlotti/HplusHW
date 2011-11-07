@@ -32,7 +32,8 @@ multicrab.extendDatasets(
 #       "Tau_173236-173692_Prompt",          # 2011A HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_175860-177452_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
 #       "Tau_177718-178380_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v1
-#       "Tau_178420-179411_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
+#       "Tau_178420-179889_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v5
+#       "Tau_179959-180252_Prompt",          # 2011B HLT_MediumIsoPFTau35_Trk20_MET60_v6
 
 #       "Tau_Single_165970-167913_Prompt",   # 2011A HLT_IsoPFTau35_Trk20_v{2,3,4}
 #       "Tau_Single_170722-172619_Aug05",    # 2011A HLT_IsoPFTau35_Trk20_v6
@@ -40,8 +41,9 @@ multicrab.extendDatasets(
 #       "Tau_Single_173236-173692_Prompt",   # 2011A HLT_MediumIsoPFTau35_Trk20_v1
 #       "Tau_Single_175860-177452_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
 #       "Tau_Single_177718-178380_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v1
-#       "Tau_Single_178420-179411_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v5
-#
+#       "Tau_Single_178420-179889_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v5
+#       "Tau_Single_179959-180252_Prompt",   # 2011B HLT_MediumIsoPFTau35_Trk20_v6
+
         # Muon data samples
 #       "SingleMu_160431-163261_May10",      # 2011A
 #       "SingleMu_163270-163869_May10",      # 2011A
@@ -58,7 +60,9 @@ multicrab.extendDatasets(
 #       "SingleMu_176545-177053_Prompt",     # 2011B
 #       "SingleMu_177074-177452_Prompt",     # 2011B
 #       "SingleMu_177718-178380_Prompt",     # 2011B
-#       "SingleMu_178420-179411_Prompt",     # 2011B
+#       "SingleMu_178420-178866_Prompt",     # 2011B
+#       "SingleMu_178871-179889_Prompt",     # 2011B
+#       "SingleMu_179959-180252_Prompt",     # 2011B
 
         # Summer11
         # Signal MC (WH)
