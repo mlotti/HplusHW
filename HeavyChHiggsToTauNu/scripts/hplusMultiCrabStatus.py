@@ -89,7 +89,7 @@ def main(opts):
         failed = []
         for key, joblist in jobs.iteritems():
             for job in joblist:
-                if job.failed(opts.status):
+                if job.failed(opts.resubmit):
                     failed.append( (job.id, job.jobExitCode) )
         if len(failed) > 0:
             failed.sort()
@@ -143,8 +143,8 @@ def main(opts):
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
-    parser.add_option("--status", dest="status", default="all", 
-                      help="Provide the resubmit list for these jobs ('all', 'Aborted', comma separated list of exit codes; default 'all'")
+    parser.add_option("--resubmit", dest="resubmit", default="all", 
+                      help="Provide the resubmit list for these jobs ('all', 'aborted', 'done', comma separated list of exit codes; default 'all'")
     parser.add_option("--failedLogs", dest="failedLogs", action="store_true", default=False,
                       help="Show the list of log files of failed jobs")
     parser.add_option("--showMissing", dest="showMissing", action="store_true", default=False,
@@ -153,9 +153,9 @@ if __name__ == "__main__":
                       help="Show summary of hosts where the jobs are running")
     (opts, args) = parser.parse_args()
 
-    opts.status = opts.status.lower()
-    if opts.status not in ["all", "aborted"]:
-        codes = opts.status.split(",")
-        opts.status = [int(c) for c in codes]
+    opts.resubmit = opts.resubmit.lower()
+    if opts.resubmit not in ["all", "aborted", "done"]:
+        codes = opts.resubmit.split(",")
+        opts.resubmit = [int(c) for c in codes]
 
     sys.exit(main(opts))
