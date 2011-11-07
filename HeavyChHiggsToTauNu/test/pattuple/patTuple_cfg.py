@@ -188,7 +188,10 @@ process.skimPath = cms.Path(
 )
 
 # In case of OR of many triggers, add event counts for each trigger separately
-if dataVersion.isData() and len(options.trigger) > 1:
+# Assume that if triggerThrow is false, the multiple triggers cover
+# different run ranges without any overlaps, then this information is
+# not interesting and can be neglected
+if dataVersion.isData() and len(options.trigger) > 1 and options.triggerThrow != 0:
     import HLTrigger.HLTfilters.hltHighLevel_cfi as hltHighLevel
     for trig in options.trigger:
         name = trig.replace("_", "")
