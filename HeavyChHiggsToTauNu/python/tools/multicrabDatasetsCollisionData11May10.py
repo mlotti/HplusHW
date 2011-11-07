@@ -91,6 +91,11 @@ datasets = {
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~390 in reality)
                 "lumiMask": "May10ReReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v19b-4be8b2cd98e864fb2d0886a3cbadb57d/USER",
+                "number_of_jobs": 20
+            },
         },
     },
 

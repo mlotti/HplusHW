@@ -388,6 +388,11 @@ datasets = {
                 "number_of_jobs": 20, # Adjusted for PATtuple file size (~10 in reality)
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166161_pattuple_v19b-a6a169849ffab7209adc1f692eb70f9c/USER",
+                "number_of_jobs": 1
+            },
         }
     },
     "SingleMu_166346-166346_Prompt": {
