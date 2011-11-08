@@ -76,6 +76,10 @@ namespace HPlus {
     if (fTriggerSelectionType == kTriggerSelectionByTriggerBit) {
       passEvent = passedTriggerBit(iEvent, iSetup, returnPath);
     }
+
+    // Possible caloMET cut should not be controlled by "disabled" bit
+    if(fTriggerSelectionType == kTriggerSelectionDisabled)
+      passEvent = true;
     
     // Calo MET cut; needed for non QCD1, disabled for others
     if(passEvent) {
@@ -84,13 +88,9 @@ namespace HPlus {
       passEvent = ret.passedEvent();
     }
 
-    // Trigger efficiency parametrisation, needed for non QCD1, disabled for others
     if(passEvent) {
       increment(fTriggerCaloMetCount);
     }
-
-    if(fTriggerSelectionType == kTriggerSelectionDisabled)
-      passEvent = true;
     
     if(passEvent) increment(fTriggerCount);
     return Data(this, returnPath, passEvent);
