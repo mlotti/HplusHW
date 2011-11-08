@@ -390,18 +390,17 @@ class TreeDraw:
         if m:
             varexp = th1_re.sub(">>"+m.group("name"), varexp)
             h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
-            
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
         nentries = tree.Draw(varexp, selection, "e goff")
-        #h = tree.GetHistogram()
+        h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
         else:
             m = th1_re.search(varexp)
             if not m:
-                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % varexp)
+                raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits from the varexp %s" % (rootFile.GetName(), selection, varexp))
             h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         h.SetDirectory(0)
         return h
@@ -415,10 +414,20 @@ class TreeDrawCompound:
         self.datasetMap[datasetName] = treeDraw
 
     def draw(self, rootFile, datasetName):
+        h = None
         if datasetName in self.datasetMap:
-            self.datasetMap[datasetName].draw(rootFile, datasetName)
+            #print "Dataset %s in datasetMap" % datasetName, self.datasetMap[datasetName].selection
+            h = self.datasetMap[datasetName].draw(rootFile, datasetName)
         else:
-            self.default.draw(rootFile, datasetName)
+            #print "Dataset %s with default" % datasetName, self.default.selection
+            h = self.default.draw(rootFile, datasetName)
+        return h
+
+    def clone(self, **kwargs):
+        ret = TreeDrawCompound(self.default.clone(**kwargs))
+        for name, td in self.datasetMap.iteritems():
+            ret.datasetMap[name] = td.clone(**kwargs)
+        return ret
 
 def treeDrawToNumEntries(treeDraw):
     var = treeDraw.weight
