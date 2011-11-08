@@ -104,7 +104,6 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
-    Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
@@ -116,7 +115,6 @@ namespace HPlus {
     Count fdeltaPhiTauMET160Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
-    Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
