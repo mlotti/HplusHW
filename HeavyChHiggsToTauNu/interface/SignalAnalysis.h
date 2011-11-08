@@ -72,8 +72,8 @@ namespace HPlus {
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
-    kSignalOrderMETSelection,
     kSignalOrderJetSelection,
+    kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     kSignalOrderDeltaPhiSelection,
     kSignalOrderFakeMETVeto,
@@ -106,8 +106,8 @@ namespace HPlus {
     Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
-    Count fMETCounter;
     Count fNJetsCounter;
+    Count fMETCounter;
     Count fBTaggingCounter;
     Count fDeltaPhiTauMETCounter;
     Count fdeltaPhiTauMET10Counter;
