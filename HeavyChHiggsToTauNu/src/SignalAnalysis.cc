@@ -52,12 +52,14 @@ namespace HPlus {
     fPrimaryVertexCounter(eventCounter.addCounter("primary vertex")),
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
+    fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
     fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
     fMETCounter(eventCounter.addCounter("MET")),
     fBTaggingCounter(eventCounter.addCounter("btagging")),
+    fBTaggingScaleFactorCounter(eventCounter.addCounter("btagging scale factor")),
     fDeltaPhiTauMETCounter(eventCounter.addCounter("DeltaPhi(Tau,MET) upper limit")),
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET lower limit")),
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET upper limit")),
@@ -235,11 +237,12 @@ namespace HPlus {
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     increment(fTausExistCounter);
     if(tauData.getSelectedTaus().size() != 1) return false; // Require exactly one tau
+    increment(fOneTauCounter);
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getSelectedTaus()[0]));
     double myTauTriggerWeight = fEventWeight.getWeight() / myWeightBeforeTauID;
     fTree.setTriggerWeight(triggerWeight.getEventWeight());
-    increment(fOneTauCounter);
+    increment(fTriggerScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     if(fProduce) {
       std::auto_ptr<std::vector<pat::Tau> > saveTaus(new std::vector<pat::Tau>());
@@ -345,10 +348,11 @@ namespace HPlus {
     
 //------ b tagging cut
     if(!btagData.passedEvent()) return false;
+    increment(fBTaggingCounter);
     // Apply scale factor as weight to event
     btagData.fillScaleFactorHistograms(); // Important!!! Needs to be called before scale factor is applied as weight to the event; Uncertainty is determined from these histograms
     fEventWeight.multiplyWeight(btagData.getScaleFactor());
-    increment(fBTaggingCounter);
+    increment(fBTaggingScaleFactorCounter);
     hSelectionFlow->Fill(kSignalOrderBTagSelection, fEventWeight.getWeight());
     fillNonQCDTypeIICounters(myTauMatch, kSignalOrderBTagSelection, tauData);
     if(fProduce) {
