@@ -244,7 +244,12 @@ tree = cms.untracked.PSet(
     tauIDs = cms.untracked.vstring(
         "byTightIsolation",
         "byMediumIsolation",
-        "byLooseIsolation"
+        "byLooseIsolation",
+        "againstElectronLoose",
+        "againstElectronMedium",
+        "againstElectronTight",
+        "againstMuonLoose",
+        "againstMuonTight",
     )
 )
 

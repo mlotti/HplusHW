@@ -64,6 +64,7 @@ namespace HPlus {
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
     fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
+    fTree->Branch("tau_emFraction", &fTauEmFraction);
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
@@ -198,6 +199,7 @@ namespace HPlus {
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
+    fTauEmFraction = taus[0]->emFraction();
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
@@ -559,6 +561,7 @@ namespace HPlus {
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
     fTauSignalChCands = 0;
+    fTauEmFraction = nan;
     for(size_t i=0; i<fTauIds.size(); ++i)
       fTauIds[i].reset();
 

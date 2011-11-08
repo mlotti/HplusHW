@@ -29,11 +29,22 @@ def isMCTask(taskdir):
     f.close()
     return mc
 
+# Convert luminosity to pb^-1
+def convertLumi(lumi, unit):
+    if unit == "ub":
+        return lumi/1e6
+    elif unit == "nb":
+        return lumi/1e3
+    elif unit == "pb":
+        return lumi
+    elif unit == "fb":
+        return lumi*1e3
+    else:
+        raise Exception("Unsupported luminosity unit %s"%unit)
+
 def main(opts, args):
     if opts.report:
         multicrab.checkCrabInPath()
-
-    crabdirs = multicrab.getTaskDirectories(opts)
 
     cell = "\|\s+(?P<%s>\S+)\s+"
 
@@ -42,33 +53,41 @@ def main(opts, args):
                          (cell % "selectedls")+
                          (cell % "recorded")+"\|")
     #lumi_re = re.compile("\|\s(?P<recorded>\S+)\s")
+    unit_re = re.compile("Recorded\(/(?P<unit>.*)\)")
 
-    data = {}
     if not opts.truncate and os.path.exists(opts.output):
         f = open(opts.output, "r")
         data = json.load(f)
         f.close()
     
-    for d in crabdirs:
-        if isMCTask(d):
-            print "  Ignoring task directory '%s', it looks like MC" % d
-            continue
-
-        if opts.report:
-            cmd = ["crab", "-report", "-c", d]
-            if opts.verbose:
-                print " ".join(cmd)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            output = p.communicate()[0]
-            ret = p.returncode
-            if ret != 0:
-                print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
-                print output
-                return 1
-            if opts.verbose:
-                print output
+    files = []
+    # only if no explicit files, or some directories explicitly given
+    if len(opts.files) == 0 or len(opts.dirs) > 0:
+        crabdirs = multicrab.getTaskDirectories(opts)
+        for d in crabdirs:
+            if isMCTask(d):
+                print "  Ignoring task directory '%s', it looks like MC" % d
+                continue
     
-        jsonfile = os.path.join(d, "res", "lumiSummary.json")
+            if opts.report:
+                cmd = ["crab", "-report", "-c", d]
+                if opts.verbose:
+                    print " ".join(cmd)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                output = p.communicate()[0]
+                ret = p.returncode
+                if ret != 0:
+                    print "Call to 'crab -report -d %s' failed with return value %d" % (d, ret)
+                    print output
+                    return 1
+                if opts.verbose:
+                    print output
+        
+            files.append((d, os.path.join(d, "res", "lumiSummary.json")))
+    files.extend([(None, f) for f in opts.files])
+    
+    data = {}
+    for task, jsonfile in files:
         #print
         #print "================================================================================"
         #print "Dataset %s:" % d
@@ -93,31 +112,48 @@ def main(opts, args):
         lines = output.split("\n")
         lines.reverse()
         lumi = -1.0
+        unit = None
         for line in lines:
+            m = unit_re.search(line)
+            if m:
+                unit = m.group("unit")
+                break
+
             m = lumi_re.search(line)
             if m:
                 lumi = float(m.group("recorded")) # lumiCalc2.py returns pb^-1
-                if opts.lumicalc1:
-                    lumi = lumi/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
-                break
+#                if opts.lumicalc1:
+#                    lumi = lumi/1e6 # ub^-1 -> pb^-1, lumiCalc.py returns ub^-1
+                continue
 
-        print "Task %s recorded luminosity %f pb^-1" % (d, lumi)
-        data[d] = lumi
+        if unit == None:
+            raise Exception("Didn't find unit information from lumiCalc output, command was %s" % " ".join(cmd))
+        lumi = convertLumi(lumi, unit)
+
+        if task == None:
+            print "File %s recorded luminosity %f pb^-1" % (jsonfile, lumi)
+        else:
+            print "Task %s recorded luminosity %f pb^-1" % (task, lumi)
+            data[task] = lumi
 
         # Save the json file after each data task in case of future errors
+        if len(data) > 0:
+            f = open(opts.output, "wb")
+            json.dump(data, f, sort_keys=True, indent=2)
+            f.close()
+
+    if len(data) > 0:
         f = open(opts.output, "wb")
         json.dump(data, f, sort_keys=True, indent=2)
         f.close()
-
-    f = open(opts.output, "wb")
-    json.dump(data, f, sort_keys=True, indent=2)
-    f.close()
 
     return 0
 
 if __name__ == "__main__":
     parser = OptionParser(usage="Usage: %prog [options]")
     multicrab.addOptions(parser)
+    parser.add_option("-f", dest="files", type="string", action="append", default=[],
+                      help="JSON files to calculate the luminosity for (this or -d is required)")
     parser.add_option("--output", "-o", dest="output", type="string", default="lumi.json",
                       help="Output file to write the dataset integrated luminosities")
     parser.add_option("--truncate", dest="truncate", default=False, action="store_true",

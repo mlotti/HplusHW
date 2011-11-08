@@ -22,6 +22,9 @@ def main(opts):
     if os.path.exists(opts.lumifile):
         datasets.loadLuminosities(opts.lumifile)
 
+    if opts.mergeData:
+        datasets.mergeData()
+
     counters = opts.counterdir
     if opts.weighted:
         counters += "/weighted"
@@ -94,6 +97,8 @@ if __name__ == "__main__":
                       help="Don't print the dataset info")
     parser.add_option("--noerror", dest="valueOnly", action="store_true", default=False,
                       help="Don't print statistical errors")
+    parser.add_option("--mergeData", dest="mergeData", action="store_true", default=False,
+                      help="Merge all data datasets")
     (opts, args) = parser.parse_args()
 
     sys.exit(main(opts))
