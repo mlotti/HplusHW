@@ -1014,6 +1014,7 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
+        self.luminosity = None
         if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
             PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
         else:
@@ -1087,8 +1088,12 @@ class ComparisonPlot(PlotBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
-    def addLuminosityText(self, *args, **kwargs):
-        pass
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if self.luminosity != None:
+            histograms.addLuminosityText(x, y, self.luminosity)
 
     ## \var ratio
     # Holds the TH1 for data/MC ratio, if exists
