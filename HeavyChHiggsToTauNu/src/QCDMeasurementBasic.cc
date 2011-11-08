@@ -244,7 +244,7 @@ namespace HPlus {
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     //fTree.setTop(TopSelectionData.getTopP4());
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
     //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
