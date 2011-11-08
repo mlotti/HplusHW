@@ -212,6 +212,16 @@ datasets = {
             },
         },
     },
+    "QCD_Pt170to300_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 2.426e+04,
+        "data": {
+            "AOD": {
+                "datasetpath": "/QCD_Pt-170to300_TuneZ2_7TeV_pythia6/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 490, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "QCD_Pt300to470_TuneZ2_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 1.168e+03,
@@ -226,6 +236,16 @@ datasets = {
 
     # EWK pythia
     # Cross sections https://twiki.cern.ch/twiki/bin/view/CMS/CrossSections_3XSeries
+    "WW_TuneZ2_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 43,
+        "data": {
+            "AOD": {
+                "datasetpath": "/WW_TuneZ2_7TeV_pythia6_tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 450, # Adjusted for PATtuple file size
+            },
+        },
+    },
     "WZ_TuneZ2_Fall11": {
         "dataVersion": "42XmcS6",
         "crossSection": 18.2,
