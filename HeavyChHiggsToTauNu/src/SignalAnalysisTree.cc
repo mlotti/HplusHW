@@ -54,6 +54,7 @@ namespace HPlus {
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightTrigger", &fTriggerWeight);
+    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
     fTree->Branch("weightAtFill", &fFillWeight);
 
@@ -542,6 +543,8 @@ namespace HPlus {
 
 
   void SignalAnalysisTree::reset() {
+    double nan = std::numeric_limits<double>::quiet_NaN();
+
     fEvent = 0;
     fLumi = 0;
     fRun = 0;
@@ -549,12 +552,11 @@ namespace HPlus {
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
     fTriggerWeight = 1.0;
+    fTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
     fFillWeight = 1.0;
 
     fNVertices = 0;
-
-    double nan = std::numeric_limits<double>::quiet_NaN();
 
     fHltTaus.clear();
 

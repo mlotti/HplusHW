@@ -131,18 +131,21 @@ namespace HPlus {
 
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau) {
     fWeight = 1.0;
+    fWeightAbsUnc = 0.0;
     if(fMode == kScaleFactor) {
       fWeight = scaleFactor(tau);
+      fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
+
       hScaleFactor->Fill(fWeight, fEventWeight.getWeight());
       hScaleFactorRelativeUncertainty->Fill(scaleFactorRelativeUncertainty(tau), fEventWeight.getWeight());
-      hScaleFactorAbsoluteUncertainty->Fill(scaleFactorAbsoluteUncertainty(tau), fEventWeight.getWeight());
+      hScaleFactorAbsoluteUncertainty->Fill(fWeightAbsUnc, fEventWeight.getWeight());
 
-      fEventWeight.multiplyWeight(fWeight);
     }
     else if(fMode == kDataEfficiency) {
       fWeight = dataEfficiency(tau);
-      fEventWeight.multiplyWeight(fWeight);
+      fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
     }
+    fEventWeight.multiplyWeight(fWeight);
     return Data(this);
   }
 }

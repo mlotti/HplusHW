@@ -306,7 +306,7 @@ namespace HPlus {
     // factor is required to pass the full tau ID, including isolation
     // etc, but the tau object here is not (yet) isolated.
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(mySelectedTau[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
 
     double mySelectedTauPt = mySelectedTau[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);

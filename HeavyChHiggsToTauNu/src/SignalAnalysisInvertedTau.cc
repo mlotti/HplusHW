@@ -349,7 +349,7 @@ namespace HPlus {
     //    if(tauData.getCleanedTauCandidates().size() == 0) return false; // Require exactly one tau
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauData.getCleanedTauCandidates()[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fOneTauCounter);
     hSelectionFlow->Fill(kSignalOrderTauID, fEventWeight.getWeight());
     if(fProduce) {

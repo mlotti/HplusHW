@@ -178,8 +178,8 @@ namespace HPlus {
     increment(fOneProngTauSelectionCounter);
     // Apply trigger scale factor here, because it depends only on tau
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
-    double myTauTriggerWeight = fEventWeight.getWeight() / myWeightBeforeTauID;
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    double myTauTriggerWeight = triggerWeight.getEventWeight();
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
