@@ -387,9 +387,9 @@ class TreeDraw:
         varexp = self.varexp
         m = th1_re.search(varexp)
         h = None
-        if m:
-            varexp = th1_re.sub(">>"+m.group("name"), varexp)
-            h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+        #if m:
+        #    varexp = th1_re.sub(">>"+m.group("name"), varexp)
+        #    h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
@@ -397,6 +397,7 @@ class TreeDraw:
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
+            h.SetDirectory(0)
         else:
             m = th1_re.search(varexp)
             if not m:
@@ -532,6 +533,7 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def _normalizedHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
+        h.SetDirectory(0)
         h.SetName(h.GetName()+"_cloned")
         if self.normalization == "none":
             return h

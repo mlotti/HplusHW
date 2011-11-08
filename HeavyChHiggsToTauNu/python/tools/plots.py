@@ -499,6 +499,7 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 def _createRatio(rootHisto1, rootHisto2, ytitle):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
         ratio = rootHisto1.Clone()
+        ratio.SetDirectory(0)
         ratio.Divide(rootHisto2)
         styles.getDataStyle().apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)

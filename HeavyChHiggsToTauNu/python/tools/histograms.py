@@ -270,6 +270,7 @@ def updatePaletteStyle(histo):
 # \param postfix     Postfix for the sum histo name
 def sumRootHistos(rootHistos, postfix="_sum"):
     h = rootHistos[0].Clone()
+    h.SetDirectory(0)
     h.SetName(h.GetName()+"_sum")
     for a in rootHistos[1:]:
         h.Add(a)
@@ -666,6 +667,7 @@ class HistoBase:
         # Hack to get the black border to the legend, only if the legend style is fill
         if "f" in self.legendStyle.lower():
             h = self.rootHisto.Clone(self.rootHisto.GetName()+"_forLegend")
+            h.SetDirectory(0)
             h.SetLineWidth(1)
             if self.rootHisto.GetLineColor() == self.rootHisto.GetFillColor():
                 h.SetLineColor(ROOT.kBlack)
@@ -789,7 +791,9 @@ class HistoTotalUncertainty(HistoBase):
             else:
                 rootHistos.append(h.getRootHisto())
 
-        HistoBase.__init__(self, rootHistos[0].Clone(), name, "F", "E2")
+        tmp = rootHistos[0].Clone()
+        tmp.SetDirectory(0)
+        HistoBase.__init__(self, tmp, name, "F", "E2")
         self.rootHisto.SetName(self.rootHisto.GetName()+"_errors")
         self.histos = histos
 
