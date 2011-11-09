@@ -26,7 +26,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
 
     # Use PatJets and PFMet directly
     param.changeJetCollection(moduleLabel="selectedPatJets") # these are really AK5PF
-    param.MET.rawSrc = "pfMet" # no PAT object at the moment
+    #param.MET.rawSrc = "pfMet" # no PAT object at the moment
 
     # Use the muons where the original muon is removed in global muon veto
     param.GlobalMuonVeto.MuonCollectionName.setModuleLabel("selectedPatMuonsEmbeddingMuonCleaned")
