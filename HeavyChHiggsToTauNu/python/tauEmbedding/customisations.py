@@ -553,7 +553,7 @@ def addTauEmbeddingMuonTaus(process):
 
     return seq
 
-    
+
 def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="generatorTaus"):
     counters = []
 
@@ -612,6 +612,72 @@ def addGeneratorTauFilter(process, sequence, filterInaccessible=False, prefix="g
             genTausInaccessibleCount
         )
 
+    sequence *= genTauSequence
+
+    return counters
+
+def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLikePreselection"):
+    counters = []
+
+    allCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"AllCount", allCount)
+    counters.append(prefix+"AllCount")
+
+    genTaus = cms.EDFilter("GenParticleSelector",
+        src = cms.InputTag("genParticles"),
+        cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
+    )
+    genTausName = prefix
+    setattr(process, genTausName, genTaus)
+
+    genTausFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(genTausName),
+        minNumber = cms.uint32(1),
+    )
+    setattr(process, prefix+"Filter", genTausFilter)
+
+    genTausCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"Count", genTausCount)
+    counters.append(prefix+"Count")
+
+    from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
+    cleanedJets = cleanPatJets.clone(
+        src = cms.InputTag(param.jetSelection.src.value()),
+        checkOverlaps = cms.PSet(
+            genTaus = cms.PSet(
+                src                 = cms.InputTag(genTausName),
+                algorithm           = cms.string("byDeltaR"),
+                preselection        = cms.string(""),
+                deltaR              = cms.double(0.5),
+                checkRecoComponents = cms.bool(False),
+                pairCut             = cms.string(""),
+                requireNoOverlaps   = cms.bool(True),
+            ),
+        )
+    )
+    cleanedJetsName = prefix+"CleanedJets"
+    setattr(process, cleanedJetsName, cleanedJets)
+
+    cleanedJetsFilter = cms.EDFilter("CandViewCountFilter",
+        src = cms.InputTag(cleanedJetsName),
+        minNumber = cms.uint32(3)
+    )
+    setattr(process, cleanedJetsName+"Filter", cleanedJetsFilter)
+
+    cleanedJetsCount = cms.EDProducer("EventCountProducer")
+    setattr(process, cleanedJetsName+"Count", cleanedJetsCount)
+    counters.append(cleanedJetsName+"Count")
+
+    genTauSequence = cms.Sequence(
+        allCount *
+        genTaus *
+        genTausFilter *
+        genTausCount *
+        cleanedJets *
+        cleanedJetsFilter *
+        cleanedJetsCount 
+    )
+    setattr(process, prefix+"Sequence", genTauSequence)
     sequence *= genTauSequence
 
     return counters

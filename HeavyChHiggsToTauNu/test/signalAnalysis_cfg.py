@@ -34,11 +34,10 @@ tauEmbeddingFinalizeMuonSelection = True
 doTauEmbeddingMuonSelectionScan = False
 # Do tau id scan for tau embedding normalisation (no tau embedding input required)
 doTauEmbeddingTauSelectionScan = False
+# Do embedding-like preselection for signal analysis
+doTauEmbeddingLikePreselection = False
 
 applyTriggerScaleFactor = True
-
-filterGenTaus = False
-filterGenTausInaccessible = False
 
 ### Systematic uncertainty flags ###
 # Running of systematic variations is controlled by the global flag
@@ -118,12 +117,6 @@ process.commonSequence, additionalCounters = addPatOnTheFly(process, options, da
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import addConfigInfo
 process.infoPath = addConfigInfo(process, options, dataVersion)
 
-###
-# MC Filter
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
-if filterGenTaus:
-    additionalCounters.extend(tauEmbeddingCustomisations.addGeneratorTauFilter(process, process.commonSequence, filterInaccessible=filterGenTausInaccessible))
-
 ################################################################################
 # The "golden" version of the signal analysis
 # Primary vertex selection
@@ -153,6 +146,7 @@ param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU di
 
 #param.trigger.selectionType = "disabled"
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as tauEmbeddingCustomisations
 if options.tauEmbeddingInput != 0:
     #tauEmbeddingCustomisations.addMuonIsolationEmbeddingForSignalAnalysis(process, process.commonSequence)
     tauEmbeddingCustomisations.setCaloMetSum(process, process.commonSequence, options, dataVersion)
@@ -161,6 +155,8 @@ if options.tauEmbeddingInput != 0:
         applyIsolation = not doTauEmbeddingMuonSelectionScan
         additionalCounters.extend(tauEmbeddingCustomisations.addFinalMuonSelection(process, process.commonSequence, param,
                                                                                    enableIsolation=applyIsolation))
+if doTauEmbeddingLikePreselection:
+    additionalCounters.extend(tauEmbeddingCustomisations.addEmbeddingLikePreselection(process, process.commonSequence, param))
 
 # Signal analysis module for the "golden analysis"
 process.signalAnalysis = cms.EDFilter("HPlusSignalAnalysisFilter",
