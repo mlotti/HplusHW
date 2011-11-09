@@ -169,6 +169,9 @@ class Count:
     def copy(self):
         return Count(self._value, self._uncertainty)
 
+    def clone(self):
+        return self.copy()
+
     def value(self):
         return self._value
 
