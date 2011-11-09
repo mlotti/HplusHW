@@ -348,6 +348,7 @@ def _mergeStackHelper(datasetList, nameList, task):
 
 
 th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+th1name_re = re.compile(">>\s*(?P<name>\S+)")
 class TreeDraw:
     def __init__(self, tree, varexp="", selection="", weight=""):
         self.tree = tree
@@ -397,12 +398,24 @@ class TreeDraw:
         h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
-            h.SetDirectory(0)
         else:
             m = th1_re.search(varexp)
-            if not m:
-                raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits from the varexp %s" % (rootFile.GetName(), selection, varexp))
-            h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            if m:
+                h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            else:
+                m = th1name_re.search(varexp)
+                if m:
+                    h = ROOT.gDirectory.Get(m.group("name"))
+                    h = h.Clone(h.GetName()+"_cloned")
+                    if nentries == 0:
+                        h.Scale(0)
+
+                    if h == None:
+                        raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', unable to infer the histogram limits,  and did not find objectr from gDirectory, from the varexp %s" % (rootFile.GetName(), selection, varexp))
+                else:
+                    raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
+
+        h.SetName(datasetName+"_"+h.GetName())
         h.SetDirectory(0)
         return h
 
