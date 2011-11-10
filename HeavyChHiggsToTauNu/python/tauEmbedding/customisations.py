@@ -225,7 +225,7 @@ def addFinalMuonSelection(process, sequence, param, enableIsolation=True, prefix
     if enableIsolation:
 #        counters.extend(addMuonRelativeIsolation(process, sequence, prefix=prefix+"Isolation", cut=0.1))
         import muonAnalysis
-        counters.extend(addMuonIsolation(process, sequence, "muonSelectionIsolation", "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]))
+        counters.extend(addMuonIsolation(process, sequence, prefix+"Isolation", "(%s)==0" % muonAnalysis.isolations["tauTightIc04Iso"]))
     counters.extend(addMuonVeto(process, sequence, param, prefix+"MuonVeto"))
     counters.extend(addElectronVeto(process, sequence, param, prefix+"ElectronVeto"))
     counters.extend(addMuonJetSelection(process, sequence, prefix+"JetSelection"))
