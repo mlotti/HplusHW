@@ -33,6 +33,10 @@ namespace HPlus {
         return fTesf->fWeight;
       }
 
+      double getEventWeightAbsoluteUncertainty() const {
+        return fTesf->fWeightAbsUnc;
+      }
+
     private:
       const TriggerEfficiencyScaleFactor *fTesf;
     };
@@ -75,6 +79,7 @@ namespace HPlus {
 
     Mode fMode;
     double fWeight;
+    double fWeightAbsUnc;
   };
 }
 

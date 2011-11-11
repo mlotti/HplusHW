@@ -769,8 +769,9 @@ class PlotSameBase(PlotBase):
     #
     # Signal histograms are identified by checking if the name contains "TTToHplus"
     def stackMCHistograms(self, stackSignal=False):
-        mcNames = self.datasetMgr.getMCDatasetNames()
-        mcNamesNoSignal = filter(lambda n: not isSignal(n), mcNames)
+        #mcNames = self.datasetMgr.getMCDatasetNames()
+        mcNames = [h.getName() for h in filter(lambda h: h.isMC(), self.histoMgr.getHistos())]
+        mcNamesNoSignal = filter(lambda n: not isSignal(n) and not "StackedMCSignal" in n, mcNames)
         if not stackSignal:
             mcNames = mcNamesNoSignal
 
@@ -1013,7 +1014,7 @@ class ComparisonPlot(PlotBase):
     #
     # The possible ratio is calculated as datasetRootHisto1/datasetRootHisto2
     def __init__(self, datasetRootHisto1, datasetRootHisto2, **kwargs):
-        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetrootHisto2, dataset.DatasetRootHistoBase):
+        if isinstance(datasetRootHisto1, dataset.DatasetRootHistoBase) and isinstance(datasetRootHisto2, dataset.DatasetRootHistoBase):
             PlotBase.__init__(self,[datasetRootHisto1, datasetRootHisto2], **kwargs)
         else:
             # assume datasetRootHisto* arguments are HistoBase objects instead

@@ -43,7 +43,7 @@ def main(opts):
                 if m:
                     sys_times.append(float(m.group("time")))
             f.close()
-        print "Task", task
+        print "Task %s, %d jobs" % (task, len(files))
         print times("Exe", exe_times)
         print times("User", user_times)
         print times("Sys", sys_times)

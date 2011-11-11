@@ -427,6 +427,7 @@ namespace HPlus {
       fillHistogramsForTauCandidates(iTau, iEvent);
       
       // Tau candidate selections
+      fTauID->incrementAllCandidates();
       if (!fTauID->passDecayModeFinding(iTau)) continue;
       if (!fTauID->passTauCandidateSelection(iTau)) continue;
       if (!fTauID->passLeadingTrackCuts(iTau)) continue;
@@ -451,18 +452,21 @@ namespace HPlus {
 
 
         if (fProngNumber == 1) {
-          if (!fTauID->passOneProngCut(iTau)) continue;
-          if (!fTauID->passChargeCut(iTau)) continue;
-          if (!fTauID->passRTauCut(iTau)) continue;
-        } else if (fProngNumber == 3) {
+	  if (!fTauID->passOneProngCut(iTau)) continue;
+	  if (!fTauID->passChargeCut(iTau)) continue;
+	  if (!fTauID->passRTauCut(iTau)) continue;
+	} else if (fProngNumber == 3) {
           if (!fTauID->passThreeProngCut(iTau)) continue;
           if (!fTauID->passChargeCut(iTau)) continue;
           //if (!fTauID->passInvMassCut(iTau)) continue; // FIXME: not tested, not validated
           //if (!fTauID->passDeltaECut(iTau)) continue; // FIXME: not tested, not validated
           //if (!fTauID->passFlightpathCut(iTau)) continue; // FIXME: not tested, not validated
           if (!fTauID->passRTauCut(iTau)) continue;
-        }
+	}
       }
+      // Further cleaning cuts
+      if (!fTauID->passEMFractionCut(iTau)) continue;
+
       // All cuts have been passed, save tau
       fillHistogramsForSelectedTaus(iTau, iEvent);
       tmpSelectedTaus.push_back(iTau);

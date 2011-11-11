@@ -89,7 +89,7 @@ class InvertedTauID:
         marker2.Draw()
 
         comp.Print("comparison.eps")
-
+	comp.Print("comparison.C")
 
     def fitQCD(self,histo): 
 
@@ -345,8 +345,14 @@ def main():
     metBase_QCD = metBase_data.Clone("QCD")
     metBase_QCD.Add(metBase_EWK,-1)
 
+#    metInverted_data_bin40_70  = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets4070")
+#    metInverted_data_bin70_150 = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets70150")
+#    metInverted_data_bin150    = metInver.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MET_InvertedTauIdJets150")
+
     invertedQCD = InvertedTauID()
     invertedQCD.comparison(metInverted_data,metBase_QCD)
+#    invertedQCD.comparison(metInverted_data_bin40_70,metInverted_data_bin70_150)
+#    invertedQCD.comparison(metInverted_data_bin40_70,metInverted_data_bin150)
     invertedQCD.fitQCD(metInverted_data)
     invertedQCD.fitEWK(metBase_EWK)
     invertedQCD.fitData(metBase_data)

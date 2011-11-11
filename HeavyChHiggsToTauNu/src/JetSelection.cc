@@ -25,7 +25,6 @@ namespace HPlus {
   JetSelection::Data::~Data() {}
   
   JetSelection::JetSelection(const edm::ParameterSet& iConfig, EventCounter& eventCounter, EventWeight& eventWeight):
-    //    fMETSelection(iConfig.getUntrackedParameter<edm::ParameterSet>("MET"), eventCounter),
     fSrc(iConfig.getUntrackedParameter<edm::InputTag>("src")),
     fPtCut(iConfig.getUntrackedParameter<double>("ptCut")),
     fEtaCut(iConfig.getUntrackedParameter<double>("etaCut")),
@@ -60,6 +59,7 @@ namespace HPlus {
     hPhi = makeTH<TH1F>(myDir, "jet_phi", "jet_phi", 400, -3.2, 3.2);
     hNumberOfSelectedJets = makeTH<TH1F>(myDir, "NumberOfSelectedJets", "NumberOfSelectedJets", 15, 0., 15.);
     hjetEMFraction = makeTH<TH1F>(myDir, "jetEMFraction", "jetEMFraction", 400, 0., 1.0);
+    hjetChargedEMFraction = makeTH<TH1F>(myDir, "chargedJetEMFraction", "chargedJetEMFraction", 400, 0., 1.0);
     hjetMaxEMFraction = makeTH<TH1F>(myDir, "jetMaxEMFraction", "jetMaxEMFraction", 400, 0., 1.0);  
     hMinDeltaRToOppositeDirectionOfTau = makeTH<TH1F>(myDir, "jet_MinDeltaRToOppositeDirectionOfTau", "jet_MinDeltaRToOppositeDirectionOfTau", 50, 0., 5.);
 
@@ -213,29 +213,34 @@ namespace HPlus {
       ++etaCutPassed;
 
       
-    // jetID cuts 
+      // jetID cuts 
+      // This is loose jet ID. Even though the EM fraction can be
+      // tightened later, we have here baseline cuts.
       if(!(iJet->numberOfDaughters() > 1)) continue;
       increment(fnumberOfDaughtersCutSubCount);
 
-      //if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
-      //increment(fchargedEmEnergyFractionCutSubCount);
+      if(!(iJet->chargedEmEnergyFraction() < 0.99)) continue;
+      increment(fchargedEmEnergyFractionCutSubCount);
 
       if(!(iJet->neutralHadronEnergyFraction() < 0.99)) continue;
       increment(fneutralHadronEnergyFractionCutSubCount);
 
-      //if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue; // EM fraction cut is applied later
-      //increment(fneutralEmEnergyFractionCutSubCount);
+      if(!(iJet->neutralEmEnergyFraction() < 0.99)) continue;
+      increment(fneutralEmEnergyFractionCutSubCount);
     
       if(fabs(iJet->eta()) < 2.4) {
 	  if(!(iJet->chargedHadronEnergyFraction() > 0)) continue;
 	  increment(fchargedHadronEnergyFractionCutSubCount);
 	  if(!(iJet->chargedMultiplicity() > 0)) continue;
 	  increment(fchargedMultiplicityCutSubCount);
-	}
+      }
+      // jetID cuts end
 
       // The following methods return the energy fractions w.r.t. raw jet energy (as they should be)
       double EMfrac = iJet->chargedEmEnergyFraction() + iJet->neutralEmEnergyFraction();
+      double chargedEMfrac = iJet->chargedEmEnergyFraction();
       hjetEMFraction->Fill(EMfrac, fEventWeight.getWeight());
+      hjetChargedEMFraction->Fill(chargedEMfrac, fEventWeight.getWeight());
       if ( EMfrac > maxEMfraction ) maxEMfraction =  EMfrac;
 
       if (EMfrac > fEMfractionCut) continue;
@@ -271,6 +276,7 @@ namespace HPlus {
 
       // Min DeltaR reversed to tau
       math::XYZTLorentzVectorD myReversedTau = -tau->p4();
+      //     math::XYZTLorentzVectorD myReversedTau = -tau.p4();
       double myDeltaR = ROOT::Math::VectorUtil::DeltaR(myReversedTau, iJet->p4());
       if (myDeltaR < fMinDeltaRToOppositeDirectionOfTau)
 	fMinDeltaRToOppositeDirectionOfTau = myDeltaR;
@@ -285,32 +291,38 @@ namespace HPlus {
       fSelectedJets.push_back(tmpSelectedJets[i]);
 
     hNumberOfSelectedJets->Fill(fSelectedJets.size(), fEventWeight.getWeight());
-    hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
-
+    if (fSelectedJets.size() > 2 ) hjetMaxEMFraction->Fill(maxEMfraction, fEventWeight.getWeight());
     iNHadronicJets = fSelectedJets.size();
     iNHadronicJetsInFwdDir = fNotSelectedJets.size();
-    passEvent = true;
-    if(cleanPassed < fMin) passEvent = false;
-    increment(fCleanCutCount);
+    
+    passEvent = fSelectedJets.size() >= fMin;
+    
+    if (cleanPassed >= fMin) 
+      increment(fCleanCutCount);
 
-    if(ptCutPassed < fMin) passEvent = false;
-    if(ptCutPassed > fMin)    increment(fPtCutCount);
+    if (ptCutPassed >= fMin)
+      increment(fPtCutCount);
 
-    if(etaCutPassed < fMin) passEvent = false;
-    if(etaCutPassed > fMin)    increment(fEtaCutCount);
+    if (etaCutPassed >= fMin)
+      increment(fEtaCutCount);
+
+
+	  //    if(maxEMfraction < fEMfractionCut+ 0.1 )increment(fEMfraction08CutCount);
+    //    if(maxEMfraction < fEMfractionCut )increment(fEMfraction07CutCount);
 
     // Set veto flags for event with high EM fraction of a selected jet
-    if(maxEMfraction < 0.8 ) 
+    if (passEvent && maxEMfraction >= 0.8 ) {
       increment(fEMfraction08CutCount);
-    else
       bEMFraction08Veto = true;
-    if(maxEMfraction < 0.7 )
+    }
+      
+    if (passEvent && maxEMfraction < 0.7 ) {
       increment(fEMfraction07CutCount);
-    else
       bEMFraction07Veto = true;
+    }
 
-    if(EMfractionCutPassed < fMin) passEvent = false;
-    if(EMfractionCutPassed > fMin )increment(fEMfractionCutCount);
+    if(EMfractionCutPassed >= fMin)
+      increment(fEMfractionCutCount);
 
     // Plot pt, eta, and phi of jets if jet selection has been passed
     if (passEvent && fSelectedJets.size() >= 3) {

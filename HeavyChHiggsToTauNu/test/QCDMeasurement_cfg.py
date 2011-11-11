@@ -5,8 +5,8 @@ from HiggsAnalysis.HeavyChHiggsToTauNu.HChOptions import getOptionsDataVersion
 # Configuration
 
 # Select the version of the data (needed only for interactice running,
-#dataVersion = "42Xmc"
-dataVersion = "42Xdata"   # Run2011 data
+dataVersion = "42Xmc"
+#dataVersion = "42Xdata"   # Run2011 data
 
 
 ##########
@@ -56,7 +56,7 @@ process.source = cms.Source('PoolSource',
     #
     # dataVersion.getAnalysisDefaultFileCastor()
     # For testing in jade
-    #dataVersion.getAnalysisDefaultFileMadhatter()
+    dataVersion.getAnalysisDefaultFileMadhatter()
     #dataVersion.getAnalysisDefaultFileMadhatterDcap()
     )
 )

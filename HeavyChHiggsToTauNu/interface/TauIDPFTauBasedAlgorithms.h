@@ -17,7 +17,7 @@ namespace HPlus {
     bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau);
     bool passIsolation(const edm::Ptr<pat::Tau> tau);
     bool passAntiIsolation(const edm::Ptr<pat::Tau> tau);
-
+    
   private:
     // Tau ID selections related to isolation
     size_t fIDIsolation;

@@ -266,7 +266,7 @@ namespace HPlus {
     // factor is required to pass the full tau ID, including isolation
     // etc, but the tau object here is not (yet) isolated.
     TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
 
     double mySelectedTauPt = tauCandidateData.getCleanedTauCandidates()[0]->pt();
     int myFactorizationTableIndex = fFactorizationTable.getCoefficientTableIndexByPtAndEta(mySelectedTauPt,0.);
@@ -328,12 +328,17 @@ namespace HPlus {
     // FIXME: how is jet selection affected by this? Sometimes there
     // is effectively a requirement of 5 jets?
     edm::PtrVector<pat::Tau> mySelectedTauFirst;
+
     mySelectedTauFirst.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
+
+    FakeMETVeto::Data fakeMETData = fFakeMETVeto.analyze(iEvent, iSetup, mySelectedTauFirst[0], jetData.getSelectedJets(), metData.getSelectedMET());
+
     // FIXME: how to handle the top reco in QCD measurement?
     fTree.setFillWeight(fEventWeight.getWeight());
-    fTree.setNonIsoLeptons(iEvent, nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
-    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets(), evtTopologyData.alphaT().fAlphaT);
+    fTree.setNonIsoLeptons(nonIsolatedMuonVetoData.getAllMuonswithTrkRef(), nonIsolatedElectronVetoData.getElectronswithGSFTrk());
+    fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
+    fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
+    fTree.fill(iEvent, mySelectedTauFirst, jetData.getSelectedJets());
 
 ///////// MET selection (factorise out)
     if (metData.passedEvent()) {

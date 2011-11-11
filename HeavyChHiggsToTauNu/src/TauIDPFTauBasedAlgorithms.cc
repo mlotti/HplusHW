@@ -60,10 +60,6 @@ namespace HPlus {
     // Muon veto
     if(tau->tauID("againstMuonTight") < 0.5 ) return false;
     fCounterPackager.incrementSubCount(fIDAgainstMuonCut);
-    // EM fraction cut
-    fCounterPackager.fill(fIDEMFractionCut, tau->emFraction());
-    if(tau->emFraction() > 0.8) return false;
-    fCounterPackager.incrementSubCount(fIDEMFractionCut);
     // All cuts passed, return true
     return true;
   }

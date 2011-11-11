@@ -34,9 +34,42 @@ tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
 )
 tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
-                                       src = cms.InputTag("tauEmbeddingMuons"),
-                                       minNumber = cms.uint32(1))
+    src = cms.InputTag("tauEmbeddingMuons"),
+    minNumber = cms.uint32(1),
+)
 tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
+tauEmbeddingMuonsOneFilter = cms.EDFilter("PATCandViewCountFilter",
+    src = cms.InputTag("tauEmbeddingMuons"),
+    minNumber = cms.uint32(1),
+    maxNumber = cms.uint32(1),
+)
+tauEmbeddingMuonsOneCount = cms.EDProducer("EventCountProducer")
+# tightenedJets = cms.EDFilter("PATJetSelector",
+#     src = cms.InputTag("selectedPatJets"),
+#     cut = cms.string(
+#     "pt() > 30 && abs(eta()) < 2.4"
+#     "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
+#     "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
+#     "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0" # eta < 2.4, so don't need the requirement here
+#     ),
+#     checkOverlaps = cms.PSet(
+#         muons = cms.PSet(
+#             src                 = cms.InputTag("tauEmbeddingMuons"),
+#             algorithm           = cms.string("byDeltaR"),
+#             preselection        = cms.string(""),
+#             deltaR              = cms.double(0.1),
+#             checkRecoComponents = cms.bool(False),
+#             pairCut             = cms.string(""),
+#             requireNoOverlaps   = cms.bool(True),
+#         )
+#     )
+# )
+# tightenedJetsFilter = cms.EDFilter("CandViewCountFilter",
+#     src = cms.InputTag("tightenedJets"),
+#     minNumber = cms.uint32(3)
+# )
+# tightenedJetsCount = cms.EDProducer("EventCountProducer")
+
 
 adaptedMuonsFromWmunu = cms.EDProducer("HPlusMuonMetAdapter",
    muonSrc = cms.untracked.InputTag("tauEmbeddingMuons"),
@@ -55,7 +88,9 @@ filterEmptyEv = cms.EDFilter("EmptyEventsFilter",
     src = cms.untracked.InputTag("generator")
 )
 
-muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount" ]
+muonSelectionCounters = [ "tightenedMuonsCount", "tauEmbeddingMuonsCount", "tauEmbeddingMuonsOneCount",
+#                          "tightenedJetsCount"
+                          ]
 
 # Avoid compilation error when TauAnalysis/MCEmbeddingTools is missing
 try:
@@ -78,6 +113,11 @@ try:
         tauEmbeddingMuons *
         tauEmbeddingMuonsFilter *
         tauEmbeddingMuonsCount *
+        tauEmbeddingMuonsOneFilter *
+        tauEmbeddingMuonsOneCount *
+#        tightenedJets *
+#        tightenedJetsFilter *
+#        tightenedJetsCount *
         adaptedMuonsFromWmunu *
         dimuonsGlobal * 
         generator * 

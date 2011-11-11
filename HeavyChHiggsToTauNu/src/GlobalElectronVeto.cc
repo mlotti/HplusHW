@@ -69,8 +69,6 @@ namespace HPlus {
     hElectronEta_gsfTrack_AfterSelection = makeTH<TH1F>(myDir, "GlobalElectronPt_gsfTrack_AfterSelection", "GlobalElectronPt_gsTrack_AfterSelection", 60, -3.0, 3.0);
     hElectronImpactParameter = makeTH<TH1F>(myDir, "ElectronImpactParameter", "ElectronImpactParameter", 100, 0.0, 0.1);
 
-    bDecision = false;
-    bPassedElecID = false;
     bUseLooseID = false;
     bUseRobustLooseID = false;
     bUseTightID = false;
@@ -153,6 +151,7 @@ namespace HPlus {
     bool bElecFiducialVolumeCut  = false;
     bool bElecMatchingMCelectron = false;
     bool bElecMatchingMCelectronFromW = false;
+    bool bPassedElecID = false;
 
     // Loop over all Electrons
     for(edm::PtrVector<pat::Electron>::const_iterator iElectron = electrons.begin(); iElectron != electrons.end(); ++iElectron) {
@@ -231,24 +230,23 @@ namespace HPlus {
 
       bElecHasGsfTrkOrTrk = true;   
       // 1) Apply Electron ID (choose low efficiency => High Purity)
-      if( (bUseLooseID) && (bElecIDIsLoose) ) bPassedElecID = true;
-      else if( (bUseRobustLooseID ) && (bElecIDIsRobustLoose) ) bPassedElecID = true;
-      else if( (bUseTightID) && (bElecIDIsTight) ) bPassedElecID = true;
-      else if( (bUseRobustTightID)         && (bElecIDIsRobustTight) ) bPassedElecID = true;
-      else if( (bUseRobustHighEnergyID)    && (bElecIDIsRobustHighEnergy) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId95relIsoID) && (fElecIDSimpleEleId95relIso == 7) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId90relIsoID) && (fElecIDSimpleEleId90relIso == 7) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId85relIsoID) && (fElecIDSimpleEleId85relIso == 7) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId80relIsoID) && (fElecIDSimpleEleId80relIso == 7) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) bPassedElecID = true;
-      else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) bPassedElecID = true;
-      else{
-	// This should never be called
-	bPassedElecID = false;
-      }
+      bool thisPassedID = false;
+      if( (bUseLooseID) && (bElecIDIsLoose) ) thisPassedID = true;
+      else if( (bUseRobustLooseID ) && (bElecIDIsRobustLoose) ) thisPassedID = true;
+      else if( (bUseTightID) && (bElecIDIsTight) ) thisPassedID = true;
+      else if( (bUseRobustTightID)         && (bElecIDIsRobustTight) ) thisPassedID = true;
+      else if( (bUseRobustHighEnergyID)    && (bElecIDIsRobustHighEnergy) ) thisPassedID = true;
+      else if( (bUseSimpleEleId95relIsoID) && (fElecIDSimpleEleId95relIso == 7) ) thisPassedID = true;
+      else if( (bUseSimpleEleId90relIsoID) && (fElecIDSimpleEleId90relIso == 7) ) thisPassedID = true;
+      else if( (bUseSimpleEleId85relIsoID) && (fElecIDSimpleEleId85relIso == 7) ) thisPassedID = true;
+      else if( (bUseSimpleEleId80relIsoID) && (fElecIDSimpleEleId80relIso == 7) ) thisPassedID = true;
+      else if( (bUseSimpleEleId70relIsoID) && (fElecIDSimpleEleId70relIso == 7) ) thisPassedID = true;
+      else if( (bUseSimpleEleId60relIsoID) && (fElecIDSimpleEleId60relIso == 7) ) thisPassedID = true;
       
-      if(bPassedElecID)
+      if(thisPassedID) {
         fSelectedElectrons.push_back(*iElectron);
+        bPassedElecID = true;
+      }
 
       // 2) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;

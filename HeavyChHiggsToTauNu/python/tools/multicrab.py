@@ -262,6 +262,8 @@ class CrabJob:
     def failed(self, status):
         if (status == "all" or status == "aborted") and self.origStatus == "Aborted":
             return True
+        if status == "done" and self.origStatus == "Done":
+            return True
         if self.origStatus != "Retrieved":
             return False
         if self.exeExitCode == 0 and self.jobExitCode == 0:

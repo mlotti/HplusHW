@@ -35,6 +35,7 @@ namespace HPlus {
     virtual ~TauIDBase();
 
     /// Returns true, if the tau candidate conditions are fulfilled (jet et, eta, ldg pt, e/mu veto) 
+    void incrementAllCandidates();
     virtual bool passDecayModeFinding(const edm::Ptr<pat::Tau>& tau) = 0;
     bool passTauCandidateSelection(const edm::Ptr<pat::Tau> tau);
     virtual bool passLeadingTrackCuts(const edm::Ptr<pat::Tau> tau) = 0;
@@ -47,6 +48,7 @@ namespace HPlus {
     virtual bool passRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual bool passAntiRTauCut(const edm::Ptr<pat::Tau> tau) = 0;
     virtual double getRtauValue(const edm::Ptr<pat::Tau> tau) const = 0;
+    bool passEMFractionCut(const edm::Ptr<pat::Tau> tau);
     bool passInvMassCut(const edm::Ptr<pat::Tau> tau);
     bool passDeltaECut(const edm::Ptr<pat::Tau> tau);
     bool passFlightpathCut(const edm::Ptr<pat::Tau> tau);
@@ -70,6 +72,7 @@ namespace HPlus {
     const double fRtauCut;
     const double fAntiRtauCut;
     const double fInvMassCut;
+    const double fEMFractionCutValue;
 
     // Counters packaged in one object
     SelectionCounterPackager fCounterPackager;

@@ -134,8 +134,10 @@ namespace HPlus {
     fSelectedMuonPt = -1.0;
     fSelectedMuonEta = -999.99;
     fSelectedMuons.clear();
+    fSelectedMuonsBeforePtAndEtaCuts.clear();
+    fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.clear();
     fSelectedMuonsBeforeIsolation.clear();
-
+    
     // the Collection is currently NOT available in the PatTuples but it will be soon (next pattuple production)
     /* FIX ME
    // Create and attach handle to (Offline) Primary Vertices Collection
@@ -309,15 +311,13 @@ namespace HPlus {
         if(std::abs(myInnerTrackRef->dz(primaryVertex->position())) < 1.0) continue; // This is the z-impact parameter w.r.t to selected primary vertex
         bMuonGoodPVCut = true;
       }
-
-      // 7) Apply Pt and Eta cut requirements
-      if (myMuonPt < fMuonPtCut) continue;
-      bMuonPtCut = true;
-      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
-      bMuonEtaCut = true;
-      fSelectedMuonsBeforeIsolation.push_back(*iMuon);
-
-      // 8) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
+      fSelectedMuonsBeforeIsolationAndPtAndEtaCuts.push_back(*iMuon);
+      
+      // Store muons before isolation, but passing pt and eta cuts
+      if (myMuonPt > fMuonPtCut && std::fabs(myMuonEta) < fMuonEtaCut)
+        fSelectedMuonsBeforeIsolation.push_back(*iMuon);
+      
+      // 7) Relative Isolation (around cone of DeltaR = 0.3) < 0.15. 
       float myTrackIso =  (*iMuon)->trackIso(); // isolation cones are dR=0.3 
       float myEcalIso  =  (*iMuon)->ecalIso();  // isolation cones are dR=0.3 
       float myHcalIso  =  (*iMuon)->hcalIso();  // isolation cones are dR=0.3 
@@ -325,8 +325,15 @@ namespace HPlus {
       // std::cout << "relIsol = " << (*iMuon).isolationR03().sumPt << "/" << myMuonPt << " = " << relIsol << std::endl;
       if( relIsol > 0.15 ) continue; 
       bMuonRelIsolationR03Cut = true;
+      fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
+      // 8) Apply Pt and Eta cut requirements
+      if (myMuonPt < fMuonPtCut) continue;
+      bMuonPtCut = true;
+      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
+      bMuonEtaCut = true;
       fSelectedMuons.push_back(*iMuon);
+
       
       // If Muon survives all cuts (1->8) then it is considered an isolated Muon. Now find the max Muon Pt of such isolated muons.
       if (myMuonPt > myHighestMuonPt) {
@@ -394,12 +401,12 @@ namespace HPlus {
                       increment(fMuonSelectionSubCountImpactParCut);
                       if(bMuonGoodPVCut || !fMuonApplyIpz) { // 6
                         increment(fMuonSelectionSubCountGoodPVCut);
-                        if(bMuonPtCut) { // 7.1
-                          increment(fMuonSelectionSubCountPtCut);
-                          if(bMuonEtaCut) { // 7.2
-                            increment(fMuonSelectionSubCountEtaCut);
-                            if(bMuonRelIsolationR03Cut) { // 8
-                              increment(fMuonSelectionSubCountRelIsolationR03Cut);
+                        if(bMuonRelIsolationR03Cut) { // 7
+                          increment(fMuonSelectionSubCountRelIsolationR03Cut);
+                          if(bMuonPtCut) { // 8.1
+                            increment(fMuonSelectionSubCountPtCut);
+                            if(bMuonEtaCut) { // 8.2
+                              increment(fMuonSelectionSubCountEtaCut);
                               if(bMuonMatchingMCmuon) { // 9
                                 increment(fMuonSelectionSubCountMatchingMCmuon);
                                 if(bMuonMatchingMCmuonFromW) { // 10
