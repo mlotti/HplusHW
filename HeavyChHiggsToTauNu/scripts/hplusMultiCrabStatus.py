@@ -12,19 +12,23 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab as multicrab
 order_done = ["Retrieved", "Done"]
 order_run = ["Running", "Scheduled", "Ready", "Submitted", "Created"]
 
+status_format = "%-18s %4d"
+
 class JobSummary:
-    def __init__(self, njobs, hosts):
-        self.njobs = njobs
+    def __init__(self, jobs, hosts):
+        self.jobs = [job.id for job in jobs]
         self.hosts = hosts
 
 def formatSummaries(opts, line, key, summary):
-    sum = " %s %d" % (key, summary.njobs)
-    if opts.showHosts:
-        line += "\n "+sum
-        if len(summary.hosts) > 0:
+    #sum = " %s %d: %s" % (key, len(summary.jobs), multicrab.prettyJobnums(summary.jobs))
+    if opts.showHosts or opts.showJobs:
+        line += "\n  "+status_format % (key+":", len(summary.jobs))
+        if opts.showJobs and len(summary.jobs) > 0:
+            line += ": "+multicrab.prettyJobnums(summary.jobs)
+        if opts.showHosts and len(summary.hosts) > 0:
             line += " (%s)" % ", ".join(summary.hosts)
     else:
-        line += sum+","
+        line += " %s %d" % (key, len(summary.jobs))+","
     return line
 
 def main(opts):
@@ -52,7 +56,7 @@ def main(opts):
                 if job.host != None:
                     hosts[job.host] = 1
             l = len(item)
-            jobSummaries[key] = JobSummary(l, hosts)
+            jobSummaries[key] = JobSummary(item, hosts)
             njobs += l
             allJobs += l
             if key in stats:
@@ -102,17 +106,17 @@ def main(opts):
     print "Summary for %d task(s), total %d job(s):" % (len(taskDirs), allJobs)
     for s in order_done:
         if s in stats:
-            print "%s: %d" % (s, stats[s])
+            print status_format % (s+":", stats[s])
             del stats[s]
     b = []
     for s in order_run:
         if s in stats:
-            b.append("%s: %d" % (s, stats[s]))
+            b.append(status_format % (s+":", stats[s]))
             del stats[s]
     keys = stats.keys()
     keys.sort()
     for key in keys:
-        print "%s: %d" % (key, stats[key])
+        print status_format % (key+":", stats[key])
     for line in b:
         print line
 
@@ -151,6 +155,8 @@ if __name__ == "__main__":
                       help="Show also the missing task directories")
     parser.add_option("--showHosts", dest="showHosts", action="store_true", default=False,
                       help="Show summary of hosts where the jobs are running")
+    parser.add_option("--showJobs", dest="showJobs", action="store_true", default=False,
+                      help="Show job numbers for each status type")
     (opts, args) = parser.parse_args()
 
     opts.resubmit = opts.resubmit.lower()
