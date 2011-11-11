@@ -1009,6 +1009,8 @@ class Dataset:
         """
 
         d = self.file.Get(self.prefix+directory)
+        if d == None:
+            raise Exception("No object %s in file %s" % (self.prefix+directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator
