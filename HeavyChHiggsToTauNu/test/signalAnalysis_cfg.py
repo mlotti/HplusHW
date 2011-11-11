@@ -143,6 +143,7 @@ puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
 param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
 #param.trigger.selectionType = "disabled"
 
@@ -292,7 +293,7 @@ if options.tauEmbeddingInput:
                     signalAnalysisCounters=True)
 
         module = module.clone()
-        module.triggerEfficiencyScaleFactor.mode = "dataEfficiency"
+        module.triggerEfficiencyScaleFactor.mode = "efficiency"
         addAnalysis(process, name+"CaloMet60TEff", module,
                     preSequence=process.commonSequence,
                     additionalCounters=additionalCounters,

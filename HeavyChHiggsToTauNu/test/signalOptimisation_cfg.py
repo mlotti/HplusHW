@@ -173,7 +173,7 @@ if (applyTriggerScaleFactor and not dataVersion.isData()):
         if len(options.puWeightEra) > 0:
             puweight = options.puWeightEra
         param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution
-
+        param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
 
         #param.trigger.selectionType = "disabled"

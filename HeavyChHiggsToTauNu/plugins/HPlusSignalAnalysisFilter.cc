@@ -17,6 +17,7 @@ class HPlusSignalAnalysisFilter: public edm::EDFilter {
   virtual bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
   virtual void endJob();
 
+  virtual bool beginRun(edm::Run& iRun, const edm::EventSetup& iSetup);
   virtual bool beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
   virtual bool endLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup);
 
@@ -34,6 +35,10 @@ HPlusSignalAnalysisFilter::HPlusSignalAnalysisFilter(const edm::ParameterSet& ps
 }
 HPlusSignalAnalysisFilter::~HPlusSignalAnalysisFilter() {}
 void HPlusSignalAnalysisFilter::beginJob() {}
+
+bool HPlusSignalAnalysisFilter::beginRun(edm::Run& run, const edm::EventSetup& iSetup) {
+  return analysis.beginRun(run, iSetup);
+}
 
 bool HPlusSignalAnalysisFilter::beginLuminosityBlock(edm::LuminosityBlock& iBlock, const edm::EventSetup & iSetup) {
   eventCounter.beginLuminosityBlock(iBlock, iSetup);
