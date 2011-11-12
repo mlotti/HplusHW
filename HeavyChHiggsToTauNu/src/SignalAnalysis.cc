@@ -371,7 +371,7 @@ namespace HPlus {
 
 //------ MET cut
     hMet->Fill(metData.getSelectedMET()->et(),fEventWeight.getWeight()); 
-    hCtrlMET->Fill(metData.getSelectedMET(), fEventWeight.getWeight()());
+    hCtrlMET->Fill(metData.getSelectedMET()->et(), fEventWeight.getWeight());
     if(!metData.passedEvent()) return false;
     increment(fMETCounter);
     hSelectionFlow->Fill(kSignalOrderMETSelection, fEventWeight.getWeight());

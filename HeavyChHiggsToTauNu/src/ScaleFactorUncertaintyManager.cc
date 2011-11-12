@@ -51,10 +51,10 @@ namespace HPlus {
     // Trigger SF
     hTriggerSF->Fill(triggerSF);
     hTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
-    hTriggerSFAbsUncertaintyCounts->Fill(0, eventWeight); // weight should include also trg SF
+    hTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
     // btag SF
     hBtagSF->Fill(btagSF);
     hTriggerSFAbsUncertainty->Fill(btagSFAbsUncertainty, eventWeight / btagSF);
-    hTriggerSFAbsUncertaintyCounts->Fill(0, eventWeight); // weight should include also trg SF
+    hTriggerSFAbsUncertaintyCounts->Fill(0.0, eventWeight); // weight should include also trg SF
   }
 }
