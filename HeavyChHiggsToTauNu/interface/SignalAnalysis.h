@@ -199,6 +199,20 @@ namespace HPlus {
 
     TH1 *hSelectionFlow;
 
+    // Control plots
+    TH1* hCtrlIdentifiedElectronPt;
+    TH1* hCtrlIdentifiedMuonPt;
+    TH1* hCtrlNjets;
+    TH1* hCtrlSelectedTauPtAfterStandardSelections;
+    TH1* hCtrlSelectedTauEtaAfterStandardSelections;
+    TH1* hCtrlSelectedTauPhiAfterStandardSelections;
+    TH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
+    TH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+    TH1* hCtrlSelectedTauRtauAfterStandardSelections;
+    TH1* hCtrlMET;
+    TH1* hCtrlNbjets;
+
+    // CounterGroups for EWK fake taus (aka non-QCD type 2(
     CounterGroup fNonQCDTypeIIGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
