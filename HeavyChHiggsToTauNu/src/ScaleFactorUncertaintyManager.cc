@@ -18,38 +18,43 @@ namespace HPlus {
     s << "ScaleFactorUncertainties";
     TFileDirectory myDir = fs->mkdir(s.str().c_str());
 
-    s.str("");
-    s << "AbsoluteUncertainty_" << name;
-    hCumulativeUncertainties = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 3, 0, 3);
-    hCumulativeUncertainties->GetXaxis()->SetBinLabel(1+kSFOrderTotalCount,"TotalCount"); // cumulative weight
-    hCumulativeUncertainties->GetXaxis()->SetBinLabel(1+kSFOrderTriggerSF,"abs. #delta_{TriggerSF}^{2}"); // cumulative absolute uncertainty squared
-    hCumulativeUncertainties->GetXaxis()->SetBinLabel(1+kSFOrderBtagSF,"abs. #delta_{btagSF}^{2}"); // cumulative absolute uncertainty squared
-    // To obtain the relative uncertainty, calculate sqrt(abs uncertainty) / cumulative weight
-    
     // Trigger SF
     s.str("");
     s << "TriggerScaleFactor_" << name;
     hTriggerSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s.str("");
+    s << "TriggerScaleFactorAbsUncert_" << name;
+    hTriggerSFAbsUncertainty = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s.str("");
+    s << "TriggerScaleFactorAbsUncertCounts_" << name;
+    hTriggerSFAbsUncertaintyCounts = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
+
     // btag SF
     s.str("");
     s << "BtagScaleFactor_" << name;
     hBtagSF = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 200., 0., 2.0);
+    s.str("");
+    s << "BtagScaleFactorAbsUncert_" << name;
+    hBtagSFAbsUncertainty = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 20000., 0., 2);
+    s.str("");
+    s << "BtagScaleFactorAbsUncertCounts_" << name;
+    hBtagSFAbsUncertaintyCounts = makeTH<TH1F>(myDir, s.str().c_str(), s.str().c_str(), 1, 0., 1);
 
   }
 
   ScaleFactorUncertaintyManager::~ScaleFactorUncertaintyManager() {}
 
   void ScaleFactorUncertaintyManager::setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty) {
-    // weight
-    hCumulativeUncertainties->Fill(kSFOrderTotalCount, eventWeight);
-
-    // Absolute uncertainty is given by weight / SF * delta(SF), weight is the event weight at the point what one is observing
-
+    // To calculate relative uncertainty, use
+    //   sqrt(sum_i((N_i * abs_uncert_i)^2)) / sum_i (N_i*w_i)
+    //   i.e. sqrt(sum_i((getBinContent(i) * getBinCenter(i))^2) / AbsUncertaintyCounts->GetBinContent(0);
     // Trigger SF
-    hCumulativeUncertainties->Fill(kSFOrderTriggerSF, eventWeight / triggerSF * triggerSFAbsUncertainty);
     hTriggerSF->Fill(triggerSF);
+    hTriggerSFAbsUncertainty->Fill(triggerSFAbsUncertainty, eventWeight / triggerSF);
+    hTriggerSFAbsUncertaintyCounts->Fill(0, eventWeight); // weight should include also trg SF
     // btag SF
-    hCumulativeUncertainties->Fill(kSFOrderBtagSF, eventWeight / btagSF * btagSFAbsUncertainty);
     hBtagSF->Fill(btagSF);
+    hTriggerSFAbsUncertainty->Fill(btagSFAbsUncertainty, eventWeight / btagSF);
+    hTriggerSFAbsUncertaintyCounts->Fill(0, eventWeight); // weight should include also trg SF
   }
 }

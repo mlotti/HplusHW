@@ -16,20 +16,18 @@ namespace edm {
 namespace HPlus {
   class ScaleFactorUncertaintyManager {
   public:
-    enum ScaleFactorOrderType {
-      kSFOrderTotalCount,
-      kSFOrderTriggerSF,
-      kSFOrderBtagSF
-    };
     explicit ScaleFactorUncertaintyManager(const std::string& name, const std::string& directory = "");
     ~ScaleFactorUncertaintyManager();
 
     void setScaleFactorUncertainties(double eventWeight, double triggerSF, double triggerSFAbsUncertainty, double btagSF, double btagSFAbsUncertainty);
 
   private:
-    TH1F* hCumulativeUncertainties;
     TH1F* hTriggerSF;
+    TH1F* hTriggerSFAbsUncertainty;
+    TH1F* hTriggerSFAbsUncertaintyCounts;
     TH1F* hBtagSF;
+    TH1F* hBtagSFAbsUncertainty;
+    TH1F* hBtagSFAbsUncertaintyCounts;
   };
 }
 
