@@ -54,7 +54,9 @@ namespace HPlus {
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
     fTree->Branch("weightTrigger", &fTriggerWeight);
+    fTree->Branch("weightTriggerAbsUnc", &fTriggerWeightAbsUnc);
     fTree->Branch("weightBTagging", &fBTaggingWeight);
+    fTree->Branch("weightBTaggingAbsUnc", &fBTaggingWeightAbsUnc);
     fTree->Branch("weightAtFill", &fFillWeight);
 
     fTree->Branch("goodPrimaryVertices_n", &fNVertices);
@@ -64,6 +66,7 @@ namespace HPlus {
     fTree->Branch("tau_p4", &fTau);
     fTree->Branch("tau_leadPFChargedHadrCand_p4", &fTauLeadingChCand);
     fTree->Branch("tau_signalPFChargedHadrCands_n", &fTauSignalChCands);
+    fTree->Branch("tau_emFraction", &fTauEmFraction);
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTree->Branch( ("tau_id_"+fTauIds[i].name).c_str(), &(fTauIds[i].value) );
     }
@@ -198,6 +201,7 @@ namespace HPlus {
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
     fTauSignalChCands = taus[0]->signalPFChargedHadrCands().size();
+    fTauEmFraction = taus[0]->emFraction();
     for(size_t i=0; i<fTauIds.size(); ++i) {
       fTauIds[i].value = taus[0]->tauID(fTauIds[i].name) > 0.5;
     }
@@ -540,6 +544,8 @@ namespace HPlus {
 
 
   void SignalAnalysisTree::reset() {
+    double nan = std::numeric_limits<double>::quiet_NaN();
+
     fEvent = 0;
     fLumi = 0;
     fRun = 0;
@@ -547,18 +553,19 @@ namespace HPlus {
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
     fTriggerWeight = 1.0;
+    fTriggerWeightAbsUnc = nan;
     fBTaggingWeight = 1.0;
+    fBTaggingWeightAbsUnc = nan;
     fFillWeight = 1.0;
 
     fNVertices = 0;
-
-    double nan = std::numeric_limits<double>::quiet_NaN();
 
     fHltTaus.clear();
 
     fTau.SetXYZT(nan, nan, nan, nan);
     fTauLeadingChCand.SetXYZT(nan, nan, nan, nan);
     fTauSignalChCands = 0;
+    fTauEmFraction = nan;
     for(size_t i=0; i<fTauIds.size(); ++i)
       fTauIds[i].reset();
 

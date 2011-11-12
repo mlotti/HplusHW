@@ -97,6 +97,7 @@ errorStyle3 = StyleCompound([StyleError(ROOT.kRed-10, 1001, linecolor=ROOT.kRed-
 
 #mcStyle = Style(ROOT.kFullSquare, ROOT.kGreen-2)
 mcStyle = StyleCompound([Style(ROOT.kFullSquare, ROOT.kRed+1)])
+mcStyle2 = StyleCompound([Style(33, ROOT.kBlue-4)])
 signalStyle = StyleCompound([Style(34, ROOT.kPink-9), 
                              StyleLine(lineStyle=ROOT.kDashed, lineWidth=6)
                              ])

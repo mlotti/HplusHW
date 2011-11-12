@@ -78,8 +78,8 @@ namespace HPlus {
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
-    kSignalOrderMETSelection,
     kSignalOrderJetSelection,
+    kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
     //kSignalOrderDeltaPhiSelection,
     kSignalOrderDeltaPhi160Selection,
@@ -92,6 +92,8 @@ namespace HPlus {
     ~SignalAnalysis();
 
     void produces(edm::EDFilter *producer) const;
+
+    bool beginRun(edm::Run& iRun, const edm::EventSetup& iSetup);
 
     // Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -111,17 +113,19 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
+    Count fTriggerScaleFactorCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
-    Count fMETCounter;
     Count fNJetsCounter;
+    Count fMETCounter;
     Count fBTaggingCounter;
+    Count fBTaggingScaleFactorCounter;
+    Count fDeltaPhiTauMETCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
-    Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;

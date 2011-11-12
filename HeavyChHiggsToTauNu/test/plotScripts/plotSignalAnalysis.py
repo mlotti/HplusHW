@@ -32,20 +32,26 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisBtaggingTest2"
 counters = analysis+"Counters/weighted"
 
+treeDraw = dataset.TreeDraw(analysis+"/tree", weight="weightPileup*weightTrigger*weightPrescale")
+
+#QCDfromData = True
+QCDfromData = False
+
+
 # main function
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
-
-   
     datasets.loadLuminosities()
 
     # Take QCD from data
-    datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111024_175451/multicrab.cfg", counters=counters)
-    datasetsQCD.loadLuminosities()
-    datasetsQCD.mergeData()
-    datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
-    datasetsQCD.rename("Data", "QCD")
+    datasetsQCD = None
+    if QCDfromData:
+        datasetsQCD = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_8_patch2/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_111024_175451/multicrab.cfg", counters=counters)
+        datasetsQCD.loadLuminosities()
+        datasetsQCD.mergeData()
+        datasetsQCD.remove(datasetsQCD.getMCDatasetNames())
+        datasetsQCD.rename("Data", "QCD")
     
 #Rtau =0
 #    datasetsSignal = dataset.getDatasetsFromMulticrabCfg(cfgfile="/home/rkinnune/signalAnalysis/CMSSW_4_2_5/src/HiggsAnalysis/HeavyChHiggsToTauNu/test/multicrab_110804_104313/multicrab.cfg", counters=counters)
@@ -81,7 +87,13 @@ def main():
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
+    # Create plots
+#    doPlots(datasets)
 
+    # Print counters
+    doCounters(datasets)
+
+def doPlots(datasets):
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
 #    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
@@ -156,8 +168,9 @@ def main():
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
     path = analysis+"/transverseMass"
     transverseMass2(plots.DataMCPlot(datasets, path), "transverseMass", rebin=20)
-    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
-    transverseMass2(plot, "transverseMass", rebin=20)
+    if QCDfromData:
+        plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
+        transverseMass2(plot, "transverseMass", rebin=20)
 
 #    path = analysis+"/transverseMassWithRtauFakeMet"
 #    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassWithRtauFakeMet", rebin=20)
@@ -235,16 +248,15 @@ def main():
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauIdAllCuts"), "MET_BaseLineTauIdAllCuts", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)    
     
-    td = dataset.TreeDraw("signalAnalysis/tree", weight="weightPileup*weightTrigger*weightPrescale")
     pasJuly = "met_p4.Et() > 70 && Max$(jets_btag) > 1.7"
-    topMass(plots.DataMCPlot(datasets, td.clone(varexp="topreco_p4.M()>>dist(20,0,800)", selection=pasJuly)), "topMass", rebin=1)
+    topMass(plots.DataMCPlot(datasets, treeDraw.clone(varexp="topreco_p4.M()>>dist(20,0,800)", selection=pasJuly)), "topMass", rebin=1)
 
-    met2(plots.DataMCPlot(datasets, td.clone(varexp="met_p4.Et()>>dist(20,0,400)")), "metRaw", rebin=1)
-    met2(plots.DataMCPlot(datasets, td.clone(varexp="metType1_p4.Et()>>dist(20,0,400)")), "metType1", rebin=1)
+    met2(plots.DataMCPlot(datasets, treeDraw.clone(varexp="met_p4.Et()>>dist(20,0,400)")), "metRaw", rebin=1)
+    met2(plots.DataMCPlot(datasets, treeDraw.clone(varexp="metType1_p4.Et()>>dist(20,0,400)")), "metType1", rebin=1)
 
     mt = "sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi())))"
-    transverseMass2(plots.DataMCPlot(datasets, td.clone(varexp=mt+">>dist(40,0,400)", selection=pasJuly)), "transverseMass_metRaw", rebin=1)
-    transverseMass2(plots.DataMCPlot(datasets, td.clone(varexp=mt.replace("met", "metType1")+">>dist(40,0,400)", selection=pasJuly.replace("met", "metType1"))), "transverseMass_metType1", rebin=1)
+    transverseMass2(plots.DataMCPlot(datasets, treeDraw.clone(varexp=mt+">>dist(40,0,400)", selection=pasJuly)), "transverseMass_metRaw", rebin=1)
+    transverseMass2(plots.DataMCPlot(datasets, treeDraw.clone(varexp=mt.replace("met", "metType1")+">>dist(40,0,400)", selection=pasJuly.replace("met", "metType1"))), "transverseMass_metType1", rebin=1)
 
 #    genComparison(datasets)
 #    zMassComparison(datasets)
@@ -253,10 +265,11 @@ def main():
 #    vertexComparison(datasets)
 
 
+def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
 
     # append row from the tree to the main counter
-    eventCounter.getMainCounter().appendRow("MET > 70", td.clone(selection="met_p4.Et() > 70"))
+    eventCounter.getMainCounter().appendRow("MET > 70", treeDraw.clone(selection="met_p4.Et() > 70"))
 
     eventCounter.normalizeMCByLuminosity()
 #    eventCounter.normalizeMCToLuminosity(73)

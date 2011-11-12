@@ -169,6 +169,9 @@ class Count:
     def copy(self):
         return Count(self._value, self._uncertainty)
 
+    def clone(self):
+        return self.copy()
+
     def value(self):
         return self._value
 
@@ -348,6 +351,7 @@ def _mergeStackHelper(datasetList, nameList, task):
 
 
 th1_re = re.compile(">>\s*(?P<name>\S+)\s*\((?P<nbins>\S+)\s*,\s*(?P<min>\S+)\s*,\s*(?P<max>\S+)\s*\)")
+th1name_re = re.compile(">>\s*(?P<name>\S+)")
 class TreeDraw:
     def __init__(self, tree, varexp="", selection="", weight=""):
         self.tree = tree
@@ -387,22 +391,34 @@ class TreeDraw:
         varexp = self.varexp
         m = th1_re.search(varexp)
         h = None
-        if m:
-            varexp = th1_re.sub(">>"+m.group("name"), varexp)
-            h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
-            
+        #if m:
+        #    varexp = th1_re.sub(">>"+m.group("name"), varexp)
+        #    h = ROOT.TH1D(m.group("name"), varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
         
         # e to have TH1.Sumw2() to be called before filling the histogram
         # goff to not to draw anything on the screen
         nentries = tree.Draw(varexp, selection, "e goff")
-        #h = tree.GetHistogram()
+        h = tree.GetHistogram()
         if h != None:
             h = h.Clone(h.GetName()+"_cloned")
         else:
             m = th1_re.search(varexp)
-            if not m:
-                raise Exception("Got null histogram for TTree::Draw(), and unable to infer the histogram limits from the varexp %s" % varexp)
-            h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            if m:
+                h = ROOT.TH1F("tmp", varexp, int(m.group("nbins")), float(m.group("min")), float(m.group("max")))
+            else:
+                m = th1name_re.search(varexp)
+                if m:
+                    h = ROOT.gDirectory.Get(m.group("name"))
+                    h = h.Clone(h.GetName()+"_cloned")
+                    if nentries == 0:
+                        h.Scale(0)
+
+                    if h == None:
+                        raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', unable to infer the histogram limits,  and did not find objectr from gDirectory, from the varexp %s" % (rootFile.GetName(), selection, varexp))
+                else:
+                    raise Exception("Got null histogram for TTree::Draw() from file %s with selection '%s', and unable to infer the histogram limits or name from the varexp %s" % (rootFile.GetName(), selection, varexp))
+
+        h.SetName(datasetName+"_"+h.GetName())
         h.SetDirectory(0)
         return h
 
@@ -415,10 +431,20 @@ class TreeDrawCompound:
         self.datasetMap[datasetName] = treeDraw
 
     def draw(self, rootFile, datasetName):
+        h = None
         if datasetName in self.datasetMap:
-            self.datasetMap[datasetName].draw(rootFile, datasetName)
+            #print "Dataset %s in datasetMap" % datasetName, self.datasetMap[datasetName].selection
+            h = self.datasetMap[datasetName].draw(rootFile, datasetName)
         else:
-            self.default.draw(rootFile, datasetName)
+            #print "Dataset %s with default" % datasetName, self.default.selection
+            h = self.default.draw(rootFile, datasetName)
+        return h
+
+    def clone(self, **kwargs):
+        ret = TreeDrawCompound(self.default.clone(**kwargs))
+        for name, td in self.datasetMap.iteritems():
+            ret.datasetMap[name] = td.clone(**kwargs)
+        return ret
 
 def treeDrawToNumEntries(treeDraw):
     var = treeDraw.weight
@@ -523,6 +549,7 @@ class DatasetRootHisto(DatasetRootHistoBase):
     def _normalizedHistogram(self):
         # Always return a clone of the original
         h = self.histo.Clone()
+        h.SetDirectory(0)
         h.SetName(h.GetName()+"_cloned")
         if self.normalization == "none":
             return h
@@ -982,6 +1009,8 @@ class Dataset:
         """
 
         d = self.file.Get(self.prefix+directory)
+        if d == None:
+            raise Exception("No object %s in file %s" % (self.prefix+directory, self.file.GetName()))
         dirlist = d.GetListOfKeys()
 
         # Suppress the warning message of missing dictionary for some iterator

@@ -193,8 +193,9 @@ namespace HPlus {
     // note: do not require here that only one tau has been found; instead take first item from mySelectedTau as the tau in the event
     increment(fOneProngTauSelectionCounter);
     // Apply trigger scale factor here, because it depends only on tau
-    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]));
-    fTree.setTriggerWeight(triggerWeight.getEventWeight());
+    TriggerEfficiencyScaleFactor::Data triggerWeight = fTriggerEfficiencyScaleFactor.applyEventWeight(*(tauCandidateData.getCleanedTauCandidates()[0]), iEvent.isRealData());
+    double myTauTriggerWeight = triggerWeight.getEventWeight();
+    fTree.setTriggerWeight(triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty());
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
@@ -274,7 +275,7 @@ namespace HPlus {
     if (!iEvent.isRealData()) {
       fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
     }
-    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor());
+    fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     //fTree.setTop(TopSelectionData.getTopP4());
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
     //fTree.setDeltaPhi(fakeMETData.closestDeltaPhi());
