@@ -32,7 +32,7 @@ class CellFormatBase:
     The deriving classes must implement
     _formatValue(value)
     _formatValuePlusMinus(value, uncertainty)
-    _formatValuePlusUpMinusLow(value, uncertaintyUp, uncertaintyLow)
+    _formatValuePlusHighMinusLow(value, uncertaintyHigh, uncertaintyLow)
 
     The value, uncertainty(Up|Low) are strings formatted with the
     value/uncertaintyFormats. The deriving class may then apply
@@ -62,7 +62,7 @@ class CellFormatBase:
     def format(self, count):
         """Format the Count object."""
         value = self._valueFormat % count.value()
-        uUp = count.uncertaintyUp()
+        uUp = count.uncertaintyHigh()
         uLow = count.uncertaintyLow()
 
         if self._valueOnly or (uLow == None and uUp == None):
@@ -71,7 +71,7 @@ class CellFormatBase:
         if (uLow == 0.0 and uUp == 0.0) or (abs(uUp-uLow)/uUp < self._uncertaintyEpsilon):
             return self._formatValuePlusMinus(value, self._uncertaintyFormat % uLow)
         else:
-            return self._formatValuePlusUpMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
+            return self._formatValuePlusHighMinusLow(value, self._uncertaintyFormat % uUp, self._uncertaintyFormat % uLow)
 
 
 class CellFormatText(CellFormatBase):
@@ -90,8 +90,8 @@ class CellFormatText(CellFormatBase):
     def _formatValuePlusMinus(self, value, uncertainty):
         return value + " +- " + uncertainty
 
-    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
-        return value + " +"+uncertaintyUp + " -"+uncertaintyLow
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        return value + " +"+uncertaintyHigh + " -"+uncertaintyLow
 
 class CellFormatTeX(CellFormatBase):
     """TeX cell format."""
@@ -113,8 +113,8 @@ class CellFormatTeX(CellFormatBase):
         (v, u) = self._texify([value, uncertainty])
         return v + " \\pm " + u
 
-    def _formatValuePlusUpMinusLow(self, value, uncertaintyUp, uncertaintyLow):
-        (v, ul, uh) = self._texify([value, uncertaintyUp, uncertaintyLow])
+    def _formatValuePlusHighMinusLow(self, value, uncertaintyHigh, uncertaintyLow):
+        (v, ul, uh) = self._texify([value, uncertaintyHigh, uncertaintyLow])
         return "%s^{+ %s}_{- %s}" % (v, ul, uh)
 
     def _texify(self, numbers):
@@ -434,7 +434,10 @@ def efficiencyColumn(name, column):
         value = None
         if count != None and prev != None:
             try:
-                value = dataset.Count(count.value() / prev.value(), None)
+                eff = count.value() / prev.value()
+                relUnc = math.sqrt((count.uncertainty()/count.value())**2 + (prev.uncertainty()/prev.value())**2)
+
+                value = dataset.Count(eff, eff*relUnc)
             except ZeroDivisionError:
                 pass
         prev = count
