@@ -39,7 +39,7 @@ namespace HPlus {
     else if(mode == "disabled")
       fMode = kDisabled;
     else
-      throw cms::Exception("Configuration") << "Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
+      throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Unsupported value for parameter 'mode' " << mode << ", should be 'efficiency', 'scaleFactor', or 'disabled'" << std::endl;
 
     if(fMode == kDisabled)
       return;
@@ -51,7 +51,7 @@ namespace HPlus {
     std::string mcSelect = iConfig.getParameter<std::string>("mcSelect");
 
     if(dataSelects.empty()) {
-      throw cms::Exception("Configuration") << "Must select at least one data run period in dataSelect" << std::endl;
+      throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Must select at least one data run period in dataSelect" << std::endl;
     }
 
     // Get MC efficiencies for the given MC era
@@ -60,7 +60,7 @@ namespace HPlus {
     for(size_t i=0; i<mcBins.size(); ++i) {
       double bin = mcBins[i].getParameter<double>("pt");
       if(!fPtBinLowEdges.empty() && bin <= fPtBinLowEdges.back())
-        throw cms::Exception("Configuration") << "Bins must be in an ascending order of lowEdges (new "
+        throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor:  Bins must be in an ascending order of lowEdges (new "
                                               << bin << " previous " << fPtBinLowEdges.back() << ")"
                                               << " in mcParameters." << mcSelect
                                               << std::endl;
@@ -79,7 +79,7 @@ namespace HPlus {
 
       std::vector<edm::ParameterSet> dataBins = pset.getParameter<std::vector<edm::ParameterSet> >("bins");
       if(dataBins.size() != fPtBinLowEdges.size())
-        throw cms::Exception("Configuration") << "dataParameters." << *iSelect << " must have same number of bins as mcParameters." << *iSelect << ", now data has " << dataBins.size() << " while mc has " << fPtBinLowEdges.size() << std::endl;
+        throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: dataParameters." << *iSelect << " must have same number of bins as mcParameters." << *iSelect << ", now data has " << dataBins.size() << " while mc has " << fPtBinLowEdges.size() << std::endl;
 
       DataValue dv;
       dv.firstRun = pset.getParameter<unsigned>("firstRun");
@@ -91,7 +91,7 @@ namespace HPlus {
         double bin = dataBins[i].getParameter<double>("pt");
 
         if(!doubleEqual(bin, fPtBinLowEdges[i]))
-          throw cms::Exception("Configuration") << "Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fPtBinLowEdges[i] << std::endl;
+          throw cms::Exception("Configuration") << "TriggerEfficiencyScaleFactor: Bin " << i << " in dataParameters." << *iSelect << " must have same low edge as mcParameters" << *iSelect << ", now data hs " << bin << " while mc has " << fPtBinLowEdges[i] << std::endl;
 
         dv.values.push_back(dataBins[i].getParameter<double>("efficiency"));
         dv.uncertainties.push_back(dataBins[i].getParameter<double>("uncertainty"));
@@ -165,7 +165,7 @@ namespace HPlus {
     // find the first bin for which fPtBinLowEdges[bin] >= pt
     std::vector<double>::const_iterator found = std::lower_bound(fPtBinLowEdges.begin(), fPtBinLowEdges.end(), pt);
     if(found == fPtBinLowEdges.begin())
-      throw cms::Exception("LogicError") << "Got tau pt " << pt << " which is less than the first bin in the given efficiencies " << fPtBinLowEdges.front();
+      throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: Got tau pt " << pt << " which is less than the first bin in the given efficiencies " << fPtBinLowEdges.front();
     // pick the previous bin
     --found;
     return found-fPtBinLowEdges.begin();
@@ -189,18 +189,18 @@ namespace HPlus {
       ss << fDataValues[i].firstRun << "-" << fDataValues[i].lastRun << " ";
     }
 
-    throw cms::Exception("LogicError") << "No data efficiency definitions found for run " << run << ", specified run regions are " << ss.str() << std::endl;
+    throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: No data efficiency definitions found for run " << run << ", specified run regions are " << ss.str() << std::endl;
   }
 
   double TriggerEfficiencyScaleFactor::dataEfficiency(const pat::Tau& tau) const {
     return dataEfficiency(index(tau));
   }
   double TriggerEfficiencyScaleFactor::dataEfficiency(size_t i) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiency()" << std::endl;
     return fCurrentRunData->values[i];
   }
   double TriggerEfficiencyScaleFactor::dataEfficiencyRelativeUncertainty(const pat::Tau& tau) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyRelativeUncertainty()" << std::endl;
     size_t i = index(tau);
     return fCurrentRunData->uncertainties[i] / fCurrentRunData->values[i];
   }
@@ -208,7 +208,7 @@ namespace HPlus {
     return dataEfficiencyAbsoluteUncertainty(index(tau.pt()));
   }
   double TriggerEfficiencyScaleFactor::dataEfficiencyAbsoluteUncertainty(size_t i) const {
-    if(!fCurrentRunData) throw cms::Exception("Assert") << "Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
+    if(!fCurrentRunData) throw cms::Exception("Assert") << "TriggerEfficiencyScaleFactor: Must call TriggerEfficiencyScaleFactor::setRun() before dataEfficiencyAbsoluteUncertainty()" << std::endl;
     return fCurrentRunData->uncertainties[i];
   }
 
@@ -261,7 +261,7 @@ namespace HPlus {
     else if(fMode == kEfficiency) {
       if(isData) {
         if(!fCurrentRunData)
-          throw cms::Exception("LogicError") << "With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
+          throw cms::Exception("LogicError") << "TriggerEfficiencyScaleFactor: With efficiency mode and data input, must call setRun() before applyEventWeight()" << std::endl;
         fWeight = dataEfficiency(tau);
         fWeightAbsUnc = dataEfficiencyAbsoluteUncertainty(tau);
       }
