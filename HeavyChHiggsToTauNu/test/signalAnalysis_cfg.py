@@ -336,7 +336,7 @@ if doAllTauIds:
 # signalAnalysisJESPlus05
 # signalAnalysisJESMinus05
 from HiggsAnalysis.HeavyChHiggsToTauNu.JetEnergyScaleVariation import addJESVariationAnalysis
-def addJESVariation(name, jetVariationMode, metVariation):
+def addJESVariation(name, doJetVariation, metVariation):
     jetVariationMode="all"
     module = getattr(process, name)
 
@@ -347,24 +347,24 @@ def addJESVariation(name, jetVariationMode, metVariation):
     JESs = "%02d" % int(JESVariation*100)
     JESe = "%02d" % int(JESEtaVariation*100)
     JESm = "%02d" % int(metVariation*100)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, metVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, metVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -metVariation, jetVariationMode)
-    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -metVariation, jetVariationMode)
+    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METPlus"+JESm,   module, additionalCounters, JESVariation, JESEtaVariation, metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METPlus"+JESm,  module, additionalCounters, -JESVariation, JESEtaVariation, metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESPlus"+JESs+"eta"+JESe+"METMinus"+JESm,  module, additionalCounters, JESVariation, JESEtaVariation, -metVariation, doJetVariation)
+    addJESVariationAnalysis(process, dataVersion, name, "JESMinus"+JESs+"eta"+JESe+"METMinus"+JESm, module, additionalCounters, -JESVariation, JESEtaVariation, -metVariation, doJetVariation)
 
 if doJESVariation or doSystematics:
-    jetVariationMode = "all"
+    doJetVariation = True
     module = "signalAnalysis"
     modulePas = "signalAnalysisRtau0MET70"
     if options.tauEmbeddingInput != 0:
-        jetVariationMode = "onlyTauMatching"
+        doJetVariation = False
         module = "signalAnalysisCaloMet60TEff"
         modulePas = "signalAnalysisRtau0MET70CaloMet60TEff"
         JESUnclusteredMETVariation=0
 
-    addJESVariation(module, jetVariationMode, JESUnclusteredMETVariation)
+    addJESVariation(module, doJetVariation, JESUnclusteredMETVariation)
     if doSummerPAS:
-        addJESVariation(modulePas, jetVariationMode, JESUnclusteredMETVariation)
+        addJESVariation(modulePas, doJetVariation, JESUnclusteredMETVariation)
 
 
 if doPUWeightVariation or doSystematics:

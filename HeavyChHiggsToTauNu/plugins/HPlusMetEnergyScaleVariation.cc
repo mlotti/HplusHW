@@ -76,16 +76,34 @@ void HPlusMetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
     reco::Candidate::LorentzVector clusteredP4Variated;
 
     addClusteredP4(clusteredP4, clusteredP4Variated, taus.begin(), taus.end());
+
+    /*
+    std::cout << "Tau clustered " << clusteredP4.Pt() << " " << clusteredP4.Phi() << " " << clusteredP4 << std::endl
+              << "     variated " << clusteredP4Variated.Pt() << " " << clusteredP4Variated.Phi() << " " << clusteredP4Variated << std::endl;
+    */
+
     addClusteredP4(clusteredP4, clusteredP4Variated, jets.begin(), jets.end());
 
+    /*
+    std::cout << "Jet clustered " << clusteredP4.Pt() << " " << clusteredP4 << std::endl
+              << "     variated " << clusteredP4Variated.Pt() << " " << clusteredP4Variated << std::endl;
+    */
+
     reco::Candidate::LorentzVector p4 = iMet->p4();
+    //std::cout << "MET original " << p4.Pt() << " " << p4.Phi() << " " << p4 << std::endl;
     p4 -= clusteredP4;
+    //std::cout << "    - clustered " << p4.Pt() << " " << p4.Phi() << " " << p4 << std::endl;
     p4 *= (1 + unclusteredVariation);
+    //std::cout << "    variated " << p4.Pt() << " " << p4.Phi() << " " << p4 << std::endl;
     p4 += clusteredP4Variated;
+    //std::cout << "    + clustered " << p4.Pt() << " " << p4.Phi() << " " << p4 << std::endl;
     p4.SetPz(0);
     p4.SetE(p4.Pt());
+    //std::cout << "    final " << p4.Pt() << " " << p4.Phi() << " " << p4 << std::endl;
     pat::MET met = *iMet;
     met.setP4(p4);
+    //std::cout << "    final " << p4.Et() << " " << p4.Phi() << " " << p4 << std::endl;
+    //std::cout << "    final " << met.et() << std::endl;
     rescaledMets->push_back(met);
   }
   iEvent.put(rescaledMets);
