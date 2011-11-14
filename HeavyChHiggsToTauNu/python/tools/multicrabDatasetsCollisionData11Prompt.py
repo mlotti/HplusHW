@@ -356,6 +356,12 @@ datasets = {
                 "number_of_jobs": 490, # Adjusted for PATtuple file size (~200 in reality)
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165088_pattuple_v19b-a96d8be905ea05d746e188c63f686c22/USER",
+                "luminosity": 139.078000,
+                "number_of_jobs": 10
+            },
         }
     },
     "SingleMu_165970-166150_Prompt": {
@@ -371,6 +377,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "number_of_jobs": 490, # Adjusted for PATtuple file size (~160 in reality)
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_165970_pattuple_v19b-a6e4aebe0f8be894b90b6ef44bce7d28/USER",
+                "luminosity": 94.710000,
+                "number_of_jobs": 7
             },
         }
     },
@@ -391,6 +403,7 @@ datasets = {
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166161_pattuple_v19b-a6a169849ffab7209adc1f692eb70f9c/USER",
+                "luminosity": 3.463000,
                 "number_of_jobs": 1
             },
         }
@@ -408,6 +421,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "number_of_jobs": 20, # Adjusted for PATtuple file size (~10 in reality)
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166346_pattuple_v19b-a7ce7c50e7339193be951ddcf44c47ca/USER",
+                "luminosity": 4.291000,
+                "number_of_jobs": 1
             },
         }
     },
