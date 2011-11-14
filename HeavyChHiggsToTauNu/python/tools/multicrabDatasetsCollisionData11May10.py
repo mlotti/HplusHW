@@ -56,6 +56,12 @@ datasets = {
                 "number_of_jobs": 350, # Adjusted for PATtuple file size
                 "lumiMask": "May10ReReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/Tau/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19-95bdfb89e63988c1ffa2ad610b62da8e/USER",
+                "luminosity": 216.149000,
+                "number_of_jobs": 6
+            },
         }
     },
 
@@ -71,9 +77,14 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/SingleMu/Run2011A-May10ReReco-v1/AOD",
-                "luminosity": 0,
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~430 in reality)
                 "lumiMask": "May10ReReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_160431_pattuple_v19b-c0ae6cd4b6a7f4894060bf4c50b6b08b/USER",
+                "luminosity": 47.008000,
+                "number_of_jobs": 15
             },
         }
     }, 
@@ -94,6 +105,7 @@ datasets = {
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/SingleMu/local-Run2011A_May10ReReco_v1_AOD_163270_pattuple_v19b-4be8b2cd98e864fb2d0886a3cbadb57d/USER",
+                "luminosity": 164.500000,
                 "number_of_jobs": 20
             },
         },
