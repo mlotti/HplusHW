@@ -553,7 +553,7 @@ datasets = {
             "pattuple_v19": {
                 "dbs_url": common.pattuple_dbs,
                 "datasetpath": "/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/local-Summer11_PU_S4_START42_V11_v1_AODSIM_pattuple_v19-9436cd413e1f831f4594f528a53faac6/USER",
-                "number_of_jobs": 16
+                "number_of_jobs": 65
             },
         },
     },
