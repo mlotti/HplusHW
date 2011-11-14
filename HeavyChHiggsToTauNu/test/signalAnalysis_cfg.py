@@ -283,8 +283,6 @@ if options.tauEmbeddingInput:
 
     for name in prototypes:
         module = getattr(process, name).clone()
-
-        module = process.signalAnalysis.clone()
 #        module.Tree.fill = False
         module.trigger.caloMetSelection.metEmulationCut = 60.0
         addAnalysis(process, name+"CaloMet60", module,
