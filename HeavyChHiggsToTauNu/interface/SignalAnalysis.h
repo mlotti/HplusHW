@@ -93,8 +93,6 @@ namespace HPlus {
 
     void produces(edm::EDFilter *producer) const;
 
-    bool beginRun(edm::Run& iRun, const edm::EventSetup& iSetup);
-
     // Interface towards the EDProducer
     bool filter(edm::Event& iEvent, const edm::EventSetup& iSetup);
 
