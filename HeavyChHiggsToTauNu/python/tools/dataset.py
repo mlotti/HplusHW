@@ -181,7 +181,7 @@ class Count:
     def uncertaintyLow(self):
         return self.uncertainty()
 
-    def uncertaintyUp(self):
+    def uncertaintyHigh(self):
         return self.uncertainty()
 
     def add(self, count):
@@ -204,6 +204,27 @@ class Count:
         self._uncertainty = math.sqrt( (self._uncertainty / count._value)**2 +
                                        (self._value*count._uncertainty / (count._value**2) )**2 )
         self._value = self._value / count._value
+
+class CountAsymmetric:
+    def __init__(self, value, uncertaintyLow, uncertaintyHigh):
+        self._value = value
+        self._uncertaintyLow = uncertaintyLow
+        self._uncertaintyHigh = uncertaintyHigh
+
+    def clone(self):
+        return CountAsymmetric(self._value, self._uncertaintyLow, self._uncertaintyHigh)
+
+    def value(self):
+        return self._value
+
+    def uncertainty(self):
+        return max(self._uncertaintyLow, self._uncertaintyHigh)
+
+    def uncertaintyLow(self):
+        return self._uncertaintyLow
+
+    def uncertaintyHigh(self):
+        return self._uncertaintyHigh
 
 ## Transform histogram (TH1) to a list of (name, Count) pairs.
 #
