@@ -14,6 +14,6 @@ LIBS = -L$(ROOTLIBDIR) $(ROOTLIBS) -L.
 	@$(CXX) $(OPT) $(INC) $(LIBS) $< -o $@ -c
 
 all: $(OBJS)
-	@echo $(OBJS)
+#	@echo $(OBJS)
 	@$(CXX) $(OPT) $(INC) $(LIBS) $(OBJS) -o datacardgenerator
 	@echo "Program compiled"
