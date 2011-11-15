@@ -55,6 +55,11 @@ void HPlusTauEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
     tau.addUserFloat("originalPx", iTau->px());
     tau.addUserFloat("originalPy", iTau->py());
     rescaledTaus->push_back(tau);
+
+    /*
+    std::cout << "Tau old " << iTau->pt() << " " << iTau->p4() << std::endl
+              << "    new " << tau.pt() << " " << tau.p4() << std::endl;
+    */
   }
   iEvent.put(rescaledTaus);
 }

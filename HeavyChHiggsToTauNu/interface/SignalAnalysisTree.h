@@ -45,11 +45,15 @@ namespace HPlus {
 
     void setPrescaleWeight(double w) { fPrescaleWeight = w; }
     void setPileupWeight(double w)   { fPileupWeight = w; }
-    void setTriggerWeight(double w)  { fTriggerWeight = w; }
+    void setTriggerWeight(double w, double au)  { fTriggerWeight = w; fTriggerWeightAbsUnc = au; }
     void setFillWeight(double w)  { fFillWeight = w; }
     void enableNonIsoLeptons(bool enableNonIsoLeptons)  { fillNonIsoLeptonVars = enableNonIsoLeptons; }
     void setNvertices(unsigned int n) { fNVertices = n; }
-    void setBTagging(bool passed, double scaleFactor) { fPassedBTagging = passed; fBTaggingWeight = scaleFactor; }
+    void setBTagging(bool passed, double scaleFactor, double scaleFactorUnc) {
+      fPassedBTagging = passed;
+      fBTaggingWeight = scaleFactor;
+      fBTaggingWeightAbsUnc = scaleFactorUnc;
+    }
     void setTop(const XYZTLorentzVector& top) { fTop = top; }
 
     void setRawMET(const edm::Ptr<reco::MET>& met) {
@@ -101,7 +105,9 @@ namespace HPlus {
     double fPrescaleWeight;
     double fPileupWeight;
     double fTriggerWeight;
+    double fTriggerWeightAbsUnc;
     double fBTaggingWeight;
+    double fBTaggingWeightAbsUnc;
     double fFillWeight;
 
     unsigned int fNVertices;
@@ -111,6 +117,7 @@ namespace HPlus {
     XYZTLorentzVector fTau;
     XYZTLorentzVector fTauLeadingChCand;
     unsigned int fTauSignalChCands;
+    double fTauEmFraction;
     std::vector<TauId> fTauIds;
 
     std::vector<XYZTLorentzVector> fJets;

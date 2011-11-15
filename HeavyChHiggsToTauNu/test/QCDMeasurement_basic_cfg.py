@@ -109,7 +109,8 @@ if applyTriggerScaleFactor and dataVersion.isMC():
 puweight = "Run2011A"
 if len(options.puWeightEra) > 0:
     puweight = options.puWeightEra
-param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution 
+param.setPileupWeightFor2011(dataVersion, era=puweight) # Reweight by true PU distribution
+param.setDataTriggerEfficiency(dataVersion, era=puweight)
 
 #Reminder(from HChSignalAnalysisParameters_cff.py):
 #def setTriggerPileupFor2011(**kwargs):
@@ -123,7 +124,7 @@ print "\nhltMetCut:", param.trigger.hltMetCut
 param.InvMassVetoOnJets.setTrueToUseModule = False
 
 ##############################################################################
-process.QCDMeasurement = cms.EDProducer("HPlusQCDMeasurementBasicFilter",
+process.QCDMeasurement = cms.EDFilter("HPlusQCDMeasurementBasicFilter",
     trigger = param.trigger,
     triggerEfficiencyScaleFactor = param.triggerEfficiencyScaleFactor,
     primaryVertexSelection = param.primaryVertexSelection,

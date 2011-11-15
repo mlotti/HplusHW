@@ -23,6 +23,12 @@ namespace HPlus {
     fEnabled(iConfig.getParameter<bool>("enabled")),
     fShiftMean(iConfig.getParameter<bool>("shiftMean"))
   {
+    edm::Service<TFileService> fs;
+    hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
+
+    if(!fEnabled)
+      return;
+
     if(fShiftMean && !fUseSimulatedPileup) {
       throw cms::Exception("Configuration") << "VertexWeight: shiftMean can be used only with the reweighting by simulated PU interactions (not reconstructed vertices)" << std::endl;
     }
@@ -67,8 +73,6 @@ namespace HPlus {
     else {
       fWeights = iConfig.getParameter<std::vector<double> >("weights");
     }
-    edm::Service<TFileService> fs;
-    hWeights = fs->make<TH1F>("pileupReweightWeights", "Reweighting weight distribution", 100, 0, 10);
   }
   VertexWeight::~VertexWeight() {}
 

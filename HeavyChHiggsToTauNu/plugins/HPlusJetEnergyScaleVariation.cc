@@ -30,13 +30,15 @@ private:
   std::vector<double> etaBins;
   std::vector<bool> plusVariations;
   bool defaultPlusVariation;
+  bool doVariation;
 };
 
 HPlusJetEnergyScaleVariation::HPlusJetEnergyScaleVariation(const edm::ParameterSet& iConfig):
   src(iConfig.getParameter<edm::InputTag>("src")),
   payloadName(iConfig.getParameter<std::string>("payloadName")),
   uncertaintyTag(iConfig.getParameter<std::string>("uncertaintyTag")),
-  defaultPlusVariation(iConfig.getParameter<bool>("defaultPlusVariation"))
+  defaultPlusVariation(iConfig.getParameter<bool>("defaultPlusVariation")),
+  doVariation(iConfig.getParameter<bool>("doVariation"))
 {
   std::vector<edm::ParameterSet> bins = iConfig.getParameter<std::vector<edm::ParameterSet> >("etaBins");
   etaBins.reserve(bins.size());
@@ -123,9 +125,16 @@ void HPlusJetEnergyScaleVariation::produce(edm::Event& iEvent, const edm::EventS
     LorentzVector p4 = iJet->p4()*myFactor; 
 
     pat::Jet jet = *iJet;
-    jet.setP4(iJet->p4()*myFactor);
+    if(doVariation)
+      jet.setP4(iJet->p4()*myFactor);
     jet.addUserFloat("originalPx", iJet->px());
     jet.addUserFloat("originalPy", iJet->py());
+    /*
+    std::cout << "Jet i " << (iJet-hjets->begin()) 
+              << " original " << iJet->pt() << " " << iJet->p4()
+              << " variated " << jet.pt() << " " << jet.p4()
+              << std::endl;
+    */
     rescaledJets->push_back(jet);
   }
   iEvent.put(rescaledJets);

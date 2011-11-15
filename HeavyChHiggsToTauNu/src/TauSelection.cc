@@ -371,13 +371,12 @@ namespace HPlus {
     fOperationMode = fOriginalOperationMode;
     // Do selection
     if (fTauID->passIsolation(tauCandidate)) {
-      if (fProngNumber == 1) {
-        if (fTauID->passOneProngCut(tauCandidate)) {
-          if (fTauID->passChargeCut(tauCandidate)) {
-            // All cuts have been passed, save tau
-            fillHistogramsForSelectedTaus(tauCandidate, iEvent);
-            fSelectedTaus.push_back(tauCandidate);
-          }
+      if ((fProngNumber == 1 && fTauID->passOneProngCut(tauCandidate)) ||
+          (fProngNumber == 3 && fTauID->passThreeProngCut(tauCandidate))) {
+        if (fTauID->passChargeCut(tauCandidate)) {
+          // All cuts have been passed, save tau
+          fillHistogramsForSelectedTaus(tauCandidate, iEvent);
+          fSelectedTaus.push_back(tauCandidate);
         }
       }
     }

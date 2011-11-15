@@ -7,6 +7,7 @@
 ######################################################################
 
 import math
+import array
 
 import ROOT
 ROOT.gROOT.SetBatch(True)
@@ -25,13 +26,27 @@ weight = ""
 #weight = "VertexWeight"
 #weight = "PileupWeight"
 
-analysis = "caloMetEfficiency%sh00_h01_All" % weight
+#analysis = "caloMetEfficiency%sh00_h01_All" % weight
 #afterCut = "caloMetEfficiency%sh02_h02_CaloMet45" % weight
-afterCut = "caloMetEfficiency%sh03_h02_CaloMet60" % weight
-counters = "caloMetEfficiency%scountAnalyzer/weighted" % weight
+#afterCut = "caloMetEfficiency%sh03_h02_CaloMet60" % weight
+#counters = "caloMetEfficiency%scountAnalyzer/weighted" % weight
+analysis = "metNtuple"
+#counters = "metNtupleCounters/weighted"
+counters = "metNtupleCounters"
 
 #cutText = "Calo E_{T}^{miss} > 45 GeV"
-cutText = "Calo E_{T}^{miss} > 60 GeV"
+#cutText = "Calo E_{T}^{miss} > 60 GeV"
+
+runRegion = 1
+#runRegion = 2
+mcDataDefinition = True
+#mcDataDefinition = False
+
+runsData = {
+    1: "165088-167913",
+    2: "170722-173692",
+}
+runs = runsData[runRegion]
 
 plotStyles = [
     styles.dataStyle,
@@ -41,6 +56,25 @@ plotStyles = [
 def main():
     # Read the datasets
     datasets = dataset.getDatasetsFromMulticrabCfg(counters=counters)
+    if runRegion == 1:
+        datasets.remove([
+                "SingleMu_Mu_170722-172619_Aug05",
+                "SingleMu_Mu_172620-173198_Prompt",
+                "SingleMu_Mu_173236-173692_Prompt"
+                ])
+    elif runRegion == 2:
+        datasets.remove([
+                "SingleMu_Mu_160431-163261_May10",
+                "SingleMu_Mu_163270-163869_May10",
+                "SingleMu_Mu_165088-166150_Prompt",
+                "SingleMu_Mu_166161-166164_Prompt",
+                "SingleMu_Mu_166346-166346_Prompt",
+                "SingleMu_Mu_166374-167043_Prompt",
+                "SingleMu_Mu_167078-167913_Prompt"
+                ])
+    else:
+        raise Exception("Unsupported run region %d" % runRegion)
+
     datasets.remove([
 #        "SingleMu_160431-163261_May10",
 #        "SingleMu_163270-163869_May10",
@@ -57,14 +91,61 @@ def main():
         ])
     datasets.loadLuminosities()
 
+    dataNames = datasets.getDataDatasetNames()
     datasets.mergeData()
 
-    printEfficienciesCalo(datasets, analysis+"/calometNoHF_et")
-    printEfficienciesPF(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
+    bins = range(0, 170, 10) + [180, 200, 250, 300, 400]
+    th1 = ROOT.TH1D("foo", "foo", len(bins)-1, array.array("d", bins))
+    #th1 = ROOT.TH1D("foo", "foo", 40, 0, 400)
+
+    binning=">>tmp(40,0,400)"
+    #binning=binningDist
+    binningEff=">>foo"
+    treeDraw = dataset.TreeDraw(analysis+"/tree",
+                                #weight="weightPileup",
+                                varexp="pfMet.Et()"+binning)
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
-    plotTurnOn(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
+
+    print "Runs", runs
+    passed = treeDraw.clone(selection="caloMetNoHF.Et() > 60")
+    commonText = "CaloMETnoHF > 60 GeV"
+    dataText = None
+    mcText = None
+    if runRegion == 1:
+        #printEfficienciesCalo(datasets, treeDraw.clone(varexp="caloMetNoHF.Et()"+binning))
+        pass
+    elif runRegion == 2:
+        passedData = treeDraw.clone(selection="l1Met.Et() > 30 && caloMet.Et() > 60")
+        cut = "L1 MET > 30 & CaloMET > 60 GeV"
+        if mcDataDefinition:
+            passed = passedData
+            commonText = cut
+        else:
+            dataText = cut
+            mcText = commonText
+            tmp = {}
+            for name in dataNames:
+                tmp[name] = passedData
+
+            passed = dataset.TreeDrawCompound(passed, tmp)
+            #passed = dataset.TreeDrawCompound(passedData)
+            #passed = passedData
+        #passed = treeDraw.clone(selection="l1Met.Et() > 30 && caloMetNoHF.Et() > 60")
+
+    printEfficienciesPF(datasets, pathAll=treeDraw.clone(), pathPassed=passed.clone(), bin=0)
+    printEfficienciesPF(datasets, pathAll=treeDraw.clone(), pathPassed=passed.clone(), bin=5)
+    printEfficienciesPF(datasets, pathAll=treeDraw.clone(), pathPassed=passed.clone())
+    plotTurnOn(datasets,
+               pathAll=treeDraw.clone(varexp="pfMet.Et()"+binningEff),
+               pathPassed=passed.clone(varexp="pfMet.Et()"+binningEff),
+               commonText=commonText,
+               dataText=dataText,
+               mcText=mcText,
+               )
+
+    #plotTurnOn(datasets, pathAll=analysis+"/pfmet_et", pathPassed=afterCut+"/pfmet_et")
 
     plots.mergeRenameReorderForDataMC(datasets)
     datasets.remove("TTToHplusBWB_M120")
@@ -75,9 +156,14 @@ def main():
     # Set the signal cross sections to a value from MSSM
 #    xsect.setHplusCrossSections(datasets, tanbeta=20, mu=200)
 
-    caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
-    caloMet(plots.DataMCPlot(datasets, analysis+"/calometNoHF_et"))
-    pfMet(plots.DataMCPlot(datasets, analysis+"/pfmet_et"))
+    l1Met(plots.DataMCPlot(datasets, treeDraw.clone(varexp="l1Met.Et()"+binning)), "caloMetNoHF")
+    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMetNoHF.Et()"+binning)), "caloMetNoHF")
+    caloMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="caloMet.Et()"+binning)), "caloMet")
+    pfMet(plots.DataMCPlot(datasets, treeDraw.clone(varexp="pfMet.Et()"+binning)), "pfMet")
+
+    #caloMet(plots.DataMCPlot(datasets, analysis+"/calomet_et"))
+    #caloMet(plots.DataMCPlot(datasets, analysis+"/calometNoHF_et"))
+    #pfMet(plots.DataMCPlot(datasets, analysis+"/pfmet_et"))
 
 
 class Eff:
@@ -136,13 +222,16 @@ def getFromPF(dataset, pathAll, pathPassed, bin):
     return (all, passed, cutvalue)
 
 def printEfficienciesCalo(datasets, path):
-    print "Calo:"
-    printEfficiency(datasets, 61, lambda d, b: getFromCalo(d, path, b))
+    print "Efficiencies of calo MET > 60 cut"
+    #bin = 61
+    bin = 7
+    printEfficiency(datasets, bin, lambda d, b: getFromCalo(d, path, b))
     print
 
-def printEfficienciesPF(datasets, pathAll, pathPassed):
-    print "PF:"
-    printEfficiency(datasets, 71, lambda d, b: getFromPF(d, pathAll, pathPassed, b))
+def printEfficienciesPF(datasets, pathAll, pathPassed, bin=8):
+    print "Efficiencies in a certain PF MET region"
+    #bin = 71
+    printEfficiency(datasets, bin, lambda d, b: getFromPF(d, pathAll, pathPassed, b))
     print
 
 def printEfficiency(datasets, bin, function):
@@ -166,7 +255,7 @@ def printEfficiency(datasets, bin, function):
 #        cutvalue = hpass.GetBinCenter(bin)
         (all, passed, cutvalue) = function(dataset, bin)
         eff = Eff(all, passed, dataset)
-        print "Dataset %s, eff %f + %f - %f" % (dataset.getName(), eff.eff, eff.eff_up, eff.eff_down)
+        print "Dataset %-35s, eff %f + %f - %f" % (dataset.getName(), eff.eff, eff.eff_up, eff.eff_down)
 #        print all, passed, cutvalue
 
 #        e = ROOT.TEfficiency("mc"+dataset.getName(), "mc_"+dataset.getName(), 1, 0, 1)
@@ -203,7 +292,7 @@ def printEfficiency(datasets, bin, function):
 #    print "  MC %f/%f = %f + %f - %f" % (mc_all, mc_passed, mc_eff, mc_eff_up, mc_eff_down)
     print "  Comb. MC %f + %f - %f" % (cmc_eff, cmc_eff_up, cmc_eff_down)
     print "  data %f/%f = %f + %f - %f" % (data_all, data_passed, data_eff, data_eff_up, data_eff_down)
-    print "  rho = %f \\pm %f" % (rho, rho_err)
+    print "  scale factor = %f \\pm %f" % (rho, rho_err)
 
     ROOT.gErrorIgnoreLevel = backup
 
@@ -216,16 +305,28 @@ class PlotTurnOn(plots.PlotBase):
     def finalize(self):
         self.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSize=1.5), plotStyles))
 
-def plotTurnOn(datasets, pathAll, pathPassed, rebin=10):
+def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=None, rebin=1):
+    dataLabel = "Data"
+    mcLabel = "Simulation"
+    if dataText != None and mcText == None:
+        raise Exception("mcText must not be None when dataText is not")
+    if dataText == None and mcText != None:
+        raise Exception("dataText must not be None when mcText is not")
+    if dataText != None:
+        dataLabel += ": "+dataText
+        mcLabel += ": "+mcText
+
     mc_effs = []
     data_eff_gr = None
     binWidth = None
+    luminosity = 0
     for dataset in datasets.getAllDatasets():
         all = dataset.getDatasetRootHisto(pathAll).getHistogram()
         passed = dataset.getDatasetRootHisto(pathPassed).getHistogram()
 
-        all.Rebin(rebin)
-        passed.Rebin(rebin)
+        if rebin > 1:
+            all.Rebin(rebin)
+            passed.Rebin(rebin)
         binWidth = all.GetBinWidth(1)
 
         if dataset.isMC() and not "TTTo" in dataset.getName():
@@ -235,57 +336,71 @@ def plotTurnOn(datasets, pathAll, pathPassed, rebin=10):
 
         elif dataset.isData():
             data_eff_gr = ROOT.TGraphAsymmErrors(passed, all, "cp")
+            luminosity += dataset.getLuminosity()
 
     mc_eff_gr = combineHistoEffs(mc_effs)
 
-    p = PlotTurnOn()
-    p.addGraph(data_eff_gr, "Data")
-    p.addGraph(mc_eff_gr, "Simulation")
-    p.finalize()
+    p = plots.ComparisonPlot(
+        histograms.HistoGraph(data_eff_gr, "Data", "p", "P"),
+        histograms.HistoGraph(mc_eff_gr, "Simulation", "p", "P")
+        )
+    p.histoMgr.forEachHisto(styles.generator2(styles.StyleMarker(markerSize=1.5), plotStyles))
+    p.histoMgr.setHistoLegendLabelMany({
+            "Data": dataLabel,
+            "Simulation": mcLabel,
+            })
+    p.setLuminosity(luminosity)
+    #p.addGraph(data_eff_gr, "Data")
+    #p.addGraph(mc_eff_gr, "Simulation")
+    #p.finalize()
 
-    p.createFrame("calomet_turnon", xmin=0, xmax=250)
-    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85), dx=-0.55, dy=-0.05))
+    opts = {"ymin": 0.0, "ymax": 1.1}
+    opts2 = {"ymin": 0.5, "ymax": 1.5}
+
+    name = "calomet_turnon_"+runs
+    if not mcDataDefinition:
+        name += "_McSummer11"
+    
+    p.createFrame(name, createRatio=True, opts=opts, opts2=opts2)
+    p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85),
+                                      #dx=-0.55, dy=-0.05
+                                      dx=-0.44, dy=-0.58
+                                      ))
 
     def text():
         l = ROOT.TLatex()
         l.SetNDC()
 #        l.SetTextFont(l.GetTextFont()-20) # bold -> normal
-        l.SetTextSize(l.GetTextSize()*0.8)
-        l.DrawLatex(0.4, 0.4, cutText)
-    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%binWidth, False, afterDraw=text)
+        l.SetTextSize(l.GetTextSize()*0.65)
+        #l.DrawLatex(0.35, 0.4, commonText)
+        l.DrawLatex(0.48, 0.32, commonText)
+    textFunction = text
+    if dataText != None:
+        textFunction = None
+    common(p, "PF E_{T}^{miss} (GeV)", "Efficiency / %.0f GeV"%binWidth, afterDraw=textFunction)
 
-def caloMet(h, rebin=10):
-    name = h.getRootHistoPath().replace("/", "_")
+def l1Met(h, name, rebin=1):
+    plotMet(h, name, "L1 MET (GeV)", rebin)
 
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "Calo MET (GeV/c^{2})"
-    ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-    
+def caloMet(h, name, rebin=1):
+    plotMet(h, name, "Calo MET (GeV)", rebin)
+
+def pfMet(h, name, rebin=1):
+    plotMet(h, name, "PF MET (GeV)", rebin)
+
+def plotMet(h, name, xlabel, rebin):
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+
+    ylabel = "Events / %.0f GeV" % h.binWidth()
+
     h.stackMCHistograms(stackSignal=False)
     h.addMCUncertainty()
 
-    opts = {"xmax": 400, "ymin": 1e-2, "ymaxfactor": 10}
+    opts = {"ymin": 1e-2, "ymaxfactor": 10}
 
     #h.createFrameFraction(name, opts=opts)
-    h.createFrame(name, opts=opts)
-    ROOT.gPad.SetLogy(True)
-    h.setLegend(histograms.createLegend())
-    common(h, xlabel, ylabel)
-
-def pfMet(h, rebin=10):
-    name = h.getRootHistoPath().replace("/", "_")
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
-    xlabel = "PF MET (GeV/c^{2})"
-    ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
-    
-    h.stackMCHistograms(stackSignal=False)
-    h.addMCUncertainty()
-
-    opts = {"xmax": 400, "ymin": 1e-2, "ymaxfactor": 10}
-
-    #h.createFrameFraction(name, opts=opts)
-    h.createFrame(name, opts=opts)
+    h.createFrame(name+"_"+runs, opts=opts)
     ROOT.gPad.SetLogy(True)
     h.setLegend(histograms.moveLegend(histograms.createLegend(), dx=-0.12))
     common(h, xlabel, ylabel)

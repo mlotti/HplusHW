@@ -24,6 +24,8 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/SignalAnalysisTree.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
+
 
 namespace edm {
   class ParameterSet;
@@ -53,6 +55,8 @@ namespace HPlus {
       void incrementNJetsCounter() { increment(fNJetsCounter); }
       void incrementBTaggingCounter() { increment(fBTaggingCounter); }
       void incrementDeltaPhiCounter() { increment(fDeltaPhiCounter); }
+      void incrementDeltaPhi160Counter() { increment(fDeltaPhi160Counter); }
+      void incrementDeltaPhi130Counter() { increment(fDeltaPhi130Counter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
     private:
@@ -63,6 +67,8 @@ namespace HPlus {
       Count fNJetsCounter;
       Count fBTaggingCounter;
       Count fDeltaPhiCounter;
+      Count fDeltaPhi160Counter;
+      Count fDeltaPhi130Counter;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
     };
@@ -72,10 +78,12 @@ namespace HPlus {
     kSignalOrderTauID,
     kSignalOrderElectronVeto,
     kSignalOrderMuonVeto,
-    kSignalOrderMETSelection,
     kSignalOrderJetSelection,
+    kSignalOrderMETSelection,
     kSignalOrderBTagSelection,
-    kSignalOrderDeltaPhiSelection,
+    //kSignalOrderDeltaPhiSelection,
+    kSignalOrderDeltaPhi160Selection,
+    kSignalOrderDeltaPhi130Selection,
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection
   };
@@ -103,18 +111,19 @@ namespace HPlus {
     Count fPrimaryVertexCounter;
     Count fTausExistCounter;
     Count fOneTauCounter;
-    Count fRtauAfterTauIDCounter;
+    Count fTriggerScaleFactorCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
-    Count fMETCounter;
     Count fNJetsCounter;
+    Count fMETCounter;
     Count fBTaggingCounter;
+    Count fBTaggingScaleFactorCounter;
     Count fDeltaPhiTauMETCounter;
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
+    Count fdeltaPhiTauMET130Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
-    Count fRtauAfterCutsCounter;
     Count fForwardJetVetoCounter;
     Count ftransverseMassCut80Counter;
     Count ftransverseMassCut100Counter;
@@ -145,6 +154,11 @@ namespace HPlus {
     
     SignalAnalysisTree fTree;
 
+    // Scale factor uncertainties
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterBTagging;
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi160;
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi130;
+    
     // Histograms
     
     // Vertex histograms
@@ -159,8 +173,12 @@ namespace HPlus {
     TH1 *hTransverseMassTopSelection;
     TH1 *hTransverseMassMET70;
     TH1 *hTransverseMassAfterDeltaPhi;
+    TH1 *hTransverseMassAfterDeltaPhi160;
+    TH1 *hTransverseMassAfterDeltaPhi130;
     TH1 *hNonQCDTypeIITransverseMass;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;
@@ -183,6 +201,20 @@ namespace HPlus {
 
     TH1 *hSelectionFlow;
 
+    // Control plots
+    TH1* hCtrlIdentifiedElectronPt;
+    TH1* hCtrlIdentifiedMuonPt;
+    TH1* hCtrlNjets;
+    TH1* hCtrlSelectedTauPtAfterStandardSelections;
+    TH1* hCtrlSelectedTauEtaAfterStandardSelections;
+    TH1* hCtrlSelectedTauPhiAfterStandardSelections;
+    TH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
+    TH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+    TH1* hCtrlSelectedTauRtauAfterStandardSelections;
+    TH1* hCtrlMET;
+    TH1* hCtrlNbjets;
+
+    // CounterGroups for EWK fake taus (aka non-QCD type 2(
     CounterGroup fNonQCDTypeIIGroup;
     CounterGroup fAllTausCounterGroup;
     CounterGroup fElectronToTausCounterGroup;
