@@ -208,6 +208,8 @@ namespace HPlus {
     iNBtags = -1;
     fMaxDiscriminatorValue = 0.;
     fScaleFactor = 1.0;
+    fScaleFactorAbsoluteUncertainty = 0.0;
+    fScaleFactorRelativeUncertainty = 0.0;
     bool passEvent = false;
 
     fSelectedJets.clear();

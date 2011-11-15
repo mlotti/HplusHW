@@ -137,7 +137,8 @@ if applyTriggerScaleFactor and dataVersion.isMC():
     param.triggerEfficiencyScaleFactor.mode = "scaleFactor"
 
 # Set the data scenario for vertex/pileup weighting
-param.setPileupWeightFor2011(dataVersion, era="EPS", method="intime") # Reweight by true PU distribution 
+param.setPileupWeightFor2011(dataVersion, era="EPS", method="intime") # Reweight by true PU distribution
+param.setDataTriggerEfficiency(dataVersion, era="EPS")
 
 #param.trigger.selectionType = "disabled"
 

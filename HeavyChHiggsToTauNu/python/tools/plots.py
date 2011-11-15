@@ -499,6 +499,7 @@ def replaceQCDFromData(datasetMgr, datasetQCDdata):
 def _createRatio(rootHisto1, rootHisto2, ytitle):
     if isinstance(rootHisto1, ROOT.TH1) and isinstance(rootHisto2, ROOT.TH1):
         ratio = rootHisto1.Clone()
+        ratio.SetDirectory(0)
         ratio.Divide(rootHisto2)
         styles.getDataStyle().apply(ratio)
         ratio.GetYaxis().SetTitle(ytitle)
@@ -526,6 +527,19 @@ def _createRatio(rootHisto1, rootHisto2, ytitle):
         return gr
     else:
         raise Exception("Arguments are of unsupported type, rootHisto1 is %s and rootHisto2 is %s" % (type(rootHisto1).__name__, type(rootHisto2).__name__))
+
+def copyStyle(src, dst):
+    properties = []
+    if hasattr(src, "GetLineColor") and hasattr(dst, "SetLineColor"):
+        properties.extend(["LineColor", "LineStyle", "LineWidth"])
+    if hasattr(src, "GetFillColor") and hasattr(dst, "SetFillColor"):
+        properties.extend(["FillColor", "FillStyle"])
+    if hasattr(src, "GetMarkerColor") and hasattr(dst, "SetMarkerColor"):
+        properties.extend(["MarkerColor", "MarkerSize", "MarkerStyle"])
+
+    for prop in properties:
+        getattr(dst, "Set"+prop)(getattr(src, "Get"+prop)())
+
 
 ## Creates a 1-line for ratio plots
 #
@@ -1087,8 +1101,12 @@ class ComparisonPlot(PlotBase):
             self.cf.canvas.cd(1)
             self.cf.pad1.Pop() # Move the first pad on top
 
-    def addLuminosityText(self, *args, **kwargs):
-        pass
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)
 
     ## \var ratio
     # Holds the TH1 for data/MC ratio, if exists
@@ -1097,3 +1115,91 @@ class ComparisonPlot(PlotBase):
     ## \var coverPad
     # Holds TPad to cover the larget Y axis value of the ratio TPad,
     # if ratio exists
+
+class ComparisonManyPlot(PlotBase):
+    def __init__(self, histoReference, histoCompares, **kwargs):
+        if isinstance(histoReference, dataset.DatasetRootHistoBase):
+            PlotBase.__init__(self, [histoReference]+histoCompares, **kwargs)
+        else:
+            # assume all argumetns are HistoBase objects instead
+            for i, hc in enumerate(histoCompares):
+                if isinstance(hc, dataset.DatasetRootHistoBase):
+                    raise Exception("Input types can't be a mixture of DatasetRootHistoBase and something, histoReference is %s, histoCompare %d is %s" % (type(histoReference).__name__, i, type(hc).__name__))
+            PlotBase.__init__(self, **kwargs)
+            for h in [histoReference]+histoCompares:
+                self.histoMgr.appendHisto(h)
+
+    def createFrame(self, filename, createRatio=False, invertRatio=False, coverPadOpts={}, **kwargs):
+        if not createRatio:
+            PlotBase.createFrame(self, filename, **kwargs)
+        else:
+            histos = self.histoMgr.getHistos()
+            reference = histos[0]
+            compares = histos[1:]
+            self.ratios = []
+            for ch in compares:
+                (numerator, denominator) = (reference.getRootHisto(), ch.getRootHisto())
+                if invertRatio:
+                    (numerator, denominator) = (denominator, numerator)
+                ratio = _createRatio(numerator, denominator, "%s/%s" % (reference.getName(), ch.getName()))
+                copyStyle(ch.getRootHisto(), ratio)
+                self.ratios.append(ratio)
+
+            self.cf = histograms.CanvasFrameTwo(self.histoMgr, self.ratios, filename, **kwargs)
+            self.frame = self.cf.frame
+            self.cf.frame2.GetYaxis().SetNdivisions(505)
+
+            self.coverPadOpts = coverPadOpts
+
+    ## Get the upper frame TH1
+    def getFrame1(self):
+        return self.cf.frame1
+
+    ## Get the lower frame TH1
+    def getFrame2(self):
+        return self.cf.frame2
+
+    ## Get the upper TPad
+    def getPad1(self):
+        return self.cf.pad1
+
+    ## Get the lower TPad
+    def getPad2(self):
+        return self.cf.pad2
+
+    def draw(self):
+        PlotBase.draw(self)
+        if hasattr(self, "ratios"):
+            self.cf.canvas.cd(2)
+
+            self.line = _createRatioLine(self.cf.frame.getXmin(), self.cf.frame.getXmax())
+            self.line.Draw("L")
+
+            ratios = self.ratios[:]
+            ratios.reverse()
+            for r in ratios:
+                r.Draw("EP same")
+
+            # Redraw the axes in order to get the tick marks on top of the
+            # histogram
+            self.getPad1().RedrawAxis()
+
+            self.cf.canvas.cd()
+
+            # Create an empty, white-colored pad to hide the topmost
+            # label of the y-axis of the lower pad. Then move the
+            # upper pad on top, so that the lowest label of the y-axis
+            # of it is shown
+            self.coverPad = _createCoverPad(**self.coverPadOpts)
+            self.coverPad.Draw()
+
+            self.cf.canvas.cd(1)
+            self.cf.pad1.Pop() # Move the first pad on top
+
+    def setLuminosity(self, lumi):
+        self.luminosity = lumi
+
+    def addLuminosityText(self, x=None, y=None):
+        if hasattr(self, "luminosity"):
+            histograms.addLuminosityText(x, y, self.luminosity)
+

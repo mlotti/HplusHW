@@ -265,14 +265,11 @@ vertexWeight = cms.untracked.PSet(
     shiftMeanAmount = cms.double(0),    
 )
 
-
-def triggerBin(pt, dataEff, dataUnc, mcEff, mcUnc):
+def triggerBin(pt, efficiency, uncertainty):
     return cms.PSet(
         pt = cms.double(pt),
-        dataEff = cms.double(dataEff),
-        dataUncertainty = cms.double(dataUnc),
-        mcEff = cms.double(mcEff),
-        mcUncertainty = cms.double(mcUnc)
+        efficiency = cms.double(efficiency),
+        uncertainty = cms.double(uncertainty)
     )
 triggerEfficiencyScaleFactor = cms.untracked.PSet(
     # The selected triggers for the efficiency. If one trigger is
@@ -288,18 +285,62 @@ triggerEfficiencyScaleFactor = cms.untracked.PSet(
     # ),
     # The parameters of the trigger efficiency parametrizations,
     # looked dynamically from TriggerEfficiency_cff.py
-    parameters = cms.untracked.VPSet(
-        # For EPS piece only
-        triggerBin(40, 0.515873,  0.04844569, 0.6168224, 0.03608822),
-        triggerBin(50, 0.8571429, 0.1583514,  0.8809524, 0.07255525),
-        triggerBin(60, 0.8571429, 0.2572427,  0.8125,    0.1494758),
-        triggerBin(80, 0.8571429, 0.2572427,  1,         0.1682306),
-        # PAS HIG-11-008
-        #triggerBin(40, 0.4035088, 0.06502412, 0.406639,  0.02247143),
-        #triggerBin(50, 0.7857143, 0.1164651,  0.6967213, 0.04239523),
-        #triggerBin(60, 0.8,       0.1108131,  0.8235294, 0.04892095),
-        #triggerBin(80, 1,         0.2496484,  0.7916667, 0.08808045),
+    dataParameters = cms.PSet(
+        # L1_SingleTauJet52 OR L1_SingleJet68 + HLT_IsoPFTau35_Trk20
+        runs_160431_167913 = cms.PSet(
+            firstRun = cms.uint32(160431),
+            lastRun = cms.uint32(167913),
+            luminosity = cms.double(1145.897000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.515873,  0.04844569),
+                triggerBin(50, 0.8571429, 0.1583514),
+                triggerBin(60, 0.8571429, 0.2572427),
+                triggerBin(80, 0.8571429, 0.2572427)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_IsoPFTau35_Trk20_MET60
+        runs_170722_173198 = cms.PSet(
+            firstRun = cms.uint32(170722),
+            lastRun = cms.uint32(173198),
+            luminosity = cms.double(780.396000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.666667, 0.101509),
+                triggerBin(50, 1,        0.369032),
+                triggerBin(60, 1,        0.369032),
+                triggerBin(80, 1,        0.8415)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011A)
+        runs_173236_173692 = cms.PSet(
+            firstRun = cms.uint32(173236),
+            lastRun = cms.uint32(173692),
+            luminosity = cms.double(246.527000), # 1/pb
+            bins = cms.VPSet(
+                triggerBin(40, 0.6, 0.204692),
+                triggerBin(50, 1,   0.458818),
+                triggerBin(60, 1,   0.369032),
+                triggerBin(80, 1,   0.8415)
+            ),
+        ),
+        # L1_Jet52_Central + HLT_MediumIsoPFTau35_Trk20_MET60 (Run2011B)
+        runs_175860_180252 = cms.PSet(
+        ),
     ),
+    mcParameters = cms.PSet(
+        Summer11 = cms.PSet(
+            bins = cms.VPSet(
+                triggerBin(40, 0.6168224, 0.03608822),
+                triggerBin(50, 0.8809524, 0.07255525),
+                triggerBin(60, 0.8125,    0.1494758),
+                triggerBin(80, 1,         0.1682306)
+            ),
+        ),
+        # Placeholder until efficiencies have been measured
+        Fall11 = cms.PSet(
+        ), 
+    ),
+    dataSelect = cms.vstring(),
+    mcSelect = cms.string("Summer11"),
     mode = cms.untracked.string("disabled") # dataEfficiency, scaleFactor, disabled
 )
 
@@ -326,70 +367,25 @@ def _getTriggerVertexArgs(kwargs):
         vargs["pset"] = module.vertexWeight
     return (effargs, vargs)
 
-# def setTriggerPileupFor2010(**kwargs):
-#     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
-#     setEfficiencyTriggersFor2010(**effargs)
-#     setPileupWeightFor2010(**vargs)
-
-# def setTriggerPileupFor2011(**kwargs):
-#     (effargs, vargs) = _getTriggerVertexArgs(kwargs)
-#     setEfficiencyTriggersFor2011(**effargs)
-#     setPileupWeightFor2011All(**vargs)
-
-# # One trigger
-# def setEfficiencyTrigger(trigger, pset=triggerEfficiency):
-#     pset.selectTriggers = [cms.PSet(trigger = cms.string(trigger), luminosity = cms.double(-1))]
-
-# # Many triggers in  (trigger, lumi) pairs
-# def setEfficiencyTriggers(triggers, pset=triggerEfficiency):
-#     pset.selectTriggers = [cms.PSet(trigger=cms.string(t), luminosity=cms.double(l)) for t,l in triggers]
-
-# # Triggers and lumis from task names
-# def setEfficiencyTriggersFromMulticrabDatasets(tasknames, datasetType="pattuple_v10", **kwargs):
-#     from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrabDatasets import datasets
-#     triggers = []
-#     for name in tasknames:
-#         if not name in datasets:
-#             raise Exception("No configuration fragment for datasets '%s' in multicrabDatasets.py" % name)
-#         conf = datasets[name]
-#         if not "trigger" in conf:
-#             raise Exception("No trigger field in configuration fragment of dataset '%s'" % name)
-
-#         if not datasetType in conf["data"]:
-#             raise Exception("No definition for datasetType '%s' for dataset '%s', required to deduce the integrated luminosity" % (datasetType, name))
-#         data = conf["data"][datasetType]
-#         while "fallback" in data:
-#             data = conf["data"][ data["fallback"] ]
-
-#         if not "luminosity" in data:
-#             raise Exception("No luminosity for dataset '%s' with datasetType '%s'" % (name, datasetType))
-
-#         triggers.append( (
-#                 conf["trigger"],
-#                 data["luminosity"]
-#             ) )
-#     setEfficiencyTriggers(triggers, **kwargs)
-
-# def setEfficiencyTriggersFor2010(datasetType="pattuple_v10", **kwargs):
-#     raise Exception("This function is not supported at the moment")
-#     setEfficiencyTriggersFromMulticrabDatasets([
-#             "BTau_146428-148058_Dec22",
-#             "BTau_148822-149182_Dec22",
-#             "BTau_149291-149294_Dec22",
-#             ], datasetType, **kwargs)
-# def setEfficiencyTriggersFor2011(datasetType="pattuple_v10", **kwargs):
-#     raise Exception("This function is not supported at the moment")
-#     setEfficiencyTriggersFromMulticrabDatasets([
-#             "Tau_160431-161016_Prompt",
-#             "Tau_162803-163261_Prompt",
-#             "Tau_163270-163369_Prompt",
-#             ], **kwargs)
-
-# def formatEfficiencyTrigger(pset):
-#     if pset.luminosity.value() < 0:
-#         return pset.trigger.value()
-#     else:
-#         return "%s (%f)" % (pset.trigger.value(), pset.luminosity.value())
+def setDataTriggerEfficiency(dataVersion, era):
+    if dataVersion.isMC():
+        if dataVersion.isS4():
+            triggerEfficiencyScaleFactor.mcSelect = "Summer11"
+        elif dataVersion.isS6():
+            triggerEfficiencyScaleFactor.mcSelect = "Fall11"
+        else:
+            raise Exception("MC trigger efficencies are available only for Summer11 and Fall11")
+    
+    if era == "EPS":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913"]
+    elif era == "Run2011A":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913", "runs_170722_173198", "runs_173236_173692"]
+    elif era == "Run2011B":
+        raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
+    elif era == "Run2011A+B":
+        raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
+    else:
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A', 'Run2011B', 'Run2011A+B'")
 
 
 # Weighting by instantaneous luminosity, and the number of true

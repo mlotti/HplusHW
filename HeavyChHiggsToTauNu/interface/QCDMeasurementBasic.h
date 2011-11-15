@@ -27,6 +27,7 @@
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TriggerEfficiencyScaleFactor.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/FakeTauIdentifier.h"
 #include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/VertexWeight.h" // PU re-weight
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/ScaleFactorUncertaintyManager.h"
 
 #include "TTree.h"
 #include "TH2F.h"
@@ -45,10 +46,10 @@ namespace HPlus {
   class QCDMeasurementBasic {  
     class AnalysisVariation {
     public:
-      AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins);
+      AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins);
       ~AnalysisVariation();
       
-      void analyse(const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, double triggerSF, FakeTauIdentifier::MCSelectedTauMatchType tauMatch);
+      void analyse(bool isRealData, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex);
 
     private:
       double fMETCut;
@@ -58,14 +59,26 @@ namespace HPlus {
       TH1F* hLeg1AfterDeltaPhiTauMET;
       TH1F* hLeg1AfterMET;
       TH1F* hLeg1AfterBTagging;
+      ScaleFactorUncertaintyManager* fSFUncertaintyAfterMetLeg;
       TH1F* hLeg2AfterTauIDNoRtau;
       TH1F* hLeg2AfterTauIDWithRtau;
-      // Transverse mass histograms
-      TH1F* hMtLegAfterDeltaPhiTauMET;
+      ScaleFactorUncertaintyManager* fSFUncertaintyAfterTauLeg;
+      // event counts in bins of tau jet pt for transverse mass
       TH1F* hMtLegAfterMET;
+      TH1F* hMtLegAfterDeltaPhiTauMET;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterMETAndDeltaPhi;
       TH1F* hMtLegAfterMETAndTauIDNoRtau;
       TH1F* hMtLegAfterMETAndTauIDWithRtau;
-      std::vector<TH1F*> hMtShapesAfterMET;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterTauID;
+      TH1F* hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
+      ScaleFactorUncertaintyManager* fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID;
+      std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhi;
+      std::vector<TH1F*> hMtShapesAfterMETAndDeltaPhiAndInvertedTau;
+      // event counts in bins of tau jet pt and transverse mass for transverse mass
+      TH2F* h2DMtLegAfterDeltaPhiTauMET;
+      TH2F* h2DMtLegAfterMETAndTauIDNoRtau;
+      TH2F* h2DMtLegAfterMETAndTauIDWithRtau;
+      TH2F* h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau;
 
       // Fake tau histograms (type II)
       TH1F* hFakeTauLeg1AfterDeltaPhiTauMET;
@@ -78,7 +91,10 @@ namespace HPlus {
       TH1F* hFakeTauMtLegAfterMET;
       TH1F* hFakeTauMtLegAfterMETAndTauIDNoRtau;
       TH1F* hFakeTauMtLegAfterMETAndTauIDWithRtau;
-      std::vector<TH1F*> hFakeTauMtShapesAfterMET;
+      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau;
+      TH1F* hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau;
+      std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhi;
+      std::vector<TH1F*> hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau;
       
       // FIXME add TTree's for trigger and btag scalefactor uncertainties
     };
@@ -108,6 +124,7 @@ namespace HPlus {
     bool analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     /// Returns index to tau pT bin; 0 is underflow and size() is highest bin
     int getTauPtBinIndex(double pt);
+    int getMtBinIndex(double mt);
     
 
   private:
@@ -156,11 +173,14 @@ namespace HPlus {
     GenParticleAnalysis fGenparticleAnalysis;   
     //
     VertexWeight fVertexWeight;
+    FakeTauIdentifier fFakeTauIdentifier;
     TriggerEfficiencyScaleFactor fTriggerEfficiencyScaleFactor;
 
     SignalAnalysisTree fTree;
-
+    ScaleFactorUncertaintyManager fSFUncertaintyAfterStandardSelections;
+    
     std::vector<double> fTauPtBinLowEdges;
+    std::vector<double> fTransverseMassBinLowEdges;
     
     // Histograms
     TH1 *hVerticesBeforeWeight;
@@ -176,10 +196,18 @@ namespace HPlus {
     TH1F* hFakeTauAfterIsolatedElectronVeto;
     TH1F* hFakeTauAfterIsolatedMuonVeto;
     TH1F* hFakeTauAfterJetSelection;
+    // Histograms for obtaining control plots
+    TH1F* hAfterTauCandidateSelectionAndTauID;
+    TH1F* hAfterIsolatedElectronVetoAndTauID;
+    TH1F* hAfterIsolatedMuonVetoAndTauID;
+    TH1F* hAfterJetSelectionAndTauID;
 
     // Other control histograms
     //TH1 *hTauCandidateSelectionIsolatedPtMax;
-    
+
+    // event counts in bins of tau jet pt and transverse mass
+    TH2* hMtAfterJetSelection;
+
     // Other histograms
     TH1 *hSelectionFlow;
 

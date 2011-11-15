@@ -11,6 +11,8 @@
 #
 ######################################################################
 
+import math, array
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -23,7 +25,6 @@ import HiggsAnalysis.HeavyChHiggsToTauNu.tools.styles as styles
 import plotMuonAnalysis as muonAnalysis
 
 # Configuration
-analysis = "signalAnalysis"
 #analysis = "signalAnalysisJESPlus03eta02METPlus00"
 #analysis = "signalAnalysisJESPlus03eta02METMinus00"
 #analysis = "signalAnalysisJESMinus03eta02METPlus00"
@@ -32,8 +33,12 @@ analysis = "signalAnalysis"
 #analysis = "signalAnalysisRtau70"
 #analysis = "signalAnalysisRtau80"
 
-#analysis = "signalAnalysisCaloMet60"
-#analysis = "signalAnalysisCaloMet60TEff"
+#postfix = ""
+#postfix = "CaloMet60"
+postfix = "CaloMet60TEff"
+
+analysis = "signalAnalysis"+postfix
+analysisNoRtau = "signalAnalysisRtau0MET70"+postfix
 
 #analysis = "signalAnalysisCaloMet60TEffJESPlus03eta02METPlus00"
 #analysis = "signalAnalysisCaloMet60TEffJESMinus03eta02METPlus00"
@@ -72,7 +77,8 @@ countersWeighted = counters
 if normalize:
     countersWeighted = counters+"/weighted"
 
-output = "mt_ewk_lands.root"
+tauPtOutput ="tauPt_ewk.root"
+mtOutput = "mt_ewk_lands.root"
 
 # main function
 def main():
@@ -82,15 +88,17 @@ def main():
                                                    )
 
     datasets.remove([
-#        "SingleMu_160431-163261_May10",
-#        "SingleMu_161119-161119_May10_Wed",
-#        "SingleMu_163270-163869_May10",
-#        "SingleMu_165088-166150_Prompt",
-#        "SingleMu_166161-166164_Prompt",
-#        "SingleMu_166346-166346_Prompt",
-#        "SingleMu_166374-167043_Prompt",
-#        "SingleMu_167078-167784_Prompt",
-#        "SingleMu_167786-167913_Prompt_Wed"
+#            "SingleMu_Mu_160431-163261_May10",
+#            "SingleMu_Mu_163270-163869_May10",
+#            "SingleMu_Mu_165088-166150_Prompt",
+#            "SingleMu_Mu_166161-166164_Prompt",
+#            "SingleMu_Mu_166346-166346_Prompt",
+#            "SingleMu_Mu_166374-167043_Prompt",
+#            "SingleMu_Mu_167078-167913_Prompt",
+
+            "SingleMu_Mu_170722-172619_Aug05",
+            "SingleMu_Mu_172620-173198_Prompt",
+            "SingleMu_Mu_173236-173692_Prompt",
         ])
     datasets.loadLuminosities()
 #    datasets.remove(["Mu_136035-144114_Dec22", "Mu_146428-147116_Dec22", "Mu_147196-149294_Dec22"]) 
@@ -108,7 +116,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     mcOnly = not datasets.hasDataset("Data")
-    mcLumi = 1062
+    mcLumi = 1141
 #    mcLumi = 199.7
                                      
 
@@ -122,20 +130,67 @@ def main():
 
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-    #opts = {"xmin": 40, "xmax": 200, "ymaxfactor":10, "ymin": 1e-1}
-    opts = {"xmin": 40, "xmax": 200, "ymaxfactor":2, "ymin": 1e-1}
-    rebin = 10
-
     def createPlot(name):
         kwargs = {}
         if mcOnly:
             kwargs["normalizeToLumi"] = mcLumi
-        return plots.DataMCPlot(datasets, analysis+"/"+name, **kwargs)
-    
-    tauPt(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-#    tauPt(createPlot("TauEmbeddingAnalysis_afterMetCut_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-    tauPt(createPlot("TauEmbeddingAnalysis_afterBTagging_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
-    tauPt(createPlot("TauEmbeddingAnalysis_afterBTagging_selectedTauPtNoWeight"), opts=opts, rebin=10, ratio=False)
+        name2 = name
+        if isinstance(name, basestring):
+            name2 = analysis+"/"+name
+        return plots.DataMCPlot(datasets, name2, **kwargs)
+
+    weight = ""
+    weightBTagging = ""
+    if normalize:
+        weight = "weightPileup*weightTrigger"
+        weightBTagging = weight+"*weightBTagging"
+    treeDraw = dataset.TreeDraw(analysis+"/tree", weight=weight)
+
+    #opts = {"xmin": 40, "xmax": 200, "ymaxfactor":10, "ymin": 1e-1}
+    opts = {"xmin": 40, "xmax": 200, "ymaxfactor":2, "ymin": 1e-1}
+    rebin = 10
+    tdTauPt = treeDraw.clone(varexp="tau_p4.Pt()>>tmp(16, 40, 200)")
+
+    caloMetCut = "(tecalomet_p4.Et() > 60)"
+    metCut = "(met_p4.Et() > 40)"
+    bTaggingCut = "passedBTagging"
+    #deltaPhi160Cut = "abs(tau_p4.Phi() - met_p4.Phi())*57.3 <= 160"
+    deltaPhi160Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 160)"
+    deltaPhi130Cut = "(acos( (tau_p4.Px()*met_p4.Px()+tau_p4.Py()*met_p4.Py())/(tau_p4.Pt()*met_p4.Et()) )*57.3 <= 130)"
+
+    tauPt(createPlot("SelectedTau/SelectedTau_pT_AfterTauID"), "selectedTauPt_1AfterTauID", opts=opts, rebin=rebin)
+    tauPt(createPlot(tdTauPt.clone()), "selectedTauPt_1AfterTauID_crosscheck", opts=opts)
+    tauPt(createPlot(tdTauPt.clone(selection=metCut)), "selectedTauPt_2AfterMET", opts=opts)
+    tauPt(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut, weight=weightBTagging)),
+          "selectedTauPt_3AfterBTagging", opts=opts)
+    tauPt(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut, weight=weightBTagging)),
+          "selectedTauPt_4AfterDeltaPhi160", opts=opts)
+    tauPt(createPlot(tdTauPt.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut, weight=weightBTagging)),
+          "selectedTauPt_4AfterDeltaPhi130", opts=opts)
+
+
+    del opts["xmin"]
+    del opts["xmax"]
+    f = ROOT.TFile.Open(tauPtOutput, "RECREATE")
+    bins = [40, 50, 60, 70, 80, 100, 120, 150, 300]
+    tauPtPrototype = ROOT.TH1F("tauPtHistoFoo", "Tau pt", len(bins)-1, array.array("d", bins))
+    tauPtPrototype.SetDirectory(ROOT.gDirectory)
+    for name, an in [
+        ("AllSelectionsNoRtau", analysisNoRtau),
+        ("AllSelections", analysis)
+        ]:
+
+        td = treeDraw.clone(tree=an+"/tree", varexp="tau_p4.Pt() >>tauPtHistoFoo", weight=weightBTagging, selection=metCut+"&&"+bTaggingCut)
+
+        tauPt(createPlot(td), "selectedTauPt_9"+name, opts=opts)
+        pt = createPlot(td)
+        scaleNormalization(pt)
+        pt_data = pt.histoMgr.getHisto("Data").getRootHisto().Clone("tauPt_ewk_"+name)
+        pt_data.SetDirectory(f)
+        pt_data.Write()
+        
+    f.Close()
+
 #    tauPt(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_selectedTauPt"), opts=opts, rebin=rebin, ratio=False)
 #    tauEta(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=True)
 #    tauPhi(createPlot("TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
@@ -162,6 +217,9 @@ def main():
     opts = {"xmin": 70, "ymaxfactor": 10}
     rebin = 10
 
+    tdMet = treeDraw.clone(varexp="met_p4.Et()>>tmp(20,0,200)")
+    tdMetOrig = treeDraw.clone(varexp="temet_p4.Et()>>tmp(20,0,200)")
+
 #    met(createPlot("MET/met"))
 #    met(createPlot("TauEmbeddingAnalysis_afterMetCut_originalMet"))
 #    met(createPlot("TauEmbeddingAnalysis_afterBTagging_originalMet"))
@@ -173,23 +231,32 @@ def main():
 #    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
 #    deltaPhi(createPlot("TauEmbeddingAnalysis_afterTauId_DeltaPhiOriginal"))
 
-    transverseMass(createPlot("TauEmbeddingAnalysis_begin_TransverseMass"))
-    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-    transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
+    #transverseMass(createPlot("TauEmbeddingAnalysis_begin_TransverseMass"))
+    #transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMass"))
+    #transverseMass(createPlot("TauEmbeddingAnalysis_afterTauId_TransverseMassOriginal"))
 
     opts = {}
-    transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
-    transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
 
-    mt = createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass")
-    scaleNormalization(mt)
-    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
-    f = ROOT.TFile.Open(output, "RECREATE")
-    mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_ewk")
-    mt_data.SetDirectory(f)
-    f.Write()
+    tdMt = treeDraw.clone(varexp="sqrt(2 * tau_p4.Pt() * met_p4.Et() * (1-cos(tau_p4.Phi()-met_p4.Phi()))) >>tmp(40,0,400)")
+    f = ROOT.TFile.Open(mtOutput, "RECREATE")
+
+    for name, selection in [
+        ("1AfterBTagging", metCut+"&&"+bTaggingCut),
+        ("2AfterDeltaPhi160", metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut),
+        ("2AfterDeltaPhi130", metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut),
+        ]:
+        td = tdMt.clone(selection=selection, weight=weightBTagging)
+        transverseMass(createPlot(td.clone()), "transverseMass_"+name, opts=opts)
+        mt = createPlot(td.clone())
+        scaleNormalization(mt)
+        mt_data = mt.histoMgr.getHisto("Data").getRootHisto().Clone("mt_ewk_"+name)
+        mt_data.SetDirectory(f)
+        mt_data.Write()
+
     f.Close()
     
+    #transverseMass(createPlot("TauEmbeddingAnalysis_afterBTagging_TransverseMass"), opts=opts, rebin=rebin)
+    #transverseMass(createPlot("TauEmbeddingAnalysis_afterFakeMetVeto_TransverseMass"), opts=opts, rebin=rebin)
 
 #    jetPt(createPlot("JetSelection/jet_pt"), "jetPtEmb")
 #    jetEta(createPlot("JetSelection/jet_eta"), "jetEtaEmb")
@@ -202,28 +269,113 @@ def main():
 #    numberOfJets(createPlot("Btagging/NumberOfBtaggedJets"), "NumberOfBJetsEmb")
 
     eventCounter = counter.EventCounter(datasets, counters=countersWeighted)
+
+    
+
+    tdCount = treeDraw.clone(weight=weightBTagging)
+    tdCountBTagging = tdCount.clone(selection=metCut+"&&"+bTaggingCut)
+    tdCountDeltaPhi160 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi160Cut)
+    tdCountDeltaPhi130 = tdCount.clone(selection=metCut+"&&"+bTaggingCut+"&&"+deltaPhi130Cut)
+    eventCounter.getMainCounter().appendRow("BTagging", tdCountBTagging)
+    eventCounter.getMainCounter().appendRow("DeltaPhi < 160", tdCountDeltaPhi160)
+    eventCounter.getMainCounter().appendRow("DeltaPhi < 130", tdCountDeltaPhi130)
+
     if mcOnly:
         eventCounter.normalizeMCToLuminosity(mcLumi)
     else:
         eventCounter.normalizeMCByLuminosity()
     scaleNormalization(eventCounter)
+
+    ewkDatasets = [
+        "WJets", "TTJets",
+        "DYJetsToLL", "SingleTop", "Diboson"
+        ]
+
     table = eventCounter.getMainCounterTable()
+    mainTable = table
 #    table = eventCounter.getSubCounterTable("Trigger")
     muonAnalysis.addSumColumn(table)
+    mainTable.insertColumn(2, counter.sumColumn("EWKMCsum", [mainTable.getColumn(name=name) for name in ewkDatasets]))
     #    muonAnalysis.reorderCounterTable(table)
 #    muonAnalysis.addDataMcRatioColumn(table)
     datasets.printInfo()
     print "============================================================"
     print "Main counter (%s)" % eventCounter.getNormalizationString()
-    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%f'))
+    cellFormat = counter.TableFormatText(counter.CellFormatText(valueFormat='%.3f'))
     print table.format(cellFormat)
 
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight").format(cellFormat)
-    print eventCounter.getSubCounterTable("TauIDPassedEvt::triggerTau_HPSTight").format(cellFormat)
+    tauTable = eventCounter.getSubCounterTable("TauIDPassedEvt::tauID_HPSTight")
+    muonAnalysis.addSumColumn(tauTable)
+    tauTable.insertColumn(2, counter.sumColumn("EWKMCsum", [tauTable.getColumn(name=name) for name in ewkDatasets]))
+    print tauTable.format(cellFormat)
 #    print eventCounter.getSubCounterTable("TauIDPassedJets::tauID_HPSTight").format()
     table = eventCounter.getSubCounterTable("Trigger")
     muonAnalysis.addSumColumn(table)
     print table.format(cellFormat)
+
+    mainTable.keepOnlyRows([
+            "All events",
+            "taus == 1",
+            "electron veto",
+            "muon veto",
+            "MET",
+            "njets",
+            "btagging",
+            "BTagging",
+            "DeltaPhi < 160",
+            "DeltaPhi < 130"
+            ])
+    tauTable.keepOnlyRows([
+            "AllTauCandidates",
+            "DecayModeFinding",
+            "TauJetPt",
+            "TauJetEta",
+            "TauLdgTrackExists",
+            "TauLdgTrackPtCut",
+            "TauECALFiducialCutsCracksAndGap",
+            "TauAgainstElectronCut",
+            "TauAgainstMuonCut",
+            #"EMFractionCut",
+            "HPS",
+            "TauOneProngCut",
+            "TauRtauCut",
+            ])
+
+    for name, table in [("Main", mainTable), ("Tau ID", tauTable)]:
+        effTable = counter.CounterTable()
+        col = table.getColumn(name="Data")
+        effTable.appendColumn(col)
+        effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+        col = table.getColumn(name="EWKMCsum")
+        effTable.appendColumn(col)
+        effTable.appendColumn(counter.efficiencyColumn(col.getName()+" eff", col))
+        print "%s counter efficiencies" % name
+        print effTable.format(cellFormat)
+
+
+    print "Trigger uncertainties"
+    for name, td in [
+        ("BTagging", tdCountBTagging),
+        ("DeltaPhi160", tdCountDeltaPhi160),
+        ("DeltaPhi130", tdCountDeltaPhi130)
+        ]:
+        nallPlot = createPlot(dataset.treeDrawToNumEntries(td.clone(weight="")))
+        neventsPlot = createPlot(dataset.treeDrawToNumEntries(td.clone(weight="weightTrigger")))
+        uncertaintyPlot = createPlot(dataset.treeDrawToNumEntries(td.clone(weight="weightTriggerAbsUnc*weightTriggerAbsUnc")))
+        th1all = nallPlot.histoMgr.getHisto("Data").getRootHisto()
+        th1 = neventsPlot.histoMgr.getHisto("Data").getRootHisto()
+        th12 = uncertaintyPlot.histoMgr.getHisto("Data").getRootHisto()
+        if th1.GetNbinsX() != 1:
+            raise Exception("th1.GetNbinsX() == %d != 1" % th1.GetNbinsX())
+        Nall = th1all.Integral(0, 2)
+        N = th1.Integral(0, 2)
+        absSum2 = th12.Integral(0, 2)
+        absUnc = math.sqrt(absSum2)
+        relUnc = absUnc/N
+
+        print "%-15s Nall = %.2f, N = %.2f, absolute uncertainty %.2f, relative uncertainty %.4f" % (name, Nall, N, absUnc, relUnc)
+
+    
 
     #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f", valueOnly=True))
     #latexFormat = counter.TableFormatConTeXtTABLE(counter.CellFormatTeX(valueFormat="%.2f", ))
@@ -349,23 +501,22 @@ def common(h, xlabel, ylabel):
 # Functions below are for plot-specific formattings. They all take the
 # plot object as an argument, then apply some formatting to it, draw
 # it and finally save it to files.
-def tauPt(h, rebin=5, ratio=True, opts={}, opts2={}):
-    name = flipName(h.getRootHistoPath())
-
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+def tauPt(h, name, rebin=1, ratio=False, opts={}, opts2={}):
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "p_{T}^{#tau jet} (GeV/c)"
     ylabel = "Events / %.0f GeV/c" % h.binWidth()
     
     scaleNormalization(h)
-#    h.stackMCHistograms()
+    h.stackMCHistograms()
 #    h.addMCUncertainty()
 
-    if h.histoMgr.hasHisto("Data"):
-        th1 = h.histoMgr.getHisto("Data").getRootHisto()
-        print name
-        for bin in xrange(1, th1.GetNbinsX()+1):
-            print "Bin %d, low edge %.0f, content %.3f" % (bin, th1.GetXaxis().GetBinLowEdge(bin), th1.GetBinContent(bin))
-        print
+#    if h.histoMgr.hasHisto("Data"):
+#        th1 = h.histoMgr.getHisto("Data").getRootHisto()
+#        print name
+#        for bin in xrange(1, th1.GetNbinsX()+1):
+#            print "Bin %d, low edge %.0f, content %.3f" % (bin, th1.GetXaxis().GetBinLowEdge(bin), th1.GetBinContent(bin))
+#        print
 
     _opts = {"ymin": 0.01, "ymaxfactor": 2}
     _opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -567,23 +718,16 @@ def deltaPhi(h, rebin=40):
     h.setLegend(histograms.createLegend(0.2, 0.6, 0.4, 0.9))
     common(h, xlabel, ylabel)
 
-def transverseMass(h, rebin=10, opts={}, opts_log={}):
-    name = flipName(h.getRootHistoPath())
-
+def transverseMass(h, name, rebin=1, opts={}, opts_log={}):
     particle = ""
-    if "Original" in name:
-        particle = "#mu"
-        name = name.replace("TransverseMass", "MtOriginal")
-    else:
-        particle = "#tau jet"
-        name = name.replace("TransverseMass", "MtEmbedding")
 
-    h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
+    if rebin > 1:
+        h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "m_{T}(%s, MET) (GeV/c^{2})" % particle
     ylabel = "Events / %.0f GeV/c^{2}" % h.binWidth()
     
-    scaleNormalization(h)   
-#    h.stackMCHistograms()
+    scaleNormalization(h)
+    h.stackMCHistograms()
 #    h.addMCUncertainty()
 
     _opts = {"xmax": 200, "ymaxfactor": 1.5}
@@ -611,17 +755,8 @@ def tauCandPt(h, name, rebin=1, ratio=True):
     ylabel = "Events /%.0f GeV/c" % h.binWidth()
     
     scaleNormalization(h)
-#    h.stackMCHistograms()
+    h.stackMCHistograms()
 #    h.addMCUncertainty()
-
-#    for histo in h.histoMgr.getHistos():
-#        rh = histo.getRootHisto()
-#        bin = 9
-#        print "Bin %d, low edge %f" % (bin, rh.GetXaxis().GetBinLowEdge(bin))
-#        all = rh.Integral(0, rh.GetNbinsX()+1)
-#        passed = rh.Integral(bin, rh.GetNbinsX()+1)
-#        print "%s: all %f, passed %f" % (histo.getName(), all, passed)
-            
 
     opts = {"ymin": 0.01, "ymaxfactor": 5}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -644,7 +779,7 @@ def tauCandEta(h, name, rebin=1, ratio=True):
     ylabel = "Events / %.2f" % h.binWidth()
     
     scaleNormalization(h)
- #   h.stackMCHistograms()
+    h.stackMCHistograms()
  #   h.addMCUncertainty()
 
     opts = {"ymin": 0.1, "ymaxfactor": 5}
@@ -665,7 +800,7 @@ def tauCandPhi(h, name, rebin=1, ratio=True):
     ylabel = "Events / %.2f" % h.binWidth()
     
     scaleNormalization(h)
- #   h.stackMCHistograms()
+    h.stackMCHistograms()
  #   h.addMCUncertainty()
 
     opts = {"ymin": 1.0, "ymaxfactor": 5}
