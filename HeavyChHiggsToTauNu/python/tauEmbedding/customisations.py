@@ -2,8 +2,14 @@ import FWCore.ParameterSet.Config as cms
 
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChTools as HChTools
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as HChSignalAnalysisParameters
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalElectronVetoFilter_cfi as ElectronVeto
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChGlobalMuonVetoFilter_cfi as MuonVeto
 
 tauEmbeddingMuons = "tauEmbeddingMuons"
+jetSelection = "pt() > 30 && abs(eta()) < 2.4"
+jetSelection += "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
+jetSelection += "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
+jetSelection += "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
 
 def customiseParamForTauEmbedding(param, options, dataVersion):
     # Change the triggers to muon
@@ -254,12 +260,7 @@ def addMuonJetSelection(process, sequence, prefix="muonSelectionJetSelection"):
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     m1 = cleanPatJets.clone(
         src = "selectedPatJets",
-        preselection = cms.string(
-            "pt() > 30 && abs(eta()) < 2.4"
-            "&& numberOfDaughters() > 1 && chargedEmEnergyFraction() < 0.99"
-            "&& neutralHadronEnergyFraction() < 0.99 && neutralEmEnergyFraction < 0.99"
-            "&& chargedHadronEnergyFraction() > 0 && chargedMultiplicity() > 0"
-        ),
+        preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             muons = cms.PSet(
                 src                 = cms.InputTag(tauEmbeddingMuons),
@@ -633,29 +634,61 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
     setattr(process, prefix+"AllCount", allCount)
     counters.append(prefix+"AllCount")
 
+    # Primary vertex
+    pvFilter = cms.EDFilter("VertexCountFilter",
+        src = cms.InputTag("selectedPrimaryVertex"),
+        minNumber = cms.uint32(1),
+        maxNumber = cms.uint32(999)
+    )
+    pvFilterCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"PrimaryVertex", pvFilter)
+    setattr(process, prefix+"PrimaryVertexCount", pvFilterCount)
+    counters.append(prefix+"PrimaryVertexCount")
+
+    # Generator taus
     genTaus = cms.EDFilter("GenParticleSelector",
         src = cms.InputTag("genParticles"),
         cut = cms.string("abs(pdgId()) == 15 && pt() > 40 && abs(eta()) < 2.1")
     )
-    genTausName = prefix
+    genTausName = prefix+"GenTau"
     setattr(process, genTausName, genTaus)
 
     genTausFilter = cms.EDFilter("CandViewCountFilter",
         src = cms.InputTag(genTausName),
         minNumber = cms.uint32(1),
     )
-    setattr(process, prefix+"Filter", genTausFilter)
+    setattr(process, prefix+"GenTauFilter", genTausFilter)
 
     genTausCount = cms.EDProducer("EventCountProducer")
-    setattr(process, prefix+"Count", genTausCount)
-    counters.append(prefix+"Count")
+    setattr(process, prefix+"GenTauCount", genTausCount)
+    counters.append(prefix+"GenTauCount")
 
+    # Select first generator tau for the jet cleaning
+    genTauFirst = cms.EDProducer("HPlusFirstCandidateSelector",
+        src = cms.InputTag(genTausName)
+    )
+    genTauFirstName = prefix+"First"
+    setattr(process, genTauFirstName, genTauFirst)
+
+    # Electron and muon veto
+    eveto = ElectronVeto.hPlusGlobalElectronVetoFilter.clone()
+    evetoCount = cms.EDProducer("EventCountProducer")
+    muveto = MuonVeto.hPlusGlobalMuonVetoFilter.clone() 
+    muvetoCount = cms.EDProducer("EventCountProducer")
+    setattr(process, prefix+"ElectronVeto", eveto)
+    setattr(process, prefix+"ElectronVetoCount", evetoCount)
+    setattr(process, prefix+"MuonVeto", muveto)
+    setattr(process, prefix+"MuonVetoCount", muvetoCount)
+    counters.extend([prefix+"ElectronVetoCount", prefix+"MuonVetoCount"])
+
+    # 3 jets
     from PhysicsTools.PatAlgos.cleaningLayer1.jetCleaner_cfi import cleanPatJets
     cleanedJets = cleanPatJets.clone(
         src = cms.InputTag(param.jetSelection.src.value()),
+        preselection = cms.string(jetSelection),
         checkOverlaps = cms.PSet(
             genTaus = cms.PSet(
-                src                 = cms.InputTag(genTausName),
+                src                 = cms.InputTag(genTauFirstName),
                 algorithm           = cms.string("byDeltaR"),
                 preselection        = cms.string(""),
                 deltaR              = cms.double(0.5),
@@ -680,12 +713,11 @@ def addEmbeddingLikePreselection(process, sequence, param, prefix="embeddingLike
 
     genTauSequence = cms.Sequence(
         allCount *
-        genTaus *
-        genTausFilter *
-        genTausCount *
-        cleanedJets *
-        cleanedJetsFilter *
-        cleanedJetsCount 
+        pvFilter * pvFilterCount *
+        genTaus * genTausFilter * genTausCount * genTauFirst *
+        eveto * evetoCount *
+        muveto * muvetoCount *
+        cleanedJets * cleanedJetsFilter * cleanedJetsCount 
     )
     setattr(process, prefix+"Sequence", genTauSequence)
     sequence *= genTauSequence
