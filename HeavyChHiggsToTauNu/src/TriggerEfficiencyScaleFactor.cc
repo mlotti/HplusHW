@@ -249,14 +249,16 @@ namespace HPlus {
   TriggerEfficiencyScaleFactor::Data TriggerEfficiencyScaleFactor::applyEventWeight(const pat::Tau& tau, bool isData) {
     fWeight = 1.0;
     fWeightAbsUnc = 0.0;
+    fRelativeUncertainty = 0.0;
+    fAbsoluteUncertainty = 0.0;
     if(fMode == kScaleFactor) {
       fWeight = scaleFactor(tau);
-      fWeightAbsUnc = scaleFactorAbsoluteUncertainty(tau);
+      fRelativeUncertainty = scaleFactorRelativeUncertainty(tau);
+      fAbsoluteUncertainty = scaleFactorAbsoluteUncertainty(tau);
 
       hScaleFactor->Fill(fWeight, fEventWeight.getWeight());
       hScaleFactorRelativeUncertainty->Fill(scaleFactorRelativeUncertainty(tau), fEventWeight.getWeight());
       hScaleFactorAbsoluteUncertainty->Fill(fWeightAbsUnc, fEventWeight.getWeight());
-
     }
     else if(fMode == kEfficiency) {
       if(isData) {

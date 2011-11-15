@@ -8,6 +8,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TNamed.h"
 
 namespace HPlus {
@@ -47,8 +48,10 @@ namespace HPlus {
     //fNonWeightedSelectedEventsAnalyzer("QCDm3p2_afterAllSelections_nonWeighted"),
     fGenparticleAnalysis(iConfig.getUntrackedParameter<edm::ParameterSet>("GenParticleAnalysis"), eventCounter, eventWeight),
     fVertexWeight(iConfig.getUntrackedParameter<edm::ParameterSet>("vertexWeight")),
+    fFakeTauIdentifier(fEventWeight),
     fTriggerEfficiencyScaleFactor(iConfig.getUntrackedParameter<edm::ParameterSet>("triggerEfficiencyScaleFactor"), fEventWeight),
-    fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator())
+    fTree(iConfig.getUntrackedParameter<edm::ParameterSet>("Tree"), fBTagging.getDiscriminator()),
+    fSFUncertaintyAfterStandardSelections("AfterStandardSelections")
     // fTriggerEmulationEfficiency(iConfig.getUntrackedParameter<edm::ParameterSet>("TriggerEmulationEfficiency"))
     // ftransverseMassCutCount(eventCounter.addCounter("transverseMass cut")),
    {
@@ -71,6 +74,11 @@ namespace HPlus {
     fTauPtBinLowEdges.push_back(120);
     fTauPtBinLowEdges.push_back(150);
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
+    // Transverse mass bins
+    for (double i = 0; i < 21; ++i) {
+      fTransverseMassBinLowEdges.push_back(i * 20.0);
+    }
+    int myTransverseMassBins = static_cast<int>(fTransverseMassBinLowEdges.size()) + 1;
 
     // Other control histograms
     //hTauCandidateSelectionIsolatedPtMax = makeTH<TH1F>(*fs, "QCD_SelectedTauCandidateMaxIsolatedPt", "QCD_SelectedTauCandidateMaxIsolatedPt;Isol. track p_{T}, GeV/c; N_{jets} / 1 GeV/c", 100, 0., 100.);
@@ -85,7 +93,13 @@ namespace HPlus {
     hFakeTauAfterIsolatedElectronVeto = makeTH<TH1F>(myDir, "FakeTauAfterIsolatedElectronVeto", "FakeTauAfterIsolatedElectronVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
     hFakeTauAfterIsolatedMuonVeto = makeTH<TH1F>(myDir, "FakeTauAfterIsolatedMuonVeto", "FakeTauAfterIsolatedMuonVeto;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
     hFakeTauAfterJetSelection = makeTH<TH1F>(myDir, "FakeTauAfterJetSelection", "FakeTauAfterJetSelection;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterTauCandidateSelectionAndTauID = makeTH<TH1F>(myDir, "AfterTauCandidateSelectionAndTauID", "AfterTauCandidateSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedElectronVetoAndTauID = makeTH<TH1F>(myDir, "AfterIsolatedElectronVetoAndTauID", "AfterIsolatedElectronVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterIsolatedMuonVetoAndTauID = makeTH<TH1F>(myDir, "AfterIsolatedMuonVetoAndTauID", "AfterIsolatedMuonVetoAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
+    hAfterJetSelectionAndTauID = makeTH<TH1F>(myDir, "AfterJetSelectionAndTauID", "AfterJetSelectionAndTauID;tau p_{T} bin;N_{events}", myTauPtBins, 0., myTauPtBins);
 
+    hMtAfterJetSelection = makeTH<TH2F>(myDir, "MtAfterJetSelection", "MtAfterJetSelection;tau p_{T} bin;transverse mass bin", myTauPtBins, 0., myTauPtBins, myTransverseMassBins, 0., myTransverseMassBins);
+    
     hSelectionFlow = makeTH<TH1F>(myDir, "QCD_SelectionFlow", "QCD_SelectionFlow;;N_{events}", 12, 0, 12);
     hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderTrigger,"Trigger");
     //hSelectionFlow->GetXaxis()->SetBinLabel(1+kQCDOrderVertexSelection,"Vertex");
@@ -99,16 +113,18 @@ namespace HPlus {
     myMETVariation.push_back(40);
     myMETVariation.push_back(70);
     std::vector<double> myDeltaPhiTauMETVariation;
+    myDeltaPhiTauMETVariation.push_back(130);
     myDeltaPhiTauMETVariation.push_back(150);
     myDeltaPhiTauMETVariation.push_back(160);
     myDeltaPhiTauMETVariation.push_back(180);
     std::vector<int> myTauIsolVariation;
     myTauIsolVariation.push_back(1);
     myTauIsolVariation.push_back(3);
+    myTauIsolVariation.push_back(11);
     for (size_t i = 0; i < myMETVariation.size(); ++i) {
       for (size_t j = 0; j < myDeltaPhiTauMETVariation.size(); ++j) {
         for (size_t k = 0; k < myTauIsolVariation.size(); ++k) {
-          fAnalyses.push_back(AnalysisVariation(myMETVariation[i], myDeltaPhiTauMETVariation[j], myTauIsolVariation[k], myTauPtBins));
+          fAnalyses.push_back(AnalysisVariation(myMETVariation[i], myDeltaPhiTauMETVariation[j], myTauIsolVariation[k], myTauPtBins, myTransverseMassBins));
         }
       }
     }
@@ -183,12 +199,18 @@ namespace HPlus {
     increment(fOneSelectedTauCounter);
     hSelectionFlow->Fill(kQCDOrderTauCandidateSelection, fEventWeight.getWeight());
     // Obtain MC matching - for EWK without genuine taus
-    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = FakeTauIdentifier::matchTauToMC(iEvent, *(tauCandidateData.getCleanedTauCandidates()[0]));
-    bool myTypeIIStatus = FakeTauIdentifier::isFakeTau(myTauMatch); // True if the selected tau is a fake
+    FakeTauIdentifier::MCSelectedTauMatchType myTauMatch = fFakeTauIdentifier.matchTauToMC(iEvent, *(tauCandidateData.getCleanedTauCandidates()[0]));
+    bool myTypeIIStatus = fFakeTauIdentifier.isFakeTau(myTauMatch); // True if the selected tau is a fake
     // Obtain tau pT bin index
     int myTauPtBinIndex = getTauPtBinIndex(tauCandidateData.getCleanedTauCandidates()[0]->pt());
     hAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
     if (myTypeIIStatus) hFakeTauAfterTauCandidateSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+
+    // Obtain boolean for rest of tauID
+    TauSelection::Data tauIDData = fOneProngTauSelection.analyzeTauIDWithoutRtauOnCleanedTauCandidates(iEvent, iSetup, tauCandidateData.getCleanedTauCandidates()[0]);
+    bool myPassedTauIDStatus = tauIDData.passedEvent() && tauCandidateData.getBestTauCandidatePassedRtauStatus();
+    // Control plot
+    if (myPassedTauIDStatus) hAfterTauCandidateSelectionAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
 
 //------ Global electron veto
@@ -201,6 +223,8 @@ namespace HPlus {
     /*NonIsolatedElectronVeto::Data nonIsolatedElectronVetoData = fNonIsolatedElectronVeto.analyze(iEvent, iSetup);
     if (!nonIsolatedElectronVetoData.passedEvent())  return false;
     increment(fNonIsolatedElectronVetoCounter);*/
+    // Control plot
+    if (myPassedTauIDStatus) hAfterIsolatedElectronVetoAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
 
 //------ Global muon veto
@@ -213,6 +237,8 @@ namespace HPlus {
     /*NonIsolatedMuonVeto::Data nonIsolatedMuonVetoData = fNonIsolatedMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
     if (!nonIsolatedMuonVetoData.passedEvent()) return; 
     increment(fNonIsolatedMuonVetoCounter);*/
+    // Control plot
+    if (myPassedTauIDStatus) hAfterIsolatedMuonVetoAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
 
 //------ Jet selection
@@ -222,6 +248,8 @@ namespace HPlus {
     hSelectionFlow->Fill(kQCDOrderJetSelection, fEventWeight.getWeight());
     hAfterJetSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
     if (myTypeIIStatus) hFakeTauAfterJetSelection->Fill(myTauPtBinIndex, fEventWeight.getWeight());
+    // Control plot
+    if (myPassedTauIDStatus) hAfterJetSelectionAndTauID->Fill(myTauPtBinIndex, fEventWeight.getWeight());
 
 
 //------ Standard selections is done, obtain data objects, fill tree, and loop over analysis variations
@@ -229,9 +257,9 @@ namespace HPlus {
     METSelection::Data metData = fMETSelection.analyze(iEvent, iSetup);
     // Obtain btagging data
     BTagging::Data btagData = fBTagging.analyze(iEvent, iSetup, jetData.getSelectedJets());
-    // Obtain alphaT 
+    // Obtain alphaT
     EvtTopology::Data evtTopologyData = fEvtTopology.analyze(*(tauCandidateData.getCleanedTauCandidates()[0]), jetData.getSelectedJets());
-    
+
     // Fill tree
     if(metData.getRawMET().isNonnull())
       fTree.setRawMET(metData.getRawMET());
@@ -244,6 +272,9 @@ namespace HPlus {
     if(metData.getTcMET().isNonnull())
       fTree.setTcMET(metData.getTcMET());
     fTree.setFillWeight(fEventWeight.getWeight());
+    if (!iEvent.isRealData()) {
+      fEventWeight.multiplyWeight(btagData.getScaleFactor()); // needed to calculate the scale factor and the uncertainties
+    }
     fTree.setBTagging(btagData.passedEvent(), btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
     //fTree.setTop(TopSelectionData.getTopP4());
     //fTree.setAlphaT(evtTopologyData.alphaT().fAlphaT);
@@ -252,11 +283,17 @@ namespace HPlus {
     mySelectedTaus.push_back(tauCandidateData.getCleanedTauCandidates()[0]);
     fTree.fill(iEvent, mySelectedTaus, jetData.getSelectedJets());
 
+    // Uncertainties after standard selections
+    fSFUncertaintyAfterStandardSelections.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                      triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                      1.0, 0.0); // these values are valid because btagging is not yet applied at this stage
+
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
+    double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, myTauTriggerWeight, myTauMatch);
+      (*it).analyse(iEvent.isRealData(), metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
     }
-    
+
 //------ End of QCD measurement
     return true;
   }
@@ -270,9 +307,18 @@ namespace HPlus {
     }
     return static_cast<int>(mySize);
   }
+  
+  int QCDMeasurementBasic::getMtBinIndex(double mt) {
+    size_t mySize = fTransverseMassBinLowEdges.size();
+    for (size_t i = 0; i < mySize; ++i) {
+      if (mt < fTransverseMassBinLowEdges[i])
+        return static_cast<int>(i);
+    }
+    return static_cast<int>(mySize);
+  }
     
   // Analysis variations
-  QCDMeasurementBasic::AnalysisVariation::AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins)
+  QCDMeasurementBasic::AnalysisVariation::AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins)
     : fMETCut(METcut),
       fDeltaPhiTauMETCut(deltaPhiTauMETCut),
       iTauIsolation(tauIsolation) {
@@ -285,64 +331,72 @@ namespace HPlus {
     hAfterElectronLeptonVeto= makeTH<TH1F>(myDir, "AfterElectronLeptonVeto", "AfterElectronLeptonVeto", nTauPtBins, 0, nTauPtBins);
     hAfterMuonLeptonVeto = makeTH<TH1F>(myDir, "AfterMuonLeptonVeto", "AfterMuonLeptonVeto", nTauPtBins, 0, nTauPtBins);
     hAfterJetSelection = makeTH<TH1F>(myDir, "AfterJetSelection", "AfterJetSelection", nTauPtBins, 0, nTauPtBins);*/
-    hLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterMET = makeTH<TH1F>(myDir, "Leg1AfterMET", "Leg1AfterMET", nTauPtBins, 0, nTauPtBins);
     hLeg1AfterBTagging = makeTH<TH1F>(myDir, "Leg1AfterBTagging", "Leg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "Leg1AfterDeltaPhiTauMET", "Leg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyAfterMetLeg = new ScaleFactorUncertaintyManager("AfterMETLeg", myName.str());
     hLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDNoRtau", "Leg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "Leg2AfterTauIDWithRtau", "Leg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
-    hFakeTauLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyAfterTauLeg = new ScaleFactorUncertaintyManager("AfterTauLeg", myName.str());
     hFakeTauLeg1AfterMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterMET", "FakeTauLeg1AfterMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg1AfterBTagging = makeTH<TH1F>(myDir, "FakeTauLeg1AfterBTagging", "FakeTauLeg1AfterBTagging", nTauPtBins, 0, nTauPtBins);
+    hFakeTauLeg1AfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauLeg1AfterDeltaPhiTauMET", "FakeTauLeg1AfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg2AfterTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDNoRtau", "FakeTauLeg2AfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hFakeTauLeg2AfterTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauLeg2AfterTauIDWithRtau", "FakeTauLeg2AfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
     // Transverse mass histograms
-    hMtLegAfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "MtLegAfterDeltaPhiTauMET", "MtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hMtLegAfterMET = makeTH<TH1F>(myDir, "MtLegAfterMET", "MtLegAfterMET", nTauPtBins, 0, nTauPtBins);
+    hMtLegAfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "MtLegAfterDeltaPhiTauMET", "MtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyMtAfterMETAndDeltaPhi = new ScaleFactorUncertaintyManager("MtAfterMETAndDeltaPhi", myName.str());
     hMtLegAfterMETAndTauIDNoRtau = makeTH<TH1F>(myDir, "MtLegAfterTauIDNoRtau", "MtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hMtLegAfterMETAndTauIDWithRtau = makeTH<TH1F>(myDir, "MtLegAfterTauIDWithRtau", "MtLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyMtAfterTauID = new ScaleFactorUncertaintyManager("MtAfterTauID", myName.str());
+    hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = makeTH<TH1F>(myDir, "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "MtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID = new ScaleFactorUncertaintyManager("MtAfterMETAndDeltaPhiAndInvertedTauID", myName.str());
     hFakeTauMtLegAfterDeltaPhiTauMET = makeTH<TH1F>(myDir, "FakeTauMtLegAfterDeltaPhiTauMET", "FakeTauMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauMtLegAfterMET = makeTH<TH1F>(myDir, "FakeTauMtLegAfterMET", "FakeTauMtLegAfterMET", nTauPtBins, 0, nTauPtBins);
     hFakeTauMtLegAfterMETAndTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDNoRtau", "FakeTauMtLegAfterTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
     hFakeTauMtLegAfterMETAndTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterTauIDWithRtau", "MFakeTautLegAfterTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterInvertedTauIDNoRtau", "FakeTauMtLegAfterInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins);
+    hFakeTauMtLegAfterMETAndInvertedTauIDWithRtau = makeTH<TH1F>(myDir, "FakeTauMtLegAfterInvertedTauIDWithRtau", "MFakeTautLegAfterInvertedTauIDWithRtau", nTauPtBins, 0, nTauPtBins);
+
+    h2DMtLegAfterDeltaPhiTauMET = makeTH<TH2F>(myDir, "2DMtLegAfterDeltaPhiTauMET", "2DMtLegAfterDeltaPhiTauMET", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndTauIDNoRtau = makeTH<TH2F>(myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndTauIDWithRtau = makeTH<TH2F>(myDir, "hMtLegAfterMETAndTauIDNoRtau", "hMtLegAfterMETAndTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+    h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau = makeTH<TH2F>(myDir, "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", "h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau", nTauPtBins, 0, nTauPtBins, nMtBins, 0, nMtBins);
+
     for (int i = 0; i < nTauPtBins; ++i) {
       myName.str("");
-      myName << "MtShapeAfterMET_bin" << i;
-      hMtShapesAfterMET.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      myName << "MtShapeAfterMETAndDeltaPhi_bin" << i;
+      hMtShapesAfterMETAndDeltaPhi.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
       myName.str("");
-      myName << "FakeTauMtShapeAfterMET_bin" << i;
-      hFakeTauMtShapesAfterMET.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      myName << "FakeTauMtShapeAfterMETAndDeltaPhi_bin" << i;
+      hFakeTauMtShapesAfterMETAndDeltaPhi.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      myName.str("");
+      myName << "MtShapeAfterMETAndDeltaPhiAndInvertedTau_bin" << i; 
+      hMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
+      myName.str("");
+      myName << "FakeTauMtShapeAfterMETAndDeltaPhiAndInvertedTau_bin" << i;
+      hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau.push_back(makeTH<TH1F>(myDir, myName.str().c_str(), myName.str().c_str(), 20, 0, 400.));
     }
   }
   
   QCDMeasurementBasic::AnalysisVariation::~AnalysisVariation() { }
   
-  void QCDMeasurementBasic::AnalysisVariation::analyse(const HPlus::METSelection::Data& METData, const HPlus::TauSelection::Data& tauCandidateData, const HPlus::BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, double triggerSF, HPlus::FakeTauIdentifier::MCSelectedTauMatchType tauMatch) {
+  void QCDMeasurementBasic::AnalysisVariation::analyse(bool isRealData, const HPlus::METSelection::Data& METData, const HPlus::TauSelection::Data& tauCandidateData, const HPlus::BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, HPlus::TriggerEfficiencyScaleFactor::Data& trgEffData, HPlus::FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex) {
+    // Make sure that event weight is 1 for real data
+    double myBTagSF = 1.0;
+    if (isRealData) {
+      weightAfterVertexReweight = 1.0;
+    } else {
+      myBTagSF = btagData.getScaleFactor();
+    }
+
     // Big box i.e. standard selections have been passed, now look at the rest of the selections
-    bool myFakeTauStatus = FakeTauIdentifier::isFakeTau(tauMatch);
+    bool myFakeTauStatus = !(tauMatch == FakeTauIdentifier::kkTauToTau || tauMatch == FakeTauIdentifier::kkTauToTauAndTauOutsideAcceptance);
     double myDeltaPhi = DeltaPhi::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET())) * 57.29578; // converted to degrees
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(METData.getSelectedMET()));
     
-    // MET leg ---------------------------------------------------------------
-    // DeltaPhi(tau,MET) cut
-    if (myDeltaPhi < fDeltaPhiTauMETCut) {
-      hLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      // MET cut
-      if (METData.getSelectedMET()->et() > fMETCut) {
-        hLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-        if (myFakeTauStatus) hFakeTauLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-        // btagging
-        if (btagData.passedEvent()) {
-          double myBTagSF = btagData.getScaleFactor();
-          hLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF*myBTagSF);
-          if (myFakeTauStatus) hFakeTauLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF*myBTagSF);
-          // FIXME: add weight uncertainty
-        }
-      }
-    }
-    
-    // tau leg ---------------------------------------------------------------
-    // tau isolation and prongs (assuming HPS tau)
+    // Obtain boolean for tau isolation and inverted isolation
     bool myPassedTauIsol = false;
     if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
       myPassedTauIsol = tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
@@ -353,41 +407,96 @@ namespace HPlus {
     else if (iTauIsolation == 21 || iTauIsolation == 23) // Loose isolation + 1/3 prong
       myPassedTauIsol = tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
         tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
-    if (myPassedTauIsol) {
-      hLeg2AfterTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      if (myFakeTauStatus) hFakeTauLeg2AfterTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      // Rtau
-      if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
-        hLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-        if (myFakeTauStatus) hFakeTauLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-        // FIXME: add weight uncertainty
+    // inverted tau isolation and prongs (assuming HPS tau)
+    bool myPassedInvertedTauIsol = false;
+    if (iTauIsolation == 1 || iTauIsolation == 3) // Tight isolation + 1/3 prong
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byTightIsolation") &&
+        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
+    else if (iTauIsolation == 11 || iTauIsolation == 13) // Medium isolation + 1/3 prong
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byMediumIsolation") &&
+        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
+    else if (iTauIsolation == 21 || iTauIsolation == 23) // Loose isolation + 1/3 prong
+      myPassedInvertedTauIsol = !tauCandidateData.applyDiscriminatorOnBestTauCandidate("byLooseIsolation") &&
+        tauCandidateData.getBestTauCandidateProngCount() == iTauIsolation;
+    bool myPassedRtau = tauCandidateData.getBestTauCandidatePassedRtauStatus();
+
+    // MET leg ---------------------------------------------------------------
+    // MET cut
+    if (METData.getSelectedMET()->et() > fMETCut) {
+      hLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      if (myFakeTauStatus) hFakeTauLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      // btagging
+      if (btagData.passedEvent()) {
+        hLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
+        if (myFakeTauStatus) hFakeTauLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
+        // DeltaPhi(tau,MET) cut
+        if (myDeltaPhi < fDeltaPhiTauMETCut) {
+          hLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
+          if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
+          fSFUncertaintyAfterMetLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF,
+                                                                 trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                 btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+        }
       }
     }
     
+    // tau leg ---------------------------------------------------------------
+    // tau isolation and prongs (assuming HPS tau)
+    if (myPassedTauIsol) {
+      hLeg2AfterTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      if (myFakeTauStatus) hFakeTauLeg2AfterTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      // Rtau
+      if (myPassedRtau) {
+        hLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        if (myFakeTauStatus) hFakeTauLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+          fSFUncertaintyAfterTauLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
+                                                                 trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                 1.0, 0.0);
+      }
+    }
+
     // mT shape and normalisation --------------------------------------------
-    // DeltaPhi(tau,MET) cut
-    if (myDeltaPhi < fDeltaPhiTauMETCut) {
-      hMtLegAfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      if (myFakeTauStatus) hFakeTauMtLegAfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-      // MET cut
-      if (METData.getSelectedMET()->et() > fMETCut) {
-        hMtLegAfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-        if (myFakeTauStatus) hFakeTauMtLegAfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
+    // MET cut
+    if (METData.getSelectedMET()->et() > fMETCut) {
+      hMtLegAfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      if (myFakeTauStatus) hFakeTauMtLegAfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      // DeltaPhi(tau,MET) cut
+      if (myDeltaPhi < fDeltaPhiTauMETCut) {
+        hMtLegAfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        if (myFakeTauStatus) hFakeTauMtLegAfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        h2DMtLegAfterDeltaPhiTauMET->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         // Obtain mT shape
-        hMtShapesAfterMET[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*triggerSF);
-        if (myFakeTauStatus) hFakeTauMtShapesAfterMET[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*triggerSF);
-        // FIXME: add weight uncertainty
-        // Obtain normalisation
-        if (myPassedTauIsol) {
-          hMtLegAfterMETAndTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-          if (myFakeTauStatus) hFakeTauMtLegAfterMETAndTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-          // Rtau
-          if (tauCandidateData.getBestTauCandidatePassedRtauStatus()) {
-            hMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-            if (myFakeTauStatus) hFakeTauMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*triggerSF);
-            // FIXME: add weight uncertainty
-          }
+        hMtShapesAfterMETAndDeltaPhi[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
+        if (myFakeTauStatus) hFakeTauMtShapesAfterMETAndDeltaPhi[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
+        fSFUncertaintyMtAfterMETAndDeltaPhi->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
+                                                                         trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                         1.0, 0.0);
+        // Obtain mT shape for inverted tau isolation
+        if (myPassedInvertedTauIsol) {
+          hMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+          if (myFakeTauStatus) hFakeTauMtLegAfterMETAndInvertedTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+          hMtShapesAfterMETAndDeltaPhiAndInvertedTau[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
+          if (myFakeTauStatus) hFakeTauMtShapesAfterMETAndDeltaPhiAndInvertedTau[tauPtBinIndex]->Fill(transverseMass, weightAfterVertexReweight*trgEffData.getEventWeight());
+          h2DMtLegAfterMETAndDeltaPhiAndInvertedTauIDNoRtau->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+          fSFUncertaintyMtAfterMETAndDeltaPhiAndInvertedTauID->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
+                                                                                           trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                                           1.0, 0.0);
         }
+      }
+    }
+    // Obtain normalisation from tau leg after standard selections
+    if (myPassedTauIsol) {
+      hMtLegAfterMETAndTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      if (myFakeTauStatus) hFakeTauMtLegAfterMETAndTauIDNoRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      h2DMtLegAfterMETAndTauIDNoRtau->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      // Rtau
+      if (myPassedRtau) {
+        hMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        if (myFakeTauStatus) hFakeTauMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        h2DMtLegAfterMETAndTauIDWithRtau->Fill(tauPtBinIndex, mTBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+        fSFUncertaintyMtAfterTauID->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
+                                                                trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                                1.0, 0.0);
       }
     }
   }

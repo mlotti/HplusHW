@@ -2,10 +2,9 @@
 #ifndef HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 #define HiggsAnalysis_HeavyChHiggsToTauNu_FakeTauIdentifier_h
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/EventWeight.h"
 
-//#include "DataFormats/Common/interface/Ptr.h"
-//#include "DataFormats/PatCandidates/interface/Tau.h"
-
+#include "TH1F.h"
 
 
 namespace edm {
@@ -20,20 +19,39 @@ namespace HPlus {
   class FakeTauIdentifier {
   public:
     enum MCSelectedTauMatchType {
+      kkNoMC,
       kkElectronToTau,
       kkMuonToTau,
       kkTauToTau,
       kkJetToTau,
-      kkNoMC,
       kkElectronToTauAndTauOutsideAcceptance,
       kkMuonToTauAndTauOutsideAcceptance,
       kkTauToTauAndTauOutsideAcceptance,
       kkJetToTauAndTauOutsideAcceptance
     };
+    enum MCSelectedTauOriginType {
+      kkUnknownOrigin,
+      kkFromW,
+      kkFromZ,
+      kkFromHplus,
+      kkFromWTau,
+      kkFromZTauTau,
+      kkFromHplusTau
+    };
 
-    static MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
-    static bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
+    FakeTauIdentifier(EventWeight& eventWeight);
+    ~FakeTauIdentifier();
     
+    MCSelectedTauMatchType matchTauToMC(const edm::Event& iEvent, const reco::Candidate& tau);
+    bool isFakeTau(MCSelectedTauMatchType type) { return !(type == kkTauToTau || type == kkTauToTauAndTauOutsideAcceptance); }
+    
+  private:
+    EventWeight& fEventWeight;
+    
+    TH1* hTauMatchType;
+    TH1* hTauOrigin;
+    TH1* hMuOrigin;
+    TH1* hElectronOrigin;
   };
 }
 

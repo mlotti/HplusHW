@@ -32,6 +32,8 @@ namespace HPlus {
       double getEventWeight() const {
         return fTesf->fWeight;
       }
+      double getEventRelativeUncertainty() const { return fTesf->fRelativeUncertainty; }
+      double getEventAbsoluteUncertainty() const { return fTesf->fAbsoluteUncertainty; }
 
       double getEventWeightAbsoluteUncertainty() const {
         return fTesf->fWeightAbsUnc;
@@ -93,6 +95,9 @@ namespace HPlus {
     std::vector<double> fScaleUncertainties;
 
     EventWeight& fEventWeight;
+
+    double fAbsoluteUncertainty;
+    double fRelativeUncertainty;
 
     const DataValue *fCurrentRunData;
 
