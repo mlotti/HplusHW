@@ -28,6 +28,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTauEmbeddingMuonSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMuonSource");
       fTauEmbeddingMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMetSource");
+      fTauEmbeddingCaloMetNoHFSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetNoHFSource");
       fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
     }
 
@@ -111,6 +112,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
       fTree->Branch("temet_p4", &fTauEmbeddingMet);
+      fTree->Branch("tecalometNoHF_p4", &fTauEmbeddingCaloMetNoHF);
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
     }
 
@@ -263,6 +265,11 @@ namespace HPlus {
       if(hmet->size() != 1)
         throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
+      edm::Handle<edm::View<reco::MET> > hcalometnohf;
+      iEvent.getByLabel(fTauEmbeddingCaloMetNoHFSource, hcalometnohf);
+      if(hcalometnohf->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding calometnohf collection size is 1 failed, the size was " << hcalometnohf->size() << std::endl;
+
       edm::Handle<edm::View<reco::MET> > hcalomet;
       iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
@@ -270,6 +277,7 @@ namespace HPlus {
 
       fTauEmbeddingMuon = hmuon->at(0).p4();
       fTauEmbeddingMet = hmet->at(0).p4();
+      fTauEmbeddingCaloMetNoHF = hcalometnohf->at(0).p4();
       fTauEmbeddingCaloMet = hcalomet->at(0).p4();
     }
 
@@ -612,6 +620,7 @@ namespace HPlus {
 
     fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
+    fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
 
     // nonIsoMuons

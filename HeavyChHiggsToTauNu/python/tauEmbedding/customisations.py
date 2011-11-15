@@ -14,7 +14,7 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
         ]
     param.trigger.hltMetCut = -1 # disable
 #    param.trigger.caloMetSelection.src = cms.untracked.InputTag("met", "", dataVersion.getRecoProcess())
-    param.trigger.caloMetSelection.src = "caloMetSum"
+    param.trigger.caloMetSelection.src = options.tauEmbeddingCaloMet
     param.trigger.caloMetSelection.metEmulationCut = -1#60.0
 
     tauTrigger = options.tauEmbeddingTauTrigger
@@ -48,13 +48,23 @@ def customiseParamForTauEmbedding(param, options, dataVersion):
     param.tree.tauEmbeddingInput = cms.untracked.bool(True)
     param.tree.tauEmbeddingMuonSource = cms.untracked.InputTag(tauEmbeddingMuons)
     param.tree.tauEmbeddingMetSource = cms.untracked.InputTag("pfMet", "", dataVersion.getRecoProcess())
+    param.tree.tauEmbeddingCaloMetNoHFSource = cms.untracked.InputTag("caloMetNoHFSum")
     param.tree.tauEmbeddingCaloMetSource = cms.untracked.InputTag("caloMetSum")
 
 def setCaloMetSum(process, sequence, options, dataVersion):
+    name = "caloMetNoHFSum"
+    m = cms.EDProducer("HPlusCaloMETSumProducer",
+                       src = cms.VInputTag(cms.InputTag("metNoHF", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("metNoHF", "", "EMBEDDING")
+                                           )
+                       )
+    setattr(process, name, m)
+    sequence *= m
+
     name = "caloMetSum"
     m = cms.EDProducer("HPlusCaloMETSumProducer",
-                       src = cms.VInputTag(cms.InputTag(options.tauEmbeddingCaloMet, "", dataVersion.getRecoProcess()),
-                                           cms.InputTag(options.tauEmbeddingCaloMet, "", "EMBEDDING")
+                       src = cms.VInputTag(cms.InputTag("met", "", dataVersion.getRecoProcess()),
+                                           cms.InputTag("met", "", "EMBEDDING")
                                            )
                        )
     setattr(process, name, m)
