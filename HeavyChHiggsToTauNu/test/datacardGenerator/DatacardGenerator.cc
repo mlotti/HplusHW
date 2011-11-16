@@ -175,7 +175,7 @@ std::string DatacardGenerator::generateSeparatorLine(std::vector< DatasetGroup* 
     }
   }
   // Construct string
-  std::string myString((nDatagroups + 2) * 8 + myMaxSize, '=');
+  std::string myString((nDatagroups + 2) * 8 + myMaxSize, '-');
   return myString;
 }
 
