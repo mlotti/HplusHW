@@ -695,6 +695,9 @@ class DatasetRootHistoMergedData(DatasetRootHistoBase):
         """
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.GetName(), self.histoWrappers[0].getDataset().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
         return hsum
 
@@ -819,6 +822,9 @@ class DatasetRootHistoMergedMC(DatasetRootHistoBase):
 
         hsum = self.histoWrappers[0].getHistogram() # we get a clone
         for h in self.histoWrappers[1:]:
+            if h.getHistogram().GetNbinsX() != hsum.GetNbinsX():
+                raise Exception("Histogram '%s' from datasets '%s' and '%s' have different binnings: %d vs. %d" % (hsum.getHistogram().GetName(), self.histoWrappers[0].getHistogram().getName(), h.getDataset().getName(), hsum.GetNbinsX(), h.getHistogram().GetNbinsX()))
+
             hsum.Add(h.getHistogram())
 
         if self.normalization == "toOne":
