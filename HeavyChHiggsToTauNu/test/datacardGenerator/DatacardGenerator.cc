@@ -99,7 +99,8 @@ void DatacardGenerator::generateParameterLines(std::vector<DatasetGroup*>& datas
   // Calculate number of nuisances
   for (size_t i = 0; i < extractables.size(); ++i) {
     if (extractables[i]->isNuisance() && 
-        (!extractables[i]->isShapeNuisance() || useShapes)) {
+        (!extractables[i]->isShapeNuisance() || useShapes) && 
+        !extractables[i]->isMerged()) {
       ++nNuisances;
     }
   }
@@ -110,7 +111,8 @@ void DatacardGenerator::generateParameterLines(std::vector<DatasetGroup*>& datas
 }
 
 void DatacardGenerator::generateShapeHeader(std::string source) {
-  sResult << "shapes * * " << source << " $PROCESS $PROCESS_$SYSTEMATIC" << std::endl;
+  sResult << "shapes * * " << source << fMassPoint << ".root"
+          << " $PROCESS $PROCESS_$SYSTEMATIC" << std::endl;
 }
 
 void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& datasetGroups,
@@ -208,7 +210,7 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
                                               bool useShapes) {
   for (size_t i = 0; i < extractables.size(); ++i) {
     if (extractables[i]->isNuisance() && 
-        (!extractables[i]->isShapeNuisance() || useShapes)) {
+        (!extractables[i]->isShapeNuisance() || useShapes) && !extractables[i]->isMerged()) {
       sResult << extractables[i]->getId() << "\t"
               << extractables[i]->getDistribution() << "\t";
       for (size_t j = 0; j < datasetGroups.size(); ++j) {

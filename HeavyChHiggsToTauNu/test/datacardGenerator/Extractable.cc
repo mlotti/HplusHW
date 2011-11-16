@@ -3,7 +3,9 @@
 #include <sstream>
 
 Extractable::Extractable(int channel)
-: fType(kExtractableObservation) {
+: fType(kExtractableObservation),
+  bIsMerged(false),
+  sMergedMasterId("") {
   std::stringstream s;
   s << "__DataChannel" << channel;
   sId = s.str();
@@ -11,7 +13,9 @@ Extractable::Extractable(int channel)
 
 Extractable::Extractable(std::string id)
 : sId(id),
-  fType(kExtractableRate) {
+  fType(kExtractableRate),
+  bIsMerged(false),
+  sMergedMasterId("") {
   
 }
 
@@ -19,7 +23,9 @@ Extractable::Extractable(std::string id, std::string distribution, std::string d
 : sDistribution(distribution),
   sId(id),
   sDescription(description),
-  fType(kExtractableNuisance) {
+  fType(kExtractableNuisance),
+  bIsMerged(false),
+  sMergedMasterId("") {
   
 }
 
@@ -60,4 +66,26 @@ int Extractable::getCounterItemIndex(TH1F* h, std::string counterItem) {
   }
   std::cout << "Error: Cannot find counter by name " << counterItem << "!" << std::endl;
   return -1;
+}
+
+Extractable* Extractable::mergedContainId(std::string id) {
+  for (size_t i = 0; i < vExtractablesToBeMerged.size(); ++i) {
+    if (vExtractablesToBeMerged[i]->getId() == id)
+      return vExtractablesToBeMerged[i];
+  }
+  return 0;
+}
+
+double Extractable::getMergedValue(std::vector< Dataset* > datasets, NormalisationInfo* info, double hostValue) {
+  std::cout << "id=" << sId << " hostvalue=" << hostValue << " merged: " << vExtractablesToBeMerged.size() << std::endl;
+  if (hostValue > 0)
+    return hostValue;
+  // Return first non-zero value
+  for (size_t i = 0; i < vExtractablesToBeMerged.size(); ++i) {
+    double myValue = vExtractablesToBeMerged[i]->doExtract(datasets, info);
+    std::cout << "id=" << vExtractablesToBeMerged[i]->getId() << " value=" << myValue << std::endl;
+    if (myValue > 0) return myValue;
+  }
+  // Nothing has been found, return zero
+  return hostValue;
 }

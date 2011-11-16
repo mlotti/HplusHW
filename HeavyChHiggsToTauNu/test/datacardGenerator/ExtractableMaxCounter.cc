@@ -31,7 +31,6 @@ double ExtractableMaxCounter::doExtract(std::vector< Dataset* > datasets, Normal
       myMaxRatio = TMath::Abs(myVariation / myNominalResult - 1.0);
   }
   return myMaxRatio; // Relative uncertainty
-  return -1.;
 }
 
 void ExtractableMaxCounter::print() {

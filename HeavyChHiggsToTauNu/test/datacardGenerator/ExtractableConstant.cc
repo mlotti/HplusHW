@@ -25,6 +25,7 @@ ExtractableConstant::~ExtractableConstant() {
 
 double ExtractableConstant::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
   // As simple as returning the constant value :)
+  
   return fValue;
 }
 

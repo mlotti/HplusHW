@@ -11,9 +11,9 @@ INC = -I. -I$(ROOTINC)
 LIBS = -L$(ROOTLIBDIR) $(ROOTLIBS) -L.
 
 %.o: %.cc
-	@$(CXX) $(OPT) $(INC) $(LIBS) $< -o $@ -c
+	$(CXX) $(OPT) $(INC) $(LIBS) $< -o $@ -c -g
 
 all: $(OBJS)
 #	@echo $(OBJS)
-	@$(CXX) $(OPT) $(INC) $(LIBS) $(OBJS) -o datacardgenerator
+	$(CXX) $(OPT) $(INC) $(LIBS) $(OBJS) -o datacardgenerator
 	@echo "Program compiled"

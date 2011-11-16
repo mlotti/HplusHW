@@ -40,20 +40,28 @@ public:
   std::string& getDescription() { return sDescription; }
   
   void addExtractableToBeMerged(Extractable* e) { vExtractablesToBeMerged.push_back(e); }
+  bool isMerged() const { return bIsMerged; }
+  void setIsMerged(std::string masterId ) { bIsMerged = true; sMergedMasterId = masterId; }
+  std::string getMergedMasterId() { return sMergedMasterId; }
+  Extractable* mergedContainId(std::string id);
+  std::vector<Extractable*> getMergedExtractables() { return vExtractablesToBeMerged; }
 
 protected:
   TH1F* getCounterHistogram(TFile* f, std::string counterHisto);
   int getCounterItemIndex(TH1F* h, std::string counterItem);
-
+  double getMergedValue(std::vector<Dataset*> datasets, NormalisationInfo* info, double hostValue); // Returns first non zero value
+  
 protected:
   std::string sDistribution;
   std::string sId;
   std::string sDescription;
 
   std::vector<Extractable*> vExtractablesToBeMerged; // list of extractables who's results are to be merged to this one (practically an or function)
-  
+
 private:
   ExtractableType fType;
+  bool bIsMerged; // if true, the nuisance will not produce a new line
+  std::string sMergedMasterId; // if non-empty, contains the ID of the master
   
 };
 

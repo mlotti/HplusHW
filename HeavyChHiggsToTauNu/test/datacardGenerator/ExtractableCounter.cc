@@ -53,7 +53,7 @@ double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, Normalisa
     // FIXME add here obtaining of result from txt file
   }
   // Return result
-  fCounterUncertainty = TMath::Sqrt(fCounterUncertainty); // +1 is because of datacard specs
+  fCounterUncertainty = TMath::Sqrt(fCounterUncertainty);
   
   if (isObservation() || isRate())
     return fCounterValue;

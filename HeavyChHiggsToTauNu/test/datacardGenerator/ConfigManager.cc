@@ -754,7 +754,8 @@ bool ConfigManager::addMergingOfExtractable(std::string str) {
     return false;
   }
   myToObject->addExtractableToBeMerged(myFromObject);
-  vExtractables.erase(itFrom);
+  //vExtractables.erase(itFrom);
+  myFromObject->setIsMerged(toId);
   return true;
 }
 

@@ -32,7 +32,17 @@ double DatasetGroup::getValueByExtractable(Extractable* e, NormalisationInfo* in
   if (hasExtractable(e)) {
     // Extractable is active, read its value for all files
     myValue = e->doExtract(vDatasets, info);
+  } else {
+    // Search id in merged extractables
+    std::vector<Extractable*> myMerged = e->getMergedExtractables();
+    for (size_t i = 0; i < myMerged.size(); ++i) {
+      if (hasExtractable(myMerged[i])) {
+        myValue = myMerged[i]->doExtract(vDatasets, info);
+      }
+    }
   }
+  
+  // Return result
   if (e->isNuisance())
     myValue += 1.0;
   return myValue;
