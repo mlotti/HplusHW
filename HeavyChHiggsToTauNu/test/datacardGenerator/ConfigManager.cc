@@ -373,7 +373,9 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   std::string myInput1;
   std::string myInput2;
   std::string myFilePath;
+  std::string myMTPlot;
   double myValue = -1;
+  double myValue2 = -1;
   std::string myLabel = "default";
   // Obtain items
   while (myPos < str.size() && myLabel.size()) {
@@ -396,12 +398,16 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myInput1 = parseString(str, myPos);
       } else if (myLabel == "denominatorCounter" || myLabel == "normHisto") {
         myInput2 = parseString(str, myPos);
-      } else if (myLabel == "value" || myLabel == "scale") {
+      } else if (myLabel == "lowerValue" || myLabel == "value" || myLabel == "scale") {
         myValue = parseNumber(str, myPos);
+      } else if (myLabel == "upperValue") {
+        myValue2 = parseNumber(str, myPos);
       } else if (myLabel == "channel") {
         myChannel = parseNumber(str, myPos);
       } else if (myLabel == "filePath") {
         myFilePath = parseString(str, myPos);
+      } else if (myLabel == "mTPlot") {
+        myMTPlot = parseString(str, myPos);
       } else if (myLabel == "files" || myLabel == "counterPaths") {
         parseVectorString(str, myPos, myFiles);
       } else {
@@ -425,6 +431,9 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     } else if (!myFiles.size()) {
       std::cout << "Error: missing or empty field 'file' for observation!" << std::endl;
       myStatus = false;
+    } else if (!myMTPlot.size()) {
+      std::cout << "Error: missing or empty field 'mTPlot' for observation!" << std::endl;
+      myStatus = false;
     }
     if (!myStatus) {
       std::cout << "  line in config: " << str << std::endl << std::endl;
@@ -433,7 +442,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
                 <<  "functionName" << '"' << ", functionparameters, [filePath="
                 << '"' << "path" << '"' << ",] file={"
                 << '"' << "file1.root" << '"' << ", " << '"' << "file2.root"
-                << '"' << " ... } }" << std::endl;
+                << '"' << " ... } }, mTPlot=" << '"' << "plotwithpath" << '"' << std::endl;
     }
   } else if (type == Extractable::kExtractableRate) {
     // Check required fields
@@ -527,6 +536,9 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       std::cout << "Example of functions and their parameters:" << std::endl;
       std::cout << "  function=" << '"' << "Constant" << '"' 
                 << ", value=" << '"' << "0.07" << '"' << std::endl;
+      std::cout << "  function=" << '"' << "Constant" << '"' 
+                << ", lowerValue=" << '"' << "0.05" << '"'
+                << ", upperValue=" << '"' << "0.07" << '"' << std::endl;
       std::cout << "  function=" << '"' << "Counter" << '"' 
                 << ", counterHisto=" << '"' << "counterHisto" << '"'
                 << ", counter=" << '"' << "counterName" << '"' << std::endl;
@@ -554,8 +566,13 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       myExtractable = new ExtractableConstant(myChannel, myValue);
     else if (type == Extractable::kExtractableRate)
       myExtractable = new ExtractableConstant(myId, myValue);
-    else if (type == Extractable::kExtractableNuisance)
-      myExtractable = new ExtractableConstant(myId, myDistribution, myDescription, myValue);
+    else if (type == Extractable::kExtractableNuisance) {
+      if (myValue2 < 0) {
+        myExtractable = new ExtractableConstant(myId, myDistribution, myDescription, myValue);
+      } else {
+        myExtractable = new ExtractableConstant(myId, myDistribution, myDescription, myValue, myValue2);
+      }
+    }
   } else if (myFunction == "Counter") {
     if (type == Extractable::kExtractableObservation)
       myExtractable = new ExtractableCounter(myChannel, myCounterHisto, myInput1);
@@ -589,7 +606,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     vExtractables.push_back(myExtractable);
   // Create dataset group for observation (for rate and nuisance they are created via addDataGroup)
   if (type == Extractable::kExtractableObservation) {
-    DatasetGroup* myDataGroup = new DatasetGroup(myChannel, -1, "Data", true);
+    DatasetGroup* myDataGroup = new DatasetGroup(myChannel, -1, "Data", true, myMTPlot, "");
     if (!myDataGroup->addDatasets(myFilePath, myFiles, fNormalisationInfo))
       return false;
     vDatasetGroups.push_back(myDataGroup);
@@ -609,6 +626,8 @@ bool ConfigManager::addDataGroup ( std::string str ) {
   std::string myLabelItem = "default";
   std::string myRate;
   std::string myFilePath;
+  std::string myMTPlot = "";
+  std::string myMTFile = "";
   // Obtain items
   while (myPos < str.size() && myLabelItem != "") {
     //std::cout << "pos=" << myPos << ", str=" << str.substr(myPos) << std::endl;
@@ -632,6 +651,10 @@ bool ConfigManager::addDataGroup ( std::string str ) {
       myFilePath = parseString(str, myPos);
     } else if (myLabelItem == "files") {
       parseVectorString(str, myPos, myFiles);
+    } else if (myLabelItem == "mTPlot") {
+      myMTPlot = parseString(str, myPos);
+    } else if (myLabelItem == "mTFile") {
+      myMTFile = parseString(str, myPos);
     } else {
       std::cout << "Error: unknown label in config: '" << myLabelItem << "'!" << std::endl;
       std::cout << "  Parsed string: " << str << std::endl;
@@ -657,6 +680,9 @@ bool ConfigManager::addDataGroup ( std::string str ) {
   } else if (!myRate.size()) {
     std::cout << "Error: missing field 'rate' for column!" << std::endl;
     myStatus = false;
+  } else if (!myMTPlot.size()) {
+    std::cout << "Error: missing field 'mTPlot' for column!" << std::endl;
+    myStatus = false;
   }
   // No check on parameters nuisance or files since they are optional
   
@@ -668,11 +694,13 @@ bool ConfigManager::addDataGroup ( std::string str ) {
               << "[, nuisances={" << '"' << "IdOfNuisance1" << '"' << ", " << '"' << "IdOfNuisance2"
               << '"' << " ... }] [filePath=" << '"' << "path" << '"' << ",] [, files={" 
               << '"' << "file1.root" << '"' << ", " << '"' << "file2.root"
-              << '"' << " ... }] }" << std::endl;
+              << '"' << " ... }] } mTPlot = " << '"' << "plotwithpath" << '"'
+              << ", [ mTFile = " << '"' << "file.root" << '"'            
+              << "]" << std::endl;
     return false;
   }
   // Create dataset group
-  DatasetGroup* myDataGroup = new DatasetGroup(myChannel, myProcess, myLabel, myMasses);
+  DatasetGroup* myDataGroup = new DatasetGroup(myChannel, myProcess, myLabel, myMasses, myMTPlot, myMTFile);
   if (!myDataGroup->addDatasets(myFilePath, myFiles, fNormalisationInfo))
     return false;
   // Register extractables

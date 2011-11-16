@@ -1,5 +1,7 @@
 #include "DatacardGenerator.h"
 #include "TMath.h"
+#include "TH1F.h"
+#include "TFile.h"
 
 #include <iostream>
 #include <fstream>
@@ -25,30 +27,11 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
                                          std::vector< Extractable* >& extractables, 
                                          std::vector< DatasetGroup* >& datasetGroups,
                                          NormalisationInfo* info) {
+  
   // Initialise
   fNormalisationInfo = info;
   sResult.str("");
-  // Construct result
-  std::string mySeparator = generateSeparatorLine(datasetGroups, extractables, useShapes);
-  generateHeader(description, luminosity);
-  sResult << mySeparator << std::endl;
-  generateParameterLines(datasetGroups, extractables, useShapes);
-  sResult << mySeparator << std::endl;
-  if (useShapes) {
-    generateShapeHeader(shapeSource);
-    sResult << mySeparator << std::endl;
-  }
-  generateObservationLine(datasetGroups, extractables);
-  sResult << mySeparator << std::endl;
-  generateProcessLines(datasetGroups);
-  sResult << mySeparator << std::endl;
-  generateRateLine(datasetGroups, extractables);
-  sResult << mySeparator << std::endl;
-  generateNuisanceLines(datasetGroups, extractables, useShapes);
-  
-  // dummy
-  std::cout << std::endl << sResult.str() << std::endl;
-  
+
   // Make directory if it doesn't already exist
   std::stringstream s;
   s << "datacards_"+sDirectory+"/datacard_"+description;
@@ -67,9 +50,44 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
       return false;
     }
   }
+  
+  // Open root file
+  std::stringstream myOutName;
+  if (useShapes) {
+    myOutName << "datacards_" << sDirectory << "/" << shapeSource << fMassPoint << ".root";
+    fFile = TFile::Open(myOutName.str().c_str(), "RECREATE");
+    if (!fFile) return false;
+  }
+  
+  // Construct result
+  std::string mySeparator = generateSeparatorLine(datasetGroups, extractables, useShapes);
+  generateHeader(description, luminosity);
+  sResult << mySeparator << std::endl;
+  generateParameterLines(datasetGroups, extractables, useShapes);
+  sResult << mySeparator << std::endl;
+  if (useShapes) {
+    generateShapeHeader(shapeSource);
+    sResult << mySeparator << std::endl;
+  }
+  generateObservationLine(datasetGroups, extractables, useShapes);
+  sResult << mySeparator << std::endl;
+  generateProcessLines(datasetGroups);
+  sResult << mySeparator << std::endl;
+  generateRateLine(datasetGroups, extractables, useShapes);
+  sResult << mySeparator << std::endl;
+  generateNuisanceLines(datasetGroups, extractables, useShapes);
+  
+  // dummy
+  std::cout << std::endl << sResult.str() << std::endl;
+  
   myFile << sResult.str() << std::endl;
   myFile.close();
   std::cout << "Written datacard to file: " << s.str() << std::endl;
+  if (useShapes) {
+    fFile->Write();
+    fFile->Close();
+    std::cout << "Written shape root file to: " << myOutName.str() << std::endl;
+  }
   return true;
 }
 
@@ -98,7 +116,7 @@ void DatacardGenerator::generateParameterLines(std::vector<DatasetGroup*>& datas
   }
   // Calculate number of nuisances
   for (size_t i = 0; i < extractables.size(); ++i) {
-    if (extractables[i]->isNuisance() && 
+    if ((extractables[i]->isNuisance() || extractables[i]->isNuisanceAsymmetric()) && 
         (!extractables[i]->isShapeNuisance() || useShapes) && 
         !extractables[i]->isMerged()) {
       ++nNuisances;
@@ -116,13 +134,21 @@ void DatacardGenerator::generateShapeHeader(std::string source) {
 }
 
 void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& datasetGroups,
-                                                std::vector< Extractable* >& extractables) {
+                                                std::vector< Extractable* >& extractables,
+                                                bool useShapes) {
   sResult << "Observation";
   for (size_t i = 0; i < extractables.size(); ++i) {
     if (extractables[i]->isObservation()) {
       for (size_t j = 0; j < datasetGroups.size(); ++j) {
         if (datasetGroups[j]->hasExtractable(extractables[i])) {
-          sResult << "\t" << std::fixed << std::setprecision(0) << datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+          double myRate = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+          sResult << "\t" << std::fixed << std::setprecision(0) << myRate;
+          if (useShapes) {
+            fFile->cd();
+            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",20,0.,400.);
+            if (!h) return;
+            h->Scale(myRate / h->Integral());
+          }
         }
       }
     }
@@ -183,13 +209,15 @@ void DatacardGenerator::generateProcessLines(std::vector< DatasetGroup* >& datas
       }
       sResult << "\t" << myIndex;
     }
-    ++myIndex;
+    if (datasetGroups[j]->hasMassPoint(fMassPoint))
+      ++myIndex;
   }
   sResult << std::endl;
 }
 
 void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGroups,
-                                             std::vector< Extractable* >& extractables) {
+                                             std::vector< Extractable* >& extractables,
+                                             bool useShapes) {
   sResult << "rate\t";
   for (size_t j = 0; j < datasetGroups.size(); ++j) {
     double myValue = 0;
@@ -198,6 +226,13 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
       if (!extractables[i]->isRate()) continue;
       if (datasetGroups[j]->hasExtractable(extractables[i])) {
         myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+        if (useShapes) {
+          fFile->cd();
+          TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
+          if (!h) return;
+          if (h->Integral() > 0) // normalise only histograms that have entries
+            h->Scale(myValue / h->Integral());
+        }
       }
     }
     sResult << "\t" << std::fixed << std::setprecision(2) << myValue;
@@ -209,17 +244,27 @@ void DatacardGenerator::generateNuisanceLines(std::vector< DatasetGroup* >& data
                                               std::vector< Extractable* >& extractables,
                                               bool useShapes) {
   for (size_t i = 0; i < extractables.size(); ++i) {
-    if (extractables[i]->isNuisance() && 
+    if ((extractables[i]->isNuisance() || extractables[i]->isNuisanceAsymmetric()) && 
         (!extractables[i]->isShapeNuisance() || useShapes) && !extractables[i]->isMerged()) {
       sResult << extractables[i]->getId() << "\t"
               << extractables[i]->getDistribution() << "\t";
       for (size_t j = 0; j < datasetGroups.size(); ++j) {
         if (!datasetGroups[j]->isData() && datasetGroups[j]->hasMassPoint(fMassPoint)) {
           double myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
+          double myUpperValue = 0.0;
+          if (extractables[i]->isNuisanceAsymmetric()) {
+            myUpperValue = datasetGroups[j]->getUpperValueByExtractable(extractables[i], fNormalisationInfo);
+          }
           if (TMath::Abs(myValue - 1.0) < 0.0001) {
             sResult << std::fixed << std::setprecision(0) << myValue << "\t";
           } else {
-            sResult << std::fixed << std::setprecision(3) << myValue << "\t";
+            if (extractables[i]->isNuisanceAsymmetric()) {
+              // asymmetric uncertainties
+              sResult << std::fixed << std::setprecision(3) << TMath::Abs(myValue-2.0) 
+                      << "/" << std::setprecision(3) << myUpperValue << "\t";
+            } else {
+              sResult << std::fixed << std::setprecision(3) << myValue << "\t";
+            }
           }
         }
       }

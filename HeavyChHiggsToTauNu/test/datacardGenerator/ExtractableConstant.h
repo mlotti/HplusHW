@@ -11,13 +11,17 @@ class ExtractableConstant : public Extractable {
   ExtractableConstant(std::string id, float value);
   /// Constructor for nuisance
   ExtractableConstant(std::string id, std::string distribution, std::string description, float value);
-  virtual ~ExtractableConstant();
+  /// Constructor for nuisance with asymmetric errors
+  ExtractableConstant(std::string id, std::string distribution, std::string description, float value, float upperValue);
+virtual ~ExtractableConstant();
   
   virtual double doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info);
+  virtual double doExtractAsymmetricUpperValue(std::vector<Dataset*> datasets, NormalisationInfo* info);
   virtual void print();
 
  private:
   double fValue;
+  double fUpperValue; // For asymmetric nuisances
   
 };
 

@@ -14,7 +14,8 @@ public:
   enum ExtractableType {
     kExtractableObservation,
     kExtractableRate,
-    kExtractableNuisance
+    kExtractableNuisance,
+    kExtractableNuisanceAsymmetric
   };
   
   /// Constructor for observation
@@ -23,16 +24,22 @@ public:
   Extractable(std::string id);
   /// Constructor for nuisance
   Extractable(std::string id, std::string distribution, std::string description);
+  /// Constructor for nuisance with asymmetric errors
+  Extractable(std::string id, std::string distribution, std::string description, bool isAsymmetric);
 
   virtual ~Extractable();
   /// Mines result from datasets and merges dataset results together
   virtual double doExtract(std::vector<Dataset*> datasets, NormalisationInfo* info);
+  
+  virtual double doExtractAsymmetricUpperValue(std::vector<Dataset*> datasets, NormalisationInfo* info);
+  
   /// For debugging
   virtual void print();
 
   bool isObservation() const { return fType == kExtractableObservation; }
   bool isRate() const { return fType == kExtractableRate; }
   bool isNuisance() const { return fType == kExtractableNuisance; }
+  bool isNuisanceAsymmetric() const { return fType == kExtractableNuisanceAsymmetric; }
   bool isShapeNuisance() const { return (isNuisance() && sDistribution == "shapeQ"); }
 
   std::string& getDistribution() { return sDistribution; }
@@ -49,13 +56,13 @@ public:
 protected:
   TH1F* getCounterHistogram(TFile* f, std::string counterHisto);
   int getCounterItemIndex(TH1F* h, std::string counterItem);
-  double getMergedValue(std::vector<Dataset*> datasets, NormalisationInfo* info, double hostValue); // Returns first non zero value
+  double getMergedValue(std::vector< Dataset* > datasets, NormalisationInfo* info, double hostValue); // Returns first non zero value
   
 protected:
   std::string sDistribution;
   std::string sId;
   std::string sDescription;
-
+  
   std::vector<Extractable*> vExtractablesToBeMerged; // list of extractables who's results are to be merged to this one (practically an or function)
 
 private:

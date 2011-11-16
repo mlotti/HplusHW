@@ -1,20 +1,26 @@
 #include "DatasetGroup.h"
 #include "TMath.h"
+#include "TH1F.h"
+#include "TFile.h"
 #include <iostream>
 
-DatasetGroup::DatasetGroup( int channel, int process, std::string label, bool isData)
+DatasetGroup::DatasetGroup( int channel, int process, std::string label, bool isData, std::string mTPlot, std::string mTFile)
 : bIsData(isData), 
   iChannel(channel),
   iProcess(process),
-  sLabel(label) {
+  sLabel(label),
+  sExternalFileForTransverseMassPlot(mTFile),
+  sTransverseMassPlotNameWithPath(mTPlot) {
   vValidMasses.push_back(-1);
 }
 
-DatasetGroup::DatasetGroup( int channel, int process, std::string label, std::vector< double > validMasses)
+DatasetGroup::DatasetGroup( int channel, int process, std::string label, std::vector< double > validMasses, std::string mTPlot, std::string mTFile)
 : bIsData(false),
   iChannel(channel),
   iProcess(process),
-  sLabel(label) {
+  sLabel(label),
+  sExternalFileForTransverseMassPlot(mTFile),
+  sTransverseMassPlotNameWithPath(mTPlot) {
   for (std::vector<double>::iterator it = validMasses.begin(); it != validMasses.end(); ++it) {
     vValidMasses.push_back(static_cast<int>(*it));
   }
@@ -43,7 +49,29 @@ double DatasetGroup::getValueByExtractable(Extractable* e, NormalisationInfo* in
   }
   
   // Return result
-  if (e->isNuisance())
+  if (e->isNuisance() || e->isNuisanceAsymmetric())
+    myValue += 1.0;
+  return myValue;
+}
+
+double DatasetGroup::getUpperValueByExtractable(Extractable* e, NormalisationInfo* info) const {
+  double myValue = 0;
+  // Search if Extrable::id is in the list of active ones
+  if (hasExtractable(e)) {
+    // Extractable is active, read its value for all files
+    myValue = e->doExtractAsymmetricUpperValue(vDatasets, info);
+  } else {
+    // Search id in merged extractables
+    std::vector<Extractable*> myMerged = e->getMergedExtractables();
+    for (size_t i = 0; i < myMerged.size(); ++i) {
+      if (hasExtractable(myMerged[i])) {
+        myValue = myMerged[i]->doExtractAsymmetricUpperValue(vDatasets, info);
+      }
+    }
+  }
+  
+  // Return result
+  if (e->isNuisanceAsymmetric())
     myValue += 1.0;
   return myValue;
 }
@@ -108,4 +136,47 @@ void DatasetGroup::print() {
   std::cout << "- has " << vDatasets.size() << " input files:" << std::endl;
   for (size_t i = 0; i < vDatasets.size(); ++i)
     std::cout << "  - " << vDatasets[i]->getFilename() << std::endl;
+}
+
+TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string name, int bins, double min, double max) {
+  TH1F* myPlot = new TH1F(name.c_str(), name.c_str(), bins, min, max);
+  /*for (int i = 1; i <= myPlot->GetNbinsX(); ++i) {
+    myPlot->SetBinContent(i,0);
+    myPlot->SetBinError(i,0);
+  }*/
+  myPlot->Sumw2();
+  if (sTransverseMassPlotNameWithPath == "empty") return myPlot;
+  if (sExternalFileForTransverseMassPlot.size()) {
+    // Obtain plot from external file
+    TFile* f = TFile::Open(sExternalFileForTransverseMassPlot.c_str());
+    if (!f) {
+      std::cout << "Error: Could not open file " << sExternalFileForTransverseMassPlot << "!" << std::endl;
+      return myPlot;
+    }
+    TH1* myHisto = dynamic_cast<TH1*>(f->Get(sTransverseMassPlotNameWithPath.c_str()));
+    if (!myHisto) {
+      std::cout << "Error: Could not open histogram " << sTransverseMassPlotNameWithPath << " in file " 
+                << sExternalFileForTransverseMassPlot << "!" << std::endl;
+      std::cout << f << ", " << myHisto << std::endl;
+      return myPlot;
+    }
+    if (myHisto->GetNbinsX() > myPlot->GetNbinsX()) {
+      //std::cout << "bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
+      myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
+      //std::cout << "new bins " << myHisto->GetNbinsX() << "->" << myPlot->GetNbinsX() << " ratio=" << myHisto->GetNbinsX() / myPlot->GetNbinsX() << std::endl;
+    }
+    myPlot->Add(myHisto);
+    return myPlot;
+  }
+    
+  // Obtain plot from datasets
+  for (size_t i = 0; i < vDatasets.size(); ++i) {
+    TH1F* myHisto = (dynamic_cast<TH1F*>(vDatasets[i]->getFile()->Get(sTransverseMassPlotNameWithPath.c_str())));
+    if (!bIsData)
+      myHisto->Scale(info->getNormalisationFactor(vDatasets[i]->getFile()));
+    if (myHisto->GetNbinsX() > myPlot->GetNbinsX())
+      myHisto->Rebin(myHisto->GetNbinsX() / myPlot->GetNbinsX());
+    myPlot->Add(myHisto);
+  }
+  return myPlot; // empty histogram, if no datasets
 }

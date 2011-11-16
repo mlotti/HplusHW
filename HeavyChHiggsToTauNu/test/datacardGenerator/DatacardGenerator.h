@@ -10,6 +10,9 @@
 #include <vector>
 #include <ctime>
 
+class TFile;
+class TH1F;
+
 class DatacardGenerator {
 public:
   DatacardGenerator(int massPoint, time_t timestamp);
@@ -33,12 +36,14 @@ private:
   void generateShapeHeader(std::string source);
   /// Generates observation line
   void generateObservationLine(std::vector<DatasetGroup*>& datasetGroups,
-                               std::vector< Extractable* >& extractables);
+                               std::vector< Extractable* >& extractables,
+                               bool useShapes);
   /// Generates process lines
   void generateProcessLines(std::vector<DatasetGroup*>& datasetGroups);
   /// Generates rate line
   void generateRateLine(std::vector<DatasetGroup*>& datasetGroups,
-                        std::vector< Extractable* >& extractables);
+                        std::vector< Extractable* >& extractables,
+                        bool useShapes);
   /// Generates nuisance lines (incl. shapes)
   void generateNuisanceLines(std::vector<DatasetGroup*>& datasetGroups,
                              std::vector<Extractable*>& extractables,
@@ -54,6 +59,7 @@ private:
   std::string sDirectory;
   std::stringstream sResult;
   NormalisationInfo* fNormalisationInfo;
+  TFile* fFile;
 };
 
 #endif // DATACARDGENERATOR_H

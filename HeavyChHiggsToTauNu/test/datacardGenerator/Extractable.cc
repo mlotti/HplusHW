@@ -29,11 +29,26 @@ Extractable::Extractable(std::string id, std::string distribution, std::string d
   
 }
 
+Extractable::Extractable(std::string id, std::string distribution, std::string description, bool isAsymmetric)
+: sDistribution(distribution),
+  sId(id),
+  sDescription(description),
+  fType(kExtractableNuisanceAsymmetric),
+  bIsMerged(false),
+  sMergedMasterId("") {
+  
+}
+
+
 Extractable::~Extractable() {
 
 }
 
 double Extractable::doExtract(std::vector< Dataset* > datasets, NormalisationInfo* info) {
+  return 0.;
+}
+
+double Extractable::doExtractAsymmetricUpperValue(std::vector< Dataset* > datasets, NormalisationInfo* info) {
   return 0.;
 }
 
