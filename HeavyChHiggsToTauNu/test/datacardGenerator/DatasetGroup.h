@@ -16,7 +16,7 @@ public:
   DatasetGroup(int channel, int process, std::string label, std::vector<double> validMasses);
   virtual ~DatasetGroup();
 
-  bool addDatasets(std::string path, std::vector< std::string > filenames);
+  bool addDatasets(std::string path, std::vector< std::string > filenames, NormalisationInfo* info);
   bool isData() const { return bIsData; }
   int getProcess() const { return iProcess; }
   int getChannel() const { return iChannel; }

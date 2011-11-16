@@ -1,5 +1,6 @@
 #include "ConfigManager.h"
 #include "ExtractableCounter.h"
+#include "ExtractableMaxCounter.h"
 #include "ExtractableConstant.h"
 #include "ExtractableRatio.h"
 #include "ExtractableScaleFactor.h"
@@ -10,7 +11,8 @@
 #include <ctime>
 
 ConfigManager::ConfigManager(bool verbose)
-: sDescription(""), 
+: fNormalisationInfo(0),
+  sDescription(""),
   fLuminosity(-1.0),
   bVerbose(verbose) {
   
@@ -38,6 +40,7 @@ bool ConfigManager::initialize(std::string configFile) {
   // Read file contents
   std::string myLine;
   std::string myConfigInfoHisto;
+  std::string myCounterHisto;
   myLine.reserve(2048);
   std::string myCommand;
   myCommand.reserve(100);
@@ -59,6 +62,9 @@ bool ConfigManager::initialize(std::string configFile) {
     } else if (myCommand == "configInfoHisto") {
       myConfigInfoHisto = parseString(myLine, myDummyPos);
       if (bVerbose) std::cout << "ConfigInfo histogram: " << myConfigInfoHisto << std::endl;
+    } else if (myCommand == "counterHisto") {
+      myCounterHisto = parseString(myLine, myDummyPos);
+      if (bVerbose) std::cout << "Counter histogram: " << myCounterHisto << std::endl;
     } else if (myCommand == "shapeSource") {
       sShapeSource = parseString(myLine, myDummyPos);
       if (bVerbose) std::cout << "Source of shapes: " << sShapeSource << std::endl;
@@ -70,19 +76,44 @@ bool ConfigManager::initialize(std::string configFile) {
       fLuminosity = parseNumber(myLine, myDummyPos);
       if ( bVerbose) std::cout << "Luminosity set to " << fLuminosity << std::endl;
     } else if (myCommand == "observation") {
+      if (!fNormalisationInfo) {
+        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before observation!" << std::endl;
+        return false;
+      }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableObservation)) return false;
     } else if (myCommand == "rate") {
+      if (!fNormalisationInfo) {
+        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before rate!" << std::endl;
+        return false;
+      }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableRate)) return false;
     } else if (myCommand == "nuisance") {
+      if (!fNormalisationInfo) {
+        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before nuisance!" << std::endl;
+        return false;
+      }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableNuisance)) return false;
     } else if (myCommand == "column") {
+      if (!fNormalisationInfo) {
+        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before column!" << std::endl;
+        return false;
+      }
       if (!addDataGroup(myLine.substr(myDummyPos+1))) return false;
+    } else if (myCommand == "mergeNuisances") {
+      if (!addMergingOfExtractable(myLine.substr(myDummyPos+1))) return false;
     } else {
       std::cout << "Error: unknown command '" << myCommand << "'!" << std::endl;
       return false;
     }
+
+    if (!fNormalisationInfo) {
+      if (myConfigInfoHisto.size()>0 && myCounterHisto.size()>0 && fLuminosity > 0) {
+        // Create normalisation info object
+        fNormalisationInfo = new NormalisationInfo(myConfigInfoHisto, myCounterHisto, fLuminosity);
+      }
+    }
   }
- 
+
   if (bVerbose) {
     // Print extractables and dataset groups
     std::cout << std::endl << "Parsed config for observation:" << std::endl;
@@ -105,12 +136,13 @@ bool ConfigManager::initialize(std::string configFile) {
   if (!myConfigInfoHisto.size()) {
     std::cout << "Error: configInfoHisto is not provided in config file!" << std::endl;
     return false;
+  } else if (!myCounterHisto.size()) {
+    std::cout << "Error: counterHisto is not provided in config file!" << std::endl;
+    return false;
   }
   if (!checkValidity())
     return false;
-  // Create normalisation info object
-  fNormalisationInfo = new NormalisationInfo(myConfigInfoHisto, fLuminosity);
-  
+
   std::cout << std::endl << "Configuration has been read" << std::endl;
   return true;
 }
@@ -362,7 +394,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myCounterHisto = parseString(str, myPos);
       } else if (myLabel == "histogram" || myLabel == "nominatorCounter" || myLabel == "counter") {
         myInput1 = parseString(str, myPos);
-      } else if (myLabel == "denominatorCounter") {
+      } else if (myLabel == "denominatorCounter" || myLabel == "normHisto") {
         myInput2 = parseString(str, myPos);
       } else if (myLabel == "value" || myLabel == "scale") {
         myValue = parseNumber(str, myPos);
@@ -370,7 +402,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         myChannel = parseNumber(str, myPos);
       } else if (myLabel == "filePath") {
         myFilePath = parseString(str, myPos);
-      } else if (myLabel == "files") {
+      } else if (myLabel == "files" || myLabel == "counterPaths") {
         parseVectorString(str, myPos, myFiles);
       } else {
         std::cout << "Error: unknown label in config: '" << myLabel << "'!" << std::endl;
@@ -456,6 +488,14 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
         std::cout << "Error: missing or empty field 'counter' for function 'Counter'!" << std::endl;
         myFunctionStatus = false;
       }
+    } else if (myFunction == "maxCounter") {
+      if (!myFiles.size()) {
+        std::cout << "Error: missing or empty field 'counterPaths' for function 'maxCounter'!" << std::endl;
+        myFunctionStatus = false;
+      } else if (!myInput1.size()) {
+        std::cout << "Error: missing or empty field 'counter' for function 'maxCounter'!" << std::endl;
+        myFunctionStatus = false;
+      }
     } else if (myFunction == "Ratio") {
       if (!myCounterHisto.size()) {
         std::cout << "Error: missing or empty field 'counterHisto' for function 'Ratio'!" << std::endl;
@@ -474,6 +514,9 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       } else if (!myInput1.size()) {
         std::cout << "Error: missing or empty field 'histogram' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
+      } else if (!myInput2.size()) {
+        std::cout << "Error: missing or empty field 'normHisto' for function 'ScaleFactor'!" << std::endl;
+        myFunctionStatus = false;
       }      
     } else {
       std::cout << "Error: specified function is unknown! (valid functions are 'Constant', 'Counter', 'Ratio', 'ScaleFactor', you tried '" << myFunction << "')" << std::endl;
@@ -487,13 +530,17 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       std::cout << "  function=" << '"' << "Counter" << '"' 
                 << ", counterHisto=" << '"' << "counterHisto" << '"'
                 << ", counter=" << '"' << "counterName" << '"' << std::endl;
+      std::cout << "  function=" << '"' << "maxCounter" << '"' 
+                << ", counterPaths={" << '"' << "pathToCounter" << '"'
+                << ", ...}, counter=" << '"' << "counterName" << '"' << std::endl;
       std::cout << "  function=" << '"' << "Ratio" << '"' 
                 << ", counterHisto=" << '"' << "counterHisto" << '"'
                 << ", nominatorCounter=" << '"' << "counterName" << '"'
                 << ", denominatorCounter=" << '"' << "counterName" << '"' << std::endl;
       std::cout << "  function=" << '"' << "ScaleFactor" << '"' 
                 << ", counterHisto=" << '"' << "counterHisto" << '"'
-                << ", histogram=" << '"' << "scaleFactorUncertaintyHistogramNameWithPath" << '"' << std::endl;
+                << ", histogram=" << '"' << "scaleFactorAbsUncertaintyHistogramNameWithPath" << '"'
+                << ", histogram=" << '"' << "scaleFactorAbsUncertaintyCountsHistogramNameWithPath" << '"' << std::endl;
     }
   }
   if (!myFunctionStatus)
@@ -516,6 +563,13 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       myExtractable = new ExtractableCounter(myId, myCounterHisto, myInput1);
     else if (type == Extractable::kExtractableNuisance)
       myExtractable = new ExtractableCounter(myId, myDistribution, myDescription, myCounterHisto, myInput1);
+  } else if (myFunction == "maxCounter") {
+    if (type == Extractable::kExtractableNuisance)
+      myExtractable = new ExtractableMaxCounter(myId, myDistribution, myDescription, myFiles, myInput1);
+    else {
+      std::cout << "Error: function 'maxCounter' is only available for nuisance!" << std::endl;
+      return false;
+    }
   } else if (myFunction == "Ratio") {
     if (type == Extractable::kExtractableNuisance)
       myExtractable = new ExtractableRatio(myId, myDistribution, myDescription, myCounterHisto, myInput1, myInput2, myValue);
@@ -525,7 +579,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     }
   } else if (myFunction == "ScaleFactor") {
     if (type == Extractable::kExtractableNuisance)
-      myExtractable = new ExtractableScaleFactor(myId, myDistribution, myDescription, myCounterHisto, myInput1);
+      myExtractable = new ExtractableScaleFactor(myId, myDistribution, myDescription, myCounterHisto, myInput1, myInput2);
     else {
       std::cout << "Error: function 'ScaleFactor' is only available for nuisance!" << std::endl;
       return false;
@@ -536,7 +590,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   // Create dataset group for observation (for rate and nuisance they are created via addDataGroup)
   if (type == Extractable::kExtractableObservation) {
     DatasetGroup* myDataGroup = new DatasetGroup(myChannel, -1, "Data", true);
-    if (!myDataGroup->addDatasets(myFilePath, myFiles))
+    if (!myDataGroup->addDatasets(myFilePath, myFiles, fNormalisationInfo))
       return false;
     vDatasetGroups.push_back(myDataGroup);
     myDataGroup->addExtractable(myExtractable);
@@ -619,7 +673,7 @@ bool ConfigManager::addDataGroup ( std::string str ) {
   }
   // Create dataset group
   DatasetGroup* myDataGroup = new DatasetGroup(myChannel, myProcess, myLabel, myMasses);
-  if (!myDataGroup->addDatasets(myFilePath, myFiles))
+  if (!myDataGroup->addDatasets(myFilePath, myFiles, fNormalisationInfo))
     return false;
   // Register extractables
   if (!registerExtractable(myDataGroup, myRate)) return false;
@@ -641,6 +695,67 @@ bool ConfigManager::registerExtractable(DatasetGroup* group, std::string id) {
   // No extractable found
   std::cout << "Error: rate or nuisance with id '" << id << "' not found!" << std::endl;
   return false;
+}
+
+bool ConfigManager::addMergingOfExtractable(std::string str) {
+  std::string toId;
+  std::string fromId;
+  // Find strings in command string
+  size_t myPos = 0;
+  std::string myLabelItem = "default";
+  bool myStatus = true;
+  while (myPos < str.size() && myLabelItem != "") {
+    //std::cout << "pos=" << myPos << ", str=" << str.substr(myPos) << std::endl;
+    // Get label
+    myLabelItem = parseLabel(str, myPos);
+    if (myPos > str.size() || myLabelItem == "") continue;
+    // Check label
+    if (myLabelItem == "id") {
+      toId = parseString(str, myPos);
+    } else if (myLabelItem == "id2") {
+      fromId = parseString(str, myPos);
+    } else {
+      std::cout << "Error: unknown item for command mergeNuisances!" << std::endl;
+      myStatus = false;
+    }
+  }
+  // Check that all necessary parameters were supplied
+  if (!toId.size()) {
+    std::cout << "Error: missing item id for command mergeNuisances!" << std::endl;
+    myStatus = false;
+  }
+  if (!fromId.size()) {
+    std::cout << "Error: missing item id2 for command mergeNuisances!" << std::endl;
+    myStatus = false;
+  }
+  if (!myStatus) {
+    std::cout << "Usage: mergeNuisances= { id=" << '"' << "1" << '"' << ", id2=" << '"' << "1b" << '"' << " }" << std::endl;
+    return false;
+  }
+
+  // Loop over extractables to find pointers
+  Extractable* myToObject = 0;
+  Extractable* myFromObject = 0;
+  std::vector<Extractable*>::iterator itFrom;
+  for (std::vector<Extractable*>::iterator it = vExtractables.begin(); it != vExtractables.end(); ++it) {
+    if ((*it)->getId() == toId)
+      myToObject = *it;
+    else if ((*it)->getId() == fromId) {
+      itFrom = it;
+      myFromObject = *it;
+    }
+  }
+  if (!myToObject) {
+    std::cout << "Error: merging / could not find nuisance id: " << toId << std::endl;
+    return false;
+  }
+  if (!myFromObject) {
+    std::cout << "Error: merging / could not find nuisance id: " << fromId << std::endl;
+    return false;
+  }
+  myToObject->addExtractableToBeMerged(myFromObject);
+  vExtractables.erase(itFrom);
+  return true;
 }
 
 bool ConfigManager::doExtract() {

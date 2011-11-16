@@ -7,13 +7,14 @@
 class NormalisationInfo {
 
 public:
-  NormalisationInfo(std::string configInfoHisto, double luminosity);
+  NormalisationInfo(std::string configInfoHisto, std::string counterHisto, double luminosity);
   virtual ~NormalisationInfo();
   
-  double getNormalisationFactor(TFile* f, std::string counterHisto);
+  double getNormalisationFactor(TFile* f);
   
 private:
   std::string sConfigInfoHisto;
+  std::string sCounterHisto;
   double fLuminosity; // luminosity in fb-1
 };
 

@@ -44,7 +44,7 @@ double ExtractableCounter::doExtract(std::vector< Dataset* > datasets, Normalisa
       int myBinIndex = getCounterItemIndex(h, sCounterItem);
       if (!myBinIndex) return -1.;
       // Obtain result
-      double myNormFactor = info->getNormalisationFactor((*it)->getFile(), sCounterHisto);
+      double myNormFactor = info->getNormalisationFactor((*it)->getFile());
       if (isObservation()) myNormFactor = 1.0;
       fCounterValue += h->GetBinContent(myBinIndex) * myNormFactor;
       fCounterUncertainty += h->GetBinError(myBinIndex) * h->GetBinError(myBinIndex)

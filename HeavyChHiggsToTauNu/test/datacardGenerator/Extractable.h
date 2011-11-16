@@ -7,6 +7,7 @@
 #include <TFile.h>
 #include <TH1F.h>
 #include <string>
+#include <vector>
 
 class Extractable {
 public:
@@ -37,6 +38,8 @@ public:
   std::string& getDistribution() { return sDistribution; }
   std::string& getId() { return sId; }
   std::string& getDescription() { return sDescription; }
+  
+  void addExtractableToBeMerged(Extractable* e) { vExtractablesToBeMerged.push_back(e); }
 
 protected:
   TH1F* getCounterHistogram(TFile* f, std::string counterHisto);
@@ -47,6 +50,8 @@ protected:
   std::string sId;
   std::string sDescription;
 
+  std::vector<Extractable*> vExtractablesToBeMerged; // list of extractables who's results are to be merged to this one (practically an or function)
+  
 private:
   ExtractableType fType;
   

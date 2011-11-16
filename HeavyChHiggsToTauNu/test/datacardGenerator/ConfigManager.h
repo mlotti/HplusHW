@@ -28,6 +28,7 @@ private:
   void parseVectorValue(std::string str, size_t& pos, std::vector<double>& myValues);
   bool addExtractable(std::string str, Extractable::ExtractableType type);
   bool addDataGroup(std::string str);
+  bool addMergingOfExtractable(std::string str);
   bool registerExtractable(DatasetGroup* group, std::string id);
   
 private:

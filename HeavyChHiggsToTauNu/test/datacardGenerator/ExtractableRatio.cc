@@ -35,7 +35,7 @@ double ExtractableRatio::doExtract(std::vector< Dataset* > datasets, Normalisati
       int myDenominatorIndex = getCounterItemIndex(h, sDenominatorItem);
       if (!myDenominatorIndex) return -1.;
       // Obtain result
-      double myNormFactor = info->getNormalisationFactor((*it)->getFile(), sCounterHisto);
+      double myNormFactor = info->getNormalisationFactor((*it)->getFile());
       myNominatorValue += h->GetBinContent(myNominatorIndex) * myNormFactor;
       myDenominatorValue += h->GetBinContent(myDenominatorIndex) * myNormFactor;
     }

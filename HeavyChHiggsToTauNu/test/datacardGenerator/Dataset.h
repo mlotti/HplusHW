@@ -16,7 +16,7 @@ public:
   
 private:
   TFile* fFile;
-  std::string sFilename;    
+  std::string sFilename;
 };
 
 #endif // DATASET_H

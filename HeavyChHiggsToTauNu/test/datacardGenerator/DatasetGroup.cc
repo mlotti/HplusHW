@@ -47,7 +47,7 @@ bool DatasetGroup::hasExtractable(Extractable* e) const {
   return false;
 }
 
-bool DatasetGroup::addDatasets (std::string path, std::vector< std::string > filenames) {
+bool DatasetGroup::addDatasets (std::string path, std::vector< std::string > filenames, NormalisationInfo* info) {
   for (std::vector< std::string >::iterator it = filenames.begin(); it != filenames.end(); ++it) {
     std::string myCombinedName = path+"/"+(*it);
     if (!path.size())
@@ -58,6 +58,8 @@ bool DatasetGroup::addDatasets (std::string path, std::vector< std::string > fil
       std::cout << "Tried to open file '" << *it << "'" << std::endl;
       return false;
     }
+    // Print output
+    std::cout << "  File " << *it << " norm. factor=" << info->getNormalisationFactor(myDataset->getFile()) << std::endl;
     vDatasets.push_back(myDataset);
   }
   return true;

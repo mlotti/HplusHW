@@ -3,8 +3,9 @@
 
 #include "TH1F.h"
 
-NormalisationInfo::NormalisationInfo(std::string configInfoHisto, double luminosity)
+NormalisationInfo::NormalisationInfo(std::string configInfoHisto, std::string counterHisto, double luminosity)
 : sConfigInfoHisto(configInfoHisto),
+  sCounterHisto(counterHisto),
   fLuminosity(luminosity) {
 
 }
@@ -13,7 +14,7 @@ NormalisationInfo::~NormalisationInfo() {
 
 }
 
-double NormalisationInfo::getNormalisationFactor(TFile* f, std::string counterHisto) {
+double NormalisationInfo::getNormalisationFactor(TFile* f) {
   // Get histograms
   TH1F* myConfigInfoHisto = dynamic_cast<TH1F*>(f->Get(sConfigInfoHisto.c_str()));
   if (!myConfigInfoHisto) {
@@ -21,10 +22,10 @@ double NormalisationInfo::getNormalisationFactor(TFile* f, std::string counterHi
               << sConfigInfoHisto << "'!" << std::endl;
     return -1.;
   }
-  TH1F* myCounterHisto = dynamic_cast<TH1F*>(f->Get(counterHisto.c_str()));
+  TH1F* myCounterHisto = dynamic_cast<TH1F*>(f->Get(sCounterHisto.c_str()));
   if (!myCounterHisto) {
     std::cout << "Error: cannot find counter histogram at '" 
-              << counterHisto << "'!" << std::endl;
+              << sCounterHisto << "'!" << std::endl;
     return -1.;
   }
   // Calculate normalisation factor
