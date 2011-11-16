@@ -13,13 +13,8 @@
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/TriggerObject.h"
-
 #include "DataFormats/PatCandidates/interface/Electron.h"
-#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
-#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include <MagneticField/Engine/interface/MagneticField.h>
-#include "FWCore/Framework/interface/ESHandle.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
 #include<vector>
 
