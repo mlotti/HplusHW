@@ -24,7 +24,7 @@ metVariation = cms.EDProducer("HPlusMetEnergyScaleVariation",
     unclusteredVariation = cms.double(0.1)
 )
 
-def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, doJetVariation):
+def addJESVariationAnalysis(process, dataVersion, prefix, name, prototype, additionalCounters, variation, etaVariation, unclusteredEnergyVariationForMET, doJetVariation=True):
     variationName = name
     tauVariationName = name+"TauVariation"
     jetVariationName = name+"JetVariation"
