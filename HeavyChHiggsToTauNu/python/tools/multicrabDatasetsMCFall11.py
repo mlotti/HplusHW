@@ -175,7 +175,17 @@ datasets = {
         "data": {
             "AOD": {
                 "datasetpath": "/HplusTB_M-190_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
-                "number_of_jobs": 25, # Adjusted for PATtuple file size
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
+            },
+        }
+    },
+    "HplusTB_M200_Fall11": {
+        "dataVersion": "42XmcS6",
+        "crossSection": 165,
+        "data": {
+            "AOD": {
+                "datasetpath": "/HplusTB_M-200_7TeV-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM",
+                "number_of_jobs": 50, # Adjusted for PATtuple file size
             },
         }
     },
