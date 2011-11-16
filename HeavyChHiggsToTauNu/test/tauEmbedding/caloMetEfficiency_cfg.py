@@ -22,7 +22,8 @@ options, dataVersion = getOptionsDataVersion(dataVersion)
 process = cms.Process("CaloMetEfficiency")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(200) )
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = cms.string(dataVersion.getGlobalTag())#
@@ -32,7 +33,7 @@ process.source = cms.Source('PoolSource',
         #dataVersion.getAnalysisDefaultFileCastor()
         # For testing in jade
         #dataVersion.getAnalysisDefaultFileMadhatter()
-        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_1_X/SingleMu_160431-163261_May10/SingleMu/Run2011A_May10ReReco_v1_AOD_160431_tauembedding_skim_v11/d2154bd8672d0356e956d91d6de8768f/skim_19_2_olM.root"
+        "/store/group/local/HiggsChToTauNuFullyHadronic/tauembedding/CMSSW_4_2_X/TTJets_TuneZ2_Summer11_1/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11_PU_S4_START42_V11_v1_AODSIM_tauembedding_skim_v13_2/6ce8de2c5b6c0c9ed414998577b7e28d/skim_982_1_xgs.root"
   )
 )
 ###############################################################################
@@ -68,28 +69,28 @@ if options.doPat == 0:
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.HChTools import *
 # Pileup weighting
-weight = None
-if dataVersion.isMC():
-    import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
+process.pileupWeightEPS = cms.EDProducer("HPlusVertexWeightProducer",
+    alias = cms.string("pileupWeightEPS"),
+)
+process.pileupWeightRun2011AnoEPS = process.pileupWeightEPS.clone(
+    alias = "pileupWeightRun2011AnoEPS"
+)
+process.pileupWeightRun2011A = process.pileupWeightEPS.clone(
+    alias = "pileupWeightRun2011A"
+)
+param.setPileupWeightFor2011(dataVersion, era="EPS")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightEPS)
+param.setPileupWeightFor2011(dataVersion, era="Run2011A-EPS")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011AnoEPS)
+param.setPileupWeightFor2011(dataVersion, era="Run2011A")
+insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeightRun2011A)
 
-    # Pileup weighting
-    process.pileupWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("pileupWeight"),
-    )
-    puweight = "Run2011A"
-    if len(options.puWeightEra) > 0:
-        puweight = options.puWeightEra
-    param.setPileupWeightFor2011(dataVersion, era=puweight)
-    insertPSetContentsTo(param.vertexWeight.clone(), process.pileupWeight)
-
-    # Vertex weighting
-    process.vertexWeight = cms.EDProducer("HPlusVertexWeightProducer",
-        alias = cms.string("vertexWeight"),
-    )
-    param.setVertexWeightFor2011()
-    insertPSetContentsTo(param.vertexWeight.clone(), process.vertexWeight)
-
-    process.commonSequence *= (process.pileupWeight*process.vertexWeight)
+process.commonSequence *= (
+    process.pileupWeightEPS *
+    process.pileupWeightRun2011AnoEPS *
+    process.pileupWeightRun2011A
+)
     
 # Add the muon selection counters, as this is done after the skim
 import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.muonSelectionPF_cff as MuonSelection
@@ -105,14 +106,20 @@ process.firstPrimaryVertex = cms.EDProducer("HPlusFirstVertexSelector",
 )
 process.commonSequence *= process.firstPrimaryVertex
 
+import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
+process.muonIsolationSequence = cms.Sequence()
+muons = customisations.addMuonIsolationEmbedding(process, process.muonIsolationSequence, muons="tightMuons")
+process.commonSequence *= process.muonIsolationSequence
+
 process.tightenedMuons = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("tightMuons"),
+    src = cms.InputTag(muons),
     cut = cms.string("pt() > 40 && abs(eta()) < 2.1")
 )
 process.tightenedMuonsFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("tightenedMuons"),
     minNumber = cms.uint32(1)
 )
+process.tightenedMuonsCount = cms.EDProducer("EventCountProducer")
 process.tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("tightenedMuons"),
     cut = cms.string("(userInt('byTightIc04ChargedOccupancy') + userInt('byTightIc04GammaOccupancy')) == 0")
@@ -120,10 +127,13 @@ process.tauEmbeddingMuons = cms.EDFilter("PATMuonSelector",
 process.tauEmbeddingMuonsFilter = cms.EDFilter("CandViewCountFilter",
                                        src = cms.InputTag("tauEmbeddingMuons"),
                                        minNumber = cms.uint32(1))
-process.commonSequence *= (process.tightenedMuons * process.tightenedMuonsFilter * process.tauEmbeddingMuons * process.tauEmbeddingMuonsFilter)
+process.tauEmbeddingMuonsCount = cms.EDProducer("EventCountProducer")
+process.commonSequence *= (
+    process.tightenedMuons * process.tightenedMuonsFilter * process.tightenedMuonsCount *
+    process.tauEmbeddingMuons * process.tauEmbeddingMuonsFilter * process.tauEmbeddingMuonsCount)
+additionalCounters.extend(["tightenedMuonsCount", "tauEmbeddingMuonsCount"])
 
 
-import HiggsAnalysis.HeavyChHiggsToTauNu.tauEmbedding.customisations as customisations
 import HiggsAnalysis.HeavyChHiggsToTauNu.HChSignalAnalysisParameters_cff as param
 additionalCounters.extend(customisations.addFinalMuonSelection(process, process.commonSequence, param))
 process.muonFinalSelectionJetSelectionGoodJets.src = "goodJets"
@@ -137,33 +147,82 @@ process.btaggingCount = cms.EDProducer("EventCountProducer")
 process.commonSequence *= process.btaggingCount
 additionalCounters.append("btaggingCount")
 
-met = Histo("et", "et()", min=0, max=400, nbins=400)
+ntuple = cms.EDAnalyzer("HPlusMetNtupleAnalyzer",
+    patTriggerEvent = cms.InputTag("patTriggerEvent"),
+    mets = cms.VPSet(
+        cms.PSet(
+            src = cms.InputTag("met"),
+            name = cms.string("caloMet"),
+        ),
+        cms.PSet(
+            src = cms.InputTag("metNoHF"),
+            name = cms.string("caloMetNoHF"),
+        ),
+        cms.PSet(
+            src = cms.InputTag("pfMet"),
+            name = cms.string("pfMet"),
+        )
+    ),
+    doubles = cms.VPSet(
+        cms.PSet(
+            src = cms.InputTag("pileupWeightEPS"),
+            name = cms.string("weightPileup_EPS")
+        ),
+        cms.PSet(
+            src = cms.InputTag("pileupWeightRun2011AnoEPS"),
+            name = cms.string("weightPileup_Run2011AnoEPS")
+        ),
+        cms.PSet(
+            src = cms.InputTag("pileupWeightRun2011A"),
+            name = cms.string("weightPileup_Run2011A")
+        )
+    ),
+)
 
-histoList = [("calomet_", cms.InputTag("met"), [met]),
-             ("calometNoHF_", cms.InputTag("metNoHF"), [met]),
-             ("pfmet_", cms.InputTag("pfMet"), [met])]
+addAnalysis(process, "metNtuple", ntuple,
+            preSequence=process.commonSequence,
+            additionalCounters=additionalCounters,
+            signalAnalysisCounters=False)
 
-def createAnalysis(prefix, weightSrc=None):
-    wSrc = weightSrc
-    if dataVersion.isData():
-        wSrc = None
+# Replace all event counters with the weighted one
+eventCounters = []
+for label, module in process.producers_().iteritems():
+    if module.type_() == "EventCountProducer":
+        eventCounters.append(label)
+prototype = cms.EDProducer("HPlusEventCountProducer",
+    weightSrc = cms.InputTag("pileupWeightRun2011A")
+)
+for label in eventCounters:
+    process.globalReplace(label, prototype.clone())
 
-    analysis = Analysis(process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=wSrc)
-    ha = analysis.addMultiHistoAnalyzer("h01_All", histoList)
 
-    analysis.addCut("CaloMet25", cms.InputTag("metNoHF"), "et() > 25")
-    ha = analysis.addCloneAnalyzer("h02_CaloMet25", ha)
+# met = Histo("et", "et()", min=0, max=400, nbins=400)
 
-    analysis.addCut("CaloMet45", cms.InputTag("metNoHF"), "et() > 45")
-    ha = analysis.addCloneAnalyzer("h02_CaloMet45", ha)
+# histoList = [("calomet_", cms.InputTag("met"), [met]),
+#              ("calometNoHF_", cms.InputTag("metNoHF"), [met]),
+#              ("pfmet_", cms.InputTag("pfMet"), [met])]
 
-    analysis.addCut("CaloMet60", cms.InputTag("metNoHF"), "et() > 60")
-    ha = analysis.addCloneAnalyzer("h02_CaloMet60", ha)
+# def createAnalysis(prefix, weightSrc=None):
+#     wSrc = weightSrc
+#     if dataVersion.isData():
+#         wSrc = None
 
-    p = cms.Path(process.commonSequence * analysis.getSequence())
-    setattr(process, prefix+"Path", p)
+#     analysis = Analysis(process, "analysis", prefix, additionalCounters=additionalCounters, weightSrc=wSrc)
+#     ha = analysis.addMultiHistoAnalyzer("h01_All", histoList)
 
-name = "caloMetEfficiency"
-createAnalysis(name)
-createAnalysis(name+"VertexWeight", weightSrc="vertexWeight")
-createAnalysis(name+"PileupWeight", weightSrc="pileupWeight")
+#     analysis.addCut("CaloMet25", cms.InputTag("metNoHF"), "et() > 25")
+#     ha = analysis.addCloneAnalyzer("h02_CaloMet25", ha)
+
+#     analysis.addCut("CaloMet45", cms.InputTag("metNoHF"), "et() > 45")
+#     ha = analysis.addCloneAnalyzer("h02_CaloMet45", ha)
+
+#     analysis.addCut("CaloMet60", cms.InputTag("metNoHF"), "et() > 60")
+#     ha = analysis.addCloneAnalyzer("h02_CaloMet60", ha)
+
+#     p = cms.Path(process.commonSequence * analysis.getSequence())
+#     setattr(process, prefix+"Path", p)
+
+# name = "caloMetEfficiency"
+# createAnalysis(name)
+# createAnalysis(name+"VertexWeight", weightSrc="vertexWeight")
+# createAnalysis(name+"PileupWeight", weightSrc="pileupWeight")
