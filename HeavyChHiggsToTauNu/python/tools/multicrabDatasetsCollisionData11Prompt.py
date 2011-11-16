@@ -444,6 +444,12 @@ datasets = {
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~380 in reality)
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_166374_pattuple_v19b-a6a169849ffab7209adc1f692eb70f9c/USER",
+                "luminosity": 422.460000,
+                "number_of_jobs": 28
+            },
         }
     },
     "SingleMu_167039-167043_Prompt": {
@@ -459,6 +465,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v4/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~40 in reality)
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_167039_pattuple_v19b-e47bf762fb7795eb5d49c512eba4cd64/USER",
+                "luminosity": 22.666000,
+                "number_of_jobs": 2
             },
         }
     },
@@ -476,6 +488,12 @@ datasets = {
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~330 in reality)
                 "lumiMask": "PromptReco"
             },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v4_AOD_167078_pattuple_v19b-5f6caa16b39a497dd29d4693920fd650/USER",
+                "luminosity": 243.081000,
+                "number_of_jobs": 16
+            },
         }
     },
     "SingleMu_172620-173198_Prompt": {
@@ -491,6 +509,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~330 in reality)
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v6_AOD_172620_pattuple_v19b-3a653e1bd941d76d28bcbdfed0228b46/USER",
+                "luminosity": 412.359000,
+                "number_of_jobs": 18
             },
         }
     },
@@ -508,6 +532,12 @@ datasets = {
                 "datasetpath": "/SingleMu/Run2011A-PromptReco-v6/AOD",
                 "number_of_jobs": 1000, # Adjusted for PATtuple file size (~330 in reality)
                 "lumiMask": "PromptReco"
+            },
+            "pattuple_v19": {
+                "dbs_url": common.pattuple_dbs,
+                "datasetpath": "/SingleMu/local-Run2011A_PromptReco_v6_AOD_173236_pattuple_v19b-4c451d8c6536329916254ceeac99b134/USER",
+                "luminosity": 246.527000,
+                "number_of_jobs": 10
             },
         }
     },
