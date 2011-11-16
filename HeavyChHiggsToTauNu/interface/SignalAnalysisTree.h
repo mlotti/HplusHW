@@ -16,6 +16,8 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 
+#include "HiggsAnalysis/HeavyChHiggsToTauNu/interface/TreeEventBranches.h"
+
 #include<vector>
 
 namespace edm {
@@ -94,9 +96,7 @@ namespace HPlus {
     TTree *fTree;
 
     bool fillNonIsoLeptonVars;
-    unsigned int fEvent;
-    unsigned int fLumi;
-    unsigned int fRun;
+    TreeEventBranches fEventBranches;
 
     double fPrescaleWeight;
     double fPileupWeight;

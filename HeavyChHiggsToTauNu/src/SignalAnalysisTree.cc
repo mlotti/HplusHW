@@ -52,9 +52,7 @@ namespace HPlus {
 
     fTree = dir.make<TTree>("tree", "Tree");
 
-    fTree->Branch("event", &fEvent);
-    fTree->Branch("lumi", &fLumi);
-    fTree->Branch("run", &fRun);
+    fEventBranches.book(fTree);
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
@@ -200,9 +198,7 @@ namespace HPlus {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
+    fEventBranches.setValues(iEvent);
 
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
@@ -558,9 +554,7 @@ namespace HPlus {
   void SignalAnalysisTree::reset() {
     double nan = std::numeric_limits<double>::quiet_NaN();
 
-    fEvent = 0;
-    fLumi = 0;
-    fRun = 0;
+    fEventBranches.reset();
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
