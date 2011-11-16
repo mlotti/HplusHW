@@ -93,6 +93,7 @@ namespace HPlus {
 
     edm::InputTag fTauEmbeddingMuonSource;
     edm::InputTag fTauEmbeddingMetSource;
+    edm::InputTag fTauEmbeddingCaloMetNoHFSource;
     edm::InputTag fTauEmbeddingCaloMetSource;
 
     TTree *fTree;
@@ -220,6 +221,7 @@ namespace HPlus {
     // Tau embedding stuff
     XYZTLorentzVector fTauEmbeddingMuon;
     XYZTLorentzVector fTauEmbeddingMet;
+    XYZTLorentzVector fTauEmbeddingCaloMetNoHF;
     XYZTLorentzVector fTauEmbeddingCaloMet;
   };
 }

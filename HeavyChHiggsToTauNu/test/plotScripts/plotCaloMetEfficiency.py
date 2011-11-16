@@ -39,8 +39,14 @@ counters = "metNtupleCounters"
 
 runRegion = 1
 #runRegion = 2
-mcDataDefinition = True
-#mcDataDefinition = False
+
+#mcDataDefinition = True
+mcDataDefinition = False
+
+caloMetNoHF = True
+caloMetNoHF = False
+if runRegion == 1:
+    caloMetNoHF = True
 
 runsData = {
     1: "165088-167913",
@@ -118,7 +124,11 @@ def main():
         pass
     elif runRegion == 2:
         passedData = treeDraw.clone(selection="l1Met.Et() > 30 && caloMet.Et() > 60")
+        #passedData = passed.clone()
         cut = "L1 MET > 30 & CaloMET > 60 GeV"
+        if caloMetNoHF:
+            passedData = treeDraw.clone(selection="l1Met.Et() > 30 && caloMetNoHF.Et() > 60")
+            cut = "L1 MET > 30 & CaloMETnoHF > 60 GeV"
         if mcDataDefinition:
             passed = passedData
             commonText = cut
@@ -170,7 +180,11 @@ class Eff:
     def __init__(self, all, passed, dataset):
         self.all = all
         self.passed = passed
-        self.eff = passed/all
+        if all == 0:
+            self.eff = 0
+        else:
+            self.eff = passed/all
+        
         self.eff_up = ROOT.TEfficiency.ClopperPearson(int(all), int(passed), 0.95, True)
         self.eff_down = ROOT.TEfficiency.ClopperPearson(int(all), int(passed), 0.95, False)
         self.eff_up = self.eff_up - self.eff
@@ -269,9 +283,12 @@ def printEfficiency(datasets, bin, function):
             data_all += all
             data_passed += passed
 
+    #cl = 0.95
+    cl = 0.683
+
     mc_eff = mc_passed/mc_all
-    mc_eff_up = ROOT.TEfficiency.ClopperPearson(int(mc_all), int(mc_passed), 0.95, True)
-    mc_eff_down = ROOT.TEfficiency.ClopperPearson(int(mc_all), int(mc_passed), 0.95, False)
+    mc_eff_up = ROOT.TEfficiency.ClopperPearson(int(mc_all), int(mc_passed), cl, True)
+    mc_eff_down = ROOT.TEfficiency.ClopperPearson(int(mc_all), int(mc_passed), cl, False)
     mc_eff_up = mc_eff_up-mc_eff
     mc_eff_down = mc_eff-mc_eff_down
 
@@ -279,8 +296,8 @@ def printEfficiency(datasets, bin, function):
     cmc_eff_err = max(cmc_eff_up, cmc_eff_down)
     
     data_eff = data_passed/data_all
-    data_eff_up = ROOT.TEfficiency.ClopperPearson(int(data_all), int(data_passed), 0.95, True)
-    data_eff_down = ROOT.TEfficiency.ClopperPearson(int(data_all), int(data_passed), 0.95, False)
+    data_eff_up = ROOT.TEfficiency.ClopperPearson(int(data_all), int(data_passed), cl, True)
+    data_eff_down = ROOT.TEfficiency.ClopperPearson(int(data_all), int(data_passed), cl, False)
     data_eff_up = data_eff_up-data_eff
     data_eff_down = data_eff-data_eff_down
     data_eff_err = max(data_eff_up, data_eff_down)
@@ -335,7 +352,7 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
             mc_effs.append(HistoEff(all, passed, dataset))
 
         elif dataset.isData():
-            data_eff_gr = ROOT.TGraphAsymmErrors(passed, all, "cp")
+            data_eff_gr = ROOT.TGraphAsymmErrors(passed, all, "cp") # 0.683 cl is default
             luminosity += dataset.getLuminosity()
 
     mc_eff_gr = combineHistoEffs(mc_effs)
@@ -360,8 +377,13 @@ def plotTurnOn(datasets, pathAll, pathPassed, commonText, dataText=None, mcText=
     name = "calomet_turnon_"+runs
     if not mcDataDefinition:
         name += "_McSummer11"
+    if caloMetNoHF:
+        name += "_caloMetNoHF"
     
-    p.createFrame(name, createRatio=True, opts=opts, opts2=opts2)
+    ratio = False
+    p.createFrame(name, createRatio=ratio, opts=opts, opts2=opts2)
+    if ratio:
+        p.getFrame2().GetYaxis().SetTitle("Data / MC")
     p.setLegend(histograms.moveLegend(histograms.createLegend(y1=0.95, y2=0.85),
                                       #dx=-0.55, dy=-0.05
                                       dx=-0.44, dy=-0.58

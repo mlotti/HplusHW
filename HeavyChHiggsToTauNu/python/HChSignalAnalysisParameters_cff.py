@@ -380,12 +380,14 @@ def setDataTriggerEfficiency(dataVersion, era):
         triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913"]
     elif era == "Run2011A":
         triggerEfficiencyScaleFactor.dataSelect = ["runs_160431_167913", "runs_170722_173198", "runs_173236_173692"]
+    elif era == "Run2011A-EPS":
+        triggerEfficiencyScaleFactor.dataSelect = ["runs_170722_173198", "runs_173236_173692"]
     elif era == "Run2011B":
         raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
     elif era == "Run2011A+B":
         raise Exception("Tau trigger efficiencies are not yet measured for Run2011B")
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A', 'Run2011B', 'Run2011A+B'")
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS, 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'")
 
 
 # Weighting by instantaneous luminosity, and the number of true
@@ -433,6 +435,15 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", metho
         pset.dataDist3D = cms.vdouble(0.00000000, 179221.81250000, 3814551.00000000, 25772300.00000000, 172987680.00000000, 356233824.00000000, 353649024.00000000, 175073792.00000000, 47863632.00000000, 10613712.00000000, 1599420.50000000, 243314.20312500, 26479.34960938, 4621.37011719, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
         pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_160404-167913.root"
 
+    elif era == "Run2011A-EPS":
+        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileup_v2.root
+        # Cert_172620-173692_PromptReco_JSON.pileup_v2.root
+        pset.dataDistIntime = cms.vdouble(4848892.97584991, 20529438.23677765, 47643960.96635760, 79748005.00045094, 108048133.88826957, 125969058.25675932, 130969086.58619121, 124083438.16256833, 108566913.20788163, 88480612.19331141, 67568311.67310232, 48566962.00574034, 32981250.33882020, 21230236.06722812, 12993001.81115350, 7581174.99149259, 4228179.23819536, 2259416.79477907, 1159379.56732899, 572440.97021515, 272480.69068092, 125257.93731902, 55699.30297723, 23995.56380003, 10029.20958816, 4072.25946078, 1608.34820338, 618.60207560, 231.95871764, 84.88525826, 30.34623619, 10.60798240, 3.62908322, 1.21605912, 0.58696811)
+        # Cert_170249-172619_7TeV_ReReco5Aug_Collisions11_JSON_v2.pileupTruth_v2.root
+        # Cert_172620-173692_PromptReco_JSON.pileupTruth_v2.root
+        pset.dataDist3D = cms.vdouble(0.00000000, 73351.21789568, 1924055.52206460, 24791818.40420207, 95209585.87688106, 156742968.69022515, 167816555.37041527, 200587495.86714596, 193603251.43905830, 132536767.53925066, 52232333.43499182, 11569144.56335005, 1264254.55759395, 106947.66097234, 6537.93290332, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000, 0.00000000)
+        pset.weightFile3D = "HiggsAnalysis/HeavyChHiggsToTauNu/data/Weight3D_170249-173692.root"
+
     elif era == "Run2011A":
         # Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_v3.pileup_v2.root
         # Cert_165088-167913_7TeV_PromptReco_JSON.pileup_v2.root
@@ -473,7 +484,7 @@ def setPileupWeightFor2011(dataVersion, pset=vertexWeight, era="Run2011A", metho
             raise Exception("No 3D weight file yet for Run2011A+B")
 
     else:
-        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
+        raise Exception("Unsupported value of era parameter, has value '%s', allowed values are 'EPS', 'Run2011A-EPS', 'Run2011A', 'Run2011B', 'Run2011A+B'" % era)
 
 # Weighting by number of reconstructed vertices
 def setVertexWeightFor2010(pset=vertexWeight):
