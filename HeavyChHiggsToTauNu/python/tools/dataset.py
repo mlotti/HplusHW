@@ -467,7 +467,7 @@ class TreeDrawCompound:
             ret.datasetMap[name] = td.clone(**kwargs)
         return ret
 
-def treeDrawToNumEntries(treeDraw):
+def _treeDrawToNumEntriesSingle(treeDraw):
     var = treeDraw.weight
     if var == "":
         var = treeDraw.selection
@@ -475,6 +475,15 @@ def treeDrawToNumEntries(treeDraw):
         var += ">>dist(1,0,2)" # the binning is arbitrary, as the under/overflow bins are counted too
     # if selection and weight are "", TreeDraw.draw() returns a histogram with the number of entries
     return treeDraw.clone(varexp=var)
+
+def treeDrawToNumEntries(treeDraw):
+    if isinstance(treeDraw, TreeDrawCompound):
+        td = TreeDrawCompound(_treeDrawToNumEntriesSingle(treeDraw.default))
+        for name, td2 in treeDraw.datasetMap.iteritems():
+            td.add(name, _treeDrawToNumEntriesSingle(td2))
+        return td
+    else:
+        return _treeDrawToNumEntriesSingle(treeDraw)
 
 class DatasetRootHistoBase:
     """Base class for DatasetRootHisto classes.
