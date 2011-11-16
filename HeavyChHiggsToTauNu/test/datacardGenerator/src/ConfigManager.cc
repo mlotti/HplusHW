@@ -795,12 +795,12 @@ bool ConfigManager::doExtract() {
 
 void ConfigManager::generateCards() {
   // Loop over mass points
-  for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
+  /*for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {
     vDatacardGenerators[i]->generateDataCard(sDescription, fLuminosity, 
                                              sShapeSource, false,
                                              vExtractables, vDatasetGroups,
                                              fNormalisationInfo);
-  }
+  }*/
   //  Generate datacards with shapes
   if (sShapeSource.size()) {
     for (size_t i = 0; i < vDatacardGenerators.size(); ++i) {

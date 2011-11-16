@@ -53,6 +53,7 @@ double Extractable::doExtractAsymmetricUpperValue(std::vector< Dataset* > datase
 }
 
 void Extractable::print() {
+  std::cout << "type=" << fType << std::endl;
   if (isObservation())
     std::cout << "observation:";
   else if (isRate())

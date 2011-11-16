@@ -66,7 +66,7 @@ protected:
   std::vector<Extractable*> vExtractablesToBeMerged; // list of extractables who's results are to be merged to this one (practically an or function)
 
 private:
-  ExtractableType fType;
+  const ExtractableType fType;
   bool bIsMerged; // if true, the nuisance will not produce a new line
   std::string sMergedMasterId; // if non-empty, contains the ID of the master
   
