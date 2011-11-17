@@ -88,6 +88,16 @@ def main():
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
 
 
+    # Replace signal dataset with EWK+signal
+    if True:
+        ttjets2 = datasets.getDataset("TTJets").deepCopy()
+        ttjets2.setName("TTJets2")
+        ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_M120").getCrossSection())
+        datasets.append(ttjets2)
+        datasets.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
+        datasets.merge("TTToHplus_M120", ["TTToHplus_M120", "EWKnoTT", "TTJets2"])
+        plots._legendLabels["TTToHplus_M120"] = "with "+plots._legendLabels["TTToHplus_M120"]
+
     # Apply TDR style
     style = tdrstyle.TDRStyle()
 
@@ -497,10 +507,13 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "Cut"
     ylabel = "Events"
-
-    h.stackMCHistograms()
+    
+        
+    #h.stackMCSignalHistograms()
+    h.stackMCHistograms()       
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
+
     
     opts = {"xmax": 7, "ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
