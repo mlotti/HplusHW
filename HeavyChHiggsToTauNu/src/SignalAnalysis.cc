@@ -189,12 +189,17 @@ namespace HPlus {
     hCtrlIdentifiedElectronPt = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlIdentifiedMuonPt = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlNjets = makeTH<TH1F>(myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", 10, 0., 10.);
-    hCtrlSelectedTauPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlSelectedTauEtaAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
     hCtrlSelectedTauPhiAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections = makeTH<TH2F>(myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", 60, -3.0, 3.0, 36, -3.1415926, 3.1415926);
-    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 80, 0.0, 400.0);
-    hCtrlSelectedTauRtauAfterStandardSelections  = makeTH<TH1F>(myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauRtauAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
+    hCtrlSelectedTauPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlIdentifiedElectronPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt_AfterStandardSelections", "IdentifiedElectronPt_AfterStandardSelections;Identified electron p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);;
+    hCtrlIdentifiedMuonPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
+    hCtrlNjetsAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlMET = makeTH<TH1F>(myCtrlDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlNbjets = makeTH<TH1F>(myCtrlDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
 
@@ -375,6 +380,11 @@ namespace HPlus {
     hCtrlSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
+    hCtrlSelectedTauPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->p(), fEventWeight.getWeight());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
 
 
 //------ MET cut

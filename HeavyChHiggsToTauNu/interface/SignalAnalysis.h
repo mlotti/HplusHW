@@ -206,11 +206,17 @@ namespace HPlus {
     TH1* hCtrlIdentifiedMuonPt;
     TH1* hCtrlNjets;
     TH1* hCtrlSelectedTauPtAfterStandardSelections;
+    TH1* hCtrlSelectedTauPAfterStandardSelections;
     TH1* hCtrlSelectedTauEtaAfterStandardSelections;
     TH1* hCtrlSelectedTauPhiAfterStandardSelections;
     TH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
     TH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
     TH1* hCtrlSelectedTauRtauAfterStandardSelections;
+    TH1* hCtrlSelectedTauPAfterStandardSelections;
+    TH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+    TH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
+    TH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
+    TH1* hCtrlNjetsAfterStandardSelections;
     TH1* hCtrlMET;
     TH1* hCtrlNbjets;
 
