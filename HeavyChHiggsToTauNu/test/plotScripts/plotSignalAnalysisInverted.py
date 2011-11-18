@@ -68,7 +68,7 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Remove signals other than M120
-##########    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
 
     datasets_lands = datasets.deepCopy()
@@ -142,9 +142,9 @@ def doPlots(datasets):
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet100120"), "MTInvertedTauIdJet100120", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet120150"), "MTInvertedTauIdJet120150", rebin=20)
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet150"), "MTInvertedTauIdJet150", rebin=20)                       
-    
-#    transverseMass(plots.DataMCPlot(datasets_tm, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMass"), "transverseMass_standard", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet"), "MTInvertedTauIdJet", rebin=10)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJetPhi"), "MTInvertedTauIdJetPhi", rebin=10)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdMet"), "MTInvertedTauIdMet", rebin=10)  
 
 
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
@@ -249,6 +249,7 @@ def mtComparison(datasets):
     mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet100120")])
     mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet120150")])
     mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")])
+    mt = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet")])
             
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060"),
 #        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070"),
@@ -315,7 +316,13 @@ def mtComparison(datasets):
     mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
     hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet150")
     hmt150.Scale(0.001792)
-
+    
+    mt._setLegendStyles()
+    mt._setLegendLabels()
+    mt.histoMgr.setHistoDrawStyleAll("P")
+    mt.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hmt = mt.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet")
+    hmt.Scale(0.0068684)
     
     hmtSum = hmt4050.Clone("mtSum")
     hmtSum.SetName("mtSum")
@@ -351,15 +358,58 @@ def mtComparison(datasets):
     canvas.cd(9)
     hmtSum.Draw()
     canvas.Print("mtComparison.png")
+    
 ##    rtauGen(mt4050, "transverseMass_vs_pttau", rebin=20)
     print "Integral  = ",hmtSum.Integral()
-
-    canvas2 = ROOT.TCanvas("canvas2","",500,500)
-    canvas2.cd(1)    
+    
+############
+    canvas2 = ROOT.TCanvas("canvas2","",500,500)   
     hmtSum.Draw()
     hmtSum.GetYaxis().SetTitle("Events")
     hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
     canvas2.Print("mtSum.png")
+
+###########
+    canvas3 = ROOT.TCanvas("canvas3","",500,500)
+    hmt.SetMarkerColor(2)
+    hmt.SetMarkerSize(1)
+    hmt.SetMarkerStyle(21)
+#    hmt.SetFillColor(2)
+    hmt.Draw("EP")
+    hmtSum.SetMarkerColor(4)
+    hmtSum.SetMarkerSize(1)
+    hmtSum.SetMarkerStyle(20)
+    hmtSum.SetFillColor(4)
+    hmtSum.Draw("same")
+    
+    tex1 = ROOT.TLatex(0.55,0.7,"No binning")
+    tex1.SetNDC()
+    tex1.SetTextSize(20)
+    tex1.Draw()    
+    marker1 = ROOT.TMarker(0.5,0.715,hmt.GetMarkerStyle())
+    marker1.SetNDC()
+    marker1.SetMarkerColor(hmt.GetMarkerColor())
+    marker1.SetMarkerSize(0.5*hmt.GetMarkerSize())
+    marker1.Draw()
+    
+    tex2 = ROOT.TLatex(0.55,0.65,"With p_{T}^{#tau jet} bins")
+    tex2.SetNDC()
+    tex2.SetTextSize(20)
+    tex2.Draw()    
+    marker2 = ROOT.TMarker(0.5,0.665,hmt.GetMarkerStyle())
+    marker2.SetNDC()
+    marker2.SetMarkerColor(hmtSum.GetMarkerColor())
+    marker2.SetMarkerSize(0.5*hmtSum.GetMarkerSize())
+    marker2.Draw()
+
+    tex1 = ROOT.TLatex(0.6,0.8,"With ")
+    tex1.SetNDC()
+    tex1.SetTextSize(20)
+    tex1.Draw()   
+    hmt.GetYaxis().SetTitle("Events")
+    hmt.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+    canvas3.Print("mtInverted.png")
+    
 
 
     

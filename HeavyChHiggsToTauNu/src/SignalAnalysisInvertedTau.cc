@@ -189,6 +189,16 @@ namespace HPlus {
     hMTInvertedTauIdJet5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdJet5060", "MTInvertedTauIdJet5060", 400, 0., 400.);
     hMTInvertedTauIdJet4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdJet4050", "MTInvertedTauIdJet4050", 400, 0., 400.);
 
+    hMTInvertedTauIdMet = makeTH<TH1F>(*fs, "MTInvertedTauIdMet", "MTInvertedTauIdMet", 400, 0., 400.);
+    hMTInvertedTauIdMet150 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet150", "MTInvertedTauIdMet150", 400, 0., 400.);
+    hMTInvertedTauIdMet120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet120150", "MTInvertedTauIdMet120150", 400, 0., 400.);
+    hMTInvertedTauIdMet100120 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet100120", "MTInvertedTauIdMet100120", 400, 0., 400.);
+    hMTInvertedTauIdMet80100 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet80100", "MTInvertedTauIdMet80100", 400, 0., 400.);
+    hMTInvertedTauIdMet7080 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet7080", "MTInvertedTauIdMet7080", 400, 0., 400.);
+    hMTInvertedTauIdMet6070 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet6070", "MTInvertedTauIdMet6070", 400, 0., 400.);
+    hMTInvertedTauIdMet5060 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet5060", "MTInvertedTauIdMet5060", 400, 0., 400.);
+    hMTInvertedTauIdMet4050 = makeTH<TH1F>(*fs, "MTInvertedTauIdMet4050", "MTInvertedTauIdMet4050", 400, 0., 400.);
+
     hMTInvertedTauIdJetPhi = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi", "MTInvertedTauIdJetPhi", 400, 0., 400.);
     hMTInvertedTauIdJetPhi150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi150", "MTInvertedTauIdJetPhi150", 400, 0., 400.);
     hMTInvertedTauIdJetPhi120150 = makeTH<TH1F>(*fs, "MTInvertedTauIdJetPhi120150", "MTInvertedTauIdJetPhi120150", 400, 0., 400.);
@@ -619,7 +629,22 @@ namespace HPlus {
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMTInvertedTauIdJet6070->Fill(transverseMass, fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMTInvertedTauIdJet5060->Fill(transverseMass, fEventWeight.getWeight()); 
     if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauIdJet4050->Fill(transverseMass, fEventWeight.getWeight()); 
+
+
+   // mt for inverted tau with MET>70 cut   
+    if (metData.getSelectedMET()->et() > 70) {
+      hMTInvertedTauIdMet->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJet150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 120 && tauData.getCleanedTauCandidates()[0]->pt() < 150 ) hMTInvertedTauIdMet120150->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 100 && tauData.getCleanedTauCandidates()[0]->pt() < 120 ) hMTInvertedTauIdMet100120->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 80 && tauData.getCleanedTauCandidates()[0]->pt() < 100 ) hMTInvertedTauIdMet80100->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 70 && tauData.getCleanedTauCandidates()[0]->pt() < 80 ) hMTInvertedTauIdMet7080->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 60 && tauData.getCleanedTauCandidates()[0]->pt() < 70 ) hMTInvertedTauIdMet6070->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 50 && tauData.getCleanedTauCandidates()[0]->pt() < 60 ) hMTInvertedTauIdMet5060->Fill(transverseMass, fEventWeight.getWeight()); 
+      if ( tauData.getCleanedTauCandidates()[0]->pt() > 40 && tauData.getCleanedTauCandidates()[0]->pt() < 50 ) hMTInvertedTauIdMet4050->Fill(transverseMass, fEventWeight.getWeight());
+    }
    // mt for inverted tau with deltaphi cut
+
     if ( deltaPhi*57.3 < 160 ) {
       hMTInvertedTauIdJetPhi->Fill(transverseMass, fEventWeight.getWeight()); 
       if ( tauData.getCleanedTauCandidates()[0]->pt() > 150  ) hMTInvertedTauIdJetPhi150->Fill(transverseMass, fEventWeight.getWeight()); 
@@ -637,7 +662,7 @@ namespace HPlus {
     hDeltaPhi->Fill(deltaPhi*57.3, fEventWeight.getWeight());
     if ( deltaPhi*57.3 > 10) increment(fdeltaPhiTauMET10Counter); 
  
-    if ( deltaPhi*57.3 < 135) {
+    if ( deltaPhi*57.3 < 130) {
       increment(fdeltaPhiTauMET160Counter);
       hTransverseMassDeltaPhiUpperCut->Fill(transverseMass, fEventWeight.getWeight());  
     }     
