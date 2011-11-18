@@ -34,7 +34,7 @@ double ExtractableScaleFactor::doExtract(std::vector< Dataset* > datasets, Norma
       if (!hNorm) return -1.;
       // Obtain result
       // FIXME
-      std::cout << "ScaleFactor: warning check code!" << std::endl;
+      std::cout << "ScaleFactor: \033[0;44m\033[1;37mwarning check code!\033[0;0m" << std::endl;
       double myNormFactor = info->getNormalisationFactor((*it)->getFile());
       for (int i = 1; i <= hUncertainty->GetNbinsX(); ++i) {
         if (sId == "1" && hUncertainty->GetBinContent(i) / (double)hUncertainty->GetEntries() > 0.1) { // trg scale factor

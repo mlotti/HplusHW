@@ -9,7 +9,7 @@ Dataset::Dataset(std::string filename)
     //std::cout << filename << std::endl;
     fFile = TFile::Open(filename.c_str());
     if (!fFile) {
-      std::cout << "Error: Cannot open root file '" << filename << "'!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Cannot open root file '" << filename << "'!" << std::endl;
       fFile = 0;
     }
   } else if (filename.substr(filename.size()-4) == ".txt") {
@@ -23,7 +23,7 @@ Dataset::Dataset(std::string filename)
     sFilename = myTestFile;
     fFile = TFile::Open(myTestFile.c_str());
     if (!fFile) {
-      std::cout << "Error: Cannot open root file '" << myTestFile << "'!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Cannot open root file '" << myTestFile << "'!" << std::endl;
       std::cout << "Check filename / did you run HPlusMergeHistograms.py?" << std::endl;
       fFile = 0;
     }

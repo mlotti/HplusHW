@@ -238,14 +238,14 @@ int main(int argc, char** argv) {
       } else if (myArg == "-v") {
         myVerboseStatus = true;
       } else {
-        std::cout << "Error: Unknown argument: " << myArg << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Unknown argument: " << myArg << std::endl;
         printUsage();
         return 0;
       }
     }
   }
   if (!myConfigName.size()) {
-    std::cout << "Error: No config file was given as argument!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m No config file was given as argument!" << std::endl;
     printUsage();
     return 0;
   }

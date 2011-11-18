@@ -28,20 +28,21 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
                                          std::vector< DatasetGroup* >& datasetGroups,
                                          NormalisationInfo* info) {
   
+  sDirectory = "datacards_" + sDirectory + "_" + description;
+  if (useShapes)
+    sDirectory += "_withShapes";
+  
   // Initialise
   fNormalisationInfo = info;
   sResult.str("");
 
   // Make directory if it doesn't already exist
   std::stringstream s;
-  s << "datacards_"+sDirectory+"/datacard_"+description;
-  if (useShapes)
-    s << "_withShapes";
-  s << "_M" << fMassPoint << ".txt";
+  s << sDirectory+"/datacard_" << fMassPoint << ".txt";
   
   std::ofstream myFile(s.str().c_str());
   if (myFile.bad() || myFile.fail()) {
-    std::string myDirCommand = "mkdir datacards_" + sDirectory;
+    std::string myDirCommand = "mkdir " + sDirectory;
     int myResult = std::system(myDirCommand.c_str());
     if (myResult) return false; // could not create directory
     myFile.open(s.str().c_str());
@@ -54,7 +55,7 @@ bool DatacardGenerator::generateDataCard(std::string description, double luminos
   // Open root file
   std::stringstream myOutName;
   if (useShapes) {
-    myOutName << "datacards_" << sDirectory << "/" << shapeSource << fMassPoint << ".root";
+    myOutName << sDirectory << "/" << shapeSource << fMassPoint << ".root";
     fFile = TFile::Open(myOutName.str().c_str(), "RECREATE");
     if (!fFile) return false;
   }
@@ -145,9 +146,12 @@ void DatacardGenerator::generateObservationLine(std::vector< DatasetGroup* >& da
           sResult << "\t" << std::fixed << std::setprecision(0) << myRate;
           if (useShapes) {
             fFile->cd();
-            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",20,0.,400.);
+            TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, "data_obs",40,0.,400.);
             if (!h) return;
-            h->Scale(myRate / h->Integral());
+            if (TMath::Abs(myRate - h->Integral()) > 0.0001) {
+              std::cout << "WARNING: Signal rate=" << myRate << " is not same as mT shape integral=" << h->Integral() << "; check mT plot source!" << std::endl;
+            }
+            // do not scale data !!!
           }
         }
       }
@@ -228,7 +232,7 @@ void DatacardGenerator::generateRateLine(std::vector< DatasetGroup* >& datasetGr
         myValue = datasetGroups[j]->getValueByExtractable(extractables[i], fNormalisationInfo);
         if (useShapes) {
           fFile->cd();
-          TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),20,0.,400.);
+          TH1F* h = datasetGroups[j]->getTransverseMassPlot(fNormalisationInfo, datasetGroups[j]->getLabel(),40,0.,400.);
           if (!h) return;
           if (h->Integral() > 0) // normalise only histograms that have entries
             h->Scale(myValue / h->Integral());

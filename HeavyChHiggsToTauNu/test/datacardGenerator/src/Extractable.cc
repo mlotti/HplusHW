@@ -68,7 +68,7 @@ TH1F* Extractable::getCounterHistogram(TFile* f, std::string counterHisto) {
   // Open histogram and check validity
   TH1F* h = dynamic_cast<TH1F*>(f->Get(counterHisto.c_str()));
   if (!h) {
-    std::cout << "Error: Cannot find counter histogram '" << counterHisto << "'!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Cannot find counter histogram '" << counterHisto << "'!" << std::endl;
     return 0;
   }
   return h;
@@ -80,7 +80,7 @@ int Extractable::getCounterItemIndex(TH1F* h, std::string counterItem) {
     if (myBinLabel == counterItem)
       return i;
   }
-  std::cout << "Error: Cannot find counter by name " << counterItem << "!" << std::endl;
+  std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Cannot find counter by name " << counterItem << "!" << std::endl;
   return -1;
 }
 

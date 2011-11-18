@@ -148,16 +148,17 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
   if (sTransverseMassPlotNameWithPath == "empty") return myPlot;
   if (sExternalFileForTransverseMassPlot.size()) {
     // Obtain plot from external file
+    std::cout << "Obtaining plot '" << sTransverseMassPlotNameWithPath << "' from file '" << sExternalFileForTransverseMassPlot << "'";
     TFile* f = TFile::Open(sExternalFileForTransverseMassPlot.c_str());
     if (!f) {
-      std::cout << "Error: Could not open file " << sExternalFileForTransverseMassPlot << "!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open file " << sExternalFileForTransverseMassPlot << "!" << std::endl;
       return myPlot;
     }
     TH1* myHisto = dynamic_cast<TH1*>(f->Get(sTransverseMassPlotNameWithPath.c_str()));
     if (!myHisto) {
-      std::cout << "Error: Could not open histogram " << sTransverseMassPlotNameWithPath << " in file " 
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open histogram " << sTransverseMassPlotNameWithPath << " in file " 
                 << sExternalFileForTransverseMassPlot << "!" << std::endl;
-      std::cout << f << ", " << myHisto << std::endl;
+      //std::cout << f << ", " << myHisto << std::endl;
       return myPlot;
     }
     if (myHisto->GetNbinsX() > myPlot->GetNbinsX()) {
@@ -171,7 +172,12 @@ TH1F* DatasetGroup::getTransverseMassPlot(NormalisationInfo* info, std::string n
     
   // Obtain plot from datasets
   for (size_t i = 0; i < vDatasets.size(); ++i) {
+    std::cout << "Obtaining plot '" << sTransverseMassPlotNameWithPath << "' from file '" << vDatasets[i]->getFilename() << "'" << std::endl;
     TH1F* myHisto = (dynamic_cast<TH1F*>(vDatasets[i]->getFile()->Get(sTransverseMassPlotNameWithPath.c_str())));
+    if (!myHisto) {
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Could not open histogram " << sTransverseMassPlotNameWithPath << " in file " << vDatasets[i]->getFilename() << "!" << std::endl;
+      return myPlot;
+    }
     if (!bIsData)
       myHisto->Scale(info->getNormalisationFactor(vDatasets[i]->getFile()));
     if (myHisto->GetNbinsX() > myPlot->GetNbinsX())

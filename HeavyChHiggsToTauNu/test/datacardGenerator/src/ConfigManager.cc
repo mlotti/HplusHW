@@ -77,32 +77,32 @@ bool ConfigManager::initialize(std::string configFile) {
       if ( bVerbose) std::cout << "Luminosity set to " << fLuminosity << std::endl;
     } else if (myCommand == "observation") {
       if (!fNormalisationInfo) {
-        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before observation!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m provide configInfoHisto, counterHisto, and luminosity before observation!" << std::endl;
         return false;
       }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableObservation)) return false;
     } else if (myCommand == "rate") {
       if (!fNormalisationInfo) {
-        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before rate!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m provide configInfoHisto, counterHisto, and luminosity before rate!" << std::endl;
         return false;
       }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableRate)) return false;
     } else if (myCommand == "nuisance") {
       if (!fNormalisationInfo) {
-        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before nuisance!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m provide configInfoHisto, counterHisto, and luminosity before nuisance!" << std::endl;
         return false;
       }
       if (!addExtractable(myLine.substr(myDummyPos+1), Extractable::kExtractableNuisance)) return false;
     } else if (myCommand == "column") {
       if (!fNormalisationInfo) {
-        std::cout << "Error: provide configInfoHisto, counterHisto, and luminosity before column!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m provide configInfoHisto, counterHisto, and luminosity before column!" << std::endl;
         return false;
       }
       if (!addDataGroup(myLine.substr(myDummyPos+1))) return false;
     } else if (myCommand == "mergeNuisances") {
       if (!addMergingOfExtractable(myLine.substr(myDummyPos+1))) return false;
     } else {
-      std::cout << "Error: unknown command '" << myCommand << "'!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m unknown command '" << myCommand << "'!" << std::endl;
       return false;
     }
 
@@ -134,10 +134,10 @@ bool ConfigManager::initialize(std::string configFile) {
 
   // Check that enough parameters have been given for reasonable operation
   if (!myConfigInfoHisto.size()) {
-    std::cout << "Error: configInfoHisto is not provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m configInfoHisto is not provided in config file!" << std::endl;
     return false;
   } else if (!myCounterHisto.size()) {
-    std::cout << "Error: counterHisto is not provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m counterHisto is not provided in config file!" << std::endl;
     return false;
   }
   if (!checkValidity())
@@ -149,20 +149,20 @@ bool ConfigManager::initialize(std::string configFile) {
 
 bool ConfigManager::checkValidity() {
   if (!sDescription.size()) {
-    std::cout << "Error: Description is not provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m Description is not provided in config file!" << std::endl;
     return false;
   }
   if (!vDatacardGenerators.size()) {
-    std::cout << "Error: No mass points provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m No mass points provided in config file!" << std::endl;
     return false;
   }
   if (fLuminosity <= 0) {
-    std::cout << "Error: No luminosity provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m No luminosity provided in config file!" << std::endl;
     return false;
   }
   
   if (!vDatasetGroups.size()) {
-    std::cout << "Error: No columns provided in config file!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m No columns provided in config file!" << std::endl;
     return false;
   }
   
@@ -172,12 +172,12 @@ bool ConfigManager::checkValidity() {
       bool myStatus = true;
       if (vDatasetGroups[i]->getLabel() == "Data" && vDatasetGroups[j]->getLabel() == "Data") {
         if (vDatasetGroups[i]->getChannel() == vDatasetGroups[j]->getChannel()) {
-          std::cout << "Error: two identical channels given for observation!" << std::endl;
+          std::cout << "\033[0;41m\033[1;37mError:\033[0;0m two identical channels given for observation!" << std::endl;
           myStatus = false;
         }
       } else {
         if (vDatasetGroups[i]->getLabel() == vDatasetGroups[j]->getLabel()) {
-          std::cout << "Error: two identical labels found for columns!" << std::endl;
+          std::cout << "\033[0;41m\033[1;37mError:\033[0;0m two identical labels found for columns!" << std::endl;
           myStatus = false;
         }
       }
@@ -197,12 +197,12 @@ bool ConfigManager::checkValidity() {
       bool myStatus = true;
       if (vExtractables[i]->isRate() && vExtractables[j]->isRate()) {
         if (vExtractables[i]->getId() == vExtractables[j]->getId()) {
-          std::cout << "Error: two identical id's given for rate!" << std::endl;
+          std::cout << "\033[0;41m\033[1;37mError:\033[0;0m two identical id's given for rate!" << std::endl;
           myStatus = false;
         }
       } else if (vExtractables[i]->isNuisance() && vExtractables[j]->isNuisance()) {
         if (vExtractables[i]->getId() == vExtractables[j]->getId()) {
-          std::cout << "Error: two identical id's given for nuisance!" << std::endl;
+          std::cout << "\033[0;41m\033[1;37mError:\033[0;0m two identical id's given for nuisance!" << std::endl;
           myStatus = false;
         }
       }
@@ -224,7 +224,7 @@ std::string ConfigManager::parseLabel( std::string str, size_t& pos ) {
   size_t myEqualPos = str.find_first_of('=', pos);
   if (myEqualPos > str.size()) {
     // no sign was found
-    //std::cout << "Error: tried to read a label, but could not find the = sign!" << std::endl;
+    //std::cout << "\033[0;41m\033[1;37mError:\033[0;0m tried to read a label, but could not find the = sign!" << std::endl;
     //std::cout << "  Parsed string: " << str.substr(myEqualPos) << std::endl;
     pos = 9999;
     return "";
@@ -248,7 +248,7 @@ std::string ConfigManager::parseLabel( std::string str, size_t& pos ) {
     --myEqualPos;
   if (myEqualPos - myStart > 0)
     return str.substr(myStart, myEqualPos - myStart);
-  std::cout << "Error: tried to read a string, but string length is zero!" << std::endl;
+  std::cout << "\033[0;41m\033[1;37mError:\033[0;0m tried to read a string, but string length is zero!" << std::endl;
   std::cout << "  Parsed string: " << str.substr(myStart) << std::endl; 
   return "";
 }
@@ -295,7 +295,7 @@ std::string ConfigManager::parseString ( std::string str, size_t& pos) {
     return "";
   }
   /*if (myLastPos == myFirstPos + 1) {
-    std::cout << "Error: empty string given as input!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m empty string given as input!" << std::endl;
     pos = 9999;
     return "";
   }*/
@@ -313,7 +313,7 @@ void ConfigManager::parseVectorString ( std::string str, size_t& pos, std::vecto
   size_t myClosingBracket = str.find_first_of('}', myOpeningBracket);
   if (myOpeningBracket == myClosingBracket) {
     // No brackets were found
-    std::cout << "Error: tried to read a vector, but could not find curly brackets!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m tried to read a vector, but could not find curly brackets!" << std::endl;
     std::cout << "  Parsed string: " << str.substr(myEqualPos) << std::endl;
     pos = 9999;
     return;
@@ -341,7 +341,7 @@ void ConfigManager::parseVectorValue( std::string str, size_t& pos, std::vector<
   size_t myClosingBracket = str.find_first_of('}', myOpeningBracket);
   if (myOpeningBracket > str.size() || myClosingBracket > str.size()) {
     // No brackets were found
-    std::cout << "Error: tried to read a vector, but could not find curly brackets!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m tried to read a vector, but could not find curly brackets!" << std::endl;
     std::cout << "  Parsed string: " << str.substr(myEqualPos) << std::endl;
     pos = 9999;
     return;
@@ -411,7 +411,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
       } else if (myLabel == "files" || myLabel == "counterPaths") {
         parseVectorString(str, myPos, myFiles);
       } else {
-        std::cout << "Error: unknown label in config: '" << myLabel << "'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m unknown label in config: '" << myLabel << "'!" << std::endl;
         std::cout << "  Parsed string: " << str << std::endl;
         return false;
       }
@@ -426,13 +426,13 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   // Check required fields
   if (type == Extractable::kExtractableObservation) {
     if (myChannel == 0) {
-      std::cout << "Error: missing or empty field 'channel' for observation!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'channel' for observation!" << std::endl;
       myStatus = false;
     } else if (!myFiles.size()) {
-      std::cout << "Error: missing or empty field 'file' for observation!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'file' for observation!" << std::endl;
       myStatus = false;
     } else if (!myMTPlot.size()) {
-      std::cout << "Error: missing or empty field 'mTPlot' for observation!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'mTPlot' for observation!" << std::endl;
       myStatus = false;
     }
     if (!myStatus) {
@@ -447,7 +447,7 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   } else if (type == Extractable::kExtractableRate) {
     // Check required fields
     if (!myId.size()) {
-      std::cout << "Error: missing or empty field 'id' for rate!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'id' for rate!" << std::endl;
       myStatus = false;
     }
     if (!myStatus) {
@@ -458,13 +458,13 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     }
   } else if (type == Extractable::kExtractableNuisance) {
     if (!myId.size()) {
-      std::cout << "Error: missing or empty field 'id' for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'id' for nuisance!" << std::endl;
       myStatus = false;
     } else if (!myDistribution.size()) {
-      std::cout << "Error: missing or empty field 'distribution' for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'distribution' for nuisance!" << std::endl;
       myStatus = false;
     } else if (!myDescription.size()) {
-      std::cout << "Error: missing or empty field 'description' for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'description' for nuisance!" << std::endl;
       myStatus = false;
     }
     if (!myStatus) {
@@ -481,54 +481,54 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
   // Check that function is defined properly
   bool myFunctionStatus = true;
   if (!myFunction.size()) {
-    std::cout << "Error: missing or empty field 'function'!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'function'!" << std::endl;
     myFunctionStatus = false;
   } else if (!myCounterHisto.size() || !myInput1.size() || !myInput2.size() || myValue < 0) {
     if (myFunction == "Constant") {
       if (myValue < 0) {
-        std::cout << "Error: missing or empty field 'value' for function 'Constant'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'value' for function 'Constant'!" << std::endl;
         myFunctionStatus = false;
       }
     } else if (myFunction == "Counter") {
       if (!myCounterHisto.size()) {
-        std::cout << "Error: missing or empty field 'counterHisto' for function 'Counter'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'Counter'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput1.size()) {
-        std::cout << "Error: missing or empty field 'counter' for function 'Counter'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counter' for function 'Counter'!" << std::endl;
         myFunctionStatus = false;
       }
     } else if (myFunction == "maxCounter") {
       if (!myFiles.size()) {
-        std::cout << "Error: missing or empty field 'counterPaths' for function 'maxCounter'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterPaths' for function 'maxCounter'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput1.size()) {
-        std::cout << "Error: missing or empty field 'counter' for function 'maxCounter'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counter' for function 'maxCounter'!" << std::endl;
         myFunctionStatus = false;
       }
     } else if (myFunction == "Ratio") {
       if (!myCounterHisto.size()) {
-        std::cout << "Error: missing or empty field 'counterHisto' for function 'Ratio'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'Ratio'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput1.size()) {
-        std::cout << "Error: missing or empty field 'nominatorCounter' for function 'Ratio'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'nominatorCounter' for function 'Ratio'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput2.size()) {
-        std::cout << "Error: missing or empty field 'denominatorCounter' for function 'Ratio'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'denominatorCounter' for function 'Ratio'!" << std::endl;
         myFunctionStatus = false;
       }
     } else if (myFunction == "ScaleFactor") {
       if (!myCounterHisto.size()) {
-        std::cout << "Error: missing or empty field 'counterHisto' for function 'ScaleFactor'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'counterHisto' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput1.size()) {
-        std::cout << "Error: missing or empty field 'histogram' for function 'ScaleFactor'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'histogram' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
       } else if (!myInput2.size()) {
-        std::cout << "Error: missing or empty field 'normHisto' for function 'ScaleFactor'!" << std::endl;
+        std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing or empty field 'normHisto' for function 'ScaleFactor'!" << std::endl;
         myFunctionStatus = false;
       }      
     } else {
-      std::cout << "Error: specified function is unknown! (valid functions are 'Constant', 'Counter', 'Ratio', 'ScaleFactor', you tried '" << myFunction << "')" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m specified function is unknown! (valid functions are 'Constant', 'Counter', 'Ratio', 'ScaleFactor', you tried '" << myFunction << "')" << std::endl;
       myFunctionStatus = false;
     }
     if (!myFunctionStatus) {
@@ -584,21 +584,21 @@ bool ConfigManager::addExtractable ( std::string str, Extractable::ExtractableTy
     if (type == Extractable::kExtractableNuisance)
       myExtractable = new ExtractableMaxCounter(myId, myDistribution, myDescription, myFiles, myInput1);
     else {
-      std::cout << "Error: function 'maxCounter' is only available for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'maxCounter' is only available for nuisance!" << std::endl;
       return false;
     }
   } else if (myFunction == "Ratio") {
     if (type == Extractable::kExtractableNuisance)
       myExtractable = new ExtractableRatio(myId, myDistribution, myDescription, myCounterHisto, myInput1, myInput2, myValue);
     else {
-      std::cout << "Error: function 'Ratio' is only available for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'Ratio' is only available for nuisance!" << std::endl;
       return false;
     }
   } else if (myFunction == "ScaleFactor") {
     if (type == Extractable::kExtractableNuisance)
       myExtractable = new ExtractableScaleFactor(myId, myDistribution, myDescription, myCounterHisto, myInput1, myInput2);
     else {
-      std::cout << "Error: function 'ScaleFactor' is only available for nuisance!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m function 'ScaleFactor' is only available for nuisance!" << std::endl;
       return false;
     }
   }
@@ -656,7 +656,7 @@ bool ConfigManager::addDataGroup ( std::string str ) {
     } else if (myLabelItem == "mTFile") {
       myMTFile = parseString(str, myPos);
     } else {
-      std::cout << "Error: unknown label in config: '" << myLabelItem << "'!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m unknown label in config: '" << myLabelItem << "'!" << std::endl;
       std::cout << "  Parsed string: " << str << std::endl;
       return false;
     }
@@ -666,22 +666,22 @@ bool ConfigManager::addDataGroup ( std::string str ) {
   // Check required fields
   bool myStatus = true;
   if (myProcess <= -10) {
-    std::cout << "Error: missing field 'process' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'process' for column!" << std::endl;
     myStatus = false;
   } else if (myChannel <= 0) {
-    std::cout << "Error: missing field 'channel' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'channel' for column!" << std::endl;
     myStatus = false;
   } else if (!myMasses.size()) {
-    std::cout << "Error: missing field 'mass' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'mass' for column!" << std::endl;
     myStatus = false;
   } else if (!myLabel.size()) {
-    std::cout << "Error: missing field 'label' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'label' for column!" << std::endl;
     myStatus = false;
   } else if (!myRate.size()) {
-    std::cout << "Error: missing field 'rate' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'rate' for column!" << std::endl;
     myStatus = false;
   } else if (!myMTPlot.size()) {
-    std::cout << "Error: missing field 'mTPlot' for column!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing field 'mTPlot' for column!" << std::endl;
     myStatus = false;
   }
   // No check on parameters nuisance or files since they are optional
@@ -721,7 +721,7 @@ bool ConfigManager::registerExtractable(DatasetGroup* group, std::string id) {
     }
   }
   // No extractable found
-  std::cout << "Error: rate or nuisance with id '" << id << "' not found!" << std::endl;
+  std::cout << "\033[0;41m\033[1;37mError:\033[0;0m rate or nuisance with id '" << id << "' not found!" << std::endl;
   return false;
 }
 
@@ -743,17 +743,17 @@ bool ConfigManager::addMergingOfExtractable(std::string str) {
     } else if (myLabelItem == "id2") {
       fromId = parseString(str, myPos);
     } else {
-      std::cout << "Error: unknown item for command mergeNuisances!" << std::endl;
+      std::cout << "\033[0;41m\033[1;37mError:\033[0;0m unknown item for command mergeNuisances!" << std::endl;
       myStatus = false;
     }
   }
   // Check that all necessary parameters were supplied
   if (!toId.size()) {
-    std::cout << "Error: missing item id for command mergeNuisances!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing item id for command mergeNuisances!" << std::endl;
     myStatus = false;
   }
   if (!fromId.size()) {
-    std::cout << "Error: missing item id2 for command mergeNuisances!" << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m missing item id2 for command mergeNuisances!" << std::endl;
     myStatus = false;
   }
   if (!myStatus) {
@@ -774,11 +774,11 @@ bool ConfigManager::addMergingOfExtractable(std::string str) {
     }
   }
   if (!myToObject) {
-    std::cout << "Error: merging / could not find nuisance id: " << toId << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m merging / could not find nuisance id: " << toId << std::endl;
     return false;
   }
   if (!myFromObject) {
-    std::cout << "Error: merging / could not find nuisance id: " << fromId << std::endl;
+    std::cout << "\033[0;41m\033[1;37mError:\033[0;0m merging / could not find nuisance id: " << fromId << std::endl;
     return false;
   }
   myToObject->addExtractableToBeMerged(myFromObject);
