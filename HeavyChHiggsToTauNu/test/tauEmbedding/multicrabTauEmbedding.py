@@ -4,14 +4,21 @@ import re
 
 from HiggsAnalysis.HeavyChHiggsToTauNu.tools.multicrab import *
 
+# Processing step
 #step = "skim"
-step = "embedding"
+#step = "embedding"
 #step = "analysis"
 #step = "analysisTau"
-#step = "signalAnalysis"
+step = "signalAnalysis"
 #step = "muonAnalysis"
 #step = "caloMetEfficiency"
 
+# Era of data to use (meaningful only for signalAnalysis
+#era = "EPS"
+#era = "Run2011A-EPS"
+era = "Run2011A"
+
+# "Midfix" for multicrab directory name
 dirPrefix = ""
 #dirPrefix += "_caloMet45"
 #dirPrefix += "_caloMet60"
@@ -27,11 +34,25 @@ dirPrefix = ""
 #dirPrefix = "_TauIdScan"
 #dirPrefix = "_iso05"
 #dirPrefix = "_test"
+#dirPrefix = "_systematics"
 
-#pt = "_pt30"
-#pt = "_pt40"
-#if step in ["generation", "embedding", "analysis", "signalAnalysis"]:
-#    dirPrefix += pt
+# Visible pt cut
+#
+# For embedding use this in the multicrab directory and madhatter
+# directory names. Remember to actually change the setting in
+# PFEmbeddingSource_cff.py!
+#
+# For analysis/signalAnalysis, select the embedded dataset with this
+# visible pt cut
+vispt = ""
+#vispt = "_vispt10"
+#vispt = "_vispt20"
+#vispt = "_vispt30"
+#vispt = "_vispt40"
+if step in ["embedding", "analysis", "signalAnalysis"]:
+    dirPrefix += vispt
+if step == "signalAnalysis":
+    dirPrefix += "_"+era
 
 if step == "signalAnalysis":
     #dirPrefix += "_triggerVertex2010"
@@ -40,13 +61,14 @@ if step == "signalAnalysis":
     #dirPrefix += "_trigger2011"
     pass
 
+# Define the processing steps: input dataset, configuration file, output file
 config = {"skim":           {"input": "AOD",                           "config": "muonSkim_cfg.py", "output": "skim.root"},
           "embedding":      {"input": "tauembedding_skim_v13", "config": "embed.py",   "output": "embedded.root"},
 #          "analysis":       {"input": "tauembedding_embedding_v13"+pt,  "config": "embeddingAnalysis_cfg.py"},
-          "analysis":       {"input": "tauembedding_embedding_v13_1",  "config": "embeddingAnalysis_cfg.py"},
+          "analysis":       {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "embeddingAnalysis_cfg.py"},
 #          "analysisTau":    {"input": "pattuple_v17",                  "config": "tauAnalysis_cfg.py"},
 #          "signalAnalysis": {"input": "tauembedding_embedding_v13"+pt,  "config": "../signalAnalysis_cfg.py"},
-          "signalAnalysis": {"input": "tauembedding_embedding_v13_1",  "config": "../signalAnalysis_cfg.py"},
+          "signalAnalysis": {"input": "tauembedding_embedding_v13_1"+vispt,  "config": "../signalAnalysis_cfg.py"},
           "muonAnalysis":   {"input": "tauembedding_skim_v13",          "config": "muonAnalysisFromSkim_cfg.py"},
           "caloMetEfficiency": {"input": "tauembedding_skim_v13",         "config": "caloMetEfficiency_cfg.py"},
           }
@@ -58,12 +80,13 @@ if step in ["analysis", "analysisTau", "signalAnalysis", "muonAnalysis", "caloMe
 
 multicrab = Multicrab(crabcfg, config[step]["config"], lumiMaskDir="..")
 
+# Define dataset collections
 datasetsData2010 = [
     "Mu_136035-144114_Apr21", # HLT_Mu9
     "Mu_146428-147116_Apr21", # HLT_Mu9
     "Mu_147196-149294_Apr21", # HLT_Mu15_v1
 ]
-datasetsData2011 = [
+datasetsData2011_EPS = [
     "SingleMu_Mu_160431-163261_May10",  # HLT_Mu20_v1
     "SingleMu_Mu_163270-163869_May10",  # HLT_Mu24_v2
     "SingleMu_Mu_165088-166150_Prompt", # HLT_Mu30_v3
@@ -71,10 +94,14 @@ datasetsData2011 = [
     "SingleMu_Mu_166346-166346_Prompt", # HLT_Mu40_v2
     "SingleMu_Mu_166374-167043_Prompt", # HLT_Mu40_v1
     "SingleMu_Mu_167078-167913_Prompt", # HLT_Mu40_v3
+]
+datasetsData2011_Run2011A_noEPS = [
     "SingleMu_Mu_170722-172619_Aug05",  # HLT_Mu40_v5
     "SingleMu_Mu_172620-173198_Prompt", # HLT_Mu40_v5
     "SingleMu_Mu_173236-173692_Prompt", # HLT_Mu40_eta2p1_v1
 ]
+datasetsData2011_Run2011A = datasetsData2011_EPS + datasetsData2011_Run2011A_noEPS
+datasetsData2011 = datasetsData2011_Run2011A
 datasetsMCnoQCD = [
     "TTJets_TuneZ2_Summer11",
     "WJets_TuneZ2_Summer11",
@@ -95,13 +122,24 @@ datasetsMCQCD = [
 datasetsTest = [
     "TTToHplusBWB_M120_Summer11"
 ]
-    
+
+# Select the datasets based on the processing step and data era
 datasets = []
 if step in ["analysis", "analysisTau"]:
     datasets.extend(datasetsMCnoQCD)
 else:
 #    datasets.extend(datasetsData2010)
-    datasets.extend(datasetsData2011)
+    if step == "signalAnalysis":
+        if era == "EPS":
+            datasets.extend(datasetsData2011_EPS)
+        elif era == "Run2011A-EPS":
+            datasets.extend(datasetsData2011_Run2011A_noEPS)
+        elif era == "Run2011A":
+            datasets.extend(datasetsData2011_Run2011A)
+        else:
+            raise Exception("Unsupported era %s" % era)
+    else:
+        datasets.extend(datasetsData2011)
     datasets.extend(datasetsMCnoQCD)
     datasets.extend(datasetsMCQCD)
 
@@ -111,17 +149,21 @@ else:
 multicrab.extendDatasets(config[step]["input"], datasets)
 
 multicrab.appendLineAll("GRID.maxtarballsize = 15")
-#if step != "skim":
-#    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
+if step != "skim":
+    multicrab.extendBlackWhiteListAll("ce_white_list", ["jade-cms.hip.fi"])
 
 
+# Define the processing version number, meaningful for skim/embedding
 path_re = re.compile("_tauembedding_.*")
 tauname = "_tauembedding_%s_v13_1" % step
 #if step in ["generation", "embedding"]:
 #    tauname += pt
+if step == "embedding":
+    tauname += vispt
 
 reco_re = re.compile("^Run[^_]+_(?P<reco>[^_]+_v\d+_[^_]+_)")
 
+# Override the default number of jobs
 # Goal: ~5 hour jobs
 skimNjobs = {
     "WJets_TuneZ2_Summer11": 1000, # ~10 hours
@@ -138,7 +180,6 @@ skimNjobs = {
     "WZ_TuneZ2_Summer11": 200,
     "ZZ_TuneZ2_Summer11": 350,
     }
-
 muonAnalysisNjobs = { # goal: 30k events/job
     "SingleMu_Mu_160431-163261_May10": 2,
     "SingleMu_Mu_163270-163869_May10": 5,
@@ -167,6 +208,7 @@ muonAnalysisNjobs = { # goal: 30k events/job
     }
    
 
+# Modification function for skim/embedding steps
 def modify(dataset):
     name = ""
 
@@ -207,21 +249,28 @@ def modify(dataset):
     dataset.appendLine("USER.publish_data_name = "+name)
     dataset.appendLine("CMSSW.output_file = "+config[step]["output"])
 
+# Modification step for analysis steps
 def modifyAnalysis(dataset):
+    if dataset.isMC():
+        dataset.appendArg("puWeightEra="+era)
     if step == "signalAnalysis":
         dataset.appendArg("tauEmbeddingInput=1")
         dataset.appendArg("doPat=1")
+        if dataset.getName() in datasetsData2011_Run2011A_noEPS:
+            dataset.appendArg("tauEmbeddingCaloMet=caloMetSum")
 #    if step == "analysisTau":
 #        if dataset.getName() == "WJets":
 #            dataset.setNumberOfJobs(100)
 
 def modifyMuonAnalysis(dataset):
+    if dataset.isMC():
+        dataset.appendArg("puWeightEra="+era)
     try:
         dataset.setNumberOfJobs(muonAnalysisNjobs[dataset.getName()])
     except KeyError:
         pass
     
-
+# Apply the modifications
 if step in ["analysis", "analysisTau","signalAnalysis"]:
     multicrab.appendLineAll("CMSSW.output_file = histograms.root")
     multicrab.forEachDataset(modifyAnalysis)
@@ -233,6 +282,7 @@ else:
 
 multicrab.extendBlackWhiteListAll("se_black_list", defaultSeBlacklist)
 
+# Create the multicrab task
 prefix = "multicrab_"+step+dirPrefix
 
 multicrab.createTasks(prefix=prefix)
