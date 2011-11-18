@@ -57,6 +57,7 @@ namespace HPlus {
     fTausExistCounter(eventCounter.addCounter("taus > 0")),
     fOneTauCounter(eventCounter.addCounter("taus == 1")),
     fTriggerScaleFactorCounter(eventCounter.addCounter("trigger scale factor")),
+    fRtauAfterTauIDCounter(eventCounter.addCounter("RtauAfterTauID")),
     fElectronVetoCounter(eventCounter.addCounter("electron veto")),
     fMuonVetoCounter(eventCounter.addCounter("muon veto")),
     fNJetsCounter(eventCounter.addCounter("njets")),
@@ -285,6 +286,12 @@ namespace HPlus {
       iEvent.put(saveTaus, "selectedTaus");
     }
     hSelectedTauRtau->Fill(tauData.getRtauOfSelectedTau(), fEventWeight.getWeight());  
+
+    // For plotting Rtau                                                                                                                                                                                
+    //    if (!tauData.selectedTauPassedRtau()) return false;                                                                                                                                           
+    if (tauData.getRtauOfSelectedTau() < 0.7) return false;                                                                                                                                       
+    increment(fRtauAfterTauIDCounter);
+
     hSelectedTauLeadingTrackPt->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     hSelectedTauEt->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hSelectedTauEta->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());

@@ -68,12 +68,9 @@ def main():
     plots.mergeRenameReorderForDataMC(datasets)
 
     # Remove signals other than M120
-    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
+##########    datasets.remove(filter(lambda name: "TTToHplus" in name and not "M120" in name, datasets.getAllDatasetNames()))
     datasets.remove(filter(lambda name: "HplusTB" in name, datasets.getAllDatasetNames()))
-    
-    # Remove QCD
-    datasets.remove(filter(lambda name: "QCD" in name, datasets.getAllDatasetNames()))
-    
+
     datasets_lands = datasets.deepCopy()
 
     # Set the signal cross sections to the ttbar for datasets for lands
@@ -87,16 +84,6 @@ def main():
 
     plots.mergeWHandHH(datasets) # merging of WH and HH signals must be done after setting the cross section
 
-
-    # Replace signal dataset with EWK+signal
-    if True:
-        ttjets2 = datasets.getDataset("TTJets").deepCopy()
-        ttjets2.setName("TTJets2")
-        ttjets2.setCrossSection(ttjets2.getCrossSection() - datasets.getDataset("TTToHplus_M120").getCrossSection())
-        datasets.append(ttjets2)
-        datasets.merge("EWKnoTT", ["WJets", "DYJetsToLL", "SingleTop", "Diboson"], keepSources=True)
-        datasets.merge("TTToHplus_M120", ["TTToHplus_M120", "EWKnoTT", "TTJets2"])
-        plots._legendLabels["TTToHplus_M120"] = "with "+plots._legendLabels["TTToHplus_M120"]
 
     # Apply TDR style
     style = tdrstyle.TDRStyle()
@@ -128,53 +115,9 @@ def writeTransverseMass(datasets_lands):
 def doPlots(datasets):
     # Create the plot objects and pass them to the formatting
     # functions to be formatted, drawn and saved to files
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesBeforeWeight", normalizeToOne=True), postfix="BeforeWeight")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesAfterWeight", normalizeToOne=True), postfix="AfterWeight")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=True), postfix="BeforeWeightTriggered")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=True), postfix="AfterWeightTriggered")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredBeforeWeight", normalizeToOne=False), postfix="BeforeWeightTriggeredNorm")
-#    vertexCount(plots.DataMCPlot(datasets, analysis+"/verticesTriggeredAfterWeight", normalizeToOne=False), postfix="AfterWeightTriggeredNorm")
-#    tauPt(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPt"), ratio=False)
-#    tauEta(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauEta"), ratio=False)
-#    tauPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_selectedTauPhi"), ratio=True)
-#    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-#    met2(plots.DataMCPlot(datasets, analysis+"/MET"), "met1", rebin=50)
-    
-    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_pT_AfterTauID"), "SelectedTau_pT_AfterTauID", rebin=1)
-    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_eta_AfterTauID"),"SelectedTau_eta_AfterTauID", rebin=1)
-    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_pT_AfterCuts"), "SelectedTau_pT_AfterCuts", rebin=1)
-    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_eta_AfterCuts"),"SelectedTau_eta_AfterCuts", rebin=1)
-    tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_phi_AfterTauID"), "SelectedTau_phi_AfterTauID")
-    rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_Rtau_AfterTauID"), "SelectedTau_Rtau_AfterTauID")
-#    tauPt(plots.DataMCPlot(datasets, analysis+"/SelectedTau_pT_AfterMetCut"), "SelectedTau_pT_AfterMetCut")
-#    tauEta(plots.DataMCPlot(datasets, analysis+"/SelectedTau_eta_AfterMetCut"), "SelectedTau_eta_AfterMetCut")
-#    tauPhi(plots.DataMCPlot(datasets, analysis+"/SelectedTau_phi_AfterMetCut"), "SelectedTau_phi_AfterMetCut")
-#     rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau_Rtau_AfterMetCut"), "SelectedTau_Rtau_AfterMetCut")
-    rtau(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_Rtau_AfterCuts"), "SelectedTau_Rtau_AfterCuts")
-#    leadingTrack(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_leadPFChargedHadrPt"), ratio=True)
-    
-    selectionFlow(plots.DataMCPlot(datasets, analysis+"/SignalSelectionFlow"), "SignalSelectionFlow")
-    
-    leadingTrack(plots.DataMCPlot(datasets, analysis+"/SelectedTau/SelectedTau_TauLeadingTrackPt"),"SelectedTau_TauLeadingTrackPt", rebin=5)
-#    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngHp"), "genRtau1ProngHp")
-#    rtau(plots.DataMCPlot(datasets, analysis+"/genRtau1ProngW"), "genRtau1ProngW")
-   
-#    tauCandPt(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_pt"), step="begin")
-#    tauCandEta(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_eta"), step="begin" )
-#    tauCandPhi(plots.DataMCPlot(datasets, analysis+"/TauSelection_all_tau_candidates_phi"), step="begin" )
 
-    
-   
-#   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_embeddingMet"), ratio=True)
-#   met(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_begin_embeddingMet"), ratio=True)
 
-#    met2(plots.DataMCPlot(datasets, analysis+"/met"), "Met", rebin=40)
-
-#    met2(plots.DataMCPlot(datasets, analysis+"/MET_BeforeMETCut"), "met", rebin=20)
-#    met2(plots.DataMCPlot(datasets, analysis+"/Met_BeforeTauId"), "met_beforeTauId", rebin=20)
-     
-#    deltaPhi(plots.DataMCPlot(datasets, analysis+"/TauEmbeddingAnalysis_afterTauId_DeltaPhi"))
-    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=20)
+    deltaPhi2(plots.DataMCPlot(datasets, analysis+"/deltaPhi"), "DeltaPhiTauMet", rebin=10)
     deltaPhi2(plots.DataMCPlot(datasets, analysis+"/FakeMETVeto/Closest_DeltaPhi_of_MET_and_selected_jets"), "DeltaPhiJetMet")
 
 
@@ -190,16 +133,19 @@ def doPlots(datasets):
 #    xsect.setHplusCrossSectionsToBR(datasets_tm, br_tH=0.2, br_Htaunu=1)
 #    datasets_tm.merge("TTToHplus_M120", ["TTToHplusBWB_M120", "TTToHplusBHminusB_M120"])
 
+
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet4050"), "MTInvertedTauIdJet4050", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet5060"), "MTInvertedTauIdJet5060", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet6070"), "MTInvertedTauIdJet6070", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet7080"), "MTInvertedTauIdJet7080", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet80100"), "MTInvertedTauIdJet80100", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet100120"), "MTInvertedTauIdJet100120", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet120150"), "MTInvertedTauIdJet120150", rebin=20)
+    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/MTInvertedTauIdJet150"), "MTInvertedTauIdJet150", rebin=20)                       
+    
 #    transverseMass(plots.DataMCPlot(datasets_tm, analysis+"/TauEmbeddingAnalysis_afterTauId_TransverseMass"))
     transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMass"), "transverseMass_standard", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassMET70"), "transverseMassMET70", rebin=20)
-    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterDeltaPhi"), "transverseMassAfterDeltaPhi", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterDeltaPhi160"), "transverseMassAfterDeltaPhi160", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterDeltaPhi130"), "transverseMassAfterDeltaPhi130", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeFakeMet"), "transverseMassBeforeFakeMet", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto")
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto")
-#    transverseMass2(plots.DataMCPlot(datasets_tm, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut")
+
 
     transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMass"), "transverseMass", rebin=20)
     path = analysis+"/transverseMass"
@@ -208,34 +154,9 @@ def doPlots(datasets):
         plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
         transverseMass2(plot, "transverseMass", rebin=20)
 
-#    path = analysis+"/transverseMassWithRtauFakeMet"
-#    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassWithRtauFakeMet", rebin=20)
-#    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
-#    transverseMass2(plot, "transverseMassWithRtauFakeMetQCDFromData", rebin=20)
-    
-#    path = analysis+"/transverseMassDeltaPhiUpperCut"
-#    transverseMass2(plots.DataMCPlot(datasets, path), "transverseMassDeltaPhiUpperCut", rebin=20)
-#    plot = replaceQCDfromData(plots.DataMCPlot(datasets, path), datasetsQCD, path)
-#    transverseMass2(plot, "transverseMassDeltaPhiUpperCutQCDFromData", rebin=20)
-
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeVeto"), "transverseMassBeforeVeto", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassAfterVeto"), "transverseMassAfterVeto", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithTopCut"), "transverseMassWithTopCut", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithRtau"), "transverseMassWithRtau", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassWithRtauFakeMet"), "transverseMassWithRtauFakeMet", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassDeltaPhiUpperCut"), "transverseMassDeltaPhiUpperCut", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassDeltaPhiUpperCutFakeMet"), "transverseMassDeltaPhiUpperCutFakeMet", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBeforeMetCut"), "transverseMassBeforeMetCut", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassTopDeltaPhiFakeMET"), "transverseMassTopDeltaPhiFakeMET", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassRtauDeltaPhiFakeMET"), "transverseMassRtauDeltaPhiFakeMET", rebin=20)
-#    transverseMass2(plots.DataMCPlot(datasets, analysis+"/transverseMassBtag33RtauDeltaPhiFakeMET"), "transverseMassBtag33RtauDeltaPhiFakeMET", rebin=20)
-#    xsect.setHplusCrossSections(datasets, toTop=True)
 
 
 
-  
-
-    jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt_central"), "centralJetPt", rebin=5)
     jetPt(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_pt"), "jetPt", rebin=20)
     jetEta(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_eta"), "jetEta", rebin=10)
     jetPhi(plots.DataMCPlot(datasets, analysis+"/JetSelection/jet_phi"), "jetPhi", rebin=10)
@@ -261,11 +182,7 @@ def doPlots(datasets):
     topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/jjbMass"), "jjbMass")
     topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_jjbMax"), "topMass_old")
 
-    topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_Top"), "topMass_realTop")
-    topMass(plots.DataMCPlot(datasets, analysis+"/TopSelection/Mass_bFromTop"), "topMass_bFromTop") 
-    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjb"), "pt_jjb")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_jjbmax"), "ptTop")
-    ptTop(plots.DataMCPlot(datasets, analysis+"/TopSelection/Pt_top"), "ptTop_realTop")
+  
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_BaseLineTauId"), "MET_BaseLineTauId", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauId"), "MET_InvertedTauId", rebin=10)
 #    met2(plots.DataMCPlot(datasets, analysis+"/MET_InvertedTauIdAllCuts"), "MET_InvertedTauIdAllCuts", rebin=10)   
@@ -287,8 +204,9 @@ def doPlots(datasets):
 #    topMassComparison(datasets)
 #    topPtComparison(datasets) 
 #    vertexComparison(datasets)
-#    mtComparison(datasets)
-
+    mtComparison(datasets)
+    metComparison(datasets)
+    
 def doCounters(datasets):
     eventCounter = counter.EventCounter(datasets)
 
@@ -323,23 +241,146 @@ def doCounters(datasets):
 #            "vertices_H120")
 
 def mtComparison(datasets):
-    mt = plots.PlotBase([
-        datasets.getDataset("TTToHplus_M80").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M90").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M100").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplus_M120").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M140").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M150").getDatasetRootHisto(analysis+"/transverseMass"),
-#        datasets.getDataset("TTToHplus_M155").getDatasetRootHisto(analysis+"/transverseMass"),
-        datasets.getDataset("TTToHplus_M160").getDatasetRootHisto(analysis+"/transverseMass"),
-        ])
-    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
-    mt._setLegendStyles()
-    mt._setLegendLabels()
-#    mt.histoMgr.setHistoDrawStyleAll("P")
-    rtauGen(mt, "transverseMass_vs_mH", rebin=20)
-          
+    mt4050 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet4050")])
+    mt5060 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060")])
+    mt6070 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070")])
+    mt7080 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet7080")])
+    mt80100 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet80100")])
+    mt100120 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet100120")])
+    mt120150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet120150")])
+    mt150 = plots.PlotBase([datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")])
+            
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet5060"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet6070"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet7080"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet80100"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet100120"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet120150"),
+#        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MTInvertedTauIdJet150")
+
+#    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    mt4050._setLegendStyles()
+    mt4050._setLegendLabels()
+    mt4050.histoMgr.setHistoDrawStyleAll("P")
+    mt4050.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
     
+    hmt4050 = mt4050.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet4050")
+    hmt4050.Scale(0.0098127)
+    
+    mt5060._setLegendStyles()
+    mt5060._setLegendLabels()
+    mt5060.histoMgr.setHistoDrawStyleAll("P")
+    mt5060.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))
+    hmt5060 = mt5060.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet5060")
+    hmt5060.Scale(0.00703156)
+    
+    mt6070._setLegendStyles()
+    mt6070._setLegendLabels()
+    mt6070.histoMgr.setHistoDrawStyleAll("P")
+    mt6070.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))    
+    hmt6070 = mt6070.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet6070")
+    hmt6070.Scale(0.0060478)
+    
+    mt7080._setLegendStyles()
+    mt7080._setLegendLabels()
+    mt7080.histoMgr.setHistoDrawStyleAll("P")
+    mt7080.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) 
+    hmt7080 = mt7080.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet7080")
+    hmt7080.Scale(0.0061608)
+    
+    mt80100._setLegendStyles()
+    mt80100._setLegendLabels()
+    mt80100.histoMgr.setHistoDrawStyleAll("P")
+    mt80100.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10)) 
+    hmt80100 = mt80100.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet80100")
+    hmt80100.Scale(0.00650936)
+    
+    mt100120._setLegendStyles()
+    mt100120._setLegendLabels()
+    mt100120.histoMgr.setHistoDrawStyleAll("P")
+    mt100120.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))     
+    hmt100120 = mt100120.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet100120")
+    hmt100120.Scale(0.004363)
+    
+    mt120150._setLegendStyles()
+    mt120150._setLegendLabels()
+    mt120150.histoMgr.setHistoDrawStyleAll("P")
+    mt120150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))      
+    hmt120150 = mt120150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet120150")
+    hmt120150.Scale(0.005427733)
+
+    mt150._setLegendStyles()
+    mt150._setLegendLabels()
+    mt150.histoMgr.setHistoDrawStyleAll("P")
+    mt150.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(10))  
+    hmt150 = mt150.histoMgr.getHisto("Data").getRootHisto().Clone(analysis+"/MTInvertedTauIdJet150")
+    hmt150.Scale(0.001792)
+
+    
+    hmtSum = hmt4050.Clone("mtSum")
+    hmtSum.SetName("mtSum")
+    hmtSum.Add(hmt5060)
+    hmtSum.Add(hmt6070)
+    hmtSum.Add(hmt7080)
+    hmtSum.Add(hmt80100)
+    hmtSum.Add(hmt100120)
+    hmtSum.Add(hmt120150)
+    hmtSum.Add(hmt150)
+    
+    canvas = ROOT.TCanvas("canvas","",500,500)
+    canvas.Divide(3,3)
+    canvas.cd(1)
+    hmt4050.GetYaxis().SetTitle("Events")
+    hmt4050.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+    hmt4050.Draw()
+    canvas.cd(2)
+    hmt5060.Draw()
+    canvas.cd(3)
+    hmt6070.Draw()
+    canvas.cd(4)
+    hmt7080.Draw()
+    canvas.cd(5)
+    hmt80100.Draw()
+    canvas.cd(6)
+    hmt100120.Draw()
+    canvas.cd(7)
+    hmt120150.Draw()
+    canvas.cd(8)
+    hmt150.Draw()
+    
+    canvas.cd(9)
+    hmtSum.Draw()
+    canvas.Print("mtComparison.png")
+##    rtauGen(mt4050, "transverseMass_vs_pttau", rebin=20)
+    print "Integral  = ",hmtSum.Integral()
+
+    canvas2 = ROOT.TCanvas("canvas2","",500,500)
+    canvas2.cd(1)    
+    hmtSum.Draw()
+    hmtSum.GetYaxis().SetTitle("Events")
+    hmtSum.GetXaxis().SetTitle("m_{T}(#tau jet, MET) (GeV/c^{2})")
+    canvas2.Print("mtSum.png")
+
+
+    
+def metComparison(datasets):
+    met = plots.PlotBase([
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets4050"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets5060"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets6070"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets7080"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets80100"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets100120"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets120150"),
+        datasets.getDataset("Data").getDatasetRootHisto(analysis+"/MET_InvertedTauIdJets150")
+        ])
+#    mt.histoMgr.normalizeMCToLuminosity(datasets.getDataset("Data").getLuminosity())
+    met._setLegendStyles()
+    met._setLegendLabels()
+    met.histoMgr.setHistoDrawStyleAll("P")
+    rtauGen(met, "met_vs_pttau", rebin=10)
+          
+       
 #def genComparison(datasets):
 #    signal = "TTToHplusBWB_M120"
 #    background = "TTJets_TuneZ2"
@@ -495,10 +536,10 @@ def rtauGen(h, name, rebin=5, ratio=False):
     if ratio:
         kwargs["opts2"] = {"ymin": 0.5, "ymax": 1.5}
         kwargs["createRatio"] = True
-#    name = name+"_log"
+    name = name+"_log"
 
     h.createFrame(name, **kwargs)
-#    h.getPad().SetLogy(True)
+    h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.2, 0.75, 0.4, 0.9))
     common(h, xlabel, ylabel, addLuminosityText=False)
 
@@ -507,13 +548,10 @@ def selectionFlow(h, name, rebin=1, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     xlabel = "Cut"
     ylabel = "Events"
-    
-        
-    #h.stackMCSignalHistograms()
-    h.stackMCHistograms()       
+
+    h.stackMCHistograms()
     h.addMCUncertainty()
     scaleMCfromWmunu(h)
-
     
     opts = {"xmax": 7, "ymin": 0.01, "ymaxfactor": 2}
     opts2 = {"ymin": 0.5, "ymax": 1.5}
@@ -703,7 +741,7 @@ def tauPhi(h, name, rebin=10, ratio=False):
     h.setLegend(histograms.createLegend(0.7, 0.3, 0.9, 0.6))
     common(h, xlabel, ylabel)
     
-def leadingTrack(h, name, rebin=5, ratio=False):
+def leadingTrack(h, rebin=5, ratio=True):
     name = flipName(h.getRootHistoPath())
 
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
@@ -959,7 +997,7 @@ def jetEta(h, name, rebin=5, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
-    opts = {"ymin": 0.01,"xmin": -5,"xmax": 5, "ymaxfactor": 10}
+    opts = {"ymin": 0.01,"xmin": -3.5,"xmax": 3.5, "ymaxfactor": 10}
     opts2 = {"ymin": 0.05, "ymax": 1.5}
     name = name+"_log"
     if ratio:
@@ -1014,16 +1052,12 @@ def jetEMFraction(h, name, rebin=5, ratio=False):
     h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend(0.7, 0.6, 0.9, 0.9))
     common(h, xlabel, ylabel)
-    
-def numberOfJets(h, name, rebin=1, ratio=False):
-    opts = {"ymin": 0.01,"xmax": 10.0, "ymaxfactor": 2.0}
-    opts2 = {"ymin": 0.05, "ymax": 1.5}
 
+def numberOfJets(h, name, rebin=1, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))
     particle = "jet"
-    if "BJets" in name:
+    if "Btagged" in name:
         particle = "b jet"
-        opts["xmax"] = 6
     xlabel = "Number of %ss" % particle
     ylabel = "Events / %.2f" % h.binWidth()
     
@@ -1031,6 +1065,8 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     h.stackMCHistograms()
     h.addMCUncertainty()
 
+    opts = {"ymin": 0.01,"xmax": 7.0, "ymaxfactor": 2.0}
+    opts2 = {"ymin": 0.05, "ymax": 1.5}
 #    name = name+"_log"
     if ratio:
         h.createFrameFraction(name, opts=opts, opts2=opts2)
@@ -1039,7 +1075,6 @@ def numberOfJets(h, name, rebin=1, ratio=False):
     h.getPad().SetLogy(True)
     h.setLegend(histograms.createLegend())
     common(h, xlabel, ylabel)
-
 
 def etSumRatio(h, name, rebin=1, ratio=False):
     h.histoMgr.forEachHisto(lambda h: h.getRootHisto().Rebin(rebin))

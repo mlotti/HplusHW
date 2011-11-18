@@ -12,6 +12,10 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
+#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "TTree.h"
 
@@ -28,6 +32,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTauEmbeddingMuonSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMuonSource");
       fTauEmbeddingMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingMetSource");
+      fTauEmbeddingCaloMetNoHFSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetNoHFSource");
       fTauEmbeddingCaloMetSource = iConfig.getUntrackedParameter<edm::InputTag>("tauEmbeddingCaloMetSource");
     }
 
@@ -47,9 +52,7 @@ namespace HPlus {
 
     fTree = dir.make<TTree>("tree", "Tree");
 
-    fTree->Branch("event", &fEvent);
-    fTree->Branch("lumi", &fLumi);
-    fTree->Branch("run", &fRun);
+    fEventBranches.book(fTree);
 
     fTree->Branch("weightPrescale", &fPrescaleWeight);
     fTree->Branch("weightPileup", &fPileupWeight);
@@ -111,6 +114,7 @@ namespace HPlus {
     if(fTauEmbeddingInput) {
       fTree->Branch("temuon_p4", &fTauEmbeddingMuon);
       fTree->Branch("temet_p4", &fTauEmbeddingMet);
+      fTree->Branch("tecalometNoHF_p4", &fTauEmbeddingCaloMetNoHF);
       fTree->Branch("tecalomet_p4", &fTauEmbeddingCaloMet);
     }
 
@@ -194,9 +198,7 @@ namespace HPlus {
     if(taus.size() != 1)
       throw cms::Exception("LogicError") << "Expected tau collection size to be 1, was " << taus.size() << " at " << __FILE__ << ":" << __LINE__ << std::endl;
 
-    fEvent = iEvent.id().event();
-    fLumi = iEvent.id().luminosityBlock();
-    fRun = iEvent.id().run();
+    fEventBranches.setValues(iEvent);
 
     fTau = taus[0]->p4();
     fTauLeadingChCand = taus[0]->leadPFChargedHadrCand()->p4();
@@ -263,6 +265,11 @@ namespace HPlus {
       if(hmet->size() != 1)
         throw cms::Exception("Assert") << "The assumption that tau embedding met collection size is 1 failed, the size was " << hmet->size() << std::endl;
 
+      edm::Handle<edm::View<reco::MET> > hcalometnohf;
+      iEvent.getByLabel(fTauEmbeddingCaloMetNoHFSource, hcalometnohf);
+      if(hcalometnohf->size() != 1)
+        throw cms::Exception("Assert") << "The assumption that tau embedding calometnohf collection size is 1 failed, the size was " << hcalometnohf->size() << std::endl;
+
       edm::Handle<edm::View<reco::MET> > hcalomet;
       iEvent.getByLabel(fTauEmbeddingCaloMetSource, hcalomet);
       if(hcalomet->size() != 1)
@@ -270,6 +277,7 @@ namespace HPlus {
 
       fTauEmbeddingMuon = hmuon->at(0).p4();
       fTauEmbeddingMet = hmet->at(0).p4();
+      fTauEmbeddingCaloMetNoHF = hcalometnohf->at(0).p4();
       fTauEmbeddingCaloMet = hcalomet->at(0).p4();
     }
 
@@ -546,9 +554,7 @@ namespace HPlus {
   void SignalAnalysisTree::reset() {
     double nan = std::numeric_limits<double>::quiet_NaN();
 
-    fEvent = 0;
-    fLumi = 0;
-    fRun = 0;
+    fEventBranches.reset();
 
     fPrescaleWeight = 1.0;
     fPileupWeight = 1.0;
@@ -612,6 +618,7 @@ namespace HPlus {
 
     fTauEmbeddingMuon.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingMet.SetXYZT(nan, nan, nan, nan);
+    fTauEmbeddingCaloMetNoHF.SetXYZT(nan, nan, nan, nan);
     fTauEmbeddingCaloMet.SetXYZT(nan, nan, nan, nan);
 
     // nonIsoMuons

@@ -112,6 +112,7 @@ namespace HPlus {
     Count fTausExistCounter;
     Count fOneTauCounter;
     Count fTriggerScaleFactorCounter;
+    Count fRtauAfterTauIDCounter;
     Count fElectronVetoCounter;
     Count fMuonVetoCounter;
     Count fNJetsCounter;
