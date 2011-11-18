@@ -400,6 +400,9 @@ class TreeDraw:
                 selection = self.weight
 
         tree = rootFile.Get(self.tree)
+        if tree == None:
+            raise Exception("No tree '%s' in file %s" % (self.tree, rootFile.GetName()))
+
         if self.varexp == "":
             nentries = tree.GetEntries(selection)
             h = ROOT.TH1F("nentries", "Number of entries by selection %s"%selection, 1, 0, 1)
