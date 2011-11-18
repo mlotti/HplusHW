@@ -1453,7 +1453,7 @@ class DatasetManager:
         for newName, nameList in toMerge.iteritems():
             self.merge(newName, nameList)
 
-    def merge(self, newName, nameList):
+    def merge(self, newName, nameList, keepSources=False):
         """Merge Datasets.
 
         Parameters:
@@ -1468,10 +1468,11 @@ class DatasetManager:
         elif len(selected) == 1:
             print >> sys.stderr, "Dataset merge: one dataset '" + selected[0].getName() + "' found from list '" + ", ".join(nameList)+"', renaming it to '%s'" % newName
             self.rename(selected[0].getName(), newName)
-            return 
+            return
 
-        notSelected.insert(firstIndex, DatasetMerged(newName, selected))
-        self.datasets = notSelected
+        if not keepSources:
+            self.datasets = notSelected
+        self.datasets.insert(firstIndex, DatasetMerged(newName, selected))
         self._populateMap()
 
     def loadLuminosities(self, fname="lumi.json"):
