@@ -386,6 +386,7 @@ namespace HPlus {
     hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     hCtrlSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
+    hCtrlSelectedTauPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hCtrlSelectedTauPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->p(), fEventWeight.getWeight());
     hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p(), fEventWeight.getWeight());
