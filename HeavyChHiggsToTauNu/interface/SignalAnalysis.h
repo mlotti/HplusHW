@@ -57,6 +57,7 @@ namespace HPlus {
       void incrementDeltaPhiCounter() { increment(fDeltaPhiCounter); }
       void incrementDeltaPhi160Counter() { increment(fDeltaPhi160Counter); }
       void incrementDeltaPhi130Counter() { increment(fDeltaPhi130Counter); }
+      void incrementDeltaPhi90Counter() { increment(fDeltaPhi90Counter); }
       void incrementFakeMETVetoCounter() { increment(fFakeMETVetoCounter); }
       void incrementTopSelectionCounter() { increment(fTopSelectionCounter); }
     private:
@@ -69,6 +70,7 @@ namespace HPlus {
       Count fDeltaPhiCounter;
       Count fDeltaPhi160Counter;
       Count fDeltaPhi130Counter;
+      Count fDeltaPhi90Counter;
       Count fFakeMETVetoCounter;
       Count fTopSelectionCounter;
     };
@@ -84,6 +86,7 @@ namespace HPlus {
     //kSignalOrderDeltaPhiSelection,
     kSignalOrderDeltaPhi160Selection,
     kSignalOrderDeltaPhi130Selection,
+    kSignalOrderDeltaPhi90Selection,
     kSignalOrderFakeMETVeto,
     kSignalOrderTopSelection
   };
@@ -123,6 +126,7 @@ namespace HPlus {
     Count fdeltaPhiTauMET10Counter;
     Count fdeltaPhiTauMET160Counter;
     Count fdeltaPhiTauMET130Counter;
+    Count fdeltaPhiTauMET90Counter;
     Count fFakeMETVetoCounter;
     Count fdeltaPhiTauMET160FakeMetCounter;
     Count fForwardJetVetoCounter;
@@ -159,7 +163,8 @@ namespace HPlus {
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterBTagging;
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi160;
     ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi130;
-    
+    ScaleFactorUncertaintyManager fSFUncertaintiesAfterDeltaPhi90;
+
     // Histograms
     
     // Vertex histograms
@@ -176,10 +181,12 @@ namespace HPlus {
     TH1 *hTransverseMassAfterDeltaPhi;
     TH1 *hTransverseMassAfterDeltaPhi160;
     TH1 *hTransverseMassAfterDeltaPhi130;
+    TH1 *hTransverseMassAfterDeltaPhi90;
     TH1 *hNonQCDTypeIITransverseMass;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi130;
     TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi160;
+    TH1 *hNonQCDTypeIITransverseMassAfterDeltaPhi90;
     TH1 *hDeltaPhi;
     TH1 *hDeltaPhiJetMet;
     TH1 *hAlphaT;

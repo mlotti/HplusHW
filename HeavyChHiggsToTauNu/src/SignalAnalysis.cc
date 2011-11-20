@@ -32,6 +32,7 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addCounter("nonQCDType2:deltaphi")),
     fDeltaPhi160Counter(eventCounter.addCounter("nonQCDType2:deltaphi160")),
     fDeltaPhi130Counter(eventCounter.addCounter("nonQCDType2:deltaphi130")),
+    fDeltaPhi90Counter(eventCounter.addCounter("nonQCDType2:deltaphi90")),
     fFakeMETVetoCounter(eventCounter.addCounter("nonQCDType2:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("nonQCDType2:Top Selection cut")) { }
   SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
@@ -44,6 +45,7 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addSubCounter(prefix,":deltaphi")),
     fDeltaPhi160Counter(eventCounter.addSubCounter(prefix,":deltaphi160")),
     fDeltaPhi130Counter(eventCounter.addSubCounter(prefix,":deltaphi130")),
+    fDeltaPhi90Counter(eventCounter.addSubCounter(prefix,":deltaphi90")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")) { }
   SignalAnalysis::CounterGroup::~CounterGroup() { }
@@ -68,6 +70,7 @@ namespace HPlus {
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET>10")),
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET<160")),
     fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET<130")),
+    fdeltaPhiTauMET90Counter(eventCounter.addCounter("deltaPhiTauMET<90")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
 
@@ -103,6 +106,7 @@ namespace HPlus {
     fSFUncertaintiesAfterBTagging("AfterBTagging"),
     fSFUncertaintiesAfterDeltaPhi160("AfterDeltaPhi160"),
     fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi130"),
+    fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi90"),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -136,12 +140,14 @@ namespace HPlus {
     hTransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi", "transverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi160", "transverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi130", "transverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi90", "transverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopSelection = makeTH<TH1F>(*fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassJetMetCut= makeTH<TH1F>(*fs, "transverseMassJetMetCut", "transverseMassJetMetCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMass = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMass", "NonQCDTypeIITransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi", "NonQCDTypeIITransverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi160", "NonQCDTypeIITransverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi130", "NonQCDTypeIITransverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hNonQCDTypeIITransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi90", "NonQCDTypeIITransverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
@@ -461,6 +467,18 @@ namespace HPlus {
       if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
     }
 
+    if (deltaPhi < 90) {
+      increment(fdeltaPhiTauMET90Counter);
+      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
+      hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
+      fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+      // Fill transverse mass histograms after Deltaphi cut
+      hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
 
 //------Experimental cuts, counters, and histograms
     
@@ -574,6 +592,9 @@ namespace HPlus {
     } else if (selection == kSignalOrderDeltaPhi130Selection) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi130Counter();
       getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi130Counter();
+    } else if (selection == kSignalOrderDeltaPhi90Selection) {
+      if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi90Counter();
+      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi90Counter();
     } else if (selection == kSignalOrderFakeMETVeto) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementFakeMETVetoCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementFakeMETVetoCounter();
