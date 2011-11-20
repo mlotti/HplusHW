@@ -538,6 +538,8 @@ namespace HPlus {
     //    if (!forwardJetData.passedEvent()) return false;
     //    increment(fForwardJetVetoCounter);
 
+    //std::cout << "run=" << iEvent.id().run() << " lumiblock=" << iEvent.id().luminosityBlock() << " event=" << iEvent.id().event() << ", mT=" << transverseMass << std::endl;
+ 
     return true;
   }
 
