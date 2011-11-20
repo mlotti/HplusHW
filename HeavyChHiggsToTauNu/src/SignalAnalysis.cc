@@ -106,7 +106,7 @@ namespace HPlus {
     fSFUncertaintiesAfterBTagging("AfterBTagging"),
     fSFUncertaintiesAfterDeltaPhi160("AfterDeltaPhi160"),
     fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi130"),
-    fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi90"),
+    fSFUncertaintiesAfterDeltaPhi90("AfterDeltaPhi90"),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
