@@ -32,6 +32,7 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addCounter("nonQCDType2:deltaphi")),
     fDeltaPhi160Counter(eventCounter.addCounter("nonQCDType2:deltaphi160")),
     fDeltaPhi130Counter(eventCounter.addCounter("nonQCDType2:deltaphi130")),
+    fDeltaPhi90Counter(eventCounter.addCounter("nonQCDType2:deltaphi90")),
     fFakeMETVetoCounter(eventCounter.addCounter("nonQCDType2:fake MET veto")),
     fTopSelectionCounter(eventCounter.addCounter("nonQCDType2:Top Selection cut")) { }
   SignalAnalysis::CounterGroup::CounterGroup(EventCounter& eventCounter, std::string prefix) :
@@ -44,6 +45,7 @@ namespace HPlus {
     fDeltaPhiCounter(eventCounter.addSubCounter(prefix,":deltaphi")),
     fDeltaPhi160Counter(eventCounter.addSubCounter(prefix,":deltaphi160")),
     fDeltaPhi130Counter(eventCounter.addSubCounter(prefix,":deltaphi130")),
+    fDeltaPhi90Counter(eventCounter.addSubCounter(prefix,":deltaphi90")),
     fFakeMETVetoCounter(eventCounter.addSubCounter(prefix,":fake MET veto")),
     fTopSelectionCounter(eventCounter.addSubCounter(prefix,":Top Selection cut")) { }
   SignalAnalysis::CounterGroup::~CounterGroup() { }
@@ -68,6 +70,7 @@ namespace HPlus {
     fdeltaPhiTauMET10Counter(eventCounter.addCounter("deltaPhiTauMET>10")),
     fdeltaPhiTauMET160Counter(eventCounter.addCounter("deltaPhiTauMET<160")),
     fdeltaPhiTauMET130Counter(eventCounter.addCounter("deltaPhiTauMET<130")),
+    fdeltaPhiTauMET90Counter(eventCounter.addCounter("deltaPhiTauMET<90")),
     fFakeMETVetoCounter(eventCounter.addCounter("fake MET veto")),
     fdeltaPhiTauMET160FakeMetCounter(eventCounter.addCounter("deltaPhi160 and fake MET veto")),
 
@@ -103,6 +106,7 @@ namespace HPlus {
     fSFUncertaintiesAfterBTagging("AfterBTagging"),
     fSFUncertaintiesAfterDeltaPhi160("AfterDeltaPhi160"),
     fSFUncertaintiesAfterDeltaPhi130("AfterDeltaPhi130"),
+    fSFUncertaintiesAfterDeltaPhi90("AfterDeltaPhi90"),
     // Non-QCD Type II related
     fNonQCDTypeIIGroup(eventCounter),
     fAllTausCounterGroup(eventCounter, "All"),
@@ -136,12 +140,14 @@ namespace HPlus {
     hTransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi", "transverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi160", "transverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi130", "transverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hTransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "transverseMassAfterDeltaPhi90", "transverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassTopSelection = makeTH<TH1F>(*fs, "transverseMassTopSelection", "transverseMassTopSelection;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hTransverseMassJetMetCut= makeTH<TH1F>(*fs, "transverseMassJetMetCut", "transverseMassJetMetCut;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMass = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMass", "NonQCDTypeIITransverseMass;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi", "NonQCDTypeIITransverseMassAfterDeltaPhi;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi160 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi160", "NonQCDTypeIITransverseMassAfterDeltaPhi160;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     hNonQCDTypeIITransverseMassAfterDeltaPhi130 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi130", "NonQCDTypeIITransverseMassAfterDeltaPhi130;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
+    hNonQCDTypeIITransverseMassAfterDeltaPhi90 = makeTH<TH1F>(*fs, "NonQCDTypeIITransverseMassAfterDeltaPhi90", "NonQCDTypeIITransverseMassAfterDeltaPhi90;m_{T}(tau,MET), GeV/c^{2};N_{events} / 10 GeV/c^{2}", 400, 0., 400.);
     
     hDeltaPhi = makeTH<TH1F>(*fs, "deltaPhi", "deltaPhi;#Delta#phi(tau,MET);N_{events} / 10 degrees", 360, 0., 180.);
     hDeltaPhiJetMet = makeTH<TH1F>(*fs, "deltaPhiJetMet", "deltaPhiJetMet", 400, 0., 3.2);  
@@ -190,12 +196,17 @@ namespace HPlus {
     hCtrlIdentifiedElectronPt = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt", "IdentifiedElectronPt;Identified electron p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlIdentifiedMuonPt = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt", "IdentifiedMuonPt;Identified muon p_{T}, GeV/c;N_{events} / 5 GeV", 100, 0., 500.);
     hCtrlNjets = makeTH<TH1F>(myCtrlDir, "Njets", "Njets;Number of selected jets;N_{events}", 10, 0., 10.);
-    hCtrlSelectedTauPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
     hCtrlSelectedTauEtaAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
     hCtrlSelectedTauPhiAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections = makeTH<TH2F>(myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", 60, -3.0, 3.0, 36, -3.1415926, 3.1415926);
-    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 10 GeV/c", 80, 0.0, 400.0);
-    hCtrlSelectedTauRtauAfterStandardSelections  = makeTH<TH1F>(myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauRtauAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
+    hCtrlSelectedTauPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlIdentifiedElectronPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt_AfterStandardSelections", "IdentifiedElectronPt_AfterStandardSelections;Identified electron p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);;
+    hCtrlIdentifiedMuonPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
+    hCtrlNjetsAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
     hCtrlMET = makeTH<TH1F>(myCtrlDir, "MET", "MET;MET, GeV;N_{events} / 10 GeV", 100, 0., 500.);
     hCtrlNbjets = makeTH<TH1F>(myCtrlDir, "NBjets", "NBjets;Number of identified b-jets;N_{events}", 10, 0., 10.);
 
@@ -381,7 +392,13 @@ namespace HPlus {
     hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->pt(), fEventWeight.getWeight());
     hCtrlSelectedTauPtAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->pt(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), fEventWeight.getWeight());
+    hCtrlSelectedTauPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
+    hCtrlSelectedTauPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->p(), fEventWeight.getWeight());
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
 
 
 //------ MET cut
@@ -450,6 +467,18 @@ namespace HPlus {
       if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi130->Fill(transverseMass, fEventWeight.getWeight());
     }
 
+    if (deltaPhi < 90) {
+      increment(fdeltaPhiTauMET90Counter);
+      fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
+      hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
+      fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
+      // Fill transverse mass histograms after Deltaphi cut
+      hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+      if (myTypeIIStatus) hNonQCDTypeIITransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
+    }
+
 
 //------Experimental cuts, counters, and histograms
     
@@ -509,6 +538,8 @@ namespace HPlus {
     //    if (!forwardJetData.passedEvent()) return false;
     //    increment(fForwardJetVetoCounter);
 
+    //std::cout << "run=" << iEvent.id().run() << " lumiblock=" << iEvent.id().luminosityBlock() << " event=" << iEvent.id().event() << ", mT=" << transverseMass << std::endl;
+ 
     return true;
   }
 
@@ -563,6 +594,9 @@ namespace HPlus {
     } else if (selection == kSignalOrderDeltaPhi130Selection) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi130Counter();
       getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi130Counter();
+    } else if (selection == kSignalOrderDeltaPhi90Selection) {
+      if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementDeltaPhi90Counter();
+      getCounterGroupByTauMatch(tauMatch)->incrementDeltaPhi90Counter();
     } else if (selection == kSignalOrderFakeMETVeto) {
       if (myTypeIIStatus) fNonQCDTypeIIGroup.incrementFakeMETVetoCounter();
       getCounterGroupByTauMatch(tauMatch)->incrementFakeMETVetoCounter();

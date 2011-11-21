@@ -31,6 +31,7 @@
 
 #include "TTree.h"
 #include "TH2F.h"
+#include <vector>
 
 namespace edm {
   class ParameterSet;
@@ -41,7 +42,6 @@ namespace edm {
 class TH1;
 class TH2;
 
-
 namespace HPlus { 
   class QCDMeasurementBasic {  
     class AnalysisVariation {
@@ -49,12 +49,28 @@ namespace HPlus {
       AnalysisVariation(double METcut, double deltaPhiTauMETCut, int tauIsolation, int nTauPtBins, int nMtBins);
       ~AnalysisVariation();
       
-      void analyse(bool isRealData, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex);
+      void analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const METSelection::Data& METData, const TauSelection::Data& tauCandidateData,const BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, TriggerEfficiencyScaleFactor::Data& trgEffData, FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex);
 
     private:
       double fMETCut;
       double fDeltaPhiTauMETCut;
       int iTauIsolation;
+      // Control plots
+      TH1* hCtrlSelectedTauPtAfterStandardSelections;
+      TH1* hCtrlSelectedTauEtaAfterStandardSelections;
+      TH1* hCtrlSelectedTauPhiAfterStandardSelections;
+      TH2* hCtrlSelectedTauEtaVsPhiAfterStandardSelections;
+      TH1* hCtrlSelectedTauLeadingTrkPtAfterStandardSelections;
+      TH1* hCtrlSelectedTauRtauAfterStandardSelections;
+      TH1* hCtrlSelectedTauPAfterStandardSelections;
+      TH1* hCtrlSelectedTauLeadingTrkPAfterStandardSelections;
+      TH1* hCtrlIdentifiedElectronPtAfterStandardSelections;
+      TH1* hCtrlIdentifiedMuonPtAfterStandardSelections;
+      TH1* hCtrlNjetsAfterStandardSelections;
+      TH1* hCtrlMET; // MET distribution
+      std::vector<TH1*> hCtrlNbjets; // Nbjets in bins of tau pT
+      std::vector<TH1*> hCtrlDeltaPhi; // DeltaPhi in bins of tau pT
+
       // event counts in bins of tau jet pt
       TH1F* hLeg1AfterDeltaPhiTauMET;
       TH1F* hLeg1AfterMET;
