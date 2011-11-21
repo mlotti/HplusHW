@@ -33,6 +33,8 @@ namespace HPlus {
     void setValues(const edm::Event& iEvent, const edm::View<reco::GenParticle>& genParticles);
     void reset();
 
+    const edm::InputTag& getInputTag() const { return fMuonSrc; }
+
   private:
     void setValues(const edm::View<pat::Muon>& muons);
 
