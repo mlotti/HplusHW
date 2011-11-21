@@ -472,7 +472,7 @@ namespace HPlus {
       fillNonQCDTypeIICounters(myTauMatch, kSignalOrderDeltaPhi90Selection, tauData);
       hSelectionFlow->Fill(kSignalOrderDeltaPhi90Selection, fEventWeight.getWeight());
       fSFUncertaintiesAfterDeltaPhi90.setScaleFactorUncertainties(fEventWeight.getWeight(),
-                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventAbsoluteUncertainty(),
+                                                                  triggerWeight.getEventWeight(), triggerWeight.getEventWeightAbsoluteUncertainty(),
                                                                   btagData.getScaleFactor(), btagData.getScaleFactorAbsoluteUncertainty());
       // Fill transverse mass histograms after Deltaphi cut
       hTransverseMassAfterDeltaPhi90->Fill(transverseMass, fEventWeight.getWeight());
