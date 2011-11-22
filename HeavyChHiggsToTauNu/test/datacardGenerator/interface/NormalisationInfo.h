@@ -11,6 +11,9 @@ public:
   virtual ~NormalisationInfo();
   
   double getNormalisationFactor(TFile* f);
+  std::string getConfigInfoHisto() { return sConfigInfoHisto; }
+  std::string getCounterHisto() { return sCounterHisto; }
+  double getLuminosity() const { return fLuminosity; }
   
 private:
   std::string sConfigInfoHisto;
