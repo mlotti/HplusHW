@@ -105,6 +105,7 @@ namespace HPlus {
   GlobalElectronVeto::Data GlobalElectronVeto::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
+    fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
 
@@ -118,6 +119,7 @@ namespace HPlus {
   GlobalElectronVeto::Data GlobalElectronVeto::analyzeCustomElecID(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     // Reset data variables
     fSelectedElectronPt = -1.0;
+    fSelectedElectronPtBeforePtCut = -1.0;
     fSelectedElectronEta = -999.99;
     fSelectedElectrons.clear();
     
@@ -142,6 +144,7 @@ namespace HPlus {
     
     // Reset/initialise variables
     float myHighestElecPt = -1.0;
+    float myHighestElecPtBeforePtCut = -1.0;
     float myHighestElecEta = -999.99;
     // 
     bool bElecPresent = false;
@@ -250,13 +253,16 @@ namespace HPlus {
 
       // FIXME: Should one add here a continue statement for electrons that have not passed ID?
 
+      if(std::abs(myElectronEta) < fElecEtaCut)
+        myHighestElecPtBeforePtCut = std::max(myHighestElecPtBeforePtCut, myElectronPt);
+
       // 2) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
 
 
       // 3) Apply Eta cut requirement      
-      if (std::fabs(myElectronEta) > fElecEtaCut) continue;
+      if (std::abs(myElectronEta) >= fElecEtaCut) continue;
       bElecEtaCut = true;
 
 

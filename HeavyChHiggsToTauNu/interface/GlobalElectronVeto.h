@@ -48,6 +48,7 @@ namespace HPlus {
       bool passedEvent() const { return fPassedEvent; }
       const float getSelectedElectronPt() const { return fGlobalElectronVeto->fSelectedElectronPt; }
       const float getSelectedElectronEta() const { return fGlobalElectronVeto->fSelectedElectronEta; }
+      const float getSelectedElectronPtBeforePtCut() const { return fGlobalElectronVeto->fSelectedElectronPtBeforePtCut; }
 
       const edm::PtrVector<pat::Electron>& getSelectedElectrons() { return fGlobalElectronVeto->fSelectedElectrons; }
 
@@ -125,6 +126,7 @@ namespace HPlus {
     // pt and eta of highest pt electron passing the selection
     float fSelectedElectronPt;
     float fSelectedElectronEta;
+    float fSelectedElectronPtBeforePtCut;
 
     // for Electron-ID Selection
     bool bUseLooseID;
