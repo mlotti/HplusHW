@@ -251,6 +251,16 @@ namespace HPlus {
     TH1 *hMTInvertedTauIdJetPhi5060;
     TH1 *hMTInvertedTauIdJetPhi4050;
 
+    TH1 *hMTInvertedTauId130Phi;
+    TH1 *hMTInvertedTauId130Phi150;
+    TH1 *hMTInvertedTauId130Phi120150;
+    TH1 *hMTInvertedTauId130Phi100120;
+    TH1 *hMTInvertedTauId130Phi80100;
+    TH1 *hMTInvertedTauId130Phi7080;
+    TH1 *hMTInvertedTauId130Phi6070;
+    TH1 *hMTInvertedTauId130Phi5060;
+    TH1 *hMTInvertedTauId130Phi4050;
+
     TH1 *hMETInvertedTauIdLoose;
     TH1 *hMETInvertedTauIdLoose150;
     TH1 *hMETInvertedTauIdLoose4070;
