@@ -314,7 +314,7 @@ namespace HPlus {
 
 //------ Global electron veto
     GlobalElectronVeto::Data electronVetoData = fGlobalElectronVeto.analyze(iEvent, iSetup);
-    hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPt->Fill(electronVetoData.getSelectedElectronPtBeforePtCut(), fEventWeight.getWeight());
     if (!electronVetoData.passedEvent()) return false;
     increment(fElectronVetoCounter);
     hSelectionFlow->Fill(kSignalOrderElectronVeto, fEventWeight.getWeight());
@@ -328,7 +328,7 @@ namespace HPlus {
 
 //------ Global muon veto
     GlobalMuonVeto::Data muonVetoData = fGlobalMuonVeto.analyze(iEvent, iSetup, pvData.getSelectedVertex());
-    hCtrlIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPt->Fill(muonVetoData.getSelectedMuonPtBeforePtCut(), fEventWeight.getWeight());
     if (!muonVetoData.passedEvent()) return false;
     increment(fMuonVetoCounter);
     hSelectionFlow->Fill(kSignalOrderMuonVeto, fEventWeight.getWeight());
@@ -396,8 +396,8 @@ namespace HPlus {
     hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->eta(), tauData.getSelectedTaus()[0]->phi(), fEventWeight.getWeight());
     hCtrlSelectedTauPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->p(), fEventWeight.getWeight());
     hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauData.getSelectedTaus()[0]->leadPFChargedHadrCand()->p(), fEventWeight.getWeight());
-    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPt(), fEventWeight.getWeight());
-    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPt(), fEventWeight.getWeight());
+    hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(electronVetoData.getSelectedElectronPtBeforePtCut(), fEventWeight.getWeight());
+    hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(muonVetoData.getSelectedMuonPtBeforePtCut(), fEventWeight.getWeight());
     hCtrlNjetsAfterStandardSelections->Fill(jetData.getHadronicJetCount(), fEventWeight.getWeight());
 
 

@@ -295,7 +295,7 @@ namespace HPlus {
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPt(), muonVetoData.getSelectedMuonPt(), jetData.getHadronicJetCount(),
+      (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPtBeforePtCut(), muonVetoData.getSelectedMuonPtBeforePtCut(), jetData.getHadronicJetCount(),
                     metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
     }
 

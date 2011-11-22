@@ -132,6 +132,7 @@ namespace HPlus {
   void GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup, const edm::Ptr<reco::Vertex>& primaryVertex){
     // Reset data variables
     fSelectedMuonPt = -1.0;
+    fSelectedMuonPtBeforePtCut = -1.0;
     fSelectedMuonEta = -999.99;
     fSelectedMuons.clear();
     fSelectedMuonsBeforePtAndEtaCuts.clear();
@@ -190,6 +191,7 @@ namespace HPlus {
 
     // Reset/initialise variables
     float myHighestMuonPt = -1.0;
+    float myHighestMuonPtBeforePtCut = -1.0;
     float myHighestMuonEta = -999.99;
     // 
     bool bMuonPresent = false;
@@ -325,10 +327,13 @@ namespace HPlus {
       bMuonRelIsolationR03Cut = true;
       fSelectedMuonsBeforePtAndEtaCuts.push_back(*iMuon);
 
+      if(std::abs(myMuonEta) < fMuonEtaCut)
+        myHighestMuonPtBeforePtCut = std::max(myHighestMuonPtBeforePtCut, myMuonPt);
+
       // 8) Apply Pt and Eta cut requirements
       if (myMuonPt < fMuonPtCut) continue;
       bMuonPtCut = true;
-      if (std::fabs(myMuonEta) > fMuonEtaCut) continue;
+      if (std::abs(myMuonEta) >= fMuonEtaCut) continue;
       bMuonEtaCut = true;
       fSelectedMuons.push_back(*iMuon);
 
@@ -426,6 +431,7 @@ namespace HPlus {
     }
     // Store the highest Muon Pt and Eta
     fSelectedMuonPt  = myHighestMuonPt;
+    fSelectedMuonPtBeforePtCut  = myHighestMuonPtBeforePtCut;
     fSelectedMuonEta = myHighestMuonEta;
     // std::cout << "fSelectedMuonPt = " << fSelectedMuonsPt << ", fSelectedMuonsEta = " << fSelectedMuonsEta << std::endl;   
   }//eof: bool GlobalMuonVeto::MuonSelection(const edm::Event& iEvent, const edm::EventSetup& iSetup){
