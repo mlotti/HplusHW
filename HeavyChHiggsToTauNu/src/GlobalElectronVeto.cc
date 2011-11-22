@@ -248,6 +248,8 @@ namespace HPlus {
         bPassedElecID = true;
       }
 
+      // FIXME: Should one add here a continue statement for electrons that have not passed ID?
+
       // 2) Apply Pt cut requirement
       if (myElectronPt < fElecPtCut) continue;
       bElecPtCut = true;
@@ -260,7 +262,7 @@ namespace HPlus {
 
 
       // If Electron survives all cuts (1->3) then it is considered an isolated Electron. Now find the max Electron Pt.
-	if (myElectronPt > myHighestElecPt) {
+	if (thisPassedID && myElectronPt > myHighestElecPt) {
 	  myHighestElecPt = myElectronPt;
 	  myHighestElecEta = myElectronEta;
 	}
