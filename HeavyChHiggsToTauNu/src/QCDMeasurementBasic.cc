@@ -75,8 +75,8 @@ namespace HPlus {
     fTauPtBinLowEdges.push_back(150);
     int myTauPtBins = static_cast<int>(fTauPtBinLowEdges.size()) + 1;
     // Transverse mass bins
-    for (double i = 0; i < 21; ++i) {
-      fTransverseMassBinLowEdges.push_back(i * 20.0);
+    for (double i = 0; i < 41; ++i) {
+      fTransverseMassBinLowEdges.push_back(i * 10.0);
     }
     int myTransverseMassBins = static_cast<int>(fTransverseMassBinLowEdges.size()) + 1;
 
@@ -111,8 +111,11 @@ namespace HPlus {
     // Analysis variations
     std::vector<double> myMETVariation;
     myMETVariation.push_back(40);
+    myMETVariation.push_back(50);
+    myMETVariation.push_back(60);
     myMETVariation.push_back(70);
     std::vector<double> myDeltaPhiTauMETVariation;
+    myDeltaPhiTauMETVariation.push_back(90);
     myDeltaPhiTauMETVariation.push_back(130);
     myDeltaPhiTauMETVariation.push_back(150);
     myDeltaPhiTauMETVariation.push_back(160);
@@ -121,6 +124,7 @@ namespace HPlus {
     myTauIsolVariation.push_back(1);
     myTauIsolVariation.push_back(3);
     myTauIsolVariation.push_back(11);
+    myTauIsolVariation.push_back(21);
     for (size_t i = 0; i < myMETVariation.size(); ++i) {
       for (size_t j = 0; j < myDeltaPhiTauMETVariation.size(); ++j) {
         for (size_t k = 0; k < myTauIsolVariation.size(); ++k) {
@@ -291,7 +295,8 @@ namespace HPlus {
     // Loop over analysis variations (that's where the rest of the tau pT spectrum plots and mT shapes are obtained ...)
     double transverseMass = TransverseMass::reconstruct(*(tauCandidateData.getCleanedTauCandidates()[0]), *(metData.getSelectedMET()));
     for(std::vector<AnalysisVariation>::iterator it = fAnalyses.begin(); it != fAnalyses.end(); ++it) {
-      (*it).analyse(iEvent.isRealData(), metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
+      (*it).analyse(iEvent.isRealData(), electronVetoData.getSelectedElectronPt(), muonVetoData.getSelectedMuonPt(), jetData.getHadronicJetCount(),
+                    metData, tauCandidateData, btagData, myTauPtBinIndex, myWeightBeforeTauID, triggerWeight, myTauMatch, getMtBinIndex(transverseMass));
     }
 
 //------ End of QCD measurement
@@ -326,6 +331,29 @@ namespace HPlus {
     myName << "QCDMeasurementVariation_METcut" << METcut << "_DeltaPhiTauMETCut" << deltaPhiTauMETCut << "_tauIsol" << tauIsolation;
     // Create histograms
     edm::Service<TFileService> fs;
+    TFileDirectory myCtrlDir = fs->mkdir(myName.str()+"/ControlPlots");
+    hCtrlSelectedTauPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_pT_AfterStandardSelections", "SelectedTau_pT_AfterStandardSelections;#tau p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauEtaAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_eta_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #eta;N_{events} / 0.1", 60, -3.0, 3.0);
+    hCtrlSelectedTauPhiAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_phi_AfterStandardSelections", "SelectedTau_eta_AfterStandardSelections;#tau #phi;N_{events} / 0.087", 360, -3.1415926, 3.1415926);
+    hCtrlSelectedTauEtaVsPhiAfterStandardSelections = makeTH<TH2F>(myCtrlDir, "SelectedTau_etavsphi_AfterStandardSelections", "SelectedTau_etavsphi_AfterStandardSelections;#tau #eta;#tau #phi", 60, -3.0, 3.0, 36, -3.1415926, 3.1415926);
+    hCtrlSelectedTauLeadingTrkPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackPt_AfterStandardSelections", "SelectedTau_LeadingTrackPt_AfterStandardSelections;#tau ldg.ch.particle p_{T}, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauRtauAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_Rtau_AfterStandardSelections", "SelectedTau_Rtau_AfterStandardSelections;R_{#tau};N_{events} / 0.1", 120, 0., 1.2);
+    hCtrlSelectedTauPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_p_AfterStandardSelections", "SelectedTau_p_AfterStandardSelections;#tau p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlSelectedTauLeadingTrkPAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "SelectedTau_LeadingTrackP_AfterStandardSelections", "SelectedTau_LeadingTrackP_AfterStandardSelections;#tau ldg.ch.particle p, GeV/c;N_{events} / 5 GeV/c", 80, 0.0, 400.0);
+    hCtrlIdentifiedElectronPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedElectronPt_AfterStandardSelections", "IdentifiedElectronPt_AfterStandardSelections;Identified electron p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);;
+    hCtrlIdentifiedMuonPtAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "IdentifiedMuonPt_AfterStandardSelections", "IdentifiedMuonPt_AfterStandardSelections;Identified muon p_{T}, GeV/c;N_{events} / 1 GeV", 20, 0., 20.);
+    hCtrlNjetsAfterStandardSelections = makeTH<TH1F>(myCtrlDir, "Njets_AfterStandardSelections", "Njets_AfterStandardSelections;Number of selected jets;N_{events}", 7, 3., 10.);
+    hCtrlMET = makeTH<TH1F>(myCtrlDir, "MET", "MET", 100, 0., 500.);
+    std::stringstream myLabel;
+    for (int i = 0; i < nTauPtBins; ++i) {
+      myLabel.str("");
+      myLabel << "NBjets_taupTbin" << i;
+      hCtrlNbjets.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 10, 0., 10.));
+      myLabel.str("");
+      myLabel << "DeltaPhi_taupTbin" << i;
+      hCtrlDeltaPhi.push_back(makeTH<TH1F>(myCtrlDir, myLabel.str().c_str(), myLabel.str().c_str(), 36, 0., 180.));
+    }
+
     TFileDirectory myDir = fs->mkdir(myName.str());
     /*hAfterTauCandidateSelection = makeTH<TH1F>(myDir, "AfterTauCandidateSelection", "AfterTauCandidateSelection", nTauPtBins, 0, nTauPtBins);
     hAfterElectronLeptonVeto= makeTH<TH1F>(myDir, "AfterElectronLeptonVeto", "AfterElectronLeptonVeto", nTauPtBins, 0, nTauPtBins);
@@ -382,7 +410,7 @@ namespace HPlus {
   
   QCDMeasurementBasic::AnalysisVariation::~AnalysisVariation() { }
   
-  void QCDMeasurementBasic::AnalysisVariation::analyse(bool isRealData, const HPlus::METSelection::Data& METData, const HPlus::TauSelection::Data& tauCandidateData, const HPlus::BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, HPlus::TriggerEfficiencyScaleFactor::Data& trgEffData, HPlus::FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex) {
+  void QCDMeasurementBasic::AnalysisVariation::analyse(bool isRealData, const float maxElectronPt, const float maxMuonPt, const int njets, const HPlus::METSelection::Data& METData, const HPlus::TauSelection::Data& tauCandidateData, const HPlus::BTagging::Data& btagData, int tauPtBinIndex, double weightAfterVertexReweight, HPlus::TriggerEfficiencyScaleFactor::Data& trgEffData, HPlus::FakeTauIdentifier::MCSelectedTauMatchType tauMatch, double mTBinIndex) {
     // Make sure that event weight is 1 for real data
     double myBTagSF = 1.0;
     if (isRealData) {
@@ -422,14 +450,17 @@ namespace HPlus {
 
     // MET leg ---------------------------------------------------------------
     // MET cut
+    hCtrlMET->Fill(METData.getSelectedMET()->et(), weightAfterVertexReweight*trgEffData.getEventWeight());
     if (METData.getSelectedMET()->et() > fMETCut) {
       hLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
       if (myFakeTauStatus) hFakeTauLeg1AfterMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
+      hCtrlNbjets[tauPtBinIndex]->Fill(btagData.getBJetCount(), weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
       // btagging
       if (btagData.passedEvent()) {
         hLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
         if (myFakeTauStatus) hFakeTauLeg1AfterBTagging->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
         // DeltaPhi(tau,MET) cut
+        hCtrlDeltaPhi[tauPtBinIndex]->Fill(myDeltaPhi, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
         if (myDeltaPhi < fDeltaPhiTauMETCut) {
           hLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
           if (myFakeTauStatus) hFakeTauLeg1AfterDeltaPhiTauMET->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight()*myBTagSF);
@@ -449,9 +480,21 @@ namespace HPlus {
       if (myPassedRtau) {
         hLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
         if (myFakeTauStatus) hFakeTauLeg2AfterTauIDWithRtau->Fill(tauPtBinIndex, weightAfterVertexReweight*trgEffData.getEventWeight());
-          fSFUncertaintyAfterTauLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
-                                                                 trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
-                                                                 1.0, 0.0);
+        fSFUncertaintyAfterTauLeg->setScaleFactorUncertainties(weightAfterVertexReweight*trgEffData.getEventWeight(),
+                                                               trgEffData.getEventWeight(), trgEffData.getEventAbsoluteUncertainty(),
+                                                               1.0, 0.0);
+        // Fill control plots here for point "standard selections with full tauID"
+        hCtrlSelectedTauRtauAfterStandardSelections->Fill(tauCandidateData.getRtauOfSelectedTau(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauLeadingTrkPtAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauPtAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->pt(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauEtaAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauPhiAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->phi(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauEtaVsPhiAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->eta(), tauCandidateData.getCleanedTauCandidates()[0]->phi(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauPAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlSelectedTauLeadingTrkPAfterStandardSelections->Fill(tauCandidateData.getCleanedTauCandidates()[0]->leadPFChargedHadrCand()->p(), weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlIdentifiedElectronPtAfterStandardSelections->Fill(maxElectronPt, weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlIdentifiedMuonPtAfterStandardSelections->Fill(maxMuonPt, weightAfterVertexReweight*trgEffData.getEventWeight());
+        hCtrlNjetsAfterStandardSelections->Fill(njets, weightAfterVertexReweight*trgEffData.getEventWeight());
       }
     }
 
