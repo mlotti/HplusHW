@@ -128,4 +128,7 @@ cmsenv
 cd ../..
 ./mkBrLimits_mssmLimit.py
 
+# rm unnecessary code
+rm -r CMSSW_*/src
+
 echo MSSM limit plots ready!
